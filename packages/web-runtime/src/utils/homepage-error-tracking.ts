@@ -45,11 +45,15 @@ export function trackHomepageSectionError(
 ): void {
   const normalized = normalizeError(error, `${section}: ${operation} failed`);
   
-  logger.error(`Homepage.${section}: ${operation} failed`, normalized, {
-    operation: `homepage.${section}`,
-    section,
-    ...(context ?? {}),
-  });
+  logger.error(
+    {
+      err: normalized,
+      operation: `homepage.${section}`,
+      section,
+      ...(context ?? {}),
+    },
+    `Homepage.${section}: ${operation} failed`
+  );
 }
 
 /**
@@ -72,10 +76,14 @@ export function trackRPCFailure(
     rpcName,
     ...(context && Object.keys(context).length > 0 ? { args: toLogContextValue(context) } : {}),
   };
-  logger.error(`Homepage RPC failure: ${rpcName}`, normalized, {
-    operation: 'homepage.rpc',
-    dbQuery: toLogContextValue(dbQueryContext),
-  });
+  logger.error(
+    {
+      err: normalized,
+      operation: 'homepage.rpc',
+      dbQuery: toLogContextValue(dbQueryContext),
+    },
+    `Homepage RPC failure: ${rpcName}`
+  );
 }
 
 /**
@@ -90,12 +98,15 @@ export function trackMissingData(
   dataType: string,
   context?: Record<string, unknown>
 ): void {
-  logger.warn(`Homepage.${section}: Missing ${dataType}`, undefined, {
-    operation: `homepage.${section}`,
-    section,
-    dataType,
-    ...(context ?? {}),
-  });
+  logger.warn(
+    {
+      operation: `homepage.${section}`,
+      section,
+      dataType,
+      ...(context ?? {}),
+    },
+    `Homepage.${section}: Missing ${dataType}`
+  );
 }
 
 /**
@@ -110,10 +121,13 @@ export function trackValidationFailure(
   validationIssue: string,
   context?: Record<string, unknown>
 ): void {
-  logger.warn(`Homepage.${section}: Validation failed - ${validationIssue}`, undefined, {
-    operation: `homepage.${section}`,
-    section,
-    validationIssue,
-    ...(context ?? {}),
-  });
+  logger.warn(
+    {
+      operation: `homepage.${section}`,
+      section,
+      validationIssue,
+      ...(context ?? {}),
+    },
+    `Homepage.${section}: Validation failed - ${validationIssue}`
+  );
 }

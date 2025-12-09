@@ -69,9 +69,13 @@ export async function generateMetadata(): Promise<Metadata> {
     };
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to generate changelog metadata');
-    metadataLogger.error('Failed to generate changelog metadata', normalized, {
-      section: 'metadata-generation',
-    });
+    metadataLogger.error(
+      {
+        err: normalized,
+        section: 'metadata-generation',
+      },
+      'Failed to generate changelog metadata'
+    );
     return {
       title: 'Changelog - Claude Pro Directory',
       description: 'Track all updates, features, and improvements to Claude Pro Directory.',
@@ -99,7 +103,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see ChangelogContentSkeleton
  * @see StructuredData
  */
-export default async function ChangelogPage() {
+export default function ChangelogPage() {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
@@ -201,9 +205,13 @@ async function ChangelogContentWithData({
     });
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load changelog content');
-    reqLogger.error('Failed to load changelog content', normalized, {
-      section: 'data-fetch',
-    });
+    reqLogger.error(
+      {
+        section: 'data-fetch',
+        err: normalized,
+      },
+      'Failed to load changelog content'
+    );
     hasError = true;
   }
 

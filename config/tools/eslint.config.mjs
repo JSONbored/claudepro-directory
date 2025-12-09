@@ -625,6 +625,9 @@ export default tseslint.config(
       'architectural-rules/require-safe-action-middleware': 'error',
       'architectural-rules/no-direct-database-access-in-actions': 'error',
       'architectural-rules/require-edge-logging-setup': 'error', // Consolidated edge logging rule
+      'architectural-rules/autofix-jsdoc-returns': 'warn', // Auto-fix: Add missing JSDoc @returns tags
+      'architectural-rules/autofix-remove-unnecessary-async': 'warn', // Auto-fix: Remove unnecessary async keyword
+      'architectural-rules/autofix-nested-ternary-parentheses': 'warn', // Auto-fix: Add parentheses around nested ternaries
 
       // Next.js & React Server Components Rules
       // NOTE: require-proper-dynamic-exports was deleted - Cache Components makes it unnecessary

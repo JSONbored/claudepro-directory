@@ -218,7 +218,7 @@ export function logClientError(
   const context: LogContext = Object.fromEntries(
     Object.entries(clientContext).map(([key, value]) => [key, toLogContextValue(value)])
   ) as LogContext;
-  logger.error(message, normalized, context);
+  logger.error({ err: normalized, ...context }, message);
 }
 
 /**
@@ -281,9 +281,9 @@ export function logClientWarn(
   if (error !== undefined) {
     const normalized = normalizeError(error, message);
     // Merge error into context - logger.warn expects (message, context, metadata)
-    logger.warn(message, { ...context, err: normalized });
+    logger.warn({ ...context, err: normalized }, message);
   } else {
-    logger.warn(message, context);
+    logger.warn(context, message);
   }
 }
 
@@ -330,7 +330,7 @@ export function logClientInfo(
   const context: LogContext = Object.fromEntries(
     Object.entries(clientContext).map(([key, value]) => [key, toLogContextValue(value)])
   ) as LogContext;
-  logger.info(message, context);
+  logger.info(context, message);
 }
 
 /**
@@ -376,7 +376,7 @@ export function logClientDebug(
   const context: LogContext = Object.fromEntries(
     Object.entries(clientContext).map(([key, value]) => [key, toLogContextValue(value)])
   ) as LogContext;
-  logger.debug(message, context);
+  logger.debug(context, message);
 }
 
 /**
@@ -528,5 +528,5 @@ export function logClientErrorBoundary(
   const context: LogContext = Object.fromEntries(
     Object.entries(clientContext).map(([key, value]) => [key, toLogContextValue(value)])
   ) as LogContext;
-  logger.error(message, normalized, context);
+  logger.error({ err: normalized, ...context }, message);
 }

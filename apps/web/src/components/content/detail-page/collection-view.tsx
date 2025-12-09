@@ -82,12 +82,12 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
         // Type guard validation
         if (!isValidCategory(refData.category)) {
           logger.error(
-            'Invalid category in collection item reference',
-            new Error('Invalid category'),
             {
+              err: new Error('Invalid category'),
               category: refData.category,
               slug: refData.slug,
-            }
+            },
+            'Invalid category in collection item reference'
           );
           return null;
         }
@@ -96,10 +96,14 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
         return item ? { ...refData, data: item } : null;
       } catch (error) {
         const normalized = normalizeError(error, 'Failed to load collection item');
-        logger.error('Failed to load collection item', normalized, {
-          category: refData.category,
-          slug: refData.slug,
-        });
+        logger.error(
+          {
+            err: normalized,
+            category: refData.category,
+            slug: refData.slug,
+          },
+          'Failed to load collection item'
+        );
         return null;
       }
     })
@@ -118,7 +122,10 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
       const category = item.category;
       // Validate category is safe before using as property key
       if (!isValidCategory(category)) {
-        logger.warn('CollectionView: Invalid category in item', { category, slug: item.slug });
+        logger.warn(
+          { category, slug: item.slug },
+          'CollectionView: Invalid category in item'
+        );
         return acc;
       }
       if (!acc[category]) {
@@ -130,12 +137,15 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
     {} as Record<string, ItemWithData[]>
   );
 
-  logger.info('Collection detail view rendered', {
-    slug: collection.slug,
-    itemCount: validItems.length,
-    categories: Object.keys(itemsByCategory), // Array of category names - better for querying
-    categoryCount: Object.keys(itemsByCategory).length,
-  });
+  logger.info(
+    {
+      slug: collection.slug,
+      itemCount: validItems.length,
+      categories: Object.keys(itemsByCategory), // Array of category names - better for querying
+      categoryCount: Object.keys(itemsByCategory).length,
+    },
+    'Collection detail view rendered'
+  );
 
   const prerequisites = ensureStringArray(metadata['prerequisites']);
   const installationOrder = ensureStringArray(metadata['installation_order']);

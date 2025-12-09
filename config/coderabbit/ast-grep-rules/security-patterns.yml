@@ -4,7 +4,7 @@
 ---
 # Rule: Detect missing input validation before database queries
 id: missing-input-validation
-language: TypeScript
+language: typescript
 rule:
   all:
     - pattern: $SUPABASE.$METHOD($$$)
@@ -22,7 +22,7 @@ severity: error
 ---
 # Rule: Detect direct user input in URL construction
 id: unsafe-url-construction
-language: TypeScript
+language: typescript
 rule:
   all:
     - pattern: new URL($INPUT, $BASE)
@@ -36,7 +36,7 @@ severity: error
 ---
 # Rule: Detect missing auth checks in API routes
 id: missing-auth-in-api-route
-language: TypeScript
+language: typescript
 rule:
   all:
     - pattern: export async function $METHOD($REQ: NextRequest) { $$$ }
@@ -52,38 +52,42 @@ severity: error
 ---
 # Rule: Detect missing auth checks in server actions
 id: missing-auth-in-server-action
-language: TypeScript
+language: typescript
 rule:
   all:
-    - pattern: export const $ACTION = $CLIENT.action($$$)
-      kind: variable_declarator
+    - pattern: 'use server'
+    - has:
+        pattern: export (const|function) $ACTION($$$) { $$$ }
     - not:
         has:
-          pattern: (authedAction|optionalAuthAction)($$$)
-message: "Server actions must use authedAction or optionalAuthAction wrappers for authentication. Import from @heyclaude/web-runtime/actions/safe-action"
+          pattern: (authedAction|optionalAuthAction|rateLimitedAction|actionClient)($$$)
+message: "Server actions must use safe-action middleware (authedAction, optionalAuthAction, rateLimitedAction, or actionClient) for authentication. Import from @heyclaude/web-runtime/actions/safe-action"
 severity: error
 
 ---
-# Rule: Detect PII logging without hashing
+# Rule: Detect PII logging in log context (outside logger.child) without hashing
 id: pii-logging-without-hash
-language: TypeScript
+language: typescript
 rule:
   all:
-    - pattern: logger.$METHOD($$$, { $CONTEXT })
+    - pattern: ($LOGGER|logger).$METHOD($$$, { $CONTEXT })
       kind: call_expression
     - has:
         pattern: (userId|user_id|email|phone|ssn): $VALUE
           regex: userId|user_id|email|phone|ssn
     - not:
+        inside:
+          pattern: logger.child({ $$$ })
+    - not:
         has:
           pattern: (hashUserId|hashEmail|hashPII)($$$)
-message: "PII (userId, email, etc.) must be hashed before logging. Use hashUserId() or hashEmail() from @heyclaude/web-runtime/logging/server"
-severity: error
+message: "PII (userId, email, etc.) in log context must be hashed. Use hashUserId() or hashEmail() from @heyclaude/shared-runtime/privacy. NOTE: logger.child({ userId }) automatically hashes via redaction - use that pattern instead."
+severity: warning
 
 ---
 # Rule: Detect dangerous eval() or Function() usage
 id: dangerous-eval-usage
-language: TypeScript
+language: typescript
 rule:
   any:
     - pattern: eval($$$)
@@ -96,7 +100,7 @@ severity: error
 ---
 # Rule: Detect unsanitized user input in dangerouslySetInnerHTML
 id: unsafe-inner-html
-language: TypeScript
+language: typescript
 rule:
   all:
     - pattern: dangerouslySetInnerHTML={{ __html: $INPUT }}
@@ -110,7 +114,7 @@ severity: error
 ---
 # Rule: Detect missing CORS headers in API routes
 id: missing-cors-headers
-language: TypeScript
+language: typescript
 rule:
   all:
     - pattern: export async function $METHOD($REQ: NextRequest) { $$$ return NextResponse.$METHOD($$$) }

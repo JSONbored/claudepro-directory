@@ -124,9 +124,10 @@ async function LibraryPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
   const { user } = await getAuthenticatedUser({ context: 'LibraryPage' });
 
   if (!user) {
-    reqLogger.warn('LibraryPage: unauthenticated access attempt detected', {
-      section: 'authentication',
-    });
+    reqLogger.warn(
+      { section: 'data-fetch' },
+      'LibraryPage: unauthenticated access attempt detected'
+    );
     return (
       <div className="space-y-6">
         <Card>
@@ -150,29 +151,26 @@ async function LibraryPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
     userId: user.id, // Redaction will automatically hash this
   });
 
-  userLogger.info('LibraryPage: authentication successful', {
-    section: 'authentication',
-  });
+  userLogger.info({ section: 'data-fetch' }, 'LibraryPage: authentication successful');
 
   // Section: Library Data Fetch
   let data: Database['public']['Functions']['get_user_library']['Returns'] | null = null;
   try {
     data = await getUserLibrary(user.id);
     if (data === null) {
-      userLogger.warn('LibraryPage: getUserLibrary returned null', {
-        section: 'library-data-fetch',
-      });
+      userLogger.warn({ section: 'data-fetch' }, 'LibraryPage: getUserLibrary returned null');
     } else {
-      userLogger.info('LibraryPage: library data loaded', {
-        section: 'library-data-fetch',
-        hasData: Boolean(data),
-      });
+      userLogger.info({ section: 'data-fetch', hasData: Boolean(data) }, 'LibraryPage: library data loaded');
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user library');
-    userLogger.error('LibraryPage: getUserLibrary threw', normalized, {
-      section: 'library-data-fetch',
-    });
+    userLogger.error(
+      {
+        section: 'data-fetch',
+        err: normalized,
+      },
+      'LibraryPage: getUserLibrary threw'
+    );
   }
 
   if (!data) {
@@ -207,17 +205,12 @@ async function LibraryPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
   const bookmarkCount = stats.bookmark_count ?? 0;
   const collectionCount = stats.collection_count ?? 0;
   if (bookmarks.length <= 0 && collections.length <= 0) {
-    userLogger.info('LibraryPage: library returned no bookmarks or collections', {
-      section: 'library-data-fetch',
-    });
+    userLogger.info({ section: 'data-fetch' }, 'LibraryPage: library returned no bookmarks or collections');
   }
 
   // Final summary log
-  userLogger.info('LibraryPage: page render completed', {
-    section: 'page-render',
-    bookmarksCount: bookmarks.length,
-    collectionsCount: collections.length,
-  });
+  userLogger.info({ section: 'data-fetch', bookmarksCount: bookmarks.length,
+    collectionsCount: collections.length }, 'LibraryPage: page render completed');
 
   return (
     <div className="space-y-6">

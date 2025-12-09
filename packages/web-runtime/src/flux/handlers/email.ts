@@ -57,11 +57,9 @@ export async function handleEmailCount(_request: NextRequest): Promise<NextRespo
     const count = await getCachedNewsletterCount();
 
     const durationMs = Date.now() - startTime;
-    logger.info('Newsletter count retrieved', {
-      ...logContext,
+    logger.info({ ...logContext,
       durationMs,
-      count,
-    });
+      count, }, 'Newsletter count retrieved');
 
     const cacheControl = `public, max-age=${NEWSLETTER_COUNT_TTL_SECONDS}, stale-while-revalidate=${NEWSLETTER_COUNT_TTL_SECONDS}`;
 
@@ -81,7 +79,7 @@ export async function handleEmailCount(_request: NextRequest): Promise<NextRespo
     );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to get newsletter count');
-    logger.error('Newsletter count failed', normalized, logContext);
+    logger.error({ err: normalized, ...logContext }, 'Newsletter count failed');
 
     return createErrorResponse(error, {
       route: '/api/flux/email/count',

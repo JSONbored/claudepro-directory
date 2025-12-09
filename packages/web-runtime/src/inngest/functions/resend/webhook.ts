@@ -129,13 +129,11 @@ export const handleResendWebhook = inngest.createFunction(
     const emails = emailData.to || [];
     const emailId = emailData.email_id;
 
-    logger.info('Processing Resend webhook', {
-      ...logContext,
+    logger.info({ ...logContext,
       eventName,
       action,
       emailId,
-      emailCount: emails.length,
-    });
+      emailCount: emails.length, }, 'Processing Resend webhook');
 
     const supabase = createSupabaseAdminClient();
 
@@ -229,7 +227,7 @@ export const handleResendWebhook = inngest.createFunction(
 
       case 'bounced':
         // Blocklist, mark subscription as bounced
-        logger.info('Processing email bounce', { ...logContext, emailId });
+        logger.info({ ...logContext, emailId }, 'Processing email bounce');
 
         for (const email of emails) {
           await step.run(`blocklist-bounce-${email}`, async () => {
@@ -246,7 +244,7 @@ export const handleResendWebhook = inngest.createFunction(
               );
 
             if (error) {
-              logger.warn('Failed to add to blocklist', { ...logContext, email, errorMessage: error.message });
+              logger.warn({ ...logContext, email, errorMessage: error.message }, 'Failed to add to blocklist');
             }
           });
 
@@ -279,11 +277,9 @@ export const handleResendWebhook = inngest.createFunction(
 
       case 'complained':
         // Blocklist, unsubscribe immediately - this is critical for sender reputation
-        logger.warn('Processing email complaint - sender reputation impact', {
-          ...logContext,
+        logger.warn({ ...logContext,
           emailId,
-          emailCount: emails.length,
-        });
+          emailCount: emails.length, }, 'Processing email complaint - sender reputation impact');
 
         for (const email of emails) {
           await step.run(`blocklist-complaint-${email}`, async () => {
@@ -301,7 +297,7 @@ export const handleResendWebhook = inngest.createFunction(
 
             if (error) {
               const normalized = normalizeError(error, 'Failed to add complaint to blocklist');
-              logger.error('Blocklist update failed for complaint', normalized, logContext);
+              logger.error({ err: normalized, ...logContext }, 'Blocklist update failed for complaint');
             }
           });
 
@@ -336,27 +332,23 @@ export const handleResendWebhook = inngest.createFunction(
 
       case 'delivery_delayed':
         // Log for monitoring - delays might indicate ISP issues
-        logger.warn('Email delivery delayed', {
-          ...logContext,
+        logger.warn({ ...logContext,
           emailId,
           emails,
-          subject: emailData.subject,
-        });
+          subject: emailData.subject, }, 'Email delivery delayed');
         // No action taken, just tracking
         break;
 
       default:
-        logger.info('Unhandled Resend event type', { ...logContext, eventName, action });
+        logger.info({ ...logContext, eventName, action }, 'Unhandled Resend event type');
     }
 
     const durationMs = Date.now() - startTime;
-    logger.info('Resend webhook processed', {
-      ...logContext,
+    logger.info({ ...logContext,
       durationMs,
       action,
       emailId,
-      processedCount: emails.length,
-    });
+      processedCount: emails.length, }, 'Resend webhook processed');
 
     return {
       success: true,

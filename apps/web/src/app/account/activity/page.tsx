@@ -99,9 +99,12 @@ async function ActivityPageContent({ reqLogger }: { reqLogger: ReturnType<typeof
   const { user } = await getAuthenticatedUser({ context: 'ActivityPage' });
 
   if (!user) {
-    reqLogger.warn('ActivityPage: unauthenticated access attempt detected', {
-      section: 'authentication',
-    });
+    reqLogger.warn(
+      {
+        section: 'data-fetch',
+      },
+      'ActivityPage: unauthenticated access attempt detected'
+    );
     return (
       <div className="space-y-6">
         <Card>
@@ -128,9 +131,7 @@ async function ActivityPageContent({ reqLogger }: { reqLogger: ReturnType<typeof
     userId: user.id, // Redaction automatically hashes this via hashUserIdCensor
   });
 
-  userLogger.info('ActivityPage: authentication successful', {
-    section: 'authentication',
-  });
+  userLogger.info({ section: 'data-fetch' }, 'ActivityPage: authentication successful');
 
   // Section: Activity Data Fetch
   // Fetch activity data - use Promise.allSettled for partial success handling
@@ -158,9 +159,13 @@ async function ActivityPageContent({ reqLogger }: { reqLogger: ReturnType<typeof
     const reason = result.reason as unknown;
     const normalized = normalizeError(reason, `Failed to load ${name}`);
     if (user) {
-      userLogger.error(`ActivityPage: ${name} failed`, normalized, {
-        section: 'activity-data-fetch',
-      });
+      userLogger.error(
+        {
+          err: normalized,
+          section: 'activity-data-fetch',
+        },
+        `ActivityPage: ${name} failed`
+      );
     }
     return null;
   }
@@ -194,18 +199,22 @@ async function ActivityPageContent({ reqLogger }: { reqLogger: ReturnType<typeof
 
   const activities = timeline?.activities ?? [];
   if (hasTimeline && activities.length === 0) {
-    userLogger.warn('ActivityPage: activity timeline returned no activities', {
-      section: 'activity-data-fetch',
-    });
+    userLogger.warn(
+      { section: 'data-fetch' },
+      'ActivityPage: activity timeline returned no activities'
+    );
   }
 
   // Final summary log
-  userLogger.info('ActivityPage: page render completed', {
-    section: 'page-render',
-    activitiesCount: activities.length,
-    hasSummary,
-    hasTimeline,
-  });
+  userLogger.info(
+    {
+      section: 'data-fetch',
+      activitiesCount: activities.length,
+      hasSummary,
+      hasTimeline,
+    },
+    'ActivityPage: page render completed'
+  );
 
   return (
     <div className="space-y-6">

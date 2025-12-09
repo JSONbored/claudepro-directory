@@ -45,7 +45,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see ContactTerminal
  * @see ContactTerminalErrorBoundary
  */
-export default async function ContactPage() {
+export default function ContactPage() {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
@@ -80,22 +80,34 @@ export default async function ContactPage() {
 function ContactPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
   const channels = getContactChannels();
   if (!channels.email) {
-    reqLogger.warn('ContactPage: email channel is not configured', {
-      channel: 'email',
-      configKey: 'CONTACT_EMAIL',
-    });
+    reqLogger.warn(
+      {
+        section: 'data-fetch',
+        channel: 'email',
+        configKey: 'CONTACT_EMAIL',
+      },
+      'ContactPage: email channel is not configured'
+    );
   }
   if (!channels.github) {
-    reqLogger.warn('ContactPage: github channel is not configured', {
-      channel: 'github',
-      configKey: 'GITHUB_URL',
-    });
+    reqLogger.warn(
+      {
+        section: 'data-fetch',
+        channel: 'github',
+        configKey: 'GITHUB_URL',
+      },
+      'ContactPage: github channel is not configured'
+    );
   }
   if (!channels.discord) {
-    reqLogger.warn('ContactPage: discord channel is not configured', {
-      channel: 'discord',
-      configKey: 'DISCORD_INVITE_URL',
-    });
+    reqLogger.warn(
+      {
+        section: 'data-fetch',
+        channel: 'discord',
+        configKey: 'DISCORD_INVITE_URL',
+      },
+      'ContactPage: discord channel is not configured'
+    );
   }
 
   // Feature flags are now static defaults - no server/middleware dependency

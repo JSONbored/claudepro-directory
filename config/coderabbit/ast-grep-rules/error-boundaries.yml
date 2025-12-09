@@ -5,7 +5,7 @@
 ---
 # Rule: Detect missing error boundaries in server components
 id: missing-error-boundary-server
-language: TypeScript
+language: typescript
 rule:
   all:
     - pattern: export default async function $COMPONENT($$$) { $$$ }
@@ -21,7 +21,7 @@ severity: warning
 ---
 # Rule: Detect missing error logging in error boundaries
 id: missing-error-boundary-logging
-language: TypeScript
+language: typescript
 rule:
   all:
     - pattern: export default function $ERROR_BOUNDARY({ error }: { error: Error }) { $$$ }
@@ -30,14 +30,14 @@ rule:
         pattern: app/**/error.tsx
     - not:
         has:
-          pattern: (logClientErrorBoundary|logger.error)($$$)
-message: "Error boundaries must log errors. Use logClientErrorBoundary() for client error boundaries or logger.error() for server error boundaries"
+          pattern: (logClientErrorBoundary|logger.error|reqLogger.error)($$$)
+message: "Error boundaries must log errors. Use logClientErrorBoundary() for client error boundaries (from @heyclaude/web-runtime/logging/client) or logger.error()/reqLogger.error() for server error boundaries (from @heyclaude/web-runtime/logging/server)"
 severity: error
 
 ---
 # Rule: Detect missing error boundaries in client components with async operations
 id: missing-error-boundary-client-async
-language: TypeScript
+language: typescript
 rule:
   all:
     - pattern: export function $COMPONENT($$$) { $$$ }
@@ -49,5 +49,8 @@ rule:
     - not:
         inside:
           pattern: <ErrorBoundary>$$$</ErrorBoundary>
-message: "Client components with async operations should be wrapped in error boundaries. Add <ErrorBoundary> wrapper or use useLoggedAsync for error handling"
+    - not:
+        has:
+          pattern: useLoggedAsync($$$)
+message: "Client components with async operations should be wrapped in error boundaries or use useLoggedAsync for error handling. Add <ErrorBoundary> wrapper or use useLoggedAsync hook from @heyclaude/web-runtime/hooks"
 severity: warning

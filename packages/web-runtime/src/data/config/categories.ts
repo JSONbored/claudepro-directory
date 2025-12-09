@@ -19,7 +19,7 @@ export function getHomepageFeaturedCategories(): readonly Database['public']['En
   });
 
   if (isBuildTime()) {
-    reqLogger.debug('getHomepageFeaturedCategories: build time, returning empty array');
+    reqLogger.debug({}, 'getHomepageFeaturedCategories: build time, returning empty array');
     return [];
   }
 
@@ -32,9 +32,10 @@ export function getHomepageFeaturedCategories(): readonly Database['public']['En
     ? config['homepage.featured_categories'].filter((value) => isValidCategoryValue(value))
     : [];
 
-  reqLogger.debug('getHomepageFeaturedCategories: loaded categories', {
-    categoryCount: categories.length,
-  });
+  reqLogger.debug(
+    { categoryCount: categories.length },
+    'getHomepageFeaturedCategories: loaded categories'
+  );
 
   return categories as readonly Database['public']['Enums']['content_category'][];
 }
@@ -47,7 +48,7 @@ export function getHomepageTabCategories(): readonly string[] {
   });
 
   if (isBuildTime()) {
-    reqLogger.debug('getHomepageTabCategories: build time, returning empty array');
+    reqLogger.debug({}, 'getHomepageTabCategories: build time, returning empty array');
     return [];
   }
 
@@ -59,9 +60,7 @@ export function getHomepageTabCategories(): readonly string[] {
   const categories = config['homepage.tab_categories'];
   const result = Array.isArray(categories) ? categories.map(String) : [];
 
-  reqLogger.debug('getHomepageTabCategories: loaded categories', {
-    categoryCount: result.length,
-  });
+  reqLogger.debug({ categoryCount: result.length }, 'getHomepageTabCategories: loaded categories');
 
   return result;
 }

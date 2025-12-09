@@ -51,14 +51,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return badRequestResponse(`Invalid format '${format}' for changelog entry`, CORS);
     }
 
-    reqLogger.info('Changelog entry request received', { slug, format });
+    reqLogger.info({ slug, format }, 'Changelog entry request received');
 
     const supabase = createSupabaseAnonClient();
     const service = new ContentService(supabase);
     const data = await service.getChangelogEntryLlmsTxt({ p_slug: slug });
 
     if (!data) {
-      reqLogger.warn('Changelog entry LLMs.txt not found', { slug });
+      reqLogger.warn({ slug }, 'Changelog entry LLMs.txt not found');
       return NextResponse.json(
         { error: 'Changelog entry LLMs.txt not found' },
         {
@@ -74,10 +74,13 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     const formatted = data.replaceAll(String.raw`\n`, '\n');
 
-    reqLogger.info('Changelog entry LLMs.txt generated', {
-      slug,
-      bytes: formatted.length,
-    });
+    reqLogger.info(
+      {
+        slug,
+        bytes: formatted.length,
+      },
+      'Changelog entry LLMs.txt generated'
+    );
 
     return new NextResponse(formatted, {
       status: 200,
@@ -90,8 +93,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       },
     });
   } catch (error) {
-    reqLogger.error('Changelog entry API error', normalizeError(error));
-    return createErrorResponse(error, {
+    const normalized = normalizeError(error, 'Operation failed');
+    reqLogger.error({ err: normalizeError(error) }, 'Changelog entry API error');
+    return createErrorResponse(normalized, {
       route: '/api/content/changelog/[slug]',
       operation: 'ChangelogEntryAPI',
       method: 'GET',

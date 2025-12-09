@@ -110,13 +110,11 @@ export async function fetchWithRetry({
 
     if (attempt < attempts - 1) {
       const delay = baseDelay * 2 ** attempt;
-      logger.warn('retrying request', {
-        ...context,
+      logger.warn({ ...context,
         attempt: attempt + 1,
         attempts,
         delay,
-        err: lastError || new Error('Unknown error'),
-      });
+        err: lastError || new Error('Unknown error'), }, 'retrying request');
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }
@@ -147,13 +145,11 @@ export async function runWithRetry<T>(
       if (onRetry) {
         onRetry(attempt + 1, errorForRetry, delay);
       } else {
-        logger.warn('retrying operation', {
-          ...context,
+        logger.warn({ ...context,
           attempt: attempt + 1,
           attempts,
           delay,
-          err: errorForRetry,
-        });
+          err: errorForRetry, }, 'retrying operation');
       }
 
       await new Promise((resolve) => setTimeout(resolve, delay));

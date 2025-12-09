@@ -130,10 +130,10 @@ async function TrendingPageContent({
 
   // Section: Category Validation
   if (categoryParameter && !normalizedCategory) {
-    reqLogger.warn('TrendingPage: invalid category parameter provided', {
-      section: 'category-validation',
-      category: categoryParameter,
-    });
+    reqLogger.warn(
+      { section: 'data-fetch', category: categoryParameter },
+      'TrendingPage: invalid category parameter provided'
+    );
   }
 
   // Section: Trending Data Fetch
@@ -141,14 +141,17 @@ async function TrendingPageContent({
     category: normalizedCategory,
     limit,
   });
-  reqLogger.info('Trending page accessed', {
-    section: 'trending-data-fetch',
-    category: normalizedCategory ?? 'all',
-    limit,
-    trendingCount: pageData.trending.length,
-    popularCount: pageData.popular.length,
-    recentCount: pageData.recent.length,
-  });
+  reqLogger.info(
+    {
+      section: 'data-fetch',
+      category: normalizedCategory ?? 'all',
+      limit,
+      trendingCount: pageData.trending.length,
+      popularCount: pageData.popular.length,
+      recentCount: pageData.recent.length,
+    },
+    'Trending page accessed'
+  );
 
   const trendingDisplay = mapTrendingMetrics(pageData.trending, normalizedCategory);
   const popularDisplay = mapPopularContent(pageData.popular, normalizedCategory);

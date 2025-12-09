@@ -51,7 +51,7 @@ const SESSION_ID_KEY = 'app_session_id';
  * ```typescript
  * // Direct usage (rare - usually handled by client-logger utilities)
  * const sessionId = getOrCreateSessionId();
- * logger.error('Action failed', error, { sessionId, operation: 'Action' });
+ * logger.error({ err: error, sessionId, operation: 'Action' }, 'Action failed');
  * 
  * // Typical usage (via client-logger utilities)
  * import { logClientError } from '../utils/client-logger';

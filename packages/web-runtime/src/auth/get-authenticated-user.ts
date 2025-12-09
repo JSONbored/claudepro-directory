@@ -39,21 +39,25 @@ export async function getAuthenticatedUserFromClient(
       // When auth is optional (requireUser=false), missing session is expected and should be debug level
       // Only log as error if auth is required or if it's an actual error (not just missing session)
       if (options?.requireUser) {
-        logger.error(`${contextLabel}: supabase auth getUser failed`, normalized);
+        logger.error({ err: normalized }, `${contextLabel}: supabase auth getUser failed`);
         throw normalized;
       }
       // Optional auth: missing session is expected, log at debug level
       // Only log as error if it's not a session missing error (e.g., network error)
       if (error.message?.includes('session') || error.message?.includes('Auth session missing')) {
-        logger.debug(`${contextLabel}: no authenticated session (optional auth)`, {
-          errorMessage: normalized.message,
-          errorName: normalized.name,
-        });
+        logger.debug(
+          {
+            errorMessage: normalized.message,
+            errorName: normalized.name,
+          },
+          `${contextLabel}: no authenticated session (optional auth)`
+        );
       } else {
         // Actual error (network, etc.) - log as warn even for optional auth
-        logger.warn(`${contextLabel}: supabase auth getUser failed (optional auth)`, {
-          err: normalized,
-        });
+        logger.warn(
+          { err: normalized },
+          `${contextLabel}: supabase auth getUser failed (optional auth)`
+        );
       }
       return {
         user: null,
@@ -65,7 +69,7 @@ export async function getAuthenticatedUserFromClient(
     if (!user) {
       if (options?.requireUser) {
         const unauthorizedError = new Error('Unauthorized. No authenticated user session found.');
-        logger.warn(`${contextLabel}: no authenticated session present`);
+        logger.warn({}, `${contextLabel}: no authenticated session present`);
         throw unauthorizedError;
       }
 
@@ -81,7 +85,7 @@ export async function getAuthenticatedUserFromClient(
     };
   } catch (error) {
     const normalized = normalizeError(error, 'Unexpected auth guard failure');
-    logger.error(`${contextLabel}: unexpected error retrieving authenticated user`, normalized);
+    logger.error({ err: normalized }, `${contextLabel}: unexpected error retrieving authenticated user`);
     if (options?.requireUser) {
       throw normalized;
     }

@@ -63,7 +63,7 @@ export async function createErrorResponse(
   
   // Log error with full context - Pino logger outputs to stdout (Vercel captures these logs)
   const normalized = normalizeError(error, 'API error occurred');
-  logger.error('API error occurred', normalized, logContext);
+  logger.error({ err: normalized, ...logContext }, 'API error occurred');
 
   // Handle Zod validation errors
   if (error instanceof z.ZodError) {

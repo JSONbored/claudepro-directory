@@ -22,11 +22,10 @@ function resolveSocialLink(key: SocialLinkKey): string {
     return link;
   }
 
-  logger.warn('marketing.contact.missing_social_link', {
-    operation: 'resolveSocialLink',
-    module: 'data/marketing/contact',
-    key,
-  });
+  logger.warn(
+    { operation: 'resolveSocialLink', module: 'data/marketing/contact', key },
+    'marketing.contact.missing_social_link'
+  );
   return SOCIAL_LINK_FALLBACKS[key];
 }
 

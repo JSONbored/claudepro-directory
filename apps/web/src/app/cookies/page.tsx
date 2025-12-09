@@ -35,7 +35,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see NavLink
  * @see generatePageMetadata
  */
-export default async function CookiesPage() {
+export default function CookiesPage() {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
@@ -66,9 +66,7 @@ export default async function CookiesPage() {
 function CookiesPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
   const lastUpdated = getLastUpdatedDate();
 
-  reqLogger.info('CookiesPage: rendering page', {
-    section: 'page-render',
-  });
+  reqLogger.info({ section: 'data-fetch' }, 'CookiesPage: rendering page');
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8 sm:py-12">

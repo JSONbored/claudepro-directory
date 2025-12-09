@@ -72,22 +72,24 @@ export async function getConfigRecommendations(
       ...(viewerId ? { p_viewer_id: viewerId } : {}),
     });
 
-    reqLogger.info('getConfigRecommendations: fetched successfully', {
-      useCase,
-      experienceLevel,
-      resultCount: result.results?.length ?? 0,
-      hasViewer: Boolean(viewerId),
-    });
+    reqLogger.info(
+      {
+        useCase,
+        experienceLevel,
+        resultCount: result.results?.length ?? 0,
+        hasViewer: Boolean(viewerId),
+      },
+      'getConfigRecommendations: fetched successfully'
+    );
 
     return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('getConfigRecommendations: unexpected error', errorForLogging, {
-      useCase,
-      experienceLevel,
-      hasViewer: Boolean(viewerId),
-    });
+    reqLogger.error(
+      { err: errorForLogging, useCase, experienceLevel, hasViewer: Boolean(viewerId) },
+      'getConfigRecommendations: unexpected error'
+    );
     return null;
   }
 }

@@ -92,11 +92,10 @@ async function getFilteredJobsDirect(options: JobsFilterOptions): Promise<JobsFi
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.warn('Job filtering failed, returning null', {
-      err: errorForLogging,
-      ...filtersLog,
-      fallbackStrategy: 'null',
-    });
+    reqLogger.warn(
+      { err: errorForLogging, ...filtersLog, fallbackStrategy: 'null' },
+      'Job filtering failed, returning null'
+    );
     return null;
   }
 }
@@ -145,20 +144,16 @@ async function getJobsListCached(limit: number, offset: number): Promise<JobsFil
     }
     const result = await new SearchService(client).filterJobs(rpcArgs);
 
-    reqLogger.info('getJobsListCached: fetched successfully', {
-      limit,
-      offset,
-      hasResult: Boolean(result),
-    });
+    reqLogger.info(
+      { limit, offset, hasResult: Boolean(result) },
+      'getJobsListCached: fetched successfully'
+    );
 
     return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('getJobsListCached: failed', errorForLogging, {
-      limit,
-      offset,
-    });
+    reqLogger.error({ err: errorForLogging, limit, offset }, 'getJobsListCached: failed');
     return null;
   }
 }
@@ -217,32 +212,39 @@ async function getFilteredJobsCached(
 
     const result = await new SearchService(client).filterJobs(rpcArguments);
 
-    reqLogger.info('getFilteredJobsCached: fetched successfully', {
-      searchQuery,
-      category,
-      employment,
-      experience,
-      remote,
-      limit,
-      offset,
-      sort,
-      hasResult: Boolean(result),
-    });
+    reqLogger.info(
+      {
+        searchQuery,
+        category,
+        employment,
+        experience,
+        remote,
+        limit,
+        offset,
+        sort,
+        hasResult: Boolean(result),
+      },
+      'getFilteredJobsCached: fetched successfully'
+    );
 
     return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('getFilteredJobsCached: failed', errorForLogging, {
-      searchQuery,
-      category,
-      employment,
-      experience,
-      remote,
-      limit,
-      offset,
-      sort,
-    });
+    reqLogger.error(
+      {
+        err: errorForLogging,
+        searchQuery,
+        category,
+        employment,
+        experience,
+        remote,
+        limit,
+        offset,
+        sort,
+      },
+      'getFilteredJobsCached: failed'
+    );
     return null;
   }
 }
@@ -291,9 +293,10 @@ export async function getFilteredJobs(
     } catch (error) {
       // logger.error() normalizes errors internally, so pass raw error
       const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-      reqLogger.error('getFilteredJobs: failed to fetch jobs list', errorForLogging, {
-        ...filtersLog,
-      });
+      reqLogger.error(
+        { err: errorForLogging, ...filtersLog },
+        'getFilteredJobs: failed to fetch jobs list'
+      );
       return null;
     }
   }
@@ -305,11 +308,10 @@ export async function getFilteredJobs(
       // Fire-and-forget analytics call - errors are logged but don't block the request
       void pulseJobSearch(searchQuery, {}, 0).catch((error: unknown) => {
         const normalized = normalizeError(error, 'Failed to pulse job search');
-        logger.error('Failed to pulse job search', normalized, {
-          operation: 'pulseJobSearch',
-          module: 'data/jobs',
-          searchQuery,
-        });
+        logger.error(
+          { err: normalized, operation: 'pulseJobSearch', module: 'data/jobs', searchQuery },
+          'Failed to pulse job search'
+        );
       });
     }
     return getFilteredJobsDirect(options);
@@ -322,11 +324,10 @@ export async function getFilteredJobs(
       // Fire-and-forget analytics call - errors are logged but don't block the request
       void pulseJobSearch(searchQuery, {}, 0).catch((error: unknown) => {
         const normalized = normalizeError(error, 'Failed to pulse job search');
-        logger.error('Failed to pulse job search', normalized, {
-          operation: 'pulseJobSearch',
-          module: 'data/jobs',
-          searchQuery,
-        });
+        logger.error(
+          { err: normalized, operation: 'pulseJobSearch', module: 'data/jobs', searchQuery },
+          'Failed to pulse job search'
+        );
       });
     }
 
@@ -373,9 +374,7 @@ export async function getFilteredJobs(
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('Failed to fetch filtered jobs', errorForLogging, {
-      ...filtersLog,
-    });
+    reqLogger.error({ err: errorForLogging, ...filtersLog }, 'Failed to fetch filtered jobs');
     return null;
   }
 }
@@ -417,18 +416,13 @@ export async function getJobBySlug(slug: string) {
 
     const result = await new JobsService(client).getJobBySlug({ p_slug: slug });
 
-    reqLogger.info('getJobBySlug: fetched successfully', {
-      slug,
-      hasResult: Boolean(result),
-    });
+    reqLogger.info({ slug, hasResult: Boolean(result) }, 'getJobBySlug: fetched successfully');
 
     return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('getJobBySlug: unexpected error', errorForLogging, {
-      slug,
-    });
+    reqLogger.error({ err: errorForLogging, slug }, 'getJobBySlug: unexpected error');
     return null;
   }
 }
@@ -472,10 +466,10 @@ export async function getFeaturedJobs(limit = 5) {
 
     const result = await new JobsService(client).getFeaturedJobs();
 
-    reqLogger.info('getFeaturedJobs: fetched successfully', {
-      limit,
-      count: result !== null && result !== undefined ? result.length : 0,
-    });
+    reqLogger.info(
+      { limit, count: result !== null && result !== undefined ? result.length : 0 },
+      'getFeaturedJobs: fetched successfully'
+    );
 
     if (result === null || result === undefined) {
       return [];
@@ -484,9 +478,7 @@ export async function getFeaturedJobs(limit = 5) {
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('getFeaturedJobs: unexpected error', errorForLogging, {
-      limit,
-    });
+    reqLogger.error({ err: errorForLogging, limit }, 'getFeaturedJobs: unexpected error');
     return [];
   }
 }

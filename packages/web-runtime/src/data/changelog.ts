@@ -90,26 +90,33 @@ export async function getChangelogOverview(
       p_offset: offset,
     });
 
-    reqLogger.info('getChangelogOverview: fetched successfully', {
-      ...(category ? { category } : {}),
-      publishedOnly,
-      featuredOnly,
-      limit,
-      offset,
-      entryCount: result.entries?.length ?? 0,
-    });
+    reqLogger.info(
+      {
+        ...(category ? { category } : {}),
+        publishedOnly,
+        featuredOnly,
+        limit,
+        offset,
+        entryCount: result.entries?.length ?? 0,
+      },
+      'getChangelogOverview: fetched successfully'
+    );
 
     return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('getChangelogOverview: failed', errorForLogging, {
-      ...(category ? { category } : {}),
-      publishedOnly,
-      featuredOnly,
-      limit,
-      offset,
-    });
+    reqLogger.error(
+      {
+        err: errorForLogging,
+        ...(category ? { category } : {}),
+        publishedOnly,
+        featuredOnly,
+        limit,
+        offset,
+      },
+      'getChangelogOverview: failed'
+    );
     return createEmptyOverview(limit, offset);
   }
 }
@@ -155,9 +162,7 @@ export async function getChangelogEntryBySlug(
     const result = await new ChangelogService(client).getChangelogDetail({ p_slug: slug });
 
     if (!result.entry) {
-      reqLogger.info('getChangelogEntryBySlug: entry not found', {
-        slug,
-      });
+      reqLogger.info({ slug }, 'getChangelogEntryBySlug: entry not found');
       return null;
     }
 
@@ -191,18 +196,16 @@ export async function getChangelogEntryBySlug(
       twitter_card: null,
     } as Database['public']['Tables']['changelog']['Row'];
 
-    reqLogger.info('getChangelogEntryBySlug: fetched successfully', {
-      slug,
-      hasEntry: Boolean(normalizedEntry),
-    });
+    reqLogger.info(
+      { slug, hasEntry: Boolean(normalizedEntry) },
+      'getChangelogEntryBySlug: fetched successfully'
+    );
 
     return normalizedEntry;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('getChangelogEntryBySlug: failed', errorForLogging, {
-      slug,
-    });
+    reqLogger.error({ err: errorForLogging, slug }, 'getChangelogEntryBySlug: failed');
     return null;
   }
 }

@@ -59,18 +59,22 @@ export default async function MFASettingsPage() {
 
   if (!user) {
     reqLogger.error(
-      'MFASettingsPage: user is null despite requireUser: true',
-      new Error('User is null'),
       {
-        section: 'authentication',
-      }
+        section: 'data-fetch',
+        err: new Error('User is null'),
+      },
+      'MFASettingsPage: user is null despite requireUser: true'
     );
     redirect(ROUTES.LOGIN);
   }
 
-  reqLogger.info('MFASettingsPage: rendered for authenticated user', {
-    userIdHash: user.id, // userId is automatically hashed by redaction
-  });
+  reqLogger.info(
+    {
+      section: 'data-fetch',
+      userIdHash: user.id, // userId is automatically hashed by redaction
+    },
+    'MFASettingsPage: rendered for authenticated user'
+  );
 
   return (
     <div className="space-y-6">

@@ -119,13 +119,13 @@ export const processDiscordSubmissionsQueue = inngest.createFunction(
     const startTime = Date.now();
     const logContext = createWebAppContextWithId('/inngest/discord/submissions', 'processDiscordSubmissionsQueue');
 
-    logger.info('Discord submissions queue processing started', logContext);
+    logger.info(logContext, 'Discord submissions queue processing started');
 
     const adminWebhookUrl = getEnvVar('DISCORD_SUBMISSIONS_WEBHOOK_URL');
     const announcementWebhookUrl = getEnvVar('DISCORD_ANNOUNCEMENTS_WEBHOOK_URL');
 
     if (!adminWebhookUrl && !announcementWebhookUrl) {
-      logger.warn('Discord submission webhook URLs not configured', logContext);
+      logger.warn(logContext, 'Discord submission webhook URLs not configured');
       return { processed: 0, sent: 0, skipped: 'no_webhook_urls' };
     }
 
@@ -146,16 +146,14 @@ export const processDiscordSubmissionsQueue = inngest.createFunction(
           msg.message && ['INSERT', 'UPDATE', 'DELETE'].includes(msg.message.type)
         );
       } catch (error) {
-        logger.warn('Failed to read Discord submissions queue', {
-          ...logContext,
-          errorMessage: normalizeError(error, 'Queue read failed').message,
-        });
+        logger.warn({ ...logContext,
+          errorMessage: normalizeError(error, 'Queue read failed').message, }, 'Failed to read Discord submissions queue');
         return [];
       }
     });
 
     if (messages.length === 0) {
-      logger.info('No messages in Discord submissions queue', logContext);
+      logger.info(logContext, 'No messages in Discord submissions queue');
       return { processed: 0, sent: 0 };
     }
 
@@ -204,28 +202,22 @@ export const processDiscordSubmissionsQueue = inngest.createFunction(
             } catch (fetchError) {
               clearTimeout(timeoutId);
               if (fetchError instanceof Error && fetchError.name === 'AbortError') {
-                logger.warn('Discord submission notification timed out', {
-                  ...logContext,
-                  submissionId: submission.id,
-                });
+                logger.warn({ ...logContext,
+                  submissionId: submission.id, }, 'Discord submission notification timed out');
               }
               return { success: false, sent: false };
             }
             clearTimeout(timeoutId);
 
             if (!response.ok) {
-              logger.warn('Discord submission notification failed', {
-                ...logContext,
+              logger.warn({ ...logContext,
                 submissionId: submission.id,
-                status: response.status,
-              });
+                status: response.status, }, 'Discord submission notification failed');
               return { success: false, sent: false };
             }
 
-            logger.info('Discord submission notification sent', {
-              ...logContext,
-              submissionId: submission.id,
-            });
+            logger.info({ ...logContext,
+              submissionId: submission.id, }, 'Discord submission notification sent');
 
             return { success: true, sent: true };
           }
@@ -258,28 +250,22 @@ export const processDiscordSubmissionsQueue = inngest.createFunction(
               } catch (fetchError) {
                 clearTimeout(timeoutId);
                 if (fetchError instanceof Error && fetchError.name === 'AbortError') {
-                  logger.warn('Discord merged notification timed out', {
-                    ...logContext,
-                    submissionId: submission.id,
-                  });
+                  logger.warn({ ...logContext,
+                    submissionId: submission.id, }, 'Discord merged notification timed out');
                 }
                 return { success: false, sent: false };
               }
               clearTimeout(timeoutId);
 
               if (!response.ok) {
-                logger.warn('Discord merged notification failed', {
-                  ...logContext,
+                logger.warn({ ...logContext,
                   submissionId: submission.id,
-                  status: response.status,
-                });
+                  status: response.status, }, 'Discord merged notification failed');
                 return { success: false, sent: false };
               }
 
-              logger.info('Discord merged notification sent', {
-                ...logContext,
-                submissionId: submission.id,
-              });
+              logger.info({ ...logContext,
+                submissionId: submission.id, }, 'Discord merged notification sent');
 
               return { success: true, sent: true };
             }
@@ -291,10 +277,8 @@ export const processDiscordSubmissionsQueue = inngest.createFunction(
           return { success: true, sent: false, reason: 'unhandled_type' };
         } catch (error) {
           const normalized = normalizeError(error, 'Discord submission notification failed');
-          logger.warn('Discord submission notification failed', {
-            ...logContext,
-            errorMessage: normalized.message,
-          });
+          logger.warn({ ...logContext,
+            errorMessage: normalized.message, }, 'Discord submission notification failed');
           return { success: false, sent: false };
         }
       });
@@ -317,12 +301,10 @@ export const processDiscordSubmissionsQueue = inngest.createFunction(
     }
 
     const durationMs = Date.now() - startTime;
-    logger.info('Discord submissions queue processing completed', {
-      ...logContext,
+    logger.info({ ...logContext,
       durationMs,
       processed: messages.length,
-      sent: sentCount,
-    });
+      sent: sentCount, }, 'Discord submissions queue processing completed');
 
     return {
       processed: messages.length,

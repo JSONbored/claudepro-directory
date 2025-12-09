@@ -224,16 +224,14 @@ export async function generateCodeScreenshot(
     };
   } catch (error) {
     const normalized = normalizeError(error, 'Screenshot generation failed');
-    logger.warn('[Share] Screenshot generation failed', {
-      err: normalized,
+    logger.warn({ err: normalized,
       category: 'share',
       component: 'generateCodeScreenshot',
       recoverable: true,
       userRetryable: true,
       hasElement: Boolean(element),
       itemCategory: category ?? 'unknown',
-      title: title ?? 'untitled',
-    });
+      title: title ?? 'untitled', }, '[Share] Screenshot generation failed');
     throw normalized;
   }
 }
@@ -252,13 +250,11 @@ export async function copyScreenshotToClipboard(blob: Blob): Promise<void> {
     await navigator.clipboard.write([clipboardItem]);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to copy to clipboard');
-    logger.warn('[Clipboard] Copy screenshot failed', {
-      err: normalized,
+    logger.warn({ err: normalized,
       category: 'clipboard',
       component: 'copyScreenshotToClipboard',
       recoverable: true,
-      userRetryable: true,
-    });
+      userRetryable: true, }, '[Clipboard] Copy screenshot failed');
     throw normalized;
   }
 }

@@ -1504,7 +1504,8 @@ function StepConfiguration({
  * @param data.onChange
  * @see WizardSubmissionPage
  * @see StepSocialProof
- */
+ 
+ * @returns {unknown} Description of return value*/
 function StepExamplesTags({
   data,
   onChange,

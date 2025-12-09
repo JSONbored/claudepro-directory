@@ -59,7 +59,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see connection from next/server
  * @see logger
  */
-export default async function CompaniesPage() {
+export default function CompaniesPage() {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
@@ -98,31 +98,39 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
   let companiesResponse: Awaited<ReturnType<typeof getCompaniesList>> | null = null;
   try {
     companiesResponse = await getCompaniesList(50, 0);
-    reqLogger.info('CompaniesPage: companies list loaded', {
-      section: 'companies-list',
-      companiesCount: companiesResponse.companies?.length ?? 0,
-    });
+    reqLogger.info(
+      {
+        section: 'data-fetch',
+        companiesCount: companiesResponse.companies?.length ?? 0,
+      },
+      'CompaniesPage: companies list loaded'
+    );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load companies list');
-    reqLogger.error('CompaniesPage: getCompaniesList failed', normalized, {
-      section: 'companies-list',
-    });
+    reqLogger.error(
+      {
+        section: 'data-fetch',
+        err: normalized,
+      },
+      'CompaniesPage: getCompaniesList failed'
+    );
     throw normalized;
   }
 
   if (!companiesResponse.companies) {
-    reqLogger.warn('CompaniesPage: companies response is empty', {
-      section: 'companies-list',
-    });
+    reqLogger.warn({ section: 'data-fetch' }, 'CompaniesPage: companies response is empty');
   }
 
   const companies = companiesResponse.companies ?? [];
 
   // Final summary log
-  reqLogger.info('CompaniesPage: page render completed', {
-    section: 'page-render',
-    companiesCount: companies.length,
-  });
+  reqLogger.info(
+    {
+      section: 'data-fetch',
+      companiesCount: companies.length,
+    },
+    'CompaniesPage: page render completed'
+  );
 
   return (
     <div className="bg-background min-h-screen">

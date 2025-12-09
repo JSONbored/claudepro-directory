@@ -83,10 +83,8 @@ export async function updateSupabaseSession(
     // Log error for debugging but don't throw
     if (error instanceof Error) {
       const normalized = normalizeError(error, 'Supabase session update failed in middleware');
-      logger.warn('Supabase session update failed in middleware', {
-        err: normalized,
-        pathname: request.nextUrl.pathname,
-      });
+      logger.warn({ err: normalized,
+        pathname: request.nextUrl.pathname, }, 'Supabase session update failed in middleware');
     }
     return null;
   }

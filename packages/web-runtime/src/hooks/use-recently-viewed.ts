@@ -177,9 +177,7 @@ function loadFromStorage(): RecentlyViewedItem[] {
 
     // Validate structure
     if (!Array.isArray(parsed)) {
-      logger.warn('Invalid recently viewed data structure', undefined, {
-        hook: 'useRecentlyViewed',
-      });
+      logger.warn({ hook: 'useRecentlyViewed' }, 'Invalid recently viewed data structure');
       return [];
     }
 
@@ -196,9 +194,7 @@ function loadFromStorage(): RecentlyViewedItem[] {
     return validItems.slice(0, MAX_ITEMS);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load recently viewed');
-    logger.error('Failed to load recently viewed', normalized, {
-      hook: 'useRecentlyViewed',
-    });
+    logger.error({ err: normalized, hook: 'useRecentlyViewed', }, 'Failed to load recently viewed');
     return [];
   }
 }
@@ -215,23 +211,17 @@ function saveToStorage(items: RecentlyViewedItem[]): void {
   } catch (error) {
     // Handle quota exceeded (unlikely with max 10 items, but defensive)
     if (error instanceof Error && error.name === 'QuotaExceededError') {
-      logger.warn('localStorage quota exceeded, clearing old items', undefined, {
-        hook: 'useRecentlyViewed',
-      });
+      logger.warn({ hook: 'useRecentlyViewed' }, 'localStorage quota exceeded, clearing old items');
       // Try saving fewer items
       const reducedItems = items.slice(0, Math.floor(MAX_ITEMS / 2));
       try {
         window.localStorage.setItem(STORAGE_KEY, JSON.stringify(reducedItems));
       } catch {
-        logger.error('Failed to save even after reduction', undefined, {
-          hook: 'useRecentlyViewed',
-        });
+        logger.error({ err: undefined, hook: 'useRecentlyViewed', }, 'Failed to save even after reduction');
       }
     } else {
       const normalized = normalizeError(error, 'Failed to save recently viewed');
-      logger.error('Failed to save recently viewed', normalized, {
-        hook: 'useRecentlyViewed',
-      });
+      logger.error({ err: normalized, hook: 'useRecentlyViewed', }, 'Failed to save recently viewed');
     }
   }
 }

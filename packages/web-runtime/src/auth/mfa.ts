@@ -84,7 +84,7 @@ export async function listMFAFactors(
 
     if (error) {
       const normalized = normalizeError(error, 'Failed to list MFA factors');
-      logger.error('MFA: listFactors failed', normalized);
+      logger.error({ err: normalized }, 'MFA: listFactors failed');
       return { factors: [], error: normalized };
     }
 
@@ -113,7 +113,7 @@ export async function listMFAFactors(
     return { factors, error: null };
   } catch (error) {
     const normalized = normalizeError(error, 'MFA listFactors threw');
-    logger.error('MFA: listFactors threw', normalized);
+    logger.error({ err: normalized }, 'MFA: listFactors threw');
     return { factors: [], error: normalized };
   }
 }
@@ -131,7 +131,7 @@ export async function enrollTOTPFactor(
 
     if (error) {
       const normalized = normalizeError(error, 'Failed to enroll TOTP factor');
-      logger.error('MFA: enroll failed', normalized);
+      logger.error({ err: normalized }, 'MFA: enroll failed');
       return { data: null, error: normalized };
     }
 
@@ -143,11 +143,9 @@ export async function enrollTOTPFactor(
     }
 
     // Log successful MFA enrollment (audit trail)
-    logger.info('MFA: TOTP factor enrolled', {
-      audit: true, // Structured tag for audit trail filtering
+    logger.info({ audit: true, // Structured tag for audit trail filtering
       factorId: data.id,
-      operation: 'mfa_enroll',
-    });
+      operation: 'mfa_enroll', }, 'MFA: TOTP factor enrolled');
 
     return {
       data: {
@@ -160,7 +158,7 @@ export async function enrollTOTPFactor(
     };
   } catch (error) {
     const normalized = normalizeError(error, 'MFA enroll threw');
-    logger.error('MFA: enroll threw', normalized);
+    logger.error({ err: normalized }, 'MFA: enroll threw');
     return { data: null, error: normalized };
   }
 }
@@ -177,7 +175,7 @@ export async function createMFAChallenge(
 
     if (error) {
       const normalized = normalizeError(error, 'Failed to create MFA challenge');
-      logger.error('MFA: challenge failed', normalized);
+      logger.error({ err: normalized }, 'MFA: challenge failed');
       return { data: null, error: normalized };
     }
 
@@ -197,7 +195,7 @@ export async function createMFAChallenge(
     };
   } catch (error) {
     const normalized = normalizeError(error, 'MFA challenge threw');
-    logger.error('MFA: challenge threw', normalized);
+    logger.error({ err: normalized }, 'MFA: challenge threw');
     return { data: null, error: normalized };
   }
 }
@@ -220,28 +218,24 @@ export async function verifyMFAChallenge(
 
     if (error) {
       const normalized = normalizeError(error, 'Failed to verify MFA challenge');
-      logger.warn('MFA: verification failed', {
-        securityEvent: true, // Structured tag for security event filtering
+      logger.warn({ securityEvent: true, // Structured tag for security event filtering
         factorId,
         challengeId,
         operation: 'mfa_verify_failed',
-        error: normalized.message,
-      });
+        error: normalized.message, }, 'MFA: verification failed');
       return { success: false, error: normalized };
     }
 
     // Log successful MFA verification (audit trail)
-    logger.info('MFA: verification successful', {
-      audit: true, // Structured tag for audit trail filtering
+    logger.info({ audit: true, // Structured tag for audit trail filtering
       factorId,
       challengeId,
-      operation: 'mfa_verify_success',
-    });
+      operation: 'mfa_verify_success', }, 'MFA: verification successful');
 
     return { success: true, error: null };
   } catch (error) {
     const normalized = normalizeError(error, 'MFA verify threw');
-    logger.error('MFA: verify threw', normalized);
+    logger.error({ err: normalized }, 'MFA: verify threw');
     return { success: false, error: normalized };
   }
 }
@@ -258,22 +252,20 @@ export async function unenrollMFAFactor(
 
     if (error) {
       const normalized = normalizeError(error, 'Failed to unenroll MFA factor');
-      logger.error('MFA: unenroll failed', normalized);
+      logger.error({ err: normalized }, 'MFA: unenroll failed');
       return { success: false, error: normalized };
     }
 
     // Log successful MFA unenrollment (audit trail - security-relevant change)
-    logger.info('MFA: factor unenrolled', {
-      audit: true, // Structured tag for audit trail filtering
+    logger.info({ audit: true, // Structured tag for audit trail filtering
       securityEvent: true, // Also a security event (reducing security level)
       factorId,
-      operation: 'mfa_unenroll',
-    });
+      operation: 'mfa_unenroll', }, 'MFA: factor unenrolled');
 
     return { success: true, error: null };
   } catch (error) {
     const normalized = normalizeError(error, 'MFA unenroll threw');
-    logger.error('MFA: unenroll threw', normalized);
+    logger.error({ err: normalized }, 'MFA: unenroll threw');
     return { success: false, error: normalized };
   }
 }
@@ -292,7 +284,7 @@ export async function getAuthenticatorAssuranceLevel(
         error,
         'Failed to get authenticator assurance level'
       );
-      logger.error('MFA: getAuthenticatorAssuranceLevel failed', normalized);
+      logger.error({ err: normalized }, 'MFA: getAuthenticatorAssuranceLevel failed');
       return { data: null, error: normalized };
     }
 
@@ -312,7 +304,7 @@ export async function getAuthenticatorAssuranceLevel(
     };
   } catch (error) {
     const normalized = normalizeError(error, 'MFA getAuthenticatorAssuranceLevel threw');
-    logger.error('MFA: getAuthenticatorAssuranceLevel threw', normalized);
+    logger.error({ err: normalized }, 'MFA: getAuthenticatorAssuranceLevel threw');
     return { data: null, error: normalized };
   }
 }
@@ -337,7 +329,7 @@ export async function requiresMFAChallenge(
     return { requires, error: null };
   } catch (error) {
     const normalized = normalizeError(error, 'requiresMFAChallenge threw');
-    logger.error('MFA: requiresMFAChallenge threw', normalized);
+    logger.error({ err: normalized }, 'MFA: requiresMFAChallenge threw');
     return { requires: false, error: normalized };
   }
 }

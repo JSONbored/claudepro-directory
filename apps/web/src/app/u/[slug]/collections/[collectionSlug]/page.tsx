@@ -116,9 +116,10 @@ export async function generateMetadata({
 
   // Note: Removed getPublicCollectionDetail call from generateMetadata to avoid cookies() access during prerendering
   // The page component will fetch the data when needed
-  metadataLogger.info('PublicCollectionPage: generating metadata', {
-    section: 'metadata-generation',
-  });
+  metadataLogger.info(
+    { section: 'metadata-generation' },
+    'PublicCollectionPage: generating metadata'
+  );
 
   return generatePageMetadata('/u/:slug/collections/:collectionSlug', {
     params: { slug, collectionSlug },
@@ -211,22 +212,30 @@ async function PublicCollectionPageContent({
       collectionSlug,
       ...(currentUser?.id ? { viewerId: currentUser.id } : {}),
     });
-    viewerLogger.info('PublicCollectionPage: collection detail loaded', {
-      section: 'collection-detail-fetch',
-      hasData: !!collectionData,
-    });
+    viewerLogger.info(
+      {
+        section: 'collection-detail-fetch',
+        hasData: !!collectionData,
+      },
+      'PublicCollectionPage: collection detail loaded'
+    );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load collection detail');
-    viewerLogger.error('PublicCollectionPage: getPublicCollectionDetail threw', normalized, {
-      section: 'collection-detail-fetch',
-    });
+    viewerLogger.error(
+      {
+        err: normalized,
+        section: 'collection-detail-fetch',
+      },
+      'PublicCollectionPage: getPublicCollectionDetail threw'
+    );
     throw normalized;
   }
 
   if (!collectionData) {
-    viewerLogger.warn('PublicCollectionPage: collection detail not found', {
-      section: 'collection-detail-fetch',
-    });
+    viewerLogger.warn(
+      { section: 'collection-detail-fetch' },
+      'PublicCollectionPage: collection detail not found'
+    );
     notFound();
   }
 

@@ -85,11 +85,10 @@ export async function getRelatedContent(input: RelatedContentInput): Promise<Rel
 
     const items = data.filter((item) => Boolean(item.title && item.slug && item.category));
 
-    reqLogger.info('getRelatedContent: fetched successfully', {
-      category,
-      slug: currentSlug,
-      count: items.length,
-    });
+    reqLogger.info(
+      { category, slug: currentSlug, count: items.length },
+      'getRelatedContent: fetched successfully'
+    );
 
     return {
       items,
@@ -97,10 +96,10 @@ export async function getRelatedContent(input: RelatedContentInput): Promise<Rel
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('getRelatedContent: failed', errorForLogging, {
-      category,
-      slug: currentSlug,
-    });
+    reqLogger.error(
+      { err: errorForLogging, category, slug: currentSlug },
+      'getRelatedContent: failed'
+    );
     return {
       items: [],
     };

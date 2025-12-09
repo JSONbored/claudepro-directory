@@ -3,43 +3,60 @@
 # Matches: config/tools/eslint-plugin-architectural-rules.js -> require-server-action-wrapper
 
 ---
-# Rule: Detect missing authedAction/optionalAuthAction wrapper
+# Rule: Detect missing safe-action wrapper (authedAction/optionalAuthAction/rateLimitedAction/actionClient)
 id: missing-action-wrapper
-language: TypeScript
+language: typescript
 rule:
   all:
-    - pattern: export const $ACTION = $CLIENT.action($$$)
+    - pattern: 'use server'
+    - has:
+        pattern: export (const|function) $ACTION($$$) { $$$ }
+    - not:
+        has:
+          pattern: (authedAction|optionalAuthAction|rateLimitedAction|actionClient)($$$)
+message: "Server actions must use safe-action middleware (authedAction, optionalAuthAction, rateLimitedAction, or actionClient). Import from @heyclaude/web-runtime/actions/safe-action"
+severity: error
+
+---
+# Rule: Detect missing metadata() call in server actions
+id: missing-action-metadata
+language: typescript
+rule:
+  all:
+    - pattern: export const $ACTION = (authedAction|optionalAuthAction|rateLimitedAction|actionClient)($$$)
       kind: variable_declarator
     - not:
         has:
-          pattern: (authedAction|optionalAuthAction)($$$)
-message: "Server actions must use authedAction or optionalAuthAction wrappers for authentication. Import from @heyclaude/web-runtime/actions/safe-action"
+          pattern: .metadata($$$)
+message: "Server actions must include metadata using .metadata({ actionName: '...', category: '...' }). Add metadata before .inputSchema()"
 severity: error
 
 ---
 # Rule: Detect missing input validation (Zod schema) in server actions
 id: missing-action-input-validation
-language: TypeScript
+language: typescript
 rule:
   all:
-    - pattern: export const $ACTION = (authedAction|optionalAuthAction)($$$)
+    - pattern: export const $ACTION = (authedAction|optionalAuthAction|rateLimitedAction|actionClient)($$$)
       kind: variable_declarator
+    - has:
+        pattern: .metadata($$$)
     - not:
         has:
           pattern: .inputSchema(z.object($$$))
-message: "Server actions must include input validation using .inputSchema(z.object(...)). Add inputSchema before .action()"
+message: "Server actions must include input validation using .inputSchema(z.object(...)). Add inputSchema after .metadata() and before .action()"
 severity: error
 
 ---
 # Rule: Detect missing error handling in server action implementation
 id: missing-action-error-handling
-language: TypeScript
+language: typescript
 rule:
   all:
     - pattern: .action(async ($$$) => { $$$ })
       kind: call_expression
     - inside:
-        pattern: (authedAction|optionalAuthAction)($$$)
+        pattern: (authedAction|optionalAuthAction|rateLimitedAction|actionClient)($$$)
     - not:
         has:
           pattern: catch ($ERROR) { $$$ }

@@ -161,7 +161,8 @@ function extractPrComponents(
  * @param owner
  * @param repo
  * @param prNumber
- */
+ 
+ * @returns {unknown} Description of return value*/
 function buildSafePrUrl(owner: string, repo: string, prNumber: string): string {
   // Additional validation matching GitHub's rules using shared regex patterns
   if (!OWNER_REGEX.test(owner) || !REPO_REGEX.test(repo) || !PR_NUMBER_REGEX.test(prNumber)) {
@@ -291,10 +292,13 @@ async function SubmissionsPageContent({
   const { user } = await getAuthenticatedUser({ context: 'SubmissionsPage' });
 
   if (!user) {
-    reqLogger.warn('SubmissionsPage: unauthenticated access attempt', {
-      section: 'authentication',
-      timestamp: new Date().toISOString(),
-    });
+    reqLogger.warn(
+      {
+        section: 'data-fetch',
+        timestamp: new Date().toISOString(),
+      },
+      'SubmissionsPage: unauthenticated access attempt'
+    );
     return (
       <div className="space-y-6">
         <Card>
@@ -329,19 +333,23 @@ async function SubmissionsPageContent({
       submissions = data.submissions;
     } else {
       userLogger.error(
-        'SubmissionsPage: getUserDashboard returned null',
-        new Error('getUserDashboard returned null'),
         {
-          section: 'submissions-data-fetch',
-        }
+          section: 'data-fetch',
+          err: new Error('getUserDashboard returned null'),
+        },
+        'SubmissionsPage: getUserDashboard returned null'
       );
       hasError = true;
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load submissions from dashboard');
-    userLogger.error('SubmissionsPage: getUserDashboard threw', normalized, {
-      section: 'submissions-data-fetch',
-    });
+    userLogger.error(
+      {
+        section: 'data-fetch',
+        err: normalized,
+      },
+      'SubmissionsPage: getUserDashboard threw'
+    );
     hasError = true;
   }
 
@@ -371,7 +379,8 @@ async function SubmissionsPageContent({
   /**
    * Validate submission status against enum values
    * @param status
-   */
+   
+ * @returns {unknown} Description of return value*/
   function isValidSubmissionStatus(
     status: unknown
   ): status is Database['public']['Enums']['submission_status'] {
@@ -382,7 +391,8 @@ async function SubmissionsPageContent({
   /**
    * Validate submission type against enum values
    * @param type
-   */
+   
+ * @returns {unknown} Description of return value*/
   function isValidSubmissionType(
     type: unknown
   ): type is Database['public']['Enums']['submission_type'] {
@@ -501,9 +511,7 @@ async function SubmissionsPageContent({
   // Log any submissions with missing IDs for data integrity monitoring
   for (const [index, sub] of submissions.entries()) {
     if (!sub.id) {
-      userLogger.warn('SubmissionsPage: submission missing ID', {
-        index: index,
-      });
+      userLogger.warn({ section: 'data-fetch', index: index }, 'SubmissionsPage: submission missing ID');
     }
   }
 

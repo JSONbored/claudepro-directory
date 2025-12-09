@@ -97,7 +97,7 @@ async function getCachedHomeMetadata(): Promise<Metadata> {
  * @see generatePageMetadata
  * @see https://nextjs.org/docs/app/api-reference/functions/generate-metadata
  */
-async function getHomeMetadata() {
+function getHomeMetadata() {
   return getCachedHomeMetadata();
 }
 
@@ -210,7 +210,8 @@ function LayoutFallback({ children }: { children: React.ReactNode }) {
  * @see getLayoutData
  * @see DEFAULT_LAYOUT_DATA
  * @see LayoutContent
- */
+ 
+ * @returns {Promise<unknown>} Description of return value*/
 async function LayoutDataWrapper({ children }: { children: React.ReactNode }) {
   const [layoutDataResult] = await Promise.allSettled([getLayoutData()]);
 
@@ -232,9 +233,10 @@ async function LayoutDataWrapper({ children }: { children: React.ReactNode }) {
       layoutDataResult.reason instanceof Error
         ? layoutDataResult.reason
         : String(layoutDataResult.reason);
-    reqLogger.error('RootLayout: layout data fetch failed', errorForLogging, {
-      source: 'root-layout',
-    });
+    reqLogger.error(
+      { err: errorForLogging, source: 'root-layout' },
+      'RootLayout: layout data fetch failed'
+    );
   }
 
   return <LayoutContent announcement={layoutData.announcement}>{children}</LayoutContent>;

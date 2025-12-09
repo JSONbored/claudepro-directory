@@ -41,15 +41,13 @@ export async function fetchContactCommands(): Promise<ContactCommandsRow | null>
 
     const result = await new MiscService(client).getContactCommands();
 
-    reqLogger.info('fetchContactCommands: fetched successfully', {
-      count: result?.length ?? 0,
-    });
+    reqLogger.info({ count: result?.length ?? 0 }, 'fetchContactCommands: fetched successfully');
 
     return result?.[0] ?? null;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('fetchContactCommands: failed', errorForLogging);
+    reqLogger.error({ err: errorForLogging }, 'fetchContactCommands: failed');
     return null;
   }
 }

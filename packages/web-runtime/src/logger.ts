@@ -33,7 +33,6 @@
  */
 import pino from 'pino';
 import { createPinoConfig } from '@heyclaude/shared-runtime';
-import { normalizeError } from './errors';
 
 /**
  * Creates a Node.js destination stream that routes JSON log chunks to console methods so Vercel detects log levels correctly.
@@ -310,54 +309,46 @@ class Logger {
     return pinoInstance ?? createLoggerInstance();
   }
 
-  debug(message: string, context?: LogContext, metadata?: LogContext): void {
+  debug(context: LogContext, message: string): void {
     // Pino handles redaction automatically via config
     // Mixin automatically injects context from logger.bindings() (operation, userId, etc.)
-    this.pino.debug({ ...context, ...metadata }, message);
+    // Object-first API (Pino native): logger.debug({ ...context }, 'message')
+    this.pino.debug(context ?? {}, message);
   }
 
-  info(message: string, context?: LogContext, metadata?: LogContext): void {
+  info(context: LogContext, message: string): void {
     // Pino handles redaction automatically via config
     // Mixin automatically injects context from logger.bindings() (operation, userId, etc.)
-    this.pino.info({ ...context, ...metadata }, message);
+    // Object-first API (Pino native): logger.info({ ...context }, 'message')
+    this.pino.info(context ?? {}, message);
   }
 
-  warn(message: string, context?: LogContext, metadata?: LogContext): void {
+  warn(context: LogContext, message: string): void {
     // Pino handles redaction automatically via config
     // Mixin automatically injects context from logger.bindings() (operation, userId, etc.)
-    this.pino.warn({ ...context, ...metadata }, message);
+    // Object-first API (Pino native): logger.warn({ ...context }, 'message')
+    this.pino.warn(context ?? {}, message);
   }
 
-  error(message: string, error?: Error | string, context?: LogContext, metadata?: LogContext): void {
+  error(context: LogContext, message: string): void {
     // Pino's stdSerializers.err automatically handles error serialization
     // Mixin automatically injects context from logger.bindings() (operation, userId, etc.)
     // Pass error as 'err' key - Pino will serialize it properly
-    const logData: Record<string, unknown> = { ...context, ...metadata };
-    if (error !== undefined) {
-      // Use normalizeError() for consistent error normalization across codebase
-      // This handles Error instances, strings, objects, and unknown types
-      const normalized = normalizeError(error, message);
-      logData['err'] = normalized;
-    }
-    this.pino.error(logData, message);
+    // Object-first API (Pino native): logger.error({ err: normalized, ...context }, 'message')
+    this.pino.error(context ?? {}, message);
   }
 
-  fatal(message: string, error?: Error | string, context?: LogContext, metadata?: LogContext): void {
+  fatal(context: LogContext, message: string): void {
     // Pino's stdSerializers.err automatically handles error serialization
     // Mixin automatically injects context from logger.bindings() (operation, userId, etc.)
-    const logData: Record<string, unknown> = { ...context, ...metadata };
-    if (error !== undefined) {
-      // Use normalizeError() for consistent error normalization across codebase
-      // This handles Error instances, strings, objects, and unknown types
-      const normalized = normalizeError(error, message);
-      logData['err'] = normalized;
-    }
-    this.pino.fatal(logData, message);
+    // Object-first API (Pino native): logger.fatal({ err: normalized, ...context }, 'message')
+    this.pino.fatal(context ?? {}, message);
   }
 
-  trace(message: string, context?: LogContext, metadata?: LogContext): void {
+  trace(context: LogContext, message: string): void {
     // Trace level for finest-grained logging (detailed debugging, performance tracing)
-    this.pino.trace({ ...context, ...metadata }, message);
+    // Object-first API (Pino native): logger.trace({ ...context }, 'message')
+    this.pino.trace(context ?? {}, message);
   }
 
   /**
@@ -435,42 +426,36 @@ class RequestLogger extends Logger {
     this.childPino = childPino;
   }
 
-  override debug(message: string, context?: LogContext, metadata?: LogContext): void {
-    this.childPino.debug({ ...context, ...metadata }, message);
+  override debug(context: LogContext, message: string): void {
+    // Object-first API (Pino native): logger.debug({ ...context }, 'message')
+    this.childPino.debug(context ?? {}, message);
   }
 
-  override info(message: string, context?: LogContext, metadata?: LogContext): void {
-    this.childPino.info({ ...context, ...metadata }, message);
+  override info(context: LogContext, message: string): void {
+    // Object-first API (Pino native): logger.info({ ...context }, 'message')
+    this.childPino.info(context ?? {}, message);
   }
 
-  override warn(message: string, context?: LogContext, metadata?: LogContext): void {
-    this.childPino.warn({ ...context, ...metadata }, message);
+  override warn(context: LogContext, message: string): void {
+    // Object-first API (Pino native): logger.warn({ ...context }, 'message')
+    this.childPino.warn(context ?? {}, message);
   }
 
-  override error(message: string, error?: Error | string, context?: LogContext, metadata?: LogContext): void {
-    const logData: Record<string, unknown> = { ...context, ...metadata };
-    if (error !== undefined) {
-      // Use normalizeError() for consistent error normalization across codebase
-      // This handles Error instances, strings, objects, and unknown types
-      const normalized = normalizeError(error, message);
-      logData['err'] = normalized;
-    }
-    this.childPino.error(logData, message);
+  override error(context: LogContext, message: string): void {
+    // Object-first API (Pino native): logger.error({ err: normalized, ...context }, 'message')
+    // Error should be in context as 'err' key, normalized before calling
+    this.childPino.error(context ?? {}, message);
   }
 
-  override fatal(message: string, error?: Error | string, context?: LogContext, metadata?: LogContext): void {
-    const logData: Record<string, unknown> = { ...context, ...metadata };
-    if (error !== undefined) {
-      // Use normalizeError() for consistent error normalization across codebase
-      // This handles Error instances, strings, objects, and unknown types
-      const normalized = normalizeError(error, message);
-      logData['err'] = normalized;
-    }
-    this.childPino.fatal(logData, message);
+  override fatal(context: LogContext, message: string): void {
+    // Object-first API (Pino native): logger.fatal({ err: normalized, ...context }, 'message')
+    // Error should be in context as 'err' key, normalized before calling
+    this.childPino.fatal(context ?? {}, message);
   }
 
-  override trace(message: string, context?: LogContext, metadata?: LogContext): void {
-    this.childPino.trace({ ...context, ...metadata }, message);
+  override trace(context: LogContext, message: string): void {
+    // Object-first API (Pino native): logger.trace({ ...context }, 'message')
+    this.childPino.trace(context ?? {}, message);
   }
 
   override bindings(): Record<string, unknown> {

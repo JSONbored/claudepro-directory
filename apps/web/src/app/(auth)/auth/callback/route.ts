@@ -68,15 +68,16 @@ export async function GET(request: NextRequest) {
 
       try {
         await refreshProfileFromOAuthServer(user.id);
-        userLogger.info('Auth callback refreshed profile from OAuth', {
-          isLinkingFlow,
-        });
+        userLogger.info({ isLinkingFlow }, 'Auth callback refreshed profile from OAuth');
       } catch (refreshError) {
         const normalized = normalizeError(refreshError, 'Failed to refresh profile from OAuth');
-        userLogger.warn('Auth callback failed to refresh profile', {
-          err: normalized,
-          isLinkingFlow,
-        });
+        userLogger.warn(
+          {
+            err: normalized,
+            isLinkingFlow,
+          },
+          'Auth callback failed to refresh profile'
+        );
       }
 
       if (shouldSubscribeToNewsletter) {
@@ -95,9 +96,7 @@ export async function GET(request: NextRequest) {
                 newsletterResult.serverError,
                 'Newsletter opt-in via auth callback failed'
               );
-              userLogger.warn('Newsletter opt-in via auth callback failed', {
-                err: normalized,
-              });
+              userLogger.warn({ err: normalized }, 'Newsletter opt-in via auth callback failed');
             } else if (newsletterResult.data?.success) {
               shouldSetNewsletterCookie = true;
             } else {
@@ -105,19 +104,20 @@ export async function GET(request: NextRequest) {
                 new Error('Unknown error'),
                 'Newsletter opt-in via auth callback failed'
               );
-              userLogger.warn('Newsletter opt-in via auth callback failed', {
-                err: normalized,
-              });
+              userLogger.warn({ err: normalized }, 'Newsletter opt-in via auth callback failed');
             }
           } catch (subscribeError) {
             const normalizedSubscribeError = normalizeError(
               subscribeError,
               'Newsletter opt-in via auth callback threw'
             );
-            userLogger.error('Newsletter opt-in via auth callback threw', normalizedSubscribeError);
+            userLogger.error(
+              { err: normalizedSubscribeError },
+              'Newsletter opt-in via auth callback threw'
+            );
           }
         } else {
-          userLogger.warn('Newsletter opt-in skipped - user email missing');
+          userLogger.warn({}, 'Newsletter opt-in skipped - user email missing');
         }
       }
 
@@ -131,10 +131,13 @@ export async function GET(request: NextRequest) {
             return new URL(url).hostname;
           } catch (urlError) {
             const normalized = normalizeError(urlError, 'Invalid origin URL in SECURITY_CONFIG');
-            userLogger.warn('Skipping invalid origin URL in SECURITY_CONFIG', {
-              err: normalized,
-              url,
-            });
+            userLogger.warn(
+              {
+                err: normalized,
+                url,
+              },
+              'Skipping invalid origin URL in SECURITY_CONFIG'
+            );
             return null;
           }
         })
@@ -143,9 +146,9 @@ export async function GET(request: NextRequest) {
 
       const redirectUrl = isLocalEnvironment
         ? `${origin}${next}`
-        : forwardedHost && isValidHost
+        : (forwardedHost && isValidHost
           ? `https://${forwardedHost}${next}`
-          : `${origin}${next}`;
+          : `${origin}${next}`);
 
       const response = NextResponse.redirect(redirectUrl);
       if (shouldSetNewsletterCookie) {
@@ -166,21 +169,29 @@ export async function GET(request: NextRequest) {
     }
 
     const normalized = normalizeError(error, 'Auth callback exchange failed');
-    reqLogger.error('Auth callback exchange failed', normalized, {
-      hasCode: true,
-      ...(error &&
-        typeof error === 'object' &&
-        'code' in error && { errorCode: String(error.code) }),
-    });
+    reqLogger.error(
+      {
+        err: normalized,
+        hasCode: true,
+        ...(error &&
+          typeof error === 'object' &&
+          'code' in error && { errorCode: String(error.code) }),
+      },
+      'Auth callback exchange failed'
+    );
   } else {
     const normalized = normalizeError(
       new Error('No authorization code provided'),
       'Auth callback missing code'
     );
-    reqLogger.error('Auth callback no code provided', normalized, {
-      hasCode: false,
-      origin,
-    });
+    reqLogger.error(
+      {
+        err: normalized,
+        hasCode: false,
+        origin,
+      },
+      'Auth callback no code provided'
+    );
   }
 
   return NextResponse.redirect(`${origin}/auth/auth-code-error`);

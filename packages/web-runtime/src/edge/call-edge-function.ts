@@ -34,7 +34,7 @@ export async function callEdgeFunction<T = unknown>(
 
   if (!token && requireAuth) {
     const normalized = normalizeError(new Error('Authentication required'), 'No auth token available for Edge function');
-    logger.error('No auth token available for Edge function', normalized, { functionName });
+    logger.error({ err: normalized, functionName }, 'No auth token available for Edge function');
     throw normalized;
   }
 
@@ -53,12 +53,10 @@ export async function callEdgeFunction<T = unknown>(
       new Error(`Edge function ${functionName} failed: ${response.status} ${response.statusText}`),
       'Edge function error'
     );
-    logger.error('Edge function error', normalized, {
-      functionName,
+    logger.error({ err: normalized, functionName,
       status: response.status,
       method,
-      responseBody: errorText,
-    });
+      responseBody: errorText, }, 'Edge function error');
 
     try {
       const parsedError = JSON.parse(errorText);

@@ -210,10 +210,13 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
   const { user } = await getAuthenticatedUser({ context: 'MyJobsPage' });
 
   if (!user) {
-    reqLogger.warn('MyJobsPage: unauthenticated access attempt detected', {
-      section: 'authentication',
-      timestamp: new Date().toISOString(),
-    });
+    reqLogger.warn(
+      {
+        section: 'data-fetch',
+        timestamp: new Date().toISOString(),
+      },
+      'MyJobsPage: unauthenticated access attempt detected'
+    );
     return (
       <div className="space-y-6">
         <Card>
@@ -237,9 +240,7 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
     userId: user.id, // Redaction will automatically hash this
   });
 
-  userLogger.info('MyJobsPage: authentication successful', {
-    section: 'authentication',
-  });
+  userLogger.info({ section: 'data-fetch' }, 'MyJobsPage: authentication successful');
 
   return (
     <div className="space-y-6">
@@ -282,7 +283,8 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
  * @see resolvePlanLabel
  * @see resolveTierLabel
  * @see formatPriceLabel
- */
+ 
+ * @returns {Promise<unknown>} Description of return value*/
 async function PaymentSuccessAlert({
   paymentJobId,
   userId,
@@ -298,7 +300,13 @@ async function PaymentSuccessAlert({
     data = await getUserDashboard(userId);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user dashboard for payment alert');
-    userLogger.error('MyJobsPage: getUserDashboard failed for payment alert', normalized);
+    userLogger.error(
+      {
+        section: 'data-fetch',
+        err: normalized,
+      },
+      'MyJobsPage: getUserDashboard failed for payment alert'
+    );
     return null;
   }
 
@@ -327,7 +335,13 @@ async function PaymentSuccessAlert({
         error,
         'Failed to load job billing summary for payment alert'
       );
-      userLogger.error('MyJobsPage: getJobBillingSummaries failed for payment alert', normalized);
+      userLogger.error(
+        {
+          section: 'data-fetch',
+          err: normalized,
+        },
+        'MyJobsPage: getJobBillingSummaries failed for payment alert'
+      );
     }
   }
 
@@ -408,22 +422,21 @@ async function JobsListWithHeader({
   let fetchError = false;
   try {
     data = await getUserDashboard(userId);
-    userLogger.info('MyJobsPage: dashboard data loaded', {
-      section: 'dashboard-data-fetch',
-      hasData: !!data,
-    });
+    userLogger.info({ section: 'data-fetch', hasData: !!data }, 'MyJobsPage: dashboard data loaded');
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user dashboard for jobs');
-    userLogger.error('MyJobsPage: getUserDashboard threw', normalized, {
-      section: 'dashboard-data-fetch',
-    });
+    userLogger.error(
+      {
+        section: 'data-fetch',
+        err: normalized,
+      },
+      'MyJobsPage: getUserDashboard threw'
+    );
     fetchError = true;
   }
 
   if (!data) {
-    userLogger.warn('MyJobsPage: getUserDashboard returned no data', {
-      section: 'dashboard-data-fetch',
-    });
+    userLogger.warn({ section: 'data-fetch' }, 'MyJobsPage: getUserDashboard returned no data');
     fetchError = true;
   }
 
@@ -484,7 +497,7 @@ async function JobsListWithHeader({
   })();
 
   if (jobs.length === 0) {
-    userLogger.info('MyJobsPage: user has no job listings');
+    userLogger.info({ section: 'data-fetch' }, 'MyJobsPage: user has no job listings');
   }
 
   const jobIds = jobs.map((job) => job.id).filter(Boolean);
@@ -566,7 +579,13 @@ async function JobsListWithBilling({
       billingSummaries = await getJobBillingSummaries(jobIds);
     } catch (error) {
       const normalized = normalizeError(error, 'Failed to load job billing summaries');
-      userLogger.error('MyJobsPage: getJobBillingSummaries failed', normalized);
+      userLogger.error(
+        {
+          section: 'data-fetch',
+          err: normalized,
+        },
+        'MyJobsPage: getJobBillingSummaries failed'
+      );
     }
   }
   const billingSummaryMap = new Map<string, JobBillingSummaryEntry>();
@@ -618,17 +637,17 @@ async function JobsListWithBilling({
             ]
               .filter(Boolean)
               .join(' • ')
-          : (job.expires_at
+          : job.expires_at
             ? `Active until ${formatRelativeDate(job.expires_at)}`
-            : null);
+            : null;
         const paymentCopy =
           summary?.last_payment_at && summary.last_payment_amount !== null
             ? `${formatPriceLabel(summary.last_payment_amount, false)} • Received ${formatRelativeDate(
                 summary.last_payment_at
               )}`
-            : (summary?.last_payment_at
+            : summary?.last_payment_at
               ? `Last payment ${formatRelativeDate(summary.last_payment_at)}`
-              : null);
+              : null;
         const showBillingCard =
           Boolean(planPriceLabel ?? renewalCopy ?? paymentCopy) || Boolean(summary);
 

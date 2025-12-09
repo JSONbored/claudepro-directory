@@ -72,11 +72,13 @@ async function JobsCountBadge() {
     totalJobs = response?.total_count ?? 0;
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to fetch jobs count for badge');
-    logger.warn('JobsCountBadge failed to fetch count', {
+    logger.warn({  section: 'data-fetch' , 
       err: normalized,
       route: '/jobs',
       operation: 'JobsCountBadge',
-    });
+      },
+      'JobsCountBadge failed to fetch count'
+    );
     // Badge will show 0 jobs
   }
   return (
@@ -195,16 +197,17 @@ async function JobsListSection({
     );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load jobs list');
-    sectionLogger.error('JobsPage: getFilteredJobs failed', normalized, {
-      hasSearch: Boolean(searchQuery),
-      category: category ?? 'all',
-      employment: employment ?? 'any',
-      experience: experience ?? 'any',
-      remote: Boolean(remote),
-      sort,
-      limit,
-      offset,
-    });
+    sectionLogger.error(
+      {
+        section: 'data-fetch',
+        err: normalized,
+        hasSearch: Boolean(searchQuery),
+        category: category ?? 'all',
+        employment: employment ?? 'any',
+        experience: experience ?? 'any',
+      },
+      'JobsPage: getFilteredJobs failed'
+    );
   }
 
   const jobs = applyJobSorting(jobsResponse?.jobs ?? [], sort);
@@ -334,17 +337,20 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
   const limit = Math.min(parsedLimit > 0 ? parsedLimit : 20, 100);
   const offset = (page - 1) * limit;
 
-  reqLogger.info('Jobs page accessed', {
-    section: 'parameter-parsing',
-    searchQuery: searchQuery ?? 'none',
-    category: category ?? 'all',
-    employment: employment ?? 'any',
-    remote: Boolean(remote),
-    experience: experience ?? 'any',
-    sort,
-    page,
-    limit,
-  });
+  reqLogger.info(
+    {
+      section: 'data-fetch',
+      searchQuery: searchQuery ?? 'none',
+      category: category ?? 'all',
+      employment: employment ?? 'any',
+      remote: Boolean(remote),
+      experience: experience ?? 'any',
+      sort,
+      page,
+      limit,
+    },
+    'Jobs page accessed'
+  );
 
   // OPTIMIZATION: Removed redundant totalJobs fetch
   // Total count is now streamed via JobsCountBadge component

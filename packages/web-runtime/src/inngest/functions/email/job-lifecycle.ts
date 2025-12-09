@@ -99,20 +99,16 @@ export const sendJobLifecycleEmail = inngest.createFunction(
 
     const { action, employerEmail, jobId, payload, jobTitle, company } = event.data;
 
-    logger.info('Job lifecycle email request received', {
-      ...logContext,
+    logger.info({ ...logContext,
       action,
-      jobId,
-    });
+      jobId, }, 'Job lifecycle email request received');
 
     // Validate action
     const config = JOB_EMAIL_CONFIGS[action];
     if (!config) {
-      logger.warn('Unknown job lifecycle action', {
-        ...logContext,
+      logger.warn({ ...logContext,
         action,
-        availableActions: Object.keys(JOB_EMAIL_CONFIGS).join(', '),
-      });
+        availableActions: Object.keys(JOB_EMAIL_CONFIGS).join(', '), }, 'Unknown job lifecycle action');
       throw new Error(`Unknown job lifecycle action: ${action}`);
     }
 
@@ -131,11 +127,9 @@ export const sendJobLifecycleEmail = inngest.createFunction(
     }> => {
       // Skip if no employer email provided
       if (!employerEmail) {
-        logger.info('No employer email provided, skipping job lifecycle email', {
-          ...logContext,
+        logger.info({ ...logContext,
           action,
-          jobId,
-        });
+          jobId, }, 'No employer email provided, skipping job lifecycle email');
         return { sent: false, emailId: null };
       }
 
@@ -155,37 +149,31 @@ export const sendJobLifecycleEmail = inngest.createFunction(
         );
 
         if (sendError) {
-          logger.warn('Job lifecycle email failed', {
-            ...logContext,
+          logger.warn({ ...logContext,
             action,
             jobId,
-            errorMessage: sendError.message,
-          });
+            errorMessage: sendError.message, }, 'Job lifecycle email failed');
           return { sent: false, emailId: null };
         }
 
         return { sent: true, emailId: sendData?.id ?? null };
       } catch (error) {
         const normalized = normalizeError(error, 'Job lifecycle email failed');
-        logger.warn('Job lifecycle email failed', {
-          ...logContext,
+        logger.warn({ ...logContext,
           action,
           jobId,
-          errorMessage: normalized.message,
-        });
+          errorMessage: normalized.message, }, 'Job lifecycle email failed');
         return { sent: false, emailId: null };
       }
     });
 
     const durationMs = Date.now() - startTime;
-    logger.info('Job lifecycle email completed', {
-      ...logContext,
+    logger.info({ ...logContext,
       durationMs,
       action,
       jobId,
       sent: emailResult.sent,
-      emailId: emailResult.emailId,
-    });
+      emailId: emailResult.emailId, }, 'Job lifecycle email completed');
 
     return {
       success: emailResult.sent,

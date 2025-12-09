@@ -77,7 +77,8 @@ export default function OAuthLinkCallbackPage({
      * @see validateNextParameter
      * @see isValidProvider
      * @see supabaseClient.auth.linkIdentity
-     */
+     
+ * @returns {Promise<unknown>} Description of return value*/
 
     async function handleLink() {
       // Prevent duplicate OAuth linking attempts (e.g., from Strict Mode re-mounts)

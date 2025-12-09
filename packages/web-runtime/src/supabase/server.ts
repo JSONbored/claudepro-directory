@@ -39,17 +39,13 @@ export async function createSupabaseServerClient(): Promise<SupabaseServerClient
     cookies: {
       getAll() {
         const allCookies = cookieStore.getAll();
-        logger.debug('Supabase getting cookies', {
-          count: allCookies.length,
-          names: allCookies.map((c) => c.name),
-        });
+        logger.debug({ count: allCookies.length,
+          names: allCookies.map((c) => c.name), }, 'Supabase getting cookies');
         return allCookies;
       },
       setAll(cookiesToSet) {
         try {
-          logger.info('Supabase setting cookies', {
-            count: cookiesToSet.length,
-          });
+          logger.info({ count: cookiesToSet.length, }, 'Supabase setting cookies');
           for (const { name, value, options } of cookiesToSet) {
             cookieStore.set(name, value, options);
           }
@@ -59,23 +55,15 @@ export async function createSupabaseServerClient(): Promise<SupabaseServerClient
               return;
             }
             const normalized = normalizeError(error, 'Failed to set auth cookies in Route Handler');
-            logger.error('Failed to set auth cookies in Route Handler', normalized, {
-              context: 'supabase_server_client',
-              cookieCount: cookiesToSet.length,
-            });
+            logger.error({ err: normalized, context: 'supabase_server_client',
+              cookieCount: cookiesToSet.length, }, 'Failed to set auth cookies in Route Handler');
           } else {
             const normalized = normalizeError(
               error,
               'Failed to set auth cookies in Route Handler (non-Error exception)'
             );
-            logger.error(
-              'Failed to set auth cookies in Route Handler (non-Error exception)',
-              normalized,
-              {
-                context: 'supabase_server_client',
-                cookieCount: cookiesToSet.length,
-              }
-            );
+            logger.error({ err: normalized, context: 'supabase_server_client',
+                cookieCount: cookiesToSet.length, }, 'Failed to set auth cookies in Route Handler (non-Error exception)');
           }
         }
       },

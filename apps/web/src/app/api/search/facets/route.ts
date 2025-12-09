@@ -1,6 +1,5 @@
 import 'server-only';
-import { normalizeError } from '@heyclaude/shared-runtime';
-import { logger, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
+import { logger, createErrorResponse, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   createSupabaseAnonClient,
   jsonResponse,
@@ -16,7 +15,8 @@ const CORS = getWithAuthCorsHeaders;
 /**
  * Cached helper function to fetch search facets
  * Uses Cache Components to reduce function invocations
- */
+ 
+ * @returns {Promise<unknown>} Description of return value*/
 async function getCachedSearchFacets() {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
@@ -34,7 +34,7 @@ export async function GET(_request: NextRequest) {
     method: 'GET',
   });
 
-  reqLogger.info('Facets request received');
+  reqLogger.info({}, 'Facets request received');
 
   try {
     let data: Awaited<ReturnType<typeof getCachedSearchFacets>> | null = null;
@@ -42,8 +42,8 @@ export async function GET(_request: NextRequest) {
       data = await getCachedSearchFacets();
     } catch (error) {
       const normalized = normalizeError(error, 'Facets RPC failed');
-      reqLogger.error('Facets RPC failed', normalized);
-      return createErrorResponse(error, {
+      reqLogger.error({ err: normalized }, 'Facets RPC failed');
+      return createErrorResponse(normalized, {
         route: '/api/search/facets',
         operation: 'get_search_facets',
         method: 'GET',
@@ -81,8 +81,8 @@ export async function GET(_request: NextRequest) {
     );
   } catch (error) {
     const normalized = normalizeError(error, 'Facets handler failed');
-    reqLogger.error('Facets handler failed', normalized);
-    return createErrorResponse(error, {
+    reqLogger.error({ err: normalized }, 'Facets handler failed');
+    return createErrorResponse(normalized, {
       route: '/api/search/facets',
       operation: 'GET',
       method: 'GET',

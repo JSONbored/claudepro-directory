@@ -137,11 +137,14 @@ export function safeParse<T = unknown>(
     const parseTime = perf.now() - startTime;
 
     if (opts.enableLogging && parseTime > 100) {
-      logger.warn('Slow JSON parse detected', {
-        strategy: String(opts.strategy),
-        parseTime: `${parseTime.toFixed(2)}ms`,
-        size: `${str.length} bytes`,
-      });
+      logger.warn(
+        {
+          strategy: String(opts.strategy),
+          parseTime: `${parseTime.toFixed(2)}ms`,
+          size: `${str.length} bytes`,
+        },
+        'Slow JSON parse detected'
+      );
     }
 
     return result;
@@ -150,11 +153,15 @@ export function safeParse<T = unknown>(
     lastError = normalized;
 
     if (opts.enableLogging) {
-      logger.error('Primary parse strategy failed', normalized, {
-        strategy: String(opts.strategy),
-        size: `${str.length} bytes`,
-        preview: str.slice(0, 100),
-      });
+      logger.error(
+        {
+          err: normalized,
+          strategy: String(opts.strategy),
+          size: `${str.length} bytes`,
+          preview: str.slice(0, 100),
+        },
+        'Primary parse strategy failed'
+      );
     }
   }
 
@@ -183,21 +190,19 @@ export function safeParse<T = unknown>(
       }
 
       if (opts.enableLogging) {
-        logger.info('Fallback parse strategy succeeded', {
-          primaryStrategy: String(opts.strategy),
-          fallbackStrategy: String(opts.fallbackStrategy),
-        });
+        logger.info({ primaryStrategy: String(opts.strategy),
+          fallbackStrategy: String(opts.fallbackStrategy), }, 'Fallback parse strategy succeeded');
       }
 
       return result;
     } catch (fallbackError) {
       if (opts.enableLogging) {
         logger.error(
-          'Fallback parse strategy failed',
-          fallbackError instanceof Error ? fallbackError : new Error(String(fallbackError)),
           {
+            err: fallbackError instanceof Error ? fallbackError : new Error(String(fallbackError)),
             strategy: String(opts.fallbackStrategy),
-          }
+          },
+          'Fallback parse strategy failed'
         );
       }
     }
@@ -246,11 +251,9 @@ export function formatDate(date: string | Date, style: DateFormatStyle = 'long')
     });
   } catch (error) {
     const normalized = normalizeError(error, 'formatDate failed');
-    logger.warn('formatDate failed', {
-      err: normalized,
+    logger.warn({ err: normalized,
       input: typeof date === 'string' ? date : date.toString(),
-      style,
-    });
+      style, }, 'formatDate failed');
     return typeof date === 'string' ? date : date.toString();
   }
 }
@@ -304,11 +307,9 @@ export function formatRelativeDate(date: string | Date, options: RelativeDateOpt
     return `${diffYears} ${diffYears === 1 ? 'year' : 'years'} ago`;
   } catch (error) {
     const normalized = normalizeError(error, 'formatRelativeDate failed');
-    logger.warn('formatRelativeDate failed', {
-      err: normalized,
+    logger.warn({ err: normalized,
       input: typeof date === 'string' ? date : date.toString(),
-      style,
-    });
+      style, }, 'formatRelativeDate failed');
     return typeof date === 'string' ? date : date.toString();
   }
 }
@@ -330,7 +331,7 @@ export function getLastUpdatedDate(): string {
     });
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to format last updated date');
-    logger.error('getLastUpdatedDate: date formatting failed', normalized);
+    logger.error({ err: normalized }, 'getLastUpdatedDate: date formatting failed');
     return 'Unavailable';
   }
 }

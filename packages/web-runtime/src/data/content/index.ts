@@ -49,18 +49,16 @@ export async function getContentByCategory(
       p_offset: 0,
     });
 
-    reqLogger.info('getContentByCategory: fetched successfully', {
-      category,
-      count: result.length,
-    });
+    reqLogger.info(
+      { category, count: result.length },
+      'getContentByCategory: fetched successfully'
+    );
 
     return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('getContentByCategory: failed', errorForLogging, {
-      category,
-    });
+    reqLogger.error({ err: errorForLogging, category }, 'getContentByCategory: failed');
     return [];
   }
 }
@@ -113,20 +111,16 @@ export async function getContentBySlug(
     });
 
     const result = data[0] ?? null;
-    reqLogger.info('getContentBySlug: fetched successfully', {
-      category,
-      slug,
-      found: Boolean(result),
-    });
+    reqLogger.info(
+      { category, slug, found: Boolean(result) },
+      'getContentBySlug: fetched successfully'
+    );
 
     return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('getContentBySlug: failed', errorForLogging, {
-      category,
-      slug,
-    });
+    reqLogger.error({ err: errorForLogging, category, slug }, 'getContentBySlug: failed');
     return null;
   }
 }
@@ -189,20 +183,27 @@ export async function getAllContent(
     const items = (result.items ??
       []) as Database['public']['CompositeTypes']['enriched_content_item'][];
 
-    reqLogger.info('getAllContent: fetched successfully', {
-      category: category ?? 'all',
-      count: items.length,
-      ...(filters ? { filters: toLogContextValue(filters as Record<string, unknown>) } : {}),
-    });
+    reqLogger.info(
+      {
+        category: category ?? 'all',
+        count: items.length,
+        ...(filters ? { filters: toLogContextValue(filters as Record<string, unknown>) } : {}),
+      },
+      'getAllContent: fetched successfully'
+    );
 
     return items;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('getAllContent: failed', errorForLogging, {
-      category: category ?? 'all',
-      ...(filters ? { filters: toLogContextValue(filters as Record<string, unknown>) } : {}),
-    });
+    reqLogger.error(
+      {
+        err: errorForLogging,
+        category: category ?? 'all',
+        ...(filters ? { filters: toLogContextValue(filters as Record<string, unknown>) } : {}),
+      },
+      'getAllContent: failed'
+    );
     return [];
   }
 }
@@ -252,18 +253,16 @@ export async function getContentCount(
     });
 
     const count = result.pagination?.total_count ?? 0;
-    reqLogger.info('getContentCount: fetched successfully', {
-      category: category ?? 'all',
-      count,
-    });
+    reqLogger.info({ category: category ?? 'all', count }, 'getContentCount: fetched successfully');
 
     return count;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('getContentCount: failed', errorForLogging, {
-      category: category ?? 'all',
-    });
+    reqLogger.error(
+      { err: errorForLogging, category: category ?? 'all' },
+      'getContentCount: failed'
+    );
     return 0;
   }
 }
@@ -313,20 +312,19 @@ export async function getTrendingContent(
       p_limit: limit,
     });
 
-    reqLogger.info('getTrendingContent: fetched successfully', {
-      category: category ?? 'all',
-      limit,
-      count: result.length,
-    });
+    reqLogger.info(
+      { category: category ?? 'all', limit, count: result.length },
+      'getTrendingContent: fetched successfully'
+    );
 
     return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('getTrendingContent: failed', errorForLogging, {
-      category: category ?? 'all',
-      limit,
-    });
+    reqLogger.error(
+      { err: errorForLogging, category: category ?? 'all', limit },
+      'getTrendingContent: failed'
+    );
     return [];
   }
 }
@@ -413,13 +411,16 @@ export async function getTrendingPageData(
       }),
     ]);
 
-    reqLogger.info('getTrendingPageData: fetched successfully', {
-      category: category ?? 'all',
-      limit: safeLimit,
-      trendingCount: trending.length,
-      popularCount: popular.length,
-      recentCount: recent.length,
-    });
+    reqLogger.info(
+      {
+        category: category ?? 'all',
+        limit: safeLimit,
+        trendingCount: trending.length,
+        popularCount: popular.length,
+        recentCount: recent.length,
+      },
+      'getTrendingPageData: fetched successfully'
+    );
 
     return {
       trending,
@@ -430,10 +431,10 @@ export async function getTrendingPageData(
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('getTrendingPageData: failed', errorForLogging, {
-      category: category ?? 'all',
-      limit: safeLimit,
-    });
+    reqLogger.error(
+      { err: errorForLogging, category: category ?? 'all', limit: safeLimit },
+      'getTrendingPageData: failed'
+    );
     return {
       trending: [],
       popular: [],

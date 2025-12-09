@@ -53,22 +53,19 @@ export async function getSimilarContent(input: {
       p_limit: limit,
     });
 
-    reqLogger.info('getSimilarContent: fetched successfully', {
-      contentType,
-      contentSlug,
-      limit,
-      hasResult: Boolean(result),
-    });
+    reqLogger.info(
+      { contentType, contentSlug, limit, hasResult: Boolean(result) },
+      'getSimilarContent: fetched successfully'
+    );
 
     return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('getSimilarContent: failed', errorForLogging, {
-      contentType,
-      contentSlug,
-      limit,
-    });
+    reqLogger.error(
+      { err: errorForLogging, contentType, contentSlug, limit },
+      'getSimilarContent: failed'
+    );
     return null;
   }
 }

@@ -92,12 +92,10 @@ async function executeSearchDirect<T>(
     
     // search_unified only accepts: p_query, p_entities, p_limit, p_offset
     // Categories, tags, and authors filtering must be done client-side after search
-    reqLogger.info('Calling SearchService.searchUnified', {
-      query: options.query,
+    reqLogger.info({ query: options.query,
       entities,
       limit: options.filters?.limit ?? 20,
-      offset: options.filters?.offset ?? 0,
-    });
+      offset: options.filters?.offset ?? 0, }, 'Calling SearchService.searchUnified');
     
     const serviceResponse = await service.searchUnified({
       p_query: options.query,
@@ -106,13 +104,11 @@ async function executeSearchDirect<T>(
       p_offset: options.filters?.offset ?? 0
     });
     
-    reqLogger.info('SearchService.searchUnified returned', {
-      hasResponse: !!serviceResponse,
+    reqLogger.info({ hasResponse: !!serviceResponse,
       hasData: 'data' in serviceResponse,
       dataIsArray: Array.isArray(serviceResponse?.data),
       dataLength: Array.isArray(serviceResponse?.data) ? serviceResponse.data.length : 0,
-      totalCount: serviceResponse?.total_count ?? 0,
-    });
+      totalCount: serviceResponse?.total_count ?? 0, }, 'SearchService.searchUnified returned');
     
     // Type guard: Validate service response structure
     // SearchService.searchUnified returns { data: UnifiedSearchResult[] | null, total_count: number }
@@ -141,13 +137,11 @@ async function executeSearchDirect<T>(
     
     const data = serviceResponse.data;
     
-    reqLogger.info('Processing search results', {
-      dataType: typeof data,
+    reqLogger.info({ dataType: typeof data,
       dataIsArray: Array.isArray(data),
       dataLength: Array.isArray(data) ? data.length : 0,
       dataIsNull: data === null,
-      dataIsUndefined: data === undefined,
-    });
+      dataIsUndefined: data === undefined, }, 'Processing search results');
     
     // Type guard: Ensure results is an array
     // Handle null/undefined data from RPC (shouldn't happen, but defensive)
@@ -163,26 +157,20 @@ async function executeSearchDirect<T>(
         'entity_type' in item
       );
       
-      reqLogger.info('Type guard filtering complete', {
-        beforeFilter,
+      reqLogger.info({ beforeFilter,
         afterFilter: results.length,
-        filteredOut: beforeFilter - results.length,
-      });
+        filteredOut: beforeFilter - results.length, }, 'Type guard filtering complete');
       
       // Log if we filtered out items (shouldn't happen with valid RPC response)
       if (data.length > 0 && results.length === 0) {
-        reqLogger.warn('All search results filtered out by type guard', {
-          originalCount: data.length,
-          sampleItemKeys: data[0] ? Object.keys(data[0]) : [],
-        });
+        reqLogger.warn({ originalCount: data.length,
+          sampleItemKeys: data[0] ? Object.keys(data[0]) : [], }, 'All search results filtered out by type guard');
       }
     } else if (data !== null && data !== undefined) {
       // Log unexpected data type
-      reqLogger.warn('Search RPC returned non-array data', {
-        dataType: typeof data,
-      });
+      reqLogger.warn({ dataType: typeof data, }, 'Search RPC returned non-array data');
     } else {
-      reqLogger.warn('Search RPC returned null/undefined data');
+      reqLogger.warn({}, 'Search RPC returned null/undefined data');
     }
     
     // Client-side filtering for categories, tags, and authors (since search_unified doesn't support these)
@@ -247,10 +235,8 @@ async function executeSearchDirect<T>(
     return response;
   } catch (error) {
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('executeSearchDirect failed', errorForLogging, {
-      query: options.query,
-      entities: options.entities,
-    });
+    reqLogger.error({ err: errorForLogging, query: options.query,
+      entities: options.entities, }, 'executeSearchDirect failed');
     throw error;
   }
 }

@@ -26,9 +26,11 @@ export async function getActiveAnnouncement(): Promise<Database['public']['Table
     return await fetchActiveAnnouncement();
   } catch (error) {
     logger.error(
-      'Failed to load announcement',
-      normalizeError(error, 'Failed to load announcement'),
-      { source: 'AnnouncementBanner' }
+      {
+        err: normalizeError(error, 'Failed to load announcement'),
+        source: 'AnnouncementBanner',
+      },
+      'Failed to load announcement'
     );
     return null;
   }

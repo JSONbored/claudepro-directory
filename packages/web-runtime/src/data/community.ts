@@ -16,7 +16,8 @@ export type CollectionDetailData =
  * Uses 'use cache' to cache directory listings. This data is public and same for all users.
  * Community directory changes periodically, so we use the 'half' cacheLife profile.
  * @param limit
- */
+ 
+ * @returns {unknown} Description of return value*/
 async function getCommunityDirectoryRpc(
   limit: number
 ): Promise<Database['public']['Functions']['get_community_directory']['Returns'] | null> {
@@ -48,18 +49,16 @@ async function getCommunityDirectoryRpc(
 
     const result = await new CommunityService(client).getCommunityDirectory({ p_limit: limit });
 
-    reqLogger.info('getCommunityDirectoryRpc: fetched successfully', {
-      limit,
-      hasResult: Boolean(result),
-    });
+    reqLogger.info(
+      { limit, hasResult: Boolean(result) },
+      'getCommunityDirectoryRpc: fetched successfully'
+    );
 
     return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('getCommunityDirectoryRpc failed', errorForLogging, {
-      limit,
-    });
+    reqLogger.error({ err: errorForLogging, limit }, 'getCommunityDirectoryRpc failed');
     throw error;
   }
 }
@@ -104,11 +103,14 @@ export async function getCommunityDirectory(options: {
           operation: 'pulseUserSearch',
           module: 'data/community',
         });
-        callbackLogger.warn('Failed to pulse user search', {
-          err: errorForLogging,
-          searchQuery: searchQuery.trim(),
-          resultCount: allUsers.length,
-        });
+        callbackLogger.warn(
+          {
+            err: errorForLogging,
+            searchQuery: searchQuery.trim(),
+            resultCount: allUsers.length,
+          },
+          'Failed to pulse user search'
+        );
       });
 
       return {
@@ -119,12 +121,10 @@ export async function getCommunityDirectory(options: {
     } catch (error) {
       // logger.error() normalizes errors internally, so pass raw error
       const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-      reqLogger.warn('Community directory search failed, using RPC fallback', {
-        err: errorForLogging,
-        searchQuery: searchQuery.trim(),
-        limit,
-        fallbackStrategy: 'rpc',
-      });
+      reqLogger.warn(
+        { err: errorForLogging, searchQuery: searchQuery.trim(), limit, fallbackStrategy: 'rpc' },
+        'Community directory search failed, using RPC fallback'
+      );
       // Fall through to RPC fallback
     }
   }
@@ -180,20 +180,23 @@ export async function getPublicUserProfile(input: {
       ...(viewerId ? { p_viewer_id: viewerId } : {}),
     });
 
-    reqLogger.info('getPublicUserProfile: fetched successfully', {
-      slug,
-      hasViewer: Boolean(viewerId),
-      hasProfile: Boolean(result),
-    });
+    reqLogger.info(
+      { slug, hasViewer: Boolean(viewerId), hasProfile: Boolean(result) },
+      'getPublicUserProfile: fetched successfully'
+    );
 
     return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('getPublicUserProfile failed', errorForLogging, {
-      slug,
-      ...(viewerId ? { viewerId } : {}),
-    });
+    reqLogger.error(
+      {
+        err: errorForLogging,
+        slug,
+        ...(viewerId ? { viewerId } : {}),
+      },
+      'getPublicUserProfile failed'
+    );
     throw error;
   }
 }
@@ -247,22 +250,24 @@ export async function getPublicCollectionDetail(input: {
       ...(viewerId ? { p_viewer_id: viewerId } : {}),
     });
 
-    reqLogger.info('getPublicCollectionDetail: fetched successfully', {
-      slug: userSlug,
-      collectionSlug,
-      hasViewer: Boolean(viewerId),
-      hasData: Boolean(data),
-    });
+    reqLogger.info(
+      { slug: userSlug, collectionSlug, hasViewer: Boolean(viewerId), hasData: Boolean(data) },
+      'getPublicCollectionDetail: fetched successfully'
+    );
 
     return data;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('getPublicCollectionDetail failed', errorForLogging, {
-      slug: userSlug,
-      collectionSlug,
-      ...(viewerId ? { viewerId } : {}),
-    });
+    reqLogger.error(
+      {
+        err: errorForLogging,
+        slug: userSlug,
+        collectionSlug,
+        ...(viewerId ? { viewerId } : {}),
+      },
+      'getPublicCollectionDetail failed'
+    );
     throw error;
   }
 }

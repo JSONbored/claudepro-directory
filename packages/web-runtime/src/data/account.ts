@@ -66,27 +66,25 @@ export async function getAccountDashboard(
     const completeData = await getUserCompleteData(userId);
 
     if (!completeData?.account_dashboard) {
-      reqLogger.warn('getAccountDashboard: account_dashboard missing from complete data', {
-        userId,
-        hasCompleteData: Boolean(completeData),
-      });
+      reqLogger.warn(
+        { userId, hasCompleteData: Boolean(completeData) },
+        'getAccountDashboard: account_dashboard missing from complete data'
+      );
       return null;
     }
 
     const result = accountDashboardSchema.parse(completeData.account_dashboard);
 
-    reqLogger.info('getAccountDashboard: fetched successfully', {
-      userId,
-      hasResult: Boolean(result),
-    });
+    reqLogger.info(
+      { userId, hasResult: Boolean(result) },
+      'getAccountDashboard: fetched successfully'
+    );
 
     return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('getAccountDashboard: unexpected error', errorForLogging, {
-      userId,
-    });
+    reqLogger.error({ err: errorForLogging, userId }, 'getAccountDashboard: unexpected error');
     return null;
   }
 }
@@ -126,25 +124,23 @@ export async function getUserLibrary(
     const completeData = await getUserCompleteData(userId);
 
     if (!completeData?.user_library) {
-      reqLogger.warn('getUserLibrary: user_library missing from complete data', {
-        userId,
-        hasCompleteData: Boolean(completeData),
-      });
+      reqLogger.warn(
+        { userId, hasCompleteData: Boolean(completeData) },
+        'getUserLibrary: user_library missing from complete data'
+      );
       return null;
     }
 
-    reqLogger.info('getUserLibrary: fetched successfully', {
-      userId,
-      hasResult: Boolean(completeData.user_library),
-    });
+    reqLogger.info(
+      { userId, hasResult: Boolean(completeData.user_library) },
+      'getUserLibrary: fetched successfully'
+    );
 
     return completeData.user_library;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('getUserLibrary: unexpected error', errorForLogging, {
-      userId,
-    });
+    reqLogger.error({ err: errorForLogging, userId }, 'getUserLibrary: unexpected error');
     return null;
   }
 }
@@ -219,25 +215,23 @@ export async function getUserDashboard(
     const completeData = await getUserCompleteData(userId);
 
     if (!completeData?.user_dashboard) {
-      reqLogger.warn('getUserDashboard: user_dashboard missing from complete data', {
-        userId,
-        hasCompleteData: Boolean(completeData),
-      });
+      reqLogger.warn(
+        { userId, hasCompleteData: Boolean(completeData) },
+        'getUserDashboard: user_dashboard missing from complete data'
+      );
       return null;
     }
 
-    reqLogger.info('getUserDashboard: fetched successfully', {
-      userId,
-      hasResult: Boolean(completeData.user_dashboard),
-    });
+    reqLogger.info(
+      { userId, hasResult: Boolean(completeData.user_dashboard) },
+      'getUserDashboard: fetched successfully'
+    );
 
     return completeData.user_dashboard;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('getUserDashboard: unexpected error', errorForLogging, {
-      userId,
-    });
+    reqLogger.error({ err: errorForLogging, userId }, 'getUserDashboard: unexpected error');
     return null;
   }
 }
@@ -309,21 +303,24 @@ export async function getUserCompleteData(
     });
 
     if (!authResult.isAuthenticated || !authResult.user) {
-      reqLogger.warn('getUserCompleteData: authentication failed', {
-        userId,
-        isAuthenticated: authResult.isAuthenticated,
-        hasUser: Boolean(authResult.user),
-        error: authResult.error?.message,
-      });
+      reqLogger.warn(
+        {
+          userId,
+          isAuthenticated: authResult.isAuthenticated,
+          hasUser: Boolean(authResult.user),
+          error: authResult.error?.message,
+        },
+        'getUserCompleteData: authentication failed'
+      );
       return null;
     }
 
     // Verify the authenticated user matches the requested userId (security check)
     if (authResult.user.id !== userId) {
-      reqLogger.warn('getUserCompleteData: userId mismatch', {
-        requestedUserId: userId,
-        authenticatedUserId: authResult.user.id,
-      });
+      reqLogger.warn(
+        { requestedUserId: userId, authenticatedUserId: authResult.user.id },
+        'getUserCompleteData: userId mismatch'
+      );
       return null;
     }
 
@@ -334,20 +331,19 @@ export async function getUserCompleteData(
     } = await client.auth.getSession();
 
     if (sessionError || !session) {
-      reqLogger.warn('getUserCompleteData: no valid session after getUser', {
-        userId,
-        sessionError: sessionError?.message,
-        hasSession: Boolean(session),
-      });
+      reqLogger.warn(
+        { userId, sessionError: sessionError?.message, hasSession: Boolean(session) },
+        'getUserCompleteData: no valid session after getUser'
+      );
       return null;
     }
 
     // Verify the authenticated user matches the requested userId (security check)
     if (session.user.id !== userId) {
-      reqLogger.warn('getUserCompleteData: userId mismatch', {
-        requestedUserId: userId,
-        authenticatedUserId: session.user.id,
-      });
+      reqLogger.warn(
+        { requestedUserId: userId, authenticatedUserId: session.user.id },
+        'getUserCompleteData: userId mismatch'
+      );
       return null;
     }
 
@@ -364,29 +360,33 @@ export async function getUserCompleteData(
 
     const result = await service.getUserCompleteData(rpcParams);
 
-    reqLogger.info('getUserCompleteData: fetched successfully', {
-      userId,
-      hasResult: Boolean(result),
-    });
+    reqLogger.info(
+      { userId, hasResult: Boolean(result) },
+      'getUserCompleteData: fetched successfully'
+    );
 
     return result;
   } catch (error) {
     // Normalize error properly - handle both Error instances and Supabase error objects
     const normalizedError = normalizeError(error, 'getUserCompleteData: unexpected error occurred');
-    reqLogger.error('getUserCompleteData: unexpected error', normalizedError, {
-      userId,
-      options,
-      // Include original error details if available
-      originalError:
-        error && typeof error === 'object' && 'code' in error
-          ? {
-              code: (error as { code?: string }).code,
-              message: (error as { message?: string }).message,
-              details: (error as { details?: string }).details,
-              hint: (error as { hint?: string }).hint,
-            }
-          : undefined,
-    });
+    reqLogger.error(
+      {
+        err: normalizedError,
+        userId,
+        options,
+        // Include original error details if available
+        originalError:
+          error && typeof error === 'object' && 'code' in error
+            ? {
+                code: (error as { code?: string }).code,
+                message: (error as { message?: string }).message,
+                details: (error as { details?: string }).details,
+                hint: (error as { hint?: string }).hint,
+              }
+            : undefined,
+      },
+      'getUserCompleteData: unexpected error occurred'
+    );
     return null;
   }
 }
@@ -427,20 +427,19 @@ export async function getCollectionDetail(
       p_slug: slug,
     });
 
-    reqLogger.info('getCollectionDetail: fetched successfully', {
-      userId,
-      slug,
-      hasResult: Boolean(result),
-    });
+    reqLogger.info(
+      { userId, slug, hasResult: Boolean(result) },
+      'getCollectionDetail: fetched successfully'
+    );
 
     return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('getCollectionDetail: unexpected error', errorForLogging, {
-      userId,
-      slug,
-    });
+    reqLogger.error(
+      { err: errorForLogging, userId, slug },
+      'getCollectionDetail: unexpected error'
+    );
     return null;
   }
 }
@@ -495,25 +494,23 @@ export async function getUserSettings(
     const completeData = await getUserCompleteData(userId);
 
     if (!completeData?.user_settings) {
-      reqLogger.warn('getUserSettings: user_settings missing from complete data', {
-        userId,
-        hasCompleteData: Boolean(completeData),
-      });
+      reqLogger.warn(
+        { userId, hasCompleteData: Boolean(completeData) },
+        'getUserSettings: user_settings missing from complete data'
+      );
       return null;
     }
 
-    reqLogger.info('getUserSettings: fetched successfully', {
-      userId,
-      hasResult: Boolean(completeData.user_settings),
-    });
+    reqLogger.info(
+      { userId, hasResult: Boolean(completeData.user_settings) },
+      'getUserSettings: fetched successfully'
+    );
 
     return completeData.user_settings;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('getUserSettings: unexpected error', errorForLogging, {
-      userId,
-    });
+    reqLogger.error({ err: errorForLogging, userId }, 'getUserSettings: unexpected error');
     return null;
   }
 }
@@ -554,20 +551,19 @@ export async function getSponsorshipAnalytics(
       p_sponsorship_id: sponsorshipId,
     });
 
-    reqLogger.info('getSponsorshipAnalytics: fetched successfully', {
-      userId,
-      sponsorshipId,
-      hasResult: Boolean(result),
-    });
+    reqLogger.info(
+      { userId, sponsorshipId, hasResult: Boolean(result) },
+      'getSponsorshipAnalytics: fetched successfully'
+    );
 
     return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('getSponsorshipAnalytics: unexpected error', errorForLogging, {
-      userId,
-      sponsorshipId,
-    });
+    reqLogger.error(
+      { err: errorForLogging, userId, sponsorshipId },
+      'getSponsorshipAnalytics: unexpected error'
+    );
     return null;
   }
 }
@@ -607,11 +603,14 @@ export async function getUserCompanies(
     const completeData = await getUserCompleteData(userId);
 
     if (!completeData?.user_dashboard?.companies) {
-      reqLogger.warn('getUserCompanies: companies missing from complete data', {
-        userId,
-        hasCompleteData: completeData != null,
-        hasUserDashboard: completeData?.user_dashboard != null,
-      });
+      reqLogger.warn(
+        {
+          userId,
+          hasCompleteData: completeData != null,
+          hasUserDashboard: completeData?.user_dashboard != null,
+        },
+        'getUserCompanies: companies missing from complete data'
+      );
       return { companies: [] };
     }
 
@@ -620,11 +619,14 @@ export async function getUserCompanies(
     const companiesJson = completeData.user_dashboard.companies;
     const companiesArray = Array.isArray(companiesJson) ? companiesJson : [];
 
-    reqLogger.info('getUserCompanies: fetched successfully', {
-      userId,
-      hasResult: Boolean(completeData.user_dashboard.companies),
-      count: companiesArray.length,
-    });
+    reqLogger.info(
+      {
+        userId,
+        hasResult: Boolean(completeData.user_dashboard.companies),
+        count: companiesArray.length,
+      },
+      'getUserCompanies: fetched successfully'
+    );
 
     return {
       companies: companiesArray as Database['public']['CompositeTypes']['user_companies_company'][],
@@ -632,9 +634,7 @@ export async function getUserCompanies(
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('getUserCompanies: unexpected error', errorForLogging, {
-      userId,
-    });
+    reqLogger.error({ err: errorForLogging, userId }, 'getUserCompanies: unexpected error');
     return { companies: [] };
   }
 }
@@ -674,26 +674,27 @@ export async function getUserSponsorships(
     const completeData = await getUserCompleteData(userId);
 
     if (!completeData?.sponsorships) {
-      reqLogger.warn('getUserSponsorships: sponsorships missing from complete data', {
-        userId,
-        hasCompleteData: Boolean(completeData),
-      });
+      reqLogger.warn(
+        { userId, hasCompleteData: Boolean(completeData) },
+        'getUserSponsorships: sponsorships missing from complete data'
+      );
       return [];
     }
 
-    reqLogger.info('getUserSponsorships: fetched successfully', {
-      userId,
-      hasResult: Boolean(completeData.sponsorships),
-      count: completeData.sponsorships.length,
-    });
+    reqLogger.info(
+      {
+        userId,
+        hasResult: Boolean(completeData.sponsorships),
+        count: completeData.sponsorships.length,
+      },
+      'getUserSponsorships: fetched successfully'
+    );
 
     return completeData.sponsorships;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('getUserSponsorships: unexpected error', errorForLogging, {
-      userId,
-    });
+    reqLogger.error({ err: errorForLogging, userId }, 'getUserSponsorships: unexpected error');
     return [];
   }
 }
@@ -745,20 +746,19 @@ export async function getSubmissionDashboard(
       p_contributors_limit: contributorsLimit,
     });
 
-    reqLogger.info('getSubmissionDashboard: fetched successfully', {
-      recentLimit,
-      contributorsLimit,
-      hasResult: Boolean(result),
-    });
+    reqLogger.info(
+      { recentLimit, contributorsLimit, hasResult: Boolean(result) },
+      'getSubmissionDashboard: fetched successfully'
+    );
 
     return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('getSubmissionDashboard: unexpected error', errorForLogging, {
-      recentLimit,
-      contributorsLimit,
-    });
+    reqLogger.error(
+      { err: errorForLogging, recentLimit, contributorsLimit },
+      'getSubmissionDashboard: unexpected error'
+    );
     return null;
   }
 }
@@ -815,10 +815,10 @@ export async function getUserActivitySummary(
     const completeData = await getUserCompleteData(userId);
 
     if (!completeData?.activity_summary) {
-      reqLogger.warn('getUserActivitySummary: activity_summary missing from complete data', {
-        userId,
-        hasCompleteData: Boolean(completeData),
-      });
+      reqLogger.warn(
+        { userId, hasCompleteData: Boolean(completeData) },
+        'getUserActivitySummary: activity_summary missing from complete data'
+      );
       return {
         total_posts: 0,
         total_comments: 0,
@@ -829,18 +829,16 @@ export async function getUserActivitySummary(
       };
     }
 
-    reqLogger.info('getUserActivitySummary: fetched successfully', {
-      userId,
-      hasResult: Boolean(completeData.activity_summary),
-    });
+    reqLogger.info(
+      { userId, hasResult: Boolean(completeData.activity_summary) },
+      'getUserActivitySummary: fetched successfully'
+    );
 
     return completeData.activity_summary;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('getUserActivitySummary: unexpected error', errorForLogging, {
-      userId,
-    });
+    reqLogger.error({ err: errorForLogging, userId }, 'getUserActivitySummary: unexpected error');
     return {
       total_posts: 0,
       total_comments: 0,
@@ -903,10 +901,10 @@ export async function getUserActivityTimeline(input: {
     });
 
     if (!completeData?.activity_timeline) {
-      reqLogger.warn('getUserActivityTimeline: activity_timeline missing from complete data', {
-        userId,
-        hasCompleteData: Boolean(completeData),
-      });
+      reqLogger.warn(
+        { userId, hasCompleteData: Boolean(completeData) },
+        'getUserActivityTimeline: activity_timeline missing from complete data'
+      );
       return {
         activities: [],
         has_more: false,
@@ -914,24 +912,25 @@ export async function getUserActivityTimeline(input: {
       };
     }
 
-    reqLogger.info('getUserActivityTimeline: fetched successfully from complete data', {
-      userId,
-      type: type ?? 'all',
-      limit,
-      offset,
-      hasResult: Boolean(completeData.activity_timeline),
-    });
+    reqLogger.info(
+      {
+        userId,
+        type: type ?? 'all',
+        limit,
+        offset,
+        hasResult: Boolean(completeData.activity_timeline),
+      },
+      'getUserActivityTimeline: fetched successfully from complete data'
+    );
 
     return completeData.activity_timeline;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('getUserActivityTimeline: unexpected error', errorForLogging, {
-      userId,
-      type: type ?? 'all',
-      limit,
-      offset,
-    });
+    reqLogger.error(
+      { err: errorForLogging, userId, type: type ?? 'all', limit, offset },
+      'getUserActivityTimeline: unexpected error'
+    );
     return {
       activities: [],
       has_more: false,
@@ -975,25 +974,23 @@ export async function getUserIdentitiesData(
     const completeData = await getUserCompleteData(userId);
 
     if (!completeData?.user_identities) {
-      reqLogger.warn('getUserIdentitiesData: user_identities missing from complete data', {
-        userId,
-        hasCompleteData: Boolean(completeData),
-      });
+      reqLogger.warn(
+        { userId, hasCompleteData: Boolean(completeData) },
+        'getUserIdentitiesData: user_identities missing from complete data'
+      );
       return { identities: [] };
     }
 
-    reqLogger.info('getUserIdentitiesData: fetched successfully', {
-      userId,
-      hasResult: Boolean(completeData.user_identities),
-    });
+    reqLogger.info(
+      { userId, hasResult: Boolean(completeData.user_identities) },
+      'getUserIdentitiesData: fetched successfully'
+    );
 
     return completeData.user_identities;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('getUserIdentitiesData: unexpected error', errorForLogging, {
-      userId,
-    });
+    reqLogger.error({ err: errorForLogging, userId }, 'getUserIdentitiesData: unexpected error');
     return { identities: [] };
   }
 }
@@ -1035,11 +1032,10 @@ export async function isBookmarked(input: {
     });
   } catch (error) {
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('isBookmarked: unexpected error', errorForLogging, {
-      userId,
-      content_type,
-      content_slug,
-    });
+    reqLogger.error(
+      { err: errorForLogging, userId, content_type, content_slug },
+      'isBookmarked: unexpected error'
+    );
     return false;
   }
 }
@@ -1078,10 +1074,10 @@ export async function isFollowing(input: {
     });
   } catch (error) {
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('isFollowing: unexpected error', errorForLogging, {
-      followerId,
-      followingId,
-    });
+    reqLogger.error(
+      { err: errorForLogging, followerId, followingId },
+      'isFollowing: unexpected error'
+    );
     return false;
   }
 }
@@ -1128,10 +1124,10 @@ export async function isBookmarkedBatch(input: {
     });
   } catch (error) {
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('isBookmarkedBatch: unexpected error', errorForLogging, {
-      userId,
-      itemCount: items.length,
-    });
+    reqLogger.error(
+      { err: errorForLogging, userId, itemCount: items.length },
+      'isBookmarkedBatch: unexpected error'
+    );
     return [];
   }
 }
@@ -1172,10 +1168,10 @@ export async function isFollowingBatch(input: {
     });
   } catch (error) {
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('isFollowingBatch: unexpected error', errorForLogging, {
-      followerId,
-      followedUserCount: followedUserIds.length,
-    });
+    reqLogger.error(
+      { err: errorForLogging, followerId, followedUserCount: followedUserIds.length },
+      'isFollowingBatch: unexpected error'
+    );
     return [];
   }
 }

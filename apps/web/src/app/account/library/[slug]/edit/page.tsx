@@ -120,9 +120,10 @@ async function EditCollectionPageContent({
   const { user } = await getAuthenticatedUser({ context: 'EditCollectionPage' });
 
   if (!user) {
-    routeLogger.warn('EditCollectionPage: unauthenticated access attempt', {
-      section: 'authentication',
-    });
+    routeLogger.warn(
+      { section: 'data-fetch' },
+      'EditCollectionPage: unauthenticated access attempt'
+    );
     redirect('/login');
   }
 
@@ -132,46 +133,39 @@ async function EditCollectionPageContent({
     userId: user.id, // Redaction will automatically hash this
   });
 
-  userLogger.info('EditCollectionPage: authentication successful', {
-    section: 'authentication',
-  });
+  userLogger.info({ section: 'data-fetch' }, 'EditCollectionPage: authentication successful');
 
   // Section: Collection Data Fetch
   let collectionData: Awaited<ReturnType<typeof getCollectionDetail>> = null;
   try {
     collectionData = await getCollectionDetail(user.id, slug);
-    userLogger.info('EditCollectionPage: collection data loaded', {
-      section: 'collection-data-fetch',
-      hasData: !!collectionData,
-    });
+    userLogger.info({ section: 'data-fetch', hasData: !!collectionData }, 'EditCollectionPage: collection data loaded');
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load collection detail');
-    userLogger.error('EditCollectionPage: getCollectionDetail threw', normalized, {
-      section: 'collection-data-fetch',
-    });
+    userLogger.error(
+      {
+        section: 'data-fetch',
+        err: normalized,
+      },
+      'EditCollectionPage: getCollectionDetail threw'
+    );
     throw normalized;
   }
 
   if (!collectionData) {
-    userLogger.warn('EditCollectionPage: collection not found or inaccessible', {
-      section: 'collection-data-fetch',
-    });
+    userLogger.warn({ section: 'data-fetch' }, 'EditCollectionPage: collection not found or inaccessible');
     notFound();
   }
 
   const { collection, bookmarks } = collectionData;
 
   if (!collection) {
-    userLogger.warn('EditCollectionPage: collection is null in response', {
-      section: 'collection-data-fetch',
-    });
+    userLogger.warn({ section: 'data-fetch' }, 'EditCollectionPage: collection is null in response');
     notFound();
   }
 
   // Final summary log
-  userLogger.info('EditCollectionPage: page render completed', {
-    section: 'page-render',
-  });
+  userLogger.info({ section: 'data-fetch' }, 'EditCollectionPage: page render completed');
 
   return (
     <div className="space-y-6">

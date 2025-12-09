@@ -19,7 +19,8 @@ import { connection, NextResponse } from 'next/server';
 /**
  * Cached helper function to fetch social proof stats.
  * Note: This uses Date.now() for timestamp, so we cache the data fetching but generate timestamp at request time.
- */
+ 
+ * @returns {unknown} Description of return value*/
 async function getCachedSocialProofData(): Promise<{
   contributors: { count: number; names: string[] };
   submissions: number;
@@ -172,15 +173,18 @@ export async function GET() {
     const timestamp = new Date().toISOString();
 
     // Structured logging with cache tags and stats
-    reqLogger.info('Social proof stats API: success', {
-      stats: {
-        contributorCount: stats.contributors.count,
-        submissionCount: stats.submissions,
-        successRate: stats.successRate,
-        totalUsers: stats.totalUsers,
+    reqLogger.info(
+      {
+        stats: {
+          contributorCount: stats.contributors.count,
+          submissionCount: stats.submissions,
+          successRate: stats.successRate,
+          totalUsers: stats.totalUsers,
+        },
+        cacheTags: ['stats', 'social-proof'],
       },
-      cacheTags: ['stats', 'social-proof'],
-    });
+      'Social proof stats retrieved'
+    );
 
     // Generate ETag from timestamp and stats hash for conditional requests
     const statsHash = `${stats.submissions}-${stats.successRate}-${stats.totalUsers}`;
@@ -204,10 +208,14 @@ export async function GET() {
     );
   } catch (error) {
     const normalized = normalizeError(error, 'Social proof stats API error');
-    reqLogger.error('Social proof stats API error', normalized, {
-      section: 'error-handling',
-    });
-    return createErrorResponse(error, {
+    reqLogger.error(
+      {
+        err: normalized,
+        section: 'error-handling',
+      },
+      'Social proof stats API error'
+    );
+    return createErrorResponse(normalized, {
       route: '/api/stats/social-proof',
       operation: 'SocialProofStatsAPI',
       method: 'GET',

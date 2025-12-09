@@ -142,9 +142,10 @@ async function JobAnalyticsPageContent({
   const { user } = await getAuthenticatedUser({ context: 'JobAnalyticsPage' });
 
   if (!user) {
-    routeLogger.warn('JobAnalyticsPage: unauthenticated access attempt', {
-      section: 'authentication',
-    });
+    routeLogger.warn(
+      { section: 'data-fetch' },
+      'JobAnalyticsPage: unauthenticated access attempt'
+    );
     redirect(ROUTES.LOGIN);
   }
 
@@ -154,28 +155,25 @@ async function JobAnalyticsPageContent({
     userId: user.id, // Redaction will automatically hash this
   });
 
-  userLogger.info('JobAnalyticsPage: authentication successful', {
-    section: 'authentication',
-  });
+  userLogger.info({ section: 'data-fetch' }, 'JobAnalyticsPage: authentication successful');
 
   // Section: Job Data Fetch
   let job: Awaited<ReturnType<typeof getUserJobById>> = null;
   try {
     job = await getUserJobById(user.id, id);
-    userLogger.info('JobAnalyticsPage: job data loaded', {
-      section: 'job-data-fetch',
-      hasJob: !!job,
-    });
+    userLogger.info({ section: 'data-fetch', hasJob: !!job }, 'JobAnalyticsPage: job data loaded');
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load job analytics detail');
-    userLogger.error('JobAnalyticsPage: getUserJobById threw', normalized, {
-      section: 'job-data-fetch',
-    });
+    userLogger.error(
+      {
+        section: 'data-fetch',
+        err: normalized,
+      },
+      'JobAnalyticsPage: getUserJobById threw'
+    );
   }
   if (!job) {
-    userLogger.warn('JobAnalyticsPage: job not found or not owned by user', {
-      section: 'job-data-fetch',
-    });
+    userLogger.warn({ section: 'data-fetch' }, 'JobAnalyticsPage: job not found or not owned by user');
     return (
       <div className="space-y-6">
         <Card>
@@ -203,11 +201,8 @@ async function JobAnalyticsPageContent({
   const status: JobStatus = job.status;
 
   // Final summary log
-  userLogger.info('JobAnalyticsPage: page render completed', {
-    section: 'page-render',
-    jobId: id,
-    status,
-  });
+  userLogger.info({ section: 'data-fetch', jobId: id,
+    status }, 'JobAnalyticsPage: page render completed');
 
   return (
     <div className="space-y-6">

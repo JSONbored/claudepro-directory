@@ -58,17 +58,23 @@ export default async function NewJobPage() {
   let planCatalog: Awaited<ReturnType<typeof getPaymentPlanCatalog>> = [];
   try {
     planCatalog = await getPaymentPlanCatalog();
-    reqLogger.info('NewJobPage: plan catalog loaded', {
-      section: 'plan-catalog-fetch',
-      plansCount: planCatalog.length,
-    });
+    reqLogger.info(
+      {
+        section: 'data-fetch',
+        plansCount: planCatalog.length,
+      },
+      'NewJobPage: plan catalog loaded'
+    );
   } catch (error) {
     const normalized = normalizeError(error, 'NewJobPage: failed to fetch plan catalog');
-    reqLogger.warn('NewJobPage: failed to fetch plan catalog, using fallback', {
-      err: normalized,
-      section: 'plan-catalog-fetch',
-      name: normalized.name,
-    });
+    reqLogger.warn(
+      {
+        section: 'data-fetch',
+        err: normalized,
+        name: normalized.name,
+      },
+      'NewJobPage: failed to fetch plan catalog, using fallback'
+    );
     // planCatalog remains [] - JobForm will use legacy fallback
   }
 
@@ -104,13 +110,13 @@ export default async function NewJobPage() {
       result = await createJob(data);
     } catch (error) {
       const normalized = normalizeError(error, 'createJob server action failed');
-      actionLogger.error('NewJobPage: createJob threw', normalized);
+      actionLogger.error({ err: normalized }, 'NewJobPage: createJob threw');
       throw normalized;
     }
 
     if (result.serverError) {
       const normalized = normalizeError(result.serverError, 'NewJobPage: createJob failed');
-      actionLogger.error('NewJobPage: createJob failed', normalized);
+      actionLogger.error({ err: normalized }, 'NewJobPage: createJob failed');
       throw normalized;
     }
 
@@ -120,7 +126,7 @@ export default async function NewJobPage() {
         'createJob returned no data',
         'NewJobPage: createJob returned no data'
       );
-      actionLogger.error('NewJobPage: createJob returned no data', normalized);
+      actionLogger.error({ err: normalized }, 'NewJobPage: createJob returned no data');
       throw normalized;
     }
 
@@ -138,10 +144,14 @@ export default async function NewJobPage() {
             new Error('Missing checkout URL for paid job creation'),
             'NewJobPage: missing checkout URL'
           );
-          actionLogger.error('NewJobPage: missing checkout URL', normalized, {
-            jobId: jobResult.job_id ?? 'unknown',
-            companyId: jobResult.company_id ?? 'unknown',
-          });
+          actionLogger.error(
+            {
+              err: normalized,
+              jobId: jobResult.job_id ?? 'unknown',
+              companyId: jobResult.company_id ?? 'unknown',
+            },
+            'NewJobPage: missing checkout URL'
+          );
           return {
             success: false,
             requiresPayment: true,
@@ -167,11 +177,15 @@ export default async function NewJobPage() {
       new Error('Job creation failed'),
       'NewJobPage: createJob returned success=false'
     );
-    actionLogger.error('NewJobPage: createJob returned success=false', normalized, {
-      jobId: jobResult.job_id ?? 'unknown',
-      companyId: jobResult.company_id ?? 'unknown',
-      requiresPayment: jobResult.requires_payment ?? false,
-    });
+    actionLogger.error(
+      {
+        err: normalized,
+        jobId: jobResult.job_id ?? 'unknown',
+        companyId: jobResult.company_id ?? 'unknown',
+        requiresPayment: jobResult.requires_payment ?? false,
+      },
+      'NewJobPage: createJob returned success=false'
+    );
     return {
       success: false,
       message: 'Job creation failed. Please try again or contact support.',

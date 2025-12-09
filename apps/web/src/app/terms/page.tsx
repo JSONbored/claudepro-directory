@@ -47,7 +47,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see NavLink
  * @see APP_CONFIG
  */
-export default async function TermsPage() {
+export default function TermsPage() {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
@@ -86,10 +86,7 @@ function TermsPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.c
   const lastUpdated = getLastUpdatedDate();
   const channels = getContactChannels();
 
-  reqLogger.info('TermsPage: rendering page', {
-    section: 'page-render',
-    securityEvent: true,
-  });
+  reqLogger.info({ section: 'data-fetch', securityEvent: true }, 'TermsPage: rendering page');
 
   return (
     <div className={`container mx-auto max-w-4xl ${UI_CLASSES.PADDING_X_DEFAULT} py-8 sm:py-12`}>

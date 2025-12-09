@@ -55,12 +55,21 @@ async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string 
     directoryData = await getCommunityDirectory({ searchQuery, limit: DEFAULT_DIRECTORY_LIMIT });
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load community directory');
-    reqLogger.error('CommunityDirectoryContent: getCommunityDirectory failed', normalized);
+    reqLogger.error(
+      {
+        section: 'data-fetch',
+        err: normalized,
+      },
+      'CommunityDirectoryContent: getCommunityDirectory failed'
+    );
     throw normalized;
   }
 
   if (!directoryData) {
-    reqLogger.warn('CommunityDirectoryContent: directory data response is empty');
+    reqLogger.warn(
+      { section: 'data-fetch' },
+      'CommunityDirectoryContent: directory data response is empty'
+    );
   }
 
   const {
@@ -186,9 +195,7 @@ interface CommunityDirectoryPageProperties {
  * @see generateMetadata
  * @see Skeleton
  */
-export default async function CommunityDirectoryPage({
-  searchParams,
-}: CommunityDirectoryPageProperties) {
+export default function CommunityDirectoryPage({ searchParams }: CommunityDirectoryPageProperties) {
   // Note: Cannot use 'use cache' on pages with searchParams - they're dynamic
   // Data layer caching is already in place for optimal performance
 

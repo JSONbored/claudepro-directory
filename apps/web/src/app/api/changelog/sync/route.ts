@@ -85,9 +85,7 @@ function validateToken(
   reqLogger: ReturnType<typeof logger.child>
 ): boolean {
   if (!expectedToken) {
-    reqLogger.warn('CHANGELOG_SYNC_TOKEN not configured', {
-      route: '/api/changelog/sync',
-    });
+    reqLogger.warn({ route: '/api/changelog/sync' }, 'CHANGELOG_SYNC_TOKEN not configured');
     return false;
   }
 
@@ -113,7 +111,8 @@ function validateToken(
  * Generates a slug from version and date.
  * @param version
  * @param date
- */
+ 
+ * @returns {unknown} Description of return value*/
 function generateSlug(version: string, date: string): string {
   // Format: 2025-12-07-v1-2-0
   const versionPart = version.replaceAll('.', '-').toLowerCase();
@@ -123,7 +122,8 @@ function generateSlug(version: string, date: string): string {
 /**
  * Converts sections object to database format.
  * @param sections
- */
+ 
+ * @returns {unknown} Description of return value*/
 function convertSectionsToChanges(
   sections: Record<string, string[]>
 ): Database['public']['Tables']['changelog']['Row']['changes'] {
@@ -177,7 +177,7 @@ export async function POST(request: NextRequest) {
         'CHANGELOG_SYNC_TOKEN is required'
       );
     } catch (error) {
-      reqLogger.error('CHANGELOG_SYNC_TOKEN not configured', normalizeError(error));
+      reqLogger.error({ err: normalizeError(error) }, 'CHANGELOG_SYNC_TOKEN not configured');
       return NextResponse.json(
         { error: 'Server configuration error' },
         {
@@ -194,7 +194,7 @@ export async function POST(request: NextRequest) {
     // Validate authentication
     const authHeader = request.headers.get('authorization');
     if (!validateToken(authHeader, changelogSyncToken, reqLogger)) {
-      reqLogger.warn('Unauthorized changelog sync attempt');
+      reqLogger.warn({}, 'Unauthorized changelog sync attempt');
       return NextResponse.json(
         { error: 'Unauthorized' },
         {
@@ -214,32 +214,42 @@ export async function POST(request: NextRequest) {
       body = await request.json();
     } catch (error) {
       const normalized = normalizeError(error, 'Failed to parse request body as JSON');
-      reqLogger.error('Invalid JSON in request body', normalized, {
-        route: '/api/changelog/sync',
-        operation: 'POST',
-        method: 'POST',
-      });
+      reqLogger.error(
+        {
+          err: normalized,
+          route: '/api/changelog/sync',
+          operation: 'POST',
+          method: 'POST',
+        },
+        'Invalid JSON in request body'
+      );
       return badRequestResponse('Invalid JSON in request body', CORS);
     }
 
     const parseResult = changelogSyncRequestSchema.safeParse(body);
     if (!parseResult.success) {
       const errorMessages = parseResult.error.issues.map((e) => e.message).join(', ');
-      reqLogger.warn('Invalid request body', {
-        errorCount: parseResult.error.issues.length,
-        errorMessages: parseResult.error.issues.map((e) => e.message),
-      });
+      reqLogger.warn(
+        {
+          errorCount: parseResult.error.issues.length,
+          errorMessages: parseResult.error.issues.map((e) => e.message),
+        },
+        'Invalid request body'
+      );
       return badRequestResponse(`Invalid request body: ${errorMessages}`, CORS);
     }
 
     const { version, date, tldr, whatChanged, sections, content, rawContent } = parseResult.data;
 
-    reqLogger.info('Changelog sync request received', {
-      version,
-      date,
-      audit: true,
-      action: 'changelog_sync_request',
-    });
+    reqLogger.info(
+      {
+        version,
+        date,
+        audit: true,
+        action: 'changelog_sync_request',
+      },
+      'Changelog sync request received'
+    );
 
     // Generate slug
     const slug = generateSlug(version, date);
@@ -275,12 +285,15 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (existing) {
-      reqLogger.info('Changelog entry already exists', {
-        slug,
-        id: existing.id,
-        audit: true,
-        action: 'changelog_sync_check',
-      });
+      reqLogger.info(
+        {
+          slug,
+          id: existing.id,
+          audit: true,
+          action: 'changelog_sync_check',
+        },
+        'Changelog entry already exists'
+      );
       return NextResponse.json(
         { success: true, message: 'Entry already exists', id: existing.id },
         {
@@ -334,11 +347,15 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (insertError) {
-      reqLogger.error('Failed to insert changelog entry', normalizeError(insertError), {
-        audit: true,
-        action: 'changelog_insert_failed',
-        slug,
-      });
+      reqLogger.error(
+        {
+          err: normalizeError(insertError),
+          audit: true,
+          action: 'changelog_insert_failed',
+          slug,
+        },
+        'Failed to insert changelog entry'
+      );
       throw new Error(`Changelog insert failed: ${insertError.message}`);
     }
 
@@ -346,12 +363,15 @@ export async function POST(request: NextRequest) {
       throw new Error('Changelog insert returned no data');
     }
 
-    reqLogger.info('Changelog entry inserted', {
-      id: changelogData.id,
-      slug,
-      audit: true,
-      action: 'changelog_insert',
-    });
+    reqLogger.info(
+      {
+        id: changelogData.id,
+        slug,
+        audit: true,
+        action: 'changelog_insert',
+      },
+      'Changelog entry inserted'
+    );
 
     // Enqueue notification job (best-effort, non-fatal)
     const notificationJob = {
@@ -365,19 +385,26 @@ export async function POST(request: NextRequest) {
 
     try {
       await pgmqSend('changelog_notify', notificationJob);
-      reqLogger.info('Notification job enqueued', {
-        entryId: changelogData.id,
-        audit: true,
-        action: 'notification_enqueued',
-      });
+      reqLogger.info(
+        {
+          entryId: changelogData.id,
+          audit: true,
+          action: 'notification_enqueued',
+        },
+        'Notification job enqueued'
+      );
     } catch (error) {
       // Notification is best-effort - log error but don't fail the request
-      reqLogger.error('Failed to enqueue notification (non-fatal)', normalizeError(error), {
-        entryId: changelogData.id,
-        slug,
-        audit: true,
-        action: 'notification_enqueue_failed',
-      });
+      reqLogger.error(
+        {
+          err: normalizeError(error),
+          entryId: changelogData.id,
+          slug,
+          audit: true,
+          action: 'notification_enqueue_failed',
+        },
+        'Failed to enqueue notification (non-fatal)'
+      );
     }
 
     return NextResponse.json(
@@ -397,8 +424,9 @@ export async function POST(request: NextRequest) {
       }
     );
   } catch (error) {
-    reqLogger.error('Changelog sync API error', normalizeError(error));
-    return createErrorResponse(error, {
+    const normalized = normalizeError(error, 'Changelog sync API error');
+    reqLogger.error({ err: normalized }, 'Changelog sync API error');
+    return createErrorResponse(normalized, {
       route: '/api/changelog/sync',
       operation: 'ChangelogSyncAPI',
       method: 'POST',

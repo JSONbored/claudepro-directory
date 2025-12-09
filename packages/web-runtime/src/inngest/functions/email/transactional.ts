@@ -61,20 +61,17 @@ export const sendTransactionalEmail = inngest.createFunction(
 
     const { type, email, emailData } = event.data;
 
-    logger.info('Transactional email request received', {
-      ...logContext,
-      type,
-      email, // Auto-hashed by pino redaction
-    });
+    logger.info(
+      { ...logContext, type, email }, // Auto-hashed by pino redaction
+      'Transactional email request received'
+    );
 
     // Validate email type
     const config = TRANSACTIONAL_EMAIL_CONFIGS[type];
     if (!config) {
-      logger.warn('Unknown transactional email type', {
-        ...logContext,
+      logger.warn({ ...logContext,
         type,
-        availableTypes: Object.keys(TRANSACTIONAL_EMAIL_CONFIGS).join(', '),
-      });
+        availableTypes: Object.keys(TRANSACTIONAL_EMAIL_CONFIGS).join(', '), }, 'Unknown transactional email type');
       throw new Error(`Unknown transactional email type: ${type}`);
     }
 
@@ -99,34 +96,28 @@ export const sendTransactionalEmail = inngest.createFunction(
         );
 
         if (sendError) {
-          logger.warn('Transactional email failed', {
-            ...logContext,
+          logger.warn({ ...logContext,
             type,
-            errorMessage: sendError.message,
-          });
+            errorMessage: sendError.message, }, 'Transactional email failed');
           return { sent: false, emailId: null };
         }
 
         return { sent: true, emailId: sendData?.id ?? null };
       } catch (error) {
         const normalized = normalizeError(error, 'Transactional email failed');
-        logger.warn('Transactional email failed', {
-          ...logContext,
+        logger.warn({ ...logContext,
           type,
-          errorMessage: normalized.message,
-        });
+          errorMessage: normalized.message, }, 'Transactional email failed');
         return { sent: false, emailId: null };
       }
     });
 
     const durationMs = Date.now() - startTime;
-    logger.info('Transactional email completed', {
-      ...logContext,
+    logger.info({ ...logContext,
       durationMs,
       type,
       sent: emailResult.sent,
-      emailId: emailResult.emailId,
-    });
+      emailId: emailResult.emailId, }, 'Transactional email completed');
 
     return {
       success: emailResult.sent,

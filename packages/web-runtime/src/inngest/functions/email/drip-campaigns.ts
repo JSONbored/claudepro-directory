@@ -56,20 +56,16 @@ export const newsletterDripCampaign = inngest.createFunction(
 
     const { email, triggerSource } = event.data;
 
-    logger.info('Starting newsletter drip campaign', {
-      ...logContext,
+    logger.info({ ...logContext,
       email,
-      triggerSource,
-    });
+      triggerSource, }, 'Starting newsletter drip campaign');
 
     // Step 1: Welcome email is already sent by welcome.ts
     // We just note the campaign start time for tracking
     await step.run('record-campaign-start', async () => {
-      logger.info('Newsletter drip campaign started', {
-        ...logContext,
+      logger.info({ ...logContext,
         email,
-        triggerSource,
-      });
+        triggerSource, }, 'Newsletter drip campaign started');
     });
 
     // Step 2: Wait up to 3 days for user to click any link in emails
@@ -82,11 +78,9 @@ export const newsletterDripCampaign = inngest.createFunction(
 
     if (clickEvent) {
       // User is engaged! Send power user tips after 1 day
-      logger.info('User engaged with email, scheduling tips', {
-        ...logContext,
+      logger.info({ ...logContext,
         email,
-        clickedLink: clickEvent.data.click?.link,
-      });
+        clickedLink: clickEvent.data.click?.link, }, 'User engaged with email, scheduling tips');
 
       await step.sleep('delay-tips-email', '1 day');
 
@@ -99,21 +93,17 @@ export const newsletterDripCampaign = inngest.createFunction(
         });
 
         if (result.error) {
-          logger.warn('Failed to send power user tips email', {
-            ...logContext,
+          logger.warn({ ...logContext,
             email,
-            errorMessage: result.error.message,
-          });
+            errorMessage: result.error.message, }, 'Failed to send power user tips email');
         }
 
         return result.data?.id;
       });
     } else {
       // User didn't click - send a gentle nudge
-      logger.info('User not engaged, sending nudge email', {
-        ...logContext,
-        email,
-      });
+      logger.info({ ...logContext,
+        email, }, 'User not engaged, sending nudge email');
 
       await step.run('send-nudge-email', async () => {
         const result = await sendEmail({
@@ -124,11 +114,9 @@ export const newsletterDripCampaign = inngest.createFunction(
         });
 
         if (result.error) {
-          logger.warn('Failed to send nudge email', {
-            ...logContext,
+          logger.warn({ ...logContext,
             email,
-            errorMessage: result.error.message,
-          });
+            errorMessage: result.error.message, }, 'Failed to send nudge email');
         }
 
         return result.data?.id;
@@ -165,12 +153,10 @@ export const newsletterDripCampaign = inngest.createFunction(
       });
     }
 
-    logger.info('Newsletter drip campaign completed', {
-      ...logContext,
+    logger.info({ ...logContext,
       email,
       engaged: !!clickEvent,
-      stillSubscribed,
-    });
+      stillSubscribed, }, 'Newsletter drip campaign completed');
 
     return { email, engaged: !!clickEvent, completed: true };
   }
@@ -202,11 +188,9 @@ export const jobPostingDripCampaign = inngest.createFunction(
     const safeJobTitle = escapeHtml(jobTitle);
     const safeName = escapeHtml(employerName || 'there');
 
-    logger.info('Starting job posting drip campaign', {
-      ...logContext,
+    logger.info({ ...logContext,
       jobId,
-      employerEmail,
-    });
+      employerEmail, }, 'Starting job posting drip campaign');
 
     // Step 1: Send confirmation email
     await step.run('send-confirmation', async () => {
@@ -218,11 +202,9 @@ export const jobPostingDripCampaign = inngest.createFunction(
       });
 
       if (result.error) {
-        logger.warn('Failed to send job confirmation email', {
-          ...logContext,
+        logger.warn({ ...logContext,
           jobId,
-          errorMessage: result.error.message,
-        });
+          errorMessage: result.error.message, }, 'Failed to send job confirmation email');
       }
 
       return result.data?.id;
@@ -311,11 +293,9 @@ export const jobPostingDripCampaign = inngest.createFunction(
       }
     }
 
-    logger.info('Job posting drip campaign completed', {
-      ...logContext,
+    logger.info({ ...logContext,
       jobId,
-      employerEmail,
-    });
+      employerEmail, }, 'Job posting drip campaign completed');
 
     return { jobId, employerEmail, completed: true };
   }

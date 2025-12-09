@@ -79,7 +79,10 @@ export default async function OAuthConsentPage({
     const authorizationId = params.authorization_id;
 
     if (!authorizationId) {
-      reqLogger.warn('OAuth consent page accessed without authorization_id');
+      reqLogger.warn(
+        { section: 'data-fetch' },
+        'OAuth consent page accessed without authorization_id'
+      );
       return (
         <SplitAuthLayout
           brandPanel={<AuthBrandPanel />}
@@ -105,11 +108,15 @@ export default async function OAuthConsentPage({
     if (!authResult.isAuthenticated || !authResult.user) {
       // Redirect to login, preserving authorization_id
       const loginUrl = `/login?redirect=/oauth/consent?authorization_id=${encodeURIComponent(authorizationId)}`;
-      reqLogger.info('User not authenticated, redirecting to login', {
-        authorizationId,
-        redirectTo: loginUrl,
-        error: authResult.error?.message,
-      });
+      reqLogger.info(
+        {
+          section: 'data-fetch',
+          authorizationId,
+          redirectTo: loginUrl,
+          error: authResult.error?.message,
+        },
+        'User not authenticated, redirecting to login'
+      );
       redirect(loginUrl);
     }
 
@@ -121,10 +128,15 @@ export default async function OAuthConsentPage({
       await supabase.auth.oauth.getAuthorizationDetails(authorizationId);
 
     if (authError !== null) {
-      reqLogger.error('Failed to get authorization details', normalizeError(authError), {
-        authorizationId,
-        userId: user.id,
-      });
+      reqLogger.error(
+        {
+          section: 'data-fetch',
+          err: normalizeError(authError),
+          authorizationId,
+          userId: user.id,
+        },
+        'Failed to get authorization details'
+      );
 
       return (
         <SplitAuthLayout
@@ -146,12 +158,13 @@ export default async function OAuthConsentPage({
 
     if (!authDetails) {
       reqLogger.error(
-        'Failed to get authorization details',
-        normalizeError(new Error('No auth details')),
         {
+          section: 'data-fetch',
+          err: normalizeError(new Error('No auth details')),
           authorizationId,
           userId: user.id,
-        }
+        },
+        'Failed to get authorization details'
       );
 
       return (
@@ -170,13 +183,17 @@ export default async function OAuthConsentPage({
       );
     }
 
-    reqLogger.info('OAuth consent page loaded', {
-      authorizationId,
-      userId: user.id,
-      clientId: authDetails.client.id,
-      clientName: authDetails.client.name,
-      scopes: authDetails.scope,
-    });
+    reqLogger.info(
+      {
+        section: 'data-fetch',
+        authorizationId,
+        userId: user.id,
+        clientId: authDetails.client.id,
+        clientName: authDetails.client.name,
+          scopes: authDetails.scope,
+      },
+      'OAuth consent page loaded'
+    );
 
     // Map authDetails to expected format for client component
     const clientAuthDetails = {
@@ -205,9 +222,14 @@ export default async function OAuthConsentPage({
     );
   } catch (error) {
     const normalized = normalizeError(error, 'OAuth consent page error');
-    reqLogger.error('OAuth consent page error', normalized, {
-      duration: Date.now() - startTime,
-    });
+    reqLogger.error(
+      {
+        section: 'data-fetch',
+        err: normalized,
+        duration: Date.now() - startTime,
+      },
+      'OAuth consent page error'
+    );
 
     return (
       <SplitAuthLayout

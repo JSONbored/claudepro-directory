@@ -84,10 +84,8 @@ export function SwipeableCardWrapper({
       };
     } catch (error) {
       const normalized = normalizeError(error, 'SwipeableCardWrapper: Failed to load animation config');
-      logger.warn('SwipeableCardWrapper: Failed to load animation config', {
-        err: normalized,
-        component: 'SwipeableCardWrapper',
-      });
+      logger.warn({ err: normalized,
+        component: 'SwipeableCardWrapper', }, 'SwipeableCardWrapper: Failed to load animation config');
       // Fallback to default values
       return {
         type: 'spring' as const,
@@ -107,10 +105,8 @@ export function SwipeableCardWrapper({
         setIsMobile(hasTouchScreen && isNarrowScreen);
       } catch (error) {
         const normalized = normalizeError(error, 'SwipeableCardWrapper: Mobile detection failed');
-        logger.warn('SwipeableCardWrapper: Mobile detection failed', {
-          err: normalized,
-          component: 'SwipeableCardWrapper',
-        });
+        logger.warn({ err: normalized,
+          component: 'SwipeableCardWrapper', }, 'SwipeableCardWrapper: Mobile detection failed');
         setIsMobile(false);
       }
     };
@@ -133,10 +129,8 @@ export function SwipeableCardWrapper({
       };
     } catch (error) {
       const normalized = normalizeError(error, 'SwipeableCardWrapper: Media query setup failed');
-      logger.warn('SwipeableCardWrapper: Media query setup failed', {
-        err: normalized,
-        component: 'SwipeableCardWrapper',
-      });
+      logger.warn({ err: normalized,
+        component: 'SwipeableCardWrapper', }, 'SwipeableCardWrapper: Media query setup failed');
       return () => {};
     }
   }, []);
@@ -216,10 +210,8 @@ export function SwipeableCardWrapper({
             }
           } catch (error) {
             const normalized = normalizeError(error, 'SwipeableCardWrapper: Swipe action failed');
-            logger.error('SwipeableCardWrapper: Swipe action failed', normalized, {
-              component: 'SwipeableCardWrapper',
-              offsetX: info.offset.x,
-            });
+            logger.error({ err: normalized, component: 'SwipeableCardWrapper',
+              offsetX: info.offset.x, }, 'SwipeableCardWrapper: Swipe action failed');
             // Always snap back on error
             x.set(0);
           }

@@ -5,7 +5,7 @@
 ---
 # Rule: Detect NextResponse promises not being awaited
 id: missing-await-nextresponse
-language: TypeScript
+language: typescript
 rule:
   all:
     - pattern: return NextResponse.$METHOD($$$)
@@ -21,7 +21,7 @@ severity: error
 ---
 # Rule: Detect missing error handling for NextResponse operations
 id: missing-nextresponse-error-handling
-language: TypeScript
+language: typescript
 rule:
   all:
     - pattern: NextResponse.$METHOD($$$)

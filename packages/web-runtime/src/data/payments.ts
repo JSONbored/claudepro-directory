@@ -99,9 +99,10 @@ export async function getPaymentPlanCatalog(): Promise<PaymentPlanCatalogEntry[]
 
     // Type guard: Validate that data is an array and has expected structure
     if (!Array.isArray(data)) {
-      reqLogger.warn('getPaymentPlanCatalog: Expected array but got non-array data', {
-        dataType: typeof data,
-      });
+      reqLogger.warn(
+        { dataType: typeof data },
+        'getPaymentPlanCatalog: Expected array but got non-array data'
+      );
       return [];
     }
 
@@ -130,16 +131,14 @@ export async function getPaymentPlanCatalog(): Promise<PaymentPlanCatalogEntry[]
       product_type: entry.product_type,
     }));
 
-    reqLogger.info('getPaymentPlanCatalog: fetched successfully', {
-      count: result.length,
-    });
+    reqLogger.info({ count: result.length }, 'getPaymentPlanCatalog: fetched successfully');
 
     return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string =
-      error instanceof Error ? error : (typeof error === 'string' ? error : String(error));
-    reqLogger.error('getPaymentPlanCatalog failed', errorForLogging);
+      error instanceof Error ? error : typeof error === 'string' ? error : String(error);
+    reqLogger.error({ err: errorForLogging }, 'getPaymentPlanCatalog failed');
     throw error;
   }
 }
@@ -206,10 +205,10 @@ export async function getJobBillingSummaries(jobIds: string[]): Promise<JobBilli
 
     // Type guard: Validate that data is an array
     if (!Array.isArray(data)) {
-      reqLogger.warn('getJobBillingSummaries: Expected array but got non-array data', {
-        dataType: typeof data,
-        jobCount: jobIds.length,
-      });
+      reqLogger.warn(
+        { dataType: typeof data, jobCount: jobIds.length },
+        'getJobBillingSummaries: Expected array but got non-array data'
+      );
       return [];
     }
 
@@ -225,10 +224,11 @@ export async function getJobBillingSummaries(jobIds: string[]): Promise<JobBilli
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string =
-      error instanceof Error ? error : (typeof error === 'string' ? error : String(error));
-    reqLogger.error('getJobBillingSummaries failed', errorForLogging, {
-      jobCount: jobIds.length,
-    });
+      error instanceof Error ? error : typeof error === 'string' ? error : String(error);
+    reqLogger.error(
+      { err: errorForLogging, jobCount: jobIds.length },
+      'getJobBillingSummaries failed'
+    );
     throw error;
   }
 }

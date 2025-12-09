@@ -70,9 +70,7 @@ export async function fetchRecentlyViewedItems(
   });
 
   if (!user) {
-    reqLogger.warn('fetchRecentlyViewedItems: unauthenticated access attempt', {
-      section: 'authentication',
-    });
+    reqLogger.warn({ section: 'authentication' }, 'fetchRecentlyViewedItems: unauthenticated access attempt');
     // Return empty array for unauthenticated users (graceful degradation)
     return [];
   }
@@ -95,10 +93,13 @@ export async function fetchRecentlyViewedItems(
           ];
           
           if (!validCategories.includes(item.category as RecentlyViewedCategory)) {
-            reqLogger.warn('Invalid recently viewed category', {
-              category: item.category,
-              slug: item.slug,
-            });
+            reqLogger.warn(
+              {
+                category: item.category,
+                slug: item.slug,
+              },
+              'Invalid recently viewed category'
+            );
             return null;
           }
 
@@ -109,11 +110,14 @@ export async function fetchRecentlyViewedItems(
           );
 
           if (!category || !isValidCategory(category)) {
-            reqLogger.warn('Failed to map recently viewed category to content_category enum', {
-              inputCategory: item.category,
-              mappedCategory: category,
-              slug: item.slug,
-            });
+            reqLogger.warn(
+              {
+                inputCategory: item.category,
+                mappedCategory: category,
+                slug: item.slug,
+              },
+              'Failed to map recently viewed category to content_category enum'
+            );
             return null;
           }
 
@@ -122,10 +126,13 @@ export async function fetchRecentlyViewedItems(
 
           if (!fullItem) {
             // Item no longer exists (deleted)
-            reqLogger.warn('Recently viewed item not found', {
-              category: item.category,
-              slug: item.slug,
-            });
+            reqLogger.warn(
+              {
+                category: item.category,
+                slug: item.slug,
+              },
+              'Invalid recently viewed category'
+            );
             return null;
           }
 
@@ -133,11 +140,14 @@ export async function fetchRecentlyViewedItems(
           // This preserves all properties: author_profile_url, bookmark_count, source, etc.
           return fullItem;
         } catch (error) {
-          reqLogger.warn('Failed to fetch recently viewed item', {
-            category: item.category,
-            slug: item.slug,
-            error: error instanceof Error ? error.message : String(error),
-          });
+          reqLogger.warn(
+            {
+              category: item.category,
+              slug: item.slug,
+              error: error instanceof Error ? error.message : String(error),
+            },
+            'Failed to fetch recently viewed item'
+          );
           return null;
         }
       })
@@ -148,16 +158,19 @@ export async function fetchRecentlyViewedItems(
       (item): item is Database['public']['CompositeTypes']['enriched_content_item'] => item !== null
     );
 
-    reqLogger.info('Fetched recently viewed items', {
-      requested: items.length,
-      found: validItems.length,
-      missing: items.length - validItems.length,
-    });
+    reqLogger.info(
+      {
+        requested: items.length,
+        found: validItems.length,
+        missing: items.length - validItems.length,
+      },
+      'Fetched recently viewed items'
+    );
 
     return validItems;
   } catch (error) {
     const errorForLogging = error instanceof Error ? error : new Error(String(error));
-    reqLogger.error('Failed to fetch recently viewed items', errorForLogging);
+    reqLogger.error({ err: errorForLogging }, 'Failed to fetch recently viewed items');
     // Return empty array on error (graceful degradation)
     return [];
   }

@@ -78,36 +78,36 @@ export async function getPaginatedContent({
       p_offset: offset,
     };
 
-    reqLogger.info('getPaginatedContent: calling RPC get_content_paginated_slim', {
-      category: normalizedCategory ?? category ?? 'all',
-      limit,
-      offset,
-      rpcArgs,
-    });
+    reqLogger.info(
+      { category: normalizedCategory ?? category ?? 'all', limit, offset, rpcArgs },
+      'getPaginatedContent: calling RPC get_content_paginated_slim'
+    );
 
     const result = await new ContentService(client).getContentPaginatedSlim(rpcArgs);
 
-    reqLogger.info('getPaginatedContent: RPC call completed', {
-      category: normalizedCategory ?? category ?? 'all',
-      limit,
-      offset,
-      hasResult: Boolean(result),
-      hasItems: Boolean(result?.items),
-      itemsLength: Array.isArray(result?.items) ? result.items.length : 0,
-      hasPagination: Boolean(result?.pagination),
-      paginationTotal: result?.pagination?.total_count ?? null,
-      resultKeys: result ? Object.keys(result) : [],
-    });
+    reqLogger.info(
+      {
+        category: normalizedCategory ?? category ?? 'all',
+        limit,
+        offset,
+        hasResult: Boolean(result),
+        hasItems: Boolean(result?.items),
+        itemsLength: Array.isArray(result?.items) ? result.items.length : 0,
+        hasPagination: Boolean(result?.pagination),
+        paginationTotal: result?.pagination?.total_count ?? null,
+        resultKeys: result ? Object.keys(result) : [],
+      },
+      'getPaginatedContent: RPC call completed'
+    );
 
     return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('getPaginatedContent: failed', errorForLogging, {
-      category: normalizedCategory ?? category ?? 'all',
-      limit,
-      offset,
-    });
+    reqLogger.error(
+      { err: errorForLogging, category: normalizedCategory ?? category ?? 'all', limit, offset },
+      'getPaginatedContent: failed'
+    );
     return null;
   }
 }

@@ -60,10 +60,14 @@ export default async function BookmarksPage() {
     module: modulePath,
   });
 
-  reqLogger.info(`BookmarksPage: redirecting legacy ${SOURCE_ROUTE} to ${TARGET_ROUTE}`, {
-    sourceRoute: SOURCE_ROUTE,
-    targetRoute: TARGET_ROUTE,
-    redirectReason: 'legacy-route-compatibility',
-  });
+  reqLogger.info(
+    {
+      section: 'data-fetch',
+      sourceRoute: SOURCE_ROUTE,
+      targetRoute: TARGET_ROUTE,
+      redirectReason: 'legacy-route-compatibility',
+    },
+    `BookmarksPage: redirecting legacy ${SOURCE_ROUTE} to ${TARGET_ROUTE}`
+  );
   redirect(TARGET_ROUTE);
 }

@@ -119,11 +119,13 @@ function mapSubmissionTypeToContentCategory(
   // Fallback if somehow an invalid value gets through (should never happen)
   // Note: This is a module-level utility function, so it can't access component-level bindings
   // Log with minimal context (utility functions don't need full request context)
-  logger.warn('mapSubmissionTypeToContentCategory: invalid submission_type', {
-    module: 'apps/web/src/app/submit',
-    operation: 'mapSubmissionTypeToContentCategory',
-    submissionType,
-  });
+  logger.warn({  section: 'data-fetch' , 
+      module: 'apps/web/src/app/submit',
+      operation: 'mapSubmissionTypeToContentCategory',
+      submissionType,
+      },
+      'mapSubmissionTypeToContentCategory: invalid submission_type'
+    );
   return DEFAULT_CONTENT_CATEGORY;
 }
 
@@ -255,19 +257,16 @@ async function SubmitPageHeroWithStats({
   let dashboardData: Awaited<ReturnType<typeof getSubmissionDashboard>> = null;
   try {
     dashboardData = await getSubmissionDashboard(5, 5);
-    reqLogger.info('SubmitPage: submission dashboard loaded', {
-      section: 'submission-dashboard',
-      recentCount: 5,
-      statsCount: 5,
-      hasData: !!dashboardData,
-    });
+    reqLogger.info(
+      { section: 'data-fetch', recentCount: 5, statsCount: 5, hasData: !!dashboardData },
+      'SubmitPage: submission dashboard loaded'
+    );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load submission dashboard');
-    reqLogger.error('SubmitPage: getSubmissionDashboard failed', normalized, {
-      section: 'submission-dashboard',
-      recentCount: 5,
-      statsCount: 5,
-    });
+    reqLogger.error(
+      { err: normalized, section: 'data-fetch', recentCount: 5, statsCount: 5 },
+      'SubmitPage: getSubmissionDashboard failed'
+    );
     // Continue with null dashboardData - page will render with fallback empty data
   }
 
@@ -301,15 +300,16 @@ async function SubmitFormWithConfig({ reqLogger }: { reqLogger: ReturnType<typeo
   let formConfig: Awaited<ReturnType<typeof getSubmissionFormFields>> | null = null;
   try {
     formConfig = await getSubmissionFormFields();
-    reqLogger.info('SubmitPage: form configuration loaded', {
-      section: 'form-config',
-      hasConfig: Boolean(formConfig),
-    });
+    reqLogger.info(
+      { section: 'data-fetch', hasConfig: Boolean(formConfig) },
+      'SubmitPage: form configuration loaded'
+    );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load submission form config');
-    reqLogger.error('SubmitPage: getSubmissionFormFields failed', normalized, {
-      section: 'form-config',
-    });
+    reqLogger.error(
+      { err: normalized, section: 'data-fetch' },
+      'SubmitPage: getSubmissionFormFields failed'
+    );
     // Continue with null config - form will render with defaults
     // This provides better UX than breaking the entire page
     formConfig = null;
@@ -326,9 +326,10 @@ async function SubmitFormWithConfig({ reqLogger }: { reqLogger: ReturnType<typeo
           return type;
         }
         // This should never happen, but TypeScript requires handling the case
-        reqLogger.warn('SubmitPage: invalid submission_type found', {
-          type,
-        });
+        reqLogger.warn(
+          { section: 'data-fetch', type },
+          'SubmitPage: invalid submission_type found'
+        );
         return DEFAULT_CONTENT_CATEGORY;
       })
       .filter((category): category is Database['public']['Enums']['content_category'] =>
@@ -341,42 +342,54 @@ async function SubmitFormWithConfig({ reqLogger }: { reqLogger: ReturnType<typeo
     const templatePromises = supportedCategories.map((category) =>
       getContentTemplates(category).catch((error) => {
         const normalized = normalizeError(error, `Failed to load templates for ${category}`);
-        reqLogger.error('SubmitPage: getContentTemplates failed for category', normalized, {
-          section: 'content-templates',
-          category,
-        });
+        reqLogger.error(
+          { err: normalized, section: 'data-fetch', category },
+          'SubmitPage: getContentTemplates failed for category'
+        );
         return []; // Return empty array on error for this category
       })
     );
     const templateResults = await Promise.all(templatePromises);
     templates = templateResults.flat();
-    reqLogger.info('SubmitPage: content templates loaded', {
-      section: 'content-templates',
-      templatesCount: templates.length,
-      categoriesCount: supportedCategories.length,
-    });
+    reqLogger.info(
+      {
+        section: 'data-fetch',
+        templatesCount: templates.length,
+        categoriesCount: supportedCategories.length,
+      },
+      'SubmitPage: content templates loaded'
+    );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load submission templates');
-    reqLogger.error('SubmitPage: getContentTemplates failed', normalized, {
-      section: 'content-templates',
-    });
+    reqLogger.error(
+      { err: normalized, section: 'data-fetch' },
+      'SubmitPage: getContentTemplates failed'
+    );
     // Continue with empty templates array - page will render without templates
   }
 
   if (templates.length === 0) {
-    reqLogger.warn('SubmitPage: no templates returned from getContentTemplates', {
-      supportedCategoriesCount: supportedCategories.length,
-      categories: supportedCategories,
-    });
+    reqLogger.warn(
+      {
+        section: 'data-fetch',
+        supportedCategoriesCount: supportedCategories.length,
+        categories: supportedCategories,
+      },
+      'SubmitPage: no templates returned from getContentTemplates'
+    );
   }
 
   // Serialize for Client Component compatibility - JSON round-trip ensures plain objects
   const serializedTemplates = JSON.parse(JSON.stringify(templates)) as typeof templates;
 
   if (!formConfig) {
-    reqLogger.error('SubmitPage: formConfig is null', new Error('Form config is null'), {
-      section: 'form-config',
-    });
+    reqLogger.error(
+      {
+        section: 'data-fetch',
+        err: new Error('Form config is null'),
+      },
+      'SubmitPage: formConfig is null'
+    );
     // Provide minimal valid config with empty sections for all submission types
     // This ensures SubmitFormClient can render without crashing while showing an error state
     const emptyFormConfig: SubmissionFormConfig = {
@@ -411,19 +424,16 @@ async function SubmitPageSidebar({ reqLogger }: { reqLogger: ReturnType<typeof l
   let dashboardData: Awaited<ReturnType<typeof getSubmissionDashboard>> = null;
   try {
     dashboardData = await getSubmissionDashboard(5, 5);
-    reqLogger.info('SubmitPage: submission dashboard loaded for sidebar', {
-      section: 'submission-dashboard-sidebar',
-      recentCount: 5,
-      statsCount: 5,
-      hasData: !!dashboardData,
-    });
+    reqLogger.info(
+      { section: 'data-fetch', recentCount: 5, statsCount: 5, hasData: !!dashboardData },
+      'SubmitPage: submission dashboard loaded for sidebar'
+    );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load submission dashboard for sidebar');
-    reqLogger.error('SubmitPage: getSubmissionDashboard failed for sidebar', normalized, {
-      section: 'submission-dashboard-sidebar',
-      recentCount: 5,
-      statsCount: 5,
-    });
+    reqLogger.error(
+      { err: normalized, section: 'data-fetch', recentCount: 5, statsCount: 5 },
+      'SubmitPage: getSubmissionDashboard failed for sidebar'
+    );
     // Continue with null dashboardData - page will render with fallback empty data
   }
   const stats = {
@@ -439,10 +449,10 @@ async function SubmitPageSidebar({ reqLogger }: { reqLogger: ReturnType<typeof l
       const contentName = submission.content_name;
       if (!id || !mergedAt || !contentName) {
         // Log warning and return null instead of throwing to prevent crashing the sidebar
-        reqLogger.warn('Invalid submission data after filter', {
-          submission,
-          section: 'submission-dashboard-sidebar',
-        });
+        reqLogger.warn(
+          { section: 'data-fetch', submission },
+          'Invalid submission data after filter'
+        );
         return null;
       }
       return {

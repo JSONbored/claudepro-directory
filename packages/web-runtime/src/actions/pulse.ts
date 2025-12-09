@@ -317,10 +317,8 @@ export const trackSponsoredImpression = optionalAuthAction
       .single();
 
     if (error || !sponsoredContent) {
-      logger.warn('Failed to fetch sponsored content for tracking', {
-        sponsored_id: parsedInput.sponsoredId,
-        error: error?.message ?? 'Not found',
-      });
+      logger.warn({ sponsored_id: parsedInput.sponsoredId,
+        error: error?.message ?? 'Not found', }, 'Failed to fetch sponsored content for tracking');
       return;
     }
 
@@ -358,10 +356,8 @@ export const trackSponsoredClick = optionalAuthAction
       .single();
 
     if (error || !sponsoredContent) {
-      logger.warn('Failed to fetch sponsored content for tracking', {
-        sponsored_id: parsedInput.sponsoredId,
-        error: error?.message ?? 'Not found',
-      });
+      logger.warn({ sponsored_id: parsedInput.sponsoredId,
+        error: error?.message ?? 'Not found', }, 'Failed to fetch sponsored content for tracking');
       return;
     }
 
@@ -406,7 +402,7 @@ export const getSimilarConfigsAction = rateLimitedAction
       if (parsedInput['limit'] !== undefined) {
         logContext['limit'] = parsedInput['limit'];
       }
-      logger.error('getSimilarConfigsAction: getSimilarContent threw', normalized, logContext);
+      logger.error({ err: normalized, ...logContext }, 'getSimilarConfigsAction: getSimilarContent threw');
       return null;
     }
   });
@@ -465,13 +461,17 @@ export const generateConfigRecommendationsAction = rateLimitedAction
         });
       } catch (transformError) {
         const normalized = normalizeError(transformError, 'Failed to transform recommendations');
-        logger.error('generateConfigRecommendationsAction: transformation failed', normalized, {
-          quizInput: {
-            // Grouped quiz input values - better for structured logging
-            useCase: parsedInput.useCase,
-            experienceLevel: parsedInput.experienceLevel,
+        logger.error(
+          {
+            err: normalized,
+            quizInput: {
+              // Grouped quiz input values - better for structured logging
+              useCase: parsedInput.useCase,
+              experienceLevel: parsedInput.experienceLevel,
+            },
           },
-        });
+          'generateConfigRecommendationsAction: transformation failed'
+        );
         normalizedResults = [];
       }
 
@@ -504,14 +504,8 @@ export const generateConfigRecommendationsAction = rateLimitedAction
     } catch (error) {
       // If getConfigRecommendations throws, return error response
       const normalized = normalizeError(error, 'Failed to generate recommendations');
-      logger.error(
-        'generateConfigRecommendationsAction: getConfigRecommendations threw',
-        normalized,
-        {
-          useCase: parsedInput.useCase,
-          experienceLevel: parsedInput.experienceLevel,
-        }
-      );
+      logger.error({ err: normalized, useCase: parsedInput.useCase,
+          experienceLevel: parsedInput.experienceLevel, }, 'generateConfigRecommendationsAction: getConfigRecommendations threw');
 
       // Return error response instead of throwing (graceful degradation)
       // Match the RecommendationsPayload type structure (snake_case)

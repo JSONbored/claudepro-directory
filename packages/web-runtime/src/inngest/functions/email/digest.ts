@@ -39,7 +39,7 @@ export const sendWeeklyDigest = inngest.createFunction(
     const startTime = Date.now();
     const logContext = createWebAppContextWithId('/inngest/email/digest', 'sendWeeklyDigest');
 
-    logger.info('Weekly digest started', logContext);
+    logger.info(logContext, 'Weekly digest started');
 
     const supabase = createSupabaseAdminClient();
 
@@ -73,11 +73,9 @@ export const sendWeeklyDigest = inngest.createFunction(
     });
 
     if (rateLimitCheck.rateLimited) {
-      logger.info('Digest rate limited', {
-        ...logContext,
+      logger.info({ ...logContext,
         hoursSinceLastRun: rateLimitCheck.hoursSinceLastRun?.toFixed(1),
-        nextAllowedAt: rateLimitCheck.nextAllowedAt,
-      });
+        nextAllowedAt: rateLimitCheck.nextAllowedAt, }, 'Digest rate limited');
       return {
         skipped: true,
         reason: 'rate_limited',
@@ -95,10 +93,8 @@ export const sendWeeklyDigest = inngest.createFunction(
       });
 
       if (digestError) {
-        logger.warn('Failed to fetch weekly digest', {
-          ...logContext,
-          errorMessage: digestError.message,
-        });
+        logger.warn({ ...logContext,
+          errorMessage: digestError.message, }, 'Failed to fetch weekly digest');
         return null;
       }
 
@@ -113,7 +109,7 @@ export const sendWeeklyDigest = inngest.createFunction(
     const hasTrendingContent = Array.isArray(digestData.trending_content) && digestData.trending_content.length > 0;
 
     if (!(hasNewContent || hasTrendingContent)) {
-      logger.info('Digest skipped - no content', logContext);
+      logger.info(logContext, 'Digest skipped - no content');
       return { skipped: true, reason: 'no_content' };
     }
 
@@ -122,10 +118,8 @@ export const sendWeeklyDigest = inngest.createFunction(
       const { data, error } = await supabase.rpc('get_active_subscribers');
 
       if (error) {
-        logger.warn('Failed to fetch subscribers', {
-          ...logContext,
-          errorMessage: error.message,
-        });
+        logger.warn({ ...logContext,
+          errorMessage: error.message, }, 'Failed to fetch subscribers');
         return [];
       }
 
@@ -133,14 +127,12 @@ export const sendWeeklyDigest = inngest.createFunction(
     });
 
     if (subscribers.length === 0) {
-      logger.info('Digest skipped - no subscribers', logContext);
+      logger.info(logContext, 'Digest skipped - no subscribers');
       return { skipped: true, reason: 'no_subscribers' };
     }
 
-    logger.info('Sending digest to subscribers', {
-      ...logContext,
-      subscriberCount: subscribers.length,
-    });
+    logger.info({ ...logContext,
+      subscriberCount: subscribers.length, }, 'Sending digest to subscribers');
 
     // Step 4: Send batch digest emails
     const sendResults = await step.run('send-batch-emails', async (): Promise<{
@@ -167,21 +159,17 @@ export const sendWeeklyDigest = inngest.createFunction(
       });
 
       if (error) {
-        logger.warn('Failed to update digest timestamp', {
-          ...logContext,
-          errorMessage: error.message,
-        });
+        logger.warn({ ...logContext,
+          errorMessage: error.message, }, 'Failed to update digest timestamp');
       }
     });
 
     const durationMs = Date.now() - startTime;
-    logger.info('Weekly digest completed', {
-      ...logContext,
+    logger.info({ ...logContext,
       durationMs,
       sent: sendResults.success,
       failed: sendResults.failed,
-      successRate: sendResults.successRate,
-    });
+      successRate: sendResults.successRate, }, 'Weekly digest completed');
 
     return {
       sent: sendResults.success,
@@ -245,23 +233,19 @@ async function sendBatchDigest(
 
       if (result.error) {
         failed += batch.length;
-        logger.warn('Batch send failed', {
-          ...logContext,
+        logger.warn({ ...logContext,
           batchStart: i,
           batchSize: batch.length,
-          errorMessage: result.error.message,
-        });
+          errorMessage: result.error.message, }, 'Batch send failed');
       } else {
         success += batch.length;
       }
     } catch (error) {
       const normalized = normalizeError(error, 'Batch send failed');
-      logger.warn('Batch send exception', {
-        ...logContext,
+      logger.warn({ ...logContext,
         batchStart: i,
         batchSize: batch.length,
-        errorMessage: normalized.message,
-      });
+        errorMessage: normalized.message, }, 'Batch send exception');
       failed += batch.length;
     }
   }

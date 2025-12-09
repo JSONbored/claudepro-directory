@@ -265,7 +265,7 @@ export function createApiHandler(
           logContext[key] = toLogContextValue(value);
         }
       }
-      reqLogger.error(`${operation} failed`, normalized, logContext);
+      reqLogger.error({ err: normalized, ...logContext }, `${operation} failed`);
       return NextResponse.json(
         { error: normalized.message },
         { status: 500, headers: buildSecurityHeaders() }

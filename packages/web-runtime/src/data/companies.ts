@@ -55,24 +55,23 @@ export async function getCompanyAdminProfile(
 
     const normalized = normalizeRpcResult(data);
     if (!normalized) {
-      requestLogger.warn('getCompanyAdminProfile: company not found', {
-        companyId,
-      });
+      requestLogger.warn({ companyId }, 'getCompanyAdminProfile: company not found');
       return null;
     }
 
-    requestLogger.info('getCompanyAdminProfile: fetched successfully', {
-      companyId,
-      hasResult: Boolean(normalized),
-    });
+    requestLogger.info(
+      {
+        companyId,
+        hasResult: Boolean(normalized),
+      },
+      'getCompanyAdminProfile: fetched successfully'
+    );
 
     return normalized as GetCompanyAdminProfileReturn[number] | null;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    requestLogger.error('getCompanyAdminProfile failed', errorForLogging, {
-      companyId,
-    });
+    requestLogger.error({ err: errorForLogging, companyId }, 'getCompanyAdminProfile failed');
     throw error;
   }
 }
@@ -114,18 +113,19 @@ export async function getCompanyProfile(
 
     const result = await new CompaniesService(client).getCompanyProfile({ p_slug: slug });
 
-    requestLogger.info('getCompanyProfile: fetched successfully', {
-      slug,
-      hasResult: Boolean(result),
-    });
+    requestLogger.info(
+      {
+        slug,
+        hasResult: Boolean(result),
+      },
+      'getCompanyProfile: fetched successfully'
+    );
 
     return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    requestLogger.error('getCompanyProfile failed', errorForLogging, {
-      slug,
-    });
+    requestLogger.error({ err: errorForLogging, slug }, 'getCompanyProfile failed');
     throw error;
   }
 }
@@ -171,21 +171,28 @@ export async function getCompaniesList(
       p_offset: offset,
     });
 
-    requestLogger.info('getCompaniesList: fetched successfully', {
-      limit,
-      offset,
-      companyCount: result.companies?.length ?? 0,
-      total: result.total ?? 0,
-    });
+    requestLogger.info(
+      {
+        limit,
+        offset,
+        companyCount: result.companies?.length ?? 0,
+        total: result.total ?? 0,
+      },
+      'getCompaniesList: fetched successfully'
+    );
 
     return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    requestLogger.error('getCompaniesList failed', errorForLogging, {
-      limit,
-      offset,
-    });
+    requestLogger.error(
+      {
+        err: errorForLogging,
+        limit,
+        offset,
+      },
+      'getCompaniesList failed'
+    );
     throw error;
   }
 }
@@ -218,12 +225,15 @@ async function fetchCompanySearchResults(
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string =
       error instanceof Error ? error : typeof error === 'string' ? error : String(error);
-    requestLogger.warn('Company search failed, returning empty results', {
-      err: errorForLogging,
-      query,
-      limit,
-      fallbackStrategy: 'empty-array',
-    });
+    requestLogger.warn(
+      {
+        err: errorForLogging,
+        query,
+        limit,
+        fallbackStrategy: 'empty-array',
+      },
+      'Company search failed, returning empty results'
+    );
     return [];
   }
 }

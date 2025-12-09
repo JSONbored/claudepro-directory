@@ -19,8 +19,9 @@ const CORS = getOnlyCorsHeaders;
 
 /**
  * Cached helper function to fetch category configs.
- */
-async function getCachedCategoryConfigs() {
+ 
+ * @returns {Promise<unknown>} Description of return value*/
+function getCachedCategoryConfigs() {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
@@ -37,21 +38,25 @@ export async function GET(_request: NextRequest) {
   });
 
   try {
-    reqLogger.info('Category configs request received');
+    reqLogger.info({}, 'Category configs request received');
 
     const data = await getCachedCategoryConfigs();
 
-    reqLogger.info('Category configs retrieved', {
-      count: Array.isArray(data) ? data.length : 'unknown',
-    });
+    reqLogger.info(
+      {
+        count: Array.isArray(data) ? data.length : 'unknown',
+      },
+      'Category configs retrieved'
+    );
 
     return jsonResponse(data, 200, CORS, {
       'X-Generated-By': 'supabase.rpc.get_category_configs_with_features',
       ...buildCacheHeaders('config'),
     });
   } catch (error) {
-    reqLogger.error('Category configs API error', normalizeError(error));
-    return createErrorResponse(error, {
+    const normalized = normalizeError(error, 'Operation failed');
+    reqLogger.error({ err: normalizeError(error) }, 'Category configs API error');
+    return createErrorResponse(normalized, {
       route: '/api/content/category-configs',
       operation: 'CategoryConfigsAPI',
       method: 'GET',

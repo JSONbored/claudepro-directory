@@ -86,10 +86,14 @@ export async function generateStaticParams() {
           module: modulePath,
         });
         const normalized = normalizeError(error, 'Failed to load content for category');
-        reqLogger.error('generateStaticParams: failed to load content for category', normalized, {
-          category,
-          section: 'static-params-generation',
-        });
+        reqLogger.error(
+          {
+            section: 'data-fetch',
+            err: normalized,
+            category,
+          },
+          'generateStaticParams: failed to load content for category'
+        );
         return { category, params: [] };
       }
     })
@@ -215,20 +219,26 @@ export default async function DetailPage({
 
   // Handle placeholder slugs (if any remain from old generateStaticParams)
   if (slug === '__placeholder__') {
-    reqLogger.warn('DetailPage: placeholder slug detected, returning 404', {
-      section: 'placeholder-handling',
-      category,
-      slug,
-    });
+    reqLogger.warn(
+      {
+        section: 'data-fetch',
+        category,
+        slug,
+      },
+      'DetailPage: placeholder slug detected, returning 404'
+    );
     notFound();
   }
 
   // Validate category early (before Suspense boundary)
   if (!isValidCategory(category)) {
-    reqLogger.warn('Invalid category in detail page', {
-      section: 'category-validation',
-      category,
-    });
+    reqLogger.warn(
+      {
+        section: 'data-fetch',
+        category,
+      },
+      'Invalid category in detail page'
+    );
     notFound();
   }
 
@@ -274,9 +284,7 @@ async function DetailPageContent({
 
   // Section: Category Validation
   if (!isValidCategory(category)) {
-    routeLogger.warn('Invalid category in detail page', {
-      section: 'category-validation',
-    });
+    routeLogger.warn({ section: 'data-fetch' }, 'Invalid category in detail page');
     notFound();
   }
 
@@ -285,9 +293,13 @@ async function DetailPageContent({
   const config = getCategoryConfig(validCategory);
   if (!config) {
     // logger.error() normalizes errors internally, so pass raw error
-    routeLogger.error('DetailPage: missing category config', new Error('Category config is null'), {
-      section: 'category-validation',
-    });
+    routeLogger.error(
+      {
+        section: 'data-fetch',
+        err: new Error('Category config is null'),
+      },
+      'DetailPage: missing category config'
+    );
     notFound();
   }
 
@@ -306,19 +318,22 @@ async function DetailPageContent({
       env.NEXT_PHASE === 'phase-production-build' || env.VERCEL_ENV === 'production';
 
     if (suppressMissingContentWarning) {
-      routeLogger.debug('DetailPage: content not found during build/production (expected)', {
-        section: 'core-content-fetch',
-        category,
-        slug,
-      });
-    } else {
-      routeLogger.warn(
-        'DetailPage: get_content_detail_core returned null - content may not exist',
+      routeLogger.debug(
         {
-          section: 'core-content-fetch',
+          section: 'data-fetch',
           category,
           slug,
-        }
+        },
+        'DetailPage: content not found during build/production (expected)'
+      );
+    } else {
+      routeLogger.warn(
+        {
+          section: 'data-fetch',
+          category,
+          slug,
+        },
+        'DetailPage: get_content_detail_core returned null - content may not exist'
       );
     }
     notFound();
@@ -328,16 +343,17 @@ async function DetailPageContent({
 
   // Null safety: If content doesn't exist in database, return 404
   if (!fullItem) {
-    routeLogger.warn('Content not found in RPC response', {
-      section: 'core-content-fetch',
-      rpcFunction: 'get_content_detail_core',
-    });
+    routeLogger.warn(
+      {
+        section: 'data-fetch',
+        rpcFunction: 'get_content_detail_core',
+      },
+      'Content not found in RPC response'
+    );
     notFound();
   }
 
-  routeLogger.info('DetailPage: core content loaded', {
-    section: 'core-content-fetch',
-  });
+  routeLogger.info({ section: 'data-fetch' }, 'DetailPage: core content loaded');
 
   // Section: Analytics & Related Fetch (Non-blocking - for Suspense)
   // 2. Fetch Analytics & Related (Non-blocking promise - for Suspense)
@@ -361,11 +377,14 @@ async function DetailPageContent({
   // This eliminates runtime overhead and follows DRY principles
 
   // Final summary log
-  routeLogger.info('DetailPage: page render completed', {
-    section: 'page-render',
-    category,
-    slug,
-  });
+  routeLogger.info(
+    {
+      section: 'data-fetch',
+      category,
+      slug,
+    },
+    'DetailPage: page render completed'
+  );
 
   // Unified rendering: All categories use UnifiedDetailPage
   // Collections pass their specialized sections via collectionSections prop

@@ -40,10 +40,8 @@ export async function onJobCreated(
         
         if (!baseUrl) {
           const configError = new Error('NEXT_PUBLIC_BASE_URL environment variable is required for payment checkout');
-          logger.error('NEXT_PUBLIC_BASE_URL is not configured', configError, {
-            jobId,
-            userId: ctx.userId,
-          });
+          logger.error({ err: configError, jobId,
+            userId: ctx.userId, }, 'NEXT_PUBLIC_BASE_URL is not configured');
           throw configError;
         }
         
@@ -62,30 +60,22 @@ export async function onJobCreated(
             checkoutResult.error,
             'Failed to create Polar checkout'
           );
-          logger.error('Failed to create Polar checkout', normalized, {
-            jobId,
-            userId: ctx.userId,
-          });
+          logger.error({ err: normalized, jobId,
+            userId: ctx.userId, }, 'Failed to create Polar checkout');
         } else {
           checkoutUrl = checkoutResult.url;
-          logger.info('Polar checkout session created', {
-            jobId,
+          logger.info({ jobId,
             sessionId: checkoutResult.sessionId,
-            checkoutUrl: checkoutResult.url,
-          });
+            checkoutUrl: checkoutResult.url, }, 'Polar checkout session created');
         }
       } else {
-        logger.warn('Polar product price ID not configured', {
-          plan,
-          tier,
-        });
+        logger.warn({ plan,
+          tier, }, 'Polar product price ID not configured');
       }
     } catch (error) {
       const normalized = normalizeError(error, 'Polar integration error');
-      logger.error('Polar integration error', normalized, {
-        jobId,
-        userId: ctx.userId,
-      });
+      logger.error({ err: normalized, jobId,
+        userId: ctx.userId, }, 'Polar integration error');
     }
   }
 
@@ -107,17 +97,13 @@ export async function onJobCreated(
         },
       });
 
-      logger.info('Job created event sent to Inngest', {
-        jobId,
-        requiresPayment,
-      });
+      logger.info({ jobId,
+        requiresPayment, }, 'Job created event sent to Inngest');
     } catch (eventError) {
       // Log but don't throw - job was created successfully
       const normalized = normalizeError(eventError, 'Job created event failed');
-      logger.warn('Failed to send job created event to Inngest', {
-        err: normalized,
-        jobId,
-      });
+      logger.warn({ err: normalized,
+        jobId, }, 'Failed to send job created event to Inngest');
     }
   }
 
@@ -173,16 +159,12 @@ export async function onJobUpdated(
         },
       });
 
-      logger.info('Job published event sent to Inngest', {
-        jobId: result.job_id,
-      });
+      logger.info({ jobId: result.job_id, }, 'Job published event sent to Inngest');
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Job update event failed');
-    logger.warn('Failed to send job update event', {
-      err: normalized,
-      jobId: result.job_id,
-    });
+    logger.warn({ err: normalized,
+      jobId: result.job_id, }, 'Failed to send job update event');
   }
 
   return result;
@@ -197,10 +179,8 @@ export async function onJobDeleted(
   input: { job_id: string }
 ) {
   if (result.success) {
-    logger.info('Job deleted', {
-      jobId: input.job_id,
-      userId: ctx.userId,
-    });
+    logger.info({ jobId: input.job_id,
+      userId: ctx.userId, }, 'Job deleted');
   }
 
   return result;
@@ -237,18 +217,14 @@ export async function onJobStatusToggled(
         },
       });
 
-      logger.info('Job status change event sent to Inngest', {
-        jobId: result.job_id,
+      logger.info({ jobId: result.job_id,
         newStatus: input.new_status,
-        action,
-      });
+        action, }, 'Job status change event sent to Inngest');
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Job status event failed');
-    logger.warn('Failed to send job status event', {
-      err: normalized,
-      jobId: result.job_id,
-    });
+    logger.warn({ err: normalized,
+      jobId: result.job_id, }, 'Failed to send job status event');
   }
 
   return result;

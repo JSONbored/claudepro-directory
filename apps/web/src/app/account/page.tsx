@@ -80,9 +80,10 @@ export default async function AccountDashboard() {
   const { user } = await getAuthenticatedUser({ context: 'AccountDashboard' });
 
   if (!user) {
-    reqLogger.warn('AccountDashboard: unauthenticated access attempt detected', {
-      section: 'authentication',
-    });
+    reqLogger.warn(
+      { section: 'data-fetch' },
+      'AccountDashboard: unauthenticated access attempt detected'
+    );
     return (
       <div className="space-y-6">
         <Card>
@@ -106,26 +107,25 @@ export default async function AccountDashboard() {
     userId: user.id, // Redaction will automatically hash this
   });
 
-  userLogger.info('AccountDashboard: authentication successful', {
-    section: 'authentication',
-  });
+  userLogger.info({ section: 'data-fetch' }, 'AccountDashboard: authentication successful');
 
   // Fetch bundle once at the top level to avoid duplicate fetches
   // This ensures consistency and eliminates fetch waterfalls
   let bundleData: Awaited<ReturnType<typeof getAccountDashboardBundle>> | null = null;
   try {
     bundleData = await getAccountDashboardBundle(user.id);
-    userLogger.info('AccountDashboard: dashboard bundle loaded', {
-      section: 'dashboard-bundle',
-      hasDashboard: !!bundleData.dashboard,
+    userLogger.info({ section: 'data-fetch', hasDashboard: !!bundleData.dashboard,
       hasLibrary: !!bundleData.library,
-      hasHomepage: !!bundleData.homepage,
-    });
+      hasHomepage: !!bundleData.homepage }, 'AccountDashboard: dashboard bundle loaded');
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load account dashboard bundle');
-    userLogger.error('AccountDashboard: getAccountDashboardBundle failed', normalized, {
-      section: 'dashboard-bundle',
-    });
+    userLogger.error(
+      {
+        section: 'data-fetch',
+        err: normalized,
+      },
+      'AccountDashboard: getAccountDashboardBundle failed'
+    );
     throw normalized;
   }
 
@@ -159,7 +159,7 @@ export default async function AccountDashboard() {
  *
  * @see QuickActionRow
  */
-async function DashboardHeaderAndStats({
+function DashboardHeaderAndStats({
   bundleData,
   userLogger,
 }: {
@@ -178,9 +178,13 @@ async function DashboardHeaderAndStats({
       new Error('Dashboard data is null'),
       'AccountDashboard: dashboard data is null'
     );
-    userLogger.error('AccountDashboard: dashboard data is null', normalized, {
-      section: 'dashboard-bundle',
-    });
+    userLogger.error(
+      {
+        section: 'data-fetch',
+        err: normalized,
+      },
+      'AccountDashboard: dashboard data is null'
+    );
     return (
       <Card>
         <CardHeader>
@@ -345,12 +349,9 @@ async function DashboardContent({
         return detail?.content ?? null;
       } catch (error) {
         const normalized = normalizeError(error, 'Failed to load bookmark content');
-        userLogger.warn('AccountDashboard: getContentDetailCore failed for bookmark', {
-          err: normalized,
-          section: 'dashboard-content',
-          slug: bookmark.content_slug,
-          category: bookmark.content_type,
-        });
+        userLogger.warn({ section: 'data-fetch', err: normalized,
+            slug: bookmark.content_slug,
+            category: bookmark.content_type }, 'AccountDashboard: getContentDetailCore failed for bookmark');
         return null;
       }
     })
@@ -415,10 +416,7 @@ function RecentlySavedSection({
   recentlySavedContent: Database['public']['Tables']['content']['Row'][];
   userLogger: ReturnType<typeof logger.child>;
 }) {
-  userLogger.info('AccountDashboard: recent bookmarks displayed', {
-    section: 'recent-bookmarks',
-    itemCount: recentlySavedContent.length,
-  });
+  userLogger.info({ section: 'data-fetch', itemCount: recentlySavedContent.length }, 'AccountDashboard: recent bookmarks displayed');
 
   return (
     <Card>
@@ -523,12 +521,9 @@ function RecommendationsSection({
         item.title !== ''
     )
     .slice(0, 3);
-  userLogger.info('AccountDashboard: recommendations generated', {
-    section: 'recommendations',
-    candidateCount: candidateRecommendations.length,
+  userLogger.info({ section: 'data-fetch', candidateCount: candidateRecommendations.length,
     finalCount: recommendations.length,
-    savedTagsCount: savedTags.size,
-  });
+    savedTagsCount: savedTags.size }, 'AccountDashboard: recommendations generated');
 
   return (
     <Card>

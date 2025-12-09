@@ -40,7 +40,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see getContactChannels
  * @see APP_CONFIG
  */
-export default async function AccessibilityPage() {
+export default function AccessibilityPage() {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 

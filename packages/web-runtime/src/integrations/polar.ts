@@ -47,7 +47,7 @@ export async function createPolarCheckout(
   const polarEnvironment = env.POLAR_ENVIRONMENT || 'production';
 
   if (!polarAccessToken) {
-    logger.error('Polar: POLAR_ACCESS_TOKEN not configured');
+    logger.error({}, 'Polar: POLAR_ACCESS_TOKEN not configured');
     return { error: 'Payment system not configured. Please contact support.' };
   }
 
@@ -80,20 +80,16 @@ export async function createPolarCheckout(
     if (!response.ok) {
       const errorText = await response.text();
       const normalized = normalizeError(response.statusText, 'Polar checkout creation failed');
-      logger.error('Polar checkout creation failed', normalized, {
-        status: response.status,
-        error: errorText,
-      });
+      logger.error({ err: normalized, status: response.status,
+        error: errorText, }, 'Polar checkout creation failed');
       return { error: `Payment setup failed: ${response.statusText}` };
     }
 
     const session = (await response.json()) as PolarCheckoutResponse;
 
-    logger.info('Polar checkout session created', {
-      sessionId: session.id,
+    logger.info({ sessionId: session.id,
       jobId: params.jobId,
-      userId: params.userId,
-    });
+      userId: params.userId, }, 'Polar checkout session created');
 
     return {
       url: session.url,
@@ -101,7 +97,7 @@ export async function createPolarCheckout(
     };
   } catch (error) {
     const normalized = normalizeError(error, 'Polar checkout creation error');
-    logger.error('Polar checkout creation error', normalized);
+    logger.error({ err: normalized }, 'Polar checkout creation error');
     return { error: 'Failed to create checkout session. Please try again.' };
   }
 }
@@ -134,7 +130,7 @@ export function getPolarProductPriceId(
   const priceId = productPriceIds[key];
 
   if (!priceId) {
-    logger.warn(`Polar product price ID not configured for: ${key}`);
+    logger.warn({}, `Polar product price ID not configured for: ${key}`);
     return null;
   }
 
@@ -159,7 +155,7 @@ export function validatePolarConfig(): { configured: boolean; missing?: string[]
   const missing = requiredVars.filter((varName) => !(env as Record<string, unknown>)[varName]);
 
   if (missing.length > 0) {
-    logger.warn('Polar configuration incomplete', { missing: missing.join(', ') });
+    logger.warn({ missing: missing.join(', ') }, 'Polar configuration incomplete');
     return { configured: false, missing };
   }
 

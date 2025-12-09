@@ -77,9 +77,13 @@ export async function generateMetadata({
     job = await getJobBySlug(slug);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load job for metadata');
-    metadataLogger.error('JobPage: getJobBySlug threw in generateMetadata', normalized, {
-      operation: 'generateMetadata',
-    });
+    metadataLogger.error(
+      {
+        err: normalized,
+        operation: 'generateMetadata',
+      },
+      'JobPage: getJobBySlug threw in generateMetadata'
+    );
   }
 
   return generatePageMetadata('/jobs/:slug', {
@@ -121,7 +125,13 @@ export async function generateStaticParams() {
     return jobs.map((job) => ({ slug: job.slug }));
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load jobs for static params');
-    reqLogger.error('JobPage: getFilteredJobs threw in generateStaticParams', normalized);
+    reqLogger.error(
+      {
+        section: 'data-fetch',
+        err: normalized,
+      },
+      'JobPage: getFilteredJobs threw in generateStaticParams'
+    );
     // Return empty array on error - Suspense boundaries will handle dynamic rendering
     return [];
   }
@@ -166,22 +176,25 @@ export default async function JobPage({ params }: PageProps) {
 
   // Handle placeholder slugs (if any remain from old generateStaticParams)
   if (slug === '__placeholder__') {
-    reqLogger.warn('JobPage: placeholder slug detected, returning 404', {
-      section: 'placeholder-handling',
-      slug,
-    });
+    reqLogger.warn(
+      {
+        section: 'data-fetch',
+        slug,
+      },
+      'JobPage: placeholder slug detected, returning 404'
+    );
     notFound();
   }
 
   // Section: Parameter Validation
   if (!validationResult.success) {
     reqLogger.error(
-      'Invalid slug parameter for job page',
-      new Error(validationResult.error.issues[0]?.message ?? 'Invalid slug'),
       {
-        section: 'parameter-validation',
+        section: 'data-fetch',
+        err: new Error(validationResult.error.issues[0]?.message ?? 'Invalid slug'),
         errorCount: validationResult.error.issues.length,
-      }
+      },
+      'Invalid slug parameter for job page'
     );
     notFound();
   }
@@ -224,16 +237,18 @@ async function JobPageContent({
     job = await getJobBySlug(slug);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load job detail');
-    reqLogger.error('JobPage: getJobBySlug threw', normalized, {
-      section: 'job-data-fetch',
-    });
+    reqLogger.error(
+      {
+        section: 'data-fetch',
+        err: normalized,
+      },
+      'JobPage: getJobBySlug threw'
+    );
     throw normalized;
   }
 
   if (!job) {
-    reqLogger.warn('JobPage: job not found', {
-      section: 'job-data-fetch',
-    });
+    reqLogger.warn({ section: 'data-fetch' }, 'JobPage: job not found');
     notFound();
   }
 

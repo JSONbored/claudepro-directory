@@ -4,7 +4,7 @@
 ---
 # Rule: Detect inline marginBottom classes (should use marginBottom.*)
 id: inline-margin-bottom
-language: TypeScript
+language: typescript
 rule:
   pattern: className={$QUOTE}mb-$SIZE$QUOTE}
   kind: jsx_attribute
@@ -20,7 +20,7 @@ fix: |
 ---
 # Rule: Detect inline marginTop classes (should use marginTop.*)
 id: inline-margin-top
-language: TypeScript
+language: typescript
 rule:
   pattern: className={$QUOTE}mt-$SIZE$QUOTE}
   kind: jsx_attribute
@@ -30,7 +30,7 @@ severity: warning
 ---
 # Rule: Detect inline space-y classes (should use spaceY.*)
 id: inline-space-y
-language: TypeScript
+language: typescript
 rule:
   pattern: className={$QUOTE}space-y-$SIZE$QUOTE}
   kind: jsx_attribute
@@ -40,7 +40,7 @@ severity: warning
 ---
 # Rule: Detect inline flex flex-col gap patterns (should use stack.*)
 id: inline-flex-col-gap
-language: TypeScript
+language: typescript
 rule:
   pattern: className={$QUOTE}flex flex-col gap-$SIZE$QUOTE}
   kind: jsx_attribute
@@ -50,7 +50,7 @@ severity: warning
 ---
 # Rule: Detect inline flex items-center gap patterns (should use cluster.*)
 id: inline-flex-center-gap
-language: TypeScript
+language: typescript
 rule:
   pattern: className={$QUOTE}flex items-center gap-$SIZE$QUOTE}
   kind: jsx_attribute
@@ -60,7 +60,7 @@ severity: warning
 ---
 # Rule: Detect inline text-muted-foreground (should use muted.default)
 id: inline-muted-text
-language: TypeScript
+language: typescript
 rule:
   pattern: className={$QUOTE}text-muted-foreground$QUOTE}
   kind: jsx_attribute
@@ -70,7 +70,7 @@ severity: warning
 ---
 # Rule: Detect inline icon sizing (h-X w-X for icons, should use iconSize.*)
 id: inline-icon-sizing
-language: TypeScript
+language: typescript
 rule:
   all:
     - pattern: className={$QUOTE}h-$SIZE w-$SIZE$QUOTE}
@@ -86,7 +86,7 @@ severity: warning
 ---
 # Rule: Detect inline rounded classes (should use radius.*)
 id: inline-rounded
-language: TypeScript
+language: typescript
 rule:
   pattern: className={$QUOTE}rounded-$SIZE$QUOTE}
   kind: jsx_attribute
@@ -96,7 +96,7 @@ severity: warning
 ---
 # Rule: Detect inline hover:bg classes (should use hoverBg.*)
 id: inline-hover-bg
-language: TypeScript
+language: typescript
 rule:
   pattern: className={$QUOTE}hover:bg-$VALUE$QUOTE}
   kind: jsx_attribute

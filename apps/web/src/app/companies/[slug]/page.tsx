@@ -120,7 +120,13 @@ export async function generateStaticParams() {
     return validCompanies.length > 0 ? validCompanies : [];
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load companies for generateStaticParams');
-    reqLogger.error('generateStaticParams: failed to load companies', normalized);
+    reqLogger.error(
+      {
+        section: 'data-fetch',
+        err: normalized,
+      },
+      'generateStaticParams: failed to load companies'
+    );
     // Return empty array on error - Suspense boundaries will handle dynamic rendering
     return [];
   }
@@ -176,10 +182,13 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
   const profile = await getCompanyProfile(slug);
 
   if (!profile?.company) {
-    reqLogger.warn('CompanyPage: company not found', {
-      section: 'company-profile-fetch',
-      slug,
-    });
+    reqLogger.warn(
+      {
+        section: 'data-fetch',
+        slug,
+      },
+      'CompanyPage: company not found'
+    );
     notFound();
   }
 

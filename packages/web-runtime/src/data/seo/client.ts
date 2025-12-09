@@ -81,9 +81,7 @@ export async function getSEOMetadata(route: string): Promise<null | {
     const result = await service.generateMetadata({ p_route: route, p_include: 'metadata' });
 
     if (!result.metadata) {
-      reqLogger.debug('getSEOMetadata: no metadata returned', {
-        route,
-      });
+      reqLogger.debug({ route }, 'getSEOMetadata: no metadata returned');
       return null;
     }
 
@@ -110,10 +108,10 @@ export async function getSEOMetadata(route: string): Promise<null | {
       debugObject.error = metadata.debug.error;
     }
 
-    reqLogger.info('getSEOMetadata: fetched successfully', {
-      route,
-      hasMetadata: Boolean(metadata),
-    });
+    reqLogger.info(
+      { route, hasMetadata: Boolean(metadata) },
+      'getSEOMetadata: fetched successfully'
+    );
 
     return {
       title: metadata.title ?? '',
@@ -129,9 +127,7 @@ export async function getSEOMetadata(route: string): Promise<null | {
     };
   } catch (error) {
     const normalized = normalizeError(error, 'getSEOMetadata failed');
-    reqLogger.error('getSEOMetadata failed', normalized, {
-      route,
-    });
+    reqLogger.error({ err: normalized, route }, 'getSEOMetadata failed');
     return null;
   }
 }
@@ -205,9 +201,7 @@ export async function getSEOMetadataWithSchemas(route: string): Promise<null | {
     });
 
     if (!result.metadata) {
-      reqLogger.debug('getSEOMetadataWithSchemas: no metadata returned', {
-        route,
-      });
+      reqLogger.debug({ route }, 'getSEOMetadataWithSchemas: no metadata returned');
       return null;
     }
 
@@ -234,11 +228,10 @@ export async function getSEOMetadataWithSchemas(route: string): Promise<null | {
       debugObject.error = metadata.debug.error;
     }
 
-    reqLogger.info('getSEOMetadataWithSchemas: fetched successfully', {
-      route,
-      hasMetadata: Boolean(metadata),
-      hasSchemas: Boolean(result.schemas),
-    });
+    reqLogger.info(
+      { route, hasMetadata: Boolean(metadata), hasSchemas: Boolean(result.schemas) },
+      'getSEOMetadataWithSchemas: fetched successfully'
+    );
 
     return {
       metadata: {
@@ -257,9 +250,7 @@ export async function getSEOMetadataWithSchemas(route: string): Promise<null | {
     };
   } catch (error) {
     const normalized = normalizeError(error, 'getSEOMetadataWithSchemas failed');
-    reqLogger.error('getSEOMetadataWithSchemas failed', normalized, {
-      route,
-    });
+    reqLogger.error({ err: normalized, route }, 'getSEOMetadataWithSchemas failed');
     return null;
   }
 }

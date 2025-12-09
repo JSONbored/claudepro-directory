@@ -62,22 +62,19 @@ export async function getReviewsWithStatsData(
       ...(userId ? { p_user_id: userId } : {}),
     });
 
-    reqLogger.info('getReviewsWithStatsData: fetched successfully', {
-      contentType,
-      contentSlug,
-      hasUser: Boolean(userId),
-      hasResult: Boolean(result),
-    });
+    reqLogger.info(
+      { contentType, contentSlug, hasUser: Boolean(userId), hasResult: Boolean(result) },
+      'getReviewsWithStatsData: fetched successfully'
+    );
 
     return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('getReviewsWithStatsData: unexpected error', errorForLogging, {
-      contentType,
-      contentSlug,
-      hasUser: Boolean(userId),
-    });
+    reqLogger.error(
+      { err: errorForLogging, contentType, contentSlug, hasUser: Boolean(userId) },
+      'getReviewsWithStatsData: unexpected error'
+    );
     return null;
   }
 }

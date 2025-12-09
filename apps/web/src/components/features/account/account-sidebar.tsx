@@ -55,11 +55,11 @@ export async function AccountSidebar({
     if (settings) {
       profile = settings.user_data;
     } else {
-      reqLogger.warn('AccountSidebar: getUserSettings returned null');
+      reqLogger.warn({}, 'AccountSidebar: getUserSettings returned null');
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user settings in account sidebar');
-    reqLogger.error('AccountSidebar: getUserSettings threw', normalized);
+    reqLogger.error({ err: normalized }, 'AccountSidebar: getUserSettings threw');
   }
 
   if (!profile) {
@@ -74,14 +74,14 @@ export async function AccountSidebar({
       if (settings) {
         profile = settings.user_data;
       } else {
-        reqLogger.warn('AccountSidebar: getUserSettings returned null after ensureUserRecord');
+        reqLogger.warn({}, 'AccountSidebar: getUserSettings returned null after ensureUserRecord');
       }
     } catch (error) {
       const normalized = normalizeError(
         error,
         'Failed to ensure user record or reload settings in account sidebar'
       );
-      reqLogger.error('AccountSidebar: ensureUserRecord or getUserSettings threw', normalized);
+      reqLogger.error({ err: normalized }, 'AccountSidebar: ensureUserRecord or getUserSettings threw');
     }
   }
 
@@ -91,7 +91,7 @@ export async function AccountSidebar({
     sponsorships = await sponsorshipsPromise;
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user sponsorships in account sidebar');
-    reqLogger.error('AccountSidebar: getUserSponsorships threw', normalized);
+    reqLogger.error({ err: normalized }, 'AccountSidebar: getUserSponsorships threw');
     sponsorships = [];
   }
 

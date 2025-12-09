@@ -168,12 +168,10 @@ export const updateProfile = authedAction
     const profile = result.profile;
 
     // Log profile update for audit trail (user data modification)
-    logger.info('User profile updated', {
-      audit: true, // Structured tag for audit trail filtering
+    logger.info({ audit: true, // Structured tag for audit trail filtering
       userId: ctx.userId,
       operation: 'profile_update',
-      fieldsUpdated: Object.keys(parsedInput).filter(k => parsedInput[k as keyof typeof parsedInput] !== undefined),
-    });
+      fieldsUpdated: Object.keys(parsedInput).filter(k => parsedInput[k as keyof typeof parsedInput] !== undefined), }, 'User profile updated');
 
     await revalidateUserSurfaces({
       slug: profile.slug ?? null,

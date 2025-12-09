@@ -114,14 +114,12 @@ export const handleSupabaseContentChanged = inngest.createFunction(
 
     const { webhookId, eventType, category, contentId, slug, record } = event.data;
 
-    logger.info('Processing Supabase content changed event', {
-      ...logContext,
+    logger.info({ ...logContext,
       eventType,
       category,
       contentId,
       slug: slug ?? null,
-      webhookId,
-    });
+      webhookId, }, 'Processing Supabase content changed event');
 
     // Step 1: Validate event type
     const validation = await step.run('validate-event', async (): Promise<{
@@ -149,13 +147,11 @@ export const handleSupabaseContentChanged = inngest.createFunction(
     });
 
     if (!validation.valid) {
-      logger.info('Supabase content event skipped', {
-        ...logContext,
+      logger.info({ ...logContext,
         eventType,
         category,
         contentId,
-        reason: validation.reason,
-      });
+        reason: validation.reason, }, 'Supabase content event skipped');
 
       return {
         success: true,
@@ -187,12 +183,10 @@ export const handleSupabaseContentChanged = inngest.createFunction(
       }
 
       if (!needsGeneration) {
-        logger.info('Package already exists, skipping workflow trigger', {
-          ...logContext,
+        logger.info({ ...logContext,
           category,
           contentId,
-          slug: slug ?? null,
-        });
+          slug: slug ?? null, }, 'Package already exists, skipping workflow trigger');
         return { success: true, skipped: true, reason: 'package_already_exists' };
       }
 
@@ -200,25 +194,21 @@ export const handleSupabaseContentChanged = inngest.createFunction(
         ? 'skill-package-needed' 
         : 'mcpb-package-needed';
 
-      logger.info('Triggering package generation workflow', {
-        ...logContext,
+      logger.info({ ...logContext,
         workflowEventType,
         category,
         contentId,
-        slug: slug ?? null,
-      });
+        slug: slug ?? null, }, 'Triggering package generation workflow');
 
       return await triggerGitHubWorkflow(workflowEventType, contentId, slug);
     });
 
     if (!packageWorkflowResult.success && !('skipped' in packageWorkflowResult && packageWorkflowResult.skipped)) {
       const errorMessage = 'error' in packageWorkflowResult ? packageWorkflowResult.error : 'Unknown error';
-      logger.error('Failed to trigger package generation workflow', undefined, {
-        ...logContext,
+      logger.error({ err: undefined, ...logContext,
         category,
         contentId,
-        error: errorMessage,
-      });
+        error: errorMessage, }, 'Failed to trigger package generation workflow');
       // Don't fail - continue to README update
     }
 
@@ -237,46 +227,43 @@ export const handleSupabaseContentChanged = inngest.createFunction(
         contentRecord.category !== oldContentRecord.category;
 
       if (!metadataChanged && eventType === 'UPDATE') {
-        logger.info('Content metadata unchanged, skipping README update', {
-          ...logContext,
+        logger.info({ ...logContext,
           category,
-          contentId,
-        });
+          contentId, }, 'Content metadata unchanged, skipping README update');
         return { success: true, skipped: true };
       }
 
-      logger.info('Triggering README update workflow', {
-        ...logContext,
+      logger.info({ ...logContext,
         category,
         contentId,
-        slug: slug ?? null,
-      });
+        slug: slug ?? null, }, 'Triggering README update workflow');
 
       return await triggerGitHubWorkflow('readme-update-needed', contentId, slug);
     });
 
     if (!readmeTriggerResult.success && !('skipped' in readmeTriggerResult && readmeTriggerResult.skipped)) {
       const errorMessage = 'error' in readmeTriggerResult ? readmeTriggerResult.error : 'Unknown error';
-      logger.warn('Failed to trigger README update workflow (non-critical)', undefined, {
-        ...logContext,
-        category,
-        contentId,
-        error: errorMessage,
-      });
+      logger.warn(
+        {
+          ...logContext,
+          category,
+          contentId,
+          error: errorMessage,
+        },
+        'Failed to trigger README update workflow (non-critical)'
+      );
       // Don't fail - README update is non-critical
     }
 
     const durationMs = Date.now() - startTime;
-    logger.info('Supabase content changed event processed', {
-      ...logContext,
+    logger.info({ ...logContext,
       eventType,
       category,
       contentId,
       slug: slug ?? null,
       webhookId,
       durationMs,
-      action: 'workflow_triggered',
-    });
+      action: 'workflow_triggered', }, 'Supabase content changed event processed');
 
     return {
       success: true,

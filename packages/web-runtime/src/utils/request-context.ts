@@ -49,7 +49,7 @@ import 'server-only';
  * 
  * export default async function MyPage() {
  *   const context = await getRequestContext();
- *   logger.info('Page loaded', { ...context, userId: user.id });
+ *   logger.info({ ...context, userId: user.id }, 'Page loaded');
  * }
  * ```
  * 

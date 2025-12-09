@@ -137,9 +137,13 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
   });
 
   if (!isValidCategory(category)) {
-    reqLogger.warn('Invalid category in list page', {
-      category,
-    });
+    reqLogger.warn(
+      {
+        section: 'data-fetch',
+        category,
+      },
+      'Invalid category in list page'
+    );
     notFound();
   }
 
@@ -149,9 +153,14 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
   // Category config is from a generated file (static), so it can be in the static shell
   const config = getCategoryConfig(typedCategory);
   if (!config) {
-    reqLogger.error('CategoryPage: missing category config', new Error('Category config is null'), {
-      category,
-    });
+    reqLogger.error(
+      {
+        section: 'data-fetch',
+        err: new Error('Category config is null'),
+        category,
+      },
+      'CategoryPage: missing category config'
+    );
     notFound();
   }
 
@@ -170,16 +179,25 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
     items = await getContentByCategory(typedCategory);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load category content');
-    reqLogger.error('CategoryPage: getContentByCategory threw', normalized, {
-      category: typedCategory,
-    });
+      reqLogger.error(
+      {
+        section: 'data-fetch',
+        err: normalized,
+        category: typedCategory,
+      },
+      'CategoryPage: getContentByCategory threw'
+    );
     items = [];
     hadError = true;
   }
   if (items.length === 0 && !hadError) {
-    reqLogger.warn('CategoryPage: getContentByCategory returned no items', {
-      category: typedCategory,
-    });
+      reqLogger.warn(
+      {
+        section: 'data-fetch',
+        category: typedCategory,
+      },
+      'CategoryPage: getContentByCategory returned no items'
+    );
   }
 
   // PPR Optimization: Static shell (hero with config) renders immediately
@@ -302,7 +320,8 @@ function CategoryHeroShell({
  * Displays three pill-shaped pulsing placeholders sized to approximate typical badges.
  *
  * @see CategoryBadges
- */
+ 
+ * @returns {unknown} Description of return value*/
 function CategoryBadgesSkeleton() {
   return (
     <div className="flex list-none flex-wrap justify-center gap-2">
@@ -330,7 +349,7 @@ function CategoryBadgesSkeleton() {
  * @see UnifiedBadge
  * @see ICON_NAME_MAP
  */
-async function CategoryBadges({
+function CategoryBadges({
   items,
   config,
 }: {
@@ -405,8 +424,9 @@ async function CategoryBadges({
  * @see ContentSearchClient
  * @see ContentSidebar
  * @see ICON_NAME_MAP
- */
-async function CategoryPageContent({
+ 
+ * @returns {Promise<unknown>} Description of return value*/
+function CategoryPageContent({
   category,
   items,
   config,

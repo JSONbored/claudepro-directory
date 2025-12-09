@@ -40,7 +40,7 @@ export const processEmailSequence = inngest.createFunction(
     const startTime = Date.now();
     const logContext = createWebAppContextWithId('/inngest/email/sequence', 'processEmailSequence');
 
-    logger.info('Email sequence processing started', logContext);
+    logger.info(logContext, 'Email sequence processing started');
 
     const supabase = createSupabaseAdminClient();
 
@@ -49,10 +49,8 @@ export const processEmailSequence = inngest.createFunction(
       const { data, error } = await supabase.rpc('get_due_sequence_emails');
 
       if (error) {
-        logger.warn('Failed to fetch due sequence emails', {
-          ...logContext,
-          errorMessage: error.message,
-        });
+        logger.warn({ ...logContext,
+          errorMessage: error.message, }, 'Failed to fetch due sequence emails');
         return [];
       }
 
@@ -71,14 +69,12 @@ export const processEmailSequence = inngest.createFunction(
     });
 
     if (dueEmails.length === 0) {
-      logger.info('No due sequence emails', logContext);
+      logger.info(logContext, 'No due sequence emails');
       return { sent: 0, failed: 0 };
     }
 
-    logger.info('Processing sequence emails', {
-      ...logContext,
-      dueCount: dueEmails.length,
-    });
+    logger.info({ ...logContext,
+      dueCount: dueEmails.length, }, 'Processing sequence emails');
 
     // Step 2: Process emails in sequence
     let sentCount = 0;
@@ -102,13 +98,11 @@ export const processEmailSequence = inngest.createFunction(
             batchSent++;
           } catch (error) {
             const normalized = normalizeError(error, 'Failed to send sequence email');
-            logger.warn('Failed to send sequence email', {
-              ...logContext,
+            logger.warn({ ...logContext,
               email: emailItem.email, // Auto-hashed by pino redaction
               sequenceId: emailItem.id,
               step: emailItem.step,
-              errorMessage: normalized.message,
-            });
+              errorMessage: normalized.message, }, 'Failed to send sequence email');
             batchFailed++;
           }
         }
@@ -121,13 +115,11 @@ export const processEmailSequence = inngest.createFunction(
     }
 
     const durationMs = Date.now() - startTime;
-    logger.info('Email sequence processing completed', {
-      ...logContext,
+    logger.info({ ...logContext,
       durationMs,
       sent: sentCount,
       failed: failedCount,
-      total: dueEmails.length,
-    });
+      total: dueEmails.length, }, 'Email sequence processing completed');
 
     return { sent: sentCount, failed: failedCount };
   }
@@ -160,12 +152,10 @@ async function processSequenceEmail(
   if (claimError || !claimResult) {
     // Either already processed (step changed) or DB error
     // If step changed, this is a duplicate - skip silently
-    logger.info('Sequence email already claimed or not found, skipping', {
-      ...logContext,
+    logger.info({ ...logContext,
       sequenceId: sequenceEmailId,
       step,
-      reason: claimError?.code === 'PGRST116' ? 'already_processed' : 'claim_failed',
-    });
+      reason: claimError?.code === 'PGRST116' ? 'already_processed' : 'claim_failed', }, 'Sequence email already claimed or not found, skipping');
     return; // Don't throw - this is expected for duplicates
   }
 
@@ -192,12 +182,16 @@ async function processSequenceEmail(
   if (sendError) {
     // Email failed to send, but step was already incremented
     // Log for monitoring - manual intervention may be needed
-    logger.error('Sequence email send failed after step claim', normalizeError(sendError, 'Send failed'), {
-      ...logContext,
-      email, // Auto-hashed
-      sequenceId: sequenceEmailId,
-      step,
-    });
+    logger.error(
+      {
+        err: normalizeError(sendError, 'Send failed'),
+        ...logContext,
+        email, // Auto-hashed
+        sequenceId: sequenceEmailId,
+        step,
+      },
+      'Sequence email send failed after step claim'
+    );
     // Don't throw - step is already claimed, throwing would cause retry which skips anyway
     return;
   }
@@ -210,12 +204,10 @@ async function processSequenceEmail(
     })
     .eq('id', sequenceEmailId);
 
-  logger.info('Sequence email sent', {
-    ...logContext,
+  logger.info({ ...logContext,
     email, // Auto-hashed by pino redaction
     sequenceId: sequenceEmailId,
-    step,
-  });
+    step, }, 'Sequence email sent');
 }
 
 /**

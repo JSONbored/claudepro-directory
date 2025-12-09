@@ -25,7 +25,8 @@ const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
  * Cached helper function to fetch category content list
  * Uses Cache Components to reduce function invocations
  * @param category
- */
+ 
+ * @returns {Promise<unknown>} Description of return value*/
 async function getCachedCategoryContent(
   category: DatabaseGenerated['public']['Enums']['content_category']
 ) {
@@ -50,7 +51,8 @@ async function getCachedCategoryContent(
  * Cached helper function to fetch category LLMs.txt
  * Uses Cache Components to reduce function invocations
  * @param category
- */
+ 
+ * @returns {Promise<unknown>} Description of return value*/
 async function getCachedCategoryLlmsTxt(
   category: DatabaseGenerated['public']['Enums']['content_category']
 ) {
@@ -123,23 +125,31 @@ export async function GET(
       return badRequestResponse(`Invalid category '${category}'`, CORS);
     }
 
-    reqLogger.info('Category content request received', { category, format });
+    reqLogger.info({ category, format }, 'Category content request received');
 
     // Handle JSON format - returns category content list
     if (format === 'json') {
       let data: Awaited<ReturnType<typeof getCachedCategoryContent>> = [];
       try {
         data = await getCachedCategoryContent(category);
-        reqLogger.info('Category JSON generated', {
-          category,
-          itemCount: data.length,
-        });
+        reqLogger.info(
+          {
+            category,
+            itemCount: data.length,
+          },
+          'Category JSON generated'
+        );
       } catch (error) {
-        reqLogger.error('Category JSON query error', normalizeError(error), {
-          category,
-          format,
-        });
-        return createErrorResponse(error, {
+        const normalized = normalizeError(error, 'Operation failed');
+        reqLogger.error(
+          {
+            err: normalizeError(error),
+            category,
+            format,
+          },
+          'Category JSON query error'
+        );
+        return createErrorResponse(normalized, {
           route: '/api/content/[category]',
           operation: 'ContentCategoryAPI',
           method: 'GET',
@@ -176,10 +186,15 @@ export async function GET(
     try {
       data = await getCachedCategoryLlmsTxt(category);
     } catch (error) {
-      reqLogger.error('Category LLMs.txt fetch error', normalizeError(error), {
-        category,
-      });
-      return createErrorResponse(error, {
+      reqLogger.error(
+        {
+          err: normalizeError(error),
+          category,
+        },
+        'Category LLMs.txt fetch error'
+      );
+      const normalized = normalizeError(error, 'Category LLMs.txt fetch error');
+      return createErrorResponse(normalized, {
         route: '/api/content/[category]',
         operation: 'ContentCategoryAPI',
         method: 'GET',
@@ -188,16 +203,19 @@ export async function GET(
     }
 
     if (!data) {
-      reqLogger.warn('Category LLMs.txt not found', { category });
+      reqLogger.warn({ category }, 'Category LLMs.txt not found');
       return badRequestResponse('Category LLMs.txt not found or invalid', CORS);
     }
 
     const formatted = data.replaceAll(String.raw`\n`, '\n');
 
-    reqLogger.info('Category LLMs.txt generated', {
-      category,
-      bytes: formatted.length,
-    });
+    reqLogger.info(
+      {
+        category,
+        bytes: formatted.length,
+      },
+      'Category LLMs.txt generated'
+    );
 
     return new NextResponse(formatted, {
       status: 200,
@@ -210,8 +228,9 @@ export async function GET(
       },
     });
   } catch (error) {
-    reqLogger.error('Category API error', normalizeError(error));
-    return createErrorResponse(error, {
+    const normalized = normalizeError(error, 'Category API error');
+    reqLogger.error({ err: normalized }, 'Category API error');
+    return createErrorResponse(normalized, {
       route: '/api/content/[category]',
       operation: 'ContentCategoryAPI',
       method: 'GET',

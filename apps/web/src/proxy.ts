@@ -64,10 +64,13 @@ export async function proxy(request: NextRequest) {
   if (isDevelopment) {
     const duration = performance.now() - startTime;
     response.headers.set('X-Middleware-Duration', `${duration.toFixed(2)}ms`);
-    logger.debug('Proxy execution', {
-      path: sanitizePathForLogging(pathname),
-      duration: `${duration.toFixed(2)}ms`,
-    });
+    logger.debug(
+      {
+        path: sanitizePathForLogging(pathname),
+        duration: `${duration.toFixed(2)}ms`,
+      },
+      'Proxy execution'
+    );
   }
 
   // Force env validation on every request in dev to catch issues early

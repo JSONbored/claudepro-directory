@@ -33,16 +33,29 @@ export async function GET(request: NextRequest, context: unknown) {
     route: '/api/inngest',
     method: 'GET',
   });
-  reqLogger.debug('Inngest GET request (introspection)');
+  reqLogger.debug({}, 'Inngest GET request (introspection)');
   try {
     return await inngestGET(request, context);
   } catch (error) {
     const normalized = normalizeError(error, 'Inngest GET request failed');
-    reqLogger.error('Inngest GET request failed', normalized, {
-      route: '/api/inngest',
-      operation: 'InngestAPI',
-      method: 'GET',
-    });
+    reqLogger.error(
+      {
+        err: normalized,
+        route: '/api/inngest',
+        operation: 'InngestAPI',
+        method: 'GET',
+      },
+      'Inngest GET request failed'
+    );
+    reqLogger.error(
+      {
+        err: normalized,
+        route: '/api/inngest',
+        operation: 'InngestAPI',
+        method: 'GET',
+      },
+      'Inngest GET request failed'
+    );
     return createErrorResponse(normalized, {
       route: '/api/inngest',
       operation: 'InngestAPI',
@@ -70,16 +83,15 @@ export async function POST(request: NextRequest, context: unknown) {
     route: '/api/inngest',
     method: 'POST',
   });
-  reqLogger.debug('Inngest POST request (function invocation)');
+  reqLogger.debug({}, 'Inngest POST request (function invocation)');
   try {
     return await inngestPOST(request, context);
   } catch (error) {
     const normalized = normalizeError(error, 'Inngest POST request failed');
-    reqLogger.error('Inngest POST request failed', normalized, {
-      route: '/api/inngest',
-      operation: 'InngestAPI',
-      method: 'POST',
-    });
+    reqLogger.error(
+      { err: normalized, route: '/api/inngest', operation: 'InngestAPI', method: 'POST' },
+      'Inngest POST request failed'
+    );
     return createErrorResponse(normalized, {
       route: '/api/inngest',
       operation: 'InngestAPI',
@@ -104,16 +116,15 @@ export async function PUT(request: NextRequest, context: unknown) {
     route: '/api/inngest',
     method: 'PUT',
   });
-  reqLogger.debug('Inngest PUT request (sync)');
+  reqLogger.debug({}, 'Inngest PUT request (sync)');
   try {
     return await inngestPUT(request, context);
   } catch (error) {
     const normalized = normalizeError(error, 'Inngest PUT request failed');
-    reqLogger.error('Inngest PUT request failed', normalized, {
-      route: '/api/inngest',
-      operation: 'InngestAPI',
-      method: 'PUT',
-    });
+    reqLogger.error(
+      { err: normalized, route: '/api/inngest', operation: 'InngestAPI', method: 'PUT' },
+      'Inngest PUT request failed'
+    );
     return createErrorResponse(normalized, {
       route: '/api/inngest',
       operation: 'InngestAPI',

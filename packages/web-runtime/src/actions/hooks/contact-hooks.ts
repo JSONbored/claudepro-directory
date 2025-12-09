@@ -25,17 +25,13 @@ export async function onContactSubmission(
       },
     });
 
-    logger.info('Contact form email event sent to Inngest', {
-      submissionId: result.submission_id,
-      category: input.category,
-    });
+    logger.info({ submissionId: result.submission_id,
+      category: input.category, }, 'Contact form email event sent to Inngest');
   } catch (error) {
     // Log but don't throw - submission was already saved to database
     const normalized = normalizeError(error, 'Contact form email event failed');
-    logger.warn('Contact form email event failed (submission saved)', {
-      err: normalized,
-      submissionId: result.submission_id,
-    });
+    logger.warn({ err: normalized,
+      submissionId: result.submission_id, }, 'Contact form email event failed (submission saved)');
   }
   
   return null;

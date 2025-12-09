@@ -5,7 +5,7 @@
 ---
 # Rule: Detect missing await for async params in page components
 id: missing-await-async-params
-language: TypeScript
+language: typescript
 rule:
   all:
     - pattern: export default async function $PAGE($PARAMS: { params: $TYPE }) { $$$ }
@@ -21,7 +21,7 @@ severity: error
 ---
 # Rule: Detect missing await for async searchParams in page components
 id: missing-await-async-search-params
-language: TypeScript
+language: typescript
 rule:
   all:
     - pattern: export default async function $PAGE($PARAMS: { searchParams: $TYPE }) { $$$ }
@@ -37,7 +37,7 @@ severity: error
 ---
 # Rule: Detect missing await for async metadata functions
 id: missing-await-async-metadata
-language: TypeScript
+language: typescript
 rule:
   all:
     - pattern: export (async )?function generateMetadata($PARAMS: { params: Promise<$TYPE> }) { $$$ }
@@ -51,7 +51,7 @@ severity: error
 ---
 # Rule: Detect incorrect metadata function signature (should accept Promise params)
 id: incorrect-metadata-signature
-language: TypeScript
+language: typescript
 rule:
   all:
     - pattern: export function generateMetadata($PARAMS: { params: $TYPE }) { $$$ }

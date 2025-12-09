@@ -49,7 +49,8 @@ function isContentCategory(
  * Validate slug is safe for use in URLs
  * Only allows alphanumeric characters, hyphens, and underscores
  * @param slug
- */
+ 
+ * @returns {unknown} Description of return value*/
 function isValidSlug(slug: string): boolean {
   if (typeof slug !== 'string' || slug.length === 0) return false;
   return /^[a-zA-Z0-9-_]+$/.test(slug);
@@ -181,7 +182,7 @@ export async function generateMetadata({ params }: UserProfilePageProperties): P
  * @see getSafeContentUrl
  * @see sanitizeDisplayText
  */
-export default async function UserProfilePage({ params }: UserProfilePageProperties) {
+export default function UserProfilePage({ params }: UserProfilePageProperties) {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
@@ -234,9 +235,7 @@ async function UserProfilePageContent({
 
   // Section: Slug Validation
   if (!isValidSlug(slug)) {
-    routeLogger.warn('UserProfilePage: invalid user slug', {
-      section: 'slug-validation',
-    });
+    routeLogger.warn({ section: 'data-fetch' }, 'UserProfilePage: invalid user slug');
     notFound();
   }
 
@@ -257,22 +256,30 @@ async function UserProfilePageContent({
       slug,
       ...(currentUser?.id ? { viewerId: currentUser.id } : {}),
     });
-    viewerLogger.info('UserProfilePage: user profile loaded', {
-      section: 'user-profile-fetch',
-      hasProfile: !!profileData,
-    });
+    viewerLogger.info(
+      {
+        section: 'user-profile-fetch',
+        hasProfile: !!profileData,
+      },
+      'UserProfilePage: user profile loaded'
+    );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user profile');
-    viewerLogger.error('UserProfilePage: get_user_profile threw', normalized, {
-      section: 'user-profile-fetch',
-    });
+    viewerLogger.error(
+      {
+        err: normalized,
+        section: 'user-profile-fetch',
+      },
+      'UserProfilePage: get_user_profile threw'
+    );
     throw normalized;
   }
 
   if (!profileData) {
-    viewerLogger.warn('UserProfilePage: user profile not found', {
-      section: 'user-profile-fetch',
-    });
+    viewerLogger.warn(
+      { section: 'user-profile-fetch' },
+      'UserProfilePage: user profile not found'
+    );
     notFound();
   }
 
@@ -424,12 +431,12 @@ async function UserProfilePageContent({
                       const safeCollectionUrl = getSafeCollectionUrl(slug, collection.slug);
                       if (!safeCollectionUrl) {
                         viewerLogger.warn(
-                          'UserProfilePage: skipping collection with invalid slug',
                           {
                             collectionId: collection.id,
                             collectionName: collection.name ?? 'Unknown',
                             collectionSlug: collection.slug,
-                          }
+                          },
+                          'UserProfilePage: skipping collection with invalid slug'
                         );
                         return null;
                       }
@@ -489,12 +496,12 @@ async function UserProfilePageContent({
                       const safeContentUrl = getSafeContentUrl(item.content_type, item.slug);
                       if (!safeContentUrl) {
                         viewerLogger.warn(
-                          'UserProfilePage: skipping contribution with invalid type or slug',
                           {
                             contentId: item.id,
                             contentType: item.content_type,
                             contentSlug: item.slug,
-                          }
+                          },
+                          'UserProfilePage: skipping contribution with invalid type or slug'
                         );
                         return null;
                       }

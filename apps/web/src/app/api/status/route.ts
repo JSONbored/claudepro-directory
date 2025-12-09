@@ -176,15 +176,19 @@ export async function GET(_request: NextRequest) {
   });
 
   try {
-    reqLogger.info('Status/health check request received');
+    reqLogger.info({}, 'Status/health check request received');
 
     const supabase = createSupabaseAnonClient();
     const { data, error } = await supabase.rpc('get_api_health');
 
     if (error) {
-      reqLogger.error('Health check RPC error', normalizeError(error), {
-        rpcName: 'get_api_health',
-      });
+      reqLogger.error(
+        {
+          err: normalizeError(error),
+          rpcName: 'get_api_health',
+        },
+        'Health check RPC error'
+      );
       return createErrorResponse(error, {
         route: '/api/status',
         operation: 'StatusAPI',
@@ -199,20 +203,24 @@ export async function GET(_request: NextRequest) {
 
     // Determine HTTP status code based on health status
     const statusCode =
-      transformed.status === 'healthy' ? 200 : (transformed.status === 'degraded' ? 200 : 503);
+      transformed.status === 'healthy' ? 200 : transformed.status === 'degraded' ? 200 : 503;
 
-    reqLogger.info('Status check completed', {
-      status: transformed.status,
-      statusCode,
-    });
+    reqLogger.info(
+      {
+        status: transformed.status,
+        statusCode,
+      },
+      'Status check completed'
+    );
 
     return jsonResponse(transformed, statusCode, CORS, {
       'X-Generated-By': 'supabase.rpc.get_api_health',
       ...buildCacheHeaders('status'),
     });
   } catch (error) {
-    reqLogger.error('Status API error', normalizeError(error));
-    return createErrorResponse(error, {
+    const normalized = normalizeError(error, 'Operation failed');
+    reqLogger.error({ err: normalizeError(error) }, 'Status API error');
+    return createErrorResponse(normalized, {
       route: '/api/status',
       operation: 'StatusAPI',
       method: 'GET',

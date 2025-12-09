@@ -158,20 +158,22 @@ async function SearchResultsSection({
   let results: Awaited<ReturnType<typeof searchContent>> = [];
   try {
     results = await searchContent(query, filters, noCache);
-    sectionLogger.info('SearchPage: search results loaded', {
-      section: 'search-results',
-      queryLength: query.length,
-      hasFilters: hasUserFilters,
-      resultsCount: results.length,
-      noCache,
-    });
+    sectionLogger.info(
+      {
+        section: 'data-fetch',
+        queryLength: query.length,
+        hasFilters: hasUserFilters,
+        resultsCount: results.length,
+        noCache,
+      },
+      'SearchPage: search results loaded'
+    );
   } catch (error) {
     const normalized = normalizeError(error, 'Search content fetch failed');
-    sectionLogger.error('SearchPage: searchContent invocation failed', normalized, {
-      section: 'search-results',
-      query,
-      hasFilters: hasUserFilters,
-    });
+    sectionLogger.error(
+      { err: normalized, section: 'data-fetch', query, hasFilters: hasUserFilters },
+      'SearchPage: searchContent invocation failed'
+    );
     throw normalized;
   }
 
@@ -209,7 +211,7 @@ async function SearchResultsSection({
  * @see SearchResultsSection
  * @see ContentSidebar
  */
-export default async function SearchPage({ searchParams }: SearchPageProperties) {
+export default function SearchPage({ searchParams }: SearchPageProperties) {
   // Note: Cannot use 'use cache' on pages with searchParams - they're dynamic
   // Data layer caching is already in place for optimal performance
 
@@ -244,7 +246,8 @@ export default async function SearchPage({ searchParams }: SearchPageProperties)
  *
  * @see ContentSearchClient
  * @see SearchResultsSkeleton
- */
+ 
+ * @returns {unknown} Description of return value*/
 function SearchResultsSkeleton() {
   return (
     <ContentSearchClient
@@ -376,17 +379,21 @@ async function SearchFacetsAndResults({
       authors: facetAggregate.authors,
       categories: facetAggregate.categories,
     };
-    reqLogger.info('SearchPage: facets loaded', {
-      section: 'facets',
-      tagsCount: facetOptions.tags.length,
-      authorsCount: facetOptions.authors.length,
-      categoriesCount: facetOptions.categories.length,
-    });
+    reqLogger.info(
+      {
+        section: 'data-fetch',
+        tagsCount: facetOptions.tags.length,
+        authorsCount: facetOptions.authors.length,
+        categoriesCount: facetOptions.categories.length,
+      },
+      'SearchPage: facets loaded'
+    );
   } catch (error) {
     const normalized = normalizeError(error, 'Search facets fetch failed');
-    reqLogger.error('SearchPage: getSearchFacets invocation failed', normalized, {
-      section: 'facets',
-    });
+    reqLogger.error(
+      { err: normalized, section: 'data-fetch' },
+      'SearchPage: getSearchFacets invocation failed'
+    );
   }
 
   // Load zero-state suggestions after facets (if no query/filters)
@@ -399,18 +406,19 @@ async function SearchFacetsAndResults({
       zeroStateSuggestions = categoryData
         ? (Object.values(categoryData).flat() as Awaited<ReturnType<typeof searchContent>>)
         : [];
-      reqLogger.info('SearchPage: zero-state suggestions loaded', {
-        section: 'zero-state-suggestions',
-        suggestionsCount: zeroStateSuggestions.length,
-      });
+      reqLogger.info(
+        { section: 'data-fetch', suggestionsCount: zeroStateSuggestions.length },
+        'SearchPage: zero-state suggestions loaded'
+      );
     } catch (error) {
       const normalized = normalizeError(
         error,
         'SearchPage: getHomepageData for suggestions failed'
       );
-      reqLogger.error('SearchPage: suggestions fetch failed', normalized, {
-        section: 'zero-state-suggestions',
-      });
+      reqLogger.error(
+        { err: normalized, section: 'data-fetch' },
+        'SearchPage: suggestions fetch failed'
+      );
     }
   }
 
@@ -437,13 +445,16 @@ async function SearchFacetsAndResults({
   );
 
   // Final summary log
-  reqLogger.info('SearchPage: facets and suggestions loaded', {
-    section: 'facets-and-suggestions',
-    hasQuery: query.length > 0,
-    hasFilters: hasUserFilters,
-    facetsLoaded: !!facetAggregate,
-    suggestionsCount: zeroStateSuggestions.length,
-  });
+  reqLogger.info(
+    {
+      section: 'data-fetch',
+      hasQuery: query.length > 0,
+      hasFilters: hasUserFilters,
+      facetsLoaded: !!facetAggregate,
+      suggestionsCount: zeroStateSuggestions.length,
+    },
+    'SearchPage: facets and suggestions loaded'
+  );
 
   // Now load results (depends on facets for UI, but can load in parallel)
   return (

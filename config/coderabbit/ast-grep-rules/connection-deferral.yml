@@ -1,11 +1,12 @@
 # Connection Deferral Pattern Rules
-# Enforces connection deferral patterns from ESLint rule: require-connection-deferral
-# Matches: config/tools/eslint-plugin-architectural-rules.js -> require-connection-deferral
+# Enforces connection deferral patterns from ESLint rule: require-cache-components
+# Matches: config/tools/eslint-plugin-architectural-rules.js -> require-cache-components
+# NOTE: connection() is required for Cache Components when using non-deterministic operations
 
 ---
 # Rule: Detect non-deterministic operations before connection()
 id: non-deterministic-before-connection
-language: TypeScript
+language: typescript
 rule:
   all:
     - pattern: export default async function $COMPONENT($$$) { $$$ }
@@ -17,13 +18,13 @@ rule:
     - not:
         follows:
           pattern: await connection()
-message: "Non-deterministic operations (Date.now(), Math.random(), new Date(), etc.) must come after await connection(). Move operation after connection() call."
+message: "Non-deterministic operations (Date.now(), Math.random(), new Date(), performance.now(), crypto.randomUUID()) must come after await connection(). Move operation after connection() call."
 severity: error
 
 ---
 # Rule: Detect missing connection() in server components with non-deterministic operations
 id: missing-connection-with-non-deterministic
-language: TypeScript
+language: typescript
 rule:
   all:
     - pattern: export default async function $COMPONENT($$$) { $$$ }
@@ -35,13 +36,13 @@ rule:
     - not:
         has:
           pattern: await connection()
-message: "Server components using non-deterministic operations must call await connection() at the start. Add: await connection() at function start."
+message: "Server components using non-deterministic operations must call await connection() at the start. Add: await connection() at function start. Import connection from 'next/server'"
 severity: error
 
 ---
 # Rule: Detect connection() called after non-deterministic operations
 id: connection-after-non-deterministic
-language: TypeScript
+language: typescript
 rule:
   all:
     - pattern: export default async function $COMPONENT($$$) { $$$ }

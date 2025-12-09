@@ -22,7 +22,8 @@ const CORS = getOnlyCorsHeaders;
 /**
  * Cached helper function to fetch sitewide content list
  * Uses Cache Components to reduce function invocations
- */
+ 
+ * @returns {Promise<unknown>} Description of return value*/
 async function getCachedSitewideContent() {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
@@ -67,7 +68,7 @@ export async function GET(request: NextRequest) {
     const url = new URL(request.url);
     const format = (url.searchParams.get('format') ?? 'llms').toLowerCase();
 
-    reqLogger.info('Sitewide content request received', { format });
+    reqLogger.info({ format }, 'Sitewide content request received');
 
     const supabase = createSupabaseAnonClient();
     const service = new ContentService(supabase);
@@ -77,14 +78,22 @@ export async function GET(request: NextRequest) {
       let data: Awaited<ReturnType<typeof getCachedSitewideContent>> = [];
       try {
         data = await getCachedSitewideContent();
-        reqLogger.info('Sitewide JSON generated', {
-          itemCount: data.length,
-        });
+        reqLogger.info(
+          {
+            itemCount: data.length,
+          },
+          'Sitewide JSON generated'
+        );
       } catch (error) {
-        reqLogger.error('Sitewide JSON query error', normalizeError(error), {
-          format,
-        });
-        return createErrorResponse(error, {
+        const normalized = normalizeError(error, 'Operation failed');
+        reqLogger.error(
+          {
+            err: normalizeError(error),
+            format,
+          },
+          'Sitewide JSON query error'
+        );
+        return createErrorResponse(normalized, {
           route: '/api/content/sitewide',
           operation: 'ContentSitewideAPI',
           method: 'GET',
@@ -112,10 +121,13 @@ export async function GET(request: NextRequest) {
     if (format === 'readme') {
       const data = await service.getSitewideReadme();
 
-      reqLogger.info('Sitewide README data fetched', {
-        categoriesCount: data.categories?.length ?? 0,
-        totalCount: data.total_count ?? 0,
-      });
+      reqLogger.info(
+        {
+          categoriesCount: data.categories?.length ?? 0,
+          totalCount: data.total_count ?? 0,
+        },
+        'Sitewide README data fetched'
+      );
 
       return NextResponse.json(data, {
         status: 200,
@@ -140,7 +152,7 @@ export async function GET(request: NextRequest) {
     const data = await service.getSitewideLlmsTxt();
 
     if (!data) {
-      reqLogger.error('Sitewide LLMs export returned null');
+      reqLogger.error({}, 'Sitewide LLMs export returned null');
       return NextResponse.json(
         {
           error: 'Sitewide LLMs export failed',
@@ -159,9 +171,12 @@ export async function GET(request: NextRequest) {
 
     const formatted = data.replaceAll(String.raw`\n`, '\n');
 
-    reqLogger.info('Sitewide llms generated', {
-      bytes: formatted.length,
-    });
+    reqLogger.info(
+      {
+        bytes: formatted.length,
+      },
+      'Sitewide llms generated'
+    );
 
     return new NextResponse(formatted, {
       status: 200,
@@ -174,8 +189,9 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    reqLogger.error('Sitewide content API error', normalizeError(error));
-    return createErrorResponse(error, {
+    const normalized = normalizeError(error, 'Sitewide content API error');
+    reqLogger.error({ err: normalized }, 'Sitewide content API error');
+    return createErrorResponse(normalized, {
       route: '/api/content/sitewide',
       operation: 'ContentSitewideAPI',
       method: 'GET',

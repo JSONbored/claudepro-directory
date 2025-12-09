@@ -33,12 +33,15 @@ export async function enqueuePulseEventServer(event: PulseEvent): Promise<void> 
     });
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to enqueue pulse event');
-    logger.warn('Failed to enqueue pulse event', {
-      err: normalized,
-      interaction_type: event.interaction_type,
-      content_type: event.content_type ?? 'unknown',
-      ...(event.user_id && { user_id: event.user_id }),
-    });
+    logger.warn(
+      {
+        err: normalized,
+        interaction_type: event.interaction_type,
+        content_type: event.content_type ?? 'unknown',
+        ...(event.user_id && { user_id: event.user_id }),
+      },
+      'Failed to enqueue pulse event'
+    );
   }
 }
 
@@ -86,7 +89,7 @@ export async function pulseJobSearch(
   } catch (error) {
     const normalized = normalizeError(error, 'Job search pulsing error');
     // Pino's stdSerializers.err automatically handles error serialization
-    logger.warn('Job search pulsing error', { err: normalized });
+    logger.warn({ err: normalized }, 'Job search pulsing error');
   }
 }
 
@@ -113,6 +116,6 @@ export async function pulseUserSearch(query: string, resultCount: number): Promi
   } catch (error) {
     const normalized = normalizeError(error, 'User search pulsing error');
     // Pino's stdSerializers.err automatically handles error serialization
-    logger.warn('User search pulsing error', { err: normalized });
+    logger.warn({ err: normalized }, 'User search pulsing error');
   }
 }

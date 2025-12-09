@@ -105,13 +105,11 @@ export async function handleActiveNotifications(_request: NextRequest): Promise<
     const traceId = createNotificationTraceId();
     const durationMs = Date.now() - startTime;
 
-    logger.info('Active notifications retrieved', {
-      ...logContext,
+    logger.info({ ...logContext,
       durationMs,
       userId: user.id,
       count: filteredNotifications.length,
-      dismissedCount: dismissedIds.length,
-    });
+      dismissedCount: dismissedIds.length, }, 'Active notifications retrieved');
 
     return NextResponse.json(
       { notifications: filteredNotifications, traceId },
@@ -119,7 +117,7 @@ export async function handleActiveNotifications(_request: NextRequest): Promise<
     );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to get active notifications');
-    logger.error('Active notifications failed', normalized, logContext);
+    logger.error({ err: normalized, ...logContext }, 'Active notifications failed');
 
     return createErrorResponse(error, {
       route: '/api/flux/notifications/active',
@@ -204,18 +202,14 @@ export async function handleDismissNotifications(request: NextRequest): Promise<
       const errorCode = (dismissError as { code?: string }).code;
       if (errorCode === '23505') {
         // Unique violation - shouldn't happen with upsert but tolerate it
-        logger.warn('Notification dismissal duplicate (unexpected)', {
-          ...logContext,
+        logger.warn({ ...logContext,
           errorMessage: dismissError.message,
-          errorCode,
-        });
+          errorCode, }, 'Notification dismissal duplicate (unexpected)');
       } else {
         // Real error - log and throw
         const normalized = normalizeError(dismissError, 'Notification dismissal failed');
-        logger.error('Notification dismissal failed', normalized, {
-          ...logContext,
-          errorCode,
-        });
+        logger.error({ err: normalized, ...logContext,
+          errorCode, }, 'Notification dismissal failed');
         throw dismissError;
       }
     }
@@ -223,12 +217,10 @@ export async function handleDismissNotifications(request: NextRequest): Promise<
     const traceId = createNotificationTraceId();
     const durationMs = Date.now() - startTime;
 
-    logger.info('Notifications dismissed', {
-      ...logContext,
+    logger.info({ ...logContext,
       durationMs,
       userId: user.id,
-      dismissedCount: sanitizedIds.length,
-    });
+      dismissedCount: sanitizedIds.length, }, 'Notifications dismissed');
 
     return NextResponse.json(
       { dismissed: sanitizedIds.length, traceId },
@@ -236,7 +228,7 @@ export async function handleDismissNotifications(request: NextRequest): Promise<
     );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to dismiss notifications');
-    logger.error('Dismiss notifications failed', normalized, logContext);
+    logger.error({ err: normalized, ...logContext }, 'Dismiss notifications failed');
 
     return createErrorResponse(error, {
       route: '/api/flux/notifications/dismiss',
@@ -380,13 +372,11 @@ export async function handleCreateNotification(request: NextRequest): Promise<Ne
     const traceId = createNotificationTraceId();
     const durationMs = Date.now() - startTime;
 
-    logger.info('Notification created', {
-      ...logContext,
+    logger.info({ ...logContext,
       durationMs,
       userId: user.id,
       notificationId: notification.id,
-      notificationType: notification.type,
-    });
+      notificationType: notification.type, }, 'Notification created');
 
     return NextResponse.json(
       { notification, traceId },
@@ -394,7 +384,7 @@ export async function handleCreateNotification(request: NextRequest): Promise<Ne
     );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to create notification');
-    logger.error('Create notification failed', normalized, logContext);
+    logger.error({ err: normalized, ...logContext }, 'Create notification failed');
 
     return createErrorResponse(error, {
       route: '/api/flux/notifications/create',

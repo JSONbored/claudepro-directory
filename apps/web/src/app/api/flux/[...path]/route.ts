@@ -56,13 +56,17 @@ async function handleFluxRequest(
   });
 
   try {
-    reqLogger.debug(`Flux ${method} request`, { path: params.path });
+    reqLogger.debug({ path: params.path }, `Flux ${method} request`);
     return await routeFluxRequest(method, params.path, request);
   } catch (error) {
     const normalized = normalizeError(error, `Flux ${method} request failed`);
-    reqLogger.error(`Flux ${method} request failed`, normalized, {
-      path: params.path.join('/'),
-    });
+    reqLogger.error(
+      {
+        err: normalized,
+        path: params.path.join('/'),
+      },
+      `Flux ${method} request failed`
+    );
     return createErrorResponse(normalized, {
       route,
       operation: `FluxAPI:${method}`,
@@ -82,7 +86,7 @@ async function handleFluxRequest(
  * @see handleFluxRequest
  * @see logger
  */
-export async function GET(request: NextRequest, context: RouteContext) {
+export function GET(request: NextRequest, context: RouteContext) {
   return handleFluxRequest('GET', request, context);
 }
 
@@ -96,7 +100,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
  * @see routeFluxRequest
  * @see logger
  */
-export async function POST(request: NextRequest, context: RouteContext) {
+export function POST(request: NextRequest, context: RouteContext) {
   return handleFluxRequest('POST', request, context);
 }
 

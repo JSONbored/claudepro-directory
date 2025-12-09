@@ -87,7 +87,13 @@ export async function generateStaticParams() {
     }));
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to generate changelog static params');
-    reqLogger.error('ChangelogEntryPage: generateStaticParams threw', normalized);
+    reqLogger.error(
+      {
+        section: 'data-fetch',
+        err: normalized,
+      },
+      'ChangelogEntryPage: generateStaticParams threw'
+    );
     // Return empty array on error - Suspense boundaries will handle dynamic rendering
     return [];
   }
@@ -122,9 +128,13 @@ export async function generateMetadata({
     entry = await getChangelogEntryBySlug(slug);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load changelog entry for metadata');
-    metadataLogger.error('ChangelogEntryPage: metadata loader threw', normalized, {
-      operation: 'generateMetadata',
-    });
+    metadataLogger.error(
+      {
+        err: normalized,
+        operation: 'generateMetadata',
+      },
+      'ChangelogEntryPage: metadata loader threw'
+    );
     entry = null;
   }
 
@@ -151,11 +161,7 @@ export async function generateMetadata({
  * @see ChangelogContent
  * @see StructuredData
  */
-export default async function ChangelogEntryPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default function ChangelogEntryPage({ params }: { params: Promise<{ slug: string }> }) {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
@@ -209,10 +215,13 @@ async function ChangelogEntryPageContent({
 
   // Handle placeholder slugs (if any remain from old generateStaticParams)
   if (slug === '__placeholder__') {
-    routeLogger.warn('ChangelogEntryPage: placeholder slug detected, returning 404', {
-      section: 'placeholder-handling',
-      slug,
-    });
+    routeLogger.warn(
+      {
+        section: 'data-fetch',
+        slug,
+      },
+      'ChangelogEntryPage: placeholder slug detected, returning 404'
+    );
     notFound();
   }
 
@@ -221,12 +230,18 @@ async function ChangelogEntryPageContent({
     entry = await getChangelogEntryBySlug(slug);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load changelog entry');
-    routeLogger.error('ChangelogEntryPage: getChangelogEntryBySlug threw', normalized);
+    routeLogger.error(
+      {
+        section: 'data-fetch',
+        err: normalized,
+      },
+      'ChangelogEntryPage: getChangelogEntryBySlug threw'
+    );
     throw normalized;
   }
 
   if (!entry) {
-    routeLogger.warn('ChangelogEntryPage: entry not found');
+    routeLogger.warn({ section: 'data-fetch' }, 'ChangelogEntryPage: entry not found');
     notFound();
   }
 

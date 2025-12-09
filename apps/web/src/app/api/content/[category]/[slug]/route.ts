@@ -25,7 +25,8 @@ import { NextRequest, NextResponse } from 'next/server';
  * Uses Cache Components to reduce function invocations
  * @param category
  * @param slug
- */
+ 
+ * @returns {Promise<unknown>} Description of return value*/
 async function getCachedContentFull(
   category: DatabaseGenerated['public']['Enums']['content_category'],
   slug: string
@@ -121,12 +122,17 @@ async function handleJsonFormat(
   try {
     data = await getCachedContentFull(category, slug);
   } catch (error) {
-    reqLogger.error('Content JSON RPC error', normalizeError(error), {
-      rpcName: 'get_api_content_full',
-      category,
-      slug,
-    });
-    return createErrorResponse(error, {
+    const normalized = normalizeError(error, 'Operation failed');
+    reqLogger.error(
+      {
+        err: normalizeError(error),
+        rpcName: 'get_api_content_full',
+        category,
+        slug,
+      },
+      'Content JSON RPC error'
+    );
+    return createErrorResponse(normalized, {
       route: '/api/content/[category]/[slug]',
       operation: 'ContentRecordAPI',
       method: 'GET',
@@ -161,11 +167,14 @@ async function handleJsonFormat(
       parsedData = JSON.parse(data);
     } catch {
       // If parsing fails, treat it as raw text and wrap it
-      reqLogger.warn('Content JSON: RPC returned non-JSON string', {
-        category,
-        slug,
-        dataPreview: data.slice(0, 100),
-      });
+      reqLogger.warn(
+        {
+          category,
+          slug,
+          dataPreview: data.slice(0, 100),
+        },
+        'Content JSON: RPC returned non-JSON string'
+      );
       return NextResponse.json(
         { error: 'Invalid JSON data from RPC' },
         {
@@ -211,11 +220,14 @@ async function handleJsonFormat(
 
   // Ensure we have actual content
   if (!cleanedData || (typeof cleanedData === 'object' && Object.keys(cleanedData).length === 0)) {
-    reqLogger.warn('Content JSON: empty or null data returned from RPC', {
-      category,
-      slug,
-      dataType: typeof data,
-    });
+    reqLogger.warn(
+      {
+        category,
+        slug,
+        dataType: typeof data,
+      },
+      'Content JSON: empty or null data returned from RPC'
+    );
     return NextResponse.json(
       { error: 'Content data is empty' },
       {
@@ -281,12 +293,17 @@ async function handleMarkdownFormat(
   const { data, error } = await supabase.rpc('generate_markdown_export', rpcArgs);
 
   if (error) {
-    reqLogger.error('Content Markdown RPC error', normalizeError(error), {
-      rpcName: 'generate_markdown_export',
-      category,
-      slug,
-    });
-    return createErrorResponse(error, {
+    reqLogger.error(
+      {
+        err: normalizeError(error),
+        rpcName: 'generate_markdown_export',
+        category,
+        slug,
+      },
+      'Content Markdown RPC error'
+    );
+    const normalized = normalizeError(error, 'Content Markdown RPC error');
+    return createErrorResponse(normalized, {
       route: '/api/content/[category]/[slug]',
       operation: 'ContentRecordAPI',
       method: 'GET',
@@ -323,12 +340,15 @@ async function handleMarkdownFormat(
     typeof filename !== 'string' ||
     typeof contentId !== 'string'
   ) {
-    reqLogger.warn('Content Markdown: invalid response structure', {
-      hasMarkdown: typeof markdown === 'string',
-      hasFilename: typeof filename === 'string',
-      hasContentId: typeof contentId === 'string',
-      dataKeys: data ? Object.keys(data) : [],
-    });
+    reqLogger.warn(
+      {
+        hasMarkdown: typeof markdown === 'string',
+        hasFilename: typeof filename === 'string',
+        hasContentId: typeof contentId === 'string',
+        dataKeys: data ? Object.keys(data) : [],
+      },
+      'Content Markdown: invalid response structure'
+    );
     return NextResponse.json(
       { error: 'Markdown generation failed: invalid response' },
       {
@@ -344,12 +364,15 @@ async function handleMarkdownFormat(
 
   // Ensure markdown content is not empty
   if (!markdown || markdown.trim().length === 0) {
-    reqLogger.warn('Content Markdown: empty markdown content returned', {
-      category,
-      slug,
-      filename,
-      contentId,
-    });
+    reqLogger.warn(
+      {
+        category,
+        slug,
+        filename,
+        contentId,
+      },
+      'Content Markdown: empty markdown content returned'
+    );
     return NextResponse.json(
       { error: 'Markdown generation failed: empty content' },
       {
@@ -366,13 +389,16 @@ async function handleMarkdownFormat(
   const safeFilename = sanitizeFilename(filename);
   const safeContentId = sanitizeHeaderValue(contentId);
 
-  reqLogger.info('Content Markdown: markdown generated successfully', {
-    category,
-    slug,
-    filename: safeFilename,
-    contentId: safeContentId,
-    markdownLength: markdown.length,
-  });
+  reqLogger.info(
+    {
+      category,
+      slug,
+      filename: safeFilename,
+      contentId: safeContentId,
+      markdownLength: markdown.length,
+    },
+    'Content Markdown: markdown generated successfully'
+  );
 
   return new NextResponse(markdown, {
     status: 200,
@@ -417,12 +443,17 @@ async function handleItemLlmsTxt(
   const { data, error } = await supabase.rpc('generate_item_llms_txt', rpcArgs);
 
   if (error) {
-    reqLogger.error('Content LLMs.txt RPC error', normalizeError(error), {
-      rpcName: 'generate_item_llms_txt',
-      category,
-      slug,
-    });
-    return createErrorResponse(error, {
+    reqLogger.error(
+      {
+        err: normalizeError(error),
+        rpcName: 'generate_item_llms_txt',
+        category,
+        slug,
+      },
+      'Content LLMs.txt RPC error'
+    );
+    const normalized = normalizeError(error, 'Content LLMs.txt RPC error');
+    return createErrorResponse(normalized, {
       route: '/api/content/[category]/[slug]',
       operation: 'ContentRecordAPI',
       method: 'GET',
@@ -456,15 +487,21 @@ async function handleItemLlmsTxt(
       try {
         // It's JSON - this shouldn't happen, but handle it gracefully
         const parsed = JSON.parse(data);
-        reqLogger.warn('Content LLMs.txt: RPC returned JSON instead of plain text', {
-          category,
-          slug,
-          dataType: 'json',
-        });
+        reqLogger.warn(
+          {
+            category,
+            slug,
+            dataType: 'json',
+          },
+          'Content LLMs.txt: RPC returned JSON instead of plain text'
+        );
         // Convert JSON to a readable format (fallback)
         formatted = JSON.stringify(parsed, null, 2);
       } catch {
         // Not valid JSON, treat as plain text
+
+        const normalized = normalizeError(error, 'Operation failed');
+        logger.error({ err: normalized }, 'Operation failed');
         formatted = data;
       }
     } else {
@@ -473,11 +510,14 @@ async function handleItemLlmsTxt(
     }
   } else {
     // If it's an object, convert to string (shouldn't happen, but handle it)
-    reqLogger.warn('Content LLMs.txt: RPC returned object instead of string', {
-      category,
-      slug,
-      dataType: typeof data,
-    });
+    reqLogger.warn(
+      {
+        category,
+        slug,
+        dataType: typeof data,
+      },
+      'Content LLMs.txt: RPC returned object instead of string'
+    );
     formatted = JSON.stringify(data, null, 2);
   }
 
@@ -488,12 +528,15 @@ async function handleItemLlmsTxt(
     .replaceAll(String.raw`\t`, '\t')
     .replaceAll(String.raw`\r`, '\r');
 
-  reqLogger.info('Content LLMs.txt: formatted successfully', {
-    category,
-    slug,
-    length: formatted.length,
-    firstLine: formatted.split('\n')[0]?.slice(0, 50),
-  });
+  reqLogger.info(
+    {
+      category,
+      slug,
+      length: formatted.length,
+      firstLine: formatted.split('\n')[0]?.slice(0, 50),
+    },
+    'Content LLMs.txt: formatted successfully'
+  );
 
   return new NextResponse(formatted, {
     status: 200,
@@ -513,7 +556,7 @@ async function handleStorageFormat(
   reqLogger: ReturnType<typeof logger.child>,
   metadataMode = false
 ) {
-  reqLogger.info('Handling storage format', { category, slug, metadataMode });
+  reqLogger.info({ category, slug, metadataMode }, 'Handling storage format');
 
   const supabase = createSupabaseAnonClient();
 
@@ -525,11 +568,16 @@ async function handleStorageFormat(
     const { data, error } = await supabase.rpc('get_skill_storage_path', rpcArgs);
 
     if (error) {
-      reqLogger.error('Skill storage path RPC error', normalizeError(error), {
-        rpcName: 'get_skill_storage_path',
-        slug,
-      });
-      return createErrorResponse(error, {
+      reqLogger.error(
+        {
+          err: normalizeError(error),
+          rpcName: 'get_skill_storage_path',
+          slug,
+        },
+        'Skill storage path RPC error'
+      );
+      const normalized = normalizeError(error, 'Skill storage path RPC error');
+      return createErrorResponse(normalized, {
         route: '/api/content/[category]/[slug]',
         operation: 'ContentRecordAPI',
         method: 'GET',
@@ -569,7 +617,7 @@ async function handleStorageFormat(
         note: 'Use download_url to fetch the actual binary file',
       };
 
-      reqLogger.info('Returning storage metadata', { bucket, objectPath });
+      reqLogger.info({ bucket, objectPath }, 'Returning storage metadata');
 
       return NextResponse.json(metadata, {
         status: 200,
@@ -597,11 +645,16 @@ async function handleStorageFormat(
     const { data, error } = await supabase.rpc('get_mcpb_storage_path', rpcArgs);
 
     if (error) {
-      reqLogger.error('MCPB storage path RPC error', normalizeError(error), {
-        rpcName: 'get_mcpb_storage_path',
-        slug,
-      });
-      return createErrorResponse(error, {
+      reqLogger.error(
+        {
+          err: normalizeError(error),
+          rpcName: 'get_mcpb_storage_path',
+          slug,
+        },
+        'MCPB storage path RPC error'
+      );
+      const normalized = normalizeError(error, 'MCPB storage path RPC error');
+      return createErrorResponse(normalized, {
         route: '/api/content/[category]/[slug]',
         operation: 'ContentRecordAPI',
         method: 'GET',
@@ -641,7 +694,7 @@ async function handleStorageFormat(
         note: 'Use download_url to fetch the actual binary file',
       };
 
-      reqLogger.info('Returning storage metadata', { bucket, objectPath });
+      reqLogger.info({ bucket, objectPath }, 'Returning storage metadata');
 
       return NextResponse.json(metadata, {
         status: 200,
@@ -691,11 +744,14 @@ export async function GET(
 
     const format = (url.searchParams.get('format') ?? 'json').toLowerCase();
 
-    reqLogger.info('Content record export request received', {
-      category,
-      slug,
-      format,
-    });
+    reqLogger.info(
+      {
+        category,
+        slug,
+        format,
+      },
+      'Content record export request received'
+    );
 
     switch (format) {
       case 'json': {
@@ -722,8 +778,9 @@ export async function GET(
       }
     }
   } catch (error) {
-    reqLogger.error('Content record API error', normalizeError(error));
-    return createErrorResponse(error, {
+    const normalized = normalizeError(error, 'Content record API error');
+    reqLogger.error({ err: normalized }, 'Content record API error');
+    return createErrorResponse(normalized, {
       route: '/api/content/[category]/[slug]',
       operation: 'ContentRecordAPI',
       method: 'GET',

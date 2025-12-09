@@ -151,9 +151,10 @@ async function CollectionDetailContent({
   const { user } = await getAuthenticatedUser({ context: 'CollectionDetailPage' });
 
   if (!user) {
-    reqLogger.warn('CollectionDetailPage: unauthenticated access attempt', {
-      section: 'authentication',
-    });
+    reqLogger.warn(
+      { section: 'data-fetch' },
+      'CollectionDetailPage: unauthenticated access attempt'
+    );
     redirect('/login');
   }
 
@@ -164,24 +165,23 @@ async function CollectionDetailContent({
     userId: user.id, // Redaction will automatically hash this
   });
 
-  userLogger.info('CollectionDetailPage: authentication successful', {
-    section: 'authentication',
-  });
+  userLogger.info({ section: 'data-fetch' }, 'CollectionDetailPage: authentication successful');
 
   // Section: Collection Data Fetch
   let collectionData: Awaited<ReturnType<typeof getCollectionDetail>> = null;
   let hasError = false;
   try {
     collectionData = await getCollectionDetail(user.id, slug);
-    userLogger.info('CollectionDetailPage: collection data loaded', {
-      section: 'collection-data-fetch',
-      hasData: !!collectionData,
-    });
+    userLogger.info({ section: 'data-fetch', hasData: !!collectionData }, 'CollectionDetailPage: collection data loaded');
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load collection detail');
-    userLogger.error('CollectionDetailPage: getCollectionDetail threw', normalized, {
-      section: 'collection-data-fetch',
-    });
+    userLogger.error(
+      {
+        section: 'data-fetch',
+        err: normalized,
+      },
+      'CollectionDetailPage: getCollectionDetail threw'
+    );
     hasError = true;
   }
 
@@ -206,23 +206,22 @@ async function CollectionDetailContent({
   }
 
   if (!collectionData) {
-    userLogger.warn('CollectionDetailPage: collection not found or inaccessible');
+    userLogger.warn(
+      { section: 'data-fetch' },
+      'CollectionDetailPage: collection not found or inaccessible'
+    );
     notFound();
   }
 
   const { collection, items, bookmarks } = collectionData;
 
   if (!collection) {
-    userLogger.warn('CollectionDetailPage: collection is null in response', {
-      section: 'collection-data-fetch',
-    });
+    userLogger.warn({ section: 'data-fetch' }, 'CollectionDetailPage: collection is null in response');
     notFound();
   }
 
   // Final summary log
-  userLogger.info('CollectionDetailPage: page render completed', {
-    section: 'page-render',
-  });
+  userLogger.info({ section: 'data-fetch' }, 'CollectionDetailPage: page render completed');
 
   // Fetch user profile to get slug for share URL
   let userSlug: null | string = null;
@@ -233,16 +232,11 @@ async function CollectionDetailContent({
       if (userData?.user_settings?.user_data?.slug) {
         userSlug = userData.user_settings.user_data.slug;
       } else {
-        userLogger.warn('CollectionDetailPage: user profile slug not found', {
-          section: 'share-url-generation',
-        });
+        userLogger.warn({ section: 'data-fetch' }, 'CollectionDetailPage: user profile slug not found');
       }
     } catch (error) {
       const normalized = normalizeError(error, 'Failed to fetch user profile for share URL');
-      userLogger.warn('CollectionDetailPage: failed to fetch user profile slug', {
-        section: 'share-url-generation',
-        error: normalized instanceof Error ? normalized.message : String(normalized),
-      });
+      userLogger.warn({ section: 'data-fetch', error: normalized instanceof Error ? normalized.message : String(normalized) }, 'CollectionDetailPage: failed to fetch user profile slug');
     }
   }
 

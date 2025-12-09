@@ -4,7 +4,7 @@
 ---
 # Rule: Detect server-only imports in client components
 id: server-import-in-client
-language: TypeScript
+language: typescript
 rule:
   all:
     - pattern: import $ITEMS from '@heyclaude/web-runtime/$MODULE'
@@ -19,7 +19,7 @@ severity: error
 ---
 # Rule: Detect Node.js APIs in client components
 id: nodejs-api-in-client
-language: TypeScript
+language: typescript
 rule:
   all:
     - pattern: import $ITEMS from '$MODULE'
@@ -34,7 +34,7 @@ severity: error
 ---
 # Rule: Detect browser APIs in server components
 id: browser-api-in-server
-language: TypeScript
+language: typescript
 rule:
   all:
     - pattern: ($WINDOW|$DOCUMENT|$LOCALSTORAGE|$SESSIONSTORAGE)
@@ -49,7 +49,7 @@ severity: error
 ---
 # Rule: Detect React hooks in server components
 id: react-hooks-in-server
-language: TypeScript
+language: typescript
 rule:
   all:
     - pattern: ($HOOK)($$$)
@@ -65,7 +65,7 @@ severity: error
 ---
 # Rule: Detect wrong logging import in client components
 id: wrong-logging-import-client
-language: TypeScript
+language: typescript
 rule:
   all:
     - pattern: import { logger } from '@heyclaude/web-runtime/$MODULE'
@@ -80,7 +80,7 @@ severity: error
 ---
 # Rule: Detect wrong logging import in server components
 id: wrong-logging-import-server
-language: TypeScript
+language: typescript
 rule:
   all:
     - pattern: import { $CLIENT_LOGGER } from '@heyclaude/web-runtime/logging/client'
@@ -96,7 +96,7 @@ severity: error
 ---
 # Rule: Detect missing 'use client' directive in component with hooks
 id: missing-use-client-directive
-language: TypeScript
+language: typescript
 rule:
   all:
     - pattern: export (function|const) $COMPONENT($$$) { $$$ }

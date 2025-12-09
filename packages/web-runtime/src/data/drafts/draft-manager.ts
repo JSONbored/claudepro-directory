@@ -123,13 +123,16 @@ export class DraftManager {
     } catch (error) {
       // Client-side utility - include full context
       const normalized = normalizeError(error, 'DraftManager: Failed to save draft');
-      logger.warn('DraftManager: Failed to save draft', {
-        err: normalized,
-        operation: 'DraftManager.save',
-        module: 'data/drafts',
-        key: this.key,
-        submission_type: data.submission_type,
-      });
+      logger.warn(
+        {
+          err: normalized,
+          operation: 'DraftManager.save',
+          module: 'data/drafts',
+          key: this.key,
+          submission_type: data.submission_type,
+        },
+        'DraftManager: Failed to save draft'
+      );
       return false;
     }
   }
@@ -165,13 +168,16 @@ export class DraftManager {
       // Version check
       if (draft.version !== DraftManager.VERSION) {
         // Client-side utility - include full context
-        logger.info('DraftManager: Draft version mismatch, clearing', {
-          operation: 'DraftManager.loadRaw',
-          module: 'data/drafts',
-          key: this.key,
-          stored: draft.version,
-          current: DraftManager.VERSION,
-        });
+        logger.info(
+          {
+            operation: 'DraftManager.loadRaw',
+            module: 'data/drafts',
+            key: this.key,
+            stored: draft.version,
+            current: DraftManager.VERSION,
+          },
+          'DraftManager: Draft version mismatch, clearing'
+        );
         this.clear();
         return null;
       }
@@ -180,12 +186,15 @@ export class DraftManager {
     } catch (error) {
       // Client-side utility - include full context
       const normalized = normalizeError(error, 'DraftManager: Failed to load draft');
-      logger.warn('DraftManager: Failed to load draft', {
-        err: normalized,
-        operation: 'DraftManager.loadRaw',
-        module: 'data/drafts',
-        key: this.key,
-      });
+      logger.warn(
+        {
+          err: normalized,
+          operation: 'DraftManager.loadRaw',
+          module: 'data/drafts',
+          key: this.key,
+        },
+        'DraftManager: Failed to load draft'
+      );
       return null;
     }
   }
@@ -200,12 +209,10 @@ export class DraftManager {
     } catch (error) {
       // Client-side utility - include full context
       const normalized = normalizeError(error, 'DraftManager: Failed to clear draft');
-      logger.warn('DraftManager: Failed to clear draft', {
-        err: normalized,
-        operation: 'DraftManager.clear',
-        module: 'data/drafts',
-        key: this.key,
-      });
+      logger.warn(
+        { err: normalized, operation: 'DraftManager.clear', module: 'data/drafts', key: this.key },
+        'DraftManager: Failed to clear draft'
+      );
       return false;
     }
   }
@@ -338,11 +345,10 @@ export class DraftManager {
     } catch (error) {
       // Client-side utility - include full context
       const normalized = normalizeError(error, 'DraftManager: Failed to list drafts');
-      logger.warn('DraftManager: Failed to list drafts', {
-        err: normalized,
-        operation: 'DraftManager.listAll',
-        module: 'data/drafts',
-      });
+      logger.warn(
+        { err: normalized, operation: 'DraftManager.listAll', module: 'data/drafts' },
+        'DraftManager: Failed to list drafts'
+      );
     }
 
     // Sort by updated_at (most recent first)
@@ -391,12 +397,10 @@ export class DraftManager {
     } catch (error) {
       // Client-side utility - include full context
       const normalized = normalizeError(error, 'DraftManager: Failed to clear expired drafts');
-      logger.warn('DraftManager: Failed to clear expired drafts', {
-        err: normalized,
-        operation: 'DraftManager.clearExpired',
-        module: 'data/drafts',
-        cleared,
-      });
+      logger.warn(
+        { err: normalized, operation: 'DraftManager.clearExpired', module: 'data/drafts', cleared },
+        'DraftManager: Failed to clear expired drafts'
+      );
     }
 
     return cleared;
@@ -427,12 +431,10 @@ export class DraftManager {
     } catch (error) {
       // Client-side utility - include full context
       const normalized = normalizeError(error, 'DraftManager: Failed to clear all drafts');
-      logger.warn('DraftManager: Failed to clear all drafts', {
-        err: normalized,
-        operation: 'DraftManager.clearAll',
-        module: 'data/drafts',
-        cleared,
-      });
+      logger.warn(
+        { err: normalized, operation: 'DraftManager.clearAll', module: 'data/drafts', cleared },
+        'DraftManager: Failed to clear all drafts'
+      );
     }
 
     return cleared;
@@ -458,11 +460,10 @@ export class DraftManager {
     } catch (error) {
       // Client-side utility - include full context
       const normalized = normalizeError(error, 'DraftManager: Failed to calculate storage size');
-      logger.warn('DraftManager: Failed to calculate storage size', {
-        err: normalized,
-        operation: 'DraftManager.getStorageSize',
-        module: 'data/drafts',
-      });
+      logger.warn(
+        { err: normalized, operation: 'DraftManager.getStorageSize', module: 'data/drafts' },
+        'DraftManager: Failed to calculate storage size'
+      );
     }
 
     return size;
@@ -494,14 +495,17 @@ export function createDebouncedSave(
       draftManager.save(data);
       const loadedDraft = draftManager.load();
       // Client-side utility - include full context
-      logger.debug('DraftManager: Auto-saved draft', {
-        operation: 'createDebouncedSave',
-        module: 'data/drafts',
-        ...(data.submission_type ? { submission_type: data.submission_type } : {}),
-        ...(loadedDraft?.quality_score === undefined
-          ? {}
-          : { quality_score: loadedDraft.quality_score }),
-      });
+      logger.debug(
+        {
+          operation: 'createDebouncedSave',
+          module: 'data/drafts',
+          ...(data.submission_type ? { submission_type: data.submission_type } : {}),
+          ...(loadedDraft?.quality_score === undefined
+            ? {}
+            : { quality_score: loadedDraft.quality_score }),
+        },
+        'DraftManager: Auto-saved draft'
+      );
     }, delay);
   };
 }

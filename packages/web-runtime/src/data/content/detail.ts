@@ -50,10 +50,10 @@ export async function getContentDetailComplete(input: {
       'Invalid category',
       'Invalid category in getContentDetailComplete'
     );
-    reqLogger.error('Invalid category in getContentDetailComplete', normalized, {
-      category,
-      slug,
-    });
+    reqLogger.error(
+      { err: normalized, category, slug },
+      'Invalid category in getContentDetailComplete'
+    );
     return null;
   }
 
@@ -83,19 +83,15 @@ export async function getContentDetailComplete(input: {
     const service = new ContentService(client);
     const result = await service.getContentDetailComplete({ p_category: category, p_slug: slug });
 
-    reqLogger.info('getContentDetailComplete: fetched successfully', {
-      category,
-      slug,
-      hasResult: Boolean(result),
-    });
+    reqLogger.info(
+      { category, slug, hasResult: Boolean(result) },
+      'getContentDetailComplete: fetched successfully'
+    );
 
     return result;
   } catch (error) {
     const normalized = normalizeError(error, 'getContentDetailComplete failed');
-    reqLogger.error('getContentDetailComplete failed', normalized, {
-      category,
-      slug,
-    });
+    reqLogger.error({ err: normalized, category, slug }, 'getContentDetailComplete failed');
     return null;
   }
 }
@@ -125,10 +121,10 @@ export async function getContentDetailCore(input: {
       'Invalid category',
       'Invalid category in getContentDetailCore'
     );
-    reqLogger.error('Invalid category in getContentDetailCore', normalized, {
-      category,
-      slug,
-    });
+    reqLogger.error(
+      { err: normalized, category, slug },
+      'Invalid category in getContentDetailCore'
+    );
     return null;
   }
 
@@ -158,19 +154,15 @@ export async function getContentDetailCore(input: {
     const service = new ContentService(client);
     const result = await service.getContentDetailCore({ p_category: category, p_slug: slug });
 
-    reqLogger.info('getContentDetailCore: fetched successfully', {
-      category,
-      slug,
-      hasResult: Boolean(result),
-    });
+    reqLogger.info(
+      { category, slug, hasResult: Boolean(result) },
+      'getContentDetailCore: fetched successfully'
+    );
 
     return result;
   } catch (error) {
     const normalized = normalizeError(error, 'getContentDetailCore failed');
-    reqLogger.error('getContentDetailCore failed', normalized, {
-      category,
-      slug,
-    });
+    reqLogger.error({ err: normalized, category, slug }, 'getContentDetailCore failed');
     return null;
   }
 }
@@ -200,10 +192,7 @@ export async function getContentAnalytics(input: {
       'Invalid category',
       'Invalid category in getContentAnalytics'
     );
-    reqLogger.error('Invalid category in getContentAnalytics', normalized, {
-      category,
-      slug,
-    });
+    reqLogger.error({ err: normalized, category, slug }, 'Invalid category in getContentAnalytics');
     return null;
   }
 
@@ -233,19 +222,15 @@ export async function getContentAnalytics(input: {
     const service = new ContentService(client);
     const result = await service.getContentAnalytics({ p_category: category, p_slug: slug });
 
-    reqLogger.info('getContentAnalytics: fetched successfully', {
-      category,
-      slug,
-      hasResult: Boolean(result),
-    });
+    reqLogger.info(
+      { category, slug, hasResult: Boolean(result) },
+      'getContentAnalytics: fetched successfully'
+    );
 
     return result;
   } catch (error) {
     const normalized = normalizeError(error, 'getContentAnalytics failed');
-    reqLogger.error('getContentAnalytics failed', normalized, {
-      category,
-      slug,
-    });
+    reqLogger.error({ err: normalized, category, slug }, 'getContentAnalytics failed');
     return null;
   }
 }

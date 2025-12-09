@@ -48,7 +48,7 @@ export function parseChangelogChanges(changes: unknown): ChangelogChanges {
       module: 'packages/web-runtime/src/data/changelog',
     });
     const normalized = normalizeError(error, 'Failed to parse changelog changes');
-    reqLogger.error('Failed to parse changelog changes', normalized);
+    reqLogger.error({ err: normalized }, 'Failed to parse changelog changes');
     return {};
   }
 }

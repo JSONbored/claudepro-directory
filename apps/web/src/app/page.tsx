@@ -132,7 +132,7 @@ async function TopContributorsServer() {
  * @see getHomepageData
  * @see trackRPCFailure
  */
-export default async function HomePage({ searchParams: _searchParams }: HomePageProperties) {
+export default function HomePage({ searchParams: _searchParams }: HomePageProperties) {
   const searchFiltersPromise = HomepageSearchFacetsServer();
 
   return (
@@ -206,7 +206,8 @@ async function HomepageHeroWithMemberCount() {
  * @param root0.searchFiltersPromise
  * @see HomepageContentServer
  * @see SearchFilterOptions
- */
+ 
+ * @returns {Promise<unknown>} Description of return value*/
 async function HomepageContentServerWrapper({
   searchFiltersPromise,
 }: {

@@ -527,14 +527,12 @@ export const BaseCard = memo(
       return cardContent;
     } catch (error) {
       const normalized = normalizeError(error, 'BaseCard: Rendering failed');
-      logger.warn('[Render] BaseCard rendering failed', {
-        err: normalized,
+      logger.warn({ err: normalized,
         category: 'render',
         component: 'BaseCard',
         recoverable: true,
         targetPath,
-        hasTitle: Boolean(displayTitle),
-      });
+        hasTitle: Boolean(displayTitle), }, '[Render] BaseCard rendering failed');
       // Return a minimal fallback
       return (
         <div className="rounded-lg border p-4" role="article" aria-label={ariaLabel}>

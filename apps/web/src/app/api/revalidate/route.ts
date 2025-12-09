@@ -64,9 +64,12 @@ export async function POST(request: NextRequest) {
         message: issue.message,
       }));
 
-      reqLogger.warn('Revalidate webhook invalid payload', {
-        zodErrors,
-      });
+      reqLogger.warn(
+        {
+          zodErrors,
+        },
+        'Revalidate webhook invalid payload'
+      );
       return NextResponse.json(
         { error: 'Invalid request payload', details: parseResult.error.issues },
         { status: 400 }
@@ -77,12 +80,15 @@ export async function POST(request: NextRequest) {
 
     // Verify secret from body (PostgreSQL trigger sends in payload)
     if (!secret || secret !== env.REVALIDATE_SECRET) {
-      reqLogger.warn('Revalidate webhook unauthorized', {
-        hasSecret: Boolean(secret),
-        // eslint-disable-next-line architectural-rules/warn-pii-field-logging -- IP address necessary for security audit trail
-        ip: request.headers.get('x-forwarded-for') ?? 'unknown',
-        securityEvent: true,
-      });
+      reqLogger.warn(
+        {
+          hasSecret: Boolean(secret),
+          // eslint-disable-next-line architectural-rules/warn-pii-field-logging -- IP address necessary for security audit trail
+          ip: request.headers.get('x-forwarded-for') ?? 'unknown',
+          securityEvent: true,
+        },
+        'Revalidate webhook unauthorized'
+      );
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -116,11 +122,14 @@ export async function POST(request: NextRequest) {
 
     // If neither category nor tags provided, return error
     if (!category && (!tags || tags.length === 0)) {
-      reqLogger.warn('Revalidate webhook invalid payload', {
-        hasCategory: Boolean(category),
-        hasTags: Boolean(tags),
-        securityEvent: true,
-      });
+      reqLogger.warn(
+        {
+          hasCategory: Boolean(category),
+          hasTags: Boolean(tags),
+          securityEvent: true,
+        },
+        'Revalidate webhook invalid payload'
+      );
       return NextResponse.json(
         { error: 'Missing category or tags in webhook payload' },
         { status: 400 }
@@ -128,20 +137,23 @@ export async function POST(request: NextRequest) {
     }
 
     // Structured logging with revalidation targets and cache tags
-    reqLogger.info('Revalidated successfully', {
-      operation: 'cache_revalidation',
-      securityEvent: true,
-      ...(category ? { category } : {}),
-      ...(slug ? { slug } : {}),
-      paths, // Array of revalidated paths - better for querying
-      pathCount: paths.length,
-      tags: invalidatedTags.length > 0 ? invalidatedTags : undefined, // Array support enables better log querying
-      tagCount: invalidatedTags.length,
-      revalidationTargets: {
-        paths,
-        tags: invalidatedTags,
+    reqLogger.info(
+      {
+        operation: 'cache_revalidation',
+        securityEvent: true,
+        ...(category ? { category } : {}),
+        ...(slug ? { slug } : {}),
+        paths, // Array of revalidated paths - better for querying
+        pathCount: paths.length,
+        tags: invalidatedTags.length > 0 ? invalidatedTags : undefined, // Array support enables better log querying
+        tagCount: invalidatedTags.length,
+        revalidationTargets: {
+          paths,
+          tags: invalidatedTags,
+        },
       },
-    });
+      'Cache revalidation completed'
+    );
 
     return NextResponse.json({
       revalidated: true,
@@ -151,9 +163,13 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: unknown) {
     const normalized = normalizeError(error, 'Revalidate API error');
-    reqLogger.error('Revalidate API error', normalized, {
-      section: 'error-handling',
-    });
+    reqLogger.error(
+      {
+        err: normalized,
+        section: 'error-handling',
+      },
+      'Revalidate API error'
+    );
     return handleApiError(error, {
       route: '/api/revalidate',
       operation: 'RevalidateAPI',

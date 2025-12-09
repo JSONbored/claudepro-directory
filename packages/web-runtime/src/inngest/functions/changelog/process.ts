@@ -342,7 +342,7 @@ export const processChangelogQueue = inngest.createFunction(
     const startTime = Date.now();
     const logContext = createWebAppContextWithId('/inngest/changelog/process', 'processChangelogQueue');
 
-    logger.info('Changelog queue processing started', logContext);
+    logger.info(logContext, 'Changelog queue processing started');
 
     const supabase = createSupabaseAdminClient();
 
@@ -363,16 +363,14 @@ export const processChangelogQueue = inngest.createFunction(
           msg.message && typeof msg.message.webhook_event_id === 'string'
         );
       } catch (error) {
-        logger.warn('Failed to read changelog queue', {
-          ...logContext,
-          errorMessage: normalizeError(error, 'Queue read failed').message,
-        });
+        logger.warn({ ...logContext,
+          errorMessage: normalizeError(error, 'Queue read failed').message, }, 'Failed to read changelog queue');
         return [];
       }
     });
 
     if (messages.length === 0) {
-      logger.info('No messages in changelog queue', logContext);
+      logger.info(logContext, 'No messages in changelog queue');
       return { processed: 0, created: 0 };
     }
 
@@ -554,11 +552,9 @@ export const processChangelogQueue = inngest.createFunction(
           return { success: true, changelogId: changelogData.id };
         } catch (error) {
           const normalized = normalizeError(error, 'Changelog processing failed');
-          logger.warn('Changelog processing failed', {
-            ...logContext,
+          logger.warn({ ...logContext,
             webhookEventId: msg.message.webhook_event_id,
-            errorMessage: normalized.message,
-          });
+            errorMessage: normalized.message, }, 'Changelog processing failed');
           return { success: false };
         }
       });
@@ -581,12 +577,10 @@ export const processChangelogQueue = inngest.createFunction(
     }
 
     const durationMs = Date.now() - startTime;
-    logger.info('Changelog queue processing completed', {
-      ...logContext,
+    logger.info({ ...logContext,
       durationMs,
       processed: messages.length,
-      created: createdCount,
-    });
+      created: createdCount, }, 'Changelog queue processing completed');
 
     return {
       processed: messages.length,

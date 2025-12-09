@@ -88,11 +88,14 @@ function logDetailProcessingWarning(
     | Database['public']['Tables']['content']['Row']
 ): void {
   const normalized = normalizeError(error, `${section} processing failed`);
-  logger.warn(`UnifiedDetailPage: ${section} processing failed`, {
-    category: item.category ?? 'null',
-    slug: item.slug ?? 'unknown',
-    error: normalized.message,
-  });
+  logger.warn(
+    {
+      category: item.category ?? 'null',
+      slug: item.slug ?? 'unknown',
+      err: normalized,
+    },
+    `UnifiedDetailPage: ${section} processing failed`
+  );
 }
 
 /**
@@ -794,12 +797,14 @@ export async function UnifiedDetailPage({
     const itemMetadata = getMetadata(item);
     if (!(itemMetadata?.['sections'] && Array.isArray(itemMetadata['sections']))) {
       // Log warning if sections are missing for guides
-      logger.warn('Guides content missing sections in metadata', {
+      logger.warn({ 
         category: item.category,
         slug: item.slug,
         hasMetadata: !!itemMetadata,
         sectionsType: itemMetadata?.['sections'] ? typeof itemMetadata['sections'] : 'undefined',
-      });
+        },
+        'Guides content missing sections in metadata'
+      );
       return null;
     }
 

@@ -164,10 +164,14 @@ function decodeQuizAnswers(
     } as DecodedQuizAnswers;
   } catch (error) {
     const normalized = normalizeError(error, 'Invalid quiz answers encoding');
-    utilityLogger.error('ConfigRecommenderResults: decodeQuizAnswers failed', normalized, {
-      resultId,
-      encodedLength: encoded.length,
-    });
+    utilityLogger.error(
+      {
+        err: normalized,
+        resultId,
+        encodedLength: encoded.length,
+      },
+      'ConfigRecommenderResults: decodeQuizAnswers failed'
+    );
     throw normalized;
   }
 }
@@ -217,11 +221,14 @@ function normalizeRecommendationResults(
   );
 
   if (normalized.length < results.length) {
-    utilityLogger.warn('ConfigRecommenderResults: filtered incomplete recommendation items', {
-      resultId,
-      originalCount: results.length,
-      filteredCount: normalized.length,
-    });
+    utilityLogger.warn(
+      {
+        resultId,
+        originalCount: results.length,
+        filteredCount: normalized.length,
+      },
+      'ConfigRecommenderResults: filtered incomplete recommendation items'
+    );
   }
 
   return normalized;
@@ -335,9 +342,10 @@ async function ResultsPageContent({
 
   // Section: Answers Validation
   if (!resolvedSearchParameters.answers) {
-    routeLogger.warn('ConfigRecommenderResults: accessed without answers parameter', {
-      section: 'answers-validation',
-    });
+    routeLogger.warn(
+      { section: 'data-fetch' },
+      'ConfigRecommenderResults: accessed without answers parameter'
+    );
     notFound();
   }
 
@@ -349,18 +357,25 @@ async function ResultsPageContent({
       resolvedParameters.id,
       routeLogger
     );
-    routeLogger.info('ConfigRecommenderResults: answers decoded successfully', {
-      section: 'answers-decoding',
-      useCase: answers.useCase,
-      experienceLevel: answers.experienceLevel,
-    });
+    routeLogger.info(
+      {
+        section: 'data-fetch',
+        useCase: answers.useCase,
+        experienceLevel: answers.experienceLevel,
+      },
+      'ConfigRecommenderResults: answers decoded successfully'
+    );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to decode quiz answers');
-    routeLogger.error('ConfigRecommenderResults: failed to decode quiz answers', normalized, {
-      section: 'answers-decoding',
-      route: `/tools/config-recommender/results/${resolvedParameters.id}`,
-      operation: 'ConfigRecommenderResults',
-    });
+    routeLogger.error(
+      {
+        section: 'data-fetch',
+        err: normalized,
+        route: `/tools/config-recommender/results/${resolvedParameters.id}`,
+        operation: 'ConfigRecommenderResults',
+      },
+      'ConfigRecommenderResults: failed to decode quiz answers'
+    );
     notFound();
   }
 
@@ -372,22 +387,25 @@ async function ResultsPageContent({
     ...(answers.p_integrations && { integrations: answers.p_integrations }),
     ...(answers.p_focus_areas && { focusAreas: answers.p_focus_areas }),
   });
-  routeLogger.info('ConfigRecommenderResults: recommendations fetched', {
-    section: 'recommendations-fetch',
-    useCase: answers.useCase,
-    experienceLevel: answers.experienceLevel,
-    resultCount: enrichedResult?.results?.length ?? 0,
-  });
+  routeLogger.info(
+    {
+      section: 'data-fetch',
+      useCase: answers.useCase,
+      experienceLevel: answers.experienceLevel,
+      resultCount: enrichedResult?.results?.length ?? 0,
+    },
+    'ConfigRecommenderResults: recommendations fetched'
+  );
 
   if (!enrichedResult?.results) {
     // logger.error() normalizes errors internally, so pass raw error
     routeLogger.error(
-      'ConfigRecommenderResults: get_recommendations returned no data',
-      new Error('Recommendations result is null'),
       {
-        section: 'recommendations-fetch',
+        section: 'data-fetch',
+        err: new Error('Recommendations result is null'),
         useCase: answers.useCase,
-      }
+      },
+      'ConfigRecommenderResults: get_recommendations returned no data'
     );
     notFound();
   }
@@ -406,12 +424,15 @@ async function ResultsPageContent({
 
   const shareUrl = `${APP_CONFIG.url}/tools/config-recommender/results/${resolvedParameters.id}?answers=${resolvedSearchParameters.answers}`;
 
-  routeLogger.info('ConfigRecommenderResults: page viewed', {
-    section: 'page-render',
-    useCase: answers.useCase,
-    experienceLevel: answers.experienceLevel,
-    resultCount: recommendations.results?.length ?? 0,
-  });
+  routeLogger.info(
+    {
+      section: 'data-fetch',
+      useCase: answers.useCase,
+      experienceLevel: answers.experienceLevel,
+      resultCount: recommendations.results?.length ?? 0,
+    },
+    'ConfigRecommenderResults: page viewed'
+  );
 
   return (
     <div className="bg-background min-h-screen">

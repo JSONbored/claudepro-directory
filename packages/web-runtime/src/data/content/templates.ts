@@ -137,18 +137,18 @@ export async function getContentTemplates(
       ) as MergedTemplateItem[];
     }
 
-    reqLogger.info('getContentTemplates: fetched successfully', {
-      category,
-      templateCount: serialized.length,
-    });
+    reqLogger.info(
+      { category, templateCount: serialized.length },
+      'getContentTemplates: fetched successfully'
+    );
 
     return serialized;
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to fetch content templates');
-    reqLogger.error('getContentTemplates: failed', normalized, {
-      category,
-      source: 'getContentTemplates',
-    });
+    reqLogger.error(
+      { err: normalized, category, source: 'getContentTemplates' },
+      'getContentTemplates: failed'
+    );
     // Return empty array on error to avoid breaking the build
     return [];
   }

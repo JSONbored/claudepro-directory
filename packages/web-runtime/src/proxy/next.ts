@@ -46,20 +46,14 @@ export function applyNextProxyGuards(
     const sanitizedPath = sanitizePath(pathname);
 
     for (const { header, value } of suspiciousHeaders) {
-      logger.error(
-        'CVE-2025-29927: Middleware bypass attempt detected',
-        normalized,
-        {
-          header,
+      logger.error({ err: normalized, header,
           value: value.substring(0, 100),
           ip: clientInfo.ip,
           userAgent: clientInfo.userAgent,
           path: sanitizedPath,
           type: 'security_bypass_attempt',
           severity: 'critical',
-          cve: 'CVE-2025-29927',
-        }
-      );
+          cve: 'CVE-2025-29927', }, 'CVE-2025-29927: Middleware bypass attempt detected');
     }
 
     const response = new NextResponse('Forbidden: Suspicious header detected', {
@@ -87,12 +81,10 @@ export function applyNextProxyGuards(
       if (!rateLimitResult.allowed) {
         const sanitizedPath = sanitizePath(pathname);
         const clientInfo = getClientInfo(request);
-        logger.warn('Proxy rate limit exceeded', {
-          path: sanitizedPath,
+        logger.warn({ path: sanitizedPath,
           ip: clientInfo.ip,
           limit: rateLimitOptions.config.maxRequests,
-          windowMs: rateLimitOptions.config.windowMs,
-        });
+          windowMs: rateLimitOptions.config.windowMs, }, 'Proxy rate limit exceeded');
 
         const retryAfter =
           rateLimitResult.retryAfter ??

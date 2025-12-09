@@ -215,11 +215,14 @@ export async function GET(request: NextRequest) {
     filtersPayload.entity = 'job';
   }
 
-  reqLogger.info('Search request received', {
-    query,
-    searchType,
-    filters: toLogContextValue(filtersPayload),
-  });
+  reqLogger.info(
+    {
+      query,
+      searchType,
+      filters: toLogContextValue(filtersPayload),
+    },
+    'Search request received'
+  );
 
   try {
     const { results, totalCount } = await getCachedSearchResults({
@@ -254,7 +257,7 @@ export async function GET(request: NextRequest) {
       // Errors already logged inside trackSearchAnalytics
       // Just prevent unhandled promise rejection
       const normalized = normalizeError(error, 'Search analytics failed silently');
-      reqLogger.warn('Search analytics failed (non-blocking)', { err: normalized });
+      reqLogger.warn({ err: normalized }, 'Search analytics failed (non-blocking)');
     });
 
     const responseBody = {
@@ -281,11 +284,14 @@ export async function GET(request: NextRequest) {
       searchType: SearchType;
     };
 
-    reqLogger.info('Search completed', {
-      searchType,
-      resultCount: highlightedResults.length,
-      totalCount,
-    });
+    reqLogger.info(
+      {
+        searchType,
+        resultCount: highlightedResults.length,
+        totalCount,
+      },
+      'Search completed'
+    );
 
     return jsonResponse(
       responseBody,
@@ -299,7 +305,7 @@ export async function GET(request: NextRequest) {
     );
   } catch (error) {
     const normalized = normalizeError(error, 'Search request failed');
-    reqLogger.error('Search request failed', normalized);
+    reqLogger.error({ err: normalized }, 'Search request failed');
     return createErrorResponse(normalized, {
       route: '/api/search',
       operation: 'SearchAPI',
@@ -369,7 +375,8 @@ function validateEnumValue<T extends string>(
  * @param params.searchType
  * @param params.sort
  * @param params.tags
- */
+ 
+ * @returns {unknown} Description of return value*/
 async function getCachedSearchResults(params: {
   authors?: string[] | undefined;
   categories?: string[] | undefined;
@@ -606,7 +613,7 @@ async function trackSearchAnalytics(
     });
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to enqueue search analytics');
-    reqLogger.warn('Failed to enqueue search analytics', { err: normalized });
+    reqLogger.warn({ err: normalized }, 'Failed to enqueue search analytics');
   }
 }
 

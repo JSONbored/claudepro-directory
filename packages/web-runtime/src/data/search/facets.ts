@@ -104,21 +104,28 @@ export async function getSearchFacets(): Promise<SearchFacetAggregate> {
       // logger.error() normalizes errors internally, so pass raw error
       const errorForLogging: Error | string =
         error instanceof Error ? error : (typeof error === 'string' ? error : String(error));
-      requestLogger.error('getSearchFacets: RPC call failed', errorForLogging, {
-        rpcName: 'get_search_facets',
-      });
+      requestLogger.error(
+        {
+          err: errorForLogging,
+          rpcName: 'get_search_facets',
+        },
+        'getSearchFacets: RPC call failed'
+      );
       throw error;
     }
 
     const facets = data.map((row) => normalizeFacetRow(row));
     const { tags, authors, categories } = aggregateFacetData(facets);
 
-    requestLogger.info('getSearchFacets: fetched successfully', {
-      facetCount: facets.length,
-      tagCount: tags.size,
-      authorCount: authors.size,
-      categoryCount: categories.size,
-    });
+    requestLogger.info(
+      {
+        facetCount: facets.length,
+        tagCount: tags.size,
+        authorCount: authors.size,
+        categoryCount: categories.size,
+      },
+      'getSearchFacets: fetched successfully'
+    );
 
     return {
       facets,
@@ -130,7 +137,7 @@ export async function getSearchFacets(): Promise<SearchFacetAggregate> {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string =
       error instanceof Error ? error : (typeof error === 'string' ? error : String(error));
-    requestLogger.error('getSearchFacets: failed', errorForLogging);
+    requestLogger.error({ err: errorForLogging }, 'getSearchFacets: failed');
     throw error;
   }
 }
@@ -184,25 +191,30 @@ export async function getPopularSearches(
     if (error) {
       const errorForLogging: Error | string =
         error instanceof Error ? error : (typeof error === 'string' ? error : String(error));
-      requestLogger.error('getPopularSearches: RPC call failed', errorForLogging, {
-        rpcName: 'get_trending_searches',
-        limit,
-      });
+      requestLogger.error(
+        {
+          err: errorForLogging,
+          rpcName: 'get_trending_searches',
+          limit,
+        },
+        'getPopularSearches: RPC call failed'
+      );
       throw error;
     }
 
-    requestLogger.info('getPopularSearches: fetched successfully', {
-      limit,
-      resultCount: data.length,
-    });
+    requestLogger.info(
+      {
+        limit,
+        resultCount: data.length,
+      },
+      'getPopularSearches: fetched successfully'
+    );
 
     return data;
   } catch (error) {
     const errorForLogging: Error | string =
       error instanceof Error ? error : (typeof error === 'string' ? error : String(error));
-    requestLogger.error('getPopularSearches: failed', errorForLogging, {
-      limit,
-    });
+    requestLogger.error({ err: errorForLogging, limit }, 'getPopularSearches: failed');
     return [];
   }
 }

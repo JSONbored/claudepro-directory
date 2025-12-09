@@ -83,7 +83,7 @@ async function NewCompanyPageContent({
   const { user } = await getAuthenticatedUser({ context: 'NewCompanyPage' });
 
   if (!user) {
-    reqLogger.warn('NewCompanyPage: unauthenticated access attempt');
+    reqLogger.warn({ section: 'data-fetch' }, 'NewCompanyPage: unauthenticated access attempt');
     redirect('/login');
   }
 

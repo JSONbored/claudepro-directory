@@ -79,17 +79,17 @@ export function SubmissionCard({
     if (isValidSubmissionStatus(submission.status)) {
       status = submission.status;
     } else {
-      logger.warn('SubmissionsPage: Invalid submission status', {
+      logger.warn({ 
         submissionId,
         invalidStatus: submission.status,
         validStatuses: VALID_SUBMISSION_STATUSES,
         error: `Invalid status: ${submission.status}`,
-      });
+        },
+        'SubmissionsPage: Invalid submission status'
+      );
     }
   } else {
-    logger.warn('SubmissionsPage: Missing submission status', undefined, {
-      submissionId,
-    });
+    logger.warn({ submissionId }, 'SubmissionsPage: Missing submission status');
   }
 
   // Validate content_type - log warning if missing or invalid
@@ -98,25 +98,23 @@ export function SubmissionCard({
     if (isValidSubmissionType(submission.content_type)) {
       type = submission.content_type;
     } else {
-      logger.warn('SubmissionsPage: Invalid submission content_type', {
+      logger.warn({ 
         submissionId,
         invalidContentType: submission.content_type,
         validContentTypes: VALID_SUBMISSION_TYPES,
         error: `Invalid content_type: ${submission.content_type}`,
-      });
+        },
+        'SubmissionsPage: Invalid submission content_type'
+      );
     }
   } else {
-    logger.warn('SubmissionsPage: Missing submission content_type', undefined, {
-      submissionId,
-    });
+    logger.warn({ submissionId }, 'SubmissionsPage: Missing submission content_type');
   }
 
   // Validate content_slug - log warning if missing
   const contentSlug = submission.content_slug;
   if (!contentSlug) {
-    logger.warn('SubmissionsPage: Missing submission content_slug', undefined, {
-      submissionId,
-    });
+    logger.warn({ submissionId }, 'SubmissionsPage: Missing submission content_slug');
   }
 
   const prLinkProps = getPrLinkProps(submission);

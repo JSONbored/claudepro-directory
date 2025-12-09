@@ -17,7 +17,8 @@ const isDevelopment = process.env.NODE_ENV === 'development';
  * ErrorCodeBlock component with copy-to-clipboard functionality
  * @param root0
  * @param root0.content
- */
+ 
+ * @returns {unknown} Description of return value*/
 function ErrorCodeBlock({ content }: { content: string }) {
   const { copied, copy } = useCopyToClipboard({
     context: { component: 'GlobalError', action: 'copy-error' },

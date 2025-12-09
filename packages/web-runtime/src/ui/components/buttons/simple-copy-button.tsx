@@ -101,15 +101,13 @@ export function SimpleCopyButton({
       setTimeout(() => setCopied(false), UI_TIMEOUTS.clipboard_reset_delay_ms);
     } catch (error) {
       const normalized = normalizeError(error, 'SimpleCopyButton: clipboard write failed');
-      logger.warn('[Clipboard] Copy failed', {
-        err: normalized,
+      logger.warn({ err: normalized,
         category: 'clipboard',
         component: 'SimpleCopyButton',
         recoverable: true,
         userRetryable: true,
         hasContent: Boolean(content),
-        label: label ?? 'unnamed',
-      });
+        label: label ?? 'unnamed', }, '[Clipboard] Copy failed');
       toasts.raw.error(errorMessage);
     }
   };

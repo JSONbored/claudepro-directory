@@ -84,7 +84,7 @@ export const processChangelogNotifyQueue = inngest.createFunction(
     const startTime = Date.now();
     const logContext = createWebAppContextWithId('/inngest/changelog/notify', 'processChangelogNotifyQueue');
 
-    logger.info('Changelog notify queue processing started', logContext);
+    logger.info(logContext, 'Changelog notify queue processing started');
 
     const supabase = createSupabaseAdminClient();
 
@@ -107,16 +107,14 @@ export const processChangelogNotifyQueue = inngest.createFunction(
           typeof msg.message.slug === 'string'
         );
       } catch (error) {
-        logger.warn('Failed to read changelog notify queue', {
-          ...logContext,
-          errorMessage: normalizeError(error, 'Queue read failed').message,
-        });
+        logger.warn({ ...logContext,
+          errorMessage: normalizeError(error, 'Queue read failed').message, }, 'Failed to read changelog notify queue');
         return [];
       }
     });
 
     if (messages.length === 0) {
-      logger.info('No messages in changelog notify queue', logContext);
+      logger.info(logContext, 'No messages in changelog notify queue');
       return { processed: 0, notified: 0 };
     }
 
@@ -154,21 +152,15 @@ export const processChangelogNotifyQueue = inngest.createFunction(
 
               if (discordResponse.ok) {
                 discordSent = true;
-                logger.info('Discord webhook sent', {
-                  ...logContext,
-                  slug: job.slug,
-                });
+                logger.info({ ...logContext,
+                  slug: job.slug, }, 'Discord webhook sent');
               } else {
-                logger.warn('Discord webhook failed', {
-                  ...logContext,
-                  status: discordResponse.status,
-                });
+                logger.warn({ ...logContext,
+                  status: discordResponse.status, }, 'Discord webhook failed');
               }
             } catch (error) {
-              logger.warn('Discord webhook error', {
-                ...logContext,
-                errorMessage: normalizeError(error, 'Discord failed').message,
-              });
+              logger.warn({ ...logContext,
+                errorMessage: normalizeError(error, 'Discord failed').message, }, 'Discord webhook error');
             }
           }
 
@@ -192,35 +184,32 @@ export const processChangelogNotifyQueue = inngest.createFunction(
           }
 
           notificationInserted = true;
-          logger.info('Notification inserted', {
-            ...logContext,
-            entryId: job.entryId,
-          });
+          logger.info({ ...logContext,
+            entryId: job.entryId, }, 'Notification inserted');
 
           // 3. Invalidate cache tags
           // Using 'max' profile for stale-while-revalidate semantics (Next.js 16+)
           try {
             revalidateTag('changelog', 'max');
             revalidateTag(`changelog-${job.slug}`, 'max');
-            logger.info('Cache invalidated', {
-              ...logContext,
-              tags: ['changelog', `changelog-${job.slug}`],
-            });
+            logger.info(
+              {
+                ...logContext,
+                tags: ['changelog', `changelog-${job.slug}`],
+              },
+              'Cache invalidated'
+            );
           } catch (error) {
-            logger.warn('Cache invalidation failed', {
-              ...logContext,
-              errorMessage: normalizeError(error, 'Cache invalidation failed').message,
-            });
+            logger.warn({ ...logContext,
+              errorMessage: normalizeError(error, 'Cache invalidation failed').message, }, 'Cache invalidation failed');
           }
 
           return { success: true, discordSent, notificationInserted };
         } catch (error) {
           const normalized = normalizeError(error, 'Changelog notification failed');
-          logger.warn('Changelog notification failed', {
-            ...logContext,
+          logger.warn({ ...logContext,
             entryId: job.entryId,
-            errorMessage: normalized.message,
-          });
+            errorMessage: normalized.message, }, 'Changelog notification failed');
           return { success: notificationInserted, discordSent, notificationInserted };
         }
       });
@@ -243,12 +232,10 @@ export const processChangelogNotifyQueue = inngest.createFunction(
     }
 
     const durationMs = Date.now() - startTime;
-    logger.info('Changelog notify queue processing completed', {
-      ...logContext,
+    logger.info({ ...logContext,
       durationMs,
       processed: messages.length,
-      notified: notifiedCount,
-    });
+      notified: notifiedCount, }, 'Changelog notify queue processing completed');
 
     return {
       processed: messages.length,

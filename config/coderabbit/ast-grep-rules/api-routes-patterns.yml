@@ -3,9 +3,27 @@
 # Matches: config/tools/eslint-plugin-architectural-rules.js -> require-authentication-for-protected-resources, require-zod-schema-for-api-routes
 
 ---
+# Rule: Detect missing logger.child() for request-scoped context in API routes
+id: missing-logger-child-api-route
+language: typescript
+rule:
+  all:
+    - pattern: export async function $METHOD($REQ: NextRequest) { $$$ }
+      kind: function_declaration
+    - inside:
+        pattern: app/api/**/*.ts
+    - has:
+        pattern: (logger|normalizeError|createErrorResponse)($$$)
+    - not:
+        has:
+          pattern: const $LOGGER = logger.child({ operation: $OP, route: $ROUTE, method: $METHOD })
+message: "API routes should use logger.child({ operation, route, method }) for request-scoped context. Create: const reqLogger = logger.child({ operation: 'APIName', route: '/api/path', method: 'GET' }) and use reqLogger for all logs"
+severity: error
+
+---
 # Rule: Detect missing auth checks in API routes
 id: missing-auth-api-route
-language: TypeScript
+language: typescript
 rule:
   all:
     - pattern: export async function $METHOD($REQ: NextRequest) { $$$ }
@@ -21,7 +39,7 @@ severity: error
 ---
 # Rule: Detect missing input validation (Zod schema) in API routes
 id: missing-api-input-validation
-language: TypeScript
+language: typescript
 rule:
   all:
     - pattern: export async function $METHOD($REQ: NextRequest) { $$$ }
@@ -39,23 +57,41 @@ severity: error
 ---
 # Rule: Detect missing error handling (createErrorResponse) in API routes
 id: missing-api-error-handling
-language: TypeScript
+language: typescript
 rule:
   all:
     - pattern: export async function $METHOD($REQ: NextRequest) { $$$ }
       kind: function_declaration
     - inside:
         pattern: app/api/**/*.ts
+    - has:
+        pattern: catch ($ERROR) { $$$ }
     - not:
         has:
           pattern: createErrorResponse($$$)
-message: "API routes must use createErrorResponse() for error handling. Import createErrorResponse from @heyclaude/web-runtime/logging/server"
+message: "API routes must use createErrorResponse() for error handling. Import createErrorResponse from @heyclaude/web-runtime/logging/server. Pattern: const normalized = normalizeError(error, 'fallback'); return createErrorResponse(normalized, { route, operation, method, logContext })"
+severity: error
+
+---
+# Rule: Detect missing normalizeError in API route catch blocks
+id: missing-normalize-error-api-route
+language: typescript
+rule:
+  all:
+    - pattern: catch ($ERROR) { $$$ }
+      kind: catch_clause
+    - inside:
+        pattern: app/api/**/*.ts
+    - not:
+        has:
+          pattern: normalizeError($$$)
+message: "API route catch blocks must use normalizeError() before logging or creating error response. Import normalizeError from @heyclaude/web-runtime/logging/server"
 severity: error
 
 ---
 # Rule: Detect missing CORS headers in API routes
 id: missing-cors-api-route
-language: TypeScript
+language: typescript
 rule:
   all:
     - pattern: export async function $METHOD($REQ: NextRequest) { $$$ return NextResponse.$METHOD($$$) }

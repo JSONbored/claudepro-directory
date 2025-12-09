@@ -124,9 +124,10 @@ async function SponsorshipAnalyticsPageContent({
   const { user } = await getAuthenticatedUser({ context: 'SponsorshipAnalyticsPage' });
 
   if (!user) {
-    routeLogger.warn('SponsorshipAnalyticsPage: unauthenticated access attempt', {
-      section: 'authentication',
-    });
+    routeLogger.warn(
+      { section: 'data-fetch' },
+      'SponsorshipAnalyticsPage: unauthenticated access attempt'
+    );
     return (
       <div className="space-y-6">
         <Card>
@@ -156,14 +157,21 @@ async function SponsorshipAnalyticsPageContent({
     analyticsData = await getSponsorshipAnalytics(user.id, id);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load sponsorship analytics');
-    userLogger.error('SponsorshipAnalyticsPage: getSponsorshipAnalytics threw', normalized, {
-      section: 'analytics-data-fetch',
-    });
+    userLogger.error(
+      {
+        section: 'data-fetch',
+        err: normalized,
+      },
+      'SponsorshipAnalyticsPage: getSponsorshipAnalytics threw'
+    );
     throw normalized;
   }
 
   if (!analyticsData) {
-    userLogger.warn('SponsorshipAnalyticsPage: analytics not found or inaccessible');
+    userLogger.warn(
+      { section: 'data-fetch' },
+      'SponsorshipAnalyticsPage: analytics not found or inaccessible'
+    );
     notFound();
   }
 
@@ -176,8 +184,11 @@ async function SponsorshipAnalyticsPageContent({
   // Handle nullability per generated types (composite types are nullable in generated types)
   if (!sponsorship || !daily_stats || !computed_metrics) {
     userLogger.error(
-      'SponsorshipAnalyticsPage: unexpected null fields in analytics data',
-      new Error('Null fields in analytics data')
+      {
+        section: 'data-fetch',
+        err: new Error('Null fields in analytics data'),
+      },
+      'SponsorshipAnalyticsPage: unexpected null fields in analytics data'
     );
     notFound();
   }
@@ -201,11 +212,9 @@ async function SponsorshipAnalyticsPageContent({
     : 'sponsored'; // Safe default for invalid values
 
   if (!isTierValid) {
-    userLogger.warn('SponsorshipAnalyticsPage: invalid tier value, using safe default', {
-      invalidTier: rawTier,
-      expectedTiers: validTiers, // Now supports arrays directly - better for log querying
-      fallbackTier: 'sponsored',
-    });
+    userLogger.warn({ section: 'data-fetch', invalidTier: rawTier,
+        expectedTiers: validTiers, // Now supports arrays directly - better for log querying
+        fallbackTier: 'sponsored' }, 'SponsorshipAnalyticsPage: invalid tier value, using safe default');
   }
 
   const impressionCount = sponsorship.impression_count ?? 0;
@@ -264,7 +273,7 @@ async function SponsorshipAnalyticsPageContent({
             value: `${ctr}%`,
             change: 'Clicks / Impressions',
             trend:
-              Number.parseFloat(ctr) > 2 ? 'up' : Number.parseFloat(ctr) > 0 ? 'unchanged' : 'down',
+              Number.parseFloat(ctr) > 2 ? 'up' : (Number.parseFloat(ctr) > 0 ? 'unchanged' : 'down'),
           },
           {
             label: 'Avg. Daily Views',

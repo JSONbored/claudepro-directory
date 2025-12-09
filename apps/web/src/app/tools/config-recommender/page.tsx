@@ -68,7 +68,7 @@ export async function generateMetadata(): Promise<Metadata> {
  *
  * @see QuizForm
  */
-export default async function ConfigRecommenderPage() {
+export default function ConfigRecommenderPage() {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
@@ -79,9 +79,7 @@ export default async function ConfigRecommenderPage() {
     module: 'apps/web/src/app/tools/config-recommender/page',
   });
 
-  reqLogger.info('ConfigRecommenderPage: rendering page', {
-    section: 'page-render',
-  });
+  reqLogger.info({ section: 'data-fetch' }, 'ConfigRecommenderPage: rendering page');
 
   // Return JSX - no try/catch needed for static content
   // Rendering errors will be caught by error boundaries

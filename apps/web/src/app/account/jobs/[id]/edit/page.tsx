@@ -130,9 +130,10 @@ async function EditJobPageContent({
   const { user } = await getAuthenticatedUser({ context: 'EditJobPage' });
 
   if (!user) {
-    routeLogger.warn('EditJobPage: unauthenticated access attempt', {
-      section: 'authentication',
-    });
+    routeLogger.warn(
+      { section: 'data-fetch' },
+      'EditJobPage: unauthenticated access attempt'
+    );
     redirect('/login');
   }
 
@@ -142,29 +143,26 @@ async function EditJobPageContent({
     userId: user.id, // Redaction will automatically hash this
   });
 
-  userLogger.info('EditJobPage: authentication successful', {
-    section: 'authentication',
-  });
+  userLogger.info({ section: 'data-fetch' }, 'EditJobPage: authentication successful');
 
   // Section: Job Data Fetch
   let job: Database['public']['Tables']['jobs']['Row'] | null = null;
   try {
     job = await getUserJobById(user.id, id);
-    userLogger.info('EditJobPage: job data loaded', {
-      section: 'job-data-fetch',
-      hasJob: !!job,
-    });
+    userLogger.info({ section: 'data-fetch', hasJob: !!job }, 'EditJobPage: job data loaded');
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user job for edit page');
-    userLogger.error('EditJobPage: getUserJobById threw', normalized, {
-      section: 'job-data-fetch',
-    });
+    userLogger.error(
+      {
+        section: 'data-fetch',
+        err: normalized,
+      },
+      'EditJobPage: getUserJobById threw'
+    );
     throw normalized;
   }
   if (!job) {
-    userLogger.warn('EditJobPage: job not found or not owned by user', {
-      section: 'job-data-fetch',
-    });
+    userLogger.warn({ section: 'data-fetch' }, 'EditJobPage: job not found or not owned by user');
     notFound();
   }
 
@@ -172,15 +170,16 @@ async function EditJobPageContent({
   let planCatalog: Awaited<ReturnType<typeof getPaymentPlanCatalog>> = [];
   try {
     planCatalog = await getPaymentPlanCatalog();
-    userLogger.info('EditJobPage: plan catalog loaded', {
-      section: 'plan-catalog-fetch',
-      plansCount: planCatalog.length,
-    });
+    userLogger.info({ section: 'data-fetch', plansCount: planCatalog.length }, 'EditJobPage: plan catalog loaded');
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load payment plan catalog');
-    userLogger.error('EditJobPage: getPaymentPlanCatalog threw', normalized, {
-      section: 'plan-catalog-fetch',
-    });
+    userLogger.error(
+      {
+        section: 'data-fetch',
+        err: normalized,
+      },
+      'EditJobPage: getPaymentPlanCatalog threw'
+    );
   }
 
   const handleSubmit = async (data: EditJobInput) => {
@@ -201,13 +200,13 @@ async function EditJobPageContent({
       });
     } catch (error) {
       const normalized = normalizeError(error, 'updateJob server action failed');
-      actionLogger.error('EditJobPage: updateJob threw', normalized);
+      actionLogger.error({ err: normalized }, 'EditJobPage: updateJob threw');
       throw normalized;
     }
 
     if (result.serverError) {
       const normalized = normalizeError(result.serverError, 'updateJob server error response');
-      actionLogger.error('EditJobPage: updateJob returned serverError', normalized);
+      actionLogger.error({ err: normalized }, 'EditJobPage: updateJob returned serverError');
       throw normalized;
     }
 
@@ -216,7 +215,7 @@ async function EditJobPageContent({
         new Error('updateJob returned no data'),
         'updateJob returned no data'
       );
-      actionLogger.error('EditJobPage: updateJob returned no data', normalized);
+      actionLogger.error({ err: normalized }, 'EditJobPage: updateJob returned no data');
       throw normalized;
     }
 
@@ -238,16 +237,10 @@ async function EditJobPageContent({
 
   // Log warnings for invalid enum values to help track data integrity issues
   if (!isValidJobType(job.type)) {
-    userLogger.warn('EditJobPage: encountered invalid job type', {
-      section: 'job-data-validation',
-      type: job.type,
-    });
+    userLogger.warn({ section: 'data-fetch', type: job.type }, 'EditJobPage: encountered invalid job type');
   }
   if (!isValidJobCategory(job.category)) {
-    userLogger.warn('EditJobPage: encountered invalid job category', {
-      section: 'job-data-validation',
-      category: job.category,
-    });
+    userLogger.warn({ section: 'data-fetch', category: job.category }, 'EditJobPage: encountered invalid job category');
   }
 
   const hasInvalidData = !isValidJobType(job.type) || !isValidJobCategory(job.category);

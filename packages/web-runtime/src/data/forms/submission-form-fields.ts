@@ -120,7 +120,8 @@ function emptySection(): SubmissionFormSection {
  * Fetch fields for a content type (cached)
  * Uses 'use cache' to cache form field configuration. This data is public and same for all users.
  * @param contentType
- */
+ 
+ * @returns {unknown} Description of return value*/
 async function fetchFieldsForContentType(
   contentType: SubmissionContentType
 ): Promise<SubmissionFormSection> {
@@ -163,12 +164,12 @@ async function fetchFieldsForContentType(
     ) {
       // logger.error() normalizes errors internally, so pass raw error
       requestLogger.error(
-        'Failed to load form fields',
-        new Error('RPC returned null or no fields'),
         {
+          err: new Error('RPC returned null or no fields'),
           contentType,
           source: 'SubmissionFormConfig',
-        }
+        },
+        'Failed to load form fields'
       );
       return emptySection();
     }
@@ -209,19 +210,26 @@ async function fetchFieldsForContentType(
       }
     }
 
-    requestLogger.info('fetchFieldsForContentType: fetched successfully', {
-      contentType,
-      fieldCount: section.common.length + section.typeSpecific.length + section.tags.length,
-    });
+    requestLogger.info(
+      {
+        contentType,
+        fieldCount: section.common.length + section.typeSpecific.length + section.tags.length,
+      },
+      'fetchFieldsForContentType: fetched successfully'
+    );
 
     return section;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    requestLogger.error('fetchFieldsForContentType: failed', errorForLogging, {
-      contentType,
-      source: 'SubmissionFormConfig',
-    });
+    requestLogger.error(
+      {
+        err: errorForLogging,
+        contentType,
+        source: 'SubmissionFormConfig',
+      },
+      'fetchFieldsForContentType: failed'
+    );
     return emptySection();
   }
 }

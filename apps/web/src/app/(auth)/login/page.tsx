@@ -103,7 +103,10 @@ async function LoginPageContent({
     redirectTo = resolvedSearchParameters.redirect;
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to resolve login search params');
-    reqLogger.error('LoginPage: resolving searchParams failed', normalized);
+    reqLogger.error(
+      { section: 'data-fetch', err: normalized },
+      'LoginPage: resolving searchParams failed'
+    );
     redirectTo = undefined;
   }
 

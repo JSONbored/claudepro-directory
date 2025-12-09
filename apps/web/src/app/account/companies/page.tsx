@@ -134,9 +134,10 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
   const { user } = await getAuthenticatedUser({ context: 'CompaniesPage' });
 
   if (!user) {
-    reqLogger.warn('CompaniesPage: unauthenticated access attempt detected', {
-      section: 'authentication',
-    });
+    reqLogger.warn(
+      { section: 'data-fetch' },
+      'CompaniesPage: unauthenticated access attempt detected'
+    );
     return (
       <div className="space-y-6">
         <Card>
@@ -160,9 +161,7 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
     userId: user.id, // Redaction will automatically hash this
   });
 
-  userLogger.info('CompaniesPage: authentication successful', {
-    section: 'authentication',
-  });
+  userLogger.info({ section: 'data-fetch' }, 'CompaniesPage: authentication successful');
 
   // Section: Companies Data Fetch
   let companies: Database['public']['Functions']['get_user_companies']['Returns']['companies'] = [];
@@ -174,21 +173,20 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
 
     if (data) {
       companies = data.companies ?? [];
-      userLogger.info('CompaniesPage: companies data loaded', {
-        section: 'companies-data-fetch',
-        companiesCount: companies.length,
-      });
+      userLogger.info({ section: 'data-fetch', companiesCount: companies.length }, 'CompaniesPage: companies data loaded');
     } else {
-      userLogger.warn('CompaniesPage: getUserCompanies returned null', {
-        section: 'companies-data-fetch',
-      });
+      userLogger.warn({ section: 'data-fetch' }, 'CompaniesPage: getUserCompanies returned null');
       hasError = true;
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to fetch user companies');
-    userLogger.error('CompaniesPage: getUserCompanies threw', normalized, {
-      section: 'companies-data-fetch',
-    });
+    userLogger.error(
+      {
+        section: 'data-fetch',
+        err: normalized,
+      },
+      'CompaniesPage: getUserCompanies threw'
+    );
     hasError = true;
   }
 
@@ -213,16 +211,11 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
   }
 
   if (companies.length === 0) {
-    userLogger.info('CompaniesPage: user has no companies', {
-      section: 'companies-data-fetch',
-    });
+    userLogger.info({ section: 'data-fetch' }, 'CompaniesPage: user has no companies');
   }
 
   // Final summary log
-  userLogger.info('CompaniesPage: page render completed', {
-    section: 'page-render',
-    companiesCount: companies.length,
-  });
+  userLogger.info({ section: 'data-fetch', companiesCount: companies.length }, 'CompaniesPage: page render completed');
 
   return (
     <div className="space-y-6">

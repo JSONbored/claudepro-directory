@@ -35,10 +35,10 @@ export function revalidateNotificationCache(userId: string): void {
     } catch (error) {
       // logger.error() normalizes errors internally, so pass raw error
       const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-      reqLogger.error('Failed to revalidate notification cache tag', errorForLogging, {
-        tag,
-        userId,
-      });
+      reqLogger.error(
+        { err: errorForLogging, tag, userId },
+        'Failed to revalidate notification cache tag'
+      );
     }
   }
 }
@@ -92,20 +92,19 @@ export async function getActiveNotifications({
 
     const result = await service.getActiveNotifications({ p_dismissed_ids: dismissedIds });
 
-    reqLogger.info('getActiveNotifications: fetched successfully', {
-      userId,
-      dismissedCount: dismissedIds.length,
-      notificationCount: result.length,
-    });
+    reqLogger.info(
+      { userId, dismissedCount: dismissedIds.length, notificationCount: result.length },
+      'getActiveNotifications: fetched successfully'
+    );
 
     return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('getActiveNotifications: unexpected error', errorForLogging, {
-      userId,
-      dismissedCount: dismissedIds.length,
-    });
+    reqLogger.error(
+      { err: errorForLogging, userId, dismissedCount: dismissedIds.length },
+      'getActiveNotifications: unexpected error'
+    );
     // Return fallback on errors
     return [];
   }

@@ -19,8 +19,9 @@ import { type NextRequest, NextResponse } from 'next/server';
  * Uses Cache Components to reduce function invocations
  * Note: getContentTemplates already has caching in data layer, but page-level caching adds another layer
  * @param category
- */
-async function getCachedTemplatesForAPI(category: Database['public']['Enums']['content_category']) {
+ 
+ * @returns {Promise<unknown>} Description of return value*/
+function getCachedTemplatesForAPI(category: Database['public']['Enums']['content_category']) {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
 
@@ -62,9 +63,12 @@ export async function GET(request: NextRequest) {
       !category ||
       !VALID_CATEGORIES.includes(category as Database['public']['Enums']['content_category'])
     ) {
-      reqLogger.warn('Templates API: invalid category', {
-        category,
-      });
+      reqLogger.warn(
+        {
+          category,
+        },
+        'Templates API: invalid category'
+      );
       return NextResponse.json(
         {
           error: 'Invalid category',
@@ -81,11 +85,14 @@ export async function GET(request: NextRequest) {
     const templates = await getCachedTemplatesForAPI(validCategory);
 
     // Structured logging with cache tags
-    reqLogger.info('Templates API: success', {
-      category: validCategory,
-      count: templates.length,
-      cacheTags: ['templates', `templates-${validCategory}`],
-    });
+    reqLogger.info(
+      {
+        category: validCategory,
+        count: templates.length,
+        cacheTags: ['templates', `templates-${validCategory}`],
+      },
+      'Templates API: success'
+    );
 
     // Return success response with optimized cache headers
     // Using 'config' preset: 1 day TTL, 2 days stale (templates change rarely)
@@ -105,11 +112,15 @@ export async function GET(request: NextRequest) {
     );
   } catch (error) {
     const normalized = normalizeError(error, 'Templates API error');
-    reqLogger.error('Templates API error', normalized, {
-      section: 'error-handling',
-      ...(category && { category }),
-    });
-    return createErrorResponse(error, {
+    reqLogger.error(
+      {
+        err: normalized,
+        section: 'error-handling',
+        ...(category && { category }),
+      },
+      'Templates API error'
+    );
+    return createErrorResponse(normalized, {
       route: '/api/templates',
       operation: 'TemplatesAPI',
       method: 'GET',

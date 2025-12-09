@@ -133,10 +133,13 @@ async function SponsorshipsPageContent({
   const { user } = await getAuthenticatedUser({ context: 'SponsorshipsPage' });
 
   if (!user) {
-    reqLogger.warn('SponsorshipsPage: unauthenticated access attempt', {
-      section: 'authentication',
-      timestamp: new Date().toISOString(),
-    });
+    reqLogger.warn(
+      {
+        section: 'data-fetch',
+        timestamp: new Date().toISOString(),
+      },
+      'SponsorshipsPage: unauthenticated access attempt'
+    );
     return (
       <div className="space-y-6">
         <Card>
@@ -166,9 +169,13 @@ async function SponsorshipsPageContent({
     sponsorships = await getUserSponsorships(user.id);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user sponsorships');
-    userLogger.error('SponsorshipsPage: getUserSponsorships threw', normalized, {
-      section: 'sponsorships-data-fetch',
-    });
+    userLogger.error(
+      {
+        section: 'data-fetch',
+        err: normalized,
+      },
+      'SponsorshipsPage: getUserSponsorships threw'
+    );
     return (
       <div className="space-y-6">
         <div className="text-destructive">Failed to load sponsorships. Please try again later.</div>
@@ -177,7 +184,7 @@ async function SponsorshipsPageContent({
   }
 
   if (sponsorships.length === 0) {
-    userLogger.info('SponsorshipsPage: user has no sponsorships');
+    userLogger.info({ section: 'data-fetch' }, 'SponsorshipsPage: user has no sponsorships');
     return (
       <div className="space-y-6">
         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>

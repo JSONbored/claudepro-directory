@@ -45,7 +45,7 @@ import Loading from './loading';
  * @see getPartnerCtas
  * @see logger
  */
-export default async function PartnerPage() {
+export default function PartnerPage() {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
@@ -88,14 +88,13 @@ async function PartnerPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
   let pricing: ReturnType<typeof getPartnerPricing>;
   try {
     pricing = getPartnerPricing();
-    reqLogger.info('PartnerPage: pricing config loaded', {
-      section: 'pricing-config',
-    });
+    reqLogger.info({ section: 'data-fetch' }, 'PartnerPage: pricing config loaded');
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load pricing config');
-    reqLogger.error('PartnerPage: getPartnerPricing failed', normalized, {
-      section: 'pricing-config',
-    });
+    reqLogger.error(
+      { err: normalized, section: 'data-fetch' },
+      'PartnerPage: getPartnerPricing failed'
+    );
     // Use defaults instead of throwing to prevent page crash
     pricing = {
       jobs: {
@@ -118,12 +117,13 @@ async function PartnerPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
   let heroStats: Awaited<ReturnType<typeof getPartnerHeroStats>>;
   try {
     heroStats = await getPartnerHeroStats();
-    reqLogger.info('PartnerPage: hero stats loaded', { section: 'hero-stats' });
+    reqLogger.info({ section: 'data-fetch' }, 'PartnerPage: hero stats loaded');
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load hero stats');
-    reqLogger.error('PartnerPage: getPartnerHeroStats failed', normalized, {
-      section: 'hero-stats',
-    });
+    reqLogger.error(
+      { err: normalized, section: 'data-fetch' },
+      'PartnerPage: getPartnerHeroStats failed'
+    );
     heroStats = {
       monthlyVisitors: 10_000,
       monthlyPageViews: 50_000,
@@ -137,9 +137,10 @@ async function PartnerPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
     partnerContacts = getPartnerContactChannels();
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load partner contact channels');
-    reqLogger.error('PartnerPage: getPartnerContactChannels failed', normalized, {
-      section: 'partner-contacts',
-    });
+    reqLogger.error(
+      { err: normalized, section: 'data-fetch' },
+      'PartnerPage: getPartnerContactChannels failed'
+    );
     // Use empty defaults instead of throwing to prevent page crash
     // Match the expected shape: partnerEmail, hiEmail, supportEmail, securityEmail
     partnerContacts = {
@@ -155,9 +156,10 @@ async function PartnerPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
     partnerCtas = getPartnerCtas();
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load partner CTAs');
-    reqLogger.error('PartnerPage: getPartnerCtas failed', normalized, {
-      section: 'partner-ctas',
-    });
+    reqLogger.error(
+      { err: normalized, section: 'data-fetch' },
+      'PartnerPage: getPartnerCtas failed'
+    );
     // Use safe default shape instead of empty object to prevent runtime TypeErrors
     // All CTAs must exist with safe values (empty hrefs) to match expected structure
     partnerCtas = {

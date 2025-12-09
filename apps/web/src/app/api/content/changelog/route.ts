@@ -20,7 +20,8 @@ const CORS = getOnlyCorsHeaders;
 
 /**
  * Cached helper function to fetch changelog LLMs.txt content.
- */
+ 
+ * @returns {unknown} Description of return value*/
 async function getCachedChangelogLlmsTxt(): Promise<null | string> {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
@@ -45,20 +46,23 @@ export async function GET(request: NextRequest) {
       return badRequestResponse(`Invalid format '${format}' for changelog index`, CORS);
     }
 
-    reqLogger.info('Changelog index request received', { format });
+    reqLogger.info({ format }, 'Changelog index request received');
 
     const data = await getCachedChangelogLlmsTxt();
 
     if (!data) {
-      reqLogger.warn('Changelog LLMs.txt not found');
+      reqLogger.warn({}, 'Changelog LLMs.txt not found');
       return badRequestResponse('Changelog LLMs.txt not found or invalid', CORS);
     }
 
     const formatted = data.replaceAll(String.raw`\n`, '\n');
 
-    reqLogger.info('Changelog LLMs.txt generated', {
-      bytes: formatted.length,
-    });
+    reqLogger.info(
+      {
+        bytes: formatted.length,
+      },
+      'Changelog LLMs.txt generated'
+    );
 
     return new NextResponse(formatted, {
       status: 200,
@@ -71,8 +75,9 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    reqLogger.error('Changelog index API error', normalizeError(error));
-    return createErrorResponse(error, {
+    const normalized = normalizeError(error, 'Operation failed');
+    reqLogger.error({ err: normalizeError(error) }, 'Changelog index API error');
+    return createErrorResponse(normalized, {
       route: '/api/content/changelog',
       operation: 'ChangelogIndexAPI',
       method: 'GET',

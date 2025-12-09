@@ -59,7 +59,7 @@ export async function trackInteraction(params: {
   });
 
   if (result?.serverError) {
-    logger.warn('trackInteraction failed', { error: result.serverError });
+    logger.warn({ error: result.serverError }, 'trackInteraction failed');
   }
 }
 
@@ -141,7 +141,7 @@ export async function trackNewsletterEvent(
   const { trackNewsletterEventAction } = await import('./actions/pulse.ts');
   const result = await trackNewsletterEventAction({ eventType, metadata });
   if (result?.serverError) {
-    logger.warn('trackNewsletterEvent failed', undefined, { error: result.serverError, eventType });
+    logger.warn({ error: result.serverError, eventType }, 'trackNewsletterEvent failed');
   }
 }
 
@@ -154,6 +154,6 @@ export async function trackUsage(params: {
   const { trackUsageAction } = await import('./actions/pulse.ts');
   const result = await trackUsageAction(params);
   if (result?.serverError) {
-    logger.warn('trackUsage failed', { error: result.serverError });
+    logger.warn({ error: result.serverError }, 'trackUsage failed');
   }
 }

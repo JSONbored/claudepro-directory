@@ -172,9 +172,7 @@ export function ThemeToggle() {
         transition.finished
           .then(() => {
             const endTime = performance.now();
-            logger.info('[Theme Toggle] Animation completed', {
-              durationMs: Number((endTime - startTime).toFixed(2)),
-            });
+            logger.info({ durationMs: Number((endTime - startTime).toFixed(2)), }, '[Theme Toggle] Animation completed');
           })
           .catch((error) => {
             logClientWarning('ThemeToggle: view transition animation failed', error);

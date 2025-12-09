@@ -23,7 +23,8 @@ import { NextRequest, NextResponse } from 'next/server';
  * Uses Cache Components to reduce function invocations
  * @param category
  * @param limit
- */
+ 
+ * @returns {unknown} Description of return value*/
 async function getCachedTrendingMetrics(
   category: ContentCategory | null,
   limit: number
@@ -44,7 +45,8 @@ async function getCachedTrendingMetrics(
  * Uses Cache Components to reduce function invocations
  * @param category
  * @param limit
- */
+ 
+ * @returns {unknown} Description of return value*/
 async function getCachedPopularContent(
   category: ContentCategory | null,
   limit: number
@@ -66,7 +68,8 @@ async function getCachedPopularContent(
  * @param category
  * @param limit
  * @param days
- */
+ 
+ * @returns {unknown} Description of return value*/
 async function getCachedRecentContent(
   category: ContentCategory | null,
   limit: number,
@@ -296,7 +299,7 @@ async function handlePageTabs(url: URL, reqLogger: ReturnType<typeof logger.chil
   const limit = clampLimit(Number(url.searchParams.get('limit') ?? '12'));
   const category = parseCategory(url.searchParams.get('category'));
 
-  reqLogger.info('Processing trending page tabs', { tab, category: category ?? 'all', limit });
+  reqLogger.info({ tab, category: category ?? 'all', limit }, 'Processing trending page tabs');
 
   try {
     if (tab === 'trending') {
@@ -343,8 +346,9 @@ async function handlePageTabs(url: URL, reqLogger: ReturnType<typeof logger.chil
 
     return badRequestResponse('Invalid tab. Valid tabs: trending, popular, recent', CORS);
   } catch (error) {
-    reqLogger.error('Trending page tabs error', normalizeError(error));
-    return createErrorResponse(error, {
+    const normalized = normalizeError(error, 'Trending page tabs error');
+    reqLogger.error({ err: normalized }, 'Trending page tabs error');
+    return createErrorResponse(normalized, {
       route: '/api/trending',
       operation: 'TrendingAPI',
       method: 'GET',
@@ -356,7 +360,7 @@ async function handleSidebar(url: URL, reqLogger: ReturnType<typeof logger.child
   const limit = clampLimit(Number(url.searchParams.get('limit') ?? '8'));
   const category = parseCategory(url.searchParams.get('category')) ?? 'guides';
 
-  reqLogger.info('Processing trending sidebar', { category, limit });
+  reqLogger.info({ category, limit }, 'Processing trending sidebar');
 
   try {
     const [trendingRows, recentRows] = await Promise.all([
@@ -369,8 +373,9 @@ async function handleSidebar(url: URL, reqLogger: ReturnType<typeof logger.child
 
     return jsonResponse({ trending, recent }, 200, CORS, buildCacheHeaders('trending_sidebar'));
   } catch (error) {
-    reqLogger.error('Trending sidebar error', normalizeError(error));
-    return createErrorResponse(error, {
+    const normalized = normalizeError(error, 'Trending sidebar error');
+    reqLogger.error({ err: normalized }, 'Trending sidebar error');
+    return createErrorResponse(normalized, {
       route: '/api/trending',
       operation: 'TrendingAPI',
       method: 'GET',
@@ -378,7 +383,7 @@ async function handleSidebar(url: URL, reqLogger: ReturnType<typeof logger.child
   }
 }
 
-export async function GET(request: NextRequest) {
+export function GET(request: NextRequest) {
   const reqLogger = logger.child({
     operation: 'TrendingAPI',
     route: '/api/trending',
@@ -386,7 +391,7 @@ export async function GET(request: NextRequest) {
   });
 
   try {
-    reqLogger.info('Trending request received');
+    reqLogger.info({}, 'Trending request received');
 
     const url = new URL(request.url);
     const segments = url.pathname.replace('/api/trending', '').split('/').filter(Boolean);
@@ -405,8 +410,9 @@ export async function GET(request: NextRequest) {
 
     return handlePageTabs(url, reqLogger);
   } catch (error) {
-    reqLogger.error('Trending API error', normalizeError(error));
-    return createErrorResponse(error, {
+    const normalized = normalizeError(error, 'Trending API error');
+    reqLogger.error({ err: normalized }, 'Trending API error');
+    return createErrorResponse(normalized, {
       route: '/api/trending',
       operation: 'TrendingAPI',
       method: 'GET',

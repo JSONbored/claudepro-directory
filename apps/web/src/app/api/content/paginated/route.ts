@@ -27,7 +27,8 @@ const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
  * @param params.category
  * @param params.limit
  * @param params.offset
- */
+ 
+ * @returns {unknown} Description of return value*/
 async function getCachedPaginatedContent(params: {
   category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
   limit: number;
@@ -125,11 +126,14 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    reqLogger.info('Paginated content request received', {
-      offset: offsetParam,
-      limit: limitParam,
-      category: category ?? 'all',
-    });
+    reqLogger.info(
+      {
+        offset: offsetParam,
+        limit: limitParam,
+        category: category ?? 'all',
+      },
+      'Paginated content request received'
+    );
 
     const { data, error } = await getCachedPaginatedContent({
       category,
@@ -139,12 +143,26 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       const normalizedError = normalizeError(error, 'Content paginated RPC error');
-      reqLogger.error('Content paginated RPC error', normalizedError, {
-        rpcName: 'get_content_paginated_slim',
-        offset: offsetParam,
-        limit: limitParam,
-        category: category ?? 'all',
-      });
+      reqLogger.error(
+        {
+          err: normalizedError,
+          rpcName: 'get_content_paginated_slim',
+          offset: offsetParam,
+          limit: limitParam,
+          category: category ?? 'all',
+        },
+        'Content paginated RPC error'
+      );
+      reqLogger.error(
+        {
+          err: normalizedError,
+          rpcName: 'get_content_paginated_slim',
+          offset: offsetParam,
+          limit: limitParam,
+          category: category ?? 'all',
+        },
+        'Content paginated RPC error'
+      );
       return createErrorResponse(normalizedError, {
         route: '/api/content/paginated',
         operation: 'ContentPaginatedAPI',
@@ -160,7 +178,7 @@ export async function GET(request: NextRequest) {
 
     const itemsValue = (data as null | { items?: unknown })?.items;
     if (!Array.isArray(itemsValue)) {
-      reqLogger.warn('Content paginated returned invalid data structure');
+      reqLogger.warn({}, 'Content paginated returned invalid data structure');
       return jsonResponse([], 200, CORS, {
         'X-Generated-By': 'supabase.rpc.get_content_paginated_slim',
         ...buildCacheHeaders('content_paginated'),
@@ -169,19 +187,23 @@ export async function GET(request: NextRequest) {
 
     const items = itemsValue;
 
-    reqLogger.info('Paginated content retrieved', {
-      itemCount: items.length,
-      offset: offsetParam,
-      limit: limitParam,
-    });
+    reqLogger.info(
+      {
+        itemCount: items.length,
+        offset: offsetParam,
+        limit: limitParam,
+      },
+      'Paginated content retrieved'
+    );
 
     return jsonResponse(items, 200, CORS, {
       'X-Generated-By': 'supabase.rpc.get_content_paginated_slim',
       ...buildCacheHeaders('content_paginated'),
     });
   } catch (error) {
-    reqLogger.error('Content paginated API error', normalizeError(error));
-    return createErrorResponse(error, {
+    const normalized = normalizeError(error, 'Operation failed');
+    reqLogger.error({ err: normalizeError(error) }, 'Content paginated API error');
+    return createErrorResponse(normalized, {
       route: '/api/content/paginated',
       operation: 'ContentPaginatedAPI',
       method: 'GET',

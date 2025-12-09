@@ -88,7 +88,7 @@ function formatStatValue(value: null | number | undefined): string {
  * @see getHomepageData
  * @see CommunityPageContent
  */
-export default async function CommunityPage() {
+export default function CommunityPage() {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
@@ -123,18 +123,24 @@ async function CommunityPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
   // Section: Configuration Check
   const channels = getContactChannels();
   if (!channels.discord) {
-    reqLogger.warn('CommunityPage: Discord channel is not configured', {
-      section: 'configuration-check',
-      channel: 'discord',
-      configKey: 'DISCORD_INVITE_URL',
-    });
+    reqLogger.warn(
+      {
+        section: 'data-fetch',
+        channel: 'discord',
+        configKey: 'DISCORD_INVITE_URL',
+      },
+      'CommunityPage: Discord channel is not configured'
+    );
   }
   if (!channels.twitter) {
-    reqLogger.warn('CommunityPage: Twitter channel is not configured', {
-      section: 'configuration-check',
-      channel: 'twitter',
-      configKey: 'TWITTER_URL',
-    });
+    reqLogger.warn(
+      {
+        section: 'data-fetch',
+        channel: 'twitter',
+        configKey: 'TWITTER_URL',
+      },
+      'CommunityPage: Twitter channel is not configured'
+    );
   }
 
   // Section: Data Fetch
@@ -142,21 +148,33 @@ async function CommunityPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
 
   const [communityDirectory, configurationCount, homepageData] = await Promise.all([
     getCommunityDirectory({ limit: 500 }).catch((error) => {
-      reqLogger.error('CommunityPage: failed to load community directory', normalizeError(error), {
-        section: 'data-fetch',
-      });
+      reqLogger.error(
+        {
+          section: 'data-fetch',
+          err: normalizeError(error),
+        },
+        'CommunityPage: failed to load community directory'
+      );
       return null;
     }),
     getConfigurationCount().catch((error) => {
-      reqLogger.error('CommunityPage: failed to load configuration count', normalizeError(error), {
-        section: 'data-fetch',
-      });
+      reqLogger.error(
+        {
+          section: 'data-fetch',
+          err: normalizeError(error),
+        },
+        'CommunityPage: failed to load configuration count'
+      );
       return 0;
     }),
     getHomepageData(categoryIds).catch((error) => {
-      reqLogger.error('CommunityPage: failed to load homepage metrics', normalizeError(error), {
-        section: 'data-fetch',
-      });
+      reqLogger.error(
+        {
+          section: 'data-fetch',
+          err: normalizeError(error),
+        },
+        'CommunityPage: failed to load homepage metrics'
+      );
       return null;
     }),
   ]);

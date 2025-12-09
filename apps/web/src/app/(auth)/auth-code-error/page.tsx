@@ -114,13 +114,17 @@ async function AuthCodeErrorContent({
   const message = Array.isArray(rawMessage) ? rawMessage[0] : rawMessage;
 
   // Log page render (informational)
-  reqLogger.info('AuthCodeErrorPage rendered', {
-    // Redact sensitive code/provider values
-    hasCode: Boolean(code && code !== 'unknown'),
-    provider: provider === 'unknown' ? 'unknown' : 'redacted',
-    hasMessage: Boolean(message),
-    hasSearchParams: Boolean(searchParameters),
-  });
+  reqLogger.info(
+    {
+      section: 'data-fetch',
+      // Redact sensitive code/provider values
+      hasCode: Boolean(code && code !== 'unknown'),
+      provider: provider === 'unknown' ? 'unknown' : 'redacted',
+      hasMessage: Boolean(message),
+      hasSearchParams: Boolean(searchParameters),
+    },
+    'AuthCodeErrorPage rendered'
+  );
 
   return (
     <Card className="w-full max-w-md">

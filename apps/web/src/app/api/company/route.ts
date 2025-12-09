@@ -22,7 +22,8 @@ const CORS = getOnlyCorsHeaders;
  * Cached helper function to fetch company profile by slug.
  * The slug parameter becomes part of the cache key, so different companies have different cache entries.
  * @param slug
- */
+ 
+ * @returns {unknown} Description of return value*/
 async function getCachedCompanyProfile(slug: string): Promise<{
   data: DatabaseGenerated['public']['Functions']['get_company_profile']['Returns'] | null;
   error: null | { code?: string; message: string };
@@ -70,20 +71,24 @@ export async function GET(request: NextRequest) {
     const slug = url.searchParams.get('slug')?.trim();
 
     if (!slug) {
-      reqLogger.warn('Company slug missing');
+      reqLogger.warn({}, 'Company slug missing');
       return badRequestResponse('Company slug is required', CORS);
     }
 
-    reqLogger.info('Company request received', { slug });
+    reqLogger.info({ slug }, 'Company request received');
 
     const { data: profile, error } = await getCachedCompanyProfile(slug);
 
     if (error) {
       const normalizedError = normalizeError(error, 'Company profile RPC error');
-      reqLogger.error('Company profile RPC error', normalizedError, {
-        rpcName: 'get_company_profile',
-        slug,
-      });
+      reqLogger.error(
+        {
+          err: normalizedError,
+          rpcName: 'get_company_profile',
+          slug,
+        },
+        'Company profile RPC error'
+      );
       return createErrorResponse(normalizedError, {
         route: '/api/company',
         operation: 'CompanyAPI',
@@ -95,15 +100,16 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    reqLogger.info('Company profile retrieved', { slug });
+    reqLogger.info({ slug }, 'Company profile retrieved');
 
     return jsonResponse(profile, 200, CORS, {
       'X-Generated-By': 'supabase.rpc.get_company_profile',
       ...buildCacheHeaders('company_profile'),
     });
   } catch (error) {
-    reqLogger.error('Company API error', normalizeError(error));
-    return createErrorResponse(error, {
+    const normalized = normalizeError(error, 'Operation failed');
+    reqLogger.error({ err: normalizeError(error) }, 'Company API error');
+    return createErrorResponse(normalized, {
       route: '/api/company',
       operation: 'CompanyAPI',
       method: 'GET',

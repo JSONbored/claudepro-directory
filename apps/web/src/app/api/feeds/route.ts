@@ -62,14 +62,10 @@ async function executeRpcWithLogging<T>(
   if ((error !== null && error !== undefined) || data == null) {
     if (error !== null && error !== undefined) {
       const normalized = normalizeError(error, `${rpcName} failed`);
-      reqLogger.error('RPC call failed', normalized, {
-        rpcName,
-      });
+      reqLogger.error({ err: normalized, rpcName }, 'RPC call failed');
       throw normalized;
     } else {
-      reqLogger.error('RPC returned null data without error', undefined, {
-        rpcName,
-      });
+      reqLogger.error({ err: undefined, rpcName }, 'RPC returned null data without error');
       throw new Error(`${rpcName} failed or returned null`);
     }
   }
@@ -81,7 +77,8 @@ async function executeRpcWithLogging<T>(
  * All parameters become part of the cache key, so different feed types/categories have different cache entries.
  * @param type
  * @param category
- */
+ 
+ * @returns {unknown} Description of return value*/
 async function getCachedFeedPayload(
   type: FeedType,
   category: null | string
@@ -213,19 +210,25 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    reqLogger.info('Feeds request received', {
-      type,
-      category: category ?? 'all',
-    });
+    reqLogger.info(
+      {
+        type,
+        category: category ?? 'all',
+      },
+      'Feeds request received'
+    );
 
     const payload = await getCachedFeedPayload(type, category);
 
-    reqLogger.info('Feed delivery', {
-      type,
-      category: category ?? 'all',
-      contentType: payload.contentType,
-      source: payload.source,
-    });
+    reqLogger.info(
+      {
+        type,
+        category: category ?? 'all',
+        contentType: payload.contentType,
+        source: payload.source,
+      },
+      'Feed delivery'
+    );
 
     return new NextResponse(payload.xml, {
       status: 200,
@@ -241,7 +244,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     const normalized = normalizeError(error, 'Feeds API error');
-    reqLogger.error('Feeds API error', normalized);
+    reqLogger.error({ err: normalized }, 'Feeds API error');
     return createErrorResponse(normalized, {
       route: '/api/feeds',
       operation: 'FeedsAPI',

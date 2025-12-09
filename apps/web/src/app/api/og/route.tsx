@@ -19,7 +19,7 @@ import { type NextRequest } from 'next/server';
  * @see OG_DIMENSIONS
  * @see ImageResponse
  */
-export async function GET(request: NextRequest) {
+export function GET(request: NextRequest) {
   const reqLogger = logger.child({
     operation: 'OGImageAPI',
     route: '/api/og',
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
       ]
     : [];
 
-  reqLogger.info('Generating OG image', { title, type, tagCount: tags.length });
+  reqLogger.info({ title, type, tagCount: tags.length }, 'Generating OG image');
 
   // Construct JSX element outside try/catch to avoid JSX construction errors in try/catch
   const ogImageJSX = (
@@ -172,11 +172,15 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     const normalized = normalizeError(error, 'OG image generation failed');
-    reqLogger.error('OG image generation failed', normalized, {
-      route: '/api/og',
-      operation: 'OGImageAPI',
-      method: 'GET',
-    });
+    reqLogger.error(
+      {
+        err: normalized,
+        route: '/api/og',
+        operation: 'OGImageAPI',
+        method: 'GET',
+      },
+      'OG image generation failed'
+    );
     return createErrorResponse(normalized, {
       route: '/api/og',
       operation: 'OGImageAPI',

@@ -23,7 +23,8 @@ import { NextRequest, NextResponse } from 'next/server';
 /**
  * Cached helper function to fetch sitemap URLs
  * Uses Cache Components to reduce function invocations
- */
+ 
+ * @returns {Promise<unknown>} Description of return value*/
 async function getCachedSiteUrls() {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
@@ -68,7 +69,7 @@ export async function GET(request: NextRequest) {
   const format = (request.nextUrl.searchParams.get('format') ?? 'xml').toLowerCase();
   const supabase = createSupabaseAnonClient();
 
-  reqLogger.info('Sitemap request received', { format });
+  reqLogger.info({ format }, 'Sitemap request received');
 
   try {
     if (format === 'json') {
@@ -76,10 +77,15 @@ export async function GET(request: NextRequest) {
       try {
         data = await getCachedSiteUrls();
       } catch (error) {
-        reqLogger.error('get_site_urls RPC failed', normalizeError(error), {
-          operation: 'get_site_urls',
-        });
-        return createErrorResponse(error, {
+        const normalized = normalizeError(error, 'Operation failed');
+        reqLogger.error(
+          {
+            err: normalizeError(error),
+            operation: 'get_site_urls',
+          },
+          'get_site_urls RPC failed'
+        );
+        return createErrorResponse(normalized, {
           route: '/api/sitemap',
           operation: 'get_site_urls',
           method: 'GET',
@@ -88,7 +94,7 @@ export async function GET(request: NextRequest) {
       }
 
       if (!Array.isArray(data) || data.length === 0) {
-        reqLogger.warn('get_site_urls returned no rows');
+        reqLogger.warn({}, 'get_site_urls returned no rows');
         return jsonResponse(
           {
             error: 'No URLs available',
@@ -140,9 +146,12 @@ export async function GET(request: NextRequest) {
         mappedUrls.push(urlEntry);
       }
 
-      reqLogger.info('Sitemap JSON payload generated', {
-        count: mappedUrls.length,
-      });
+      reqLogger.info(
+        {
+          count: mappedUrls.length,
+        },
+        'Sitemap JSON payload generated'
+      );
 
       return jsonResponse(
         {
@@ -169,10 +178,15 @@ export async function GET(request: NextRequest) {
     const { data, error } = await supabase.rpc('generate_sitemap_xml', rpcArgs);
 
     if (error) {
-      reqLogger.error('generate_sitemap_xml RPC failed', normalizeError(error), {
-        rpcArgs,
-      });
-      return createErrorResponse(error, {
+      reqLogger.error(
+        {
+          err: normalizeError(error),
+          rpcArgs,
+        },
+        'generate_sitemap_xml RPC failed'
+      );
+      const normalized = normalizeError(error, 'generate_sitemap_xml RPC failed');
+      return createErrorResponse(normalized, {
         route: '/api/sitemap',
         operation: 'generate_sitemap_xml',
         method: 'GET',
@@ -181,11 +195,11 @@ export async function GET(request: NextRequest) {
     }
 
     if (!data) {
-      reqLogger.warn('generate_sitemap_xml returned null');
+      reqLogger.warn({}, 'generate_sitemap_xml returned null');
       return jsonResponse({ error: 'Sitemap XML generation returned null' }, 500, CORS);
     }
 
-    reqLogger.info('Sitemap XML generated');
+    reqLogger.info({}, 'Sitemap XML generated');
 
     return new NextResponse(data, {
       status: 200,
@@ -200,8 +214,9 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    reqLogger.error('Unhandled sitemap GET error', normalizeError(error));
-    return createErrorResponse(error, {
+    const normalized = normalizeError(error, 'Unhandled sitemap GET error');
+    reqLogger.error({ err: normalized }, 'Unhandled sitemap GET error');
+    return createErrorResponse(normalized, {
       route: '/api/sitemap',
       operation: 'SitemapAPI',
       method: 'GET',
@@ -217,10 +232,13 @@ export async function POST(request: NextRequest) {
     method: 'POST',
   });
 
-  reqLogger.info('IndexNow submission received', {
-    operation: 'indexnow_submission',
-    securityEvent: true,
-  });
+  reqLogger.info(
+    {
+      operation: 'indexnow_submission',
+      securityEvent: true,
+    },
+    'IndexNow submission received'
+  );
 
   if (!INDEXNOW_TRIGGER_KEY) {
     return jsonResponse(
@@ -235,7 +253,7 @@ export async function POST(request: NextRequest) {
 
   const triggerKey = request.headers.get('x-indexnow-trigger-key');
   if (!timingSafeEqual(triggerKey, INDEXNOW_TRIGGER_KEY)) {
-    reqLogger.warn('Invalid IndexNow trigger key', { securityEvent: true });
+    reqLogger.warn({ securityEvent: true }, 'Invalid IndexNow trigger key');
     return jsonResponse(
       {
         error: 'Unauthorized',
@@ -261,10 +279,15 @@ export async function POST(request: NextRequest) {
   try {
     const { data, error } = await supabase.rpc('get_site_urls');
     if (error) {
-      reqLogger.error('get_site_urls RPC failed', normalizeError(error), {
-        operation: 'get_site_urls',
-      });
-      return createErrorResponse(error, {
+      reqLogger.error(
+        {
+          err: normalizeError(error),
+          operation: 'get_site_urls',
+        },
+        'get_site_urls RPC failed'
+      );
+      const normalized = normalizeError(error, 'get_site_urls RPC failed');
+      return createErrorResponse(normalized, {
         route: '/api/sitemap',
         operation: 'get_site_urls',
         method: 'POST',
@@ -273,7 +296,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!Array.isArray(data) || data.length === 0) {
-      reqLogger.warn('No URLs returned, skipping IndexNow');
+      reqLogger.warn({}, 'No URLs returned, skipping IndexNow');
       return jsonResponse({ error: 'No URLs to submit' }, 500, CORS);
     }
 
@@ -314,11 +337,14 @@ export async function POST(request: NextRequest) {
 
     if (!response.ok) {
       const text = await response.text();
-      reqLogger.warn('IndexNow request failed', {
-        status: response.status,
-        body: text,
-        securityEvent: true,
-      });
+      reqLogger.warn(
+        {
+          status: response.status,
+          body: text,
+          securityEvent: true,
+        },
+        'IndexNow request failed'
+      );
       return jsonResponse(
         {
           error: 'IndexNow request failed',
@@ -330,11 +356,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    reqLogger.info('IndexNow submission successful', {
-      operation: 'indexnow_submission',
-      submitted: urlList.length,
-      securityEvent: true,
-    });
+    reqLogger.info(
+      {
+        operation: 'indexnow_submission',
+        submitted: urlList.length,
+        securityEvent: true,
+      },
+      'IndexNow submission successful'
+    );
 
     return jsonResponse(
       {
@@ -345,7 +374,7 @@ export async function POST(request: NextRequest) {
       CORS
     );
   } catch (error) {
-    reqLogger.error('IndexNow submission error', normalizeError(error));
+    reqLogger.error({ err: normalizeError(error) }, 'IndexNow submission error');
     return jsonResponse(
       {
         ok: false,

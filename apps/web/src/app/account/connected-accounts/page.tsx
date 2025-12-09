@@ -107,13 +107,17 @@ async function ConnectedAccountsPageContent({
   const { user } = await getAuthenticatedUser({ context: 'ConnectedAccountsPage' });
 
   if (!user) {
-    reqLogger.warn('ConnectedAccountsPage: unauthenticated access attempt detected', {
-      section: 'authentication',
-    });
-    reqLogger.info('ConnectedAccountsPage: page render completed (unauthenticated)', {
-      section: 'page-render',
-      outcome: 'unauthenticated',
-    });
+    reqLogger.warn(
+      { section: 'data-fetch' },
+      'ConnectedAccountsPage: unauthenticated access attempt detected'
+    );
+    reqLogger.info(
+      {
+        section: 'data-fetch',
+        outcome: 'unauthenticated',
+      },
+      'ConnectedAccountsPage: page render completed (unauthenticated)'
+    );
     return (
       <div className="space-y-6">
         <Card>
@@ -138,24 +142,23 @@ async function ConnectedAccountsPageContent({
     userId: user.id, // Redaction automatically hashes this via hashUserIdCensor
   });
 
-  userLogger.info('ConnectedAccountsPage: authentication successful', {
-    section: 'authentication',
-  });
+  userLogger.info({ section: 'data-fetch' }, 'ConnectedAccountsPage: authentication successful');
 
   // Section: Identities Data Fetch
   // Call the data function directly to leverage its built-in caching ('use cache: private')
   let identitiesData: Awaited<ReturnType<typeof getUserIdentitiesData>>;
   try {
     identitiesData = await getUserIdentitiesData(user.id);
-    userLogger.info('ConnectedAccountsPage: identities data loaded', {
-      section: 'identities-data-fetch',
-      hasData: Boolean(identitiesData),
-    });
+    userLogger.info({ section: 'data-fetch', hasData: Boolean(identitiesData) }, 'ConnectedAccountsPage: identities data loaded');
   } catch (error) {
     const normalized = normalizeError(error, 'getUserIdentitiesData invocation failed');
-    userLogger.error('ConnectedAccountsPage: getUserIdentitiesData threw', normalized, {
-      section: 'identities-data-fetch',
-    });
+    userLogger.error(
+      {
+        section: 'data-fetch',
+        err: normalized,
+      },
+      'ConnectedAccountsPage: getUserIdentitiesData threw'
+    );
     // Fallback to empty identities array on error
     identitiesData = { identities: [] };
   }
@@ -169,16 +172,11 @@ async function ConnectedAccountsPageContent({
 
   const identities = identitiesData?.identities ?? [];
   if (identities.length === 0) {
-    userLogger.info('ConnectedAccountsPage: no OAuth identities found', {
-      section: 'identities-data-fetch',
-    });
+    userLogger.info({ section: 'data-fetch' }, 'ConnectedAccountsPage: no OAuth identities found');
   }
 
   // Final summary log
-  userLogger.info('ConnectedAccountsPage: page render completed', {
-    section: 'page-render',
-    identitiesCount: identities.length,
-  });
+  userLogger.info({ section: 'data-fetch', identitiesCount: identities.length }, 'ConnectedAccountsPage: page render completed');
 
   return (
     <div className="space-y-6">

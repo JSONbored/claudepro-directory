@@ -363,7 +363,7 @@ export default {
           category: 'Best Practices',
           recommended: true,
         },
-        fixable: null,
+        fixable: 'code', // Enable autofix to add error logging
         schema: [],
         messages: {
           missingErrorLogging:
@@ -552,15 +552,139 @@ export default {
 
             const shouldSkip = hasLoggerError || usesErrorHandler || isRethrow || isInJSX;
             if (!shouldSkip) {
+              const catchParam = node.param;
+              const errorVarName = catchParam && catchParam.type === 'Identifier' ? catchParam.name : 'error';
+              
+              // Find logger name from context
+              let loggerName = 'logger';
+              let hasLoggerImport = false;
+              let loggerImportPath = null;
+              
+              // Check for logger imports
+              for (const stmt of ast.body || []) {
+                if (stmt.type === 'ImportDeclaration' && stmt.source && stmt.source.type === 'Literal') {
+                  const sourceValue = stmt.source.value;
+                  if (typeof sourceValue === 'string' && (sourceValue.includes('logging/server') || sourceValue.includes('logging/client'))) {
+                    for (const spec of stmt.specifiers || []) {
+                      if (spec.type === 'ImportSpecifier' && spec.imported && spec.imported.name === 'logger') {
+                        hasLoggerImport = true;
+                        loggerImportPath = sourceValue;
+                        if (spec.local && spec.local.name) {
+                          loggerName = spec.local.name;
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+              
+              // Check for reqLogger usage in parent scope
+              let parent = node.parent;
+              while (parent) {
+                if (parent.type === 'FunctionDeclaration' || parent.type === 'FunctionExpression') {
+                  // Check function body for reqLogger
+                  if (parent.body && parent.body.type === 'BlockStatement') {
+                    for (const stmt of parent.body.body || []) {
+                      if (stmt.type === 'VariableDeclaration') {
+                        for (const decl of stmt.declarations || []) {
+                          if (decl.id && decl.id.type === 'Identifier') {
+                            const varName = decl.id.name;
+                            if (varName === 'reqLogger' || varName === 'sectionLogger' || varName === 'routeLogger') {
+                              loggerName = varName;
+                              break;
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                parent = parent.parent;
+              }
+              
               context.report({
                 node: node.body,
                 messageId: 'missingErrorLogging',
+                fix(fixer) {
+                  const fixes = [];
+                  
+                  // Add imports if missing
+                  if (!hasLoggerImport) {
+                    const importPath = filename.includes('/app/') || filename.includes('/api/')
+                      ? '@heyclaude/web-runtime/logging/server'
+                      : '@heyclaude/web-runtime/logging/client';
+                    
+                    let lastImport = null;
+                    for (const stmt of ast.body || []) {
+                      if (stmt.type === 'ImportDeclaration') {
+                        lastImport = stmt;
+                      } else if (lastImport) {
+                        break;
+                      }
+                    }
+                    
+                    if (lastImport) {
+                      fixes.push(fixer.insertTextAfter(lastImport, `\nimport { logger, normalizeError } from '${importPath}';`));
+                    } else {
+                      const firstStmt = ast.body[0];
+                      if (firstStmt) {
+                        fixes.push(fixer.insertTextBefore(firstStmt, `import { logger, normalizeError } from '${importPath}';\n`));
+                      }
+                    }
+                  } else {
+                    // Check if normalizeError is imported
+                    let hasNormalizeErrorImport = false;
+                    for (const stmt of ast.body || []) {
+                      if (stmt.type === 'ImportDeclaration' && stmt.source && stmt.source.type === 'Literal') {
+                        const sourceValue = stmt.source.value;
+                        if (typeof sourceValue === 'string' && sourceValue === loggerImportPath) {
+                          for (const spec of stmt.specifiers || []) {
+                            if (spec.type === 'ImportSpecifier' && spec.imported && spec.imported.name === 'normalizeError') {
+                              hasNormalizeErrorImport = true;
+                              break;
+                            }
+                          }
+                        }
+                      }
+                    }
+                    
+                    if (!hasNormalizeErrorImport && loggerImportPath) {
+                      // Add normalizeError to existing import
+                      for (const stmt of ast.body || []) {
+                        if (stmt.type === 'ImportDeclaration' && stmt.source && stmt.source.type === 'Literal') {
+                          if (stmt.source.value === loggerImportPath) {
+                            const lastSpec = stmt.specifiers[stmt.specifiers.length - 1];
+                            if (lastSpec) {
+                              fixes.push(fixer.insertTextAfter(lastSpec, ', normalizeError'));
+                            }
+                            break;
+                          }
+                        }
+                      }
+                    }
+                  }
+                  
+                  // Add error logging in catch block
+                  const logCode = `\n    const normalized = normalizeError(${errorVarName}, 'Operation failed');\n    ${loggerName}.error({ err: normalized }, 'Operation failed');\n`;
+                  
+                  if (node.body && node.body.type === 'BlockStatement') {
+                    if (node.body.body.length > 0) {
+                      fixes.push(fixer.insertTextBefore(node.body.body[0], logCode));
+                    } else {
+                      const bodyStart = node.body.range[0] + 1;
+                      fixes.push(fixer.insertTextAfterRange([bodyStart, bodyStart], logCode));
+                    }
+                  }
+                  
+                  return fixes;
+                },
               });
             } else if (hasLoggerError && !hasNormalizeError) {
               // Error if logger.error is used but normalizeError is not
               context.report({
                 node: node.body,
                 messageId: 'missingErrorLogging',
+                // Note: This case is handled by require-normalize-error rule autofix
               });
             }
           },
@@ -1556,7 +1680,7 @@ export default {
           category: 'Best Practices',
           recommended: true,
         },
-        fixable: null,
+        fixable: 'code', // Enable autofix to add section to log context
         schema: [],
         messages: {
           missingSectionLogging:
@@ -1670,8 +1794,101 @@ export default {
               }
             }
           },
+          CallExpression(node) {
+            // Track logger calls that need section added
+            if (node.callee && node.callee.type === 'MemberExpression') {
+              const obj = node.callee.object;
+              const prop = node.callee.property;
+              if (obj && obj.type === 'Identifier' && prop && prop.type === 'Identifier') {
+                const loggerNames = ['logger', 'reqLogger', 'sectionLogger', 'routeLogger', 'userLogger'];
+                const logMethods = ['info', 'error', 'warn', 'debug', 'trace'];
+                if (loggerNames.includes(obj.name) && logMethods.includes(prop.name)) {
+                  // Check if first argument (object) has section property
+                  if (node.arguments && node.arguments.length > 0) {
+                    const firstArg = node.arguments[0];
+                    if (firstArg && firstArg.type === 'ObjectExpression') {
+                      // Check if section property exists
+                      const hasSection = firstArg.properties.some(
+                        (prop) => prop.type === 'Property' && prop.key && prop.key.type === 'Identifier' && prop.key.name === 'section'
+                      );
+                      
+                      if (!hasSection && hasAsyncOperations) {
+                        // Infer section name from context
+                        let inferredSection = 'data-fetch'; // Default
+                        
+                        // Check surrounding code for hints
+                        const parent = node.parent;
+                        if (parent) {
+                          // Look for comments or variable names that hint at section
+                          const comments = sourceCode.getCommentsBefore(node) || [];
+                          for (const comment of comments) {
+                            const commentText = comment.value?.toLowerCase() || '';
+                            if (commentText.includes('authentication') || commentText.includes('auth')) {
+                              inferredSection = 'authentication';
+                            } else if (commentText.includes('data') || commentText.includes('fetch') || commentText.includes('load')) {
+                              inferredSection = 'data-fetch';
+                            } else if (commentText.includes('render') || commentText.includes('page')) {
+                              inferredSection = 'page-render';
+                            } else if (commentText.includes('validation')) {
+                              inferredSection = 'validation';
+                            }
+                          }
+                        }
+                        
+                        context.report({
+                          node: firstArg,
+                          messageId: 'missingSectionLogging',
+                          fix(fixer) {
+                            // Object-first API: logger.info({ section: '...', ...context }, 'message')
+                            // Add section to existing context object (first argument)
+                            if (firstArg.properties.length === 0) {
+                              // Empty object - add section as first property
+                              return fixer.insertTextAfterRange(
+                                [firstArg.range[0] + 1, firstArg.range[0] + 1],
+                                `section: '${inferredSection}'`
+                              );
+                            } else {
+                              // Check if section already exists
+                              const hasSection = firstArg.properties.some(
+                                (prop) => prop.type === 'Property' && prop.key && prop.key.type === 'Identifier' && prop.key.name === 'section'
+                              );
+                              if (!hasSection) {
+                                // Add section as first property
+                                const firstProp = firstArg.properties[0];
+                                return fixer.insertTextBefore(
+                                  firstProp,
+                                  `section: '${inferredSection}',\n    `
+                                );
+                              }
+                              return null; // Section already exists
+                            }
+                          },
+                        });
+                      }
+                    } else if (firstArg && firstArg.type === 'Literal' && typeof firstArg.value === 'string') {
+                      // Log call with string message but no context object
+                      // Object-first API: logger.info({ section: '...' }, 'message')
+                      // Need to wrap message and add context object as first argument
+                      const messageText = sourceCode.getText(firstArg);
+                      const inferredSection = 'data-fetch'; // Default
+                      
+                      context.report({
+                        node,
+                        messageId: 'missingSectionLogging',
+                        fix(fixer) {
+                          // Object-first API: Replace 'message' with { section: '...' }, 'message'
+                          return fixer.replaceText(firstArg, `{ section: '${inferredSection}' }, ${messageText}`);
+                        },
+                      });
+                    }
+                  }
+                }
+              }
+            }
+          },
           'Program:exit'() {
             // If page has async operations and logger calls but no section logging, warn
+            // (Individual logger calls are now fixed above)
             if (hasAsyncOperations && hasLoggerCalls && !hasSectionLogging) {
               context.report({
                 node: ast,
@@ -1690,7 +1907,7 @@ export default {
           category: 'Best Practices',
           recommended: true,
         },
-        fixable: null,
+        fixable: 'code', // Enable autofix to add useLoggedAsync hook
         schema: [],
         messages: {
           useLoggedAsync:
@@ -1712,6 +1929,9 @@ export default {
         let hasAsyncOperations = false;
         let hasUseLoggedAsync = false;
         let hasRunLoggedAsync = false;
+        let hasUseLoggedAsyncImport = false;
+        let componentName = 'Component';
+        let firstFunctionBody = null;
 
         // Helper to check for async operations using AST
         function hasAsyncOps(node) {
@@ -1747,9 +1967,93 @@ export default {
           return found;
         }
 
+        // Extract component name from default export or first function
+        function extractComponentName(node) {
+          // Look for default export function
+          for (const stmt of node.body || []) {
+            if (stmt.type === 'ExportDefaultDeclaration' && stmt.declaration) {
+              const decl = stmt.declaration;
+              if (decl.type === 'FunctionDeclaration' && decl.id) {
+                return decl.id.name;
+              }
+              if (decl.type === 'Identifier') {
+                // Export default identifier - find its declaration
+                const name = decl.name;
+                for (const s of node.body || []) {
+                  if (s.type === 'FunctionDeclaration' && s.id && s.id.name === name) {
+                    return name;
+                  }
+                  if (s.type === 'VariableDeclaration') {
+                    for (const v of s.declarations || []) {
+                      if (v.id && v.id.type === 'Identifier' && v.id.name === name) {
+                        if (v.init && v.init.type === 'ArrowFunctionExpression') {
+                          return name;
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            // Look for first function declaration
+            if (stmt.type === 'FunctionDeclaration' && stmt.id) {
+              return stmt.id.name;
+            }
+          }
+          return 'Component';
+        }
+
         return {
+          ImportDeclaration(node) {
+            // Check for useLoggedAsync import
+            if (node.source && node.source.type === 'Literal' && typeof node.source.value === 'string') {
+              if (node.source.value.includes('@heyclaude/web-runtime/hooks')) {
+                for (const spec of node.specifiers || []) {
+                  if (spec.type === 'ImportSpecifier' && spec.imported && spec.imported.name === 'useLoggedAsync') {
+                    hasUseLoggedAsyncImport = true;
+                  }
+                }
+              }
+            }
+          },
           Program(node) {
             hasAsyncOperations = hasAsyncOps(node);
+            componentName = extractComponentName(node);
+            // Find first function body for hook insertion
+            for (const stmt of node.body || []) {
+              if (stmt.type === 'ExportDefaultDeclaration' && stmt.declaration) {
+                const decl = stmt.declaration;
+                if (decl.type === 'FunctionDeclaration' && decl.body) {
+                  firstFunctionBody = decl.body;
+                  break;
+                }
+                if (decl.type === 'Identifier') {
+                  // Find the actual function
+                  const name = decl.name;
+                  for (const s of node.body || []) {
+                    if (s.type === 'FunctionDeclaration' && s.id && s.id.name === name && s.body) {
+                      firstFunctionBody = s.body;
+                      break;
+                    }
+                    if (s.type === 'VariableDeclaration') {
+                      for (const v of s.declarations || []) {
+                        if (v.id && v.id.type === 'Identifier' && v.id.name === name) {
+                          if (v.init && v.init.type === 'ArrowFunctionExpression' && v.init.body) {
+                            if (v.init.body.type === 'BlockStatement') {
+                              firstFunctionBody = v.init.body;
+                            }
+                            break;
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              } else if (stmt.type === 'FunctionDeclaration' && stmt.body && !firstFunctionBody) {
+                firstFunctionBody = stmt.body;
+                break;
+              }
+            }
           },
           CallExpression(node) {
             // Check for useLoggedAsync() hook calls
@@ -1768,6 +2072,50 @@ export default {
               context.report({
                 node: ast,
                 messageId: 'useLoggedAsync',
+                fix(fixer) {
+                  const fixes = [];
+                  
+                  // Add import if missing
+                  if (!hasUseLoggedAsyncImport) {
+                    // Find last import statement
+                    let lastImport = null;
+                    for (const stmt of ast.body || []) {
+                      if (stmt.type === 'ImportDeclaration') {
+                        lastImport = stmt;
+                      } else if (lastImport) {
+                        break;
+                      }
+                    }
+                    
+                    if (lastImport) {
+                      // Add to existing import or create new
+                      const importText = "import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';";
+                      fixes.push(fixer.insertTextAfter(lastImport, `\n${importText}`));
+                    } else {
+                      // No imports - add at top
+                      const firstStmt = ast.body[0];
+                      if (firstStmt) {
+                        fixes.push(fixer.insertTextBefore(firstStmt, "import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';\n"));
+                      }
+                    }
+                  }
+                  
+                  // Add hook usage in component body
+                  if (firstFunctionBody && firstFunctionBody.type === 'BlockStatement') {
+                    const hookCode = `\n  const runLoggedAsync = useLoggedAsync({\n    scope: '${componentName}',\n    defaultMessage: 'Operation failed',\n    defaultRethrow: false,\n  });\n`;
+                    
+                    if (firstFunctionBody.body && firstFunctionBody.body.length > 0) {
+                      // Insert after first statement (usually hooks/state)
+                      fixes.push(fixer.insertTextAfter(firstFunctionBody.body[0], hookCode));
+                    } else {
+                      // Empty function body
+                      const bodyStart = firstFunctionBody.range[0] + 1; // After {
+                      fixes.push(fixer.insertTextAfterRange([bodyStart, bodyStart], hookCode));
+                    }
+                  }
+                  
+                  return fixes;
+                },
               });
             }
           },
@@ -4870,6 +5218,25 @@ export default {
             }
 
             if (functionName === 'createSupabaseAdminClient') {
+              // Find the parent statement node (AssignmentExpression, VariableDeclarator, etc.)
+              // Comments are often before the statement, not the CallExpression
+              let statementNode = node.parent;
+              while (statementNode && 
+                     statementNode.type !== 'VariableDeclarator' && 
+                     statementNode.type !== 'AssignmentExpression' &&
+                     statementNode.type !== 'ExpressionStatement' &&
+                     statementNode.type !== 'ReturnStatement') {
+                statementNode = statementNode.parent;
+              }
+
+              // Check comments before the parent statement (most common case)
+              const statementComments = statementNode 
+                ? sourceCode.getCommentsBefore(statementNode) || []
+                : [];
+
+              // Also check comments directly before the CallExpression
+              const directComments = sourceCode.getCommentsBefore(node) || [];
+
               // Check comments in the surrounding context (within 10 lines before the call)
               // This handles cases where comments are separated by import statements
               const nodeLine = node.loc.start.line;
@@ -4882,11 +5249,8 @@ export default {
                 return commentLine >= nodeLine - 10 && commentLine < nodeLine;
               });
 
-              // Also check comments directly before the CallExpression
-              const directComments = sourceCode.getCommentsBefore(node) || [];
-
-              // Check all nearby comments for explanation
-              const allRelevantComments = [...directComments, ...nearbyComments];
+              // Check all relevant comments for explanation
+              const allRelevantComments = [...statementComments, ...directComments, ...nearbyComments];
               const hasExplanation = allRelevantComments.some((comment) => {
                 if (!comment || !comment.value) return false;
                 // Check comment.value (AST property) - split and check exact matches (pure AST property access)
@@ -6037,6 +6401,25 @@ export default {
               node.callee.type === 'Identifier' &&
               node.callee.name === 'createSupabaseAdminClient'
             ) {
+              // Find the parent statement node (AssignmentExpression, VariableDeclarator, etc.)
+              // Comments are often before the statement, not the CallExpression
+              let statementNode = node.parent;
+              while (statementNode && 
+                     statementNode.type !== 'VariableDeclarator' && 
+                     statementNode.type !== 'AssignmentExpression' &&
+                     statementNode.type !== 'ExpressionStatement' &&
+                     statementNode.type !== 'ReturnStatement') {
+                statementNode = statementNode.parent;
+              }
+
+              // Check comments before the parent statement (most common case)
+              const statementComments = statementNode 
+                ? sourceCode.getCommentsBefore(statementNode) || []
+                : [];
+
+              // Also check comments directly before the CallExpression
+              const directComments = sourceCode.getCommentsBefore(node) || [];
+
               // Check comments in the surrounding context (within 10 lines before the call)
               // This handles cases where comments are separated by import statements
               const nodeLine = node.loc.start.line;
@@ -6049,11 +6432,8 @@ export default {
                 return commentLine >= nodeLine - 10 && commentLine < nodeLine;
               });
 
-              // Also check comments directly before the CallExpression
-              const directComments = sourceCode.getCommentsBefore(node) || [];
-
-              // Check all nearby comments for explanation
-              const allRelevantComments = [...directComments, ...nearbyComments];
+              // Check all relevant comments for explanation
+              const allRelevantComments = [...statementComments, ...directComments, ...nearbyComments];
               const hasExplanation = allRelevantComments.some((comment) => {
                 if (!comment || !comment.value) return false;
                 // Check comment.value (AST property) - split and check exact matches (pure AST property access)
@@ -7133,17 +7513,15 @@ export default {
       meta: {
         type: 'problem',
         docs: {
-          description: 'Require child logger with requestId in async page/layout functions',
+          description: 'Require child logger in async page/layout functions (requestId was removed from codebase)',
           category: 'Best Practices',
           recommended: true,
         },
-        fixable: null,
+        fixable: 'code', // Enable autofix to add logger.child() if missing
         schema: [],
         messages: {
           missingChildLogger:
-            'Async server component should create child logger with requestId for log correlation. Use: const reqLogger = logger.child({ requestId, operation, route, module });',
-          missingRequestId:
-            'Child logger should include requestId for log correlation. Add: const requestId = generateRequestId();',
+            'Async server component should create child logger for request-scoped context. Use: const reqLogger = logger.child({ operation, route, module });',
         },
       },
       create(context) {
@@ -7167,13 +7545,41 @@ export default {
 
         let hasAsyncExport = false;
         let hasChildLogger = false;
-        let hasRequestId = false;
+        let asyncFunctionNode = null;
+        let firstStatementNode = null;
+        let hasLoggerImport = false;
+        let lastImportNode = null;
 
         return {
+          ImportDeclaration(node) {
+            // Track imports to add logger import if needed
+            lastImportNode = node;
+            if (node.source && node.source.value) {
+              const importPath = typeof node.source.value === 'string' ? node.source.value : '';
+              if (importPath.includes('logging/server') || importPath.includes('logger')) {
+                // Check if logger is imported
+                for (const spec of node.specifiers || []) {
+                  if (spec.type === 'ImportSpecifier' && spec.imported && spec.imported.type === 'Identifier') {
+                    if (spec.imported.name === 'logger') {
+                      hasLoggerImport = true;
+                    }
+                  } else if (spec.type === 'ImportDefaultSpecifier') {
+                    // Default import might be logger
+                    hasLoggerImport = true;
+                  }
+                }
+              }
+            }
+          },
           ExportDefaultDeclaration(node) {
             // Check if default export is async function
             if (node.declaration.type === 'FunctionDeclaration' && node.declaration.async) {
               hasAsyncExport = true;
+              asyncFunctionNode = node.declaration;
+              // Find first statement in function body
+              if (asyncFunctionNode.body && asyncFunctionNode.body.body && asyncFunctionNode.body.body.length > 0) {
+                firstStatementNode = asyncFunctionNode.body.body[0];
+              }
             }
           },
           VariableDeclarator(node) {
@@ -7185,37 +7591,69 @@ export default {
               node.init.callee.property.name === 'child'
             ) {
               hasChildLogger = true;
-
-              // Check if child logger includes requestId
-              const childCallText = sourceCode.getText(node.init);
-              if (childCallText.includes('requestId')) {
-                hasRequestId = true;
-              }
-            }
-
-            // Check for generateRequestId call
-            if (
-              node.init?.type === 'CallExpression' &&
-              node.init.callee.type === 'Identifier' &&
-              node.init.callee.name === 'generateRequestId'
-            ) {
-              hasRequestId = true;
             }
           },
           'Program:exit'() {
+            // NOTE: requestId was removed from codebase - only check for logger.child() existence
             if (hasAsyncExport && !hasChildLogger) {
-              context.report({
-                loc: { line: 1, column: 0 },
-                messageId: 'missingChildLogger',
-              });
-            }
+              // Determine operation name from function name or file path
+              const operationName = asyncFunctionNode?.id?.name || 'Page';
+              const route = filename.includes('/app/') 
+                ? filename.split('/app/')[1]?.replace(/\/page\.tsx$/, '').replace(/\/layout\.tsx$/, '') || '/'
+                : '/';
+              const modulePath = filename.includes('apps/web/src/')
+                ? filename.split('apps/web/src/')[1] || filename
+                : filename;
 
-            if (hasAsyncExport && hasChildLogger && !hasRequestId) {
               context.report({
-                loc: { line: 1, column: 0 },
-                messageId: 'missingRequestId',
+                node: asyncFunctionNode || ast,
+                messageId: 'missingChildLogger',
+                fix(fixer) {
+                  const fixes = [];
+
+                  // Step 1: Add logger import if missing
+                  if (!hasLoggerImport && lastImportNode) {
+                    const importPath = filename.includes('apps/web/src/')
+                      ? '@heyclaude/web-runtime/logging/server'
+                      : '@heyclaude/shared-runtime/logger';
+                    fixes.push(
+                      fixer.insertTextAfter(
+                        lastImportNode,
+                        `\nimport { logger } from '${importPath}';`
+                      )
+                    );
+                  } else if (!hasLoggerImport) {
+                    // No imports at all - add at top
+                    const importPath = filename.includes('apps/web/src/')
+                      ? '@heyclaude/web-runtime/logging/server'
+                      : '@heyclaude/shared-runtime/logger';
+                    fixes.push(
+                      fixer.insertTextBefore(
+                        ast.body[0] || asyncFunctionNode,
+                        `import { logger } from '${importPath}';\n`
+                      )
+                    );
+                  }
+
+                  // Step 2: Add logger.child() call at start of function
+                  // NOTE: requestId was removed from codebase - do NOT add it
+                  if (asyncFunctionNode && asyncFunctionNode.body) {
+                    const childLoggerCode = `const reqLogger = logger.child({\n  operation: '${operationName}',\n  route: '${route}',\n  module: '${modulePath}',\n});\n\n`;
+                    
+                    if (firstStatementNode) {
+                      fixes.push(fixer.insertTextBefore(firstStatementNode, childLoggerCode));
+                    } else {
+                      // Empty function body - add after opening brace
+                      const bodyStart = asyncFunctionNode.body.range[0] + 1; // After {
+                      fixes.push(fixer.insertTextAfterRange([bodyStart, bodyStart], `\n${childLoggerCode}`));
+                    }
+                  }
+
+                  return fixes;
+                },
               });
             }
+            // NOTE: Removed requestId check - requestId was removed from codebase
           },
         };
       },
@@ -8372,7 +8810,7 @@ export default {
           category: 'Best Practices',
           recommended: true,
         },
-        fixable: null,
+        fixable: null, // DISABLED: Autofix too risky - directive placement is critical and can break pages
         schema: [],
         messages: {
           missingCacheDirective: "Server components with async data fetching must use 'use cache' or 'use cache: private' directive",
@@ -8575,8 +9013,9 @@ export default {
 
             if (!hasUseCache) {
               context.report({
-                node: ast,
+                node: defaultExportFunction || ast,
                 messageId: 'missingCacheDirective',
+                // NOTE: Autofix disabled - directive placement is critical and can break pages if added incorrectly
               });
             } else if (!hasCacheLife) {
               context.report({
@@ -10015,7 +10454,7 @@ export default {
           category: 'Best Practices',
           recommended: true,
         },
-        fixable: null,
+        fixable: 'code', // Enable autofix to add normalizeError() call
         schema: [],
         messages: {
           missingNormalizeError: 'Error must be normalized with normalizeError() before logging. Use: const normalized = normalizeError(error, "fallback message"); logger.error({ err: normalized }, "message")',
@@ -10040,6 +10479,8 @@ export default {
 
         const errorUsages = [];
         const normalizedVariables = new Set();
+        let hasNormalizeErrorImport = false;
+        let normalizeErrorImportPath = null;
 
         // Track normalized variables
         function trackNormalizedVariables(node) {
@@ -10060,7 +10501,33 @@ export default {
           return false;
         }
 
+        // Determine import path based on file location
+        function getNormalizeErrorImportPath() {
+          if (filename.includes('/app/') || filename.includes('/api/')) {
+            return '@heyclaude/web-runtime/logging/server';
+          }
+          if (filename.includes('client') || hasUseClientDirective(ast)) {
+            return '@heyclaude/web-runtime/logging/client';
+          }
+          // Default to server
+          return '@heyclaude/web-runtime/logging/server';
+        }
+
         return {
+          ImportDeclaration(node) {
+            // Check for normalizeError import
+            if (node.source && node.source.type === 'Literal' && typeof node.source.value === 'string') {
+              const sourceValue = node.source.value;
+              if (sourceValue.includes('logging/server') || sourceValue.includes('logging/client') || sourceValue.includes('errors')) {
+                for (const spec of node.specifiers || []) {
+                  if (spec.type === 'ImportSpecifier' && spec.imported && spec.imported.name === 'normalizeError') {
+                    hasNormalizeErrorImport = true;
+                    normalizeErrorImportPath = sourceValue;
+                  }
+                }
+              }
+            }
+          },
           VariableDeclarator: trackNormalizedVariables,
           CatchClause(node) {
             errorUsages.push(node);
@@ -10104,9 +10571,64 @@ export default {
                             return false;
                           });
                           if (catchBlock) {
+                            const catchParam = catchBlock.param;
+                            const errorVarName = catchParam && catchParam.type === 'Identifier' ? catchParam.name : 'error';
+                            
                             context.report({
                               node: errValue,
                               messageId: 'missingNormalizeError',
+                              fix(fixer) {
+                                const fixes = [];
+                                
+                                // Add import if missing
+                                if (!hasNormalizeErrorImport) {
+                                  const importPath = getNormalizeErrorImportPath();
+                                  let lastImport = null;
+                                  for (const stmt of ast.body || []) {
+                                    if (stmt.type === 'ImportDeclaration') {
+                                      lastImport = stmt;
+                                    } else if (lastImport) {
+                                      break;
+                                    }
+                                  }
+                                  
+                                  if (lastImport) {
+                                    fixes.push(fixer.insertTextAfter(lastImport, `\nimport { normalizeError } from '${importPath}';`));
+                                  } else {
+                                    const firstStmt = ast.body[0];
+                                    if (firstStmt) {
+                                      fixes.push(fixer.insertTextBefore(firstStmt, `import { normalizeError } from '${importPath}';\n`));
+                                    }
+                                  }
+                                }
+                                
+                                // Find catch block body
+                                if (catchBlock.body && catchBlock.body.type === 'BlockStatement') {
+                                  // Check if normalized variable already exists
+                                  const hasNormalizedVar = catchBlock.body.body.some(stmt => 
+                                    stmt.type === 'VariableDeclaration' &&
+                                    stmt.declarations.some(decl =>
+                                      decl.id && decl.id.type === 'Identifier' && decl.id.name === 'normalized'
+                                    )
+                                  );
+                                  
+                                  if (!hasNormalizedVar) {
+                                    // Add normalizeError call at start of catch block
+                                    const normalizeCode = `\n    const normalized = normalizeError(${errorVarName}, 'Operation failed');\n`;
+                                    if (catchBlock.body.body.length > 0) {
+                                      fixes.push(fixer.insertTextBefore(catchBlock.body.body[0], normalizeCode));
+                                    } else {
+                                      const bodyStart = catchBlock.body.range[0] + 1;
+                                      fixes.push(fixer.insertTextAfterRange([bodyStart, bodyStart], normalizeCode));
+                                    }
+                                  }
+                                  
+                                  // Replace error usage with normalized
+                                  fixes.push(fixer.replaceText(errValue, 'normalized'));
+                                }
+                                
+                                return fixes;
+                              },
                             });
                           }
                         }
@@ -10142,9 +10664,64 @@ export default {
                       return false;
                     });
                     if (catchBlock) {
+                      const catchParam = catchBlock.param;
+                      const errorVarName = catchParam && catchParam.type === 'Identifier' ? catchParam.name : 'error';
+                      
                       context.report({
                         node: errorArg,
                         messageId: 'missingNormalizeError',
+                        fix(fixer) {
+                          const fixes = [];
+                          
+                          // Add import if missing
+                          if (!hasNormalizeErrorImport) {
+                            const importPath = getNormalizeErrorImportPath();
+                            let lastImport = null;
+                            for (const stmt of ast.body || []) {
+                              if (stmt.type === 'ImportDeclaration') {
+                                lastImport = stmt;
+                              } else if (lastImport) {
+                                break;
+                              }
+                            }
+                            
+                            if (lastImport) {
+                              fixes.push(fixer.insertTextAfter(lastImport, `\nimport { normalizeError } from '${importPath}';`));
+                            } else {
+                              const firstStmt = ast.body[0];
+                              if (firstStmt) {
+                                fixes.push(fixer.insertTextBefore(firstStmt, `import { normalizeError } from '${importPath}';\n`));
+                              }
+                            }
+                          }
+                          
+                          // Find catch block body
+                          if (catchBlock.body && catchBlock.body.type === 'BlockStatement') {
+                            // Check if normalized variable already exists
+                            const hasNormalizedVar = catchBlock.body.body.some(stmt => 
+                              stmt.type === 'VariableDeclaration' &&
+                              stmt.declarations.some(decl =>
+                                decl.id && decl.id.type === 'Identifier' && decl.id.name === 'normalized'
+                              )
+                            );
+                            
+                            if (!hasNormalizedVar) {
+                              // Add normalizeError call at start of catch block
+                              const normalizeCode = `\n    const normalized = normalizeError(${errorVarName}, 'Operation failed');\n`;
+                              if (catchBlock.body.body.length > 0) {
+                                fixes.push(fixer.insertTextBefore(catchBlock.body.body[0], normalizeCode));
+                              } else {
+                                const bodyStart = catchBlock.body.range[0] + 1;
+                                fixes.push(fixer.insertTextAfterRange([bodyStart, bodyStart], normalizeCode));
+                              }
+                            }
+                            
+                            // Replace error usage with normalized
+                            fixes.push(fixer.replaceText(errorArg, 'normalized'));
+                          }
+                          
+                          return fixes;
+                        },
                       });
                     }
                   }
@@ -10467,6 +11044,314 @@ export default {
           'CallExpression:exit'(node) {
             if (isIIFE(node)) {
               iifeStack.pop();
+            }
+          },
+        };
+      },
+    },
+
+    'autofix-jsdoc-returns': {
+      meta: {
+        type: 'suggestion',
+        docs: {
+          description: 'Auto-fix: Add missing JSDoc @returns tag to functions',
+          category: 'Best Practices',
+          recommended: false,
+        },
+        fixable: 'code',
+        schema: [],
+        messages: {
+          missingReturns:
+            'Function is missing JSDoc @returns tag. Auto-fix will add a basic @returns tag.',
+        },
+      },
+      create(context) {
+        const sourceCode = context.getSourceCode();
+
+        /**
+         * Find JSDoc comment for a function node
+         */
+        function findJSDocComment(node) {
+          const comments = sourceCode.getCommentsBefore(node);
+          // Look for the last JSDoc comment (/** ... */) before the function
+          for (let i = comments.length - 1; i >= 0; i--) {
+            const comment = comments[i];
+            if (comment.type === 'Block' && comment.value.startsWith('*')) {
+              return comment;
+            }
+          }
+          return null;
+        }
+
+        /**
+         * Check if JSDoc comment has @returns tag
+         */
+        function hasReturnsTag(jsdocComment) {
+          if (!jsdocComment || !jsdocComment.value) return false;
+          const value = jsdocComment.value;
+          // Check for @returns or @return (both are valid)
+          return /@returns?\s/.test(value);
+        }
+
+        /**
+         * Infer return type from function signature
+         */
+        function inferReturnType(node) {
+          // Check if function has explicit return type annotation
+          if (node.returnType && node.returnType.typeAnnotation) {
+            const typeAnnotation = node.returnType.typeAnnotation;
+            if (typeAnnotation.type === 'TSVoidKeyword') {
+              return 'void';
+            }
+            if (typeAnnotation.type === 'TSPromiseType') {
+              return 'Promise<unknown>';
+            }
+            // For other types, return generic
+            return 'unknown';
+          }
+
+          // Check if function is async
+          if (node.async) {
+            return 'Promise<unknown>';
+          }
+
+          // Default to unknown
+          return 'unknown';
+        }
+
+        return {
+          FunctionDeclaration(node) {
+            // Skip if function has no body (type declaration)
+            if (!node.body) return;
+
+            // Find JSDoc comment
+            const jsdocComment = findJSDocComment(node);
+            
+            // If no JSDoc comment exists, skip (let jsdoc/require-returns handle it)
+            if (!jsdocComment) return;
+
+            // If @returns already exists, skip
+            if (hasReturnsTag(jsdocComment)) return;
+
+            // Report and provide autofix
+            context.report({
+              node,
+              messageId: 'missingReturns',
+              fix(fixer) {
+                const returnType = inferReturnType(node);
+                const commentText = jsdocComment.value;
+                
+                // Find the end of the comment (before closing */)
+                const commentEnd = jsdocComment.range[1] - 2; // -2 for */
+                
+                // Determine indentation from the comment
+                const commentLines = sourceCode.getText(jsdocComment).split('\n');
+                const lastLine = commentLines[commentLines.length - 1];
+                const indentMatch = lastLine.match(/^(\s*)\*\s*$/);
+                const indent = indentMatch ? indentMatch[1] : '';
+
+                // Add @returns tag before closing */
+                const returnsTag = `\n${indent} * @returns {${returnType}} Description of return value`;
+                return fixer.insertTextBeforeRange([commentEnd, commentEnd], returnsTag);
+              },
+            });
+          },
+        };
+      },
+    },
+
+    // ============================================================================
+    // AUTOFIX RULES - Phase 2
+    // ============================================================================
+
+    'autofix-remove-unnecessary-async': {
+      meta: {
+        type: 'suggestion',
+        docs: {
+          description: 'Auto-fix: Remove unnecessary async keyword when function has no await',
+          category: 'Best Practices',
+          recommended: false,
+        },
+        fixable: 'code',
+        schema: [],
+        messages: {
+          unnecessaryAsync:
+            'Function is marked async but has no await expression. Auto-fix will remove async keyword.',
+        },
+      },
+      create(context) {
+        const sourceCode = context.getSourceCode();
+
+        function hasAwaitExpression(node) {
+          if (!node || !node.body) return false;
+          let found = false;
+          function traverse(n) {
+            if (!n || found) return;
+            if (n.type === 'AwaitExpression') {
+              found = true;
+              return;
+            }
+            // Don't traverse into nested function declarations/expressions
+            if (n.type === 'FunctionDeclaration' || n.type === 'FunctionExpression' || n.type === 'ArrowFunctionExpression') {
+              if (n !== node) {
+                // Skip nested functions
+                return;
+              }
+            }
+            for (const key in n) {
+              if (key !== 'parent' && typeof n[key] === 'object' && n[key] !== null) {
+                if (Array.isArray(n[key])) {
+                  for (const item of n[key]) {
+                    traverse(item);
+                    if (found) return;
+                  }
+                } else {
+                  traverse(n[key]);
+                  if (found) return;
+                }
+              }
+            }
+          }
+          traverse(node.body);
+          return found;
+        }
+
+        function hasExplicitPromiseReturn(node) {
+          // Check if function has explicit Promise return type
+          if (node.returnType && node.returnType.typeAnnotation) {
+            const returnType = node.returnType.typeAnnotation;
+            if (returnType.type === 'TSTypeReference') {
+              if (returnType.typeName && returnType.typeName.type === 'Identifier') {
+                return returnType.typeName.name === 'Promise';
+              }
+            }
+          }
+          return false;
+        }
+
+        return {
+          FunctionDeclaration(node) {
+            if (!node.async) return;
+            if (hasExplicitPromiseReturn(node)) return; // Keep async if explicitly returning Promise
+            if (hasAwaitExpression(node)) return; // Keep async if has await
+
+            context.report({
+              node,
+              messageId: 'unnecessaryAsync',
+              fix(fixer) {
+                // Remove async keyword
+                const asyncToken = sourceCode.getFirstToken(node, (token) => token.value === 'async');
+                if (asyncToken) {
+                  const nextToken = sourceCode.getTokenAfter(asyncToken);
+                  // Remove async and the space after it
+                  return fixer.removeRange([asyncToken.range[0], nextToken ? nextToken.range[0] : asyncToken.range[1]]);
+                }
+                return null;
+              },
+            });
+          },
+          ArrowFunctionExpression(node) {
+            if (!node.async) return;
+            if (hasAwaitExpression(node)) return; // Keep async if has await
+
+            // For arrow functions, check parent for return type
+            if (node.parent && node.parent.type === 'VariableDeclarator') {
+              // Check if variable has type annotation
+              if (node.parent.id && node.parent.id.typeAnnotation) {
+                const typeAnnotation = node.parent.id.typeAnnotation.typeAnnotation;
+                if (typeAnnotation.type === 'TSTypeReference' && typeAnnotation.typeName && typeAnnotation.typeName.name === 'Promise') {
+                  return; // Keep async if explicitly typed as Promise
+                }
+              }
+            }
+
+            context.report({
+              node,
+              messageId: 'unnecessaryAsync',
+              fix(fixer) {
+                // Remove async keyword
+                const asyncToken = sourceCode.getFirstToken(node, (token) => token.value === 'async');
+                if (asyncToken) {
+                  const nextToken = sourceCode.getTokenAfter(asyncToken);
+                  // Remove async and the space after it
+                  return fixer.removeRange([asyncToken.range[0], nextToken ? nextToken.range[0] : asyncToken.range[1]]);
+                }
+                return null;
+              },
+            });
+          },
+        };
+      },
+    },
+
+    'autofix-nested-ternary-parentheses': {
+      meta: {
+        type: 'suggestion',
+        docs: {
+          description: 'Auto-fix: Add parentheses around nested ternary expressions',
+          category: 'Best Practices',
+          recommended: false,
+        },
+        fixable: 'code',
+        schema: [],
+        messages: {
+          nestedTernary:
+            'Nested ternary expression should be parenthesized. Auto-fix will add parentheses.',
+        },
+      },
+      create(context) {
+        const sourceCode = context.getSourceCode();
+
+        function isNestedTernary(node) {
+          if (node.type !== 'ConditionalExpression') return false;
+          // Check if the consequent or alternate is also a ternary
+          return (
+            (node.consequent && node.consequent.type === 'ConditionalExpression') ||
+            (node.alternate && node.alternate.type === 'ConditionalExpression')
+          );
+        }
+
+        function isAlreadyParenthesized(node) {
+          const parent = node.parent;
+          if (!parent) return false;
+          // Check if parent is a parenthesized expression
+          return parent.type === 'ParenthesizedExpression';
+        }
+
+        return {
+          ConditionalExpression(node) {
+            if (!isNestedTernary(node)) return;
+            if (isAlreadyParenthesized(node)) return;
+
+            // Only fix if nested ternary is in the alternate (right side)
+            // This is the most common case: a ? b : c ? d : e
+            if (node.alternate && node.alternate.type === 'ConditionalExpression') {
+              context.report({
+                node: node.alternate,
+                messageId: 'nestedTernary',
+                fix(fixer) {
+                  // Add parentheses around the nested ternary in alternate
+                  return [
+                    fixer.insertTextBefore(node.alternate, '('),
+                    fixer.insertTextAfter(node.alternate, ')'),
+                  ];
+                },
+              });
+            }
+            // Also fix if nested ternary is in consequent (left side)
+            // Less common: a ? b ? c : d : e
+            else if (node.consequent && node.consequent.type === 'ConditionalExpression') {
+              context.report({
+                node: node.consequent,
+                messageId: 'nestedTernary',
+                fix(fixer) {
+                  // Add parentheses around the nested ternary in consequent
+                  return [
+                    fixer.insertTextBefore(node.consequent, '('),
+                    fixer.insertTextAfter(node.consequent, ')'),
+                  ];
+                },
+              });
             }
           },
         };

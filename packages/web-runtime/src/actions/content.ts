@@ -73,7 +73,7 @@ export const getReviewsWithStats = optionalAuthAction
           new Error('getReviewsWithStatsData returned null'),
           'Failed to fetch reviews'
         );
-        logger.error('getReviewsWithStats: data fetch returned null', normalized, logContext);
+        logger.error({ err: normalized, ...logContext }, 'getReviewsWithStats: data fetch returned null');
         throw new Error('Failed to fetch reviews. Please try again.');
       }
 
@@ -81,7 +81,7 @@ export const getReviewsWithStats = optionalAuthAction
     } catch (error) {
       // If error is already normalized/logged by getReviewsWithStatsData, still log with action context
       const normalized = normalizeError(error, 'Failed to fetch reviews');
-      logger.error('getReviewsWithStats: action failed', normalized, logContext);
+      logger.error({ err: normalized, ...logContext }, 'getReviewsWithStats: action failed');
       // Re-throw normalized error to let safe-action wrapper handle it
       throw normalized;
     }
@@ -114,21 +114,17 @@ export const fetchPaginatedContent = rateLimitedAction
     const logContext = createWebAppContextWithId('/api/actions', 'fetchPaginatedContent');
 
     try {
-      logger.info('fetchPaginatedContent: action started', {
-        ...logContext,
+      logger.info({ ...logContext,
         category: parsedInput.category,
         limit: parsedInput.limit,
-        offset: parsedInput.offset,
-      });
+        offset: parsedInput.offset, }, 'fetchPaginatedContent: action started');
 
       const { getPaginatedContent: getPaginatedContentData } = await import('../data/content/paginated.ts');
 
-      logger.info('fetchPaginatedContent: calling getPaginatedContentData', {
-        ...logContext,
+      logger.info({ ...logContext,
         category: parsedInput.category,
         limit: parsedInput.limit,
-        offset: parsedInput.offset,
-      });
+        offset: parsedInput.offset, }, 'fetchPaginatedContent: calling getPaginatedContentData');
 
       const data = await getPaginatedContentData({
         category: parsedInput.category,
@@ -136,39 +132,31 @@ export const fetchPaginatedContent = rateLimitedAction
         offset: parsedInput.offset,
       });
 
-      logger.info('fetchPaginatedContent: getPaginatedContentData result received', {
-        ...logContext,
+      logger.info({ ...logContext,
         hasData: Boolean(data),
         hasItems: Boolean(data?.items),
         itemsLength: Array.isArray(data?.items) ? data.items.length : 0,
         hasPagination: Boolean(data?.pagination),
-        paginationTotal: data?.pagination?.total_count ?? null,
-      });
+        paginationTotal: data?.pagination?.total_count ?? null, }, 'fetchPaginatedContent: getPaginatedContentData result received');
 
       // get_content_paginated_slim returns content_paginated_slim_result composite type
       if (!data?.items) {
-        logger.warn('fetchPaginatedContent: no items in result, returning empty array', {
-          ...logContext,
+        logger.warn({ ...logContext,
           hasData: Boolean(data),
-          dataKeys: data ? Object.keys(data) : [],
-        });
+          dataKeys: data ? Object.keys(data) : [], }, 'fetchPaginatedContent: no items in result, returning empty array');
         return [];
       }
       // Return items directly - they are already properly typed as content_paginated_slim_item[]
       const items = data.items as DisplayableContent[];
-      logger.info('fetchPaginatedContent: returning items', {
-        ...logContext,
-        itemsCount: items.length,
-      });
+      logger.info({ ...logContext,
+        itemsCount: items.length, }, 'fetchPaginatedContent: returning items');
       return items;
     } catch (error) {
       const normalized = normalizeError(error, 'fetchPaginatedContent failed');
-      logger.error('fetchPaginatedContent: action failed', normalized, {
-        ...logContext,
+      logger.error({ err: normalized, ...logContext,
         category: parsedInput.category,
         limit: parsedInput.limit,
-        offset: parsedInput.offset,
-      });
+        offset: parsedInput.offset, }, 'fetchPaginatedContent: action failed');
       // Fallback to empty array on error (safe-action middleware handles logging)
       return [];
     }

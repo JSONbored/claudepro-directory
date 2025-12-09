@@ -76,9 +76,13 @@ export function logActionFailure(
   // Note: Errors are logged with operation and context
   // Client-side errors (client components)
   // Server actions will have context from their logger
-  logger.error(`[Action] ${actionName} failed`, normalized, {
-    ...sanitizeContext(context),
-  });
+  logger.error(
+    {
+      err: normalized,
+      ...sanitizeContext(context),
+    },
+    `[Action] ${actionName} failed`
+  );
   return normalized;
 }
 
@@ -91,7 +95,7 @@ export function logClientWarning(
   const sanitized = sanitizeContext(context);
   // Pino's stdSerializers.err automatically handles error serialization
   // Pass error as 'err' key for proper formatting
-  logger.warn(message, { ...(sanitized ?? {}), err: normalized });
+  logger.warn({ ...(sanitized ?? {}), err: normalized }, message);
   return normalized;
 }
 
@@ -101,6 +105,12 @@ export function logUnhandledPromise(
   context?: ContextInput
 ): Error {
   const normalized = normalizeError(error);
-  logger.error(`[Promise] ${promiseName} rejected`, normalized, sanitizeContext(context));
+  logger.error(
+    {
+      err: normalized,
+      ...sanitizeContext(context),
+    },
+    `[Promise] ${promiseName} rejected`
+  );
   return normalized;
 }

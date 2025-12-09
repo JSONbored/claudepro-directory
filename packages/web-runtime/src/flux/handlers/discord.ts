@@ -75,10 +75,8 @@ export async function handleDiscordDirect(request: NextRequest): Promise<NextRes
     // Get appropriate webhook URL based on notification type
     const webhookUrl = getWebhookUrl(notificationType);
     if (!webhookUrl) {
-      logger.warn('Discord webhook URL not configured', {
-        ...logContext,
-        notificationType,
-      });
+      logger.warn({ ...logContext,
+        notificationType, }, 'Discord webhook URL not configured');
       return NextResponse.json(
         { error: `Webhook not configured for type: ${notificationType}` },
         { status: 400, headers: DISCORD_CORS_HEADERS }
@@ -100,10 +98,8 @@ export async function handleDiscordDirect(request: NextRequest): Promise<NextRes
     } catch (fetchError) {
       clearTimeout(timeoutId);
       if (fetchError instanceof Error && fetchError.name === 'AbortError') {
-        logger.warn('Discord webhook timed out', {
-          ...logContext,
-          notificationType,
-        });
+        logger.warn({ ...logContext,
+          notificationType, }, 'Discord webhook timed out');
         return NextResponse.json(
           { error: 'Discord webhook timed out' },
           { status: 504, headers: DISCORD_CORS_HEADERS }
@@ -115,12 +111,10 @@ export async function handleDiscordDirect(request: NextRequest): Promise<NextRes
 
     if (!response.ok) {
       const errorText = await response.text();
-      logger.warn('Discord webhook failed', {
-        ...logContext,
+      logger.warn({ ...logContext,
         notificationType,
         status: response.status,
-        errorText: errorText.slice(0, 200),
-      });
+        errorText: errorText.slice(0, 200), }, 'Discord webhook failed');
       return NextResponse.json(
         { error: 'Discord webhook failed', status: response.status },
         { status: 502, headers: DISCORD_CORS_HEADERS }
@@ -128,11 +122,9 @@ export async function handleDiscordDirect(request: NextRequest): Promise<NextRes
     }
 
     const durationMs = Date.now() - startTime;
-    logger.info('Discord notification sent', {
-      ...logContext,
+    logger.info({ ...logContext,
       durationMs,
-      notificationType,
-    });
+      notificationType, }, 'Discord notification sent');
 
     return NextResponse.json(
       { success: true, notificationType },
@@ -140,7 +132,7 @@ export async function handleDiscordDirect(request: NextRequest): Promise<NextRes
     );
   } catch (error) {
     const normalized = normalizeError(error, 'Discord notification failed');
-    logger.error('Discord notification failed', normalized, logContext);
+    logger.error({ err: normalized, ...logContext }, 'Discord notification failed');
 
     return createErrorResponse(error, {
       route: '/api/flux/discord/direct',

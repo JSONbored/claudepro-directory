@@ -24,8 +24,9 @@ const CORS = getOnlyCorsHeaders;
  * Route and include parameters become part of the cache key, so different routes have different cache entries.
  * @param route
  * @param include
- */
-async function getCachedSeoMetadata(route: string, include: string) {
+ 
+ * @returns {Promise<unknown>} Description of return value*/
+function getCachedSeoMetadata(route: string, include: string) {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
@@ -56,7 +57,7 @@ export async function GET(request: NextRequest) {
     // Sanitize route parameter
     const route = sanitizeRoute(routeParam);
 
-    reqLogger.info('SEO request received', { route, include });
+    reqLogger.info({ route, include }, 'SEO request received');
 
     const data = await getCachedSeoMetadata(route, include);
     const dataObj = data as Record<string, unknown>;
@@ -81,9 +82,10 @@ export async function GET(request: NextRequest) {
       try {
         processedSchemas = schemasArray.map((schema: Json) => serializeJsonLd(schema));
       } catch (error) {
-        reqLogger.warn('JSON-LD serialization failed, omitting schemas for safety', {
-          error: normalizeError(error),
-        });
+        reqLogger.warn(
+          { err: normalizeError(error) },
+          'JSON-LD serialization failed, omitting schemas for safety'
+        );
         processedSchemas = [];
       }
     }
@@ -132,12 +134,15 @@ export async function GET(request: NextRequest) {
 
     const responseBody = JSON.stringify(responseData);
 
-    reqLogger.info('SEO generated', {
-      route,
-      include,
-      bytes: responseBody.length,
-      schemasSerialized: processedSchemas.length > 0,
-    });
+    reqLogger.info(
+      {
+        route,
+        include,
+        bytes: responseBody.length,
+        schemasSerialized: processedSchemas.length > 0,
+      },
+      'SEO generated'
+    );
 
     const robotsHeaderValue = `${robots.index ? 'index' : 'noindex'}, ${
       robots.follow ? 'follow' : 'nofollow'
@@ -154,8 +159,9 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    reqLogger.error('SEO API error', normalizeError(error));
-    return createErrorResponse(error, {
+    const normalized = normalizeError(error, 'SEO API error');
+    reqLogger.error({ err: normalized }, 'SEO API error');
+    return createErrorResponse(normalized, {
       route: '/api/seo',
       operation: 'SeoAPI',
       method: 'GET',

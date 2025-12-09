@@ -41,15 +41,13 @@ export async function getQuizConfiguration(): Promise<null | QuizConfigurationRe
 
     const result = await service.getQuizConfiguration();
 
-    reqLogger.info('getQuizConfiguration: fetched successfully', {
-      hasResult: Boolean(result),
-    });
+    reqLogger.info({ hasResult: Boolean(result) }, 'getQuizConfiguration: fetched successfully');
 
     return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('getQuizConfiguration: unexpected error', errorForLogging);
+    reqLogger.error({ err: errorForLogging }, 'getQuizConfiguration: unexpected error');
     return null;
   }
 }

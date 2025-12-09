@@ -3,9 +3,9 @@
 # Matches: config/tools/eslint-plugin-architectural-rules.js -> require-cache-components
 
 ---
-# Rule: Detect missing 'use cache' directive in cached components
+# Rule: Detect missing 'use cache' directive in server components with async data fetching
 id: missing-use-cache-directive
-language: TypeScript
+language: typescript
 rule:
   all:
     - pattern: export default async function $COMPONENT($$$) { $$$ }
@@ -13,17 +13,17 @@ rule:
     - inside:
         pattern: app/**/*.tsx
     - has:
-        pattern: await connection()
+        pattern: await $ASYNC($$$)
     - not:
         precedes:
           pattern: 'use cache'
-message: "Components using connection() must have 'use cache' or 'use cache: private' directive. Add directive before function declaration."
+message: "Server components with async data fetching must use 'use cache' or 'use cache: private' directive. Add directive as first statement in function body."
 severity: error
 
 ---
 # Rule: Detect non-deterministic operations before connection()
 id: non-deterministic-before-connection
-language: TypeScript
+language: typescript
 rule:
   all:
     - pattern: export default async function $COMPONENT($$$) { $$$ }
@@ -31,27 +31,27 @@ rule:
     - inside:
         pattern: app/**/*.tsx
     - has:
-        pattern: (Date.now()|Math.random()|new Date()|performance.now())($$$)
+        pattern: (Date.now()|Math.random()|new Date()|performance.now()|crypto.randomUUID())($$$)
     - not:
         follows:
           pattern: await connection()
-message: "Non-deterministic operations (Date.now(), Math.random(), etc.) must come after await connection(). Move operation after connection() call."
+message: "Non-deterministic operations (Date.now(), Math.random(), new Date(), performance.now(), crypto.randomUUID()) must come after await connection(). Move operation after connection() call."
 severity: error
 
 ---
-# Rule: Detect missing connection() in cached components
-id: missing-connection-in-cached
-language: TypeScript
+# Rule: Detect missing connection() in components with non-deterministic operations
+id: missing-connection-with-non-deterministic
+language: typescript
 rule:
   all:
     - pattern: export default async function $COMPONENT($$$) { $$$ }
       kind: function_declaration
     - inside:
         pattern: app/**/*.tsx
-    - precedes:
-        pattern: 'use cache'
+    - has:
+        pattern: (Date.now()|Math.random()|new Date()|performance.now()|crypto.randomUUID())($$$)
     - not:
         has:
           pattern: await connection()
-message: "Cached components must call await connection() at the start to defer to request time. Add: await connection() at function start."
+message: "Components using non-deterministic operations must call await connection() at the start. Add: await connection() at function start."
 severity: error

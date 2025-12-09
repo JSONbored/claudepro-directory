@@ -60,7 +60,7 @@ export function createErrorBoundaryFallback(
     });
     
     // Use structured logging instead of console.error
-    logger.error('React error boundary caught error', normalized, logContext);
+    logger.error({ err: normalized, ...logContext }, 'React error boundary caught error');
     
     return {
       success: false,
@@ -82,7 +82,7 @@ export function createErrorBoundaryFallback(
           fallbackError: true,
         }
       );
-      logger.error('Error boundary fallback handler failed', normalized, logContext, undefined);
+      logger.error({ err: normalized, ...logContext }, 'Error boundary fallback handler failed');
     } catch {
       // Last resort - if even logging fails, just return error response
     }

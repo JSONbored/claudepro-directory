@@ -51,9 +51,7 @@ export async function GET(
 
   // Validate provider
   if (!isValidProvider(rawProvider)) {
-    reqLogger.warn('OAuth link: invalid provider', {
-      provider: rawProvider,
-    });
+    reqLogger.warn({ provider: rawProvider }, 'OAuth link: invalid provider');
     return NextResponse.redirect(`${origin}/account/connected-accounts?error=invalid_provider`);
   }
 
@@ -64,9 +62,7 @@ export async function GET(
   });
 
   if (!authResult.isAuthenticated || !authResult.user) {
-    reqLogger.warn('OAuth link: user not authenticated', {
-      provider: rawProvider,
-    });
+    reqLogger.warn({ provider: rawProvider }, 'OAuth link: user not authenticated');
     // Redirect to login with return URL, preserving the 'next' parameter
     const loginUrl = new URL(`${origin}/login`);
     const linkUrl = new URL(`${origin}/auth/link/${rawProvider}`);

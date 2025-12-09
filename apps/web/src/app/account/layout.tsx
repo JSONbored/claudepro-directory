@@ -98,12 +98,13 @@ async function AccountAuthWrapper({ children }: { children: React.ReactNode }) {
       const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
       if (refreshError) {
         const normalized = normalizeError(refreshError, 'Session refresh failed');
-        reqLogger.warn('AccountLayout: session refresh failed', {
-          err: normalized,
-        });
+        reqLogger.warn(
+          { err: normalized },
+          'AccountLayout: session refresh failed'
+        );
         // Continue with existing session - user may need to re-authenticate on next request
       } else if (refreshData.session) {
-        reqLogger.debug('AccountLayout: session refreshed successfully');
+        reqLogger.debug({}, 'AccountLayout: session refreshed successfully');
       }
     }
   }

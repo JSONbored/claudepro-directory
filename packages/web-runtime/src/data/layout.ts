@@ -61,7 +61,7 @@ export async function getLayoutData(): Promise<LayoutData> {
                 'toString' in reason &&
                 typeof reason.toString === 'function'
               ? reason.toString()
-              : String(reason)));
+              : String(reason));
       reqLogger.error(
         { err: errorForLogging, source: 'layout-data', component: 'announcement' },
         'getLayoutData: announcement fetch failed'

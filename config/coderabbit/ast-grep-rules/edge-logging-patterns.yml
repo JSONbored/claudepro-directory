@@ -5,29 +5,29 @@
 ---
 # Rule: Detect wrong logger import in edge functions (should use shared-runtime or edge-runtime)
 id: wrong-logger-import-edge
-language: TypeScript
+language: typescript
 rule:
   all:
-    - pattern: import $ITEMS from '@heyclaude/web-runtime/core'
+    - pattern: import $ITEMS from '@heyclaude/web-runtime/$MODULE'
       kind: import_statement
       has:
-        regex: logger
+        regex: (core|logging/server)
     - inside:
-        pattern: apps/edge/functions/**/*.ts
-message: "Edge functions must use logError/logInfo/logWarn from @heyclaude/shared-runtime OR logger from @heyclaude/edge-runtime. Do not use logger from @heyclaude/web-runtime/core."
+        pattern: apps/edge/supabase/functions/**/*.ts
+message: "Edge functions must use logError/logInfo/logWarn from @heyclaude/shared-runtime/logging.ts OR logger/initRequestLogging from @heyclaude/edge-runtime/utils/logger-helpers.ts. Do not use logger from @heyclaude/web-runtime/core or @heyclaude/web-runtime/logging/server."
 severity: error
 
 ---
 # Rule: Detect missing logContext creation in edge function handlers
 id: missing-log-context-edge
-language: TypeScript
+language: typescript
 rule:
   all:
     - pattern: export (const|function) $HANDLER($$$) { $$$ }
       kind: function_declaration
       regex: (GET|POST|PUT|DELETE|PATCH|OPTIONS|HEAD)
     - inside:
-        pattern: apps/edge/functions/**/*.ts
+        pattern: apps/edge/supabase/functions/**/*.ts
     - not:
         has:
           pattern: const logContext = create$CONTEXT($$$)
@@ -38,14 +38,14 @@ severity: error
 ---
 # Rule: Detect missing initRequestLogging() call in edge function handlers
 id: missing-init-request-logging
-language: TypeScript
+language: typescript
 rule:
   all:
     - pattern: export (const|function) $HANDLER($$$) { $$$ }
       kind: function_declaration
       regex: (GET|POST|PUT|DELETE|PATCH|OPTIONS|HEAD)
     - inside:
-        pattern: apps/edge/functions/**/*.ts
+        pattern: apps/edge/supabase/functions/**/*.ts
     - has:
         pattern: const logContext = create$CONTEXT($$$)
     - not:
@@ -57,14 +57,14 @@ severity: error
 ---
 # Rule: Detect missing traceRequestComplete() call before success response
 id: missing-trace-request-complete
-language: TypeScript
+language: typescript
 rule:
   all:
     - pattern: export (const|function) $HANDLER($$$) { $$$ }
       kind: function_declaration
       regex: (GET|POST|PUT|DELETE|PATCH|OPTIONS|HEAD)
     - inside:
-        pattern: apps/edge/functions/**/*.ts
+        pattern: apps/edge/supabase/functions/**/*.ts
     - has:
         pattern: return (new Response|Response.$METHOD)($$$)
     - not:

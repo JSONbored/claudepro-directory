@@ -1,7 +1,7 @@
 import 'server-only';
 import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
-import { normalizeError, validateLimit, validateQueryString } from '@heyclaude/shared-runtime';
-import { logger, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
+import { validateLimit, validateQueryString } from '@heyclaude/shared-runtime';
+import { logger, createErrorResponse, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   createSupabaseAnonClient,
   badRequestResponse,
@@ -21,7 +21,8 @@ const CORS = getWithAuthCorsHeaders;
  * Cache key includes query and limit for per-query caching
  * @param query
  * @param limit
- */
+ 
+ * @returns {Promise<unknown>} Description of return value*/
 async function getCachedSearchSuggestions(query: string, limit: number) {
   'use cache';
   cacheLife('quarter'); // 15min stale, 5min revalidate, 2hr expire - More dynamic than static content
@@ -77,7 +78,7 @@ export async function GET(request: NextRequest) {
   }
   const limit = limitValidation.limit;
 
-  reqLogger.info('Autocomplete request received', { query });
+  reqLogger.info({ query }, 'Autocomplete request received');
 
   try {
     let data: Awaited<ReturnType<typeof getCachedSearchSuggestions>> | null = null;
@@ -85,8 +86,8 @@ export async function GET(request: NextRequest) {
       data = await getCachedSearchSuggestions(query, limit);
     } catch (error) {
       const normalized = normalizeError(error, 'Autocomplete RPC failed');
-      reqLogger.error('Autocomplete RPC failed', normalized);
-      return createErrorResponse(error, {
+      reqLogger.error({ err: normalized }, 'Autocomplete RPC failed');
+      return createErrorResponse(normalized, {
         route: '/api/search/autocomplete',
         operation: 'get_search_suggestions_from_history',
         method: 'GET',
@@ -122,8 +123,8 @@ export async function GET(request: NextRequest) {
     );
   } catch (error) {
     const normalized = normalizeError(error, 'Autocomplete handler failed');
-    reqLogger.error('Autocomplete handler failed', normalized);
-    return createErrorResponse(error, {
+    reqLogger.error({ err: normalized }, 'Autocomplete handler failed');
+    return createErrorResponse(normalized, {
       route: '/api/search/autocomplete',
       operation: 'GET',
       method: 'GET',

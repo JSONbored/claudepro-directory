@@ -73,10 +73,13 @@ export default async function SettingsPage() {
   const { user } = await getAuthenticatedUser({ context: 'SettingsPage' });
 
   if (!user) {
-    reqLogger.warn('SettingsPage: unauthenticated access attempt', {
-      section: 'authentication',
-      timestamp: new Date().toISOString(),
-    });
+    reqLogger.warn(
+      {
+        section: 'data-fetch',
+        timestamp: new Date().toISOString(),
+      },
+      'SettingsPage: unauthenticated access attempt'
+    );
     return (
       <div className="space-y-6">
         <Card>
@@ -105,15 +108,17 @@ export default async function SettingsPage() {
   try {
     settingsData = await getUserSettings(user.id);
     if (!settingsData) {
-      userLogger.warn('SettingsPage: getUserSettings returned null', {
-        section: 'settings-data-fetch',
-      });
+      userLogger.warn({ section: 'data-fetch' }, 'SettingsPage: getUserSettings returned null');
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user settings');
-    userLogger.error('SettingsPage: getUserSettings threw', normalized, {
-      section: 'settings-data-fetch',
-    });
+    userLogger.error(
+      {
+        section: 'data-fetch',
+        err: normalized,
+      },
+      'SettingsPage: getUserSettings threw'
+    );
   }
 
   if (!settingsData) {
@@ -150,13 +155,13 @@ export default async function SettingsPage() {
   const profileValue: unknown = profile;
   if (profileValue && typeof profileValue === 'string') {
     userLogger.error(
-      'SettingsPage: profile is a string (serialized tuple) - RPC return type issue',
-      new Error('Profile data serialization error'),
       {
-        section: 'data-extraction',
+        section: 'data-fetch',
+        err: new Error('Profile data serialization error'),
         profileType: typeof profileValue,
         profileSample: profileValue.slice(0, 100),
-      }
+      },
+      'SettingsPage: profile is a string (serialized tuple) - RPC return type issue'
     );
     // Profile data is corrupted - cannot proceed
     return (
@@ -180,29 +185,20 @@ export default async function SettingsPage() {
     if (isPostgresTupleString(profile.display_name)) {
       const extracted = extractFirstFieldFromTuple(profile.display_name);
       if (extracted === null) {
-        userLogger.warn('SettingsPage: failed to extract display_name from tuple', {
-          section: 'data-extraction',
-          tupleString: profile.display_name.slice(0, 100),
-        });
+        userLogger.warn({ section: 'data-fetch', tupleString: profile.display_name.slice(0, 100) }, 'SettingsPage: failed to extract display_name from tuple');
         profile.display_name = '';
       } else {
         profile = {
           ...profile,
           display_name: extracted,
         };
-        userLogger.info('SettingsPage: extracted display_name from tuple string', {
-          section: 'data-extraction',
-          extracted: profile.display_name,
-          originalLength: profile.display_name?.length ?? 0,
-        });
+        userLogger.info({ section: 'data-fetch', extracted: profile.display_name,
+            originalLength: profile.display_name?.length ?? 0 }, 'SettingsPage: extracted display_name from tuple string');
       }
     } else if (typeof profile.display_name !== 'string') {
       // Not a tuple string, but also not a string - convert to string or empty
-      userLogger.warn('SettingsPage: display_name is not a string', {
-        section: 'data-extraction',
-        displayNameType: typeof profile.display_name,
-        displayNameValue: String(profile.display_name).slice(0, 100),
-      });
+      userLogger.warn({ section: 'data-fetch', displayNameType: typeof profile.display_name,
+        displayNameValue: String(profile.display_name).slice(0, 100) }, 'SettingsPage: display_name is not a string');
       profile.display_name = '';
     }
     // If it's already a string and not a tuple, keep it as is
@@ -210,7 +206,10 @@ export default async function SettingsPage() {
 
   // Initialize user if missing (consolidated - no more profiles table)
   if (!userData) {
-    userLogger.warn('SettingsPage: user_data missing, invoking ensureUserRecord');
+    userLogger.warn(
+      { section: 'data-fetch' },
+      'SettingsPage: user_data missing, invoking ensureUserRecord'
+    );
     try {
       // Type-safe access to user_metadata (Record<string, unknown> from Supabase)
       const userMetadata = user.user_metadata;
@@ -231,11 +230,20 @@ export default async function SettingsPage() {
         userData = refreshed.user_data;
         profile = refreshed.profile;
       } else {
-        userLogger.warn('SettingsPage: getUserSettings returned null after ensureUserRecord');
+        userLogger.warn(
+          { section: 'data-fetch' },
+          'SettingsPage: getUserSettings returned null after ensureUserRecord'
+        );
       }
     } catch (error) {
       const normalized = normalizeError(error, 'Failed to initialize user record');
-      userLogger.error('SettingsPage: ensureUserRecord failed', normalized);
+      userLogger.error(
+        {
+          section: 'data-fetch',
+          err: normalized,
+        },
+        'SettingsPage: ensureUserRecord failed'
+      );
       // Leave userData/profile undefined so page can render fallback UI
     }
   }
@@ -243,8 +251,11 @@ export default async function SettingsPage() {
   if (!profile) {
     // No error object available, only context
     userLogger.error(
-      'SettingsPage: profile missing from getUserSettings response',
-      new Error('Profile missing from response')
+      {
+        section: 'data-fetch',
+        err: new Error('Profile missing from response'),
+      },
+      'SettingsPage: profile missing from getUserSettings response'
     );
     return (
       <div className="space-y-6">

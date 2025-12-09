@@ -5,7 +5,7 @@
 ---
 # Rule: Detect missing error destructuring from RPC calls
 id: missing-rpc-error-destructuring
-language: TypeScript
+language: typescript
 rule:
   all:
     - pattern: const $RESULT = await $SUPABASE.rpc($$$)
@@ -19,7 +19,7 @@ severity: error
 ---
 # Rule: Detect missing error check after RPC call
 id: missing-rpc-error-check
-language: TypeScript
+language: typescript
 rule:
   all:
     - pattern: const { $DATA, error } = await $SUPABASE.rpc($$$)
@@ -33,7 +33,7 @@ severity: error
 ---
 # Rule: Detect missing normalizeError in RPC error handlers
 id: missing-normalize-error-rpc
-language: TypeScript
+language: typescript
 rule:
   all:
     - pattern: catch ($ERROR) { $$$ }
@@ -43,13 +43,13 @@ rule:
     - not:
         has:
           pattern: normalizeError($$$)
-message: "RPC error handlers must use normalizeError() before logging or throwing. Import normalizeError from @heyclaude/shared-runtime/logger"
+message: "RPC error handlers must use normalizeError() before logging or throwing. Import normalizeError from @heyclaude/web-runtime/logging/server (server) or @heyclaude/shared-runtime/logger (shared)"
 severity: error
 
 ---
 # Rule: Detect missing error logging in RPC catch blocks
 id: missing-rpc-error-logging
-language: TypeScript
+language: typescript
 rule:
   all:
     - pattern: catch ($ERROR) { $$$ }
@@ -58,7 +58,7 @@ rule:
         pattern: $SUPABASE.rpc($$$)
     - not:
         has:
-          pattern: logger.$METHOD($$$)
+          pattern: ($LOGGER|logger).$METHOD($$$)
           regex: (error|warn)
-message: "RPC error handlers must log errors. Add: logger.error('RPC call failed', normalized, { rpcName: '...' })"
+message: "RPC error handlers must log errors. Add: reqLogger.error('RPC call failed', normalized, { rpcName: '...', section: 'rpc-call' }) or logger.error('RPC call failed', normalized, { rpcName: '...' })"
 severity: error

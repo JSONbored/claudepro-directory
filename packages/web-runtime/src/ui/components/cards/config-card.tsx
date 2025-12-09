@@ -338,11 +338,9 @@ export const ConfigCard = memo(
             'Invalid content type',
             'Invalid content type for bookmark'
           );
-          logger.error('Invalid content type for bookmark', normalized, {
-            component: 'ConfigCard',
+          logger.error({ err: normalized, component: 'ConfigCard',
             contentType: categoryValue,
-            contentSlug: item.slug,
-          });
+            contentSlug: item.slug, }, 'Invalid content type for bookmark');
           toasts.error.fromError(new Error(`Invalid content type: ${categoryValue}`));
           return;
         }
@@ -376,11 +374,9 @@ export const ConfigCard = memo(
           }
         } catch (error) {
           const normalized = normalizeError(error, 'ConfigCard: Failed to add bookmark via swipe');
-          logger.error('ConfigCard: Failed to add bookmark via swipe', normalized, {
-            component: 'ConfigCard',
+          logger.error({ err: normalized, component: 'ConfigCard',
             contentType: validatedCategory,
-            contentSlug: item.slug,
-          });
+            contentSlug: item.slug, }, 'ConfigCard: Failed to add bookmark via swipe');
           if (error instanceof Error && error.message.includes('signed in')) {
             toasts.error.authRequired();
           } else {
@@ -407,26 +403,22 @@ export const ConfigCard = memo(
                 })
                 .catch((error) => {
                   const normalized = normalizeError(error, 'Failed to track copy action');
-                  logger.warn('[Clipboard] Failed to track copy action', {
-                    err: normalized,
+                  logger.warn({ err: normalized,
                     category: 'clipboard',
                     component: 'ConfigCard',
                     nonCritical: true,
                     context: 'config_card_quick_copy',
                     itemCategory: cardCategory,
-                    itemSlug: cardSlug,
-                  });
+                    itemSlug: cardSlug, }, '[Clipboard] Failed to track copy action');
                 });
             }
           } catch (error) {
             const normalized = normalizeError(error, 'ConfigCard: quick action copy failed');
-            logger.warn('[Clipboard] Quick action copy failed', {
-              err: normalized,
+            logger.warn({ err: normalized,
               category: 'clipboard',
               component: 'ConfigCard',
               recoverable: true,
-              userRetryable: true,
-            });
+              userRetryable: true, }, '[Clipboard] Quick action copy failed');
             toasts.raw.error('Copy failed', { description: 'Unable to copy to clipboard.' });
           }
         },
@@ -461,9 +453,7 @@ export const ConfigCard = memo(
             });
           } catch (error) {
             const normalized = normalizeError(error, 'ConfigCard: failed to toggle pinboard state');
-            logger.error('ConfigCard: failed to toggle pinboard state', normalized, {
-              component: 'ConfigCard',
-            });
+            logger.error({ err: normalized, component: 'ConfigCard', }, 'ConfigCard: failed to toggle pinboard state');
             toasts.raw.error('Unable to update pinboard', {
               description: 'Please try again.',
             });
@@ -823,13 +813,11 @@ export const ConfigCard = memo(
                     }
                   ).catch((error) => {
                     const normalized = normalizeError(error, 'Failed to copy configuration');
-                    logger.warn('[Clipboard] Copy configuration failed', {
-                      err: normalized,
+                    logger.warn({ err: normalized,
                       category: 'clipboard',
                       component: 'ConfigCard',
                       recoverable: true,
-                      userRetryable: true,
-                    });
+                      userRetryable: true, }, '[Clipboard] Copy configuration failed');
                   });
                 }}
                 aria-label="Copy configuration JSON"
@@ -944,14 +932,12 @@ export const ConfigCard = memo(
       );
     } catch (error) {
       const normalized = normalizeError(error, 'ConfigCard: Rendering failed');
-      logger.warn('[Render] ConfigCard rendering failed', {
-        err: normalized,
+      logger.warn({ err: normalized,
         category: 'render',
         component: 'ConfigCard',
         recoverable: true,
         hasSlug: Boolean(item.slug),
-        hasCategory: Boolean(item.category),
-      });
+        hasCategory: Boolean(item.category), }, '[Render] ConfigCard rendering failed');
       // Return minimal fallback
       return (
         <div className="rounded-lg border p-4" role="article">

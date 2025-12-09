@@ -85,11 +85,14 @@ async function getVisitorStats(): Promise<VisitorStats> {
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    requestLogger.warn('Visitor stats fetch failed, using defaults', {
-      err: errorForLogging,
-      source: 'vercel-analytics-api',
-      fallbackStrategy: 'defaults',
-    });
+    requestLogger.warn(
+      {
+        err: errorForLogging,
+        source: 'vercel-analytics-api',
+        fallbackStrategy: 'defaults',
+      },
+      'Visitor stats fetch failed, using defaults'
+    );
     return HERO_DEFAULTS;
   }
 }
@@ -121,7 +124,10 @@ export async function getContentDescriptionCopy(): Promise<string> {
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    requestLogger.error('MarketingSite: failed to build content description', errorForLogging);
+    requestLogger.error(
+      { err: errorForLogging },
+      'MarketingSite: failed to build content description'
+    );
     return DESCRIPTION_FALLBACK;
   }
 }
@@ -163,7 +169,7 @@ export async function getPartnerHeroStats(): Promise<PartnerHeroStats> {
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    requestLogger.error('MarketingSite: failed to load hero stats', errorForLogging);
+    requestLogger.error({ err: errorForLogging }, 'MarketingSite: failed to load hero stats');
     return {
       configurationCount: 0,
       ...HERO_DEFAULTS,

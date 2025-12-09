@@ -95,10 +95,13 @@ async function NewCollectionPageContent({
   const { user } = await getAuthenticatedUser({ context: 'NewCollectionPage' });
 
   if (!user) {
-    reqLogger.warn('NewCollectionPage: unauthenticated access attempt', {
-      section: 'authentication',
-      timestamp: new Date().toISOString(),
-    });
+    reqLogger.warn(
+      {
+        section: 'data-fetch',
+        timestamp: new Date().toISOString(),
+      },
+      'NewCollectionPage: unauthenticated access attempt'
+    );
     redirect('/login');
   }
 
@@ -108,21 +111,14 @@ async function NewCollectionPageContent({
     userId: user.id, // Redaction will automatically hash this
   });
 
-  userLogger.info('NewCollectionPage: authentication successful', {
-    section: 'authentication',
-  });
+  userLogger.info({ section: 'data-fetch' }, 'NewCollectionPage: authentication successful');
 
   // Section: Bookmarks Data Fetch
   const bookmarks = await getUserBookmarksForCollections(user.id);
-  userLogger.info('NewCollectionPage: bookmarks data loaded', {
-    section: 'bookmarks-data-fetch',
-    bookmarksCount: bookmarks.length,
-  });
+  userLogger.info({ section: 'data-fetch', bookmarksCount: bookmarks.length }, 'NewCollectionPage: bookmarks data loaded');
 
   // Final summary log
-  userLogger.info('NewCollectionPage: page render completed', {
-    section: 'page-render',
-  });
+  userLogger.info({ section: 'data-fetch' }, 'NewCollectionPage: page render completed');
 
   return (
     <div className="space-y-6">

@@ -55,7 +55,7 @@ export function ActivityTimeline({ activities, limit }: ActivityTimelineProps) {
 
           // Guard against unknown activity types
           if (!config) {
-            logger.warn('Unknown activity type', { type: activity.type });
+            logger.warn({ type: activity.type }, 'Unknown activity type');
             return null;
           }
 

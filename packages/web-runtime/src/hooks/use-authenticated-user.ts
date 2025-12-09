@@ -38,7 +38,7 @@ export function useAuthenticatedUser(
       const { data, error: authError } = await supabase.auth.getUser();
       if (authError) {
         const normalized = new Error(authError.message ?? 'Failed to fetch authenticated user');
-        logger.error(`${contextLabel}: supabase auth getUser failed`, normalized);
+        logger.error({ err: normalized }, `${contextLabel}: supabase auth getUser failed`);
         return { user: null, error: normalized };
       }
       return { user: data.user ?? null, error: null };
@@ -47,7 +47,7 @@ export function useAuthenticatedUser(
         caught instanceof Error
           ? caught
           : new Error(typeof caught === 'string' ? caught : 'Unknown auth error');
-      logger.error(`${contextLabel}: unexpected auth getUser failure`, normalized);
+      logger.error({ err: normalized }, `${contextLabel}: unexpected auth getUser failure`);
       return { user: null, error: normalized };
     }
   }, [supabase, contextLabel]);

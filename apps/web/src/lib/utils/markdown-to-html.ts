@@ -57,11 +57,15 @@ export function markdownToHtml(markdown: null | string | undefined): string {
     // Log error but return empty string to prevent crashes
     // Use universal logger (works in both server and client contexts)
     const normalized = normalizeError(error, 'Failed to parse markdown');
-    logger.error('[markdownToHtml] Failed to parse markdown', normalized, {
-      operation: 'markdownToHtml',
-      module: 'lib/utils/markdown-to-html',
-      markdownLength: markdown.length,
-    });
+    logger.error(
+      {
+        err: normalized,
+        operation: 'markdownToHtml',
+        module: 'lib/utils/markdown-to-html',
+        markdownLength: markdown.length,
+      },
+      '[markdownToHtml] Failed to parse markdown'
+    );
     return '';
   }
 }

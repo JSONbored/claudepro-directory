@@ -12,6 +12,7 @@
 import { type Database } from '@heyclaude/database-types';
 import { VALID_CATEGORIES } from '@heyclaude/web-runtime/core';
 import { getContentTemplates } from '@heyclaude/web-runtime/data';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { notFound } from 'next/navigation';
 import { NextResponse } from 'next/server';
 
@@ -27,6 +28,12 @@ export const dynamic = 'force-dynamic';
  * @param root0.params
  */
 export default async function TemplatesPage({ params }: { params: Promise<{ category: string }> }) {
+  const reqLogger = logger.child({
+    operation: 'TemplatesPage',
+    route: 'templates/[category]',
+    module: 'app/templates/[category]/page.tsx',
+  });
+
   const { category } = await params;
 
   // Validate category
@@ -42,9 +49,11 @@ export default async function TemplatesPage({ params }: { params: Promise<{ cate
   let templates: Awaited<ReturnType<typeof getContentTemplates>> = [];
   try {
     templates = await getContentTemplates(validCategory);
-  } catch {
+  } catch (error) {
     // Log error but return empty array to avoid breaking the API
     // The data layer function already handles errors gracefully
+    const normalized = normalizeError(error, 'Failed to fetch templates');
+    reqLogger.error({ err: normalized, section: 'data-fetch' }, 'Failed to fetch templates');
     templates = [];
   }
 

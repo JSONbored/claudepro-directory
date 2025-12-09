@@ -67,7 +67,7 @@ export const processPulseQueue = inngest.createFunction(
     const startTime = Date.now();
     const logContext = createWebAppContextWithId('/inngest/analytics/pulse', 'processPulseQueue');
 
-    logger.info('Pulse queue processing started', logContext);
+    logger.info(logContext, 'Pulse queue processing started');
 
     const supabase = createSupabaseAdminClient();
 
@@ -86,23 +86,19 @@ export const processPulseQueue = inngest.createFunction(
         // Filter valid pulse events
         return data.filter((msg) => isValidPulseEvent(msg.message));
       } catch (error) {
-        logger.warn('Failed to read pulse queue', {
-          ...logContext,
-          errorMessage: normalizeError(error, 'Queue read failed').message,
-        });
+        logger.warn({ ...logContext,
+          errorMessage: normalizeError(error, 'Queue read failed').message, }, 'Failed to read pulse queue');
         return [];
       }
     });
 
     if (messages.length === 0) {
-      logger.info('No messages in pulse queue', logContext);
+      logger.info(logContext, 'No messages in pulse queue');
       return { processed: 0, inserted: 0, failed: 0 };
     }
 
-    logger.info('Processing pulse events', {
-      ...logContext,
-      messageCount: messages.length,
-    });
+    logger.info({ ...logContext,
+      messageCount: messages.length, }, 'Processing pulse events');
 
     // Step 2: Separate events by type
     const { searchEvents, interactionEvents } = await step.run('categorize-events', async (): Promise<{
@@ -174,10 +170,8 @@ export const processPulseQueue = inngest.createFunction(
           return { inserted: searchQueries.length, failed: 0 };
         } catch (error) {
           const normalized = normalizeError(error, 'Search events batch insert failed');
-          logger.warn('Search events batch insert failed', {
-            ...logContext,
-            errorMessage: normalized.message,
-          });
+          logger.warn({ ...logContext,
+            errorMessage: normalized.message, }, 'Search events batch insert failed');
           return { inserted: 0, failed: searchEvents.length };
         }
       });
@@ -202,11 +196,9 @@ export const processPulseQueue = inngest.createFunction(
 
             if (!isValidInteractionType(event.interaction_type)) {
               // Log invalid interaction types and mark for cleanup
-              logger.warn('Invalid interaction type, marking for deletion', {
-                ...logContext,
+              logger.warn({ ...logContext,
                 msgId: String(msg.msg_id),
-                interactionType: String(event.interaction_type ?? 'undefined'),
-              });
+                interactionType: String(event.interaction_type ?? 'undefined'), }, 'Invalid interaction type, marking for deletion');
               invalidMsgIds.push(msg.msg_id);
               continue;
             }
@@ -253,10 +245,8 @@ export const processPulseQueue = inngest.createFunction(
           return { inserted, failed };
         } catch (error) {
           const normalized = normalizeError(error, 'Interaction events batch insert failed');
-          logger.warn('Interaction events batch insert failed', {
-            ...logContext,
-            errorMessage: normalized.message,
-          });
+          logger.warn({ ...logContext,
+            errorMessage: normalized.message, }, 'Interaction events batch insert failed');
           return { inserted: 0, failed: interactionEvents.length };
         }
       });
@@ -272,10 +262,8 @@ export const processPulseQueue = inngest.createFunction(
           try {
             await pgmqDelete('pulse', msgId);
           } catch (error) {
-            logger.warn('Failed to delete pulse message', {
-              ...logContext,
-              msgId: msgId.toString(),
-            });
+            logger.warn({ ...logContext,
+              msgId: msgId.toString(), }, 'Failed to delete pulse message');
           }
         }
       });
@@ -295,11 +283,9 @@ export const processPulseQueue = inngest.createFunction(
         for (const msg of failedMessages) {
           try {
             await pgmqDelete('pulse', msg.msg_id);
-            logger.warn('Pulse event exceeded max retries, removed from queue', {
-              ...logContext,
+            logger.warn({ ...logContext,
               msgId: String(msg.msg_id),
-              readCount: msg.read_ct,
-            });
+              readCount: msg.read_ct, }, 'Pulse event exceeded max retries, removed from queue');
           } catch {
             // Silent fail
           }
@@ -308,13 +294,11 @@ export const processPulseQueue = inngest.createFunction(
     }
 
     const durationMs = Date.now() - startTime;
-    logger.info('Pulse queue processing completed', {
-      ...logContext,
+    logger.info({ ...logContext,
       durationMs,
       processed: messages.length,
       inserted: totalInserted,
-      failed: totalFailed,
-    });
+      failed: totalFailed, }, 'Pulse queue processing completed');
 
     return {
       processed: messages.length,

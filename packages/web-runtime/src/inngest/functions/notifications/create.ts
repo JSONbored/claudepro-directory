@@ -51,21 +51,19 @@ export const createNotification = inngest.createFunction(
 
     const { title, message, type, priority, action_label, action_href, id } = event.data;
 
-    logger.info('Creating notification', {
-      ...logContext,
+    logger.info({ ...logContext,
       title,
       type: type ?? 'info',
-      priority: priority ?? 'normal',
-    });
+      priority: priority ?? 'normal', }, 'Creating notification');
 
     // Validate required fields
     if (!title || typeof title !== 'string') {
-      logger.warn('Invalid notification: missing title', logContext);
+      logger.warn(logContext, 'Invalid notification: missing title');
       throw new Error('Invalid notification: title is required');
     }
 
     if (!message || typeof message !== 'string') {
-      logger.warn('Invalid notification: missing message', logContext);
+      logger.warn(logContext, 'Invalid notification: missing message');
       throw new Error('Invalid notification: message is required');
     }
 
@@ -74,20 +72,16 @@ export const createNotification = inngest.createFunction(
       try {
         const url = new URL(action_href);
         if (!['http:', 'https:'].includes(url.protocol)) {
-          logger.warn('Invalid action_href: only http/https allowed', {
-            ...logContext,
-            action_href,
-          });
+          logger.warn({ ...logContext,
+            action_href, }, 'Invalid action_href: only http/https allowed');
           throw new Error('Invalid action_href: only http and https URLs are allowed');
         }
       } catch (urlError) {
         if (urlError instanceof Error && urlError.message.includes('only http')) {
           throw urlError; // Re-throw our validation error
         }
-        logger.warn('Invalid action_href: invalid URL format', {
-          ...logContext,
-          action_href,
-        });
+        logger.warn({ ...logContext,
+          action_href, }, 'Invalid action_href: invalid URL format');
         throw new Error('Invalid action_href: must be a valid URL');
       }
     }
@@ -133,18 +127,14 @@ export const createNotification = inngest.createFunction(
 
     // Step 2: Log the notification creation
     await step.run('log-notification', async () => {
-      logger.info('Notification created successfully', {
-        ...logContext,
-        notificationId: notification.id,
-      });
+      logger.info({ ...logContext,
+        notificationId: notification.id, }, 'Notification created successfully');
     });
 
     const durationMs = Date.now() - startTime;
-    logger.info('Create notification function completed', {
-      ...logContext,
+    logger.info({ ...logContext,
       durationMs,
-      notificationId: notification.id,
-    });
+      notificationId: notification.id, }, 'Create notification function completed');
 
     return {
       success: true,
@@ -172,20 +162,18 @@ export const broadcastNotification = inngest.createFunction(
 
     const { title, message, type, priority, action_label, action_href } = event.data;
 
-    logger.info('Broadcasting notification', {
-      ...logContext,
+    logger.info({ ...logContext,
       title,
-      type: type ?? 'announcement',
-    });
+      type: type ?? 'announcement', }, 'Broadcasting notification');
 
     // Validate required fields
     if (!title || typeof title !== 'string') {
-      logger.warn('Invalid broadcast notification: missing title', logContext);
+      logger.warn(logContext, 'Invalid broadcast notification: missing title');
       throw new Error('Invalid notification: title is required');
     }
 
     if (!message || typeof message !== 'string') {
-      logger.warn('Invalid broadcast notification: missing message', logContext);
+      logger.warn(logContext, 'Invalid broadcast notification: missing message');
       throw new Error('Invalid notification: message is required');
     }
 
@@ -194,20 +182,16 @@ export const broadcastNotification = inngest.createFunction(
       try {
         const url = new URL(action_href);
         if (!['http:', 'https:'].includes(url.protocol)) {
-          logger.warn('Invalid action_href: only http/https allowed', {
-            ...logContext,
-            action_href,
-          });
+          logger.warn({ ...logContext,
+            action_href, }, 'Invalid action_href: only http/https allowed');
           throw new Error('Invalid action_href: only http and https URLs are allowed');
         }
       } catch (urlError) {
         if (urlError instanceof Error && urlError.message.includes('only http')) {
           throw urlError; // Re-throw our validation error
         }
-        logger.warn('Invalid action_href: invalid URL format', {
-          ...logContext,
-          action_href,
-        });
+        logger.warn({ ...logContext,
+          action_href, }, 'Invalid action_href: invalid URL format');
         throw new Error('Invalid action_href: must be a valid URL');
       }
     }
@@ -252,18 +236,14 @@ export const broadcastNotification = inngest.createFunction(
 
     // Step 2: Log the broadcast (actual delivery handled by notification system)
     await step.run('log-broadcast', async () => {
-      logger.info('Broadcast notification created', {
-        ...logContext,
-        notificationId: notification.id,
-      });
+      logger.info({ ...logContext,
+        notificationId: notification.id, }, 'Broadcast notification created');
     });
 
     const durationMs = Date.now() - startTime;
-    logger.info('Broadcast notification completed', {
-      ...logContext,
+    logger.info({ ...logContext,
       durationMs,
-      notificationId: notification.id,
-    });
+      notificationId: notification.id, }, 'Broadcast notification completed');
 
     return {
       success: true,
