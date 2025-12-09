@@ -24,6 +24,7 @@ import {
   UnifiedBadge,
   cn,
 } from '@heyclaude/web-runtime/ui';
+import { ANIMATIONS, MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
 import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -169,10 +170,15 @@ export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTable
                   <PopoverContent align="start" className={cn(DIMENSIONS.NAV_DROPDOWN_TABLET, UI_CLASSES.PADDING_DEFAULT, 'overflow-hidden')} sideOffset={8}>
                     <div className="space-y-4">
                       {/* Post a Job Hero Card */}
-                      <Link
-                        href="/account/jobs/new"
-                        className="group/cta block rounded-lg border-2 border-accent/20 bg-gradient-to-br from-accent/10 to-accent/5 p-4 hover:border-accent/40 transition-all"
+                      <motion.div
+                        whileHover={MICROINTERACTIONS.card.hover}
+                        whileTap={MICROINTERACTIONS.card.tap}
+                        transition={MICROINTERACTIONS.card.transition}
                       >
+                        <Link
+                          href="/account/jobs/new"
+                          className="group/cta block rounded-lg border-2 border-accent/20 bg-gradient-to-br from-accent/10 to-accent/5 p-4"
+                        >
                         <div className="flex items-center gap-3 mb-2">
                           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/20 group-hover/cta:bg-accent/30 transition-colors">
                             <PlusCircle className="h-5 w-5 text-accent" />
@@ -187,9 +193,10 @@ export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTable
                         </p>
                         <div className="flex items-center gap-2 text-xs font-medium text-accent">
                           <span>Create Listing</span>
-                          <ChevronDown className="h-3 w-3 rotate-[-90deg]" />
-                        </div>
-                      </Link>
+                        <ChevronDown className="h-3 w-3 rotate-[-90deg]" />
+                      </div>
+                    </Link>
+                      </motion.div>
 
                       {/* Quick Links */}
                       <div className="space-y-1">
@@ -197,22 +204,27 @@ export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTable
                           const ChildIcon = child.icon;
                               const iconBgClass = getIconBackgroundClass(child.href);
                           return (
-                            <Link
+                            <motion.div
                               key={`${link.label}-quick-${childIndex}-${child.label}`}
-                              href={child.href}
-                              prefetch
-                              className="group/item block rounded-lg px-3 py-2.5 text-sm leading-none no-underline outline-none transition-all hover:bg-accent/5 hover:scale-[1.02] hover:shadow-sm focus:bg-accent/5 overflow-hidden"
+                              whileHover={MICROINTERACTIONS.button.hover}
+                              whileTap={MICROINTERACTIONS.button.tap}
+                              transition={MICROINTERACTIONS.button.transition}
                             >
+                              <Link
+                                href={child.href}
+                                prefetch
+                                className="group/item block rounded-lg px-3 py-2.5 text-sm leading-none no-underline outline-none hover:bg-accent/5 focus:bg-accent/5 overflow-hidden"
+                              >
                               <div className="flex items-start gap-3">
                                 {ChildIcon && (
                                   <motion.div
                                     className={cn(
-                                      'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200',
+                                      'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg',
                                       iconBgClass
                                     )}
-                                    whileHover={{ scale: 1.1 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    transition={{ type: 'spring', stiffness: 400 }}
+                                    whileHover={{ scale: MICROINTERACTIONS.iconButton.hover.scale }}
+                                    whileTap={{ scale: MICROINTERACTIONS.iconButton.tap.scale }}
+                                    transition={MICROINTERACTIONS.iconButton.transition}
                                   >
                                     <ChildIcon className="h-4 w-4" />
                                   </motion.div>
@@ -223,12 +235,13 @@ export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTable
                                     <p className="text-muted-foreground line-clamp-1 text-xs leading-snug mt-0.5">
                                       {child.description}
                                     </p>
-                                  )}
+                                    )}
+                                  </div>
                                 </div>
-                              </div>
-                            </Link>
-                          );
-                        })}
+                              </Link>
+                            </motion.div>
+                            );
+                          })}
                       </div>
                     </div>
                   </PopoverContent>
@@ -302,60 +315,64 @@ export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTable
                                   initial={{ opacity: 0, y: 4 }}
                                   animate={{ opacity: 1, y: 0 }}
                                   transition={{
-                                    type: 'spring',
-                                    stiffness: 300,
-                                    damping: 25,
+                                    ...ANIMATIONS.spring.smooth,
                                     delay: childIndex * 0.03,
                                   }}
                                 >
-                                  <Link
-                                    href={child.href}
-                                    prefetch
-                                    className={cn('group/item block rounded-lg px-3 py-2.5 text-sm leading-none no-underline outline-none transition-all', STATE_PATTERNS.HOVER_BG_STRONG, 'hover:scale-[1.02] hover:shadow-sm', STATE_PATTERNS.FOCUS_RING)}
+                                  <motion.div
+                                    whileHover={MICROINTERACTIONS.card.hover}
+                                    whileTap={MICROINTERACTIONS.card.tap}
+                                    transition={MICROINTERACTIONS.card.transition}
                                   >
-                                    <div className="flex items-start gap-3">
-                                      {ChildIcon && (
-                                        <motion.div
-                                          className={cn(
-                                            'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200',
-                                            iconBgClass
-                                          )}
-                                          whileHover={{ scale: 1.1 }}
-                                          whileTap={{ scale: 0.95 }}
-                                          transition={{ type: 'spring', stiffness: 400 }}
-                                        >
-                                          <ChildIcon className="h-4 w-4" />
-                                        </motion.div>
-                                      )}
-                                      <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                                          <div className="font-medium break-words word-break-break-word">{child.label}</div>
-                                          {(() => {
-                                            const category = getCategoryFromHref(child.href);
-                                            return category ? (
-                                              <UnifiedBadge 
-                                                variant="category" 
-                                                category={category} 
-                                                href={null}
-                                                className="shrink-0 text-[10px] px-1.5 py-0" 
-                                              />
-                                            ) : null;
-                                          })()}
-                                          {child.isNew && (
-                                            <UnifiedBadge variant="new-badge" badgeVariant="default" className="shrink-0" />
-                                          )}
-                                          {child.external && (
-                                            <span className="text-muted-foreground text-xs shrink-0 ml-auto">↗</span>
+                                    <Link
+                                      href={child.href}
+                                      prefetch
+                                      className={cn('group/item block rounded-lg px-3 py-2.5 text-sm leading-none no-underline outline-none', STATE_PATTERNS.HOVER_BG_STRONG, STATE_PATTERNS.FOCUS_RING)}
+                                    >
+                                      <div className="flex items-start gap-3">
+                                        {ChildIcon && (
+                                          <motion.div
+                                            className={cn(
+                                              'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg',
+                                              iconBgClass
+                                            )}
+                                            whileHover={MICROINTERACTIONS.iconButton.hover}
+                                            whileTap={MICROINTERACTIONS.iconButton.tap}
+                                            transition={MICROINTERACTIONS.iconButton.transition}
+                                          >
+                                            <ChildIcon className="h-4 w-4" />
+                                          </motion.div>
+                                        )}
+                                        <div className="flex-1 min-w-0">
+                                          <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                                            <div className="font-medium break-words word-break-break-word">{child.label}</div>
+                                            {(() => {
+                                              const category = getCategoryFromHref(child.href);
+                                              return category ? (
+                                                <UnifiedBadge 
+                                                  variant="category" 
+                                                  category={category} 
+                                                  href={null}
+                                                  className="shrink-0 text-[10px] px-1.5 py-0" 
+                                                />
+                                              ) : null;
+                                            })()}
+                                            {child.isNew && (
+                                              <UnifiedBadge variant="new-badge" badgeVariant="default" className="shrink-0" />
+                                            )}
+                                            {child.external && (
+                                              <span className="text-muted-foreground text-xs shrink-0 ml-auto">↗</span>
+                                            )}
+                                          </div>
+                                          {child.description && (
+                                            <p className="text-muted-foreground text-xs leading-snug break-words word-break-break-word line-clamp-2">
+                                              {child.description}
+                                            </p>
                                           )}
                                         </div>
-                                        {child.description && (
-                                          <p className="text-muted-foreground text-xs leading-snug break-words word-break-break-word line-clamp-2">
-                                            {child.description}
-                                          </p>
-                                        )}
                                       </div>
-                                    </div>
-                                  </Link>
+                                    </Link>
+                                  </motion.div>
                                 </motion.div>
                               );
                             })}
@@ -441,63 +458,67 @@ export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTable
                                       initial={{ opacity: 0, y: 4 }}
                                       animate={{ opacity: 1, y: 0 }}
                                       transition={{
-                                        type: 'spring',
-                                        stiffness: 300,
-                                        damping: 25,
+                                        ...ANIMATIONS.spring.smooth,
                                         delay: childIndex * 0.03,
                                       }}
-                                    >
-                                      <Link
-                                        href={child.href}
-                                        prefetch
-                                        className={cn('group/item block rounded-lg px-3 py-2.5 text-sm leading-none no-underline outline-none transition-all', STATE_PATTERNS.HOVER_BG_STRONG, 'hover:scale-[1.02] hover:shadow-sm', STATE_PATTERNS.FOCUS_RING)}
                                       >
-                                        <div className="flex items-start gap-3">
-                                          {ChildIcon && (
-                                            <motion.div
-                                              className={cn(
-                                                'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200',
-                                                iconBgClass
+                                        <motion.div
+                                          whileHover={MICROINTERACTIONS.card.hover}
+                                          whileTap={MICROINTERACTIONS.card.tap}
+                                          transition={MICROINTERACTIONS.card.transition}
+                                        >
+                                          <Link
+                                            href={child.href}
+                                            prefetch
+                                            className={cn('group/item block rounded-lg px-3 py-2.5 text-sm leading-none no-underline outline-none', STATE_PATTERNS.HOVER_BG_STRONG, STATE_PATTERNS.FOCUS_RING)}
+                                          >
+                                            <div className="flex items-start gap-3">
+                                              {ChildIcon && (
+                                                <motion.div
+                                                  className={cn(
+                                                    'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg',
+                                                    iconBgClass
+                                                  )}
+                                                  whileHover={MICROINTERACTIONS.iconButton.hover}
+                                                  whileTap={MICROINTERACTIONS.iconButton.tap}
+                                                  transition={MICROINTERACTIONS.iconButton.transition}
+                                                >
+                                                  <ChildIcon className="h-4 w-4" />
+                                                </motion.div>
                                               )}
-                                              whileHover={{ scale: 1.1 }}
-                                              whileTap={{ scale: 0.95 }}
-                                              transition={{ type: 'spring', stiffness: 400 }}
-                                            >
-                                              <ChildIcon className="h-4 w-4" />
-                                            </motion.div>
-                                          )}
-                                          <div className="flex-1 min-w-0">
-                                            <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                                              <div className="font-medium break-words word-break-break-word">{child.label}</div>
-                                              {(() => {
-                                                const category = getCategoryFromHref(child.href);
-                                                return category ? (
-                                                  <UnifiedBadge 
-                                                    variant="category" 
-                                                    category={category} 
-                                                    href={null}
-                                                    className="shrink-0 text-[10px] px-1.5 py-0" 
-                                                  />
-                                                ) : null;
-                                              })()}
-                                              {child.isNew && (
-                                                <UnifiedBadge variant="new-badge" badgeVariant="default" className="shrink-0" />
-                                              )}
-                                              {child.external && (
-                                                <span className="text-muted-foreground text-xs shrink-0 ml-auto">↗</span>
-                                              )}
+                                              <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                                                  <div className="font-medium break-words word-break-break-word">{child.label}</div>
+                                                  {(() => {
+                                                    const category = getCategoryFromHref(child.href);
+                                                    return category ? (
+                                                      <UnifiedBadge 
+                                                        variant="category" 
+                                                        category={category} 
+                                                        href={null}
+                                                        className="shrink-0 text-[10px] px-1.5 py-0" 
+                                                      />
+                                                    ) : null;
+                                                  })()}
+                                                  {child.isNew && (
+                                                    <UnifiedBadge variant="new-badge" badgeVariant="default" className="shrink-0" />
+                                                  )}
+                                                  {child.external && (
+                                                    <span className="text-muted-foreground text-xs shrink-0 ml-auto">↗</span>
+                                                  )}
+                                                </div>
+                                                {child.description && (
+                                                  <p className="text-muted-foreground text-xs leading-snug break-words word-break-break-word line-clamp-2">
+                                                    {child.description}
+                                                  </p>
+                                                )}
+                                              </div>
                                             </div>
-                                            {child.description && (
-                                              <p className="text-muted-foreground text-xs leading-snug break-words word-break-break-word line-clamp-2">
-                                                {child.description}
-                                              </p>
-                                            )}
-                                          </div>
-                                        </div>
-                                      </Link>
-                                    </motion.div>
-                                  );
-                                })}
+                                          </Link>
+                                        </motion.div>
+                                      </motion.div>
+                                    );
+                                  })}
                               </div>
                             </li>
                           ))}
@@ -572,15 +593,20 @@ export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTable
                                       ease: [0.25, 0.1, 0.25, 1],
                                     }}
                                   >
-                                    <Link
-                                      href={child.href}
-                                      prefetch
-                                      className={cn('group/item block rounded-lg px-3 py-2.5 text-sm leading-none no-underline outline-none transition-all', STATE_PATTERNS.HOVER_BG_STRONG, 'hover:scale-[1.02] hover:shadow-sm', STATE_PATTERNS.FOCUS_RING)}
+                                    <motion.div
+                                      whileHover={MICROINTERACTIONS.card.hover}
+                                      whileTap={MICROINTERACTIONS.card.tap}
+                                      transition={MICROINTERACTIONS.card.transition}
                                     >
+                                      <Link
+                                        href={child.href}
+                                        prefetch
+                                        className={cn('group/item block rounded-lg px-3 py-2.5 text-sm leading-none no-underline outline-none', STATE_PATTERNS.HOVER_BG_STRONG, STATE_PATTERNS.FOCUS_RING)}
+                                      >
                                       <div className="flex items-start gap-3">
                                         {ChildIcon && (
                                           <div className={cn(
-                                            'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all',
+                                            'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg',
                                             iconBgClass
                                           )}>
                                             <ChildIcon className="h-4 w-4" />
@@ -615,7 +641,8 @@ export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTable
                                         </div>
                                       </div>
                                     </Link>
-                                  </motion.div>
+                                        </motion.div>
+                                      </motion.div>
                                 );
                               })}
                             </div>
@@ -632,18 +659,23 @@ export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTable
                         {link.children.map((child, childIndex) => {
                           const ChildIcon = child.icon;
                           return (
-                            <Link
+                            <motion.div
                               key={`${link.label}-child-${childIndex}-${child.label}`}
-                              href={child.href}
-                              prefetch
-                              className="flex items-center gap-2 px-2 py-1.5 text-sm rounded-md hover:bg-accent/5 transition-colors group/item"
+                              whileHover={MICROINTERACTIONS.button.hover}
+                              whileTap={MICROINTERACTIONS.button.tap}
+                              transition={MICROINTERACTIONS.button.transition}
                             >
+                              <Link
+                                href={child.href}
+                                prefetch
+                                className="flex items-center gap-2 px-2 py-1.5 text-sm rounded-md hover:bg-accent/5 group/item"
+                              >
                               {ChildIcon && (
                                 <motion.div
-                                  className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg transition-all duration-200 opacity-70 group-hover/item:opacity-100"
-                                  whileHover={{ scale: 1.1 }}
-                                  whileTap={{ scale: 0.95 }}
-                                  transition={{ type: 'spring', stiffness: 400 }}
+                                  className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg opacity-70 group-hover/item:opacity-100"
+                                  whileHover={MICROINTERACTIONS.iconButton.hover}
+                                  whileTap={MICROINTERACTIONS.iconButton.tap}
+                                  transition={MICROINTERACTIONS.iconButton.transition}
                                 >
                                   <ChildIcon className="h-4 w-4 text-muted-foreground group-hover/item:text-foreground transition-colors" />
                                 </motion.div>
@@ -653,6 +685,7 @@ export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTable
                                 <UnifiedBadge variant="new-indicator" label={`New: ${child.label}`} />
                               )}
                             </Link>
+                            </motion.div>
                           );
                         })}
                       </div>

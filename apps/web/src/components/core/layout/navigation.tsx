@@ -9,40 +9,31 @@
  */
 
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { usePinboard } from '@heyclaude/web-runtime/hooks';
-import { Bookmark, DiscordIcon } from '@heyclaude/web-runtime/icons';
 import {
   ANIMATION_CONSTANTS,
   POSITION_PATTERNS,
   UI_CLASSES,
-  Button,
 } from '@heyclaude/web-runtime/ui';
 import { motion, useScroll, useTransform } from 'motion/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { memo, useEffect, useState } from 'react';
 
-import { GitHubStarsButton } from '@/src/components/core/buttons/external/github-stars-button';
 import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';
-import { NavigationCommandMenu } from '@/src/components/core/layout/navigation-command-menu';
+// NavigationCommandMenu is now rendered in CommandMenuWrapper (root-layout-wrapper.tsx)
+// Removed import to prevent duplicate rendering
 import { NavigationDesktop } from '@/src/components/core/layout/navigation-desktop';
 import { NavigationMobile } from '@/src/components/core/layout/navigation-mobile';
 import { NavigationTablet } from '@/src/components/core/layout/navigation-tablet';
 import { SubMenuBar } from '@/src/components/core/layout/sub-menu-bar';
 import { UserMenu } from '@/src/components/core/layout/user-menu';
-import { useCommandPalette } from '@/src/components/features/navigation/command-palette-provider';
-import { usePinboardDrawer } from '@/src/components/features/navigation/pinboard-drawer-provider';
 
 // NavigationProps removed - component accepts no props
 
 const NavigationComponent = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const { isOpen: commandPaletteOpen, openPalette, closePalette } = useCommandPalette();
   const pathname = usePathname();
-  const { pinnedItems, isLoaded: pinboardLoaded } = usePinboard();
-  const { openDrawer: openPinboardDrawer } = usePinboardDrawer();
-  const pinCount = pinboardLoaded ? pinnedItems.length : 0;
 
   // Motion.dev scroll-based animations (Phase 1.5 - October 2025)
   const { scrollY } = useScroll();
@@ -94,17 +85,9 @@ const NavigationComponent = () => {
         Skip to main content
       </a>
 
-      {/* Global Command Menu (⌘K) */}
-      <NavigationCommandMenu
-        open={commandPaletteOpen}
-        onOpenChange={(open) => {
-          if (open) {
-            openPalette();
-          } else {
-            closePalette();
-          }
-        }}
-      />
+      {/* CRITICAL FIX: NavigationCommandMenu is now rendered in CommandMenuWrapper (root-layout-wrapper.tsx) */}
+      {/* Removed duplicate render to prevent conflicts */}
+      {/* The CommandMenuWrapper handles the command palette state management */}
 
       <motion.header
         className={`${POSITION_PATTERNS.STICKY_TOP} z-50 w-full will-change-transform contain-layout`}
@@ -132,52 +115,14 @@ const NavigationComponent = () => {
                   <HeyClaudeLogo size="md" duration={0} />
                 </Link>
 
-                {/* Desktop Navigation - ONLY show at xl: (1280px+) */}
-                <NavigationDesktop
-                  isActive={isActive}
-                  onCommandPaletteOpen={openPalette}
-                />
-
                 {/* Tablet Navigation (768px-1279px) - Horizontal scroll with Motion.dev */}
                 <NavigationTablet isActive={isActive} onMobileMenuOpen={() => setIsOpen(true)} />
 
-                {/* Right Side Actions */}
+                {/* Right Side Actions - Desktop Navigation + User Menu */}
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5}>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={openPinboardDrawer}
-                    className={`relative ${UI_CLASSES.BUTTON_GHOST_ICON}`}
-                    aria-label={
-                      pinCount > 0
-                        ? `Open pinboard (${pinCount} saved)`
-                        : 'Open pinboard (save items for later)'
-                    }
-                  >
-                    <Bookmark className={UI_CLASSES.ICON_XS} />
-                    {pinCount > 0 && (
-                      <span className="bg-primary text-primary-foreground absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-semibold">
-                        {pinCount > 99 ? '99+' : pinCount}
-                      </span>
-                    )}
-                  </Button>
-                  {/* Discord Button - Icon only, normal opacity */}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => window.open('https://discord.gg/Ax3Py4YDrq', '_blank')}
-                    className="hidden md:flex transition-colors"
-                    style={{ color: '#F6F8F4' }}
-                    aria-label="Join our Discord community"
-                  >
-                    <DiscordIcon className={UI_CLASSES.ICON_XS} />
-                  </Button>
-
-                  {/* GitHub Stars Button - Icon + star count, normal opacity */}
-                  <GitHubStarsButton
-                    variant="ghost"
-                    size="sm"
-                    className="hidden md:flex transition-colors [&_span]:text-xs [&_span]:font-normal [color:#F6F8F4] [&_svg]:[color:#F6F8F4] [&_span]:[color:#F6F8F4]"
+                  {/* Desktop Navigation - ONLY show at xl: (1280px+) */}
+                  <NavigationDesktop
+                    isActive={isActive}
                   />
 
                   <UserMenu className="hidden md:flex" />

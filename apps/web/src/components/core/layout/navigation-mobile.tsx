@@ -12,7 +12,7 @@ import {
   SECONDARY_NAVIGATION,
 } from '@heyclaude/web-runtime/config/navigation';
 import { getContactChannels } from '@heyclaude/web-runtime/core';
-import { getAnimationConfig } from '@heyclaude/web-runtime/data';
+import { ANIMATIONS, MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
 import { DiscordIcon, Github, Menu } from '@heyclaude/web-runtime/icons';
 import {
   ANIMATION_CONSTANTS,
@@ -81,21 +81,10 @@ interface NavigationMobileProps {
 const CONTACT_CHANNELS = getContactChannels();
 
 export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationMobileProps) {
-  const [springDefault, setSpringDefault] = useState({
-    type: 'spring' as const,
-    stiffness: 400,
-    damping: 17,
-  });
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
-    const config = getAnimationConfig();
-    setSpringDefault({
-      type: 'spring' as const,
-      stiffness: config['animation.spring.default.stiffness'],
-      damping: config['animation.spring.default.damping'],
-    });
   }, []);
 
   // Don't render Sheet until mounted to prevent Radix UI ID hydration mismatch
@@ -130,7 +119,7 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
             if (info.offset.y > 100) onOpenChange(false);
           }}
           whileDrag={{ scale: 1.2, backgroundColor: 'rgb(249, 115, 22)' }} // Claude orange (was hsl(var(--accent)))
-          transition={springDefault}
+          transition={ANIMATIONS.spring.smooth}
         />
 
         <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
@@ -158,14 +147,19 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.15 + index * 0.05 }}
                   >
-                    <Link
-                      href={link.href}
-                      onClick={() => onOpenChange(false)}
-                      className={`border-accent bg-accent text-accent-foreground flex w-full items-center justify-center rounded-xl border-2 px-5 py-4 text-base font-semibold ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:bg-accent/90 active:scale-[0.97]`}
+                    <motion.div
+                      whileTap={MICROINTERACTIONS.button.tap}
+                      transition={MICROINTERACTIONS.button.transition}
                     >
+                      <Link
+                        href={link.href}
+                        onClick={() => onOpenChange(false)}
+                        className={`border-accent bg-accent text-accent-foreground flex w-full items-center justify-center rounded-xl border-2 px-5 py-4 text-base font-semibold ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:bg-accent/90`}
+                      >
                       {ActionIcon ? <ActionIcon className="mr-2 h-5 w-5 shrink-0" /> : null}
                       <span>{link.label}</span>
                     </Link>
+                    </motion.div>
                   </motion.div>
                 );
               })}
@@ -181,12 +175,16 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.15 + adjustedIndex * 0.05 }}
                   >
-                    <NavLink
-                      href={link.href}
-                      isActive={isActive}
-                      onClick={() => onOpenChange(false)}
-                      className={`border-border bg-card flex w-full items-center rounded-xl border px-5 py-4 text-base font-medium ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:border-accent/50 hover:bg-accent/10 active:scale-[0.97]`}
+                    <motion.div
+                      whileTap={MICROINTERACTIONS.button.tap}
+                      transition={MICROINTERACTIONS.button.transition}
                     >
+                      <NavLink
+                        href={link.href}
+                        isActive={isActive}
+                        onClick={() => onOpenChange(false)}
+                        className={`border-border bg-card flex w-full items-center rounded-xl border px-5 py-4 text-base font-medium ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:border-accent/50 hover:bg-accent/10`}
+                      >
                       {IconComponent ? <IconComponent className="mr-3 h-5 w-5 shrink-0" /> : null}
                       <span>{link.label}</span>
                       {link.isNew ? (
@@ -196,7 +194,8 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
                           className="ml-auto"
                         />
                       ) : null}
-                    </NavLink>
+                      </NavLink>
+                    </motion.div>
                   </motion.div>
                 );
               })}
@@ -207,31 +206,38 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
                 aria-label="Secondary navigation"
               >
                 <div className="space-y-3">
-                  {SECONDARY_NAVIGATION.flatMap((group) => group.links).map((link, index) => {
-                    const IconComponent = link.icon;
-                    return (
-                      <motion.div
-                        key={`secondary-${link.label}-${index}`}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{
-                          delay: 0.15 + (PRIMARY_NAVIGATION.length + index) * 0.05,
-                        }}
-                      >
-                        <NavLink
-                          href={link.href}
-                          isActive={isActive}
-                          onClick={() => onOpenChange(false)}
-                          className={`border-border/40 bg-card/50 text-muted-foreground flex w-full items-center rounded-xl border px-5 py-4 text-sm font-medium ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:border-accent/30 hover:bg-accent/5 hover:text-foreground active:scale-[0.98]`}
+                  {SECONDARY_NAVIGATION.flatMap((group) => group.links)
+                    .filter((link) => link.label !== 'Pinboard') // Remove pinboard from mobile
+                    .map((link, index) => {
+                      const IconComponent = link.icon;
+                      return (
+                        <motion.div
+                          key={`secondary-${link.label}-${index}`}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{
+                            delay: 0.15 + (PRIMARY_NAVIGATION.length + index) * 0.05,
+                          }}
                         >
-                          {IconComponent ? (
-                            <IconComponent className="mr-3 h-4 w-4 shrink-0" />
-                          ) : null}
-                          <span>{link.label}</span>
-                        </NavLink>
-                      </motion.div>
-                    );
-                  })}
+                          <motion.div
+                            whileTap={MICROINTERACTIONS.button.tap}
+                            transition={MICROINTERACTIONS.button.transition}
+                          >
+                            <NavLink
+                              href={link.href}
+                              isActive={isActive}
+                              onClick={() => onOpenChange(false)}
+                              className={`border-border/40 bg-card/50 text-muted-foreground flex w-full items-center rounded-xl border px-5 py-4 text-sm font-medium ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:border-accent/30 hover:bg-accent/5 hover:text-foreground`}
+                            >
+                              {IconComponent ? (
+                                <IconComponent className="mr-3 h-4 w-4 shrink-0" />
+                              ) : null}
+                              <span>{link.label}</span>
+                            </NavLink>
+                          </motion.div>
+                        </motion.div>
+                      );
+                    })}
                 </div>
               </nav>
             </nav>
@@ -259,7 +265,11 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
                   color: 'accent',
                 },
               ].map((item) => (
-                <motion.div key={item.label} whileTap={{ scale: 0.9 }} transition={springDefault}>
+                <motion.div
+                  key={item.label}
+                  whileTap={MICROINTERACTIONS.button.tap}
+                  transition={MICROINTERACTIONS.button.transition}
+                >
                   <Button
                     variant="outline"
                     size="lg"

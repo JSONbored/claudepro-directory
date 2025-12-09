@@ -29,11 +29,13 @@
  */
 
 import {
+  Bookmark,
   BookOpen,
   Briefcase,
   Building,
   Calendar,
   FileText,
+  Github,
   Handshake,
   HelpCircle,
   Layers,
@@ -43,7 +45,6 @@ import {
   Plug,
   Rocket,
   Rss,
-  Search,
   Settings,
   Shield,
   Sparkles,
@@ -172,7 +173,7 @@ export const PRIMARY_NAVIGATION: NavigationLink[] = [
   {
     label: 'Discover',
     href: '#',
-    icon: Search,
+    icon: Sparkles,
     description: 'Find content and people',
     sections: [
       {
@@ -187,7 +188,7 @@ export const PRIMARY_NAVIGATION: NavigationLink[] = [
           {
             label: 'Search',
             href: '/search',
-            icon: Search,
+            icon: Sparkles,
             description: 'Find configurations and content',
           },
         ],
@@ -400,6 +401,32 @@ export const SECONDARY_NAVIGATION: NavigationGroup[] = [
       },
     ],
   },
+  {
+    heading: 'Community',
+    links: [
+      {
+        label: 'Pinboard',
+        href: '#',
+        icon: Bookmark,
+        description: 'View your saved items',
+        // Note: Special handling in desktop navigation to open drawer instead of navigating
+      },
+      {
+        label: 'Discord',
+        href: 'https://discord.gg/Ax3Py4YDrq',
+        icon: MessageSquare,
+        description: 'Join our Discord community',
+        external: true,
+      },
+      {
+        label: 'GitHub',
+        href: 'https://github.com/heyclaude/directory',
+        icon: Github,
+        description: 'Star us on GitHub',
+        external: true,
+      },
+    ],
+  },
 ];
 
 /** Action links (CTAs) */
@@ -489,7 +516,6 @@ function getIconName(icon?: LucideIcon): string | null {
     [Plug, 'Plug'],
     [Rocket, 'Rocket'],
     [Rss, 'Rss'],
-    [Search, 'Search'],
     [Settings, 'Settings'],
     [Shield, 'Shield'],
     [Sparkles, 'Sparkles'],
@@ -532,11 +558,15 @@ function convertLinkToCommandItems(link: NavigationLink): Array<{
 
   // Flatten sections (for Configs dropdown)
   if (link.sections) {
+    let sectionIndex = 0;
     for (const section of link.sections) {
       for (const childLink of section.links) {
-        // Create unique path by including section context to avoid duplicate keys
-        // Use section heading + path to ensure uniqueness
-        const uniquePath = childLink.href === '#' ? childLink.href : `${childLink.href}?section=${encodeURIComponent(section.heading)}`;
+        // CRITICAL FIX: Create unique path by including section heading AND index
+        // This prevents duplicates when the same heading appears multiple times (e.g., "Community")
+        // Use section heading + section index + path to ensure uniqueness
+        const uniquePath = childLink.href === '#' 
+          ? childLink.href 
+          : `${childLink.href}?section=${encodeURIComponent(section.heading)}&sectionIndex=${sectionIndex}`;
         items.push({
           path: uniquePath,
           title: childLink.label,
@@ -544,6 +574,7 @@ function convertLinkToCommandItems(link: NavigationLink): Array<{
           icon_name: getIconName(childLink.icon),
         });
       }
+      sectionIndex++;
     }
   }
 
