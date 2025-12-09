@@ -7,7 +7,7 @@
  * to the search interaction context for coordinated animations.
  */
 
-import { NumberTicker, MorphingBlobBackground } from '@heyclaude/web-runtime/ui';
+import { NumberTicker, MorphingBlobBackground, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import dynamicImport from 'next/dynamic';
 import { memo } from 'react';
@@ -71,7 +71,18 @@ function HomepageHeroClientComponent({ memberCount }: HomepageHeroClientProps) {
 
           <p className="text-muted-foreground mx-auto max-w-2xl text-base leading-relaxed sm:text-lg lg:text-xl">
             Join{' '}
-            <NumberTicker value={memberCount} className="font-semibold" style={{ color: 'var(--claude-orange)' }} suffix="+" />{' '}
+            <TooltipProvider delayDuration={300}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="cursor-help">
+                    <NumberTicker value={memberCount} className="font-semibold" style={{ color: 'var(--claude-orange)' }} suffix="+" />
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  Active community members who have contributed configurations, rules, or content to the directory
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>{' '}
             members discovering and sharing the best Claude configurations. Explore expert rules,
             powerful MCP servers, specialized agents, automation hooks, and connect with the
             community building the future of AI.

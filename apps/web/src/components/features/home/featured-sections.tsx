@@ -10,7 +10,7 @@ import {
   type DisplayableContent,
   type UnifiedCategoryConfig,
 } from '@heyclaude/web-runtime/types/component.types';
-import { UI_CLASSES, UnifiedBadge, UnifiedCardGrid, ConfigCard } from '@heyclaude/web-runtime/ui';
+import { UI_CLASSES, UnifiedBadge, UnifiedCardGrid, ConfigCard, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, BlurText } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { type FC, memo, useEffect, useMemo } from 'react';
 
@@ -52,7 +52,21 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
     return (
       <div>
         <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mb-8`}>
-          <h2 className="text-2xl font-bold">{title}</h2>
+          <BlurText
+            text={title}
+            delay={50}
+            animateBy="words"
+            direction="top"
+            threshold={0.1}
+            rootMargin="0px"
+            className="text-2xl font-bold"
+            animationFrom={{ filter: 'blur(10px)', opacity: 0, y: -20 }}
+            animationTo={[
+              { filter: 'blur(5px)', opacity: 0.7, y: 0 },
+              { filter: 'blur(0px)', opacity: 1, y: 0 }
+            ]}
+            stepDuration={0.35}
+          />
           <Link href={href} className="text-accent flex items-center gap-2 hover:underline">
             View all <ExternalLink className={UI_CLASSES.ICON_SM} />
           </Link>
@@ -67,26 +81,46 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
             return (
               <div className="relative h-full">
                 {showNew || showTrending ? (
-                  <div className="pointer-events-none absolute top-3 left-3 z-10 flex flex-col gap-2">
-                    {showNew ? (
-                      <UnifiedBadge
-                        variant="base"
-                        style="secondary"
-                        className="text-[10px] tracking-wide uppercase"
-                      >
-                        New this week
-                      </UnifiedBadge>
-                    ) : null}
-                    {showTrending ? (
-                      <UnifiedBadge
-                        variant="base"
-                        style="outline"
-                        className="text-[10px] tracking-wide uppercase"
-                      >
-                        Trending
-                      </UnifiedBadge>
-                    ) : null}
-                  </div>
+                  <TooltipProvider delayDuration={300}>
+                    <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
+                      {showNew ? (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="cursor-help">
+                              <UnifiedBadge
+                                variant="base"
+                                style="secondary"
+                                className="text-[10px] tracking-wide uppercase pointer-events-auto"
+                              >
+                                New this week
+                              </UnifiedBadge>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent side="right" className="max-w-xs">
+                            Added or updated within the last 7 days
+                          </TooltipContent>
+                        </Tooltip>
+                      ) : null}
+                      {showTrending ? (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="cursor-help">
+                              <UnifiedBadge
+                                variant="base"
+                                style="outline"
+                                className="text-[10px] tracking-wide uppercase pointer-events-auto"
+                              >
+                                Trending
+                              </UnifiedBadge>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent side="right" className="max-w-xs">
+                            Most viewed and copied configurations this week
+                          </TooltipContent>
+                        </Tooltip>
+                      ) : null}
+                    </div>
+                  </TooltipProvider>
                 ) : null}
                 <ConfigCard item={item} showBorderBeam={index < 3} />
               </div>
@@ -191,7 +225,21 @@ const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({
       {featuredJobs.length > 0 && (
         <div>
           <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mb-8`}>
-            <h2 className="text-2xl font-bold">Featured Jobs</h2>
+            <BlurText
+              text="Featured Jobs"
+              delay={50}
+              animateBy="words"
+              direction="top"
+              threshold={0.1}
+              rootMargin="0px"
+              className="text-2xl font-bold"
+              animationFrom={{ filter: 'blur(10px)', opacity: 0, y: -20 }}
+              animationTo={[
+                { filter: 'blur(5px)', opacity: 0.7, y: 0 },
+                { filter: 'blur(0px)', opacity: 1, y: 0 }
+              ]}
+              stepDuration={0.35}
+            />
             <Link
               href={ROUTES.JOBS}
               className="text-accent flex items-center gap-2 hover:underline"

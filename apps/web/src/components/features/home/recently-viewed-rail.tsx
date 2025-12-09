@@ -4,7 +4,7 @@ import { type Database } from '@heyclaude/database-types';
 import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
 import { usePulse, useRecentlyViewed, getCategoryRoute } from '@heyclaude/web-runtime/hooks';
 import { ArrowRight, Trash } from '@heyclaude/web-runtime/icons';
-import { cn, ConfigCard, Button, Skeleton } from '@heyclaude/web-runtime/ui';
+import { cn, ConfigCard, Button, Skeleton, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';
 import { memo, useMemo, useEffect, useState } from 'react';
 
@@ -155,28 +155,44 @@ export const RecentlyViewedRail = memo(function RecentlyViewedRail() {
               Recently viewed
             </h2>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="gap-2 text-sm"
-              onClick={handleResumeSearch}
-              aria-label="Resume your last search"
-            >
-              <ArrowRight className="h-4 w-4" aria-hidden="true" />
-              Resume search
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="gap-2 text-sm"
-              onClick={handleClearHistory}
-              aria-label="Clear recently viewed history"
-            >
-              <Trash className="text-destructive h-4 w-4" aria-hidden="true" />
-              Clear history
-            </Button>
-          </div>
+          <TooltipProvider delayDuration={300}>
+            <div className="flex flex-wrap gap-2">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="gap-2 text-sm"
+                    onClick={handleResumeSearch}
+                    aria-label="Resume your last search"
+                  >
+                    <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                    Resume search
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  Continue your last search with the same filters and category
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="gap-2 text-sm"
+                    onClick={handleClearHistory}
+                    aria-label="Clear recently viewed history"
+                  >
+                    <Trash className="text-destructive h-4 w-4" aria-hidden="true" />
+                    Clear history
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  Remove all items from your recently viewed list
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          </TooltipProvider>
         </div>
 
         <div

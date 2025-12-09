@@ -22,6 +22,10 @@ import {
   NumberTicker,
   UnifiedBadge,
   HomepageStatsSkeleton,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
 } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import Link from 'next/link';
@@ -751,121 +755,142 @@ function HomePageClientComponent({
           {stats && Object.keys(stats).length > 0 ? (
             <>
               {/* Mobile Stats - Compact horizontal scroll carousel */}
-              <motion.div
-                className="scrollbar-hide mt-6 overflow-x-auto md:hidden"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-              >
-                <div className="flex gap-3 px-4 pb-2">
-                  {categoryStatsConfig.slice(0, 5).map(({ categoryId, delay }, index) => {
+              <TooltipProvider delayDuration={300}>
+                <motion.div
+                  className="scrollbar-hide mt-6 overflow-x-auto md:hidden"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <div className="flex gap-3 px-4 pb-2">
+                    {categoryStatsConfig.slice(0, 5).map(({ categoryId, delay }, index) => {
+                      const categoryRoute = ROUTES[categoryId.toUpperCase() as keyof typeof ROUTES];
+                      const count =
+                        typeof stats[categoryId] === 'number'
+                          ? stats[categoryId]
+                          : stats[categoryId]?.total || 0;
+                      const categoryConfig = categoryConfigs[categoryId];
+                      const tooltipText = categoryConfig?.description || `View all ${categoryId} configurations`;
+
+                      return (
+                        <Tooltip key={categoryId}>
+                          <TooltipTrigger asChild>
+                            <Link href={categoryRoute}>
+                              <motion.div
+                                className="backdrop-blur-sm flex min-w-fit items-center gap-2 rounded-lg border px-3 py-2 whitespace-nowrap transition-colors cursor-help"
+                                initial={{ opacity: 0, x: -8 }}
+                                animate={{ 
+                                  opacity: 1, 
+                                  x: 0,
+                                  borderColor: 'rgba(255, 255, 255, 0.15)',
+                                  backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                                }}
+                                transition={{
+                                  delay: index * 0.03,
+                                  type: 'spring',
+                                  stiffness: 300,
+                                  damping: 25,
+                                }}
+                                whileHover={{
+                                  scale: 1.02,
+                                  borderColor: 'rgba(249, 115, 22, 0.5)',
+                                  backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                                }}
+                                whileTap={{ scale: 0.98 }}
+                              >
+                                <UnifiedBadge
+                                  variant="category"
+                                  category={categoryId}
+                                  href={null}
+                                  className="shrink-0"
+                                />
+                                <NumberTicker
+                                  value={count}
+                                  delay={delay}
+                                  className="text-sm font-semibold tabular-nums"
+                                />
+                              </motion.div>
+                            </Link>
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom" className="max-w-xs text-center">
+                            {tooltipText}
+                          </TooltipContent>
+                        </Tooltip>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              </TooltipProvider>
+
+              {/* Desktop Stats - Minimal 2025 design with UnifiedBadge + CountingNumber */}
+              <TooltipProvider delayDuration={300}>
+                <div className="mt-6 hidden flex-wrap justify-center gap-2 md:flex lg:gap-3">
+                  {categoryStatsConfig.map(({ categoryId, delay }, index) => {
+                    // Get category route from ROUTES constant
                     const categoryRoute = ROUTES[categoryId.toUpperCase() as keyof typeof ROUTES];
                     const count =
                       typeof stats[categoryId] === 'number'
                         ? stats[categoryId]
                         : stats[categoryId]?.total || 0;
+                    const categoryConfig = categoryConfigs[categoryId];
+                    const tooltipText = categoryConfig?.description || `View all ${categoryId} configurations`;
 
                     return (
-                      <Link key={categoryId} href={categoryRoute}>
-                        <motion.div
-                          className="backdrop-blur-sm flex min-w-fit items-center gap-2 rounded-lg border px-3 py-2 whitespace-nowrap transition-colors"
-                          initial={{ opacity: 0, x: -8 }}
-                          animate={{ 
-                            opacity: 1, 
-                            x: 0,
-                            borderColor: 'rgba(255, 255, 255, 0.15)',
-                            backgroundColor: 'rgba(0, 0, 0, 0.3)',
-                          }}
-                          transition={{
-                            delay: index * 0.03,
-                            type: 'spring',
-                            stiffness: 300,
-                            damping: 25,
-                          }}
-                          whileHover={{
-                            scale: 1.02,
-                            borderColor: 'rgba(249, 115, 22, 0.5)',
-                            backgroundColor: 'rgba(249, 115, 22, 0.1)',
-                          }}
-                          whileTap={{ scale: 0.98 }}
-                        >
-                          <UnifiedBadge
-                            variant="category"
-                            category={categoryId}
-                            href={null}
-                            className="shrink-0"
-                          />
-                          <NumberTicker
-                            value={count}
-                            delay={delay}
-                            className="text-sm font-semibold tabular-nums"
-                          />
-                        </motion.div>
-                      </Link>
+                      <Tooltip key={categoryId}>
+                        <TooltipTrigger asChild>
+                          <Link
+                            href={categoryRoute}
+                            className="group no-underline"
+                            aria-label={`View all ${categoryId} configurations`}
+                          >
+                            <motion.div
+                              className="group flex items-center gap-2 rounded-lg border backdrop-blur-sm px-3 py-2 transition-colors cursor-help"
+                              initial={{ opacity: 0, y: 8 }}
+                              animate={{ 
+                                opacity: 1, 
+                                y: 0,
+                                borderColor: 'rgba(255, 255, 255, 0.15)',
+                                backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                              }}
+                              transition={{
+                                delay: index * 0.03,
+                                type: 'spring',
+                                stiffness: 300,
+                                damping: 25,
+                              }}
+                              whileHover={{
+                                scale: 1.02,
+                                borderColor: 'rgba(249, 115, 22, 0.5)',
+                                backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                                transition: { type: 'spring', stiffness: 400, damping: 25 },
+                              }}
+                              whileTap={{
+                                scale: 0.98,
+                                transition: { type: 'spring', stiffness: 400, damping: 25 },
+                              }}
+                            >
+                              <UnifiedBadge
+                                variant="category"
+                                category={categoryId}
+                                href={null} // Badge is inside Link, so href=null
+                                className="shrink-0"
+                              />
+                              <NumberTicker
+                                value={count}
+                                delay={delay}
+                                className="text-sm font-semibold tabular-nums"
+                              />
+                            </motion.div>
+                          </Link>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="max-w-xs text-center">
+                          {tooltipText}
+                        </TooltipContent>
+                      </Tooltip>
                     );
                   })}
                 </div>
-              </motion.div>
-
-              {/* Desktop Stats - Minimal 2025 design with UnifiedBadge + CountingNumber */}
-              <div className="mt-6 hidden flex-wrap justify-center gap-2 md:flex lg:gap-3">
-                {categoryStatsConfig.map(({ categoryId, delay }, index) => {
-                  // Get category route from ROUTES constant
-                  const categoryRoute = ROUTES[categoryId.toUpperCase() as keyof typeof ROUTES];
-                  const count =
-                    typeof stats[categoryId] === 'number'
-                      ? stats[categoryId]
-                      : stats[categoryId]?.total || 0;
-
-                  return (
-                    <Link
-                      key={categoryId}
-                      href={categoryRoute}
-                      className="group no-underline"
-                      aria-label={`View all ${categoryId} configurations`}
-                    >
-                      <motion.div
-                        className="group flex items-center gap-2 rounded-lg border backdrop-blur-sm px-3 py-2 transition-colors"
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ 
-                          opacity: 1, 
-                          y: 0,
-                          borderColor: 'rgba(255, 255, 255, 0.15)',
-                          backgroundColor: 'rgba(0, 0, 0, 0.3)',
-                        }}
-                        transition={{
-                          delay: index * 0.03,
-                          type: 'spring',
-                          stiffness: 300,
-                          damping: 25,
-                        }}
-                        whileHover={{
-                          scale: 1.02,
-                          borderColor: 'rgba(249, 115, 22, 0.5)',
-                          backgroundColor: 'rgba(249, 115, 22, 0.1)',
-                          transition: { type: 'spring', stiffness: 400, damping: 25 },
-                        }}
-                        whileTap={{
-                          scale: 0.98,
-                          transition: { type: 'spring', stiffness: 400, damping: 25 },
-                        }}
-                      >
-                        <UnifiedBadge
-                          variant="category"
-                          category={categoryId}
-                          href={null} // Badge is inside Link, so href=null
-                          className="shrink-0"
-                        />
-                        <NumberTicker
-                          value={count}
-                          delay={delay}
-                          className="text-sm font-semibold tabular-nums"
-                        />
-                      </motion.div>
-                    </Link>
-                  );
-                })}
-              </div>
+              </TooltipProvider>
             </>
           ) : (
             <HomepageStatsSkeleton className="mt-6" />
