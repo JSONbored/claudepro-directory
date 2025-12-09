@@ -195,20 +195,27 @@ export const DetailSidebar = memo(function DetailSidebar({
   const hasPermissions = 'permissions' in metadata;
   const permissions = hasPermissions ? ensureStringArray(metadata['permissions']) : [];
   const hasSource = 'source' in contentItem && contentItem.source;
-  const mcpServers =
-    metadata['mcpServers'] && typeof metadata['mcpServers'] === 'object'
-      ? metadata['mcpServers']
-      : null;
-  const configurationObject =
-    metadata['configuration'] && typeof metadata['configuration'] === 'object'
-      ? metadata['configuration']
-      : null;
+  // Type guard for Record<string, unknown> (object but not array or null)
+  function isValidRecord(value: unknown): value is Record<string, unknown> {
+    return (
+      typeof value === 'object' &&
+      value !== null &&
+      !Array.isArray(value)
+    );
+  }
+
+  const mcpServers = isValidRecord(metadata['mcpServers'])
+    ? metadata['mcpServers']
+    : null;
+  const configurationObject = isValidRecord(metadata['configuration'])
+    ? metadata['configuration']
+    : null;
   const quickActions = useDetailQuickActions({
     item: contentItem,
     metadata,
     packageName: packageName ?? null,
-    configurationObject: configurationObject as null | Record<string, unknown>,
-    mcpServers: mcpServers as null | Record<string, unknown>,
+    configurationObject,
+    mcpServers,
   });
 
   if (customRenderer) {
@@ -463,19 +470,28 @@ export const DetailSidebar = memo(function DetailSidebar({
                   ? relatedItem.slug
                   : '';
               // Validate and sanitize URL before using
-              // getSafeContentItemUrl already performs validation and logging, so no need for duplicate check
               const safeRelatedUrl = getSafeContentItemUrl(relatedCategory, relatedSlug);
               if (!safeRelatedUrl) {
-                // getSafeContentItemUrl already logged the warning, just return null
+                logClientWarn(
+                  '[Content] Invalid related content URL rejected',
+                  undefined,
+                  'NavigationSidebar.render',
+                  {
+                    component: 'NavigationSidebar',
+                    action: 'render-related-content-link',
+                    category: 'content',
+                    relatedCategory,
+                    relatedSlug,
+                  }
+                );
                 return null;
               }
               // At this point, safeRelatedUrl is validated and safe for use in Next.js Link
               // getSafeContentItemUrl ensures the URL is a safe internal path
-              const validatedUrl: string = safeRelatedUrl;
               return (
                 <Link
                   key={relatedSlug}
-                  href={validatedUrl}
+                  href={safeRelatedUrl}
                   className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} border-border hover:bg-muted/50 block w-full cursor-pointer rounded-lg border p-3 text-left transition-colors`}
                 >
                   <div className="min-w-0 flex-1">

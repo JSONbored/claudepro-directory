@@ -9,6 +9,10 @@ import { type Database } from '@heyclaude/database-types';
 import { normalizeError } from '@heyclaude/shared-runtime';
 import { refreshProfileFromOAuth, updateProfile } from '@heyclaude/web-runtime';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
+import {
+  extractFirstFieldFromTuple,
+  isPostgresTupleString,
+} from '@heyclaude/web-runtime';
 import { toasts, UI_CLASSES, FormField, ToggleField, Button } from '@heyclaude/web-runtime/ui';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTransition } from 'react';
@@ -29,10 +33,15 @@ type ProfileData = Pick<
   | 'social_x_link'
   | 'website'
   | 'work'
+  | 'username'
 >;
 
 const profileFormSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100),
+  // Username validation is handled by database constraint (users_username_format_check)
+  // Database enforces: lowercase alphanumeric + hyphens, 3-30 chars, no leading/trailing hyphens
+  // Client-side: basic string validation only, database will provide detailed error messages
+  username: z.string().optional(),
   bio: z.string().max(500).optional(),
   work: z.string().max(100).optional(),
   website: z
@@ -94,14 +103,31 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
       profileFormSchema as unknown as Parameters<typeof zodResolver>[0]
     ) as unknown as Resolver<ProfileFormData>,
     defaultValues: {
-      name: profile.display_name || '',
-      bio: profile.bio || '',
-      work: profile.work || '',
-      website: profile.website || '',
-      social_x_link: profile.social_x_link || '',
-      interests: profile.interests || [],
-      public: profile.profile_public ?? true,
-      follow_email: profile.follow_email ?? true,
+      // Defensive: Ensure display_name is a string, not a serialized tuple
+      name: (() => {
+        if (!profile.display_name) {
+          return '';
+        }
+        // Check if it's a PostgreSQL tuple string
+        if (isPostgresTupleString(profile.display_name)) {
+          const extracted = extractFirstFieldFromTuple(profile.display_name);
+          return extracted ?? '';
+        }
+        // If it's already a string, use it
+        if (typeof profile.display_name === 'string') {
+          return profile.display_name;
+        }
+        // Otherwise, convert to string
+        return String(profile.display_name);
+      })(),
+      username: profile.username ?? undefined,
+      bio: typeof profile.bio === 'string' ? profile.bio : '',
+      work: typeof profile.work === 'string' ? profile.work : '',
+      website: typeof profile.website === 'string' ? profile.website : '',
+      social_x_link: typeof profile.social_x_link === 'string' ? profile.social_x_link : '',
+      interests: Array.isArray(profile.interests) ? profile.interests : [],
+      public: typeof profile.profile_public === 'boolean' ? profile.profile_public : true,
+      follow_email: typeof profile.follow_email === 'boolean' ? profile.follow_email : true,
     },
   });
 
@@ -116,6 +142,7 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
           async () => {
             const result = await updateProfile({
               display_name: data.name || undefined,
+              ...(data.username && { username: data.username }),
               bio: data.bio || '',
               work: data.work || '',
               website: data.website || '',
@@ -161,6 +188,18 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
         required
         error={!!errors.name}
         {...(errors.name?.message && { errorMessage: errors.name.message })}
+      />
+
+      <FormField
+        variant="input"
+        label="Username"
+        value={watch('username') || ''}
+        onChange={(e) => setValue('username', e.target.value.toLowerCase(), { shouldDirty: true })}
+        placeholder="slick-rabbit29"
+        maxLength={30}
+        description="Your profile URL will be /u/your-username. Only lowercase letters, numbers, and hyphens."
+        error={!!errors.username}
+        {...(errors.username?.message && { errorMessage: errors.username.message })}
       />
 
       <FormField

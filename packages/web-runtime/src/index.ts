@@ -205,6 +205,8 @@ export * from './integrations/polar.ts';
 export * from './utils/auth-redirect.ts';
 export * from './utils/category-validation.ts';
 export * from './utils/content-highlights.ts';
+export * from './utils/deserialize-postgres-tuple.ts';
+export * from './utils/placeholder-images.ts';
 
 // Actions (Isomorphic exports)
 export * from './entries/actions.ts';

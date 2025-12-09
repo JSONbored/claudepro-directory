@@ -4,16 +4,10 @@
  */
 
 import 'server-only';
-
 import { TrendingService } from '@heyclaude/data-layer';
 import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
-import {
-  generateRequestId,
-  logger,
-  normalizeError,
-  createErrorResponse,
-} from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
 import {
   badRequestResponse,
   buildCacheHeaders,
@@ -21,7 +15,74 @@ import {
   getOnlyCorsHeaders,
   jsonResponse,
 } from '@heyclaude/web-runtime/server';
+import { cacheLife } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
+
+/**
+ * Cached helper function to fetch trending metrics
+ * Uses Cache Components to reduce function invocations
+ * @param category
+ * @param limit
+ */
+async function getCachedTrendingMetrics(
+  category: ContentCategory | null,
+  limit: number
+): Promise<TrendingMetricsRow[]> {
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
+
+  const supabase = createSupabaseAnonClient();
+  const service = new TrendingService(supabase);
+  return service.getTrendingMetrics({
+    ...(category ? { p_category: category } : {}),
+    p_limit: limit,
+  });
+}
+
+/**
+ * Cached helper function to fetch popular content
+ * Uses Cache Components to reduce function invocations
+ * @param category
+ * @param limit
+ */
+async function getCachedPopularContent(
+  category: ContentCategory | null,
+  limit: number
+): Promise<PopularContentRow[]> {
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
+
+  const supabase = createSupabaseAnonClient();
+  const service = new TrendingService(supabase);
+  return service.getPopularContent({
+    ...(category ? { p_category: category } : {}),
+    p_limit: limit,
+  });
+}
+
+/**
+ * Cached helper function to fetch recent content
+ * Uses Cache Components to reduce function invocations
+ * @param category
+ * @param limit
+ * @param days
+ */
+async function getCachedRecentContent(
+  category: ContentCategory | null,
+  limit: number,
+  days: number
+): Promise<RecentContentRow[]> {
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
+
+  const supabase = createSupabaseAnonClient();
+  const service = new TrendingService(supabase);
+  return service.getRecentContent({
+    ...(category ? { p_category: category } : {}),
+    p_limit: limit,
+    p_days: days,
+  });
+}
 
 const CORS = getOnlyCorsHeaders;
 type ContentCategory = DatabaseGenerated['public']['Enums']['content_category'];
@@ -237,15 +298,9 @@ async function handlePageTabs(url: URL, reqLogger: ReturnType<typeof logger.chil
 
   reqLogger.info('Processing trending page tabs', { tab, category: category ?? 'all', limit });
 
-  const supabase = createSupabaseAnonClient();
-  const service = new TrendingService(supabase);
-
   try {
     if (tab === 'trending') {
-      const rows = await service.getTrendingMetrics({
-        ...(category ? { p_category: category } : {}),
-        p_limit: limit,
-      });
+      const rows = await getCachedTrendingMetrics(category, limit);
       const trending = mapTrendingRows(rows, category);
       return jsonResponse(
         {
@@ -259,10 +314,7 @@ async function handlePageTabs(url: URL, reqLogger: ReturnType<typeof logger.chil
     }
 
     if (tab === 'popular') {
-      const rows = await service.getPopularContent({
-        ...(category ? { p_category: category } : {}),
-        p_limit: limit,
-      });
+      const rows = await getCachedPopularContent(category, limit);
       const popular = mapPopularRows(rows, category);
       return jsonResponse(
         {
@@ -276,11 +328,7 @@ async function handlePageTabs(url: URL, reqLogger: ReturnType<typeof logger.chil
     }
 
     if (tab === 'recent') {
-      const rows = await service.getRecentContent({
-        ...(category ? { p_category: category } : {}),
-        p_limit: limit,
-        p_days: 30,
-      });
+      const rows = await getCachedRecentContent(category, limit, 30);
       const recent = mapRecentRows(rows, category);
       return jsonResponse(
         {
@@ -310,20 +358,10 @@ async function handleSidebar(url: URL, reqLogger: ReturnType<typeof logger.child
 
   reqLogger.info('Processing trending sidebar', { category, limit });
 
-  const supabase = createSupabaseAnonClient();
-  const service = new TrendingService(supabase);
-
   try {
     const [trendingRows, recentRows] = await Promise.all([
-      service.getTrendingMetrics({
-        p_category: category,
-        p_limit: limit,
-      }),
-      service.getRecentContent({
-        p_category: category,
-        p_limit: limit,
-        p_days: 30,
-      }),
+      getCachedTrendingMetrics(category, limit),
+      getCachedRecentContent(category, limit, 30),
     ]);
 
     const trending = mapSidebarTrending(trendingRows, category);
@@ -341,9 +379,7 @@ async function handleSidebar(url: URL, reqLogger: ReturnType<typeof logger.child
 }
 
 export async function GET(request: NextRequest) {
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'TrendingAPI',
     route: '/api/trending',
     method: 'GET',

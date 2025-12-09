@@ -1,10 +1,11 @@
 import { type Database } from '@heyclaude/database-types';
 import { type CreateJobInput } from '@heyclaude/web-runtime';
 import { createJob } from '@heyclaude/web-runtime/actions';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata, getPaymentPlanCatalog } from '@heyclaude/web-runtime/server';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { connection } from 'next/server';
 
@@ -43,16 +44,11 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see createJob
  */
 export default async function NewJobPage() {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
-
-  // Generate single requestId for this page request (after connection() to allow Date.now())
-  const requestId = generateRequestId();
+  'use cache: private';
+  cacheLife('userProfile'); // 1min stale, 5min revalidate, 30min expire - User-specific data
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    requestId,
     operation: 'NewJobPage',
     route: '/account/jobs/new',
     module: 'apps/web/src/app/account/jobs/new',
@@ -95,12 +91,8 @@ export default async function NewJobPage() {
   async function handleSubmit(data: CreateJobInput) {
     'use server';
 
-    // Generate requestId for server action (separate from page render)
-    const actionRequestId = generateRequestId();
-
     // Create request-scoped child logger for server action
     const actionLogger = logger.child({
-      requestId: actionRequestId,
       operation: 'NewJobPageAction',
       route: '/account/jobs/new',
       module: 'apps/web/src/app/account/jobs/new',

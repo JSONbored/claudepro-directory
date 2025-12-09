@@ -1,12 +1,7 @@
 import 'server-only';
-
 import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { normalizeError, validateLimit, validateQueryString } from '@heyclaude/shared-runtime';
-import {
-  generateRequestId,
-  logger,
-  createErrorResponse,
-} from '@heyclaude/web-runtime/logging/server';
+import { logger, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
 import {
   createSupabaseAnonClient,
   badRequestResponse,
@@ -15,9 +10,33 @@ import {
   buildCacheHeaders,
   handleOptionsRequest,
 } from '@heyclaude/web-runtime/server';
+import { cacheLife } from 'next/cache';
 import { type NextRequest } from 'next/server';
 
 const CORS = getWithAuthCorsHeaders;
+
+/**
+ * Cached helper function to fetch search autocomplete suggestions
+ * Uses Cache Components to reduce function invocations
+ * Cache key includes query and limit for per-query caching
+ * @param query
+ * @param limit
+ */
+async function getCachedSearchSuggestions(query: string, limit: number) {
+  'use cache';
+  cacheLife('quarter'); // 15min stale, 5min revalidate, 2hr expire - More dynamic than static content
+
+  const supabase = createSupabaseAnonClient();
+  const rpcArgs: DatabaseGenerated['public']['Functions']['get_search_suggestions_from_history']['Args'] =
+    {
+      p_query: query,
+      p_limit: limit,
+    };
+
+  const { data, error } = await supabase.rpc('get_search_suggestions_from_history', rpcArgs);
+  if (error) throw error;
+  return data;
+}
 
 /**
  * Handle GET requests for search autocomplete and return matching suggestions based on the user's query.
@@ -35,9 +54,7 @@ const CORS = getWithAuthCorsHeaders;
  * @see createErrorResponse
  */
 export async function GET(request: NextRequest) {
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'SearchAutocompleteAPI',
     route: '/api/search/autocomplete',
     method: 'GET',
@@ -62,17 +79,11 @@ export async function GET(request: NextRequest) {
 
   reqLogger.info('Autocomplete request received', { query });
 
-  const supabase = createSupabaseAnonClient();
-  const rpcArgs: DatabaseGenerated['public']['Functions']['get_search_suggestions_from_history']['Args'] =
-    {
-      p_query: query,
-      p_limit: limit,
-    };
-
   try {
-    const { data, error } = await supabase.rpc('get_search_suggestions_from_history', rpcArgs);
-
-    if (error) {
+    let data: Awaited<ReturnType<typeof getCachedSearchSuggestions>> | null = null;
+    try {
+      data = await getCachedSearchSuggestions(query, limit);
+    } catch (error) {
       const normalized = normalizeError(error, 'Autocomplete RPC failed');
       reqLogger.error('Autocomplete RPC failed', normalized);
       return createErrorResponse(error, {
@@ -80,7 +91,6 @@ export async function GET(request: NextRequest) {
         operation: 'get_search_suggestions_from_history',
         method: 'GET',
         logContext: {
-          requestId,
           query,
         },
       });
@@ -118,7 +128,6 @@ export async function GET(request: NextRequest) {
       operation: 'GET',
       method: 'GET',
       logContext: {
-        requestId,
         query,
       },
     });

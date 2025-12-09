@@ -183,11 +183,6 @@
         "SUPABASE_PROJECT_REF"
       ]
     },
-    "backup:db:exec": {
-      "dependsOn": ["generators:build"],
-      "cache": false,
-      "passThroughEnv": ["SUPABASE_SERVICE_ROLE_KEY", "NEXT_PUBLIC_SUPABASE_URL"]
-    },
     "cache:info:exec": {
       "dependsOn": ["generators:build"],
       "cache": false

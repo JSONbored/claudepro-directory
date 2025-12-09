@@ -1,23 +1,46 @@
 name: 'Setup'
-description: 'Setup repository with pnpm and Node.js'
+description: 'Setup repository with pnpm and Node.js (optimized with caching)'
+
+inputs:
+  node-version:
+    description: 'Node.js version to use'
+    required: false
+    default: '22'
+  pnpm-version:
+    description: 'pnpm version to use'
+    required: false
+    default: '10.24.0'
+  install-args:
+    description: 'Additional arguments for pnpm install'
+    required: false
+    default: '--frozen-lockfile'
+  fetch-depth:
+    description: 'Git fetch depth (0 for full history, 1 for shallow)'
+    required: false
+    default: '1'
 
 runs:
   using: 'composite'
   steps:
-    - uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: ${{ inputs.fetch-depth }}
       shell: bash
       
-    - uses: pnpm/action-setup@v3
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
       with:
-        version: 10.23.0
+        version: ${{ inputs.pnpm-version }}
       shell: bash
           
-    - uses: actions/setup-node@v4
+    - name: Setup Node.js
+      uses: actions/setup-node@v6
       with:
-        node-version: '22'
+        node-version: ${{ inputs.node-version }}
         cache: 'pnpm'
       shell: bash
 
     - name: Install dependencies
-      run: pnpm install
+      run: pnpm install ${{ inputs.install-args }}
       shell: bash

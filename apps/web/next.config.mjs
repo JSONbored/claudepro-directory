@@ -57,6 +57,7 @@ const nextConfig = {
    * - `metadata`: 12hr stale, 24hr revalidate, 48hr expire - SEO metadata (homepage metadata, page metadata)
    * - `stable`: 6hr stale, 1hr revalidate, 7 days expire - Stable data (navigation menus, site config)
    * - `static`: 1 day stale, 6hr revalidate, 30 days expire - Rarely changing data (paginated content)
+   * - `userProfile`: 1min stale, 5min revalidate, 30min expire - User-specific data (account pages, user profiles)
    *
    * Usage in data functions:
    * ```ts
@@ -87,12 +88,16 @@ const nextConfig = {
     half: { stale: 1800, revalidate: 600, expire: 10800 },
     /** Hourly updates (content detail, search facets, changelog) - 1hr stale, 15min revalidate, 1 day expire */
     hours: { stale: 3600, revalidate: 900, expire: 86400 },
+    /** Content detail pages - 2hr stale, 30min revalidate, 1 day expire - Detail pages change less frequently than list pages */
+    detail: { stale: 7200, revalidate: 1800, expire: 86400 },
     /** SEO metadata (homepage metadata, page metadata) - 12hr stale, 24hr revalidate, 48hr expire */
     metadata: { stale: 43200, revalidate: 86400, expire: 172800 },
     /** Stable data (navigation menus, site config) - 6hr stale, 1hr revalidate, 7 days expire */
     stable: { stale: 21600, revalidate: 3600, expire: 604800 },
     /** Rarely changing data (SEO metadata, paginated content) - 1 day stale, 6hr revalidate, 30 days expire */
     static: { stale: 86400, revalidate: 21600, expire: 2592000 },
+    /** User-specific data (account pages, user profiles) - 1min stale, 5min revalidate, 30min expire - For personalized content that changes per user */
+    userProfile: { stale: 60, revalidate: 300, expire: 1800 },
   },
 
   typescript: {
@@ -110,6 +115,8 @@ const nextConfig = {
       { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
       { protocol: 'https', hostname: '*.supabase.co' },
       { protocol: 'https', hostname: 'hgtjdifxfapoltfflowc.supabase.co' },
+      // Placeholder images are now self-hosted in Supabase Storage (placeholders bucket)
+      // No external placeholder domains needed
     ],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
@@ -177,8 +184,6 @@ const nextConfig = {
       'packages/shared-runtime/src/**/*',
       'packages/data-layer/src/**/*',
       'packages/database-types/dist/**/*',
-      'packages/web-runtime/src/config/generated-config.ts',
-      'packages/web-runtime/src/data/config/category/category-config.generated.ts',
     ],
   },
 

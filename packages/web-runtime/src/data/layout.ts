@@ -3,7 +3,6 @@
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { logger } from '../logger.ts';
-import { generateRequestId } from '../utils/request-id.ts';
 
 import { getActiveAnnouncement } from './announcements';
 import { DEFAULT_LAYOUT_DATA, type LayoutData } from './layout/constants';
@@ -35,9 +34,7 @@ export async function getLayoutData(): Promise<LayoutData> {
   cacheTag('navigation');
   cacheTag('announcements');
 
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'getLayoutData',
     module: 'data/layout',
   });
@@ -53,12 +50,18 @@ export async function getLayoutData(): Promise<LayoutData> {
     if (announcementResult.status === PROMISE_REJECTED_STATUS) {
       // logger.error() normalizes errors internally, so pass raw error
       // Convert unknown error to Error | string for TypeScript
+      const reason = announcementResult.reason;
       const errorForLogging: Error | string =
-        announcementResult.reason instanceof Error
-          ? announcementResult.reason
-          : announcementResult.reason instanceof String
-            ? announcementResult.reason.toString()
-            : String(announcementResult.reason);
+        typeof reason === 'object' && reason !== null && 'message' in reason && 'stack' in reason
+          ? (reason as Error)
+          : typeof reason === 'string'
+            ? reason
+            : typeof reason === 'object' &&
+                reason !== null &&
+                'toString' in reason &&
+                typeof reason.toString === 'function'
+              ? reason.toString()
+              : String(reason);
       reqLogger.error('getLayoutData: announcement fetch failed', errorForLogging, {
         source: 'layout-data',
         component: 'announcement',
@@ -76,7 +79,12 @@ export async function getLayoutData(): Promise<LayoutData> {
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     // Convert unknown error to Error | string for TypeScript
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
+    const errorForLogging: Error | string =
+      typeof error === 'object' && error !== null && 'message' in error && 'stack' in error
+        ? (error as Error)
+        : typeof error === 'string'
+          ? error
+          : String(error);
     reqLogger.error('getLayoutData: catastrophic failure, using defaults', errorForLogging, {
       source: 'layout-data',
       fallbackStrategy: 'defaults',

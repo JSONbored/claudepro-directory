@@ -16,7 +16,7 @@ import {
   MapPin,
   Users,
 } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata, getJobBySlug } from '@heyclaude/web-runtime/server';
 import { type PageProps } from '@heyclaude/web-runtime/types/app.schema';
 import { slugParamsSchema } from '@heyclaude/web-runtime/types/app.schema';
@@ -30,13 +30,15 @@ import {
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { Pulse } from '@/src/components/core/infra/pulse';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
+
+import Loading from './loading';
 
 /**
  * Dynamic Rendering: Job detail pages are rendered at request time
@@ -51,6 +53,7 @@ import { StructuredData } from '@/src/components/core/infra/structured-data';
  * If the job cannot be loaded, returns metadata without the job `item` and logs the failure.
  *
  * @param params - Promise resolving to route params; must include `slug`.
+ * @param params.params
  * @returns The page Metadata populated with the job data when available, otherwise metadata without `item`.
  * @see getJobBySlug
  * @see generatePageMetadata
@@ -62,16 +65,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
 
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
-
-  // Generate requestId for metadata generation (separate from page render, after connection() to allow Date.now())
-  const metadataRequestId = generateRequestId();
-
-  // Create request-scoped child logger to avoid race conditions
+  // Create request-scoped child logger
   const metadataLogger = logger.child({
-    requestId: metadataRequestId,
     operation: 'JobPageMetadata',
     route: `/jobs/${slug}`,
     module: 'apps/web/src/app/jobs/[slug]',
@@ -109,12 +104,8 @@ export async function generateStaticParams() {
   // Remaining jobs are handled via dynamic routing on-demand
   const MAX_STATIC_JOBS = 10;
 
-  // Generate requestId for static params generation (build-time)
-  const staticParametersRequestId = generateRequestId();
-
-  // Create request-scoped child logger to avoid race conditions
+  // Create request-scoped child logger
   const reqLogger = logger.child({
-    requestId: staticParametersRequestId,
     operation: 'JobPageStaticParams',
     route: '/jobs',
     module: 'apps/web/src/app/jobs/[slug]',
@@ -144,6 +135,8 @@ export async function generateStaticParams() {
  * and job details. Calls `notFound()` when slug validation fails or no job is found.
  *
  * @param props.params - Route parameters containing the `slug` for the job to display.
+ * @param root0
+ * @param root0.params
  * @returns The server-rendered React element for the job detail page.
  *
  * @see getJobBySlug
@@ -151,26 +144,21 @@ export async function generateStaticParams() {
  * @see getSafeMailtoUrl
  */
 export default async function JobPage({ params }: PageProps) {
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
+
   if (!params) {
     notFound();
   }
 
   const rawParameters = await params;
   const validationResult = slugParamsSchema.safeParse(rawParameters);
-
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
-
-  // Generate single requestId for this page request (after connection() to allow Date.now())
-  const requestId = generateRequestId();
   const slug = validationResult.success
     ? validationResult.data.slug
     : String(rawParameters['slug']);
 
-  // Create request-scoped child logger to avoid race conditions
+  // Create request-scoped child logger
   const reqLogger = logger.child({
-    requestId,
     operation: 'JobPage',
     route: `/jobs/${slug}`,
     module: 'apps/web/src/app/jobs/[slug]',
@@ -201,7 +189,7 @@ export default async function JobPage({ params }: PageProps) {
   const validatedSlug = validationResult.data.slug;
 
   return (
-    <Suspense fallback={<div className="container mx-auto px-4 py-8">Loading job...</div>}>
+    <Suspense fallback={<Loading />}>
       <JobPageContent slug={validatedSlug} reqLogger={reqLogger} />
     </Suspense>
   );
@@ -213,8 +201,10 @@ export default async function JobPage({ params }: PageProps) {
  * Fetches the job data in a Suspense boundary to enable progressive rendering.
  * If the job is not found, calls `notFound()` to trigger a 404 response.
  *
+ * @param slug.reqLogger
  * @param slug - The validated job slug
  * @param reqLogger - Request-scoped logger for structured logging
+ * @param slug.slug
  * @returns The server-rendered React element for the job detail page
  *
  * @see getJobBySlug

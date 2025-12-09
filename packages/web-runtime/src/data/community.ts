@@ -5,7 +5,6 @@ import { type Database } from '@heyclaude/database-types';
 
 import { logger, pulseUserSearch, searchUsersUnified } from '../index.ts';
 import { createSupabaseServerClient } from '../supabase/server.ts';
-import { generateRequestId } from '../utils/request-id.ts';
 
 const DEFAULT_DIRECTORY_LIMIT = 100;
 
@@ -16,6 +15,7 @@ export type CollectionDetailData =
  * Get community directory via RPC (cached)
  * Uses 'use cache' to cache directory listings. This data is public and same for all users.
  * Community directory changes periodically, so we use the 'half' cacheLife profile.
+ * @param limit
  */
 async function getCommunityDirectoryRpc(
   limit: number
@@ -31,9 +31,7 @@ async function getCommunityDirectoryRpc(
   cacheTag('community');
   cacheTag('users');
 
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'getCommunityDirectoryRpc',
     module: 'data/community',
   });
@@ -71,9 +69,7 @@ export async function getCommunityDirectory(options: {
   searchQuery?: string;
 }): Promise<Database['public']['Functions']['get_community_directory']['Returns'] | null> {
   const { searchQuery, limit = DEFAULT_DIRECTORY_LIMIT } = options;
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'getCommunityDirectory',
     module: 'data/community',
   });
@@ -94,19 +90,17 @@ export async function getCommunityDirectory(options: {
           created_at: result.created_at,
         }));
 
-      // Fire-and-forget: Generate explicit requestId for traceability in async callback
-      const callbackRequestId = generateRequestId();
+      // Fire-and-forget: Pulse user search
       pulseUserSearch(searchQuery.trim(), allUsers.length).catch((error) => {
         // logger.error() normalizes errors internally, so pass raw error
         const errorForLogging: Error | string =
           error instanceof Error
             ? error
-            : error instanceof String
+            : (error instanceof String
               ? error.toString()
-              : String(error);
+              : String(error));
         // Use child logger for callback to maintain isolation
         const callbackLogger = logger.child({
-          requestId: callbackRequestId,
           operation: 'pulseUserSearch',
           module: 'data/community',
         });
@@ -151,6 +145,9 @@ export async function getCommunityDirectory(options: {
  * - Minimum 30 seconds stale time (required for runtime prefetch)
  * - Per-user cache keys (slug and viewerId in cache tag)
  * - Not prerendered (runs at request time)
+ * @param input
+ * @param input.slug
+ * @param input.viewerId
  */
 export async function getPublicUserProfile(input: {
   slug: string;
@@ -168,9 +165,7 @@ export async function getPublicUserProfile(input: {
     cacheTag(`user-profile-viewer-${viewerId}`);
   }
 
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'getPublicUserProfile',
     module: 'data/community',
   });
@@ -214,6 +209,10 @@ export async function getPublicUserProfile(input: {
  * - Minimum 30 seconds stale time (required for runtime prefetch)
  * - Per-user cache keys (userSlug, collectionSlug, and viewerId in cache tag)
  * - Not prerendered (runs at request time)
+ * @param input
+ * @param input.collectionSlug
+ * @param input.userSlug
+ * @param input.viewerId
  */
 export async function getPublicCollectionDetail(input: {
   collectionSlug: string;
@@ -232,9 +231,7 @@ export async function getPublicCollectionDetail(input: {
     cacheTag(`user-collection-viewer-${viewerId}`);
   }
 
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'getPublicCollectionDetail',
     module: 'data/community',
   });

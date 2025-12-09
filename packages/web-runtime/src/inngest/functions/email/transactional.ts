@@ -10,7 +10,7 @@ import { normalizeError, escapeHtml } from '@heyclaude/shared-runtime';
 import { inngest } from '../../client';
 import { sendEmail } from '../../../integrations/resend';
 import { HELLO_FROM, JOBS_FROM, COMMUNITY_FROM } from '../../../email/config/email-config';
-import { logger, generateRequestId, createWebAppContextWithId } from '../../../logging/server';
+import { logger, createWebAppContextWithId } from '../../../logging/server';
 
 // Email type configurations
 const TRANSACTIONAL_EMAIL_CONFIGS: Record<string, {
@@ -57,8 +57,7 @@ export const sendTransactionalEmail = inngest.createFunction(
   { event: 'email/transactional' },
   async ({ event, step }) => {
     const startTime = Date.now();
-    const requestId = generateRequestId();
-    const logContext = createWebAppContextWithId(requestId, '/inngest/email/transactional', 'sendTransactionalEmail');
+    const logContext = createWebAppContextWithId('/inngest/email/transactional', 'sendTransactionalEmail');
 
     const { type, email, emailData } = event.data;
 

@@ -12,7 +12,7 @@ import {
   getPublicUserProfile,
 } from '@heyclaude/web-runtime/data';
 import { FolderOpen, Globe, Users } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   UI_CLASSES,
   NavLink,
@@ -24,12 +24,14 @@ import {
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { FollowButton } from '@/src/components/core/buttons/social/follow-button';
+
+import Loading from './loading';
 
 // Use enum values directly from @heyclaude/database-types Constants
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
@@ -46,6 +48,7 @@ function isContentCategory(
 /**
  * Validate slug is safe for use in URLs
  * Only allows alphanumeric characters, hyphens, and underscores
+ * @param slug
  */
 function isValidSlug(slug: string): boolean {
   if (typeof slug !== 'string' || slug.length === 0) return false;
@@ -90,7 +93,7 @@ function getSafeCollectionUrl(userSlug: string, collectionSlug: string): null | 
   // sanitizeSlug preserves already-valid slugs, so this catches any issues
   const sanitizedUserSlug = sanitizeSlug(userSlug);
   const sanitizedCollectionSlug = sanitizeSlug(collectionSlug);
-  if (!(isValidSlug(sanitizedUserSlug) && isValidSlug(sanitizedCollectionSlug))) return null;
+  if (!isValidSlug(sanitizedUserSlug) || !isValidSlug(sanitizedCollectionSlug)) return null;
   return `/u/${sanitizedUserSlug}/collections/${sanitizedCollectionSlug}`;
 }
 
@@ -150,14 +153,12 @@ interface UserProfilePageProperties {
  * Produce page metadata for a user profile route using the provided slug.
  *
  * @param params - A promise resolving to an object with `slug`, the user identifier used to populate the route parameter.
+ * @param params.params
  * @returns The Next.js `Metadata` for the /u/:slug user profile page.
  *
  * @see generatePageMetadata
  */
 export async function generateMetadata({ params }: UserProfilePageProperties): Promise<Metadata> {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
   const { slug } = await params;
   return generatePageMetadata('/u/:slug', {
     params: { slug },
@@ -172,6 +173,7 @@ export async function generateMetadata({ params }: UserProfilePageProperties): P
  * is not found, the page will trigger Next.js not-found handling.
  *
  * @param params - Route parameters containing the `slug` of the user to display.
+ * @param params.params
  * @returns The React element for the user's profile page.
  *
  * @see getPublicUserProfile
@@ -180,22 +182,17 @@ export async function generateMetadata({ params }: UserProfilePageProperties): P
  * @see sanitizeDisplayText
  */
 export default async function UserProfilePage({ params }: UserProfilePageProperties) {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
-  // Generate single requestId for this page request (after connection() to allow Date.now())
-  const requestId = generateRequestId();
-
-  // Create request-scoped child logger to avoid race conditions
+  // Create request-scoped child logger
   const reqLogger = logger.child({
-    requestId,
     operation: 'UserProfilePage',
     module: 'apps/web/src/app/u/[slug]',
   });
 
   return (
-    <Suspense fallback={<div className="container mx-auto px-4 py-8">Loading profile...</div>}>
+    <Suspense fallback={<Loading />}>
       <UserProfilePageContent params={params} reqLogger={reqLogger} />
     </Suspense>
   );
@@ -205,8 +202,10 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
  * Renders the user profile page content for a given route slug, including profile header, activity stats, public collections, and contributions.
  *
  * @param params - Promise resolving to an object containing the route `slug`
+ * @param params.params
  * @param reqLogger - Request-scoped logger used for route and fetch logging
  *
+ * @param params.reqLogger
  * @returns The server-rendered React element for the user profile page content
  *
  * @remarks

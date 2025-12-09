@@ -3072,6 +3072,7 @@ export type Database = {
           submission_count: number
           tier: Database["public"]["Enums"]["user_tier"] | null
           updated_at: string
+          username: string | null
           votes_received_count: number | null
           website: string | null
           work: string | null
@@ -3102,6 +3103,7 @@ export type Database = {
           submission_count?: number
           tier?: Database["public"]["Enums"]["user_tier"] | null
           updated_at?: string
+          username?: string | null
           votes_received_count?: number | null
           website?: string | null
           work?: string | null
@@ -3132,6 +3134,7 @@ export type Database = {
           submission_count?: number
           tier?: Database["public"]["Enums"]["user_tier"] | null
           updated_at?: string
+          username?: string | null
           votes_received_count?: number | null
           website?: string | null
           work?: string | null
@@ -3753,6 +3756,7 @@ export type Database = {
           submission_count: number
           tier: Database["public"]["Enums"]["user_tier"] | null
           updated_at: string
+          username: string | null
           votes_received_count: number | null
           website: string | null
           work: string | null
@@ -3857,6 +3861,7 @@ export type Database = {
         }
         Returns: string
       }
+      generate_friendly_username: { Args: never; Returns: string }
       generate_item_llms_txt: {
         Args: {
           p_category: Database["public"]["Enums"]["content_category"]
@@ -4548,16 +4553,6 @@ export type Database = {
           isSetofReturn: true
         }
       }
-      get_navigation_menu: {
-        Args: never
-        Returns: Database["public"]["CompositeTypes"]["navigation_menu_result"]
-        SetofOptions: {
-          from: "*"
-          to: "navigation_menu_result"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
       get_new_content_for_week: {
         Args: { p_limit?: number; p_week_start: string }
         Returns: {
@@ -5086,10 +5081,10 @@ export type Database = {
       }
       get_user_settings: {
         Args: { p_user_id: string }
-        Returns: Database["public"]["CompositeTypes"]["user_settings_result"]
+        Returns: Database["public"]["CompositeTypes"]["user_settings_result_v2"]
         SetofOptions: {
           from: "*"
-          to: "user_settings_result"
+          to: "user_settings_result_v2"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -5651,6 +5646,7 @@ export type Database = {
           submission_count: number
           tier: Database["public"]["Enums"]["user_tier"] | null
           updated_at: string
+          username: string | null
           votes_received_count: number | null
           website: string | null
           work: string | null
@@ -5862,13 +5858,14 @@ export type Database = {
           p_profile_public?: boolean
           p_social_x_link?: string
           p_user_id: string
+          p_username?: string
           p_website?: string
           p_work?: string
         }
-        Returns: Database["public"]["CompositeTypes"]["update_user_profile_result"]
+        Returns: Database["public"]["CompositeTypes"]["update_user_profile_result_v2"]
         SetofOptions: {
           from: "*"
-          to: "update_user_profile_result"
+          to: "update_user_profile_result_v2"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -7187,24 +7184,6 @@ export type Database = {
         created_at: string | null
         moderated_at: string | null
       }
-      navigation_menu_item: {
-        path: string | null
-        title: string | null
-        description: string | null
-        icon_name: string | null
-        group: string | null
-      }
-      navigation_menu_result: {
-        primary:
-          | Database["public"]["CompositeTypes"]["navigation_menu_item"][]
-          | null
-        secondary:
-          | Database["public"]["CompositeTypes"]["navigation_menu_item"][]
-          | null
-        actions:
-          | Database["public"]["CompositeTypes"]["navigation_menu_item"][]
-          | null
-      }
       pending_submissions_item: {
         id: string | null
         submission_type: Database["public"]["Enums"]["submission_type"] | null
@@ -7628,6 +7607,12 @@ export type Database = {
         profile_public: boolean | null
         follow_email: boolean | null
       }
+      update_user_profile_result_v2: {
+        success: boolean | null
+        profile:
+          | Database["public"]["CompositeTypes"]["update_user_profile_result_profile"]
+          | null
+      }
       user_activity_summary: {
         total_posts: number | null
         total_comments: number | null
@@ -7737,7 +7722,7 @@ export type Database = {
           | Database["public"]["CompositeTypes"]["user_dashboard_result"]
           | null
         user_settings:
-          | Database["public"]["CompositeTypes"]["user_settings_result"]
+          | Database["public"]["CompositeTypes"]["user_settings_result_v2"]
           | null
         activity_summary:
           | Database["public"]["CompositeTypes"]["user_activity_summary"]
@@ -7916,6 +7901,15 @@ export type Database = {
         user_data:
           | Database["public"]["CompositeTypes"]["user_settings_user_data"]
           | null
+      }
+      user_settings_result_v2: {
+        profile:
+          | Database["public"]["CompositeTypes"]["user_settings_profile"]
+          | null
+        user_data:
+          | Database["public"]["CompositeTypes"]["user_settings_user_data"]
+          | null
+        username: string | null
       }
       user_settings_user_data: {
         slug: string | null

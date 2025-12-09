@@ -1,5 +1,4 @@
 import 'server-only';
-
 import { SeoService } from '@heyclaude/data-layer';
 import { type Database } from '@heyclaude/database-types';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
@@ -9,8 +8,11 @@ import { isBuildTime } from '../../build-time.ts';
 import { normalizeError } from '../../errors.ts';
 import { logger } from '../../logger.ts';
 import { createSupabaseAnonClient } from '../../supabase/server-anon.ts';
-import { generateRequestId } from '../../utils/request-id.ts';
 
+/**
+ * Determines if RPC calls should be skipped due to missing environment variables
+ * @returns True if environment variables are missing, false otherwise
+ */
 function shouldSkipRpcCall(): boolean {
   const hasEnvironmentVariables =
     Boolean(env.NEXT_PUBLIC_SUPABASE_URL) && Boolean(env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
@@ -21,6 +23,8 @@ function shouldSkipRpcCall(): boolean {
  * Get SEO metadata for a route
  * Uses 'use cache' to cache SEO metadata. Route becomes part of the cache key.
  * This data is public and same for all users, so it can be cached at build time.
+ * @param route - The route path to generate SEO metadata for
+ * @returns SEO metadata object, or null if error occurs or no metadata available
  */
 export async function getSEOMetadata(route: string): Promise<null | {
   _debug?: {
@@ -52,9 +56,7 @@ export async function getSEOMetadata(route: string): Promise<null | {
   cacheTag('seo');
   cacheTag(`seo-${route}`);
 
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'getSEOMetadata',
     module: 'data/seo/client',
   });
@@ -64,6 +66,12 @@ export async function getSEOMetadata(route: string): Promise<null | {
     let client;
     if (isBuildTime()) {
       const { createSupabaseAdminClient } = await import('../../supabase/admin.ts');
+      // NOTE: Admin client bypasses RLS and is required here because:
+      // 1. This function runs during static site generation (build time)
+      // 2. SEO metadata is public data (same for all users, no user-specific content)
+      // 3. Admin client provides better performance during build (no RLS overhead)
+      // 4. At runtime, we use anon client with RLS for security
+      // 5. The data being accessed is non-sensitive (public SEO metadata)
       client = createSupabaseAdminClient();
     } else {
       client = createSupabaseAnonClient();
@@ -72,7 +80,7 @@ export async function getSEOMetadata(route: string): Promise<null | {
     const service = new SeoService(client);
     const result = await service.generateMetadata({ p_route: route, p_include: 'metadata' });
 
-    if (!result?.metadata) {
+    if (!result.metadata) {
       reqLogger.debug('getSEOMetadata: no metadata returned', {
         route,
       });
@@ -132,6 +140,8 @@ export async function getSEOMetadata(route: string): Promise<null | {
  * Get SEO metadata with schemas for a route
  * Uses 'use cache' to cache SEO metadata with schemas. Route becomes part of the cache key.
  * This data is public and same for all users, so it can be cached at build time.
+ * @param route - The route path to generate SEO metadata for
+ * @returns SEO metadata with structured data schemas, or null if error occurs
  */
 export async function getSEOMetadataWithSchemas(route: string): Promise<null | {
   metadata: {
@@ -167,9 +177,7 @@ export async function getSEOMetadataWithSchemas(route: string): Promise<null | {
   cacheTag(`seo-${route}`);
   cacheTag('structured-data');
 
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'getSEOMetadataWithSchemas',
     module: 'data/seo/client',
   });
@@ -179,6 +187,12 @@ export async function getSEOMetadataWithSchemas(route: string): Promise<null | {
     let client;
     if (isBuildTime()) {
       const { createSupabaseAdminClient } = await import('../../supabase/admin.ts');
+      // NOTE: Admin client bypasses RLS and is required here because:
+      // 1. This function runs during static site generation (build time)
+      // 2. SEO metadata is public data (same for all users, no user-specific content)
+      // 3. Admin client provides better performance during build (no RLS overhead)
+      // 4. At runtime, we use anon client with RLS for security
+      // 5. The data being accessed is non-sensitive (public SEO metadata)
       client = createSupabaseAdminClient();
     } else {
       client = createSupabaseAnonClient();
@@ -190,7 +204,7 @@ export async function getSEOMetadataWithSchemas(route: string): Promise<null | {
       p_include: 'metadata,schemas',
     });
 
-    if (!result?.metadata) {
+    if (!result.metadata) {
       reqLogger.debug('getSEOMetadataWithSchemas: no metadata returned', {
         route,
       });

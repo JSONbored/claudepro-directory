@@ -11,7 +11,7 @@ import { NewsletterService } from '@heyclaude/data-layer';
 import { normalizeError } from '@heyclaude/shared-runtime';
 
 import { createSupabaseAdminClient } from '../../supabase/admin';
-import { logger, generateRequestId, createWebAppContextWithId } from '../../logging/server';
+import { logger, createWebAppContextWithId } from '../../logging/server';
 import { createErrorResponse } from '../../utils/error-handler';
 
 // Cache TTL in seconds (5 minutes)
@@ -48,9 +48,7 @@ async function getCachedNewsletterCount(): Promise<number> {
  */
 export async function handleEmailCount(_request: NextRequest): Promise<NextResponse> {
   const startTime = Date.now();
-  const requestId = generateRequestId();
   const logContext = createWebAppContextWithId(
-    requestId,
     '/api/flux/email/count',
     'handleEmailCount'
   );
@@ -89,7 +87,7 @@ export async function handleEmailCount(_request: NextRequest): Promise<NextRespo
       route: '/api/flux/email/count',
       operation: 'GET',
       method: 'GET',
-      logContext: { requestId },
+      logContext: {},
     });
   }
 }

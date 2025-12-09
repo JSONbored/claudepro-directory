@@ -11,7 +11,7 @@ import {
   MousePointer,
   Sparkles,
 } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   RESPONSIVE_PATTERNS,
   UI_CLASSES,
@@ -24,8 +24,10 @@ import {
   CardHeader,
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
-import { connection } from 'next/server';
+import { cacheLife } from 'next/cache';
 import { Suspense } from 'react';
+
+import Loading from './loading';
 
 /**
  * Render the Partner marketing page showing pricing, benefits, real-time stats, and CTAs.
@@ -41,27 +43,21 @@ import { Suspense } from 'react';
  * @see getPartnerHeroStats
  * @see getPartnerContactChannels
  * @see getPartnerCtas
- * @see generateRequestId
  * @see logger
  */
 export default async function PartnerPage() {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
-  // Generate single requestId for this page request (after connection() to allow Date.now())
-  const requestId = generateRequestId();
-
-  // Create request-scoped child logger to avoid race conditions
+  // Create request-scoped child logger
   const reqLogger = logger.child({
-    requestId,
     operation: 'PartnerPage',
     route: '/partner',
     module: 'app/partner',
   });
 
   return (
-    <Suspense fallback={<div className="container mx-auto px-4 py-8">Loading partner page...</div>}>
+    <Suspense fallback={<Loading />}>
       <PartnerPageContent reqLogger={reqLogger} />
     </Suspense>
   );
@@ -78,6 +74,8 @@ export default async function PartnerPage() {
  *
  * @param props.reqLogger - A request-scoped logger created via `logger.child` used for telemetry
  *                          and error reporting during data fetches.
+ * @param root0
+ * @param root0.reqLogger
  * @returns The JSX element tree for the Partner page content.
  *
  * @see getPartnerPricing
@@ -117,7 +115,7 @@ async function PartnerPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
     };
   }
 
-  let heroStats;
+  let heroStats: Awaited<ReturnType<typeof getPartnerHeroStats>>;
   try {
     heroStats = await getPartnerHeroStats();
     reqLogger.info('PartnerPage: hero stats loaded', { section: 'hero-stats' });
@@ -134,7 +132,7 @@ async function PartnerPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
   }
   const configCount = heroStats.configurationCount;
 
-  let partnerContacts;
+  let partnerContacts: ReturnType<typeof getPartnerContactChannels>;
   try {
     partnerContacts = getPartnerContactChannels();
   } catch (error) {
@@ -365,7 +363,7 @@ async function PartnerPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
                   </div>
                   <div className="flex items-start gap-2">
                     <Check className={`mt-0.5 ${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_SUCCESS}`} />
-                    <p className={UI_CLASSES.TEXT_SM}>"Sponsored" badge</p>
+                    <p className={UI_CLASSES.TEXT_SM}>&quot;Sponsored&quot; badge</p>
                   </div>
                   <div className="flex items-start gap-2">
                     <Check className={`mt-0.5 ${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_SUCCESS}`} />
@@ -436,7 +434,7 @@ async function PartnerPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
             <CardContent className="pt-6">
               <p className="mb-2 font-semibold">How quickly can I get started?</p>
               <p className={UI_CLASSES.TEXT_SM_MUTED}>
-                Email us today, and we'll have your listing live within 24 hours. No lengthy
+                Email us today, and we&apos;ll have your listing live within 24 hours. No lengthy
                 onboarding process.
               </p>
             </CardContent>
@@ -445,8 +443,8 @@ async function PartnerPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
             <CardContent className="pt-6">
               <p className="mb-2 font-semibold">Can I cancel anytime?</p>
               <p className={UI_CLASSES.TEXT_SM_MUTED}>
-                Yes, absolutely. No contracts, no commitments. Just email us and we'll process your
-                cancellation immediately.
+                Yes, absolutely. No contracts, no commitments. Just email us and we&apos;ll process
+                your cancellation immediately.
               </p>
             </CardContent>
           </Card>
@@ -476,7 +474,9 @@ async function PartnerPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
             <Button size="lg" asChild>
               <a href={partnerCtas.partnershipInquiry.href}>
                 <Mail className="mr-2 h-4 w-4" />
-                Email: {partnerContacts.partnerEmail}
+                {partnerContacts.partnerEmail
+                  ? `Email: ${partnerContacts.partnerEmail}`
+                  : 'Contact Us'}
               </a>
             </Button>
             <p className={`${UI_CLASSES.TEXT_XS_MUTED} mt-4`}>

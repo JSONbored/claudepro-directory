@@ -5,8 +5,8 @@
  * Used in metadata configuration across the application.
  */
 
-import { env } from '@heyclaude/shared-runtime/schemas/env';
 import { APP_CONFIG } from '@heyclaude/shared-runtime';
+// import { env } from '@heyclaude/shared-runtime/schemas/env'; // Reserved for future dynamic OG image generation
 
 /**
  * OpenGraph image dimensions
@@ -20,21 +20,30 @@ export const OG_IMAGE_DIMENSIONS = {
 /**
  * Generate OpenGraph image URL for any page path
  *
- * Returns the dynamic OG image from the edge function, which generates
+ * Returns the dynamic OG image from the Next.js API route, which generates
  * images based on route metadata (title, description, category, tags).
+ * Falls back to static image if dynamic generation is unavailable.
  *
  * @param path - The page path (e.g., '/agents/code-reviewer' or '/')
- * @returns Full URL to the dynamic OG image edge function
+ * @returns Full URL to the dynamic OG image API route or static fallback
  */
 export function generateOGImageUrl(path: string): string {
-  const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
-  if (!supabaseUrl) {
-    // Fallback to static image if Supabase URL is not available (e.g., during build)
-    return `${APP_CONFIG.url}/og-images/og-image.webp`;
-  }
-
-  const route = encodeURIComponent(path || '/');
-  return `${supabaseUrl}/functions/v1/og-image?route=${route}`;
+  // Use Next.js API route for dynamic OG image generation
+  // The /api/og route generates images on-demand with proper parameters
+  const baseUrl = APP_CONFIG.url;
+  
+  // For now, use static image as primary (dynamic route can be enabled later)
+  // TODO: Enable dynamic OG image generation once /api/og route is fully tested
+  // When enabled, use path parameter to generate dynamic OG images:
+  // const route = path || '/';
+  // const encodedRoute = encodeURIComponent(route);
+  // return `${baseUrl}/api/og?route=${encodedRoute}`;
+  
+  // Path parameter is part of the public API signature but currently unused
+  // (reserved for future dynamic OG image generation)
+  void path; // Mark as intentionally unused for now
+  
+  return `${baseUrl}/og-images/og-image.webp`;
 }
 
 /**

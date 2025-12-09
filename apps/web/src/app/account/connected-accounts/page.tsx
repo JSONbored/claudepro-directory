@@ -4,7 +4,7 @@ import {
   getUserIdentitiesData,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   Button,
   Card,
@@ -14,11 +14,14 @@ import {
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import Link from 'next/link';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { ConnectedAccountsClient } from '@/src/components/features/account/connected-accounts-client';
+
+import Loading from './loading';
 
 /**
  * Dynamic Rendering Required
@@ -46,7 +49,7 @@ export async function generateMetadata(): Promise<Metadata> {
 /**
  * Render the Connected Accounts page that displays the user's linked OAuth identities or a sign-in prompt when unauthenticated.
  *
- * This server component defers non-deterministic operations to request time (calls `connection()`), generates a request-scoped identifier and logger, and mounts the client/content renderer inside a Suspense boundary.
+ * This server component defers non-deterministic operations to request time (calls `connection()`), creates a request-scoped logger, and mounts the client/content renderer inside a Suspense boundary.
  *
  * @returns The page React element containing the header and an "OAuth Providers" card populated with the authenticated user's identities, or a sign-in prompt if no user is authenticated.
  *
@@ -56,26 +59,22 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see ROUTES.LOGIN
  */
 export default async function ConnectedAccountsPage() {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
+  'use cache: private';
+  cacheLife('userProfile'); // 1min stale, 5min revalidate, 30min expire - User-specific data
 
-  // Generate single requestId for this page request (after connection() to allow Date.now())
-  const requestId = generateRequestId();
   const operation = 'ConnectedAccountsPage';
   const route = ROUTE;
   const modulePath = 'apps/web/src/app/account/connected-accounts/page';
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    requestId,
     operation,
     route,
     module: modulePath,
   });
 
   return (
-    <Suspense fallback={<div className="space-y-6">Loading connected accounts...</div>}>
+    <Suspense fallback={<Loading />}>
       <ConnectedAccountsPageContent reqLogger={reqLogger} />
     </Suspense>
   );
@@ -91,6 +90,7 @@ export default async function ConnectedAccountsPage() {
  *
  * @param reqLogger - A request-scoped logger (created with `logger.child`) used for structured,
  *   redacted logging throughout authentication, data fetching, and render phases.
+ * @param reqLogger.reqLogger
  * @returns A React element containing either a sign-in prompt when no user is authenticated or
  *   the Connected Accounts UI populated with the user's OAuth identities.
  *

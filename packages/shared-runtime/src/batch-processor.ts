@@ -3,7 +3,7 @@
  * Handles errors, retries, and progress tracking
  */
 
-import { createUtilityContext, logError, logInfo, logWarn } from './logging.ts';
+import { logger, normalizeError } from './logger/index.ts';
 
 // =============================================================================
 // BatchProcessor Class (Queue-style API)
@@ -90,10 +90,13 @@ export class BatchProcessor<T> {
             })
             .catch(async (error) => {
               // Log error and continue the flush loop to prevent it from stopping
-              const logContext = createUtilityContext('batch-processor', 'flush-loop', {
+              const normalized = normalizeError(error, 'Batch flush loop failed');
+              logger.error({ 
+                err: normalized, 
+                function: 'batch-processor', 
+                operation: 'flush-loop',
                 flush_interval_ms: this.flushInterval,
-              });
-              await logError('Batch flush loop failed', logContext, error);
+              }, 'Batch flush loop failed');
               // Re-schedule even after error to keep the loop running
               this.scheduleFlush();
             });
@@ -126,10 +129,13 @@ export class BatchProcessor<T> {
         await this.processor(itemsToProcess);
       } catch (error) {
         // Log error but don't throw - continue processing
-        const logContext = createUtilityContext('batch-processor', 'process-batch', {
+        const normalized = normalizeError(error, 'Batch processing failed');
+        logger.error({ 
+          err: normalized, 
+          function: 'batch-processor', 
+          operation: 'process-batch',
           batch_size: itemsToProcess.length,
-        });
-        await logError('Batch processing failed', logContext, error);
+        }, 'Batch processing failed');
       } finally {
         this.isProcessing = false;
         this.processingPromise = null;
@@ -179,13 +185,15 @@ export async function batchProcess<T, R>(
 ): Promise<BatchProcessResult<T>> {
   const { concurrency = 5, retries = 0, retryDelayMs = 1000, onProgress, onError } = options;
 
-  const logContext = createUtilityContext('batch-processor', 'process', {
+  const logContext = {
+    function: 'batch-processor',
+    operation: 'process',
     total_items: items.length,
     concurrency,
     retries,
-  });
+  };
 
-  logInfo('Starting batch processing', logContext);
+  logger.info(logContext, 'Starting batch processing');
 
   const success: T[] = [];
   const failed: Array<{ error: unknown; item: T }> = [];
@@ -214,13 +222,13 @@ export async function batchProcess<T, R>(
           onError(item, error, attempt);
         }
 
-        logWarn('Item processing failed, retrying', {
+        logger.warn({
           ...logContext,
           operation: 'item-error',
           attempt,
           item_index: items.indexOf(item),
           total_retries: retries,
-        });
+        }, 'Item processing failed, retrying');
 
         // Wait before retry (exponential backoff)
         if (attempt <= retries) {
@@ -231,12 +239,14 @@ export async function batchProcess<T, R>(
     }
 
     // All retries failed
-    await logError('Item processing failed after all retries', {
+    const normalized = normalizeError(lastError, 'Item processing failed after all retries');
+    logger.error({
+      err: normalized,
       ...logContext,
       operation: 'item-failed',
       item_index: items.indexOf(item),
       total_retries: retries,
-    }, lastError);
+    }, 'Item processing failed after all retries');
     failed.push({ error: lastError, item });
     processed++;
     if (onProgress) {
@@ -262,12 +272,12 @@ export async function batchProcess<T, R>(
     failedCount: failed.length,
   };
 
-  logInfo('Batch processing completed', {
+  logger.info({
     ...logContext,
     success_count: result.successCount,
     failed_count: result.failedCount,
     success_rate: `${((result.successCount / result.total) * 100).toFixed(1)}%`,
-  });
+  }, 'Batch processing completed');
 
   return result;
 }

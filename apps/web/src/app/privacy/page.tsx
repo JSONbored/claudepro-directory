@@ -1,11 +1,13 @@
 import { getLastUpdatedDate } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
-import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
+import { logger } from '@heyclaude/web-runtime/logging/server';
 import { NavLink } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
-import { connection } from 'next/server';
+import { cacheLife } from 'next/cache';
 import { Suspense } from 'react';
+
+import PrivacyLoading from './loading';
 
 /**
  * Provide Next.js metadata for the Privacy page, deferring non-deterministic operations to request time.
@@ -18,9 +20,6 @@ import { Suspense } from 'react';
  */
 
 export async function generateMetadata(): Promise<Metadata> {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
   return generatePageMetadata('/privacy');
 }
 
@@ -38,25 +37,18 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see NavLink
  */
 export default async function PrivacyPage() {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
-  // Generate single requestId for this page request (after connection() to allow Date.now())
-  const requestId = generateRequestId();
-
-  // Create request-scoped child logger to avoid race conditions
+  // Create request-scoped child logger
   const reqLogger = logger.child({
-    requestId,
     operation: 'PrivacyPage',
     route: '/privacy',
     module: 'apps/web/src/app/privacy',
   });
 
   return (
-    <Suspense
-      fallback={<div className="container mx-auto max-w-4xl px-4 py-8 sm:py-12">Loading...</div>}
-    >
+    <Suspense fallback={<PrivacyLoading />}>
       <PrivacyPageContent reqLogger={reqLogger} />
     </Suspense>
   );
@@ -66,6 +58,7 @@ export default async function PrivacyPage() {
  * Renders the Privacy Policy page content and emits a request-scoped render log.
  *
  * @param reqLogger - Request-scoped logger (created via `logger.child`) used to record structured log entries for this render.
+ * @param reqLogger.reqLogger
  * @returns The JSX element containing the privacy policy content, including the last-updated date and sectioned policy text.
  *
  * @see getLastUpdatedDate
@@ -156,7 +149,7 @@ function PrivacyPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger
         </section>
 
         <section className="mb-8">
-          <h2 className="mb-4 text-2xl font-semibold">7. Children's Privacy</h2>
+          <h2 className="mb-4 text-2xl font-semibold">7. Children&apos;s Privacy</h2>
           <p className="mb-4">
             Our service is not directed to children under 13 years of age. We do not knowingly
             collect personal information from children under 13.
@@ -167,7 +160,8 @@ function PrivacyPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger
           <h2 className="mb-4 text-2xl font-semibold">8. Changes to This Policy</h2>
           <p className="mb-4">
             We may update this Privacy Policy from time to time. We will notify you of any changes
-            by posting the new Privacy Policy on this page and updating the "Last updated" date.
+            by posting the new Privacy Policy on this page and updating the &quot;Last updated&quot;
+            date.
           </p>
         </section>
 

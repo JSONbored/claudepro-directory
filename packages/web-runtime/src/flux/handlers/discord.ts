@@ -9,7 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { getEnvVar, normalizeError } from '@heyclaude/shared-runtime';
 
-import { logger, generateRequestId, createWebAppContextWithId } from '../../logging/server';
+import { logger, createWebAppContextWithId } from '../../logging/server';
 import { createErrorResponse } from '../../utils/error-handler';
 
 // CORS headers for Discord routes
@@ -45,11 +45,9 @@ interface DiscordPayload {
  */
 export async function handleDiscordDirect(request: NextRequest): Promise<NextResponse> {
   const startTime = Date.now();
-  const requestId = generateRequestId();
   const notificationType = request.headers.get('X-Discord-Notification-Type');
   
   const logContext = createWebAppContextWithId(
-    requestId,
     '/api/flux/discord/direct',
     'handleDiscordDirect'
   );
@@ -148,7 +146,7 @@ export async function handleDiscordDirect(request: NextRequest): Promise<NextRes
       route: '/api/flux/discord/direct',
       operation: 'POST',
       method: 'POST',
-      logContext: { requestId },
+      logContext: {},
     });
   }
 }

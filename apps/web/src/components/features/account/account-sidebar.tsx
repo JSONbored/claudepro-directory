@@ -18,7 +18,7 @@ import {
   TrendingUp,
   User as UserIcon,
 } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { UI_CLASSES, Button, Card } from '@heyclaude/web-runtime/ui';
 import { type User } from '@supabase/supabase-js';
 import Image from 'next/image';
@@ -36,9 +36,7 @@ export async function AccountSidebar({
   userImageMetadata,
 }: AccountSidebarProps) {
   // Generate request-scoped logger for sidebar data fetching
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'AccountSidebar',
     route: '/account',
     module: 'apps/web/src/components/features/account/account-sidebar',
@@ -48,8 +46,10 @@ export async function AccountSidebar({
   // Fetch sponsorships in parallel with settings (they don't depend on each other)
   const sponsorshipsPromise = getUserSponsorships(user.id);
 
+  // getUserSettings now returns user_settings_result_v2 from get_user_complete_data
+  // This provides automatic TypeScript type generation from the database
   let settings: Awaited<ReturnType<typeof getUserSettings>> = null;
-  let profile: NonNullable<Awaited<ReturnType<typeof getUserSettings>>>['user_data'] = null;
+  let profile: NonNullable<Awaited<ReturnType<typeof getUserSettings>>>['user_data'] | null = null;
   try {
     settings = await getUserSettings(user.id);
     if (settings) {
@@ -72,7 +72,7 @@ export async function AccountSidebar({
       });
       settings = await getUserSettings(user.id);
       if (settings) {
-        profile = settings.user_data ?? null;
+        profile = settings.user_data;
       } else {
         reqLogger.warn('AccountSidebar: getUserSettings returned null after ensureUserRecord');
       }
@@ -111,13 +111,16 @@ export async function AccountSidebar({
     { name: 'Connected Accounts', href: '/account/connected-accounts', icon: Plug },
   ];
 
+  // Determine image source - prefer OAuth metadata over database
+  const imageSrc = userImageMetadata || profile?.image || null;
+
   return (
     <Card className="h-fit p-4 md:col-span-1">
       <div className="mb-6 flex items-center gap-3 border-b pb-4">
-        {profile?.image ? (
+        {imageSrc ? (
           <Image
-            src={profile.image}
-            alt={`${profile.name ?? 'User'}'s avatar`}
+            src={imageSrc}
+            alt={`${profile?.name ?? userNameMetadata ?? 'User'}'s avatar`}
             width={48}
             height={48}
             className="h-12 w-12 rounded-full object-cover"

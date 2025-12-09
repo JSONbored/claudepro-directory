@@ -7,7 +7,7 @@
 
 import { Resend } from 'resend';
 import { Constants, type Database, type Database as DatabaseGenerated } from '@heyclaude/database-types';
-import { createUtilityContext, withTimeout, TIMEOUT_PRESETS } from '@heyclaude/shared-runtime';
+import { withTimeout, TIMEOUT_PRESETS } from '@heyclaude/shared-runtime';
 import { normalizeError } from '../errors';
 import { logger, type LogContext } from '../logger';
 import { runWithRetry } from './http-client';
@@ -139,10 +139,12 @@ export async function callResendApi<T>({
     };
   } catch (error) {
     // Log all Resend API errors for observability
-    const logContext = createUtilityContext('resend', 'call-resend-api', {
+    const logContext = {
+      function: 'resend',
+      operation: 'call-resend-api',
       path: normalizedPath,
       method,
-    });
+    };
     const errorObj = normalizeError(error, 'Resend API error');
 
     if (error instanceof ResendApiError) {
@@ -695,7 +697,11 @@ async function sendEmailInternal(
   resendClient?: Resend
 ): Promise<{ data: { id: string } | null; error: { message: string } | null }> {
   const resend = resendClient ?? getResendClient();
-  const logContext = createUtilityContext('resend', 'send-email', { to: options.to });
+  const logContext = {
+    function: 'resend',
+    operation: 'send-email',
+    to: options.to,
+  };
 
   const { data, error } = (await withTimeout(
     resend.emails.send({

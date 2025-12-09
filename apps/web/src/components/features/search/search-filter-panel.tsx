@@ -65,7 +65,7 @@ function SearchFilterPanelComponent({
   const dateRangeSelectId = useId();
 
   return (
-    <section className="border-border/50 bg-card/30 space-y-4 rounded-lg border p-4 md:space-y-6 md:p-6">
+    <section className="border-border/50 bg-[rgba(0,0,0,0.6)] backdrop-blur-xl space-y-4 rounded-lg border p-4 md:space-y-6 md:p-6 shadow-xl">
       {/* Main Filters */}
       <fieldset className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6 lg:grid-cols-3">
         <legend className="sr-only">Filter by category, author, and date range</legend>

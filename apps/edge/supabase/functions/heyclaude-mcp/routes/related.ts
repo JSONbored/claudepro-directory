@@ -91,6 +91,12 @@ export async function handleGetRelatedContent(
       items,
       source: { slug, category },
       count: items.length,
+      limit,
+      pagination: {
+        total: items.length,
+        limit,
+        hasMore: false, // Related doesn't support pagination
+      },
     },
   };
 }

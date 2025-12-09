@@ -6,7 +6,6 @@ import { cacheLife, cacheTag } from 'next/cache';
 
 import { logger } from '../../index.ts';
 import { createSupabaseServerClient } from '../../supabase/server.ts';
-import { generateRequestId } from '../../utils/request-id.ts';
 
 export interface RecommendationInput {
   experienceLevel: Database['public']['Enums']['experience_level'];
@@ -29,6 +28,7 @@ export interface RecommendationInput {
  * - Minimum 30 seconds stale time (required for runtime prefetch)
  * - Cache keys include all input parameters
  * - Not prerendered (runs at request time)
+ * @param input
  */
 export async function getConfigRecommendations(
   input: RecommendationInput
@@ -52,9 +52,7 @@ export async function getConfigRecommendations(
     cacheTag(`recommendations-viewer-${viewerId}`);
   }
 
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'getConfigRecommendations',
     module: 'data/tools/recommendations',
   });

@@ -11,7 +11,7 @@ import {
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft, ExternalLink } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   BADGE_COLORS,
   UI_CLASSES,
@@ -24,12 +24,15 @@ import {
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { MetricsDisplay } from '@/src/components/features/analytics/metrics-display';
+
+import Loading from './loading';
 
 /**
  * Dynamic Rendering Required
@@ -60,6 +63,7 @@ function getStatusColor(status: JobStatus): string {
  * Produce page metadata for the job analytics route using the provided route parameters.
  *
  * @param params - An object (as a promise) containing route params; `id` is the job identifier used to build the metadata.
+ * @param params.params
  * @returns A `Metadata` object for the "/account/jobs/:id/analytics" page scoped to the given job id.
  *
  * @see generatePageMetadata
@@ -79,6 +83,7 @@ export async function generateMetadata({ params }: JobAnalyticsPageProperties): 
  * The component redirects to the login route when no authenticated user is present and renders a "Job analytics unavailable" card when the job cannot be loaded or is not owned by the user.
  *
  * @param params - Route params; expects an object with `id` set to the job identifier to display analytics for.
+ * @param params.params
  * @returns The analytics page React element showing listing details, metrics, trends, and contextual insights.
  *
  * @see getAuthenticatedUser
@@ -86,22 +91,17 @@ export async function generateMetadata({ params }: JobAnalyticsPageProperties): 
  * @see MetricsDisplay
  */
 export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProperties) {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
-
-  // Generate single requestId for this page request (after connection() to allow Date.now())
-  const requestId = generateRequestId();
+  'use cache: private';
+  cacheLife('userProfile'); // 1min stale, 5min revalidate, 30min expire - User-specific data
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    requestId,
     operation: 'JobAnalyticsPage',
     module: 'apps/web/src/app/account/jobs/[id]/analytics',
   });
 
   return (
-    <Suspense fallback={<div className="space-y-6">Loading analytics...</div>}>
+    <Suspense fallback={<Loading />}>
       <JobAnalyticsPageContent params={params} reqLogger={reqLogger} />
     </Suspense>
   );
@@ -116,7 +116,9 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPagePrope
  * by the authenticated user, it renders a “Job analytics unavailable” message with a back link.
  *
  * @param params - A promise that resolves to an object containing the route parameter `id`.
+ * @param params.params
  * @param reqLogger - A request-scoped logger; a route- and user-scoped child logger is created internally for structured logging.
+ * @param params.reqLogger
  * @returns The React element tree for the job analytics page content.
  *
  * @see MetricsDisplay
@@ -315,8 +317,8 @@ async function JobAnalyticsPageContent({
             {viewCount === 0 && (
               <div className="bg-muted/50 rounded-lg p-4">
                 <p className="text-sm">
-                  Your job listing hasn't received any views yet. Try sharing it on social media or
-                  updating the description to make it more discoverable.
+                  Your job listing hasn&apos;t received any views yet. Try sharing it on social
+                  media or updating the description to make it more discoverable.
                 </p>
               </div>
             )}

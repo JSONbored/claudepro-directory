@@ -24,7 +24,7 @@ import { normalizeError } from '@heyclaude/shared-runtime';
 
 import { inngest } from '../../client';
 import { createSupabaseAdminClient } from '../../../supabase/admin';
-import { logger, generateRequestId, createWebAppContextWithId } from '../../../logging/server';
+import { logger, createWebAppContextWithId } from '../../../logging/server';
 import { CONCURRENCY_LIMITS, RETRY_CONFIGS, ACCOUNT_CONCURRENCY_KEYS } from '../../config';
 
 /**
@@ -75,9 +75,7 @@ export const handlePolarWebhook = inngest.createFunction(
   { event: 'polar/webhook' },
   async ({ event, step }) => {
     const startTime = Date.now();
-    const requestId = generateRequestId();
     const logContext = createWebAppContextWithId(
-      requestId,
       '/inngest/polar/webhook',
       'handlePolarWebhook'
     );

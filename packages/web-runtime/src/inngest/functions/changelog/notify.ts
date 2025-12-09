@@ -12,7 +12,7 @@ import { revalidateTag } from 'next/cache';
 import { inngest } from '../../client';
 import { createSupabaseAdminClient } from '../../../supabase/admin';
 import { pgmqRead, pgmqDelete, type PgmqMessage } from '../../../supabase/pgmq-client';
-import { logger, generateRequestId, createWebAppContextWithId } from '../../../logging/server';
+import { logger, createWebAppContextWithId } from '../../../logging/server';
 
 const CHANGELOG_NOTIFY_QUEUE = 'changelog_notify';
 const BATCH_SIZE = 5;
@@ -82,8 +82,7 @@ export const processChangelogNotifyQueue = inngest.createFunction(
   { cron: '*/30 * * * *' }, // Every 30 minutes
   async ({ step }) => {
     const startTime = Date.now();
-    const requestId = generateRequestId();
-    const logContext = createWebAppContextWithId(requestId, '/inngest/changelog/notify', 'processChangelogNotifyQueue');
+    const logContext = createWebAppContextWithId('/inngest/changelog/notify', 'processChangelogNotifyQueue');
 
     logger.info('Changelog notify queue processing started', logContext);
 

@@ -348,4 +348,25 @@ export class AccountService {
       throw error;
     }
   }
+
+  /**
+   * Calls the database RPC: get_user_complete_data
+   */
+  async getUserCompleteData(args: Database['public']['Functions']['get_user_complete_data']['Args']) {
+    try {
+      const { data, error } = await this.supabase.rpc('get_user_complete_data', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_user_complete_data',
+          operation: 'AccountService.getUserCompleteData',
+          args: args,
+        });
+        throw error;
+      }
+      return data;
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
+  }
 }

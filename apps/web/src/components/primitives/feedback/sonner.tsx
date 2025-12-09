@@ -15,30 +15,21 @@
 import { useTheme } from 'next-themes';
 import { Toaster as Sonner } from 'sonner';
 import { useEffect, useRef } from 'react';
-import { logClientInfo, generateRequestId } from '@heyclaude/web-runtime/logging/client';
+import { logClientInfo } from '@heyclaude/web-runtime/logging/client';
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
 const Toaster = ({ ...props }: ToasterProps) => {
   const { theme = 'system' } = useTheme();
-  const requestIdRef = useRef<string | null>(null);
   const hasLoggedMount = useRef(false);
-
-  // Generate requestId once on mount
-  useEffect(() => {
-    if (!requestIdRef.current) {
-      requestIdRef.current = generateRequestId();
-    }
-  }, []);
 
   // Log Toaster mount
   useEffect(() => {
-    if (!hasLoggedMount.current && requestIdRef.current) {
+    if (!hasLoggedMount.current) {
       logClientInfo('Toaster mounted', 'Toaster.mount', {
         component: 'Toaster',
         module: 'apps/web/src/components/primitives/feedback/sonner',
         theme: theme as string,
-        requestId: requestIdRef.current,
       });
       hasLoggedMount.current = true;
     }
@@ -47,13 +38,12 @@ const Toaster = ({ ...props }: ToasterProps) => {
   // Log theme changes
   const prevThemeRef = useRef<string | null>(null);
   useEffect(() => {
-    if (prevThemeRef.current !== null && prevThemeRef.current !== theme && requestIdRef.current) {
+    if (prevThemeRef.current !== null && prevThemeRef.current !== theme) {
       logClientInfo('Toaster theme changed', 'Toaster.themeChange', {
         component: 'Toaster',
         module: 'apps/web/src/components/primitives/feedback/sonner',
         previousTheme: prevThemeRef.current,
         newTheme: theme as string,
-        requestId: requestIdRef.current,
       });
     }
     prevThemeRef.current = theme as string;

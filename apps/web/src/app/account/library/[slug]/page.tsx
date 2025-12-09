@@ -6,7 +6,7 @@ import {
 } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG, ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft, Edit } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   UI_CLASSES,
   UnifiedBadge,
@@ -19,12 +19,15 @@ import {
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { CollectionItemManager } from '@/src/components/core/domain/collection-items-editor';
+
+import Loading from './loading';
 
 /**
  * Dynamic Rendering Required
@@ -41,6 +44,7 @@ interface CollectionPageProperties {
  * Awaits a request-scoped server connection so non-deterministic operations (e.g., dates) are evaluated at request time.
  *
  * @param params - Promise-resolved route parameters containing `slug`
+ * @param params.params
  * @returns Metadata for the collection page
  *
  * @see generatePageMetadata
@@ -63,6 +67,7 @@ export async function generateMetadata({ params }: CollectionPageProperties): Pr
  * - Displays an error Card if fetching collection data fails.
  *
  * @param params - An object whose `slug` property identifies the collection to display.
+ * @param params.params
  * @returns The page JSX that shows collection metadata, controls (share/edit), a collection item manager, and summary statistics.
  *
  * @see getAuthenticatedUser
@@ -70,22 +75,17 @@ export async function generateMetadata({ params }: CollectionPageProperties): Pr
  * @see generatePageMetadata
  */
 export default async function CollectionDetailPage({ params }: CollectionPageProperties) {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
-
-  // Generate single requestId for this page request (after connection() to allow Date.now())
-  const requestId = generateRequestId();
+  'use cache: private';
+  cacheLife('userProfile'); // 1min stale, 5min revalidate, 30min expire - User-specific data
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    requestId,
     operation: 'CollectionDetailPage',
     module: 'apps/web/src/app/account/library/[slug]',
   });
 
   return (
-    <Suspense fallback={<div className="space-y-6">Loading collection...</div>}>
+    <Suspense fallback={<Loading />}>
       <CollectionDetailPageContent params={params} reqLogger={reqLogger} />
     </Suspense>
   );
@@ -97,7 +97,9 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
  * Awaits route params to obtain the collection slug, creates a logger scoped to the route, and renders CollectionDetailContent with those values.
  *
  * @param params - A promise resolving to an object containing the route `slug`
+ * @param params.params
  * @param reqLogger - The request-scoped logger to derive a route-scoped child logger from
+ * @param params.reqLogger
  * @returns The CollectionDetailContent React element for the requested collection
  *
  * @see CollectionDetailContent
@@ -126,8 +128,11 @@ async function CollectionDetailPageContent({
  * detail for the authenticated user, displays an error card when loading fails, calls `notFound()` when the
  * collection is not found or inaccessible, and otherwise renders the collection header, item manager, and stats.
  *
+ * @param root0
+ * @param root0.reqLogger
  * @param props.slug - The collection slug from the route.
  * @param props.reqLogger - Request-scoped logger used to record authentication, data-fetch, and render events.
+ * @param root0.slug
  * @returns The rendered collection detail JSX for the authenticated user or an error UI when loading fails.
  *
  * @see getAuthenticatedUser

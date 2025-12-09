@@ -10,9 +10,9 @@ import {
   getSubmissionDashboard,
   getSubmissionFormFields,
 } from '@heyclaude/web-runtime/data';
-import { type SubmissionFormConfig } from '@heyclaude/web-runtime/types/component.types';
 import { TrendingUp } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { type SubmissionFormConfig } from '@heyclaude/web-runtime/types/component.types';
 import {
   cn,
   UI_CLASSES,
@@ -30,6 +30,8 @@ import { SubmitFormClient } from '@/src/components/core/forms/content-submission
 import { SidebarActivityCard } from '@/src/components/core/forms/sidebar-activity-card';
 import { SubmitPageHero } from '@/src/components/core/forms/submit-page-hero';
 import { ContentSidebar } from '@/src/components/core/layout/content-sidebar';
+
+import SubmitFormLoading from './loading-form';
 
 /**
  * Dynamic Rendering
@@ -167,9 +169,7 @@ function isValidRecentSubmission(submission: unknown): submission is {
  * @see import('next').Metadata
  */
 export async function generateMetadata(): Promise<Metadata> {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
+  await connection(); // Still needed for generatePageMetadata if it uses Date.now()
   return generatePageMetadata('/submit');
 }
 
@@ -192,16 +192,14 @@ export async function generateMetadata(): Promise<Metadata> {
  */
 
 export default async function SubmitPage() {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
+  // Note: Cannot use 'use cache' on pages that call functions with 'use cache: private'
+  // This page calls getSubmissionDashboard() which uses 'use cache: private'
+  // Data layer caching is already in place for optimal performance
 
-  // Generate single requestId for this page request (after connection() to allow Date.now())
-  const requestId = generateRequestId();
+  await connection(); // Still needed for generatePageMetadata if it uses Date.now()
 
-  // Create request-scoped child logger to avoid race conditions
+  // Create request-scoped child logger
   const reqLogger = logger.child({
-    requestId,
     operation: 'SubmitPage',
     route: '/submit',
     module: 'apps/web/src/app/submit',
@@ -217,7 +215,7 @@ export default async function SubmitPage() {
       <div className="grid items-start gap-6 lg:grid-cols-[2fr_1fr] lg:gap-8">
         <div className="w-full min-w-0">
           {/* Form Configuration and Templates in separate Suspense boundaries */}
-          <Suspense fallback={<div className="bg-muted/20 h-96 animate-pulse rounded-lg" />}>
+          <Suspense fallback={<SubmitFormLoading />}>
             <SubmitFormWithConfig reqLogger={reqLogger} />
           </Suspense>
         </div>
@@ -243,6 +241,7 @@ export default async function SubmitPage() {
  * falling back to `0` for any missing stats so the hero always receives complete numeric values.
  *
  * @param reqLogger - A scoped request logger created via `logger.child` used to record fetch outcomes.
+ * @param reqLogger.reqLogger
  * @returns The SubmitPageHero React element populated with the derived `stats` object.
  *
  * @see getSubmissionDashboard
@@ -290,6 +289,7 @@ async function SubmitPageHeroWithStats({
  * is emitted. Form configuration loading failures are propagated.
  *
  * @param reqLogger - A per-request scoped logger (result of logger.child) used for contextual logging.
+ * @param reqLogger.reqLogger
  * @returns The SubmitFormClient component configured with the fetched `formConfig` and `templates`.
  * @throws The normalized error produced when loading the submission form configuration fails.
  * @see getSubmissionFormFields
@@ -370,6 +370,9 @@ async function SubmitFormWithConfig({ reqLogger }: { reqLogger: ReturnType<typeo
     });
   }
 
+  // Serialize for Client Component compatibility - JSON round-trip ensures plain objects
+  const serializedTemplates = JSON.parse(JSON.stringify(templates)) as typeof templates;
+
   if (!formConfig) {
     reqLogger.error('SubmitPage: formConfig is null', new Error('Form config is null'), {
       section: 'form-config',
@@ -385,15 +388,10 @@ async function SubmitFormWithConfig({ reqLogger }: { reqLogger: ReturnType<typeo
       statuslines: { nameField: null, common: [], typeSpecific: [], tags: [] },
       skills: { nameField: null, common: [], typeSpecific: [], tags: [] },
     };
-    return (
-      <SubmitFormClient
-        formConfig={emptyFormConfig}
-        templates={templates}
-      />
-    );
+    return <SubmitFormClient formConfig={emptyFormConfig} templates={serializedTemplates} />;
   }
 
-  return <SubmitFormClient formConfig={formConfig} templates={templates} />;
+  return <SubmitFormClient formConfig={formConfig} templates={serializedTemplates} />;
 }
 
 /**
@@ -402,6 +400,7 @@ async function SubmitFormWithConfig({ reqLogger }: { reqLogger: ReturnType<typeo
  * This component requests the submission dashboard, builds three summary stats (total, pending, merged this week), and prepares a list of recently merged submissions for display. If the dashboard fetch fails or data is missing, the component renders with default empty values so the page can show graceful fallbacks.
  *
  * @param reqLogger - A scoped request logger used for contextual logging of fetch outcomes.
+ * @param reqLogger.reqLogger
  * @returns A React fragment containing the community stats card and the activity/tips sidebar.
  *
  * @see getSubmissionDashboard
@@ -560,8 +559,8 @@ function SubmitPageSidebarSkeleton() {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="space-y-2">
+        {Array.from({ length: 3 }, (_, i) => (
+          <div key={`skeleton-${i}`} className="space-y-2">
             <Skeleton className="h-4 w-3/4" />
             <Skeleton className="h-3 w-1/2" />
           </div>

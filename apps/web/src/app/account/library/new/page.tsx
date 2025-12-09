@@ -5,15 +5,18 @@ import {
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
+import { logger } from '@heyclaude/web-runtime/logging/server';
 import { Button, Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { CollectionForm } from '@/src/components/core/forms/collection-form';
+
+import Loading from './loading';
 
 /**
  * Dynamic Rendering Required
@@ -52,23 +55,18 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see ROUTES.ACCOUNT_LIBRARY
  */
 export default async function NewCollectionPage() {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
-
-  // Generate single requestId for this page request (after connection() to allow Date.now())
-  const requestId = generateRequestId();
+  'use cache: private';
+  cacheLife('userProfile'); // 1min stale, 5min revalidate, 30min expire - User-specific data
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    requestId,
     operation: 'NewCollectionPage',
     route: '/account/library/new',
     module: 'apps/web/src/app/account/library/new',
   });
 
   return (
-    <Suspense fallback={<div className="space-y-6">Loading collection form...</div>}>
+    <Suspense fallback={<Loading />}>
       <NewCollectionPageContent reqLogger={reqLogger} />
     </Suspense>
   );
@@ -80,6 +78,7 @@ export default async function NewCollectionPage() {
  * This server component enforces authentication (redirecting to /login for unauthenticated requests), loads the current user's bookmarks for use by the collection form, and returns the page UI including back navigation, page title, and a CollectionForm prepopulated with the user's bookmarks.
  *
  * @param reqLogger - A request-scoped logger instance used to emit structured logs for authentication, data loading, and page render events.
+ * @param reqLogger.reqLogger
  * @returns The page React element for creating a new collection.
  *
  * @see getAuthenticatedUser

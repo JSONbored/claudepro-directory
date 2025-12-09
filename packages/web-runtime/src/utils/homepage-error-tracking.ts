@@ -2,7 +2,7 @@
  * Homepage Error Tracking Utilities
  * 
  * Provides standardized error tracking for homepage components with structured logging.
- * Follows existing patterns: logger, normalizeError, generateRequestId
+ * Follows existing patterns: logger, normalizeError
  * 
  * Usage:
  * ```typescript
@@ -18,7 +18,6 @@
 
 import { logger, toLogContextValue } from '../logger.ts';
 import { normalizeError } from '../errors.ts';
-import { generateRequestId } from './request-id.ts';
 
 export type HomepageSection = 
   | 'hero' 
@@ -45,10 +44,8 @@ export function trackHomepageSectionError(
   context?: Record<string, unknown>
 ): void {
   const normalized = normalizeError(error, `${section}: ${operation} failed`);
-  const requestId = generateRequestId();
   
   logger.error(`Homepage.${section}: ${operation} failed`, normalized, {
-    requestId,
     operation: `homepage.${section}`,
     section,
     ...(context ?? {}),
@@ -68,7 +65,6 @@ export function trackRPCFailure(
   context?: Record<string, unknown>
 ): void {
   const normalized = normalizeError(error, `RPC ${rpcName} failed`);
-  const requestId = generateRequestId();
   
   // Use dbQuery serializer for consistent database query formatting
   // Convert dbQuery object to LogContextValue-compatible structure
@@ -77,7 +73,6 @@ export function trackRPCFailure(
     ...(context && Object.keys(context).length > 0 ? { args: toLogContextValue(context) } : {}),
   };
   logger.error(`Homepage RPC failure: ${rpcName}`, normalized, {
-    requestId,
     operation: 'homepage.rpc',
     dbQuery: toLogContextValue(dbQueryContext),
   });
@@ -95,10 +90,7 @@ export function trackMissingData(
   dataType: string,
   context?: Record<string, unknown>
 ): void {
-  const requestId = generateRequestId();
-  
   logger.warn(`Homepage.${section}: Missing ${dataType}`, undefined, {
-    requestId,
     operation: `homepage.${section}`,
     section,
     dataType,
@@ -118,10 +110,7 @@ export function trackValidationFailure(
   validationIssue: string,
   context?: Record<string, unknown>
 ): void {
-  const requestId = generateRequestId();
-  
   logger.warn(`Homepage.${section}: Validation failed - ${validationIssue}`, undefined, {
-    requestId,
     operation: `homepage.${section}`,
     section,
     validationIssue,

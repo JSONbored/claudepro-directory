@@ -11,12 +11,6 @@
 verify_jwt = false
 import_map = "./functions/public-api/deno.json"
 
-# 2. FLUX STATION MONOLITH
-# Write-heavy, async processing, webhooks, email, queues.
-[functions.flux-station]
-verify_jwt = false
-import_map = "./functions/flux-station/deno.json"
-
 [functions.heyclaude-mcp]
 verify_jwt = true
 import_map = "./functions/heyclaude-mcp/deno.json"

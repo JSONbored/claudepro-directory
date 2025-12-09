@@ -122,6 +122,9 @@ export const updateProfile = authedAction
   .inputSchema(
     z.object({
       display_name: z.string().optional(),
+      // Username validation is handled by database constraint (users_username_format_check)
+      // Database enforces: lowercase alphanumeric + hyphens, 3-30 chars, no leading/trailing hyphens
+      username: z.string().optional(),
       bio: z.string().optional(),
       work: z.string().optional(),
       website: z.string().optional().or(z.literal('')),
@@ -132,11 +135,12 @@ export const updateProfile = authedAction
     })
   )
   .action(async ({ parsedInput, ctx }) => {
-    const result = await runRpc<Database['public']['Functions']['update_user_profile']['Returns']>(
+    const result = await runRpc<Database['public']['CompositeTypes']['update_user_profile_result_v2']>(
       'update_user_profile',
       {
         p_user_id: ctx.userId,
         ...(parsedInput.display_name && { p_display_name: parsedInput.display_name }),
+        ...(parsedInput.username !== undefined && { p_username: parsedInput.username }),
         ...(parsedInput.bio !== undefined && { p_bio: parsedInput.bio }),
         ...(parsedInput.work !== undefined && { p_work: parsedInput.work }),
         ...(parsedInput.website !== undefined && { p_website: parsedInput.website }),
@@ -157,10 +161,11 @@ export const updateProfile = authedAction
     );
 
     // Extract profile with null check
-    const profile = result.profile;
-    if (profile == null) {
+    // update_user_profile returns composite type update_user_profile_result_v2
+    if (!result || !result.profile) {
       throw new Error('update_user_profile returned null profile');
     }
+    const profile = result.profile;
 
     // Log profile update for audit trail (user data modification)
     logger.info('User profile updated', {

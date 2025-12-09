@@ -8,7 +8,7 @@ import {
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { CheckCircle, Clock, GitPullRequest, Send, XCircle } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   BADGE_COLORS,
   UI_CLASSES,
@@ -21,11 +21,14 @@ import {
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import Link from 'next/link';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { SubmissionCard } from '@/src/components/core/domain/submissions/submission-card';
+
+import Loading from './loading';
 
 /**
  * Produce metadata for the account submissions page while ensuring request-time evaluation.
@@ -141,9 +144,9 @@ function extractPrComponents(
     const [, owner, repo, prNumber] = pathMatch;
 
     // Validate owner and repo against their specific regex patterns
-    if (!(owner && OWNER_REGEX.test(owner))) return null;
-    if (!(repo && REPO_REGEX.test(repo))) return null;
-    if (!(prNumber && PR_NUMBER_REGEX.test(prNumber))) return null;
+    if (!owner || !OWNER_REGEX.test(owner)) return null;
+    if (!repo || !REPO_REGEX.test(repo)) return null;
+    if (!prNumber || !PR_NUMBER_REGEX.test(prNumber)) return null;
 
     return { owner, repo, prNumber };
   } catch {
@@ -155,10 +158,13 @@ function extractPrComponents(
  * Construct a safe GitHub PR URL from validated components
  * This ensures we're using only trusted, validated data instead of user-controlled URLs
  * Uses URL constructor for canonicalization to prevent encoding-based attacks
+ * @param owner
+ * @param repo
+ * @param prNumber
  */
 function buildSafePrUrl(owner: string, repo: string, prNumber: string): string {
   // Additional validation matching GitHub's rules using shared regex patterns
-  if (!(OWNER_REGEX.test(owner) && REPO_REGEX.test(repo) && PR_NUMBER_REGEX.test(prNumber))) {
+  if (!OWNER_REGEX.test(owner) || !REPO_REGEX.test(repo) || !PR_NUMBER_REGEX.test(prNumber)) {
     return '#';
   }
   try {
@@ -223,7 +229,7 @@ function getSafeContentUrl(
   type: Database['public']['Enums']['submission_type'],
   slug: string
 ): null | string {
-  if (!(isSafeType(type) && isValidSlug(slug))) {
+  if (!isSafeType(type) || !isValidSlug(slug)) {
     return null;
   }
   return `/${type}/${slug}`;
@@ -245,23 +251,18 @@ function getSafeContentUrl(
  * @see extractPrComponents
  */
 export default async function SubmissionsPage() {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
-
-  // Generate single requestId for this page request (after connection() to allow Date.now())
-  const requestId = generateRequestId();
+  'use cache: private';
+  cacheLife('userProfile'); // 1min stale, 5min revalidate, 30min expire - User-specific data
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    requestId,
     operation: 'SubmissionsPage',
     route: '/account/submissions',
     module: 'apps/web/src/app/account/submissions',
   });
 
   return (
-    <Suspense fallback={<div className="space-y-6">Loading submissions...</div>}>
+    <Suspense fallback={<Loading />}>
       <SubmissionsPageContent reqLogger={reqLogger} />
     </Suspense>
   );
@@ -271,6 +272,7 @@ export default async function SubmissionsPage() {
  * Render the authenticated user's submissions page content, including list, empty state, and error or sign-in prompts.
  *
  * @param reqLogger - Request-scoped logger used for telemetry and data-integrity warnings; a child logger is created with user context when available.
+ * @param reqLogger.reqLogger
  * @returns A React element containing the submissions UI: sign-in prompt when unauthenticated, an error message on fetch failure, an empty-state call-to-action when no submissions exist, or a grid of submission cards when submissions are available.
  *
  * @see getAuthenticatedUser
@@ -346,7 +348,19 @@ async function SubmissionsPageContent({
   if (hasError) {
     return (
       <div className="space-y-6">
-        <div className="text-destructive">Failed to load submissions. Please try again later.</div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Unable to load submissions</CardTitle>
+            <CardDescription>
+              We couldn&apos;t load your submissions right now. Please refresh or try again later.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild variant="outline">
+              <Link href={ROUTES.ACCOUNT}>Back to dashboard</Link>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -356,6 +370,7 @@ async function SubmissionsPageContent({
 
   /**
    * Validate submission status against enum values
+   * @param status
    */
   function isValidSubmissionStatus(
     status: unknown
@@ -366,6 +381,7 @@ async function SubmissionsPageContent({
 
   /**
    * Validate submission type against enum values
+   * @param type
    */
   function isValidSubmissionType(
     type: unknown
@@ -408,13 +424,13 @@ async function SubmissionsPageContent({
       Database['public']['Enums']['submission_type'],
       Database['public']['Enums']['content_category']
     > = {
-      'agents': 'agents',
-      'mcp': 'mcp',
-      'rules': 'rules',
-      'commands': 'commands',
-      'hooks': 'hooks',
-      'statuslines': 'statuslines',
-      'skills': 'skills',
+      agents: 'agents',
+      mcp: 'mcp',
+      rules: 'rules',
+      commands: 'commands',
+      hooks: 'hooks',
+      statuslines: 'statuslines',
+      skills: 'skills',
     };
 
     const category = categoryMap[type];
@@ -426,15 +442,15 @@ async function SubmissionsPageContent({
     // Fallback to hardcoded labels if category mapping fails
     // Use explicit enum string values instead of fragile numeric indexing
     const fallbackLabels: Record<Database['public']['Enums']['submission_type'], string> = {
-      'agents': 'Claude Agent',
-      'mcp': 'MCP Server',
-      'rules': 'CLAUDE.md',
-      'commands': 'Command',
-      'hooks': 'Hook',
-      'statuslines': 'Statusline',
-      'skills': 'Skill',
+      agents: 'Claude Agent',
+      mcp: 'MCP Server',
+      rules: 'CLAUDE.md',
+      commands: 'Command',
+      hooks: 'Hook',
+      statuslines: 'Statusline',
+      skills: 'Skill',
     };
-    return fallbackLabels[type] ?? type;
+    return fallbackLabels[type];
   };
 
   /**

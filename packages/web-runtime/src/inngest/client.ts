@@ -13,6 +13,7 @@
  */
 
 import { EventSchemas, Inngest } from 'inngest';
+import type { Database } from '@heyclaude/database-types';
 
 /**
  * Event type definitions for type-safe event sending.
@@ -207,6 +208,11 @@ type Events = {
   'polar/webhook': {
     data: PolarWebhookEventData;
   };
+
+  // Supabase database webhook events (content changes)
+  'supabase/content-changed': {
+    data: SupabaseContentChangedEventData;
+  };
 };
 
 /**
@@ -240,6 +246,31 @@ export interface ResendEmailEventData {
   subject: string;
   // Additional fields that may be present
   [key: string]: unknown;
+}
+
+/**
+ * Supabase database webhook event data structure
+ * @see https://supabase.com/docs/guides/database/webhooks
+ */
+export interface SupabaseContentChangedEventData {
+  /** Unique webhook event ID from database (for idempotency) */
+  webhookId: string;
+  /** Svix ID for deduplication */
+  svixId: string | null;
+  /** Database event type: INSERT, UPDATE, DELETE */
+  eventType: 'INSERT' | 'UPDATE' | 'DELETE';
+  /** Content category: 'skills' or 'mcp' */
+  category: 'skills' | 'mcp';
+  /** Content ID (UUID) */
+  contentId: string;
+  /** Content slug */
+  slug?: string | undefined;
+  /** New record data (partial ContentRow) */
+  record: Partial<Database['public']['Tables']['content']['Row']>;
+  /** Old record data (for UPDATE/DELETE) */
+  oldRecord?: Partial<Database['public']['Tables']['content']['Row']> | undefined;
+  /** Full webhook payload */
+  payload: Record<string, unknown>;
 }
 
 /**

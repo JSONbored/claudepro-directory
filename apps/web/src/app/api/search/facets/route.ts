@@ -1,11 +1,6 @@
 import 'server-only';
-
 import { normalizeError } from '@heyclaude/shared-runtime';
-import {
-  generateRequestId,
-  logger,
-  createErrorResponse,
-} from '@heyclaude/web-runtime/logging/server';
+import { logger, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
 import {
   createSupabaseAnonClient,
   jsonResponse,
@@ -13,14 +8,27 @@ import {
   buildCacheHeaders,
   handleOptionsRequest,
 } from '@heyclaude/web-runtime/server';
+import { cacheLife } from 'next/cache';
 import { type NextRequest } from 'next/server';
 
 const CORS = getWithAuthCorsHeaders;
 
+/**
+ * Cached helper function to fetch search facets
+ * Uses Cache Components to reduce function invocations
+ */
+async function getCachedSearchFacets() {
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
+
+  const supabase = createSupabaseAnonClient();
+  const { data, error } = await supabase.rpc('get_search_facets');
+  if (error) throw error;
+  return data;
+}
+
 export async function GET(_request: NextRequest) {
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'SearchFacetsAPI',
     route: '/api/search/facets',
     method: 'GET',
@@ -28,21 +36,18 @@ export async function GET(_request: NextRequest) {
 
   reqLogger.info('Facets request received');
 
-  const supabase = createSupabaseAnonClient();
-
   try {
-    const { data, error } = await supabase.rpc('get_search_facets');
-
-    if (error) {
+    let data: Awaited<ReturnType<typeof getCachedSearchFacets>> | null = null;
+    try {
+      data = await getCachedSearchFacets();
+    } catch (error) {
       const normalized = normalizeError(error, 'Facets RPC failed');
       reqLogger.error('Facets RPC failed', normalized);
       return createErrorResponse(error, {
         route: '/api/search/facets',
         operation: 'get_search_facets',
         method: 'GET',
-        logContext: {
-          requestId,
-        },
+        logContext: {},
       });
     }
 
@@ -81,9 +86,7 @@ export async function GET(_request: NextRequest) {
       route: '/api/search/facets',
       operation: 'GET',
       method: 'GET',
-      logContext: {
-        requestId,
-      },
+      logContext: {},
     });
   }
 }

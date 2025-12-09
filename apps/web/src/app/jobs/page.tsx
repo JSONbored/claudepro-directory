@@ -20,7 +20,7 @@ import {
   Search,
   SlidersHorizontal,
 } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { type PagePropsWithSearchParams } from '@heyclaude/web-runtime/types/app.schema';
 import {
   POSITION_PATTERNS,
@@ -39,7 +39,6 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import Link from 'next/link';
-import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { JobCard } from '@/src/components/core/domain/cards/job-card';
@@ -75,7 +74,6 @@ async function JobsCountBadge() {
     const normalized = normalizeError(error, 'Failed to fetch jobs count for badge');
     logger.warn('JobsCountBadge failed to fetch count', {
       err: normalized,
-      requestId: generateRequestId(),
       route: '/jobs',
       operation: 'JobsCountBadge',
     });
@@ -97,6 +95,7 @@ async function JobsCountBadge() {
  * filter context.
  *
  * @param searchParams - An object (or thenable resolving to an object) of URL query parameters; `category` is read as a string and `remote` is interpreted as `true` only when equal to `"true"`.
+ * @param searchParams.searchParams
  * @returns Metadata for the `/jobs` page including a `filters` context with `category` and `remote`.
  *
  * @see generatePageMetadata
@@ -104,9 +103,6 @@ async function JobsCountBadge() {
 export async function generateMetadata({
   searchParams,
 }: PagePropsWithSearchParams): Promise<Metadata> {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
   const rawParameters = await searchParams;
   return generatePageMetadata('/jobs', {
     filters: {
@@ -122,14 +118,23 @@ export async function generateMetadata({
  * Fetches matching jobs (uncached when any filter is active; ISR applies when no filters)
  * and renders either a total-empty state, a filtered-empty state, or a grid of JobCard entries.
  *
+ * @param root0
+ * @param root0.category
+ * @param root0.employment
+ * @param root0.experience
+ * @param root0.limit
+ * @param root0.offset
+ * @param root0.remote
  * @param props.searchQuery - Full-text search string to filter job titles and descriptions.
  * @param props.category - Category filter (omit or `undefined` to ignore).
  * @param props.employment - Employment type filter (e.g., "full-time", "part-time"; omit or `undefined` to ignore).
  * @param props.experience - Experience level filter (e.g., "junior", "senior"; omit or `undefined` to ignore).
  * @param props.remote - If `true`, restrict to remote roles; if `false`, restrict to non-remote; omit to ignore.
+ * @param root0.searchQuery
  * @param props.sort - Sort option applied after fetching (`'newest' | 'oldest' | 'salary'`).
  * @param props.limit - Maximum number of jobs requested for this page.
  * @param props.offset - Offset for pagination.
+ * @param root0.sort
  * @returns A JSX element containing either the jobs list or an appropriate empty-state card.
  *
  * @see getFilteredJobs
@@ -156,9 +161,7 @@ async function JobsListSection({
   sort: SortOption;
 }) {
   // Create request-scoped child logger for this component
-  const sectionRequestId = generateRequestId();
   const sectionLogger = logger.child({
-    requestId: sectionRequestId,
     operation: 'JobsListSection',
     route: '/jobs',
     module: 'apps/web/src/app/jobs',
@@ -216,8 +219,9 @@ async function JobsListSection({
           </div>
           <h3 className="mb-4 text-2xl font-bold">No Jobs Available Yet</h3>
           <p className="text-muted-foreground mb-8 max-w-md text-center leading-relaxed">
-            We're building our jobs board! Soon you'll find amazing opportunities with companies
-            working on the future of AI. Be the first to know when new positions are posted.
+            We&apos;re building our jobs board! Soon you&apos;ll find amazing opportunities with
+            companies working on the future of AI. Be the first to know when new positions are
+            posted.
           </p>
           <div className="flex gap-4">
             <Button asChild>
@@ -275,7 +279,7 @@ async function JobsListSection({
 /**
  * Renders the Jobs listing page shell with static hero and filter UI while streaming dynamic counts and job results.
  *
- * The component defers to request time (calls connection()) before parsing query parameters and generating a request-scoped ID.
+ * The component defers to request time (calls connection()) before parsing query parameters and creating a request-scoped logger.
  * Filters, pagination, and sort are read from `props.searchParams`. When no filters are active, the job list and total count
  * use cached responses to enable efficient streaming; when filters are active, job queries are uncached for freshness.
  *
@@ -289,6 +293,8 @@ async function JobsListSection({
  *   - `page`: 1-based page number (clamped to 1–10000)
  *   - `limit`: items per page (defaults to 20, max 100)
  *
+ * @param root0
+ * @param root0.searchParams
  * @returns The page JSX containing the hero header, streaming JobsCountBadge, filter form with active-filter chips and Clear All action, the JobsListSection (server fetch + client sorting), and ContentSidebar (JobsPromo + RecentlyViewed).
  *
  * @see JobsCountBadge
@@ -296,20 +302,14 @@ async function JobsListSection({
  * @see applyJobSorting
  */
 export default async function JobsPage({ searchParams }: PagePropsWithSearchParams) {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  // MUST be called before accessing searchParams (uncached data)
-  await connection();
+  // Note: Cannot use 'use cache' on pages with searchParams - they're dynamic
+  // Data layer caching is already in place for optimal performance
 
   // Section: Parameter Parsing
   const rawParameters = (await searchParams) ?? {};
 
-  // Generate single requestId for this page request (after connection() to allow Date.now())
-  const requestId = generateRequestId();
-
-  // Create request-scoped child logger to avoid race conditions
+  // Create request-scoped child logger
   const reqLogger = logger.child({
-    requestId,
     operation: 'JobsPage',
     route: '/jobs',
     module: 'apps/web/src/app/jobs',
@@ -704,10 +704,9 @@ const SORT_VALUES = new Set<SortOption>(['newest', 'oldest', 'salary']);
  * @see extractSalaryValue - Parses salary strings into numeric values used for salary sorting
  */
 function applyJobSorting(jobs: JobsFilterResult['jobs'], sort: SortOption) {
-  if (!(jobs && Array.isArray(jobs))) return [];
-  const clone = [...jobs];
+  if (!jobs || !Array.isArray(jobs)) return [];
   if (sort === 'oldest') {
-    return clone.toSorted((a, b) => {
+    return jobs.toSorted((a, b) => {
       const aDate = a.posted_at ? new Date(a.posted_at).getTime() : 0;
       const bDate = b.posted_at ? new Date(b.posted_at).getTime() : 0;
       return aDate - bDate;
@@ -715,7 +714,7 @@ function applyJobSorting(jobs: JobsFilterResult['jobs'], sort: SortOption) {
   }
 
   if (sort === 'salary') {
-    return clone.toSorted((a, b) => {
+    return jobs.toSorted((a, b) => {
       const aMax = extractSalaryValue(a.salary);
       const bMax = extractSalaryValue(b.salary);
       return bMax - aMax;
@@ -723,7 +722,7 @@ function applyJobSorting(jobs: JobsFilterResult['jobs'], sort: SortOption) {
   }
 
   // newest default
-  return clone.toSorted((a, b) => {
+  return jobs.toSorted((a, b) => {
     const aDate = a.posted_at ? new Date(a.posted_at).getTime() : 0;
     const bDate = b.posted_at ? new Date(b.posted_at).getTime() : 0;
     return bDate - aDate;

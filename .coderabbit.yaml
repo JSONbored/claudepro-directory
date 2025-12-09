@@ -251,8 +251,6 @@ code_generation:
         instructions: '          Use vitest for testing framework.           Mock SupabaseClient and test error scenarios.           Verify error normalization and logging context.           Test timeout handling if applicable.           Co-locate tests: run-rpc.ts → run-rpc.test.ts (same directory).'
       - path: packages/web-runtime/src/cache/**/*.ts
         instructions: '          Use vitest for testing framework.           Mock Next.js unstable_cache (already set up in vitest.setup.ts).           Test cache key generation, TTL, and tag invalidation.           Test fallback values and cache miss scenarios.           Co-locate tests: fetch-cached.ts → fetch-cached.test.ts (same directory).'
-      - path: packages/web-runtime/src/utils/validate-*.ts
-        instructions: '          Use vitest for testing framework.           Test with valid and invalid config files.           Test pattern matching accuracy.           Test error message clarity.           Use file system mocks (vi.mock(''fs'')).           Co-locate tests: validate-next-config.ts → validate-next-config.test.ts (same directory).'
       - path: packages/web-runtime/src/errors.ts
         instructions: '          Use vitest for testing framework.           Test error normalization with various error types.           Test context preservation.           Test logging integration.           Co-locate tests: errors.ts → errors.test.ts (same directory).'
       - path: packages/web-runtime/src/data/**/*.ts

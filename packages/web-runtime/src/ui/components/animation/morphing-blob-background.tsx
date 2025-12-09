@@ -280,6 +280,7 @@ export function MorphingBlobBackground({
 }: MorphingBlobBackgroundProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isMounted, setIsMounted] = useState(false);
+  // Don't initialize positions until container is ready - prevents flash of wrong positions
   const [blobPositions, setBlobPositions] = useState<Array<{ x: number; y: number }>>([]);
 
   // Motion values for mouse tracking
@@ -290,49 +291,88 @@ export function MorphingBlobBackground({
   useEffect(() => {
     setIsMounted(true);
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReducedMotion || disabled) return;
-
-    // Initialize blob positions
+    
+    // Initialize blob positions - wait for container to be ready
     const updateContainerSize = () => {
       if (containerRef.current) {
         const rect = containerRef.current.getBoundingClientRect();
-
-        // Initialize blob positions (distributed across container)
-        const positions = Array.from({ length: blobCount }, (_, i) => {
-          const angle = (i / blobCount) * Math.PI * 2;
-          const radius = Math.min(rect.width, rect.height) * 0.25;
-          return {
-            x: rect.width / 2 + Math.cos(angle) * radius,
-            y: rect.height / 2 + Math.sin(angle) * radius,
-          };
-        });
-        setBlobPositions(positions);
+        
+        // Only set positions if container has valid dimensions (prevents flash of wrong positions)
+        if (rect.width > 0 && rect.height > 0) {
+          // Initialize blob positions (distributed across container)
+          const positions = Array.from({ length: blobCount }, (_, i) => {
+            const angle = (i / blobCount) * Math.PI * 2;
+            const radius = Math.min(rect.width, rect.height) * 0.25;
+            return {
+              x: rect.width / 2 + Math.cos(angle) * radius,
+              y: rect.height / 2 + Math.sin(angle) * radius,
+            };
+          });
+          setBlobPositions(positions);
+          return true; // Successfully set positions
+        }
       }
+      return false; // Container not ready
     };
 
-    updateContainerSize();
+    // Try immediately, then wait for next frame, then use ResizeObserver as fallback
+    let rafId: number | null = null;
+    let timeoutId: NodeJS.Timeout | null = null;
+    
+    // Try immediately
+    if (!updateContainerSize()) {
+      // If not ready, wait for next frame
+      rafId = requestAnimationFrame(() => {
+        if (!updateContainerSize()) {
+          // If still not ready, try again after a short delay
+          timeoutId = setTimeout(() => {
+            updateContainerSize();
+          }, 100);
+        }
+      });
+    }
+    
+    // Only set up animations if not reduced motion and not disabled
+    if (!prefersReducedMotion && !disabled) {
+      const resizeObserver = new ResizeObserver(updateContainerSize);
+      if (containerRef.current) {
+        resizeObserver.observe(containerRef.current);
+      }
+
+      // Track mouse position
+      const handleMouseMove = (e: MouseEvent) => {
+        if (containerRef.current) {
+          const rect = containerRef.current.getBoundingClientRect();
+          mouseX.set(e.clientX - rect.left);
+          mouseY.set(e.clientY - rect.top);
+        }
+      };
+
+      window.addEventListener('mousemove', handleMouseMove, { passive: true });
+
+      return () => {
+        if (rafId !== null) cancelAnimationFrame(rafId);
+        if (timeoutId) clearTimeout(timeoutId);
+        resizeObserver.disconnect();
+        window.removeEventListener('mousemove', handleMouseMove);
+      };
+    }
+    
+    // If reduced motion or disabled, still update positions but don't set up animations
+    // Use a one-time resize observer to get initial size
     const resizeObserver = new ResizeObserver(updateContainerSize);
     if (containerRef.current) {
       resizeObserver.observe(containerRef.current);
     }
-
-    // Track mouse position
-    const handleMouseMove = (e: MouseEvent) => {
-      if (containerRef.current) {
-        const rect = containerRef.current.getBoundingClientRect();
-        mouseX.set(e.clientX - rect.left);
-        mouseY.set(e.clientY - rect.top);
-      }
-    };
-
-    window.addEventListener('mousemove', handleMouseMove, { passive: true });
-
+    
     return () => {
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      if (timeoutId) clearTimeout(timeoutId);
       resizeObserver.disconnect();
-      window.removeEventListener('mousemove', handleMouseMove);
     };
   }, [blobCount, disabled, mouseX, mouseY]);
 
+  // Don't render until positions are initialized (prevents flash of wrong positions)
   if (!isMounted || disabled || blobPositions.length === 0) {
     return null;
   }

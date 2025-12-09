@@ -2,7 +2,7 @@ import { type PagePropsWithSearchParams } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { AlertCircle } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
+import { logger } from '@heyclaude/web-runtime/logging/server';
 import {
   UI_CLASSES,
   Button,
@@ -43,7 +43,6 @@ export async function generateMetadata(): Promise<Metadata> {
  * @returns The JSX element rendering the authentication error card with "Try Again" and "Return Home" actions
  *
  * @see ROUTES
- * @see generateRequestId
  * @see logger
  */
 export default function AuthCodeError(properties: PagePropsWithSearchParams) {
@@ -78,6 +77,7 @@ export default function AuthCodeError(properties: PagePropsWithSearchParams) {
  * Renders an authentication error card based on URL query parameters.
  *
  * @param searchParams - A Promise that resolves to a record of query parameters where values may be strings or string arrays. The component extracts optional `code`, `provider`, and `message` keys; `code` and `provider` default to `"unknown"` when absent and `message` may be `undefined`.
+ * @param searchParams.searchParams
  * @returns A JSX element containing an authentication error card with actions to retry login or return home.
  *
  * @see AUTH_CODE_ERROR_PATH
@@ -91,15 +91,12 @@ async function AuthCodeErrorContent({
   // This is required by Cache Components for non-deterministic operations
   await connection();
 
-  // Generate single requestId for this page request (after connection() to allow Date.now())
-  const requestId = generateRequestId();
   const operation = 'AuthCodeErrorPage';
   const route = AUTH_CODE_ERROR_PATH;
   const modulePath = 'apps/web/src/app/(auth)/auth-code-error/page';
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    requestId,
     operation,
     route,
     module: modulePath,

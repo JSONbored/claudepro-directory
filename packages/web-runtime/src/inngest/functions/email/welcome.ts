@@ -16,7 +16,7 @@ import {
   sendEmail,
   enrollInOnboardingSequence,
 } from '../../../integrations/resend';
-import { logger, generateRequestId, createWebAppContextWithId } from '../../../logging/server';
+import { logger, createWebAppContextWithId } from '../../../logging/server';
 
 /**
  * Welcome email function
@@ -37,8 +37,7 @@ export const sendWelcomeEmail = inngest.createFunction(
   { event: 'email/welcome' },
   async ({ event, step }) => {
     const startTime = Date.now();
-    const requestId = generateRequestId();
-    const logContext = createWebAppContextWithId(requestId, '/inngest/email/welcome', 'sendWelcomeEmail');
+    const logContext = createWebAppContextWithId('/inngest/email/welcome', 'sendWelcomeEmail');
 
     const { email, subscriptionId, triggerSource } = event.data;
 

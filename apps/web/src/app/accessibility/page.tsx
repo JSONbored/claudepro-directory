@@ -3,6 +3,7 @@ import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { NavLink } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import { connection } from 'next/server';
 
 /**
@@ -22,7 +23,7 @@ import { connection } from 'next/server';
  * @see connection
  */
 export async function generateMetadata(): Promise<Metadata> {
-  // generatePageMetadata internally uses Date.now() via getSEOMetadata -> generateRequestId
+  // generatePageMetadata internally uses Date.now() via getSEOMetadata
   // So we need connection() here, but the page content itself is static
   await connection();
   return await generatePageMetadata('/accessibility');
@@ -39,7 +40,10 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see getContactChannels
  * @see APP_CONFIG
  */
-export default function AccessibilityPage() {
+export default async function AccessibilityPage() {
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
+
   return <AccessibilityPageContent />;
 }
 

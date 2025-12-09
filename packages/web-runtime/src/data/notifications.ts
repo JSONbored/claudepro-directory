@@ -4,7 +4,6 @@ import { cacheLife, cacheTag, revalidateTag } from 'next/cache';
 
 import { logger } from '../index.ts';
 import { createSupabaseServerClient } from '../supabase/server.ts';
-import { generateRequestId } from '../utils/request-id.ts';
 
 export type ActiveNotificationRecord =
   Database['public']['Functions']['get_active_notifications']['Returns'][number];
@@ -24,9 +23,7 @@ export function getNotificationCacheTags(userId: string): string[] {
 
 export function revalidateNotificationCache(userId: string): void {
   // Create request-scoped child logger to avoid race conditions
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'revalidateNotificationCache',
     module: 'data/notifications',
   });
@@ -62,6 +59,9 @@ interface NotificationFetchParameters {
  * - Minimum 30 seconds stale time (required for runtime prefetch)
  * - Per-user cache keys (userId and dismissedIds in cache tag)
  * - Not prerendered (runs at request time)
+ * @param root0
+ * @param root0.userId
+ * @param root0.dismissedIds
  */
 export async function getActiveNotifications({
   userId,
@@ -80,9 +80,7 @@ export async function getActiveNotifications({
   }
 
   // Create request-scoped child logger to avoid race conditions
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'getActiveNotifications',
     module: 'data/notifications',
   });

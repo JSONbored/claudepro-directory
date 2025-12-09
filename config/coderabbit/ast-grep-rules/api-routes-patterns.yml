@@ -1,0 +1,69 @@
+# API Routes Pattern Rules
+# Enforces API route standards from ESLint rules: require-authentication-for-protected-resources, require-zod-schema-for-api-routes
+# Matches: config/tools/eslint-plugin-architectural-rules.js -> require-authentication-for-protected-resources, require-zod-schema-for-api-routes
+
+---
+# Rule: Detect missing auth checks in API routes
+id: missing-auth-api-route
+language: TypeScript
+rule:
+  all:
+    - pattern: export async function $METHOD($REQ: NextRequest) { $$$ }
+      kind: function_declaration
+    - inside:
+        pattern: app/api/**/*.ts
+    - not:
+        has:
+          pattern: (getUser|checkAuth|verifyToken|authedAction|optionalAuthAction)($$$)
+message: "API routes must include authentication checks. Use getUser() or checkAuth() before processing requests, or use authedAction/optionalAuthAction for server actions"
+severity: error
+
+---
+# Rule: Detect missing input validation (Zod schema) in API routes
+id: missing-api-input-validation
+language: TypeScript
+rule:
+  all:
+    - pattern: export async function $METHOD($REQ: NextRequest) { $$$ }
+      kind: function_declaration
+    - inside:
+        pattern: app/api/**/*.ts
+    - has:
+        pattern: ($REQ.body|$REQ.json()|$REQ.formData())($$$)
+    - not:
+        has:
+          pattern: z.object($$$)
+message: "API routes must validate input with Zod schemas before processing. Add: const schema = z.object({...}); const validated = schema.parse(await req.json());"
+severity: error
+
+---
+# Rule: Detect missing error handling (createErrorResponse) in API routes
+id: missing-api-error-handling
+language: TypeScript
+rule:
+  all:
+    - pattern: export async function $METHOD($REQ: NextRequest) { $$$ }
+      kind: function_declaration
+    - inside:
+        pattern: app/api/**/*.ts
+    - not:
+        has:
+          pattern: createErrorResponse($$$)
+message: "API routes must use createErrorResponse() for error handling. Import createErrorResponse from @heyclaude/web-runtime/logging/server"
+severity: error
+
+---
+# Rule: Detect missing CORS headers in API routes
+id: missing-cors-api-route
+language: TypeScript
+rule:
+  all:
+    - pattern: export async function $METHOD($REQ: NextRequest) { $$$ return NextResponse.$METHOD($$$) }
+      kind: function_declaration
+    - inside:
+        pattern: app/api/**/*.ts
+    - not:
+        has:
+          pattern: (Access-Control|CORS|cors|getOnlyCorsHeaders)($$$)
+message: "API routes should include proper CORS headers. Use CORS middleware or set Access-Control-Allow-Origin headers"
+severity: warning

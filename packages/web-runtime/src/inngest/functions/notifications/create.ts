@@ -10,7 +10,7 @@ import { Constants } from '@heyclaude/database-types';
 
 import { inngest } from '../../client';
 import { createSupabaseAdminClient } from '../../../supabase/admin';
-import { logger, generateRequestId, createWebAppContextWithId } from '../../../logging/server';
+import { logger, createWebAppContextWithId } from '../../../logging/server';
 
 type NotificationType = DatabaseGenerated['public']['Enums']['notification_type'];
 type NotificationPriority = DatabaseGenerated['public']['Enums']['notification_priority'];
@@ -47,8 +47,7 @@ export const createNotification = inngest.createFunction(
   { event: 'notification/create' },
   async ({ event, step }) => {
     const startTime = Date.now();
-    const requestId = generateRequestId();
-    const logContext = createWebAppContextWithId(requestId, '/inngest/notifications/create', 'createNotification');
+    const logContext = createWebAppContextWithId('/inngest/notifications/create', 'createNotification');
 
     const { title, message, type, priority, action_label, action_href, id } = event.data;
 
@@ -169,8 +168,7 @@ export const broadcastNotification = inngest.createFunction(
   { event: 'notification/broadcast' },
   async ({ event, step }) => {
     const startTime = Date.now();
-    const requestId = generateRequestId();
-    const logContext = createWebAppContextWithId(requestId, '/inngest/notifications/broadcast', 'broadcastNotification');
+    const logContext = createWebAppContextWithId('/inngest/notifications/broadcast', 'broadcastNotification');
 
     const { title, message, type, priority, action_label, action_href } = event.data;
 

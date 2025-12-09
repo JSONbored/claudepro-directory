@@ -1,13 +1,11 @@
 import 'server-only';
-
 import { JobsService, SearchService } from '@heyclaude/data-layer';
 import { type Database } from '@heyclaude/database-types';
-import { logError } from '@heyclaude/shared-runtime';
+import { normalizeError } from '@heyclaude/shared-runtime';
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { logger } from '../logger.ts';
 import { pulseJobSearch } from '../pulse.ts';
-import { generateRequestId } from '../utils/request-id.ts';
 import {
   isValidJobCategory,
   isValidJobType,
@@ -34,10 +32,8 @@ export interface JobsFilterOptions {
  * @returns The filtered jobs result, or `null` if an error occurs
  */
 async function getFilteredJobsDirect(options: JobsFilterOptions): Promise<JobsFilterResult | null> {
-  // Create request-scoped child logger to avoid race conditions
-  const requestId = generateRequestId();
+  // Create request-scoped child logger
   const reqLogger = logger.child({
-    requestId,
     operation: 'getFilteredJobsDirect',
     module: 'data/jobs',
   });
@@ -92,9 +88,7 @@ async function getFilteredJobsDirect(options: JobsFilterOptions): Promise<JobsFi
     // Both are created from the same underlying Supabase client factory with Database type
     // This is safe because createSupabaseAnonClient returns ReturnType<typeof createSupabaseClient<Database>>
     // We use a type assertion here because TypeScript doesn't recognize the structural compatibility
-    const result = await new SearchService(client).filterJobs(rpcArguments);
-
-    return result;
+    return await new SearchService(client).filterJobs(rpcArguments);
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
@@ -111,6 +105,8 @@ async function getFilteredJobsDirect(options: JobsFilterOptions): Promise<JobsFi
  * Get jobs list without filters (cached)
  * Uses 'use cache' to cache jobs lists. This data is public and same for all users.
  * Jobs lists change periodically, so we use the 'half' cacheLife profile.
+ * @param limit
+ * @param offset
  */
 async function getJobsListCached(limit: number, offset: number): Promise<JobsFilterResult | null> {
   'use cache';
@@ -122,9 +118,7 @@ async function getJobsListCached(limit: number, offset: number): Promise<JobsFil
   cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
   cacheTag('jobs-list');
 
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'getJobsListCached',
     module: 'data/jobs',
   });
@@ -134,15 +128,21 @@ async function getJobsListCached(limit: number, offset: number): Promise<JobsFil
     let client;
     if (isBuildTime()) {
       const { createSupabaseAdminClient } = await import('../supabase/admin.ts');
+      // Admin client required during build: bypasses RLS for faster static generation
+      // This is safe because build-time queries are read-only and don't expose user data
       client = createSupabaseAdminClient();
     } else {
       client = createSupabaseAnonClient();
     }
 
-    const result = await new SearchService(client).filterJobs({
-      ...(limit === undefined ? {} : { p_limit: limit }),
-      ...(offset === undefined ? {} : { p_offset: offset }),
-    });
+    const rpcArgs: Database['public']['Functions']['filter_jobs']['Args'] = {};
+    if (limit !== undefined) {
+      rpcArgs.p_limit = limit;
+    }
+    if (offset !== undefined) {
+      rpcArgs.p_offset = offset;
+    }
+    const result = await new SearchService(client).filterJobs(rpcArgs);
 
     reqLogger.info('getJobsListCached: fetched successfully', {
       limit,
@@ -166,6 +166,15 @@ async function getJobsListCached(limit: number, offset: number): Promise<JobsFil
  * Get filtered jobs with search/filters (cached)
  * Uses 'use cache' to cache filtered jobs. This data is public and same for all users.
  * Filtered jobs change periodically, so we use the 'half' cacheLife profile.
+ * @param rpcArguments
+ * @param searchQuery
+ * @param category
+ * @param employment
+ * @param experience
+ * @param remote
+ * @param limit
+ * @param offset
+ * @param sort
  */
 async function getFilteredJobsCached(
   rpcArguments: Database['public']['Functions']['filter_jobs']['Args'],
@@ -187,9 +196,7 @@ async function getFilteredJobsCached(
   cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
   cacheTag('jobs-search');
 
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'getFilteredJobsCached',
     module: 'data/jobs',
   });
@@ -199,6 +206,8 @@ async function getFilteredJobsCached(
     let client;
     if (isBuildTime()) {
       const { createSupabaseAdminClient } = await import('../supabase/admin.ts');
+      // Admin client required during build: bypasses RLS for faster static generation
+      // This is safe because build-time queries are read-only and don't expose user data
       client = createSupabaseAdminClient();
     } else {
       client = createSupabaseAnonClient();
@@ -248,9 +257,7 @@ export async function getFilteredJobs(
   noCache = false
 ): Promise<JobsFilterResult | null> {
   // Create request-scoped child logger to avoid race conditions
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'getFilteredJobs',
     module: 'data/jobs',
   });
@@ -293,21 +300,14 @@ export async function getFilteredJobs(
   if (noCache) {
     // Pulse the search for analytics (fire and forget)
     if (searchQuery) {
-      pulseJobSearch(searchQuery, {}, 0).catch(async (error: unknown) => {
-        // Note: Using explicit context here for nested async callbacks
-        // While parent bindings are available at runtime, explicit context ensures
-        // proper correlation and traceability for fire-and-forget operations
-        const callbackRequestId = generateRequestId();
-        await logError(
-          'Failed to pulse job search',
-          {
-            requestId: callbackRequestId,
-            operation: 'pulseJobSearch',
-            module: 'data/jobs',
-            searchQuery,
-          },
-          error
-        );
+      // Fire-and-forget analytics call - errors are logged but don't block the request
+      void pulseJobSearch(searchQuery, {}, 0).catch((error: unknown) => {
+        const normalized = normalizeError(error, 'Failed to pulse job search');
+        logger.error('Failed to pulse job search', normalized, {
+          operation: 'pulseJobSearch',
+          module: 'data/jobs',
+          searchQuery,
+        });
       });
     }
     return getFilteredJobsDirect(options);
@@ -317,21 +317,14 @@ export async function getFilteredJobs(
   try {
     // Pulse the search for analytics (fire and forget)
     if (searchQuery) {
-      pulseJobSearch(searchQuery, {}, 0).catch(async (error: unknown) => {
-        // Note: Using explicit context here for nested async callbacks
-        // While parent bindings are available at runtime, explicit context ensures
-        // proper correlation and traceability for fire-and-forget operations
-        const callbackRequestId = generateRequestId();
-        await logError(
-          'Failed to pulse job search',
-          {
-            requestId: callbackRequestId,
-            operation: 'pulseJobSearch',
-            module: 'data/jobs',
-            searchQuery,
-          },
-          error
-        );
+      // Fire-and-forget analytics call - errors are logged but don't block the request
+      void pulseJobSearch(searchQuery, {}, 0).catch((error: unknown) => {
+        const normalized = normalizeError(error, 'Failed to pulse job search');
+        logger.error('Failed to pulse job search', normalized, {
+          operation: 'pulseJobSearch',
+          module: 'data/jobs',
+          searchQuery,
+        });
       });
     }
 
@@ -389,6 +382,7 @@ export async function getFilteredJobs(
  * Gets a single job by slug
  * Uses 'use cache' to cache job details. This data is public and same for all users.
  * Job details change periodically, so we use the 'half' cacheLife profile.
+ * @param slug
  */
 export async function getJobBySlug(slug: string) {
   'use cache';
@@ -402,9 +396,7 @@ export async function getJobBySlug(slug: string) {
   cacheTag(`job-${slug}`);
   cacheTag('jobs');
 
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'getJobBySlug',
     module: 'data/jobs',
   });
@@ -414,6 +406,8 @@ export async function getJobBySlug(slug: string) {
     let client;
     if (isBuildTime()) {
       const { createSupabaseAdminClient } = await import('../supabase/admin.ts');
+      // Admin client required during build: bypasses RLS for faster static generation
+      // This is safe because build-time queries are read-only and don't expose user data
       client = createSupabaseAdminClient();
     } else {
       client = createSupabaseAnonClient();
@@ -457,9 +451,7 @@ export async function getFeaturedJobs(limit = 5) {
   cacheTag('jobs-featured');
   cacheTag('jobs');
 
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'getFeaturedJobs',
     module: 'data/jobs',
   });
@@ -469,6 +461,8 @@ export async function getFeaturedJobs(limit = 5) {
     let client;
     if (isBuildTime()) {
       const { createSupabaseAdminClient } = await import('../supabase/admin.ts');
+      // Admin client required during build: bypasses RLS for faster static generation
+      // This is safe because build-time queries are read-only and don't expose user data
       client = createSupabaseAdminClient();
     } else {
       client = createSupabaseAnonClient();
@@ -478,10 +472,13 @@ export async function getFeaturedJobs(limit = 5) {
 
     reqLogger.info('getFeaturedJobs: fetched successfully', {
       limit,
-      count: result?.length ?? 0,
+      count: result !== null && result !== undefined ? result.length : 0,
     });
 
-    return result ?? [];
+    if (result === null || result === undefined) {
+      return [];
+    }
+    return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);

@@ -7,7 +7,7 @@ import { Constants, type Database } from '@heyclaude/database-types';
 import { isValidCategory } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getTrendingPageData } from '@heyclaude/web-runtime/data';
 import { Clock, Star, TrendingUp, Users } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
+import { logger } from '@heyclaude/web-runtime/logging/server';
 import { type PagePropsWithSearchParams } from '@heyclaude/web-runtime/types/app.schema';
 import {
   type DisplayableContent,
@@ -15,7 +15,6 @@ import {
 } from '@heyclaude/web-runtime/types/component.types';
 import { UI_CLASSES, UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
-import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { LazySection } from '@/src/components/core/infra/scroll-animated-section';
@@ -37,9 +36,6 @@ import { TrendingContent } from '@/src/components/core/shared/trending-content';
  */
 
 export async function generateMetadata(): Promise<Metadata> {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
   return generatePageMetadata('/trending');
 }
 
@@ -54,6 +50,8 @@ export async function generateMetadata(): Promise<Metadata> {
  *
  * @param props.searchParams - Search parameters from the request; supports `category` (string or single-element array)
  *   and `limit` (number, defaults to 12, clamped to 100).
+ * @param root0
+ * @param root0.searchParams
  * @returns The React element for the Trending page containing header, content sections, and newsletter CTA.
  *
  * @see getTrendingPageData
@@ -62,16 +60,14 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see mapRecentContent
  */
 export default async function TrendingPage({ searchParams }: PagePropsWithSearchParams) {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
+  // Note: Cannot use 'use cache' on pages with searchParams - they're dynamic
+  // Data layer caching is already in place for optimal performance
 
-  // Generate single requestId for this page request
-  const requestId = generateRequestId();
+  // Await searchParams to establish request context
+  await searchParams;
 
-  // Create request-scoped child logger to avoid race conditions
+  // Create request-scoped child logger
   const reqLogger = logger.child({
-    requestId,
     operation: 'TrendingPage',
     route: '/trending',
     module: 'apps/web/src/app/trending',
@@ -96,8 +92,11 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
  * This component resolves and validates `searchParams` on the server, fetches data via the
  * trending data API, and renders `TrendingContent` with mapped display items.
  *
+ * @param root0
+ * @param root0.reqLogger
  * @param props.searchParams - Promise that resolves to the route's search parameters (may include `category` and `limit`).
  * @param props.reqLogger - A request-scoped logger used for structured warnings and info about parameter validation and data fetching.
+ * @param root0.searchParams
  * @returns A React element that displays the trending configurations page (header, badges, and content sections).
  *
  * @see getTrendingPageData
@@ -115,15 +114,19 @@ async function TrendingPageContent({
 }) {
   const rawParameters = await searchParams;
   const categoryParameter = (() => {
-    const category = rawParameters?.['category'];
+    const category = rawParameters['category'];
     if (Array.isArray(category)) {
       return category.length > 0 ? category[0] : undefined;
     }
     return category;
   })();
-  const limit = Math.min(Number(rawParameters?.['limit']) || 12, 100);
+  // Parse and validate limit parameter - guard against negative/invalid values
+  const rawLimit = Number(rawParameters['limit']);
+  const limit = Number.isFinite(rawLimit) && rawLimit >= 1 ? Math.min(rawLimit, 100) : 12;
   const normalizedCategory =
-    categoryParameter && isValidCategory(categoryParameter) ? categoryParameter : null;
+    categoryParameter !== undefined && isValidCategory(categoryParameter)
+      ? categoryParameter
+      : null;
 
   // Section: Category Validation
   if (categoryParameter && !normalizedCategory) {
@@ -298,6 +301,19 @@ function mapRecentContent(
  *                `author` defaults to `"Community"`, `tags` defaults to `[]`, `source` defaults to `"community"`,
  *                `created_at`/`date_added` default to the current ISO timestamp when both are missing,
  *                `viewCount`/`copyCount` default to `0`. The `featured` flag is set when `featuredScore` is provided.
+ * @param input.author
+ * @param input.category
+ * @param input.copyCount
+ * @param input.created_at
+ * @param input.date_added
+ * @param input.description
+ * @param input.featuredRank
+ * @param input.featuredScore
+ * @param input.slug
+ * @param input.source
+ * @param input.tags
+ * @param input.title
+ * @param input.viewCount
  * @returns The normalized HomepageContentItem with canonical field names (`view_count`, `copy_count`, `created_at`, `date_added`, etc.) and defaults applied.
  *
  * @see mapTrendingMetrics

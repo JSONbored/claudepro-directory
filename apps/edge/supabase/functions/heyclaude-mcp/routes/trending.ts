@@ -82,6 +82,12 @@ export async function handleGetTrending(
       items,
       category: category || 'all',
       count: items.length,
+      limit,
+      pagination: {
+        total: items.length,
+        limit,
+        hasMore: false, // Trending doesn't support pagination
+      },
     },
   };
 }

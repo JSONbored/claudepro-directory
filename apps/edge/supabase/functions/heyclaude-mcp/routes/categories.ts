@@ -7,6 +7,7 @@
 
 import type { Database } from '@heyclaude/database-types';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { getCategoryUsageHints } from '../lib/usage-hints.ts';
 import { logError } from '@heyclaude/shared-runtime/logging.ts';
 import type { ListCategoriesInput } from '../lib/types.ts';
 
@@ -73,6 +74,9 @@ export async function handleListCategories(
     .map((c: { name: string; slug: string; count: number; description: string }) => `• ${c.name} (${c.slug}): ${c.count} items - ${c.description}`)
     .join('\n');
 
+  // Get usage hints for categories
+  const usageHints = getCategoryUsageHints();
+
   return {
     content: [
       {
@@ -84,6 +88,8 @@ export async function handleListCategories(
     _meta: {
       categories,
       total: categories.length,
+      usageHints,
+      relatedTools: ['searchContent', 'getTrending', 'getRecent', 'getCategoryConfigs'],
     },
   };
 }

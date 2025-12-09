@@ -1,14 +1,18 @@
 /**
  * OAuth Authorization Proxy Endpoint
  *
- * Proxies OAuth authorization requests to Supabase Auth with the resource parameter
+ * Proxies OAuth authorization requests to Supabase Auth OAuth 2.1 Server with the resource parameter
  * (RFC 8707) to ensure tokens include the MCP server URL in the audience claim.
+ *
+ * **IMPORTANT:** This requires OAuth 2.1 Server to be enabled in your Supabase project.
+ * Enable it in: Authentication > OAuth Server in the Supabase dashboard.
  *
  * This endpoint enables full OAuth 2.1 flow for MCP clients:
  * 1. Client initiates OAuth with resource parameter
- * 2. User authenticates via Supabase Auth
- * 3. Token issued with correct audience claim
- * 4. Client uses token with MCP server
+ * 2. Supabase Auth OAuth 2.1 Server validates and redirects to authorization UI
+ * 3. User authenticates (using existing account) and approves/denies
+ * 4. Token issued with correct audience claim (from resource parameter)
+ * 5. Client uses token with MCP server
  */
 
 import { edgeEnv } from '@heyclaude/edge-runtime/config/env.ts';
@@ -45,11 +49,14 @@ function jsonError(
 }
 
 /**
- * Proxies incoming OAuth authorization requests to Supabase Auth, injecting the RFC 8707 `resource` parameter for MCP audience and preserving required OAuth and PKCE parameters.
+ * Proxies incoming OAuth authorization requests to Supabase Auth OAuth 2.1 Server, injecting the RFC 8707 `resource` parameter for MCP audience and preserving required OAuth and PKCE parameters.
+ *
+ * **IMPORTANT:** This requires OAuth 2.1 Server to be enabled in your Supabase project.
+ * Enable it in: Authentication > OAuth Server in the Supabase dashboard.
  *
  * Performs required validation for `client_id`, `response_type` (must be `code`), `redirect_uri`, and PKCE (`code_challenge` / `code_challenge_method` must be `S256`) and returns appropriate JSON OAuth error responses on validation failure.
  *
- * @returns A redirect Response to the Supabase Auth `/authorize` endpoint when the request is valid, or a JSON error Response describing the validation or server error.
+ * @returns A redirect Response to the Supabase Auth `/oauth/authorize` endpoint (OAuth 2.1 Server) when the request is valid, or a JSON error Response describing the validation or server error.
  */
 export async function handleOAuthAuthorize(c: Context): Promise<Response> {
   const logContext = createDataApiContext('oauth-authorize', {
@@ -120,9 +127,10 @@ export async function handleOAuthAuthorize(c: Context): Promise<Response> {
       return jsonError(c, 'invalid_request', 'Only S256 code challenge method is supported', 400);
     }
 
-    // Build Supabase Auth authorization URL
+    // Build Supabase Auth OAuth 2.1 authorization URL
+    // Use /oauth/authorize endpoint (requires OAuth 2.1 Server to be enabled)
     // Include resource parameter (RFC 8707) to ensure token has correct audience
-    const supabaseAuthUrl = new URL(`${SUPABASE_AUTH_URL}/authorize`);
+    const supabaseAuthUrl = new URL(`${SUPABASE_AUTH_URL}/oauth/authorize`);
 
     // Preserve all OAuth parameters
     supabaseAuthUrl.searchParams.set('client_id', clientId);

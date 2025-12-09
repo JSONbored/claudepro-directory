@@ -5,7 +5,7 @@ import {
   getSponsorshipAnalytics,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   POSITION_PATTERNS,
   UI_CLASSES,
@@ -18,12 +18,15 @@ import {
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { MetricsDisplay } from '@/src/components/features/analytics/metrics-display';
+
+import Loading from './loading';
 
 /**
  * Dynamic Rendering Required
@@ -43,6 +46,7 @@ interface AnalyticsPageProperties {
  * `connection()`, ensuring compatibility with Next.js Cache Components.
  *
  * @param params - A promise that resolves to route parameters; must resolve to an object containing `id`
+ * @param params.params
  * @returns The Metadata object for the sponsorship analytics page for `id`
  *
  * @see generatePageMetadata
@@ -64,30 +68,25 @@ export async function generateMetadata({ params }: AnalyticsPageProperties): Pro
  * analytics data is missing or invalid.
  *
  * @param params - Route parameters object containing the `id` of the sponsorship to display.
+ * @param params.params
  * @returns A React element showing campaign metrics, daily performance visualization, and optimization tips.
  *
  * @see getSponsorshipAnalytics
  * @see getAuthenticatedUser
- * @see generateRequestId
  * @see notFound
  */
 export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPageProperties) {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
-
-  // Generate single requestId for this page request (after connection() to allow Date.now())
-  const requestId = generateRequestId();
+  'use cache: private';
+  cacheLife('userProfile'); // 1min stale, 5min revalidate, 30min expire - User-specific data
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    requestId,
     operation: 'SponsorshipAnalyticsPage',
     module: 'apps/web/src/app/account/sponsorships/[id]/analytics',
   });
 
   return (
-    <Suspense fallback={<div className="space-y-6">Loading sponsorship analytics...</div>}>
+    <Suspense fallback={<Loading />}>
       <SponsorshipAnalyticsPageContent params={params} reqLogger={reqLogger} />
     </Suspense>
   );
@@ -99,7 +98,9 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
  * Renders a sign-in prompt when no authenticated user is present and triggers Next.js `notFound()` when analytics or required fields are missing.
  *
  * @param params - Promise resolving to route parameters with an `id` property
+ * @param params.params
  * @param reqLogger - Request-scoped logger (used to create route- and user-scoped child loggers)
+ * @param params.reqLogger
  * @returns The React elements comprising the sponsorship analytics UI
  * @throws Normalized error when fetching sponsorship analytics fails
  * @see getSponsorshipAnalytics
@@ -173,7 +174,7 @@ async function SponsorshipAnalyticsPageContent({
   const computed_metrics = analyticsData.computed_metrics;
 
   // Handle nullability per generated types (composite types are nullable in generated types)
-  if (!(sponsorship && daily_stats && computed_metrics)) {
+  if (!sponsorship || !daily_stats || !computed_metrics) {
     userLogger.error(
       'SponsorshipAnalyticsPage: unexpected null fields in analytics data',
       new Error('Null fields in analytics data')
@@ -333,7 +334,7 @@ async function SponsorshipAnalyticsPageContent({
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            {Array.from({ length: 30 }).map((_, index) => {
+            {Array.from({ length: 30 }, (_, index) => {
               const date = new Date();
               date.setDate(date.getDate() - (29 - index));
               const dayKey = date.toISOString().slice(0, 10); // Extract YYYY-MM-DD

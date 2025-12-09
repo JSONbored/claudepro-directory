@@ -8,6 +8,9 @@
 import type { Database } from '@heyclaude/database-types';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { logError } from '@heyclaude/shared-runtime/logging.ts';
+import { McpErrorCode, createErrorResponse } from '../lib/errors.ts';
+import { sanitizeString, isValidSlug } from '../lib/utils.ts';
+import { getContentUsageHints } from '../lib/usage-hints.ts';
 import type { GetContentDetailInput } from '../lib/types.ts';
 
 /**
@@ -23,7 +26,18 @@ export async function handleGetContentDetail(
   supabase: SupabaseClient<Database>,
   input: GetContentDetailInput
 ) {
-  const { slug, category } = input;
+  // Sanitize and validate inputs
+  const slug = sanitizeString(input.slug);
+  const category = input.category;
+  
+  // Validate slug format
+  if (!isValidSlug(slug)) {
+    const error = createErrorResponse(
+      McpErrorCode.INVALID_SLUG,
+      `Invalid slug format: ${slug}. Slugs must be alphanumeric with hyphens, underscores, or dots.`
+    );
+    throw new Error(error.message);
+  }
 
   // Query the content table directly since get_content_detail_complete returns nested nulls
   const { data, error } = await supabase
@@ -117,6 +131,9 @@ ${details.description}
 ${details.content ? `## Content\n${details.content}` : ''}
 `.trim();
 
+  // Get usage hints for this content
+  const usageHints = getContentUsageHints(details.category, details.slug);
+
   return {
     content: [
       {
@@ -124,6 +141,10 @@ ${details.content ? `## Content\n${details.content}` : ''}
         text: textSummary,
       },
     ],
-    _meta: details,
+    _meta: {
+      ...details,
+      usageHints,
+      relatedTools: ['downloadContentForPlatform', 'getRelatedContent', 'getContentByTag', 'searchContent'],
+    },
   };
 }

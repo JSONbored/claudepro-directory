@@ -15,12 +15,7 @@
  * Runtime: Node.js (required for revalidatePath/revalidateTag)
  */
 import { env } from '@heyclaude/shared-runtime/schemas/env';
-import {
-  generateRequestId,
-  logger,
-  normalizeError,
-  handleApiError,
-} from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError, handleApiError } from '@heyclaude/web-runtime/logging/server';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
@@ -50,12 +45,8 @@ const RevalidateRequestSchema = z.object({
  * @see env.REVALIDATE_SECRET
  */
 export async function POST(request: NextRequest) {
-  // Generate single requestId for this API request
-  const requestId = generateRequestId();
-
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    requestId,
     operation: 'RevalidateAPI',
     route: '/api/revalidate',
     module: 'apps/web/src/app/api/revalidate',

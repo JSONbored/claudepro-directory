@@ -6,7 +6,7 @@
 import { Constants, type Database } from '@heyclaude/database-types';
 import { type CreateJobInput } from '@heyclaude/web-runtime';
 import { updateJob } from '@heyclaude/web-runtime/actions';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
@@ -15,11 +15,14 @@ import {
 } from '@heyclaude/web-runtime/server';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import { notFound, redirect } from 'next/navigation';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { JobForm } from '@/src/components/core/forms/job-form';
+
+import Loading from './loading';
 
 /**
  * Dynamic Rendering Required
@@ -36,6 +39,7 @@ interface EditJobPageMetadataProperties {
  * Produce page metadata for the Edit Job page at /account/jobs/:id/edit using the route `id`.
  *
  * @param props - An object with a `params` property that resolves to route parameters; expects `params.id` to identify the job.
+ * @param props.params
  * @returns Metadata for the page, populated for the path `/account/jobs/:id/edit`.
  *
  * @see generatePageMetadata
@@ -61,6 +65,7 @@ interface EditJobPageProperties {
  * Renders a pre-filled JobForm for the specified job id, shows a warning when job enum fields are invalid, redirects unauthenticated users to /login, and calls the server action to update the job (redirecting to /account/jobs on successful update). If the job is not found or not owned by the user, it triggers Next.js notFound().
  *
  * @param params - Route params promise containing `{ id: string }` for the job to edit
+ * @param params.params
  * @returns The page's React element tree for editing a job listing
  *
  * @see getAuthenticatedUser
@@ -70,22 +75,17 @@ interface EditJobPageProperties {
  * @see JobForm
  */
 export default async function EditJobPage({ params }: EditJobPageProperties) {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
-
-  // Generate single requestId for this page request (after connection() to allow Date.now())
-  const requestId = generateRequestId();
+  'use cache: private';
+  cacheLife('userProfile'); // 1min stale, 5min revalidate, 30min expire - User-specific data
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    requestId,
     operation: 'EditJobPage',
     module: 'apps/web/src/app/account/jobs/[id]/edit',
   });
 
   return (
-    <Suspense fallback={<div className="space-y-6">Loading job editor...</div>}>
+    <Suspense fallback={<Loading />}>
       <EditJobPageContent params={params} reqLogger={reqLogger} />
     </Suspense>
   );
@@ -102,7 +102,9 @@ export default async function EditJobPage({ params }: EditJobPageProperties) {
  * - Validates `job.type` and `job.category` against public enums, logs warnings for invalid values, and shows a UI warning banner when applicable.
  *
  * @param params - A promise resolving to an object with the route `id` for the job to edit.
+ * @param params.params
  * @param reqLogger - A request-scoped logger child used to derive route- and user-scoped loggers; sensitive identifiers are redacted by the logger configuration.
+ * @param params.reqLogger
  * @returns The rendered React node for the Edit Job page content.
  *
  * @see JobForm
@@ -184,12 +186,8 @@ async function EditJobPageContent({
   const handleSubmit = async (data: EditJobInput) => {
     'use server';
 
-    // Generate requestId for server action (separate from page render)
-    const actionRequestId = generateRequestId();
-
     // Create request-scoped child logger for server action
     const actionLogger = logger.child({
-      requestId: actionRequestId,
       operation: 'EditJobPageAction',
       route: `/account/jobs/${id}/edit`,
       module: 'apps/web/src/app/account/jobs/[id]/edit',
@@ -252,7 +250,7 @@ async function EditJobPageContent({
     });
   }
 
-  const hasInvalidData = !(isValidJobType(job.type) && isValidJobCategory(job.category));
+  const hasInvalidData = !isValidJobType(job.type) || !isValidJobCategory(job.category);
 
   return (
     <div className="space-y-6">
@@ -263,7 +261,7 @@ async function EditJobPageContent({
       {hasInvalidData ? (
         <div className="rounded-md bg-yellow-50 p-4 dark:bg-yellow-900/20">
           <p className="text-sm text-yellow-800 dark:text-yellow-200">
-            Some fields contain invalid data and couldn't be loaded. Please review and update.
+            Some fields contain invalid data and couldn&apos;t be loaded. Please review and update.
           </p>
         </div>
       ) : null}

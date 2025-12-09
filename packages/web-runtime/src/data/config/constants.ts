@@ -251,6 +251,7 @@ export { SOCIAL_LINKS } from '../../config/social-links.ts';
 /**
  * Get a social link by key
  * This helper function allows other files to access social links without directly importing SOCIAL_LINKS
+ * @param key
  */
 export function getSocialLink(key: SocialLinkKey): string | undefined {
   return SOCIAL_LINKS[key];

@@ -1,4 +1,5 @@
 import { OG_DEFAULTS, OG_DIMENSIONS } from '@heyclaude/shared-runtime';
+import { logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
 import { ImageResponse } from 'next/og';
 import { type NextRequest } from 'next/server';
 
@@ -18,7 +19,14 @@ import { type NextRequest } from 'next/server';
  * @see OG_DIMENSIONS
  * @see ImageResponse
  */
-export function GET(request: NextRequest) {
+export async function GET(request: NextRequest) {
+  const reqLogger = logger.child({
+    operation: 'OGImageAPI',
+    route: '/api/og',
+    method: 'GET',
+  });
+
+  // Extract parameters and prepare data outside try/catch to avoid JSX construction in try/catch
   const { searchParams } = new URL(request.url);
   const title = searchParams.get('title') ?? OG_DEFAULTS.title;
   const description = searchParams.get('description') ?? OG_DEFAULTS.description;
@@ -35,7 +43,10 @@ export function GET(request: NextRequest) {
       ]
     : [];
 
-  return new ImageResponse(
+  reqLogger.info('Generating OG image', { title, type, tagCount: tags.length });
+
+  // Construct JSX element outside try/catch to avoid JSX construction errors in try/catch
+  const ogImageJSX = (
     <div
       style={{
         height: '100%',
@@ -150,10 +161,27 @@ export function GET(request: NextRequest) {
           <div style={{ fontSize: '24px', color: '#6b7280' }}>claudepro.directory</div>
         </div>
       </div>
-    </div>,
-    {
+    </div>
+  );
+
+  try {
+    // ImageResponse may throw during rendering, so we wrap it in try/catch
+    return new ImageResponse(ogImageJSX, {
       width: OG_DIMENSIONS.width,
       height: OG_DIMENSIONS.height,
-    }
-  );
+    });
+  } catch (error) {
+    const normalized = normalizeError(error, 'OG image generation failed');
+    reqLogger.error('OG image generation failed', normalized, {
+      route: '/api/og',
+      operation: 'OGImageAPI',
+      method: 'GET',
+    });
+    return createErrorResponse(normalized, {
+      route: '/api/og',
+      operation: 'OGImageAPI',
+      method: 'GET',
+      logContext: {},
+    });
+  }
 }

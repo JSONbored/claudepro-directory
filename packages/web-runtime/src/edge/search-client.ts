@@ -68,12 +68,9 @@ async function executeSearchDirect<T>(
 ): Promise<UnifiedSearchResponse<T>> {
   const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
   const { logger } = await import('../logger.ts');
-  const { generateRequestId } = await import('../utils/request-id.ts');
   
   // Create request-scoped child logger to avoid race conditions
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'executeSearchDirect',
     module: 'edge/search-client',
   });
@@ -95,11 +92,26 @@ async function executeSearchDirect<T>(
     
     // search_unified only accepts: p_query, p_entities, p_limit, p_offset
     // Categories, tags, and authors filtering must be done client-side after search
+    reqLogger.info('Calling SearchService.searchUnified', {
+      query: options.query,
+      entities,
+      limit: options.filters?.limit ?? 20,
+      offset: options.filters?.offset ?? 0,
+    });
+    
     const serviceResponse = await service.searchUnified({
       p_query: options.query,
       p_entities: entities,
       p_limit: options.filters?.limit ?? 20,
       p_offset: options.filters?.offset ?? 0
+    });
+    
+    reqLogger.info('SearchService.searchUnified returned', {
+      hasResponse: !!serviceResponse,
+      hasData: 'data' in serviceResponse,
+      dataIsArray: Array.isArray(serviceResponse?.data),
+      dataLength: Array.isArray(serviceResponse?.data) ? serviceResponse.data.length : 0,
+      totalCount: serviceResponse?.total_count ?? 0,
     });
     
     // Type guard: Validate service response structure
@@ -129,12 +141,49 @@ async function executeSearchDirect<T>(
     
     const data = serviceResponse.data;
     
+    reqLogger.info('Processing search results', {
+      dataType: typeof data,
+      dataIsArray: Array.isArray(data),
+      dataLength: Array.isArray(data) ? data.length : 0,
+      dataIsNull: data === null,
+      dataIsUndefined: data === undefined,
+    });
+    
     // Type guard: Ensure results is an array
-    let results: UnifiedSearchResult[] = Array.isArray(data) 
-      ? data.filter((item): item is UnifiedSearchResult => 
-          item !== null && typeof item === 'object' && 'id' in item
-        )
-      : [];
+    // Handle null/undefined data from RPC (shouldn't happen, but defensive)
+    let results: UnifiedSearchResult[] = [];
+    if (Array.isArray(data)) {
+      // Filter out null/undefined items, but keep all valid objects
+      // UnifiedSearchResult from search_unified has: entity_type, id, title, description, slug, category, tags, created_at, relevance_score, engagement_score
+      const beforeFilter = data.length;
+      results = data.filter((item): item is UnifiedSearchResult => 
+        item !== null && 
+        typeof item === 'object' && 
+        'id' in item &&
+        'entity_type' in item
+      );
+      
+      reqLogger.info('Type guard filtering complete', {
+        beforeFilter,
+        afterFilter: results.length,
+        filteredOut: beforeFilter - results.length,
+      });
+      
+      // Log if we filtered out items (shouldn't happen with valid RPC response)
+      if (data.length > 0 && results.length === 0) {
+        reqLogger.warn('All search results filtered out by type guard', {
+          originalCount: data.length,
+          sampleItemKeys: data[0] ? Object.keys(data[0]) : [],
+        });
+      }
+    } else if (data !== null && data !== undefined) {
+      // Log unexpected data type
+      reqLogger.warn('Search RPC returned non-array data', {
+        dataType: typeof data,
+      });
+    } else {
+      reqLogger.warn('Search RPC returned null/undefined data');
+    }
     
     // Client-side filtering for categories, tags, and authors (since search_unified doesn't support these)
     if (options.filters?.categories && options.filters.categories.length > 0) {

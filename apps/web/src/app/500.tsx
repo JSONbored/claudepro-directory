@@ -9,11 +9,7 @@
 
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { AlertCircle, Home, RefreshCw } from '@heyclaude/web-runtime/icons';
-import {
-  generateRequestId,
-  logClientError,
-  normalizeError,
-} from '@heyclaude/web-runtime/logging/client';
+import { logClientError, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { UI_CLASSES, Button, Card } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { useEffect } from 'react';
@@ -25,13 +21,11 @@ import { useEffect } from 'react';
  *
  * @returns The server error page as a JSX element.
  *
- * @see generateRequestId
  * @see logClientError
  * @see ROUTES.HOME
  */
 export default function ServerError() {
   useEffect(() => {
-    const requestId = generateRequestId();
     const route = globalThis.location.pathname;
     const operation = 'ServerErrorPage';
     const serverError = new Error('Server error (500)');
@@ -40,7 +34,6 @@ export default function ServerError() {
       component: 'ServerError',
       action: 'display-error-page',
       category: 'error',
-      requestId,
       route,
       userAgent: globalThis.navigator.userAgent,
       url: globalThis.location.href,

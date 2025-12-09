@@ -153,7 +153,7 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
                 const ActionIcon = link.icon;
                 return (
                   <motion.div
-                    key={link.href}
+                    key={`action-${link.label}-${index}`}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.15 + index * 0.05 }}
@@ -176,7 +176,7 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
                 const adjustedIndex = ACTION_LINKS.length + index;
                 return (
                   <motion.div
-                    key={link.href}
+                    key={`primary-${link.label}-${index}`}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.15 + adjustedIndex * 0.05 }}
@@ -211,7 +211,7 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
                     const IconComponent = link.icon;
                     return (
                       <motion.div
-                        key={link.href}
+                        key={`secondary-${link.label}-${index}`}
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{

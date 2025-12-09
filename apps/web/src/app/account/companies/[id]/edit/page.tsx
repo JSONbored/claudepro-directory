@@ -9,7 +9,7 @@ import {
   getUserCompanyById,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   Button,
   Card,
@@ -19,12 +19,15 @@ import {
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { CompanyForm } from '@/src/components/core/forms/company-form';
+
+import Loading from './loading';
 
 /**
  * Provide metadata for the edit-company route and ensure a server-side connection before performing non-deterministic operations.
@@ -58,6 +61,8 @@ interface EditCompanyPageProperties {
  * error card; if the company does not exist or access is denied this page triggers a 404.
  *
  * @param props.params - Route parameters containing the `id` of the company to edit.
+ * @param root0
+ * @param root0.params
  * @returns The page element that displays the edit form pre-populated with the company data,
  *          or an error card / redirect / 404 response when appropriate.
  *
@@ -67,24 +72,20 @@ interface EditCompanyPageProperties {
  * @see ROUTES.ACCOUNT_COMPANIES
  */
 export default async function EditCompanyPage({ params }: EditCompanyPageProperties) {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
+  'use cache: private';
+  cacheLife('userProfile'); // 1min stale, 5min revalidate, 30min expire - User-specific data
 
-  // Generate single requestId for this page request (after connection() to allow Date.now())
-  const requestId = generateRequestId();
   const operation = 'EditCompanyPage';
   const modulePath = 'apps/web/src/app/account/companies/[id]/edit/page';
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    requestId,
     operation,
     module: modulePath,
   });
 
   return (
-    <Suspense fallback={<div className="space-y-6">Loading company editor...</div>}>
+    <Suspense fallback={<Loading />}>
       <EditCompanyPageContent params={params} reqLogger={reqLogger} />
     </Suspense>
   );
@@ -94,7 +95,9 @@ export default async function EditCompanyPage({ params }: EditCompanyPagePropert
  * Render the edit-company UI for the specified company id, handling authentication, data loading errors, and access control.
  *
  * @param params - Route parameters as a promise resolving to an object with an `id` property for the company to edit.
+ * @param params.params
  * @param reqLogger - Request-scoped logger used for structured, redacted logging within the request lifecycle.
+ * @param params.reqLogger
  * @returns A React element: the populated CompanyForm when the company is loaded, an error card when data loading fails; this function may redirect unauthenticated users to `/login` or call `notFound()` when the company is not found or access is denied.
  *
  * @see CompanyForm

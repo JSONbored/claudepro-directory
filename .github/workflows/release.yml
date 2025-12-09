@@ -1,17 +1,13 @@
-# GitHub Actions Workflow: Automatic Release Creation
-#
-# Automatically creates GitHub releases when version tags are pushed.
-#
-# **Trigger:**
-# - Pushes to tags matching `v*.*.*` format (e.g., `v1.2.3`)
+# Create Release - Optimized for performance
+# - Only runs on tag pushes (v*.*.* format) - very specific trigger
+# - Uses reusable composite action for setup (reduces duplication)
+# - fetch-depth: 0 needed for changelog generation (requires git history)
+# - Continues on non-critical errors (changelog generation failures)
 #
 # **What it does:**
 # 1. Extracts version from tag name
 # 2. Generates changelog entry for the release (if git-cliff is available)
-# 3. Creates GitHub Release with:
-#    - Release name: "Release vX.Y.Z"
-#    - Release notes: Contents of CHANGELOG.md
-#    - Auto-generated release notes from commits
+# 3. Creates GitHub Release with release notes
 #
 # **Complete Workflow:**
 # 1. Developer generates changelog: `pnpm changelog:generate`
@@ -19,10 +15,6 @@
 # 3. Developer commits: `git commit -m "chore: bump version to X.Y.Z"`
 # 4. Developer tags: `git tag vX.Y.Z && git push origin main --tags`
 # 5. This workflow automatically creates the GitHub release
-#
-# **Requirements:**
-# - Tag format must be `v*.*.*` (e.g., `v1.2.3`, not `1.2.3` or `version-1.2.3`)
-# - Repository must have `contents: write` permission (automatically provided)
 #
 # **Related Files:**
 # - packages/generators/src/commands/bump-version.ts - Version bump script
@@ -42,38 +34,74 @@ jobs:
       contents: write  # Required to create releases
     
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
         with:
-          fetch-depth: 0  # Need full history for changelog
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.24.0
-      
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+          # fetch-depth: 0 needed for changelog generation (requires git history)
+          fetch-depth: 0
       
       - name: Extract version from tag
         id: tag_version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
       
-      - name: Generate changelog for release
-        run: pnpm changelog:generate --tag v${{ steps.tag_version.outputs.VERSION }}
-        continue-on-error: true  # Don't fail if changelog generation fails
+      - name: Verify changelog command exists
+        run: |
+          if ! grep -q '"changelog:generate"' package.json; then
+            echo "❌ changelog:generate script not found in package.json" >&2
+            exit 1
+          fi
+          echo "✅ changelog:generate command verified in package.json"
       
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+      - name: Generate changelog for release
+        id: changelog
+        run: |
+          # Generate changelog entry
+          pnpm changelog:generate --tag v${{ steps.tag_version.outputs.VERSION }} || {
+            echo "⚠️ Changelog generation failed (non-critical - will use auto-generated notes)" >&2
+            echo "CHANGELOG_GENERATED=false" >> $GITHUB_OUTPUT
+            exit 0
+          }
+          echo "CHANGELOG_GENERATED=true" >> $GITHUB_OUTPUT
+        continue-on-error: true  # Don't fail workflow if changelog generation fails (auto-generated notes are fallback)
+      
+      - name: Verify CHANGELOG.md exists and prepare release body
+        id: release_body
+        run: |
+          # Check if CHANGELOG.md exists
+          if [ ! -f "CHANGELOG.md" ]; then
+            echo "⚠️ CHANGELOG.md not found - release will use auto-generated notes only" >&2
+            echo "USE_CHANGELOG=false" >> $GITHUB_OUTPUT
+            echo "BODY_PATH=" >> $GITHUB_OUTPUT
+          else
+            echo "✅ CHANGELOG.md found"
+            # Only use CHANGELOG.md if it was generated successfully in this run
+            if [ "${{ steps.changelog.outputs.CHANGELOG_GENERATED }}" == "true" ]; then
+              echo "USE_CHANGELOG=true" >> $GITHUB_OUTPUT
+              echo "BODY_PATH=CHANGELOG.md" >> $GITHUB_OUTPUT
+            else
+              echo "USE_CHANGELOG=false" >> $GITHUB_OUTPUT
+              echo "BODY_PATH=" >> $GITHUB_OUTPUT
+            fi
+          fi
+        continue-on-error: true  # Don't fail if CHANGELOG.md is missing (auto-generated notes are fallback)
+      
+      - name: Create GitHub Release (with CHANGELOG.md)
+        if: steps.release_body.outputs.BODY_PATH != ''
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
           name: Release v${{ steps.tag_version.outputs.VERSION }}
-          body_path: CHANGELOG.md
+          body_path: ${{ steps.release_body.outputs.BODY_PATH }}
           draft: false
           prerelease: false
-          generate_release_notes: true
+          generate_release_notes: true  # Also generate notes (will be merged with body_path content)
+      
+      - name: Create GitHub Release (without CHANGELOG.md)
+        if: steps.release_body.outputs.BODY_PATH == ''
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release v${{ steps.tag_version.outputs.VERSION }}
+          # body_path omitted - will use generate_release_notes as primary source
+          draft: false
+          prerelease: false
+          generate_release_notes: true  # Primary source when CHANGELOG.md is missing or generation failed

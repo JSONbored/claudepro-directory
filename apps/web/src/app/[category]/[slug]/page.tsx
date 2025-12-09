@@ -5,11 +5,11 @@
  *
  * ISR: 2 hours (7200s) - Detail pages change less frequently than list pages
  */
-import { type Database } from '@heyclaude/database-types';
+import { Constants, type Database } from '@heyclaude/database-types';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
 import { ensureStringArray, isValidCategory } from '@heyclaude/web-runtime/core';
 import { type RecentlyViewedCategory } from '@heyclaude/web-runtime/hooks';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   generatePageMetadata,
   getCategoryConfig,
@@ -18,8 +18,8 @@ import {
   getRelatedContent,
 } from '@heyclaude/web-runtime/server';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import { notFound } from 'next/navigation';
-import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { CollectionDetailView } from '@/src/components/content/detail-page/collection-view';
@@ -28,6 +28,8 @@ import { ReadProgress } from '@/src/components/content/read-progress';
 import { Pulse } from '@/src/components/core/infra/pulse';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { RecentlyViewedTracker } from '@/src/components/features/navigation/recently-viewed-tracker';
+
+import Loading from './loading';
 
 /**
  * Produce static route parameters ({ category, slug }) for a subset of homepage categories to pre-render at build time.
@@ -49,10 +51,10 @@ export async function generateStaticParams() {
   const categories = getHomepageCategoryIds;
   const parameters: Array<{ category: string; slug: string }> = [];
 
-  // Limit to top 20 items per category to optimize build time
-  // Increased from 10 to 20 after database query optimizations (80% faster queries)
-  // ISR with dynamicParams=true handles remaining pages on-demand with 2hr revalidation
-  const MAX_ITEMS_PER_CATEGORY = 30;
+  // Limit to top items per category to optimize build time
+  // Increased from 30 to 50 after Cache Components optimization (more static generation)
+  // Cache Components with dynamicParams=true handles remaining pages on-demand
+  const MAX_ITEMS_PER_CATEGORY = 50;
 
   // Process all categories in parallel
   // OPTIMIZATION: Skip validation - rely on dynamicParams=true for on-demand rendering
@@ -75,12 +77,10 @@ export async function generateStaticParams() {
         return { category, params: categoryParameters };
       } catch (error) {
         // Log error but continue with other categories
-        const requestId = generateRequestId();
         const operation = 'generateStaticParams';
         const route = `/${category}`;
         const modulePath = 'apps/web/src/app/[category]/[slug]/page';
         const reqLogger = logger.child({
-          requestId,
           operation,
           route,
           module: modulePath,
@@ -110,14 +110,14 @@ export async function generateStaticParams() {
 // Map route categories (plural) to RecentlyViewedCategory (singular)
 // Use explicit string keys instead of fragile array indexing to prevent breakage if enum order changes
 const CATEGORY_TO_RECENTLY_VIEWED: Record<string, RecentlyViewedCategory> = {
-  agents: 'agent',
-  commands: 'command',
-  hooks: 'hook',
-  mcp: 'mcp',
-  rules: 'rule',
-  statuslines: 'statusline',
-  skills: 'skill',
-  jobs: 'job',
+  [Constants.public.Enums.content_category[0]]: 'agent', // 'agents'
+  [Constants.public.Enums.content_category[1]]: 'command', // 'commands'
+  [Constants.public.Enums.content_category[2]]: 'hook', // 'hooks'
+  [Constants.public.Enums.content_category[3]]: 'mcp', // 'mcp'
+  [Constants.public.Enums.content_category[4]]: 'rule', // 'rules'
+  [Constants.public.Enums.content_category[5]]: 'statusline', // 'statuslines'
+  [Constants.public.Enums.content_category[6]]: 'skill', // 'skills'
+  [Constants.public.Enums.content_category[7]]: 'job', // 'jobs'
   job: 'job', // Alias for consistency
 } as const;
 
@@ -141,6 +141,7 @@ function mapCategoryToRecentlyViewed(category: string): null | RecentlyViewedCat
  * Generate page metadata for a detail route from route params and category configuration.
  *
  * @param params - An object containing `category` and `slug` route parameters.
+ * @param params.params
  * @returns The Metadata for the detail page. If `category` is invalid, returns the default metadata for `/:category/:slug`.
  *
  * @see generatePageMetadata
@@ -154,39 +155,13 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { category, slug } = await params;
 
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
-
-  // Generate requestId for metadata generation (separate from page render, after connection() to allow Date.now())
-  const metadataRequestId = generateRequestId();
-
-  // Create request-scoped child logger to avoid race conditions
-  const metadataLogger = logger.child({
-    requestId: metadataRequestId,
-    operation: 'DetailPageMetadata',
-    route: `/${category}/${slug}`,
-    module: 'apps/web/src/app/[category]/[slug]',
-  });
-
-  // Validate category at compile time
   if (!isValidCategory(category)) {
-    metadataLogger.warn('Invalid category in generateMetadata', {
-      section: 'category-validation',
-      category,
-    });
     return generatePageMetadata('/:category/:slug', {
       params: { category, slug },
     });
   }
 
   const config = getCategoryConfig(category);
-
-  metadataLogger.info('DetailPage: generating metadata', {
-    section: 'metadata-generation',
-    category,
-    slug,
-  });
 
   return generatePageMetadata('/:category/:slug', {
     params: { category, slug },
@@ -205,6 +180,7 @@ export async function generateMetadata({
  * Suspense boundaries for optimal streaming.
  *
  * @param params - A promise that resolves to an object with `category` and `slug` route parameters
+ * @param params.params
  * @returns A React element representing the detail page for the specified `category` and `slug`
  *
  * @see getContentDetailCore
@@ -219,24 +195,23 @@ export default async function DetailPage({
 }: {
   params: Promise<{ category: string; slug: string }>;
 }) {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
-  // Generate single requestId for this page request (after connection() to allow Date.now())
-  const requestId = generateRequestId();
+  // Params is runtime data - cache key includes params, so different content items create different cache entries
+  const { category, slug } = await params;
+
   const operation = 'DetailPage';
   const modulePath = 'apps/web/src/app/[category]/[slug]/page';
 
-  // Create request-scoped child logger to avoid race conditions
+  // Create request-scoped child logger
   const reqLogger = logger.child({
-    requestId,
     operation,
+    route: `/${category}/${slug}`,
     module: modulePath,
   });
 
-  // Resolve params early for validation, but defer content fetching to Suspense
-  const { category, slug } = await params;
+  // Note: category and slug are already available from await params above
 
   // Handle placeholder slugs (if any remain from old generateStaticParams)
   if (slug === '__placeholder__') {
@@ -258,7 +233,7 @@ export default async function DetailPage({
   }
 
   return (
-    <Suspense fallback={<div className="container mx-auto px-4 py-8">Loading content...</div>}>
+    <Suspense fallback={<Loading />}>
       <DetailPageContent category={category} slug={slug} reqLogger={reqLogger} />
     </Suspense>
   );
@@ -272,8 +247,11 @@ export default async function DetailPage({
  * optional RecentlyViewed tracking and collection-specific sections.
  *
  * @param category - The content category identifying the type of content to display
+ * @param category.category
+ * @param category.reqLogger
  * @param slug - The content slug identifying the specific item to display
  * @param reqLogger - A request-scoped logger; a route-scoped child logger will be created for logging within this component.
+ * @param category.slug
  * @returns A React fragment containing progress UI, structured data, optional recently-viewed tracking, and the unified detail page with deferred data promises.
  *
  * @see UnifiedDetailPage

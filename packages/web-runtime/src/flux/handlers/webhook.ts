@@ -12,7 +12,7 @@ import type { Database as DatabaseGenerated, Json } from '@heyclaude/database-ty
 import { normalizeError, verifySvixSignature } from '@heyclaude/shared-runtime';
 
 import { createSupabaseAdminClient } from '../../supabase/admin';
-import { logger, generateRequestId, createWebAppContextWithId } from '../../logging/server';
+import { logger, createWebAppContextWithId } from '../../logging/server';
 import { createErrorResponse } from '../../utils/error-handler';
 
 // CORS headers - Webhooks are server-to-server and don't need browser CORS
@@ -224,6 +224,37 @@ async function detectAndVerifyWebhookSource(headers: Headers, body: string): Pro
     return 'vercel';
   }
 
+  // Check for Supabase database webhook
+  const supabaseSignature = headers.get('x-supabase-signature') || 
+                           headers.get('x-webhook-signature') ||
+                           headers.get('x-signature');
+  const supabaseTimestamp = headers.get('x-webhook-timestamp') || 
+                            headers.get('x-timestamp');
+  
+  if (supabaseSignature) {
+    // Verify Supabase database webhook signature
+    const webhookSecret = process.env['INTERNAL_API_SECRET'];
+    if (!webhookSecret) {
+      logger.warn('INTERNAL_API_SECRET not configured, cannot verify Supabase webhook');
+      return null;
+    }
+
+    // Dynamic import to avoid circular dependencies
+    const { verifySupabaseDatabaseWebhook } = await import('@heyclaude/shared-runtime');
+    const isValid = await verifySupabaseDatabaseWebhook({
+      rawBody: body,
+      secret: webhookSecret,
+      signature: supabaseSignature,
+      timestamp: supabaseTimestamp || null,
+    });
+
+    if (!isValid) {
+      logger.warn('Supabase database webhook signature verification failed');
+      return null;
+    }
+    return 'supabase_db';
+  }
+
   return null;
 }
 
@@ -234,6 +265,18 @@ function mapEventType(source: WebhookSource, eventType: string | undefined): Web
   // Map known event types to our enum values
   if (source === 'vercel' && eventType === 'deployment') {
     return 'deployment.succeeded';
+  }
+
+  // Map Supabase database webhook events
+  if (source === 'supabase_db') {
+    if (eventType === 'INSERT') {
+      return 'content_announcement_create' as WebhookEventType;
+    }
+    if (eventType === 'UPDATE') {
+      return 'content_announcement_update' as WebhookEventType;
+    }
+    // DELETE events don't need package generation
+    return 'webhook_received' as WebhookEventType;
   }
   
   // TODO: Add more event type mappings as needed
@@ -279,6 +322,17 @@ async function ingestWebhookEvent(
     case 'vercel':
       svixId = payload['id'] as string | null;
       eventTypeRaw = payload['type'] as string | undefined;
+      break;
+    case 'supabase_db':
+      // Supabase database webhooks use record.id as unique identifier
+      svixId = (payload['record'] as Record<string, unknown>)?.['id'] as string | null ||
+               headers.get('x-request-id') || 
+               null;
+      // Type-safe event type extraction
+      const dbEventType = payload['type'] as string | undefined;
+      eventTypeRaw = dbEventType && ['INSERT', 'UPDATE', 'DELETE'].includes(dbEventType) 
+        ? dbEventType 
+        : undefined;
       break;
     default:
       svixId = headers.get('x-request-id') || null;
@@ -570,14 +624,171 @@ async function processResendWebhook(
 }
 
 /**
+ * Process Supabase database webhook events
+ * 
+ * Forwards content change events to Inngest for durable processing.
+ * This enables:
+ * - Automatic package generation (skills, MCPB) when content is added/updated
+ * - GitHub Actions workflow triggers
+ * - Idempotent processing with automatic retries
+ */
+async function processSupabaseWebhook(
+  result: WebhookIngestResult,
+  logContext: Record<string, unknown>
+): Promise<{ forwarded: boolean; eventName?: string; error?: string }> {
+  const { eventType, payload, webhookId, svixId } = result;
+
+  logger.info('Processing Supabase database webhook', {
+    ...logContext,
+    eventType,
+    webhookId,
+  });
+
+  // Validate webhookId (required for idempotency)
+  if (!webhookId) {
+    logger.warn('Supabase webhook missing webhookId, cannot forward to Inngest', {
+      ...logContext,
+      eventType,
+      svixId,
+    });
+    return { forwarded: false, error: 'Missing webhookId' };
+  }
+
+  // Validate payload structure (Supabase database webhook format)
+  const record = payload['record'] as Record<string, unknown> | undefined;
+  const oldRecord = payload['old_record'] as Record<string, unknown> | null | undefined;
+  const table = payload['table'] as string | undefined;
+  const schema = payload['schema'] as string | undefined;
+
+  if (!record || !table || !schema) {
+    logger.warn('Supabase webhook missing required fields', {
+      ...logContext,
+      eventType,
+      hasRecord: !!record,
+      hasTable: !!table,
+      hasSchema: !!schema,
+    });
+    return { forwarded: false, error: 'Invalid webhook payload structure' };
+  }
+
+  // Only process content table changes
+  if (table !== 'content' || schema !== 'public') {
+    logger.info('Supabase webhook for non-content table, skipping', {
+      ...logContext,
+      eventType,
+      table,
+      schema,
+    });
+    return { forwarded: false };
+  }
+
+  // Extract content metadata
+  const contentId = record['id'] as string | undefined;
+  const category = record['category'] as string | undefined;
+  const slug = record['slug'] as string | undefined;
+
+  if (!contentId || !category) {
+    logger.warn('Supabase webhook missing content metadata', {
+      ...logContext,
+      eventType,
+      hasContentId: !!contentId,
+      hasCategory: !!category,
+    });
+    return { forwarded: false, error: 'Missing content metadata' };
+  }
+
+  // Only process skills and MCP categories
+  if (category !== 'skills' && category !== 'mcp') {
+    logger.info('Supabase webhook for non-package category, skipping', {
+      ...logContext,
+      eventType,
+      category,
+    });
+    return { forwarded: false };
+  }
+
+  // Check if package generation is needed
+  // For skills: check if storage_url is null/empty
+  // For MCP: check if mcpb_storage_url is null/empty
+  const needsGeneration = 
+    (category === 'skills' && (!record['storage_url'] || String(record['storage_url']).trim() === '')) ||
+    (category === 'mcp' && (!record['mcpb_storage_url'] || String(record['mcpb_storage_url']).trim() === ''));
+
+  if (!needsGeneration) {
+    logger.info('Supabase webhook: package already exists, skipping', {
+      ...logContext,
+      eventType,
+      category,
+      contentId,
+      slug,
+    });
+    return { forwarded: false };
+  }
+
+  // Forward to Inngest for durable processing
+  try {
+    // Dynamic import to avoid circular dependencies
+    const { inngest } = await import('../../inngest/client');
+
+    // Type-safe event type casting
+    const dbEventType = eventType as 'INSERT' | 'UPDATE' | 'DELETE';
+    if (!['INSERT', 'UPDATE', 'DELETE'].includes(dbEventType)) {
+      logger.warn('Invalid Supabase event type', {
+        ...logContext,
+        eventType,
+        webhookId,
+      });
+      return { forwarded: false, error: `Invalid event type: ${eventType}` };
+    }
+
+    await inngest.send({
+      name: 'supabase/content-changed',
+      data: {
+        webhookId,
+        svixId,
+        eventType: dbEventType,
+        category: category as 'skills' | 'mcp',
+        contentId,
+        slug: slug ?? undefined,
+        record,
+        oldRecord: oldRecord ?? undefined,
+        payload,
+      },
+    });
+
+    logger.info('Supabase webhook forwarded to Inngest', {
+      ...logContext,
+      eventType,
+      webhookId,
+      category,
+      contentId,
+      slug: slug ?? null,
+    });
+
+    return { forwarded: true, eventName: 'supabase/content-changed' };
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to forward Supabase webhook to Inngest');
+    logger.error('Supabase webhook forwarding failed', normalized, {
+      ...logContext,
+      eventType,
+      webhookId,
+      category,
+      contentId,
+    });
+    
+    // Don't fail the webhook - log and continue
+    // The event is already recorded in webhook_events table
+    return { forwarded: false, error: normalized.message };
+  }
+}
+
+/**
  * POST /api/flux/webhook/external
  * Process external webhooks from Polar, Resend, Vercel, etc.
  */
 export async function handleExternalWebhook(request: NextRequest): Promise<NextResponse> {
   const startTime = Date.now();
-  const requestId = generateRequestId();
   const logContext = createWebAppContextWithId(
-    requestId,
     '/api/flux/webhook/external',
     'handleExternalWebhook'
   );
@@ -622,11 +833,13 @@ export async function handleExternalWebhook(request: NextRequest): Promise<NextR
         webhookId: result.webhookId,
       });
 
-      // Process based on source - both Polar and Resend forward to Inngest
+      // Process based on source - Polar, Resend, and Supabase forward to Inngest
       if (result.source === 'polar') {
         processingResult = await processPolarWebhook(result, logContext);
       } else if (result.source === 'resend') {
         processingResult = await processResendWebhook(result, logContext);
+      } else if (result.source === 'supabase_db') {
+        processingResult = await processSupabaseWebhook(result, logContext);
       }
     }
 
@@ -659,7 +872,7 @@ export async function handleExternalWebhook(request: NextRequest): Promise<NextR
       route: '/api/flux/webhook/external',
       operation: 'POST',
       method: 'POST',
-      logContext: { requestId },
+      logContext: {},
     });
   }
 }

@@ -16,6 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
+import { cacheLife } from 'next/cache';
 import Link from 'next/link';
 
 const helpTopics = [
@@ -115,7 +116,10 @@ const commonQuestions = [
  * @see Card
  * @see revalidate - page is statically generated (revalidation controlled by this module)
  */
-export default function HelpPage() {
+export default async function HelpPage() {
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
+
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8 sm:py-12">
       <div className="mb-12 text-center">

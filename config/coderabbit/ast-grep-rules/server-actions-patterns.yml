@@ -1,0 +1,47 @@
+# Server Actions Pattern Rules
+# Enforces server action standards from ESLint rule: require-server-action-wrapper
+# Matches: config/tools/eslint-plugin-architectural-rules.js -> require-server-action-wrapper
+
+---
+# Rule: Detect missing authedAction/optionalAuthAction wrapper
+id: missing-action-wrapper
+language: TypeScript
+rule:
+  all:
+    - pattern: export const $ACTION = $CLIENT.action($$$)
+      kind: variable_declarator
+    - not:
+        has:
+          pattern: (authedAction|optionalAuthAction)($$$)
+message: "Server actions must use authedAction or optionalAuthAction wrappers for authentication. Import from @heyclaude/web-runtime/actions/safe-action"
+severity: error
+
+---
+# Rule: Detect missing input validation (Zod schema) in server actions
+id: missing-action-input-validation
+language: TypeScript
+rule:
+  all:
+    - pattern: export const $ACTION = (authedAction|optionalAuthAction)($$$)
+      kind: variable_declarator
+    - not:
+        has:
+          pattern: .inputSchema(z.object($$$))
+message: "Server actions must include input validation using .inputSchema(z.object(...)). Add inputSchema before .action()"
+severity: error
+
+---
+# Rule: Detect missing error handling in server action implementation
+id: missing-action-error-handling
+language: TypeScript
+rule:
+  all:
+    - pattern: .action(async ($$$) => { $$$ })
+      kind: call_expression
+    - inside:
+        pattern: (authedAction|optionalAuthAction)($$$)
+    - not:
+        has:
+          pattern: catch ($ERROR) { $$$ }
+message: "Server actions should include error handling. Wrap action body in try/catch or use actionClient which handles errors automatically"
+severity: warning

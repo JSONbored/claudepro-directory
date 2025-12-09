@@ -257,7 +257,20 @@ export default function WizardSubmissionPage() {
       setTemplatesLoading(true);
       await runLoggedAsync(
         async () => {
-          const response = await fetch(`/api/templates?category=${formData.submission_type}`);
+          // Use static templates route (ISR) instead of API route
+          // Falls back to API route if static route fails
+          let response: Response;
+          try {
+            response = await fetch(`/templates/${formData.submission_type}`);
+            // If static route returns 404, fallback to API route
+            if (!response.ok && response.status === 404) {
+              response = await fetch(`/api/templates?category=${formData.submission_type}`);
+            }
+          } catch {
+            // If static route fails completely, fallback to API route
+            response = await fetch(`/api/templates?category=${formData.submission_type}`);
+          }
+
           if (response.ok) {
             const data = (await response.json()) as {
               category: string;
@@ -445,7 +458,7 @@ export default function WizardSubmissionPage() {
               success: boolean;
             };
 
-            if (!(result.success && result.publicUrl)) {
+            if (!result.success || !result.publicUrl) {
               throw new Error(result.error ?? 'Thumbnail generation failed');
             }
 
@@ -900,8 +913,11 @@ export default function WizardSubmissionPage() {
  *
  * Displays a header with decorative icon and social proof, and renders the type selection cards.
  *
+ * @param root0
+ * @param root0.onSelect
  * @param props.selected - Currently selected submission content type.
  * @param props.onSelect - Callback invoked when a submission type is chosen.
+ * @param root0.selected
  * @returns The JSX element for the type selection step.
  *
  * @see WizardSubmissionPage
@@ -951,11 +967,18 @@ function StepTypeSelection({
  * when form values change, an image is selected for thumbnail generation, or the thumbnail is removed.
  *
  * @param props.data - Current form values for the step.
+ * @param root0
+ * @param root0.data
+ * @param root0.isUploadingThumbnail
  * @param props.onChange - Called with partial updates to form data when any field changes.
+ * @param root0.onChange
  * @param props.onImageUpload - Handler invoked with a selected image file to generate/upload a thumbnail.
  * @param props.isUploadingThumbnail - Whether a thumbnail is currently being generated/uploaded.
+ * @param root0.onImageUpload
+ * @param root0.onRemoveThumbnail
  * @param props.thumbnailPreview - Local or remote URL to render the thumbnail preview, or `null` if none.
  * @param props.onRemoveThumbnail - Callback to remove the current thumbnail and clear its preview.
+ * @param root0.thumbnailPreview
  * @returns The JSX for step 2 (basic information) of the wizard.
  *
  * @see WizardSubmissionPage
@@ -976,29 +999,27 @@ function StepBasicInfo({
   onRemoveThumbnail: () => void;
   thumbnailPreview: null | string;
 }) {
-  const [nameValidation, setNameValidation] = useState<ValidationState>('idle');
-  const [descValidation, setDescValidation] = useState<ValidationState>('idle');
-
-  // Real-time validation
-  useEffect(() => {
+  // Real-time validation - computed directly from data (derived state)
+  // Using useMemo instead of useState + useEffect to avoid cascading renders
+  const nameValidation = useMemo<ValidationState>(() => {
     if (data.name.length === 0) {
-      setNameValidation('idle');
+      return 'idle';
     } else if (data.name.length < 3) {
-      setNameValidation('invalid');
+      return 'invalid';
     } else {
-      setNameValidation('valid');
+      return 'valid';
     }
   }, [data.name]);
 
-  useEffect(() => {
+  const descValidation = useMemo<ValidationState>(() => {
     if (data.description.length === 0) {
-      setDescValidation('idle');
+      return 'idle';
     } else if (data.description.length < 10) {
-      setDescValidation('warning');
+      return 'warning';
     } else if (data.description.length < 50) {
-      setDescValidation('valid');
+      return 'valid';
     } else {
-      setDescValidation('valid');
+      return 'valid';
     }
   }, [data.description]);
 
@@ -1202,13 +1223,20 @@ function StepBasicInfo({
 /**
  * Render the configuration step of the submission wizard for the selected content type.
  *
+ * @param submissionType.data
+ * @param submissionType.getHighlightClasses
+ * @param submissionType.onApplyTemplate
+ * @param submissionType.onChange
  * @param submissionType - The selected content type which controls which type-specific fields are shown.
  * @param data - Current type-specific form values (e.g., systemPrompt, temperature, npmPackage).
  * @param onChange - Callback invoked with updated type-specific data when any field changes.
+ * @param submissionType.submissionType
  * @param templates - Optional templates available for the current content type shown in the quick-select.
+ * @param submissionType.templates
  * @param templatesLoading - When true, show a loading skeleton for the template selector.
  * @param onApplyTemplate - Optional callback invoked when a template is applied from the quick-select.
  * @param getHighlightClasses - Optional helper that returns CSS classes to highlight a given field path (e.g., "type_specific.systemPrompt").
+ * @param submissionType.templatesLoading
  * @returns The rendered React element for the configuration step.
  *
  * @see StepSocialProof
@@ -1471,7 +1499,9 @@ function StepConfiguration({
  * Renders the "Examples & Tags" wizard step allowing users to add, remove, and review usage examples and discovery tags.
  *
  * @param data - Current form data containing `examples` and `tags`.
+ * @param data.data
  * @param onChange - Callback invoked with partial `FormData` updates when examples or tags change.
+ * @param data.onChange
  * @see WizardSubmissionPage
  * @see StepSocialProof
  */

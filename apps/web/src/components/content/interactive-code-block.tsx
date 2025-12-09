@@ -6,6 +6,7 @@
 
 import { type Database } from '@heyclaude/database-types';
 import { isValidCategory, logUnhandledPromise, type SharePlatform } from '@heyclaude/web-runtime/core';
+import { VALID_CATEGORIES } from '@heyclaude/web-runtime';
 import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
@@ -315,8 +316,8 @@ export function ProductionCodeBlock({
 
     // Warn and use explicit sentinel for invalid categories to avoid misleading analytics
     if (!isValidCategory(rawCategory)) {
-      // Defensive fallback: use explicit string literal 'agents' as guaranteed valid enum member
-      const fallbackCategory = 'agents' as Database['public']['Enums']['content_category'];
+      // Defensive fallback: use first valid category from VALID_CATEGORIES
+      const fallbackCategory = VALID_CATEGORIES[0] as Database['public']['Enums']['content_category'];
       logClientWarn(
         'Invalid category in pathname, using fallback',
         undefined,

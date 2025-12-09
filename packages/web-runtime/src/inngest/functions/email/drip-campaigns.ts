@@ -12,7 +12,7 @@
 import { inngest } from '../../client';
 import { createSupabaseAdminClient } from '../../../supabase/admin';
 import { sendEmail } from '../../../integrations/resend';
-import { logger, generateRequestId, createWebAppContextWithId } from '../../../logging/server';
+import { logger, createWebAppContextWithId } from '../../../logging/server';
 import { getEnvVar, escapeHtml } from '@heyclaude/shared-runtime';
 
 const BASE_URL = getEnvVar('NEXT_PUBLIC_SITE_URL') || 'https://claudepro.directory';
@@ -52,8 +52,7 @@ export const newsletterDripCampaign = inngest.createFunction(
   },
   { event: 'email/welcome' },
   async ({ event, step }) => {
-    const requestId = generateRequestId();
-    const logContext = createWebAppContextWithId(requestId, 'inngest', 'newsletterDripCampaign');
+    const logContext = createWebAppContextWithId('inngest', 'newsletterDripCampaign');
 
     const { email, triggerSource } = event.data;
 
@@ -197,8 +196,7 @@ export const jobPostingDripCampaign = inngest.createFunction(
   },
   { event: 'job/published' },
   async ({ event, step }) => {
-    const requestId = generateRequestId();
-    const logContext = createWebAppContextWithId(requestId, 'inngest', 'jobPostingDripCampaign');
+    const logContext = createWebAppContextWithId('inngest', 'jobPostingDripCampaign');
 
     const { jobId, employerEmail, employerName, jobTitle, jobSlug } = event.data;
     const safeJobTitle = escapeHtml(jobTitle);

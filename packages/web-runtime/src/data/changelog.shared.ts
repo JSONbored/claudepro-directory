@@ -4,7 +4,6 @@ import { z } from 'zod';
 
 import { normalizeError } from '../errors.ts';
 import { logger } from '../logger.ts';
-import { generateRequestId } from '../utils/request-id.ts';
 
 // Support both formats:
 // 1. Array of objects: [{ content: "..." }]
@@ -38,14 +37,12 @@ const changesSchema = z
 
 export type ChangelogChanges = z.infer<typeof changesSchema>;
 
-export function parseChangelogChanges(changes: unknown, requestId?: string): ChangelogChanges {
+export function parseChangelogChanges(changes: unknown): ChangelogChanges {
   try {
     return changesSchema.parse(changes);
   } catch (error) {
     // Only create logger on error to avoid wasting work on successful path
-    const errorRequestId = requestId ?? generateRequestId();
     const reqLogger = logger.child({
-      requestId: errorRequestId,
       operation: 'parseChangelogChanges',
       route: 'utility-function', // Utility function - no specific route
       module: 'packages/web-runtime/src/data/changelog',

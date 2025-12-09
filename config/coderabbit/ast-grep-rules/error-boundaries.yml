@@ -1,0 +1,53 @@
+# Error Boundary Pattern Rules
+# Enforces error boundary patterns from ESLint rules: require-error-handling-server-components, require-error-handling-client-components
+# Matches: config/tools/eslint-plugin-architectural-rules.js -> require-error-handling-server-components, require-error-handling-client-components
+
+---
+# Rule: Detect missing error boundaries in server components
+id: missing-error-boundary-server
+language: TypeScript
+rule:
+  all:
+    - pattern: export default async function $COMPONENT($$$) { $$$ }
+      kind: function_declaration
+    - inside:
+        pattern: app/**/*.tsx
+    - not:
+        inside:
+          pattern: <ErrorBoundary>$$$</ErrorBoundary>
+message: "Server components should be wrapped in error boundaries for error handling. Add <ErrorBoundary> wrapper or create error.tsx file"
+severity: warning
+
+---
+# Rule: Detect missing error logging in error boundaries
+id: missing-error-boundary-logging
+language: TypeScript
+rule:
+  all:
+    - pattern: export default function $ERROR_BOUNDARY({ error }: { error: Error }) { $$$ }
+      kind: function_declaration
+    - inside:
+        pattern: app/**/error.tsx
+    - not:
+        has:
+          pattern: (logClientErrorBoundary|logger.error)($$$)
+message: "Error boundaries must log errors. Use logClientErrorBoundary() for client error boundaries or logger.error() for server error boundaries"
+severity: error
+
+---
+# Rule: Detect missing error boundaries in client components with async operations
+id: missing-error-boundary-client-async
+language: TypeScript
+rule:
+  all:
+    - pattern: export function $COMPONENT($$$) { $$$ }
+      kind: function_declaration
+    - inside:
+        pattern: 'use client'
+    - has:
+        pattern: await $ASYNC($$$)
+    - not:
+        inside:
+          pattern: <ErrorBoundary>$$$</ErrorBoundary>
+message: "Client components with async operations should be wrapped in error boundaries. Add <ErrorBoundary> wrapper or use useLoggedAsync for error handling"
+severity: warning

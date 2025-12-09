@@ -45,14 +45,17 @@ function HomepageHeroClientComponent({ memberCount }: HomepageHeroClientProps) {
       />
 
       <motion.div
+        key={isSearchFocused ? 'focused' : 'unfocused'}
         className="relative z-10 container mx-auto px-4 py-10 sm:py-16 lg:py-24"
         animate={{
           opacity: isSearchFocused ? 0.7 : 1,
           scale: isSearchFocused ? 0.98 : 1,
         }}
         transition={{
-          duration: 0.4,
-          ease: 'easeOut',
+          type: 'spring',
+          stiffness: 200,
+          damping: 20,
+          mass: 0.5,
         }}
       >
         <div className="mx-auto max-w-3xl text-center">

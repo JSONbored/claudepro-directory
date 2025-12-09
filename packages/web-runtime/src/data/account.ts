@@ -6,9 +6,10 @@ import { Constants } from '@heyclaude/database-types';
 import { cacheLife, cacheTag } from 'next/cache';
 import { z } from 'zod';
 
+import { getAuthenticatedUserFromClient } from '../auth/get-authenticated-user.ts';
+import { normalizeError } from '../errors.ts';
 import { logger } from '../index.ts';
 import { createSupabaseServerClient } from '../supabase/server.ts';
-import { generateRequestId } from '../utils/request-id.ts';
 
 const USER_TIER_VALUES = Constants.public.Enums.user_tier;
 
@@ -44,6 +45,7 @@ const accountDashboardSchema = z.object({
  * - Minimum 30 seconds stale time (required for runtime prefetch)
  * - Per-user cache keys (userId in cache tag)
  * - Not prerendered (runs at request time)
+ * @param userId
  */
 export async function getAccountDashboard(
   userId: string
@@ -54,9 +56,7 @@ export async function getAccountDashboard(
   // Also tag with complete data cache to share cache entry
   cacheTag(`user-complete-data-${userId}`);
 
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'getAccountDashboard',
     module: 'data/account',
   });
@@ -105,6 +105,7 @@ export async function getAccountDashboard(
  * - Minimum 30 seconds stale time (required for runtime prefetch)
  * - Per-user cache keys (userId in cache tag)
  * - Not prerendered (runs at request time)
+ * @param userId
  */
 export async function getUserLibrary(
   userId: string
@@ -115,9 +116,7 @@ export async function getUserLibrary(
   // Also tag with complete data cache to share cache entry
   cacheTag(`user-complete-data-${userId}`);
 
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'getUserLibrary',
     module: 'data/account',
   });
@@ -199,6 +198,7 @@ export async function getUserBookmarksForCollections(
  * - Minimum 30 seconds stale time (required for runtime prefetch)
  * - Per-user cache keys (userId in cache tag)
  * - Not prerendered (runs at request time)
+ * @param userId
  */
 export async function getUserDashboard(
   userId: string
@@ -209,9 +209,7 @@ export async function getUserDashboard(
   // Also tag with complete data cache to share cache entry
   cacheTag(`user-complete-data-${userId}`);
 
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'getUserDashboard',
     module: 'data/account',
   });
@@ -277,6 +275,9 @@ export async function getUserJobById(
  *
  * @param userId - Authenticated user ID
  * @param options - Optional parameters for activity timeline pagination
+ * @param options.activityLimit
+ * @param options.activityOffset
+ * @param options.activityType
  * @returns Consolidated user data or null if user not found
  */
 export async function getUserCompleteData(
@@ -286,14 +287,12 @@ export async function getUserCompleteData(
     activityOffset?: number;
     activityType?: null | string;
   }
-): Promise<Database['public']['Functions']['get_user_complete_data']['Returns'] | null> {
+): Promise<Database['public']['CompositeTypes']['user_complete_data_result'] | null> {
   'use cache: private';
   cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`user-complete-data-${userId}`);
 
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'getUserCompleteData',
     module: 'data/account',
   });
@@ -303,26 +302,27 @@ export async function getUserCompleteData(
 
     // Verify session is valid before making RPC call
     // This ensures PostgREST receives a valid auth token
-    // Use getUser() instead of getSession() as it automatically refreshes expired tokens
-    const {
-      data: { user: authUser },
-      error: authError,
-    } = await client.auth.getUser();
+    // Use getAuthenticatedUserFromClient instead of direct auth.getUser() for proper error handling
+    const authResult = await getAuthenticatedUserFromClient(client, {
+      context: 'getUserCompleteData',
+      requireUser: true,
+    });
 
-    if (authError || !authUser) {
+    if (!authResult.isAuthenticated || !authResult.user) {
       reqLogger.warn('getUserCompleteData: authentication failed', {
         userId,
-        authError: authError?.message,
-        hasUser: Boolean(authUser),
+        isAuthenticated: authResult.isAuthenticated,
+        hasUser: Boolean(authResult.user),
+        error: authResult.error?.message,
       });
       return null;
     }
 
     // Verify the authenticated user matches the requested userId (security check)
-    if (authUser.id !== userId) {
+    if (authResult.user.id !== userId) {
       reqLogger.warn('getUserCompleteData: userId mismatch', {
         requestedUserId: userId,
-        authenticatedUserId: authUser.id,
+        authenticatedUserId: authResult.user.id,
       });
       return null;
     }
@@ -351,52 +351,41 @@ export async function getUserCompleteData(
       return null;
     }
 
-    // Call RPC directly since AccountService is auto-generated and doesn't include this yet
+    // Use AccountService for proper architectural flow through data layer
+    const service = new AccountService(client);
+
     // Build RPC parameters - only include p_activity_type if it's provided (not null/undefined)
-    const rpcParams: {
-      p_activity_limit: number;
-      p_activity_offset: number;
-      p_activity_type?: string;
-      p_user_id: string;
-    } = {
+    const rpcParams: Database['public']['Functions']['get_user_complete_data']['Args'] = {
       p_user_id: userId,
       p_activity_limit: options?.activityLimit ?? 20,
       p_activity_offset: options?.activityOffset ?? 0,
+      ...(options?.activityType && { p_activity_type: options.activityType }),
     };
 
-    // Only include p_activity_type if it's a non-empty string
-    if (options?.activityType) {
-      rpcParams.p_activity_type = options.activityType;
-    }
-
-    const { data, error } = await client.rpc('get_user_complete_data', rpcParams);
-
-    if (error) {
-      reqLogger.error('getUserCompleteData: RPC call failed', error, {
-        userId,
-        options,
-        errorCode: error.code,
-        errorMessage: error.message,
-        errorDetails: error.details,
-        errorHint: error.hint,
-        hasSession: Boolean(session),
-        sessionUserId: session?.user?.id,
-      });
-      throw error;
-    }
+    const result = await service.getUserCompleteData(rpcParams);
 
     reqLogger.info('getUserCompleteData: fetched successfully', {
       userId,
-      hasResult: Boolean(data),
+      hasResult: Boolean(result),
     });
 
-    return data;
+    return result;
   } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('getUserCompleteData: unexpected error', errorForLogging, {
+    // Normalize error properly - handle both Error instances and Supabase error objects
+    const normalizedError = normalizeError(error, 'getUserCompleteData: unexpected error occurred');
+    reqLogger.error('getUserCompleteData: unexpected error', normalizedError, {
       userId,
       options,
+      // Include original error details if available
+      originalError:
+        error && typeof error === 'object' && 'code' in error
+          ? {
+              code: (error as { code?: string }).code,
+              message: (error as { message?: string }).message,
+              details: (error as { details?: string }).details,
+              hint: (error as { hint?: string }).hint,
+            }
+          : undefined,
     });
     return null;
   }
@@ -413,6 +402,8 @@ export async function getUserCompleteData(
  * - Minimum 30 seconds stale time (required for runtime prefetch)
  * - Per-user cache keys (userId and slug in cache tag)
  * - Not prerendered (runs at request time)
+ * @param userId
+ * @param slug
  */
 export async function getCollectionDetail(
   userId: string,
@@ -422,9 +413,7 @@ export async function getCollectionDetail(
   cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`user-collection-${userId}-${slug}`);
 
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'getCollectionDetail',
     module: 'data/account',
   });
@@ -471,6 +460,22 @@ export async function getCollectionDetail(
  * - Per-user cache keys (userId in cache tag)
  * - Not prerendered (runs at request time)
  */
+/**
+ * Get user settings
+ *
+ * Uses 'use cache: private' to enable cross-request caching for user-specific data.
+ * This allows cookies() to be used inside the cache scope while still providing
+ * per-user caching with TTL and cache invalidation support.
+ *
+ * NOTE: This function now uses the consolidated getUserCompleteData internally
+ * for better performance and to avoid "role 'user' does not exist" errors.
+ *
+ * Cache behavior:
+ * - Minimum 30 seconds stale time (required for runtime prefetch)
+ * - Per-user cache keys (userId in cache tag)
+ * - Not prerendered (runs at request time)
+ * @param userId
+ */
 export async function getUserSettings(
   userId: string
 ): Promise<Database['public']['Functions']['get_user_settings']['Returns'] | null> {
@@ -480,9 +485,7 @@ export async function getUserSettings(
   // Also tag with complete data cache to share cache entry
   cacheTag(`user-complete-data-${userId}`);
 
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'getUserSettings',
     module: 'data/account',
   });
@@ -526,6 +529,8 @@ export async function getUserSettings(
  * - Minimum 30 seconds stale time (required for runtime prefetch)
  * - Per-user cache keys (userId and sponsorshipId in cache tag)
  * - Not prerendered (runs at request time)
+ * @param userId
+ * @param sponsorshipId
  */
 export async function getSponsorshipAnalytics(
   userId: string,
@@ -535,9 +540,7 @@ export async function getSponsorshipAnalytics(
   cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`user-sponsorship-analytics-${userId}-${sponsorshipId}`);
 
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'getSponsorshipAnalytics',
     module: 'data/account',
   });
@@ -583,6 +586,7 @@ export async function getSponsorshipAnalytics(
  * - Minimum 30 seconds stale time (required for runtime prefetch)
  * - Per-user cache keys (userId in cache tag)
  * - Not prerendered (runs at request time)
+ * @param userId
  */
 export async function getUserCompanies(
   userId: string
@@ -593,9 +597,7 @@ export async function getUserCompanies(
   // Also tag with complete data cache to share cache entry
   cacheTag(`user-complete-data-${userId}`);
 
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'getUserCompanies',
     module: 'data/account',
   });
@@ -607,8 +609,8 @@ export async function getUserCompanies(
     if (!completeData?.user_dashboard?.companies) {
       reqLogger.warn('getUserCompanies: companies missing from complete data', {
         userId,
-        hasCompleteData: Boolean(completeData),
-        hasUserDashboard: Boolean(completeData?.user_dashboard),
+        hasCompleteData: completeData != null,
+        hasUserDashboard: completeData?.user_dashboard != null,
       });
       return { companies: [] };
     }
@@ -651,6 +653,7 @@ export async function getUserCompanies(
  * - Minimum 30 seconds stale time (required for runtime prefetch)
  * - Per-user cache keys (userId in cache tag)
  * - Not prerendered (runs at request time)
+ * @param userId
  */
 export async function getUserSponsorships(
   userId: string
@@ -661,9 +664,7 @@ export async function getUserSponsorships(
   // Also tag with complete data cache to share cache entry
   cacheTag(`user-complete-data-${userId}`);
 
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'getUserSponsorships',
     module: 'data/account',
   });
@@ -719,6 +720,8 @@ export async function getUserCompanyById(
  * - Minimum 30 seconds stale time (required for runtime prefetch)
  * - Cache keys include limits for different cache entries
  * - Not prerendered (runs at request time)
+ * @param recentLimit
+ * @param contributorsLimit
  */
 export async function getSubmissionDashboard(
   recentLimit = 5,
@@ -728,9 +731,7 @@ export async function getSubmissionDashboard(
   cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`submission-dashboard-${recentLimit}-${contributorsLimit}`);
 
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'getSubmissionDashboard',
     module: 'data/account',
   });
@@ -793,6 +794,7 @@ export interface AccountDashboardBundle {
  * - Minimum 30 seconds stale time (required for runtime prefetch)
  * - Per-user cache keys (userId in cache tag)
  * - Not prerendered (runs at request time)
+ * @param userId
  */
 export async function getUserActivitySummary(
   userId: string
@@ -803,9 +805,7 @@ export async function getUserActivitySummary(
   // Also tag with complete data cache to share cache entry
   cacheTag(`user-complete-data-${userId}`);
 
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'getUserActivitySummary',
     module: 'data/account',
   });
@@ -868,6 +868,11 @@ export async function getUserActivitySummary(
  * - Minimum 30 seconds stale time (required for runtime prefetch)
  * - Per-user cache keys (userId, type, limit, offset in cache tag)
  * - Not prerendered (runs at request time)
+ * @param input
+ * @param input.limit
+ * @param input.offset
+ * @param input.type
+ * @param input.userId
  */
 export async function getUserActivityTimeline(input: {
   limit?: number | undefined;
@@ -884,9 +889,7 @@ export async function getUserActivityTimeline(input: {
     cacheTag(`user-complete-data-${userId}`);
   }
 
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'getUserActivityTimeline',
     module: 'data/account',
   });
@@ -951,6 +954,7 @@ export async function getUserActivityTimeline(input: {
  * - Minimum 30 seconds stale time (required for runtime prefetch)
  * - Per-user cache keys (userId in cache tag)
  * - Not prerendered (runs at request time)
+ * @param userId
  */
 export async function getUserIdentitiesData(
   userId: string
@@ -961,9 +965,7 @@ export async function getUserIdentitiesData(
   // Also tag with complete data cache to share cache entry
   cacheTag(`user-complete-data-${userId}`);
 
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'getUserIdentitiesData',
     module: 'data/account',
   });
@@ -1000,6 +1002,10 @@ export async function getUserIdentitiesData(
  * Check if content is bookmarked by user
  *
  * Uses 'use cache: private' to enable cross-request caching for user-specific data.
+ * @param input
+ * @param input.content_slug
+ * @param input.content_type
+ * @param input.userId
  */
 export async function isBookmarked(input: {
   content_slug: string;
@@ -1014,9 +1020,7 @@ export async function isBookmarked(input: {
   cacheTag(`user-${userId}`);
   cacheTag(`content-${content_slug}`);
 
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'isBookmarked',
     module: 'data/account',
   });
@@ -1024,13 +1028,11 @@ export async function isBookmarked(input: {
   try {
     const client = await createSupabaseServerClient();
     const service = new AccountService(client);
-    const result = await service.isBookmarked({
+    return await service.isBookmarked({
       p_user_id: userId,
       p_content_type: content_type,
       p_content_slug: content_slug,
     });
-
-    return result ?? false;
   } catch (error) {
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error('isBookmarked: unexpected error', errorForLogging, {
@@ -1046,6 +1048,9 @@ export async function isBookmarked(input: {
  * Check if user is following another user
  *
  * Uses 'use cache: private' to enable cross-request caching for user-specific data.
+ * @param input
+ * @param input.followerId
+ * @param input.followingId
  */
 export async function isFollowing(input: {
   followerId: string;
@@ -1059,9 +1064,7 @@ export async function isFollowing(input: {
   cacheTag(`user-${followerId}`);
   cacheTag(`user-${followingId}`);
 
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'isFollowing',
     module: 'data/account',
   });
@@ -1069,12 +1072,10 @@ export async function isFollowing(input: {
   try {
     const client = await createSupabaseServerClient();
     const service = new AccountService(client);
-    const result = await service.isFollowing({
+    return await service.isFollowing({
       follower_id: followerId,
       following_id: followingId,
     });
-
-    return result ?? false;
   } catch (error) {
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error('isFollowing: unexpected error', errorForLogging, {
@@ -1089,6 +1090,9 @@ export async function isFollowing(input: {
  * Batch check bookmark status for multiple items
  *
  * Uses 'use cache: private' to enable cross-request caching for user-specific data.
+ * @param input
+ * @param input.items
+ * @param input.userId
  */
 export async function isBookmarkedBatch(input: {
   items: Array<{
@@ -1106,13 +1110,11 @@ export async function isBookmarkedBatch(input: {
   // Include sorted item keys in cache tag for proper cache key generation
   const itemKey = items
     .map((i) => `${i.content_type}:${i.content_slug}`)
-    .sort()
+    .toSorted()
     .join(',');
   cacheTag(`bookmark-batch-${itemKey}`);
 
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'isBookmarkedBatch',
     module: 'data/account',
   });
@@ -1120,12 +1122,10 @@ export async function isBookmarkedBatch(input: {
   try {
     const client = await createSupabaseServerClient();
     const service = new AccountService(client);
-    const result = await service.isBookmarkedBatch({
+    return await service.isBookmarkedBatch({
       p_user_id: userId,
       p_items: items,
     });
-
-    return result ?? [];
   } catch (error) {
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error('isBookmarkedBatch: unexpected error', errorForLogging, {
@@ -1140,6 +1140,9 @@ export async function isBookmarkedBatch(input: {
  * Batch check follow status for multiple users
  *
  * Uses 'use cache: private' to enable cross-request caching for user-specific data.
+ * @param input
+ * @param input.followedUserIds
+ * @param input.followerId
  */
 export async function isFollowingBatch(input: {
   followedUserIds: string[];
@@ -1152,12 +1155,10 @@ export async function isFollowingBatch(input: {
   cacheTag('users');
   cacheTag(`user-${followerId}`);
   // Include sorted user IDs in cache tag for proper cache key generation
-  const userIdsKey = [...followedUserIds].sort().join(',');
+  const userIdsKey = [...followedUserIds].toSorted().join(',');
   cacheTag(`follow-batch-${userIdsKey}`);
 
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'isFollowingBatch',
     module: 'data/account',
   });
@@ -1165,12 +1166,10 @@ export async function isFollowingBatch(input: {
   try {
     const client = await createSupabaseServerClient();
     const service = new AccountService(client);
-    const result = await service.isFollowingBatch({
+    return await service.isFollowingBatch({
       p_follower_id: followerId,
       p_followed_user_ids: followedUserIds,
     });
-
-    return result ?? [];
   } catch (error) {
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error('isFollowingBatch: unexpected error', errorForLogging, {
@@ -1192,6 +1191,8 @@ export async function isFollowingBatch(input: {
  * - Minimum 30 seconds stale time (required for runtime prefetch)
  * - Per-user cache keys (userId in cache tag)
  * - Not prerendered (runs at request time)
+ * @param userId
+ * @param categoryIds
  */
 export async function getAccountDashboardBundle(
   userId: string,

@@ -22,9 +22,23 @@ heyclaude-mcp/
 │   ├── detail.ts         # getContentDetail tool
 │   ├── trending.ts       # getTrending tool
 │   ├── featured.ts       # getFeatured tool
-│   └── templates.ts      # getTemplates tool
+│   ├── templates.ts      # getTemplates tool
+│   ├── mcp-servers.ts    # getMcpServers tool
+│   ├── related.ts        # getRelatedContent tool
+│   ├── tags.ts           # getContentByTag tool
+│   ├── popular.ts        # getPopular tool
+│   ├── recent.ts         # getRecent tool
+│   ├── download-platform.ts # downloadContentForPlatform tool
+│   ├── newsletter.ts     # subscribeNewsletter tool
+│   ├── account.ts        # createAccount tool
+│   ├── submit-content.ts # submitContent tool
+│   ├── oauth-authorize.ts # OAuth authorization proxy
+│   └── auth-metadata.ts  # OAuth metadata endpoints
+├── resources/            # MCP resource handlers
+│   └── content.ts        # Content resource handlers (LLMs.txt, Markdown, JSON, RSS/Atom)
 └── lib/                  # Shared utilities
-    └── types.ts          # MCP tool type definitions
+    ├── types.ts          # MCP tool type definitions
+    └── platform-formatters.ts # Platform-specific formatting functions
 ```
 
 ## Tools
@@ -37,6 +51,32 @@ heyclaude-mcp/
 4. **getTrending** - Get trending content across categories
 5. **getFeatured** - Get featured/highlighted content
 6. **getTemplates** - Get submission templates by category
+
+### Advanced Tools (v1.0.0)
+
+7. **getMcpServers** - List all MCP servers with download URLs
+8. **getRelatedContent** - Find related/similar content
+9. **getContentByTag** - Filter content by tags with AND/OR logic
+10. **getPopular** - Get popular content by views and engagement
+11. **getRecent** - Get recently added content
+
+### Platform Formatting Tools (v1.0.0)
+
+12. **downloadContentForPlatform** - Download content formatted for your platform (Claude Code, Cursor, etc.) with installation instructions
+
+### Growth Tools (v1.0.0)
+
+13. **subscribeNewsletter** - Subscribe an email address to the Claude Pro Directory newsletter via Inngest
+14. **createAccount** - Create a new account using OAuth (GitHub, Google, Discord) with newsletter opt-in support
+15. **submitContent** - Submit content (agents, rules, MCP servers, etc.) for review with step-by-step guidance
+
+### Feature Enhancement Tools (v1.0.0)
+
+16. **getSearchSuggestions** - Get search autocomplete suggestions based on query history
+17. **getSearchFacets** - Get available search facets (categories, tags, authors) for filtering
+18. **getChangelog** - Get changelog of content updates in LLMs.txt format
+19. **getSocialProofStats** - Get community statistics (contributors, submissions, success rate)
+20. **getCategoryConfigs** - Get category-specific configurations and features
 
 ## Endpoints
 
@@ -71,6 +111,16 @@ npx @modelcontextprotocol/inspector
 # Deploy to production
 supabase functions deploy --no-verify-jwt heyclaude-mcp
 ```
+
+## Environment Variables
+
+The following environment variables are required or recommended:
+
+- **INNGEST_EVENT_KEY** (Required for production): Inngest event key for sending events (newsletter tool)
+- **INNGEST_URL** (Optional): Inngest API URL (defaults to Inngest Cloud or local dev server)
+- **APP_URL** (Optional): Application URL (defaults to `https://claudepro.directory`)
+- **MCP_SERVER_URL** (Optional): MCP server URL (defaults to `https://mcp.claudepro.directory`)
+- **API_BASE_URL** (Optional): API base URL for resource handlers (defaults to `https://claudepro.directory`)
 
 ## Version
 

@@ -6,7 +6,7 @@ import {
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { GitPullRequest } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   UI_CLASSES,
   Button,
@@ -17,11 +17,14 @@ import {
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import Link from 'next/link';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { ActivityTimeline } from '@/src/components/features/user-activity/activity-timeline';
+
+import Loading from './loading';
 
 /**
  * Produce the Metadata for the account Activity route.
@@ -56,26 +59,22 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see ActivityTimeline
  */
 export default async function ActivityPage() {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
+  'use cache: private';
+  cacheLife('userProfile'); // 1min stale, 5min revalidate, 30min expire - User-specific data
 
-  // Generate single requestId for this page request (after connection() to allow Date.now())
-  const requestId = generateRequestId();
   const operation = 'ActivityPage';
   const route = '/account/activity';
   const modulePath = 'apps/web/src/app/account/activity/page';
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    requestId,
     operation,
     route,
     module: modulePath,
   });
 
   return (
-    <Suspense fallback={<div className="space-y-6">Loading activity...</div>}>
+    <Suspense fallback={<Loading />}>
       <ActivityPageContent reqLogger={reqLogger} />
     </Suspense>
   );
@@ -86,7 +85,8 @@ export default async function ActivityPage() {
  *
  * This server component fetches the user's activity summary and timeline concurrently and tolerates partial failures: it will render available data when one source succeeds, show a global fallback when both fail, or prompt for sign-in when no user is authenticated.
  *
- * @param reqLogger - A request-scoped logger (created via `logger.child`) used for structured, request-scoped logging and error reporting. The logger should already include request identifiers.
+ * @param reqLogger - A request-scoped logger (created via `logger.child`) used for structured, request-scoped logging and error reporting.
+ * @param reqLogger.reqLogger
  * @returns The JSX content for the Account Activity page.
  *
  * @see getAuthenticatedUser
@@ -172,7 +172,7 @@ async function ActivityPageContent({ reqLogger }: { reqLogger: ReturnType<typeof
   const hasTimeline = !!timeline;
 
   // Only show global fallback when both fail
-  if (!(hasSummary || hasTimeline)) {
+  if (!hasSummary && !hasTimeline) {
     return (
       <div className="space-y-6">
         <Card>

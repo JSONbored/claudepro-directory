@@ -10,7 +10,7 @@ import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
-import { generateRequestId, logger } from '../logging/server.ts';
+import { logger, toLogContextValue, type LogContext } from '../logging/server.ts';
 
 export const publicCorsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -170,8 +170,6 @@ export function handleOptionsRequest(
  * Context object provided to API route handlers
  */
 export interface ApiRouteContext {
-  /** Unique request identifier for logging correlation */
-  requestId: string;
   /** Scoped logger with request context */
   logger: ReturnType<typeof logger.child>;
   /** The original Next.js request */
@@ -203,7 +201,6 @@ export type ApiRouteHandler = (ctx: ApiRouteContext) => Promise<NextResponse>;
 
 /**
  * Creates a standardized API route handler with automatic:
- * - Request ID generation
  * - Scoped logging
  * - Error handling and response formatting
  * - CORS headers
@@ -218,9 +215,7 @@ export type ApiRouteHandler = (ctx: ApiRouteContext) => Promise<NextResponse>;
  * ```ts
  * // Before (verbose)
  * export async function GET(request: NextRequest) {
- *   const requestId = generateRequestId();
  *   const reqLogger = logger.child({
- *     requestId,
  *     operation: 'SearchAPI',
  *     route: '/api/search',
  *     method: 'GET',
@@ -250,11 +245,9 @@ export function createApiHandler(
   const { operation, route } = config;
 
   return async (request: NextRequest): Promise<NextResponse> => {
-    const requestId = generateRequestId();
     const method = request.method;
     
     const reqLogger = logger.child({
-      requestId,
       operation,
       route,
       method,
@@ -265,18 +258,21 @@ export function createApiHandler(
       additionalContext?: Record<string, unknown>
     ): NextResponse => {
       const normalized = normalizeError(error, `${operation} failed`);
-      reqLogger.error(`${operation} failed`, normalized, {
-        requestId,
-        ...additionalContext,
-      });
+      // Convert additionalContext to LogContext format (toLogContextValue ensures type safety)
+      const logContext: LogContext = {};
+      if (additionalContext) {
+        for (const [key, value] of Object.entries(additionalContext)) {
+          logContext[key] = toLogContextValue(value);
+        }
+      }
+      reqLogger.error(`${operation} failed`, normalized, logContext);
       return NextResponse.json(
-        { error: normalized.message, requestId },
+        { error: normalized.message },
         { status: 500, headers: buildSecurityHeaders() }
       );
     };
 
     const ctx: ApiRouteContext = {
-      requestId,
       logger: reqLogger,
       request,
       url: request.nextUrl,

@@ -10,10 +10,11 @@
 import { type Database } from '@heyclaude/database-types';
 import { highlightCode } from '@heyclaude/shared-runtime/code-highlight';
 import { useNewsletter } from '@heyclaude/web-runtime/hooks';
+import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { ArrowRight, Loader2, Mail } from '@heyclaude/web-runtime/icons';
 import { cn, SimpleCopyButton, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { AnimatePresence, motion } from 'motion/react';
-import { useId, useMemo } from 'react';
+import { useEffect, useId, useMemo, useState } from 'react';
 
 /**
  * Email validation regex - simple but effective
@@ -52,8 +53,48 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
     }
   };
 
-  // Highlight the MCP command
-  const highlightedCode = highlightCode(MCP_COMMAND, 'bash', { showLineNumbers: false });
+  // Highlight the MCP command and sanitize with DOMPurify for defense-in-depth
+  const rawHighlightedCode = highlightCode(MCP_COMMAND, 'bash', { showLineNumbers: false });
+  const [sanitizedCode, setSanitizedCode] = useState<string>('');
+
+  useEffect(() => {
+    // Sanitize highlighted code with DOMPurify for XSS protection
+    // Even though input is hardcoded, sanitization provides defense-in-depth
+    if (typeof window !== 'undefined' && rawHighlightedCode) {
+      import('dompurify')
+        .then((DOMPurify) => {
+          // Sanitize with restrictive allowlist for code highlighting HTML
+          // sugar-high typically uses: <div>, <pre>, <code>, <span> with class attributes
+          const sanitized = DOMPurify.default.sanitize(rawHighlightedCode, {
+            ALLOWED_TAGS: ['div', 'pre', 'code', 'span', 'button'],
+            ALLOWED_ATTR: ['class', 'data-line'],
+            // Allow data-* attributes (sugar-high may use data-line for line numbers)
+            ALLOW_DATA_ATTR: true,
+            // Remove any dangerous protocols or scripts
+            FORBID_TAGS: ['script', 'iframe', 'object', 'embed', 'form', 'input'],
+            FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'href', 'src'],
+          });
+          setSanitizedCode(sanitized);
+        })
+        .catch((error) => {
+          const normalized = normalizeError(error, 'Failed to load DOMPurify');
+          logClientWarn(
+            '[FooterNewsletterCTA] Failed to sanitize highlighted code',
+            normalized,
+            'FooterNewsletterCTA.sanitize',
+            {
+              component: 'FooterNewsletterCTA',
+              action: 'sanitize-code',
+            }
+          );
+          // Fallback to original HTML if DOMPurify fails (input is hardcoded, so safe)
+          setSanitizedCode(rawHighlightedCode);
+        });
+    } else {
+      // During SSR, use empty string (will be sanitized on client)
+      setSanitizedCode('');
+    }
+  }, [rawHighlightedCode]);
 
   return (
     <div className="border-border/50 bg-background border-b">
@@ -94,7 +135,9 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
                   </div>
                   <div
                     className="code-block-wrapper overflow-x-auto rounded-md"
-                    dangerouslySetInnerHTML={{ __html: highlightedCode }}
+                    // eslint-disable-next-line jsx-a11y/no-danger -- HTML is sanitized with DOMPurify with strict allowlist (client-side)
+                    // biome-ignore lint/security/noDangerouslySetInnerHtml: HTML is sanitized client-side with DOMPurify
+                    dangerouslySetInnerHTML={{ __html: sanitizedCode }}
                   />
                 </div>
                 <p className="text-muted-foreground mt-3 text-sm">

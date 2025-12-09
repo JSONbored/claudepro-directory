@@ -6,7 +6,6 @@ import { cacheLife, cacheTag } from 'next/cache';
 
 import { logger } from '../../index.ts';
 import { createSupabaseServerClient } from '../../supabase/server.ts';
-import { generateRequestId } from '../../utils/request-id.ts';
 
 interface ReviewsWithStatsParameters {
   contentSlug: string;
@@ -28,6 +27,7 @@ interface ReviewsWithStatsParameters {
  * - Minimum 30 seconds stale time (required for runtime prefetch)
  * - Cache keys include all input parameters
  * - Not prerendered (runs at request time)
+ * @param parameters
  */
 export async function getReviewsWithStatsData(
   parameters: ReviewsWithStatsParameters
@@ -43,9 +43,7 @@ export async function getReviewsWithStatsData(
     cacheTag(`reviews-user-${userId}`);
   }
 
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'getReviewsWithStatsData',
     module: 'data/content/reviews',
   });

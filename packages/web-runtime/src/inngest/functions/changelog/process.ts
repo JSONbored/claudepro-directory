@@ -17,7 +17,7 @@ import { normalizeError, getEnvVar } from '@heyclaude/shared-runtime';
 import { inngest } from '../../client';
 import { createSupabaseAdminClient } from '../../../supabase/admin';
 import { pgmqRead, pgmqDelete, pgmqSend, type PgmqMessage } from '../../../supabase/pgmq-client';
-import { logger, generateRequestId, createWebAppContextWithId } from '../../../logging/server';
+import { logger, createWebAppContextWithId } from '../../../logging/server';
 import { generateOGImageUrl } from '../../../seo/og';
 
 const CHANGELOG_QUEUE = 'changelog_process';
@@ -340,8 +340,7 @@ export const processChangelogQueue = inngest.createFunction(
   { cron: '*/30 * * * *' }, // Every 30 minutes
   async ({ step }) => {
     const startTime = Date.now();
-    const requestId = generateRequestId();
-    const logContext = createWebAppContextWithId(requestId, '/inngest/changelog/process', 'processChangelogQueue');
+    const logContext = createWebAppContextWithId('/inngest/changelog/process', 'processChangelogQueue');
 
     logger.info('Changelog queue processing started', logContext);
 

@@ -1,10 +1,16 @@
+# Security Scanning - Optimized for performance and resource efficiency
+# - Only runs on PRs (not every push) or scheduled weekly
+# - Path-based filtering to skip when security files unchanged
+# - Conditional job execution (secrets on PRs, CodeQL on schedule)
+# - Shallow git clones where possible (fetch-depth: 1 or 2)
+# - Cancels in-progress PR runs when new commits pushed (saves resources)
 name: Security
 
 on:
-  # Weekly scheduled scan (Monday 3am UTC)
+  # Weekly scheduled scan (Monday 3am UTC) - comprehensive analysis
   schedule:
     - cron: '0 3 * * 1'
-  # Only on PRs (not every push)
+  # Only on PRs (not every push) - path-based filtering
   pull_request:
     branches: [main]
     paths:
@@ -13,11 +19,11 @@ on:
       - 'package.json'
       - 'pnpm-lock.yaml'
       - '.github/workflows/security.yml'
-  # Manual trigger
+  # Manual trigger for on-demand scanning
   workflow_dispatch:
 
 env:
-  PNPM_VERSION: 10.23.0
+  PNPM_VERSION: 10.24.0
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -32,8 +38,9 @@ jobs:
     if: github.event_name != 'schedule'
     
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
         with:
+          # PRs need depth 2 for base comparison, others only need 1
           fetch-depth: ${{ github.event_name == 'pull_request' && 2 || 1 }}
 
       - name: Check for hardcoded secrets
@@ -57,7 +64,9 @@ jobs:
       security-events: write
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1 # Shallow clone - CodeQL doesn't need full history
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
@@ -83,9 +92,9 @@ jobs:
       pull-requests: write
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 1 # Shallow clone - dependency review only needs current state
 
       - name: Dependency Review
         uses: actions/dependency-review-action@v4

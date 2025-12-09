@@ -3,13 +3,16 @@
  */
 
 import { generatePageMetadata, getAuthenticatedUser } from '@heyclaude/web-runtime/data';
-import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
+import { logger } from '@heyclaude/web-runtime/logging/server';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { CompanyForm } from '@/src/components/core/forms/company-form';
+
+import Loading from './loading';
 
 /**
  * Dynamic Rendering Required
@@ -39,27 +42,21 @@ export async function generateMetadata(): Promise<Metadata> {
  *
  * @see getAuthenticatedUser
  * @see CompanyForm
- * @see generateRequestId
  * @see logger
  */
 export default async function NewCompanyPage() {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
-
-  // Generate single requestId for this page request (after connection() to allow Date.now())
-  const requestId = generateRequestId();
+  'use cache: private';
+  cacheLife('userProfile'); // 1min stale, 5min revalidate, 30min expire - User-specific data
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    requestId,
     operation: 'NewCompanyPage',
     route: '/account/companies/new',
     module: 'apps/web/src/app/account/companies/new/page',
   });
 
   return (
-    <Suspense fallback={<div className="space-y-6">Loading company form...</div>}>
+    <Suspense fallback={<Loading />}>
       <NewCompanyPageContent reqLogger={reqLogger} />
     </Suspense>
   );
@@ -71,6 +68,7 @@ export default async function NewCompanyPage() {
  * If no authenticated user is found, logs a warning to `reqLogger` and redirects the request to `/login`.
  *
  * @param reqLogger - Request-scoped logger created for the current request; used for warning on unauthenticated access.
+ * @param reqLogger.reqLogger
  * @returns The JSX for the page section containing the header, description, and the `CompanyForm` in create mode.
  *
  * @see CompanyForm

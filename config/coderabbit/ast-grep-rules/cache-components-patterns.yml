@@ -1,0 +1,57 @@
+# Cache Components Pattern Rules
+# Enforces Cache Components patterns from ESLint rule: require-cache-components
+# Matches: config/tools/eslint-plugin-architectural-rules.js -> require-cache-components
+
+---
+# Rule: Detect missing 'use cache' directive in cached components
+id: missing-use-cache-directive
+language: TypeScript
+rule:
+  all:
+    - pattern: export default async function $COMPONENT($$$) { $$$ }
+      kind: function_declaration
+    - inside:
+        pattern: app/**/*.tsx
+    - has:
+        pattern: await connection()
+    - not:
+        precedes:
+          pattern: 'use cache'
+message: "Components using connection() must have 'use cache' or 'use cache: private' directive. Add directive before function declaration."
+severity: error
+
+---
+# Rule: Detect non-deterministic operations before connection()
+id: non-deterministic-before-connection
+language: TypeScript
+rule:
+  all:
+    - pattern: export default async function $COMPONENT($$$) { $$$ }
+      kind: function_declaration
+    - inside:
+        pattern: app/**/*.tsx
+    - has:
+        pattern: (Date.now()|Math.random()|new Date()|performance.now())($$$)
+    - not:
+        follows:
+          pattern: await connection()
+message: "Non-deterministic operations (Date.now(), Math.random(), etc.) must come after await connection(). Move operation after connection() call."
+severity: error
+
+---
+# Rule: Detect missing connection() in cached components
+id: missing-connection-in-cached
+language: TypeScript
+rule:
+  all:
+    - pattern: export default async function $COMPONENT($$$) { $$$ }
+      kind: function_declaration
+    - inside:
+        pattern: app/**/*.tsx
+    - precedes:
+        pattern: 'use cache'
+    - not:
+        has:
+          pattern: await connection()
+message: "Cached components must call await connection() at the start to defer to request time. Add: await connection() at function start."
+severity: error

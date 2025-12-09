@@ -49,7 +49,7 @@ export async function createErrorResponse(
     logContext?: Record<string, string | number | boolean>;
   } = {}
 ): Promise<NextResponse> {
-  // Create standardized log context with single requestId
+  // Create standardized log context
   const logContext = createWebAppContext(
     context.route || 'unknown',
     context.operation || 'unknown',

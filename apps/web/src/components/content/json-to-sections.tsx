@@ -208,13 +208,15 @@ type Section =
   | TldrSection;
 
 /**
- * Render sanitized HTML content, sanitizing on the client and preserving raw HTML during SSR.
+ * Render sanitized HTML content, sanitizing on the client and using a safe placeholder during SSR.
  *
- * Sanitizes the provided `html` string using DOMPurify on the client and renders the sanitized result.
- * During server-side rendering the original `html` is rendered (client will replace it with the sanitized version).
+ * **IMPORTANT:** The `html` prop must be pre-sanitized before passing to this component.
+ * During SSR, a safe empty placeholder is rendered to prevent XSS vulnerabilities.
+ * On the client, the HTML is re-sanitized with DOMPurify for additional safety.
+ *
  * If DOMPurify fails to load, the original `html` is used as a fallback and a client warning is logged.
  *
- * @param html - The HTML string to render; required.
+ * @param html - The HTML string to render; must be pre-sanitized. Required.
  * @param className - Optional CSS class names to apply to the container element.
  * @param id - Optional id attribute for the container element.
  *
@@ -224,13 +226,13 @@ type Section =
  */
 function TrustedHTML({ html, className, id }: { className?: string; html: string; id?: string }) {
   // Hooks must be called unconditionally before any early returns
-  const [safeHtml, setSafeHtml] = useState<string>(
-    html // Initialize with raw HTML; useEffect will sanitize on client
-  );
+  // Initialize with empty string during SSR to prevent XSS - will be sanitized on client
+  const [safeHtml, setSafeHtml] = useState<string>('');
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
+    // Only sanitize on client - html should be pre-sanitized but we sanitize again for safety
     if (globalThis.window !== undefined && html && typeof html === 'string') {
       import('dompurify')
         .then((DOMPurify) => {
@@ -307,8 +309,9 @@ function TrustedHTML({ html, className, id }: { className?: string; html: string
     return <div id={id} className={className} />;
   }
 
-  // During SSR, render the HTML directly (will be sanitized on client)
-  const displayHtml = isClient ? safeHtml : html;
+  // During SSR, render safe empty placeholder to prevent XSS
+  // On client, render sanitized HTML once DOMPurify has processed it
+  const displayHtml = isClient ? safeHtml : '';
 
   return (
     <div
@@ -716,6 +719,66 @@ function render_section(section: Section, index: number): React.ReactNode {
 }
 
 /**
+ * Normalize legacy section shapes to Section[] format.
+ *
+ * Detects legacy shapes (objects with `html` property but no `type` discriminator)
+ * and converts them to `text` sections. Logs warnings for unrecognized shapes.
+ */
+function normalizeLegacySection(
+  item: unknown,
+  index: number
+): Section | null {
+  if (!item || typeof item !== 'object') {
+    return null;
+  }
+
+  // Check if it's already a valid Section (has type discriminator)
+  if ('type' in item && typeof item.type === 'string') {
+    return item as Section;
+  }
+
+  // Legacy shape: object with html property
+  if ('html' in item && typeof item.html === 'string') {
+    logClientWarn(
+      '[Content] Legacy section shape detected, normalizing to text section',
+      undefined,
+      'JSONSectionRenderer.normalizeLegacySection',
+      {
+        component: 'JSONSectionRenderer',
+        action: 'normalize-legacy-section',
+        index,
+      }
+    );
+    const textSection: TextSection = {
+      type: 'text',
+      content: item.html,
+    };
+    if ('id' in item && typeof item.id === 'string') {
+      textSection.id = item.id;
+    }
+    if ('className' in item && typeof item.className === 'string') {
+      textSection.className = item.className;
+    }
+    return textSection;
+  }
+
+  // Unrecognized shape - log and skip
+  logClientWarn(
+    '[Content] Unrecognized section shape, skipping',
+    undefined,
+    'JSONSectionRenderer.normalizeLegacySection',
+    {
+      component: 'JSONSectionRenderer',
+      action: 'normalize-legacy-section',
+      index,
+      hasType: 'type' in item,
+      hasHtml: 'html' in item,
+    }
+  );
+  return null;
+}
+
+/**
  * Render an array of content sections into their corresponding React UI blocks.
  *
  * @param sections - Sections to render. Accepts a typed Section[] or legacy/guide section shapes (array of record objects, possibly containing `html`). The prop will be normalized to an array of Section objects before rendering.
@@ -726,15 +789,22 @@ function render_section(section: Section, index: number): React.ReactNode {
  * @see TrustedHTML
  */
 export function JSONSectionRenderer({ sections }: JSONSectionRendererProps) {
-  const sections_array = Array.isArray(sections) ? (sections as Section[]) : [];
+  if (!Array.isArray(sections)) {
+    return null;
+  }
 
-  if (sections_array.length === 0) {
+  // Normalize sections: detect legacy shapes and convert to Section[]
+  const normalizedSections = sections
+    .map((item, index) => normalizeLegacySection(item, index))
+    .filter((section): section is Section => section !== null);
+
+  if (normalizedSections.length === 0) {
     return null;
   }
 
   return (
     <div className="space-y-8">
-      {sections_array.map((section, index) => {
+      {normalizedSections.map((section, index) => {
         const key = section.id || `section-${index}`;
         return (
           <React.Fragment key={key}>

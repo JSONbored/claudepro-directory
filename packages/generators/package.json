@@ -1,14 +1,12 @@
 {
   "name": "@heyclaude/generators",
-  "version": "0.0.0",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
   "bin": {
-    "heyclaude-generate-categories": "./src/bin/generate-categories.ts",
     "heyclaude-generate-service-worker": "./src/bin/generate-service-worker.ts",
     "heyclaude-generate-skills": "./src/bin/generate-skills.ts",
     "heyclaude-generate-mcpb": "./src/bin/generate-mcpb.ts",
-    "heyclaude-backup-db": "./src/bin/backup-database.ts",
     "heyclaude-generate-readme": "./src/bin/generate-readme.ts",
     "heyclaude-verify-mcpb": "./src/bin/verify-mcpb.ts",
     "heyclaude-cache": "./src/bin/cache.ts",
@@ -22,7 +20,6 @@
     "heyclaude-generate-services": "./src/bin/generate-services.ts",
     "heyclaude-generate-zod": "./src/bin/generate-zod-schemas.ts",
     "heyclaude-generate-actions": "./src/bin/generate-server-actions.ts",
-    "heyclaude-generate-edge-routes": "./src/bin/generate-edge-routes.ts",
     "heyclaude-mcp-login": "./src/bin/mcp-login.ts",
     "heyclaude-bump-version": "./src/bin/bump-version.ts",
     "heyclaude-analyze-commits": "./src/bin/analyze-commits.ts",
@@ -54,7 +51,7 @@
     "@heyclaude/shared-runtime": "workspace:*",
     "@heyclaude/web-runtime": "workspace:*",
     "@iarna/toml": "^2.2.5",
-    "@supabase/supabase-js": "^2.86.0",
+    "@supabase/supabase-js": "^2.86.2",
     "archiver": "^7.0.1",
     "escape-html": "^1.0.3",
     "jiti": "^2.6.1",
@@ -62,9 +59,11 @@
     "ora": "^9.0.0",
     "pino": "^10.1.0",
     "resend": "^6.5.2",
+    "ts-morph": "^24.0.0",
     "zod": "^4.1.12"
   },
   "devDependencies": {
-    "@types/escape-html": "^1.0.4"
+    "@types/escape-html": "^1.0.4",
+    "ts-morph": "^27.0.2"
   }
 }

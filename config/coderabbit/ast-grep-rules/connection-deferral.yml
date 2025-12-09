@@ -1,0 +1,59 @@
+# Connection Deferral Pattern Rules
+# Enforces connection deferral patterns from ESLint rule: require-connection-deferral
+# Matches: config/tools/eslint-plugin-architectural-rules.js -> require-connection-deferral
+
+---
+# Rule: Detect non-deterministic operations before connection()
+id: non-deterministic-before-connection
+language: TypeScript
+rule:
+  all:
+    - pattern: export default async function $COMPONENT($$$) { $$$ }
+      kind: function_declaration
+    - inside:
+        pattern: app/**/*.tsx
+    - has:
+        pattern: (Date.now()|Math.random()|new Date()|performance.now()|crypto.randomUUID())($$$)
+    - not:
+        follows:
+          pattern: await connection()
+message: "Non-deterministic operations (Date.now(), Math.random(), new Date(), etc.) must come after await connection(). Move operation after connection() call."
+severity: error
+
+---
+# Rule: Detect missing connection() in server components with non-deterministic operations
+id: missing-connection-with-non-deterministic
+language: TypeScript
+rule:
+  all:
+    - pattern: export default async function $COMPONENT($$$) { $$$ }
+      kind: function_declaration
+    - inside:
+        pattern: app/**/*.tsx
+    - has:
+        pattern: (Date.now()|Math.random()|new Date()|performance.now()|crypto.randomUUID())($$$)
+    - not:
+        has:
+          pattern: await connection()
+message: "Server components using non-deterministic operations must call await connection() at the start. Add: await connection() at function start."
+severity: error
+
+---
+# Rule: Detect connection() called after non-deterministic operations
+id: connection-after-non-deterministic
+language: TypeScript
+rule:
+  all:
+    - pattern: export default async function $COMPONENT($$$) { $$$ }
+      kind: function_declaration
+    - inside:
+        pattern: app/**/*.tsx
+    - has:
+        pattern: await connection()
+    - has:
+        pattern: (Date.now()|Math.random()|new Date()|performance.now()|crypto.randomUUID())($$$)
+    - not:
+        follows:
+          pattern: await connection()
+message: "connection() must be called before any non-deterministic operations. Move await connection() to the start of the function."
+severity: error

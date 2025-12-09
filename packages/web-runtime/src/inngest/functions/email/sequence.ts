@@ -11,7 +11,7 @@ import { inngest } from '../../client';
 import { createSupabaseAdminClient } from '../../../supabase/admin';
 import { sendEmail } from '../../../integrations/resend';
 import { ONBOARDING_FROM } from '../../../email/config/email-config';
-import { logger, generateRequestId, createWebAppContextWithId } from '../../../logging/server';
+import { logger, createWebAppContextWithId } from '../../../logging/server';
 
 // Type for sequence email - simplified based on RPC return
 interface SequenceEmailItem {
@@ -38,8 +38,7 @@ export const processEmailSequence = inngest.createFunction(
   { cron: '0 */6 * * *' }, // Every 6 hours
   async ({ step }) => {
     const startTime = Date.now();
-    const requestId = generateRequestId();
-    const logContext = createWebAppContextWithId(requestId, '/inngest/email/sequence', 'processEmailSequence');
+    const logContext = createWebAppContextWithId('/inngest/email/sequence', 'processEmailSequence');
 
     logger.info('Email sequence processing started', logContext);
 

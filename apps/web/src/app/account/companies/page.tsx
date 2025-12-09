@@ -20,7 +20,7 @@ import {
   Eye,
   Plus,
 } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   UI_CLASSES,
   UnifiedBadge,
@@ -32,10 +32,13 @@ import {
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import Image from 'next/image';
 import Link from 'next/link';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
+
+import Loading from './loading';
 
 /**
  * Dynamic Rendering Required
@@ -85,30 +88,25 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see getAuthenticatedUser
  * @see getUserCompanies
  * @see isAllowedHttpUrl
- * @see generateRequestId
  * @see logger
  */
 export default async function CompaniesPage() {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
+  'use cache: private';
+  cacheLife('userProfile'); // 1min stale, 5min revalidate, 30min expire - User-specific data
 
-  // Generate single requestId for this page request (after connection() to allow Date.now())
-  const requestId = generateRequestId();
   const operation = 'CompaniesPage';
   const route = '/account/companies';
   const modulePath = 'apps/web/src/app/account/companies/page';
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    requestId,
     operation,
     route,
     module: modulePath,
   });
 
   return (
-    <Suspense fallback={<div className="space-y-6">Loading companies...</div>}>
+    <Suspense fallback={<Loading />}>
       <CompaniesPageContent reqLogger={reqLogger} />
     </Suspense>
   );
@@ -124,6 +122,7 @@ export default async function CompaniesPage() {
  * - Renders a responsive list of company cards when companies exist, including logo handling, sanitized external website links, stats, and action buttons.
  *
  * @param reqLogger - A request-scoped logger created via logger.child used for contextual logging and redaction of user identifiers.
+ * @param reqLogger.reqLogger
  * @returns A JSX element representing the companies page content.
  *
  * @see getAuthenticatedUser
@@ -349,7 +348,7 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
                           {(() => {
                             const website = company.website;
                             // Validate protocol (http/https) and sanitize URL to prevent XSS and redirect attacks
-                            if (!(website && isAllowedHttpUrl(website))) {
+                            if (!website || !isAllowedHttpUrl(website)) {
                               return null;
                             }
                             // Canonicalize and sanitize URL

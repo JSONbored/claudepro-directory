@@ -5,7 +5,6 @@ import { type Database } from '@heyclaude/database-types';
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { logger } from '../logger.ts';
-import { generateRequestId } from '../utils/request-id.ts';
 
 type ContactCommandsRow =
   Database['public']['Functions']['get_contact_commands']['Returns'][number];
@@ -25,9 +24,7 @@ export async function fetchContactCommands(): Promise<ContactCommandsRow | null>
   cacheLife('hours'); // 1hr stale, 15min revalidate, 1 day expire
   cacheTag('contact');
 
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'fetchContactCommands',
     module: 'data/contact',
   });

@@ -17,7 +17,7 @@ import {
   Layers,
   Plus,
 } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   UI_CLASSES,
   NavLink,
@@ -34,9 +34,12 @@ import {
   TabsTrigger,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import Link from 'next/link';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
+
+import Loading from './loading';
 
 // Extract collections category value to avoid fragile enum index access
 const COLLECTIONS_TAB_VALUE = 'collections' as const;
@@ -76,27 +79,21 @@ export async function generateMetadata(): Promise<Metadata> {
  *
  * @see getAuthenticatedUser - obtains the current user for this request
  * @see getUserLibrary - fetches bookmarks, collections, and stats for the user
- * @see generateRequestId - creates the request-scoped identifier used for logging
  * @see normalizeError - used to normalize fetch errors for logging
  */
 export default async function LibraryPage() {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
-
-  // Generate single requestId for this page request (after connection() to allow Date.now())
-  const requestId = generateRequestId();
+  'use cache: private';
+  cacheLife('userProfile'); // 1min stale, 5min revalidate, 30min expire - User-specific data
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    requestId,
     operation: 'LibraryPage',
     route: '/account/library',
     module: 'apps/web/src/app/account/library',
   });
 
   return (
-    <Suspense fallback={<div className="space-y-6">Loading library...</div>}>
+    <Suspense fallback={<Loading />}>
       <LibraryPageContent reqLogger={reqLogger} />
     </Suspense>
   );
@@ -115,6 +112,7 @@ export default async function LibraryPage() {
  *
  * @param reqLogger - Request-scoped logger (a child of the incoming request logger). A child
  *   logger with user context is created for user-scoped log entries; userId fields are redacted.
+ * @param reqLogger.reqLogger
  * @returns The React element tree for the library page content (cards, tabs, lists, and actions).
  *
  * @see getAuthenticatedUser
@@ -208,7 +206,7 @@ async function LibraryPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
   // Map snake_case to camelCase for compatibility
   const bookmarkCount = stats.bookmark_count ?? 0;
   const collectionCount = stats.collection_count ?? 0;
-  if (!(bookmarks.length > 0 || collections.length > 0)) {
+  if (bookmarks.length <= 0 && collections.length <= 0) {
     userLogger.info('LibraryPage: library returned no bookmarks or collections', {
       section: 'library-data-fetch',
     });

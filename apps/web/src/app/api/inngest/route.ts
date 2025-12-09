@@ -12,7 +12,7 @@ import {
   POST as inngestPOST,
   PUT as inngestPUT,
 } from '@heyclaude/web-runtime/inngest';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
 import { type NextRequest } from 'next/server';
 
 /**
@@ -25,13 +25,10 @@ import { type NextRequest } from 'next/server';
  * @returns {Promise<Response>} The Response produced by the Inngest runtime handler.
  *
  * @see {@link @heyclaude/web-runtime/inngest~GET} - Underlying Inngest GET handler
- * @see {@link @heyclaude/web-runtime/logging/server~generateRequestId} - Request ID generator used for tracing
  * @see {@link @heyclaude/web-runtime/logging/server~logger} - Logger used to create a per-request child logger
  */
 export async function GET(request: NextRequest, context: unknown) {
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'InngestAPI',
     route: '/api/inngest',
     method: 'GET',
@@ -40,9 +37,18 @@ export async function GET(request: NextRequest, context: unknown) {
   try {
     return await inngestGET(request, context);
   } catch (error) {
-    const normalized = normalizeError(error, 'Inngest GET handler failed');
-    reqLogger.error('Inngest GET handler failed', normalized);
-    throw normalized;
+    const normalized = normalizeError(error, 'Inngest GET request failed');
+    reqLogger.error('Inngest GET request failed', normalized, {
+      route: '/api/inngest',
+      operation: 'InngestAPI',
+      method: 'GET',
+    });
+    return createErrorResponse(normalized, {
+      route: '/api/inngest',
+      operation: 'InngestAPI',
+      method: 'GET',
+      logContext: {},
+    });
   }
 }
 
@@ -56,13 +62,10 @@ export async function GET(request: NextRequest, context: unknown) {
  * @returns Promise<Response> - The HTTP response produced by the Inngest POST handler.
  * @throws Any error thrown by the underlying `inngestPOST` handler is normalized, logged, and then re-thrown.
  * @see {@link inngestPOST}
- * @see {@link generateRequestId}
  * @see {@link logger}
  */
 export async function POST(request: NextRequest, context: unknown) {
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'InngestAPI',
     route: '/api/inngest',
     method: 'POST',
@@ -71,9 +74,18 @@ export async function POST(request: NextRequest, context: unknown) {
   try {
     return await inngestPOST(request, context);
   } catch (error) {
-    const normalized = normalizeError(error, 'Inngest POST handler failed');
-    reqLogger.error('Inngest POST handler failed', normalized);
-    throw normalized;
+    const normalized = normalizeError(error, 'Inngest POST request failed');
+    reqLogger.error('Inngest POST request failed', normalized, {
+      route: '/api/inngest',
+      operation: 'InngestAPI',
+      method: 'POST',
+    });
+    return createErrorResponse(normalized, {
+      route: '/api/inngest',
+      operation: 'InngestAPI',
+      method: 'POST',
+      logContext: {},
+    });
   }
 }
 
@@ -84,13 +96,10 @@ export async function POST(request: NextRequest, context: unknown) {
  * @param context - unknown: The route context forwarded to the Inngest handler
  * @returns The Response produced by the Inngest PUT handler
  * @see {@link @heyclaude/web-runtime/inngest#PUT}
- * @see {@link @heyclaude/web-runtime/logging/server.generateRequestId}
  * @see {@link @heyclaude/web-runtime/logging/server.logger}
  */
 export async function PUT(request: NextRequest, context: unknown) {
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'InngestAPI',
     route: '/api/inngest',
     method: 'PUT',
@@ -99,8 +108,17 @@ export async function PUT(request: NextRequest, context: unknown) {
   try {
     return await inngestPUT(request, context);
   } catch (error) {
-    const normalized = normalizeError(error, 'Inngest PUT handler failed');
-    reqLogger.error('Inngest PUT handler failed', normalized);
-    throw normalized;
+    const normalized = normalizeError(error, 'Inngest PUT request failed');
+    reqLogger.error('Inngest PUT request failed', normalized, {
+      route: '/api/inngest',
+      operation: 'InngestAPI',
+      method: 'PUT',
+    });
+    return createErrorResponse(normalized, {
+      route: '/api/inngest',
+      operation: 'InngestAPI',
+      method: 'PUT',
+      logContext: {},
+    });
   }
 }

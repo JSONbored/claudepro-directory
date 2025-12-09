@@ -12,7 +12,7 @@ import { Constants, type Database as DatabaseGenerated } from '@heyclaude/databa
 import { getEnvVar, normalizeError } from '@heyclaude/shared-runtime';
 
 import { pgmqRead, pgmqDelete } from '../../supabase/pgmq-client';
-import { logger, generateRequestId, createWebAppContextWithId } from '../../logging/server';
+import { logger, createWebAppContextWithId } from '../../logging/server';
 import { createErrorResponse } from '../../utils/error-handler';
 
 // CORS headers
@@ -94,9 +94,7 @@ function timingSafeEqual(a: string, b: string): boolean {
  */
 export async function handleRevalidation(_request: NextRequest): Promise<NextResponse> {
   const startTime = Date.now();
-  const requestId = generateRequestId();
   const logContext = createWebAppContextWithId(
-    requestId,
     '/api/flux/revalidation',
     'handleRevalidation'
   );
@@ -239,7 +237,7 @@ export async function handleRevalidation(_request: NextRequest): Promise<NextRes
       route: '/api/flux/revalidation',
       operation: 'POST',
       method: 'POST',
-      logContext: { requestId },
+      logContext: {},
     });
   }
 }

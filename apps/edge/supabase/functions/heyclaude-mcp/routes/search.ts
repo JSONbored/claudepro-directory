@@ -6,6 +6,7 @@
 import { ContentService } from '@heyclaude/data-layer/services/content.ts';
 import type { Database } from '@heyclaude/database-types';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { getSearchUsageHints } from '../lib/usage-hints.ts';
 import type { SearchContentInput } from '../lib/types.ts';
 
 type ContentPaginatedItem = Database['public']['CompositeTypes']['content_paginated_item'];
@@ -60,9 +61,18 @@ export async function handleSearchContent(
 
   // Handle empty results explicitly
   if (items.length === 0) {
+    const usageHints = getSearchUsageHints(false, category);
     return {
       content: [{ type: 'text' as const, text: 'No results found.' }],
-      _meta: { items: [], total: 0, page, limit, hasMore: false },
+      _meta: { 
+        items: [], 
+        total: 0, 
+        page, 
+        limit, 
+        hasMore: false,
+        usageHints,
+        relatedTools: ['getSearchSuggestions', 'getSearchFacets', 'listCategories'],
+      },
     };
   }
 
@@ -95,19 +105,34 @@ export async function handleSearchContent(
     )
     .join('\n\n');
 
+  // Calculate pagination metadata
+  const totalPages = Math.ceil(total / limit);
+  const hasNext = hasMore;
+  const hasPrev = page > 1;
+
+  // Get usage hints for search results
+  const usageHints = getSearchUsageHints(true, category);
+
   return {
     content: [
       {
         type: 'text' as const,
-        text: `Search Results ${searchDesc}${categoryDesc}${tagDesc}:\n\nShowing ${formattedItems.length} of ${total} results (page ${page}):\n\n${textSummary}${hasMore ? '\n\n(More results available on next page)' : ''}`,
+        text: `Search Results ${searchDesc}${categoryDesc}${tagDesc}:\n\nShowing ${formattedItems.length} of ${total} results (page ${page} of ${totalPages}):\n\n${textSummary}${hasMore ? '\n\n(More results available on next page)' : ''}`,
       },
     ],
     _meta: {
       items: formattedItems,
-      total,
-      page,
-      limit,
-      hasMore,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages,
+        hasNext,
+        hasPrev,
+        hasMore,
+      },
+      usageHints,
+      relatedTools: ['getContentDetail', 'downloadContentForPlatform', 'getRelatedContent', 'getContentByTag'],
     },
   };
 }

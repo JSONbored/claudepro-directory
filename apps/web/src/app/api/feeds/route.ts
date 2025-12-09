@@ -4,22 +4,17 @@
  */
 
 import 'server-only';
-
 import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
-import {
-  generateRequestId,
-  logger,
-  normalizeError,
-  createErrorResponse,
-} from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
 import {
   createSupabaseAnonClient,
   badRequestResponse,
   getOnlyCorsHeaders,
   buildCacheHeaders,
 } from '@heyclaude/web-runtime/server';
+import { cacheLife } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
 
 const CORS = getOnlyCorsHeaders;
@@ -79,6 +74,30 @@ async function executeRpcWithLogging<T>(
     }
   }
   return data;
+}
+
+/**
+ * Cached helper function to generate feed payload.
+ * All parameters become part of the cache key, so different feed types/categories have different cache entries.
+ * @param type
+ * @param category
+ */
+async function getCachedFeedPayload(
+  type: FeedType,
+  category: null | string
+): Promise<{ contentType: string; source: string; xml: string }> {
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
+
+  const supabase = createSupabaseAnonClient();
+  // Create a minimal logger for the cached helper
+  const reqLogger = logger.child({
+    operation: 'getCachedFeedPayload',
+    route: '/api/feeds',
+    module: 'apps/web/src/app/api/feeds',
+  });
+
+  return generateFeedPayload(type, category, supabase, reqLogger);
 }
 
 /**
@@ -169,9 +188,7 @@ async function generateFeedPayload(
 }
 
 export async function GET(request: NextRequest) {
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'FeedsAPI',
     route: '/api/feeds',
     method: 'GET',
@@ -201,8 +218,7 @@ export async function GET(request: NextRequest) {
       category: category ?? 'all',
     });
 
-    const supabase = createSupabaseAnonClient();
-    const payload = await generateFeedPayload(type, category, supabase, reqLogger);
+    const payload = await getCachedFeedPayload(type, category);
 
     reqLogger.info('Feed delivery', {
       type,

@@ -13,9 +13,9 @@
 import { type Database } from '@heyclaude/database-types';
 import { getContentBySlug } from '@heyclaude/web-runtime/data';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/data';
-import { getCategoryRoute } from '@heyclaude/web-runtime/hooks';
+import { type RecentlyViewedCategory } from '@heyclaude/web-runtime/hooks';
 import { logger } from '@heyclaude/web-runtime/logging/server';
-import { generateRequestId } from '@heyclaude/web-runtime/logging/server';
+import { isValidCategory } from '@heyclaude/web-runtime/core';
 
 export interface RecentlyViewedItemInput {
   category: string;
@@ -27,6 +27,29 @@ export interface RecentlyViewedItemInput {
 }
 
 /**
+ * Maps singular RecentlyViewedCategory to plural content_category enum value.
+ * This is the correct mapping for database lookups (not route strings).
+ * 
+ * @param category - Singular RecentlyViewedCategory (e.g., 'agent', 'hook')
+ * @returns Plural content_category enum value (e.g., 'agents', 'hooks'), or null if invalid
+ */
+function mapRecentlyViewedToContentCategory(
+  category: RecentlyViewedCategory
+): Database['public']['Enums']['content_category'] | null {
+  const mapping: Record<RecentlyViewedCategory, Database['public']['Enums']['content_category']> = {
+    agent: 'agents',
+    mcp: 'mcp',
+    hook: 'hooks',
+    command: 'commands',
+    rule: 'rules',
+    statusline: 'statuslines',
+    skill: 'skills',
+    job: 'jobs',
+  };
+  return mapping[category] ?? null;
+}
+
+/**
  * Fetch full item data for recently viewed items
  * Returns enriched_content_item directly to preserve all properties for ConfigCard
  * 
@@ -35,9 +58,7 @@ export interface RecentlyViewedItemInput {
 export async function fetchRecentlyViewedItems(
   items: RecentlyViewedItemInput[]
 ): Promise<Database['public']['CompositeTypes']['enriched_content_item'][]> {
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'fetchRecentlyViewedItems',
     module: 'actions/fetch-recently-viewed-items',
   });
@@ -61,11 +82,40 @@ export async function fetchRecentlyViewedItems(
     const enrichedItems = await Promise.all(
       items.map(async (item) => {
         try {
-          // Convert singular category to plural (e.g., 'agent' -> 'agents')
-          const categoryRoute = getCategoryRoute(
-            item.category as Parameters<typeof getCategoryRoute>[0]
+          // Validate item.category is a valid RecentlyViewedCategory
+          const validCategories: RecentlyViewedCategory[] = [
+            'agent',
+            'mcp',
+            'hook',
+            'command',
+            'rule',
+            'statusline',
+            'skill',
+            'job',
+          ];
+          
+          if (!validCategories.includes(item.category as RecentlyViewedCategory)) {
+            reqLogger.warn('Invalid recently viewed category', {
+              category: item.category,
+              slug: item.slug,
+            });
+            return null;
+          }
+
+          // Map singular RecentlyViewedCategory directly to plural content_category enum
+          // (not via route strings - this is for database lookups)
+          const category = mapRecentlyViewedToContentCategory(
+            item.category as RecentlyViewedCategory
           );
-          const category = categoryRoute as Database['public']['Enums']['content_category'];
+
+          if (!category || !isValidCategory(category)) {
+            reqLogger.warn('Failed to map recently viewed category to content_category enum', {
+              inputCategory: item.category,
+              mappedCategory: category,
+              slug: item.slug,
+            });
+            return null;
+          }
 
           // Fetch full item data
           const fullItem = await getContentBySlug(category, item.slug);

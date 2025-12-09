@@ -18,7 +18,7 @@ import {
   Eye,
   Plus,
 } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   BADGE_COLORS,
   UI_CLASSES,
@@ -34,12 +34,16 @@ import {
   AlertTitle,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import Link from 'next/link';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { JobDeleteButton } from '@/src/components/core/buttons/jobs/job-delete-button';
 import { JobToggleButton } from '@/src/components/core/buttons/jobs/job-toggle-button';
+
+import Loading from './loading';
+import JobsListLoading from './loading-list';
 
 /**
  * Dynamic Rendering Required
@@ -178,6 +182,8 @@ interface MyJobsPageProperties {
  *   - `payment`: payment status indicator (e.g., "success")
  *   - `job_id`: job identifier associated with a payment
  *
+ * @param root0
+ * @param root0.searchParams
  * @returns The page React element for the user's job listings.
  *
  * @see getUserDashboard
@@ -186,16 +192,11 @@ interface MyJobsPageProperties {
  * @see resolveTierLabel
  */
 export default async function MyJobsPage({ searchParams }: MyJobsPageProperties) {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
-
-  // Generate single requestId for this page request (after connection() to allow Date.now())
-  const requestId = generateRequestId();
+  'use cache: private';
+  cacheLife('userProfile'); // 1min stale, 5min revalidate, 30min expire - User-specific data
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    requestId,
     operation: 'MyJobsPage',
     route: '/account/jobs',
     module: 'apps/web/src/app/account/jobs',
@@ -254,7 +255,7 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
       ) : null}
 
       {/* Jobs list with header - dashboard data in Suspense for streaming */}
-      <Suspense fallback={<div className="space-y-6">Loading jobs...</div>}>
+      <Suspense fallback={<Loading />}>
         <JobsListWithHeader userId={user.id} userLogger={userLogger} />
       </Suspense>
     </div>
@@ -269,9 +270,13 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
  * Designed to be used as a server component and wrapped in a Suspense boundary for streaming.
  *
  * @param props.paymentJobId - The ID of the job associated with the successful payment
+ * @param root0
+ * @param root0.paymentJobId
  * @param props.userId - The authenticated user's ID used to scope dashboard data
+ * @param root0.userId
  * @param props.userLogger - A request-scoped logger (child) used to record fetch or normalization errors
  *
+ * @param root0.userLogger
  * @see getUserDashboard
  * @see getJobBillingSummaries
  * @see resolvePlanLabel
@@ -381,7 +386,10 @@ async function PaymentSuccessAlert({
  * - Validates runtime shape of returned `jobs` JSON before rendering.
  *
  * @param props.userId - The authenticated user's ID whose dashboard and jobs should be loaded.
+ * @param root0
+ * @param root0.userId
  * @param props.userLogger - A request-scoped logger (child logger) used for recording fetch and validation events.
+ * @param root0.userLogger
  * @returns A React element containing the page header and either an empty-state card or the jobs list; billing details are streamed inside a Suspense boundary.
  *
  * @see JobsListWithBilling
@@ -515,7 +523,7 @@ async function JobsListWithHeader({
           </CardContent>
         </Card>
       ) : (
-        <Suspense fallback={<div className="grid gap-4">Loading job details...</div>}>
+        <Suspense fallback={<JobsListLoading />}>
           <JobsListWithBilling jobs={jobs} jobIds={jobIds} userLogger={userLogger} />
         </Suspense>
       )}
@@ -531,9 +539,13 @@ async function JobsListWithHeader({
  * This server component is intended to be wrapped in a Suspense boundary so billing
  * data can stream independently from other page data.
  *
+ * @param root0
+ * @param root0.jobIds
  * @param props.jobs - Array of job rows to render as cards (from the `jobs` table).
  * @param props.jobIds - List of job IDs to fetch billing summaries for.
+ * @param root0.jobs
  * @param props.userLogger - Request-scoped child logger used to record billing fetch errors.
+ * @param root0.userLogger
  * @returns The rendered jobs list element containing job cards and associated billing sections.
  *
  * @see JobsListWithHeader
@@ -606,17 +618,17 @@ async function JobsListWithBilling({
             ]
               .filter(Boolean)
               .join(' • ')
-          : job.expires_at
+          : (job.expires_at
             ? `Active until ${formatRelativeDate(job.expires_at)}`
-            : null;
+            : null);
         const paymentCopy =
           summary?.last_payment_at && summary.last_payment_amount !== null
             ? `${formatPriceLabel(summary.last_payment_amount, false)} • Received ${formatRelativeDate(
                 summary.last_payment_at
               )}`
-            : summary?.last_payment_at
+            : (summary?.last_payment_at
               ? `Last payment ${formatRelativeDate(summary.last_payment_at)}`
-              : null;
+              : null);
         const showBillingCard =
           Boolean(planPriceLabel ?? renewalCopy ?? paymentCopy) || Boolean(summary);
 

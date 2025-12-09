@@ -1,23 +1,23 @@
 'use server';
 
-import { ContentService } from '@heyclaude/data-layer';
 import { type Database } from '@heyclaude/database-types';
 import { cacheLife, cacheTag } from 'next/cache';
-
-import { logger } from '../../logger.ts';
-import { generateRequestId } from '../../utils/request-id.ts';
 
 /**
  * Get homepage data
  * Uses 'use cache' to cache homepage data. This data is public and same for all users.
+ * @param categoryIds
  */
 export async function getHomepageData(
   categoryIds: readonly string[]
 ): Promise<Database['public']['Functions']['get_homepage_optimized']['Returns'] | null> {
   'use cache';
 
-  const { isBuildTime } = await import('../../build-time.ts');
-  const { createSupabaseAnonClient } = await import('../../supabase/server-anon.ts');
+  // Dynamically import all dependencies to avoid class instance serialization issues
+  const [{ isBuildTime }, { createSupabaseAnonClient }] = await Promise.all([
+    import('../../build-time.ts'),
+    import('../../supabase/server-anon.ts'),
+  ]);
 
   // CRITICAL: Use sorted, joined string for cache key to ensure stability
   // The categoryIds array order might vary, so we sort and join to create a stable key
@@ -30,15 +30,6 @@ export async function getHomepageData(
   cacheTag('content');
   cacheTag('trending');
 
-  // Create request-scoped child logger to avoid race conditions
-  const requestId = generateRequestId();
-  const reqLogger = logger.child({
-    requestId,
-    operation: 'getHomepageData',
-    route: 'utility-function', // Utility function - no specific route
-    module: 'packages/web-runtime/src/data/content/homepage',
-  });
-
   try {
     // Use admin client during build for better performance, anon client at runtime
     let client;
@@ -49,25 +40,54 @@ export async function getHomepageData(
       client = createSupabaseAnonClient();
     }
 
+    // Dynamically import ContentService to avoid class instance serialization issues
+    const { ContentService } = await import('@heyclaude/data-layer');
     const result = await new ContentService(client).getHomepageOptimized({
       p_category_ids: [...categoryIds],
       p_limit: 6, // 6 items per category for featured sections (8 categories × 6 = 48 items total)
     });
 
-    reqLogger.info('getHomepageData: fetched successfully', {
-      categoryIds: sortedCategoryIds,
-      categoryCount: categoryIds.length,
-      limit: 6,
+    // Use cache-safe logging (createLogger with timestamp: false) for cached components
+    // Dynamically import logger only when needed to avoid serialization issues
+    const { createLogger } = await import('@heyclaude/shared-runtime/logger/index.ts');
+    const cacheLogger = createLogger({ timestamp: false });
+    const reqLogger = cacheLogger.child({
+      operation: 'getHomepageData',
+      route: 'utility-function', // Utility function - no specific route
+      module: 'packages/web-runtime/src/data/content/homepage',
     });
+
+    reqLogger.info(
+      {
+        categoryIds: sortedCategoryIds,
+        categoryCount: categoryIds.length,
+        limit: 6,
+      },
+      'getHomepageData: fetched successfully'
+    );
 
     return result;
   } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error('getHomepageData failed', errorForLogging, {
-      categoryIds,
-      categoryCount: categoryIds.length,
+    // Use cache-safe logging with error normalization
+    const { createLogger, normalizeError } =
+      await import('@heyclaude/shared-runtime/logger/index.ts');
+    const cacheLogger = createLogger({ timestamp: false });
+    const reqLogger = cacheLogger.child({
+      operation: 'getHomepageData',
+      route: 'utility-function',
+      module: 'packages/web-runtime/src/data/content/homepage',
     });
+
+    const normalized = normalizeError(error, 'getHomepageData failed');
+    reqLogger.error(
+      {
+        err: normalized,
+        categoryIds: sortedCategoryIds,
+        categoryCount: categoryIds.length,
+      },
+      'getHomepageData failed'
+    );
+
     return null;
   }
 }

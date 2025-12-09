@@ -2,14 +2,16 @@ import { getContactChannels } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { DiscordIcon, Github, Mail, MessageSquare } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
+import { logger } from '@heyclaude/web-runtime/logging/server';
 import { NavLink, Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
-import { connection } from 'next/server';
+import { cacheLife } from 'next/cache';
 import { Suspense } from 'react';
 
 import { ContactTerminal } from '@/src/components/features/contact/contact-terminal';
 import { ContactTerminalErrorBoundary } from '@/src/components/features/contact/contact-terminal-error-boundary';
+
+import Loading from './loading';
 
 /**
  * Generate metadata for the Contact page while ensuring evaluation happens at request time.
@@ -24,9 +26,6 @@ import { ContactTerminalErrorBoundary } from '@/src/components/features/contact/
  */
 
 export async function generateMetadata(): Promise<Metadata> {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
   return generatePageMetadata('/contact');
 }
 
@@ -37,7 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * (GitHub Discussions, GitHub Issues, Discord, and Email when configured), and additional FAQ,
  * response time, and contributing sections.
  *
- * This server-rendered component generates a request-scoped ID and logger and emits warnings
+ * This server-rendered component creates a request-scoped logger and emits warnings
  * when expected contact channels (email, github, discord) are not configured.
  *
  * @returns The React element for the Contact page.
@@ -47,25 +46,18 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see ContactTerminalErrorBoundary
  */
 export default async function ContactPage() {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
-  // Generate single requestId for this page request
-  const requestId = generateRequestId();
-
-  // Create request-scoped child logger to avoid race conditions
+  // Create request-scoped child logger
   const reqLogger = logger.child({
-    requestId,
     operation: 'ContactPage',
     route: '/contact',
     module: 'apps/web/src/app/contact',
   });
 
   return (
-    <Suspense
-      fallback={<div className="container mx-auto px-4 py-8">Loading contact information...</div>}
-    >
+    <Suspense fallback={<Loading />}>
       <ContactPageContent reqLogger={reqLogger} />
     </Suspense>
   );
@@ -77,6 +69,7 @@ export default async function ContactPage() {
  * Logs warnings via the provided request-scoped logger when expected contact channels (email, GitHub, Discord) are not configured.
  *
  * @param reqLogger - A request-scoped logger used to emit warnings and contextual log entries for this render.
+ * @param reqLogger.reqLogger
  * @returns A React element containing the contact options UI and additional informational sections.
  *
  * @see ContactTerminal
@@ -143,7 +136,7 @@ function ContactPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger
         </h2>
 
         <div className="grid gap-6 md:grid-cols-2">
-          {!(channels.github || channels.discord || channels.email) && (
+          {!channels.github && !channels.discord && !channels.email && (
             <div className="text-muted-foreground col-span-2 py-8 text-center">
               <p>Contact channels are currently being configured. Please check back soon.</p>
             </div>

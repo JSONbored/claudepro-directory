@@ -3,7 +3,7 @@
 import { z } from 'zod';
 
 import { getEnvObject } from '../env.ts';
-import { logError, logWarn } from '../logging.ts';
+import { logger, normalizeError } from '../logger/index.ts';
 
 import { nonEmptyString, urlString } from './primitives.ts';
 
@@ -247,12 +247,14 @@ function validateEnv(): Env {
     const errorDetails = JSON.stringify(parsed.error.flatten().fieldErrors, null, 2);
     const validationError = new Error(`Invalid environment variables: ${errorDetails}`);
     // Fire-and-forget: validation must remain synchronous
-    void logError('Invalid environment variables detected', {
+    const normalized = normalizeError(validationError, 'Invalid environment variables detected');
+    void logger.error({
+      err: normalized,
       module: 'shared-runtime',
       operation: 'validateEnv',
       errorDetails,
       phase: 'validation',
-    }, validationError);
+    }, 'Invalid environment variables detected');
 
     // In production, we should fail fast on invalid env vars
     if ((rawEnv['NODE_ENV'] ?? 'development') === 'production') {
@@ -260,10 +262,10 @@ function validateEnv(): Env {
     }
 
     // In development, warn but continue with defaults
-    logWarn('Using default values for missing environment variables', {
+    logger.warn({
       module: 'shared-runtime',
       operation: 'validateEnv',
-    });
+    }, 'Using default values for missing environment variables');
     cachedEnv = envSchema.parse({
       ...rawEnv,
       NODE_ENV: rawEnv['NODE_ENV'] ?? 'development',
@@ -288,11 +290,13 @@ function validateEnv(): Env {
       const missingEnvError = new Error(`Missing required production environment variables: ${missingVars}`);
       
       // Fire-and-forget: log the error before throwing
-      void logError('Missing required production environment variables for security features', {
+      const normalized = normalizeError(missingEnvError, 'Missing required production environment variables for security features');
+      void logger.error({
+        err: normalized,
         module: 'shared-runtime',
         operation: 'validateEnv',
         missingVars,
-      }, missingEnvError);
+      }, 'Missing required production environment variables for security features');
       throw new Error(
         `Missing required production environment variables: ${missingVars}. These are required for security and functionality in production.`
       );

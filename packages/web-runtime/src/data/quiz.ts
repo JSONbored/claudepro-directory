@@ -6,7 +6,6 @@ import { cacheLife, cacheTag } from 'next/cache';
 
 import { logger } from '../index.ts';
 import { createSupabaseServerClient } from '../supabase/server.ts';
-import { generateRequestId } from '../utils/request-id.ts';
 
 export type QuizConfigurationResult =
   Database['public']['Functions']['get_quiz_configuration']['Returns'];
@@ -21,6 +20,7 @@ export type QuizConfigurationResult =
  * Cache behavior:
  * - Minimum 30 seconds stale time (required for runtime prefetch)
  * - Not prerendered (runs at request time)
+ * @returns Quiz configuration result or null if error occurs
  */
 export async function getQuizConfiguration(): Promise<null | QuizConfigurationResult> {
   'use cache: private';
@@ -29,9 +29,7 @@ export async function getQuizConfiguration(): Promise<null | QuizConfigurationRe
   cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag('quiz-configuration');
 
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'getQuizConfiguration',
     module: 'data/quiz',
   });

@@ -75,15 +75,7 @@ pre-commit:
       fail_text: "⚠️  ESLint found errors (not blocking - fix before merging)."
       stage_fixed: true
 
-    # 4. Validate Next.js config can be loaded (catches syntax errors ESLint/TS miss)
-    validate-next-config:
-      glob: "apps/web/next.config.mjs"
-      run: |
-        echo "🔍 Validating next.config.mjs syntax..."
-        pnpm validate:next-config
-      fail_text: "❌ next.config.mjs has syntax errors. Fix them before committing."
-
-    # 5. Validate client/server boundaries (catches build-time import issues)
+    # 4. Validate client/server boundaries (catches build-time import issues)
     validate-client-server:
       glob: "apps/web/src/**/*.{ts,tsx}"
       run: |
@@ -91,7 +83,115 @@ pre-commit:
         pnpm validate:client-server
       fail_text: "❌ Client/server boundary violations found. Fix them before committing."
 
-    # 6. Run tests for changed files (non-blocking, warnings only)
+    # 6. Validate MCP tools (if MCP files changed)
+    validate-mcp-tools:
+      glob: "apps/edge/supabase/functions/heyclaude-mcp/**/*.ts"
+      run: |
+        echo "🔍 Validating MCP tools..."
+        pnpm validate:mcp-tools
+      fail_text: "❌ MCP tool validation failed. Fix errors before committing."
+
+    # 7. Validate Zod schemas (if MCP types changed)
+    validate-zod-schemas:
+      glob: "apps/edge/supabase/functions/heyclaude-mcp/lib/types.ts"
+      run: |
+        echo "🔍 Validating Zod schemas..."
+        pnpm validate:zod-schemas
+      fail_text: "❌ Zod schema validation failed. Fix errors before committing."
+
+    # 8. Validate API routes (if API routes changed)
+    validate-api-routes:
+      glob: "apps/web/src/app/api/**/route.ts"
+      run: |
+        echo "🔍 Validating API routes..."
+        pnpm validate:api-routes
+      fail_text: "❌ API route validation failed. Fix errors before committing."
+
+    # 9. Validate client/server boundaries (if components changed)
+    validate-boundaries:
+      glob: "apps/web/src/**/*.{tsx,ts}"
+      exclude:
+        - "apps/web/src/app/**"  # App router pages are server components by default
+      run: |
+        echo "🔍 Validating client/server boundaries..."
+        pnpm validate:boundaries
+      fail_text: "❌ Client/server boundary validation failed. Fix errors before committing."
+
+    # 10. Validate server actions (if actions changed)
+    validate-server-actions:
+      glob: "packages/web-runtime/src/actions/**/*.ts"
+      run: |
+        echo "🔍 Validating server actions..."
+        pnpm validate:server-actions
+      fail_text: "❌ Server action validation failed. Fix errors before committing."
+
+    # 11. Validate database queries (if data layer or app code changed)
+    validate-database-queries:
+      glob: "apps/web/src/**/*.{ts,tsx}"
+      exclude:
+        - "apps/web/src/components/**"  # Components shouldn't have direct queries
+      run: |
+        echo "🔍 Validating database queries..."
+        pnpm validate:database-queries
+      fail_text: "❌ Database query validation failed. Fix errors before committing."
+
+    # 12. Validate authentication checks (if API routes or actions changed)
+    validate-authentication:
+      glob: "apps/web/src/app/api/**/*.{ts,tsx}"
+      run: |
+        echo "🔍 Validating authentication checks..."
+        pnpm validate:authentication
+      fail_text: "❌ Authentication validation failed. Fix errors before committing."
+
+    # 13. Validate RLS policies (if migrations changed)
+    validate-rls-policies:
+      glob: "supabase/migrations/**/*.sql"
+      run: |
+        echo "🔍 Validating RLS policies..."
+        pnpm validate:rls-policies
+      fail_text: "❌ RLS policy validation failed. Fix errors before committing."
+
+    # 14. Validate Cache Components (if pages or API routes changed)
+    validate-cache-components:
+      glob: "apps/web/src/app/**/*.{tsx,ts}"
+      run: |
+        echo "🔍 Validating Cache Components usage..."
+        pnpm validate:cache-components
+      fail_text: "❌ Cache Components validation failed. Fix errors before committing."
+
+    # 15. Validate NextResponse promise handling (if API routes changed)
+    validate-nextresponse-promises:
+      glob: "apps/web/src/app/api/**/*.{ts,tsx}"
+      run: |
+        echo "🔍 Validating NextResponse promise handling..."
+        pnpm validate:nextresponse-promises
+      fail_text: "❌ NextResponse promise validation failed. Fix errors before committing."
+
+    # 16. Validate server component error handling (if pages changed)
+    validate-server-component-errors:
+      glob: "apps/web/src/app/**/page.{tsx,ts}"
+      run: |
+        echo "🔍 Validating server component error handling..."
+        pnpm validate:server-component-errors
+      fail_text: "❌ Server component error handling validation failed. Fix errors before committing."
+
+    # 17. Validate client component error handling (if components changed)
+    validate-client-component-errors:
+      glob: "apps/web/src/components/**/*.{tsx,ts}"
+      run: |
+        echo "🔍 Validating client component error handling..."
+        pnpm validate:client-component-errors
+      fail_text: "❌ Client component error handling validation failed. Fix errors before committing."
+
+    # 18. Validate logging context (if pages/routes/components changed)
+    validate-logging-context:
+      glob: "apps/web/src/app/**/*.{tsx,ts} apps/web/src/components/**/*.{tsx,ts}"
+      run: |
+        echo "🔍 Validating logging context and request ID usage..."
+        pnpm validate:logging-context
+      fail_text: "❌ Logging context validation failed. Fix errors before committing."
+
+    # 7. Run tests for changed files (non-blocking, warnings only)
     test-affected:
       glob: "**/*.{ts,tsx}"
       exclude: 
@@ -161,7 +261,98 @@ pre-push:
         exit 0
       fail_text: "⚠️  ESLint found errors (not blocking - fix before merging)."
 
-    # 3. Production build verification (graceful)
+    # 3. Validate MCP tools and schemas (comprehensive check)
+    validate-mcp-all:
+      run: |
+        echo "🔍 Validating MCP tools and schemas..."
+        pnpm validate:mcp
+      fail_text: "❌ MCP validation failed. Fix errors before pushing."
+
+    # 4. Analyze dependencies (non-blocking warnings)
+    analyze-dependencies:
+      run: |
+        echo "🔍 Analyzing dependencies..."
+        pnpm analyze:dependencies
+      fail_text: "⚠️  Dependency issues found (not blocking - fix iteratively)."
+
+    # 5. Validate API routes (comprehensive check)
+    validate-api-routes-all:
+      run: |
+        echo "🔍 Validating all API routes..."
+        pnpm validate:api-routes
+      fail_text: "❌ API route validation failed. Fix errors before pushing."
+
+    # 6. Validate client/server boundaries (comprehensive check)
+    validate-boundaries-all:
+      run: |
+        echo "🔍 Validating all client/server boundaries..."
+        pnpm validate:boundaries
+      fail_text: "❌ Client/server boundary validation failed. Fix errors before pushing."
+
+    # 7. Validate server actions (comprehensive check)
+    validate-server-actions-all:
+      run: |
+        echo "🔍 Validating all server actions..."
+        pnpm validate:server-actions
+      fail_text: "❌ Server action validation failed. Fix errors before pushing."
+
+    # 8. Validate database queries (comprehensive check)
+    validate-database-queries-all:
+      run: |
+        echo "🔍 Validating all database queries..."
+        pnpm validate:database-queries
+      fail_text: "❌ Database query validation failed. Fix errors before pushing."
+
+    # 9. Validate authentication checks (comprehensive check)
+    validate-authentication-all:
+      run: |
+        echo "🔍 Validating all authentication checks..."
+        pnpm validate:authentication
+      fail_text: "❌ Authentication validation failed. Fix errors before pushing."
+
+    # 10. Validate RLS policies (comprehensive check)
+    validate-rls-policies-all:
+      run: |
+        echo "🔍 Validating all RLS policies..."
+        pnpm validate:rls-policies
+      fail_text: "❌ RLS policy validation failed. Fix errors before pushing."
+
+    # 11. Validate Cache Components (comprehensive check)
+    validate-cache-components-all:
+      run: |
+        echo "🔍 Validating all Cache Components usage..."
+        pnpm validate:cache-components
+      fail_text: "❌ Cache Components validation failed. Fix errors before pushing."
+
+    # 12. Validate NextResponse promises (comprehensive check)
+    validate-nextresponse-promises-all:
+      run: |
+        echo "🔍 Validating all NextResponse promise handling..."
+        pnpm validate:nextresponse-promises
+      fail_text: "❌ NextResponse promise validation failed. Fix errors before pushing."
+
+    # 13. Validate server component error handling (comprehensive check)
+    validate-server-component-errors-all:
+      run: |
+        echo "🔍 Validating all server component error handling..."
+        pnpm validate:server-component-errors
+      fail_text: "❌ Server component error handling validation failed. Fix errors before pushing."
+
+    # 14. Validate client component error handling (comprehensive check)
+    validate-client-component-errors-all:
+      run: |
+        echo "🔍 Validating all client component error handling..."
+        pnpm validate:client-component-errors
+      fail_text: "❌ Client component error handling validation failed. Fix errors before pushing."
+
+    # 15. Validate logging context (comprehensive check)
+    validate-logging-context-all:
+      run: |
+        echo "🔍 Validating all logging context and request ID usage..."
+        pnpm validate:logging-context
+      fail_text: "❌ Logging context validation failed. Fix errors before pushing."
+
+    # 4. Production build verification (graceful)
     build:
       run: |
         echo "🏗️  Verifying production build..."

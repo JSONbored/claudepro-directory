@@ -27,7 +27,7 @@ import {
   sendEmail,
   enrollInOnboardingSequence,
 } from '../../../integrations/resend';
-import { logger, generateRequestId, createWebAppContextWithId } from '../../../logging/server';
+import { logger, createWebAppContextWithId } from '../../../logging/server';
 
 /**
  * Newsletter subscribe function
@@ -51,8 +51,7 @@ export const subscribeNewsletter = inngest.createFunction(
   { event: 'email/subscribe' },
   async ({ event, step }) => {
     const startTime = Date.now();
-    const requestId = generateRequestId();
-    const logContext = createWebAppContextWithId(requestId, '/inngest/email/subscribe', 'subscribeNewsletter');
+    const logContext = createWebAppContextWithId('/inngest/email/subscribe', 'subscribeNewsletter');
 
     const { email, source, referrer, copyType, copyCategory, copySlug } = event.data;
 

@@ -1,11 +1,13 @@
 import { getContactChannels, getLastUpdatedDate } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
-import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
+import { logger } from '@heyclaude/web-runtime/logging/server';
 import { UI_CLASSES, NavLink } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
-import { connection } from 'next/server';
+import { cacheLife } from 'next/cache';
 import { Suspense } from 'react';
+
+import Loading from './loading';
 
 /**
  * Produce page metadata for the Terms page.
@@ -28,9 +30,6 @@ import { Suspense } from 'react';
  */
 
 export async function generateMetadata(): Promise<Metadata> {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
   return generatePageMetadata('/terms');
 }
 
@@ -38,7 +37,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * Render the Terms of Service page inside a Suspense boundary and supply a per-request logger.
  *
  * Awaits connection() to defer non-deterministic operations (e.g., current time) to request time,
- * generates a single requestId, and creates a request-scoped logger which is passed to the
+ * creates a request-scoped logger which is passed to the
  * page content before rendering.
  *
  * @returns The React element for the Terms of Service page wrapped in a Suspense fallback.
@@ -49,25 +48,18 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see APP_CONFIG
  */
 export default async function TermsPage() {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
-  // Generate single requestId for this page request (after connection() to allow Date.now())
-  const requestId = generateRequestId();
-
-  // Create request-scoped child logger to avoid race conditions
+  // Create request-scoped child logger
   const reqLogger = logger.child({
-    requestId,
     operation: 'TermsPage',
     route: '/terms',
     module: 'apps/web/src/app/terms',
   });
 
   return (
-    <Suspense
-      fallback={<div className="container mx-auto max-w-4xl px-4 py-8 sm:py-12">Loading...</div>}
-    >
+    <Suspense fallback={<Loading />}>
       <TermsPageContent reqLogger={reqLogger} />
     </Suspense>
   );
@@ -81,6 +73,7 @@ export default async function TermsPage() {
  * APP_CONFIG values and NavLink components.
  *
  * @param reqLogger - A request-scoped logger created via `logger.child` used to record render events.
+ * @param reqLogger.reqLogger
  * @returns The Terms of Service React element.
  *
  * @see getLastUpdatedDate
@@ -95,6 +88,7 @@ function TermsPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.c
 
   reqLogger.info('TermsPage: rendering page', {
     section: 'page-render',
+    securityEvent: true,
   });
 
   return (
@@ -178,9 +172,9 @@ function TermsPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.c
         <section className={UI_CLASSES.MARGIN_RELAXED}>
           <h2 className={`${UI_CLASSES.MARGIN_DEFAULT} text-2xl font-semibold`}>6. Disclaimers</h2>
           <p className={UI_CLASSES.MARGIN_DEFAULT}>
-            The service is provided "AS IS" and "AS AVAILABLE" without warranties of any kind,
-            either express or implied, including but not limited to implied warranties of
-            merchantability, fitness for a particular purpose, or non-infringement.
+            The service is provided &quot;AS IS&quot; and &quot;AS AVAILABLE&quot; without
+            warranties of any kind, either express or implied, including but not limited to implied
+            warranties of merchantability, fitness for a particular purpose, or non-infringement.
           </p>
           <p className={UI_CLASSES.MARGIN_DEFAULT}>
             We do not warrant that the service will be uninterrupted, secure, or error-free, or that
@@ -216,9 +210,9 @@ function TermsPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.c
           </h2>
           <p className={UI_CLASSES.MARGIN_DEFAULT}>
             We reserve the right to modify these Terms of Service at any time. We will notify users
-            of any material changes by posting the new terms on this page and updating the "Last
-            updated" date. Your continued use of the service after changes constitutes acceptance of
-            the new terms.
+            of any material changes by posting the new terms on this page and updating the
+            &quot;Last updated&quot; date. Your continued use of the service after changes
+            constitutes acceptance of the new terms.
           </p>
         </section>
 

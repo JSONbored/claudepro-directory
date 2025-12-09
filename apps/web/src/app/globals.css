@@ -176,59 +176,59 @@
      Consistent colors for content types
      ======================================== */
 
-  /* Agents - Green */
-  --color-category-agents: oklch(64% 0.19 145);
-  --color-category-agents-bg: oklch(64% 0.19 145 / 0.2);
-  --color-category-agents-border: oklch(64% 0.19 145 / 0.3);
-  --color-category-agents-hover: oklch(64% 0.19 145 / 0.6);
+  /* Agents - Green - Premium with higher saturation */
+  --color-category-agents: oklch(68% 0.22 145);
+  --color-category-agents-bg: oklch(68% 0.22 145 / 0.25);
+  --color-category-agents-border: oklch(68% 0.22 145 / 0.4);
+  --color-category-agents-hover: oklch(68% 0.22 145 / 0.6);
 
-  /* MCP - Purple */
-  --color-category-mcp: oklch(58% 0.195 305);
-  --color-category-mcp-bg: oklch(58% 0.195 305 / 0.2);
-  --color-category-mcp-border: oklch(58% 0.195 305 / 0.3);
-  --color-category-mcp-hover: oklch(58% 0.195 305 / 0.6);
+  /* MCP - Purple - Premium with higher saturation */
+  --color-category-mcp: oklch(62% 0.22 305);
+  --color-category-mcp-bg: oklch(62% 0.22 305 / 0.25);
+  --color-category-mcp-border: oklch(62% 0.22 305 / 0.4);
+  --color-category-mcp-hover: oklch(62% 0.22 305 / 0.6);
 
-  /* Rules - Blue */
-  --color-category-rules: oklch(58% 0.19 250);
-  --color-category-rules-bg: oklch(58% 0.19 250 / 0.2);
-  --color-category-rules-border: oklch(58% 0.19 250 / 0.3);
-  --color-category-rules-hover: oklch(58% 0.19 250 / 0.6);
+  /* Rules - Blue - Premium with higher saturation */
+  --color-category-rules: oklch(62% 0.22 250);
+  --color-category-rules-bg: oklch(62% 0.22 250 / 0.25);
+  --color-category-rules-border: oklch(62% 0.22 250 / 0.4);
+  --color-category-rules-hover: oklch(62% 0.22 250 / 0.6);
 
-  /* Commands - Orange (proportionally brighter +12%) */
-  --color-category-commands: oklch(77% 0.2 38);
-  --color-category-commands-bg: oklch(77% 0.2 38 / 0.2);
-  --color-category-commands-border: oklch(77% 0.2 38 / 0.3);
-  --color-category-commands-hover: oklch(77% 0.2 38 / 0.6);
+  /* Commands - Orange - Premium with higher saturation */
+  --color-category-commands: oklch(75% 0.22 38);
+  --color-category-commands-bg: oklch(75% 0.22 38 / 0.25);
+  --color-category-commands-border: oklch(75% 0.22 38 / 0.4);
+  --color-category-commands-hover: oklch(75% 0.22 38 / 0.6);
 
-  /* Hooks - Pink */
-  --color-category-hooks: oklch(65% 0.24 350);
-  --color-category-hooks-bg: oklch(65% 0.24 350 / 0.2);
-  --color-category-hooks-border: oklch(65% 0.24 350 / 0.3);
-  --color-category-hooks-hover: oklch(65% 0.24 350 / 0.6);
+  /* Hooks - Pink - Premium with higher saturation */
+  --color-category-hooks: oklch(68% 0.26 350);
+  --color-category-hooks-bg: oklch(68% 0.26 350 / 0.25);
+  --color-category-hooks-border: oklch(68% 0.26 350 / 0.4);
+  --color-category-hooks-hover: oklch(68% 0.26 350 / 0.6);
 
-  /* Statuslines - Purple */
-  --color-category-statuslines: oklch(60% 0.2 290);
-  --color-category-statuslines-bg: oklch(60% 0.2 290 / 0.2);
-  --color-category-statuslines-border: oklch(60% 0.2 290 / 0.3);
-  --color-category-statuslines-hover: oklch(60% 0.2 290 / 0.6);
+  /* Statuslines - Purple - Premium with higher saturation */
+  --color-category-statuslines: oklch(64% 0.22 290);
+  --color-category-statuslines-bg: oklch(64% 0.22 290 / 0.25);
+  --color-category-statuslines-border: oklch(64% 0.22 290 / 0.4);
+  --color-category-statuslines-hover: oklch(64% 0.22 290 / 0.6);
 
-  /* Collections - Indigo */
-  --color-category-collections: oklch(58% 0.19 270);
-  --color-category-collections-bg: oklch(58% 0.19 270 / 0.2);
-  --color-category-collections-border: oklch(58% 0.19 270 / 0.3);
-  --color-category-collections-hover: oklch(58% 0.19 270 / 0.6);
+  /* Collections - Indigo - Premium with higher saturation */
+  --color-category-collections: oklch(62% 0.22 270);
+  --color-category-collections-bg: oklch(62% 0.22 270 / 0.25);
+  --color-category-collections-border: oklch(62% 0.22 270 / 0.4);
+  --color-category-collections-hover: oklch(62% 0.22 270 / 0.6);
 
-  /* Guides - Indigo */
-  --color-category-guides: oklch(58% 0.19 280);
-  --color-category-guides-bg: oklch(58% 0.19 280 / 0.2);
-  --color-category-guides-border: oklch(58% 0.19 280 / 0.3);
-  --color-category-guides-hover: oklch(58% 0.19 280 / 0.6);
+  /* Guides - Indigo - Premium with higher saturation */
+  --color-category-guides: oklch(62% 0.22 280);
+  --color-category-guides-bg: oklch(62% 0.22 280 / 0.25);
+  --color-category-guides-border: oklch(62% 0.22 280 / 0.4);
+  --color-category-guides-hover: oklch(62% 0.22 280 / 0.6);
 
-  /* Skills - Violet */
-  --color-category-skills: oklch(65% 0.2 310);
-  --color-category-skills-bg: oklch(65% 0.2 310 / 0.2);
-  --color-category-skills-border: oklch(65% 0.2 310 / 0.3);
-  --color-category-skills-hover: oklch(65% 0.2 310 / 0.6);
+  /* Skills - Violet - Premium with higher saturation */
+  --color-category-skills: oklch(68% 0.22 310);
+  --color-category-skills-bg: oklch(68% 0.22 310 / 0.25);
+  --color-category-skills-border: oklch(68% 0.22 310 / 0.4);
+  --color-category-skills-hover: oklch(68% 0.22 310 / 0.6);
 
   /* Tutorials - Green (same as agents) */
   --color-category-tutorials: oklch(64% 0.19 145);
@@ -1275,50 +1275,78 @@
   }
 
   /* Category Badge Utilities */
+  /* Premium Category Badges - Enhanced colors with better contrast and saturation */
   .badge-category-agents {
     background-color: var(--color-category-agents-bg);
     color: var(--color-category-agents);
     border-color: var(--color-category-agents-border);
+    font-weight: 600;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
   .badge-category-mcp {
     background-color: var(--color-category-mcp-bg);
     color: var(--color-category-mcp);
     border-color: var(--color-category-mcp-border);
+    font-weight: 600;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
   .badge-category-rules {
     background-color: var(--color-category-rules-bg);
     color: var(--color-category-rules);
     border-color: var(--color-category-rules-border);
+    font-weight: 600;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
   .badge-category-commands {
     background-color: var(--color-category-commands-bg);
     color: var(--color-category-commands);
     border-color: var(--color-category-commands-border);
+    font-weight: 600;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
   .badge-category-hooks {
     background-color: var(--color-category-hooks-bg);
     color: var(--color-category-hooks);
     border-color: var(--color-category-hooks-border);
+    font-weight: 600;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
   .badge-category-statuslines {
     background-color: var(--color-category-statuslines-bg);
     color: var(--color-category-statuslines);
     border-color: var(--color-category-statuslines-border);
+    font-weight: 600;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
   .badge-category-collections {
     background-color: var(--color-category-collections-bg);
     color: var(--color-category-collections);
     border-color: var(--color-category-collections-border);
+    font-weight: 600;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
   .badge-category-guides {
     background-color: var(--color-category-guides-bg);
     color: var(--color-category-guides);
     border-color: var(--color-category-guides-border);
+    font-weight: 600;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
   .badge-category-skills {
     background-color: var(--color-category-skills-bg);
     color: var(--color-category-skills);
     border-color: var(--color-category-skills-border);
+    font-weight: 600;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
 
   /* Micro Font Sizes */

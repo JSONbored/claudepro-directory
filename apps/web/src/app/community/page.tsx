@@ -8,7 +8,7 @@ import {
   Twitter,
   Users,
 } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   generatePageMetadata,
   getCommunityDirectory,
@@ -26,9 +26,12 @@ import {
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import Link from 'next/link';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
+
+import Loading from './loading';
 
 /**
  * Dynamic Rendering
@@ -83,27 +86,21 @@ function formatStatValue(value: null | number | undefined): string {
  * @see getCommunityDirectory
  * @see getConfigurationCount
  * @see getHomepageData
- * @see generateRequestId
  * @see CommunityPageContent
  */
 export default async function CommunityPage() {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
-
-  // Generate single requestId for this page request (after connection() to allow Date.now())
-  const requestId = generateRequestId();
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    requestId,
     operation: 'CommunityPage',
     route: '/community',
     module: 'apps/web/src/app/community',
   });
 
   return (
-    <Suspense fallback={<div className="container mx-auto px-4 py-8">Loading community...</div>}>
+    <Suspense fallback={<Loading />}>
       <CommunityPageContent reqLogger={reqLogger} />
     </Suspense>
   );
@@ -116,6 +113,7 @@ export default async function CommunityPage() {
  * logs configuration warnings for missing contact channels, and gracefully falls back when fetches fail.
  *
  * @param reqLogger - A request-scoped logger (child logger) used for warnings and error reporting during configuration checks and data fetches.
+ * @param reqLogger.reqLogger
  * @returns The JSX element for the community page content.
  *
  * @see generateMetadata

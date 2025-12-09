@@ -8,6 +8,10 @@ import { cacheLife, cacheTag } from 'next/cache';
  * Get similar content
  * Uses 'use cache' to cache similar content. This data is public and same for all users.
  * Similar content changes periodically, so we use the 'hours' cacheLife profile.
+ * @param input
+ * @param input.contentSlug
+ * @param input.contentType
+ * @param input.limit
  */
 export async function getSimilarContent(input: {
   contentSlug: string;
@@ -21,7 +25,6 @@ export async function getSimilarContent(input: {
   const { isBuildTime } = await import('../../build-time.ts');
   const { createSupabaseAnonClient } = await import('../../supabase/server-anon.ts');
   const { logger } = await import('../../logger.ts');
-  const { generateRequestId } = await import('../../utils/request-id.ts');
 
   // Configure cache - use 'hours' profile for similar content
   cacheLife('hours'); // 1hr stale, 15min revalidate, 1 day expire
@@ -29,9 +32,7 @@ export async function getSimilarContent(input: {
   cacheTag('similar');
   cacheTag(`content-${contentSlug}`);
 
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'getSimilarContent',
     module: 'data/content/similar',
   });

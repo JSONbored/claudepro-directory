@@ -4,15 +4,9 @@
  */
 
 import 'server-only';
-
 import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { getStringProperty, getNumberProperty, getObjectProperty } from '@heyclaude/shared-runtime';
-import {
-  generateRequestId,
-  logger,
-  normalizeError,
-  createErrorResponse,
-} from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
 import {
   createSupabaseAnonClient,
   jsonResponse,
@@ -175,9 +169,7 @@ function transformHealthResult(
  * @see createErrorResponse
  */
 export async function GET(_request: NextRequest) {
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'StatusAPI',
     route: '/api/status',
     method: 'GET',
@@ -207,7 +199,7 @@ export async function GET(_request: NextRequest) {
 
     // Determine HTTP status code based on health status
     const statusCode =
-      transformed.status === 'healthy' ? 200 : transformed.status === 'degraded' ? 200 : 503;
+      transformed.status === 'healthy' ? 200 : (transformed.status === 'degraded' ? 200 : 503);
 
     reqLogger.info('Status check completed', {
       status: transformed.status,

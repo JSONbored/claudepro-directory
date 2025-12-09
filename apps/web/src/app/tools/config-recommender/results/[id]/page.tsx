@@ -6,13 +6,15 @@
 import { Constants, type Database } from '@heyclaude/database-types';
 import { generatePageMetadata, getConfigRecommendations } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { type Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { ResultsDisplay } from '@/src/components/features/tools/recommender/results-display';
+
+import ResultsLoading from './loading';
 
 /**
  * Dynamic Rendering Required
@@ -41,6 +43,7 @@ interface DecodedQuizAnswers {
  *
  * @param encoded - The base64url-encoded JSON payload containing quiz answers.
  * @param resultId - Identifier used to annotate logs when decoding fails.
+ * @param parentLogger
  * @returns The decoded answers containing required fields `useCase`, `experienceLevel`, and `toolPreferences`, and optionally `p_integrations`, `p_focus_areas`, `teamSize`, and `timestamp`.
  * @throws An error normalized by `normalizeError` when the input cannot be decoded or fails validation.
  *
@@ -53,13 +56,12 @@ function decodeQuizAnswers(
   resultId: string,
   parentLogger?: ReturnType<typeof logger.child>
 ): DecodedQuizAnswers {
-  // Use parent logger if provided, otherwise create a child logger with generated requestId
+  // Use parent logger if provided, otherwise create a child logger
   const utilityLogger = parentLogger
     ? parentLogger.child({
         operation: 'decodeQuizAnswers',
       })
     : logger.child({
-        requestId: generateRequestId(),
         route: 'utility-function',
         module: 'apps/web/src/app/tools/config-recommender/results/[id]',
         operation: 'decodeQuizAnswers',
@@ -192,13 +194,12 @@ function normalizeRecommendationResults(
     title: string;
   }
 > {
-  // Use parent logger if provided, otherwise create a child logger with generated requestId
+  // Use parent logger if provided, otherwise create a child logger
   const utilityLogger = parentLogger
     ? parentLogger.child({
         operation: 'normalizeRecommendationResults',
       })
     : logger.child({
-        requestId: generateRequestId(),
         route: 'utility-function',
         module: 'apps/web/src/app/tools/config-recommender/results/[id]',
         operation: 'normalizeRecommendationResults',
@@ -266,7 +267,10 @@ export async function generateMetadata({ params }: PageProperties): Promise<Meta
  * is missing, invalid, or backend recommendations are absent.
  *
  * @param props.params - Route parameters containing the `id` of the results set
+ * @param root0
+ * @param root0.params
  * @param props.searchParams - Query parameters; must include `answers` (base64url-encoded JSON)
+ * @param root0.searchParams
  * @returns The React element that displays the recommendations and a shareable URL
  *
  * @see decodeQuizAnswers
@@ -279,20 +283,14 @@ export default async function ResultsPage({ params, searchParams }: PageProperti
   // This is required by Cache Components for non-deterministic operations
   await connection();
 
-  // Generate single requestId for this page request (after connection() to allow Date.now())
-  const requestId = generateRequestId();
-
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    requestId,
     operation: 'ConfigRecommenderResults',
     module: 'apps/web/src/app/tools/config-recommender/results/[id]',
   });
 
   return (
-    <Suspense
-      fallback={<div className="container mx-auto px-4 py-8">Loading recommendations...</div>}
-    >
+    <Suspense fallback={<ResultsLoading />}>
       <ResultsPageContent params={params} searchParams={searchParams} reqLogger={reqLogger} />
     </Suspense>
   );
@@ -307,8 +305,11 @@ export default async function ResultsPage({ params, searchParams }: PageProperti
  * or the recommendations RPC returns no results, this function calls `notFound()` (renders a 404).
  *
  * @param params - Promise resolving to route parameters containing `id`
+ * @param params.params
+ * @param params.reqLogger
  * @param searchParams - Promise resolving to search parameters containing `answers` (base64url-encoded)
  * @param reqLogger - Request-scoped logger; a route-scoped child logger is derived for internal logging
+ * @param params.searchParams
  * @returns A JSX element rendering the results page with recommendations and share URL
  *
  * @see decodeQuizAnswers
@@ -354,10 +355,11 @@ async function ResultsPageContent({
       experienceLevel: answers.experienceLevel,
     });
   } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    routeLogger.error('ConfigRecommenderResults: failed to decode quiz answers', errorForLogging, {
+    const normalized = normalizeError(error, 'Failed to decode quiz answers');
+    routeLogger.error('ConfigRecommenderResults: failed to decode quiz answers', normalized, {
       section: 'answers-decoding',
+      route: `/tools/config-recommender/results/${resolvedParameters.id}`,
+      operation: 'ConfigRecommenderResults',
     });
     notFound();
   }

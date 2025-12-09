@@ -13,7 +13,7 @@
  * However, the structure renders immediately while sidebar data streams.
  */
 
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { createSupabaseServerClient, getAuthenticatedUser } from '@heyclaude/web-runtime/server';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
@@ -32,6 +32,7 @@ import { AccountSidebarSkeleton } from '@/src/components/features/account/accoun
  * If the user is unauthenticated, the component redirects to `/login`. When a session is present and expires within one hour, it attempts a session refresh but continues rendering if refresh fails. Extracted user metadata (display name and image) is passed to the sidebar; the main content is protected by the MFA guard.
  *
  * @param children - Content to render inside the account layout's protected main area
+ * @param children.children
  * @returns The account layout element containing top navigation, a sidebar (loaded via Suspense), and an MFA-protected content region
  *
  * @see AccountSidebar
@@ -63,21 +64,25 @@ async function AccountAuthWrapper({ children }: { children: React.ReactNode }) {
 
   if (!user) redirect('/login');
 
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  // Must be called before any impure functions like Date.now()
+  await connection();
+
+  // Calculate timestamp immediately after connection() to ensure it's at request time
+  // This satisfies React's purity requirements by isolating the impure function call
+  // eslint-disable-next-line react-hooks/purity -- Date.now() is safe after await connection() (Next.js pattern)
+  const currentTimestamp = Math.floor(Date.now() / 1000);
+
   // Session management - required for authentication
+  // Moved after connection() to ensure we're in request time, not render time
   const supabase = await createSupabaseServerClient();
   const {
     data: { session },
   } = await supabase.auth.getSession();
 
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
-
-  // Generate single requestId for this layout request (after connection() to allow Date.now())
-  const requestId = generateRequestId();
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    requestId,
     operation: 'AccountLayout',
     route: '/account',
     module: 'apps/web/src/app/account/layout',
@@ -86,8 +91,9 @@ async function AccountAuthWrapper({ children }: { children: React.ReactNode }) {
 
   // Session refresh - required to maintain authentication
   // Only refresh if session is near expiry (within 1 hour)
+  // Use timestamp calculated at request time (after connection()) to ensure purity
   if (session?.expires_at) {
-    const expiresIn = session.expires_at - Math.floor(Date.now() / 1000);
+    const expiresIn = session.expires_at - currentTimestamp;
     if (expiresIn < 3600) {
       const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
       if (refreshError) {
@@ -129,7 +135,9 @@ async function AccountAuthWrapper({ children }: { children: React.ReactNode }) {
 
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
-          {/* Sidebar with Suspense - data fetching doesn't block page navigation */}
+          {/* Sidebar wrapped in its own Suspense boundary to properly isolate async operations */}
+          {/* This prevents "async info not on parent boundary" errors by ensuring each async component */}
+          {/* has its own clearly defined Suspense boundary */}
           <Suspense fallback={<AccountSidebarSkeleton />}>
             <AccountSidebar
               user={user}
@@ -156,8 +164,10 @@ async function AccountAuthWrapper({ children }: { children: React.ReactNode }) {
  * and a main content area guarded by multi-factor authentication.
  *
  * Authentication and session management are wrapped in Suspense to avoid blocking the layout render.
+ * All blocking operations are moved inside the Suspense boundary to comply with architectural rules.
  *
  * @param children - Content rendered inside the layout's main area
+ * @param children.children
  * @returns The account layout element containing the top bar, Suspense-wrapped sidebar, and MFA-protected main content
  *
  * @see getAuthenticatedUser
@@ -167,11 +177,11 @@ async function AccountAuthWrapper({ children }: { children: React.ReactNode }) {
  * @see AccountMFAGuard
  * @see AuthSignOutButton
  */
-export default async function AccountLayout({ children }: { children: React.ReactNode }) {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
-
+export default function AccountLayout({ children }: { children: React.ReactNode }) {
+  // All blocking operations (authentication, session management) are moved inside Suspense boundary (AccountAuthWrapper)
+  // This ensures the layout itself is non-blocking and can render immediately
+  // AccountSidebar has its own Suspense boundary inside AccountAuthWrapper to properly isolate its async operations
+  // This prevents "async info not on parent boundary" errors by ensuring each async component has a clear boundary
   return (
     <Suspense
       fallback={

@@ -264,7 +264,7 @@ function FooterComponent() {
                 <h3 className="text-foreground mb-4 text-sm font-semibold">Browse</h3>
                 <ul className="space-y-2.5">
                   {browseLinks.map((link) => (
-                    <li key={link.href}>
+                    <li key={`browse-${link.label}`}>
                       <Link
                         href={link.href}
                         className="text-muted-foreground hover:text-foreground text-sm transition-colors"
@@ -281,7 +281,7 @@ function FooterComponent() {
                 <h3 className="text-foreground mb-4 text-sm font-semibold">Resources</h3>
                 <ul className="space-y-2.5">
                   {resourceLinks.map((link) => (
-                    <li key={link.href}>
+                    <li key={`resources-${link.label}`}>
                       <Link
                         href={link.href}
                         className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition-colors"
@@ -299,7 +299,7 @@ function FooterComponent() {
                 <h3 className="text-foreground mb-4 text-sm font-semibold">Support</h3>
                 <ul className="space-y-2.5">
                   {supportLinks.map((link) => (
-                    <li key={link.href}>
+                    <li key={`support-${link.label}`}>
                       <Link
                         href={link.href}
                         className="text-muted-foreground hover:text-foreground text-sm transition-colors"
@@ -316,7 +316,7 @@ function FooterComponent() {
                 <h3 className="text-foreground mb-4 text-sm font-semibold">Legal</h3>
                 <ul className="space-y-2.5">
                   {legalLinks.map((link) => (
-                    <li key={link.href}>
+                    <li key={`legal-${link.label}`}>
                       <Link
                         href={link.href}
                         className="text-muted-foreground hover:text-foreground text-sm transition-colors"
@@ -335,7 +335,7 @@ function FooterComponent() {
                 <h3 className="text-foreground mb-4 text-sm font-semibold">Browse</h3>
                 <ul className="space-y-2.5">
                   {browseLinks.map((link) => (
-                    <li key={link.href}>
+                    <li key={`browse-${link.label}`}>
                       <Link
                         href={link.href}
                         className="text-muted-foreground hover:text-foreground text-sm transition-colors"
@@ -352,7 +352,7 @@ function FooterComponent() {
                 <h3 className="text-foreground mb-4 text-sm font-semibold">Resources</h3>
                 <ul className="space-y-2.5">
                   {resourceLinks.map((link) => (
-                    <li key={link.href}>
+                    <li key={`resources-${link.label}`}>
                       <Link
                         href={link.href}
                         className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition-colors"
@@ -370,7 +370,7 @@ function FooterComponent() {
                 <h3 className="text-foreground mb-4 text-sm font-semibold">Support</h3>
                 <ul className="space-y-2.5">
                   {supportLinks.map((link) => (
-                    <li key={link.href}>
+                    <li key={`support-${link.label}`}>
                       <Link
                         href={link.href}
                         className="text-muted-foreground hover:text-foreground text-sm transition-colors"
@@ -387,7 +387,7 @@ function FooterComponent() {
                 <h3 className="text-foreground mb-4 text-sm font-semibold">Legal</h3>
                 <ul className="space-y-2.5">
                   {legalLinks.map((link) => (
-                    <li key={link.href}>
+                    <li key={`legal-${link.label}`}>
                       <Link
                         href={link.href}
                         className="text-muted-foreground hover:text-foreground text-sm transition-colors"

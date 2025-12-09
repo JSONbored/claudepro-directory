@@ -312,25 +312,25 @@ class Logger {
 
   debug(message: string, context?: LogContext, metadata?: LogContext): void {
     // Pino handles redaction automatically via config
-    // Mixin automatically injects context from logger.bindings() (requestId, operation, userId, etc.)
+    // Mixin automatically injects context from logger.bindings() (operation, userId, etc.)
     this.pino.debug({ ...context, ...metadata }, message);
   }
 
   info(message: string, context?: LogContext, metadata?: LogContext): void {
     // Pino handles redaction automatically via config
-    // Mixin automatically injects context from logger.bindings() (requestId, operation, userId, etc.)
+    // Mixin automatically injects context from logger.bindings() (operation, userId, etc.)
     this.pino.info({ ...context, ...metadata }, message);
   }
 
   warn(message: string, context?: LogContext, metadata?: LogContext): void {
     // Pino handles redaction automatically via config
-    // Mixin automatically injects context from logger.bindings() (requestId, operation, userId, etc.)
+    // Mixin automatically injects context from logger.bindings() (operation, userId, etc.)
     this.pino.warn({ ...context, ...metadata }, message);
   }
 
   error(message: string, error?: Error | string, context?: LogContext, metadata?: LogContext): void {
     // Pino's stdSerializers.err automatically handles error serialization
-    // Mixin automatically injects context from logger.bindings() (requestId, operation, userId, etc.)
+    // Mixin automatically injects context from logger.bindings() (operation, userId, etc.)
     // Pass error as 'err' key - Pino will serialize it properly
     const logData: Record<string, unknown> = { ...context, ...metadata };
     if (error !== undefined) {
@@ -344,7 +344,7 @@ class Logger {
 
   fatal(message: string, error?: Error | string, context?: LogContext, metadata?: LogContext): void {
     // Pino's stdSerializers.err automatically handles error serialization
-    // Mixin automatically injects context from logger.bindings() (requestId, operation, userId, etc.)
+    // Mixin automatically injects context from logger.bindings() (operation, userId, etc.)
     const logData: Record<string, unknown> = { ...context, ...metadata };
     if (error !== undefined) {
       // Use normalizeError() for consistent error normalization across codebase

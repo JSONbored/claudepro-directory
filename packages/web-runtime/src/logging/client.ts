@@ -59,8 +59,6 @@ export {
 // Session ID management
 export { getOrCreateSessionId, clearSessionId } from '../utils/client-session.ts';
 
-// Request ID generation (client-safe, works in all contexts)
-export { generateRequestId } from '../utils/request-id.ts';
 
 // Error normalization (client-safe, works in all contexts)
 export { normalizeError } from '../errors.ts';

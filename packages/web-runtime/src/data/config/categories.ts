@@ -1,11 +1,9 @@
 import 'server-only';
-
 import { type Database } from '@heyclaude/database-types';
 
 import { isBuildTime } from '../../build-time.ts';
 import { getHomepageConfigBundle } from '../../config/static-configs.ts';
 import { logger } from '../../logger.ts';
-import { generateRequestId } from '../../utils/request-id.ts';
 
 function isValidCategoryValue(
   value: unknown
@@ -15,9 +13,7 @@ function isValidCategoryValue(
 
 export function getHomepageFeaturedCategories(): readonly Database['public']['Enums']['content_category'][] {
   // Create request-scoped child logger to avoid race conditions
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'getHomepageFeaturedCategories',
     module: 'data/config/categories',
   });
@@ -45,9 +41,7 @@ export function getHomepageFeaturedCategories(): readonly Database['public']['En
 
 export function getHomepageTabCategories(): readonly string[] {
   // Create request-scoped child logger to avoid race conditions
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'getHomepageTabCategories',
     module: 'data/config/categories',
   });

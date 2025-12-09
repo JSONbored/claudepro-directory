@@ -65,20 +65,20 @@ function extractLatestEntry(): string {
   }
 
   const date = entryMatch[1];
-  const versionName = entryMatch[2].trim();
+  const versionName = entryMatch[2]?.trim() ?? '';
 
   // Extract everything from this entry until the next ## or end of file
-  const entryStart = entryMatch.index! + entryMatch[0].length;
+  const entryStart = (entryMatch.index ?? 0) + entryMatch[0].length;
   const nextEntryMatch = content.slice(entryStart).match(/^##\s+/m);
   const entryEnd = nextEntryMatch
-    ? entryStart + nextEntryMatch.index!
+    ? entryStart + (nextEntryMatch.index ?? 0)
     : content.length;
 
   const entryContent = content.slice(entryStart, entryEnd).trim();
 
   // Extract TL;DR
   const tldrMatch = entryContent.match(/\*\*TL;DR:\*\*\s*(.+?)(?=\n|$)/);
-  const tldr = tldrMatch ? tldrMatch[1].trim() : '';
+  const tldr = tldrMatch?.[1]?.trim() ?? '';
 
   // Extract sections (excluding Technical Details, Deployment, Statistics - these are metadata)
   const sections: Record<string, string[]> = {};
@@ -87,14 +87,14 @@ function extractLatestEntry(): string {
   let sectionMatch;
 
   while ((sectionMatch = sectionRegex.exec(entryContent)) !== null) {
-    const sectionTitle = sectionMatch[1].trim();
+    const sectionTitle = sectionMatch[1]?.trim();
     
     // Skip metadata sections (they're not part of the structured changes)
-    if (metadataSections.includes(sectionTitle)) {
+    if (!sectionTitle || metadataSections.includes(sectionTitle)) {
       continue;
     }
 
-    const sectionContent = sectionMatch[2].trim();
+    const sectionContent = sectionMatch[2]?.trim() ?? '';
 
     // Parse bullet points
     const bullets = sectionContent
@@ -111,7 +111,7 @@ function extractLatestEntry(): string {
 
   // Extract "What Changed" section (if exists)
   const whatChangedMatch = entryContent.match(/###\s+What Changed\n([\s\S]*?)(?=###|$)/);
-  const whatChanged = whatChangedMatch ? whatChangedMatch[1].trim() : '';
+  const whatChanged = whatChangedMatch?.[1]?.trim() ?? '';
 
   // Build JSON object
   const entry = {

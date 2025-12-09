@@ -288,6 +288,10 @@ export const UI_CLASSES = {
   SPACE_Y_4: 'space-y-4',
   SPACE_Y_6: 'space-y-6',
   SPACE_Y_8: 'space-y-8',
+  // Semantic spacing variants (matching SPACE_* naming)
+  SPACE_Y_TIGHT: 'space-y-1', // Alias for SPACE_Y_1
+  SPACE_Y_DEFAULT: 'space-y-3', // Alias for SPACE_Y_3
+  SPACE_Y_COMFORTABLE: 'space-y-4', // Alias for SPACE_Y_4
   SPACE_X_2: 'space-x-2',
   SPACE_X_4: 'space-x-4',
   MB_1: 'mb-1',
@@ -487,6 +491,16 @@ export const DIMENSIONS = {
   DROPDOWN_LG: 'w-[480px]',
   DROPDOWN_XL: 'w-[560px]',
   MEGA_MENU: 'w-[560px]',
+  // Navigation dropdown widths (responsive, content-optimized)
+  NAV_DROPDOWN_BASE: 'w-[480px]', // Standard dropdown width (reduced from 520px)
+  NAV_DROPDOWN_BASE_LG: 'lg:w-[600px]', // Wide dropdown for Configs/Resources/Discover (reduced from 680px)
+  NAV_DROPDOWN_WIDE: 'w-[600px]', // Wide dropdown for Configs/Resources/Discover (reduced from 680px)
+  NAV_DROPDOWN_TABLET: 'w-[440px]', // Tablet popover width
+  NAV_DROPDOWN_JOBS: 'w-[480px]', // Jobs-specific dropdown (reduced from 500px)
+  NAV_DROPDOWN_INNER_MD: 'md:w-[400px]', // Inner grid md breakpoint (reduced from 420px)
+  NAV_DROPDOWN_INNER_SM: 'sm:w-[400px]', // Inner grid sm breakpoint (reduced from 420px)
+  NAV_DROPDOWN_INNER_LG: 'lg:w-[600px]', // Inner grid lg breakpoint (reduced from 680px)
+  NAV_DROPDOWN_BASE_MD: 'md:w-[480px]', // Standard dropdown md breakpoint (reduced from 520px)
   SIDEBAR: 'w-[280px]',
   SIDEBAR_LG: 'w-[380px]',
 

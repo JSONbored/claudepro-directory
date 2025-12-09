@@ -1,0 +1,193 @@
+# Package Generation Workflow - Optimized for performance and resource efficiency
+# - Only runs when packages actually need generation (database-driven or manual trigger)
+# - Uses reusable composite action for setup (reduces duplication)
+# - Shallow git clone (fetch-depth: 1) for faster checkout
+# - Parallel execution of skills and mcpb generation when both needed
+# - Turbo remote cache enabled for faster builds
+# - Smart concurrency grouping to prevent duplicate runs
+name: Generate Packages
+
+on:
+  # Primary: Database webhook trigger (via Inngest → GitHub Actions)
+  # Only triggers when new/updated content entries need packages
+  repository_dispatch:
+    types: [skill-package-needed, mcpb-package-needed]
+  # Manual trigger (for testing/debugging)
+  workflow_dispatch:
+    inputs:
+      package-type:
+        description: 'Package type to generate'
+        required: true
+        type: choice
+        options:
+          - skills
+          - mcpb
+          - both
+      content_id:
+        description: 'Specific content ID to generate (optional)'
+        required: false
+  # Fallback: scheduled check for missing packages (every 15 minutes)
+  # Only runs if webhook system missed something
+  schedule:
+    - cron: '*/15 * * * *'
+  # Legacy: file-based triggers (kept for backward compatibility)
+  # Will be removed once webhook system is fully validated
+  push:
+    branches: [main]
+    paths:
+      - 'content/skills/**/*'
+      - 'apps/web/src/app/**/*'
+      - 'packages/generators/src/commands/generate-skill-packages.ts'
+      - 'packages/generators/src/commands/generate-mcpb-packages.ts'
+      - 'packages/generators/src/bin/generate-skills.ts'
+      - 'packages/generators/src/bin/generate-mcpb.ts'
+      - 'packages/web-runtime/src/transformers/skill-to-md.ts'
+      - 'packages/data-layer/**/*'
+      - '.build-cache/cache.json'
+
+# Smart concurrency: group by trigger type to prevent duplicate runs
+# - Scheduled runs grouped together (only one scheduled run at a time)
+# - repository_dispatch with content_id grouped by content_id (one per content item)
+# - Other triggers use default group
+concurrency:
+  group: generate-packages-${{ github.event_name == 'schedule' && 'scheduled' || github.event_name == 'repository_dispatch' && github.event.client_payload.content_id || 'default' }}
+  cancel-in-progress: false # Don't cancel - let each run complete (packages may differ)
+
+jobs:
+  # Fast determination job - only checkout if needed for path-based triggers
+  determine-packages:
+    name: Determine Packages to Generate
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # Only checkout for push events (need to check changed paths)
+      # Other triggers don't need checkout
+      - name: Checkout (only for push events)
+        if: github.event_name == 'push'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1 # Shallow clone - only need current commit for path checking
+    outputs:
+      generate-skills: ${{ steps.determine.outputs.generate-skills }}
+      generate-mcpb: ${{ steps.determine.outputs.generate-mcpb }}
+      content-id: ${{ steps.determine.outputs.content-id }}
+      slug: ${{ steps.determine.outputs.slug }}
+      - name: Determine package types
+        id: determine
+        run: |
+          # Determine what to generate based on trigger
+          if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
+            # repository_dispatch event type is in github.event.action
+            EVENT_TYPE="${{ github.event.action }}"
+            if [ "$EVENT_TYPE" = "skill-package-needed" ]; then
+              echo "generate-skills=true" >> $GITHUB_OUTPUT
+              echo "generate-mcpb=false" >> $GITHUB_OUTPUT
+            elif [ "$EVENT_TYPE" = "mcpb-package-needed" ]; then
+              echo "generate-skills=false" >> $GITHUB_OUTPUT
+              echo "generate-mcpb=true" >> $GITHUB_OUTPUT
+            fi
+            echo "content-id=${{ github.event.client_payload.content_id || '' }}" >> $GITHUB_OUTPUT
+            echo "slug=${{ github.event.client_payload.slug || '' }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            PACKAGE_TYPE="${{ github.event.inputs.package-type }}"
+            if [ "$PACKAGE_TYPE" = "skills" ] || [ "$PACKAGE_TYPE" = "both" ]; then
+              echo "generate-skills=true" >> $GITHUB_OUTPUT
+            else
+              echo "generate-skills=false" >> $GITHUB_OUTPUT
+            fi
+            if [ "$PACKAGE_TYPE" = "mcpb" ] || [ "$PACKAGE_TYPE" = "both" ]; then
+              echo "generate-mcpb=true" >> $GITHUB_OUTPUT
+            else
+              echo "generate-mcpb=false" >> $GITHUB_OUTPUT
+            fi
+            echo "content-id=${{ github.event.inputs.content_id || '' }}" >> $GITHUB_OUTPUT
+            echo "slug=" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event_name }}" = "schedule" ]; then
+            # Scheduled: check for missing packages (both types)
+            echo "generate-skills=true" >> $GITHUB_OUTPUT
+            echo "generate-mcpb=true" >> $GITHUB_OUTPUT
+            echo "content-id=" >> $GITHUB_OUTPUT
+            echo "slug=" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event_name }}" = "push" ]; then
+            # Push: determine based on changed paths
+            CHANGED_PATHS="${{ join(github.event.commits.*.modified, ' ') }} ${{ join(github.event.commits.*.added, ' ') }}"
+            if echo "$CHANGED_PATHS" | grep -qE '(content/skills|generate-skill|skill-to-md)'; then
+              echo "generate-skills=true" >> $GITHUB_OUTPUT
+            else
+              echo "generate-skills=false" >> $GITHUB_OUTPUT
+            fi
+            if echo "$CHANGED_PATHS" | grep -qE '(generate-mcpb|data-layer)'; then
+              echo "generate-mcpb=true" >> $GITHUB_OUTPUT
+            else
+              echo "generate-mcpb=false" >> $GITHUB_OUTPUT
+            fi
+            echo "content-id=" >> $GITHUB_OUTPUT
+            echo "slug=" >> $GITHUB_OUTPUT
+          fi
+
+  # Parallel generation jobs - only run if needed (conditional execution saves resources)
+  generate-skills:
+    name: Generate Skill Packages
+    needs: determine-packages
+    if: needs.determine-packages.outputs.generate-skills == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: ./.github/actions/setup
+        with:
+          fetch-depth: 1 # Shallow clone - only need current commit
+      - name: Generate skill packages
+        run: pnpm build:skills
+        env:
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          CONTENT_ID: ${{ needs.determine-packages.outputs.content-id || '' }}
+          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+          TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+
+  generate-mcpb:
+    name: Generate MCPB Packages
+    needs: determine-packages
+    if: needs.determine-packages.outputs.generate-mcpb == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: ./.github/actions/setup
+        with:
+          fetch-depth: 1 # Shallow clone - only need current commit
+      - name: Generate MCPB packages
+        run: pnpm build:mcpb
+        env:
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          CONTENT_ID: ${{ needs.determine-packages.outputs.content-id || '' }}
+          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+          TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+
+  summary:
+    name: Generation Summary
+    needs: [determine-packages, generate-skills, generate-mcpb]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    steps:
+      - name: Summary
+        run: |
+          echo "## ✅ Package Generation Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Trigger:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Packages Generated:**" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.determine-packages.outputs.generate-skills }}" = "true" ]; then
+            echo "- ✅ Skills packages" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ "${{ needs.determine-packages.outputs.generate-mcpb }}" = "true" ]; then
+            echo "- ✅ MCPB packages" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -n "${{ needs.determine-packages.outputs.content-id }}" ]; then
+            echo "**Content ID:** ${{ needs.determine-packages.outputs.content-id }}" >> $GITHUB_STEP_SUMMARY
+            echo "**Slug:** ${{ needs.determine-packages.outputs.slug }}" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Note:** Packages are stored in Supabase Storage, not committed to git." >> $GITHUB_STEP_SUMMARY

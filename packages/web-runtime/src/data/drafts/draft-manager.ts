@@ -74,7 +74,7 @@ export class DraftManager {
   private static readonly VERSION = 1;
   private static readonly EXPIRATION_DAYS = 30;
 
-  private key: string;
+  private readonly key: string;
 
   constructor(submissionType?: SubmissionContentType) {
     // Key includes submission type for multiple draft support
@@ -85,6 +85,7 @@ export class DraftManager {
 
   /**
    * Save draft to localStorage
+   * @param data
    */
   save(data: Partial<DraftFormData>): boolean {
     try {
@@ -120,7 +121,7 @@ export class DraftManager {
       localStorage.setItem(this.key, JSON.stringify(draft));
       return true;
     } catch (error) {
-      // Client-side utility - no requestId needed, but include full context
+      // Client-side utility - include full context
       const normalized = normalizeError(error, 'DraftManager: Failed to save draft');
       logger.warn('DraftManager: Failed to save draft', {
         err: normalized,
@@ -163,7 +164,7 @@ export class DraftManager {
 
       // Version check
       if (draft.version !== DraftManager.VERSION) {
-        // Client-side utility - no requestId needed, but include full context
+        // Client-side utility - include full context
         logger.info('DraftManager: Draft version mismatch, clearing', {
           operation: 'DraftManager.loadRaw',
           module: 'data/drafts',
@@ -177,7 +178,7 @@ export class DraftManager {
 
       return draft;
     } catch (error) {
-      // Client-side utility - no requestId needed, but include full context
+      // Client-side utility - include full context
       const normalized = normalizeError(error, 'DraftManager: Failed to load draft');
       logger.warn('DraftManager: Failed to load draft', {
         err: normalized,
@@ -197,7 +198,7 @@ export class DraftManager {
       localStorage.removeItem(this.key);
       return true;
     } catch (error) {
-      // Client-side utility - no requestId needed, but include full context
+      // Client-side utility - include full context
       const normalized = normalizeError(error, 'DraftManager: Failed to clear draft');
       logger.warn('DraftManager: Failed to clear draft', {
         err: normalized,
@@ -242,6 +243,7 @@ export class DraftManager {
 
   /**
    * Calculate quality score (0-100)
+   * @param data
    */
   private calculateQualityScore(data: Partial<DraftFormData>): number {
     let score = 0;
@@ -280,6 +282,7 @@ export class DraftManager {
 
   /**
    * Get quality level based on score
+   * @param score
    */
   getQualityLevel(score: number): 'high' | 'low' | 'medium' | 'perfect' {
     if (score >= 90) return 'perfect';
@@ -333,7 +336,7 @@ export class DraftManager {
         });
       }
     } catch (error) {
-      // Client-side utility - no requestId needed, but include full context
+      // Client-side utility - include full context
       const normalized = normalizeError(error, 'DraftManager: Failed to list drafts');
       logger.warn('DraftManager: Failed to list drafts', {
         err: normalized,
@@ -386,7 +389,7 @@ export class DraftManager {
         }
       }
     } catch (error) {
-      // Client-side utility - no requestId needed, but include full context
+      // Client-side utility - include full context
       const normalized = normalizeError(error, 'DraftManager: Failed to clear expired drafts');
       logger.warn('DraftManager: Failed to clear expired drafts', {
         err: normalized,
@@ -422,7 +425,7 @@ export class DraftManager {
         cleared++;
       }
     } catch (error) {
-      // Client-side utility - no requestId needed, but include full context
+      // Client-side utility - include full context
       const normalized = normalizeError(error, 'DraftManager: Failed to clear all drafts');
       logger.warn('DraftManager: Failed to clear all drafts', {
         err: normalized,
@@ -453,7 +456,7 @@ export class DraftManager {
         }
       }
     } catch (error) {
-      // Client-side utility - no requestId needed, but include full context
+      // Client-side utility - include full context
       const normalized = normalizeError(error, 'DraftManager: Failed to calculate storage size');
       logger.warn('DraftManager: Failed to calculate storage size', {
         err: normalized,
@@ -473,6 +476,8 @@ export class DraftManager {
  * ```tsx
  * const handleChange = useDebouncedSave(draftManager, formData, 2000);
  * ```
+ * @param draftManager
+ * @param delay
  */
 export function createDebouncedSave(
   draftManager: DraftManager,
@@ -488,7 +493,7 @@ export function createDebouncedSave(
     timeoutId = setTimeout(() => {
       draftManager.save(data);
       const loadedDraft = draftManager.load();
-      // Client-side utility - no requestId needed, but include full context
+      // Client-side utility - include full context
       logger.debug('DraftManager: Auto-saved draft', {
         operation: 'createDebouncedSave',
         module: 'data/drafts',

@@ -12,7 +12,7 @@ import { optionalAuthAction, rateLimitedAction } from './safe-action.ts';
 // import { getReviewsWithStatsData } from '../data/content/reviews.ts';
 import { z } from 'zod';
 import type { DisplayableContent } from '../types/component.types.ts';
-import { logger, generateRequestId, createWebAppContextWithId } from '../logging/server.ts';
+import { logger, createWebAppContextWithId } from '../logging/server.ts';
 import { normalizeError } from '../errors.ts';
 
 // Use enum values directly from @heyclaude/database-types Constants
@@ -46,8 +46,7 @@ export const getReviewsWithStats = optionalAuthAction
   .action(async ({ parsedInput, ctx }) => {
     const { content_type, content_slug, sort_by, limit, offset } = parsedInput;
 
-    const requestId = generateRequestId();
-    const logContext = createWebAppContextWithId(requestId, 'action', 'getReviewsWithStats', {
+    const logContext = createWebAppContextWithId('action', 'getReviewsWithStats', {
       contentType: content_type,
       contentSlug: content_slug,
       sortBy: sort_by,
@@ -112,8 +111,7 @@ export const fetchPaginatedContent = rateLimitedAction
   .inputSchema(fetchPaginatedContentSchema)
   .metadata({ actionName: 'content.fetchPaginatedContent', category: 'content' })
   .action(async ({ parsedInput }) => {
-    const requestId = generateRequestId();
-    const logContext = createWebAppContextWithId(requestId, '/api/actions', 'fetchPaginatedContent');
+    const logContext = createWebAppContextWithId('/api/actions', 'fetchPaginatedContent');
 
     try {
       logger.info('fetchPaginatedContent: action started', {

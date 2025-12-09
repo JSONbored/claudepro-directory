@@ -5,16 +5,10 @@
  */
 
 import 'server-only';
-
 import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { APP_CONFIG, buildSecurityHeaders } from '@heyclaude/shared-runtime';
-import {
-  generateRequestId,
-  logger,
-  normalizeError,
-  createErrorResponse,
-} from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
 import {
   createSupabaseAnonClient,
   badRequestResponse,
@@ -23,7 +17,33 @@ import {
   buildCacheHeaders,
   proxyStorageFile,
 } from '@heyclaude/web-runtime/server';
+import { cacheLife } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
+
+/**
+ * Cached helper function to fetch full content record
+ * Uses Cache Components to reduce function invocations
+ * @param category
+ * @param slug
+ */
+async function getCachedContentFull(
+  category: DatabaseGenerated['public']['Enums']['content_category'],
+  slug: string
+) {
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
+
+  const supabase = createSupabaseAnonClient();
+  const rpcArgs = {
+    p_category: category,
+    p_slug: slug,
+    p_base_url: SITE_URL,
+  } satisfies DatabaseGenerated['public']['Functions']['get_api_content_full']['Args'];
+
+  const { data, error } = await supabase.rpc('get_api_content_full', rpcArgs);
+  if (error) throw error;
+  return data;
+}
 
 const CORS_JSON = getOnlyCorsHeaders;
 const CORS_MARKDOWN = getWithAcceptCorsHeaders;
@@ -97,16 +117,10 @@ async function handleJsonFormat(
   slug: string,
   reqLogger: ReturnType<typeof logger.child>
 ) {
-  const supabase = createSupabaseAnonClient();
-  const rpcArgs = {
-    p_category: category,
-    p_slug: slug,
-    p_base_url: SITE_URL,
-  } satisfies DatabaseGenerated['public']['Functions']['get_api_content_full']['Args'];
-
-  const { data, error } = await supabase.rpc('get_api_content_full', rpcArgs);
-
-  if (error) {
+  let data: Awaited<ReturnType<typeof getCachedContentFull>> | null = null;
+  try {
+    data = await getCachedContentFull(category, slug);
+  } catch (error) {
     reqLogger.error('Content JSON RPC error', normalizeError(error), {
       rpcName: 'get_api_content_full',
       category,
@@ -138,7 +152,86 @@ async function handleJsonFormat(
     );
   }
 
-  const jsonData: string = typeof data === 'string' ? data : JSON.stringify(data);
+  // Handle different return types from get_api_content_full
+  // The RPC can return JSONB (which might be a string) or a JSON object
+  let parsedData: unknown;
+  if (typeof data === 'string') {
+    // If it's already a JSON string, parse it
+    try {
+      parsedData = JSON.parse(data);
+    } catch {
+      // If parsing fails, treat it as raw text and wrap it
+      reqLogger.warn('Content JSON: RPC returned non-JSON string', {
+        category,
+        slug,
+        dataPreview: data.slice(0, 100),
+      });
+      return NextResponse.json(
+        { error: 'Invalid JSON data from RPC' },
+        {
+          status: 500,
+          headers: {
+            'Content-Type': 'application/json; charset=utf-8',
+            ...buildSecurityHeaders(),
+            ...CORS_JSON,
+          },
+        }
+      );
+    }
+  } else {
+    // If it's already an object, use it directly
+    parsedData = data;
+  }
+
+  // Deep clean the data to fix escaped newlines and formatting issues
+  // Recursively process the object to unescape newlines in string values
+  const cleanData = (obj: unknown): unknown => {
+    if (typeof obj === 'string') {
+      // Replace escaped newlines with actual newlines
+      // Handle both \\n (double-escaped) and \n (single-escaped)
+      return obj
+        .replaceAll(String.raw`\n`, '\n')
+        .replaceAll(String.raw`\t`, '\t')
+        .replaceAll(String.raw`\r`, '\r');
+    }
+    if (Array.isArray(obj)) {
+      return obj.map(cleanData);
+    }
+    if (obj !== null && typeof obj === 'object') {
+      const cleaned: Record<string, unknown> = {};
+      for (const [key, value] of Object.entries(obj)) {
+        cleaned[key] = cleanData(value);
+      }
+      return cleaned;
+    }
+    return obj;
+  };
+
+  const cleanedData = cleanData(parsedData);
+
+  // Ensure we have actual content
+  if (!cleanedData || (typeof cleanedData === 'object' && Object.keys(cleanedData).length === 0)) {
+    reqLogger.warn('Content JSON: empty or null data returned from RPC', {
+      category,
+      slug,
+      dataType: typeof data,
+    });
+    return NextResponse.json(
+      { error: 'Content data is empty' },
+      {
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          ...buildSecurityHeaders(),
+          ...CORS_JSON,
+        },
+      }
+    );
+  }
+
+  // Stringify with proper formatting (2-space indent for readability)
+  const jsonData = JSON.stringify(cleanedData, null, 2);
+
   return new NextResponse(jsonData, {
     status: 200,
     headers: {
@@ -230,6 +323,12 @@ async function handleMarkdownFormat(
     typeof filename !== 'string' ||
     typeof contentId !== 'string'
   ) {
+    reqLogger.warn('Content Markdown: invalid response structure', {
+      hasMarkdown: typeof markdown === 'string',
+      hasFilename: typeof filename === 'string',
+      hasContentId: typeof contentId === 'string',
+      dataKeys: data ? Object.keys(data) : [],
+    });
     return NextResponse.json(
       { error: 'Markdown generation failed: invalid response' },
       {
@@ -243,8 +342,37 @@ async function handleMarkdownFormat(
     );
   }
 
+  // Ensure markdown content is not empty
+  if (!markdown || markdown.trim().length === 0) {
+    reqLogger.warn('Content Markdown: empty markdown content returned', {
+      category,
+      slug,
+      filename,
+      contentId,
+    });
+    return NextResponse.json(
+      { error: 'Markdown generation failed: empty content' },
+      {
+        status: 400,
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          ...buildSecurityHeaders(),
+          ...CORS_MARKDOWN,
+        },
+      }
+    );
+  }
+
   const safeFilename = sanitizeFilename(filename);
   const safeContentId = sanitizeHeaderValue(contentId);
+
+  reqLogger.info('Content Markdown: markdown generated successfully', {
+    category,
+    slug,
+    filename: safeFilename,
+    contentId: safeContentId,
+    markdownLength: markdown.length,
+  });
 
   return new NextResponse(markdown, {
     status: 200,
@@ -320,8 +448,52 @@ async function handleItemLlmsTxt(
     );
   }
 
-  const dataString = typeof data === 'string' ? data : String(data);
-  const formatted: string = dataString.replaceAll(String.raw`\n`, '\n');
+  // Handle different return types - RPC might return JSON or plain text
+  let formatted: string;
+  if (typeof data === 'string') {
+    // If it's a string, check if it's JSON
+    if (data.trim().startsWith('{') || data.trim().startsWith('[')) {
+      try {
+        // It's JSON - this shouldn't happen, but handle it gracefully
+        const parsed = JSON.parse(data);
+        reqLogger.warn('Content LLMs.txt: RPC returned JSON instead of plain text', {
+          category,
+          slug,
+          dataType: 'json',
+        });
+        // Convert JSON to a readable format (fallback)
+        formatted = JSON.stringify(parsed, null, 2);
+      } catch {
+        // Not valid JSON, treat as plain text
+        formatted = data;
+      }
+    } else {
+      // Plain text string
+      formatted = data;
+    }
+  } else {
+    // If it's an object, convert to string (shouldn't happen, but handle it)
+    reqLogger.warn('Content LLMs.txt: RPC returned object instead of string', {
+      category,
+      slug,
+      dataType: typeof data,
+    });
+    formatted = JSON.stringify(data, null, 2);
+  }
+
+  // Replace escaped newlines with actual newlines
+  // Handle both \\n (double-escaped) and \n (single-escaped in string literals)
+  formatted = formatted
+    .replaceAll(String.raw`\n`, '\n')
+    .replaceAll(String.raw`\t`, '\t')
+    .replaceAll(String.raw`\r`, '\r');
+
+  reqLogger.info('Content LLMs.txt: formatted successfully', {
+    category,
+    slug,
+    length: formatted.length,
+    firstLine: formatted.split('\n')[0]?.slice(0, 50),
+  });
 
   return new NextResponse(formatted, {
     status: 200,
@@ -338,9 +510,10 @@ async function handleItemLlmsTxt(
 async function handleStorageFormat(
   category: DatabaseGenerated['public']['Enums']['content_category'],
   slug: string,
-  reqLogger: ReturnType<typeof logger.child>
+  reqLogger: ReturnType<typeof logger.child>,
+  metadataMode = false
 ) {
-  reqLogger.info('Proxying storage file', { category, slug });
+  reqLogger.info('Handling storage format', { category, slug, metadataMode });
 
   const supabase = createSupabaseAnonClient();
 
@@ -381,8 +554,33 @@ async function handleStorageFormat(
     const bucket = getStringProperty(location, 'bucket');
     const objectPath = getStringProperty(location, 'object_path');
 
-    if (!(bucket && objectPath)) {
+    if (!bucket || !objectPath) {
       return badRequestResponse('Storage file not found', CORS_JSON);
+    }
+
+    // If metadata mode requested, return JSON metadata instead of binary file
+    if (metadataMode) {
+      const metadata = {
+        bucket,
+        object_path: objectPath,
+        category,
+        slug,
+        download_url: `${SITE_URL}/api/content/${category}/${slug}?format=storage`,
+        note: 'Use download_url to fetch the actual binary file',
+      };
+
+      reqLogger.info('Returning storage metadata', { bucket, objectPath });
+
+      return NextResponse.json(metadata, {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          'X-Generated-By': 'supabase.rpc.get_skill_storage_path',
+          ...buildSecurityHeaders(),
+          ...CORS_JSON,
+          ...buildCacheHeaders('content_export'),
+        },
+      });
     }
 
     return proxyStorageFile({
@@ -428,8 +626,33 @@ async function handleStorageFormat(
     const bucket = getStringProperty(location, 'bucket');
     const objectPath = getStringProperty(location, 'object_path');
 
-    if (!(bucket && objectPath)) {
+    if (!bucket || !objectPath) {
       return badRequestResponse('MCPB package not found', CORS_JSON);
+    }
+
+    // If metadata mode requested, return JSON metadata instead of binary file
+    if (metadataMode) {
+      const metadata = {
+        bucket,
+        object_path: objectPath,
+        category,
+        slug,
+        download_url: `${SITE_URL}/api/content/${category}/${slug}?format=storage`,
+        note: 'Use download_url to fetch the actual binary file',
+      };
+
+      reqLogger.info('Returning storage metadata', { bucket, objectPath });
+
+      return NextResponse.json(metadata, {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          'X-Generated-By': 'supabase.rpc.get_mcpb_storage_path',
+          ...buildSecurityHeaders(),
+          ...CORS_JSON,
+          ...buildCacheHeaders('content_export'),
+        },
+      });
     }
 
     return proxyStorageFile({
@@ -449,9 +672,7 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ category: string; slug: string }> }
 ) {
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'ContentRecordAPI',
     route: '/api/content/[category]/[slug]',
     method: 'GET',
@@ -489,7 +710,9 @@ export async function GET(
         return handleItemLlmsTxt(category, slug, reqLogger);
       }
       case 'storage': {
-        return handleStorageFormat(category, slug, reqLogger);
+        // Check if metadata mode is requested (for MCP resources)
+        const metadataMode = url.searchParams.get('metadata') === 'true';
+        return handleStorageFormat(category, slug, reqLogger, metadataMode);
       }
       default: {
         return badRequestResponse(

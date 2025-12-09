@@ -35,6 +35,7 @@ export interface RelatedContentResult {
 /**
  * Get related content
  * Uses 'use cache' to cache related content. This data is public and same for all users.
+ * @param input
  */
 export async function getRelatedContent(input: RelatedContentInput): Promise<RelatedContentResult> {
   'use cache';
@@ -51,7 +52,6 @@ export async function getRelatedContent(input: RelatedContentInput): Promise<Rel
   const { isBuildTime } = await import('../../build-time.ts');
   const { createSupabaseAnonClient } = await import('../../supabase/server-anon.ts');
   const { logger } = await import('../../logger.ts');
-  const { generateRequestId } = await import('../../utils/request-id.ts');
 
   // Configure cache - use 'hours' profile for related content (changes hourly)
   cacheLife('hours'); // 1hr stale, 15min revalidate, 1 day expire
@@ -60,9 +60,7 @@ export async function getRelatedContent(input: RelatedContentInput): Promise<Rel
     cacheTag(tag);
   }
 
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'getRelatedContent',
     module: 'data/content/related',
   });

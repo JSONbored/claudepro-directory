@@ -6,11 +6,11 @@
  */
 
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
-import { normalizeError, getEnvVar } from '@heyclaude/shared-runtime';
+import { normalizeError, getEnvVar, sanitizeForDiscord } from '@heyclaude/shared-runtime';
 
 import { inngest } from '../../client';
 import { pgmqRead, pgmqDelete, type PgmqMessage } from '../../../supabase/pgmq-client';
-import { logger, generateRequestId, createWebAppContextWithId } from '../../../logging/server';
+import { logger, createWebAppContextWithId } from '../../../logging/server';
 
 type JobRow = DatabaseGenerated['public']['Tables']['jobs']['Row'];
 
@@ -39,15 +39,6 @@ interface JobWebhookPayload {
   schema: string;
   record: JobRow;
   old_record: JobRow | null;
-}
-
-/**
- * Sanitize string for Discord markdown (removes link injection, truncates)
- */
-function sanitizeForDiscord(str: string | null | undefined, maxLength = 200): string {
-  if (!str) return '';
-  // Remove markdown link syntax to prevent phishing
-  return str.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1').slice(0, maxLength);
 }
 
 /**
@@ -117,8 +108,7 @@ export const processDiscordJobsQueue = inngest.createFunction(
   { cron: '*/30 * * * *' }, // Every 30 minutes
   async ({ step }) => {
     const startTime = Date.now();
-    const requestId = generateRequestId();
-    const logContext = createWebAppContextWithId(requestId, '/inngest/discord/jobs', 'processDiscordJobsQueue');
+    const logContext = createWebAppContextWithId('/inngest/discord/jobs', 'processDiscordJobsQueue');
 
     logger.info('Discord jobs queue processing started', logContext);
 

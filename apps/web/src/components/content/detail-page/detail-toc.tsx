@@ -5,68 +5,11 @@ import { type ContentHeadingMetadata } from '@heyclaude/web-runtime/types/compon
 import { cn, STATE_PATTERNS } from '@heyclaude/web-runtime/ui';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import { normalizeHeadings, type NormalizedHeading } from './utils/normalize-headings';
+
 interface DetailTocProps {
   className?: string;
   headings?: ContentHeadingMetadata[] | null;
-}
-
-interface NormalizedHeading {
-  anchor: string;
-  id: string;
-  level: number;
-  title: string;
-}
-
-/**
- * Convert raw heading metadata into a deduplicated, normalized list suitable for rendering a table of contents.
- *
- * @param headings - Array of raw heading objects (or null/undefined). Each item is expected to contain `id`, `title`, and optionally `level` and `anchor`. Non-array inputs return an empty array.
- * @returns An array of NormalizedHeading objects: `id` and `title` are trimmed strings, `level` is rounded and clamped to the range 2–6 (default 2), `anchor` always begins with `#` (uses `#<id>` if missing), entries are unique by `id`, and the result contains at most 50 headings.
- *
- * @see NormalizedHeading
- * @see DetailToc
- */
-function normalizeHeadings(
-  headings: ContentHeadingMetadata[] | null | undefined
-): NormalizedHeading[] {
-  if (!Array.isArray(headings)) return [];
-
-  const deduped = new Map<string, NormalizedHeading>();
-
-  for (const heading of headings) {
-    if (!heading || typeof heading !== 'object') continue;
-    const rawId = typeof heading.id === 'string' ? heading.id.trim() : '';
-    const rawTitle = typeof heading.title === 'string' ? heading.title.trim() : '';
-
-    if (!(rawId && rawTitle)) continue;
-
-    if (deduped.has(rawId)) {
-      continue;
-    }
-
-    const level =
-      typeof heading.level === 'number' && Number.isFinite(heading.level)
-        ? Math.min(Math.max(Math.round(heading.level), 2), 6)
-        : 2;
-
-    const anchor =
-      typeof heading.anchor === 'string' && heading.anchor.startsWith('#')
-        ? heading.anchor
-        : `#${rawId}`;
-
-    deduped.set(rawId, {
-      id: rawId,
-      anchor,
-      level,
-      title: rawTitle,
-    });
-
-    if (deduped.size >= 50) {
-      break;
-    }
-  }
-
-  return [...deduped.values()];
 }
 
 /**

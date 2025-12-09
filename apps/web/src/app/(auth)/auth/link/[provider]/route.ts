@@ -4,7 +4,7 @@
  */
 
 import { isValidProvider, validateNextParameter } from '@heyclaude/web-runtime';
-import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
+import { logger } from '@heyclaude/web-runtime/logging/server';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/server';
 import { type NextRequest, NextResponse } from 'next/server';
 
@@ -26,9 +26,9 @@ import { type NextRequest, NextResponse } from 'next/server';
  *
  * @param request - The incoming NextRequest for this route
  * @param params - A Promise resolving to an object containing the route `provider` string
+ * @param params.params
  * @returns A NextResponse performing a redirect to one of the target URLs described above
  *
- * @see generateRequestId
  * @see isValidProvider
  * @see validateNextParameter
  * @see getAuthenticatedUser
@@ -38,16 +38,12 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ provider: string }> }
 ) {
-  // Generate single requestId for this route request
-  const requestId = generateRequestId();
-
   const { provider: rawProvider } = await params;
   const { searchParams, origin } = new URL(request.url);
   const next = validateNextParameter(searchParams.get('next'), '/account/connected-accounts');
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    requestId,
     operation: 'OAuthLink',
     route: `/auth/link/${rawProvider}`,
     module: 'app/(auth)/auth/link/[provider]',
@@ -67,7 +63,7 @@ export async function GET(
     context: 'OAuthLink',
   });
 
-  if (!(authResult.isAuthenticated && authResult.user)) {
+  if (!authResult.isAuthenticated || !authResult.user) {
     reqLogger.warn('OAuth link: user not authenticated', {
       provider: rawProvider,
     });

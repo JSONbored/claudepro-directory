@@ -28,6 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * This server layout uses dynamic rendering inherited from its configuration.
  *
  * @param children - The React nodes to render inside the layout
+ * @param children.children
  * @returns The provided `children` rendered as-is
  *
  * @see generatePageMetadata

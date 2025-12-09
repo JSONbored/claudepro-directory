@@ -9,11 +9,7 @@ import { normalizeError } from '@heyclaude/shared-runtime';
 import { isValidProvider, validateNextParameter } from '@heyclaude/web-runtime';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks';
 import { AlertCircle, Loader2 } from '@heyclaude/web-runtime/icons';
-import {
-  generateRequestId,
-  logClientError,
-  logClientWarn,
-} from '@heyclaude/web-runtime/logging/client';
+import { logClientError, logClientWarn } from '@heyclaude/web-runtime/logging/client';
 import {
   UI_CLASSES,
   Button,
@@ -34,6 +30,7 @@ import { use, useEffect, useRef, useState } from 'react';
  * Initiates an OAuth account linking flow for a given provider and renders either a loading UI while redirecting or an error UI on failure.
  *
  * @param params - A promise resolving to an object with the OAuth provider slug (for example, `{ provider: 'github' }`)
+ * @param params.params
  * @returns The page's React element showing a loading state while redirecting to the provider or an error state if linking fails
  *
  * @see isValidProvider
@@ -96,8 +93,6 @@ export default function OAuthLinkCallbackPage({
       // Mark as attempted before proceeding
       hasAttempted.current = true;
 
-      // Generate single requestId for this client-side operation
-      const requestId = generateRequestId();
       const operation = 'OAuthLinkCallback';
       const route = `/auth/link/${resolvedParameters.provider}/callback`;
       const modulePath = 'apps/web/src/app/(auth)/auth/link/[provider]/callback/page';
@@ -117,7 +112,7 @@ export default function OAuthLinkCallbackPage({
         setProvider(rawProvider);
 
         // Check if user is authenticated
-        if (!(isAuthenticated && user)) {
+        if (!isAuthenticated || !user) {
           if (!mounted) return;
           setStatus('error');
           setErrorMessage('You must be signed in to link an account. Redirecting to login...');
@@ -125,7 +120,6 @@ export default function OAuthLinkCallbackPage({
             component: 'OAuthLinkCallback',
             action: 'check-auth',
             category: 'auth',
-            requestId,
             route,
             module: modulePath,
             provider: rawProvider,
@@ -169,7 +163,6 @@ export default function OAuthLinkCallbackPage({
             component: 'OAuthLinkCallback',
             action: 'link-identity',
             category: 'auth',
-            requestId,
             route,
             module: modulePath,
             provider: rawProvider,
@@ -198,7 +191,6 @@ export default function OAuthLinkCallbackPage({
           component: 'OAuthLinkCallback',
           action: 'oauth-callback',
           category: 'auth',
-          requestId,
           route,
           module: modulePath,
           provider: resolvedParameters.provider,

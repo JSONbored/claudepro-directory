@@ -25,9 +25,9 @@
 import { type Database } from '@heyclaude/database-types';
 import { generatePageMetadata, getChangelogOverview } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG, QUERY_LIMITS } from '@heyclaude/web-runtime/data/config/constants';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { type Metadata } from 'next';
-import { connection } from 'next/server';
+import { cacheLife } from 'next/cache';
 import { Suspense } from 'react';
 
 import { StructuredData } from '@/src/components/core/infra/structured-data';
@@ -47,16 +47,8 @@ import { ChangelogTimelineView } from '@/src/components/features/changelog/chang
  * @see APP_CONFIG
  */
 export async function generateMetadata(): Promise<Metadata> {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
-
-  // Generate requestId for metadata generation (separate from page render, after connection() to allow Date.now())
-  const metadataRequestId = generateRequestId();
-
-  // Create request-scoped child logger to avoid race conditions
+  // Create request-scoped child logger
   const metadataLogger = logger.child({
-    requestId: metadataRequestId,
     operation: 'ChangelogPageMetadata',
     route: '/changelog',
     module: 'apps/web/src/app/changelog',
@@ -108,16 +100,11 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see StructuredData
  */
 export default async function ChangelogPage() {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
-  // Generate single requestId for this page request (after connection() to allow Date.now())
-  const requestId = generateRequestId();
-
-  // Create request-scoped child logger to avoid race conditions
+  // Create request-scoped child logger
   const reqLogger = logger.child({
-    requestId,
     operation: 'ChangelogPage',
     route: '/changelog',
     module: 'apps/web/src/app/changelog',
@@ -153,6 +140,7 @@ export default async function ChangelogPage() {
  * Performs server-side data loading intended to be used inside a Suspense boundary; normalizes `keywords` and `contributors` to never be null and transforms overview entries to match the frontend changelog row schema before rendering.
  *
  * @param reqLogger - Request-scoped logger used to record errors during data fetching
+ * @param reqLogger.reqLogger
  * @returns JSX element containing the changelog timeline populated with sorted entries, or an error card if loading fails
  *
  * @see getChangelogOverview
@@ -206,7 +194,7 @@ async function ChangelogContentWithData({
     });
 
     // Sort entries by date (newest first) - EXACTLY matches Magic UI template
-    sortedEntries = [...publishedEntries].sort((a, b) => {
+    sortedEntries = [...publishedEntries].toSorted((a, b) => {
       const dateA = new Date(a.release_date).getTime();
       const dateB = new Date(b.release_date).getTime();
       return dateB - dateA;

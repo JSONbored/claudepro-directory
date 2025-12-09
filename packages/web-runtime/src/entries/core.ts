@@ -52,7 +52,6 @@ export * from '../utils/url-safety.ts';
 // Logging utilities - use barrel exports instead
 // export * from '../utils/log-context.ts'; // Use @heyclaude/web-runtime/logging/server instead
 // export * from '../utils/request-context.ts'; // Use @heyclaude/web-runtime/logging/server instead
-export * from '../utils/request-id.ts'; // Client-safe request ID generation
 // Note: createWebAppContext/createWebAppContextWithId removed - use @heyclaude/web-runtime/logging/server for server components
 // or @heyclaude/web-runtime/logging/client for client components
 export * from '../utils/homepage-error-tracking.ts';

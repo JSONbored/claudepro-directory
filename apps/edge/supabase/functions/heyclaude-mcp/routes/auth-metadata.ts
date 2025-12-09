@@ -96,36 +96,30 @@ export async function handleAuthorizationServerMetadata(_c: Context): Promise<Re
   const logContext = setupMetadataLogging('oauth-authorization-server-metadata');
 
   try {
-    // Supabase Auth provides OIDC discovery at:
-    // https://<project>.supabase.co/.well-known/openid-configuration
+    // After OAuth 2.1 Server is enabled, Supabase Auth provides:
+    // - OAuth 2.1 Authorization Server Metadata at: /.well-known/oauth-authorization-server/auth/v1
+    // - OIDC Discovery at: /auth/v1/.well-known/openid-configuration
     //
-    // For OAuth 2.0 Authorization Server Metadata (RFC 8414), we can either:
-    // 1. Proxy to Supabase's OIDC discovery and transform it
-    // 2. Return a redirect to Supabase's endpoint
-    // 3. Return metadata pointing to Supabase
-
-    // Option: Return metadata that points clients to Supabase's OIDC discovery
-    // Clients should use Supabase's OIDC discovery endpoint directly
-    // For OAuth 2.1 with resource parameter (RFC 8707), we need to use our proxy endpoint
+    // For OAuth 2.1 with resource parameter (RFC 8707), we use our proxy endpoint
     // which ensures the resource parameter is included and tokens have correct audience
     const authorizationEndpoint = `${MCP_SERVER_URL}/oauth/authorize`;
 
     const metadata = {
       issuer: SUPABASE_AUTH_URL,
-      authorization_endpoint: authorizationEndpoint, // Our proxy endpoint
-      token_endpoint: `${SUPABASE_AUTH_URL}/token`,
-      // Supabase Auth supports OIDC Discovery, so clients should use that
-      // This is a fallback for OAuth 2.0-only clients
+      authorization_endpoint: authorizationEndpoint, // Our proxy endpoint (adds resource parameter)
+      token_endpoint: `${SUPABASE_AUTH_URL}/oauth/token`, // OAuth 2.1 token endpoint (requires OAuth 2.1 Server)
       jwks_uri: `${SUPABASE_AUTH_URL}/.well-known/jwks.json`,
       response_types_supported: ['code'],
       grant_types_supported: ['authorization_code', 'refresh_token'],
       code_challenge_methods_supported: ['S256'], // PKCE support (required for OAuth 2.1)
-      scopes_supported: ['openid', 'email', 'profile', 'mcp:tools'],
+      scopes_supported: ['openid', 'email', 'profile', 'phone', 'mcp:tools', 'mcp:resources'],
       token_endpoint_auth_methods_supported: ['none', 'client_secret_post'],
       // Resource Indicators (RFC 8707) - MCP spec requires this
       resource_parameter_supported: true,
+      // Point to Supabase's OAuth 2.1 discovery endpoint (requires OAuth 2.1 Server to be enabled)
+      oauth_discovery_url: `${SUPABASE_URL}/.well-known/oauth-authorization-server/auth/v1`,
       // Point to OIDC discovery for full metadata
-      oidc_discovery_url: `${SUPABASE_URL}/.well-known/openid-configuration`,
+      oidc_discovery_url: `${SUPABASE_URL}/auth/v1/.well-known/openid-configuration`,
     };
 
     return jsonResponse(metadata, 200, {

@@ -1,1 +1,5 @@
-export { CategoryLoading as default } from '@heyclaude/web-runtime/ui';
+'use client';
+
+import { getLoadingComponent } from '@heyclaude/web-runtime/ui';
+
+export default getLoadingComponent('/rules');

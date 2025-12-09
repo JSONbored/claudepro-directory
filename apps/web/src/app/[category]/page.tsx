@@ -39,13 +39,13 @@ import { getCategoryConfig } from '@heyclaude/web-runtime/data/config/category';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { getContentByCategory } from '@heyclaude/web-runtime/data/content';
 import { ExternalLink, HelpCircle } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import { ICON_NAME_MAP, UnifiedBadge, Button } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { ContentSearchSkeleton } from '@/src/components/content/content-grid-list';
@@ -68,6 +68,8 @@ import { ContentSidebar } from '@/src/components/core/layout/content-sidebar';
  * This function awaits a server connection to permit request-time non-deterministic operations (e.g., Date.now()).
  *
  * @param props.params - Promise resolving to route params containing the `category` slug
+ * @param root0
+ * @param root0.params
  * @returns The Next.js Metadata object for the page
  * @see getCategoryConfig
  * @see generatePageMetadata
@@ -77,9 +79,6 @@ export async function generateMetadata({
 }: {
   params: Promise<{ category: string }>;
 }): Promise<Metadata> {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
   const { category } = await params;
 
   // Validate category and load config
@@ -121,18 +120,17 @@ export async function generateMetadata({
  * @see isValidCategory
  */
 export default async function CategoryPage({ params }: { params: Promise<{ category: string }> }) {
-  // Params is runtime data - must call connection() first per Cache Components rules
-  await connection();
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
+
+  // Params is runtime data - cache key includes params, so different categories create different cache entries
   const { category } = await params;
 
-  // Generate single requestId for this page request (after connection() to allow Date.now())
-  const requestId = generateRequestId();
   const operation = 'CategoryPage';
   const modulePath = 'apps/web/src/app/[category]/page';
 
-  // Create request-scoped child logger to avoid race conditions
+  // Create request-scoped child logger
   const reqLogger = logger.child({
-    requestId,
     operation,
     module: modulePath,
     route: `/${category}`,
@@ -164,9 +162,29 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
   );
   const iconName = iconEntry?.[0] ?? 'sparkles';
 
+  // OPTIMIZATION: Fetch content once at page level to avoid duplicate calls
+  // Both CategoryBadges and CategoryPageContent need the same data
+  let items: Awaited<ReturnType<typeof getContentByCategory>> = [];
+  let hadError = false;
+  try {
+    items = await getContentByCategory(typedCategory);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load category content');
+    reqLogger.error('CategoryPage: getContentByCategory threw', normalized, {
+      category: typedCategory,
+    });
+    items = [];
+    hadError = true;
+  }
+  if (items.length === 0 && !hadError) {
+    reqLogger.warn('CategoryPage: getContentByCategory returned no items', {
+      category: typedCategory,
+    });
+  }
+
   // PPR Optimization: Static shell (hero with config) renders immediately
   // Dynamic content (badges + items list) streams in Suspense
-  // Items are loaded once and used for both badges and content list
+  // Items are loaded once and passed to both components
   return (
     <div className="bg-background min-h-screen">
       {/* Static Hero Section - Renders immediately (config is from generated file) */}
@@ -178,13 +196,13 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
       >
         {/* Badges stream in Suspense */}
         <Suspense fallback={<CategoryBadgesSkeleton />}>
-          <CategoryBadges category={typedCategory} config={config} reqLogger={reqLogger} />
+          <CategoryBadges items={items} config={config} />
         </Suspense>
       </CategoryHeroShell>
 
       {/* Content section - Outside hero, streams separately */}
       <Suspense fallback={<ContentSearchSkeleton />}>
-        <CategoryPageContent category={typedCategory} config={config} reqLogger={reqLogger} />
+        <CategoryPageContent category={typedCategory} items={items} config={config} />
       </Suspense>
     </div>
   );
@@ -197,10 +215,16 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
  * description, and a Submit button. Badges and other dynamic content are provided via the
  * `children` slot and are expected to stream in (e.g., wrapped in a Suspense boundary).
  *
+ * @param root0
+ * @param root0.category
+ * @param root0.children
+ * @param root0.description
+ * @param root0.icon
  * @param props.title - The plural title of the category (displayed as the main heading)
  * @param props.description - A short description or subtitle for the category
  * @param props.icon - The icon key used to look up a component in ICON_NAME_MAP; falls back to a help icon
  * @param props.children - Child nodes (typically streamed badges or content) that render beneath the description
+ * @param root0.title
  * @returns The hero section JSX element for the category page
  *
  * @see CategoryBadges
@@ -223,7 +247,7 @@ function CategoryHeroShell({
 
   return (
     <section
-      className="border-border bg-code/50 border-b backdrop-blur-sm"
+      className="border-border bg-code border-b opacity-30 backdrop-blur-sm"
       aria-labelledby="category-title"
     >
       <div className="container mx-auto px-4 py-20">
@@ -298,6 +322,8 @@ function CategoryBadgesSkeleton() {
  * @param category - The content category for which to load items and compute badges
  * @param config - Unified category configuration that may include `listPage.badges` and `pluralTitle`
  * @param reqLogger - Request-scoped logger used to record load warnings or errors
+ * @param category.config
+ * @param category.items
  * @returns A list (<ul>) of rendered UnifiedBadge elements for the category
  *
  * @see getContentByCategory
@@ -305,36 +331,14 @@ function CategoryBadgesSkeleton() {
  * @see ICON_NAME_MAP
  */
 async function CategoryBadges({
-  category,
+  items,
   config,
-  reqLogger,
 }: {
-  category: Database['public']['Enums']['content_category'];
   config: UnifiedCategoryConfig<Database['public']['Enums']['content_category']>;
-  reqLogger: ReturnType<typeof logger.child>;
+  items: Awaited<ReturnType<typeof getContentByCategory>>;
 }) {
-  const route = `/${category}`;
-  const routeLogger = reqLogger.child({ route });
-
-  // Load content for this category to compute badge counts
-  // This function uses 'use cache' so subsequent calls will hit cache
-  let items: Awaited<ReturnType<typeof getContentByCategory>> = [];
-  let hadError = false;
-  try {
-    items = await getContentByCategory(category);
-  } catch (error) {
-    const normalized = normalizeError(error, 'Failed to load category content for badges');
-    routeLogger.error('CategoryBadges: getContentByCategory threw', normalized, {
-      category,
-    });
-    items = [];
-    hadError = true;
-  }
-  if (items.length === 0 && !hadError) {
-    routeLogger.warn('CategoryBadges: getContentByCategory returned no items', {
-      category,
-    });
-  }
+  // OPTIMIZATION: Items are now passed as prop from parent (fetched once at page level)
+  // This eliminates duplicate getContentByCategory() calls
 
   // Process badges (handle dynamic count badges)
   const badges = config.listPage.badges.map((badge) => {
@@ -390,9 +394,13 @@ async function CategoryBadges({
  * a ContentSearchClient populated with those items alongside the ContentSidebar.
  *
  * @param params.category - The content category to load and render
+ * @param root0
+ * @param root0.category
  * @param params.config - Unified category configuration used for titles, placeholders, and icon resolution
  * @param params.reqLogger - Request-scoped logger used for route-level logging
  *
+ * @param root0.config
+ * @param root0.items
  * @see getContentByCategory
  * @see ContentSearchClient
  * @see ContentSidebar
@@ -400,35 +408,15 @@ async function CategoryBadges({
  */
 async function CategoryPageContent({
   category,
+  items,
   config,
-  reqLogger,
 }: {
   category: Database['public']['Enums']['content_category'];
   config: UnifiedCategoryConfig<Database['public']['Enums']['content_category']>;
-  reqLogger: ReturnType<typeof logger.child>;
+  items: Awaited<ReturnType<typeof getContentByCategory>>;
 }) {
-  const route = `/${category}`;
-  const routeLogger = reqLogger.child({ route });
-
-  // Load content for this category
-  // This function uses 'use cache' so subsequent calls will hit cache
-  let items: Awaited<ReturnType<typeof getContentByCategory>> = [];
-  let hadError = false;
-  try {
-    items = await getContentByCategory(category);
-  } catch (error) {
-    const normalized = normalizeError(error, 'Failed to load category content');
-    routeLogger.error('CategoryPageContent: getContentByCategory threw', normalized, {
-      category,
-    });
-    items = [];
-    hadError = true;
-  }
-  if (items.length === 0 && !hadError) {
-    routeLogger.warn('CategoryPageContent: getContentByCategory returned no items', {
-      category,
-    });
-  }
+  // OPTIMIZATION: Items are now passed as prop from parent (fetched once at page level)
+  // This eliminates duplicate getContentByCategory() calls
 
   // Get icon name from component by finding it in ICON_NAME_MAP
   const iconEntry = Object.entries(ICON_NAME_MAP).find(

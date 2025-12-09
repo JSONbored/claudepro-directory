@@ -14,7 +14,7 @@ import { normalizeError } from '@heyclaude/shared-runtime';
 import { inngest } from '../../client';
 import { createSupabaseAdminClient } from '../../../supabase/admin';
 import { pgmqRead, pgmqDelete, type PgmqMessage } from '../../../supabase/pgmq-client';
-import { logger, generateRequestId, createWebAppContextWithId } from '../../../logging/server';
+import { logger, createWebAppContextWithId } from '../../../logging/server';
 
 const PULSE_BATCH_SIZE = 100;
 const MAX_RETRY_ATTEMPTS = 5;
@@ -65,8 +65,7 @@ export const processPulseQueue = inngest.createFunction(
   { cron: '*/30 * * * *' }, // Every 30 minutes (batches queue events)
   async ({ step }) => {
     const startTime = Date.now();
-    const requestId = generateRequestId();
-    const logContext = createWebAppContextWithId(requestId, '/inngest/analytics/pulse', 'processPulseQueue');
+    const logContext = createWebAppContextWithId('/inngest/analytics/pulse', 'processPulseQueue');
 
     logger.info('Pulse queue processing started', logContext);
 

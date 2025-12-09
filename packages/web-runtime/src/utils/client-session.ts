@@ -11,7 +11,7 @@
  * 
  * **Client/Server Boundaries:**
  * - This module uses `sessionStorage` which is only available in the browser
- * - For server-side request tracking, use {@link ../utils/request-id.generateRequestId | generateRequestId} from {@link ../logging/server | Server Logging Barrel} instead
+ * - For server-side logging, use {@link ../logging/server | Server Logging Barrel} instead
  * 
  * **Related Modules:**
  * - {@link ../utils/client-logger | Client Logger Utilities} - Uses session IDs in log context

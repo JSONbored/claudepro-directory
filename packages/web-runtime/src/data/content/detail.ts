@@ -9,7 +9,6 @@ import { isBuildTime } from '../../build-time.ts';
 import { normalizeError } from '../../errors.ts';
 import { logger } from '../../logger.ts';
 import { createSupabaseAnonClient } from '../../supabase/server-anon.ts';
-import { generateRequestId } from '../../utils/request-id.ts';
 import { generateContentTags } from '../content-helpers.ts';
 
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
@@ -31,6 +30,9 @@ export type ContentDetailData =
  *
  * Uses 'use cache' to cache content detail data. Category and slug become part of the cache key.
  * This data is public and same for all users, so it can be cached at build time.
+ * @param input
+ * @param input.category
+ * @param input.slug
  */
 export async function getContentDetailComplete(input: {
   category: string;
@@ -40,9 +42,7 @@ export async function getContentDetailComplete(input: {
   const { category, slug } = input;
 
   if (!isValidContentCategory(category)) {
-    const requestId = generateRequestId();
     const reqLogger = logger.child({
-      requestId,
       operation: 'getContentDetailComplete',
       module: 'data/content/detail',
     });
@@ -65,9 +65,7 @@ export async function getContentDetailComplete(input: {
     cacheTag(tag);
   }
 
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'getContentDetailComplete',
     module: 'data/content/detail',
   });
@@ -107,6 +105,9 @@ export async function getContentDetailComplete(input: {
  *
  * Uses 'use cache' to cache content detail data. Category and slug become part of the cache key.
  * This data is public and same for all users, so it can be cached at build time.
+ * @param input
+ * @param input.category
+ * @param input.slug
  */
 export async function getContentDetailCore(input: {
   category: string;
@@ -116,9 +117,7 @@ export async function getContentDetailCore(input: {
   const { category, slug } = input;
 
   if (!isValidContentCategory(category)) {
-    const requestId = generateRequestId();
     const reqLogger = logger.child({
-      requestId,
       operation: 'getContentDetailCore',
       module: 'data/content/detail',
     });
@@ -141,9 +140,7 @@ export async function getContentDetailCore(input: {
     cacheTag(tag);
   }
 
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'getContentDetailCore',
     module: 'data/content/detail',
   });
@@ -183,6 +180,9 @@ export async function getContentDetailCore(input: {
  *
  * Uses 'use cache' to cache content analytics data. Category and slug become part of the cache key.
  * This data is public and same for all users, so it can be cached at build time.
+ * @param input
+ * @param input.category
+ * @param input.slug
  */
 export async function getContentAnalytics(input: {
   category: string;
@@ -192,9 +192,7 @@ export async function getContentAnalytics(input: {
   const { category, slug } = input;
 
   if (!isValidContentCategory(category)) {
-    const requestId = generateRequestId();
     const reqLogger = logger.child({
-      requestId,
       operation: 'getContentAnalytics',
       module: 'data/content/detail',
     });
@@ -217,9 +215,7 @@ export async function getContentAnalytics(input: {
     cacheTag(tag);
   }
 
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'getContentAnalytics',
     module: 'data/content/detail',
   });

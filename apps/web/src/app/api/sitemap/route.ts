@@ -1,5 +1,4 @@
 import 'server-only';
-
 import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import {
   APP_CONFIG,
@@ -9,12 +8,7 @@ import {
   getStringProperty,
   TIMEOUT_PRESETS,
 } from '@heyclaude/shared-runtime';
-import {
-  generateRequestId,
-  logger,
-  normalizeError,
-  createErrorResponse,
-} from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
 import {
   createSupabaseAnonClient,
   jsonResponse,
@@ -23,7 +17,22 @@ import {
   handleOptionsRequest,
   fetchWithRetryAndTimeout,
 } from '@heyclaude/web-runtime/server';
+import { cacheLife } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
+
+/**
+ * Cached helper function to fetch sitemap URLs
+ * Uses Cache Components to reduce function invocations
+ */
+async function getCachedSiteUrls() {
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
+
+  const supabase = createSupabaseAnonClient();
+  const { data, error } = await supabase.rpc('get_site_urls');
+  if (error) throw error;
+  return data;
+}
 
 const CORS = getOnlyCorsHeaders;
 const INDEXNOW_API_URL = 'https://api.indexnow.org/IndexNow';
@@ -51,9 +60,7 @@ function timingSafeEqual(a?: null | string, b?: null | string): boolean {
 }
 
 export async function GET(request: NextRequest) {
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'SitemapAPI',
     route: '/api/sitemap',
     method: 'GET',
@@ -65,9 +72,10 @@ export async function GET(request: NextRequest) {
 
   try {
     if (format === 'json') {
-      const { data, error } = await supabase.rpc('get_site_urls');
-
-      if (error) {
+      let data: Awaited<ReturnType<typeof getCachedSiteUrls>> | null = null;
+      try {
+        data = await getCachedSiteUrls();
+      } catch (error) {
         reqLogger.error('get_site_urls RPC failed', normalizeError(error), {
           operation: 'get_site_urls',
         });
@@ -75,9 +83,7 @@ export async function GET(request: NextRequest) {
           route: '/api/sitemap',
           operation: 'get_site_urls',
           method: 'GET',
-          logContext: {
-            requestId,
-          },
+          logContext: {},
         });
       }
 
@@ -170,9 +176,7 @@ export async function GET(request: NextRequest) {
         route: '/api/sitemap',
         operation: 'generate_sitemap_xml',
         method: 'GET',
-        logContext: {
-          requestId,
-        },
+        logContext: {},
       });
     }
 
@@ -201,17 +205,13 @@ export async function GET(request: NextRequest) {
       route: '/api/sitemap',
       operation: 'SitemapAPI',
       method: 'GET',
-      logContext: {
-        requestId,
-      },
+      logContext: {},
     });
   }
 }
 
 export async function POST(request: NextRequest) {
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'SitemapAPI',
     route: '/api/sitemap',
     method: 'POST',
@@ -268,9 +268,7 @@ export async function POST(request: NextRequest) {
         route: '/api/sitemap',
         operation: 'get_site_urls',
         method: 'POST',
-        logContext: {
-          requestId,
-        },
+        logContext: {},
       });
     }
 

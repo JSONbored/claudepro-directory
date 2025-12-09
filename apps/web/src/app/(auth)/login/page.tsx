@@ -1,5 +1,5 @@
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { type Metadata } from 'next';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
@@ -38,6 +38,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * and `reqLogger`.
  *
  * @param searchParams - Promise resolving to an object that may contain a `redirect` string (e.g., `{ redirect?: string }`)
+ * @param searchParams.searchParams
  * @returns The React element for the login page layout
  *
  * @see {@link LoginPanelClient}
@@ -54,15 +55,12 @@ export default async function LoginPage({
   // This is required by Cache Components for non-deterministic operations
   await connection();
 
-  // Generate single requestId for this page request
-  const requestId = generateRequestId();
   const operation = 'LoginPage';
   const route = '/login';
   const modulePath = 'apps/web/src/app/(auth)/login/page';
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    requestId,
     operation,
     route,
     module: modulePath,
@@ -82,8 +80,10 @@ export default async function LoginPage({
  * with `reqLogger` and proceeds without a redirect. Renders a SplitAuthLayout where
  * LoginPanelClient receives `redirectTo` only when a redirect value was successfully resolved.
  *
+ * @param searchParams.reqLogger
  * @param searchParams - A promise that should resolve to an object that may contain `redirect`.
  * @param reqLogger - Request-scoped logger used to record resolution errors and contextual logs.
+ * @param searchParams.searchParams
  * @returns A React element containing the composed login layout.
  *
  * @see LoginPanelClient

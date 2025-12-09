@@ -3,6 +3,7 @@
  */
 
 import { type Database } from '@heyclaude/database-types';
+import { extractFirstFieldFromTuple, isPostgresTupleString } from '@heyclaude/web-runtime';
 import { ensureUserRecord } from '@heyclaude/web-runtime/actions';
 import {
   generatePageMetadata,
@@ -10,7 +11,7 @@ import {
   getUserSettings,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   UI_CLASSES,
   Button,
@@ -21,10 +22,9 @@ import {
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import Image from 'next/image';
 import Link from 'next/link';
-import { connection } from 'next/server';
-import { Suspense } from 'react';
 
 import {
   ProfileEditForm,
@@ -40,9 +40,6 @@ import {
  * @see generatePageMetadata
  */
 export async function generateMetadata(): Promise<Metadata> {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
   return generatePageMetadata('/account/settings');
 }
 
@@ -63,49 +60,15 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see RefreshProfileButton
  */
 export default async function SettingsPage() {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
-
-  // Generate single requestId for this page request (after connection() to allow Date.now())
-  const requestId = generateRequestId();
+  'use cache: private';
+  cacheLife('userProfile'); // 1min stale, 5min revalidate, 30min expire - User-specific data
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    requestId,
     operation: 'SettingsPage',
     route: '/account/settings',
     module: 'apps/web/src/app/account/settings',
   });
-
-  return (
-    <Suspense fallback={<div className="space-y-6">Loading settings...</div>}>
-      <SettingsPageContent reqLogger={reqLogger} />
-    </Suspense>
-  );
-}
-
-/**
- * Renders the server-side Settings page content for the authenticated user, handling
- * authentication, settings retrieval, and optional user initialization.
- *
- * This server component:
- * - Checks authentication and renders a sign-in prompt if no user is present.
- * - Loads user settings and renders a fallback card if settings cannot be loaded.
- * - Attempts to initialize a missing user record and re-fetch settings when necessary.
- * - Renders the full settings UI (profile edit form, account details, and profile picture)
- *   when profile data is available.
- *
- * @param reqLogger - A request-scoped logger instance (created via `logger.child`) used for structured logging.
- * @returns A React element containing the settings UI or an appropriate fallback card based on authentication and data availability.
- *
- * @see getAuthenticatedUser
- * @see getUserSettings
- * @see ensureUserRecord
- * @see ProfileEditForm
- * @see RefreshProfileButton
- */
-async function SettingsPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
   // Section: Authentication
   const { user } = await getAuthenticatedUser({ context: 'SettingsPage' });
 
@@ -174,8 +137,76 @@ async function SettingsPageContent({ reqLogger }: { reqLogger: ReturnType<typeof
   }
 
   // Type-safe RPC return using centralized type definition
-  let userData = settingsData.user_data;
-  let profile = settingsData.profile;
+  // get_user_settings now returns composite type user_settings_result_v2
+  // This provides automatic TypeScript type generation from the database
+  let userData = settingsData?.user_data ?? null;
+  let profile = settingsData?.profile ?? null;
+  const username = settingsData?.username ?? null;
+
+  // Defensive: If profile is a string (serialized tuple), we need to handle it differently
+  // This can happen if the RPC returns a composite type that gets serialized incorrectly
+  // Note: With composite types, this should not happen, but we keep defensive code
+  // Type assertion needed because TypeScript knows profile shouldn't be string from type definition
+  const profileValue: unknown = profile;
+  if (profileValue && typeof profileValue === 'string') {
+    userLogger.error(
+      'SettingsPage: profile is a string (serialized tuple) - RPC return type issue',
+      new Error('Profile data serialization error'),
+      {
+        section: 'data-extraction',
+        profileType: typeof profileValue,
+        profileSample: profileValue.slice(0, 100),
+      }
+    );
+    // Profile data is corrupted - cannot proceed
+    return (
+      <div className="space-y-6">
+        <h1 className="text-3xl font-bold">Settings</h1>
+        <p className="text-destructive">
+          Profile data format error. Please contact support if this persists.
+        </p>
+      </div>
+    );
+  }
+
+  // Ensure profile is an object with expected structure
+  if (
+    profile &&
+    typeof profile === 'object' &&
+    !Array.isArray(profile) && // Profile is an object - ensure display_name is a string, not a serialized tuple
+    profile.display_name
+  ) {
+    // Check if display_name is a PostgreSQL tuple string
+    if (isPostgresTupleString(profile.display_name)) {
+      const extracted = extractFirstFieldFromTuple(profile.display_name);
+      if (extracted === null) {
+        userLogger.warn('SettingsPage: failed to extract display_name from tuple', {
+          section: 'data-extraction',
+          tupleString: profile.display_name.slice(0, 100),
+        });
+        profile.display_name = '';
+      } else {
+        profile = {
+          ...profile,
+          display_name: extracted,
+        };
+        userLogger.info('SettingsPage: extracted display_name from tuple string', {
+          section: 'data-extraction',
+          extracted: profile.display_name,
+          originalLength: profile.display_name?.length ?? 0,
+        });
+      }
+    } else if (typeof profile.display_name !== 'string') {
+      // Not a tuple string, but also not a string - convert to string or empty
+      userLogger.warn('SettingsPage: display_name is not a string', {
+        section: 'data-extraction',
+        displayNameType: typeof profile.display_name,
+        displayNameValue: String(profile.display_name).slice(0, 100),
+      });
+      profile.display_name = '';
+    }
+    // If it's already a string and not a tuple, keep it as is
+  }
 
   // Initialize user if missing (consolidated - no more profiles table)
   if (!userData) {
@@ -238,7 +269,7 @@ async function SettingsPageContent({ reqLogger }: { reqLogger: ReturnType<typeof
               <CardTitle>Profile Information</CardTitle>
               <CardDescription>Update your public profile details</CardDescription>
             </div>
-            {userData?.slug ? (
+            {userData?.slug && typeof userData.slug === 'string' ? (
               <Button asChild variant="outline" size="sm">
                 <Link href={`/u/${userData.slug}`}>View Profile</Link>
               </Button>
@@ -246,7 +277,7 @@ async function SettingsPageContent({ reqLogger }: { reqLogger: ReturnType<typeof
           </div>
         </CardHeader>
         <CardContent>
-          <ProfileEditForm profile={profile} />
+          <ProfileEditForm profile={{ ...profile, username }} />
         </CardContent>
       </Card>
 

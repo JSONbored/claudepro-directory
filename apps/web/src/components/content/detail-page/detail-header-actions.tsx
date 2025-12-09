@@ -194,7 +194,7 @@ export interface DetailHeaderActionsProps {
  * @param typeName - Human-readable content type label displayed as a badge
  * @param category - Content category used for routing, download selection, and analytics
  * @param hasContent - Whether the item exposes copyable content; toggles content-specific action UI
- * @param displayTitle - Title shown in the header (falls back to item.title or item.slug when absent)
+ * @param displayTitle - Title shown in the header. Callers should provide a pre-fallback title (e.g., `item.title ?? item.slug`) as this component renders `displayTitle` directly without fallback logic.
  * @param primaryAction - Primary CTA shown in the actions sidebar; its `type` triggers special handling (e.g., `download`)
  * @param secondaryActions - Optional array of additional serializable actions rendered as secondary buttons
  * @param onCopyContent - Optional override invoked when the Copy Content button is pressed; when provided, the component delegates copy handling to this callback
@@ -579,6 +579,16 @@ export function DetailHeaderActions({
                     const handleCopyForAI = async () => {
                       try {
                         const response = await fetch(`/${safeCategory}/${safeSlug}/llms.txt`);
+                        if (!response.ok) {
+                          toasts.raw.error('Unable to copy for AI', {
+                            description: 'The AI-optimized content could not be loaded.',
+                          });
+                          logUnhandledPromise('Failed to copy for AI', new Error(`HTTP ${response.status}: ${response.statusText}`), {
+                            category,
+                            slug: contentItem.slug,
+                          });
+                          return;
+                        }
                         const content = await response.text();
                         await copyToClipboard(content);
                         toasts.raw.success('Copied llms.txt to clipboard!');
@@ -588,6 +598,9 @@ export function DetailHeaderActions({
                           metadata: { action_type: 'llmstxt' },
                         });
                       } catch (error) {
+                        toasts.raw.error('Unable to copy for AI', {
+                          description: 'An unexpected error occurred while copying.',
+                        });
                         logUnhandledPromise('Failed to copy for AI', error, {
                           category,
                           slug: contentItem.slug,
@@ -600,6 +613,16 @@ export function DetailHeaderActions({
                         const response = await fetch(
                           `/${safeCategory}/${safeSlug}.md?include_metadata=true&include_footer=false`
                         );
+                        if (!response.ok) {
+                          toasts.raw.error('Unable to copy markdown', {
+                            description: 'The markdown content could not be loaded.',
+                          });
+                          logUnhandledPromise('Failed to copy markdown', new Error(`HTTP ${response.status}: ${response.statusText}`), {
+                            category,
+                            slug: contentItem.slug,
+                          });
+                          return;
+                        }
                         const content = await response.text();
                         await copyToClipboard(content);
                         showModal({
@@ -615,6 +638,9 @@ export function DetailHeaderActions({
                           metadata: { action_type: 'copy' },
                         });
                       } catch (error) {
+                        toasts.raw.error('Unable to copy markdown', {
+                          description: 'An unexpected error occurred while copying.',
+                        });
                         logUnhandledPromise('Failed to copy markdown', error, {
                           category,
                           slug: contentItem.slug,
@@ -665,6 +691,16 @@ export function DetailHeaderActions({
                     const handleDownloadMarkdown = async () => {
                       try {
                         const response = await fetch(`/${safeCategory}/${safeSlug}.md`);
+                        if (!response.ok) {
+                          toasts.raw.error('Unable to download markdown', {
+                            description: 'The markdown file could not be loaded.',
+                          });
+                          logUnhandledPromise('Failed to download markdown', new Error(`HTTP ${response.status}: ${response.statusText}`), {
+                            category,
+                            slug: contentItem.slug,
+                          });
+                          return;
+                        }
                         const content = await response.text();
                         const blob = new Blob([content], { type: 'text/markdown' });
                         const url = URL.createObjectURL(blob);
@@ -682,6 +718,9 @@ export function DetailHeaderActions({
                           action_type: 'download_markdown',
                         });
                       } catch (error) {
+                        toasts.raw.error('Unable to download markdown', {
+                          description: 'An unexpected error occurred while downloading.',
+                        });
                         logUnhandledPromise('Failed to download markdown', error, {
                           category,
                           slug: contentItem.slug,

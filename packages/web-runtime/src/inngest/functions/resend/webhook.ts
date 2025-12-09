@@ -23,7 +23,7 @@ import { normalizeError } from '@heyclaude/shared-runtime';
 
 import { inngest, type ResendEmailEventData } from '../../client';
 import { createSupabaseAdminClient } from '../../../supabase/admin';
-import { logger, generateRequestId, createWebAppContextWithId } from '../../../logging/server';
+import { logger, createWebAppContextWithId } from '../../../logging/server';
 import { CONCURRENCY_LIMITS, RETRY_CONFIGS } from '../../config';
 
 type EmailEngagementSummary = DatabaseGenerated['public']['Tables']['email_engagement_summary']['Row'];
@@ -117,12 +117,10 @@ export const handleResendWebhook = inngest.createFunction(
   RESEND_EVENT_TYPES.map((event) => ({ event })),
   async ({ event, step }) => {
     const startTime = Date.now();
-    const requestId = generateRequestId();
     const eventName = event.name as ResendEventType;
     const action = getEventAction(eventName);
 
     const logContext = createWebAppContextWithId(
-      requestId,
       '/inngest/resend/webhook',
       'handleResendWebhook'
     );

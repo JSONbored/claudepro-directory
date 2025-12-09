@@ -4,15 +4,9 @@
  */
 
 import 'server-only';
-
 import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
-import {
-  generateRequestId,
-  logger,
-  normalizeError,
-  createErrorResponse,
-} from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
 import {
   createSupabaseAnonClient,
   badRequestResponse,
@@ -20,10 +14,45 @@ import {
   getOnlyCorsHeaders,
   buildCacheHeaders,
 } from '@heyclaude/web-runtime/server';
+import { cacheLife } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
 
 const CORS = getOnlyCorsHeaders;
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
+
+/**
+ * Cached helper function to fetch paginated content.
+ * All parameters become part of the cache key, so different queries have different cache entries.
+ * @param params
+ * @param params.category
+ * @param params.limit
+ * @param params.offset
+ */
+async function getCachedPaginatedContent(params: {
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}): Promise<{
+  data: DatabaseGenerated['public']['Functions']['get_content_paginated_slim']['Returns'] | null;
+  error: null | { code?: string; message: string };
+}> {
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
+
+  const supabase = createSupabaseAnonClient();
+  const rpcArgs: DatabaseGenerated['public']['Functions']['get_content_paginated_slim']['Args'] = {
+    ...(params.category === undefined ? {} : { p_category: params.category }),
+    p_limit: params.limit,
+    p_offset: params.offset,
+  };
+
+  const { data, error } = await supabase.rpc('get_content_paginated_slim', rpcArgs);
+
+  return {
+    data,
+    error: error ? { message: error.message, code: error.code } : null,
+  };
+}
 
 /**
  * Normalize and validate a content category string against the allowed enum values.
@@ -67,9 +96,7 @@ function toContentCategory(
  * @see buildCacheHeaders
  */
 export async function GET(request: NextRequest) {
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'ContentPaginatedAPI',
     route: '/api/content/paginated',
     method: 'GET',
@@ -104,24 +131,21 @@ export async function GET(request: NextRequest) {
       category: category ?? 'all',
     });
 
-    const supabase = createSupabaseAnonClient();
-    const rpcArgs: DatabaseGenerated['public']['Functions']['get_content_paginated_slim']['Args'] =
-      {
-        ...(category === undefined ? {} : { p_category: category }),
-        p_limit: limitParam,
-        p_offset: offsetParam,
-      };
-
-    const { data, error } = await supabase.rpc('get_content_paginated_slim', rpcArgs);
+    const { data, error } = await getCachedPaginatedContent({
+      category,
+      limit: limitParam,
+      offset: offsetParam,
+    });
 
     if (error) {
-      reqLogger.error('Content paginated RPC error', normalizeError(error), {
+      const normalizedError = normalizeError(error, 'Content paginated RPC error');
+      reqLogger.error('Content paginated RPC error', normalizedError, {
         rpcName: 'get_content_paginated_slim',
         offset: offsetParam,
         limit: limitParam,
         category: category ?? 'all',
       });
-      return createErrorResponse(error, {
+      return createErrorResponse(normalizedError, {
         route: '/api/content/paginated',
         operation: 'ContentPaginatedAPI',
         method: 'GET',

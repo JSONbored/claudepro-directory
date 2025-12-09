@@ -1,10 +1,12 @@
 import { getLastUpdatedDate } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
-import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
+import { logger } from '@heyclaude/web-runtime/logging/server';
 import { NavLink } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
-import { connection } from 'next/server';
+import { cacheLife } from 'next/cache';
 import { Suspense } from 'react';
+
+import CookiesLoading from './loading';
 
 /**
  * Produce page metadata for the Cookies page.
@@ -18,9 +20,6 @@ import { Suspense } from 'react';
  */
 
 export async function generateMetadata(): Promise<Metadata> {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
   return generatePageMetadata('/cookies');
 }
 
@@ -37,25 +36,18 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see generatePageMetadata
  */
 export default async function CookiesPage() {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
-  // Generate single requestId for this page request (after connection() to allow Date.now())
-  const requestId = generateRequestId();
-
-  // Create request-scoped child logger to avoid race conditions
+  // Create request-scoped child logger
   const reqLogger = logger.child({
-    requestId,
     operation: 'CookiesPage',
     route: '/cookies',
     module: 'apps/web/src/app/cookies',
   });
 
   return (
-    <Suspense
-      fallback={<div className="container mx-auto max-w-4xl px-4 py-8 sm:py-12">Loading...</div>}
-    >
+    <Suspense fallback={<CookiesLoading />}>
       <CookiesPageContent reqLogger={reqLogger} />
     </Suspense>
   );
@@ -65,6 +57,7 @@ export default async function CookiesPage() {
  * Renders the Cookie Policy page content and logs a page-render event.
  *
  * @param reqLogger - Request-scoped logger (result of `logger.child`) used to record rendering telemetry.
+ * @param reqLogger.reqLogger
  * @returns The JSX element containing the Cookie Policy content, including the last-updated date and internal navigation links.
  *
  * @see getLastUpdatedDate
@@ -217,7 +210,7 @@ function CookiesPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger
           <h2 className="mb-4 text-2xl font-semibold">7. Updates to This Policy</h2>
           <p className="mb-4">
             We may update this Cookie Policy from time to time. Any changes will be posted on this
-            page with an updated "Last updated" date.
+            page with an updated &quot;Last updated&quot; date.
           </p>
         </section>
 

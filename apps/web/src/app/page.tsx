@@ -2,7 +2,6 @@
 
 import { type Database } from '@heyclaude/database-types';
 import { trackRPCFailure } from '@heyclaude/web-runtime/core';
-import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
 import {
   generatePageMetadata,
   getHomepageCategoryIds,
@@ -11,16 +10,15 @@ import {
 import { type SearchFilterOptions } from '@heyclaude/web-runtime/types/component.types';
 import { HomePageLoading } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
-import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { LazySection } from '@/src/components/core/infra/scroll-animated-section';
 import { TopContributors } from '@/src/components/features/community/top-contributors';
+import { HeroSearchConnectionProvider } from '@/src/components/features/home/hero-search-connection';
 import { HomepageContentServer } from '@/src/components/features/home/homepage-content-server';
 import { HomepageHeroServer } from '@/src/components/features/home/homepage-hero-server';
 import { HomepageSearchFacetsServer } from '@/src/components/features/home/homepage-search-facets-server';
 import { RecentlyViewedRail } from '@/src/components/features/home/recently-viewed-rail';
-import { HeroSearchConnectionProvider } from '@/src/components/features/home/hero-search-connection';
 
 /**
  * Generate metadata for the root page, deferring execution until request time.
@@ -33,9 +31,6 @@ import { HeroSearchConnectionProvider } from '@/src/components/features/home/her
  * @see connection
  */
 export async function generateMetadata(): Promise<Metadata> {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
   return generatePageMetadata('/');
 }
 
@@ -76,7 +71,7 @@ async function TopContributorsServer() {
 
   interface TopContributor {
     bio: null | string;
-    created_at?: null | string;
+    created_at?: Date | null | string;
     id: string;
     image: null | string;
     name: string;
@@ -89,17 +84,35 @@ async function TopContributorsServer() {
     .filter((c): c is TopContributor => {
       return 'id' in c && 'slug' in c && 'name' in c && Boolean(c.id && c.slug && c.name);
     })
-    .map((contributor) => ({
-      id: contributor.id,
-      slug: contributor.slug,
-      name: contributor.name,
-      image: contributor.image,
-      bio: contributor.bio,
-      work: contributor.work,
-      tier: contributor.tier ?? 'free',
-      // Use actual created_at from database if available, otherwise use current timestamp as fallback
-      created_at: contributor.created_at ?? new Date().toISOString(),
-    }));
+    .map((contributor) => {
+      // Convert created_at to string - UserProfile requires created_at: string
+      let created_at: string;
+      if (contributor.created_at) {
+        if (typeof contributor.created_at === 'object' && 'toISOString' in contributor.created_at) {
+          // Date object
+          created_at = contributor.created_at.toISOString();
+        } else if (typeof contributor.created_at === 'string') {
+          created_at = contributor.created_at;
+        } else {
+          // Fallback to empty string if unexpected type
+          created_at = '';
+        }
+      } else {
+        // Fallback to empty string if missing
+        created_at = '';
+      }
+
+      return {
+        id: contributor.id,
+        slug: contributor.slug,
+        name: contributor.name,
+        image: contributor.image,
+        bio: contributor.bio,
+        work: contributor.work,
+        tier: contributor.tier ?? 'free',
+        created_at, // Always present as string
+      };
+    });
 
   return <TopContributors contributors={topContributors} />;
 }
@@ -110,6 +123,7 @@ async function TopContributorsServer() {
  * Awaits connection() to establish request-time dynamic context before resolving non-deterministic data and the provided `searchParams`. Streams the hero, search facets, and main content independently and lazy-loads below-the-fold sections (e.g., top contributors).
  *
  * @param searchParams - A promise that resolves to the page's query parameters (object with optional `q` string)
+ * @param searchParams.searchParams
  * @returns The homepage React element composed of streaming Suspense boundaries and lazy-loaded sections
  *
  * @see HomepageHeroServer
@@ -118,29 +132,7 @@ async function TopContributorsServer() {
  * @see getHomepageData
  * @see trackRPCFailure
  */
-export default async function HomePage({ searchParams }: HomePageProperties) {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  // MUST be called before accessing searchParams (uncached data)
-  await connection();
-
-  // Access searchParams after connection() to establish dynamic context
-  await searchParams;
-
-  // Generate single requestId for this page request (after connection() to allow Date.now())
-  const requestId = generateRequestId();
-
-  // Create request-scoped child logger
-  const reqLogger = logger.child({
-    requestId,
-    operation: 'HomePage',
-    route: '/',
-    module: 'apps/web/src/app',
-  });
-
-  reqLogger.info('HomePage: rendering homepage');
-
-  // Fetch search facets in parallel (non-blocking, streams separately)
+export default async function HomePage({ searchParams: _searchParams }: HomePageProperties) {
   const searchFiltersPromise = HomepageSearchFacetsServer();
 
   return (
@@ -152,16 +144,16 @@ export default async function HomePage({ searchParams }: HomePageProperties) {
             <HomepageHeroWithMemberCount />
           </Suspense>
 
-        <LazySection>
-          <RecentlyViewedRail />
-        </LazySection>
+          <LazySection>
+            <RecentlyViewedRail />
+          </LazySection>
 
-        {/* Homepage content - streams when ready (non-blocking) */}
-        <div className="relative">
-          <Suspense fallback={<HomePageLoading />}>
-            <HomepageContentServerWrapper searchFiltersPromise={searchFiltersPromise} />
-          </Suspense>
-        </div>
+          {/* Homepage content - streams when ready (non-blocking) */}
+          <div className="relative">
+            <Suspense fallback={<HomePageLoading />}>
+              <HomepageContentServerWrapper searchFiltersPromise={searchFiltersPromise} />
+            </Suspense>
+          </div>
 
           {/* Top contributors - lazy loaded below fold */}
           <LazySection rootMargin="0px 0px -500px 0px">
@@ -210,6 +202,8 @@ async function HomepageHeroWithMemberCount() {
  *
  * @param props.searchFiltersPromise - A promise that resolves to the search filter options to pass to HomepageContentServer.
  *
+ * @param root0
+ * @param root0.searchFiltersPromise
  * @see HomepageContentServer
  * @see SearchFilterOptions
  */

@@ -72,6 +72,9 @@ import { createNotification, broadcastNotification } from './functions/notificat
 // Polar webhook functions (Phase 5 - Payment processing)
 import { handlePolarWebhook } from './functions/polar/webhook';
 
+// Supabase database webhook functions
+import { handleSupabaseContentChanged } from './functions/supabase/content-changed';
+
 /**
  * All Inngest functions that should be served.
  * Add new functions here as they are created.
@@ -112,6 +115,9 @@ export const functions = [
 
   // Polar webhook functions (Phase 5) - Payment processing
   handlePolarWebhook, // Event: polar/webhook (unified handler with idempotency)
+
+  // Supabase database webhook functions
+  handleSupabaseContentChanged, // Event: supabase/content-changed (triggers GitHub Actions)
 ];
 
 // Re-export individual functions for direct imports
@@ -149,6 +155,9 @@ export { broadcastNotification };
 
 // Polar webhook functions
 export { handlePolarWebhook };
+
+// Supabase database webhook functions
+export { handleSupabaseContentChanged };
 
 // Import the client for serve handler
 import { inngest } from './client';

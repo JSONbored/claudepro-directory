@@ -4,14 +4,8 @@
  */
 
 import 'server-only';
-
 import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
-import {
-  generateRequestId,
-  logger,
-  normalizeError,
-  createErrorResponse,
-} from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
 import {
   badRequestResponse,
   jsonResponse,
@@ -19,9 +13,35 @@ import {
   buildCacheHeaders,
   createSupabaseAnonClient,
 } from '@heyclaude/web-runtime/server';
+import { cacheLife } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
 
 const CORS = getOnlyCorsHeaders;
+
+/**
+ * Cached helper function to fetch company profile by slug.
+ * The slug parameter becomes part of the cache key, so different companies have different cache entries.
+ * @param slug
+ */
+async function getCachedCompanyProfile(slug: string): Promise<{
+  data: DatabaseGenerated['public']['Functions']['get_company_profile']['Returns'] | null;
+  error: null | { code?: string; message: string };
+}> {
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
+
+  const supabase = createSupabaseAnonClient();
+  const rpcArgs = {
+    p_slug: slug,
+  } satisfies DatabaseGenerated['public']['Functions']['get_company_profile']['Args'];
+
+  const { data, error } = await supabase.rpc('get_company_profile', rpcArgs);
+
+  return {
+    data,
+    error: error ? { message: error.message, code: error.code } : null,
+  };
+}
 
 /**
  * Handle GET /api/company requests and return the company profile identified by the `slug` query parameter.
@@ -39,9 +59,7 @@ const CORS = getOnlyCorsHeaders;
  * @see badRequestResponse
  */
 export async function GET(request: NextRequest) {
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'CompanyAPI',
     route: '/api/company',
     method: 'GET',
@@ -58,19 +76,15 @@ export async function GET(request: NextRequest) {
 
     reqLogger.info('Company request received', { slug });
 
-    const supabase = createSupabaseAnonClient();
-    const rpcArgs = {
-      p_slug: slug,
-    } satisfies DatabaseGenerated['public']['Functions']['get_company_profile']['Args'];
-
-    const { data: profile, error } = await supabase.rpc('get_company_profile', rpcArgs);
+    const { data: profile, error } = await getCachedCompanyProfile(slug);
 
     if (error) {
-      reqLogger.error('Company profile RPC error', normalizeError(error), {
+      const normalizedError = normalizeError(error, 'Company profile RPC error');
+      reqLogger.error('Company profile RPC error', normalizedError, {
         rpcName: 'get_company_profile',
         slug,
       });
-      return createErrorResponse(error, {
+      return createErrorResponse(normalizedError, {
         route: '/api/company',
         operation: 'CompanyAPI',
         method: 'GET',

@@ -10,6 +10,34 @@ interface StructuredDataProps {
   route: string;
 }
 
+/**
+ * Recursively sanitize URLs in a JSON object to remove javascript: protocol
+ */
+function sanitizeUrlsInObject(obj: unknown): unknown {
+  if (obj === null || obj === undefined) {
+    return obj;
+  }
+
+  if (typeof obj === 'string') {
+    // Remove javascript: protocol from URLs
+    return obj.replace(/javascript:/gi, '').trim() || obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map((item) => sanitizeUrlsInObject(item));
+  }
+
+  if (typeof obj === 'object') {
+    const sanitized: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(obj)) {
+      sanitized[key] = sanitizeUrlsInObject(value);
+    }
+    return sanitized;
+  }
+
+  return obj;
+}
+
 export async function StructuredData({ route }: StructuredDataProps) {
   const seoData = await getSEOMetadataWithSchemas(route);
 
@@ -22,8 +50,11 @@ export async function StructuredData({ route }: StructuredDataProps) {
   return (
     <>
       {seoData.schemas.map((schema, index) => {
+        // Sanitize schema to remove javascript: protocol before serialization
+        const sanitizedSchema = sanitizeUrlsInObject(schema) as typeof schema;
+        
         // Serialize JSON-LD with XSS protection
-        const serialized = serializeJsonLd(schema);
+        const serialized = serializeJsonLd(sanitizedSchema);
 
         // Extract @type for key
         let schemaType = 'schema';

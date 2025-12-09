@@ -27,8 +27,9 @@ export class SearchService {
         });
         throw error;
       }
-      const rows = data;
-      return { data: rows, total_count: rows?.length ?? 0 };
+      // RPC can return null if no results or on error - normalize to empty array
+      const rows = Array.isArray(data) ? data : (data === null || data === undefined ? [] : [data]);
+      return { data: rows, total_count: rows.length };
     } catch (error) {
       // Error already logged above
       throw error;

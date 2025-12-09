@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 import { createSupabaseAnonClient } from '../supabase/server-anon.ts';
 import { logger } from '../logger.ts';
 import type { LogContext } from '../logger.ts';
-import { createUtilityContext, normalizeError } from '@heyclaude/shared-runtime';
+import { normalizeError } from '@heyclaude/shared-runtime';
 import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
 
 export interface StorageProxyOptions {
@@ -44,10 +44,12 @@ function detectContentType(path: string): string {
 }
 
 function createStorageProxyLogContext(bucket: string, path: string): LogContext {
-  return createUtilityContext('storage-proxy', 'download', {
+  return {
+    function: 'storage-proxy',
+    operation: 'download',
     bucket,
     path,
-  }) as LogContext;
+  } as LogContext;
 }
 
 function sanitizeContentDispositionFilename(name: string): { ascii: string; encoded: string } {

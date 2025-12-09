@@ -4,15 +4,18 @@ import {
   getCollectionDetail,
 } from '@heyclaude/web-runtime/data';
 import { ArrowLeft } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { Button, Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { CollectionForm } from '@/src/components/core/forms/collection-form';
+
+import Loading from './loading';
 
 /**
  * Dynamic Rendering Required
@@ -27,6 +30,7 @@ interface EditCollectionPageProperties {
  * Generates page metadata for the Edit Collection route using the route `slug`.
  *
  * @param params - Route parameters containing `slug`
+ * @param params.params
  * @returns Metadata for the `/account/library/:slug/edit` route populated with the provided `slug`
  *
  * @see generatePageMetadata
@@ -50,6 +54,7 @@ export async function generateMetadata({
  * trigger a 404 via `notFound()`, or rethrow a normalized error when data fetching fails.
  *
  * @param params - An object whose `slug` identifies the collection to edit.
+ * @param params.params
  * @returns The page element containing navigation, collection details header, and the edit `CollectionForm`.
  *
  * @see CollectionForm
@@ -57,23 +62,18 @@ export async function generateMetadata({
  * @see getAuthenticatedUser
  */
 export default async function EditCollectionPage({ params }: EditCollectionPageProperties) {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
-
-  // Generate single requestId for this page request (after connection() to allow Date.now())
-  const requestId = generateRequestId();
+  'use cache: private';
+  cacheLife('userProfile'); // 1min stale, 5min revalidate, 30min expire - User-specific data
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    requestId,
     operation: 'EditCollectionPage',
     route: '/account/library/[slug]/edit',
     module: 'apps/web/src/app/account/library/[slug]/edit',
   });
 
   return (
-    <Suspense fallback={<div className="space-y-6">Loading collection editor...</div>}>
+    <Suspense fallback={<Loading />}>
       <EditCollectionPageContent params={params} reqLogger={reqLogger} />
     </Suspense>
   );
@@ -89,7 +89,9 @@ export default async function EditCollectionPage({ params }: EditCollectionPageP
  * data layer while fetching collection details are logged and rethrown.
  *
  * @param params - A promise that resolves to an object containing the route `slug`.
+ * @param params.params
  * @param reqLogger - A request-scoped logger; this function creates route- and user-scoped children for structured logs.
+ * @param params.reqLogger
  * @returns The JSX element tree for the edit-collection page content.
  * @throws Rethrows any error thrown by `getCollectionDetail`.
  *

@@ -1,5 +1,7 @@
 # Logging Pattern Rules
 # Enforces logging standards from .cursor/rules/logging-instrumentation.mdc
+# Updated to match current logging architecture: packages/shared-runtime/src/logger/index.ts
+# Matches: config/tools/eslint-plugin-architectural-rules.js -> require-logging-context
 
 ---
 # Rule: Detect console.* usage (should use logger instead)
@@ -11,11 +13,11 @@ rule:
   has:
     kind: member_expression
     pattern: console.$METHOD
-message: "Use structured logging (logger.*) instead of console.*. Import logger from @heyclaude/web-runtime/logging/server or @heyclaude/web-runtime/logging/client"
+message: "Use structured logging (logger.*) instead of console.*. Import logger from @heyclaude/shared-runtime/logger (server) or @heyclaude/web-runtime/logging/client (client)"
 severity: error
 fix: |
   // Replace console.$METHOD with appropriate logger method
-  // Server: logger.info/warn/error from @heyclaude/web-runtime/logging/server
+  // Server: logger.info/warn/error from @heyclaude/shared-runtime/logger
   // Client: logClientInfo/logClientWarn/logClientError from @heyclaude/web-runtime/logging/client
 
 ---
@@ -29,40 +31,42 @@ rule:
     - not:
         has:
           pattern: normalizeError($$$)
-message: "Catch blocks must use normalizeError() before logging or throwing. Import normalizeError from @heyclaude/web-runtime/core or @heyclaude/web-runtime/logging/server"
+message: "Catch blocks must use normalizeError() before logging or throwing. Import normalizeError from @heyclaude/shared-runtime/logger"
 severity: error
 
 ---
-# Rule: Detect missing requestId in server components
-id: missing-request-id-server
+# Rule: Detect missing logger.child() for request-scoped context in server components
+id: missing-logger-child-context
 language: TypeScript
 rule:
   all:
     - pattern: export default async function $NAME($$$) { $$$ }
       kind: function_declaration
     - inside:
-        pattern: 'use server'
+        pattern: app/**/*.tsx
+    - has:
+        pattern: logger.$METHOD($$$)
     - not:
         has:
-          pattern: generateRequestId()
-message: "Server components/pages must generate requestId at the start. Import generateRequestId from @heyclaude/web-runtime/core"
+          pattern: const $LOGGER = logger.child({ operation: $OP, route: $ROUTE })
+message: "Server components/pages must use logger.child({ operation, route }) for request-scoped context. Create: const reqLogger = logger.child({ operation: 'PageName', route: '/path' }) and use reqLogger for all logs"
 severity: error
 
 ---
-# Rule: Detect missing withDuration in server page logs
-id: missing-duration-tracking
+# Rule: Detect missing operation/route in logger.child() calls
+id: missing-operation-route-in-child
 language: TypeScript
 rule:
   all:
-    - pattern: logger.$METHOD($$$)
+    - pattern: logger.child({ $$$ })
       kind: call_expression
-    - inside:
-        pattern: export default async function $NAME($$$) { $$$ }
-        kind: function_declaration
     - not:
         has:
-          pattern: withDuration($$$)
-message: "Server pages must track duration using withDuration() in all log statements. Import withDuration from @heyclaude/web-runtime/core"
+          pattern: operation: $OP
+    - not:
+        has:
+          pattern: route: $ROUTE
+message: "logger.child() must include operation and route fields. Use: logger.child({ operation: 'PageName', route: '/path' })"
 severity: error
 
 ---

@@ -1,9 +1,8 @@
 import { type Database } from '@heyclaude/database-types';
 import { generatePageMetadata, getCommunityDirectory } from '@heyclaude/web-runtime/data';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { Skeleton } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
-import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { ContributorsSidebar } from '@/src/components/features/community/contributors-sidebar';
@@ -20,9 +19,6 @@ import { ProfileSearchClient } from '@/src/components/features/community/profile
  * @see connection
  */
 export async function generateMetadata(): Promise<Metadata> {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
   return generatePageMetadata('/community/directory');
 }
 
@@ -38,6 +34,7 @@ const DEFAULT_DIRECTORY_LIMIT = 100;
  * and renders the main profile search grid with a contributors sidebar.
  *
  * @param searchQuery - Text used to filter directory results; empty string returns unfiltered results
+ * @param searchQuery.searchQuery
  * @returns The React element tree for the community directory section
  * @throws If fetching the community directory fails, the error is normalized and rethrown
  * @see getCommunityDirectory
@@ -45,16 +42,8 @@ const DEFAULT_DIRECTORY_LIMIT = 100;
  * @see ContributorsSidebar
  */
 async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string }) {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
-
-  // Generate single requestId for this component
-  const requestId = generateRequestId();
-
-  // Create request-scoped child logger to avoid race conditions
+  // Create request-scoped child logger
   const reqLogger = logger.child({
-    requestId,
     operation: 'CommunityDirectoryContent',
     route: '/community/directory',
     module: 'apps/web/src/app/community/directory',
@@ -191,11 +180,18 @@ interface CommunityDirectoryPageProperties {
  *
  * @param props.searchParams - A promise that resolves to an object containing optional query parameters (e.g., `{ q?: string }`); forwarded to CommunityDirectoryPageContent.
  *
+ * @param root0
+ * @param root0.searchParams
  * @see CommunityDirectoryPageContent
  * @see generateMetadata
  * @see Skeleton
  */
-export default function CommunityDirectoryPage({ searchParams }: CommunityDirectoryPageProperties) {
+export default async function CommunityDirectoryPage({
+  searchParams,
+}: CommunityDirectoryPageProperties) {
+  // Note: Cannot use 'use cache' on pages with searchParams - they're dynamic
+  // Data layer caching is already in place for optimal performance
+
   return (
     <Suspense fallback={<Skeleton size="xl" className="h-screen w-full" />}>
       <CommunityDirectoryPageContent searchParams={searchParams} />
@@ -207,6 +203,8 @@ export default function CommunityDirectoryPage({ searchParams }: CommunityDirect
  * Resolves incoming route search parameters and renders the CommunityDirectoryContent for the extracted query.
  *
  * @param props.searchParams - A promise resolving to an object possibly containing `q` (the search query).
+ * @param root0
+ * @param root0.searchParams
  * @returns A React element rendering CommunityDirectoryContent for the resolved `q` (defaults to an empty string when absent).
  *
  * @see CommunityDirectoryContent
@@ -217,6 +215,7 @@ async function CommunityDirectoryPageContent({
 }: {
   searchParams: Promise<{ q?: string }>;
 }) {
+  // Await searchParams outside of any cache scope
   const resolvedParameters = await searchParams;
   const searchQuery = resolvedParameters.q ?? '';
 

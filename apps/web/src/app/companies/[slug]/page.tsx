@@ -16,7 +16,7 @@ import {
   TrendingUp,
   Users,
 } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   UI_CLASSES,
   UnifiedBadge,
@@ -27,12 +27,12 @@ import {
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { connection } from 'next/server';
-import { Suspense } from 'react';
 import type React from 'react';
+import { Suspense } from 'react';
 
 import { JobCard } from '@/src/components/core/domain/cards/job-card';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
@@ -40,9 +40,12 @@ import { StructuredData } from '@/src/components/core/infra/structured-data';
 /**
  * Render an external anchor for a validated website URL or nothing when the URL is not safe.
  *
+ * @param url.children
+ * @param url.className
  * @param url - The website URL to validate; may be `null` or `undefined`. If not a safe URL, nothing is rendered.
  * @param children - Content to display inside the anchor element.
  * @param className - Optional CSS class names applied to the anchor.
+ * @param url.url
  * @returns An anchor element for the validated URL, or `null` if the URL is not safe.
  *
  * @see {@link @heyclaude/web-runtime/core#getSafeWebsiteUrl}
@@ -89,17 +92,12 @@ const MAX_STATIC_COMPANIES = 10;
  *
  * @see {@link /apps/web/src/app/companies/[slug]/page.tsx | CompanyPage}
  * @see {@link getCompaniesList} from @heyclaude/web-runtime/data
- * @see {@link generateRequestId}
  * @see {@link normalizeError}
  * @see {@link MAX_STATIC_COMPANIES}
  */
 export async function generateStaticParams() {
-  // Generate requestId for static params generation (build-time)
-  const staticParamsRequestId = generateRequestId();
-
-  // Create request-scoped child logger to avoid race conditions
+  // Create request-scoped child logger
   const reqLogger = logger.child({
-    requestId: staticParamsRequestId,
     operation: 'CompanyPageStaticParams',
     route: '/companies/[slug]',
     module: 'apps/web/src/app/companies/[slug]',
@@ -134,16 +132,13 @@ export async function generateStaticParams() {
  * Defers non-deterministic work to request time before producing metadata for `/companies/:slug`.
  *
  * @param params - Route parameters containing the `slug` of the company
+ * @param params.params
  * @returns The Metadata for the `/companies/:slug` page
  *
  * @see generatePageMetadata
  */
 export async function generateMetadata({ params }: CompanyPageProperties): Promise<Metadata> {
   const { slug } = await params;
-
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
 
   return generatePageMetadata('/companies/:slug', {
     params: { slug },
@@ -157,6 +152,7 @@ export async function generateMetadata({ params }: CompanyPageProperties): Promi
  * CompanyJobsList, and CompanyStats load their cached data and stream into the UI.
  *
  * @param params - Route params object containing the `slug` of the company
+ * @param params.params
  * @returns The React element tree for the company profile page (header, listings, and stats)
  *
  * @see getCompanyProfile
@@ -164,16 +160,11 @@ export async function generateMetadata({ params }: CompanyPageProperties): Promi
  * @see generateStaticParams
  */
 export default async function CompanyPage({ params }: CompanyPageProperties) {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
-  // Generate single requestId for this page request (after connection() to allow Date.now())
-  const requestId = generateRequestId();
-
-  // Create request-scoped child logger to avoid race conditions
+  // Create request-scoped child logger
   const reqLogger = logger.child({
-    requestId,
     operation: 'CompanyPage',
     module: 'apps/web/src/app/companies/[slug]',
   });
@@ -234,12 +225,13 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
  * Receives the profile as a prop to avoid duplicate fetches and ensure consistency.
  *
  * @param props.profile - The company profile data (fetched once in parent component).
- * @param props.reqLogger - Request-scoped logger used for route-scoped logging.
+ * @param root0
+ * @param root0.profile
  * @returns The header JSX for the company's profile page.
  *
  * @see SafeWebsiteLink
  */
-async function CompanyHeader({
+function CompanyHeader({
   profile,
 }: {
   profile: NonNullable<Awaited<ReturnType<typeof getCompanyProfile>>>;
@@ -331,17 +323,17 @@ async function CompanyHeader({
  * Receives the profile as a prop to avoid duplicate fetches and ensure consistency.
  *
  * @param props.profile - The company profile data (fetched once in parent component).
- * @param props.reqLogger - A request-scoped logger; used to create a route-scoped child logger for this component.
+ * @param root0
+ * @param root0.profile
  * @returns A JSX element containing the section header and either a "No Active Positions" card or a grid of `JobCard` components.
  *
  * @see JobCard
  */
-async function CompanyJobsList({
+function CompanyJobsList({
   profile,
 }: {
   profile: NonNullable<Awaited<ReturnType<typeof getCompanyProfile>>>;
 }) {
-
   const { active_jobs } = profile;
 
   const filteredActiveJobs =
@@ -389,7 +381,7 @@ async function CompanyJobsList({
             <Briefcase className="text-muted-foreground mb-4 h-12 w-12" />
             <h3 className="mb-2 text-xl font-semibold">No Active Positions</h3>
             <p className="text-muted-foreground mb-6 max-w-md text-center">
-              This company doesn't have any job openings at the moment. Check back later!
+              This company doesn&apos;t have any job openings at the moment. Check back later!
             </p>
             <Link href={ROUTES.JOBS}>
               <UnifiedBadge variant="base" style="default">
@@ -442,12 +434,13 @@ async function CompanyJobsList({
  * Receives the profile as a prop to avoid duplicate fetches and ensure consistency.
  *
  * @param props.profile - The company profile data (fetched once in parent component).
- * @param props.reqLogger - A request-scoped logger instance for structured logging.
+ * @param root0
+ * @param root0.profile
  * @returns The sidebar JSX containing company stats and a CTA.
  *
  * @see SafeWebsiteLink
  */
-async function CompanyStats({
+function CompanyStats({
   profile,
 }: {
   profile: NonNullable<Awaited<ReturnType<typeof getCompanyProfile>>>;

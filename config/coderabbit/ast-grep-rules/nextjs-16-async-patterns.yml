@@ -1,0 +1,66 @@
+# Next.js 16 Async Pattern Rules
+# Enforces Next.js 16 async patterns from ESLint rule: require-nextjs-async-params
+# Matches: config/tools/eslint-plugin-architectural-rules.js -> require-nextjs-async-params
+
+---
+# Rule: Detect missing await for async params in page components
+id: missing-await-async-params
+language: TypeScript
+rule:
+  all:
+    - pattern: export default async function $PAGE($PARAMS: { params: $TYPE }) { $$$ }
+      kind: function_declaration
+      has:
+        pattern: params: Promise<$TYPE>
+    - not:
+        has:
+          pattern: const $RESOLVED = await params
+message: "Next.js 16 requires await for async params. Use: const resolvedParams = await params"
+severity: error
+
+---
+# Rule: Detect missing await for async searchParams in page components
+id: missing-await-async-search-params
+language: TypeScript
+rule:
+  all:
+    - pattern: export default async function $PAGE($PARAMS: { searchParams: $TYPE }) { $$$ }
+      kind: function_declaration
+      has:
+        pattern: searchParams: Promise<$TYPE>
+    - not:
+        has:
+          pattern: const $RESOLVED = await searchParams
+message: "Next.js 16 requires await for async searchParams. Use: const resolvedSearchParams = await searchParams"
+severity: error
+
+---
+# Rule: Detect missing await for async metadata functions
+id: missing-await-async-metadata
+language: TypeScript
+rule:
+  all:
+    - pattern: export (async )?function generateMetadata($PARAMS: { params: Promise<$TYPE> }) { $$$ }
+      kind: function_declaration
+    - not:
+        has:
+          pattern: const $RESOLVED = await params
+message: "Next.js 16 metadata functions require await for async params. Use: const resolvedParams = await params"
+severity: error
+
+---
+# Rule: Detect incorrect metadata function signature (should accept Promise params)
+id: incorrect-metadata-signature
+language: TypeScript
+rule:
+  all:
+    - pattern: export function generateMetadata($PARAMS: { params: $TYPE }) { $$$ }
+      kind: function_declaration
+      has:
+        pattern: params: $TYPE
+        not:
+          pattern: Promise<$TYPE>
+    - inside:
+        pattern: app/**/page.tsx
+message: "Next.js 16 metadata functions must accept Promise params. Change: params: Type to params: Promise<Type>"
+severity: error

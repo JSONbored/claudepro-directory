@@ -9,7 +9,7 @@ import {
   Star,
   TrendingUp,
 } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   UI_CLASSES,
   UnifiedBadge,
@@ -21,10 +21,12 @@ import {
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import Image from 'next/image';
 import Link from 'next/link';
-import { connection } from 'next/server';
 import { Suspense } from 'react';
+
+import Loading from './loading';
 
 /**
  * Companies list page - uses request-time rendering via connection()
@@ -41,9 +43,6 @@ import { Suspense } from 'react';
  * @see generatePageMetadata
  */
 export async function generateMetadata(): Promise<Metadata> {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
   return await generatePageMetadata('/companies');
 }
 
@@ -51,34 +50,28 @@ export async function generateMetadata(): Promise<Metadata> {
  * Render the Companies directory page and initialize request-scoped logging for the request.
  *
  * This server component awaits `connection()` to ensure non-deterministic operations occur at request time,
- * generates a single `requestId`, creates a request-scoped child logger, and renders the page content inside
+ * creates a request-scoped child logger, and renders the page content inside
  * a React `Suspense` boundary which mounts `CompaniesPageContent`.
  *
  * @returns The React element tree for the /companies route.
  *
  * @see CompaniesPageContent
  * @see connection from next/server
- * @see generateRequestId
  * @see logger
  */
 export default async function CompaniesPage() {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
-  // Generate single requestId for this page request (after connection() to allow Date.now())
-  const requestId = generateRequestId();
-
-  // Create request-scoped child logger to avoid race conditions
+  // Create request-scoped child logger
   const reqLogger = logger.child({
-    requestId,
     operation: 'CompaniesPage',
     route: '/companies',
     module: 'apps/web/src/app/companies',
   });
 
   return (
-    <Suspense fallback={<div className="container mx-auto px-4 py-8">Loading companies...</div>}>
+    <Suspense fallback={<Loading />}>
       <CompaniesPageContent reqLogger={reqLogger} />
     </Suspense>
   );
@@ -91,6 +84,7 @@ export default async function CompaniesPage() {
  * and throws a normalized error if the companies list cannot be loaded.
  *
  * @param reqLogger - A request-scoped logger (result of `logger.child`) used to record load, warning, error, and render events.
+ * @param reqLogger.reqLogger
  * @returns A React element containing the hero section and a responsive grid of company cards (or an empty-state card when no companies exist).
  *
  * @see getCompaniesList

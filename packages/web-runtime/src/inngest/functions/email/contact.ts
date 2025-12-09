@@ -12,7 +12,7 @@ import { normalizeError, escapeHtml } from '@heyclaude/shared-runtime';
 import { inngest } from '../../client';
 import { sendEmail } from '../../../integrations/resend';
 import { HELLO_FROM, CONTACT_FROM } from '../../../email/config/email-config';
-import { logger, generateRequestId, createWebAppContextWithId } from '../../../logging/server';
+import { logger, createWebAppContextWithId } from '../../../logging/server';
 
 type ContactCategory = DatabaseGenerated['public']['Enums']['contact_category'];
 
@@ -35,8 +35,7 @@ export const sendContactEmails = inngest.createFunction(
   { event: 'email/contact' },
   async ({ event, step }) => {
     const startTime = Date.now();
-    const requestId = generateRequestId();
-    const logContext = createWebAppContextWithId(requestId, '/inngest/email/contact', 'sendContactEmails');
+    const logContext = createWebAppContextWithId('/inngest/email/contact', 'sendContactEmails');
 
     const { submissionId, name, email, category, message } = event.data;
 

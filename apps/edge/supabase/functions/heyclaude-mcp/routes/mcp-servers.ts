@@ -181,6 +181,12 @@ export async function handleGetMcpServers(
     _meta: {
       servers,
       count: servers.length,
+      limit,
+      pagination: {
+        total: servers.length,
+        limit,
+        hasMore: false, // MCP servers doesn't support pagination
+      },
     },
   };
 }

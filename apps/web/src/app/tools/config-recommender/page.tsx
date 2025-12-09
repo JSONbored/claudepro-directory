@@ -19,6 +19,7 @@
 
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { BarChart, Clock, Sparkles, Target, Zap } from '@heyclaude/web-runtime/icons';
+import { logger } from '@heyclaude/web-runtime/logging/server';
 import {
   UI_CLASSES,
   UnifiedBadge,
@@ -29,6 +30,7 @@ import {
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 
 import { QuizForm } from '@/src/components/features/tools/recommender/quiz-form';
 
@@ -68,11 +70,18 @@ export async function generateMetadata(): Promise<Metadata> {
  */
 export default async function ConfigRecommenderPage() {
   'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
-  // Configure cache for static landing page content
-  // Cache preset: 5 minutes stale, 1 day revalidate, 1 week expire
-  const { cacheLife } = await import('next/cache');
-  cacheLife('days');
+  // Create request-scoped child logger for log correlation
+  const reqLogger = logger.child({
+    operation: 'ConfigRecommenderPage',
+    route: '/tools/config-recommender',
+    module: 'apps/web/src/app/tools/config-recommender/page',
+  });
+
+  reqLogger.info('ConfigRecommenderPage: rendering page', {
+    section: 'page-render',
+  });
 
   // Return JSX - no try/catch needed for static content
   // Rendering errors will be caught by error boundaries
@@ -192,7 +201,7 @@ export default async function ConfigRecommenderPage() {
             <CardHeader>
               <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                 <BarChart className="text-primary h-5 w-5" />
-                What You'll Get
+                What You&apos;ll Get
               </CardTitle>
             </CardHeader>
             <CardContent>

@@ -15,7 +15,7 @@ import { inngest } from '../../client';
 import { createSupabaseAdminClient } from '../../../supabase/admin';
 import { getResendClient } from '../../../integrations/resend';
 import { HELLO_FROM } from '../../../email/config/email-config';
-import { logger, generateRequestId, createWebAppContextWithId } from '../../../logging/server';
+import { logger, createWebAppContextWithId } from '../../../logging/server';
 
 // Types for digest data
 type WeeklyDigestData = DatabaseGenerated['public']['Functions']['get_weekly_digest']['Returns'];
@@ -37,8 +37,7 @@ export const sendWeeklyDigest = inngest.createFunction(
   { cron: '0 9 * * 1' }, // Every Monday at 9:00 AM UTC
   async ({ step }) => {
     const startTime = Date.now();
-    const requestId = generateRequestId();
-    const logContext = createWebAppContextWithId(requestId, '/inngest/email/digest', 'sendWeeklyDigest');
+    const logContext = createWebAppContextWithId('/inngest/email/digest', 'sendWeeklyDigest');
 
     logger.info('Weekly digest started', logContext);
 

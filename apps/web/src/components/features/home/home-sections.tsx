@@ -19,8 +19,8 @@ import {
   type HomePageClientProps,
 } from '@heyclaude/web-runtime/types/component.types';
 import {
-  UI_CLASSES,
   NumberTicker,
+  UnifiedBadge,
   HomepageStatsSkeleton,
 } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
@@ -87,7 +87,7 @@ function HomePageClientComponent({
     // Final fallback: empty array
     return [] as readonly Database['public']['Enums']['content_category'][];
   });
-  const [springDefault, setSpringDefault] = useState({
+  const [, setSpringDefault] = useState({
     type: 'spring' as const,
     stiffness: 400,
     damping: 17,
@@ -404,6 +404,7 @@ function HomePageClientComponent({
       // Cancel previous request if still pending
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
+        abortControllerRef.current = null;
       }
 
       // Clear search if query is empty
@@ -416,27 +417,30 @@ function HomePageClientComponent({
 
       // Set query immediately (for UI feedback)
       setCurrentSearchQuery(trimmedQuery);
-      setIsSearching(true);
-
-      // Check cache first
+      
+      // Check cache first - if cached, use immediately without loading state
       const effectiveTab = categoryOverride ?? activeTab;
       const categories =
         effectiveTab !== 'all' && effectiveTab !== 'community' ? [effectiveTab] : undefined;
-
+      // Normalize sort for cache key - map 'trending' to 'relevance' to match API behavior
+      const normalizedSort = filters.sort === 'trending' ? 'relevance' : (filters.sort || 'relevance');
       const cacheKey = {
         categories: categories || [],
         tags: filters.tags || [],
         authors: filters.author ? [filters.author] : [],
-        sort: filters.sort || 'relevance',
+        sort: normalizedSort,
       };
 
       const cachedResults = searchCache.get(trimmedQuery, cacheKey);
       if (cachedResults) {
-        // Use cached results immediately
+        // Use cached results immediately without showing loading state
         setSearchResults(cachedResults as DisplayableContent[]);
         setIsSearching(false);
         return;
       }
+      
+      // No cache - show loading state and fetch
+      setIsSearching(true);
 
       try {
         await runLoggedAsync(
@@ -476,6 +480,7 @@ function HomePageClientComponent({
             if (filters.sort) {
               const sortMap: Record<string, 'relevance' | 'popularity' | 'newest' | 'alphabetical'> =
                 {
+                  trending: 'relevance', // Map 'trending' to 'relevance' for API compatibility
                   relevance: 'relevance',
                   popularity: 'popularity',
                   newest: 'newest',
@@ -487,6 +492,20 @@ function HomePageClientComponent({
               }
             }
 
+            logClientWarn(
+              '[HomePageClient] Calling searchUnifiedClient',
+              null,
+              'HomePageClient.handleSearch.call',
+              {
+                component: 'HomePageClient',
+                action: 'handle-search-call',
+                category: 'search',
+                query: trimmedQuery,
+                entities: ['content'],
+                filters: searchFilters,
+              }
+            );
+            
             const result = await searchUnifiedClient({
               query: trimmedQuery,
               entities: ['content'],
@@ -498,7 +517,45 @@ function HomePageClientComponent({
               return;
             }
 
-            const results = (result.results as DisplayableContent[]) || [];
+            // Extract results - ensure we have an array
+            const results = Array.isArray(result.results) 
+              ? (result.results as DisplayableContent[])
+              : [];
+            
+            logClientWarn(
+              '[HomePageClient] searchUnifiedClient result received',
+              null,
+              'HomePageClient.handleSearch.result',
+              {
+                component: 'HomePageClient',
+                action: 'handle-search-result',
+                category: 'search',
+                query: trimmedQuery,
+                hasResult: Boolean(result),
+                resultsType: typeof result.results,
+                resultsIsArray: Array.isArray(result.results),
+                resultsLength: Array.isArray(result.results) ? result.results.length : 0,
+                extractedLength: results.length,
+                firstResultSlug: results[0]?.slug,
+              }
+            );
+            
+            // Log if we got unexpected results structure
+            if (!Array.isArray(result.results) && result.results !== null && result.results !== undefined) {
+              logClientWarn(
+                '[HomePageClient] Search returned non-array results',
+                null,
+                'HomePageClient.handleSearch.unexpectedResults',
+                {
+                  component: 'HomePageClient',
+                  action: 'handle-search-unexpected',
+                  category: 'search',
+                  query: trimmedQuery,
+                  resultsType: typeof result.results,
+                  hasResults: result.results !== null && result.results !== undefined,
+                }
+              );
+            }
 
             // Cache the results
             searchCache.set(trimmedQuery, cacheKey, results);
@@ -652,10 +709,31 @@ function HomePageClientComponent({
           <MagneticSearchWrapper
             placeholder="Search for rules, MCP servers, agents, commands, and more..."
             onSearch={(query) => {
+              // UnifiedSearch already debounces (400ms), so this will be called after debounce
               // Create new AbortController for this search
               const controller = new AbortController();
               abortControllerRef.current = controller;
-              handleSearch(query, undefined, controller.signal);
+              // handleSearch will cancel previous request if still pending
+              handleSearch(query, undefined, controller.signal).catch((error) => {
+                // Ignore abort errors (expected when canceling)
+                if (error instanceof Error && error.name !== 'AbortError') {
+                  const normalized = normalizeError(error, 'Search handler failed');
+                  logClientWarn(
+                    '[HomePageClient] handleSearch error',
+                    normalized,
+                    'HomePageClient.onSearch.error',
+                    {
+                      component: 'HomePageClient',
+                      action: 'on-search-error',
+                      category: 'search',
+                      query: query.trim(),
+                    }
+                  );
+                  trackHomepageSectionError('search', 'search-handler', error, {
+                    query: query.trim(),
+                  });
+                }
+              });
             }}
             onFiltersChange={handleFiltersChange}
             filters={filters}
@@ -680,30 +758,48 @@ function HomePageClientComponent({
                 transition={{ delay: 0.3 }}
               >
                 <div className="flex gap-3 px-4 pb-2">
-                  {categoryStatsConfig.slice(0, 5).map(({ categoryId, icon: Icon, delay }) => {
+                  {categoryStatsConfig.slice(0, 5).map(({ categoryId, delay }, index) => {
                     const categoryRoute = ROUTES[categoryId.toUpperCase() as keyof typeof ROUTES];
+                    const count =
+                      typeof stats[categoryId] === 'number'
+                        ? stats[categoryId]
+                        : stats[categoryId]?.total || 0;
 
                     return (
                       <Link key={categoryId} href={categoryRoute}>
                         <motion.div
-                          className="border-border/40 bg-card/50 flex min-w-fit items-center gap-2 rounded-lg border px-4 py-2.5 whitespace-nowrap backdrop-blur-sm"
-                          whileTap={{ scale: 0.95 }}
-                          transition={springDefault}
+                          className="backdrop-blur-sm flex min-w-fit items-center gap-2 rounded-lg border px-3 py-2 whitespace-nowrap transition-colors"
+                          initial={{ opacity: 0, x: -8 }}
+                          animate={{ 
+                            opacity: 1, 
+                            x: 0,
+                            borderColor: 'rgba(255, 255, 255, 0.15)',
+                            backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                          }}
+                          transition={{
+                            delay: index * 0.03,
+                            type: 'spring',
+                            stiffness: 300,
+                            damping: 25,
+                          }}
+                          whileHover={{
+                            scale: 1.02,
+                            borderColor: 'rgba(249, 115, 22, 0.5)',
+                            backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                          }}
+                          whileTap={{ scale: 0.98 }}
                         >
-                          <Icon
-                            className={`${UI_CLASSES.ICON_SM} shrink-0-accent`}
-                            aria-hidden="true"
+                          <UnifiedBadge
+                            variant="category"
+                            category={categoryId}
+                            href={null}
+                            className="shrink-0"
                           />
-                          <span className="text-sm font-medium">
-                            <NumberTicker
-                              value={
-                                typeof stats[categoryId] === 'number'
-                                  ? stats[categoryId]
-                                  : stats[categoryId]?.total || 0
-                              }
-                              delay={delay}
-                            />
-                          </span>
+                          <NumberTicker
+                            value={count}
+                            delay={delay}
+                            className="text-sm font-semibold tabular-nums"
+                          />
                         </motion.div>
                       </Link>
                     );
@@ -711,48 +807,60 @@ function HomePageClientComponent({
                 </div>
               </motion.div>
 
-              {/* Desktop Stats - Full layout (unchanged) */}
-              <div className="text-muted-foreground mt-6 hidden flex-wrap justify-center gap-2 text-xs md:flex lg:gap-3 lg:text-sm">
-                {categoryStatsConfig.map(({ categoryId, icon: Icon, displayText, delay }) => {
+              {/* Desktop Stats - Minimal 2025 design with UnifiedBadge + CountingNumber */}
+              <div className="mt-6 hidden flex-wrap justify-center gap-2 md:flex lg:gap-3">
+                {categoryStatsConfig.map(({ categoryId, delay }, index) => {
                   // Get category route from ROUTES constant
                   const categoryRoute = ROUTES[categoryId.toUpperCase() as keyof typeof ROUTES];
+                  const count =
+                    typeof stats[categoryId] === 'number'
+                      ? stats[categoryId]
+                      : stats[categoryId]?.total || 0;
 
                   return (
                     <Link
                       key={categoryId}
                       href={categoryRoute}
                       className="group no-underline"
-                      aria-label={`View all ${displayText}`}
+                      aria-label={`View all ${categoryId} configurations`}
                     >
                       <motion.div
-                        className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5} cursor-pointer rounded-md border border-transparent px-2 py-1 transition-colors`}
+                        className="group flex items-center gap-2 rounded-lg border backdrop-blur-sm px-3 py-2 transition-colors"
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ 
+                          opacity: 1, 
+                          y: 0,
+                          borderColor: 'rgba(255, 255, 255, 0.15)',
+                          backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                        }}
+                        transition={{
+                          delay: index * 0.03,
+                          type: 'spring',
+                          stiffness: 300,
+                          damping: 25,
+                        }}
                         whileHover={{
-                          scale: 1.05,
-                          y: -2,
-                          borderColor: 'rgba(249, 115, 22, 0.3)', // Claude orange with 30% opacity (was hsl(var(--accent) / 0.3))
-                          backgroundColor: 'rgba(249, 115, 22, 0.05)', // Claude orange with 5% opacity (was hsl(var(--accent) / 0.05))
-                          transition: springDefault,
+                          scale: 1.02,
+                          borderColor: 'rgba(249, 115, 22, 0.5)',
+                          backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                          transition: { type: 'spring', stiffness: 400, damping: 25 },
                         }}
                         whileTap={{
                           scale: 0.98,
-                          transition: springDefault,
+                          transition: { type: 'spring', stiffness: 400, damping: 25 },
                         }}
                       >
-                        <Icon
-                          className={`${UI_CLASSES.ICON_SM} group-hover:text-accent transition-colors`}
-                          aria-hidden="true"
+                        <UnifiedBadge
+                          variant="category"
+                          category={categoryId}
+                          href={null} // Badge is inside Link, so href=null
+                          className="shrink-0"
                         />
-                        <span className={`transition-colors ${UI_CLASSES.GROUP_HOVER_ACCENT}`}>
-                          <NumberTicker
-                            value={
-                              typeof stats[categoryId] === 'number'
-                                ? stats[categoryId]
-                                : stats[categoryId]?.total || 0
-                            }
-                            delay={delay}
-                          />{' '}
-                          {displayText}
-                        </span>
+                        <NumberTicker
+                          value={count}
+                          delay={delay}
+                          className="text-sm font-semibold tabular-nums"
+                        />
                       </motion.div>
                     </Link>
                   );

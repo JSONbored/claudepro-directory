@@ -134,35 +134,88 @@ export function MagneticSearchWrapper({
     };
   }, [enableMagnetic, mouseX, mouseY, rotateX, rotateY, isFocused]);
 
-  // Handle focus state
+  // Handle focus state - use MutationObserver + polling to catch input when it renders
   useEffect(() => {
-    const input = containerRef.current?.querySelector('input');
-    if (!input) return;
+    if (!containerRef.current) return;
 
-    const handleFocus = () => {
-      setIsFocused(true);
-      if (enableExpansion) {
-        scale.set(1.015); // Subtle expansion
-      }
-      onFocusChange?.(true);
+    let cleanupFn: (() => void) | null = null;
+    let pollInterval: NodeJS.Timeout | null = null;
+
+    const findAndAttachListeners = (): boolean => {
+      const input = containerRef.current?.querySelector('input');
+      if (!input) return false;
+
+      const handleFocus = () => {
+        setIsFocused(true);
+        if (enableExpansion) {
+          scale.set(1.015); // Subtle expansion
+        }
+        onFocusChange?.(true);
+      };
+
+      const handleBlur = () => {
+        setIsFocused(false);
+        scale.set(1);
+        if (!enableMagnetic) {
+          rotateY.set(0);
+          rotateX.set(0);
+        }
+        onFocusChange?.(false);
+      };
+
+      input.addEventListener('focus', handleFocus);
+      input.addEventListener('blur', handleBlur);
+
+      cleanupFn = () => {
+        input.removeEventListener('focus', handleFocus);
+        input.removeEventListener('blur', handleBlur);
+      };
+
+      return true;
     };
 
-    const handleBlur = () => {
-      setIsFocused(false);
-      scale.set(1);
-      if (!enableMagnetic) {
-        rotateY.set(0);
-        rotateX.set(0);
-      }
-      onFocusChange?.(false);
-    };
+    // Try immediately
+    if (findAndAttachListeners()) {
+      return cleanupFn || undefined;
+    }
 
-    input.addEventListener('focus', handleFocus);
-    input.addEventListener('blur', handleBlur);
+    // MutationObserver to catch when input appears
+    const observer = new MutationObserver(() => {
+      if (findAndAttachListeners()) {
+        observer.disconnect();
+        if (pollInterval) {
+          clearInterval(pollInterval);
+          pollInterval = null;
+        }
+      }
+    });
+
+    observer.observe(containerRef.current, {
+      childList: true,
+      subtree: true,
+    });
+
+    // Polling fallback: check every 100ms for up to 5 seconds (50 attempts)
+    let pollCount = 0;
+    pollInterval = setInterval(() => {
+      pollCount++;
+      if (findAndAttachListeners() || pollCount >= 50) {
+        if (pollInterval) {
+          clearInterval(pollInterval);
+          pollInterval = null;
+        }
+        observer.disconnect();
+      }
+    }, 100);
 
     return () => {
-      input.removeEventListener('focus', handleFocus);
-      input.removeEventListener('blur', handleBlur);
+      observer.disconnect();
+      if (pollInterval) {
+        clearInterval(pollInterval);
+      }
+      if (cleanupFn) {
+        cleanupFn();
+      }
     };
   }, [enableExpansion, enableMagnetic, onFocusChange, scale, rotateX, rotateY]);
 
@@ -176,90 +229,40 @@ export function MagneticSearchWrapper({
         rotateY: enableMagnetic ? rotateY : 0,
         transformStyle: 'preserve-3d',
         perspective: '1000px',
+        willChange: enableMagnetic ? 'transform' : 'auto',
       }}
       transition={{
         type: 'spring',
         stiffness: 300,
         damping: 30,
+        mass: 0.5,
       }}
     >
-      {/* Glow effect when focused */}
-      {isFocused && (
-        <motion.div
-          className="pointer-events-none absolute -inset-2 rounded-xl"
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          transition={{ duration: 0.3 }}
-          style={{
-            background: 'radial-gradient(circle, rgba(249, 115, 22, 0.25) 0%, transparent 70%)',
-            filter: 'blur(24px)',
-            zIndex: -1,
-          }}
-        />
-      )}
-
-      {/* Search component */}
-      <div className={className}>
-        <UnifiedSearch {...searchProps} />
-      </div>
-
-      {/* Particle effect on focus (subtle) */}
-      {isFocused && (
-        <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-xl">
-          <ParticleEmitter />
+      {/* Glassmorphism container - minimal 2025 design with darker background */}
+      <motion.div
+        className="relative rounded-xl border backdrop-blur-xl"
+        animate={{
+          borderColor: isFocused
+            ? 'rgba(249, 115, 22, 0.6)' // HeyClaude orange when active
+            : 'rgba(255, 255, 255, 0.15)',
+          backgroundColor: isFocused
+            ? 'rgba(0, 0, 0, 0.4)' // Darker when focused
+            : 'rgba(0, 0, 0, 0.25)', // Darker default for better glassmorphism
+          boxShadow: isFocused
+            ? '0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(249, 115, 22, 0.4)'
+            : '0 4px 16px rgba(0, 0, 0, 0.15)',
+        }}
+        transition={{
+          type: 'spring',
+          stiffness: 400,
+          damping: 30,
+        }}
+      >
+        {/* Search component */}
+        <div className={className}>
+          <UnifiedSearch {...searchProps} />
         </div>
-      )}
+      </motion.div>
     </motion.div>
-  );
-}
-
-/**
- * Subtle particle emitter for search focus effect
- */
-function ParticleEmitter() {
-  const [particles, setParticles] = useState<Array<{ id: number; x: number; y: number }>>([]);
-
-  useEffect(() => {
-    // Emit particles periodically while focused
-    const interval = setInterval(() => {
-      setParticles((prev) => {
-        const newParticle = {
-          id: Date.now() + Math.random(),
-          x: Math.random() * 100,
-          y: Math.random() * 100,
-        };
-        // Keep only last 4 particles
-        return [...prev.slice(-3), newParticle];
-      });
-    }, 600);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  return (
-    <>
-      {particles.map((particle) => (
-        <motion.div
-          key={particle.id}
-          className="absolute h-1 w-1 rounded-full bg-accent/50"
-          initial={{
-            x: `${particle.x}%`,
-            y: `${particle.y}%`,
-            opacity: 1,
-            scale: 0,
-          }}
-          animate={{
-            opacity: 0,
-            scale: 3,
-            y: `${particle.y - 30}%`,
-          }}
-          transition={{
-            duration: 1.2,
-            ease: 'easeOut',
-          }}
-        />
-      ))}
-    </>
   );
 }

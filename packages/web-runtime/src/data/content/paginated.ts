@@ -30,6 +30,10 @@ function toContentCategory(
 /**
  * Get paginated content
  * Uses 'use cache' to cache paginated content lists. This data is public and same for all users.
+ * @param root0
+ * @param root0.category
+ * @param root0.limit
+ * @param root0.offset
  */
 export async function getPaginatedContent({
   category,
@@ -45,7 +49,6 @@ export async function getPaginatedContent({
   const { isBuildTime } = await import('../../build-time.ts');
   const { createSupabaseAnonClient } = await import('../../supabase/server-anon.ts');
   const { logger } = await import('../../logger.ts');
-  const { generateRequestId } = await import('../../utils/request-id.ts');
 
   // Configure cache - use 'static' profile for paginated content (changes daily)
   cacheLife('static'); // 1 day stale, 6 hours revalidate, 30 days expire
@@ -54,9 +57,7 @@ export async function getPaginatedContent({
     cacheTag(tag);
   }
 
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'getPaginatedContent',
     module: 'data/content/paginated',
   });

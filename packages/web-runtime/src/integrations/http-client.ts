@@ -7,7 +7,6 @@
  * @module packages/web-runtime/src/integrations/http-client
  */
 
-import { createUtilityContext } from '@heyclaude/shared-runtime';
 import { normalizeError } from '../errors';
 import { logger } from '../logger';
 
@@ -22,7 +21,7 @@ export interface FetchWithRetryOptions {
     retryOn?: number[];
     noRetryOn?: number[];
   };
-  logContext?: ReturnType<typeof createUtilityContext>;
+  logContext?: Record<string, unknown>;
 }
 
 export interface FetchWithRetryResult {
@@ -37,7 +36,7 @@ export interface RetryOptions {
   attempts?: number;
   baseDelayMs?: number;
   onRetry?: (attempt: number, error: Error, delay: number) => void;
-  logContext?: ReturnType<typeof createUtilityContext>;
+  logContext?: Record<string, unknown>;
 }
 
 export async function fetchWithRetry({
@@ -53,7 +52,12 @@ export async function fetchWithRetry({
   const retryOn = retry?.retryOn;
   const noRetryOn = retry?.noRetryOn;
 
-  const context = logContext ?? createUtilityContext('fetchWithRetry', 'fetch', { url, method });
+  const context = logContext ?? {
+    function: 'fetchWithRetry',
+    operation: 'fetch',
+    url,
+    method,
+  };
 
   let lastError: Error | null = null;
 
@@ -124,7 +128,10 @@ export async function runWithRetry<T>(
   fn: () => Promise<T>,
   { attempts = DEFAULT_ATTEMPTS, baseDelayMs = DEFAULT_BASE_DELAY_MS, onRetry, logContext }: RetryOptions = {}
 ): Promise<T> {
-  const context = logContext ?? createUtilityContext('runWithRetry', 'retry');
+  const context = logContext ?? {
+    function: 'runWithRetry',
+    operation: 'retry',
+  };
   let lastError: Error | null = null;
 
   for (let attempt = 0; attempt < attempts; attempt++) {

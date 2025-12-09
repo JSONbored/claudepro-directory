@@ -5,7 +5,7 @@
 
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { Shield } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
+import { logger } from '@heyclaude/web-runtime/logging/server';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/server';
 import {
   UI_CLASSES,
@@ -16,9 +16,8 @@ import {
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { connection } from 'next/server';
-import { Suspense } from 'react';
 
 import { MFAFactorsListClient } from './mfa-factors-list-client';
 
@@ -30,58 +29,27 @@ export const metadata: Metadata = {
 /**
  * Render the MFA Settings page that lets an authenticated user view and manage multi-factor authentication.
  *
- * If no authenticated user is found, the function redirects to `/login`. A request-scoped identifier and logger are created for the page request.
+ * If no authenticated user is found, the function redirects to `/login`. A request-scoped logger is created for the page request.
+ *
+ * Note: Suspense boundary removed - account layout already provides Suspense boundary.
+ * Nested Suspense boundaries cause React errors with Dialog portals.
  *
  * @returns The JSX for the MFA Settings page, including an enrolled factors list and explanatory "How it works" content.
  *
  * @see getAuthenticatedUser
  * @see MFAFactorsListClient
- * @see generateRequestId
  * @see redirect
  */
 export default async function MFASettingsPage() {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
-
-  // Generate single requestId for this page request (after connection() to allow Date.now())
-  const requestId = generateRequestId();
+  'use cache: private';
+  cacheLife('userProfile'); // 1min stale, 5min revalidate, 30min expire - User-specific data
 
   // Create request-scoped child logger
   const reqLogger = logger.child({
-    requestId,
     operation: 'MFASettingsPage',
     route: '/account/settings/mfa',
     module: 'apps/web/src/app/account/settings/mfa',
   });
-
-  return (
-    <Suspense fallback={<div className="space-y-6">Loading MFA settings...</div>}>
-      <MFASettingsPageContent reqLogger={reqLogger} />
-    </Suspense>
-  );
-}
-
-/**
- * Render the server-side MFA settings content for an authenticated user.
- *
- * Fetches the authenticated user (requires authentication) and redirects to /login if no user is present.
- * Logs request-scoped telemetry via `reqLogger` and returns the JSX for the MFA settings page, including
- * the MFA factors list and explanatory guidance.
- *
- * @param reqLogger - A request-scoped logger (result of `logger.child`) used for access and audit logging.
- * @returns The JSX element representing the MFA settings page content.
- *
- * @see getAuthenticatedUser
- * @see MFAFactorsListClient
- * @see redirect
- * @see logger.child
- */
-async function MFASettingsPageContent({
-  reqLogger,
-}: {
-  reqLogger: ReturnType<typeof logger.child>;
-}) {
   // getAuthenticatedUser with requireUser: true throws when no user is present,
   // so the null check below is unreachable
   const { user } = await getAuthenticatedUser({

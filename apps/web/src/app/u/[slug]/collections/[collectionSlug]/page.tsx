@@ -11,7 +11,7 @@ import {
   getPublicCollectionDetail,
 } from '@heyclaude/web-runtime/data';
 import { ArrowLeft, ExternalLink } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   UI_CLASSES,
   NavLink,
@@ -25,12 +25,15 @@ import {
   Separator,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { Pulse } from '@/src/components/core/infra/pulse';
+
+import Loading from './loading';
 
 // Whitelisted content types for outgoing links - use Constants from database types
 const ALLOWED_CONTENT_TYPES = Constants.public.Enums.content_category;
@@ -65,6 +68,8 @@ function isValidSlug(slug: string): boolean {
  * Produces an internal path for a content item when its content type and slug are valid.
  *
  * @param item - Object with `content_type` and `content_slug` fields to validate
+ * @param item.content_slug
+ * @param item.content_type
  * @returns The path `/content_type/content_slug` if both values are valid, `null` otherwise
  *
  * @see isValidContentType
@@ -87,6 +92,7 @@ interface PublicCollectionPageProperties {
  * Calls connection() to allow non-deterministic operations at request time, emits a metadata-generation log entry, and does not fetch collection details (data is fetched during page render).
  *
  * @param params - Promise resolving to route parameters containing `slug` (user slug) and `collectionSlug`
+ * @param params.params
  * @returns Page metadata for the route `/u/:slug/collections/:collectionSlug`
  *
  * @see getPublicCollectionDetail
@@ -101,12 +107,8 @@ export async function generateMetadata({
   // This is required by Cache Components for non-deterministic operations
   await connection();
 
-  // Generate requestId for metadata generation (separate from page render, after connection() to allow Date.now())
-  const metadataRequestId = generateRequestId();
-
   // Create request-scoped child logger to avoid race conditions
   const metadataLogger = logger.child({
-    requestId: metadataRequestId,
     operation: 'PublicCollectionPageMetadata',
     route: `/u/${slug}/collections/${collectionSlug}`,
     module: 'apps/web/src/app/u/[slug]/collections/[collectionSlug]',
@@ -129,30 +131,29 @@ export async function generateMetadata({
  * Render the public collection detail page for a user's collection.
  *
  * @param params - A promise that resolves to route parameters containing `slug` (profile owner) and `collectionSlug` (collection identifier).
+ * @param params.params
  * @returns The React element tree for the public collection page.
  *
  * @see getPublicCollectionDetail
  * @see getAuthenticatedUser
  * @see getSafeContentLink
- * @see generateRequestId
  */
 export default async function PublicCollectionPage({ params }: PublicCollectionPageProperties) {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
-  // Generate single requestId for this page request (after connection() to allow Date.now())
-  const requestId = generateRequestId();
+  // Params is runtime data - cache key includes params, so different collections create different cache entries
+  const { slug, collectionSlug } = await params;
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    requestId,
     operation: 'PublicCollectionPage',
+    route: `/u/${slug}/collections/${collectionSlug}`,
     module: 'apps/web/src/app/u/[slug]/collections/[collectionSlug]',
   });
 
   return (
-    <Suspense fallback={<div className="container mx-auto px-4 py-8">Loading collection...</div>}>
+    <Suspense fallback={<Loading />}>
       <PublicCollectionPageContent params={params} reqLogger={reqLogger} />
     </Suspense>
   );
@@ -166,7 +167,9 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
  * view tracking. If no collection is found, calls `notFound()` to trigger a 404 response.
  *
  * @param params - A Promise that resolves to an object containing `collectionSlug` and `slug` (user slug).
+ * @param params.params
  * @param reqLogger - A request-scoped logger; a child logger is created for the route and viewer.
+ * @param params.reqLogger
  * @returns The React element for the public collection detail page.
  * @throws When `getPublicCollectionDetail` throws an error during fetch; the error is logged and rethrown.
  *
@@ -247,7 +250,7 @@ async function PublicCollectionPageContent({
           <Link href={`/u/${slug}`}>
             <Button variant="ghost" className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <ArrowLeft className="h-4 w-4" />
-              Back to {profileUser?.name ?? slug}'s Profile
+              Back to {profileUser?.name ?? slug}&apos;s Profile
             </Button>
           </Link>
 

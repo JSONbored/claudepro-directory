@@ -6,7 +6,7 @@ import './sugar-high.css';
 import { getComponentCardConfig } from '@heyclaude/web-runtime/config/static-configs';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { ComponentConfigContextProvider } from '@heyclaude/web-runtime/hooks';
-import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
+import { logger } from '@heyclaude/web-runtime/logging/server';
 import {
   generatePageMetadata,
   getLayoutData,
@@ -181,6 +181,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * Server-safe Suspense fallback that renders children inside a full-height column layout.
  *
  * @param children - Content to render inside the main content area while the parent Suspense is pending
+ * @param children.children
  * @returns A wrapper element with a background and a full-height main region containing `children`
  *
  * @see LayoutDataWrapper
@@ -201,10 +202,11 @@ function LayoutFallback({ children }: { children: React.ReactNode }) {
  *
  * This async server component attempts to retrieve layout data (announcements and navigation)
  * and passes that data to LayoutContent. If the fetch fails, it falls back to DEFAULT_LAYOUT_DATA
- * and logs the failure with a generated requestId; it does not throw or block rendering.
+ * and logs the failure; it does not throw or block rendering.
  *
  * @param children - The content to render inside LayoutContent
  *
+ * @param children.children
  * @see getLayoutData
  * @see DEFAULT_LAYOUT_DATA
  * @see LayoutContent
@@ -219,10 +221,7 @@ async function LayoutDataWrapper({ children }: { children: React.ReactNode }) {
   // Log any failures for monitoring (but don't block render)
   // eslint-disable-next-line architectural-rules/no-hardcoded-enum-values -- PromiseSettledResult status is a standard JavaScript value, not a database enum
   if (layoutDataResult.status === 'rejected') {
-    // Generate requestId for logging (after data access, so Date.now() is allowed)
-    const requestId = generateRequestId();
     const reqLogger = logger.child({
-      requestId,
       operation: 'RootLayout',
       route: '/',
       module: 'apps/web/src/app/layout',
@@ -251,7 +250,6 @@ async function LayoutDataWrapper({ children }: { children: React.ReactNode }) {
  *
  * @see getLayoutData
  * @see DEFAULT_LAYOUT_DATA
- * @see generateRequestId
  */
 
 export default function RootLayout({

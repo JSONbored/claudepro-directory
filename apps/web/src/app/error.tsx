@@ -18,6 +18,8 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 
 /**
  * ErrorCodeBlock component with copy-to-clipboard functionality
+ * @param root0
+ * @param root0.content
  */
 function ErrorCodeBlock({ content }: { content: string }) {
   const { copied, copy } = useCopyToClipboard({
@@ -33,7 +35,9 @@ function ErrorCodeBlock({ content }: { content: string }) {
         variant="ghost"
         size="sm"
         className="absolute top-2 right-2 h-6 w-6 p-0"
-        onClick={() => copy(content)}
+        onClick={() => {
+          void copy(content);
+        }}
         aria-label={copied ? 'Copied!' : 'Copy error message'}
       >
         {copied ? (
@@ -52,7 +56,9 @@ function ErrorCodeBlock({ content }: { content: string }) {
  * Shows a generic message with action buttons, and when NODE_ENV is "development" displays the error message and optional digest for debugging.
  *
  * @param error - The caught error object; may include an optional `digest` string used for diagnostic correlation.
+ * @param error.error
  * @param reset - Callback invoked to attempt recovery (for example, retry or re-render) when the user clicks "Try Again".
+ * @param error.reset
  * @returns A React element presenting the error boundary UI.
  *
  * @see logClientErrorBoundary
@@ -92,7 +98,8 @@ export default function ErrorBoundary({
           </div>
           <h1 className="mb-2 text-2xl font-bold">Something went wrong</h1>
           <p className="text-muted-foreground">
-            An unexpected error occurred. We've logged the issue and will investigate it shortly.
+            An unexpected error occurred. We&apos;ve logged the issue and will investigate it
+            shortly.
           </p>
         </div>
 

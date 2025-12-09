@@ -23,6 +23,8 @@ import { usePathname } from 'next/navigation';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useSavedSearchPresets } from '@/src/hooks/use-saved-search-presets';
+import { useSearchDebounce } from '@/src/hooks/use-search-debounce';
+import { searchCache } from '@/src/utils/search-cache';
 
 const UnifiedSearch = dynamic(
   () =>
@@ -246,15 +248,16 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
     return merged;
   }, [items, searchResults]);
 
-  const handleSearch = useCallback(
+  // Create search function that handles caching and API calls
+  const performSearch = useCallback(
     async (
       query: string,
       overrideFilters?: FilterState,
-      telemetry?: { quickFilterType?: QuickFilterType; quickFilterValue?: string }
+      telemetry?: { quickFilterType?: QuickFilterType; quickFilterValue?: string },
+      signal?: AbortSignal
     ) => {
       const nextFilters = overrideFilters ?? filters;
       const sanitizedQuery = query.trim();
-      setSearchQuery(query);
 
       const shouldExecuteSearch = sanitizedQuery.length > 0 || hasFilterCriteria(nextFilters);
       if (!shouldExecuteSearch) {
@@ -262,8 +265,32 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
         return;
       }
 
+      // Build cache key from query and filters
+      const cacheKey: Record<string, unknown> = {
+        categories: nextFilters.category
+          ? [nextFilters.category]
+          : category
+            ? [category]
+            : [],
+        tags: nextFilters.tags || [],
+        authors: nextFilters.author ? [nextFilters.author] : [],
+        sort: nextFilters.sort || 'relevance',
+      };
+
+      // Check cache first
+      const cached = searchCache.get(sanitizedQuery, cacheKey);
+      if (cached && !signal?.aborted) {
+        setSearchResults(cached as T[]);
+        // Still fetch fresh in background (don't await, fire and forget)
+      }
+
       const result = await runLoggedAsync(
         async () => {
+          // Check if request was aborted
+          if (signal?.aborted) {
+            return null;
+          }
+
           const searchFilters: UnifiedSearchFilters = {
             limit: 100,
           };
@@ -296,11 +323,21 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
             }
           }
 
+          // Check if request was aborted before making API call
+          if (signal?.aborted) {
+            return null;
+          }
+
           const result = await searchUnifiedClient({
             query: sanitizedQuery,
             entities: ['content'],
             filters: searchFilters,
           });
+
+          // Check again after API call
+          if (signal?.aborted) {
+            return null;
+          }
 
           return result.results as T[];
         },
@@ -315,14 +352,51 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
         }
       );
 
-      if (result) {
+      // Only update if request wasn't aborted
+      if (!signal?.aborted && result) {
         setSearchResults(result);
-      } else {
+        // Store in cache
+        searchCache.set(sanitizedQuery, cacheKey, result);
+      } else if (!signal?.aborted && !result) {
         // On error, fallback to original items
         setSearchResults(items);
       }
     },
     [category, filters, items, runLoggedAsync]
+  );
+
+  // Use debounced search hook for query changes only
+  const { debouncedSearch: debouncedPerformSearch } = useSearchDebounce({
+    delay: 400,
+    onSearch: async (query, signal) => {
+      await performSearch(query, filters, undefined, signal);
+    },
+  });
+
+  const handleSearch = useCallback(
+    async (
+      query: string,
+      overrideFilters?: FilterState,
+      telemetry?: { quickFilterType?: QuickFilterType; quickFilterValue?: string }
+    ) => {
+      const nextFilters = overrideFilters ?? filters;
+      const sanitizedQuery = query.trim();
+      setSearchQuery(query);
+
+      // If filters changed, execute immediately (no debounce for filter changes)
+      // If only query changed, use debounced search
+      if (overrideFilters && JSON.stringify(overrideFilters) !== JSON.stringify(filters)) {
+        // Filter change - execute immediately
+        await performSearch(query, nextFilters, telemetry);
+      } else if (sanitizedQuery.length > 0) {
+        // Query change - use debounced search
+        debouncedPerformSearch(sanitizedQuery);
+      } else {
+        // Empty query - reset to items
+        setSearchResults(items);
+      }
+    },
+    [category, filters, items, debouncedPerformSearch, performSearch]
   );
 
   const handleFiltersChange = useCallback(

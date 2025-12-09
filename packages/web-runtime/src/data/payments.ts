@@ -4,8 +4,6 @@ import { type Database } from '@heyclaude/database-types';
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { logger } from '../index.ts';
-import { createSupabaseServerClient } from '../supabase/server.ts';
-import { generateRequestId } from '../utils/request-id.ts';
 
 type PaymentPlanRow = Database['public']['Tables']['payment_plan_catalog']['Row'];
 type JobBillingSummaryRow = Database['public']['Views']['job_billing_summary']['Row'];
@@ -54,6 +52,9 @@ function sanitizeBenefits(benefits: PaymentPlanRow['benefits']): null | string[]
 /**
  * Get payment plan catalog
  * Uses 'use cache' to cache payment plan catalog. This data is public and same for all users.
+ *
+ * Note: Uses anon client instead of server client to avoid cookies() inside cache scope.
+ * This is safe because payment plan catalog is public data that doesn't require authentication.
  */
 export async function getPaymentPlanCatalog(): Promise<PaymentPlanCatalogEntry[]> {
   'use cache';
@@ -63,14 +64,15 @@ export async function getPaymentPlanCatalog(): Promise<PaymentPlanCatalogEntry[]
   cacheTag('payment-plans');
 
   // Create request-scoped child logger to avoid race conditions
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'getPaymentPlanCatalog',
     module: 'data/payments',
   });
 
-  const supabase = await createSupabaseServerClient();
+  // Use anon client to avoid cookies() inside cache scope
+  // Payment plan catalog is public data, so no authentication needed
+  const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
+  const supabase = createSupabaseAnonClient();
 
   try {
     const { data, error } = await supabase
@@ -136,7 +138,7 @@ export async function getPaymentPlanCatalog(): Promise<PaymentPlanCatalogEntry[]
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string =
-      error instanceof Error ? error : typeof error === 'string' ? error : String(error);
+      error instanceof Error ? error : (typeof error === 'string' ? error : String(error));
     reqLogger.error('getPaymentPlanCatalog failed', errorForLogging);
     throw error;
   }
@@ -153,6 +155,7 @@ export async function getPaymentPlanCatalog(): Promise<PaymentPlanCatalogEntry[]
  * - Minimum 30 seconds stale time (required for runtime prefetch)
  * - Per-user cache keys (jobIds in cache tag)
  * - Not prerendered (runs at request time)
+ * @param jobIds
  */
 export async function getJobBillingSummaries(jobIds: string[]): Promise<JobBillingSummaryEntry[]> {
   'use cache: private';
@@ -168,9 +171,7 @@ export async function getJobBillingSummaries(jobIds: string[]): Promise<JobBilli
   cacheTag(`job-billing-${sortedJobIds}`);
 
   // Create request-scoped child logger to avoid race conditions
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'getJobBillingSummaries',
     module: 'data/payments',
   });
@@ -224,7 +225,7 @@ export async function getJobBillingSummaries(jobIds: string[]): Promise<JobBilli
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string =
-      error instanceof Error ? error : typeof error === 'string' ? error : String(error);
+      error instanceof Error ? error : (typeof error === 'string' ? error : String(error));
     reqLogger.error('getJobBillingSummaries failed', errorForLogging, {
       jobCount: jobIds.length,
     });

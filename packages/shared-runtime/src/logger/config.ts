@@ -663,7 +663,7 @@ export interface PinoConfigOptions {
   /**
    * Mixin function to add dynamic context to every log
    * 
-   * @default defaultMixin (injects bindings: requestId, operation, userId, route, module, etc.)
+   * @default defaultMixin (injects bindings: operation, userId, route, module, etc.)
    * 
    * @remarks
    * Mixin is called for EVERY log message. It should return a new object (will be mutated by Pino).
@@ -678,7 +678,7 @@ export interface PinoConfigOptions {
    * **Performance:** Called for every log - keep it fast. Avoid heavy computations.
    * 
    * **When to Use:**
-   * - Adding dynamic context (requestId, userId, etc.) ✅
+   * - Adding dynamic context (operation, userId, etc.) ✅
    * - Adding static metadata → Use `base` option instead
    * - Concatenating values for specific keys → Use mixin (avoids duplicate keys caveat)
    * 
@@ -689,7 +689,7 @@ export interface PinoConfigOptions {
    *     // Add dynamic context from bindings
    *     const bindings = logger.bindings();
    *     return {
-   *       requestId: bindings.requestId,
+   *       operation: bindings.operation,
    *       userId: bindings.userId,
    *       timestamp: Date.now()
    *     };
@@ -786,10 +786,10 @@ export interface PinoConfigOptions {
    * ```typescript
    * const logger = createLogger({
    *   nestedKey: 'payload',
-   *   mixin: () => ({ requestId: 'req-123' })
+   *   mixin: () => ({ operation: 'myOperation' })
    * });
    * logger.info({ description: 'Ok' }, 'Message');
-   * // Output: { "level": 30, "payload": { "requestId": "req-123", "description": "Ok" }, "msg": "Message" }
+   * // Output: { "level": 30, "payload": { "operation": "myOperation", "description": "Ok" }, "msg": "Message" }
    * ```
    * 
    * @see {@link https://getpino.io/#/docs/api#nestedkey-string | Pino NestedKey Documentation}
@@ -813,10 +813,8 @@ export interface PinoConfigOptions {
    *   onChild: (child) => {
    *     // Track child logger creation
    *     console.log('Child logger created with bindings:', child.bindings());
-   *     // Validate child logger context
-   *     if (!child.bindings().requestId) {
-   *       console.warn('Child logger missing requestId');
-   *     }
+   *     // Validate child logger context if needed
+   *     // (example: check for required bindings)
    *   }
    * });
    * ```
@@ -1238,7 +1236,7 @@ function defaultStreamWrite(s: string): string {
  * The returned configuration:
  * - Merges provided options with secure defaults (redaction paths, censoring that hashes user IDs, serializers for user/db/request/response).
  * - Builds a base context including BASE_CONTEXT plus optional service/name and any provided base fields.
- * - Provides a default mixin that injects bindings (requestId, operation, userId, module, route, etc.) and observability flags (hasDbQuery, hasUser, hasError, isErrorLevel) unless those fields are explicitly provided on the log call.
+ * - Provides a default mixin that injects bindings (operation, userId, module, route, etc.) and observability flags (hasDbQuery, hasUser, hasError, isErrorLevel) unless those fields are explicitly provided on the log call.
  * - Supplies a default logMethod that samples debug/trace logs to ~10% in production to reduce volume (sampling is deterministic based on a simple hash of the log payload).
  * - Uses defaultStreamWrite for final-string sanitization unless a custom streamWrite hook is provided.
  * - Automatically enables pino-pretty in development when appropriate, but never configures transports in detected edge runtimes (Deno or Vercel Edge). A custom transport in options will be used only in non-edge environments.
@@ -1368,7 +1366,7 @@ export function createPinoConfig(options?: PinoConfigOptions): pino.LoggerOption
   };
 
   // Build mixin function - automatically inject context from logger bindings
-  // This eliminates the need to manually pass requestId, operation, userId, etc. in every log call
+  // This eliminates the need to manually pass operation, userId, etc. in every log call
   // The mixin function reads from logger.bindings() which is set via setBindings()
   // 
   // Parameters:
@@ -1379,7 +1377,7 @@ export function createPinoConfig(options?: PinoConfigOptions): pino.LoggerOption
   // Returns: Dynamic context object that will be merged with mergeObject via mixinMergeStrategy
   // 
   // Implementation: We enhance observability by:
-  // 1. Injecting automatic context from bindings (requestId, operation, userId, etc.)
+  // 1. Injecting automatic context from bindings (operation, userId, etc.)
   // 2. Adding log level for filtering/analysis
   // 3. Detecting conflicts between mergeObject and bindings to avoid duplication
   // 4. Enriching context based on what's being logged
@@ -1418,9 +1416,6 @@ export function createPinoConfig(options?: PinoConfigOptions): pino.LoggerOption
     
     // Request correlation context
     // Only add if not already present in mergeObject (avoid duplication, mergeObject takes priority)
-    if (bindings['requestId'] !== undefined && mergeObj['requestId'] === undefined) {
-      dynamicContext['requestId'] = bindings['requestId'];
-    }
     if (bindings['operation'] !== undefined && mergeObj['operation'] === undefined) {
       dynamicContext['operation'] = bindings['operation'];
     }
@@ -1509,28 +1504,10 @@ export function createPinoConfig(options?: PinoConfigOptions): pino.LoggerOption
   });
   
   // Build onChild hook - track child logger creation for debugging and monitoring
-  // In development mode, warn if child logger is missing recommended context (requestId)
-  const defaultOnChild = options?.onChild ?? ((child: pino.Logger): void => {
-    // Only validate in development mode to avoid noise in production
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Runtime check for Edge compatibility
-    const isDevelopment = typeof process !== 'undefined' && process.env?.['NODE_ENV'] === 'development';
-    
-    if (isDevelopment) {
-      const bindings = child.bindings();
-      
-      // Warn if child logger is missing requestId (important for request correlation)
-      // This helps developers catch cases where request context is not properly propagated
-      if (bindings['requestId'] === undefined && bindings['correlationId'] === undefined) {
-        // Use console.warn since this is the logger config file - using logger here
-        // would create a circular dependency. This is development-time validation only.
-        // eslint-disable-next-line architectural-rules/no-console-in-production-enhanced
-        console.warn(
-          '[Logger] Child logger created without requestId or correlationId. ' +
-          'Consider adding request context for better log correlation. ' +
-          'Current bindings:', Object.keys(bindings).join(', ') || '(none)'
-        );
-      }
-    }
+  // No-op by default (can be overridden via options.onChild)
+  const defaultOnChild = options?.onChild ?? ((_child: pino.Logger): void => {
+    // No validation needed - child loggers are created with appropriate context
+    // via logger.child() calls throughout the codebase
   });
 
   // Build browser configuration - include ALL browser options

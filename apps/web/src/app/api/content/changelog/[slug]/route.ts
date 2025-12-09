@@ -4,15 +4,9 @@
  */
 
 import 'server-only';
-
 import { ContentService } from '@heyclaude/data-layer';
 import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
-import {
-  generateRequestId,
-  logger,
-  normalizeError,
-  createErrorResponse,
-} from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
 import {
   createSupabaseAnonClient,
   badRequestResponse,
@@ -33,6 +27,7 @@ const CORS = getOnlyCorsHeaders;
  *
  * @param request - The incoming NextRequest for this API route
  * @param params - An object with a Promise that resolves to route params; must include `slug`
+ * @param params.params
  * @returns A NextResponse containing the plaintext LLMs-formatted changelog entry on success, or a 400/standardized error response on failure
  *
  * @see ContentService#getChangelogEntryLlmsTxt
@@ -40,9 +35,7 @@ const CORS = getOnlyCorsHeaders;
  * @see buildSecurityHeaders
  */
 export async function GET(request: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'ChangelogEntryAPI',
     route: '/api/content/changelog/[slug]',
     method: 'GET',

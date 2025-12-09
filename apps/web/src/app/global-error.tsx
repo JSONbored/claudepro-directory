@@ -15,6 +15,8 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 
 /**
  * ErrorCodeBlock component with copy-to-clipboard functionality
+ * @param root0
+ * @param root0.content
  */
 function ErrorCodeBlock({ content }: { content: string }) {
   const { copied, copy } = useCopyToClipboard({
@@ -30,7 +32,9 @@ function ErrorCodeBlock({ content }: { content: string }) {
         variant="ghost"
         size="sm"
         className="absolute top-2 right-2 h-6 w-6 p-0"
-        onClick={() => copy(content)}
+        onClick={() => {
+          void copy(content);
+        }}
         aria-label={copied ? 'Copied!' : 'Copy error message'}
       >
         {copied ? (
@@ -47,7 +51,9 @@ function ErrorCodeBlock({ content }: { content: string }) {
  * Top-level error boundary component that logs unhandled errors and renders a critical fallback UI.
  *
  * @param error - The caught Error object; may include an optional `digest` string used for observability.
+ * @param error.error
  * @param reset - Callback to reset the error boundary and attempt to recover the application.
+ * @param error.reset
  * @returns The fallback React element displayed when a global unhandled error occurs.
  *
  * @see {@link logClientErrorBoundary}

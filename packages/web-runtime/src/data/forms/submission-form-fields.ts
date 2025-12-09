@@ -17,7 +17,6 @@ import {
   type SelectFieldDefinition,
   type SelectOption,
 } from '../../types/component.types.ts';
-import { generateRequestId } from '../../utils/request-id.ts';
 
 const SUBMISSION_CONTENT_TYPES = Constants.public.Enums
   .submission_type as readonly SubmissionContentType[];
@@ -27,7 +26,7 @@ const FORM_FIELDS_CACHE_SECONDS = 60 * 60 * 6;
 type FormFieldConfigItem = Database['public']['CompositeTypes']['form_field_config_item'];
 
 function mapField(item: FormFieldConfigItem): FieldDefinition | null {
-  if (!(item.name && item.label && item.type)) {
+  if (!item.name || !item.label || !item.type) {
     return null;
   }
 
@@ -120,6 +119,7 @@ function emptySection(): SubmissionFormSection {
 /**
  * Fetch fields for a content type (cached)
  * Uses 'use cache' to cache form field configuration. This data is public and same for all users.
+ * @param contentType
  */
 async function fetchFieldsForContentType(
   contentType: SubmissionContentType
@@ -135,9 +135,7 @@ async function fetchFieldsForContentType(
   cacheTag(`submission-${contentType}`);
 
   // Create request-scoped child logger to avoid race conditions
-  const requestId = generateRequestId();
   const requestLogger = logger.child({
-    requestId,
     operation: 'fetchFieldsForContentType',
     route: 'utility-function', // Utility function - no specific route
     module: 'data/forms/submission-form-fields',
@@ -148,6 +146,8 @@ async function fetchFieldsForContentType(
     let client;
     if (isBuildTime()) {
       const { createSupabaseAdminClient } = await import('../../supabase/admin.ts');
+      // Admin client required during build: bypasses RLS for faster static generation
+      // This is safe because build-time queries are read-only and don't expose user data
       client = createSupabaseAdminClient();
     } else {
       client = createSupabaseAnonClient();
@@ -155,7 +155,12 @@ async function fetchFieldsForContentType(
 
     const result = await new MiscService(client).getFormFieldConfig({ p_form_type: contentType });
 
-    if (!result?.fields) {
+    if (
+      result === null ||
+      result === undefined ||
+      result.fields === null ||
+      result.fields === undefined
+    ) {
       // logger.error() normalizes errors internally, so pass raw error
       requestLogger.error(
         'Failed to load form fields',

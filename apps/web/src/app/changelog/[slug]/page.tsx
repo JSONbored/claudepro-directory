@@ -32,7 +32,7 @@ import {
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft, Calendar } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   UI_CLASSES,
   NavLink,
@@ -42,14 +42,16 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import { formatChangelogDate, getChangelogUrl } from '@heyclaude/web-runtime/utils/changelog';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import { notFound } from 'next/navigation';
-import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { ReadProgress } from '@/src/components/content/read-progress';
 import { Pulse } from '@/src/components/core/infra/pulse';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { ChangelogContent } from '@/src/components/features/changelog/changelog-content';
+
+import ChangelogEntryLoading from './loading';
 
 /**
  * Build static route params for the most recent changelog entries to seed Next.js static generation.
@@ -66,12 +68,8 @@ export async function generateStaticParams() {
   // Import shared constant for consistency across changelog pages
   const { STATIC_GENERATION_LIMITS } = await import('@heyclaude/web-runtime/data/config/constants');
 
-  // Generate requestId for static params generation (build-time)
-  const requestId = generateRequestId();
-
-  // Create request-scoped child logger to avoid race conditions
+  // Create request-scoped child logger
   const reqLogger = logger.child({
-    requestId,
     operation: 'ChangelogEntryPageStaticParams',
     route: '/changelog',
     module: 'apps/web/src/app/changelog/[slug]',
@@ -82,13 +80,11 @@ export async function generateStaticParams() {
 
     // Only pre-render the most recent entries to optimize build time
     const limit = Math.max(0, STATIC_GENERATION_LIMITS.changelog);
-    const params = entries.slice(0, limit).map((entry) => ({
-      slug: entry.slug,
-    }));
-
     // Return empty array if no entries found - Suspense boundaries will handle dynamic rendering
     // This follows Next.js best practices by avoiding placeholder patterns
-    return params;
+    return entries.slice(0, limit).map((entry) => ({
+      slug: entry.slug,
+    }));
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to generate changelog static params');
     reqLogger.error('ChangelogEntryPage: generateStaticParams threw', normalized);
@@ -101,6 +97,7 @@ export async function generateStaticParams() {
  * Produce route metadata for a changelog entry identified by `slug`.
  *
  * @param params - Promise that resolves to an object containing the route `slug` to load metadata for
+ * @param params.params
  * @returns Metadata for the `/changelog/:slug` route; if the entry cannot be loaded, the metadata will be generated with `item: null`
  *
  * @see getChangelogEntryBySlug
@@ -113,16 +110,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
 
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
-
-  // Generate requestId for metadata generation (separate from page render, after connection() to allow Date.now())
-  const metadataRequestId = generateRequestId();
-
-  // Create request-scoped child logger to avoid race conditions
+  // Create request-scoped child logger
   const metadataLogger = logger.child({
-    requestId: metadataRequestId,
     operation: 'ChangelogEntryPageMetadata',
     route: `/changelog/${slug}`,
     module: 'apps/web/src/app/changelog/[slug]',
@@ -153,6 +142,7 @@ export async function generateMetadata({
  * page chrome (read progress, view tracking, structured data) alongside the entry content.
  *
  * @param params - Promise resolving to an object containing the `slug` of the changelog entry to render
+ * @param params.params
  * @returns The server-rendered React element for the changelog entry page
  * @throws A normalized error when loading the changelog entry fails
  *
@@ -166,26 +156,18 @@ export default async function ChangelogEntryPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  // MUST be called before accessing params (uncached data)
-  await connection();
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
-  // Generate single requestId for this page request (after connection() to allow Date.now())
-  const requestId = generateRequestId();
-
-  // Create request-scoped child logger to avoid race conditions
+  // Create request-scoped child logger
   const reqLogger = logger.child({
-    requestId,
     operation: 'ChangelogEntryPage',
     route: '/changelog/[slug]',
     module: 'apps/web/src/app/changelog/[slug]',
   });
 
   return (
-    <Suspense
-      fallback={<div className="container mx-auto px-4 py-8">Loading changelog entry...</div>}
-    >
+    <Suspense fallback={<ChangelogEntryLoading />}>
       <ChangelogEntryPageContent params={params} reqLogger={reqLogger} />
     </Suspense>
   );
@@ -198,7 +180,9 @@ export default async function ChangelogEntryPage({
  * and if the entry is not found the Next.js `notFound()` helper is invoked to render a 404.
  *
  * @param params - A promise resolving to an object with the `slug` of the changelog entry to render.
+ * @param params.params
  * @param reqLogger - Route-scoped logger used for request-scoped logging.
+ * @param params.reqLogger
  * @returns The rendered changelog entry page JSX including read progress, view tracking, structured data, header, and content.
  *
  * @throws A normalized error when fetching the changelog entry fails.

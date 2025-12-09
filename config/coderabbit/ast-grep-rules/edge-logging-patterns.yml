@@ -1,0 +1,74 @@
+# Edge Function Logging Pattern Rules
+# Enforces edge function logging standards from ESLint rule: require-edge-logging-setup
+# Matches: config/tools/eslint-plugin-architectural-rules.js -> require-edge-logging-setup
+
+---
+# Rule: Detect wrong logger import in edge functions (should use shared-runtime or edge-runtime)
+id: wrong-logger-import-edge
+language: TypeScript
+rule:
+  all:
+    - pattern: import $ITEMS from '@heyclaude/web-runtime/core'
+      kind: import_statement
+      has:
+        regex: logger
+    - inside:
+        pattern: apps/edge/functions/**/*.ts
+message: "Edge functions must use logError/logInfo/logWarn from @heyclaude/shared-runtime OR logger from @heyclaude/edge-runtime. Do not use logger from @heyclaude/web-runtime/core."
+severity: error
+
+---
+# Rule: Detect missing logContext creation in edge function handlers
+id: missing-log-context-edge
+language: TypeScript
+rule:
+  all:
+    - pattern: export (const|function) $HANDLER($$$) { $$$ }
+      kind: function_declaration
+      regex: (GET|POST|PUT|DELETE|PATCH|OPTIONS|HEAD)
+    - inside:
+        pattern: apps/edge/functions/**/*.ts
+    - not:
+        has:
+          pattern: const logContext = create$CONTEXT($$$)
+          regex: (createEmailHandlerContext|createDataApiContext|createSearchContext|createTransformApiContext|createUtilityContext|createNotificationRouterContext|createChangelogHandlerContext|createWebAppContext)
+message: "Edge function handler is missing logContext creation. Add: const logContext = create{Service}Context(...) at handler start."
+severity: error
+
+---
+# Rule: Detect missing initRequestLogging() call in edge function handlers
+id: missing-init-request-logging
+language: TypeScript
+rule:
+  all:
+    - pattern: export (const|function) $HANDLER($$$) { $$$ }
+      kind: function_declaration
+      regex: (GET|POST|PUT|DELETE|PATCH|OPTIONS|HEAD)
+    - inside:
+        pattern: apps/edge/functions/**/*.ts
+    - has:
+        pattern: const logContext = create$CONTEXT($$$)
+    - not:
+        has:
+          pattern: initRequestLogging($$$)
+message: "Edge function handler is missing initRequestLogging() call. Add: initRequestLogging(logContext) at handler start. This will automatically set logger bindings."
+severity: error
+
+---
+# Rule: Detect missing traceRequestComplete() call before success response
+id: missing-trace-request-complete
+language: TypeScript
+rule:
+  all:
+    - pattern: export (const|function) $HANDLER($$$) { $$$ }
+      kind: function_declaration
+      regex: (GET|POST|PUT|DELETE|PATCH|OPTIONS|HEAD)
+    - inside:
+        pattern: apps/edge/functions/**/*.ts
+    - has:
+        pattern: return (new Response|Response.$METHOD)($$$)
+    - not:
+        has:
+          pattern: traceRequestComplete($$$)
+message: "Edge function handler is missing traceRequestComplete() call before success response. Add: traceRequestComplete(logContext) before returning."
+severity: error

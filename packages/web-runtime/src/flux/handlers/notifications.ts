@@ -15,7 +15,7 @@ import { normalizeError } from '@heyclaude/shared-runtime';
 
 import { createSupabaseAdminClient } from '../../supabase/admin';
 import { createSupabaseServerClient } from '../../supabase/server';
-import { logger, generateRequestId, createWebAppContextWithId } from '../../logging/server';
+import { logger, createWebAppContextWithId } from '../../logging/server';
 import { createErrorResponse } from '../../utils/error-handler';
 
 // Type guards for enum validation
@@ -56,9 +56,7 @@ function createNotificationTraceId(): string {
  */
 export async function handleActiveNotifications(_request: NextRequest): Promise<NextResponse> {
   const startTime = Date.now();
-  const requestId = generateRequestId();
   const logContext = createWebAppContextWithId(
-    requestId,
     '/api/flux/notifications/active',
     'handleActiveNotifications'
   );
@@ -127,7 +125,7 @@ export async function handleActiveNotifications(_request: NextRequest): Promise<
       route: '/api/flux/notifications/active',
       operation: 'GET',
       method: 'GET',
-      logContext: { requestId },
+      logContext: {},
     });
   }
 }
@@ -138,9 +136,7 @@ export async function handleActiveNotifications(_request: NextRequest): Promise<
  */
 export async function handleDismissNotifications(request: NextRequest): Promise<NextResponse> {
   const startTime = Date.now();
-  const requestId = generateRequestId();
   const logContext = createWebAppContextWithId(
-    requestId,
     '/api/flux/notifications/dismiss',
     'handleDismissNotifications'
   );
@@ -246,7 +242,7 @@ export async function handleDismissNotifications(request: NextRequest): Promise<
       route: '/api/flux/notifications/dismiss',
       operation: 'POST',
       method: 'POST',
-      logContext: { requestId },
+      logContext: {},
     });
   }
 }
@@ -269,9 +265,7 @@ interface CreateNotificationPayload {
  */
 export async function handleCreateNotification(request: NextRequest): Promise<NextResponse> {
   const startTime = Date.now();
-  const requestId = generateRequestId();
   const logContext = createWebAppContextWithId(
-    requestId,
     '/api/flux/notifications/create',
     'handleCreateNotification'
   );
@@ -406,7 +400,7 @@ export async function handleCreateNotification(request: NextRequest): Promise<Ne
       route: '/api/flux/notifications/create',
       operation: 'POST',
       method: 'POST',
-      logContext: { requestId },
+      logContext: {},
     });
   }
 }

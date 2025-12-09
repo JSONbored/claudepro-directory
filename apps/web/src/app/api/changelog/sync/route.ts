@@ -34,77 +34,105 @@
  * 6. Returns success response
  *
  * @see {@link packages/web-runtime/src/inngest/functions/changelog/notify.ts | Notification Handler}
- * @see {@link .github/workflows/auto-release.yml | GitHub Actions Workflow}
+ * @see {@link .github/workflows/release.yml | GitHub Actions Workflow}
  */
 
 import 'server-only';
+import { timingSafeEqual } from 'node:crypto';
 
-import type { Database } from '@heyclaude/database-types';
-import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
-import {
-  generateRequestId,
-  logger,
-  normalizeError,
-  createErrorResponse,
-} from '@heyclaude/web-runtime/logging/server';
-import {
-  createSupabaseAdminClient,
-  badRequestResponse,
-  getOnlyCorsHeaders,
-} from '@heyclaude/web-runtime/server';
+import { Constants, type Database } from '@heyclaude/database-types';
+import { buildSecurityHeaders, APP_CONFIG, requireEnvVar } from '@heyclaude/shared-runtime';
 import {
   generateOptimizedTitle,
   generateOptimizedDescription,
   extractKeywords,
   generateOGImageUrl,
 } from '@heyclaude/web-runtime';
-import { APP_CONFIG } from '@heyclaude/shared-runtime';
+import { logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
+import {
+  createSupabaseAdminClient,
+  badRequestResponse,
+  postCorsHeaders,
+  pgmqSend,
+} from '@heyclaude/web-runtime/server';
 import { NextRequest, NextResponse } from 'next/server';
-import { pgmqSend } from '@heyclaude/web-runtime/server';
+import { z } from 'zod';
 
-const CORS = getOnlyCorsHeaders;
-const CHANGELOG_SYNC_TOKEN = process.env['CHANGELOG_SYNC_TOKEN'];
+const CORS = postCorsHeaders;
+
+// Zod schema for request body validation
+const changelogSyncRequestSchema = z.object({
+  version: z.string().min(1),
+  date: z.string().min(1),
+  tldr: z.string().optional(),
+  whatChanged: z.string().optional(),
+  sections: z.record(z.string(), z.array(z.string())).optional(),
+  content: z.string().min(1),
+  rawContent: z.string().optional(),
+});
 
 /**
- * Validates the authentication token.
+ * Validates the authentication token using timing-safe comparison to prevent timing attacks.
+ *
+ * @param authHeader - The Authorization header value from the request
+ * @param expectedToken - The expected token value from environment
+ * @param reqLogger - Request-scoped logger for error logging
+ * @returns True if token is valid, false otherwise
  */
-function validateToken(authHeader: string | null): boolean {
-  if (!CHANGELOG_SYNC_TOKEN) {
-    logger.warn('CHANGELOG_SYNC_TOKEN not configured', {
+function validateToken(
+  authHeader: null | string,
+  expectedToken: string,
+  reqLogger: ReturnType<typeof logger.child>
+): boolean {
+  if (!expectedToken) {
+    reqLogger.warn('CHANGELOG_SYNC_TOKEN not configured', {
       route: '/api/changelog/sync',
     });
     return false;
   }
 
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  if (!authHeader?.startsWith('Bearer ')) {
     return false;
   }
 
   const token = authHeader.slice(7);
-  return token === CHANGELOG_SYNC_TOKEN;
+
+  // Convert strings to Buffers for timing-safe comparison
+  const tokenBuffer = Buffer.from(token, 'utf8');
+  const expectedBuffer = Buffer.from(expectedToken, 'utf8');
+
+  // Length check must happen before timingSafeEqual
+  if (tokenBuffer.length !== expectedBuffer.length) {
+    return false;
+  }
+
+  return timingSafeEqual(tokenBuffer, expectedBuffer);
 }
 
 /**
  * Generates a slug from version and date.
+ * @param version
+ * @param date
  */
 function generateSlug(version: string, date: string): string {
   // Format: 2025-12-07-v1-2-0
-  const datePart = date.replace(/-/g, '-');
-  const versionPart = version.replace(/\./g, '-').toLowerCase();
-  return `${datePart}-v${versionPart}`;
+  const versionPart = version.replaceAll('.', '-').toLowerCase();
+  return `${date}-v${versionPart}`;
 }
 
 /**
  * Converts sections object to database format.
+ * @param sections
  */
 function convertSectionsToChanges(
   sections: Record<string, string[]>
 ): Database['public']['Tables']['changelog']['Row']['changes'] {
   const changes: Database['public']['Tables']['changelog']['Row']['changes'] = {};
 
-  // Map section names to changelog categories
+  // Map section names to changelog categories using Constants enum
   // Note: Statistics, Technical Details, Deployment are metadata sections, not categories
-  const categoryMap: Record<string, keyof typeof changes> = {
+  const validCategories = Constants.public.Enums.changelog_category;
+  const categoryMap: Record<string, Database['public']['Enums']['changelog_category']> = {
     Added: 'Added',
     Changed: 'Changed',
     Fixed: 'Fixed',
@@ -115,7 +143,13 @@ function convertSectionsToChanges(
 
   for (const [sectionName, items] of Object.entries(sections)) {
     const category = categoryMap[sectionName];
-    if (category && items.length > 0) {
+    // Validate category is in enum and items array is non-empty
+    if (
+      category &&
+      validCategories.includes(category) &&
+      Array.isArray(items) &&
+      items.length > 0
+    ) {
       changes[category] = items.map((item) => ({ content: item }));
     }
   }
@@ -125,20 +159,41 @@ function convertSectionsToChanges(
 
 /**
  * POST handler for changelog sync.
+ * @param request
  */
 export async function POST(request: NextRequest) {
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'ChangelogSyncAPI',
     route: '/api/changelog/sync',
     method: 'POST',
   });
 
   try {
+    // Get environment variable with validation
+    let changelogSyncToken: string;
+    try {
+      changelogSyncToken = requireEnvVar(
+        'CHANGELOG_SYNC_TOKEN',
+        'CHANGELOG_SYNC_TOKEN is required'
+      );
+    } catch (error) {
+      reqLogger.error('CHANGELOG_SYNC_TOKEN not configured', normalizeError(error));
+      return NextResponse.json(
+        { error: 'Server configuration error' },
+        {
+          status: 500,
+          headers: {
+            'Content-Type': 'application/json',
+            ...buildSecurityHeaders(),
+            ...CORS,
+          },
+        }
+      );
+    }
+
     // Validate authentication
     const authHeader = request.headers.get('authorization');
-    if (!validateToken(authHeader)) {
+    if (!validateToken(authHeader, changelogSyncToken, reqLogger)) {
       reqLogger.warn('Unauthorized changelog sync attempt');
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -153,34 +208,63 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Parse request body
-    const body = await request.json();
-    const { version, date, tldr, whatChanged, sections, content, rawContent } = body;
-
-    // Validate required fields
-    if (!version || !date || !content) {
-      return badRequestResponse('Missing required fields: version, date, content', CORS);
+    // Parse and validate request body with Zod schema
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch (error) {
+      const normalized = normalizeError(error, 'Failed to parse request body as JSON');
+      reqLogger.error('Invalid JSON in request body', normalized, {
+        route: '/api/changelog/sync',
+        operation: 'POST',
+        method: 'POST',
+      });
+      return badRequestResponse('Invalid JSON in request body', CORS);
     }
 
-    reqLogger.info('Changelog sync request received', { version, date });
+    const parseResult = changelogSyncRequestSchema.safeParse(body);
+    if (!parseResult.success) {
+      const errorMessages = parseResult.error.issues.map((e) => e.message).join(', ');
+      reqLogger.warn('Invalid request body', {
+        errorCount: parseResult.error.issues.length,
+        errorMessages: parseResult.error.issues.map((e) => e.message),
+      });
+      return badRequestResponse(`Invalid request body: ${errorMessages}`, CORS);
+    }
+
+    const { version, date, tldr, whatChanged, sections, content, rawContent } = parseResult.data;
+
+    reqLogger.info('Changelog sync request received', {
+      version,
+      date,
+      audit: true,
+      action: 'changelog_sync_request',
+    });
 
     // Generate slug
     const slug = generateSlug(version, date);
 
-    // Convert sections to database format
+    // Convert sections to database format (sections is now properly typed)
     const changes = sections ? convertSectionsToChanges(sections) : {};
 
-    // Generate SEO-optimized fields
-    const seoTitle = generateOptimizedTitle(version, sections || {});
-    const seoDescription = generateOptimizedDescription(sections || {}, date);
-    const keywords = extractKeywords(sections || {});
+    // Generate SEO-optimized fields (sections is now properly typed)
+    const sectionsForSeo = sections ?? {};
+    const seoTitle = generateOptimizedTitle(version, sectionsForSeo);
+    const seoDescription = generateOptimizedDescription(sectionsForSeo, date);
+    const keywords = extractKeywords(sectionsForSeo);
 
     // Generate canonical URL and OG image
     const changelogPath = `/changelog/${slug}`;
     const canonicalUrl = `${APP_CONFIG.url}${changelogPath}`;
     const ogImageUrl = generateOGImageUrl(changelogPath);
 
-    // Create Supabase admin client
+    // NOTE: Admin client bypasses RLS and is required here because:
+    // 1. This is an automated webhook endpoint (GitHub Actions) that needs to bypass RLS
+    // 2. Changelog entries are system-generated content, not user-generated
+    // 3. The endpoint is protected by Bearer token authentication (CHANGELOG_SYNC_TOKEN)
+    // 4. This is a trusted automation source, not user-facing functionality
+    // 5. RLS policies on changelog table may restrict access that automation needs
+
     const supabase = createSupabaseAdminClient();
 
     // Check if entry already exists
@@ -191,7 +275,12 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (existing) {
-      reqLogger.info('Changelog entry already exists', { slug, id: existing.id });
+      reqLogger.info('Changelog entry already exists', {
+        slug,
+        id: existing.id,
+        audit: true,
+        action: 'changelog_sync_check',
+      });
       return NextResponse.json(
         { success: true, message: 'Entry already exists', id: existing.id },
         {
@@ -206,17 +295,20 @@ export async function POST(request: NextRequest) {
     }
 
     // Prepare changelog entry
+    // Note: tldr and whatChanged are both optional, so we use the first available or empty string
+    const tldrValue = tldr ?? whatChanged ?? '';
+    const rawContentValue = rawContent ?? content;
     const changelogEntry: Database['public']['Tables']['changelog']['Insert'] = {
       title: version,
       slug,
-      tldr: tldr || whatChanged || '',
-      description: tldr || whatChanged || '',
-      content: content || rawContent || '',
-      raw_content: rawContent || content || '',
+      tldr: tldrValue,
+      description: tldrValue,
+      content: content,
+      raw_content: rawContentValue,
       release_date: date,
       published: true,
       featured: false,
-      source: 'automation',
+      source: Constants.public.Enums.changelog_source[2], // 'automation'
       changes,
       // SEO fields (optimized)
       seo_title: seoTitle, // SEO-optimized title (53-60 chars)
@@ -242,25 +334,51 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (insertError) {
-      reqLogger.error('Failed to insert changelog entry', normalizeError(insertError));
+      reqLogger.error('Failed to insert changelog entry', normalizeError(insertError), {
+        audit: true,
+        action: 'changelog_insert_failed',
+        slug,
+      });
       throw new Error(`Changelog insert failed: ${insertError.message}`);
     }
 
-    reqLogger.info('Changelog entry inserted', { id: changelogData.id, slug });
+    if (!changelogData) {
+      throw new Error('Changelog insert returned no data');
+    }
 
-    // Enqueue notification job
+    reqLogger.info('Changelog entry inserted', {
+      id: changelogData.id,
+      slug,
+      audit: true,
+      action: 'changelog_insert',
+    });
+
+    // Enqueue notification job (best-effort, non-fatal)
     const notificationJob = {
       entryId: changelogData.id,
       slug,
       title: version,
-      tldr: tldr || whatChanged || '',
-      sections: sections || {},
+      tldr: tldrValue,
+      sections: sections ?? {},
       releaseDate: date,
     };
 
-    await pgmqSend('changelog_notify', notificationJob);
-
-    reqLogger.info('Notification job enqueued', { entryId: changelogData.id });
+    try {
+      await pgmqSend('changelog_notify', notificationJob);
+      reqLogger.info('Notification job enqueued', {
+        entryId: changelogData.id,
+        audit: true,
+        action: 'notification_enqueued',
+      });
+    } catch (error) {
+      // Notification is best-effort - log error but don't fail the request
+      reqLogger.error('Failed to enqueue notification (non-fatal)', normalizeError(error), {
+        entryId: changelogData.id,
+        slug,
+        audit: true,
+        action: 'notification_enqueue_failed',
+      });
+    }
 
     return NextResponse.json(
       {

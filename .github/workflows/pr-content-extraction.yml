@@ -1,10 +1,17 @@
+# PR Content Extraction - Optimized for performance
+# - Only runs on PR open/edit (not on every push)
+# - Shallow git clone (fetch-depth: 1) - only need current commit
+# - Cancels in-progress runs when PR updated (saves resources)
+# - Uses github-script (no dependencies needed)
 name: PR Content Extraction
 
 on:
+  # Only trigger on PR open/edit (not on every push to PR branch)
   pull_request:
     types: [opened, edited]
     branches: [main]
 
+# Cancel in-progress runs when PR updated (prevents duplicate processing)
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -18,15 +25,10 @@ jobs:
       contents: read
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
         with:
-          fetch-depth: 1  # Shallow clone for speed
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '22'
+          fetch-depth: 1 # Shallow clone - only need current commit
+          install-deps: false # Don't install deps - we only use github-script
 
       - name: Extract plaintext submission
         id: extract

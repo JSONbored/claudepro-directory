@@ -16,11 +16,7 @@
 
 import { normalizeError } from '@heyclaude/shared-runtime';
 import { routeFluxRequest, handleOptions } from '@heyclaude/web-runtime/flux';
-import {
-  generateRequestId,
-  logger,
-  createErrorResponse,
-} from '@heyclaude/web-runtime/logging/server';
+import { logger, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
 import { type NextRequest } from 'next/server';
 
 interface RouteContext {
@@ -44,7 +40,6 @@ type HttpMethod = 'GET' | 'POST';
  * @see routeFluxRequest
  * @see normalizeError
  * @see createErrorResponse
- * @see generateRequestId
  * @see logger
  */
 async function handleFluxRequest(
@@ -52,11 +47,9 @@ async function handleFluxRequest(
   request: NextRequest,
   context: RouteContext
 ): Promise<Response> {
-  const requestId = generateRequestId();
   const params = await context.params;
   const route = `/api/flux/${params.path.join('/')}`;
   const reqLogger = logger.child({
-    requestId,
     operation: 'FluxAPI',
     route,
     method,
@@ -74,7 +67,7 @@ async function handleFluxRequest(
       route,
       operation: `FluxAPI:${method}`,
       method,
-      logContext: { requestId, path: params.path.join('/') },
+      logContext: { path: params.path.join('/') },
     });
   }
 }
@@ -87,7 +80,6 @@ async function handleFluxRequest(
  * @returns Response - The HTTP response produced by the Flux router for this GET request.
  * @see routeFluxRequest
  * @see handleFluxRequest
- * @see generateRequestId
  * @see logger
  */
 export async function GET(request: NextRequest, context: RouteContext) {
@@ -102,7 +94,6 @@ export async function GET(request: NextRequest, context: RouteContext) {
  * @returns The Response produced by the Flux router for the given path and request.
  *
  * @see routeFluxRequest
- * @see generateRequestId
  * @see logger
  */
 export async function POST(request: NextRequest, context: RouteContext) {

@@ -1,11 +1,9 @@
 import 'server-only';
-
 import { ChangelogService } from '@heyclaude/data-layer';
 import { type Database } from '@heyclaude/database-types';
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { logger } from '../logger.ts';
-import { generateRequestId } from '../utils/request-id.ts';
 
 import { QUERY_LIMITS } from './config/constants.ts';
 import './changelog.shared.ts';
@@ -39,6 +37,12 @@ function createEmptyOverview(
 /**
  * Get changelog overview
  * Uses 'use cache' to cache changelog overview. This data is public and same for all users.
+ * @param options
+ * @param options.category
+ * @param options.featuredOnly
+ * @param options.limit
+ * @param options.offset
+ * @param options.publishedOnly
  */
 export async function getChangelogOverview(
   options: {
@@ -63,9 +67,7 @@ export async function getChangelogOverview(
     cacheTag(`changelog-category-${category}`);
   }
 
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'getChangelogOverview',
     module: 'data/changelog',
   });
@@ -120,6 +122,7 @@ export async function getChangelogOverview(
  * Get changelog entry by slug
  * Uses 'use cache' to cache changelog entries. This data is public and same for all users.
  * Changelog entries change periodically, so we use the 'hours' cacheLife profile.
+ * @param slug
  */
 export async function getChangelogEntryBySlug(
   slug: string
@@ -134,9 +137,7 @@ export async function getChangelogEntryBySlug(
   cacheTag(CHANGELOG_TAG);
   cacheTag(`changelog-${slug}`);
 
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'getChangelogEntryBySlug',
     module: 'data/changelog',
   });

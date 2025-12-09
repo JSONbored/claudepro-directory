@@ -8,7 +8,7 @@ import {
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { Bookmark, Calendar } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { type HomepageContentItem } from '@heyclaude/web-runtime/types/component.types';
 import {
   UI_CLASSES,
@@ -22,11 +22,14 @@ import {
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import Link from 'next/link';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { RecentlySavedGrid } from '@/src/components/features/account/recently-saved-grid';
+
+import Loading from './loading';
 
 /**
  * Generate metadata for the account page at request time.
@@ -63,16 +66,11 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see RecentlySavedGrid
  */
 export default async function AccountDashboard() {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
-
-  // Generate single requestId for this page request (after connection() to allow Date.now())
-  const requestId = generateRequestId();
+  'use cache: private';
+  cacheLife('userProfile'); // 1min stale, 5min revalidate, 30min expire - User-specific data
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    requestId,
     operation: 'AccountDashboard',
     route: '/account',
     module: 'apps/web/src/app/account',
@@ -134,14 +132,12 @@ export default async function AccountDashboard() {
   return (
     <div className="space-y-6">
       {/* Dashboard header and stats - streams in Suspense */}
-      <Suspense fallback={<div className="space-y-6">Loading dashboard...</div>}>
+      <Suspense fallback={<Loading />}>
         <DashboardHeaderAndStats bundleData={bundleData} userLogger={userLogger} />
       </Suspense>
 
-      {/* Quick actions and content sections - streams in Suspense */}
-      <Suspense fallback={<div className="space-y-6">Loading content...</div>}>
-        <DashboardContent bundleData={bundleData} userLogger={userLogger} />
-      </Suspense>
+      {/* Quick actions and content sections - data already fetched in DashboardContent */}
+      <DashboardContent bundleData={bundleData} userLogger={userLogger} />
     </div>
   );
 }
@@ -155,7 +151,10 @@ export default async function AccountDashboard() {
  * When the dashboard data is missing it renders a fallback Card indicating the dashboard is unavailable.
  *
  * @param props.bundleData - The account dashboard bundle data (fetched once in parent component).
+ * @param root0
+ * @param root0.bundleData
  * @param props.userLogger - A request-scoped logger child used for structured logging.
+ * @param root0.userLogger
  * @returns The dashboard UI as JSX to be streamed to the client.
  *
  * @see QuickActionRow
@@ -167,6 +166,10 @@ async function DashboardHeaderAndStats({
   bundleData: NonNullable<Awaited<ReturnType<typeof getAccountDashboardBundle>>>;
   userLogger: ReturnType<typeof logger.child>;
 }) {
+  // Calculate timestamp - safe to use Date.now() here because parent function uses 'use cache: private'
+  // which ensures this runs at request time, not during prerendering
+  const currentTimestamp = Date.now();
+
   const dashboardData = bundleData.dashboard;
   const libraryData = bundleData.library;
 
@@ -197,8 +200,12 @@ async function DashboardHeaderAndStats({
 
   const { bookmark_count, profile } = dashboardData;
   const bookmarkCount = bookmark_count;
+  // Calculate account age in days - use timestamp calculated at request time (after connection())
+  // to ensure purity
   const accountAge = profile?.created_at
-    ? Math.floor((Date.now() - new Date(profile.created_at).getTime()) / (1000 * 60 * 60 * 24))
+    ? Math.floor(
+        (currentTimestamp - new Date(profile.created_at).getTime()) / (1000 * 60 * 60 * 24)
+      )
     : 0;
 
   const bookmarks = (libraryData?.bookmarks ?? []).filter(
@@ -302,7 +309,9 @@ async function DashboardHeaderAndStats({
  * a recently saved/bookmarks section and a recommendations section.
  *
  * @param bundleData - The account dashboard bundle data (fetched once in parent component).
+ * @param bundleData.bundleData
  * @param userLogger - Request-scoped logger preconfigured for the current user/session
+ * @param bundleData.userLogger
  * @returns The dashboard content element containing recent bookmarks and recommendations
  *
  * @see RecentlySavedSection
@@ -392,12 +401,14 @@ async function DashboardContent({
  * Displays a RecentlySavedGrid when items are available or an empty-state when none are provided.
  *
  * @param recentlySavedContent - Array of resolved content items to display.
+ * @param recentlySavedContent.recentlySavedContent
  * @param userLogger - Request-scoped logger already configured for the current user; used to record display metrics.
+ * @param recentlySavedContent.userLogger
  * @returns A card element containing either a grid of resolved content items or an empty state message.
  *
  * @see RecentlySavedGrid
  */
-async function RecentlySavedSection({
+function RecentlySavedSection({
   recentlySavedContent,
   userLogger,
 }: {
@@ -432,15 +443,19 @@ async function RecentlySavedSection({
  * This server component selects up to three homepage items that match tags extracted from the user's recent saved content,
  * excludes items that are already bookmarked, and renders a Card with links to explore each recommendation or explore similar items.
  *
+ * @param homepageData.bookmarkedSlugs
  * @param homepageData - The `homepage` payload from the account dashboard bundle; used to derive candidate recommendation items.
  * @param bookmarkedSlugs - A set of strings in the form `"{category}/{slug}"` representing the user's already-bookmarked items to exclude.
+ * @param homepageData.homepageData
  * @param recentlySavedContent - Resolved content items from recent bookmarks used to extract tags for recommendations.
+ * @param homepageData.recentlySavedContent
  * @param userLogger - A request-scoped logger used to record recommendation-generation metrics.
+ * @param homepageData.userLogger
  * @returns A Card element containing up to three recommended items (each with "Explore" and optional "Explore similar" links), or a fallback prompt encouraging the user to bookmark content.
  *
  * @see getAccountDashboardBundle
  */
-async function RecommendationsSection({
+function RecommendationsSection({
   homepageData,
   bookmarkedSlugs,
   recentlySavedContent,
@@ -573,9 +588,12 @@ async function RecommendationsSection({
 /**
  * Renders a compact action row with a title, description, and a right-aligned "Open" link.
  *
+ * @param title.description
+ * @param title.href
  * @param title - Short label for the action
  * @param description - One-line explanation of what the action does
  * @param href - Destination URL for the "Open" link
+ * @param title.title
  * @returns A JSX element representing the quick action row
  *
  * @see NavLink

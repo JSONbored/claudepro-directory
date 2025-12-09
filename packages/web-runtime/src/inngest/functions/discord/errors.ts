@@ -9,7 +9,7 @@ import { normalizeError, getEnvVar } from '@heyclaude/shared-runtime';
 
 import { inngest } from '../../client';
 import { pgmqRead, pgmqDelete } from '../../../supabase/pgmq-client';
-import { logger, generateRequestId, createWebAppContextWithId } from '../../../logging/server';
+import { logger, createWebAppContextWithId } from '../../../logging/server';
 
 const DISCORD_ERRORS_QUEUE = 'discord_errors';
 const BATCH_SIZE = 10;
@@ -63,9 +63,7 @@ export const processDiscordErrorsQueue = inngest.createFunction(
   },
   { cron: '*/15 * * * *' }, // Every 15 minutes (errors need faster alerts)
   async ({ step }) => {
-    const requestId = generateRequestId();
     const logContext = createWebAppContextWithId(
-      requestId,
       '/inngest/discord-errors',
       'processDiscordErrorsQueue'
     );

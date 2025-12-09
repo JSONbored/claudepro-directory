@@ -86,15 +86,18 @@ export function ReadProgress({
     restDelta: 0.0001,
   },
 }: ReadProgressProps) {
+  // ALL hooks must be called unconditionally before any early returns (Rules of Hooks)
   const [isMounted, setIsMounted] = useState(false);
   const [navHeight, setNavHeight] = useState(0);
   const [navWidth, setNavWidth] = useState(0);
   const [navLeft, setNavLeft] = useState(0);
+  const [currentProgress, setCurrentProgress] = useState(0);
 
   // Motion hooks must be called unconditionally (React rules)
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, springConfig);
 
+  // ALL useEffect hooks must be called unconditionally before any early returns (Rules of Hooks)
   // Dynamically measure navigation height
   useEffect(() => {
     setIsMounted(true);
@@ -137,7 +140,22 @@ export function ReadProgress({
     };
   }, [position]);
 
+  // Update progress value in effect to avoid hydration mismatch
+  // This effect must be called unconditionally (before any early returns)
+  useEffect(() => {
+    if (!isMounted) return;
+    
+    const updateProgress = () => {
+      setCurrentProgress(Math.round(scrollYProgress.get() * 100));
+    };
+    updateProgress();
+    // Subscribe to scroll progress changes
+    const unsubscribe = scrollYProgress.on('change', updateProgress);
+    return () => unsubscribe();
+  }, [scrollYProgress, isMounted]);
+
   // Don't render on server or before mount
+  // This prevents hydration mismatches by ensuring server and client both render null initially
   if (!isMounted) {
     return null;
   }
@@ -180,7 +198,7 @@ export function ReadProgress({
       aria-label="Reading progress"
       aria-valuemin={0}
       aria-valuemax={100}
-      aria-valuenow={Math.round(scrollYProgress.get() * 100)}
+      aria-valuenow={currentProgress}
       suppressHydrationWarning
     />
   );
@@ -223,3 +241,7 @@ export const ReadProgressPresets = {
     />
   ),
 } as const;
+
+// Explicit default export for better module resolution
+// This helps Turbopack properly resolve the client component reference
+export default ReadProgress;

@@ -70,7 +70,7 @@ describe('createRunRpc', () => {
 
       await runRpc('test_rpc', {}, {
         action: 'testAction',
-        meta: { source: 'api', requestId: 'req123' },
+        meta: { source: 'api' },
       });
 
       expect(mockClient.rpc).toHaveBeenCalled();

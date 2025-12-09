@@ -3,7 +3,7 @@
 import { z } from 'zod';
 import type { Database } from '@heyclaude/database-types';
 import { rateLimitedAction } from './safe-action.ts';
-import { logger, generateRequestId, createWebAppContextWithId } from '../logging/server.ts';
+import { logger, createWebAppContextWithId } from '../logging/server.ts';
 
 // Newsletter source enum from database types
 type NewsletterSource = Database['public']['Enums']['newsletter_source'];
@@ -61,8 +61,7 @@ export const subscribeNewsletterAction = rateLimitedAction
   .inputSchema(subscribeSchema)
   .metadata({ actionName: 'newsletter.subscribe', category: 'form' })
   .action(async ({ parsedInput }) => {
-    const requestId = generateRequestId();
-    const logContext = createWebAppContextWithId(requestId, 'action', 'subscribeNewsletterAction');
+    const logContext = createWebAppContextWithId('action', 'subscribeNewsletterAction');
     
     const normalizedEmail = parsedInput.email.toLowerCase().trim();
     
@@ -112,8 +111,7 @@ export const subscribeViaOAuthAction = rateLimitedAction
   .inputSchema(subscribeViaOAuthSchema)
   .metadata({ actionName: 'newsletter.subscribeViaOAuth', category: 'form' })
   .action(async ({ parsedInput }) => {
-    const requestId = generateRequestId();
-    const logContext = createWebAppContextWithId(requestId, 'action', 'subscribeViaOAuthAction');
+    const logContext = createWebAppContextWithId('action', 'subscribeViaOAuthAction');
     
     const normalizedEmail = parsedInput.email.toLowerCase().trim();
 

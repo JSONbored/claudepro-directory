@@ -4,7 +4,6 @@ import { env } from '@heyclaude/shared-runtime/schemas/env';
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { logger } from '../../logger.ts';
-import { generateRequestId } from '../../utils/request-id.ts';
 import { getContentCount } from '../content/index.ts';
 
 const DESCRIPTION_FALLBACK =
@@ -49,14 +48,12 @@ async function getVisitorStats(): Promise<VisitorStats> {
   cacheTag('marketing-visitor-stats');
 
   // Create request-scoped child logger - do not mutate shared logger in cached function
-  const requestId = generateRequestId();
   const requestLogger = logger.child({
-    requestId,
     operation: 'getVisitorStats',
     module: 'data/marketing/site',
   });
 
-  if (!(VERCEL_ANALYTICS_TOKEN && VERCEL_PROJECT_ID)) {
+  if (!VERCEL_ANALYTICS_TOKEN || !VERCEL_PROJECT_ID) {
     return HERO_DEFAULTS;
   }
 
@@ -80,12 +77,10 @@ async function getVisitorStats(): Promise<VisitorStats> {
     }
 
     const data = (await response.json()) as VercelAnalyticsResponse;
-    const result = {
+    return {
       monthlyVisitors: Number(data.visitors?.value ?? HERO_DEFAULTS.monthlyVisitors),
       monthlyPageViews: Number(data.pageViews?.value ?? HERO_DEFAULTS.monthlyPageViews),
     };
-
-    return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
@@ -114,9 +109,7 @@ export async function getContentDescriptionCopy(): Promise<string> {
   cacheTag('content-description');
 
   // Create request-scoped child logger to avoid race conditions
-  const requestId = generateRequestId();
   const requestLogger = logger.child({
-    requestId,
     operation: 'getContentDescriptionCopy',
     module: 'data/marketing/site',
   });
@@ -154,9 +147,7 @@ export async function getPartnerHeroStats(): Promise<PartnerHeroStats> {
   cacheTag('partner-hero-stats');
 
   // Create request-scoped child logger to avoid race conditions
-  const requestId = generateRequestId();
   const requestLogger = logger.child({
-    requestId,
     operation: 'getPartnerHeroStats',
     module: 'data/marketing/site',
   });

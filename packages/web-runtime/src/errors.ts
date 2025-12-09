@@ -73,9 +73,9 @@ export function logActionFailure(
 ): Error {
   const normalized = normalizeError(error);
   
-  // Note: requestId is added by logger for server-side errors
-  // For client-side errors, we don't need requestId (client components)
-  // Server actions will have requestId from their context
+  // Note: Errors are logged with operation and context
+  // Client-side errors (client components)
+  // Server actions will have context from their logger
   logger.error(`[Action] ${actionName} failed`, normalized, {
     ...sanitizeContext(context),
   });

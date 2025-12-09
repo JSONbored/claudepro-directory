@@ -5,7 +5,7 @@ import {
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { BarChart, Eye, MousePointer, TrendingUp } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   UI_CLASSES,
   UnifiedBadge,
@@ -17,9 +17,12 @@ import {
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import Link from 'next/link';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
+
+import Loading from './loading';
 
 /**
  * Dynamic Rendering Required
@@ -50,6 +53,9 @@ export async function generateMetadata(): Promise<Metadata> {
  *   - `active`: boolean or null indicating whether the sponsorship is enabled
  *   - `start_date`: ISO date string for the start of the sponsorship period
  *   - `end_date`: ISO date string for the end of the sponsorship period
+ * @param sponsorship.start_date
+ * @param sponsorship.end_date
+ * @param sponsorship.active
  * @param now - Reference Date used to evaluate whether the sponsorship is within its active range
  * @returns `true` if the sponsorship's `active` flag is `true` and `now` is between `start_date` and `end_date` (inclusive), `false` otherwise.
  *
@@ -84,23 +90,18 @@ function isSponsorshipActive(
  * @see isSponsorshipActive
  */
 export default async function SponsorshipsPage() {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
-
-  // Generate single requestId for this page request (after connection() to allow Date.now())
-  const requestId = generateRequestId();
+  'use cache: private';
+  cacheLife('userProfile'); // 1min stale, 5min revalidate, 30min expire - User-specific data
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    requestId,
     operation: 'SponsorshipsPage',
     route: '/account/sponsorships',
     module: 'apps/web/src/app/account/sponsorships',
   });
 
   return (
-    <Suspense fallback={<div className="space-y-6">Loading sponsorships...</div>}>
+    <Suspense fallback={<Loading />}>
       <SponsorshipsPageContent reqLogger={reqLogger} />
     </Suspense>
   );
@@ -116,6 +117,7 @@ export default async function SponsorshipsPage() {
  * - or a list of sponsorship cards (with status, metrics, progress, and analytics links) when sponsorships exist.
  *
  * @param reqLogger - A request-scoped logger (used to create a user-scoped child logger for per-request telemetry).
+ * @param reqLogger.reqLogger
  * @returns The server-rendered React element for the sponsorships page content.
  *
  * @see getAuthenticatedUser
@@ -192,7 +194,7 @@ async function SponsorshipsPageContent({
         </div>
         <Card>
           <CardContent className="text-muted-foreground py-12 text-center">
-            You haven't launched any sponsorship campaigns yet.
+            You haven&apos;t launched any sponsorship campaigns yet.
           </CardContent>
         </Card>
       </div>

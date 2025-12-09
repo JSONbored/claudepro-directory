@@ -4,30 +4,38 @@
  */
 
 import 'server-only';
-
 import { SeoService } from '@heyclaude/data-layer';
 import { type Json } from '@heyclaude/database-types';
 import { buildSecurityHeaders, sanitizeRoute, serializeJsonLd } from '@heyclaude/shared-runtime';
-import {
-  generateRequestId,
-  logger,
-  normalizeError,
-  createErrorResponse,
-} from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
 import {
   createSupabaseAnonClient,
   badRequestResponse,
   getOnlyCorsHeaders,
   buildCacheHeaders,
 } from '@heyclaude/web-runtime/server';
+import { cacheLife } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
 
 const CORS = getOnlyCorsHeaders;
 
+/**
+ * Cached helper function to generate SEO metadata.
+ * Route and include parameters become part of the cache key, so different routes have different cache entries.
+ * @param route
+ * @param include
+ */
+async function getCachedSeoMetadata(route: string, include: string) {
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
+
+  const supabase = createSupabaseAnonClient();
+  const service = new SeoService(supabase);
+  return service.generateMetadata({ p_route: route, p_include: include });
+}
+
 export async function GET(request: NextRequest) {
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'SeoAPI',
     route: '/api/seo',
     method: 'GET',
@@ -50,9 +58,7 @@ export async function GET(request: NextRequest) {
 
     reqLogger.info('SEO request received', { route, include });
 
-    const supabase = createSupabaseAnonClient();
-    const service = new SeoService(supabase);
-    const data = await service.generateMetadata({ p_route: route, p_include: include });
+    const data = await getCachedSeoMetadata(route, include);
     const dataObj = data as Record<string, unknown>;
     const hasMetadata =
       'metadata' in dataObj &&

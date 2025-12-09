@@ -6,7 +6,7 @@ import { env } from '@heyclaude/shared-runtime/schemas/env';
 import { refreshProfileFromOAuthServer, validateNextParameter } from '@heyclaude/web-runtime';
 import { subscribeViaOAuthAction } from '@heyclaude/web-runtime/actions';
 import { SECURITY_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { createSupabaseServerClient } from '@heyclaude/web-runtime/server';
 import { type NextRequest, NextResponse } from 'next/server';
 
@@ -33,15 +33,12 @@ import { type NextRequest, NextResponse } from 'next/server';
  * @see SECURITY_CONFIG
  */
 export async function GET(request: NextRequest) {
-  // Generate single requestId for this route request
-  const requestId = generateRequestId();
   const operation = 'AuthCallback';
   const route = '/auth/callback';
   const modulePath = 'apps/web/src/app/(auth)/auth/callback/route';
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    requestId,
     operation,
     route,
     module: modulePath,

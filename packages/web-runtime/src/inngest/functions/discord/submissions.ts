@@ -10,7 +10,7 @@ import { normalizeError, getEnvVar } from '@heyclaude/shared-runtime';
 
 import { inngest } from '../../client';
 import { pgmqRead, pgmqDelete, type PgmqMessage } from '../../../supabase/pgmq-client';
-import { logger, generateRequestId, createWebAppContextWithId } from '../../../logging/server';
+import { logger, createWebAppContextWithId } from '../../../logging/server';
 
 type ContentSubmission = DatabaseGenerated['public']['Tables']['content_submissions']['Row'];
 
@@ -117,8 +117,7 @@ export const processDiscordSubmissionsQueue = inngest.createFunction(
   { cron: '*/30 * * * *' }, // Every 30 minutes
   async ({ step }) => {
     const startTime = Date.now();
-    const requestId = generateRequestId();
-    const logContext = createWebAppContextWithId(requestId, '/inngest/discord/submissions', 'processDiscordSubmissionsQueue');
+    const logContext = createWebAppContextWithId('/inngest/discord/submissions', 'processDiscordSubmissionsQueue');
 
     logger.info('Discord submissions queue processing started', logContext);
 

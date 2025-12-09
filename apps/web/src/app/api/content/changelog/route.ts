@@ -4,29 +4,34 @@
  */
 
 import 'server-only';
-
 import { ContentService } from '@heyclaude/data-layer';
 import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
-import {
-  generateRequestId,
-  logger,
-  normalizeError,
-  createErrorResponse,
-} from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
 import {
   createSupabaseAnonClient,
   badRequestResponse,
   getOnlyCorsHeaders,
   buildCacheHeaders,
 } from '@heyclaude/web-runtime/server';
+import { cacheLife } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
 
 const CORS = getOnlyCorsHeaders;
 
+/**
+ * Cached helper function to fetch changelog LLMs.txt content.
+ */
+async function getCachedChangelogLlmsTxt(): Promise<null | string> {
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
+
+  const supabase = createSupabaseAnonClient();
+  const service = new ContentService(supabase);
+  return service.getChangelogLlmsTxt();
+}
+
 export async function GET(request: NextRequest) {
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'ChangelogIndexAPI',
     route: '/api/content/changelog',
     method: 'GET',
@@ -42,9 +47,7 @@ export async function GET(request: NextRequest) {
 
     reqLogger.info('Changelog index request received', { format });
 
-    const supabase = createSupabaseAnonClient();
-    const service = new ContentService(supabase);
-    const data = await service.getChangelogLlmsTxt();
+    const data = await getCachedChangelogLlmsTxt();
 
     if (!data) {
       reqLogger.warn('Changelog LLMs.txt not found');

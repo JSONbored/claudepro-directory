@@ -1,5 +1,4 @@
 import 'server-only';
-
 import { SearchService } from '@heyclaude/data-layer';
 import {
   Constants,
@@ -14,7 +13,6 @@ import {
   validateQueryString,
 } from '@heyclaude/shared-runtime';
 import {
-  generateRequestId,
   logger,
   createErrorResponse,
   toLogContextValue,
@@ -28,6 +26,7 @@ import {
   handleOptionsRequest,
   enqueuePulseEventServer,
 } from '@heyclaude/web-runtime/server';
+import { cacheLife } from 'next/cache';
 import { type NextRequest } from 'next/server';
 
 const CORS = getWithAuthCorsHeaders;
@@ -82,9 +81,7 @@ type SearchResultRow = Record<string, unknown>;
  *   On validation failure or server error, returns a JSON error response with an appropriate status code.
  */
 export async function GET(request: NextRequest) {
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'SearchAPI',
     route: '/api/search',
     method: 'GET',
@@ -224,12 +221,8 @@ export async function GET(request: NextRequest) {
     filters: toLogContextValue(filtersPayload),
   });
 
-  const supabase = createSupabaseAnonClient();
-  const searchService = new SearchService(supabase);
-
   try {
-    const { results, totalCount } = await executeSearch({
-      searchService,
+    const { results, totalCount } = await getCachedSearchResults({
       searchType,
       query,
       categories: validatedCategories,
@@ -312,7 +305,6 @@ export async function GET(request: NextRequest) {
       operation: 'SearchAPI',
       method: 'GET',
       logContext: {
-        requestId,
         searchType,
       },
     });
@@ -361,8 +353,54 @@ function validateEnumValue<T extends string>(
 }
 
 /**
+ * Cached helper function to execute search queries.
+ * All parameters become part of the cache key, so different searches have different cache entries.
+ * @param params
+ * @param params.authors
+ * @param params.categories
+ * @param params.entities
+ * @param params.jobCategory
+ * @param params.jobEmployment
+ * @param params.jobExperience
+ * @param params.jobRemote
+ * @param params.limit
+ * @param params.offset
+ * @param params.query
+ * @param params.searchType
+ * @param params.sort
+ * @param params.tags
+ */
+async function getCachedSearchResults(params: {
+  authors?: string[] | undefined;
+  categories?: string[] | undefined;
+  entities?: string[] | undefined;
+  jobCategory?: JobCategory | undefined;
+  jobEmployment?: JobEmployment | undefined;
+  jobExperience?: JobExperience | undefined;
+  jobRemote?: boolean | undefined;
+  limit: number;
+  offset: number;
+  query: string;
+  searchType: SearchType;
+  sort: SortType;
+  tags?: string[] | undefined;
+}): Promise<{ results: SearchResultRow[]; totalCount: number }> {
+  'use cache';
+  cacheLife('quarter'); // 15min stale, 1hr revalidate, 1 day expire - Search results change frequently
+
+  const supabase = createSupabaseAnonClient();
+  const searchService = new SearchService(supabase);
+
+  return executeSearch({
+    searchService,
+    ...params,
+  });
+}
+
+/**
  * Dispatches the search to the appropriate backend ('jobs', 'unified', or 'content') and returns matching rows with a total count.
  *
+ * @param params
  * @param params.authors - Optional list of author slugs to filter content results.
  * @param params.categories - Optional list of content categories to filter content results.
  * @param params.entities - Optional list of entity types to include for unified searches; when omitted or empty, defaults to DEFAULT_ENTITIES.

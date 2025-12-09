@@ -148,6 +148,12 @@ export async function handleGetContentByTag(
       logic,
       category: category || 'all',
       count: formattedItems.length,
+      limit,
+      pagination: {
+        total: formattedItems.length,
+        limit,
+        hasMore: false, // Tags doesn't support pagination (uses limit only)
+      },
     },
   };
 }

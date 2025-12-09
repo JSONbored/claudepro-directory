@@ -4,28 +4,33 @@
  */
 
 import 'server-only';
-
 import { ContentService } from '@heyclaude/data-layer';
-import {
-  generateRequestId,
-  logger,
-  normalizeError,
-  createErrorResponse,
-} from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
 import {
   createSupabaseAnonClient,
   jsonResponse,
   getOnlyCorsHeaders,
   buildCacheHeaders,
 } from '@heyclaude/web-runtime/server';
+import { cacheLife } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
 
 const CORS = getOnlyCorsHeaders;
 
+/**
+ * Cached helper function to fetch category configs.
+ */
+async function getCachedCategoryConfigs() {
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
+
+  const supabase = createSupabaseAnonClient();
+  const service = new ContentService(supabase);
+  return service.getCategoryConfigs();
+}
+
 export async function GET(_request: NextRequest) {
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'CategoryConfigsAPI',
     route: '/api/content/category-configs',
     method: 'GET',
@@ -34,9 +39,7 @@ export async function GET(_request: NextRequest) {
   try {
     reqLogger.info('Category configs request received');
 
-    const supabase = createSupabaseAnonClient();
-    const service = new ContentService(supabase);
-    const data = await service.getCategoryConfigs();
+    const data = await getCachedCategoryConfigs();
 
     reqLogger.info('Category configs retrieved', {
       count: Array.isArray(data) ? data.length : 'unknown',

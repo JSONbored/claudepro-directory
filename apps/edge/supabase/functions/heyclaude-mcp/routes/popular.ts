@@ -97,6 +97,12 @@ export async function handleGetPopular(supabase: SupabaseClient<Database>, input
       items,
       category: category || 'all',
       count: items.length,
+      limit,
+      pagination: {
+        total: items.length,
+        limit,
+        hasMore: false, // Popular doesn't support pagination
+      },
     },
   };
 }

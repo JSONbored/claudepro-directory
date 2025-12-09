@@ -15,7 +15,7 @@ import { escapeHtml, getEnvVar, normalizeError } from '@heyclaude/shared-runtime
 import { inngest } from '../../client';
 import { sendEmail } from '../../../integrations/resend';
 import { JOBS_FROM } from '../../../email/config/email-config';
-import { logger, generateRequestId, createWebAppContextWithId } from '../../../logging/server';
+import { logger, createWebAppContextWithId } from '../../../logging/server';
 
 // Base URL for links - configurable via environment
 const BASE_URL = getEnvVar('NEXT_PUBLIC_SITE_URL') || 'https://claudepro.directory';
@@ -95,8 +95,7 @@ export const sendJobLifecycleEmail = inngest.createFunction(
   { event: 'email/job-lifecycle' },
   async ({ event, step }) => {
     const startTime = Date.now();
-    const requestId = generateRequestId();
-    const logContext = createWebAppContextWithId(requestId, '/inngest/email/job-lifecycle', 'sendJobLifecycleEmail');
+    const logContext = createWebAppContextWithId('/inngest/email/job-lifecycle', 'sendJobLifecycleEmail');
 
     const { action, employerEmail, jobId, payload, jobTitle, company } = event.data;
 

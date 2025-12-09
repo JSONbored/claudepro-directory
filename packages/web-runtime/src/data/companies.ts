@@ -7,7 +7,6 @@ import { cacheLife, cacheTag } from 'next/cache';
 import { searchCompaniesUnified } from '../edge/search-client.ts';
 import { logger } from '../logger.ts';
 import { createSupabaseServerClient } from '../supabase/server.ts';
-import { generateRequestId } from '../utils/request-id.ts';
 
 import { normalizeRpcResult } from './content-helpers.ts';
 
@@ -27,6 +26,7 @@ type GetCompanyAdminProfileReturn =
  * - Minimum 30 seconds stale time (required for runtime prefetch)
  * - Per-company cache keys (companyId in cache tag)
  * - Not prerendered (runs at request time)
+ * @param companyId
  */
 export async function getCompanyAdminProfile(
   companyId: string
@@ -41,9 +41,7 @@ export async function getCompanyAdminProfile(
   cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`company-admin-${companyId}`);
 
-  const requestId = generateRequestId();
   const requestLogger = logger.child({
-    requestId,
     operation: 'getCompanyAdminProfile',
     module: 'data/companies',
   });
@@ -83,6 +81,7 @@ export async function getCompanyAdminProfile(
  * Get company profile by slug
  * Uses 'use cache' to cache company profiles. This data is public and same for all users.
  * Company profiles change periodically, so we use the 'half' cacheLife profile.
+ * @param slug
  */
 export async function getCompanyProfile(
   slug: string
@@ -98,9 +97,7 @@ export async function getCompanyProfile(
   cacheTag(JOBS_CATEGORY);
   cacheTag(`company-${slug}`);
 
-  const requestId = generateRequestId();
   const requestLogger = logger.child({
-    requestId,
     operation: 'getCompanyProfile',
     module: 'data/companies',
   });
@@ -137,6 +134,8 @@ export async function getCompanyProfile(
  * Get companies list
  * Uses 'use cache' to cache companies lists. This data is public and same for all users.
  * Company lists change periodically, so we use the 'half' cacheLife profile.
+ * @param limit
+ * @param offset
  */
 export async function getCompaniesList(
   limit = 50,
@@ -152,9 +151,7 @@ export async function getCompaniesList(
   cacheTag('companies');
   cacheTag(JOBS_CATEGORY);
 
-  const requestId = generateRequestId();
   const requestLogger = logger.child({
-    requestId,
     operation: 'getCompaniesList',
     module: 'data/companies',
   });
@@ -204,23 +201,19 @@ async function fetchCompanySearchResults(
   query: string,
   limit: number
 ): Promise<CompanySearchResult[]> {
-  const requestId = generateRequestId();
   const requestLogger = logger.child({
-    requestId,
     operation: 'fetchCompanySearchResults',
     module: 'data/companies',
   });
 
   try {
     const results = await searchCompaniesUnified(query, limit);
-    const result = results.map((entity) => ({
+    return results.map((entity) => ({
       id: entity.id,
       name: entity.title || entity.slug || '',
       slug: entity.slug,
       description: entity.description,
     }));
-
-    return result;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string =
@@ -241,6 +234,8 @@ async function fetchCompanySearchResults(
  * Uses 'use cache' to cache search results. Query and limit become part of the cache key.
  * This data is public and same for all users with the same query, so it can be cached.
  * Company search results change frequently, so we use the 'quarter' cacheLife profile.
+ * @param query
+ * @param limit
  */
 export async function searchCompanies(query: string, limit = 10): Promise<CompanySearchResult[]> {
   'use cache';

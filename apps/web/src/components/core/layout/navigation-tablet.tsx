@@ -5,6 +5,8 @@
  * Uses Popover for dropdowns (click-to-open, better for touch devices)
  */
 
+'use client';
+
 import type { Database } from '@heyclaude/database-types';
 import { PRIMARY_NAVIGATION } from '@heyclaude/web-runtime/config/navigation';
 import { ChevronDown, PlusCircle } from '@heyclaude/web-runtime/icons';
@@ -12,6 +14,7 @@ import {
   ANIMATION_CONSTANTS,
   DIMENSIONS,
   POSITION_PATTERNS,
+  STATE_PATTERNS,
   UI_CLASSES,
   PrefetchLink,
   Button,
@@ -21,8 +24,9 @@ import {
   UnifiedBadge,
   cn,
 } from '@heyclaude/web-runtime/ui';
-import { motion } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
 /**
  * Get category from href for badge display
@@ -41,39 +45,39 @@ function getCategoryFromHref(href: string): Database['public']['Enums']['content
 }
 
 /**
- * Get icon background color classes based on link href/category
- * Returns colored background classes for icons instead of monochromatic
+ * Get icon background gradient classes based on link href/category
+ * Returns gradient background classes for icons instead of flat colors
  */
 function getIconBackgroundClass(href: string): string {
-  // Category-based colors
-  if (href.includes('/agents')) return 'bg-purple-500/10 text-purple-400 group-hover/item:bg-purple-500/20';
-  if (href.includes('/mcp')) return 'bg-cyan-500/10 text-cyan-400 group-hover/item:bg-cyan-500/20';
-  if (href.includes('/commands')) return 'bg-blue-500/10 text-blue-400 group-hover/item:bg-blue-500/20';
-  if (href.includes('/rules') || href.includes('/claude.md')) return 'bg-amber-500/10 text-amber-400 group-hover/item:bg-amber-500/20';
-  if (href.includes('/hooks')) return 'bg-green-500/10 text-green-400 group-hover/item:bg-green-500/20';
-  if (href.includes('/statuslines')) return 'bg-teal-500/10 text-teal-400 group-hover/item:bg-teal-500/20';
-  if (href.includes('/collections')) return 'bg-indigo-500/10 text-indigo-400 group-hover/item:bg-indigo-500/20';
-  if (href.includes('/skills')) return 'bg-pink-500/10 text-pink-400 group-hover/item:bg-pink-500/20';
-  if (href.includes('/guides')) return 'bg-violet-500/10 text-violet-400 group-hover/item:bg-violet-500/20';
-  if (href.includes('/jobs')) return 'bg-orange-500/10 text-orange-400 group-hover/item:bg-orange-500/20';
-  if (href.includes('/changelog')) return 'bg-slate-500/10 text-slate-400 group-hover/item:bg-slate-500/20';
+  // Category-based gradients
+  if (href.includes('/agents')) return 'bg-gradient-to-br from-purple-500/20 to-purple-600/10 text-purple-400 group-hover/item:from-purple-500/30 group-hover/item:to-purple-600/20';
+  if (href.includes('/mcp')) return 'bg-gradient-to-br from-cyan-500/20 to-cyan-600/10 text-cyan-400 group-hover/item:from-cyan-500/30 group-hover/item:to-cyan-600/20';
+  if (href.includes('/commands')) return 'bg-gradient-to-br from-blue-500/20 to-blue-600/10 text-blue-400 group-hover/item:from-blue-500/30 group-hover/item:to-blue-600/20';
+  if (href.includes('/rules') || href.includes('/claude.md')) return 'bg-gradient-to-br from-amber-500/20 to-amber-600/10 text-amber-400 group-hover/item:from-amber-500/30 group-hover/item:to-amber-600/20';
+  if (href.includes('/hooks')) return 'bg-gradient-to-br from-green-500/20 to-green-600/10 text-green-400 group-hover/item:from-green-500/30 group-hover/item:to-green-600/20';
+  if (href.includes('/statuslines')) return 'bg-gradient-to-br from-teal-500/20 to-teal-600/10 text-teal-400 group-hover/item:from-teal-500/30 group-hover/item:to-teal-600/20';
+  if (href.includes('/collections')) return 'bg-gradient-to-br from-indigo-500/20 to-indigo-600/10 text-indigo-400 group-hover/item:from-indigo-500/30 group-hover/item:to-indigo-600/20';
+  if (href.includes('/skills')) return 'bg-gradient-to-br from-pink-500/20 to-pink-600/10 text-pink-400 group-hover/item:from-pink-500/30 group-hover/item:to-pink-600/20';
+  if (href.includes('/guides')) return 'bg-gradient-to-br from-violet-500/20 to-violet-600/10 text-violet-400 group-hover/item:from-violet-500/30 group-hover/item:to-violet-600/20';
+  if (href.includes('/jobs')) return 'bg-gradient-to-br from-orange-500/20 to-orange-600/10 text-orange-400 group-hover/item:from-orange-500/30 group-hover/item:to-orange-600/20';
+  if (href.includes('/changelog')) return 'bg-gradient-to-br from-slate-500/20 to-slate-600/10 text-slate-400 group-hover/item:from-slate-500/30 group-hover/item:to-slate-600/20';
   
-  // Feature-based colors
-  if (href.includes('/search')) return 'bg-blue-500/10 text-blue-400 group-hover/item:bg-blue-500/20';
-  if (href.includes('/trending')) return 'bg-orange-500/10 text-orange-400 group-hover/item:bg-orange-500/20';
-  if (href.includes('/help')) return 'bg-green-500/10 text-green-400 group-hover/item:bg-green-500/20';
-  if (href.includes('/tools')) return 'bg-purple-500/10 text-purple-400 group-hover/item:bg-purple-500/20';
-  if (href.includes('/submit')) return 'bg-accent/10 text-accent group-hover/item:bg-accent/20';
-  if (href.includes('/community')) return 'bg-blue-500/10 text-blue-400 group-hover/item:bg-blue-500/20';
-  if (href.includes('/companies')) return 'bg-indigo-500/10 text-indigo-400 group-hover/item:bg-indigo-500/20';
-  if (href.includes('/partner')) return 'bg-amber-500/10 text-amber-400 group-hover/item:bg-amber-500/20';
-  if (href.includes('/consulting')) return 'bg-orange-500/10 text-orange-400 group-hover/item:bg-orange-500/20';
-  if (href.includes('/contact')) return 'bg-blue-500/10 text-blue-400 group-hover/item:bg-blue-500/20';
-  if (href.includes('/rss') || href.includes('/feeds')) return 'bg-orange-500/10 text-orange-400 group-hover/item:bg-orange-500/20';
-  if (href.includes('/llms.txt')) return 'bg-purple-500/10 text-purple-400 group-hover/item:bg-purple-500/20';
+  // Feature-based gradients
+  if (href.includes('/search')) return 'bg-gradient-to-br from-blue-500/20 to-blue-600/10 text-blue-400 group-hover/item:from-blue-500/30 group-hover/item:to-blue-600/20';
+  if (href.includes('/trending')) return 'bg-gradient-to-br from-orange-500/20 to-orange-600/10 text-orange-400 group-hover/item:from-orange-500/30 group-hover/item:to-orange-600/20';
+  if (href.includes('/help')) return 'bg-gradient-to-br from-green-500/20 to-green-600/10 text-green-400 group-hover/item:from-green-500/30 group-hover/item:to-green-600/20';
+  if (href.includes('/tools')) return 'bg-gradient-to-br from-purple-500/20 to-purple-600/10 text-purple-400 group-hover/item:from-purple-500/30 group-hover/item:to-purple-600/20';
+  if (href.includes('/submit')) return 'bg-gradient-to-br from-accent/20 to-accent/10 text-accent group-hover/item:from-accent/30 group-hover/item:to-accent/20';
+  if (href.includes('/community')) return 'bg-gradient-to-br from-blue-500/20 to-blue-600/10 text-blue-400 group-hover/item:from-blue-500/30 group-hover/item:to-blue-600/20';
+  if (href.includes('/companies')) return 'bg-gradient-to-br from-indigo-500/20 to-indigo-600/10 text-indigo-400 group-hover/item:from-indigo-500/30 group-hover/item:to-indigo-600/20';
+  if (href.includes('/partner')) return 'bg-gradient-to-br from-amber-500/20 to-amber-600/10 text-amber-400 group-hover/item:from-amber-500/30 group-hover/item:to-amber-600/20';
+  if (href.includes('/consulting')) return 'bg-gradient-to-br from-orange-500/20 to-orange-600/10 text-orange-400 group-hover/item:from-orange-500/30 group-hover/item:to-orange-600/20';
+  if (href.includes('/contact')) return 'bg-gradient-to-br from-blue-500/20 to-blue-600/10 text-blue-400 group-hover/item:from-blue-500/30 group-hover/item:to-blue-600/20';
+  if (href.includes('/rss') || href.includes('/feeds')) return 'bg-gradient-to-br from-orange-500/20 to-orange-600/10 text-orange-400 group-hover/item:from-orange-500/30 group-hover/item:to-orange-600/20';
+  if (href.includes('/llms.txt')) return 'bg-gradient-to-br from-purple-500/20 to-purple-600/10 text-purple-400 group-hover/item:from-purple-500/30 group-hover/item:to-purple-600/20';
   
-  // Default
-  return 'bg-muted/50 text-muted-foreground group-hover/item:bg-accent/10 group-hover/item:text-accent';
+  // Default gradient
+  return 'bg-gradient-to-br from-muted/50 to-muted/30 text-muted-foreground group-hover/item:from-accent/20 group-hover/item:to-accent/10 group-hover/item:text-accent';
 }
 
 interface NavLinkProps {
@@ -130,16 +134,16 @@ export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTable
       aria-label="Tablet navigation"
     >
       <div className={`flex ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} px-2`}>
-        {PRIMARY_NAVIGATION.slice(0, 5).map((link, index) => {
+        {PRIMARY_NAVIGATION.slice(0, 5).map((link, linkIndex) => {
           // Special handling for Jobs dropdown with enhanced design
           if (link.label === 'Jobs' && link.sections) {
             return (
               <motion.div
-                key={link.href}
+                key={`nav-${linkIndex}-${link.label}`}
                 className="snap-center"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.05, duration: 0.3 }}
+                transition={{ delay: linkIndex * 0.05, duration: 0.3 }}
               >
                 <Popover>
                   <PopoverTrigger asChild>
@@ -162,7 +166,7 @@ export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTable
                       <ChevronDown className="ml-1 h-2.5 w-2.5 opacity-50" />
                     </button>
                   </PopoverTrigger>
-                  <PopoverContent align="start" className="w-[420px] p-4 overflow-hidden" sideOffset={8}>
+                  <PopoverContent align="start" className={cn(DIMENSIONS.NAV_DROPDOWN_TABLET, UI_CLASSES.PADDING_DEFAULT, 'overflow-hidden')} sideOffset={8}>
                     <div className="space-y-4">
                       {/* Post a Job Hero Card */}
                       <Link
@@ -189,24 +193,29 @@ export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTable
 
                       {/* Quick Links */}
                       <div className="space-y-1">
-                        {link.sections[0]?.links.map((child) => {
+                        {link.sections[0]?.links.map((child, childIndex) => {
                           const ChildIcon = child.icon;
                               const iconBgClass = getIconBackgroundClass(child.href);
                           return (
                             <Link
-                              key={child.href}
+                              key={`${link.label}-quick-${childIndex}-${child.label}`}
                               href={child.href}
                               prefetch
-                              className="group/item block rounded-lg px-3 py-2.5 text-sm leading-none no-underline outline-none transition-all hover:bg-accent/5 focus:bg-accent/5 overflow-hidden"
+                              className="group/item block rounded-lg px-3 py-2.5 text-sm leading-none no-underline outline-none transition-all hover:bg-accent/5 hover:scale-[1.02] hover:shadow-sm focus:bg-accent/5 overflow-hidden"
                             >
                               <div className="flex items-start gap-3">
                                 {ChildIcon && (
-                                  <div className={cn(
-                                    'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all',
-                                    iconBgClass
-                                  )}>
+                                  <motion.div
+                                    className={cn(
+                                      'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200',
+                                      iconBgClass
+                                    )}
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    transition={{ type: 'spring', stiffness: 400 }}
+                                  >
                                     <ChildIcon className="h-4 w-4" />
-                                  </div>
+                                  </motion.div>
                                 )}
                                 <div className="flex-1 min-w-0">
                                   <div className="font-medium">{child.label}</div>
@@ -232,11 +241,11 @@ export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTable
           if (link.label === 'Configs' && link.sections) {
             return (
               <motion.div
-                key={link.href}
+                key={`nav-${linkIndex}-${link.label}`}
                 className="snap-center"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.05, duration: 0.3 }}
+                transition={{ delay: linkIndex * 0.05, duration: 0.3 }}
               >
                 <Popover>
                   <PopoverTrigger asChild>
@@ -259,76 +268,95 @@ export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTable
                       <ChevronDown className="ml-1 h-2.5 w-2.5 opacity-50" />
                     </button>
                   </PopoverTrigger>
-                  <PopoverContent align="start" className="w-[420px] p-4 overflow-hidden" sideOffset={8}>
-                    <ul className="grid gap-3">
-                      {/* Hero card */}
-                      <li>
-                        <Link
-                          href="#"
-                          className="from-muted/50 to-muted flex w-full flex-col justify-end rounded-md bg-gradient-to-b p-4 no-underline outline-none select-none focus:shadow-md transition-colors hover:bg-muted/80"
-                        >
-                          <div className="mb-2 text-base font-semibold">{link.label}</div>
-                          <p className="text-muted-foreground text-sm leading-tight">
-                            {link.description || 'Browse all configuration types for Claude Code'}
-                          </p>
-                        </Link>
-                      </li>
+                  <PopoverContent align="start" className={cn(DIMENSIONS.NAV_DROPDOWN_TABLET, UI_CLASSES.PADDING_DEFAULT, 'overflow-hidden')} sideOffset={8}>
+                    <ul className={cn('grid', UI_CLASSES.SPACE_DEFAULT)}>
+                      {/* Hero card - only show if href is not "#" */}
+                      {link.href !== '#' && (
+                        <li key={`${link.label}-hero`}>
+                          <Link
+                            href={link.href}
+                            className="from-muted/50 to-muted flex w-full flex-col justify-end rounded-md bg-gradient-to-b p-4 no-underline outline-none select-none focus:shadow-md transition-colors hover:bg-muted/80"
+                          >
+                            <div className="mb-2 text-base font-semibold">{link.label}</div>
+                            <p className="text-muted-foreground text-sm leading-tight">
+                              {link.description || 'Browse all configuration types for Claude Code'}
+                            </p>
+                          </Link>
+                        </li>
+                      )}
                       {/* Sections */}
-                      {link.sections.map((section) => (
-                        <li key={section.heading}>
+                      {link.sections.map((section, sectionIndex) => (
+                        <li key={`${link.label}-section-${sectionIndex}-${section.heading}`}>
                           <div className="mb-2">
                             <p className="text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-wider px-2">
                               {section.heading}
                             </p>
                           </div>
-                          <div className="space-y-1">
-                            {section.links.map((child) => {
+                          <div className={UI_CLASSES.SPACE_Y_TIGHT}>
+                            {section.links.map((child, childIndex) => {
                               const ChildIcon = child.icon;
                               const iconBgClass = getIconBackgroundClass(child.href);
                               return (
-                                <Link
-                                  key={child.href}
-                                  href={child.href}
-                                  prefetch
-                                  className="group/item block rounded-lg px-3 py-2.5 text-sm leading-none no-underline outline-none transition-all hover:bg-accent/5 focus:bg-accent/5"
+                                <motion.div
+                                  key={`${link.label}-section-${sectionIndex}-${section.heading}-${child.label}`}
+                                  initial={{ opacity: 0, y: 4 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{
+                                    type: 'spring',
+                                    stiffness: 300,
+                                    damping: 25,
+                                    delay: childIndex * 0.03,
+                                  }}
                                 >
-                                  <div className="flex items-start gap-3">
-                                    {ChildIcon && (
-                                      <div className={cn(
-                                        'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all',
-                                        iconBgClass
-                                      )}>
-                                        <ChildIcon className="h-4 w-4" />
-                                      </div>
-                                    )}
-                                    <div className="flex-1 min-w-0">
-                                      <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                                        <div className="font-medium break-words word-break-break-word">{child.label}</div>
-                                        {(() => {
-                                          const category = getCategoryFromHref(child.href);
-                                          return category ? (
-                                            <UnifiedBadge 
-                                              variant="category" 
-                                              category={category} 
-                                              className="shrink-0 text-[10px] px-1.5 py-0" 
-                                            />
-                                          ) : null;
-                                        })()}
-                                        {child.isNew && (
-                                          <UnifiedBadge variant="new-badge" badgeVariant="default" className="shrink-0" />
-                                        )}
-                                        {child.external && (
-                                          <span className="text-muted-foreground text-xs shrink-0 ml-auto">↗</span>
-                                        )}
-                                      </div>
-                                      {child.description && (
-                                        <p className="text-muted-foreground text-xs leading-snug break-words word-break-break-word line-clamp-2">
-                                          {child.description}
-                                        </p>
+                                  <Link
+                                    href={child.href}
+                                    prefetch
+                                    className={cn('group/item block rounded-lg px-3 py-2.5 text-sm leading-none no-underline outline-none transition-all', STATE_PATTERNS.HOVER_BG_STRONG, 'hover:scale-[1.02] hover:shadow-sm', STATE_PATTERNS.FOCUS_RING)}
+                                  >
+                                    <div className="flex items-start gap-3">
+                                      {ChildIcon && (
+                                        <motion.div
+                                          className={cn(
+                                            'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200',
+                                            iconBgClass
+                                          )}
+                                          whileHover={{ scale: 1.1 }}
+                                          whileTap={{ scale: 0.95 }}
+                                          transition={{ type: 'spring', stiffness: 400 }}
+                                        >
+                                          <ChildIcon className="h-4 w-4" />
+                                        </motion.div>
                                       )}
+                                      <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                                          <div className="font-medium break-words word-break-break-word">{child.label}</div>
+                                          {(() => {
+                                            const category = getCategoryFromHref(child.href);
+                                            return category ? (
+                                              <UnifiedBadge 
+                                                variant="category" 
+                                                category={category} 
+                                                href={null}
+                                                className="shrink-0 text-[10px] px-1.5 py-0" 
+                                              />
+                                            ) : null;
+                                          })()}
+                                          {child.isNew && (
+                                            <UnifiedBadge variant="new-badge" badgeVariant="default" className="shrink-0" />
+                                          )}
+                                          {child.external && (
+                                            <span className="text-muted-foreground text-xs shrink-0 ml-auto">↗</span>
+                                          )}
+                                        </div>
+                                        {child.description && (
+                                          <p className="text-muted-foreground text-xs leading-snug break-words word-break-break-word line-clamp-2">
+                                            {child.description}
+                                          </p>
+                                        )}
+                                      </div>
                                     </div>
-                                  </div>
-                                </Link>
+                                  </Link>
+                                </motion.div>
                               );
                             })}
                           </div>
@@ -346,15 +374,25 @@ export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTable
             (link.label === 'Discover' || link.label === 'Resources' || link.label === 'Contribute') &&
             link.sections
           ) {
+            const [isOpen, setIsOpen] = useState(false);
+            const [animationKey, setAnimationKey] = useState(0);
+
+            useEffect(() => {
+              if (isOpen) {
+                // Force remount of animated children when popover opens
+                setAnimationKey((prev) => prev + 1);
+              }
+            }, [isOpen]);
+
             return (
               <motion.div
-                key={link.href}
+                key={`nav-${linkIndex}-${link.label}`}
                 className="snap-center"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.05, duration: 0.3 }}
+                transition={{ delay: linkIndex * 0.05, duration: 0.3 }}
               >
-                <Popover>
+                <Popover onOpenChange={setIsOpen}>
                   <PopoverTrigger asChild>
                     <button
                       type="button"
@@ -375,69 +413,97 @@ export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTable
                       <ChevronDown className="ml-1 h-2.5 w-2.5 opacity-50" />
                     </button>
                   </PopoverTrigger>
-                  <PopoverContent align="start" className="w-[420px] p-4 overflow-hidden" sideOffset={8}>
-                    <ul className="grid gap-3">
-                      {link.sections.map((section) => (
-                        <li key={section.heading}>
-                          <div className="mb-2">
-                            <p className="text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-wider px-2">
-                              {section.heading}
-                            </p>
-                          </div>
-                          <div className="space-y-1">
-                            {section.links.map((child) => {
-                              const ChildIcon = child.icon;
-                              const iconBgClass = getIconBackgroundClass(child.href);
-                              return (
-                                <Link
-                                  key={child.href}
-                                  href={child.href}
-                                  prefetch
-                                  className="group/item block rounded-lg px-3 py-2.5 text-sm leading-none no-underline outline-none transition-all hover:bg-accent/5 focus:bg-accent/5"
-                                >
-                                  <div className="flex items-start gap-3">
-                                    {ChildIcon && (
-                                      <div className={cn(
-                                        'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all',
-                                        iconBgClass
-                                      )}>
-                                        <ChildIcon className="h-4 w-4" />
-                                      </div>
-                                    )}
-                                        <div className="flex-1 min-w-0">
-                                          <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                                            <div className="font-medium break-words">{child.label}</div>
-                                            {(() => {
-                                              const category = getCategoryFromHref(child.href);
-                                              return category ? (
-                                                <UnifiedBadge 
-                                                  variant="category" 
-                                                  category={category} 
-                                                  className="shrink-0 text-[10px] px-1.5 py-0" 
-                                                />
-                                              ) : null;
-                                            })()}
-                                            {child.isNew && (
-                                              <UnifiedBadge variant="new-badge" badgeVariant="default" className="shrink-0" />
-                                            )}
-                                            {child.external && (
-                                              <span className="text-muted-foreground text-xs shrink-0 ml-auto">↗</span>
+                  <PopoverContent align="start" className={cn(DIMENSIONS.NAV_DROPDOWN_TABLET, UI_CLASSES.PADDING_DEFAULT, 'overflow-hidden')} sideOffset={8}>
+                    <AnimatePresence mode="wait">
+                      {isOpen && (
+                        <motion.ul
+                          key={animationKey}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.1 }}
+                          className={cn('grid', UI_CLASSES.SPACE_DEFAULT)}
+                        >
+                          {link.sections.map((section, sectionIndex) => (
+                            <li key={`${link.label}-section-${sectionIndex}-${section.heading}`}>
+                              <div className="mb-2">
+                                <p className="text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-wider px-2">
+                                  {section.heading}
+                                </p>
+                              </div>
+                              <div className={UI_CLASSES.SPACE_Y_TIGHT}>
+                                {section.links.map((child, childIndex) => {
+                                  const ChildIcon = child.icon;
+                                  const iconBgClass = getIconBackgroundClass(child.href);
+                                  return (
+                                    <motion.div
+                                      key={`${animationKey}-${link.label}-${section.heading}-${child.label}`}
+                                      initial={{ opacity: 0, y: 4 }}
+                                      animate={{ opacity: 1, y: 0 }}
+                                      transition={{
+                                        type: 'spring',
+                                        stiffness: 300,
+                                        damping: 25,
+                                        delay: childIndex * 0.03,
+                                      }}
+                                    >
+                                      <Link
+                                        href={child.href}
+                                        prefetch
+                                        className={cn('group/item block rounded-lg px-3 py-2.5 text-sm leading-none no-underline outline-none transition-all', STATE_PATTERNS.HOVER_BG_STRONG, 'hover:scale-[1.02] hover:shadow-sm', STATE_PATTERNS.FOCUS_RING)}
+                                      >
+                                        <div className="flex items-start gap-3">
+                                          {ChildIcon && (
+                                            <motion.div
+                                              className={cn(
+                                                'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200',
+                                                iconBgClass
+                                              )}
+                                              whileHover={{ scale: 1.1 }}
+                                              whileTap={{ scale: 0.95 }}
+                                              transition={{ type: 'spring', stiffness: 400 }}
+                                            >
+                                              <ChildIcon className="h-4 w-4" />
+                                            </motion.div>
+                                          )}
+                                          <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                                              <div className="font-medium break-words word-break-break-word">{child.label}</div>
+                                              {(() => {
+                                                const category = getCategoryFromHref(child.href);
+                                                return category ? (
+                                                  <UnifiedBadge 
+                                                    variant="category" 
+                                                    category={category} 
+                                                    href={null}
+                                                    className="shrink-0 text-[10px] px-1.5 py-0" 
+                                                  />
+                                                ) : null;
+                                              })()}
+                                              {child.isNew && (
+                                                <UnifiedBadge variant="new-badge" badgeVariant="default" className="shrink-0" />
+                                              )}
+                                              {child.external && (
+                                                <span className="text-muted-foreground text-xs shrink-0 ml-auto">↗</span>
+                                              )}
+                                            </div>
+                                            {child.description && (
+                                              <p className="text-muted-foreground text-xs leading-snug break-words word-break-break-word line-clamp-2">
+                                                {child.description}
+                                              </p>
                                             )}
                                           </div>
-                                          {child.description && (
-                                            <p className="text-muted-foreground text-xs leading-snug break-words line-clamp-2 overflow-hidden">
-                                              {child.description}
-                                            </p>
-                                          )}
                                         </div>
-                                  </div>
-                                </Link>
-                              );
-                            })}
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
+                                      </Link>
+                                    </motion.div>
+                                  );
+                                })}
+                              </div>
+                            </li>
+                          ))}
+                        </motion.ul>
+                      )}
+                    </AnimatePresence>
                   </PopoverContent>
                 </Popover>
               </motion.div>
@@ -451,11 +517,11 @@ export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTable
           if (hasDropdown) {
             return (
               <motion.div
-                key={link.href}
+                key={`nav-${linkIndex}-${link.label}`}
                 className="snap-center"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.05, duration: 0.3 }}
+                transition={{ delay: linkIndex * 0.05, duration: 0.3 }}
               >
                 <Popover>
                   <PopoverTrigger asChild>
@@ -481,9 +547,9 @@ export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTable
                   <PopoverContent align="start" className="w-56 p-3" sideOffset={8}>
                     {link.sections ? (
                       // Organized sections with headers
-                      <div className="space-y-4">
+                      <div className={UI_CLASSES.SPACE_Y_COMFORTABLE}>
                         {link.sections.map((section, sectionIndex) => (
-                          <div key={section.heading}>
+                          <div key={`${link.label}-section-${sectionIndex}-${section.heading}`}>
                             {/* Section header */}
                             <div className="px-2 py-1 mb-1.5">
                               <p className="text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-wider">
@@ -491,41 +557,65 @@ export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTable
                               </p>
                             </div>
                             {/* Section items */}
-                            <div className="space-y-1">
-                              {section.links.map((child) => {
+                            <div className={UI_CLASSES.SPACE_Y_TIGHT}>
+                              {section.links.map((child, childIndex) => {
                                 const ChildIcon = child.icon;
                                 const iconBgClass = getIconBackgroundClass(child.href);
                                 return (
-                                  <Link
-                                    key={child.href}
-                                    href={child.href}
-                                    prefetch
-                                    className="group/item block rounded-lg px-3 py-2.5 text-sm leading-none no-underline outline-none transition-all hover:bg-accent/5 focus:bg-accent/5"
+                                  <motion.div
+                                    key={`${link.label}-section-${sectionIndex}-${section.heading}-${child.label}`}
+                                    initial={{ opacity: 0, y: 4 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{
+                                      duration: 0.2,
+                                      delay: childIndex * 0.03,
+                                      ease: [0.25, 0.1, 0.25, 1],
+                                    }}
                                   >
-                                    <div className="flex items-start gap-3">
-                                      {ChildIcon && (
-                                        <div className={cn(
-                                          'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all',
-                                          iconBgClass
-                                        )}>
-                                          <ChildIcon className="h-4 w-4" />
-                                        </div>
-                                      )}
-                                      <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-2 mb-0.5">
-                                          <div className="font-medium">{child.label}</div>
-                                          {child.isNew && (
-                                            <UnifiedBadge variant="new-badge" badgeVariant="default" className="shrink-0" />
+                                    <Link
+                                      href={child.href}
+                                      prefetch
+                                      className={cn('group/item block rounded-lg px-3 py-2.5 text-sm leading-none no-underline outline-none transition-all', STATE_PATTERNS.HOVER_BG_STRONG, 'hover:scale-[1.02] hover:shadow-sm', STATE_PATTERNS.FOCUS_RING)}
+                                    >
+                                      <div className="flex items-start gap-3">
+                                        {ChildIcon && (
+                                          <div className={cn(
+                                            'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all',
+                                            iconBgClass
+                                          )}>
+                                            <ChildIcon className="h-4 w-4" />
+                                          </div>
+                                        )}
+                                        <div className="flex-1 min-w-0">
+                                          <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                                            <div className="font-medium break-words word-break-break-word">{child.label}</div>
+                                            {(() => {
+                                              const category = getCategoryFromHref(child.href);
+                                              return category ? (
+                                                <UnifiedBadge 
+                                                  variant="category" 
+                                                  category={category} 
+                                                  href={null}
+                                                  className="shrink-0 text-[10px] px-1.5 py-0" 
+                                                />
+                                              ) : null;
+                                            })()}
+                                            {child.isNew && (
+                                              <UnifiedBadge variant="new-badge" badgeVariant="default" className="shrink-0" />
+                                            )}
+                                            {child.external && (
+                                              <span className="text-muted-foreground text-xs shrink-0 ml-auto">↗</span>
+                                            )}
+                                          </div>
+                                          {child.description && (
+                                            <p className="text-muted-foreground text-xs leading-snug break-words word-break-break-word line-clamp-2">
+                                              {child.description}
+                                            </p>
                                           )}
                                         </div>
-                                        {child.description && (
-                                          <p className="text-muted-foreground line-clamp-2 text-xs leading-snug">
-                                            {child.description}
-                                          </p>
-                                        )}
                                       </div>
-                                    </div>
-                                  </Link>
+                                    </Link>
+                                  </motion.div>
                                 );
                               })}
                             </div>
@@ -539,17 +629,24 @@ export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTable
                     ) : link.children ? (
                       // Fallback: flat list for links without sections
                       <div className="space-y-0.5">
-                        {link.children.map((child) => {
+                        {link.children.map((child, childIndex) => {
                           const ChildIcon = child.icon;
                           return (
                             <Link
-                              key={child.href}
+                              key={`${link.label}-child-${childIndex}-${child.label}`}
                               href={child.href}
                               prefetch
                               className="flex items-center gap-2 px-2 py-1.5 text-sm rounded-md hover:bg-accent/5 transition-colors group/item"
                             >
                               {ChildIcon && (
-                                <ChildIcon className="h-4 w-4 text-muted-foreground group-hover/item:text-foreground transition-colors" />
+                                <motion.div
+                                  className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg transition-all duration-200 opacity-70 group-hover/item:opacity-100"
+                                  whileHover={{ scale: 1.1 }}
+                                  whileTap={{ scale: 0.95 }}
+                                  transition={{ type: 'spring', stiffness: 400 }}
+                                >
+                                  <ChildIcon className="h-4 w-4 text-muted-foreground group-hover/item:text-foreground transition-colors" />
+                                </motion.div>
                               )}
                               <span className="flex-1">{child.label}</span>
                               {child.isNew && (
@@ -569,11 +666,11 @@ export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTable
           // Render regular link for items without dropdowns
           return (
             <motion.div
-              key={link.href}
+              key={`nav-${linkIndex}-${link.label}`}
               className="snap-center"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.05, duration: 0.3 }}
+              transition={{ delay: linkIndex * 0.05, duration: 0.3 }}
             >
               <NavLink
                 href={link.href}
