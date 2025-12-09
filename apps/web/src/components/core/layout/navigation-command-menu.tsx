@@ -85,7 +85,11 @@ export function NavigationCommandMenu({
 
   const handleSelect = (path: string) => {
     setOpen(false);
-    router.push(path);
+    // Strip query parameters added for uniqueness (section/group params)
+    const cleanPath = path.split('?')[0];
+    if (cleanPath) {
+      router.push(cleanPath);
+    }
   };
 
   // Dynamic icon mapper

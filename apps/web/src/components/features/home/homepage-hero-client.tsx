@@ -17,7 +17,7 @@ import { useHeroSearchConnection } from './hero-search-connection';
 const RollingText = dynamicImport(
   () => import('@heyclaude/web-runtime/ui').then((mod) => ({ default: mod.RollingText })),
   {
-    loading: () => <span className="text-accent">enthusiasts</span>,
+    loading: () => <span style={{ color: 'var(--claude-orange)' }}>enthusiasts</span>,
   }
 );
 
@@ -64,13 +64,14 @@ function HomepageHeroClientComponent({ memberCount }: HomepageHeroClientProps) {
             <RollingText
               words={['enthusiasts', 'developers', 'power users', 'beginners', 'builders']}
               duration={3000}
-              className="text-accent block"
+              className="block"
+              style={{ color: 'var(--claude-orange)' }}
             />
           </h1>
 
           <p className="text-muted-foreground mx-auto max-w-2xl text-base leading-relaxed sm:text-lg lg:text-xl">
             Join{' '}
-            <NumberTicker value={memberCount} className="text-accent font-semibold" suffix="+" />{' '}
+            <NumberTicker value={memberCount} className="font-semibold" style={{ color: 'var(--claude-orange)' }} suffix="+" />{' '}
             members discovering and sharing the best Claude configurations. Explore expert rules,
             powerful MCP servers, specialized agents, automation hooks, and connect with the
             community building the future of AI.

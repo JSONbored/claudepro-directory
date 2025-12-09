@@ -27,6 +27,22 @@ export interface RecentlyViewedItemInput {
 }
 
 /**
+ * Mapping from singular RecentlyViewedCategory to plural content_category enum value.
+ * This is the correct mapping for database lookups (not route strings).
+ * Single source of truth for valid categories.
+ */
+const RECENTLY_VIEWED_TO_CONTENT_CATEGORY: Record<RecentlyViewedCategory, Database['public']['Enums']['content_category']> = {
+  agent: 'agents',
+  mcp: 'mcp',
+  hook: 'hooks',
+  command: 'commands',
+  rule: 'rules',
+  statusline: 'statuslines',
+  skill: 'skills',
+  job: 'jobs',
+} as const;
+
+/**
  * Maps singular RecentlyViewedCategory to plural content_category enum value.
  * This is the correct mapping for database lookups (not route strings).
  * 
@@ -36,17 +52,7 @@ export interface RecentlyViewedItemInput {
 function mapRecentlyViewedToContentCategory(
   category: RecentlyViewedCategory
 ): Database['public']['Enums']['content_category'] | null {
-  const mapping: Record<RecentlyViewedCategory, Database['public']['Enums']['content_category']> = {
-    agent: 'agents',
-    mcp: 'mcp',
-    hook: 'hooks',
-    command: 'commands',
-    rule: 'rules',
-    statusline: 'statuslines',
-    skill: 'skills',
-    job: 'jobs',
-  };
-  return mapping[category] ?? null;
+  return RECENTLY_VIEWED_TO_CONTENT_CATEGORY[category] ?? null;
 }
 
 /**
@@ -81,16 +87,8 @@ export async function fetchRecentlyViewedItems(
       items.map(async (item) => {
         try {
           // Validate item.category is a valid RecentlyViewedCategory
-          const validCategories: RecentlyViewedCategory[] = [
-            'agent',
-            'mcp',
-            'hook',
-            'command',
-            'rule',
-            'statusline',
-            'skill',
-            'job',
-          ];
+          // Derive valid categories from the mapping to ensure single source of truth
+          const validCategories = Object.keys(RECENTLY_VIEWED_TO_CONTENT_CATEGORY) as RecentlyViewedCategory[];
           
           if (!validCategories.includes(item.category as RecentlyViewedCategory)) {
             reqLogger.warn(

@@ -534,8 +534,11 @@ function convertLinkToCommandItems(link: NavigationLink): Array<{
   if (link.sections) {
     for (const section of link.sections) {
       for (const childLink of section.links) {
+        // Create unique path by including section context to avoid duplicate keys
+        // Use section heading + path to ensure uniqueness
+        const uniquePath = childLink.href === '#' ? childLink.href : `${childLink.href}?section=${encodeURIComponent(section.heading)}`;
         items.push({
-          path: childLink.href,
+          path: uniquePath,
           title: childLink.label,
           description: childLink.description ?? null,
           icon_name: getIconName(childLink.icon),
@@ -608,7 +611,12 @@ export function getCommandMenuNavigationData(): {
   for (const group of SECONDARY_NAVIGATION) {
     for (const link of group.links) {
       const items = convertLinkToCommandItems(link);
-      secondary.push(...items);
+      // Add group context to paths to ensure uniqueness
+      const itemsWithContext = items.map(item => ({
+        ...item,
+        path: item.path === '#' ? item.path : `${item.path}?group=${encodeURIComponent(group.heading)}`,
+      }));
+      secondary.push(...itemsWithContext);
     }
   }
 

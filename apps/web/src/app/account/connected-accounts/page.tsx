@@ -59,6 +59,29 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see ROUTES.LOGIN
  */
 export default async function ConnectedAccountsPage() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <ConnectedAccountsPageContent />
+    </Suspense>
+  );
+}
+
+/**
+ * Renders the Connected Accounts page content, enforcing authentication, fetching the user's
+ * OAuth identities, and presenting either a sign-in prompt or the connected accounts UI.
+ *
+ * Performs server-side authentication via getAuthenticatedUser and retrieves identity data with
+ * getUserIdentitiesData; on fetch failure it falls back to an empty identities list so the page
+ * can still render.
+ *
+ * @returns A React element containing either a sign-in prompt when no user is authenticated or
+ *   the Connected Accounts UI populated with the user's OAuth identities.
+ *
+ * @see getAuthenticatedUser
+ * @see getUserIdentitiesData
+ * @see ConnectedAccountsClient
+ */
+async function ConnectedAccountsPageContent() {
   'use cache: private';
   cacheLife('userProfile'); // 1min stale, 5min revalidate, 30min expire - User-specific data
 
@@ -73,36 +96,6 @@ export default async function ConnectedAccountsPage() {
     module: modulePath,
   });
 
-  return (
-    <Suspense fallback={<Loading />}>
-      <ConnectedAccountsPageContent reqLogger={reqLogger} />
-    </Suspense>
-  );
-}
-
-/**
- * Renders the Connected Accounts page content, enforcing authentication, fetching the user's
- * OAuth identities, and presenting either a sign-in prompt or the connected accounts UI.
- *
- * Performs server-side authentication via getAuthenticatedUser and retrieves identity data with
- * getUserIdentitiesData; on fetch failure it falls back to an empty identities list so the page
- * can still render.
- *
- * @param reqLogger - A request-scoped logger (created with `logger.child`) used for structured,
- *   redacted logging throughout authentication, data fetching, and render phases.
- * @param reqLogger.reqLogger
- * @returns A React element containing either a sign-in prompt when no user is authenticated or
- *   the Connected Accounts UI populated with the user's OAuth identities.
- *
- * @see getAuthenticatedUser
- * @see getUserIdentitiesData
- * @see ConnectedAccountsClient
- */
-async function ConnectedAccountsPageContent({
-  reqLogger,
-}: {
-  reqLogger: ReturnType<typeof logger.child>;
-}) {
   // Section: Authentication
   const { user } = await getAuthenticatedUser({ context: 'ConnectedAccountsPage' });
 

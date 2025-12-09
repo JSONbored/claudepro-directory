@@ -393,7 +393,7 @@ async function getCachedSearchResults(params: {
   tags?: string[] | undefined;
 }): Promise<{ results: SearchResultRow[]; totalCount: number }> {
   'use cache';
-  cacheLife('quarter'); // 15min stale, 1hr revalidate, 1 day expire - Search results change frequently
+  cacheLife('quarter'); // 15min stale, 5min revalidate, 2hr expire - Search results change frequently
 
   const supabase = createSupabaseAnonClient();
   const searchService = new SearchService(supabase);

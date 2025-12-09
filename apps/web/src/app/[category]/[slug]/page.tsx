@@ -5,7 +5,7 @@
  *
  * ISR: 2 hours (7200s) - Detail pages change less frequently than list pages
  */
-import { Constants, type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
 import { ensureStringArray, isValidCategory } from '@heyclaude/web-runtime/core';
 import { type RecentlyViewedCategory } from '@heyclaude/web-runtime/hooks';
@@ -114,14 +114,14 @@ export async function generateStaticParams() {
 // Map route categories (plural) to RecentlyViewedCategory (singular)
 // Use explicit string keys instead of fragile array indexing to prevent breakage if enum order changes
 const CATEGORY_TO_RECENTLY_VIEWED: Record<string, RecentlyViewedCategory> = {
-  [Constants.public.Enums.content_category[0]]: 'agent', // 'agents'
-  [Constants.public.Enums.content_category[1]]: 'command', // 'commands'
-  [Constants.public.Enums.content_category[2]]: 'hook', // 'hooks'
-  [Constants.public.Enums.content_category[3]]: 'mcp', // 'mcp'
-  [Constants.public.Enums.content_category[4]]: 'rule', // 'rules'
-  [Constants.public.Enums.content_category[5]]: 'statusline', // 'statuslines'
-  [Constants.public.Enums.content_category[6]]: 'skill', // 'skills'
-  [Constants.public.Enums.content_category[7]]: 'job', // 'jobs'
+  agents: 'agent',
+  mcp: 'mcp',
+  rules: 'rule',
+  commands: 'command',
+  hooks: 'hook',
+  statuslines: 'statusline',
+  skills: 'skill',
+  jobs: 'job',
   job: 'job', // Alias for consistency
 } as const;
 
@@ -216,19 +216,6 @@ export default async function DetailPage({
   });
 
   // Note: category and slug are already available from await params above
-
-  // Handle placeholder slugs (if any remain from old generateStaticParams)
-  if (slug === '__placeholder__') {
-    reqLogger.warn(
-      {
-        section: 'data-fetch',
-        category,
-        slug,
-      },
-      'DetailPage: placeholder slug detected, returning 404'
-    );
-    notFound();
-  }
 
   // Validate category early (before Suspense boundary)
   if (!isValidCategory(category)) {

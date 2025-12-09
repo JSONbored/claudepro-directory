@@ -26,8 +26,8 @@ const CORS = getOnlyCorsHeaders;
  * appropriate security, CORS, and cache headers.
  *
  * @param request - The incoming NextRequest for this API route
- * @param params - An object with a Promise that resolves to route params; must include `slug`
- * @param params.params
+ * @param context - An object with a Promise that resolves to route params; must include `slug`
+ * @param context.params - Promise resolving to route parameters containing `slug: string`
  * @returns A NextResponse containing the plaintext LLMs-formatted changelog entry on success, or a 400/standardized error response on failure
  *
  * @see ContentService#getChangelogEntryLlmsTxt

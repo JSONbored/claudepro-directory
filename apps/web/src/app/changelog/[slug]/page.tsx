@@ -213,18 +213,6 @@ async function ChangelogEntryPageContent({
   // Create route-specific logger
   const routeLogger = reqLogger.child({ route });
 
-  // Handle placeholder slugs (if any remain from old generateStaticParams)
-  if (slug === '__placeholder__') {
-    routeLogger.warn(
-      {
-        section: 'data-fetch',
-        slug,
-      },
-      'ChangelogEntryPage: placeholder slug detected, returning 404'
-    );
-    notFound();
-  }
-
   let entry: Awaited<ReturnType<typeof getChangelogEntryBySlug>>;
   try {
     entry = await getChangelogEntryBySlug(slug);

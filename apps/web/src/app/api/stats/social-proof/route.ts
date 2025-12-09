@@ -11,7 +11,7 @@
  * Caching: 5 minutes via Cache-Control headers (s-maxage=300)
  */
 // Constants import removed - not used
-import { logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError, createErrorResponse, toLogContextValue } from '@heyclaude/web-runtime/logging/server';
 import { createSupabaseAdminClient } from '@heyclaude/web-runtime/server';
 import { cacheLife } from 'next/cache';
 import { connection, NextResponse } from 'next/server';
@@ -65,27 +65,83 @@ async function getCachedSocialProofData(): Promise<{
     status: string;
   }
 
+  // Log errors from Promise.allSettled results
+  if (recentResult.status === 'rejected') {
+    logger.error(
+      {
+        query: 'stats:social-proof:recent',
+        error: toLogContextValue(recentResult.reason),
+      },
+      'stats:social-proof:recent query failed'
+    );
+  }
+  if (monthResult.status === 'rejected') {
+    logger.error(
+      {
+        query: 'stats:social-proof:month',
+        error: toLogContextValue(monthResult.reason),
+      },
+      'stats:social-proof:month query failed'
+    );
+  }
+  if (contentResult.status === 'rejected') {
+    logger.error(
+      {
+        query: 'stats:social-proof:content',
+        error: toLogContextValue(contentResult.reason),
+      },
+      'stats:social-proof:content query failed'
+    );
+  }
+
   let recentSubmissions: null | SubmissionRow[] = null;
   if (recentResult.status === 'fulfilled') {
     const response = recentResult.value as { data: null | SubmissionRow[]; error: unknown };
+    if (response.error) {
+      logger.error(
+        {
+          query: 'stats:social-proof:recent',
+          error: toLogContextValue(response.error),
+        },
+        'stats:social-proof:recent query returned error'
+      );
+    }
     recentSubmissions = response.data;
   }
 
   let monthSubmissions: null | StatusRow[] = null;
   if (monthResult.status === 'fulfilled') {
     const response = monthResult.value as { data: null | StatusRow[]; error: unknown };
+    if (response.error) {
+      logger.error(
+        {
+          query: 'stats:social-proof:month',
+          error: toLogContextValue(response.error),
+        },
+        'stats:social-proof:month query returned error'
+      );
+    }
     monthSubmissions = response.data;
   }
 
   let contentCount: null | number = null;
   if (contentResult.status === 'fulfilled') {
     const response = contentResult.value as { count: null | number; error: unknown };
+    if (response.error) {
+      logger.error(
+        {
+          query: 'stats:social-proof:content',
+          error: toLogContextValue(response.error),
+        },
+        'stats:social-proof:content query returned error'
+      );
+    }
     contentCount = response.count;
   }
 
   const submissionCount = recentSubmissions?.length ?? 0;
   const total = monthSubmissions?.length ?? 0;
-  const approved = monthSubmissions?.filter((s) => s.status === 'merged').length ?? 0;
+  const approved = monthSubmissions ? monthSubmissions.filter((s) => s.status === 'merged').length : 0;
   const successRate = total > 0 ? Math.round((approved / total) * 100) : null;
 
   // Get top contributors this week (unique authors with most submissions)
@@ -187,7 +243,7 @@ export async function GET() {
     );
 
     // Generate ETag from timestamp and stats hash for conditional requests
-    const statsHash = `${stats.submissions}-${stats.successRate}-${stats.totalUsers}`;
+    const statsHash = `${stats.contributors.count}-${stats.submissions}-${stats.successRate}-${stats.totalUsers}`;
     const etag = `"${Buffer.from(`${timestamp}-${statsHash}`).toString('base64').slice(0, 16)}"`;
 
     // Return stats with ETag and Last-Modified headers

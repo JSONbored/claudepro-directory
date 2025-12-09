@@ -24,7 +24,7 @@ const CORS = getOnlyCorsHeaders;
  * @returns {unknown} Description of return value*/
 async function getCachedChangelogLlmsTxt(): Promise<null | string> {
   'use cache';
-  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
+  cacheLife({ stale: 86400, revalidate: 21600, expire: 2592000 }); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
   const supabase = createSupabaseAnonClient();
   const service = new ContentService(supabase);

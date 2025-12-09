@@ -20,18 +20,14 @@
 
 import { cn } from '../../utils.ts';
 import { useSpring } from 'motion/react';
+import * as React from 'react';
 import { memo, useEffect, useRef, useState } from 'react';
 
-interface NumberTickerProps {
+interface NumberTickerProps extends Omit<React.HTMLAttributes<HTMLSpanElement>, 'children'> {
   /**
    * Target value to animate to
    */
   value: number;
-
-  /**
-   * Custom class name
-   */
-  className?: string;
 
   /**
    * Delay before animation starts (ms)
@@ -63,6 +59,8 @@ function NumberTickerComponent({
   decimalPlaces = 0,
   prefix = '',
   suffix = '',
+  style,
+  ...props
 }: NumberTickerProps) {
   // Create spring-animated value - called at top level
   const spring = useSpring(0, { stiffness: 100, damping: 30 });
@@ -109,7 +107,9 @@ function NumberTickerComponent({
       style={{
         // Prevent CLS by reserving space for final value
         minWidth: `${String(value).length + prefix.length + suffix.length}ch`,
+        ...style,
       }}
+      {...props}
     >
       {displayValue}
     </span>

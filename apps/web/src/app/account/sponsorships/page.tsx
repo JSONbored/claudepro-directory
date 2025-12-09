@@ -136,7 +136,6 @@ async function SponsorshipsPageContent({
     reqLogger.warn(
       {
         section: 'data-fetch',
-        timestamp: new Date().toISOString(),
       },
       'SponsorshipsPage: unauthenticated access attempt'
     );
@@ -208,7 +207,7 @@ async function SponsorshipsPageContent({
     );
   }
 
-  const orderedSponsorships = [...sponsorships].toSorted(
+  const orderedSponsorships = [...sponsorships].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   );
 

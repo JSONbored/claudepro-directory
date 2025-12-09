@@ -265,7 +265,8 @@ function CategoryHeroShell({
 
   return (
     <section
-      className="border-border bg-code border-b opacity-30 backdrop-blur-sm"
+      className="border-border border-b backdrop-blur-sm"
+      style={{ backgroundColor: 'rgba(var(--code), 0.3)' }}
       aria-labelledby="category-title"
     >
       <div className="container mx-auto px-4 py-20">

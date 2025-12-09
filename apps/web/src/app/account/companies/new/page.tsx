@@ -45,6 +45,25 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see logger
  */
 export default async function NewCompanyPage() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <NewCompanyPageContent />
+    </Suspense>
+  );
+}
+
+/**
+ * Server component that enforces authentication and renders the "Create Company" page content.
+ *
+ * If no authenticated user is found, logs a warning and redirects the request to `/login`.
+ *
+ * @returns The JSX for the page section containing the header, description, and the `CompanyForm` in create mode.
+ *
+ * @see CompanyForm
+ * @see getAuthenticatedUser
+ * @see redirect
+ */
+async function NewCompanyPageContent() {
   'use cache: private';
   cacheLife('userProfile'); // 1min stale, 5min revalidate, 30min expire - User-specific data
 
@@ -55,31 +74,6 @@ export default async function NewCompanyPage() {
     module: 'apps/web/src/app/account/companies/new/page',
   });
 
-  return (
-    <Suspense fallback={<Loading />}>
-      <NewCompanyPageContent reqLogger={reqLogger} />
-    </Suspense>
-  );
-}
-
-/**
- * Server component that enforces authentication and renders the "Create Company" page content.
- *
- * If no authenticated user is found, logs a warning to `reqLogger` and redirects the request to `/login`.
- *
- * @param reqLogger - Request-scoped logger created for the current request; used for warning on unauthenticated access.
- * @param reqLogger.reqLogger
- * @returns The JSX for the page section containing the header, description, and the `CompanyForm` in create mode.
- *
- * @see CompanyForm
- * @see getAuthenticatedUser
- * @see redirect
- */
-async function NewCompanyPageContent({
-  reqLogger,
-}: {
-  reqLogger: ReturnType<typeof logger.child>;
-}) {
   const { user } = await getAuthenticatedUser({ context: 'NewCompanyPage' });
 
   if (!user) {

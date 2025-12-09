@@ -68,12 +68,12 @@ export async function GET(request: NextRequest, context: unknown) {
 /**
  * Forward POST requests to /api/inngest to the Inngest POST handler while creating a per-request logger.
  *
- * If the underlying handler throws, the error is normalized and logged before being re-thrown.
+ * If the underlying handler throws, the error is normalized, logged, and returned as an error response.
  *
  * @param request - NextRequest - The incoming request for the API route.
  * @param context - unknown - The Next.js route handler context provided to the API route.
  * @returns Promise<Response> - The HTTP response produced by the Inngest POST handler.
- * @throws Any error thrown by the underlying `inngestPOST` handler is normalized, logged, and then re-thrown.
+ * @note Errors thrown by the underlying `inngestPOST` handler are caught, normalized, logged, and returned as error responses.
  * @see {@link inngestPOST}
  * @see {@link logger}
  */

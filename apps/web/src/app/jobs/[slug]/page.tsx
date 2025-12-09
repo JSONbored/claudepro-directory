@@ -174,18 +174,6 @@ export default async function JobPage({ params }: PageProps) {
     module: 'apps/web/src/app/jobs/[slug]',
   });
 
-  // Handle placeholder slugs (if any remain from old generateStaticParams)
-  if (slug === '__placeholder__') {
-    reqLogger.warn(
-      {
-        section: 'data-fetch',
-        slug,
-      },
-      'JobPage: placeholder slug detected, returning 404'
-    );
-    notFound();
-  }
-
   // Section: Parameter Validation
   if (!validationResult.success) {
     reqLogger.error(

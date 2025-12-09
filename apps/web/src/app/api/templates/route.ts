@@ -11,7 +11,7 @@ import { VALID_CATEGORIES } from '@heyclaude/web-runtime/core';
 import { getContentTemplates } from '@heyclaude/web-runtime/data';
 import { logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
 import { buildCacheHeaders } from '@heyclaude/web-runtime/server';
-import { cacheLife } from 'next/cache';
+import { cacheLife, cacheTag } from 'next/cache';
 import { type NextRequest, NextResponse } from 'next/server';
 
 /**
@@ -23,6 +23,8 @@ import { type NextRequest, NextResponse } from 'next/server';
  * @returns {Promise<unknown>} Description of return value*/
 function getCachedTemplatesForAPI(category: Database['public']['Enums']['content_category']) {
   'use cache';
+  cacheTag('templates');
+  cacheTag(`templates-${category}`);
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
 
   return getContentTemplates(category);

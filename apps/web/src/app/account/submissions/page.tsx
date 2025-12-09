@@ -378,9 +378,10 @@ async function SubmissionsPageContent({
 
   /**
    * Validate submission status against enum values
-   * @param status
-   
- * @returns {unknown} Description of return value*/
+   *
+   * @param status - The status value to validate
+   * @returns True if status is a valid submission_status enum value, false otherwise
+   */
   function isValidSubmissionStatus(
     status: unknown
   ): status is Database['public']['Enums']['submission_status'] {
@@ -390,9 +391,10 @@ async function SubmissionsPageContent({
 
   /**
    * Validate submission type against enum values
-   * @param type
-   
- * @returns {unknown} Description of return value*/
+   *
+   * @param type - The type value to validate
+   * @returns True if type is a valid submission_type enum value, false otherwise
+   */
   function isValidSubmissionType(
     type: unknown
   ): type is Database['public']['Enums']['submission_type'] {

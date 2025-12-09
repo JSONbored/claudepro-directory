@@ -114,8 +114,9 @@ export async function POST(request: NextRequest) {
     // Tag invalidation (new logic)
     if (tags && tags.length > 0) {
       // Invalidate each tag (already validated as strings by Zod)
+      // Using 'max' profile for stale-while-revalidate semantics (recommended)
       for (const tag of tags) {
-        revalidateTag(tag, 'default');
+        revalidateTag(tag, 'max');
         invalidatedTags.push(tag);
       }
     }

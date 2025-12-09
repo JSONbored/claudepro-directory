@@ -289,9 +289,8 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
                             }
                             // Allow Supabase storage (public bucket path) or common CDN domains
                             // Restrict to specific CDN patterns to prevent subdomain abuse
-                            const isSupabaseHost =
-                              parsed.hostname.endsWith('.supabase.co') ||
-                              parsed.hostname.endsWith('.supabase.in');
+                            // Only allow official Supabase domains: supabase.co (project subdomains)
+                            const isSupabaseHost = parsed.hostname.endsWith('.supabase.co');
                             const isCloudinary = parsed.hostname === 'res.cloudinary.com';
                             const isAwsS3 =
                               /^[a-z0-9-]+\.s3\.amazonaws\.com$/.test(parsed.hostname) ||

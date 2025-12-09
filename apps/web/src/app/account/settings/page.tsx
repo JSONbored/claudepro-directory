@@ -183,6 +183,7 @@ export default async function SettingsPage() {
   ) {
     // Check if display_name is a PostgreSQL tuple string
     if (isPostgresTupleString(profile.display_name)) {
+      const originalLength = profile.display_name?.length ?? 0;
       const extracted = extractFirstFieldFromTuple(profile.display_name);
       if (extracted === null) {
         userLogger.warn({ section: 'data-fetch', tupleString: profile.display_name.slice(0, 100) }, 'SettingsPage: failed to extract display_name from tuple');
@@ -192,8 +193,14 @@ export default async function SettingsPage() {
           ...profile,
           display_name: extracted,
         };
-        userLogger.info({ section: 'data-fetch', extracted: profile.display_name,
-            originalLength: profile.display_name?.length ?? 0 }, 'SettingsPage: extracted display_name from tuple string');
+        userLogger.info(
+          {
+            section: 'data-fetch',
+            extracted: profile.display_name,
+            originalLength,
+          },
+          'SettingsPage: extracted display_name from tuple string'
+        );
       }
     } else if (typeof profile.display_name !== 'string') {
       // Not a tuple string, but also not a string - convert to string or empty

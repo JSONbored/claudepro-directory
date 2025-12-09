@@ -202,7 +202,9 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
           <div className="container mx-auto px-4 py-8">
             <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
               <AccountSidebarSkeleton />
-              <div className="md:col-span-3">{children}</div>
+              <div className="md:col-span-3">
+                <div className="bg-muted h-96 animate-pulse rounded-lg" />
+              </div>
             </div>
           </div>
         </div>

@@ -24,7 +24,6 @@ interface LoginPanelClientProperties {
  * Displays a newsletter opt-in tile (including a formatted subscriber count when available) alongside OAuth provider buttons.
  *
  * @param redirectTo - Optional URL to navigate to after successful OAuth sign-in.
- * @param redirectTo.redirectTo
  * @returns The JSX element containing the sign-in panel with provider buttons and the newsletter opt-in tile.
  *
  * @see AuthFormPanel

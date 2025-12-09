@@ -1,9 +1,9 @@
 'use client';
 
 /**
- * New Collection Loading Skeleton
+ * New Library Loading Skeleton
  *
- * Loading skeleton for the new collection page.
+ * Loading skeleton for the new library page.
  */
 
 import { getLoadingComponent } from '@heyclaude/web-runtime/ui';

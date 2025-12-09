@@ -49,6 +49,11 @@ jobs:
             SYNC_ARGS="$SYNC_ARGS --force"
           fi
           if [ -n "${{ github.event.inputs.only }}" ]; then
+            # Validate only parameter contains only alphanumeric, comma, and hyphen
+            if ! echo "${{ github.event.inputs.only }}" | grep -qE '^[a-zA-Z0-9,\-]+$'; then
+              echo "❌ Invalid --only parameter. Must contain only alphanumeric characters, commas, and hyphens."
+              exit 1
+            fi
             SYNC_ARGS="$SYNC_ARGS --only=${{ github.event.inputs.only }}"
           fi
           pnpm exec heyclaude-sync-email $SYNC_ARGS
@@ -71,7 +76,19 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git add packages/edge-runtime/src/utils/email/templates/template-map.json
           git commit -m "chore: auto-update email template map from Resend sync"
-          git push
+          
+          # Retry logic: pull latest main and retry push if it fails
+          for i in {1..3}; do
+            if git push; then
+              echo "✅ Successfully pushed template-map.json changes"
+              exit 0
+            elif [ $i -lt 3 ]; then
+              echo "Push failed, pulling latest main and retrying... (attempt $((i+1))/3)"
+              git pull --rebase origin main
+            fi
+          done
+          echo "❌ Failed to push after 3 attempts"
+          exit 1
       - name: Summary
         if: always()
         run: |

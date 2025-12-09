@@ -44,42 +44,6 @@ function getCategoryFromHref(href: string): Database['public']['Enums']['content
   return null;
 }
 
-/**
- * Get icon background gradient classes based on link href/category
- * Returns gradient background classes for icons instead of flat colors
- */
-function getIconBackgroundClass(href: string): string {
-  // Category-based gradients
-  if (href.includes('/agents')) return 'bg-gradient-to-br from-purple-500/20 to-purple-600/10 text-purple-400 group-hover/item:from-purple-500/30 group-hover/item:to-purple-600/20';
-  if (href.includes('/mcp')) return 'bg-gradient-to-br from-cyan-500/20 to-cyan-600/10 text-cyan-400 group-hover/item:from-cyan-500/30 group-hover/item:to-cyan-600/20';
-  if (href.includes('/commands')) return 'bg-gradient-to-br from-blue-500/20 to-blue-600/10 text-blue-400 group-hover/item:from-blue-500/30 group-hover/item:to-blue-600/20';
-  if (href.includes('/rules') || href.includes('/claude.md')) return 'bg-gradient-to-br from-amber-500/20 to-amber-600/10 text-amber-400 group-hover/item:from-amber-500/30 group-hover/item:to-amber-600/20';
-  if (href.includes('/hooks')) return 'bg-gradient-to-br from-green-500/20 to-green-600/10 text-green-400 group-hover/item:from-green-500/30 group-hover/item:to-green-600/20';
-  if (href.includes('/statuslines')) return 'bg-gradient-to-br from-teal-500/20 to-teal-600/10 text-teal-400 group-hover/item:from-teal-500/30 group-hover/item:to-teal-600/20';
-  if (href.includes('/collections')) return 'bg-gradient-to-br from-indigo-500/20 to-indigo-600/10 text-indigo-400 group-hover/item:from-indigo-500/30 group-hover/item:to-indigo-600/20';
-  if (href.includes('/skills')) return 'bg-gradient-to-br from-pink-500/20 to-pink-600/10 text-pink-400 group-hover/item:from-pink-500/30 group-hover/item:to-pink-600/20';
-  if (href.includes('/guides')) return 'bg-gradient-to-br from-violet-500/20 to-violet-600/10 text-violet-400 group-hover/item:from-violet-500/30 group-hover/item:to-violet-600/20';
-  if (href.includes('/jobs')) return 'bg-gradient-to-br from-orange-500/20 to-orange-600/10 text-orange-400 group-hover/item:from-orange-500/30 group-hover/item:to-orange-600/20';
-  if (href.includes('/changelog')) return 'bg-gradient-to-br from-slate-500/20 to-slate-600/10 text-slate-400 group-hover/item:from-slate-500/30 group-hover/item:to-slate-600/20';
-  
-  // Feature-based gradients
-  if (href.includes('/search')) return 'bg-gradient-to-br from-blue-500/20 to-blue-600/10 text-blue-400 group-hover/item:from-blue-500/30 group-hover/item:to-blue-600/20';
-  if (href.includes('/trending')) return 'bg-gradient-to-br from-orange-500/20 to-orange-600/10 text-orange-400 group-hover/item:from-orange-500/30 group-hover/item:to-orange-600/20';
-  if (href.includes('/help')) return 'bg-gradient-to-br from-green-500/20 to-green-600/10 text-green-400 group-hover/item:from-green-500/30 group-hover/item:to-green-600/20';
-  if (href.includes('/tools')) return 'bg-gradient-to-br from-purple-500/20 to-purple-600/10 text-purple-400 group-hover/item:from-purple-500/30 group-hover/item:to-purple-600/20';
-  if (href.includes('/submit')) return 'bg-gradient-to-br from-accent/20 to-accent/10 text-accent group-hover/item:from-accent/30 group-hover/item:to-accent/20';
-  if (href.includes('/community')) return 'bg-gradient-to-br from-blue-500/20 to-blue-600/10 text-blue-400 group-hover/item:from-blue-500/30 group-hover/item:to-blue-600/20';
-  if (href.includes('/companies')) return 'bg-gradient-to-br from-indigo-500/20 to-indigo-600/10 text-indigo-400 group-hover/item:from-indigo-500/30 group-hover/item:to-indigo-600/20';
-  if (href.includes('/partner')) return 'bg-gradient-to-br from-amber-500/20 to-amber-600/10 text-amber-400 group-hover/item:from-amber-500/30 group-hover/item:to-amber-600/20';
-  if (href.includes('/consulting')) return 'bg-gradient-to-br from-orange-500/20 to-orange-600/10 text-orange-400 group-hover/item:from-orange-500/30 group-hover/item:to-orange-600/20';
-  if (href.includes('/contact')) return 'bg-gradient-to-br from-blue-500/20 to-blue-600/10 text-blue-400 group-hover/item:from-blue-500/30 group-hover/item:to-blue-600/20';
-  if (href.includes('/rss') || href.includes('/feeds')) return 'bg-gradient-to-br from-orange-500/20 to-orange-600/10 text-orange-400 group-hover/item:from-orange-500/30 group-hover/item:to-orange-600/20';
-  if (href.includes('/llms.txt')) return 'bg-gradient-to-br from-purple-500/20 to-purple-600/10 text-purple-400 group-hover/item:from-purple-500/30 group-hover/item:to-purple-600/20';
-  
-  // Default gradient
-  return 'bg-gradient-to-br from-muted/50 to-muted/30 text-muted-foreground group-hover/item:from-accent/20 group-hover/item:to-accent/10 group-hover/item:text-accent';
-}
-
 interface NavLinkProps {
   children: React.ReactNode;
   className?: string;
@@ -126,10 +90,9 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
 interface ConfigsDropdownProps {
   link: typeof PRIMARY_NAVIGATION[0];
   getCategoryFromHref: (href: string) => Database['public']['Enums']['content_category'] | null;
-  getIconBackgroundClass: (href: string) => string;
 }
 
-function ConfigsDropdown({ link, getCategoryFromHref, getIconBackgroundClass }: ConfigsDropdownProps) {
+function ConfigsDropdown({ link, getCategoryFromHref }: ConfigsDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [animationKey, setAnimationKey] = useState(0);
 
@@ -164,7 +127,7 @@ function ConfigsDropdown({ link, getCategoryFromHref, getIconBackgroundClass }: 
       </NavigationHoverCardTrigger>
       <NavigationHoverCardContent
         align="start"
-        className={cn('w-[720px] xl:w-[800px]', UI_CLASSES.PADDING_DEFAULT, 'overflow-hidden bg-popover')}
+        className={cn('w-[720px] xl:w-[800px]', UI_CLASSES.PADDING_DEFAULT, 'overflow-hidden bg-popover border border-border/50 shadow-lg')}
         sideOffset={8}
       >
         <AnimatePresence mode="wait">
@@ -181,7 +144,7 @@ function ConfigsDropdown({ link, getCategoryFromHref, getIconBackgroundClass }: 
               <div>
                 <Link
                   href="/tools/config-recommender"
-                  className="group/hero block rounded-lg border-2 border-accent/20 bg-gradient-to-br from-accent/10 to-accent/5 p-4 hover:border-accent/40 transition-all hover:scale-[1.02]"
+                  className="group/hero block rounded-lg border border-border/50 bg-card/50 p-4 hover:border-border hover:bg-card/80 transition-all"
                 >
                   <div className="mb-3">
                     <h3 className="font-semibold text-base mb-1">{link.label}</h3>
@@ -215,10 +178,9 @@ function ConfigsDropdown({ link, getCategoryFromHref, getIconBackgroundClass }: 
                   return (
                     <div className={cn('grid gap-4', columns.length === 1 ? 'grid-cols-1' : columns.length === 2 ? 'grid-cols-2' : 'grid-cols-3')}>
                       {columns.map((columnLinks, colIndex) => (
-                        <div key={`${link.label}-column-${colIndex}`} className="space-y-2 max-h-[280px] overflow-y-auto">
+                        <div key={`${link.label}-column-${colIndex}`} className="space-y-2 max-h-[280px] overflow-y-auto overflow-x-hidden">
                           {columnLinks.map((child, childIndex) => {
                             const category = getCategoryFromHref(child.href);
-                            const iconBgClass = getIconBackgroundClass(child.href);
                             const ChildIcon = child.icon;
                             return (
                               <motion.div
@@ -235,21 +197,13 @@ function ConfigsDropdown({ link, getCategoryFromHref, getIconBackgroundClass }: 
                                 <Link
                                   href={child.href}
                                   prefetch
-                                  className={cn('group/item block rounded-lg px-2.5 py-2 text-sm leading-none no-underline outline-none transition-all', STATE_PATTERNS.HOVER_BG_STRONG, 'hover:scale-[1.02] hover:shadow-sm', STATE_PATTERNS.FOCUS_RING)}
+                                  className={cn('group/item block rounded-lg px-2.5 py-2 text-sm leading-none no-underline outline-none transition-all', STATE_PATTERNS.HOVER_BG_STRONG, STATE_PATTERNS.FOCUS_RING, 'overflow-hidden')}
                                 >
                                   <div className="flex items-center gap-2 mb-0.5 flex-wrap">
                                     {ChildIcon && (
-                                      <motion.div
-                                        className={cn(
-                                          'flex h-6 w-6 shrink-0 items-center justify-center rounded-lg transition-all duration-200 opacity-70 group-hover/item:opacity-100',
-                                          iconBgClass
-                                        )}
-                                        whileHover={{ scale: 1.1 }}
-                                        whileTap={{ scale: 0.95 }}
-                                        transition={{ type: 'spring', stiffness: 400 }}
-                                      >
+                                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-muted/50 text-muted-foreground group-hover/item:bg-muted group-hover/item:text-foreground transition-all duration-200">
                                         <ChildIcon className="h-3.5 w-3.5" />
-                                      </motion.div>
+                                      </div>
                                     )}
                                     <div className="font-medium break-words word-break-break-word">{child.label}</div>
                                     {category && (
@@ -297,10 +251,9 @@ function ConfigsDropdown({ link, getCategoryFromHref, getIconBackgroundClass }: 
 interface DiscoverResourcesContributeDropdownProps {
   link: typeof PRIMARY_NAVIGATION[0];
   getCategoryFromHref: (href: string) => Database['public']['Enums']['content_category'] | null;
-  getIconBackgroundClass: (href: string) => string;
 }
 
-function DiscoverResourcesContributeDropdown({ link, getCategoryFromHref, getIconBackgroundClass }: DiscoverResourcesContributeDropdownProps) {
+function DiscoverResourcesContributeDropdown({ link, getCategoryFromHref }: DiscoverResourcesContributeDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [animationKey, setAnimationKey] = useState(0);
 
@@ -335,7 +288,7 @@ function DiscoverResourcesContributeDropdown({ link, getCategoryFromHref, getIco
       </NavigationHoverCardTrigger>
       <NavigationHoverCardContent
         align="start"
-        className={cn(DIMENSIONS.NAV_DROPDOWN_BASE, DIMENSIONS.NAV_DROPDOWN_BASE_LG, UI_CLASSES.PADDING_DEFAULT, 'overflow-hidden')}
+        className={cn(DIMENSIONS.NAV_DROPDOWN_BASE, DIMENSIONS.NAV_DROPDOWN_BASE_LG, UI_CLASSES.PADDING_DEFAULT, 'overflow-hidden bg-popover border border-border/50 shadow-lg')}
         sideOffset={8}
       >
         <AnimatePresence mode="wait">
@@ -358,7 +311,6 @@ function DiscoverResourcesContributeDropdown({ link, getCategoryFromHref, getIco
                   <div className={UI_CLASSES.SPACE_Y_TIGHT}>
                     {section.links.map((child, childIndex) => {
                       const ChildIcon = child.icon;
-                      const iconBgClass = getIconBackgroundClass(child.href);
                       return (
                         <motion.div
                           key={`${animationKey}-${link.label}-${section.heading}-${child.label}`}
@@ -374,21 +326,13 @@ function DiscoverResourcesContributeDropdown({ link, getCategoryFromHref, getIco
                           <Link
                             href={child.href}
                             prefetch
-                            className={cn('group/item block rounded-lg px-3 py-2.5 text-sm leading-none no-underline outline-none transition-all', STATE_PATTERNS.HOVER_BG_STRONG, 'hover:scale-[1.02] hover:shadow-sm', STATE_PATTERNS.FOCUS_RING)}
+                            className={cn('group/item block rounded-lg px-3 py-2.5 text-sm leading-none no-underline outline-none transition-all', STATE_PATTERNS.HOVER_BG_STRONG, STATE_PATTERNS.FOCUS_RING, 'overflow-hidden')}
                           >
                             <div className="flex items-start gap-3">
                               {ChildIcon && (
-                                <motion.div
-                                  className={cn(
-                                    'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200',
-                                    iconBgClass
-                                  )}
-                                  whileHover={{ scale: 1.1 }}
-                                  whileTap={{ scale: 0.95 }}
-                                  transition={{ type: 'spring', stiffness: 400 }}
-                                >
+                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted/50 text-muted-foreground group-hover/item:bg-muted group-hover/item:text-foreground transition-all duration-200">
                                   <ChildIcon className="h-4 w-4" />
-                                </motion.div>
+                                </div>
                               )}
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-0.5 flex-wrap">
@@ -440,10 +384,9 @@ function DiscoverResourcesContributeDropdown({ link, getCategoryFromHref, getIco
 interface FallbackDropdownProps {
   link: typeof PRIMARY_NAVIGATION[0];
   getCategoryFromHref: (href: string) => Database['public']['Enums']['content_category'] | null;
-  getIconBackgroundClass: (href: string) => string;
 }
 
-function FallbackDropdown({ link, getCategoryFromHref, getIconBackgroundClass }: FallbackDropdownProps) {
+function FallbackDropdown({ link, getCategoryFromHref }: FallbackDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [animationKey, setAnimationKey] = useState(0);
 
@@ -476,7 +419,7 @@ function FallbackDropdown({ link, getCategoryFromHref, getIconBackgroundClass }:
           <ChevronDown className="ml-1 h-2.5 w-2.5 opacity-50" />
         </button>
       </NavigationHoverCardTrigger>
-      <NavigationHoverCardContent align="start" className={cn('w-64', UI_CLASSES.PADDING_COMPACT)} sideOffset={8}>
+      <NavigationHoverCardContent align="start" className={cn('w-64', UI_CLASSES.PADDING_COMPACT, 'bg-popover border border-border/50 shadow-lg')} sideOffset={8}>
         <AnimatePresence mode="wait">
           {isOpen && (
             <motion.div
@@ -498,7 +441,6 @@ function FallbackDropdown({ link, getCategoryFromHref, getIconBackgroundClass }:
                       <div className={UI_CLASSES.SPACE_Y_TIGHT}>
                         {section.links.map((child, childIndex) => {
                           const ChildIcon = child.icon;
-                          const iconBgClass = getIconBackgroundClass(child.href);
                           return (
                             <motion.div
                               key={`${animationKey}-${link.label}-${section.heading}-${child.label}-${childIndex}`}
@@ -514,21 +456,13 @@ function FallbackDropdown({ link, getCategoryFromHref, getIconBackgroundClass }:
                               <Link
                                 href={child.href}
                                 prefetch
-                                className={cn('group/item block rounded-lg px-3 py-2.5 text-sm leading-none no-underline outline-none transition-all', STATE_PATTERNS.HOVER_BG_STRONG, 'hover:scale-[1.02] hover:shadow-sm', STATE_PATTERNS.FOCUS_RING)}
+                                className={cn('group/item block rounded-lg px-3 py-2.5 text-sm leading-none no-underline outline-none transition-all', STATE_PATTERNS.HOVER_BG_STRONG, STATE_PATTERNS.FOCUS_RING, 'overflow-hidden')}
                               >
                                 <div className="flex items-start gap-3">
                                   {ChildIcon && (
-                                    <motion.div
-                                      className={cn(
-                                        'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200',
-                                        iconBgClass
-                                      )}
-                                      whileHover={{ scale: 1.1 }}
-                                      whileTap={{ scale: 0.95 }}
-                                      transition={{ type: 'spring', stiffness: 400 }}
-                                    >
+                                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted/50 text-muted-foreground group-hover/item:bg-muted group-hover/item:text-foreground transition-all duration-200">
                                       <ChildIcon className="h-4 w-4" />
-                                    </motion.div>
+                                    </div>
                                   )}
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 mb-0.5 flex-wrap">
@@ -573,7 +507,6 @@ function FallbackDropdown({ link, getCategoryFromHref, getIconBackgroundClass }:
                 <div className={UI_CLASSES.SPACE_Y_TIGHT}>
                   {link.children.map((child, childIndex) => {
                     const ChildIcon = child.icon;
-                    const iconBgClass = getIconBackgroundClass(child.href);
                     return (
                       <motion.div
                         key={`${animationKey}-${link.label}-${child.label}-${childIndex}`}
@@ -593,17 +526,9 @@ function FallbackDropdown({ link, getCategoryFromHref, getIconBackgroundClass }:
                         >
                           <div className="flex items-start gap-3">
                             {ChildIcon && (
-                              <motion.div
-                                className={cn(
-                                  'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200',
-                                  iconBgClass
-                                )}
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.95 }}
-                                transition={{ type: 'spring', stiffness: 400 }}
-                              >
+                              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted/50 text-muted-foreground group-hover/item:bg-muted group-hover/item:text-foreground transition-all duration-200">
                                 <ChildIcon className="h-4 w-4" />
-                              </motion.div>
+                              </div>
                             )}
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-0.5">
@@ -771,7 +696,6 @@ export function NavigationDesktop({ isActive, onCommandPaletteOpen }: Navigation
               key={link.label}
               link={link}
               getCategoryFromHref={getCategoryFromHref}
-              getIconBackgroundClass={getIconBackgroundClass}
             />
           );
         }
@@ -786,7 +710,6 @@ export function NavigationDesktop({ isActive, onCommandPaletteOpen }: Navigation
               key={link.label}
               link={link}
               getCategoryFromHref={getCategoryFromHref}
-              getIconBackgroundClass={getIconBackgroundClass}
             />
           );
         }
@@ -798,7 +721,6 @@ export function NavigationDesktop({ isActive, onCommandPaletteOpen }: Navigation
               key={link.label}
               link={link}
               getCategoryFromHref={getCategoryFromHref}
-              getIconBackgroundClass={getIconBackgroundClass}
             />
           );
         }
@@ -835,7 +757,7 @@ export function NavigationDesktop({ isActive, onCommandPaletteOpen }: Navigation
             <ChevronDown className="ml-1 h-2.5 w-2.5 opacity-50" />
           </button>
         </NavigationHoverCardTrigger>
-        <NavigationHoverCardContent align="end" className={cn('w-80', UI_CLASSES.PADDING_DEFAULT, 'overflow-hidden')} sideOffset={8}>
+        <NavigationHoverCardContent align="end" className={cn('w-80', UI_CLASSES.PADDING_DEFAULT, 'overflow-hidden bg-popover border border-border/50 shadow-lg')} sideOffset={8}>
           {/* Support group with enhanced layout */}
           <div className={UI_CLASSES.SPACE_Y_DEFAULT}>
             {SECONDARY_NAVIGATION.map((group) => (
@@ -846,7 +768,6 @@ export function NavigationDesktop({ isActive, onCommandPaletteOpen }: Navigation
                 <ul className="grid gap-1">
                   {group.links.map((link) => {
                     const LinkIcon = link.icon;
-                    const iconBgClass = getIconBackgroundClass(link.href);
                     return (
                       <li key={`${group.heading}-${link.label}`}>
                         <Link
@@ -856,17 +777,9 @@ export function NavigationDesktop({ isActive, onCommandPaletteOpen }: Navigation
                         >
                           <div className="flex items-start gap-3">
                             {LinkIcon && (
-                              <motion.div
-                                className={cn(
-                                  'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200',
-                                  iconBgClass
-                                )}
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.95 }}
-                                transition={{ type: 'spring', stiffness: 400 }}
-                              >
+                              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted/50 text-muted-foreground group-hover/item:bg-muted group-hover/item:text-foreground transition-all duration-200">
                                 <LinkIcon className="h-4 w-4" />
-                              </motion.div>
+                              </div>
                             )}
                             <div className="flex-1 min-w-0 overflow-hidden">
                               <div className="font-medium mb-0.5 break-words">{link.label}</div>

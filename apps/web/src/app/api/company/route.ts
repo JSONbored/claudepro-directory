@@ -25,8 +25,7 @@ const CORS = getOnlyCorsHeaders;
  
  * @returns {unknown} Description of return value*/
 async function getCachedCompanyProfile(slug: string): Promise<{
-  data: DatabaseGenerated['public']['Functions']['get_company_profile']['Returns'] | null;
-  error: null | { code?: string; message: string };
+  data: DatabaseGenerated['public']['Functions']['get_company_profile']['Returns'];
 }> {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
@@ -38,10 +37,14 @@ async function getCachedCompanyProfile(slug: string): Promise<{
 
   const { data, error } = await supabase.rpc('get_company_profile', rpcArgs);
 
-  return {
-    data,
-    error: error ? { message: error.message, code: error.code } : null,
-  };
+  if (error) {
+    // Throw error immediately to prevent caching error responses
+    throw new Error(error.message || 'Company profile RPC error', {
+      cause: { code: error.code, message: error.message },
+    });
+  }
+
+  return { data };
 }
 
 /**
@@ -77,9 +80,11 @@ export async function GET(request: NextRequest) {
 
     reqLogger.info({ slug }, 'Company request received');
 
-    const { data: profile, error } = await getCachedCompanyProfile(slug);
-
-    if (error) {
+    let profile;
+    try {
+      const result = await getCachedCompanyProfile(slug);
+      profile = result.data;
+    } catch (error) {
       const normalizedError = normalizeError(error, 'Company profile RPC error');
       reqLogger.error(
         {
