@@ -5,6 +5,7 @@
  * Runs as a cron job to process notification queue.
  */
 
+import { MiscService } from '@heyclaude/data-layer';
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { normalizeError, getEnvVar } from '@heyclaude/shared-runtime';
 import { revalidateTag } from 'next/cache';
@@ -175,13 +176,8 @@ export const processChangelogNotifyQueue = inngest.createFunction(
             action_href: `/changelog/${job.slug}`,
           };
 
-          const { error: notifyError } = await supabase
-            .from('notifications')
-            .upsert(notificationInsert, { onConflict: 'id' });
-
-          if (notifyError) {
-            throw new Error(`Notification insert failed: ${notifyError.message}`);
-          }
+          const service = new MiscService(supabase);
+          await service.upsertNotification(notificationInsert);
 
           notificationInserted = true;
           logger.info({ ...logContext,

@@ -1,20 +1,17 @@
 /**
  * useOnboardingToasts Hook
  *
- * Manages onboarding notifications via flux-station notification system.
+ * Manages client-side onboarding toasts with localStorage persistence.
  * Features:
- * - Server-side notification management
- * - Persistent dismissal via database
- * - Sequential display with delays
- * - User-specific notifications
+ * - Client-side only (no database persistence)
+ * - Persistent dismissal via localStorage
  * - Context-aware messaging
+ *
+ * Note: Database notification system is disabled - this hook only manages client-side toasts.
  */
 
 'use client';
 
-import { env } from '@heyclaude/shared-runtime/schemas/env';
-import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
-import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { useCallback, useEffect, useState } from 'react';
 
 interface OnboardingToast {
@@ -60,175 +57,35 @@ interface OnboardingToastsOptions {
 export function useOnboardingToasts({
   enabled = true,
   context = 'wizard',
-  customToasts,
 }: OnboardingToastsOptions = {}) {
   const [hasSeenToasts, setHasSeenToasts] = useState(true);
-  const [activeToasts, setActiveToasts] = useState<Set<string>>(new Set());
+  const [activeToasts] = useState<Set<string>>(new Set());
 
-  // Check if user has seen toasts for this context
-  const { user } = useAuthenticatedUser({
-    context: 'useOnboardingToasts',
-    subscribe: false,
-  });
-
-  // Fetch active notifications from flux-station
+  // Check localStorage on mount to determine if toasts have been seen
   useEffect(() => {
-    if (!(enabled && user)) return;
+    if (!enabled) return;
+    try {
+      const seenToasts = localStorage.getItem(STORAGE_KEY);
+      const seenData = seenToasts ? JSON.parse(seenToasts) : {};
+      setHasSeenToasts(Boolean(seenData[context]));
+    } catch {
+      // Ignore localStorage errors
+      setHasSeenToasts(false);
+    }
+  }, [enabled, context]);
 
-    const fetchNotifications = async () => {
-      try {
-        const fluxStationUrl = env.NEXT_PUBLIC_SUPABASE_URL
-          ? `${env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/flux-station/active-notifications`
-          : null;
-        if (!fluxStationUrl) {
-          logClientWarn(
-            '[Onboarding] NEXT_PUBLIC_SUPABASE_URL not configured, skipping notification fetch',
-            undefined,
-            'useOnboardingToasts.fetchNotifications',
-            {
-              component: 'useOnboardingToasts',
-              action: 'fetch-notifications',
-              category: 'onboarding',
-            }
-          );
-          return;
-        }
-        const response = await fetch(fluxStationUrl, {
-          headers: {
-            Authorization: `Bearer ${user.id}`,
-          },
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          const hasOnboardingNotifs = data.notifications?.some(
-            (n: { metadata?: { context?: string }; type?: string }) =>
-              n.metadata?.context === context && n.type === 'onboarding'
-          );
-          setHasSeenToasts(hasOnboardingNotifs);
-        }
-      } catch {
-        // Fallback to localStorage
-        try {
-          const seenToasts = localStorage.getItem(STORAGE_KEY);
-          const seenData = seenToasts ? JSON.parse(seenToasts) : {};
-          if (!seenData[context]) {
-            setHasSeenToasts(false);
-          }
-        } catch {
-          // Ignore localStorage errors
-        }
-      }
-    };
-
-    fetchNotifications().catch((error: unknown) => {
-      const normalized = normalizeError(error, 'Failed to fetch notifications');
-      logClientWarn(
-        '[Onboarding] Failed to fetch notifications',
-        normalized,
-        'useOnboardingToasts.fetchNotifications',
-        {
-          component: 'useOnboardingToasts',
-          action: 'fetch-notifications',
-          category: 'onboarding',
-        }
-      );
-    });
-  }, [enabled, context, user]);
-
-  // Mark toasts as seen in both database and localStorage
+  // Mark toasts as seen in localStorage
   const markToastsAsSeen = useCallback(async () => {
     try {
-      // Mark in localStorage (immediate)
       const seenToasts = localStorage.getItem(STORAGE_KEY);
       const seenData = seenToasts ? JSON.parse(seenToasts) : {};
       seenData[context] = true;
       localStorage.setItem(STORAGE_KEY, JSON.stringify(seenData));
-
-      // Dismiss notifications in database (async) via edge function
-      // Note: This is a no-op since we don't have notification IDs here
-      // The actual dismissal happens when users interact with notifications
-      // This hook just tracks localStorage state
-
       setHasSeenToasts(true);
     } catch {
       // Ignore errors when marking toasts as seen
     }
   }, [context]);
-
-  // Create onboarding notifications via flux-station
-  useEffect(() => {
-    if (!enabled || hasSeenToasts || !user) return;
-
-    const createNotifications = async () => {
-      const toastsToShow = customToasts || ONBOARDING_TOASTS;
-
-      try {
-        // Create notifications in database via edge function
-        const fluxStationUrl = env.NEXT_PUBLIC_SUPABASE_URL
-          ? `${env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/flux-station/notifications/create`
-          : null;
-        if (!fluxStationUrl) {
-          logClientWarn(
-            '[Onboarding] NEXT_PUBLIC_SUPABASE_URL not configured, skipping notification creation',
-            undefined,
-            'useOnboardingToasts.createNotifications',
-            {
-              component: 'useOnboardingToasts',
-              action: 'create-notifications',
-              category: 'onboarding',
-            }
-          );
-          return;
-        }
-        for (const toast of toastsToShow) {
-          await fetch(fluxStationUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${user.id}`,
-            },
-            body: JSON.stringify({
-              type: 'announcement', // Edge function expects 'announcement' or 'feedback'
-              priority: 'low',
-              title: toast.title,
-              message: toast.message,
-              // Note: metadata field is not supported by notifications table schema
-            }),
-          });
-
-          setActiveToasts((prev) => new Set(prev).add(toast.id));
-        }
-
-        // Mark as seen after creation
-        await markToastsAsSeen();
-      } catch {
-        // Fallback: mark as seen in localStorage only
-        try {
-          const seenToasts = localStorage.getItem(STORAGE_KEY);
-          const seenData = seenToasts ? JSON.parse(seenToasts) : {};
-          seenData[context] = true;
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(seenData));
-        } catch {
-          // Ignore localStorage errors
-        }
-      }
-    };
-
-    createNotifications().catch((error: unknown) => {
-      const normalized = normalizeError(error, 'Failed to create onboarding notifications');
-      logClientWarn(
-        '[Onboarding] Failed to create notifications',
-        normalized,
-        'useOnboardingToasts.createNotifications',
-        {
-          component: 'useOnboardingToasts',
-          action: 'create-notifications',
-          category: 'onboarding',
-        }
-      );
-    });
-  }, [enabled, hasSeenToasts, customToasts, user, context, markToastsAsSeen]);
 
   // Reset toasts (for testing or user preference)
   const resetToasts = useCallback(() => {

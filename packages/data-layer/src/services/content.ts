@@ -9,6 +9,7 @@ import  { type Database } from '@heyclaude/database-types';
 import  { type SupabaseClient } from '@supabase/supabase-js';
 
 import { logRpcError } from '../utils/rpc-error-logging.ts';
+import { withSmartCache } from '../utils/request-cache.ts';
 
 export interface ContentFilterOptions {
   author?: string;
@@ -49,510 +50,733 @@ export class ContentService {
 
   /**
    * Calls the database RPC: generate_readme_data
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getSitewideReadme() {
-    try {
-      const { data, error } = await this.supabase.rpc('generate_readme_data');
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'generate_readme_data',
-          operation: 'ContentService.getSitewideReadme',
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'generate_readme_data',
+      'getSitewideReadme',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('generate_readme_data');
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'generate_readme_data',
+              operation: 'ContentService.getSitewideReadme',
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      undefined
+    );
   }
 
   /**
    * Calls the database RPC: get_sitewide_content_list
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getSitewideContentList(
     args?: Database['public']['Functions']['get_sitewide_content_list']['Args']
   ) {
-    try {
-      const { data, error } = await this.supabase.rpc('get_sitewide_content_list', args ?? {});
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_sitewide_content_list',
-          operation: 'ContentService.getSitewideContentList',
-          args: args ?? {},
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_sitewide_content_list',
+      'getSitewideContentList',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_sitewide_content_list', args ?? {});
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_sitewide_content_list',
+              operation: 'ContentService.getSitewideContentList',
+              args: args ?? {},
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args ?? {}
+    );
+  }
+
+  /**
+   * Calls the database RPC: get_category_content_list
+   * Uses request-scoped caching to avoid duplicate calls within the same request
+   */
+  async getCategoryContentList(
+    args: Database['public']['Functions']['get_category_content_list']['Args']
+  ) {
+    return withSmartCache(
+      'get_category_content_list',
+      'getCategoryContentList',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_category_content_list', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_category_content_list',
+              operation: 'ContentService.getCategoryContentList',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: generate_sitewide_llms_txt
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getSitewideLlmsTxt() {
-    try {
-      const { data, error } = await this.supabase.rpc('generate_sitewide_llms_txt');
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'generate_sitewide_llms_txt',
-          operation: 'ContentService.getSitewideLlmsTxt',
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'generate_sitewide_llms_txt',
+      'getSitewideLlmsTxt',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('generate_sitewide_llms_txt');
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'generate_sitewide_llms_txt',
+              operation: 'ContentService.getSitewideLlmsTxt',
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      undefined
+    );
   }
 
   /**
    * Calls the database RPC: generate_changelog_llms_txt
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getChangelogLlmsTxt() {
-    try {
-      const { data, error } = await this.supabase.rpc('generate_changelog_llms_txt');
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'generate_changelog_llms_txt',
-          operation: 'ContentService.getChangelogLlmsTxt',
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'generate_changelog_llms_txt',
+      'getChangelogLlmsTxt',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('generate_changelog_llms_txt');
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'generate_changelog_llms_txt',
+              operation: 'ContentService.getChangelogLlmsTxt',
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      undefined
+    );
   }
 
   /**
    * Calls the database RPC: generate_category_llms_txt
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getCategoryLlmsTxt(args: Database['public']['Functions']['generate_category_llms_txt']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('generate_category_llms_txt', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'generate_category_llms_txt',
-          operation: 'ContentService.getCategoryLlmsTxt',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'generate_category_llms_txt',
+      'getCategoryLlmsTxt',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('generate_category_llms_txt', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'generate_category_llms_txt',
+              operation: 'ContentService.getCategoryLlmsTxt',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: generate_changelog_entry_llms_txt
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getChangelogEntryLlmsTxt(args: Database['public']['Functions']['generate_changelog_entry_llms_txt']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('generate_changelog_entry_llms_txt', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'generate_changelog_entry_llms_txt',
-          operation: 'ContentService.getChangelogEntryLlmsTxt',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'generate_changelog_entry_llms_txt',
+      'getChangelogEntryLlmsTxt',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('generate_changelog_entry_llms_txt', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'generate_changelog_entry_llms_txt',
+              operation: 'ContentService.getChangelogEntryLlmsTxt',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: generate_tool_llms_txt
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getToolLlmsTxt(args: Database['public']['Functions']['generate_tool_llms_txt']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('generate_tool_llms_txt', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'generate_tool_llms_txt',
-          operation: 'ContentService.getToolLlmsTxt',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'generate_tool_llms_txt',
+      'getToolLlmsTxt',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('generate_tool_llms_txt', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'generate_tool_llms_txt',
+              operation: 'ContentService.getToolLlmsTxt',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: get_category_configs_with_features
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getCategoryConfigs() {
-    try {
-      const { data, error } = await this.supabase.rpc('get_category_configs_with_features');
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_category_configs_with_features',
-          operation: 'ContentService.getCategoryConfigs',
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_category_configs_with_features',
+      'getCategoryConfigs',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_category_configs_with_features');
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_category_configs_with_features',
+              operation: 'ContentService.getCategoryConfigs',
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      undefined
+    );
   }
 
   /**
    * Calls the database RPC: get_api_content_full
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getApiContentFull(args: Database['public']['Functions']['get_api_content_full']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('get_api_content_full', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_api_content_full',
-          operation: 'ContentService.getApiContentFull',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_api_content_full',
+      'getApiContentFull',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_api_content_full', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_api_content_full',
+              operation: 'ContentService.getApiContentFull',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: generate_markdown_export
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async generateMarkdownExport(
     args: Database['public']['Functions']['generate_markdown_export']['Args']
   ) {
-    try {
-      const { data, error } = await this.supabase.rpc('generate_markdown_export', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'generate_markdown_export',
-          operation: 'ContentService.generateMarkdownExport',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'generate_markdown_export',
+      'generateMarkdownExport',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('generate_markdown_export', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'generate_markdown_export',
+              operation: 'ContentService.generateMarkdownExport',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: generate_item_llms_txt
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getItemLlmsTxt(args: Database['public']['Functions']['generate_item_llms_txt']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('generate_item_llms_txt', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'generate_item_llms_txt',
-          operation: 'ContentService.getItemLlmsTxt',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'generate_item_llms_txt',
+      'getItemLlmsTxt',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('generate_item_llms_txt', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'generate_item_llms_txt',
+              operation: 'ContentService.getItemLlmsTxt',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: get_skill_storage_path
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getSkillStoragePath(
     args: Database['public']['Functions']['get_skill_storage_path']['Args']
   ) {
-    try {
-      const { data, error } = await this.supabase.rpc('get_skill_storage_path', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_skill_storage_path',
-          operation: 'ContentService.getSkillStoragePath',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_skill_storage_path',
+      'getSkillStoragePath',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_skill_storage_path', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_skill_storage_path',
+              operation: 'ContentService.getSkillStoragePath',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: get_mcpb_storage_path
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getMcpbStoragePath(
     args: Database['public']['Functions']['get_mcpb_storage_path']['Args']
   ) {
-    try {
-      const { data, error } = await this.supabase.rpc('get_mcpb_storage_path', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_mcpb_storage_path',
-          operation: 'ContentService.getMcpbStoragePath',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_mcpb_storage_path',
+      'getMcpbStoragePath',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_mcpb_storage_path', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_mcpb_storage_path',
+              operation: 'ContentService.getMcpbStoragePath',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: get_content_detail_complete
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getContentDetailComplete(args: Database['public']['Functions']['get_content_detail_complete']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('get_content_detail_complete', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_content_detail_complete',
-          operation: 'ContentService.getContentDetailComplete',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_content_detail_complete',
+      'getContentDetailComplete',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_content_detail_complete', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_content_detail_complete',
+              operation: 'ContentService.getContentDetailComplete',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: get_enriched_content_list
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getEnrichedContentList(args: Database['public']['Functions']['get_enriched_content_list']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('get_enriched_content_list', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_enriched_content_list',
-          operation: 'ContentService.getEnrichedContentList',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_enriched_content_list',
+      'getEnrichedContentList',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_enriched_content_list', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_enriched_content_list',
+              operation: 'ContentService.getEnrichedContentList',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: get_content_paginated
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getContentPaginated(args: Database['public']['Functions']['get_content_paginated']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('get_content_paginated', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_content_paginated',
-          operation: 'ContentService.getContentPaginated',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_content_paginated',
+      'getContentPaginated',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_content_paginated', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_content_paginated',
+              operation: 'ContentService.getContentPaginated',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: get_homepage_complete
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getHomepageComplete(args: Database['public']['Functions']['get_homepage_complete']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('get_homepage_complete', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_homepage_complete',
-          operation: 'ContentService.getHomepageComplete',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_homepage_complete',
+      'getHomepageComplete',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_homepage_complete', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_homepage_complete',
+              operation: 'ContentService.getHomepageComplete',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: get_reviews_with_stats
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getReviewsWithStats(args: Database['public']['Functions']['get_reviews_with_stats']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('get_reviews_with_stats', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_reviews_with_stats',
-          operation: 'ContentService.getReviewsWithStats',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_reviews_with_stats',
+      'getReviewsWithStats',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_reviews_with_stats', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_reviews_with_stats',
+              operation: 'ContentService.getReviewsWithStats',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: get_related_content
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getRelatedContent(args: Database['public']['Functions']['get_related_content']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('get_related_content', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_related_content',
-          operation: 'ContentService.getRelatedContent',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_related_content',
+      'getRelatedContent',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_related_content', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_related_content',
+              operation: 'ContentService.getRelatedContent',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: get_similar_content
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getSimilarContent(args: Database['public']['Functions']['get_similar_content']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('get_similar_content', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_similar_content',
-          operation: 'ContentService.getSimilarContent',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_similar_content',
+      'getSimilarContent',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_similar_content', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_similar_content',
+              operation: 'ContentService.getSimilarContent',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: get_content_templates
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getContentTemplates(args: Database['public']['Functions']['get_content_templates']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('get_content_templates', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_content_templates',
-          operation: 'ContentService.getContentTemplates',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_content_templates',
+      'getContentTemplates',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_content_templates', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_content_templates',
+              operation: 'ContentService.getContentTemplates',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: get_content_paginated_slim
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getContentPaginatedSlim(args: Database['public']['Functions']['get_content_paginated_slim']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('get_content_paginated_slim', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_content_paginated_slim',
-          operation: 'ContentService.getContentPaginatedSlim',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_content_paginated_slim',
+      'getContentPaginatedSlim',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_content_paginated_slim', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_content_paginated_slim',
+              operation: 'ContentService.getContentPaginatedSlim',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: get_content_detail_core
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getContentDetailCore(args: Database['public']['Functions']['get_content_detail_core']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('get_content_detail_core', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_content_detail_core',
-          operation: 'ContentService.getContentDetailCore',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_content_detail_core',
+      'getContentDetailCore',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_content_detail_core', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_content_detail_core',
+              operation: 'ContentService.getContentDetailCore',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: get_content_analytics
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getContentAnalytics(args: Database['public']['Functions']['get_content_analytics']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('get_content_analytics', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_content_analytics',
-          operation: 'ContentService.getContentAnalytics',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_content_analytics',
+      'getContentAnalytics',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_content_analytics', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_content_analytics',
+              operation: 'ContentService.getContentAnalytics',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
@@ -567,48 +791,183 @@ export class ContentService {
    * 2. The validation logic provides better error messages for schema mismatches
    * 3. Removes redundant try-catch wrapper while maintaining proper error logging
    * 
-   * This pattern should be applied to other methods in a future refactor for consistency.
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getHomepageOptimized(args: Database['public']['Functions']['get_homepage_optimized']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_homepage_optimized', args);
-    
-    if (error) {
-      // Log RPC error with business context
-      logRpcError(error, {
-        rpcName: 'get_homepage_optimized',
-        operation: 'ContentService.getHomepageOptimized',
-        args: args,
-      });
-      throw error;
-    }
-    
-    // Null/undefined is expected when no rows returned
-    if (data === null || data === undefined) {
-      return null;
-    }
-    
-    // Array format indicates schema mismatch - fail fast with descriptive error
-    if (Array.isArray(data)) {
-      const schemaError = new Error('Unexpected array format from get_homepage_optimized (expected single object) - possible schema/RPC misconfiguration');
-      logRpcError(schemaError, {
-        rpcName: 'get_homepage_optimized',
-        operation: 'ContentService.getHomepageOptimized',
-        args: args,
-      });
-      throw schemaError;
-    }
-    
-    // Invalid data type - fail fast with descriptive error
-    if (typeof data !== 'object') {
-      const typeError = new Error(`Invalid data type from get_homepage_optimized: expected object, got ${typeof data}`);
-      logRpcError(typeError, {
-        rpcName: 'get_homepage_optimized',
-        operation: 'ContentService.getHomepageOptimized',
-        args: args,
-      });
-      throw typeError;
-    }
-    
-    return data;
+    return withSmartCache(
+      'get_homepage_optimized',
+      'getHomepageOptimized',
+      async () => {
+        const { data, error } = await this.supabase.rpc('get_homepage_optimized', args);
+        
+        if (error) {
+          // Log RPC error with business context
+          logRpcError(error, {
+            rpcName: 'get_homepage_optimized',
+            operation: 'ContentService.getHomepageOptimized',
+            args: args,
+          });
+          throw error;
+        }
+        
+        // Null/undefined is expected when no rows returned
+        if (data === null || data === undefined) {
+          return null;
+        }
+        
+        // Array format indicates schema mismatch - fail fast with descriptive error
+        if (Array.isArray(data)) {
+          const schemaError = new Error('Unexpected array format from get_homepage_optimized (expected single object) - possible schema/RPC misconfiguration');
+          logRpcError(schemaError, {
+            rpcName: 'get_homepage_optimized',
+            operation: 'ContentService.getHomepageOptimized',
+            args: args,
+          });
+          throw schemaError;
+        }
+        
+        // Invalid data type - fail fast with descriptive error
+        if (typeof data !== 'object') {
+          const typeError = new Error(`Invalid data type from get_homepage_optimized: expected object, got ${typeof data}`);
+          logRpcError(typeError, {
+            rpcName: 'get_homepage_optimized',
+            operation: 'ContentService.getHomepageOptimized',
+            args: args,
+          });
+          throw typeError;
+        }
+        
+        return data;
+      },
+      args
+    );
+  }
+
+  /**
+   * Calls the database RPC: generate_changelog_rss_feed
+   * Returns RSS feed XML for changelog entries
+   * Uses request-scoped caching to avoid duplicate calls within the same request
+   */
+  async generateChangelogRssFeed(
+    args?: Database['public']['Functions']['generate_changelog_rss_feed']['Args']
+  ) {
+    return withSmartCache(
+      'generate_changelog_rss_feed',
+      'generateChangelogRssFeed',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('generate_changelog_rss_feed', args ?? {});
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'generate_changelog_rss_feed',
+              operation: 'ContentService.generateChangelogRssFeed',
+              args: args ?? {},
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args ?? {}
+    );
+  }
+
+  /**
+   * Calls the database RPC: generate_changelog_atom_feed
+   * Returns Atom feed XML for changelog entries
+   * Uses request-scoped caching to avoid duplicate calls within the same request
+   */
+  async generateChangelogAtomFeed(
+    args?: Database['public']['Functions']['generate_changelog_atom_feed']['Args']
+  ) {
+    return withSmartCache(
+      'generate_changelog_atom_feed',
+      'generateChangelogAtomFeed',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('generate_changelog_atom_feed', args ?? {});
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'generate_changelog_atom_feed',
+              operation: 'ContentService.generateChangelogAtomFeed',
+              args: args ?? {},
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args ?? {}
+    );
+  }
+
+  /**
+   * Calls the database RPC: generate_content_rss_feed
+   * Returns RSS feed XML for content entries
+   * Uses request-scoped caching to avoid duplicate calls within the same request
+   */
+  async generateContentRssFeed(
+    args?: Database['public']['Functions']['generate_content_rss_feed']['Args']
+  ) {
+    return withSmartCache(
+      'generate_content_rss_feed',
+      'generateContentRssFeed',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('generate_content_rss_feed', args ?? {});
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'generate_content_rss_feed',
+              operation: 'ContentService.generateContentRssFeed',
+              args: args ?? {},
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args ?? {}
+    );
+  }
+
+  /**
+   * Calls the database RPC: generate_content_atom_feed
+   * Returns Atom feed XML for content entries
+   * Uses request-scoped caching to avoid duplicate calls within the same request
+   */
+  async generateContentAtomFeed(
+    args?: Database['public']['Functions']['generate_content_atom_feed']['Args']
+  ) {
+    return withSmartCache(
+      'generate_content_atom_feed',
+      'generateContentAtomFeed',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('generate_content_atom_feed', args ?? {});
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'generate_content_atom_feed',
+              operation: 'ContentService.generateContentAtomFeed',
+              args: args ?? {},
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args ?? {}
+    );
   }
 }

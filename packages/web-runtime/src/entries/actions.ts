@@ -6,7 +6,6 @@ export * from '../actions/contact.ts';
 export * from '../actions/content.ts';
 export * from '../actions/search.ts';
 export * from '../actions/jobs.ts';
-export * from '../actions/notifications.ts';
 export * from '../actions/user.ts';
 
 // Export input types (can't export from 'use server' files)

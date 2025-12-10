@@ -9,48 +9,65 @@ import  { type Database } from '@heyclaude/database-types';
 import  { type SupabaseClient } from '@supabase/supabase-js';
 
 import { logRpcError } from '../utils/rpc-error-logging.ts';
+import { withSmartCache } from '../utils/request-cache.ts';
 
 export class QuizService {
   constructor(private supabase: SupabaseClient<Database>) {}
 
   /**
    * Calls the database RPC: get_quiz_configuration
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getQuizConfiguration() {
-    try {
-      const { data, error } = await this.supabase.rpc('get_quiz_configuration');
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_quiz_configuration',
-          operation: 'QuizService.getQuizConfiguration',
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_quiz_configuration',
+      'getQuizConfiguration',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_quiz_configuration');
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_quiz_configuration',
+              operation: 'QuizService.getQuizConfiguration',
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      undefined
+    );
   }
 
   /**
    * Calls the database RPC: get_recommendations
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getRecommendations(args: Database['public']['Functions']['get_recommendations']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('get_recommendations', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_recommendations',
-          operation: 'QuizService.getRecommendations',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_recommendations',
+      'getRecommendations',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_recommendations', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_recommendations',
+              operation: 'QuizService.getRecommendations',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 }

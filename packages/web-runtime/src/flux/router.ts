@@ -8,7 +8,6 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { handleEmailCount } from './handlers/email';
 import { handleDiscordDirect } from './handlers/discord';
-import { handleActiveNotifications, handleDismissNotifications, handleCreateNotification } from './handlers/notifications';
 import { handleRevalidation } from './handlers/revalidation';
 import { handleExternalWebhook } from './handlers/webhook';
 
@@ -62,33 +61,6 @@ export async function routeFluxRequest(
     case 'discord/direct':
       if (method === 'POST') {
         return handleDiscordDirect(request);
-      }
-      return NextResponse.json(
-        { error: 'Method not allowed', path: route, method, allowedMethods: ['POST'] },
-        { status: 405, headers: { ...DEFAULT_CORS_HEADERS, 'Allow': 'POST' } }
-      );
-
-    case 'notifications/active':
-      if (method === 'GET') {
-        return handleActiveNotifications(request);
-      }
-      return NextResponse.json(
-        { error: 'Method not allowed', path: route, method, allowedMethods: ['GET'] },
-        { status: 405, headers: { ...DEFAULT_CORS_HEADERS, 'Allow': 'GET' } }
-      );
-
-    case 'notifications/dismiss':
-      if (method === 'POST') {
-        return handleDismissNotifications(request);
-      }
-      return NextResponse.json(
-        { error: 'Method not allowed', path: route, method, allowedMethods: ['POST'] },
-        { status: 405, headers: { ...DEFAULT_CORS_HEADERS, 'Allow': 'POST' } }
-      );
-
-    case 'notifications/create':
-      if (method === 'POST') {
-        return handleCreateNotification(request);
       }
       return NextResponse.json(
         { error: 'Method not allowed', path: route, method, allowedMethods: ['POST'] },

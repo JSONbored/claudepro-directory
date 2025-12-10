@@ -3578,6 +3578,18 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      batch_insert_search_queries: {
+        Args: {
+          p_queries: Database["public"]["CompositeTypes"]["search_query_input"][]
+        }
+        Returns: Database["public"]["CompositeTypes"]["batch_insert_search_queries_result"]
+        SetofOptions: {
+          from: "*"
+          to: "batch_insert_search_queries_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       batch_insert_user_interactions: {
         Args: {
           p_interactions: Database["public"]["CompositeTypes"]["user_interaction_input"][]
@@ -6624,6 +6636,12 @@ export type Database = {
         saved_count: number | null
         total_requested: number | null
       }
+      batch_insert_search_queries_result: {
+        inserted: number | null
+        failed: number | null
+        total: number | null
+        errors: Json | null
+      }
       batch_insert_user_interactions_result: {
         inserted: number | null
         failed: number | null
@@ -7669,6 +7687,13 @@ export type Database = {
         name: string | null
         image: string | null
         tier: Database["public"]["Enums"]["user_tier"] | null
+      }
+      search_query_input: {
+        query: string | null
+        filters: Json | null
+        result_count: number | null
+        user_id: string | null
+        session_id: string | null
       }
       seo_metadata: {
         title: string | null

@@ -1,4 +1,5 @@
 import 'server-only';
+import { MiscService } from '@heyclaude/data-layer';
 import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import {
   APP_CONFIG,
@@ -30,9 +31,8 @@ async function getCachedSiteUrls() {
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
 
   const supabase = createSupabaseAnonClient();
-  const { data, error } = await supabase.rpc('get_site_urls');
-  if (error) throw error;
-  return data;
+  const service = new MiscService(supabase);
+  return service.getSiteUrls();
 }
 
 const CORS = getOnlyCorsHeaders;
@@ -67,7 +67,6 @@ export async function GET(request: NextRequest) {
     method: 'GET',
   });
   const format = (request.nextUrl.searchParams.get('format') ?? 'xml').toLowerCase();
-  const supabase = createSupabaseAnonClient();
 
   reqLogger.info({ format }, 'Sitemap request received');
 
@@ -80,8 +79,9 @@ export async function GET(request: NextRequest) {
         const normalized = normalizeError(error, 'Operation failed');
         reqLogger.error(
           {
-            err: normalizeError(error),
+            err: normalized,
             operation: 'get_site_urls',
+            rpcName: 'get_site_urls',
           },
           'get_site_urls RPC failed'
         );
@@ -89,7 +89,9 @@ export async function GET(request: NextRequest) {
           route: '/api/sitemap',
           operation: 'get_site_urls',
           method: 'GET',
-          logContext: {},
+          logContext: {
+            rpcName: 'get_site_urls',
+          },
         });
       }
 
@@ -172,25 +174,33 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    const supabase = createSupabaseAnonClient();
+    const service = new MiscService(supabase);
+
     const rpcArgs = {
       p_base_url: SITE_URL,
     } satisfies DatabaseGenerated['public']['Functions']['generate_sitemap_xml']['Args'];
-    const { data, error } = await supabase.rpc('generate_sitemap_xml', rpcArgs);
 
-    if (error) {
+    let data;
+    try {
+      data = await service.generateSitemapXml(rpcArgs);
+    } catch (error) {
+      const normalized = normalizeError(error, 'generate_sitemap_xml RPC failed');
       reqLogger.error(
         {
-          err: normalizeError(error),
+          err: normalized,
           rpcArgs,
+          rpcName: 'generate_sitemap_xml',
         },
         'generate_sitemap_xml RPC failed'
       );
-      const normalized = normalizeError(error, 'generate_sitemap_xml RPC failed');
       return createErrorResponse(normalized, {
         route: '/api/sitemap',
         operation: 'generate_sitemap_xml',
         method: 'GET',
-        logContext: {},
+        logContext: {
+          rpcName: 'generate_sitemap_xml',
+        },
       });
     }
 
@@ -276,22 +286,29 @@ export async function POST(request: NextRequest) {
   }
 
   const supabase = createSupabaseAnonClient();
+  const service = new MiscService(supabase);
+
   try {
-    const { data, error } = await supabase.rpc('get_site_urls');
-    if (error) {
+    let data;
+    try {
+      data = await service.getSiteUrls();
+    } catch (error) {
+      const normalized = normalizeError(error, 'get_site_urls RPC failed');
       reqLogger.error(
         {
-          err: normalizeError(error),
+          err: normalized,
           operation: 'get_site_urls',
+          rpcName: 'get_site_urls',
         },
         'get_site_urls RPC failed'
       );
-      const normalized = normalizeError(error, 'get_site_urls RPC failed');
       return createErrorResponse(normalized, {
         route: '/api/sitemap',
         operation: 'get_site_urls',
         method: 'POST',
-        logContext: {},
+        logContext: {
+          rpcName: 'get_site_urls',
+        },
       });
     }
 

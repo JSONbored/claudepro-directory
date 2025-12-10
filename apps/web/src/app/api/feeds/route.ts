@@ -4,6 +4,7 @@
  */
 
 import 'server-only';
+import { ContentService } from '@heyclaude/data-layer';
 import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
@@ -40,36 +41,6 @@ function toContentCategory(value: null | string): ContentCategory | null {
   return CONTENT_CATEGORY_VALUES.includes(value as ContentCategory)
     ? (value as ContentCategory)
     : null;
-}
-
-/**
- * Execute a Supabase RPC call with request-scoped logging and unified error handling.
- *
- * Logs the RPC failure when an error is present, rethrows the original Error if the RPC returned an Error,
- * and otherwise throws a new Error when the RPC returned an error-like value or null data.
- *
- * @param rpcName - Human-readable RPC identifier used in logs and error messages
- * @param rpcCall - Function that executes the RPC and resolves to an object with `data` (T or null) and `error` (any)
- * @param reqLogger - Request-scoped logger (result of `logger.child(...)`) used to record RPC failures
- * @returns The RPC `data` when the call succeeds
- */
-async function executeRpcWithLogging<T>(
-  rpcName: string,
-  rpcCall: () => PromiseLike<{ data: null | T; error: unknown }>,
-  reqLogger: ReturnType<typeof logger.child>
-): Promise<T> {
-  const { data, error } = await rpcCall();
-  if ((error !== null && error !== undefined) || data == null) {
-    if (error !== null && error !== undefined) {
-      const normalized = normalizeError(error, `${rpcName} failed`);
-      reqLogger.error({ err: normalized, rpcName }, 'RPC call failed');
-      throw normalized;
-    } else {
-      reqLogger.error({ err: undefined, rpcName }, 'RPC returned null data without error');
-      throw new Error(`${rpcName} failed or returned null`);
-    }
-  }
-  return data;
 }
 
 /**
@@ -118,35 +89,41 @@ async function generateFeedPayload(
   supabase: ReturnType<typeof createSupabaseAnonClient>,
   reqLogger: ReturnType<typeof logger.child>
 ): Promise<{ contentType: string; source: string; xml: string }> {
+  const service = new ContentService(supabase);
+
   if (category === 'changelog') {
     if (type === 'rss') {
       const rpcArgs = {
         p_limit: FEED_LIMIT,
       } satisfies DatabaseGenerated['public']['Functions']['generate_changelog_rss_feed']['Args'];
-      const feedData = await executeRpcWithLogging<string>(
-        'generate_changelog_rss_feed',
-        () => supabase.rpc('generate_changelog_rss_feed', rpcArgs),
-        reqLogger
-      );
-      return {
-        xml: feedData,
-        contentType: 'application/rss+xml; charset=utf-8',
-        source: 'PostgreSQL changelog (rss)',
-      };
+      try {
+        const feedData = await service.generateChangelogRssFeed(rpcArgs);
+        return {
+          xml: feedData,
+          contentType: 'application/rss+xml; charset=utf-8',
+          source: 'PostgreSQL changelog (rss)',
+        };
+      } catch (error) {
+        const normalized = normalizeError(error, 'generate_changelog_rss_feed failed');
+        reqLogger.error({ err: normalized, rpcName: 'generate_changelog_rss_feed' }, 'RPC call failed');
+        throw normalized;
+      }
     }
     const rpcArgs2 = {
       p_limit: FEED_LIMIT,
     } satisfies DatabaseGenerated['public']['Functions']['generate_changelog_atom_feed']['Args'];
-    const feedData = await executeRpcWithLogging<string>(
-      'generate_changelog_atom_feed',
-      () => supabase.rpc('generate_changelog_atom_feed', rpcArgs2),
-      reqLogger
-    );
-    return {
-      xml: feedData,
-      contentType: 'application/atom+xml; charset=utf-8',
-      source: 'PostgreSQL changelog (atom)',
-    };
+    try {
+      const feedData = await service.generateChangelogAtomFeed(rpcArgs2);
+      return {
+        xml: feedData,
+        contentType: 'application/atom+xml; charset=utf-8',
+        source: 'PostgreSQL changelog (atom)',
+      };
+    } catch (error) {
+      const normalized = normalizeError(error, 'generate_changelog_atom_feed failed');
+      reqLogger.error({ err: normalized, rpcName: 'generate_changelog_atom_feed' }, 'RPC call failed');
+      throw normalized;
+    }
   }
 
   const typedCategory = category && category !== 'changelog' ? toContentCategory(category) : null;
@@ -156,32 +133,36 @@ async function generateFeedPayload(
       ...(typedCategory ? { p_category: typedCategory } : {}),
       p_limit: FEED_LIMIT,
     } satisfies DatabaseGenerated['public']['Functions']['generate_content_rss_feed']['Args'];
-    const feedData = await executeRpcWithLogging<string>(
-      'generate_content_rss_feed',
-      () => supabase.rpc('generate_content_rss_feed', rpcArgs3),
-      reqLogger
-    );
-    return {
-      xml: feedData,
-      contentType: 'application/rss+xml; charset=utf-8',
-      source: category ? `PostgreSQL content (${category})` : 'PostgreSQL content (all categories)',
-    };
+    try {
+      const feedData = await service.generateContentRssFeed(rpcArgs3);
+      return {
+        xml: feedData,
+        contentType: 'application/rss+xml; charset=utf-8',
+        source: category ? `PostgreSQL content (${category})` : 'PostgreSQL content (all categories)',
+      };
+    } catch (error) {
+      const normalized = normalizeError(error, 'generate_content_rss_feed failed');
+      reqLogger.error({ err: normalized, rpcName: 'generate_content_rss_feed' }, 'RPC call failed');
+      throw normalized;
+    }
   }
 
   const rpcArgs4 = {
     ...(typedCategory ? { p_category: typedCategory } : {}),
     p_limit: FEED_LIMIT,
   } satisfies DatabaseGenerated['public']['Functions']['generate_content_atom_feed']['Args'];
-  const feedData = await executeRpcWithLogging<string>(
-    'generate_content_atom_feed',
-    () => supabase.rpc('generate_content_atom_feed', rpcArgs4),
-    reqLogger
-  );
-  return {
-    xml: feedData,
-    contentType: 'application/atom+xml; charset=utf-8',
-    source: category ? `PostgreSQL content (${category})` : 'PostgreSQL content (all categories)',
-  };
+  try {
+    const feedData = await service.generateContentAtomFeed(rpcArgs4);
+    return {
+      xml: feedData,
+      contentType: 'application/atom+xml; charset=utf-8',
+      source: category ? `PostgreSQL content (${category})` : 'PostgreSQL content (all categories)',
+    };
+  } catch (error) {
+    const normalized = normalizeError(error, 'generate_content_atom_feed failed');
+    reqLogger.error({ err: normalized, rpcName: 'generate_content_atom_feed' }, 'RPC call failed');
+    throw normalized;
+  }
 }
 
 export async function GET(request: NextRequest) {

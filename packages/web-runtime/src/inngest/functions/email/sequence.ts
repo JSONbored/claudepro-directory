@@ -5,6 +5,7 @@
  * Runs on a cron schedule (every 6 hours).
  */
 
+import { EmailService } from '@heyclaude/data-layer';
 import { normalizeError } from '@heyclaude/shared-runtime';
 
 import { inngest } from '../../client';
@@ -46,26 +47,29 @@ export const processEmailSequence = inngest.createFunction(
 
     // Step 1: Fetch due sequence emails
     const dueEmails = await step.run('fetch-due-emails', async (): Promise<SequenceEmailItem[]> => {
-      const { data, error } = await supabase.rpc('get_due_sequence_emails');
+      const service = new EmailService(supabase);
 
-      if (error) {
+      try {
+        const data = await service.getDueSequenceEmails();
+
+        // Map RPC result to our expected type, filtering out nulls
+        if (!Array.isArray(data)) return [];
+        
+        return data
+          .filter((item): item is { id: string; email: string; step: number } => 
+            item.id !== null && item.email !== null && item.step !== null
+          )
+          .map((item) => ({
+            id: item.id,
+            email: item.email,
+            step: item.step,
+          }));
+      } catch (error) {
+        const normalized = normalizeError(error, 'Failed to fetch due sequence emails');
         logger.warn({ ...logContext,
-          errorMessage: error.message, }, 'Failed to fetch due sequence emails');
+          err: normalized, }, 'Failed to fetch due sequence emails');
         return [];
       }
-
-      // Map RPC result to our expected type, filtering out nulls
-      if (!Array.isArray(data)) return [];
-      
-      return data
-        .filter((item): item is { id: string; email: string; step: number } => 
-          item.id !== null && item.email !== null && item.step !== null
-        )
-        .map((item) => ({
-          id: item.id,
-          email: item.email,
-          step: item.step,
-        }));
     });
 
     if (dueEmails.length === 0) {
@@ -135,27 +139,19 @@ async function processSequenceEmail(
 ): Promise<void> {
   const { email, step, id: sequenceEmailId } = emailItem;
 
+  const service = new EmailService(supabase);
+
   // IDEMPOTENCY: First, atomically claim this email by updating the step
   // This prevents duplicate sends if the function retries after sending but before updating
   // We use a conditional update that only succeeds if current_step matches expected value
-  const { data: claimResult, error: claimError } = await supabase
-    .from('email_sequences')
-    .update({
-      current_step: step + 1,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', sequenceEmailId)
-    .eq('current_step', step) // Only update if step hasn't changed (idempotency check)
-    .select('id')
-    .single();
+  const claimResult = await service.claimEmailSequenceStep(sequenceEmailId, step);
 
-  if (claimError || !claimResult) {
-    // Either already processed (step changed) or DB error
-    // If step changed, this is a duplicate - skip silently
+  if (!claimResult) {
+    // Already claimed or not found - skip silently (expected for duplicates)
     logger.info({ ...logContext,
       sequenceId: sequenceEmailId,
       step,
-      reason: claimError?.code === 'PGRST116' ? 'already_processed' : 'claim_failed', }, 'Sequence email already claimed or not found, skipping');
+      reason: 'already_processed', }, 'Sequence email already claimed or not found, skipping');
     return; // Don't throw - this is expected for duplicates
   }
 
@@ -197,12 +193,7 @@ async function processSequenceEmail(
   }
 
   // Update last_sent_at to track successful delivery
-  await supabase
-    .from('email_sequences')
-    .update({
-      last_sent_at: new Date().toISOString(),
-    })
-    .eq('id', sequenceEmailId);
+  await service.updateEmailSequenceLastSent(sequenceEmailId);
 
   logger.info({ ...logContext,
     email, // Auto-hashed by pino redaction

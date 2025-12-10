@@ -11,6 +11,7 @@ import type { Database as DatabaseGenerated, Json } from '@heyclaude/database-ty
 import { Constants } from '@heyclaude/database-types';
 import { normalizeError } from '@heyclaude/shared-runtime';
 
+import { SearchService } from '@heyclaude/data-layer';
 import { inngest } from '../../client';
 import { createSupabaseAdminClient } from '../../../supabase/admin';
 import { pgmqRead, pgmqDelete, type PgmqMessage } from '../../../supabase/pgmq-client';
@@ -147,27 +148,30 @@ export const processPulseQueue = inngest.createFunction(
             };
           });
 
-          const insertData: DatabaseGenerated['public']['Tables']['search_queries']['Insert'][] =
+          // Prepare search query inputs for batch RPC
+          const searchQueryInputs: DatabaseGenerated['public']['CompositeTypes']['search_query_input'][] =
             searchQueries.map((q) => ({
               query: q.query,
+              filters: q.filters,
               result_count: q.result_count,
               user_id: q.user_id,
               session_id: q.session_id,
-              ...(q.filters ? { filters: q.filters } : {}),
             }));
 
-          const { error } = await supabase.from('search_queries').insert(insertData);
-
-          if (error) {
-            throw error;
-          }
+          const service = new SearchService(supabase);
+          const result = await service.batchInsertSearchQueries({
+            p_queries: searchQueryInputs,
+          });
 
           // Mark these messages as processed
           for (const msg of searchEvents) {
             processedMsgIds.push(msg.msg_id);
           }
 
-          return { inserted: searchQueries.length, failed: 0 };
+          const inserted = result?.inserted ?? 0;
+          const failed = result?.failed ?? 0;
+
+          return { inserted, failed };
         } catch (error) {
           const normalized = normalizeError(error, 'Search events batch insert failed');
           logger.warn({ ...logContext,

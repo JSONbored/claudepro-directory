@@ -1069,6 +1069,7 @@ export default tseslint.config(
       'architectural-rules/require-request-validation-in-api-routes': 'error',
       'architectural-rules/require-cors-headers-for-public-apis': 'off',
       'architectural-rules/no-long-running-operations-in-edge-functions': 'off',
+      'architectural-rules/no-direct-rpc-calls-in-api-routes': 'error',
 
       // Testing & Quality Rules
       'architectural-rules/require-test-file-for-complex-functions': 'off',
@@ -1428,6 +1429,7 @@ export default tseslint.config(
       'architectural-rules/require-error-handler': 'error',
       'architectural-rules/no-direct-auth-getuser': 'error',
       'architectural-rules/no-data-layer-violations': 'error',
+      'architectural-rules/no-direct-rpc-calls-in-api-routes': 'error',
       'architectural-rules/require-pino-object-first-api': 'error', // Pino uses object-first API
       'architectural-rules/require-await-log-error': 'error',
       'architectural-rules/require-normalize-error': 'error', // Consolidated rule

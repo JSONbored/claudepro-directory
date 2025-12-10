@@ -22,6 +22,7 @@
 import type { Database as DatabaseGenerated, Json } from '@heyclaude/database-types';
 import { normalizeError } from '@heyclaude/shared-runtime';
 
+import { MiscService } from '@heyclaude/data-layer';
 import { inngest } from '../../client';
 import { createSupabaseAdminClient } from '../../../supabase/admin';
 import { logger, createWebAppContextWithId } from '../../../logging/server';
@@ -219,14 +220,8 @@ export const handlePolarWebhook = inngest.createFunction(
       await step.run('update-webhook-status', async () => {
         try {
           const supabase = createSupabaseAdminClient();
-
-          await supabase
-            .from('webhook_events')
-            .update({
-              processed_at: new Date().toISOString(),
-              status: 'processed' as const,
-            })
-            .eq('id', webhookId);
+          const service = new MiscService(supabase);
+          await service.updateWebhookEventStatus(webhookId);
 
           logger.info({ ...logContext,
             webhookId,

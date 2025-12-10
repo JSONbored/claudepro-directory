@@ -9,71 +9,96 @@ import  { type Database } from '@heyclaude/database-types';
 import  { type SupabaseClient } from '@supabase/supabase-js';
 
 import { logRpcError } from '../utils/rpc-error-logging.ts';
+import { withSmartCache } from '../utils/request-cache.ts';
 
 export class ChangelogService {
   constructor(private supabase: SupabaseClient<Database>) {}
 
   /**
    * Calls the database RPC: get_changelog_overview
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getChangelogOverview(args: Database['public']['Functions']['get_changelog_overview']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('get_changelog_overview', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_changelog_overview',
-          operation: 'ChangelogService.getChangelogOverview',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_changelog_overview',
+      'getChangelogOverview',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_changelog_overview', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_changelog_overview',
+              operation: 'ChangelogService.getChangelogOverview',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: get_changelog_detail
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getChangelogDetail(args: Database['public']['Functions']['get_changelog_detail']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('get_changelog_detail', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_changelog_detail',
-          operation: 'ChangelogService.getChangelogDetail',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_changelog_detail',
+      'getChangelogDetail',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_changelog_detail', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_changelog_detail',
+              operation: 'ChangelogService.getChangelogDetail',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: get_changelog_with_category_stats
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getChangelogWithCategoryStats(args: Database['public']['Functions']['get_changelog_with_category_stats']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('get_changelog_with_category_stats', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_changelog_with_category_stats',
-          operation: 'ChangelogService.getChangelogWithCategoryStats',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_changelog_with_category_stats',
+      'getChangelogWithCategoryStats',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_changelog_with_category_stats', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_changelog_with_category_stats',
+              operation: 'ChangelogService.getChangelogWithCategoryStats',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**

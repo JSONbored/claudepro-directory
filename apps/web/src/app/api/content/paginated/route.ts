@@ -4,6 +4,7 @@
  */
 
 import 'server-only';
+import { ContentService } from '@heyclaude/data-layer';
 import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
@@ -41,18 +42,32 @@ async function getCachedPaginatedContent(params: {
   cacheLife({ stale: 86400, revalidate: 21600, expire: 2592000 }); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
   const supabase = createSupabaseAnonClient();
+  const service = new ContentService(supabase);
   const rpcArgs: DatabaseGenerated['public']['Functions']['get_content_paginated_slim']['Args'] = {
     ...(params.category === undefined ? {} : { p_category: params.category }),
     p_limit: params.limit,
     p_offset: params.offset,
   };
 
-  const { data, error } = await supabase.rpc('get_content_paginated_slim', rpcArgs);
-
-  return {
-    data,
-    error: error ? { message: error.message, code: error.code } : null,
-  };
+  try {
+    const data = await service.getContentPaginatedSlim(rpcArgs);
+    return {
+      data,
+      error: null,
+    };
+  } catch (error) {
+    // Service method already logs the error, just return it in the expected format
+    const normalized = normalizeError(error, 'Content paginated RPC error');
+    // Extract code from original error if it's a Supabase error
+    const code = error && typeof error === 'object' && 'code' in error ? String(error.code) : undefined;
+    return {
+      data: null,
+      error: {
+        message: normalized.message,
+        ...(code !== undefined && { code }),
+      },
+    };
+  }
 }
 
 /**
@@ -143,16 +158,6 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       const normalizedError = normalizeError(error, 'Content paginated RPC error');
-      reqLogger.error(
-        {
-          err: normalizedError,
-          rpcName: 'get_content_paginated_slim',
-          offset: offsetParam,
-          limit: limitParam,
-          category: category ?? 'all',
-        },
-        'Content paginated RPC error'
-      );
       reqLogger.error(
         {
           err: normalizedError,

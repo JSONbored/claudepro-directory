@@ -4,6 +4,7 @@
  */
 
 import 'server-only';
+import { MiscService } from '@heyclaude/data-layer';
 import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { getStringProperty, getNumberProperty, getObjectProperty } from '@heyclaude/shared-runtime';
 import { logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
@@ -179,17 +180,21 @@ export async function GET(_request: NextRequest) {
     reqLogger.info({}, 'Status/health check request received');
 
     const supabase = createSupabaseAnonClient();
-    const { data, error } = await supabase.rpc('get_api_health');
+    const service = new MiscService(supabase);
 
-    if (error) {
+    let data;
+    try {
+      data = await service.getApiHealth();
+    } catch (error) {
+      const normalized = normalizeError(error, 'Health check RPC error');
       reqLogger.error(
         {
-          err: normalizeError(error),
+          err: normalized,
           rpcName: 'get_api_health',
         },
         'Health check RPC error'
       );
-      return createErrorResponse(error, {
+      return createErrorResponse(normalized, {
         route: '/api/status',
         operation: 'StatusAPI',
         method: 'GET',

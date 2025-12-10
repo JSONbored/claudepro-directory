@@ -1,4 +1,5 @@
 import 'server-only';
+import { SearchService } from '@heyclaude/data-layer';
 import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { validateLimit, validateQueryString } from '@heyclaude/shared-runtime';
 import { logger, createErrorResponse, normalizeError } from '@heyclaude/web-runtime/logging/server';
@@ -28,15 +29,14 @@ async function getCachedSearchSuggestions(query: string, limit: number) {
   cacheLife('quarter'); // 15min stale, 5min revalidate, 2hr expire - More dynamic than static content
 
   const supabase = createSupabaseAnonClient();
+  const service = new SearchService(supabase);
   const rpcArgs: DatabaseGenerated['public']['Functions']['get_search_suggestions_from_history']['Args'] =
     {
       p_query: query,
       p_limit: limit,
     };
 
-  const { data, error } = await supabase.rpc('get_search_suggestions_from_history', rpcArgs);
-  if (error) throw error;
-  return data;
+  return await service.getSearchSuggestions(rpcArgs);
 }
 
 /**

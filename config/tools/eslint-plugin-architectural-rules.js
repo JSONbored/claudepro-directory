@@ -2215,7 +2215,21 @@ export default {
             
             // Check for data layer service usage
             if (node.callee && node.callee.type === 'Identifier') {
-              const serviceNames = ['ContentService', 'AccountService', 'SearchService', 'JobsService'];
+              const serviceNames = [
+                'ContentService',
+                'AccountService',
+                'SearchService',
+                'JobsService',
+                'NewsletterService',
+                'MiscService',
+                'EmailService',
+                'CompaniesService',
+                'ChangelogService',
+                'CommunityService',
+                'SeoService',
+                'TrendingService',
+                'QuizService',
+              ];
               if (serviceNames.includes(node.callee.name)) {
                 hasDataLayer = true;
               }
@@ -2223,7 +2237,21 @@ export default {
             
             // Check for service instantiation: new ContentService(), etc.
             if (node.callee && node.callee.type === 'NewExpression' && node.callee.callee && node.callee.callee.type === 'Identifier') {
-              const serviceNames = ['ContentService', 'AccountService', 'SearchService', 'JobsService'];
+              const serviceNames = [
+                'ContentService',
+                'AccountService',
+                'SearchService',
+                'JobsService',
+                'NewsletterService',
+                'MiscService',
+                'EmailService',
+                'CompaniesService',
+                'ChangelogService',
+                'CommunityService',
+                'SeoService',
+                'TrendingService',
+                'QuizService',
+              ];
               if (serviceNames.includes(node.callee.callee.name)) {
                 hasDataLayer = true;
               }
@@ -2232,7 +2260,21 @@ export default {
           MemberExpression(node) {
             // Check for service method calls: service.getContent(), etc.
             if (node.object && node.object.type === 'Identifier' && node.property && node.property.type === 'Identifier') {
-              const serviceNames = ['contentService', 'accountService', 'searchService', 'jobsService'];
+              const serviceNames = [
+                'contentService',
+                'accountService',
+                'searchService',
+                'jobsService',
+                'newsletterService',
+                'miscService',
+                'emailService',
+                'companiesService',
+                'changelogService',
+                'communityService',
+                'seoService',
+                'trendingService',
+                'quizService',
+              ];
               if (serviceNames.includes(node.object.name)) {
                 hasDataLayer = true;
               }
@@ -2240,6 +2282,145 @@ export default {
           },
           'Program:exit'() {
             if (hasDirectAccess && !hasDataLayer) {
+              context.report({
+                node: ast,
+                messageId: 'useDataLayer',
+              });
+            }
+          },
+        };
+      },
+    },
+    'no-direct-rpc-calls-in-api-routes': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'Prevent direct Supabase RPC calls in API routes (should use data layer services)',
+          category: 'Best Practices',
+          recommended: true,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          useDataLayer:
+            'Direct RPC calls (supabase.rpc()) in API routes are not allowed. Use data layer services (e.g., ContentService, MiscService) instead of direct supabase.rpc() calls.',
+        },
+      },
+      create(context) {
+        const filename = context.getFilename();
+        const sourceCode = context.getSourceCode();
+        const ast = sourceCode.ast;
+
+        // Only apply to API route files
+        const isApiRouteFile =
+          (filename.includes('/app/api/') || filename.includes('/api/')) &&
+          filename.endsWith('route.ts') &&
+          !filename.includes('.test.') &&
+          !filename.includes('.spec.');
+
+        if (!isApiRouteFile) {
+          return {};
+        }
+
+        let hasDirectRpc = false;
+        let hasDataLayer = false;
+
+        return {
+          CallExpression(node) {
+            // Check for direct RPC calls: supabase.rpc()
+            if (node.callee && node.callee.type === 'MemberExpression') {
+              const obj = node.callee.object;
+              const prop = node.callee.property;
+              
+              if (obj && prop && prop.type === 'Identifier' && prop.name === 'rpc') {
+                // Check if parent is a member expression with supabase
+                let current = obj;
+                while (current && current.type === 'MemberExpression') {
+                  if (current.object && current.object.type === 'Identifier' && 
+                      (current.object.name === 'supabase' || current.object.name.toLowerCase().includes('supabase'))) {
+                    hasDirectRpc = true;
+                    break;
+                  }
+                  current = current.object;
+                }
+                
+                // Also check direct supabase.rpc() pattern
+                if (obj && obj.type === 'Identifier' && 
+                    (obj.name === 'supabase' || obj.name.toLowerCase().includes('supabase'))) {
+                  hasDirectRpc = true;
+                }
+              }
+            }
+            
+            // Check for data layer service usage
+            if (node.callee && node.callee.type === 'Identifier') {
+              const serviceNames = [
+                'ContentService',
+                'AccountService',
+                'SearchService',
+                'JobsService',
+                'NewsletterService',
+                'MiscService',
+                'EmailService',
+                'CompaniesService',
+                'ChangelogService',
+                'CommunityService',
+                'SeoService',
+                'TrendingService',
+                'QuizService',
+              ];
+              if (serviceNames.includes(node.callee.name)) {
+                hasDataLayer = true;
+              }
+            }
+            
+            // Check for service instantiation: new ContentService(), etc.
+            if (node.callee && node.callee.type === 'NewExpression' && node.callee.callee && node.callee.callee.type === 'Identifier') {
+              const serviceNames = [
+                'ContentService',
+                'AccountService',
+                'SearchService',
+                'JobsService',
+                'NewsletterService',
+                'MiscService',
+                'EmailService',
+                'CompaniesService',
+                'ChangelogService',
+                'CommunityService',
+                'SeoService',
+                'TrendingService',
+                'QuizService',
+              ];
+              if (serviceNames.includes(node.callee.callee.name)) {
+                hasDataLayer = true;
+              }
+            }
+          },
+          MemberExpression(node) {
+            // Check for service method calls: service.getContent(), etc.
+            if (node.object && node.object.type === 'Identifier' && node.property && node.property.type === 'Identifier') {
+              const serviceNames = [
+                'contentService',
+                'accountService',
+                'searchService',
+                'jobsService',
+                'newsletterService',
+                'miscService',
+                'emailService',
+                'companiesService',
+                'changelogService',
+                'communityService',
+                'seoService',
+                'trendingService',
+                'quizService',
+              ];
+              if (serviceNames.includes(node.object.name)) {
+                hasDataLayer = true;
+              }
+            }
+          },
+          'Program:exit'() {
+            if (hasDirectRpc && !hasDataLayer) {
               context.report({
                 node: ast,
                 messageId: 'useDataLayer',

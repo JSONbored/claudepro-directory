@@ -9,6 +9,7 @@
  * @see https://www.inngest.com/docs/features/inngest-functions/steps-workflows/wait-for-event
  */
 
+import { JobsService, NewsletterService } from '@heyclaude/data-layer';
 import { inngest } from '../../client';
 import { createSupabaseAdminClient } from '../../../supabase/admin';
 import { sendEmail } from '../../../integrations/resend';
@@ -129,14 +130,11 @@ export const newsletterDripCampaign = inngest.createFunction(
 
     const stillSubscribed = await step.run('check-subscription', async () => {
       const supabase = createSupabaseAdminClient();
-      const { data } = await supabase
-        .from('newsletter_subscriptions')
-        .select('status')
-        .eq('email', email)
-        .single();
+      const newsletterService = new NewsletterService(supabase);
+      const subscription = await newsletterService.getSubscriptionStatusByEmail(email);
 
       // Check if status is a valid active status
-      const status = data?.status;
+      const status = subscription?.status;
       return status !== 'unsubscribed' && status !== 'bounced' && status !== 'complained';
     });
 
@@ -237,13 +235,8 @@ export const jobPostingDripCampaign = inngest.createFunction(
 
     const jobStats = await step.run('get-job-stats', async () => {
       const supabase = createSupabaseAdminClient();
-      const { data } = await supabase
-        .from('jobs')
-        .select('view_count, click_count, status')
-        .eq('id', jobId)
-        .single();
-
-      return data;
+      const jobsService = new JobsService(supabase);
+      return await jobsService.getJobStatsById(jobId);
     });
 
     if (jobStats && jobStats.status === 'active') {
@@ -270,11 +263,8 @@ export const jobPostingDripCampaign = inngest.createFunction(
       // Check if job is still active
       const stillActive = await step.run('check-job-status', async () => {
         const supabase = createSupabaseAdminClient();
-        const { data } = await supabase
-          .from('jobs')
-          .select('status, expires_at')
-          .eq('id', jobId)
-          .single();
+        const jobsService = new JobsService(supabase);
+        const data = await jobsService.getJobStatusById(jobId);
 
         return data?.status === 'active';
       });

@@ -9,28 +9,37 @@ import  { type Database } from '@heyclaude/database-types';
 import  { type SupabaseClient } from '@supabase/supabase-js';
 
 import { logRpcError } from '../utils/rpc-error-logging.ts';
+import { withSmartCache } from '../utils/request-cache.ts';
 
 export class SeoService {
   constructor(private supabase: SupabaseClient<Database>) {}
 
   /**
    * Calls the database RPC: generate_metadata_complete
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async generateMetadata(args: Database['public']['Functions']['generate_metadata_complete']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('generate_metadata_complete', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'generate_metadata_complete',
-          operation: 'SeoService.generateMetadata',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'generate_metadata_complete',
+      'generateMetadata',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('generate_metadata_complete', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'generate_metadata_complete',
+              operation: 'SeoService.generateMetadata',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 }

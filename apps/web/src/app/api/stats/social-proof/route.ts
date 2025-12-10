@@ -10,6 +10,7 @@
  * Runtime: Node.js (required for Supabase client)
  * Caching: 5 minutes via Cache-Control headers (s-maxage=300)
  */
+import { MiscService } from '@heyclaude/data-layer';
 import { type Database } from '@heyclaude/database-types';
 import { logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
 import { createSupabaseAdminClient } from '@heyclaude/web-runtime/server';
@@ -32,14 +33,11 @@ async function getCachedSocialProofData(): Promise<{
   cacheLife('quarter'); // 15min stale, 5min revalidate, 2hr expire - Stats change frequently (defined in next.config.mjs)
 
   const supabase = createSupabaseAdminClient();
+  const service = new MiscService(supabase);
 
   // Use database RPC to do all aggregations in database (much faster than multiple queries + client-side processing)
   // RPC has two overloads - we're calling with no args, so we get the first overload's return type
-  const { data, error } = await supabase.rpc('get_social_proof_stats');
-
-  if (error) {
-    throw error;
-  }
+  const data = await service.getSocialProofStats();
 
   // Extract the first overload's return type (no args version)
   // The function has two overloads, but when called with no args, TypeScript infers the first one

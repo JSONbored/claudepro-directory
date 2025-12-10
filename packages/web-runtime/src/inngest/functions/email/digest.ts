@@ -8,6 +8,7 @@
  * Runs on a cron schedule (Mondays at 9am UTC)
  */
 
+import { MiscService, NewsletterService } from '@heyclaude/data-layer';
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { normalizeError } from '@heyclaude/shared-runtime';
 
@@ -49,11 +50,8 @@ export const sendWeeklyDigest = inngest.createFunction(
       hoursSinceLastRun?: number;
       nextAllowedAt?: string;
     }> => {
-      const { data: lastRunData } = await supabase
-        .from('app_settings')
-        .select('setting_value, updated_at')
-        .eq('setting_key', 'last_digest_email_timestamp')
-        .single();
+      const service = new MiscService(supabase);
+      const lastRunData = await service.getAppSetting('last_digest_email_timestamp');
 
       if (lastRunData?.setting_value) {
         const lastRunTimestamp = new Date(lastRunData.setting_value as string);
@@ -115,15 +113,17 @@ export const sendWeeklyDigest = inngest.createFunction(
 
     // Step 3: Fetch subscribers
     const subscribers = await step.run('fetch-subscribers', async (): Promise<string[]> => {
-      const { data, error } = await supabase.rpc('get_active_subscribers');
+      const newsletterService = new NewsletterService(supabase);
 
-      if (error) {
+      try {
+        const data = await newsletterService.getActiveSubscribers();
+        return data || [];
+      } catch (error) {
+        const normalized = normalizeError(error, 'Failed to fetch subscribers');
         logger.warn({ ...logContext,
-          errorMessage: error.message, }, 'Failed to fetch subscribers');
+          err: normalized, }, 'Failed to fetch subscribers');
         return [];
       }
-
-      return data || [];
     });
 
     if (subscribers.length === 0) {
@@ -145,22 +145,24 @@ export const sendWeeklyDigest = inngest.createFunction(
 
     // Step 5: Update last run timestamp
     await step.run('update-timestamp', async () => {
+      const service = new MiscService(supabase);
       const currentTimestamp = new Date().toISOString();
       
-      const { error } = await supabase.from('app_settings').upsert({
-        setting_key: 'last_digest_email_timestamp',
-        setting_value: currentTimestamp,
-        setting_type: 'string',
-        environment: 'production',
-        enabled: true,
-        description: 'Timestamp of last successful weekly digest email send',
-        category: 'config',
-        version: 1,
-      });
-
-      if (error) {
+      try {
+        await service.upsertAppSetting({
+          setting_key: 'last_digest_email_timestamp',
+          setting_value: currentTimestamp,
+          setting_type: 'string',
+          environment: 'production',
+          enabled: true,
+          description: 'Timestamp of last successful weekly digest email send',
+          category: 'config',
+          version: 1,
+        });
+      } catch (error) {
+        const normalized = normalizeError(error, 'Failed to update digest timestamp');
         logger.warn({ ...logContext,
-          errorMessage: error.message, }, 'Failed to update digest timestamp');
+          err: normalized, }, 'Failed to update digest timestamp');
       }
     });
 

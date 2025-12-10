@@ -5,6 +5,7 @@
  * Used for system announcements, feature releases, etc.
  */
 
+import { MiscService } from '@heyclaude/data-layer';
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 
@@ -112,15 +113,8 @@ export const createNotification = inngest.createFunction(
         notificationData.action_href = action_href;
       }
 
-      const { data, error } = await supabase
-        .from('notifications')
-        .insert(notificationData)
-        .select('id')
-        .single();
-
-      if (error) {
-        throw new Error(`Notification insert failed: ${error.message}`);
-      }
+      const service = new MiscService(supabase);
+      const data = await service.insertNotification(notificationData);
 
       return { id: data.id };
     });
@@ -221,15 +215,8 @@ export const broadcastNotification = inngest.createFunction(
         notificationData.action_href = action_href;
       }
 
-      const { data, error } = await supabase
-        .from('notifications')
-        .insert(notificationData)
-        .select('id')
-        .single();
-
-      if (error) {
-        throw new Error(`Broadcast notification insert failed: ${error.message}`);
-      }
+      const service = new MiscService(supabase);
+      const data = await service.insertNotification(notificationData);
 
       return { id: data.id };
     });

@@ -4,6 +4,7 @@
  */
 
 import 'server-only';
+import { CompaniesService } from '@heyclaude/data-layer';
 import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
 import {
@@ -31,19 +32,12 @@ async function getCachedCompanyProfile(slug: string): Promise<{
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
   const supabase = createSupabaseAnonClient();
+  const service = new CompaniesService(supabase);
   const rpcArgs = {
     p_slug: slug,
   } satisfies DatabaseGenerated['public']['Functions']['get_company_profile']['Args'];
 
-  const { data, error } = await supabase.rpc('get_company_profile', rpcArgs);
-
-  if (error) {
-    // Throw error immediately to prevent caching error responses
-    throw new Error(error.message || 'Company profile RPC error', {
-      cause: { code: error.code, message: error.message },
-    });
-  }
-
+  const data = await service.getCompanyProfile(rpcArgs);
   return { data };
 }
 

@@ -309,16 +309,13 @@ export const trackSponsoredImpression = optionalAuthAction
 
     const { createSupabaseServerClient } = await import('../supabase/server.ts');
     const supabase = await createSupabaseServerClient();
+    const { MiscService } = await import('@heyclaude/data-layer');
+    const service = new MiscService(supabase);
 
-    const { data: sponsoredContent, error } = await supabase
-      .from('sponsored_content')
-      .select('content_type')
-      .eq('id', parsedInput.sponsoredId)
-      .single();
+    const sponsoredContent = await service.getSponsoredContentById(parsedInput.sponsoredId);
 
-    if (error || !sponsoredContent) {
-      logger.warn({ sponsored_id: parsedInput.sponsoredId,
-        error: error?.message ?? 'Not found', }, 'Failed to fetch sponsored content for tracking');
+    if (!sponsoredContent) {
+      logger.warn({ sponsored_id: parsedInput.sponsoredId }, 'Failed to fetch sponsored content for tracking');
       return;
     }
 
@@ -348,16 +345,13 @@ export const trackSponsoredClick = optionalAuthAction
 
     const { createSupabaseServerClient } = await import('../supabase/server.ts');
     const supabase = await createSupabaseServerClient();
+    const { MiscService } = await import('@heyclaude/data-layer');
+    const service = new MiscService(supabase);
 
-    const { data: sponsoredContent, error } = await supabase
-      .from('sponsored_content')
-      .select('content_type')
-      .eq('id', parsedInput.sponsoredId)
-      .single();
+    const sponsoredContent = await service.getSponsoredContentById(parsedInput.sponsoredId);
 
-    if (error || !sponsoredContent) {
-      logger.warn({ sponsored_id: parsedInput.sponsoredId,
-        error: error?.message ?? 'Not found', }, 'Failed to fetch sponsored content for tracking');
+    if (!sponsoredContent) {
+      logger.warn({ sponsored_id: parsedInput.sponsoredId }, 'Failed to fetch sponsored content for tracking');
       return;
     }
 

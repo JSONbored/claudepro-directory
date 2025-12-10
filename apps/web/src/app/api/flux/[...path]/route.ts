@@ -4,8 +4,6 @@
  * Handles all flux operations via dynamic routing:
  * - GET  /api/flux/email/count           -> Newsletter subscriber count
  * - POST /api/flux/discord/direct        -> Send Discord notification
- * - GET  /api/flux/notifications/active  -> Get active notifications
- * - POST /api/flux/notifications/dismiss -> Dismiss notifications
  * - POST /api/flux/revalidation          -> Process revalidation queue
  * - POST /api/flux/webhook/external      -> Process external webhooks
  *

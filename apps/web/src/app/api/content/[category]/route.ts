@@ -34,14 +34,8 @@ async function getCachedCategoryContent(
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
 
   const supabase = createSupabaseAnonClient();
-  // Use RPC function for better performance and consistent architecture
-  // Use generated types directly from database
-  const { data, error } = await supabase.rpc('get_category_content_list', {
-    p_category: category,
-  });
-
-  if (error) throw error;
-  return data;
+  const service = new ContentService(supabase);
+  return await service.getCategoryContentList({ p_category: category });
 }
 
 /**

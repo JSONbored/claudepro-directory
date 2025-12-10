@@ -9,65 +9,176 @@ import  { type Database } from '@heyclaude/database-types';
 import  { type SupabaseClient } from '@supabase/supabase-js';
 
 import { logRpcError } from '../utils/rpc-error-logging.ts';
+import { withSmartCache } from '../utils/request-cache.ts';
 
 export class SearchService {
   constructor(private supabase: SupabaseClient<Database>) {}
 
   /**
    * Calls the database RPC: search_unified
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async searchUnified(args: Database['public']['Functions']['search_unified']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('search_unified', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'search_unified',
-          operation: 'SearchService.searchUnified',
-          args: args,
-        });
-        throw error;
-      }
-      // RPC can return null if no results or on error - normalize to empty array
-      const rows = Array.isArray(data) ? data : (data === null || data === undefined ? [] : [data]);
-      return { data: rows, total_count: rows.length };
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'search_unified',
+      'searchUnified',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('search_unified', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'search_unified',
+              operation: 'SearchService.searchUnified',
+              args: args,
+            });
+            throw error;
+          }
+          // RPC can return null if no results or on error - normalize to empty array
+          const rows = Array.isArray(data) ? data : (data === null || data === undefined ? [] : [data]);
+          return { data: rows, total_count: rows.length };
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: search_content_optimized
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async searchContent(args: Database['public']['Functions']['search_content_optimized']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('search_content_optimized', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'search_content_optimized',
-          operation: 'SearchService.searchContent',
-          args: args,
-        });
-        throw error;
-      }
-      const rows = data;
-      return { data: rows, total_count: rows?.length ?? 0 };
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'search_content_optimized',
+      'searchContent',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('search_content_optimized', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'search_content_optimized',
+              operation: 'SearchService.searchContent',
+              args: args,
+            });
+            throw error;
+          }
+          const rows = data;
+          return { data: rows, total_count: rows?.length ?? 0 };
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: filter_jobs
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async filterJobs(args: Database['public']['Functions']['filter_jobs']['Args']) {
+    return withSmartCache(
+      'filter_jobs',
+      'filterJobs',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('filter_jobs', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'filter_jobs',
+              operation: 'SearchService.filterJobs',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
+  }
+
+  /**
+   * Calls the database RPC: get_search_facets
+   * Returns search facets including categories, tags, authors, and content counts
+   * Uses request-scoped caching to avoid duplicate calls within the same request
+   */
+  async getSearchFacets() {
+    return withSmartCache(
+      'get_search_facets',
+      'getSearchFacets',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_search_facets');
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_search_facets',
+              operation: 'SearchService.getSearchFacets',
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      undefined
+    );
+  }
+
+  /**
+   * Calls the database RPC: get_search_suggestions_from_history
+   * Returns search suggestions based on historical search queries
+   * Uses request-scoped caching to avoid duplicate calls within the same request
+   */
+  async getSearchSuggestions(
+    args: Database['public']['Functions']['get_search_suggestions_from_history']['Args']
+  ) {
+    return withSmartCache(
+      'get_search_suggestions_from_history',
+      'getSearchSuggestions',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_search_suggestions_from_history', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_search_suggestions_from_history',
+              operation: 'SearchService.getSearchSuggestions',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
+  }
+
+  /**
+   * Calls the database RPC: batch_insert_search_queries
+   * Batch inserts search queries with error handling
+   * Returns result with inserted/failed counts and error details
+   */
+  async batchInsertSearchQueries(
+    args: Database['public']['Functions']['batch_insert_search_queries']['Args']
+  ): Promise<Database['public']['Functions']['batch_insert_search_queries']['Returns']> {
     try {
-      const { data, error } = await this.supabase.rpc('filter_jobs', args);
+      const { data, error } = await this.supabase.rpc('batch_insert_search_queries', args);
       if (error) {
         logRpcError(error, {
-          rpcName: 'filter_jobs',
-          operation: 'SearchService.filterJobs',
+          rpcName: 'batch_insert_search_queries',
+          operation: 'SearchService.batchInsertSearchQueries',
           args: args,
         });
         throw error;

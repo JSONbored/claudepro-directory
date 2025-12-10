@@ -1,4 +1,5 @@
 import 'server-only';
+import { SearchService } from '@heyclaude/data-layer';
 import { logger, createErrorResponse, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   createSupabaseAnonClient,
@@ -22,9 +23,8 @@ async function getCachedSearchFacets() {
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
 
   const supabase = createSupabaseAnonClient();
-  const { data, error } = await supabase.rpc('get_search_facets');
-  if (error) throw error;
-  return data;
+  const service = new SearchService(supabase);
+  return await service.getSearchFacets();
 }
 
 export async function GET(_request: NextRequest) {

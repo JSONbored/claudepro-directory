@@ -38,7 +38,6 @@ export * from './data/jobs.ts';
 export * from './data/payments.ts';
 export * from './data/community.ts';
 export * from './data/account.ts';
-export { getActiveNotifications } from './data/notifications.ts';
 export * from './data/announcements.ts';
 export * from './data/contact.ts';
 export * from './data/marketing.ts';

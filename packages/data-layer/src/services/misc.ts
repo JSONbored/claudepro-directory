@@ -9,65 +9,339 @@ import  { type Database } from '@heyclaude/database-types';
 import  { type SupabaseClient } from '@supabase/supabase-js';
 
 import { logRpcError } from '../utils/rpc-error-logging.ts';
+import { withSmartCache } from '../utils/request-cache.ts';
 
 export class MiscService {
   constructor(private supabase: SupabaseClient<Database>) {}
 
   /**
    * Calls the database RPC: get_active_notifications
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getActiveNotifications(args: Database['public']['Functions']['get_active_notifications']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('get_active_notifications', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_active_notifications',
-          operation: 'MiscService.getActiveNotifications',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_active_notifications',
+      'getActiveNotifications',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_active_notifications', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_active_notifications',
+              operation: 'MiscService.getActiveNotifications',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: get_active_announcement
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getActiveAnnouncement() {
-    try {
-      const { data, error } = await this.supabase.rpc('get_active_announcement');
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_active_announcement',
-          operation: 'MiscService.getActiveAnnouncement',
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_active_announcement',
+      'getActiveAnnouncement',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_active_announcement');
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_active_announcement',
+              operation: 'MiscService.getActiveAnnouncement',
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      undefined
+    );
   }
 
   /**
    * Calls the database RPC: get_contact_commands
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getContactCommands() {
+    return withSmartCache(
+      'get_contact_commands',
+      'getContactCommands',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_contact_commands');
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_contact_commands',
+              operation: 'MiscService.getContactCommands',
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      undefined
+    );
+  }
+
+  /**
+   * Calls the database RPC: get_form_field_config
+   * Uses request-scoped caching to avoid duplicate calls within the same request
+   */
+  async getFormFieldConfig(args: Database['public']['Functions']['get_form_field_config']['Args']) {
+    return withSmartCache(
+      'get_form_field_config',
+      'getFormFieldConfig',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_form_field_config', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_form_field_config',
+              operation: 'MiscService.getFormFieldConfig',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
+  }
+
+  /**
+   * Calls the database RPC: get_social_proof_stats
+   * Returns social proof statistics: contributors, submissions, success rate, and total users
+   * Uses request-scoped caching to avoid duplicate calls within the same request
+   */
+  async getSocialProofStats() {
+    return withSmartCache(
+      'get_social_proof_stats',
+      'getSocialProofStats',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_social_proof_stats');
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_social_proof_stats',
+              operation: 'MiscService.getSocialProofStats',
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      undefined
+    );
+  }
+
+  /**
+   * Calls the database RPC: get_api_health
+   * Returns API health status including database latency, content table count, and category configs count
+   * Uses request-scoped caching to avoid duplicate calls within the same request
+   */
+  async getApiHealth() {
+    return withSmartCache(
+      'get_api_health',
+      'getApiHealth',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_api_health');
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_api_health',
+              operation: 'MiscService.getApiHealth',
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      undefined
+    );
+  }
+
+  /**
+   * Calls the database RPC: get_site_urls
+   * Returns array of site URLs with metadata (path, lastmod, changefreq, priority) for sitemap generation
+   * Uses request-scoped caching to avoid duplicate calls within the same request
+   */
+  async getSiteUrls() {
+    return withSmartCache(
+      'get_site_urls',
+      'getSiteUrls',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_site_urls');
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_site_urls',
+              operation: 'MiscService.getSiteUrls',
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      undefined
+    );
+  }
+
+  /**
+   * Calls the database RPC: generate_sitemap_xml
+   * Returns complete sitemap XML string for the site
+   * Uses request-scoped caching to avoid duplicate calls within the same request
+   */
+  async generateSitemapXml(
+    args?: Database['public']['Functions']['generate_sitemap_xml']['Args']
+  ) {
+    return withSmartCache(
+      'generate_sitemap_xml',
+      'generateSitemapXml',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('generate_sitemap_xml', args ?? {});
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'generate_sitemap_xml',
+              operation: 'MiscService.generateSitemapXml',
+              args: args ?? {},
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args ?? {}
+    );
+  }
+
+  /**
+   * Gets sponsored content by ID
+   * Returns the content_type for the sponsored content entry
+   * Uses request-scoped caching to avoid duplicate calls within the same request
+   */
+  async getSponsoredContentById(sponsoredId: string): Promise<{
+    content_type: Database['public']['Tables']['sponsored_content']['Row']['content_type'];
+  } | null> {
+    return withSmartCache(
+      'sponsored_content.select',
+      'getSponsoredContentById',
+      async () => {
+        try {
+          const { data, error } = await this.supabase
+            .from('sponsored_content')
+            .select('content_type')
+            .eq('id', sponsoredId)
+            .single();
+
+          if (error) {
+            // Log error but don't throw - caller handles null case
+            logRpcError(error, {
+              rpcName: 'sponsored_content.select',
+              operation: 'MiscService.getSponsoredContentById',
+              args: { sponsoredId },
+            });
+            return null;
+          }
+
+          return data;
+        } catch (error) {
+          // Error already logged above
+          return null;
+        }
+      },
+      { sponsoredId }
+    );
+  }
+
+  /**
+   * Gets app setting by key
+   * Returns the setting value and updated_at for the given setting key
+   * Uses request-scoped caching to avoid duplicate calls within the same request
+   */
+  async getAppSetting(settingKey: string): Promise<{
+    setting_value: Database['public']['Tables']['app_settings']['Row']['setting_value'];
+    updated_at: Database['public']['Tables']['app_settings']['Row']['updated_at'];
+  } | null> {
+    return withSmartCache(
+      'app_settings.select',
+      'getAppSetting',
+      async () => {
+        try {
+          const { data, error } = await this.supabase
+            .from('app_settings')
+            .select('setting_value, updated_at')
+            .eq('setting_key', settingKey)
+            .single();
+
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'app_settings.select',
+              operation: 'MiscService.getAppSetting',
+              args: { settingKey },
+            });
+            return null;
+          }
+
+          return data;
+        } catch (error) {
+          // Error already logged above
+          return null;
+        }
+      },
+      { settingKey }
+    );
+  }
+
+  /**
+   * Upserts app setting
+   */
+  async upsertAppSetting(
+    setting: Database['public']['Tables']['app_settings']['Insert']
+  ): Promise<void> {
     try {
-      const { data, error } = await this.supabase.rpc('get_contact_commands');
+      const { error } = await this.supabase.from('app_settings').upsert(setting);
+
       if (error) {
         logRpcError(error, {
-          rpcName: 'get_contact_commands',
-          operation: 'MiscService.getContactCommands',
+          rpcName: 'app_settings.upsert',
+          operation: 'MiscService.upsertAppSetting',
+          args: { settingKey: setting.setting_key },
         });
         throw error;
       }
-      return data;
     } catch (error) {
       // Error already logged above
       throw error;
@@ -75,19 +349,167 @@ export class MiscService {
   }
 
   /**
-   * Calls the database RPC: get_form_field_config
+   * Gets email engagement summary by email
+   * Returns the full engagement summary record for the given email
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
-  async getFormFieldConfig(args: Database['public']['Functions']['get_form_field_config']['Args']) {
+  async getEmailEngagementSummary(email: string): Promise<
+    Database['public']['Tables']['email_engagement_summary']['Row'] | null
+  > {
+    return withSmartCache(
+      'email_engagement_summary.select',
+      'getEmailEngagementSummary',
+      async () => {
+        try {
+          const { data, error } = await this.supabase
+            .from('email_engagement_summary')
+            .select('*')
+            .eq('email', email)
+            .single();
+
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'email_engagement_summary.select',
+              operation: 'MiscService.getEmailEngagementSummary',
+              args: { email },
+            });
+            return null;
+          }
+
+          return data;
+        } catch (error) {
+          // Error already logged above
+          return null;
+        }
+      },
+      { email }
+    );
+  }
+
+  /**
+   * Upserts email engagement summary
+   */
+  async upsertEmailEngagementSummary(
+    engagement: Database['public']['Tables']['email_engagement_summary']['Insert']
+  ): Promise<void> {
     try {
-      const { data, error } = await this.supabase.rpc('get_form_field_config', args);
+      const { error } = await this.supabase
+        .from('email_engagement_summary')
+        .upsert(engagement, { onConflict: 'email' });
+
       if (error) {
         logRpcError(error, {
-          rpcName: 'get_form_field_config',
-          operation: 'MiscService.getFormFieldConfig',
-          args: args,
+          rpcName: 'email_engagement_summary.upsert',
+          operation: 'MiscService.upsertEmailEngagementSummary',
+          args: { email: engagement.email },
         });
         throw error;
       }
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
+  }
+
+  /**
+   * Upserts email blocklist entry
+   */
+  async upsertEmailBlocklist(
+    blocklistEntry: Database['public']['Tables']['email_blocklist']['Insert']
+  ): Promise<void> {
+    try {
+      const { error } = await this.supabase
+        .from('email_blocklist')
+        .upsert(blocklistEntry, { onConflict: 'email' });
+
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'email_blocklist.upsert',
+          operation: 'MiscService.upsertEmailBlocklist',
+          args: { email: blocklistEntry.email },
+        });
+        throw error;
+      }
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
+  }
+
+  /**
+   * Updates webhook event status to processed
+   */
+  async updateWebhookEventStatus(webhookId: string): Promise<void> {
+    try {
+      const { error } = await this.supabase
+        .from('webhook_events')
+        .update({
+          processed_at: new Date().toISOString(),
+          status: 'processed' as const,
+        })
+        .eq('id', webhookId);
+
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'webhook_events.update',
+          operation: 'MiscService.updateWebhookEventStatus',
+          args: { webhookId },
+        });
+        throw error;
+      }
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
+  }
+
+  /**
+   * Upserts notification (for admin/system notifications)
+   */
+  async upsertNotification(
+    notification: Database['public']['Tables']['notifications']['Insert']
+  ): Promise<void> {
+    try {
+      const { error } = await this.supabase
+        .from('notifications')
+        .upsert(notification, { onConflict: 'id' });
+
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'notifications.upsert',
+          operation: 'MiscService.upsertNotification',
+          args: { notificationId: notification.id },
+        });
+        throw error;
+      }
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
+  }
+
+  /**
+   * Inserts notification (for admin/system notifications)
+   */
+  async insertNotification(
+    notification: Database['public']['Tables']['notifications']['Insert']
+  ): Promise<Database['public']['Tables']['notifications']['Row']> {
+    try {
+      const { data, error } = await this.supabase
+        .from('notifications')
+        .insert(notification)
+        .select()
+        .single();
+
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'notifications.insert',
+          operation: 'MiscService.insertNotification',
+          args: { notificationId: notification.id },
+        });
+        throw error;
+      }
+
       return data;
     } catch (error) {
       // Error already logged above

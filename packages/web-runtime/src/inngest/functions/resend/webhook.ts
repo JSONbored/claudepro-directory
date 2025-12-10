@@ -18,6 +18,7 @@
  * @see https://resend.com/docs/webhooks
  */
 
+import { MiscService, NewsletterService } from '@heyclaude/data-layer';
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { normalizeError } from '@heyclaude/shared-runtime';
 
@@ -26,7 +27,6 @@ import { createSupabaseAdminClient } from '../../../supabase/admin';
 import { logger, createWebAppContextWithId } from '../../../logging/server';
 import { CONCURRENCY_LIMITS, RETRY_CONFIGS } from '../../config';
 
-type EmailEngagementSummary = DatabaseGenerated['public']['Tables']['email_engagement_summary']['Row'];
 type EmailEngagementInsert = DatabaseGenerated['public']['Tables']['email_engagement_summary']['Insert'];
 
 /**
@@ -62,14 +62,11 @@ async function incrementEngagementCounter(
   timestampField: 'last_sent_at' | 'last_delivered_at' | 'last_opened_at' | 'last_clicked_at',
   healthStatus?: string
 ): Promise<void> {
-  const { data: existing } = await supabase
-    .from('email_engagement_summary')
-    .select('*')
-    .eq('email', email)
-    .single();
+  const service = new MiscService(supabase);
+  const existing = await service.getEmailEngagementSummary(email);
 
   const now = new Date().toISOString();
-  const currentCount = (existing as EmailEngagementSummary | null)?.[counterField] ?? 0;
+  const currentCount = existing?.[counterField] ?? 0;
 
   const updateData: EmailEngagementInsert = {
     email,
@@ -90,7 +87,7 @@ async function incrementEngagementCounter(
 
   if (healthStatus) updateData.health_status = healthStatus;
 
-  await supabase.from('email_engagement_summary').upsert(updateData, { onConflict: 'email' });
+  await service.upsertEmailEngagementSummary(updateData);
 }
 
 /**
@@ -156,13 +153,8 @@ export const handleResendWebhook = inngest.createFunction(
           });
 
           await step.run(`update-subscription-delivered-${email}`, async () => {
-            await supabase
-              .from('newsletter_subscriptions')
-              .update({
-                last_email_sent_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-              })
-              .eq('email', email);
+            const newsletterService = new NewsletterService(supabase);
+            await newsletterService.updateLastEmailSentAt(email);
           });
         }
         break;
@@ -175,23 +167,14 @@ export const handleResendWebhook = inngest.createFunction(
           });
 
           await step.run(`update-engagement-opened-${email}`, async () => {
-            const { data: subscription } = await supabase
-              .from('newsletter_subscriptions')
-              .select('engagement_score')
-              .eq('email', email)
-              .single();
+            const newsletterService = new NewsletterService(supabase);
+            const subscription = await newsletterService.getSubscriptionEngagementScore(email);
 
             const currentScore = subscription?.engagement_score ?? 0;
             const newScore = Math.min(100, currentScore + 5);
 
-            await supabase
-              .from('newsletter_subscriptions')
-              .update({
-                last_active_at: new Date().toISOString(),
-                engagement_score: newScore,
-                updated_at: new Date().toISOString(),
-              })
-              .eq('email', email);
+            await newsletterService.updateLastActiveAt(email);
+            await newsletterService.updateEngagementScore(email, newScore);
           });
         }
         break;
@@ -204,23 +187,14 @@ export const handleResendWebhook = inngest.createFunction(
           });
 
           await step.run(`update-engagement-clicked-${email}`, async () => {
-            const { data: subscription } = await supabase
-              .from('newsletter_subscriptions')
-              .select('engagement_score')
-              .eq('email', email)
-              .single();
+            const newsletterService = new NewsletterService(supabase);
+            const subscription = await newsletterService.getSubscriptionEngagementScore(email);
 
             const currentScore = subscription?.engagement_score ?? 0;
             const newScore = Math.min(100, currentScore + 10);
 
-            await supabase
-              .from('newsletter_subscriptions')
-              .update({
-                last_active_at: new Date().toISOString(),
-                engagement_score: newScore,
-                updated_at: new Date().toISOString(),
-              })
-              .eq('email', email);
+            await newsletterService.updateLastActiveAt(email);
+            await newsletterService.updateEngagementScore(email, newScore);
           });
         }
         break;
@@ -231,46 +205,34 @@ export const handleResendWebhook = inngest.createFunction(
 
         for (const email of emails) {
           await step.run(`blocklist-bounce-${email}`, async () => {
-            const { error } = await supabase
-              .from('email_blocklist')
-              .upsert(
-                {
-                  email,
-                  reason: 'hard_bounce' as const,
-                  notes: `Bounced email_id: ${emailId}`,
-                  updated_at: new Date().toISOString(),
-                },
-                { onConflict: 'email' }
-              );
-
-            if (error) {
-              logger.warn({ ...logContext, email, errorMessage: error.message }, 'Failed to add to blocklist');
+            const service = new MiscService(supabase);
+            try {
+              await service.upsertEmailBlocklist({
+                email,
+                reason: 'hard_bounce' as const,
+                notes: `Bounced email_id: ${emailId}`,
+                updated_at: new Date().toISOString(),
+              });
+            } catch (error) {
+              const normalized = normalizeError(error, 'Failed to add to blocklist');
+              logger.warn({ err: normalized, ...logContext, email }, 'Failed to add to blocklist');
             }
           });
 
           await step.run(`update-subscription-bounced-${email}`, async () => {
-            await supabase
-              .from('newsletter_subscriptions')
-              .update({
-                status: 'bounced',
-                updated_at: new Date().toISOString(),
-              })
-              .eq('email', email);
+            const newsletterService = new NewsletterService(supabase);
+            await newsletterService.updateSubscriptionStatus(email, 'bounced');
           });
 
           await step.run(`update-engagement-bounced-${email}`, async () => {
-            await supabase
-              .from('email_engagement_summary')
-              .upsert(
-                {
-                  email,
-                  emails_bounced: 1,
-                  last_bounce_at: new Date().toISOString(),
-                  health_status: 'bounced',
-                  updated_at: new Date().toISOString(),
-                },
-                { onConflict: 'email' }
-              );
+            const service = new MiscService(supabase);
+            await service.upsertEmailEngagementSummary({
+              email,
+              emails_bounced: 1,
+              last_bounce_at: new Date().toISOString(),
+              health_status: 'bounced',
+              updated_at: new Date().toISOString(),
+            });
           });
         }
         break;
@@ -283,49 +245,35 @@ export const handleResendWebhook = inngest.createFunction(
 
         for (const email of emails) {
           await step.run(`blocklist-complaint-${email}`, async () => {
-            const { error } = await supabase
-              .from('email_blocklist')
-              .upsert(
-                {
-                  email,
-                  reason: 'spam_complaint' as const,
-                  notes: `Spam complaint for email_id: ${emailId}`,
-                  updated_at: new Date().toISOString(),
-                },
-                { onConflict: 'email' }
-              );
-
-            if (error) {
+            const service = new MiscService(supabase);
+            try {
+              await service.upsertEmailBlocklist({
+                email,
+                reason: 'spam_complaint' as const,
+                notes: `Spam complaint for email_id: ${emailId}`,
+                updated_at: new Date().toISOString(),
+              });
+            } catch (error) {
               const normalized = normalizeError(error, 'Failed to add complaint to blocklist');
               logger.error({ err: normalized, ...logContext }, 'Blocklist update failed for complaint');
             }
           });
 
           await step.run(`unsubscribe-complaint-${email}`, async () => {
-            await supabase
-              .from('newsletter_subscriptions')
-              .update({
-                status: 'unsubscribed',
-                unsubscribed_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-              })
-              .eq('email', email);
+            const newsletterService = new NewsletterService(supabase);
+            await newsletterService.unsubscribeWithTimestamp(email);
           });
 
           await step.run(`update-engagement-complaint-${email}`, async () => {
-            await supabase
-              .from('email_engagement_summary')
-              .upsert(
-                {
-                  email,
-                  emails_complained: 1,
-                  last_complaint_at: new Date().toISOString(),
-                  health_status: 'complained',
-                  engagement_score: 0, // Reset engagement score
-                  updated_at: new Date().toISOString(),
-                },
-                { onConflict: 'email' }
-              );
+            const service = new MiscService(supabase);
+            await service.upsertEmailEngagementSummary({
+              email,
+              emails_complained: 1,
+              last_complaint_at: new Date().toISOString(),
+              health_status: 'complained',
+              engagement_score: 0, // Reset engagement score
+              updated_at: new Date().toISOString(),
+            });
           });
         }
         break;
