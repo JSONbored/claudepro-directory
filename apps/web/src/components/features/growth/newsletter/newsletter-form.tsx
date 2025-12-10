@@ -10,6 +10,7 @@ import {
   UI_CLASSES,
   Input,
 } from '@heyclaude/web-runtime/ui';
+import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { AnimatePresence, motion } from 'motion/react';
 import { useId, useMemo } from 'react';
 
@@ -113,11 +114,7 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
                 initial={{ opacity: 0, x: -8, scale: 0.8 }}
                 animate={{ opacity: 1, x: 0, scale: 1 }}
                 exit={{ opacity: 0, x: -8, scale: 0.8 }}
-                transition={{
-                  type: 'spring',
-                  stiffness: 400,
-                  damping: 25,
-                }}
+                transition={SPRING.loading}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 aria-label={NEWSLETTER_CTA_CONFIG.buttonText}
@@ -125,7 +122,7 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
                 <motion.div
                   initial={{ rotate: 0 }}
                   whileHover={{ rotate: 15 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                  transition={SPRING.bouncy}
                 >
                   <ArrowRight className="h-5 w-5" aria-hidden="true" />
                 </motion.div>

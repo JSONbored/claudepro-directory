@@ -34,7 +34,7 @@ import { addBookmark } from '../../../actions/add-bookmark.generated.ts';
 import { checkConfettiEnabled } from '../../../config/static-configs.ts';
 import { removeBookmark } from '../../../actions/remove-bookmark.generated.ts';
 import { isValidCategory, logClientWarning, normalizeError } from '../../../entries/core.ts';
-import { useLoggedAsync, usePulse, useConfetti } from '../../../hooks/index.ts';
+import { useAuthenticatedUser, useLoggedAsync, usePulse, useConfetti } from '../../../hooks/index.ts';
 import { Bookmark, BookmarkCheck, Loader2 } from '../../../icons.tsx';
 import type { ButtonStyleProps } from '../../../types/component.types.ts';
 import { cn } from '../../../ui/utils.ts';
@@ -54,6 +54,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../too
  * @property {string} contentSlug - Unique slug for the content item
  * @property {boolean} [initialBookmarked=false] - Initial bookmarked state (from server)
  * @property {boolean} [showLabel=false] - Show "Save"/"Saved" label next to icon
+ * @property {() => void} [onAuthRequired] - Optional callback when authentication is required (opens auth modal if provided)
  * @property {ButtonStyleProps} - Standard button styling props (variant, size, className, disabled)
  */
 export interface BookmarkButtonProps extends ButtonStyleProps {
@@ -61,6 +62,8 @@ export interface BookmarkButtonProps extends ButtonStyleProps {
   contentSlug: string;
   initialBookmarked?: boolean;
   showLabel?: boolean;
+  /** Optional callback when authentication is required. If provided, opens auth modal instead of showing toast. */
+  onAuthRequired?: () => void;
 }
 
 export function BookmarkButton({
@@ -72,6 +75,7 @@ export function BookmarkButton({
   variant = 'ghost',
   className,
   disabled = false,
+  onAuthRequired,
 }: BookmarkButtonProps) {
   const [isBookmarked, setIsBookmarked] = useState(initialBookmarked);
   const [isPending, startTransition] = useTransition();
@@ -79,6 +83,7 @@ export function BookmarkButton({
   const pathname = usePathname();
   const { celebrateBookmark } = useConfetti();
   const pulse = usePulse();
+  const { user, status } = useAuthenticatedUser({ context: 'BookmarkButton' });
   const runLoggedAsync = useLoggedAsync({
     scope: 'BookmarkButton',
     defaultMessage: 'Bookmark operation failed',
@@ -93,6 +98,32 @@ export function BookmarkButton({
       return;
     }
 
+    // Proactive auth check - show modal before attempting action
+    if (status === 'loading') {
+      // Wait for auth check to complete
+      return;
+    }
+
+    if (!user) {
+      // User is not authenticated - show auth modal or toast
+      if (onAuthRequired) {
+        // Use provided callback (opens auth modal)
+        onAuthRequired();
+      } else {
+        // Fallback to toast with redirect (for backwards compatibility)
+        toasts.raw.error('Please sign in to bookmark content', {
+          action: {
+            label: 'Sign In',
+            onClick: () => {
+              window.location.href = `/login?redirect=${window.location.pathname}`;
+            },
+          },
+        });
+      }
+      return;
+    }
+
+    // User is authenticated - proceed with bookmark action
     const validatedCategory = contentType as Database['public']['Enums']['content_category'];
 
     startTransition(async () => {
@@ -187,16 +218,24 @@ export function BookmarkButton({
         }
       } catch (error) {
         // Error already logged by useLoggedAsync
+        // Handle auth errors (fallback - should not reach here if proactive check works)
         if (error instanceof Error && error.message.includes('signed in')) {
-          toasts.raw.error('Please sign in to bookmark content', {
-            action: {
-              label: 'Sign In',
-              onClick: () => {
-                window.location.href = `/login?redirect=${window.location.pathname}`;
+          if (onAuthRequired) {
+            // Use provided callback (opens auth modal)
+            onAuthRequired();
+          } else {
+            // Fallback to toast with redirect (for backwards compatibility)
+            toasts.raw.error('Please sign in to bookmark content', {
+              action: {
+                label: 'Sign In',
+                onClick: () => {
+                  window.location.href = `/login?redirect=${window.location.pathname}`;
+                },
               },
-            },
-          });
+            });
+          }
         } else {
+          // Non-auth errors (network, server, etc.)
           toasts.error.fromError(normalizeError(error, 'Failed to update bookmark'));
         }
       }

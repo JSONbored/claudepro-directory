@@ -1,12 +1,56 @@
 'use server';
 
-import { CommunityService } from '@heyclaude/data-layer';
+import { CommunityService, SearchService } from '@heyclaude/data-layer';
 import { type Database } from '@heyclaude/database-types';
 
-import { logger, pulseUserSearch, searchUsersUnified } from '../index.ts';
+import { logger, pulseUserSearch } from '../index.ts';
 import { createSupabaseServerClient } from '../supabase/server.ts';
 
 const DEFAULT_DIRECTORY_LIMIT = 100;
+
+/**
+ * Search users using unified search (cached)
+ * Uses 'use cache' to cache search results. Query and limit become part of the cache key.
+ * Follows architectural strategy: data layer -> database RPC -> DB
+ */
+async function searchUsersUnified(
+  query: string,
+  limit: number
+): Promise<Database['public']['CompositeTypes']['community_directory_user'][]> {
+  'use cache';
+  const { cacheLife, cacheTag } = await import('next/cache');
+  const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
+
+  // Configure cache - use 'quarter' profile for user search (same as API route)
+  cacheLife('quarter'); // 15min stale, 5min revalidate, 2hr expire
+  cacheTag('user-search');
+  cacheTag('community');
+
+  const supabase = createSupabaseAnonClient();
+  const searchService = new SearchService(supabase);
+
+  const unifiedArgs: Database['public']['Functions']['search_unified']['Args'] = {
+    p_query: query,
+    p_entities: ['user'],
+    p_limit: limit,
+    p_offset: 0,
+    p_highlight_query: query,
+  };
+
+  const searchResponse = await searchService.searchUnified(unifiedArgs);
+  const results = searchResponse.data || [];
+
+  return results.map((result) => ({
+    id: result.id as string,
+    slug: result.slug as string,
+    name: (result.title || result.slug || '') as string,
+    image: null,
+    bio: (result.description || null) as string | null,
+    work: null,
+    tier: 'free',
+    created_at: result.created_at as string,
+  }));
+}
 
 export type CollectionDetailData =
   Database['public']['Functions']['get_user_collection_detail']['Returns'];
@@ -75,19 +119,9 @@ export async function getCommunityDirectory(options: {
 
   if (searchQuery?.trim()) {
     try {
-      const unifiedResults = await searchUsersUnified(searchQuery.trim(), limit);
-
-      const allUsers: Database['public']['CompositeTypes']['community_directory_user'][] =
-        unifiedResults.map((result) => ({
-          id: result.id,
-          slug: result.slug,
-          name: result.title || result.slug || '',
-          image: null,
-          bio: result.description || null,
-          work: null,
-          tier: 'free',
-          created_at: result.created_at,
-        }));
+      // Use SearchService directly (same as API route)
+      // Follows architectural strategy: data layer -> database RPC -> DB
+      const allUsers = await searchUsersUnified(searchQuery.trim(), limit);
 
       // Fire-and-forget: Pulse user search
       pulseUserSearch(searchQuery.trim(), allUsers.length).catch((error) => {

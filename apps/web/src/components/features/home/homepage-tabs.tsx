@@ -24,7 +24,10 @@ import {
 import { MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 import Link from 'next/link';
-import { type FC, memo, useEffect, useMemo, useState } from 'react';
+import { usePathname } from 'next/navigation';
+import { type FC, memo, useCallback, useEffect, useMemo, useState } from 'react';
+
+import { useAuthModal } from '@/src/hooks/use-auth-modal';
 
 export interface TabsSectionProps {
   activeTab: string;
@@ -46,6 +49,15 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
   weekStart,
 }) => {
   const [tabCategories, setTabCategories] = useState<readonly string[]>([]);
+  const { openAuthModal } = useAuthModal();
+  const pathname = usePathname();
+
+  const handleAuthRequired = useCallback(() => {
+    openAuthModal({
+      valueProposition: 'Sign in to save bookmarks',
+      redirectTo: pathname ?? undefined,
+    });
+  }, [openAuthModal, pathname]);
 
   // Get static config bundle
   useEffect(() => {
@@ -170,7 +182,13 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
                         </div>
                       </TooltipProvider>
                     ) : null}
-                    <ConfigCard item={item} variant="default" showCategory showActions />
+                    <ConfigCard
+                      item={item}
+                      variant="default"
+                      showCategory
+                      showActions
+                      onAuthRequired={handleAuthRequired}
+                    />
                   </div>
                 );
               }}

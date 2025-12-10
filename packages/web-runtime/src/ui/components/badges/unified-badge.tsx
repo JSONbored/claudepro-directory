@@ -42,7 +42,7 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { getAnimationConfig } from '../../../config/static-configs.ts';
+import { SPRING } from '../../../design-system/index.ts';
 import { Star, TrendingUp, Zap } from '../../../icons.tsx';
 import { ANIMATION_CONSTANTS, UI_CLASSES } from '../../constants.ts';
 import { cn } from '../../utils.ts';
@@ -50,7 +50,6 @@ import { COLORS } from '../../../design-tokens/index.ts';
 import { cva } from 'class-variance-authority';
 import { motion } from 'motion/react';
 import type * as React from 'react';
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
 /**
@@ -323,21 +322,8 @@ const PulseWrapper = ({
 );
 
 export function UnifiedBadge(props: UnifiedBadgeProps) {
-  const [springDefault, setSpringDefault] = useState({
-    type: 'spring' as const,
-    stiffness: 400,
-    damping: 17,
-  });
-
-  useEffect(() => {
-    // Load animation config from static defaults
-    const config = getAnimationConfig();
-    setSpringDefault({
-      type: 'spring' as const,
-      stiffness: config['animation.spring.default.stiffness'],
-      damping: config['animation.spring.default.damping'],
-    });
-  }, []);
+  // Spring animation config from design system
+  const springDefault = SPRING.default;
 
   // Base badge variant (informational - no hover)
   if (props.variant === 'base') {

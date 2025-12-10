@@ -60,10 +60,13 @@ import {
   toasts,
 } from '@heyclaude/web-runtime/ui';
 import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/design-tokens';
+import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { AnimatePresence, motion } from 'motion/react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+
+import { useAuthModal } from '@/src/hooks/use-auth-modal';
 
 import {
   AnimatedFormField,
@@ -148,10 +151,12 @@ export default function WizardSubmissionPage() {
   // Onboarding toasts
   useOnboardingToasts({ enabled: true, context: 'wizard' });
   const router = useRouter();
-  const { user } = useAuthenticatedUser({
+  const pathname = usePathname();
+  const { user, status } = useAuthenticatedUser({
     context: 'WizardSubmissionPage',
     subscribe: false,
   });
+  const { openAuthModal } = useAuthModal();
   const formTracking = useFormTracking();
   const { celebrateSubmission } = useConfetti();
 
@@ -327,8 +332,18 @@ export default function WizardSubmissionPage() {
   // Handle thumbnail image upload
   const handleImageUpload = useCallback(
     async (file: File) => {
+      // Proactive auth check - show modal before attempting action
+      if (status === 'loading') {
+        // Wait for auth check to complete
+        return;
+      }
+
       if (!user) {
-        toasts.error.authRequired();
+        // User is not authenticated - show auth modal
+        openAuthModal({
+          valueProposition: 'Sign in to upload images',
+          redirectTo: pathname ?? undefined,
+        });
         return;
       }
 
@@ -514,7 +529,7 @@ export default function WizardSubmissionPage() {
         setIsUploadingThumbnail(false);
       }
     },
-    [user, runLoggedAsync, updateFormData, setFormData]
+    [user, status, openAuthModal, pathname, runLoggedAsync, updateFormData, setFormData]
   );
 
   // Check if can proceed from current step (defined early for draft resume validation)
@@ -725,8 +740,18 @@ export default function WizardSubmissionPage() {
 
   // Handle final submit
   const handleSubmit = useCallback(async () => {
+    // Proactive auth check - show modal before attempting action
+    if (status === 'loading') {
+      // Wait for auth check to complete
+      return;
+    }
+
     if (!user) {
-      toasts.error.authRequired();
+      // User is not authenticated - show auth modal
+      openAuthModal({
+        valueProposition: 'Sign in to submit content',
+        redirectTo: pathname ?? undefined,
+      });
       return;
     }
 
@@ -787,7 +812,7 @@ export default function WizardSubmissionPage() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [user, formData, formTracking, qualityScore, draftManager, router, log, celebrateSubmission]);
+  }, [user, status, openAuthModal, pathname, formData, formTracking, qualityScore, draftManager, router, log, celebrateSubmission]);
 
   // Render step content
   const renderStepContent = () => {
@@ -934,13 +959,13 @@ function StepTypeSelection({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={TOKENS.animations.spring.smooth}
+        transition={SPRING.smooth}
         className="text-center"
       >
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ ...TOKENS.animations.spring.bouncy, delay: 0.2 }}
+          transition={{ ...SPRING.bouncy, delay: 0.2 }}
           className="mb-4 inline-flex"
         >
           <Sparkles className="h-12 w-12" style={{ color: TOKENS.colors.accent.primary }} />
@@ -1028,13 +1053,13 @@ function StepBasicInfo({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={TOKENS.animations.spring.smooth}
+        transition={SPRING.smooth}
         className="text-center"
       >
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ ...TOKENS.animations.spring.bouncy, delay: 0.2 }}
+          transition={{ ...SPRING.bouncy, delay: 0.2 }}
           className="mb-4 inline-flex"
         >
           <FileText className="h-12 w-12" style={{ color: TOKENS.colors.accent.primary }} />
@@ -1048,7 +1073,7 @@ function StepBasicInfo({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ ...TOKENS.animations.spring.smooth, delay: 0.1 }}
+        transition={{ ...SPRING.smooth, delay: 0.1 }}
       >
         <Card
           style={{
@@ -1183,7 +1208,7 @@ function StepBasicInfo({
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.95 }}
-                      transition={TOKENS.animations.spring.smooth}
+                      transition={SPRING.smooth}
                       className="relative inline-block"
                     >
                       <div
@@ -1266,13 +1291,13 @@ function StepConfiguration({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={TOKENS.animations.spring.smooth}
+        transition={SPRING.smooth}
         className="text-center"
       >
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ ...TOKENS.animations.spring.bouncy, delay: 0.2 }}
+          transition={{ ...SPRING.bouncy, delay: 0.2 }}
           className="mb-4 inline-flex"
         >
           <Code className="h-12 w-12" style={{ color: TOKENS.colors.accent.primary }} />
@@ -1291,7 +1316,7 @@ function StepConfiguration({
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ ...TOKENS.animations.spring.smooth, delay: 0.15 }}
+          transition={{ ...SPRING.smooth, delay: 0.15 }}
         >
           <TemplateQuickSelectSkeleton />
         </motion.div>
@@ -1301,7 +1326,7 @@ function StepConfiguration({
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ ...TOKENS.animations.spring.smooth, delay: 0.15 }}
+          transition={{ ...SPRING.smooth, delay: 0.15 }}
         >
           <TemplateQuickSelect
             templates={templates}
@@ -1315,7 +1340,7 @@ function StepConfiguration({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ ...TOKENS.animations.spring.smooth, delay: 0.1 }}
+        transition={{ ...SPRING.smooth, delay: 0.1 }}
       >
         <Card
           style={{
@@ -1547,13 +1572,13 @@ function StepExamplesTags({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={TOKENS.animations.spring.smooth}
+        transition={SPRING.smooth}
         className="text-center"
       >
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ ...TOKENS.animations.spring.bouncy, delay: 0.2 }}
+          transition={{ ...SPRING.bouncy, delay: 0.2 }}
           className="mb-4 inline-flex"
         >
           <Sparkles className="h-12 w-12" style={{ color: TOKENS.colors.accent.primary }} />
@@ -1570,7 +1595,7 @@ function StepExamplesTags({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ ...TOKENS.animations.spring.smooth, delay: 0.1 }}
+        transition={{ ...SPRING.smooth, delay: 0.1 }}
         className="space-y-6"
       >
         {/* Examples Section */}
@@ -1630,7 +1655,7 @@ function StepExamplesTags({
                         initial={{ opacity: 0, x: -20, scale: 0.9 }}
                         animate={{ opacity: 1, x: 0, scale: 1 }}
                         exit={{ opacity: 0, x: 20, scale: 0.9 }}
-                        transition={TOKENS.animations.spring.snappy}
+                        transition={SPRING.snappy}
                         className="group hover:border-accent/50 flex items-start gap-3 rounded-lg border p-3 transition-all"
                         style={{
                           backgroundColor: TOKENS.colors.background.primary,
@@ -1687,7 +1712,7 @@ function StepExamplesTags({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ ...TOKENS.animations.spring.smooth, delay: 0.2 }}
+        transition={{ ...SPRING.smooth, delay: 0.2 }}
       >
         <Card
           style={{
@@ -1753,7 +1778,7 @@ function StepExamplesTags({
                         initial={{ opacity: 0, scale: 0 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0 }}
-                        transition={TOKENS.animations.spring.bouncy}
+                        transition={SPRING.bouncy}
                         whileHover={{ scale: 1.05 }}
                       >
                         <Badge

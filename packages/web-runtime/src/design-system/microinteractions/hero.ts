@@ -6,6 +6,8 @@
  * @module web-runtime/design-system/microinteractions/hero
  */
 
+import { SPRING } from '../animations/spring.ts';
+
 /**
  * Hero Section Microinteractions
  */
@@ -17,10 +19,8 @@ export const HERO = {
     opacity: 0.7,
     scale: 0.98,
     transition: {
-      damping: 20,
+      ...SPRING.smooth,
       mass: 0.5,
-      stiffness: 200,
-      type: 'spring' as const,
     },
   },
 
@@ -28,10 +28,8 @@ export const HERO = {
    * Default transition for hero animations
    */
   transition: {
-    damping: 20,
+    ...SPRING.smooth,
     mass: 0.5,
-    stiffness: 200,
-    type: 'spring' as const,
   },
 
   /**
@@ -41,10 +39,8 @@ export const HERO = {
     opacity: 1,
     scale: 1,
     transition: {
-      damping: 20,
+      ...SPRING.smooth,
       mass: 0.5,
-      stiffness: 200,
-      type: 'spring' as const,
     },
   },
 } as const;

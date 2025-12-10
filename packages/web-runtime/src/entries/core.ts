@@ -60,7 +60,18 @@ export * from '../utils/client-logger.ts';
 export * from '../hooks/use-client-logger.ts';
 export * from '../data/marketing/contact.ts';
 export type { JobsFilterResult } from '../data/jobs.ts';
-export type { SearchFilters } from '../edge/search-client.ts';
+// SearchFilters type - uses generated database types
+// Categories are enum arrays, not string arrays
+import type { Database } from '@heyclaude/database-types';
+
+export type SearchFilters = {
+  sort?: 'relevance' | 'popularity' | 'newest' | 'alphabetical';
+  p_categories?: Database['public']['Enums']['content_category'][]; // Use generated enum type
+  p_tags?: string[];
+  p_authors?: string[];
+  p_limit?: number;
+  p_offset?: number;
+};
 export type { CollectionDetailData } from '../data/community.ts';
 export type { CategoryType } from '../ui/constants.ts';
 export type { SharePlatform } from '../client/share.ts';

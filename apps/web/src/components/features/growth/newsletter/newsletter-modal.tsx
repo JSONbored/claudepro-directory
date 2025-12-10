@@ -16,6 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@heyclaude/web-runtime/ui';
+import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
 
@@ -239,11 +240,7 @@ export function NewsletterModal({
                 isInputFocused
                   ? {
                       scale: 1.02,
-                      transition: {
-                        type: 'spring',
-                        stiffness: 400,
-                        damping: 25,
-                      },
+                      transition: SPRING.loading,
                     }
                   : { scale: 1 }
               }

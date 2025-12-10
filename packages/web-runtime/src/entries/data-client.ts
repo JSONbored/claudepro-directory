@@ -39,13 +39,8 @@ export {
 export * from '../storage/image-utils.ts';
 export * from '../edge/call-edge-function.ts';
 export * from '../edge/transform.ts';
-export { searchUnifiedClient } from '../edge/search-client.ts';
-export type {
-  UnifiedSearchOptions,
-  UnifiedSearchResponse,
-  UnifiedSearchFilters,
-  SearchEntity,
-} from '../edge/search-client.ts';
+// Search functions removed - use /api/search route instead
+// Follows architectural strategy: API route -> data layer -> database RPC -> DB
 export * from '../seo/og.ts';
 
 // Shared Data Utils (No fetchers, no server-only imports)

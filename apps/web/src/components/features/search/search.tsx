@@ -33,6 +33,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@heyclaude/web-runtime/ui';
+import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 import { usePathname } from 'next/navigation';
 import { memo, useCallback, useEffect, useId, useRef, useState } from 'react';
@@ -362,7 +363,7 @@ function UnifiedSearchComponent({
                         whileFocus={{
                           boxShadow: '0 0 0 2px rgba(249, 115, 22, 0.3)',
                         }}
-                        transition={{ type: 'spring', stiffness: 200, damping: 30, mass: 0.5 }}
+                        transition={{ ...SPRING.smooth, mass: 0.5 }}
                         onClick={(e) => {
                           e.stopPropagation();
                           setIsFilterOpen(!isFilterOpen);
@@ -385,7 +386,7 @@ function UnifiedSearchComponent({
                             className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-[rgb(249,115,22)] text-[10px] font-semibold flex items-center justify-center text-white shadow-lg"
                             initial={{ scale: 0, rotate: -180 }}
                             animate={{ scale: 1, rotate: 0 }}
-                            transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                            transition={SPRING.snappy}
                             aria-label={`${activeFilterCount} active filters`}
                           >
                             {activeFilterCount}

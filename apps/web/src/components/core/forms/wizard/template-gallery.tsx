@@ -36,6 +36,7 @@ import {
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
 import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/design-tokens';
+import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -104,7 +105,7 @@ export function TemplateGallery({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={TOKENS.animations.spring.smooth}
+      transition={SPRING.smooth}
       className={cn('space-y-6', className)}
     >
       {/* Header */}
@@ -113,7 +114,7 @@ export function TemplateGallery({
           <motion.div
             initial={{ scale: 0, rotate: -180 }}
             animate={{ scale: 1, rotate: 0 }}
-            transition={TOKENS.animations.spring.bouncy}
+            transition={SPRING.bouncy}
             className={cn(
               'flex h-10 w-10 items-center justify-center rounded-xl',
               'bg-linear-to-br from-amber-500/20 to-orange-500/20',
@@ -248,7 +249,7 @@ function TemplateCard({ template, index, onApply }: TemplateCardProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.9 }}
-      transition={{ ...TOKENS.animations.spring.smooth, delay: index * 0.05 }}
+      transition={{ ...SPRING.smooth, delay: index * 0.05 }}
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
     >
@@ -309,7 +310,7 @@ function TemplateCard({ template, index, onApply }: TemplateCardProps) {
                 x: isHovered ? 4 : 0,
                 opacity: isHovered ? 1 : 0.6,
               }}
-              transition={TOKENS.animations.spring.snappy}
+              transition={SPRING.snappy}
             >
               <ArrowRight className="h-4 w-4 shrink-0 text-amber-500" />
             </motion.div>
@@ -389,7 +390,7 @@ function TemplateCard({ template, index, onApply }: TemplateCardProps) {
           animate={{
             opacity: isHovered ? 1 : 0,
           }}
-          transition={TOKENS.animations.spring.smooth}
+          transition={SPRING.smooth}
         />
       </Card>
     </motion.div>
@@ -455,7 +456,7 @@ export function TemplateQuickSelect({
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={TOKENS.animations.spring.smooth}
+      transition={SPRING.smooth}
       className={cn('space-y-3', className)}
     >
       {/* Onboarding Tooltip */}
@@ -464,7 +465,7 @@ export function TemplateQuickSelect({
           initial={{ opacity: 0, scale: 0.95, y: -10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: -10 }}
-          transition={TOKENS.animations.spring.bouncy}
+          transition={SPRING.bouncy}
         >
           <Alert className="border-amber-500/50 bg-amber-500/10">
             <Info className="h-4 w-4 text-amber-500" />
@@ -513,7 +514,7 @@ export function TemplateQuickSelect({
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               transition={{
-                ...TOKENS.animations.spring.smooth,
+                ...SPRING.smooth,
                 delay: index * 0.05,
               }}
               onClick={() => onApplyTemplate(template)}

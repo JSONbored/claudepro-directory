@@ -41,6 +41,12 @@ type SortType = (typeof VALID_SORTS)[number];
 type JobCategory = DatabaseGenerated['public']['Enums']['job_category'];
 type JobEmployment = DatabaseGenerated['public']['Enums']['job_type'];
 type JobExperience = DatabaseGenerated['public']['Enums']['experience_level'];
+
+type SearchType = 'content' | 'jobs' | 'unified';
+
+// Use generated database types directly - no custom types
+type SearchResultRow = DatabaseGenerated['public']['Functions']['search_unified']['Returns'][number] | DatabaseGenerated['public']['Functions']['search_content_optimized']['Returns'][number];
+
 type HighlightedSearchResult = Record<string, unknown> & {
   author_highlighted?: string;
   description_highlighted?: string;
@@ -48,22 +54,27 @@ type HighlightedSearchResult = Record<string, unknown> & {
   title_highlighted?: string;
 };
 
-type SearchType = 'content' | 'jobs' | 'unified';
-
-interface FiltersPayload {
-  authors?: string[];
-  categories?: string[];
-  entities?: string[];
-  entity?: string;
-  job_category?: DatabaseGenerated['public']['Enums']['job_category'];
-  job_employment?: DatabaseGenerated['public']['Enums']['job_type'];
-  job_experience?: DatabaseGenerated['public']['Enums']['experience_level'];
-  job_remote?: boolean;
-  sort: SortType;
-  tags?: string[];
+/**
+ * Convert string array to content_category enum array
+ * Filters out invalid categories and returns only valid enum values
+ * Uses generated database types
+ */
+function toContentCategoryArray(
+  categories: string[] | undefined
+): DatabaseGenerated['public']['Enums']['content_category'][] | undefined {
+  if (!categories || categories.length === 0) return undefined;
+  const valid = categories
+    .map((cat) => {
+      const lowered = cat.trim().toLowerCase();
+      return CONTENT_CATEGORY_VALUES.includes(
+        lowered as DatabaseGenerated['public']['Enums']['content_category']
+      )
+        ? (lowered as DatabaseGenerated['public']['Enums']['content_category'])
+        : null;
+    })
+    .filter((cat): cat is DatabaseGenerated['public']['Enums']['content_category'] => cat !== null);
+  return valid.length > 0 ? valid : undefined;
 }
-
-type SearchResultRow = Record<string, unknown>;
 
 /**
  * Handle GET requests to the search API: validate query parameters, run the appropriate search,
@@ -177,9 +188,8 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const validatedCategories = categories?.filter((category) =>
-    CONTENT_CATEGORY_VALUES.includes(category as (typeof CONTENT_CATEGORY_VALUES)[number])
-  );
+  // Convert string categories to enum array (using generated types)
+  const validatedCategories = toContentCategoryArray(categories);
 
   if (categories && categories.length > 0 && !validatedCategories?.length) {
     return badRequestResponse(
@@ -197,36 +207,24 @@ export async function GET(request: NextRequest) {
 
   const searchType = determineSearchType(entities, hasJobFilters);
 
-  const filtersPayload: FiltersPayload = {
-    sort,
-    ...(validatedCategories ? { categories: validatedCategories } : {}),
-    ...(tags ? { tags } : {}),
-    ...(authors ? { authors } : {}),
-    ...(entities ? { entities } : {}),
-    ...(jobCategory ? { job_category: jobCategory } : {}),
-    ...(jobEmployment ? { job_employment: jobEmployment } : {}),
-    ...(jobExperience ? { job_experience: jobExperience } : {}),
-    ...(jobRemote === undefined ? {} : { job_remote: jobRemote }),
-  };
-
-  if (searchType === 'jobs') {
-    filtersPayload.entity = 'job';
-  }
-
   reqLogger.info(
     {
       query,
       searchType,
-      filters: toLogContextValue(filtersPayload),
+      hasCategories: Boolean(validatedCategories?.length),
+      hasTags: Boolean(tags?.length),
+      hasAuthors: Boolean(authors?.length),
+      hasJobFilters,
     },
     'Search request received'
   );
 
   try {
+    // Use generated types - categories are already converted to enum array
     const { results, totalCount } = await getCachedSearchResults({
       searchType,
       query,
-      categories: validatedCategories,
+      categories: validatedCategories, // Already enum array
       tags,
       authors,
       entities,
@@ -246,8 +244,15 @@ export async function GET(request: NextRequest) {
     trackSearchAnalytics(
       query,
       {
-        ...filtersPayload,
-        ...(searchType === 'jobs' ? { entity: 'job' } : {}),
+        sort,
+        ...(validatedCategories ? { categories: validatedCategories } : {}),
+        ...(tags ? { tags } : {}),
+        ...(authors ? { authors } : {}),
+        ...(entities ? { entities } : {}),
+        ...(jobCategory ? { job_category: jobCategory } : {}),
+        ...(jobEmployment ? { job_employment: jobEmployment } : {}),
+        ...(jobExperience ? { job_experience: jobExperience } : {}),
+        ...(jobRemote !== undefined ? { job_remote: jobRemote } : {}),
       },
       highlightedResults.length,
       reqLogger
@@ -258,10 +263,21 @@ export async function GET(request: NextRequest) {
       reqLogger.warn({ err: normalized }, 'Search analytics failed (non-blocking)');
     });
 
+    // Response uses simple types for JSON serialization (no custom types)
     const responseBody = {
       results: highlightedResults,
       query,
-      filters: filtersPayload,
+      filters: {
+        sort,
+        ...(validatedCategories ? { categories: validatedCategories } : {}),
+        ...(tags ? { tags } : {}),
+        ...(authors ? { authors } : {}),
+        ...(entities ? { entities } : {}),
+        ...(jobCategory ? { job_category: jobCategory } : {}),
+        ...(jobEmployment ? { job_employment: jobEmployment } : {}),
+        ...(jobExperience ? { job_experience: jobExperience } : {}),
+        ...(jobRemote !== undefined ? { job_remote: jobRemote } : {}),
+      },
       pagination: {
         total: totalCount,
         limit,
@@ -269,17 +285,6 @@ export async function GET(request: NextRequest) {
         hasMore: offset + highlightedResults.length < totalCount,
       },
       searchType,
-    } satisfies {
-      filters: FiltersPayload;
-      pagination: {
-        hasMore: boolean;
-        limit: number;
-        offset: number;
-        total: number;
-      };
-      query: string;
-      results: HighlightedSearchResult[];
-      searchType: SearchType;
     };
 
     reqLogger.info(
@@ -302,35 +307,26 @@ export async function GET(request: NextRequest) {
       }
     );
   } catch (error) {
-    const normalized = normalizeError(error, 'Search request failed');
-    reqLogger.error({ err: normalized }, 'Search request failed');
+    const normalized = normalizeError(error, 'Search failed');
+    reqLogger.error({ err: normalized }, 'Search failed');
     return createErrorResponse(normalized, {
       route: '/api/search',
-      operation: 'SearchAPI',
+      operation: 'GET',
       method: 'GET',
       logContext: {
+        query,
         searchType,
       },
     });
   }
 }
 
-/**
- * Handle CORS preflight (OPTIONS) requests for the search API route.
- *
- * @returns A Response configured for an HTTP OPTIONS preflight, including appropriate CORS headers.
- * @see handleOptionsRequest
- * @see CORS
- */
 export function OPTIONS() {
   return handleOptionsRequest(CORS);
 }
 
 /**
- * Convert a comma-separated string into an array of trimmed, non-empty values.
- *
- * @param {null | string} value - The comma-separated input string, or `null` to indicate absence.
- * @returns {string[] | undefined} An array of trimmed, non-empty strings parsed from `value`, or `undefined` if `value` is `null`, empty, or contains no valid parts.
+ * Parse comma-separated parameter value into array
  */
 function parseCsvParam(value: null | string): string[] | undefined {
   if (!value) return undefined;
@@ -359,25 +355,14 @@ function validateEnumValue<T extends string>(
 /**
  * Cached helper function to execute search queries.
  * All parameters become part of the cache key, so different searches have different cache entries.
- * @param params
- * @param params.authors
- * @param params.categories
- * @param params.entities
- * @param params.jobCategory
- * @param params.jobEmployment
- * @param params.jobExperience
- * @param params.jobRemote
- * @param params.limit
- * @param params.offset
- * @param params.query
- * @param params.searchType
- * @param params.sort
- * @param params.tags
+ * 
+ * Uses generated database types - categories must be enum array, not string array
+ * 
  * @returns A promise resolving to an object with `results` (array of search result rows) and `totalCount` (total matching items).
  */
-async function getCachedSearchResults(params: {
+export async function getCachedSearchResults(params: {
   authors?: string[] | undefined;
-  categories?: string[] | undefined;
+  categories?: DatabaseGenerated['public']['Enums']['content_category'][] | undefined; // Use generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -407,7 +392,7 @@ async function getCachedSearchResults(params: {
  *
  * @param params
  * @param params.authors - Optional list of author slugs to filter content results.
- * @param params.categories - Optional list of content categories to filter content results.
+ * @param params.categories - Optional list of content categories to filter content results (enum array, not string array).
  * @param params.entities - Optional list of entity types to include for unified searches; when omitted or empty, defaults to DEFAULT_ENTITIES.
  * @param params.jobCategory - Optional job category to filter job searches.
  * @param params.jobEmployment - Optional employment type to filter job searches.
@@ -424,7 +409,7 @@ async function getCachedSearchResults(params: {
  */
 async function executeSearch(params: {
   authors?: string[] | undefined;
-  categories?: string[] | undefined;
+  categories?: DatabaseGenerated['public']['Enums']['content_category'][] | undefined; // Use generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -516,6 +501,7 @@ async function executeSearch(params: {
     };
   }
 
+  // searchType === 'content'
   const args: DatabaseGenerated['public']['Functions']['search_content_optimized']['Args'] = {
     p_query: query,
     p_limit: limit,
@@ -524,7 +510,8 @@ async function executeSearch(params: {
   };
 
   if (categories?.length) {
-    args.p_categories = categories as DatabaseGenerated['public']['Enums']['content_category'][];
+    // categories is already enum array from getCachedSearchResults params
+    args.p_categories = categories;
   }
   if (tags?.length) {
     args.p_tags = tags;
@@ -580,7 +567,17 @@ function highlightResults(results: SearchResultRow[], query: string): Highlighte
 
 async function trackSearchAnalytics(
   query: string,
-  filters: FiltersPayload,
+  filters: {
+    sort: SortType;
+    categories?: DatabaseGenerated['public']['Enums']['content_category'][];
+    tags?: string[];
+    authors?: string[];
+    entities?: string[];
+    job_category?: JobCategory;
+    job_employment?: JobEmployment;
+    job_experience?: JobExperience;
+    job_remote?: boolean;
+  },
   resultCount: number,
   reqLogger: ReturnType<typeof logger.child>
 ) {
@@ -603,23 +600,19 @@ async function trackSearchAnalytics(
       metadata,
     });
   } catch (error) {
-    const normalized = normalizeError(error, 'Failed to enqueue search analytics');
-    reqLogger.warn({ err: normalized }, 'Failed to enqueue search analytics');
+    const normalized = normalizeError(error, 'Search analytics tracking failed');
+    reqLogger.warn({ err: normalized }, 'Search analytics tracking failed (non-blocking)');
   }
 }
 
 /**
  * Choose the effective search type based on requested entities and whether job-specific filters are present.
  *
- * @param entities - An optional array of entity names to restrict the search (e.g., `['job']`). `undefined` or an empty array means no entity restriction.
+ * @param entities - Array of entity types requested by the client; may be undefined or empty.
  * @param hasJobFilters - `true` when job-specific filters (category, employment, experience, remote) are present.
- * @returns The selected SearchType: `'jobs'` when the search targets job results, `'unified'` when one or more non-job entities are specified, or `'content'` when there is no entity restriction.
- * @see executeSearch
+ * @returns The search type to use: `'jobs'` when job filters are present, `'unified'` when entities are specified, otherwise `'content'`.
  */
 function determineSearchType(entities: string[] | undefined, hasJobFilters: boolean): SearchType {
-  if (entities?.length === 1 && entities[0] === 'job') {
-    return 'jobs';
-  }
   if (hasJobFilters) {
     return 'jobs';
   }

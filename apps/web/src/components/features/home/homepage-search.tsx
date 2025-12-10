@@ -11,7 +11,10 @@
 import { Search } from '@heyclaude/web-runtime/icons';
 import { type DisplayableContent } from '@heyclaude/web-runtime/types/component.types';
 import { UI_CLASSES, UnifiedCardGrid, ConfigCard, Button } from '@heyclaude/web-runtime/ui';
-import { type FC, memo } from 'react';
+import { usePathname } from 'next/navigation';
+import { type FC, memo, useCallback } from 'react';
+
+import { useAuthModal } from '@/src/hooks/use-auth-modal';
 
 export interface SearchSectionProps {
   filteredResults: readonly DisplayableContent[];
@@ -26,6 +29,16 @@ const SearchSectionComponent: FC<SearchSectionProps> = ({
   onClearSearch,
   searchQuery,
 }) => {
+  const { openAuthModal } = useAuthModal();
+  const pathname = usePathname();
+
+  const handleAuthRequired = useCallback(() => {
+    openAuthModal({
+      valueProposition: 'Sign in to save bookmarks',
+      redirectTo: pathname ?? undefined,
+    });
+  }, [openAuthModal, pathname]);
+
   // Show search section if there's a search query (not just when loading)
   // isSearching is used for loading state indicator
   if (!searchQuery || searchQuery.length === 0) return null;
@@ -68,6 +81,7 @@ const SearchSectionComponent: FC<SearchSectionProps> = ({
               showCategory
               showActions
               {...(searchQuery ? { searchQuery } : {})}
+              onAuthRequired={handleAuthRequired}
             />
           )}
         />

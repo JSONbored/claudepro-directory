@@ -14,8 +14,10 @@ import { UI_CLASSES, UnifiedBadge, UnifiedCardGrid, ConfigCard, Tooltip, Tooltip
 import { ANIMATIONS, TEXT_ANIMATIONS, STAGGER, VIEWPORT } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 import Link from 'next/link';
-import { type FC, memo, useEffect, useMemo } from 'react';
+import { usePathname } from 'next/navigation';
+import { type FC, memo, useCallback, useEffect, useMemo } from 'react';
 
+import { useAuthModal } from '@/src/hooks/use-auth-modal';
 import { JobCard } from '@/src/components/core/domain/cards/job-card';
 
 interface FeaturedSectionProps {
@@ -36,6 +38,16 @@ interface FeaturedSectionProps {
  */
 const FeaturedSection: FC<FeaturedSectionProps> = memo(
   ({ title, href, items, weekStart }: FeaturedSectionProps) => {
+    const { openAuthModal } = useAuthModal();
+    const pathname = usePathname();
+
+    const handleAuthRequired = useCallback(() => {
+      openAuthModal({
+        valueProposition: 'Sign in to save bookmarks',
+        redirectTo: pathname ?? undefined,
+      });
+    }, [openAuthModal, pathname]);
+
     // PERFORMANCE: Memoize the sliced array to prevent re-creating on every render
     // Previous: rules.slice(0, 6) created new array on EVERY parent render
     // Current: Stable reference unless items array changes
@@ -130,7 +142,11 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
                     </div>
                   </TooltipProvider>
                 ) : null}
-                <ConfigCard item={item} showBorderBeam={index < 3} />
+                <ConfigCard
+                  item={item}
+                  showBorderBeam={index < 3}
+                  onAuthRequired={handleAuthRequired}
+                />
               </motion.div>
             );
           }}

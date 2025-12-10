@@ -3,15 +3,46 @@
  */
 
 import { Constants, type Database } from '@heyclaude/database-types';
-import { type SearchFilters } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
   getHomepageData,
   getSearchFacets,
-  searchContent,
   getHomepageCategoryIds,
 } from '@heyclaude/web-runtime/data';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import type { DisplayableContent } from '@heyclaude/web-runtime';
+import { Constants } from '@heyclaude/database-types';
+import { getCachedSearchResults } from '@/src/app/api/search/route';
+
+// Use generated database types - no custom types
+type ContentCategory = Database['public']['Enums']['content_category'];
+const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category as readonly ContentCategory[];
+
+type SortType = 'relevance' | 'popularity' | 'newest' | 'alphabetical';
+
+/**
+ * Convert string to content_category enum
+ */
+function toContentCategory(value: string | undefined): ContentCategory | undefined {
+  if (!value) return undefined;
+  const lowered = value.trim().toLowerCase();
+  return CONTENT_CATEGORY_VALUES.includes(lowered as ContentCategory)
+    ? (lowered as ContentCategory)
+    : undefined;
+}
+
+/**
+ * Convert string array to content_category enum array
+ */
+function toContentCategoryArray(
+  categories: string[] | undefined
+): ContentCategory[] | undefined {
+  if (!categories || categories.length === 0) return undefined;
+  const valid = categories
+    .map(toContentCategory)
+    .filter((cat): cat is ContentCategory => cat !== undefined);
+  return valid.length > 0 ? valid : undefined;
+}
 import { type Metadata } from 'next';
 import { Suspense } from 'react';
 
@@ -26,7 +57,7 @@ import { ContentSidebar } from '@/src/components/core/layout/content-sidebar';
  * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
  */
 
-const VALID_SORT_OPTIONS = new Set<SearchFilters['sort']>([
+const VALID_SORT_OPTIONS = new Set<SortType>([
   'relevance',
   'popularity',
   'newest',
@@ -49,10 +80,9 @@ type ContentCategory = Database['public']['Enums']['content_category'];
  * @returns `true` if `value` is one of the entries in `VALID_SORT_OPTIONS`, `false` otherwise.
  *
  * @see VALID_SORT_OPTIONS
- * @see SearchFilters
  */
-function isValidSort(value: string | undefined): value is SearchFilters['sort'] {
-  return value !== undefined && VALID_SORT_OPTIONS.has(value as SearchFilters['sort']);
+function isValidSort(value: string | undefined): value is SortType {
+  return value !== undefined && VALID_SORT_OPTIONS.has(value as SortType);
 }
 
 interface SearchPageProperties {
@@ -118,7 +148,7 @@ export async function generateMetadata({ searchParams }: SearchPageProperties): 
  * @throws A normalized error when the backend search fetch fails.
  *
  * @see ContentSearchClient
- * @see searchContent
+ * @see getCachedSearchResults
  * @see normalizeError
  */
 async function SearchResultsSection({
@@ -136,8 +166,15 @@ async function SearchResultsSection({
     categories: ContentCategory[];
     tags: string[];
   };
-  fallbackSuggestions: Awaited<ReturnType<typeof searchContent>>;
-  filters: SearchFilters;
+  fallbackSuggestions: DisplayableContent[];
+  filters: {
+    sort?: SortType;
+    p_categories?: ContentCategory[]; // Use generated enum type
+    p_tags?: string[];
+    p_authors?: string[];
+    p_limit?: number;
+    p_offset?: number;
+  };
   hasUserFilters: boolean;
   query: string;
   quickAuthors: string[];
@@ -152,19 +189,39 @@ async function SearchResultsSection({
   });
 
   // Section: Search Results
-  // Use noCache for search queries (cache: 'no-store' equivalent)
-  const noCache = query.length > 0 || hasUserFilters;
-
-  let results: Awaited<ReturnType<typeof searchContent>> = [];
+  // Use getCachedSearchResults for consistent caching (same as API route)
+  // Follows architectural strategy: API route -> data layer -> database RPC -> DB
+  let results: DisplayableContent[] = [];
   try {
-    results = await searchContent(query, filters, noCache);
+    // Convert to proper types - p_categories should already be enum array, but ensure it
+    const categoryEnums = filters.p_categories
+      ? filters.p_categories.filter((cat): cat is ContentCategory =>
+          CONTENT_CATEGORY_VALUES.includes(cat)
+        )
+      : undefined;
+
+    const searchResult = await getCachedSearchResults({
+      query,
+      searchType: 'unified',
+      entities: ['content'],
+      categories: categoryEnums, // Use generated enum type
+      tags: filters.p_tags,
+      authors: filters.p_authors,
+      sort: filters.sort || 'relevance',
+      limit: filters.p_limit || 50,
+      offset: filters.p_offset || 0,
+    });
+    
+    // search_unified returns content items compatible with DisplayableContent
+    results = searchResult.results as DisplayableContent[];
+    
     sectionLogger.info(
       {
         section: 'data-fetch',
         queryLength: query.length,
         hasFilters: hasUserFilters,
         resultsCount: results.length,
-        noCache,
+        totalCount: searchResult.totalCount,
       },
       'SearchPage: search results loaded'
     );
@@ -172,7 +229,7 @@ async function SearchResultsSection({
     const normalized = normalizeError(error, 'Search content fetch failed');
     sectionLogger.error(
       { err: normalized, section: 'data-fetch', query, hasFilters: hasUserFilters },
-      'SearchPage: searchContent invocation failed'
+      'SearchPage: getCachedSearchResults invocation failed'
     );
     throw normalized;
   }
@@ -301,23 +358,33 @@ async function SearchPageContent({
 
   const query = (resolvedParameters.q ?? '').trim().slice(0, 200);
 
-  const categories = resolvedParameters.category?.split(',').filter(Boolean);
+  const categoryStrings = resolvedParameters.category?.split(',').filter(Boolean);
   const tags = resolvedParameters.tags?.split(',').filter(Boolean);
   const author = resolvedParameters.author;
 
-  const filters: SearchFilters = {};
-
+  // Convert URL params to generated database types
   const validatedSort = isValidSort(resolvedParameters.sort) ? resolvedParameters.sort : undefined;
+  const categoryEnums = toContentCategoryArray(categoryStrings); // Convert to enum array
+
+  const filters: {
+    sort?: SortType;
+    p_categories?: ContentCategory[]; // Use generated enum type
+    p_tags?: string[];
+    p_authors?: string[];
+    p_limit?: number;
+    p_offset?: number;
+  } = {};
+
   if (validatedSort) {
     filters.sort = validatedSort;
   }
-  if (categories && categories.length > 0) filters.p_categories = categories;
+  if (categoryEnums && categoryEnums.length > 0) filters.p_categories = categoryEnums;
   if (tags && tags.length > 0) filters.p_tags = tags;
   if (author) filters.p_authors = [author];
   filters.p_limit = 50;
 
   const hasUserFilters =
-    !!validatedSort || (categories?.length ?? 0) > 0 || (tags?.length ?? 0) > 0 || !!author;
+    !!validatedSort || (categoryEnums?.length ?? 0) > 0 || (tags?.length ?? 0) > 0 || !!author;
 
   // Gate zero-state data behind !query && !hasFilters (Phase 3 requirement)
   const hasQueryOrFilters = query.length > 0 || hasUserFilters;
@@ -397,14 +464,14 @@ async function SearchFacetsAndResults({
   }
 
   // Load zero-state suggestions after facets (if no query/filters)
-  let zeroStateSuggestions: Awaited<ReturnType<typeof searchContent>> = [];
+  let zeroStateSuggestions: DisplayableContent[] = [];
   if (!hasQueryOrFilters) {
     try {
       const homepageData = await getHomepageData(getHomepageCategoryIds);
       const categoryData = (homepageData?.content as { categoryData?: Record<string, unknown[]> })
         .categoryData;
       zeroStateSuggestions = categoryData
-        ? (Object.values(categoryData).flat() as Awaited<ReturnType<typeof searchContent>>)
+        ? (Object.values(categoryData).flat() as DisplayableContent[])
         : [];
       reqLogger.info(
         { section: 'data-fetch', suggestionsCount: zeroStateSuggestions.length },

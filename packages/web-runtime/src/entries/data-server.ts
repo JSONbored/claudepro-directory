@@ -8,7 +8,7 @@ export * from '../storage/image-utils.ts';
 export * from '../supabase/server.ts'; // Export server client
 export * from '../edge/call-edge-function.ts';
 export * from '../edge/transform.ts';
-export * from '../edge/search-client.ts';
+// Removed search-client.ts export - all search functions migrated to /api/search route
 export * from '../seo/og.ts';
 export * from '../auth/get-authenticated-user.ts';
 

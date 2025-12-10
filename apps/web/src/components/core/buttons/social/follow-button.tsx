@@ -14,10 +14,13 @@
 
 import { normalizeError } from '@heyclaude/shared-runtime';
 import { toggleFollow } from '@heyclaude/web-runtime/actions';
-import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
-import { Button } from '@heyclaude/web-runtime/ui';
-import { useOptimistic, useTransition } from 'react';
+import { useAuthenticatedUser, useLoggedAsync } from '@heyclaude/web-runtime/hooks';
+import { Button, toasts } from '@heyclaude/web-runtime/ui';
+import { usePathname } from 'next/navigation';
+import { useCallback, useOptimistic, useTransition } from 'react';
 import { toast } from 'sonner';
+
+import { useAuthModal } from '@/src/hooks/use-auth-modal';
 
 export interface FollowButtonProps {
   className?: string;
@@ -58,15 +61,34 @@ export function FollowButton({
     initialIsFollowing,
     (_, newState: boolean) => newState
   );
+  const { user, status } = useAuthenticatedUser({ context: 'FollowButton' });
+  const { openAuthModal } = useAuthModal();
+  const pathname = usePathname();
   const runLoggedAsync = useLoggedAsync({
     scope: 'FollowButton',
     defaultMessage: 'Follow operation failed',
     defaultRethrow: true, // Re-throw so outer catch can handle rollback
   });
 
-  const handleToggleFollow = () => {
+  const handleToggleFollow = useCallback(() => {
+    // Proactive auth check - show modal before attempting action
+    if (status === 'loading') {
+      // Wait for auth check to complete
+      return;
+    }
+
+    if (!user) {
+      // User is not authenticated - show auth modal
+      openAuthModal({
+        valueProposition: 'Sign in to follow users',
+        redirectTo: pathname ?? undefined,
+      });
+      return;
+    }
+
+    // User is authenticated - proceed with follow action
     startTransition(async () => {
-      // Optimistic update
+      // Optimistic update (only after auth check passes)
       const newState = !optimisticIsFollowing;
       setOptimisticIsFollowing(newState);
 
@@ -100,10 +122,29 @@ export function FollowButton({
         );
       } catch (error) {
         // Error already logged by useLoggedAsync, rollback already done in error paths above
-        toast.error(normalizeError(error, 'An unexpected error occurred').message);
+        const normalized = normalizeError(error, 'An unexpected error occurred');
+        const errorMessage = normalized.message;
+
+        // Check if error is auth-related and show modal if so
+        if (errorMessage.includes('signed in') || errorMessage.includes('auth') || errorMessage.includes('unauthorized')) {
+          openAuthModal({
+            valueProposition: 'Sign in to follow users',
+            redirectTo: pathname ?? undefined,
+          });
+        } else {
+          // Non-auth errors - show toast with retry option
+          toasts.raw.error('Failed to update follow status', {
+            action: {
+              label: 'Retry',
+              onClick: () => {
+                handleToggleFollow();
+              },
+            },
+          });
+        }
       }
     });
-  };
+  }, [user, status, openAuthModal, pathname, optimisticIsFollowing, setOptimisticIsFollowing, userId, userSlug, runLoggedAsync]);
 
   return (
     <Button

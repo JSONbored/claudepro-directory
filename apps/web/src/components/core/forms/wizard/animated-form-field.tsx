@@ -18,6 +18,7 @@
 import { AlertCircle, AlertTriangle, CheckCircle, Info } from '@heyclaude/web-runtime/icons';
 import { cn, Label } from '@heyclaude/web-runtime/ui';
 import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/design-tokens';
+import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { AnimatePresence, motion } from 'motion/react';
 import { type FocusEvent, type ReactNode, useCallback, useState } from 'react';
 
@@ -126,7 +127,7 @@ export function AnimatedFormField({
             initial={{ scale: 0, rotate: -180 }}
             animate={{ scale: 1, rotate: 0 }}
             exit={{ scale: 0, rotate: 180 }}
-            transition={TOKENS.animations.spring.bouncy}
+            transition={SPRING.bouncy}
           >
             <CheckCircle className="h-5 w-5" style={{ color: TOKENS.colors.success.text }} />
           </motion.div>
@@ -138,7 +139,7 @@ export function AnimatedFormField({
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             exit={{ scale: 0 }}
-            transition={TOKENS.animations.spring.snappy}
+            transition={SPRING.snappy}
           >
             <AlertCircle className="h-5 w-5" style={{ color: TOKENS.colors.error.text }} />
           </motion.div>
@@ -150,7 +151,7 @@ export function AnimatedFormField({
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             exit={{ scale: 0 }}
-            transition={TOKENS.animations.spring.snappy}
+            transition={SPRING.snappy}
           >
             <AlertTriangle className="h-5 w-5" style={{ color: TOKENS.colors.warning.text }} />
           </motion.div>
@@ -207,7 +208,7 @@ export function AnimatedFormField({
       className={cn('space-y-2', className)}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={TOKENS.animations.spring.smooth}
+      transition={SPRING.smooth}
     >
       {/* Label Row */}
       <div className="flex items-center justify-between">
@@ -275,7 +276,7 @@ export function AnimatedFormField({
             initial={{ opacity: 0, y: -5 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -5 }}
-            transition={TOKENS.animations.spring.smooth}
+            transition={SPRING.smooth}
             className="flex items-start gap-2"
           >
             {/* Icon for messages */}
@@ -335,7 +336,7 @@ export function AnimatedFormField({
           scaleX: isFocused ? 1 : 0,
           opacity: isFocused ? 1 : 0,
         }}
-        transition={TOKENS.animations.spring.snappy}
+        transition={SPRING.snappy}
         style={{
           backgroundColor: TOKENS.colors.accent.primary,
           transformOrigin: 'left',

@@ -22,6 +22,7 @@
  * @module components/content/read-progress
  */
 
+import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { motion, useScroll, useSpring } from 'motion/react';
 import { useEffect, useState } from 'react';
 
@@ -46,7 +47,7 @@ export interface ReadProgressProps {
 
   /**
    * Spring physics configuration
-   * @default { stiffness: 400, damping: 40, restDelta: 0.0001 }
+   * @default { ...SPRING.scroll, restDelta: 0.0001 }
    */
   springConfig?: {
     damping?: number;
@@ -70,7 +71,7 @@ export interface ReadProgressProps {
  * @param height - Height of the progress bar in pixels. @default 5
  * @param color - Visual color token to apply: 'accent', 'foreground', or 'primary'. Maps to corresponding background utility classes. @default 'accent'
  * @param zIndex - CSS z-index value applied to the bar. @default 51
- * @param springConfig - Spring physics controlling the smoothness of the scale animation. Provide `stiffness`, `damping`, and `restDelta` to tune responsiveness. Defaults to `{ stiffness: 400, damping: 40, restDelta: 0.0001 }`
+ * @param springConfig - Spring physics controlling the smoothness of the scale animation. Provide `stiffness`, `damping`, and `restDelta` to tune responsiveness. Defaults to `{ ...SPRING.scroll, restDelta: 0.0001 }`
  * @returns The progress bar React element that visually represents reading progress as a percentage (0–100) via its horizontal scale.
  *
  * @see ReadProgressPresets
@@ -81,8 +82,7 @@ export function ReadProgress({
   color = 'accent',
   zIndex = 51,
   springConfig = {
-    stiffness: 400,
-    damping: 40,
+    ...SPRING.scroll,
     restDelta: 0.0001,
   },
 }: ReadProgressProps) {
@@ -234,8 +234,7 @@ export const ReadProgressPresets = {
   fast: () => (
     <ReadProgress
       springConfig={{
-        stiffness: 200,
-        damping: 40,
+        ...SPRING.scroll,
         restDelta: 0.001,
       }}
     />

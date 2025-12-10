@@ -29,6 +29,7 @@
  */
 
 import { POSITION_PATTERNS, UI_CLASSES } from '../../constants.ts';
+import { SPRING } from '../../../design-system/index.ts';
 import { cn } from '../../utils.ts';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { motion } from 'motion/react';
@@ -116,9 +117,7 @@ export function Skeleton({
             x: ['-100%', '100%'],
           }}
           transition={{
-            type: 'spring',
-            stiffness: 200,
-            damping: 30,
+            ...SPRING.shimmer,
             mass: 0.8,
             repeat: Number.POSITIVE_INFINITY,
             duration: 1.5,
@@ -192,9 +191,7 @@ function ConfigGridSkeleton({
               transition={
                 stagger && !prefersReducedMotion
                   ? {
-                      type: 'spring',
-                      stiffness: 400,
-                      damping: 25,
+                ...SPRING.loading,
                       mass: 0.5,
                       delay: i * 0.05, // Stagger by 50ms per card
                     }
@@ -235,9 +232,7 @@ function ContentListSkeleton({
             transition={
               stagger && !prefersReducedMotion
                 ? {
-                    type: 'spring',
-                    stiffness: 400,
-                    damping: 25,
+                ...SPRING.default,
                     mass: 0.5,
                     delay: i * 0.04, // Faster stagger for lists
                   }
@@ -303,9 +298,7 @@ function FilterBarSkeleton({
               transition={
                 stagger && !prefersReducedMotion
                   ? {
-                      type: 'spring',
-                      stiffness: 400,
-                      damping: 25,
+                ...SPRING.loading,
                       mass: 0.5,
                       delay: i * 0.05, // 50ms stagger per filter
                     }
@@ -332,9 +325,7 @@ function FilterBarSkeleton({
               transition={
                 stagger && !prefersReducedMotion
                   ? {
-                      type: 'spring',
-                      stiffness: 400,
-                      damping: 25,
+                ...SPRING.loading,
                       mass: 0.5,
                       delay: 0.2 + i * 0.02, // Start after filters, 20ms stagger per tag
                     }
@@ -384,9 +375,7 @@ function TableSkeleton({
             transition={
               stagger && !prefersReducedMotion
                 ? {
-                    type: 'spring',
-                    stiffness: 400,
-                    damping: 25,
+                ...SPRING.default,
                     mass: 0.5,
                     delay: rowIndex * 0.03, // 30ms stagger per row
                   }
@@ -457,9 +446,7 @@ function FeaturedSectionSkeleton({
               transition={
                 stagger && !prefersReducedMotion
                   ? {
-                      type: 'spring',
-                      stiffness: 400,
-                      damping: 25,
+                ...SPRING.loading,
                       mass: 0.5,
                       delay: i * 0.05,
                     }
@@ -501,9 +488,7 @@ function HomepageStatsSkeleton({
             transition={
               stagger && !prefersReducedMotion
                 ? {
-                    type: 'spring',
-                    stiffness: 400,
-                    damping: 25,
+                ...SPRING.default,
                     mass: 0.5,
                     delay: i * 0.04, // 40ms stagger per stat
                   }

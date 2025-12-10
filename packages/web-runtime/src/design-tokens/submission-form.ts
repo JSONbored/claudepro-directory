@@ -262,44 +262,6 @@ export const SUBMISSION_FORM_TOKENS = {
   },
 
   // ==========================================
-  // ANIMATIONS - Motion.dev spring configs
-  // ==========================================
-  animations: {
-    spring: {
-      default: {
-        type: 'spring' as const,
-        stiffness: 300,
-        damping: 25,
-      },
-      snappy: {
-        type: 'spring' as const,
-        stiffness: 400,
-        damping: 17,
-      },
-      bouncy: {
-        type: 'spring' as const,
-        stiffness: 500,
-        damping: 15,
-      },
-      smooth: {
-        type: 'spring' as const,
-        stiffness: 200,
-        damping: 30,
-      },
-    },
-    duration: {
-      fast: 0.15,
-      default: 0.25,
-      slow: 0.4,
-    },
-    easing: {
-      default: [0.4, 0, 0.2, 1], // ease-out
-      emphasized: [0.2, 0, 0, 1], // emphasized ease
-      linear: [0, 0, 1, 1], // linear
-    },
-  },
-
-  // ==========================================
   // LAYOUT CONSTRAINTS
   // ==========================================
   layout: {
@@ -345,16 +307,6 @@ export const SUBMISSION_FORM_TOKENS = {
     tooltip: 70,
   },
 
-  // ==========================================
-  // TRANSITIONS
-  // ==========================================
-  transitions: {
-    fast: 'all 0.15s ease-out',
-    default: 'all 0.25s ease-out',
-    slow: 'all 0.4s ease-out',
-    colors: 'color 0.2s ease-out, background-color 0.2s ease-out, border-color 0.2s ease-out',
-    transform: 'transform 0.3s ease-out',
-  },
 } as const;
 
 /**

@@ -7849,12 +7849,67 @@ export type Database = {
         image: string | null
         tier: Database["public"]["Enums"]["user_tier"] | null
       }
+      search_content_optimized_result: {
+        results:
+          | Database["public"]["CompositeTypes"]["search_content_optimized_row"][]
+          | null
+        total_count: number | null
+      }
+      search_content_optimized_row: {
+        id: string | null
+        slug: string | null
+        title: string | null
+        description: string | null
+        category: Database["public"]["Enums"]["content_category"] | null
+        author: string | null
+        author_profile_url: string | null
+        date_added: string | null
+        tags: string[] | null
+        source: string | null
+        created_at: string | null
+        updated_at: string | null
+        features: string[] | null
+        use_cases: string[] | null
+        examples: Json | null
+        relevance_score: number | null
+        viewCount: number | null
+        copyCount: number | null
+        bookmark_count: number | null
+        combined_score: number | null
+        _featured: Json | null
+        title_highlighted: string | null
+        description_highlighted: string | null
+        author_highlighted: string | null
+        tags_highlighted: string[] | null
+      }
       search_query_input: {
         query: string | null
         filters: Json | null
         result_count: number | null
         user_id: string | null
         session_id: string | null
+      }
+      search_unified_result: {
+        results:
+          | Database["public"]["CompositeTypes"]["search_unified_row"][]
+          | null
+        total_count: number | null
+      }
+      search_unified_row: {
+        entity_type: string | null
+        id: string | null
+        title: string | null
+        description: string | null
+        slug: string | null
+        category: string | null
+        tags: string[] | null
+        created_at: string | null
+        relevance_score: number | null
+        engagement_score: number | null
+        title_highlighted: string | null
+        description_highlighted: string | null
+        author_highlighted: string | null
+        tags_highlighted: string[] | null
       }
       seo_metadata: {
         title: string | null

@@ -10,6 +10,7 @@
  */
 
 import { UI_CLASSES } from '../../constants.ts';
+import { SPRING } from '../../../design-system/index.ts';
 import { getSkeletonKeys } from '../../../skeleton-keys.ts';
 import {
   ConfigCardSkeleton,
@@ -395,9 +396,7 @@ export function SubmitPageLoading() {
         transition={
           !prefersReducedMotion
             ? {
-                type: 'spring',
-                stiffness: 400,
-                damping: 25,
+                ...SPRING.loading,
                 mass: 0.5,
               }
             : {}
@@ -438,9 +437,7 @@ export function SubmitPageLoading() {
                   transition={
                     !prefersReducedMotion
                       ? {
-                          type: 'spring',
-                          stiffness: 400,
-                          damping: 25,
+                          ...SPRING.default,
                           mass: 0.5,
                           delay: i * 0.05,
                         }
@@ -464,9 +461,7 @@ export function SubmitPageLoading() {
             transition={
               !prefersReducedMotion
                 ? {
-                    type: 'spring',
-                    stiffness: 400,
-                    damping: 25,
+                    ...SPRING.default,
                     mass: 0.5,
                     delay: 0.2,
                   }
@@ -512,9 +507,7 @@ export function CompanyProfileLoading() {
           transition={
             !prefersReducedMotion
               ? {
-                  type: 'spring',
-                  stiffness: 400,
-                  damping: 25,
+                  ...SPRING.default,
                   mass: 0.5,
                 }
               : {}
@@ -548,9 +541,7 @@ export function CompanyProfileLoading() {
               transition={
                 !prefersReducedMotion
                   ? {
-                      type: 'spring',
-                      stiffness: 400,
-                      damping: 25,
+                      ...SPRING.default,
                       mass: 0.5,
                       delay: 0.1,
                     }
@@ -568,9 +559,7 @@ export function CompanyProfileLoading() {
                     transition={
                       !prefersReducedMotion
                         ? {
-                            type: 'spring',
-                            stiffness: 400,
-                            damping: 25,
+                            ...SPRING.default,
                             mass: 0.5,
                             delay: 0.2 + i * 0.05,
                           }
@@ -595,11 +584,9 @@ export function CompanyProfileLoading() {
               transition={
                 !prefersReducedMotion
                   ? {
-                      type: 'spring',
-                      stiffness: 400,
-                      damping: 25,
-                      mass: 0.5,
-                      delay: 0.3,
+                  ...SPRING.default,
+                  mass: 0.5,
+                  delay: 0.3,
                     }
                   : {}
               }
@@ -1010,9 +997,7 @@ export function createListPageLoading(config: ListPageLoadingConfig = {}) {
           transition={
             !prefersReducedMotion
               ? {
-                  type: 'spring',
-                  stiffness: 400,
-                  damping: 25,
+                  ...SPRING.default,
                   mass: 0.5,
                 }
               : {}
@@ -1063,9 +1048,7 @@ export function createListPageLoading(config: ListPageLoadingConfig = {}) {
                   transition={
                     !prefersReducedMotion
                       ? {
-                          type: 'spring',
-                          stiffness: 400,
-                          damping: 25,
+                          ...SPRING.default,
                           mass: 0.5,
                           delay: i * 0.05,
                         }
@@ -1093,9 +1076,7 @@ export function createListPageLoading(config: ListPageLoadingConfig = {}) {
                   transition={
                     !prefersReducedMotion
                       ? {
-                          type: 'spring',
-                          stiffness: 400,
-                          damping: 25,
+                          ...SPRING.default,
                           mass: 0.5,
                           delay: i * 0.05,
                         }
@@ -1140,9 +1121,7 @@ export function createListPageLoading(config: ListPageLoadingConfig = {}) {
                 transition={
                   !prefersReducedMotion
                     ? {
-                        type: 'spring',
-                        stiffness: 400,
-                        damping: 25,
+                        ...SPRING.loading,
                         mass: 0.5,
                         delay: i * 0.05,
                       }
@@ -1632,9 +1611,7 @@ export function createDashboardPageLoading(config: DashboardPageLoadingConfig = 
                 transition={
                   !prefersReducedMotion
                     ? {
-                        type: 'spring',
-                        stiffness: 400,
-                        damping: 25,
+                        ...SPRING.loading,
                         mass: 0.5,
                         delay: i * 0.05,
                       }
@@ -1666,9 +1643,7 @@ export function createDashboardPageLoading(config: DashboardPageLoadingConfig = 
             transition={
               !prefersReducedMotion
                 ? {
-                    type: 'spring',
-                    stiffness: 400,
-                    damping: 25,
+                    ...SPRING.default,
                     mass: 0.5,
                     delay: 0.2,
                   }
@@ -1689,11 +1664,9 @@ export function createDashboardPageLoading(config: DashboardPageLoadingConfig = 
                   transition={
                     !prefersReducedMotion
                       ? {
-                          type: 'spring',
-                          stiffness: 400,
-                          damping: 25,
-                          mass: 0.5,
-                          delay: 0.3 + i * 0.05,
+                        ...SPRING.default,
+                        mass: 0.5,
+                        delay: 0.3 + i * 0.05,
                         }
                       : {}
                   }
@@ -1721,9 +1694,7 @@ export function createDashboardPageLoading(config: DashboardPageLoadingConfig = 
                 transition={
                   !prefersReducedMotion
                     ? {
-                        type: 'spring',
-                        stiffness: 400,
-                        damping: 25,
+                        ...SPRING.default,
                         mass: 0.5,
                         delay: 0.3 + i * 0.1,
                       }
@@ -1853,9 +1824,7 @@ export function createProfilePageLoading(config: ProfilePageLoadingConfig = {}) 
               transition={
                 !prefersReducedMotion
                   ? {
-                      type: 'spring',
-                      stiffness: 400,
-                      damping: 25,
+                      ...SPRING.loading,
                       mass: 0.5,
                     }
                   : {}
@@ -1882,9 +1851,7 @@ export function createProfilePageLoading(config: ProfilePageLoadingConfig = {}) 
                 transition={
                   !prefersReducedMotion
                     ? {
-                        type: 'spring',
-                        stiffness: 400,
-                        damping: 25,
+                        ...SPRING.loading,
                         mass: 0.5,
                         delay: i * 0.05,
                       }
@@ -1913,11 +1880,9 @@ export function createProfilePageLoading(config: ProfilePageLoadingConfig = {}) 
                   transition={
                     !prefersReducedMotion
                       ? {
-                          type: 'spring',
-                          stiffness: 400,
-                          damping: 25,
-                          mass: 0.5,
-                          delay: 0.2 + cardIndex * 0.1,
+                        ...SPRING.default,
+                        mass: 0.5,
+                        delay: 0.2 + cardIndex * 0.1,
                         }
                       : {}
                   }
@@ -2067,9 +2032,7 @@ export function createContactPageLoading(config: ContactPageLoadingConfig = {}) 
                 transition={
                   !prefersReducedMotion
                     ? {
-                        type: 'spring',
-                        stiffness: 400,
-                        damping: 25,
+                        ...SPRING.loading,
                         mass: 0.5,
                         delay: i * 0.05,
                       }
@@ -2096,9 +2059,7 @@ export function createContactPageLoading(config: ContactPageLoadingConfig = {}) 
                 transition={
                   !prefersReducedMotion
                     ? {
-                        type: 'spring',
-                        stiffness: 400,
-                        damping: 25,
+                        ...SPRING.default,
                         mass: 0.5,
                         delay: 0.3 + i * 0.1,
                       }

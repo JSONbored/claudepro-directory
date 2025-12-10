@@ -5,21 +5,31 @@ import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
 import { usePulse, useRecentlyViewed, getCategoryRoute } from '@heyclaude/web-runtime/hooks';
 import { ArrowRight, Trash } from '@heyclaude/web-runtime/icons';
 import { cn, ConfigCard, Button, Skeleton, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@heyclaude/web-runtime/ui';
-import { useRouter } from 'next/navigation';
-import { memo, useMemo, useEffect, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { memo, useCallback, useMemo, useEffect, useState } from 'react';
 
 import { fetchRecentlyViewedItems } from '@/src/actions/fetch-recently-viewed-items';
+import { useAuthModal } from '@/src/hooks/use-auth-modal';
 
 const MAX_RAIL_ITEMS = 6;
 
 export const RecentlyViewedRail = memo(function RecentlyViewedRail() {
   const { recentlyViewed, isLoaded, clearAll } = useRecentlyViewed();
   const router = useRouter();
+  const pathname = usePathname();
   const pulse = usePulse();
+  const { openAuthModal } = useAuthModal();
   const [enrichedItems, setEnrichedItems] = useState<
     Database['public']['CompositeTypes']['enriched_content_item'][]
   >([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  const handleAuthRequired = useCallback(() => {
+    openAuthModal({
+      valueProposition: 'Sign in to save bookmarks',
+      redirectTo: pathname ?? undefined,
+    });
+  }, [openAuthModal, pathname]);
 
   // Fetch full item data for recently viewed items
   useEffect(() => {
@@ -210,6 +220,7 @@ export const RecentlyViewedRail = memo(function RecentlyViewedRail() {
               showActions
               enableSwipeGestures={false}
               useViewTransitions
+              onAuthRequired={handleAuthRequired}
             />
           ))}
         </div>

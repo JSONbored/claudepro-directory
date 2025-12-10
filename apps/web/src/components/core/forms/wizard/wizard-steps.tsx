@@ -29,6 +29,7 @@ import {
   Input,
 } from '@heyclaude/web-runtime/ui';
 import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/design-tokens';
+import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { AnimatePresence, motion } from 'motion/react';
 import { useCallback, useState } from 'react';
 
@@ -96,13 +97,13 @@ export function StepExamplesTags({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={TOKENS.animations.spring.smooth}
+        transition={SPRING.smooth}
         className="text-center"
       >
         <motion.div
           initial={{ scale: 0, rotate: -180 }}
           animate={{ scale: 1, rotate: 0 }}
-          transition={{ ...TOKENS.animations.spring.bouncy, delay: 0.2 }}
+          transition={{ ...SPRING.bouncy, delay: 0.2 }}
           className="mb-4 inline-flex"
         >
           <Sparkles className="h-12 w-12" style={{ color: TOKENS.colors.accent.primary }} />
@@ -117,7 +118,7 @@ export function StepExamplesTags({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ ...TOKENS.animations.spring.smooth, delay: 0.1 }}
+          transition={{ ...SPRING.smooth, delay: 0.1 }}
       >
         <Card
           style={{
@@ -183,7 +184,7 @@ export function StepExamplesTags({
                         initial={{ opacity: 0, x: -20, scale: 0.9 }}
                         animate={{ opacity: 1, x: 0, scale: 1 }}
                         exit={{ opacity: 0, x: 20, scale: 0.9 }}
-                        transition={TOKENS.animations.spring.snappy}
+                        transition={SPRING.snappy}
                         className="group hover:border-accent-primary/50 flex items-start gap-3 rounded-lg border p-3 transition-all"
                         style={{
                           backgroundColor: TOKENS.colors.background.primary,
@@ -240,7 +241,7 @@ export function StepExamplesTags({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ ...TOKENS.animations.spring.smooth, delay: 0.2 }}
+          transition={{ ...SPRING.smooth, delay: 0.2 }}
       >
         <Card
           style={{
@@ -306,7 +307,7 @@ export function StepExamplesTags({
                         initial={{ opacity: 0, scale: 0 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0 }}
-                        transition={TOKENS.animations.spring.bouncy}
+                        transition={SPRING.bouncy}
                         whileHover={{ scale: 1.05 }}
                       >
                         <Badge
@@ -402,7 +403,7 @@ export function StepReviewSubmit({
             <motion.div
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}
-              transition={TOKENS.animations.spring.bouncy}
+              transition={SPRING.bouncy}
               className="text-center"
             >
               <motion.div
@@ -464,13 +465,13 @@ export function StepReviewSubmit({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={TOKENS.animations.spring.smooth}
+        transition={SPRING.smooth}
         className="text-center"
       >
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ ...TOKENS.animations.spring.bouncy, delay: 0.2 }}
+          transition={{ ...SPRING.bouncy, delay: 0.2 }}
           className="mb-4 inline-flex"
         >
           <Eye className="h-12 w-12" style={{ color: TOKENS.colors.accent.primary }} />
@@ -485,7 +486,7 @@ export function StepReviewSubmit({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ ...TOKENS.animations.spring.smooth, delay: 0.1 }}
+          transition={{ ...SPRING.smooth, delay: 0.1 }}
       >
         <Card
           style={{
@@ -499,7 +500,7 @@ export function StepReviewSubmit({
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                transition={TOKENS.animations.spring.bouncy}
+                transition={SPRING.bouncy}
                 className="mb-4 inline-flex"
               >
                 <div className="relative">
@@ -542,7 +543,7 @@ export function StepReviewSubmit({
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{
                         delay: 0.5,
-                        ...TOKENS.animations.spring.bouncy,
+                        ...SPRING.bouncy,
                       }}
                     >
                       {qualityScore}%
@@ -567,7 +568,7 @@ export function StepReviewSubmit({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ ...TOKENS.animations.spring.smooth, delay: 0.2 }}
+          transition={{ ...SPRING.smooth, delay: 0.2 }}
         className="grid gap-4 sm:grid-cols-2"
       >
         {/* Basic Info Summary */}
@@ -633,7 +634,7 @@ export function StepReviewSubmit({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ ...TOKENS.animations.spring.smooth, delay: 0.3 }}
+          transition={{ ...SPRING.smooth, delay: 0.3 }}
       >
         <Card
           style={{
@@ -654,7 +655,7 @@ export function StepReviewSubmit({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ ...TOKENS.animations.spring.smooth, delay: 0.4 }}
+          transition={{ ...SPRING.smooth, delay: 0.4 }}
       >
         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
           <Button

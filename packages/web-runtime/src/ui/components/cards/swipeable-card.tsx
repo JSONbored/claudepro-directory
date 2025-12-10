@@ -36,15 +36,15 @@
  * Bundle Impact: +2 KB (Motion.dev drag utilities)
  */
 
+import { SPRING } from '../../../design-system/index.ts';
 import { logger } from '../../../logger.ts';
 import { normalizeError } from '../../../errors.ts';
-import { getAnimationConfig } from '../../../config/static-configs.ts';
 import { Bookmark, Copy as CopyIcon } from '../../../icons.tsx';
 import { POSITION_PATTERNS, UI_CLASSES } from '../../constants.ts';
 import { COLORS } from '../../../design-tokens/index.ts';
 import { motion, useMotionValue, useTransform } from 'motion/react';
 import type { ReactNode } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export interface SwipeableCardWrapperProps {
   /** Child components to wrap with swipe gestures */
@@ -74,26 +74,8 @@ export function SwipeableCardWrapper({
 }: SwipeableCardWrapperProps) {
   const [isMobile, setIsMobile] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-  const springSmooth = useMemo(() => {
-    try {
-      const config = getAnimationConfig();
-      return {
-        type: 'spring' as const,
-        stiffness: config['animation.spring.smooth.stiffness'],
-        damping: config['animation.spring.smooth.damping'],
-      };
-    } catch (error) {
-      const normalized = normalizeError(error, 'SwipeableCardWrapper: Failed to load animation config');
-      logger.warn({ err: normalized,
-        component: 'SwipeableCardWrapper', }, 'SwipeableCardWrapper: Failed to load animation config');
-      // Fallback to default values
-      return {
-        type: 'spring' as const,
-        stiffness: 300,
-        damping: 25,
-      };
-    }
-  }, []);
+  // Spring animation config from design system
+  const springSmooth = SPRING.smooth;
 
   // Detect mobile and reduced motion preference
   useEffect(() => {

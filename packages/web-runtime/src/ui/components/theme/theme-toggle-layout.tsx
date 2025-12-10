@@ -73,11 +73,7 @@ export function ThemeToggleLayout({
       <motion.div
         className="pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0"
         layout
-        transition={{
-          type: 'spring',
-          stiffness: SPRING.snappy.stiffness,
-          damping: SPRING.snappy.damping,
-        }}
+        transition={SPRING.snappy}
       />
     </motion.button>
   );

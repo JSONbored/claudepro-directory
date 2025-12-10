@@ -7,6 +7,7 @@ import {
   markReviewHelpful,
 } from '@heyclaude/web-runtime/actions';
 import { formatDistanceToNow, logUnhandledPromise } from '@heyclaude/web-runtime/core';
+import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { Edit, Star, ThumbsUp, Trash } from '@heyclaude/web-runtime/icons';
 import { type ReviewSectionProps } from '@heyclaude/web-runtime/types/component.types';
@@ -19,9 +20,10 @@ import {
   Label,
   StarDisplay,
 } from '@heyclaude/web-runtime/ui';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useId, useState } from 'react';
 
+import { useAuthModal } from '@/src/hooks/use-auth-modal';
 import { ReviewForm } from '@/src/components/core/forms/review-form';
 
 import { ReviewRatingHistogram } from './review-rating-histogram';
@@ -57,6 +59,9 @@ export function ReviewListSection({
   >(null);
   const [editingReviewId, setEditingReviewId] = useState<null | string>(null);
   const router = useRouter();
+  const pathname = usePathname();
+  const { user, status } = useAuthenticatedUser({ context: 'ReviewListSection' });
+  const { openAuthModal } = useAuthModal();
 
   const REVIEWS_PER_PAGE = 10;
 
@@ -146,7 +151,23 @@ export function ReviewListSection({
   };
 
   // Handle delete
-  const handleDelete = async (reviewId: string) => {
+  const handleDelete = useCallback(async (reviewId: string) => {
+    // Proactive auth check - show modal before attempting action
+    if (status === 'loading') {
+      // Wait for auth check to complete
+      return;
+    }
+
+    if (!user) {
+      // User is not authenticated - show auth modal
+      openAuthModal({
+        valueProposition: 'Sign in to interact with reviews',
+        redirectTo: pathname ?? undefined,
+      });
+      return;
+    }
+
+    // User is authenticated - proceed with delete action
     try {
       const result = await deleteReview({ delete_id: reviewId });
       if (result?.data?.success) {
@@ -176,9 +197,88 @@ export function ReviewListSection({
           contentSlug,
         }
       );
-      toasts.error.reviewActionFailed('delete');
+      // Check if error is auth-related and show modal if so
+      const errorMessage = normalized.message;
+      if (errorMessage.includes('signed in') || errorMessage.includes('auth') || errorMessage.includes('unauthorized')) {
+        openAuthModal({
+          valueProposition: 'Sign in to interact with reviews',
+          redirectTo: pathname ?? undefined,
+        });
+      } else {
+        // Non-auth errors - show toast with retry option
+        toasts.raw.error('Failed to delete review', {
+          action: {
+            label: 'Retry',
+            onClick: () => {
+              handleDelete(reviewId);
+            },
+          },
+        });
+      }
     }
-  };
+  }, [user, status, openAuthModal, pathname, sortBy, contentType, contentSlug, router, loadReviewsWithStats]);
+
+  // Handle mark helpful
+  const handleMarkHelpful = useCallback(async (reviewId: string) => {
+    // Proactive auth check - show modal before attempting action
+    if (status === 'loading') {
+      // Wait for auth check to complete
+      return;
+    }
+
+    if (!user) {
+      // User is not authenticated - show auth modal
+      openAuthModal({
+        valueProposition: 'Sign in to interact with reviews',
+        redirectTo: pathname ?? undefined,
+      });
+      return;
+    }
+
+    // User is authenticated - proceed with mark helpful action
+    try {
+      await markReviewHelpful({ review_id: reviewId, helpful: true });
+      toasts.success.actionCompleted('mark as helpful');
+      // Refresh reviews to update helpful count
+      loadReviewsWithStats(page, sortBy).catch((error) => {
+        logUnhandledPromise('ReviewListSection refresh after mark helpful', error, {
+          contentType,
+          contentSlug,
+        });
+      });
+    } catch (error) {
+      const normalized = normalizeError(error, 'Failed to mark review as helpful');
+      logClientWarn(
+        '[Reviews] Mark helpful failed',
+        normalized,
+        'ReviewListSection.handleMarkHelpful',
+        {
+          component: 'ReviewListSection',
+          action: 'mark-helpful',
+          category: 'reviews',
+          reviewId,
+        }
+      );
+      // Check if error is auth-related and show modal if so
+      const errorMessage = normalized.message;
+      if (errorMessage.includes('signed in') || errorMessage.includes('auth') || errorMessage.includes('unauthorized')) {
+        openAuthModal({
+          valueProposition: 'Sign in to interact with reviews',
+          redirectTo: pathname ?? undefined,
+        });
+      } else {
+        // Non-auth errors - show toast with retry option
+        toasts.raw.error('Failed to mark review as helpful', {
+          action: {
+            label: 'Retry',
+            onClick: () => {
+              handleMarkHelpful(reviewId);
+            },
+          },
+        });
+      }
+    }
+  }, [user, status, openAuthModal, pathname, page, sortBy, contentType, contentSlug, loadReviewsWithStats]);
 
   return (
     <div className="space-y-6">
@@ -250,16 +350,7 @@ export function ReviewListSection({
                   });
                 });
               }}
-              onMarkHelpful={() => {
-                // Refresh reviews after marking helpful
-                setPage(1);
-                loadReviewsWithStats(1, sortBy).catch((error: unknown) => {
-                  logUnhandledPromise('ReviewListSection refresh after mark helpful', error, {
-                    contentType,
-                    contentSlug,
-                  });
-                });
-              }}
+              onMarkHelpful={(reviewId: string) => handleMarkHelpful(reviewId)}
             />
           ))}
         </div>
@@ -308,7 +399,6 @@ function ReviewCardItem({
   onDelete,
   isEditing,
   onCancelEdit,
-  onMarkHelpful,
 }: {
   contentSlug: string;
   contentType: Database['public']['Enums']['content_category'];
@@ -317,7 +407,7 @@ function ReviewCardItem({
   onCancelEdit?: () => void;
   onDelete?: () => void;
   onEdit?: () => void;
-  onMarkHelpful?: () => void;
+  onMarkHelpful: (reviewId: string) => void;
   review: Database['public']['CompositeTypes']['review_with_stats_item'];
 }) {
   const [showFullText, setShowFullText] = useState(false);
@@ -395,27 +485,10 @@ function ReviewCardItem({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={async (e) => {
+                onClick={(e) => {
                   e.stopPropagation();
-                  try {
-                    await markReviewHelpful({ review_id: review.id ?? '', helpful: true });
-                    toasts.success.actionCompleted('mark as helpful');
-                    // Call parent callback to refresh reviews
-                    onMarkHelpful?.();
-                  } catch (error) {
-                    const normalized = normalizeError(error, 'Failed to mark review as helpful');
-                    logClientWarn(
-                      '[Reviews] Mark helpful failed',
-                      normalized,
-                      'ReviewListSection.handleMarkHelpful',
-                      {
-                        component: 'ReviewListSection',
-                        action: 'mark-helpful',
-                        category: 'reviews',
-                        reviewId: review.id ?? '',
-                      }
-                    );
-                    toasts.error.reviewActionFailed('vote');
+                  if (review.id) {
+                    onMarkHelpful(review.id);
                   }
                 }}
                 className={UI_CLASSES.BUTTON_GHOST_ICON}

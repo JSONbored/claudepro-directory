@@ -1,8 +1,6 @@
 'use client';
 
 import { type Database } from '@heyclaude/database-types';
-import { type UnifiedSearchFilters } from '@heyclaude/web-runtime';
-import { searchUnifiedClient } from '@heyclaude/web-runtime/data';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { HelpCircle } from '@heyclaude/web-runtime/icons';
 import {
@@ -26,6 +24,7 @@ import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
+import { useAuthModal } from '@/src/hooks/use-auth-modal';
 import { useSavedSearchPresets } from '@/src/hooks/use-saved-search-presets';
 import { useSearchDebounce } from '@/src/hooks/use-search-debounce';
 import { searchCache } from '@/src/utils/search-cache';
@@ -199,7 +198,7 @@ function hasFilterCriteria(filters?: FilterState | null): boolean {
  * @see UnifiedCardGrid
  * @see ConfigCard
  * @see useSavedSearchPresets
- * @see searchUnifiedClient
+ * @see /api/search route
  */
 function ContentSearchClientComponent<T extends DisplayableContent>({
   items,
@@ -295,26 +294,18 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
             return null;
           }
 
-          const searchFilters: UnifiedSearchFilters = {
-            limit: 100,
-          };
+          // Build query parameters for API route
+          // Follows architectural strategy: API route -> data layer -> database RPC -> DB
+          const searchParams = new URLSearchParams({
+            q: sanitizedQuery,
+            searchType: 'unified',
+            entities: 'content',
+            limit: '100',
+          });
 
-          if (nextFilters.category) {
-            searchFilters.categories = [nextFilters.category];
-          } else if (category) {
-            searchFilters.categories = [category];
-          }
-
-          if (nextFilters.tags && nextFilters.tags.length > 0) {
-            searchFilters.tags = nextFilters.tags;
-          }
-
-          if (nextFilters.author) {
-            searchFilters.authors = [nextFilters.author];
-          }
-
+          // Map FilterState sort to API route sort
           if (nextFilters.sort) {
-            const sortMap: Record<string, 'alphabetical' | 'newest' | 'popularity' | 'relevance'> =
+            const sortMap: Record<string, 'relevance' | 'popularity' | 'newest' | 'alphabetical'> =
               {
                 relevance: 'relevance',
                 popularity: 'popularity',
@@ -323,8 +314,24 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
               };
             const mappedSort = sortMap[nextFilters.sort];
             if (mappedSort) {
-              searchFilters.sort = mappedSort;
+              searchParams.set('sort', mappedSort);
             }
+          }
+
+          // Add category filter if provided
+          const effectiveCategory = nextFilters.category || category;
+          if (effectiveCategory) {
+            searchParams.set('categories', effectiveCategory);
+          }
+
+          // Add tag filters if provided
+          if (nextFilters.tags && nextFilters.tags.length > 0) {
+            searchParams.set('tags', nextFilters.tags.join(','));
+          }
+
+          // Add author filter if provided
+          if (nextFilters.author) {
+            searchParams.set('authors', nextFilters.author);
           }
 
           // Check if request was aborted before making API call
@@ -332,18 +339,25 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
             return null;
           }
 
-          const result = await searchUnifiedClient({
-            query: sanitizedQuery,
-            entities: ['content'],
-            filters: searchFilters,
+          // Call API route (follows architectural strategy: API route -> data layer -> database RPC -> DB)
+          const response = await fetch(`/api/search?${searchParams.toString()}`, {
+            method: 'GET',
+            ...(signal ? { signal } : {}), // Support request cancellation
           });
+
+          if (!response.ok) {
+            throw new Error(`Search API returned ${response.status}: ${response.statusText}`);
+          }
+
+          const result = await response.json();
 
           // Check again after API call
           if (signal?.aborted) {
             return null;
           }
 
-          return result.results as T[];
+          // Extract results from API response
+          return (Array.isArray(result.results) ? result.results : []) as T[];
         },
         {
           context: {
@@ -622,6 +636,15 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
     resolvedQuickAuthorOptions.length > 0 ||
     resolvedQuickCategoryOptions.length > 0;
 
+  const { openAuthModal } = useAuthModal();
+
+  const handleAuthRequired = useCallback(() => {
+    openAuthModal({
+      valueProposition: 'Sign in to save bookmarks',
+      redirectTo: pathname ?? undefined,
+    });
+  }, [openAuthModal, pathname]);
+
   const renderSuggestionCard = useCallback(
     (item: DisplayableContent) => (
       <ConfigCard
@@ -630,9 +653,10 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
         showCategory
         showActions
         searchQuery={searchQuery}
+        onAuthRequired={handleAuthRequired}
       />
     ),
-    [searchQuery]
+    [searchQuery, handleAuthRequired]
   );
 
   return (
@@ -672,6 +696,7 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
                 variant="default"
                 showCategory
                 showActions
+                onAuthRequired={handleAuthRequired}
                 searchQuery={searchQuery}
               />
             )}

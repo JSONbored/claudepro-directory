@@ -7,7 +7,9 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
-import type { SearchResult } from '../edge/search-client.ts';
+
+// Use generated type from database instead of legacy SearchResult
+type SearchResult = Database['public']['Functions']['search_content_optimized']['Returns'][number];
 import type { LucideIcon } from '../icons.tsx';
 import type { ReactNode } from 'react';
 import type {
@@ -83,6 +85,8 @@ export interface ConfigCardProps {
   showBorderBeam?: boolean;
   /** Optional search query for highlighting search terms in title/description */
   searchQuery?: string;
+  /** Optional callback when authentication is required for bookmark action */
+  onAuthRequired?: () => void;
 }
 
 // ============================================================================

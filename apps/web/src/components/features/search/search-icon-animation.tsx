@@ -6,6 +6,7 @@
  * Animated search icon with typing pulse effect and focus glow.
  */
 
+import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search } from '@heyclaude/web-runtime/icons';
 import { cn } from '@heyclaude/web-runtime/ui';
@@ -47,17 +48,13 @@ export function SearchIconAnimation({
         transition={
           isTyping
             ? {
-                type: 'spring' as const,
-                stiffness: 150,
-                damping: 20,
+                ...SPRING.smooth,
                 mass: 0.8,
                 repeat: Infinity,
                 repeatType: 'reverse' as const,
               }
             : {
-                type: 'spring' as const,
-                stiffness: 200,
-                damping: 30,
+                ...SPRING.shimmer,
                 mass: 0.5,
               }
         }
@@ -74,9 +71,7 @@ export function SearchIconAnimation({
             animate={{ opacity: 1, scale: 1.2 }}
             exit={{ opacity: 0, scale: 0.8 }}
             transition={{
-              type: 'spring' as const,
-              stiffness: 200,
-              damping: 30,
+              ...SPRING.shimmer,
               mass: 0.5,
             }}
           />

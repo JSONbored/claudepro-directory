@@ -49,12 +49,7 @@ const ANIMATION_CONFIG_COMPAT = {
   'animation.stagger.slow_ms': UI_ANIMATION['stagger.slow_ms'],
   'animation.beam.default_ms': UI_ANIMATION['beam.default_ms'],
   'animation.card.stagger_ms': UI_ANIMATION['card.stagger_ms'],
-  'animation.spring.default.stiffness': UI_ANIMATION['spring.default.stiffness'],
-  'animation.spring.default.damping': UI_ANIMATION['spring.default.damping'],
-  'animation.spring.bouncy.stiffness': UI_ANIMATION['spring.bouncy.stiffness'],
-  'animation.spring.bouncy.damping': UI_ANIMATION['spring.bouncy.damping'],
-  'animation.spring.smooth.stiffness': UI_ANIMATION['spring.smooth.stiffness'],
-  'animation.spring.smooth.damping': UI_ANIMATION['spring.smooth.damping'],
+  // Spring physics - REMOVED: Use SPRING from @heyclaude/web-runtime/design-system instead
   'confetti.success.particle_count': CONFETTI_CONFIG['success.particle_count'],
   'confetti.success.spread': CONFETTI_CONFIG['success.spread'],
   'confetti.success.ticks': CONFETTI_CONFIG['success.ticks'],

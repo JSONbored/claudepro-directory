@@ -18,7 +18,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
-import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/design-tokens';
+import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { AnimatePresence, motion } from 'motion/react';
 import { useState } from 'react';
 
@@ -53,7 +53,7 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={TOKENS.animations.spring.smooth}
+      transition={SPRING.smooth}
     >
       <Card className="overflow-hidden">
         <CardHeader className="space-y-1 pb-3">
@@ -144,7 +144,7 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                transition={TOKENS.animations.spring.smooth}
+                transition={SPRING.smooth}
               >
                 {previewCard}
               </motion.div>
@@ -189,7 +189,7 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                transition={TOKENS.animations.spring.smooth}
+                transition={SPRING.smooth}
                 className="fixed inset-x-4 top-1/2 z-50 -translate-y-1/2 sm:inset-x-auto sm:left-1/2 sm:w-full sm:max-w-md sm:-translate-x-1/2"
               >
                 <div className="space-y-3">

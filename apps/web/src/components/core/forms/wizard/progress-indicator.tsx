@@ -17,6 +17,7 @@
 import { CheckCircle } from '@heyclaude/web-runtime/icons';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/design-tokens';
+import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 
 export interface WizardStep {
@@ -107,7 +108,7 @@ export function ProgressIndicator({
           className="absolute top-0 left-0 h-full rounded-full"
           initial={{ width: 0 }}
           animate={{ width: `${progressPercentage}%` }}
-          transition={TOKENS.animations.spring.smooth}
+          transition={SPRING.smooth}
           style={{
             backgroundColor: TOKENS.colors.accent.primary,
             boxShadow: TOKENS.shadows.glow.orange,
@@ -147,7 +148,7 @@ export function ProgressIndicator({
                 <motion.div
                   initial={{ scale: 0, rotate: -180 }}
                   animate={{ scale: 1, rotate: 0 }}
-                  transition={TOKENS.animations.spring.bouncy}
+                  transition={SPRING.bouncy}
                 >
                   <CheckCircle className="h-5 w-5 text-white" />
                 </motion.div>
@@ -202,7 +203,7 @@ export function ProgressIndicator({
                   animate={{
                     scaleX: step.isCompleted ? 1 : 0,
                   }}
-                  transition={TOKENS.animations.spring.smooth}
+                  transition={SPRING.smooth}
                   style={{
                     backgroundColor: TOKENS.colors.accent.primary,
                     transformOrigin: 'left',

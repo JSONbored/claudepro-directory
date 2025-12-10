@@ -8,6 +8,7 @@
 
 import { CheckCircle, Clock, Send, Sparkles, Users } from '@heyclaude/web-runtime/icons';
 import { cn, UI_CLASSES, BorderBeam } from '@heyclaude/web-runtime/ui';
+import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 
 interface SubmitPageHeroProps {
@@ -53,11 +54,7 @@ const iconVariants = {
   hidden: { scale: 0 },
   visible: {
     scale: 1,
-    transition: {
-      type: 'spring' as const,
-      stiffness: 500,
-      damping: 15,
-    },
+    transition: SPRING.icon,
   },
 };
 
@@ -155,7 +152,7 @@ export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
           <motion.div
             className="relative"
             whileHover={{ scale: 1.05 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+            transition={SPRING.smooth}
           >
             <div
               className={cn(

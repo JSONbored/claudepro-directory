@@ -9,6 +9,7 @@
  * @module web-runtime/design-system/microinteractions/search
  */
 
+import { SPRING } from '../animations/spring.ts';
 import { COLORS } from '../../design-tokens/index.ts';
 
 /**
@@ -21,10 +22,8 @@ export const SEARCH = {
   expand: {
     scale: 1,
     transition: {
-      damping: 30,
+      ...SPRING.smooth,
       mass: 0.5,
-      stiffness: 200,
-      type: 'spring' as const,
     },
     width: '100%',
   },
@@ -38,10 +37,8 @@ export const SEARCH = {
     boxShadow: `0 0 0 3px ${COLORS.semantic.primary.dark.base} / 0.1`, // Orange shadow with 10% opacity - matches rgba(249, 115, 22, 0.1)
     scale: 1.02,
     transition: {
-      damping: 30,
+      ...SPRING.smooth,
       mass: 0.5,
-      stiffness: 200,
-      type: 'spring' as const,
     },
   },
 
@@ -49,10 +46,8 @@ export const SEARCH = {
    * Default transition for search animations - smooth and liquid
    */
   transition: {
-    damping: 30,
+    ...SPRING.smooth,
     mass: 0.5,
-    stiffness: 200,
-    type: 'spring' as const,
   },
 
   /**
@@ -61,12 +56,10 @@ export const SEARCH = {
   typing: {
     scale: [1, 1.1, 1],
     transition: {
-      damping: 20,
+      ...SPRING.smooth,
       duration: 0.6,
       mass: 0.8,
       repeat: Infinity,
-      stiffness: 150,
-      type: 'spring' as const,
     },
   },
 } as const;

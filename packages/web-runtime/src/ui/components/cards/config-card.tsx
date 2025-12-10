@@ -55,7 +55,7 @@ import {
   normalizeError,
 } from '../../../entries/core.ts';
 import { getCategoryConfig } from '../../../data/config/category/index.ts';
-import { useCopyToClipboard, usePulse, usePinboard, useComponentCardConfig } from '../../../hooks/index.ts';
+import { useCopyToClipboard, usePulse, usePinboard, useComponentCardConfig, useAuthenticatedUser } from '../../../hooks/index.ts';
 import { Button } from '../button.tsx';
 import { BookmarkButton } from '../buttons/bookmark-button.tsx';
 import { SimpleCopyButton } from '../buttons/simple-copy-button.tsx';
@@ -135,6 +135,7 @@ export const ConfigCard = memo(
     useViewTransitions = true,
     showBorderBeam,
     searchQuery,
+    onAuthRequired,
   }: GenericConfigCardProps) => {
     try {
       const displayTitle = getDisplayTitle({
@@ -217,6 +218,7 @@ export const ConfigCard = memo(
       // Initialize all hooks at the top level
       const pulse = usePulse();
       const router = useRouter();
+      const { user, status } = useAuthenticatedUser({ context: 'ConfigCard' });
       const { copy: copyLink } = useCopyToClipboard({
         context: {
           component: 'ConfigCard',
@@ -335,6 +337,23 @@ export const ConfigCard = memo(
 
       const handleSwipeLeftBookmark = useCallback(async () => {
         if (!item.slug) return;
+
+        // Proactive auth check - show modal before attempting action
+        if (status === 'loading') {
+          // Wait for auth check to complete
+          return;
+        }
+
+        if (!user) {
+          // User is not authenticated - use callback if provided, otherwise show toast
+          if (onAuthRequired) {
+            onAuthRequired();
+          } else {
+            toasts.error.authRequired();
+          }
+          return;
+        }
+
         const categoryValue = item.category ?? Constants.public.Enums.content_category[0];
         if (!isValidCategory(categoryValue)) {
           const normalized = normalizeError(
@@ -350,6 +369,7 @@ export const ConfigCard = memo(
 
         const validatedCategory = categoryValue as Database['public']['Enums']['content_category'];
 
+        // User is authenticated - proceed with bookmark action
         try {
           const result = await addBookmark({
             content_type: validatedCategory,
@@ -381,12 +401,17 @@ export const ConfigCard = memo(
             contentType: validatedCategory,
             contentSlug: item.slug, }, 'ConfigCard: Failed to add bookmark via swipe');
           if (error instanceof Error && error.message.includes('signed in')) {
-            toasts.error.authRequired();
+            // Auth error - use callback if provided, otherwise show toast
+            if (onAuthRequired) {
+              onAuthRequired();
+            } else {
+              toasts.error.authRequired();
+            }
           } else {
             toasts.error.actionFailed('bookmark');
           }
         }
-      }, [item.category, item.slug, router, pulse]);
+      }, [item.category, item.slug, router, pulse, user, status, onAuthRequired]);
 
       const copyInlineValue = useCallback(
         async (value: string, successDescription: string, metadata?: Record<string, unknown>) => {
@@ -909,6 +934,7 @@ export const ConfigCard = memo(
                         : Constants.public.Enums.content_category[0]
                     }
                     contentSlug={item.slug}
+                    {...(onAuthRequired ? { onAuthRequired } : {})}
                   />
                 )}
                 {bookmarkCount !== undefined && bookmarkCount > 0 && (

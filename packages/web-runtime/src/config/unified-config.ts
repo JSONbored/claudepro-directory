@@ -105,13 +105,7 @@ export const UI_ANIMATION = {
   'card.stagger_ms': 100,
   // Border beam
   'beam.default_ms': 15000,
-  // Spring physics
-  'spring.default.stiffness': 400,
-  'spring.default.damping': 17,
-  'spring.bouncy.stiffness': 500,
-  'spring.bouncy.damping': 20,
-  'spring.smooth.stiffness': 300,
-  'spring.smooth.damping': 25,
+  // Spring physics - REMOVED: Use SPRING from @heyclaude/web-runtime/design-system instead
 } as const;
 
 /** Confetti animation settings */

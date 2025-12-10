@@ -30,6 +30,7 @@
  * @module components/infra/lazy-section
  */
 
+import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 import { type ReactNode } from 'react';
 import { memo, useEffect, useState } from 'react';
@@ -153,8 +154,7 @@ const ANIMATION_VARIANTS: Record<
  * Tuned for natural, bouncy motion that feels premium
  */
 const DEFAULT_SPRING = {
-  stiffness: 100,
-  damping: 15,
+  ...SPRING.bouncy,
   mass: 0.8,
 };
 

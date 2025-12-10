@@ -198,8 +198,8 @@
  * ## Animation System
  *
  * All skeletons use consistent Motion.dev spring physics animations:
- * - **Shimmer:** `stiffness: 200, damping: 30, mass: 0.8` (organic, liquid feel)
- * - **Stagger/Mount:** `stiffness: 400, damping: 25, mass: 0.5` (snappy, responsive)
+ * - **Shimmer:** Uses `SPRING.shimmer` with `mass: 0.8` (organic, liquid feel)
+ * - **Stagger/Mount:** Uses `SPRING.loading` with `mass: 0.5` (smooth, controlled loading feel)
  * - **prefers-reduced-motion:** All animations respect user preferences
  * - **GPU-accelerated:** Uses `transform` properties for performance
  *

@@ -1,15 +1,16 @@
 'use client';
 
 import { createReview, updateReview } from '@heyclaude/web-runtime/actions';
-import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
+import { useAuthenticatedUser, useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import {
   MAX_REVIEW_LENGTH,
   type ReviewFormProps,
 } from '@heyclaude/web-runtime/types/component.types';
 import { toasts, UI_CLASSES, Button, Label, Textarea } from '@heyclaude/web-runtime/ui';
-import { useRouter } from 'next/navigation';
-import { useId, useState, useTransition } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useCallback, useId, useState, useTransition } from 'react';
 
+import { useAuthModal } from '@/src/hooks/use-auth-modal';
 import { ReviewRatingInteractive } from '@/src/components/core/domain/reviews/review-rating-interactive';
 
 /**
@@ -42,6 +43,9 @@ export function ReviewForm({
   const [isPending, startTransition] = useTransition();
   const [showRatingError, setShowRatingError] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
+  const { user, status } = useAuthenticatedUser({ context: 'ReviewForm' });
+  const { openAuthModal } = useAuthModal();
   const textareaId = useId();
   const ratingErrorId = useId();
   const textareaErrorId = useId();
@@ -56,18 +60,35 @@ export function ReviewForm({
   const isValid = rating > 0;
   const hasTextError = reviewText.length > MAX_REVIEW_LENGTH;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
 
-    if (!isValid) {
-      setShowRatingError(true);
-      toasts.error.validation('Please select a star rating');
-      return;
-    }
+      // Proactive auth check - show modal before attempting action
+      if (status === 'loading') {
+        // Wait for auth check to complete
+        return;
+      }
 
-    setShowRatingError(false);
+      if (!user) {
+        // User is not authenticated - show auth modal
+        openAuthModal({
+          valueProposition: 'Sign in to write a review',
+          redirectTo: pathname ?? undefined,
+        });
+        return;
+      }
 
-    startTransition(async () => {
+      if (!isValid) {
+        setShowRatingError(true);
+        toasts.error.validation('Please select a star rating');
+        return;
+      }
+
+      setShowRatingError(false);
+
+      // User is authenticated - proceed with review submission
+      startTransition(async () => {
       try {
         await runLoggedAsync(
           async () => {
@@ -116,11 +137,10 @@ export function ReviewForm({
       } catch (error) {
         // Error already logged by useLoggedAsync
         if (error instanceof Error && error.message.includes('signed in')) {
-          toasts.raw.error('Please sign in to write a review', {
-            action: {
-              label: 'Sign In',
-              onClick: () => router.push(`/login?redirect=${globalThis.location.pathname}`),
-            },
+          // Auth error - show modal (shouldn't happen due to proactive check, but handle as fallback)
+          openAuthModal({
+            valueProposition: 'Sign in to write a review',
+            redirectTo: pathname ?? undefined,
           });
         } else if (error instanceof Error && error.message.includes('already reviewed')) {
           toasts.error.validation('You have already reviewed this content');
@@ -129,7 +149,9 @@ export function ReviewForm({
         }
       }
     });
-  };
+    },
+    [user, status, openAuthModal, pathname, isValid, isEditing, contentType, contentSlug, rating, reviewText, existingReview, router, onSuccess, runLoggedAsync, setShowRatingError]
+  );
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">

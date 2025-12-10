@@ -18,7 +18,7 @@
 import { Bot, Brain, Code, FileCode, Sparkles, Terminal, Zap } from '@heyclaude/web-runtime/icons';
 import { type SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
 import { cn } from '@heyclaude/web-runtime/ui';
-import { MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
+import { MICROINTERACTIONS, SPRING } from '@heyclaude/web-runtime/design-system';
 import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/design-tokens';
 import { motion } from 'motion/react';
 import { useCallback, useState } from 'react';
@@ -195,7 +195,7 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
                       scale: isHovered ? 1.1 : 1,
                       rotate: isHovered ? 5 : 0,
                     }}
-                    transition={TOKENS.animations.spring.bouncy}
+                    transition={SPRING.bouncy}
                   >
                     <Icon
                       className="h-6 w-6"
@@ -210,7 +210,7 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
                     <motion.div
                       initial={{ scale: 0, rotate: -180 }}
                       animate={{ scale: 1, rotate: 0 }}
-                      transition={TOKENS.animations.spring.bouncy}
+                      transition={SPRING.bouncy}
                       className="flex h-6 w-6 items-center justify-center rounded-full"
                       style={{
                         backgroundColor: TOKENS.colors.accent.primary,

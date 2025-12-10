@@ -10,6 +10,7 @@
  * @module components/ui/animation/sliding-number
  */
 
+import { SPRING } from '../../../design-system/index.ts';
 import { cn } from '../../utils.ts';
 import {
   useSpring,
@@ -127,8 +128,7 @@ export function SlidingNumber({
   decimalSeparator = '.',
   decimalPlaces = 0,
   transition = {
-    stiffness: 200,
-    damping: 20,
+    ...SPRING.slide,
     mass: 0.4,
   },
   ...props

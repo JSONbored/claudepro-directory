@@ -19,6 +19,7 @@ import {
   CardContent,
   Input,
 } from '@heyclaude/web-runtime/ui';
+import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
 import { useId, useMemo, useState } from 'react';
@@ -79,7 +80,7 @@ export function JobsPromo() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.2, type: 'spring', stiffness: 300, damping: 20 }}
+      transition={{ duration: 0.5, delay: 0.2, ...SPRING.smooth }}
     >
       <Card
         className={cn(
@@ -121,7 +122,7 @@ export function JobsPromo() {
             )}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.4, type: 'spring', stiffness: 200 }}
+            transition={{ delay: 0.4, ...SPRING.smooth }}
           >
             <div className={cn(UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN, UI_CLASSES.TEXT_SM)}>
               <span className={UI_CLASSES.TEXT_MUTED}>Active community</span>
@@ -183,9 +184,7 @@ export function JobsPromo() {
                 animate={{ opacity: 1, height: 'auto', y: 0 }}
                 exit={{ opacity: 0, height: 0, y: -10 }}
                 transition={{
-                  type: 'spring',
-                  stiffness: 300,
-                  damping: 30,
+                  ...SPRING.gentle,
                   mass: 0.8,
                 }}
                 style={{ overflow: 'hidden' }}
@@ -259,11 +258,7 @@ export function JobsPromo() {
                           initial={{ opacity: 0, x: -8, scale: 0.8 }}
                           animate={{ opacity: 1, x: 0, scale: 1 }}
                           exit={{ opacity: 0, x: -8, scale: 0.8 }}
-                          transition={{
-                            type: 'spring',
-                            stiffness: 400,
-                            damping: 25,
-                          }}
+                          transition={SPRING.loading}
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
                           aria-label="Subscribe to job alerts"
@@ -271,7 +266,7 @@ export function JobsPromo() {
                           <motion.div
                             initial={{ rotate: 0 }}
                             whileHover={{ rotate: 15 }}
-                            transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                            transition={SPRING.bouncy}
                           >
                             <Send className="h-4 w-4" aria-hidden="true" />
                           </motion.div>
@@ -340,7 +335,7 @@ export function JobsPromo() {
               <span>{showNewsletterForm ? 'Hide job alerts' : 'Get job alerts by email'}</span>
               <motion.div
                 animate={{ rotate: showNewsletterForm ? 180 : 0 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                transition={SPRING.smooth}
               >
                 <ChevronUp className="h-4 w-4" aria-hidden="true" />
               </motion.div>

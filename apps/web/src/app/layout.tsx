@@ -19,6 +19,7 @@ import localFont from 'next/font/local';
 import { ThemeProvider } from 'next-themes';
 import { Suspense } from 'react';
 
+import { AuthModalProvider } from '@/src/components/core/auth/auth-modal-provider';
 import { PostCopyEmailProvider } from '@/src/components/core/infra/providers/email-capture-modal-provider';
 import { Pulse } from '@/src/components/core/infra/pulse';
 import { PulseCannon } from '@/src/components/core/infra/pulse-cannon';
@@ -310,13 +311,15 @@ export default function RootLayout({
             enableColorScheme={false}
           >
             <PostCopyEmailProvider>
-              <ErrorBoundary>
-                <Suspense fallback={<LayoutFallback>{children}</LayoutFallback>}>
-                  <LayoutDataWrapper>{children}</LayoutDataWrapper>
-                </Suspense>
-              </ErrorBoundary>
-              <Toaster />
-              {/* Newsletter capture is conditionally rendered in LayoutContent for non-auth pages */}
+              <AuthModalProvider>
+                <ErrorBoundary>
+                  <Suspense fallback={<LayoutFallback>{children}</LayoutFallback>}>
+                    <LayoutDataWrapper>{children}</LayoutDataWrapper>
+                  </Suspense>
+                </ErrorBoundary>
+                <Toaster />
+                {/* Newsletter capture is conditionally rendered in LayoutContent for non-auth pages */}
+              </AuthModalProvider>
             </PostCopyEmailProvider>
           </ThemeProvider>
         </ComponentConfigContextProvider>

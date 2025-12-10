@@ -1,10 +1,9 @@
 'use server';
 
-import { CompaniesService } from '@heyclaude/data-layer';
+import { CompaniesService, SearchService } from '@heyclaude/data-layer';
 import { Constants, type Database } from '@heyclaude/database-types';
 import { cacheLife, cacheTag } from 'next/cache';
 
-import { searchCompaniesUnified } from '../edge/search-client.ts';
 import { logger } from '../logger.ts';
 import { createSupabaseServerClient } from '../supabase/server.ts';
 
@@ -208,18 +207,42 @@ async function fetchCompanySearchResults(
   query: string,
   limit: number
 ): Promise<CompanySearchResult[]> {
+  'use cache';
+  const { cacheLife, cacheTag } = await import('next/cache');
+  const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
+
+  // Configure cache - use 'quarter' profile for company search (same as API route)
+  cacheLife('quarter'); // 15min stale, 5min revalidate, 2hr expire
+  cacheTag('company-search');
+  cacheTag('companies');
+
   const requestLogger = logger.child({
     operation: 'fetchCompanySearchResults',
     module: 'data/companies',
   });
 
   try {
-    const results = await searchCompaniesUnified(query, limit);
+    // Use SearchService directly (same as API route)
+    // Follows architectural strategy: data layer -> database RPC -> DB
+    const supabase = createSupabaseAnonClient();
+    const searchService = new SearchService(supabase);
+
+    const unifiedArgs: Database['public']['Functions']['search_unified']['Args'] = {
+      p_query: query,
+      p_entities: ['company'],
+      p_limit: limit,
+      p_offset: 0,
+      p_highlight_query: query,
+    };
+
+    const searchResponse = await searchService.searchUnified(unifiedArgs);
+    const results = searchResponse.data || [];
+    
     return results.map((entity) => ({
-      id: entity.id,
-      name: entity.title || entity.slug || '',
-      slug: entity.slug,
-      description: entity.description,
+      id: entity.id as string,
+      name: (entity.title || entity.slug || '') as string,
+      slug: entity.slug as string,
+      description: entity.description as string,
     }));
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
@@ -244,20 +267,18 @@ async function fetchCompanySearchResults(
  * Uses 'use cache' to cache search results. Query and limit become part of the cache key.
  * This data is public and same for all users with the same query, so it can be cached.
  * Company search results change frequently, so we use the 'quarter' cacheLife profile.
+ * 
+ * Follows architectural strategy: data layer -> database RPC -> DB
  * @param query
  * @param limit
  */
 export async function searchCompanies(query: string, limit = 10): Promise<CompanySearchResult[]> {
-  'use cache';
   const trimmed = query.trim();
   if (trimmed.length < 2) {
     return [];
   }
 
-  // Configure cache - use 'quarter' profile for company search (changes every 5 minutes)
-  cacheLife('quarter'); // 15min stale, 5min revalidate, 2 hours expire
-  cacheTag('company-search');
-
+  // fetchCompanySearchResults already has 'use cache', so we just call it
   // query and limit are automatically part of cache key
   return fetchCompanySearchResults(trimmed, limit);
 }

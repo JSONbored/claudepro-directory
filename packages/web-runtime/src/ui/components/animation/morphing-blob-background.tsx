@@ -24,6 +24,7 @@
  */
 
 import { cn } from '../../utils.ts';
+import { SPRING } from '../../../design-system/index.ts';
 import { motion, useMotionValue, useSpring, animate } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
 import { logClientInfo, logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
@@ -191,8 +192,8 @@ function BlobShape({
 
   // Spring-animated position - smoother, more liquid physics
   // Use safe values to prevent NaN initialization
-  const x = useSpring(safeBaseX, { stiffness: 150, damping: 30, mass: 0.8 });
-  const y = useSpring(safeBaseY, { stiffness: 150, damping: 30, mass: 0.8 });
+  const x = useSpring(safeBaseX, { ...SPRING.smooth, mass: 0.8 });
+  const y = useSpring(safeBaseY, { ...SPRING.smooth, mass: 0.8 });
 
   // Time value for morphing
   const time = useMotionValue(0);

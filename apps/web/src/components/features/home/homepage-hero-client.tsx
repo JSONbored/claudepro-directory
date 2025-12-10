@@ -19,6 +19,7 @@ import { MICROINTERACTIONS, ANIMATIONS } from '@heyclaude/web-runtime/design-sys
 import { SCROLL_ANIMATIONS, VIEWPORT, STAGGER } from '@heyclaude/web-runtime/design-system';
 import { getCategoryConfigs, getCategoryStatsConfig } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { motion, useScroll, useTransform, useSpring } from 'motion/react';
 import dynamicImport from 'next/dynamic';
 import Link from 'next/link';
@@ -63,13 +64,11 @@ function HomepageHeroClientComponent({
   // Smooth the animations with spring physics for fluid feel
   // Note: useSpring expects MotionValue<number>, heroOpacity/heroScale are already MotionValue<number>
   const smoothOpacity = useSpring(heroOpacity as any, {
-    stiffness: 100,
-    damping: 30,
+    ...SPRING.hero,
     restDelta: 0.001,
   });
   const smoothScale = useSpring(heroScale as any, {
-    stiffness: 100,
-    damping: 30,
+    ...SPRING.hero,
     restDelta: 0.001,
   });
 

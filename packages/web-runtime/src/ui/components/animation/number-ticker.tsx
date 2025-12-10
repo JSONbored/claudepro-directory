@@ -19,6 +19,7 @@
  */
 
 import { cn } from '../../utils.ts';
+import { SPRING } from '../../../design-system/index.ts';
 import { useSpring } from 'motion/react';
 import * as React from 'react';
 import { memo, useEffect, useRef, useState } from 'react';
@@ -63,7 +64,7 @@ function NumberTickerComponent({
   ...props
 }: NumberTickerProps) {
   // Create spring-animated value - called at top level
-  const spring = useSpring(0, { stiffness: 100, damping: 30 });
+  const spring = useSpring(0, SPRING.smooth);
 
   // Subscribe to spring value changes and format to string
   // Start with actual value to prevent "0" flash (production fix)

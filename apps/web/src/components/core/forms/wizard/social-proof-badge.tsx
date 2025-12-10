@@ -12,7 +12,7 @@
 
 import { Award, CheckCircle, Sparkles, TrendingUp, Users } from '@heyclaude/web-runtime/icons';
 import { cn } from '@heyclaude/web-runtime/ui';
-import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/design-tokens';
+import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 
 interface SocialProofBadgeProps {
@@ -49,7 +49,7 @@ export function SocialProofBadge({
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={TOKENS.animations.spring.smooth}
+        transition={SPRING.smooth}
         className={cn(
           'flex items-center gap-2 rounded-lg border border-purple-500/30',
           'bg-purple-500/10 px-3 py-2',
@@ -73,7 +73,7 @@ export function SocialProofBadge({
       <motion.div
         initial={{ opacity: 0, x: -10 }}
         animate={{ opacity: 1, x: 0 }}
-        transition={TOKENS.animations.spring.smooth}
+        transition={SPRING.smooth}
         className={cn(
           'flex items-center gap-2 rounded-lg border border-blue-500/30',
           'bg-blue-500/10 px-3 py-2',
@@ -92,7 +92,7 @@ export function SocialProofBadge({
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={TOKENS.animations.spring.bouncy}
+        transition={SPRING.bouncy}
         className={cn(
           'flex items-center gap-2 rounded-lg border border-green-500/30',
           'bg-green-500/10 px-3 py-2',
@@ -111,7 +111,7 @@ export function SocialProofBadge({
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={TOKENS.animations.spring.smooth}
+        transition={SPRING.smooth}
         className={cn(
           'flex items-center gap-2 rounded-lg border border-amber-500/30',
           'bg-amber-500/10 px-3 py-2',
@@ -164,7 +164,7 @@ export function SocialProofBar({ stats, className }: SocialProofBarProps) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={TOKENS.animations.spring.smooth}
+      transition={SPRING.smooth}
       className={cn('flex flex-wrap items-center gap-2', className)}
     >
       {stats.contributors && stats.contributors.count > 0 ? (
@@ -229,7 +229,7 @@ export function InlineSocialProof({
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={TOKENS.animations.spring.smooth}
+      transition={SPRING.smooth}
       className={cn('text-muted-foreground inline-flex items-center gap-1.5 text-xs', className)}
     >
       {icons[icon]}

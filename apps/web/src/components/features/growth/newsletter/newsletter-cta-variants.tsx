@@ -14,6 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
+import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 
@@ -154,7 +155,7 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
           initial={{ scale: 0.9, opacity: 0 }}
           whileInView={{ scale: 1, opacity: 1 }}
           viewport={{ once: true }}
-          transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+          transition={SPRING.smooth}
         >
           <div className="border-border bg-background rounded-xl border p-3">
             <Mail className="text-foreground h-6 w-6 md:h-7 md:w-7" aria-hidden="true" />

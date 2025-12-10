@@ -15,9 +15,13 @@ import { Constants, type Database } from '@heyclaude/database-types';
 import { submitContentForReview } from '@heyclaude/web-runtime/actions';
 import { checkConfettiEnabled } from '@heyclaude/web-runtime/config/static-configs';
 import { ParseStrategy, safeParse } from '@heyclaude/web-runtime/core';
-import { getAnimationConfig } from '@heyclaude/web-runtime/data';
+import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { useLoggedAsync, useConfetti } from '@heyclaude/web-runtime/hooks';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
+import { usePathname } from 'next/navigation';
+import { useCallback } from 'react';
+
+import { useAuthModal } from '@/src/hooks/use-auth-modal';
 import {
   CheckCircle,
   Code,
@@ -52,7 +56,7 @@ import {
   FormSectionCard,
 } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
-import { useEffect, useId, useState, useTransition } from 'react';
+import { useId, useState, useTransition } from 'react';
 import { z } from 'zod';
 
 import { DuplicateWarning } from './duplicate-warning';
@@ -179,35 +183,16 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
     submission_id: string;
   }>(null);
 
-  /** Animation configs */
-  const [springSmooth, setSpringSmooth] = useState({
-    type: 'spring' as const,
-    stiffness: 300,
-    damping: 25,
-  });
-  const [springBouncy, setSpringBouncy] = useState({
-    type: 'spring' as const,
-    stiffness: 500,
-    damping: 20,
-  });
-  const { user } = useAuthenticatedUser({
+  /** Animation configs from design system */
+  const springSmooth = SPRING.smooth;
+  const springBouncy = SPRING.bouncy;
+  
+  const { user, status } = useAuthenticatedUser({
     context: 'ContentSubmissionForm',
     subscribe: false,
   });
-
-  useEffect(() => {
-    const config = getAnimationConfig();
-    setSpringSmooth({
-      type: 'spring' as const,
-      stiffness: config['animation.spring.smooth.stiffness'],
-      damping: config['animation.spring.smooth.damping'],
-    });
-    setSpringBouncy({
-      type: 'spring' as const,
-      stiffness: config['animation.spring.bouncy.stiffness'],
-      damping: config['animation.spring.bouncy.damping'],
-    });
-  }, []);
+  const { openAuthModal } = useAuthModal();
+  const pathname = usePathname();
 
   /**
    * Single ID prefix for ALL form fields
@@ -303,15 +288,28 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
     toasts.success.templateApplied();
   };
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleSubmit = useCallback(
+    async (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
 
-    startTransition(async () => {
-      try {
-        if (!user) {
-          toasts.error.submissionFailed('You must be signed in to submit content');
-          return;
-        }
+      // Proactive auth check - show modal before attempting action
+      if (status === 'loading') {
+        // Wait for auth check to complete
+        return;
+      }
+
+      if (!user) {
+        // User is not authenticated - show auth modal
+        openAuthModal({
+          valueProposition: 'Sign in to submit content',
+          redirectTo: pathname ?? undefined,
+        });
+        return;
+      }
+
+      // User is authenticated - proceed with submission
+      startTransition(async () => {
+        try {
 
         await runLoggedAsync(
           async () => {
@@ -468,12 +466,14 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
             },
           }
         );
-      } catch (error) {
-        // Error already logged by useLoggedAsync
-        toasts.error.submissionFailed(normalizeError(error, 'Failed to submit content').message);
-      }
-    });
-  };
+        } catch (error) {
+          // Error already logged by useLoggedAsync
+          toasts.error.submissionFailed(normalizeError(error, 'Failed to submit content').message);
+        }
+      });
+    },
+    [user, status, openAuthModal, pathname, contentType, name, description, runLoggedAsync, celebrateSubmission, setSubmissionResult]
+  );
 
   const getSection = (type: SubmissionContentType): SubmissionFormSection => {
     return formConfig[type] ?? EMPTY_SECTION;

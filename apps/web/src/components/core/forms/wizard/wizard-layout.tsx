@@ -21,6 +21,7 @@ import { logClientError, logClientWarn, normalizeError } from '@heyclaude/web-ru
 import { type SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
 import { cn, Button } from '@heyclaude/web-runtime/ui';
 import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/design-tokens';
+import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { AnimatePresence, motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { type ReactNode, useCallback, useEffect, useState } from 'react';
@@ -252,7 +253,7 @@ export function WizardLayout({
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
-            transition={TOKENS.animations.spring.smooth}
+            transition={SPRING.smooth}
             className="min-h-[60vh]"
           >
             {children}

@@ -10,6 +10,7 @@ import { addBookmarkBatch } from '@heyclaude/web-runtime/actions';
 import { getContentItemUrl, isValidCategory, sanitizeSlug } from '@heyclaude/web-runtime/core';
 import { getCategoryConfig } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks';
 import {
   ArrowRight,
   Award,
@@ -51,8 +52,10 @@ import {
   toasts,
 } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
-import { useState, useTransition } from 'react';
+import { usePathname } from 'next/navigation';
+import { useCallback, useState, useTransition } from 'react';
 
+import { useAuthModal } from '@/src/hooks/use-auth-modal';
 import { ShareResults } from './share-results';
 
 // Type matching DecodedQuizAnswers from results page
@@ -84,10 +87,29 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
   const [minScore, setMinScore] = useState(60);
   const [maxResults, setMaxResults] = useState(10);
   const [showRefinePanel, setShowRefinePanel] = useState(false);
+  const { openAuthModal } = useAuthModal();
+  const pathname = usePathname();
+  const { user, status } = useAuthenticatedUser({ context: 'ResultsDisplay' });
 
   const { results, summary, total_matches, answers } = recommendations;
 
-  const handleSaveAll = () => {
+  const handleSaveAll = useCallback(() => {
+    // Proactive auth check - show modal before attempting action
+    if (status === 'loading') {
+      // Wait for auth check to complete
+      return;
+    }
+
+    if (!user) {
+      // User is not authenticated - show auth modal
+      openAuthModal({
+        valueProposition: 'Sign in to save recommendations',
+        redirectTo: pathname ?? undefined,
+      });
+      return;
+    }
+
+    // User is authenticated - proceed with save action
     startTransition(async () => {
       try {
         const items = (results ?? [])
@@ -125,11 +147,28 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
         } else {
           toasts.error.saveFailed();
         }
-      } catch {
-        toasts.error.saveFailed();
+      } catch (error) {
+        // Check if error is auth-related and show modal if so
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        if (errorMessage.includes('signed in') || errorMessage.includes('auth') || errorMessage.includes('unauthorized')) {
+          openAuthModal({
+            valueProposition: 'Sign in to save recommendations',
+            redirectTo: pathname ?? undefined,
+          });
+        } else {
+          // Non-auth errors - show toast with retry option
+          toasts.raw.error('Failed to save recommendations', {
+            action: {
+              label: 'Retry',
+              onClick: () => {
+                handleSaveAll();
+              },
+            },
+          });
+        }
       }
     });
-  };
+  }, [user, status, openAuthModal, pathname, results]);
 
   const filteredResults = (results ?? [])
     .filter((r) => selectedCategory === 'all' || r.category === selectedCategory)
@@ -440,6 +479,12 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                         contentType={result.category}
                         contentSlug={result.slug}
                         initialBookmarked={false}
+                        onAuthRequired={() => {
+                          openAuthModal({
+                            valueProposition: 'Sign in to save recommendations',
+                            redirectTo: window.location.pathname,
+                          });
+                        }}
                       />
                     </div>
 

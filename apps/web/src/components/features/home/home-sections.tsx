@@ -427,33 +427,16 @@ function HomePageClientComponent({
               return;
             }
 
-            const { searchUnifiedClient } =
-              await import('@heyclaude/web-runtime/edge/search-client');
+            // Build query parameters for API route
+            // Follows architectural strategy: API route -> data layer -> database RPC -> DB
+            const searchParams = new URLSearchParams({
+              q: trimmedQuery,
+              searchType: 'unified',
+              entities: 'content',
+              limit: '50',
+            });
 
-            // Build filters object - only include defined properties
-            const searchFilters: {
-              limit: number;
-              categories?: string[];
-              tags?: string[];
-              authors?: string[];
-              sort?: 'relevance' | 'popularity' | 'newest' | 'alphabetical';
-            } = {
-              limit: 50,
-            };
-
-            if (categories) {
-              searchFilters.categories = categories;
-            }
-
-            if (filters.tags && filters.tags.length > 0) {
-              searchFilters.tags = filters.tags;
-            }
-
-            if (filters.author) {
-              searchFilters.authors = [filters.author];
-            }
-
-            // Map FilterState sort to UnifiedSearchFilters sort
+            // Map FilterState sort to API route sort
             if (filters.sort) {
               const sortMap: Record<string, 'relevance' | 'popularity' | 'newest' | 'alphabetical'> =
                 {
@@ -465,12 +448,27 @@ function HomePageClientComponent({
                 };
               const mappedSort = sortMap[filters.sort];
               if (mappedSort) {
-                searchFilters.sort = mappedSort;
+                searchParams.set('sort', mappedSort);
               }
             }
 
+            // Add category filter if provided
+            if (categories && categories.length > 0) {
+              searchParams.set('categories', categories.join(','));
+            }
+
+            // Add tag filters if provided
+            if (filters.tags && filters.tags.length > 0) {
+              searchParams.set('tags', filters.tags.join(','));
+            }
+
+            // Add author filter if provided
+            if (filters.author) {
+              searchParams.set('authors', filters.author);
+            }
+
             logClientWarn(
-              '[HomePageClient] Calling searchUnifiedClient',
+              '[HomePageClient] Calling /api/search',
               null,
               'HomePageClient.handleSearch.call',
               {
@@ -479,15 +477,21 @@ function HomePageClientComponent({
                 category: 'search',
                 query: trimmedQuery,
                 entities: ['content'],
-                filters: searchFilters,
+                searchParams: searchParams.toString(),
               }
             );
-            
-            const result = await searchUnifiedClient({
-              query: trimmedQuery,
-              entities: ['content'],
-              filters: searchFilters,
+
+            // Call API route (follows architectural strategy: API route -> data layer -> database RPC -> DB)
+            const response = await fetch(`/api/search?${searchParams.toString()}`, {
+              method: 'GET',
+              ...(signal ? { signal } : {}), // Support request cancellation
             });
+
+            if (!response.ok) {
+              throw new Error(`Search API returned ${response.status}: ${response.statusText}`);
+            }
+
+            const result = await response.json();
 
             // Check if request was aborted before setting results
             if (signal?.aborted) {
@@ -500,7 +504,7 @@ function HomePageClientComponent({
               : [];
             
             logClientWarn(
-              '[HomePageClient] searchUnifiedClient result received',
+              '[HomePageClient] /api/search result received',
               null,
               'HomePageClient.handleSearch.result',
               {
@@ -514,6 +518,7 @@ function HomePageClientComponent({
                 resultsLength: Array.isArray(result.results) ? result.results.length : 0,
                 extractedLength: results.length,
                 firstResultSlug: results[0]?.slug,
+                searchType: result.searchType,
               }
             );
             

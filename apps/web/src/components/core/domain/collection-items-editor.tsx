@@ -15,6 +15,7 @@ import {
   reorderCollectionItems,
 } from '@heyclaude/web-runtime/actions';
 import { isValidCategory, sanitizeSlug } from '@heyclaude/web-runtime/core';
+import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { ArrowDown, ArrowUp, ExternalLink, Plus, Trash } from '@heyclaude/web-runtime/icons';
 import {
@@ -29,8 +30,10 @@ import {
   SelectValue,
   Separator,
 } from '@heyclaude/web-runtime/ui';
-import { useRouter } from 'next/navigation';
-import { useState, useTransition } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useCallback, useState, useTransition } from 'react';
+
+import { useAuthModal } from '@/src/hooks/use-auth-modal';
 
 /**
  * Validate slug is safe for use in URLs
@@ -91,6 +94,9 @@ export function CollectionItemManager({
   availableBookmarks,
 }: CollectionItemManagerProps) {
   const router = useRouter();
+  const pathname = usePathname();
+  const { user, status } = useAuthenticatedUser({ context: 'CollectionItemManager' });
+  const { openAuthModal } = useAuthModal();
   const [isPending, startTransition] = useTransition();
   const [items, setItems] = useState(initialItems);
   const [selectedBookmarkId, setSelectedBookmarkId] = useState<string>('');
@@ -104,7 +110,22 @@ export function CollectionItemManager({
       )
   );
 
-  const handleAdd = async () => {
+  const handleAdd = useCallback(async () => {
+    // Proactive auth check - show modal before attempting action
+    if (status === 'loading') {
+      // Wait for auth check to complete
+      return;
+    }
+
+    if (!user) {
+      // User is not authenticated - show auth modal
+      openAuthModal({
+        valueProposition: 'Sign in to add items to collections',
+        redirectTo: pathname ?? undefined,
+      });
+      return;
+    }
+
     if (!selectedBookmarkId) {
       toasts.error.validation('Please select a bookmark to add');
       return;
@@ -113,6 +134,7 @@ export function CollectionItemManager({
     const bookmark = availableBookmarks.find((b) => b.id === selectedBookmarkId);
     if (!bookmark) return;
 
+    // User is authenticated - proceed with add action
     startTransition(async () => {
       try {
         // Server-side schema validation handles content_type validation via categoryIdSchema
@@ -142,10 +164,27 @@ export function CollectionItemManager({
             bookmarkId: bookmark.id,
           }
         );
-        toasts.error.fromError(error, 'Failed to add item');
+        // Check if error is auth-related and show modal if so
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        if (errorMessage.includes('signed in') || errorMessage.includes('auth') || errorMessage.includes('unauthorized')) {
+          openAuthModal({
+            valueProposition: 'Sign in to add items to collections',
+            redirectTo: pathname ?? undefined,
+          });
+        } else {
+          // Non-auth errors - show toast with retry option
+          toasts.raw.error('Failed to add item to collection', {
+            action: {
+              label: 'Retry',
+              onClick: () => {
+                handleAdd();
+              },
+            },
+          });
+        }
       }
     });
-  };
+  }, [user, status, openAuthModal, pathname, selectedBookmarkId, availableBookmarks, collectionId, items.length, router]);
 
   const handleRemove = async (itemId: string) => {
     startTransition(async () => {

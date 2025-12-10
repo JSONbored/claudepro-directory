@@ -12,7 +12,7 @@
  * - Respects prefers-reduced-motion
  */
 
-import { UI_ANIMATION } from '../../config/unified-config.ts';
+import { SPRING } from '../../design-system/index.ts';
 import { X } from '../../icons.tsx';
 import { POSITION_PATTERNS, UI_CLASSES } from '../constants.ts';
 import { cn } from '../utils.ts';
@@ -70,12 +70,8 @@ interface SheetContentProps
   extends React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>,
     VariantProps<typeof sheetVariants> {}
 
-/** Spring animation config from unified config */
-const springSmooth = {
-  type: 'spring' as const,
-  stiffness: UI_ANIMATION['spring.smooth.stiffness'],
-  damping: UI_ANIMATION['spring.smooth.damping'],
-};
+/** Spring animation config from design system */
+const springSmooth = SPRING.smooth;
 
 const SheetContent = ({
   side = 'right',

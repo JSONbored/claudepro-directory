@@ -13,6 +13,7 @@ import { useNewsletter } from '@heyclaude/web-runtime/hooks';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { ArrowRight, Loader2, Mail } from '@heyclaude/web-runtime/icons';
 import { cn, SimpleCopyButton, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useId, useMemo, useState } from 'react';
 
@@ -166,7 +167,7 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
                 initial={{ scale: 0.9, opacity: 0 }}
                 whileInView={{ scale: 1, opacity: 1 }}
                 viewport={{ once: true }}
-                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                transition={SPRING.smooth}
               >
                 <div className="border-border/50 bg-card/50 rounded-xl border p-4">
                   <Mail className="text-foreground h-8 w-8 md:h-10 md:w-10" aria-hidden="true" />
@@ -246,11 +247,7 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
                         initial={{ opacity: 0, x: -8, scale: 0.8 }}
                         animate={{ opacity: 1, x: 0, scale: 1 }}
                         exit={{ opacity: 0, x: -8, scale: 0.8 }}
-                        transition={{
-                          type: 'spring',
-                          stiffness: 400,
-                          damping: 25,
-                        }}
+                        transition={SPRING.loading}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         aria-label="Subscribe to newsletter"
@@ -258,7 +255,7 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
                         <motion.div
                           initial={{ rotate: 0 }}
                           whileHover={{ rotate: 15 }}
-                          transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                          transition={SPRING.bouncy}
                         >
                           <ArrowRight className="h-5 w-5" aria-hidden="true" />
                         </motion.div>
