@@ -44,12 +44,7 @@ const ANIMATION_CONFIG_COMPAT = {
   'animation.ticker.default_ms': UI_ANIMATION['ticker.default_ms'],
   'animation.ticker.fast_ms': UI_ANIMATION['ticker.fast_ms'],
   'animation.ticker.slow_ms': UI_ANIMATION['ticker.slow_ms'],
-  'animation.stagger.fast_ms': UI_ANIMATION['stagger.fast_ms'],
-  'animation.stagger.medium_ms': UI_ANIMATION['stagger.medium_ms'],
-  'animation.stagger.slow_ms': UI_ANIMATION['stagger.slow_ms'],
   'animation.beam.default_ms': UI_ANIMATION['beam.default_ms'],
-  'animation.card.stagger_ms': UI_ANIMATION['card.stagger_ms'],
-  // Spring physics - REMOVED: Use SPRING from @heyclaude/web-runtime/design-system instead
   'confetti.success.particle_count': CONFETTI_CONFIG['success.particle_count'],
   'confetti.success.spread': CONFETTI_CONFIG['success.spread'],
   'confetti.success.ticks': CONFETTI_CONFIG['success.ticks'],

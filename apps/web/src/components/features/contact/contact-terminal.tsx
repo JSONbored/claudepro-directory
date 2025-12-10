@@ -45,6 +45,7 @@ import {
   SheetTitle,
   Textarea,
 } from '@heyclaude/web-runtime/ui';
+import { STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
 import { AnimatePresence, motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -509,7 +510,7 @@ export function ContactTerminal() {
                 key={line.id}
                 initial={{ opacity: 0, y: -5 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.2, delay: index * 0.03 }}
+                transition={{ duration: DURATION.quick, delay: index * STAGGER.micro }} // Using micro for 30ms
                 className={cn(
                   'flex items-start gap-2',
                   line.type === 'error' && 'text-destructive',

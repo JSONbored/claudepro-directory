@@ -46,7 +46,7 @@ import {
 import { UI_CLASSES } from '../../constants.ts';
 import { cn } from '../../utils.ts';
 import { SUBMISSION_FORM_TOKENS as TOKENS } from '../../../design-tokens/submission-form.ts';
-import { SPRING } from '../../../design-system/index.ts';
+import { SPRING, STAGGER } from '../../../design-system/index.ts';
 import type { LucideIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import Link from 'next/link';
@@ -136,7 +136,7 @@ export function EmptyState({
     : {
         initial: { scale: 0, rotate: -180 },
         animate: { scale: 1, rotate: 0 },
-        transition: { ...SPRING.bouncy, delay: 0.15 },
+        transition: { ...SPRING.bouncy, delay: STAGGER.medium },
       };
 
   const ctaAnimation = noAnimation
@@ -144,7 +144,7 @@ export function EmptyState({
     : {
         initial: { opacity: 0, y: 10 },
         animate: { opacity: 1, y: 0 },
-        transition: { ...SPRING.smooth, delay: 0.3 },
+        transition: { ...SPRING.smooth, delay: STAGGER.slow },
       };
 
   // Render action button

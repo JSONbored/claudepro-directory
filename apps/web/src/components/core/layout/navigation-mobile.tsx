@@ -12,7 +12,7 @@ import {
   SECONDARY_NAVIGATION,
 } from '@heyclaude/web-runtime/config/navigation';
 import { getContactChannels } from '@heyclaude/web-runtime/core';
-import { SPRING, MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
+import { SPRING, MICROINTERACTIONS, STAGGER } from '@heyclaude/web-runtime/design-system';
 import { DiscordIcon, Github, Menu } from '@heyclaude/web-runtime/icons';
 import {
   ANIMATION_CONSTANTS,
@@ -129,7 +129,7 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
             className="flex items-center px-1 pb-8"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.1 }}
+            transition={{ delay: STAGGER.fast }}
           >
             <HeyClaudeLogo size="lg" duration={1.2} />
           </motion.div>
@@ -145,7 +145,7 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
                     key={`action-${link.label}-${index}`}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.15 + index * 0.05 }}
+                    transition={{ delay: STAGGER.medium + index * STAGGER.micro }}
                   >
                     <motion.div
                       whileTap={MICROINTERACTIONS.button.tap}
@@ -173,7 +173,7 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
                     key={`primary-${link.label}-${index}`}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.15 + adjustedIndex * 0.05 }}
+                    transition={{ delay: STAGGER.medium + adjustedIndex * STAGGER.micro }}
                   >
                     <motion.div
                       whileTap={MICROINTERACTIONS.button.tap}
@@ -216,7 +216,7 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{
-                            delay: 0.15 + (PRIMARY_NAVIGATION.length + index) * 0.05,
+                            delay: STAGGER.medium + (PRIMARY_NAVIGATION.length + index) * STAGGER.micro,
                           }}
                         >
                           <motion.div
@@ -248,7 +248,7 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
             className="border-border/30 border-t pt-6 pb-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
+            transition={{ delay: STAGGER.slow }}
           >
             <div className={`${UI_CLASSES.GRID_COLS_3_GAP_4} px-4`}>
               {[

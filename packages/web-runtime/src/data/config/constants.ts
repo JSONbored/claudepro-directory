@@ -106,7 +106,6 @@ export const GUIDE_CATEGORIES = {
 export const UI_CONFIG = {
   animation: {
     easing: UI_ANIMATION.easing,
-    duration: UI_ANIMATION.duration,
   },
   pagination: PAGINATION_CONFIG,
 } as const;
@@ -181,12 +180,6 @@ export const ANIMATION_DURATIONS = {
     default: 1500, // 1.5 seconds
     fast: 1000, // 1 second
     slow: 2000, // 2 seconds
-  },
-  // Stagger delays for sequential animations
-  stagger: {
-    fast: 100, // 100ms between items
-    medium: 200, // 200ms between items
-    slow: 300, // 300ms between items
   },
   // Border beam animations
   beam: {

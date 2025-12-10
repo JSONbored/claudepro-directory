@@ -11,7 +11,7 @@
  * - Mobile: Not used (falls back to normal menu)
  */
 
-import { SPRING } from '@heyclaude/web-runtime/design-system';
+import { SPRING, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import { Navigation3DCard, type Navigation3DCardProps } from './navigation-3d-card';
@@ -40,8 +40,8 @@ export function NavigationCardGrid({
           initial={{ opacity: 0, y: 20, scale: 0.9 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{
-            duration: 0.4,
-            delay: index * 0.05, // Stagger by 50ms per card
+            duration: DURATION.slow,
+            delay: index * STAGGER.micro, // Stagger by 50ms per card
             ...SPRING.smooth,
           }}
           className="h-[90px] xl:h-[100px]" // Half size - compact fixed height for cards

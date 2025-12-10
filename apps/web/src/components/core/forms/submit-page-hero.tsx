@@ -8,7 +8,7 @@
 
 import { CheckCircle, Clock, Send, Sparkles, Users } from '@heyclaude/web-runtime/icons';
 import { cn, UI_CLASSES, BorderBeam } from '@heyclaude/web-runtime/ui';
-import { SPRING } from '@heyclaude/web-runtime/design-system';
+import { SPRING, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 
 interface SubmitPageHeroProps {
@@ -29,8 +29,8 @@ const containerVariants = {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.5,
-      staggerChildren: 0.1,
+      duration: DURATION.moderate,
+      staggerChildren: STAGGER.fast,
     },
   },
 };
@@ -43,7 +43,7 @@ const itemVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.4 },
+    transition: { duration: DURATION.slow },
   },
 };
 
@@ -172,7 +172,7 @@ export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
                 opacity: [0.5, 0, 0.5],
               }}
               transition={{
-                duration: 2,
+                duration: DURATION.maximum,
                 repeat: Number.POSITIVE_INFINITY,
                 ease: 'easeInOut',
               }}

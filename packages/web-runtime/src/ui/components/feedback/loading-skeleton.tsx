@@ -29,7 +29,7 @@
  */
 
 import { POSITION_PATTERNS, UI_CLASSES } from '../../constants.ts';
-import { SPRING } from '../../../design-system/index.ts';
+import { SPRING, STAGGER, DURATION } from '../../../design-system/index.ts';
 import { cn } from '../../utils.ts';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { motion } from 'motion/react';
@@ -120,7 +120,7 @@ export function Skeleton({
             ...SPRING.shimmer,
             mass: 0.8,
             repeat: Number.POSITIVE_INFINITY,
-            duration: 1.5,
+            duration: DURATION.veryExtended,
           }}
           style={{
             willChange: 'transform',
@@ -193,7 +193,7 @@ function ConfigGridSkeleton({
                   ? {
                 ...SPRING.loading,
                       mass: 0.5,
-                      delay: i * 0.05, // Stagger by 50ms per card
+                      delay: i * STAGGER.micro, // Stagger by 50ms per card
                     }
                   : {}
               }
@@ -234,7 +234,7 @@ function ContentListSkeleton({
                 ? {
                 ...SPRING.default,
                     mass: 0.5,
-                    delay: i * 0.04, // Faster stagger for lists
+                    delay: i * STAGGER.micro, // Faster stagger for lists (using micro for 40ms)
                   }
                 : {}
             }
@@ -300,7 +300,7 @@ function FilterBarSkeleton({
                   ? {
                 ...SPRING.loading,
                       mass: 0.5,
-                      delay: i * 0.05, // 50ms stagger per filter
+                      delay: i * STAGGER.micro, // 50ms stagger per filter
                     }
                   : {}
               }
@@ -327,7 +327,7 @@ function FilterBarSkeleton({
                   ? {
                 ...SPRING.loading,
                       mass: 0.5,
-                      delay: 0.2 + i * 0.02, // Start after filters, 20ms stagger per tag
+                      delay: STAGGER.default + i * STAGGER.micro, // Start after filters, 20ms stagger per tag (using micro for 20ms)
                     }
                   : {}
               }
@@ -377,7 +377,7 @@ function TableSkeleton({
                 ? {
                 ...SPRING.default,
                     mass: 0.5,
-                    delay: rowIndex * 0.03, // 30ms stagger per row
+                    delay: rowIndex * STAGGER.micro, // 30ms stagger per row (using micro for 30ms)
                   }
                 : {}
             }
@@ -448,7 +448,7 @@ function FeaturedSectionSkeleton({
                   ? {
                 ...SPRING.loading,
                       mass: 0.5,
-                      delay: i * 0.05,
+                      delay: i * STAGGER.micro,
                     }
                   : {}
               }
@@ -490,7 +490,7 @@ function HomepageStatsSkeleton({
                 ? {
                 ...SPRING.default,
                     mass: 0.5,
-                    delay: i * 0.04, // 40ms stagger per stat
+                    delay: i * STAGGER.micro, // 40ms stagger per stat (using micro for 40ms)
                   }
                 : {}
             }

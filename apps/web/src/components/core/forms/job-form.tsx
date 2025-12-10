@@ -11,7 +11,7 @@ import { normalizeError } from '@heyclaude/shared-runtime';
 import { type CreateJobInput } from '@heyclaude/web-runtime';
 import { type PaymentPlanCatalogEntry } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
+import { useAuthenticatedUser, useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { Star } from '@heyclaude/web-runtime/icons';
 import {
   toasts,
@@ -31,8 +31,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@heyclaude/web-runtime/ui';
-import { useEffect, useId, useMemo, useState, useTransition } from 'react';
+import { usePathname } from 'next/navigation';
+import { useCallback, useEffect, useId, useMemo, useState, useTransition } from 'react';
 
+import { useAuthModal } from '@/src/hooks/use-auth-modal';
 import { CompanySelector } from '@/src/components/core/forms/company-selector';
 import { ListItemManager } from '@/src/components/core/forms/list-items-editor';
 
@@ -159,6 +161,9 @@ export function JobForm({
     defaultMessage: 'Job submission failed',
     defaultRethrow: false,
   });
+  const { user, status } = useAuthenticatedUser({ context: 'JobForm' });
+  const { openAuthModal } = useAuthModal();
+  const pathname = usePathname();
   const featuredCheckboxId = useId();
   const [isPending, startTransition] = useTransition();
   const planOptions = useMemo<PlanOption[]>(() => {
@@ -252,8 +257,23 @@ export function JobForm({
         } upgrade`
       : null;
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    // Proactive auth check - show modal before attempting action
+    if (status === 'loading') {
+      // Wait for auth check to complete
+      return;
+    }
+
+    if (!user) {
+      // User is not authenticated - show auth modal
+      openAuthModal({
+        valueProposition: 'Sign in to post jobs',
+        redirectTo: pathname ?? undefined,
+      });
+      return;
+    }
 
     const formData = new FormData(e.currentTarget);
 
@@ -334,10 +354,34 @@ export function JobForm({
         );
       } catch (error) {
         // Error already logged by useLoggedAsync
-        toasts.error.fromError(normalizeError(error, 'Failed to save job'), 'Failed to save job');
+        const normalized = normalizeError(error, 'Failed to save job');
+        const errorMessage = normalized.message;
+        
+        // Check if error is auth-related and show modal if so
+        if (errorMessage.includes('signed in') || errorMessage.includes('auth') || errorMessage.includes('unauthorized')) {
+          openAuthModal({
+            valueProposition: 'Sign in to post jobs',
+            redirectTo: pathname ?? undefined,
+          });
+        } else {
+          // Non-auth errors - show toast with retry option
+          toasts.raw.error('Failed to save job', {
+            action: {
+              label: 'Retry',
+              onClick: () => {
+                // Trigger form submission again
+                const form = e.currentTarget;
+                if (form) {
+                  const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+                  form.dispatchEvent(submitEvent);
+                }
+              },
+            },
+          });
+        }
       }
     });
-  };
+  }, [user, status, openAuthModal, pathname, onSubmit, runLoggedAsync]);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">

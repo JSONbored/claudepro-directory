@@ -648,10 +648,6 @@ export const POSITION_PATTERNS = {
 // ==========================================
 
 export const ANIMATION_CONSTANTS = {
-  DURATION_FAST: 0.15,
-  DURATION_DEFAULT: 0.2,
-  DURATION_SLOW: 0.3,
-
   EASE_DEFAULT: [0.4, 0, 0.2, 1] as const,
   EASE_OUT: [0, 0, 0.2, 1] as const,
   EASE_IN: [0.4, 0, 1, 1] as const,

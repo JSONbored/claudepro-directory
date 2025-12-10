@@ -6,7 +6,7 @@
  * Animated search icon with typing pulse effect and focus glow.
  */
 
-import { SPRING } from '@heyclaude/web-runtime/design-system';
+import { SPRING, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search } from '@heyclaude/web-runtime/icons';
 import { cn } from '@heyclaude/web-runtime/ui';
@@ -95,9 +95,9 @@ export function SearchIconAnimation({
                 }}
                 exit={{ opacity: 0, scale: 0 }}
                 transition={{
-                  duration: 0.8,
+                  duration: DURATION.long,
                   repeat: Infinity,
-                  delay: i * 0.2,
+                  delay: i * STAGGER.default,
                   ease: 'easeOut',
                 }}
               />

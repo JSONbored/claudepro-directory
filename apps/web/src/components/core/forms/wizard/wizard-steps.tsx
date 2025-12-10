@@ -29,7 +29,7 @@ import {
   Input,
 } from '@heyclaude/web-runtime/ui';
 import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/design-tokens';
-import { SPRING } from '@heyclaude/web-runtime/design-system';
+import { SPRING, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
 import { AnimatePresence, motion } from 'motion/react';
 import { useCallback, useState } from 'react';
 
@@ -103,7 +103,7 @@ export function StepExamplesTags({
         <motion.div
           initial={{ scale: 0, rotate: -180 }}
           animate={{ scale: 1, rotate: 0 }}
-          transition={{ ...SPRING.bouncy, delay: 0.2 }}
+          transition={{ ...SPRING.bouncy, delay: STAGGER.default }}
           className="mb-4 inline-flex"
         >
           <Sparkles className="h-12 w-12" style={{ color: TOKENS.colors.accent.primary }} />
@@ -118,7 +118,7 @@ export function StepExamplesTags({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-          transition={{ ...SPRING.smooth, delay: 0.1 }}
+          transition={{ ...SPRING.smooth, delay: STAGGER.fast }}
       >
         <Card
           style={{
@@ -241,7 +241,7 @@ export function StepExamplesTags({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-          transition={{ ...SPRING.smooth, delay: 0.2 }}
+          transition={{ ...SPRING.smooth, delay: STAGGER.default }}
       >
         <Card
           style={{
@@ -412,7 +412,7 @@ export function StepReviewSubmit({
                   rotate: [0, 10, -10, 0],
                 }}
                 transition={{
-                  duration: 0.6,
+                  duration: DURATION.extended,
                   repeat: Number.POSITIVE_INFINITY,
                   repeatDelay: 0.5,
                 }}
@@ -440,8 +440,8 @@ export function StepReviewSubmit({
                       scale: [1, 1.5, 0],
                     }}
                     transition={{
-                      duration: 1.5,
-                      delay: i * 0.05,
+                      duration: DURATION.veryExtended,
+                      delay: i * STAGGER.micro,
                       ease: 'easeOut',
                     }}
                     className="pointer-events-none absolute top-1/2 left-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full"
@@ -471,7 +471,7 @@ export function StepReviewSubmit({
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ ...SPRING.bouncy, delay: 0.2 }}
+          transition={{ ...SPRING.bouncy, delay: STAGGER.default }}
           className="mb-4 inline-flex"
         >
           <Eye className="h-12 w-12" style={{ color: TOKENS.colors.accent.primary }} />
@@ -486,7 +486,7 @@ export function StepReviewSubmit({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-          transition={{ ...SPRING.smooth, delay: 0.1 }}
+          transition={{ ...SPRING.smooth, delay: STAGGER.fast }}
       >
         <Card
           style={{
@@ -526,7 +526,7 @@ export function StepReviewSubmit({
                       strokeLinecap="round"
                       initial={{ pathLength: 0 }}
                       animate={{ pathLength: qualityScore / 100 }}
-                      transition={{ duration: 1, ease: 'easeOut' }}
+                      transition={{ duration: DURATION.veryLong, ease: 'easeOut' }}
                       style={{
                         pathLength: qualityScore / 100,
                         strokeDasharray: '1 1',
@@ -542,7 +542,7 @@ export function StepReviewSubmit({
                       initial={{ opacity: 0, scale: 0 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{
-                        delay: 0.5,
+                        delay: STAGGER.loose,
                         ...SPRING.bouncy,
                       }}
                     >
@@ -552,7 +552,7 @@ export function StepReviewSubmit({
                       className="text-muted-foreground text-xs"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      transition={{ delay: 0.7 }}
+                      transition={{ delay: STAGGER.veryExtended }}
                     >
                       {qualityLevel.label}
                     </motion.span>
@@ -568,7 +568,7 @@ export function StepReviewSubmit({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-          transition={{ ...SPRING.smooth, delay: 0.2 }}
+          transition={{ ...SPRING.smooth, delay: STAGGER.default }}
         className="grid gap-4 sm:grid-cols-2"
       >
         {/* Basic Info Summary */}
@@ -634,7 +634,7 @@ export function StepReviewSubmit({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-          transition={{ ...SPRING.smooth, delay: 0.3 }}
+          transition={{ ...SPRING.smooth, delay: STAGGER.slow }}
       >
         <Card
           style={{
@@ -655,7 +655,7 @@ export function StepReviewSubmit({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-          transition={{ ...SPRING.smooth, delay: 0.4 }}
+          transition={{ ...SPRING.smooth, delay: STAGGER.relaxed }}
       >
         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
           <Button
@@ -674,7 +674,7 @@ export function StepReviewSubmit({
                 <motion.div
                   animate={{ rotate: 360 }}
                   transition={{
-                    duration: 1,
+                    duration: DURATION.veryLong,
                     repeat: Number.POSITIVE_INFINITY,
                     ease: 'linear',
                   }}

@@ -39,6 +39,8 @@ import Link from 'next/link';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 
+import { SignInButton } from '@/src/components/core/auth/sign-in-button';
+
 import { JobDeleteButton } from '@/src/components/core/buttons/jobs/job-delete-button';
 import { JobToggleButton } from '@/src/components/core/buttons/jobs/job-toggle-button';
 
@@ -225,9 +227,9 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
             <CardDescription>Please sign in to manage your job listings.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild>
-              <Link href={ROUTES.LOGIN}>Go to login</Link>
-            </Button>
+            <SignInButton valueProposition="Sign in to manage your job listings" redirectTo="/account/jobs">
+              Go to login
+            </SignInButton>
           </CardContent>
         </Card>
       </div>

@@ -7,7 +7,7 @@
 /* Smooth fade for all transitions by default */
 ::view-transition-old(root),
 ::view-transition-new(root) {
-  animation-duration: 0.3s;
+  animation-duration: var(--duration-default);
   animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -19,20 +19,20 @@
 ::view-transition-old(config-card),
 ::view-transition-new(config-card) {
   /* Shared transition for all cards */
-  animation-duration: 0.4s;
+  animation-duration: var(--duration-slow);
   animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1); /* Spring easing */
 }
 
 /* Specific card transitions by slug - removed attribute selector as not supported in View Transitions */
 ::view-transition-old(config-card),
 ::view-transition-new(config-card) {
-  animation-duration: 0.35s;
+  animation-duration: var(--duration-balanced);
 }
 
 /* Image transitions (for avatars, logos, etc.) */
 ::view-transition-old(config-image),
 ::view-transition-new(config-image) {
-  animation-duration: 0.3s;
+  animation-duration: var(--duration-default);
   animation-timing-function: ease-in-out;
   /* Prevent image distortion during transition */
   object-fit: cover;
@@ -114,7 +114,7 @@
 /* Smooth fade for navigation changes */
 ::view-transition-old(nav-link),
 ::view-transition-new(nav-link) {
-  animation-duration: 0.2s;
+  animation-duration: var(--duration-quick);
   animation-timing-function: ease-in-out;
 }
 
@@ -124,7 +124,7 @@
 
 ::view-transition-old(modal),
 ::view-transition-new(modal) {
-  animation: scale-in 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: scale-in var(--duration-comfortable) cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* ===========================
@@ -134,7 +134,7 @@
 /* Circular expansion from click point - OPTIMIZED for performance */
 ::view-transition-old(theme-toggle),
 ::view-transition-new(theme-toggle) {
-  animation-duration: 0.2s; /* Reduced from 0.5s for snappier feel */
+  animation-duration: var(--duration-quick);
   animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -143,7 +143,7 @@
 ::view-transition-new(root) {
   will-change: transform, opacity;
   backface-visibility: hidden;
-  animation-duration: 0.2s;
+  animation-duration: var(--duration-quick);
   animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -169,22 +169,22 @@
 /* Fade transition */
 .vt-fade::view-transition-old(root),
 .vt-fade::view-transition-new(root) {
-  animation: fade-in 0.3s ease-in-out;
+  animation: fade-in var(--duration-default) ease-in-out;
 }
 
 /* Slide up transition */
 .vt-slide-up::view-transition-new(root) {
-  animation: slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: slide-up var(--duration-default) cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Slide down transition */
 .vt-slide-down::view-transition-new(root) {
-  animation: slide-down 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: slide-down var(--duration-default) cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Scale transition */
 .vt-scale::view-transition-new(root) {
-  animation: scale-in 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: scale-in var(--duration-comfortable) cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* ===========================

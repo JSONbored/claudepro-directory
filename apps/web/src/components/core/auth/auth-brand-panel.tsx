@@ -4,6 +4,7 @@
 
 'use client';
 
+import { STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 
 import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';
@@ -20,7 +21,7 @@ export function AuthBrandPanel() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.2 }}
+        transition={{ duration: DURATION.extended, delay: STAGGER.default }}
       >
         <div className="mb-6">
           <HeyClaudeLogo size="xl" inView duration={1.5} />

@@ -18,7 +18,7 @@
 import { AlertCircle, AlertTriangle, CheckCircle, Info } from '@heyclaude/web-runtime/icons';
 import { cn, Label } from '@heyclaude/web-runtime/ui';
 import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/design-tokens';
-import { SPRING } from '@heyclaude/web-runtime/design-system';
+import { SPRING, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
 import { AnimatePresence, motion } from 'motion/react';
 import { type FocusEvent, type ReactNode, useCallback, useState } from 'react';
 
@@ -234,7 +234,7 @@ export function AnimatedFormField({
             )}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
+            transition={{ delay: STAGGER.default }}
           >
             {currentLength} / {maxLength}
           </motion.span>
@@ -248,7 +248,7 @@ export function AnimatedFormField({
           animate={{
             borderColor: getBorderColor(),
           }}
-          transition={{ duration: 0.2 }}
+          transition={{ duration: DURATION.quick }}
           style={{
             boxShadow: getGlowEffect(),
           }}

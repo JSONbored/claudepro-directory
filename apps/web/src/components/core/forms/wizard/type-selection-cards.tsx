@@ -18,7 +18,7 @@
 import { Bot, Brain, Code, FileCode, Sparkles, Terminal, Zap } from '@heyclaude/web-runtime/icons';
 import { type SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
 import { cn } from '@heyclaude/web-runtime/ui';
-import { MICROINTERACTIONS, SPRING } from '@heyclaude/web-runtime/design-system';
+import { MICROINTERACTIONS, SPRING, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
 import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/design-tokens';
 import { motion } from 'motion/react';
 import { useCallback, useState } from 'react';
@@ -119,7 +119,7 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
           visible: {
             opacity: 1,
             transition: {
-              staggerChildren: 0.08,
+              staggerChildren: STAGGER.tight,
             },
           },
         }}
@@ -179,7 +179,7 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
                 animate={{
                   opacity: isHovered || isSelected ? 1 : 0,
                 }}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: DURATION.default }}
               />
 
               {/* Content */}
@@ -266,8 +266,8 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
                         x: 0,
                       }}
                       transition={{
-                        delay: 0.1 + index * 0.05,
-                        duration: 0.2,
+                        delay: STAGGER.fast + index * STAGGER.micro,
+                        duration: DURATION.quick,
                       }}
                     >
                       <div
@@ -292,7 +292,7 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
                 animate={{
                   opacity: isHovered ? 0.3 : 0,
                 }}
-                transition={{ duration: 0.2 }}
+                transition={{ duration: DURATION.quick }}
               />
             </motion.button>
           );
@@ -304,7 +304,7 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
         className="text-muted-foreground mt-6 text-center text-sm"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
+        transition={{ delay: STAGGER.loose }}
       >
         Select the type that best matches your submission
       </motion.p>

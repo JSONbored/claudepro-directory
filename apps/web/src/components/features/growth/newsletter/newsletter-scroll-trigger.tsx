@@ -8,6 +8,7 @@
 import { type Database } from '@heyclaude/database-types';
 import { getNewsletterConfigValue } from '@heyclaude/web-runtime/config/static-configs';
 import { ensureNumber, logUnhandledPromise } from '@heyclaude/web-runtime/core';
+import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { motion, useScroll } from 'motion/react';
 import { useEffect, useState } from 'react';
@@ -110,10 +111,7 @@ export function NewsletterScrollTrigger({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{
-        duration: 0.4,
-        ease: [0.16, 1, 0.3, 1], // Smooth spring
-      }}
+      transition={SPRING.smooth}
       className="my-12"
     >
       <NewsletterCTAVariant variant="inline" source={source} {...(category ? { category } : {})} />

@@ -6,6 +6,8 @@
  * @module web-runtime/design-system/microinteractions/ripple
  */
 
+import { DURATION } from '../animations/duration.ts';
+
 /**
  * Ripple Effect
  */
@@ -30,7 +32,7 @@ export const RIPPLE = {
    * Transition for ripple effect
    */
   transition: {
-    duration: 0.6,
+    duration: DURATION.extended,
     ease: 'easeOut',
   },
 } as const;

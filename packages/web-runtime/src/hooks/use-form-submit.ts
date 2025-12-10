@@ -16,7 +16,7 @@
 import { normalizeError } from '@heyclaude/shared-runtime';
 
 import { useRouter } from 'next/navigation';
-import { useCallback, useTransition } from 'react';
+import { useCallback, useRef, useTransition } from 'react';
 
 import { toasts } from '../client/toast.ts';
 
@@ -133,6 +133,8 @@ export function useFormSubmit<TResult = unknown>(
 
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  // Store last operation for retry functionality
+  const lastOperationRef = useRef<(() => Promise<TResult>) | null>(null);
 
   const runLoggedAsync = useLoggedAsync({
     scope,
@@ -142,6 +144,8 @@ export function useFormSubmit<TResult = unknown>(
 
   const handleSubmit = useCallback(
     async (operation: () => Promise<TResult>): Promise<void> => {
+      // Store operation for retry
+      lastOperationRef.current = operation;
       startTransition(async () => {
         try {
           const result = await runLoggedAsync(operation, {
@@ -180,7 +184,20 @@ export function useFormSubmit<TResult = unknown>(
             error,
             messages.errorTitle ?? 'Operation failed'
           );
-          toasts.error.fromError(normalized, messages.errorTitle ?? 'Operation failed');
+          // Show error toast with "Retry" button
+          // Note: Retry will call the operation again
+          toasts.raw.error(messages.errorTitle ?? 'Operation failed', {
+            description: normalized.message,
+            action: {
+              label: 'Retry',
+              onClick: () => {
+                // Retry by calling the operation again
+                handleSubmit(operation).catch(() => {
+                  // Error already handled by this catch block
+                });
+              },
+            },
+          });
           onError?.(normalized);
         }
       });

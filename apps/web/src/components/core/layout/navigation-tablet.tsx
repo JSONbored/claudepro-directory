@@ -24,7 +24,7 @@ import {
   UnifiedBadge,
   cn,
 } from '@heyclaude/web-runtime/ui';
-import { SPRING, MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
+import { SPRING, MICROINTERACTIONS, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
 import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -131,7 +131,7 @@ export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTable
       className="scrollbar-hide hidden snap-x snap-mandatory overflow-x-auto md:flex xl:hidden"
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, ease: 'easeOut' }}
+      transition={{ duration: DURATION.default, ease: 'easeOut' }}
       aria-label="Tablet navigation"
     >
       <div className={`flex ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} px-2`}>
@@ -144,7 +144,7 @@ export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTable
                 className="snap-center"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: linkIndex * 0.05, duration: 0.3 }}
+                transition={{ delay: linkIndex * STAGGER.micro, duration: DURATION.default }}
               >
                 <Popover>
                   <PopoverTrigger asChild>
@@ -258,7 +258,7 @@ export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTable
                 className="snap-center"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: linkIndex * 0.05, duration: 0.3 }}
+                transition={{ delay: linkIndex * STAGGER.micro, duration: DURATION.default }}
               >
                 <Popover>
                   <PopoverTrigger asChild>
@@ -316,7 +316,7 @@ export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTable
                                   animate={{ opacity: 1, y: 0 }}
                                   transition={{
                                     ...SPRING.smooth,
-                                    delay: childIndex * 0.03,
+                                    delay: childIndex * STAGGER.micro, // Using micro for 30ms
                                   }}
                                 >
                                   <motion.div
@@ -407,7 +407,7 @@ export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTable
                 className="snap-center"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: linkIndex * 0.05, duration: 0.3 }}
+                transition={{ delay: linkIndex * STAGGER.micro, duration: DURATION.default }}
               >
                 <Popover onOpenChange={setIsOpen}>
                   <PopoverTrigger asChild>
@@ -438,7 +438,7 @@ export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTable
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           exit={{ opacity: 0 }}
-                          transition={{ duration: 0.1 }}
+                          transition={{ duration: DURATION.micro }}
                           className={cn('grid', UI_CLASSES.SPACE_DEFAULT)}
                         >
                           {link.sections.map((section, sectionIndex) => (
@@ -459,7 +459,7 @@ export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTable
                                       animate={{ opacity: 1, y: 0 }}
                                       transition={{
                                         ...SPRING.smooth,
-                                        delay: childIndex * 0.03,
+                                        delay: childIndex * STAGGER.micro, // Using micro for 30ms
                                       }}
                                       >
                                         <motion.div
@@ -542,7 +542,7 @@ export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTable
                 className="snap-center"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: linkIndex * 0.05, duration: 0.3 }}
+                transition={{ delay: linkIndex * STAGGER.micro, duration: DURATION.default }}
               >
                 <Popover>
                   <PopoverTrigger asChild>
@@ -588,9 +588,8 @@ export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTable
                                     initial={{ opacity: 0, y: 4 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{
-                                      duration: 0.2,
-                                      delay: childIndex * 0.03,
-                                      ease: [0.25, 0.1, 0.25, 1],
+                                      ...SPRING.smooth,
+                                      delay: childIndex * STAGGER.micro, // Using micro for 30ms
                                     }}
                                   >
                                     <motion.div
@@ -703,7 +702,7 @@ export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTable
               className="snap-center"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: linkIndex * 0.05, duration: 0.3 }}
+              transition={{ delay: linkIndex * STAGGER.micro, duration: DURATION.default }}
             >
               <NavLink
                 href={link.href}

@@ -128,8 +128,23 @@ export function useDetailQuickActions({
                 userRetryable: true,
               }
             );
+            // Show error toast with "Retry" button
             toasts.raw.error('Copy failed', {
               description: 'Unable to copy pnpm command.',
+              action: {
+                label: 'Retry',
+                onClick: async () => {
+                  try {
+                    await copyToClipboard(pnpmCommand);
+                    toasts.raw.success('Install command copied', {
+                      description: pnpmCommand,
+                    });
+                    trackCopyPulse({ action: 'copy_install', manager: 'pnpm' });
+                  } catch (retryError) {
+                    // Error will be handled by the toast above if it fails again
+                  }
+                },
+              },
             });
           }
         },
@@ -162,8 +177,23 @@ export function useDetailQuickActions({
                 userRetryable: true,
               }
             );
+            // Show error toast with "Retry" button
             toasts.raw.error('Copy failed', {
               description: 'Unable to copy Claude Desktop configuration.',
+              action: {
+                label: 'Retry',
+                onClick: async () => {
+                  try {
+                    await copyToClipboard(JSON.stringify({ mcpServers: resolvedMcpServers }, null, 2));
+                    toasts.raw.success('Claude config copied', {
+                      description: 'Paste into Claude Desktop → Settings → MCP Servers.',
+                    });
+                    trackCopyPulse({ action: 'copy_mcp_config' });
+                  } catch (retryError) {
+                    // Error will be handled by the toast above if it fails again
+                  }
+                },
+              },
             });
           }
         },
@@ -196,8 +226,23 @@ export function useDetailQuickActions({
                 userRetryable: true,
               }
             );
+            // Show error toast with "Retry" button
             toasts.raw.error('Copy failed', {
               description: 'Unable to copy configuration JSON.',
+              action: {
+                label: 'Retry',
+                onClick: async () => {
+                  try {
+                    await copyToClipboard(JSON.stringify(resolvedConfigurationObject, null, 2));
+                    toasts.raw.success('Configuration copied', {
+                      description: 'JSON configuration saved to your clipboard.',
+                    });
+                    trackCopyPulse({ action: 'copy_configuration' });
+                  } catch (retryError) {
+                    // Error will be handled by the toast above if it fails again
+                  }
+                },
+              },
             });
           }
         },

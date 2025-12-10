@@ -32,7 +32,6 @@ import {
 import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useMemo, useState } from 'react';
-import { usePathname, useSearchParams } from 'next/navigation';
 
 import { NewsletterOptInTile } from '@/src/components/core/auth/newsletter-opt-in-tile';
 import { OAuthProviderButton } from '@/src/components/core/auth/oauth-provider-button';
@@ -72,22 +71,23 @@ export function AuthModal({
   valueProposition = 'Sign in to continue',
   redirectTo,
 }: AuthModalProps) {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
   const [newsletterOptIn, setNewsletterOptIn] = useState(false);
   const [newsletterConfig, setNewsletterConfig] = useState<Record<string, unknown>>({});
   const { count, isLoading } = useNewsletterCount();
   const subscriberCountLabel = useMemo(() => formatSubscriberCount(count), [count]);
 
   // Determine redirect path - use provided redirectTo, or current pathname with search params
+  // Lazy-load pathname/searchParams to avoid blocking render
   const finalRedirectTo = useMemo(() => {
     if (redirectTo) return redirectTo;
-    if (pathname) {
-      const search = searchParams?.toString();
-      return search ? `${pathname}?${search}` : pathname;
+    // Access route data lazily only when modal is open and redirectTo is not provided
+    if (typeof window !== 'undefined') {
+      const pathname = window.location.pathname;
+      const search = window.location.search;
+      return search ? `${pathname}${search}` : pathname;
     }
     return undefined;
-  }, [redirectTo, pathname, searchParams]);
+  }, [redirectTo]);
 
   // Load newsletter config
   useEffect(() => {

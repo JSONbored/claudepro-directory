@@ -45,6 +45,7 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
+import { useRef } from 'react';
 
 import { usePostCopyEmail } from '@/src/components/core/infra/providers/email-capture-modal-provider';
 import { usePinboardDrawer } from '@/src/components/features/navigation/pinboard-drawer-provider';
@@ -224,6 +225,8 @@ export function DetailHeaderActions({
   const contentItem = item as ContentItem;
 
   const pulse = usePulse();
+  const handleCopyContentRef = useRef<(() => Promise<void>) | null>(null);
+  
   const { copy } = useCopyWithEmailCapture({
     emailContext: {
       copyType: determineCopyType(contentItem),
@@ -237,8 +240,20 @@ export function DetailHeaderActions({
       });
     },
     onError: () => {
+      // Show error toast with "Retry" button
       toasts.raw.error('Copy failed', {
         description: 'Unable to copy content to clipboard.',
+        action: {
+          label: 'Retry',
+          onClick: () => {
+            // Retry by calling handleCopyContent again
+            if (handleCopyContentRef.current) {
+              handleCopyContentRef.current().catch(() => {
+                // Error already handled by onError callback
+              });
+            }
+          },
+        },
       });
     },
     context: {
@@ -311,7 +326,8 @@ export function DetailHeaderActions({
     }
 
     await copy(contentToCopy);
-
+    
+    // Track copy action (non-blocking)
     pulse.copy({ category, slug: contentItem.slug }).catch((error) => {
       logUnhandledPromise('trackInteraction:copy-content', error, {
         slug: contentItem.slug,
@@ -319,6 +335,9 @@ export function DetailHeaderActions({
       });
     });
   };
+  
+  // Store handleCopyContent in ref for retry functionality
+  handleCopyContentRef.current = handleCopyContent;
 
   // Check if download is available for this item
   const hasMcpbDownload =
@@ -647,8 +666,15 @@ export function DetailHeaderActions({
                       try {
                         const response = await fetch(`/${safeCategory}/${safeSlug}/llms.txt`);
                         if (!response.ok) {
+                          // Show error toast with "Retry" button
                           toasts.raw.error('Unable to copy for AI', {
                             description: 'The AI-optimized content could not be loaded.',
+                            action: {
+                              label: 'Retry',
+                              onClick: () => {
+                                handleCopyForAI();
+                              },
+                            },
                           });
                           logUnhandledPromise('Failed to copy for AI', new Error(`HTTP ${response.status}: ${response.statusText}`), {
                             category,
@@ -665,8 +691,15 @@ export function DetailHeaderActions({
                           metadata: { action_type: 'llmstxt' },
                         });
                       } catch (error) {
+                        // Show error toast with "Retry" button
                         toasts.raw.error('Unable to copy for AI', {
                           description: 'An unexpected error occurred while copying.',
+                          action: {
+                            label: 'Retry',
+                            onClick: () => {
+                              handleCopyForAI();
+                            },
+                          },
                         });
                         logUnhandledPromise('Failed to copy for AI', error, {
                           category,
@@ -681,8 +714,15 @@ export function DetailHeaderActions({
                           `/${safeCategory}/${safeSlug}.md?include_metadata=true&include_footer=false`
                         );
                         if (!response.ok) {
+                          // Show error toast with "Retry" button
                           toasts.raw.error('Unable to copy markdown', {
                             description: 'The markdown content could not be loaded.',
+                            action: {
+                              label: 'Retry',
+                              onClick: () => {
+                                handleCopyMarkdown();
+                              },
+                            },
                           });
                           logUnhandledPromise('Failed to copy markdown', new Error(`HTTP ${response.status}: ${response.statusText}`), {
                             category,
@@ -705,8 +745,15 @@ export function DetailHeaderActions({
                           metadata: { action_type: 'copy' },
                         });
                       } catch (error) {
+                        // Show error toast with "Retry" button
                         toasts.raw.error('Unable to copy markdown', {
                           description: 'An unexpected error occurred while copying.',
+                          action: {
+                            label: 'Retry',
+                            onClick: () => {
+                              handleCopyMarkdown();
+                            },
+                          },
                         });
                         logUnhandledPromise('Failed to copy markdown', error, {
                           category,
@@ -759,8 +806,15 @@ export function DetailHeaderActions({
                       try {
                         const response = await fetch(`/${safeCategory}/${safeSlug}.md`);
                         if (!response.ok) {
+                          // Show error toast with "Retry" button
                           toasts.raw.error('Unable to download markdown', {
                             description: 'The markdown file could not be loaded.',
+                            action: {
+                              label: 'Retry',
+                              onClick: () => {
+                                handleDownloadMarkdown();
+                              },
+                            },
                           });
                           logUnhandledPromise('Failed to download markdown', new Error(`HTTP ${response.status}: ${response.statusText}`), {
                             category,
@@ -785,8 +839,15 @@ export function DetailHeaderActions({
                           action_type: 'download_markdown',
                         });
                       } catch (error) {
+                        // Show error toast with "Retry" button
                         toasts.raw.error('Unable to download markdown', {
                           description: 'An unexpected error occurred while downloading.',
+                          action: {
+                            label: 'Retry',
+                            onClick: () => {
+                              handleDownloadMarkdown();
+                            },
+                          },
                         });
                         logUnhandledPromise('Failed to download markdown', error, {
                           category,

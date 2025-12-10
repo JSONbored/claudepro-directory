@@ -14,7 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
-import { SPRING } from '@heyclaude/web-runtime/design-system';
+import { SPRING, STAGGER } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 
@@ -168,7 +168,7 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
           initial={{ y: 10, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.1 }}
+          transition={{ delay: STAGGER.fast }}
         >
           {finalHeadline}
         </motion.h2>
@@ -179,7 +179,7 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
           initial={{ y: 10, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.15 }}
+          transition={{ delay: STAGGER.medium }}
         >
           {finalDescription}
         </motion.p>
@@ -190,7 +190,7 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
           initial={{ y: 10, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.2 }}
+          transition={{ delay: STAGGER.default }}
         >
           <NewsletterForm source={source} className="w-full" />
         </motion.div>
@@ -201,7 +201,7 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.25 }}
+          transition={{ delay: STAGGER.comfortable }}
         >
           <div className="flex items-center gap-2">
             <span className="inline-flex h-1.5 w-1.5 rounded-full bg-green-500" />

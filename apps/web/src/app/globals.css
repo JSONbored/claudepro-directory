@@ -410,15 +410,38 @@
   --spacing-28: 7rem;
   --spacing-32: 8rem;
 
-  /* Animation Durations */
+  /* Animation Durations - Semantic design tokens from DURATION presets */
+  --duration-micro: 100ms;        /* 0.1s - Very quick animations */
+  --duration-fast: 150ms;        /* 0.15s - Quick feedback */
+  --duration-quick: 200ms;       /* 0.2s - Rapid animations */
+  --duration-comfortable: 250ms; /* 0.25s - Balanced quick animations */
+  --duration-default: 300ms;     /* 0.3s - Standard animations */
+  --duration-balanced: 350ms;     /* 0.35s - Between default and slow */
+  --duration-slow: 400ms;        /* 0.4s - Deliberate animations */
+  --duration-moderate: 500ms;    /* 0.5s - Balanced animations */
+  --duration-extended: 600ms;    /* 0.6s - Longer animations */
+  --duration-relaxed: 700ms;     /* 0.7s - Between extended and long */
+  --duration-long: 800ms;        /* 0.8s - Extended animations */
+  --duration-very-long: 1000ms;  /* 1.0s - Very long animations */
+  --duration-extended-long: 1200ms; /* 1.2s - Extended long animations */
+  --duration-very-extended: 1500ms; /* 1.5s - Very extended animations */
+  --duration-maximum: 2000ms;    /* 2.0s - Maximum animations */
+  --duration-extra-long: 2500ms; /* 2.5s - Extra long animations */
+  --duration-extreme: 3000ms;    /* 3.0s - Extreme animations */
+  --duration-hero: 5000ms;       /* 5.0s - Hero-level animations */
+  --duration-subtle: 8000ms;     /* 8.0s - Subtle, long animations */
+  --duration-beam: 15000ms;      /* 15.0s - Border beam animations */
+  --duration-morphing: 20000ms;  /* 20.0s - Morphing blob animations */
+  
+  /* Legacy duration variables (kept for backward compatibility) */
   --duration-75: 75ms;
-  --duration-100: 100ms;
-  --duration-150: 150ms;
-  --duration-200: 200ms;
-  --duration-300: 300ms;
-  --duration-500: 500ms;
-  --duration-700: 700ms;
-  --duration-1000: 1000ms;
+  --duration-100: var(--duration-micro);
+  --duration-150: var(--duration-fast);
+  --duration-200: var(--duration-quick);
+  --duration-300: var(--duration-default);
+  --duration-500: var(--duration-moderate);
+  --duration-700: var(--duration-relaxed);
+  --duration-1000: var(--duration-very-long);
 
   /* Animation Easings */
   --ease-linear: linear;
@@ -602,9 +625,9 @@
     --shadow-orange: 0 0 20px var(--color-accent) / 0.3;
 
     /* Transition presets */
-    --transition-fast: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-normal: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-slow: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: all var(--duration-fast) cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-normal: all var(--duration-quick) cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: all var(--duration-default) cubic-bezier(0.4, 0, 0.2, 1);
 
     /* Monospace font family */
     --font-mono: "JetBrains Mono", "SF Mono", Consolas, "Monaco", monospace;
@@ -758,7 +781,7 @@
   }
 
   .transition-colors-smooth {
-    transition: color var(--duration-200) var(--ease-in-out);
+    transition: color var(--duration-quick) var(--ease-in-out);
   }
 
   .transition-fast {
@@ -796,7 +819,7 @@
     width: 0;
     height: 2px;
     background-color: var(--color-accent);
-    transition: width 0.3s ease;
+    transition: width var(--duration-default) ease;
   }
 
   .link-accent-underline:hover::after {
@@ -806,7 +829,7 @@
   /* Icon links - no underline, just color change */
   .link-icon {
     text-decoration: none;
-    transition: color 0.2s ease;
+    transition: color var(--duration-quick) ease;
   }
 
   .link-icon:hover {
@@ -889,7 +912,7 @@
     border: 1px solid var(--color-border-default);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-sm);
-    transition: all var(--duration-200) var(--ease-in-out);
+    transition: all var(--duration-quick) var(--ease-in-out);
   }
 
   .claude-card:hover {
@@ -907,7 +930,7 @@
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-medium);
     border-radius: var(--radius-md);
-    transition: all var(--duration-150) var(--ease-in-out);
+    transition: all var(--duration-fast) var(--ease-in-out);
     cursor: pointer;
     user-select: none;
   }
@@ -964,7 +987,7 @@
     border: 1px solid var(--color-border-default);
     border-radius: var(--radius-md);
     font-size: var(--font-size-sm);
-    transition: all var(--duration-150) var(--ease-in-out);
+    transition: all var(--duration-fast) var(--ease-in-out);
   }
 
   .claude-input:hover {
@@ -1005,7 +1028,7 @@
   .claude-link {
     color: var(--color-accent);
     text-decoration: none;
-    transition: all var(--duration-150) var(--ease-in-out);
+    transition: all var(--duration-fast) var(--ease-in-out);
     text-underline-offset: 2px;
   }
 
@@ -1227,7 +1250,7 @@
     padding: var(--spacing-2) var(--spacing-3);
     color: var(--color-text-secondary);
     border-radius: var(--radius-md);
-    transition: all var(--duration-150) var(--ease-in-out);
+    transition: all var(--duration-fast) var(--ease-in-out);
     cursor: pointer;
   }
 
@@ -1253,7 +1276,7 @@
   .claude-list-item {
     padding: var(--spacing-3) var(--spacing-4);
     border-bottom: 1px solid var(--color-border-light);
-    transition: background-color var(--duration-150) var(--ease-in-out);
+    transition: background-color var(--duration-fast) var(--ease-in-out);
   }
 
   .claude-list-item:hover {
@@ -1367,11 +1390,11 @@
 
   /* Animations */
   .animate-fade-in {
-    animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: fadeIn var(--duration-moderate) cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .animate-slide-up {
-    animation: slideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: slideUp var(--duration-extended) cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   /* Navigation styling */
@@ -1421,7 +1444,7 @@
 
     /* Animate new view with enhanced circle blur expansion */
     ::view-transition-new(root) {
-      animation: circle-blur-expand 700ms cubic-bezier(0.22, 1, 0.36, 1);
+      animation: circle-blur-expand var(--duration-relaxed) cubic-bezier(0.22, 1, 0.36, 1);
       mix-blend-mode: normal;
       /* Animation origin set dynamically via inline style */
     }
@@ -1450,7 +1473,7 @@
     /* Root transition: Subtle cross-fade for layout context */
     ::view-transition-old(root),
     ::view-transition-new(root) {
-      animation-duration: 350ms;
+      animation-duration: var(--duration-balanced);
       animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
     }
 
@@ -1460,13 +1483,13 @@
      */
     ::view-transition-group(*),
     ::view-transition-image-pair(*) {
-      animation-duration: 400ms;
+      animation-duration: var(--duration-slow);
       animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
     }
 
     /* Old view (card): Scale down and fade out */
     ::view-transition-old(*) {
-      animation-duration: 400ms;
+      animation-duration: var(--duration-slow);
       animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
       animation-name: card-shrink-fade-out;
       mix-blend-mode: normal;
@@ -1474,7 +1497,7 @@
 
     /* New view (detail page): Scale up and fade in */
     ::view-transition-new(*) {
-      animation-duration: 400ms;
+      animation-duration: var(--duration-slow);
       animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
       animation-name: card-grow-fade-in;
       mix-blend-mode: normal;
@@ -1532,7 +1555,7 @@
 
 /* Transition utilities */
 @utility transition-colors-smooth {
-  transition: color var(--duration-200) var(--ease-in-out);
+  transition: color var(--duration-quick) var(--ease-in-out);
 }
 
 /* Prose typography utilities */
@@ -1737,27 +1760,27 @@
 
 /* Animation Utilities */
 .animate-fade-in {
-  animation: fadeIn var(--duration-200) var(--ease-out) both;
+  animation: fadeIn var(--duration-quick) var(--ease-out) both;
 }
 
 .animate-slide-up {
-  animation: slideUp var(--duration-300) var(--ease-out) both;
+  animation: slideUp var(--duration-default) var(--ease-out) both;
 }
 
 .animate-scale-in {
-  animation: scale-in var(--duration-200) var(--ease-out) both;
+  animation: scale-in var(--duration-quick) var(--ease-out) both;
 }
 
 .animate-pulse {
-  animation: pulse-accent var(--duration-1000) var(--ease-in-out) infinite;
+  animation: pulse-accent var(--duration-very-long) var(--ease-in-out) infinite;
 }
 
 .animate-shimmer {
-  animation: shimmer 2s linear infinite;
+  animation: shimmer var(--duration-maximum) linear infinite;
 }
 
 .animate-gridMove {
-  animation: gridMove 20s linear infinite;
+  animation: gridMove var(--duration-morphing) linear infinite;
 }
 
 .animate-border-beam {
@@ -1823,7 +1846,7 @@
 }
 
 .animate-fadeIn {
-  animation: fadeIn 0.3s ease-out forwards;
+  animation: fadeIn var(--duration-default) ease-out forwards;
 }
 
 /* ========================================

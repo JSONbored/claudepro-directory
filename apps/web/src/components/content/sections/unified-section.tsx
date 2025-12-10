@@ -2,6 +2,7 @@
 
 import { type Database } from '@heyclaude/database-types';
 import { isValidCategory } from '@heyclaude/web-runtime/core';
+import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import {
   Bookmark,
@@ -88,7 +89,7 @@ function Wrapper({
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-50px' }}
-      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      transition={SPRING.smooth}
     >
       <Card className={cn('', className)}>
         <CardHeader>

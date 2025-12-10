@@ -33,6 +33,7 @@ import {
   toasts,
   UI_CLASSES,
 } from '@heyclaude/web-runtime/ui';
+import { DURATION } from '@heyclaude/web-runtime/design-system';
 // DOMPurify will be dynamically imported
 import { motion } from 'motion/react';
 import { usePathname } from 'next/navigation';
@@ -384,7 +385,15 @@ export function ProductionCodeBlock({
           itemSlug: slug,
         }
       );
-      toasts.error.copyFailed('code');
+      // Show error toast with "Retry" button
+      toasts.raw.error('Failed to copy code', {
+        action: {
+          label: 'Retry',
+          onClick: () => {
+            handleCopy();
+          },
+        },
+      });
       return;
     }
 
@@ -454,8 +463,16 @@ export function ProductionCodeBlock({
           });
         });
     } catch (error) {
-      toasts.error.screenshotFailed();
       const normalized = normalizeError(error, 'Screenshot generation failed');
+      // Show error toast with "Retry" button
+      toasts.raw.error('Failed to generate screenshot', {
+        action: {
+          label: 'Retry',
+          onClick: () => {
+            handleScreenshot();
+          },
+        },
+      });
       logClientWarn(
         '[Share] Screenshot generation failed',
         normalized,
@@ -539,8 +556,16 @@ export function ProductionCodeBlock({
         });
       });
     } catch (error) {
-      toasts.error.downloadFailed();
       const normalized = normalizeError(error, 'Download failed');
+      // Show error toast with "Retry" button
+      toasts.raw.error('Failed to download code', {
+        action: {
+          label: 'Retry',
+          onClick: () => {
+            handleDownload();
+          },
+        },
+      });
       logClientWarn(
         '[Share] Download failed',
         normalized,
@@ -576,7 +601,15 @@ export function ProductionCodeBlock({
         if (success) {
           toasts.success.linkCopied();
         } else {
-          toasts.error.copyFailed('link');
+          // Show error toast with "Retry" button
+          toasts.raw.error('Failed to copy link', {
+            action: {
+              label: 'Retry',
+              onClick: () => {
+                handleShare(platform);
+              },
+            },
+          });
         }
       }
 
@@ -590,8 +623,16 @@ export function ProductionCodeBlock({
 
       setIsShareOpen(false);
     } catch (error) {
-      toasts.error.shareFailed();
       const normalized = normalizeError(error, 'Share failed');
+      // Show error toast with "Retry" button
+      toasts.raw.error('Failed to share', {
+        action: {
+          label: 'Retry',
+          onClick: () => {
+            handleShare(platform);
+          },
+        },
+      });
       logClientWarn(
         '[Share] Share failed',
         normalized,
@@ -658,7 +699,7 @@ export function ProductionCodeBlock({
               type="button"
               onClick={handleCopy}
               animate={isCopied ? { scale: [1, 1.1, 1] } : {}}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: DURATION.default }}
               className={UI_CLASSES.CODE_BLOCK_BUTTON_BASE}
               title={isCopied ? 'Copied!' : 'Copy code'}
             >
@@ -739,7 +780,7 @@ export function ProductionCodeBlock({
               type="button"
               onClick={handleCopy}
               animate={isCopied ? { scale: [1, 1.1, 1] } : {}}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: DURATION.default }}
               className={UI_CLASSES.CODE_BLOCK_BUTTON_BASE}
               title={isCopied ? 'Copied!' : 'Copy code'}
             >

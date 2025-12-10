@@ -13,7 +13,7 @@ import { useNewsletter } from '@heyclaude/web-runtime/hooks';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { ArrowRight, Loader2, Mail } from '@heyclaude/web-runtime/icons';
 import { cn, SimpleCopyButton, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { SPRING } from '@heyclaude/web-runtime/design-system';
+import { SPRING, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useId, useMemo, useState } from 'react';
 
@@ -108,7 +108,7 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
+              transition={{ duration: DURATION.moderate }}
             >
               <div className="space-y-2">
                 <h2 className="text-foreground text-2xl font-bold leading-tight md:text-3xl">
@@ -159,7 +159,7 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.1 }}
+              transition={{ duration: DURATION.moderate, delay: STAGGER.fast }}
             >
               {/* Envelope Icon */}
               <motion.div
@@ -227,7 +227,7 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.8 }}
-                        transition={{ duration: 0.2 }}
+                        transition={{ duration: DURATION.quick }}
                         aria-label="Subscribing..."
                       >
                         <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
@@ -274,7 +274,7 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
                       initial={{ opacity: 0, y: -4 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -4 }}
-                      transition={{ duration: 0.2 }}
+                      transition={{ duration: DURATION.quick }}
                     >
                       {error}
                     </motion.p>

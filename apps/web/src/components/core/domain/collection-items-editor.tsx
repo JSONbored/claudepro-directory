@@ -211,7 +211,15 @@ export function CollectionItemManager({
             itemId,
           }
         );
-        toasts.error.fromError(error, 'Failed to remove item');
+        // Show error toast with "Retry" button
+        toasts.raw.error('Failed to remove item', {
+          action: {
+            label: 'Retry',
+            onClick: () => {
+              handleRemove(itemId);
+            },
+          },
+        });
       }
     });
   };
@@ -257,7 +265,15 @@ export function CollectionItemManager({
             collectionId,
           }
         );
-        toasts.error.actionFailed('reorder items');
+        // Show error toast with "Retry" button
+        toasts.raw.error('Failed to reorder items', {
+          action: {
+            label: 'Retry',
+            onClick: () => {
+              handleMoveUp(index);
+            },
+          },
+        });
       }
     });
   };
@@ -303,7 +319,15 @@ export function CollectionItemManager({
             collectionId,
           }
         );
-        toasts.error.actionFailed('reorder items');
+        // Show error toast with "Retry" button
+        toasts.raw.error('Failed to reorder items', {
+          action: {
+            label: 'Retry',
+            onClick: () => {
+              handleMoveDown(index);
+            },
+          },
+        });
       }
     });
   };

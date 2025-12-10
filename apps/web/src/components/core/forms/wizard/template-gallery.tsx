@@ -36,7 +36,7 @@ import {
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
 import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/design-tokens';
-import { SPRING } from '@heyclaude/web-runtime/design-system';
+import { SPRING, STAGGER } from '@heyclaude/web-runtime/design-system';
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -249,7 +249,7 @@ function TemplateCard({ template, index, onApply }: TemplateCardProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.9 }}
-      transition={{ ...SPRING.smooth, delay: index * 0.05 }}
+      transition={{ ...SPRING.smooth, delay: index * STAGGER.micro }}
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
     >
@@ -515,7 +515,7 @@ export function TemplateQuickSelect({
               exit={{ opacity: 0, x: -20 }}
               transition={{
                 ...SPRING.smooth,
-                delay: index * 0.05,
+                delay: index * STAGGER.micro,
               }}
               onClick={() => onApplyTemplate(template)}
               className={cn(

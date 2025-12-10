@@ -4,13 +4,11 @@ import {
   getAuthenticatedUser,
   getSponsorshipAnalytics,
 } from '@heyclaude/web-runtime/data';
-import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   POSITION_PATTERNS,
   UI_CLASSES,
   UnifiedBadge,
-  Button,
   Card,
   CardContent,
   CardDescription,
@@ -19,11 +17,11 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 
+import { SignInButton } from '@/src/components/core/auth/sign-in-button';
 import { MetricsDisplay } from '@/src/components/features/analytics/metrics-display';
 
 import Loading from './loading';
@@ -136,9 +134,9 @@ async function SponsorshipAnalyticsPageContent({
             <CardDescription>Please sign in to view sponsorship analytics.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild>
-              <Link href={ROUTES.LOGIN}>Go to sign in</Link>
-            </Button>
+            <SignInButton valueProposition="Sign in to view sponsorship analytics">
+              Go to sign in
+            </SignInButton>
           </CardContent>
         </Card>
       </div>

@@ -38,6 +38,8 @@ import Link from 'next/link';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 
+import { SignInButton } from '@/src/components/core/auth/sign-in-button';
+
 import Loading from './loading';
 
 /**
@@ -145,9 +147,9 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
             <CardDescription>Please sign in to manage your companies.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild>
-              <Link href={ROUTES.LOGIN}>Go to login</Link>
-            </Button>
+            <SignInButton valueProposition="Sign in to manage your companies" redirectTo="/account/companies">
+              Go to login
+            </SignInButton>
           </CardContent>
         </Card>
       </div>

@@ -9,6 +9,7 @@
  */
 
 import Cal, { getCalApi } from '@calcom/embed-react';
+import { SPRING, STAGGER } from '@heyclaude/web-runtime/design-system';
 import { logClientError, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { motion } from 'motion/react';
 import Link from 'next/link';
@@ -45,7 +46,7 @@ export function ConsultingClient() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+        transition={SPRING.smooth}
         className="mx-auto mb-8 max-w-2xl sm:mb-16"
       >
         <div className="border-border bg-card/50 overflow-hidden rounded-lg border p-6 shadow-sm backdrop-blur-sm sm:p-8">
@@ -127,7 +128,7 @@ export function ConsultingClient() {
       <motion.section
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.2, ease: [0.4, 0, 0.2, 1] }}
+        transition={{ ...SPRING.smooth, delay: STAGGER.default }}
         className="mx-auto max-w-4xl"
       >
         <h2 className="mb-6 text-center text-2xl font-bold sm:mb-8 sm:text-3xl">

@@ -22,7 +22,7 @@ import {
 } from '@heyclaude/web-runtime/actions';
 import { FORM_CONFIG } from '@heyclaude/web-runtime/config/unified-config';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { useFormSubmit, useLoggedAsync, useSafeAction } from '@heyclaude/web-runtime/hooks';
+import { useAuthenticatedUser, useFormSubmit, useLoggedAsync, useSafeAction } from '@heyclaude/web-runtime/hooks';
 import { FileText, X } from '@heyclaude/web-runtime/icons';
 import { logClientError } from '@heyclaude/web-runtime/logging/client';
 import {
@@ -38,7 +38,10 @@ import {
   SelectItem,
 } from '@heyclaude/web-runtime/ui';
 import Image from 'next/image';
-import { useEffect, useId, useState } from 'react';
+import { usePathname } from 'next/navigation';
+import { useCallback, useEffect, useId, useState } from 'react';
+
+import { useAuthModal } from '@/src/hooks/use-auth-modal';
 
 // Use the generated composite type from the RPC return
 type CompanyCompositeType = Database['public']['CompositeTypes']['user_companies_company'];
@@ -94,6 +97,9 @@ async function fileToBase64(file: File) {
  */
 export function CompanyForm({ initialData, mode }: CompanyFormProps) {
   const logoUploadId = useId();
+  const pathname = usePathname();
+  const { user, status } = useAuthenticatedUser({ context: 'CompanyForm' });
+  const { openAuthModal } = useAuthModal();
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [logoUrl, setLogoUrl] = useState<null | string>(initialData?.logo || null);
   const [logoPreview, setLogoPreview] = useState<null | string>(initialData?.logo || null);
@@ -101,6 +107,19 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
   const [maxFileSize, setMaxFileSize] = useState(DEFAULT_MAX_FILE_SIZE);
   const [maxDimension, setMaxDimension] = useState(DEFAULT_MAX_DIMENSION);
   const { executeAsync: uploadLogo } = useSafeAction(uploadCompanyLogoAction);
+
+  // Custom error handler for form submission (handles auth errors)
+  const handleFormError = useCallback((error: Error) => {
+    // Custom error handling for auth errors
+    const errorMessage = error.message;
+    if (errorMessage.includes('signed in') || errorMessage.includes('auth') || errorMessage.includes('unauthorized')) {
+      openAuthModal({
+        valueProposition: 'Sign in to manage companies',
+        redirectTo: pathname ?? undefined,
+      });
+    }
+    // useFormSubmit already shows error toast, so we don't need to show another one
+  }, [openAuthModal, pathname]);
 
   // Use standardized form submission hook
   const { isPending, handleSubmit, router } = useFormSubmit({
@@ -116,6 +135,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
     logContext: {
       companyId: initialData?.id ?? undefined,
     },
+    onError: handleFormError,
   });
 
   // Logged async for logo upload (separate from main form submit)
@@ -131,7 +151,22 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
     setMaxDimension(FORM_CONFIG.max_image_dimension_px);
   }, []);
 
-  const handleLogoUpload = async (file: File) => {
+  const handleLogoUpload = useCallback(async (file: File) => {
+    // Proactive auth check - show modal before attempting action
+    if (status === 'loading') {
+      // Wait for auth check to complete
+      return;
+    }
+
+    if (!user) {
+      // User is not authenticated - show auth modal
+      openAuthModal({
+        valueProposition: 'Sign in to upload company logos',
+        redirectTo: pathname ?? undefined,
+      });
+      return;
+    }
+
     // Client-side validation
     if (file.size > maxFileSize) {
       toasts.error.actionFailed(`File too large. Maximum size is ${maxFileSize / 1024}KB.`);
@@ -231,17 +266,48 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
         }
       );
     } catch (error) {
-      toasts.error.fromError(
-        normalizeError(error, 'Failed to upload logo'),
-        'Failed to upload logo'
-      );
+      const normalized = normalizeError(error, 'Failed to upload logo');
+      const errorMessage = normalized.message;
+      
+      // Check if error is auth-related and show modal if so
+      if (errorMessage.includes('signed in') || errorMessage.includes('auth') || errorMessage.includes('unauthorized')) {
+        openAuthModal({
+          valueProposition: 'Sign in to upload company logos',
+          redirectTo: pathname ?? undefined,
+        });
+      } else {
+        // Non-auth errors - show toast with retry option
+        toasts.raw.error('Failed to upload logo', {
+          action: {
+            label: 'Retry',
+            onClick: () => {
+              handleLogoUpload(file);
+            },
+          },
+        });
+      }
     } finally {
       setIsUploadingLogo(false);
     }
-  };
+  }, [user, status, openAuthModal, pathname, maxFileSize, maxDimension, uploadLogo, runLoggedAsync, initialData?.id, logoUrl]);
 
-  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    // Proactive auth check - show modal before attempting action
+    if (status === 'loading') {
+      // Wait for auth check to complete
+      return;
+    }
+
+    if (!user) {
+      // User is not authenticated - show auth modal
+      openAuthModal({
+        valueProposition: 'Sign in to manage companies',
+        redirectTo: pathname ?? undefined,
+      });
+      return;
+    }
 
     const formData = new FormData(e.currentTarget);
 
@@ -258,6 +324,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
         : null,
     };
 
+    // User is authenticated - proceed with form submission
     await handleSubmit(async () => {
       if (mode === 'create') {
         const result = await createCompany(data);
@@ -285,7 +352,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
         return result;
       }
     });
-  };
+  }, [user, status, openAuthModal, pathname, mode, handleSubmit, logoUrl, useCursorDate, initialData?.id]);
 
   return (
     <form onSubmit={onSubmit} className="space-y-6">
@@ -394,7 +461,28 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
                         category: 'form',
                       }
                     );
-                    toasts.error.fromError(error, 'Failed to upload logo');
+                    const normalized = normalizeError(error, 'Failed to upload logo');
+                    const errorMessage = normalized.message;
+                    
+                    // Check if error is auth-related and show modal if so
+                    if (errorMessage.includes('signed in') || errorMessage.includes('auth') || errorMessage.includes('unauthorized')) {
+                      openAuthModal({
+                        valueProposition: 'Sign in to upload company logos',
+                        redirectTo: pathname ?? undefined,
+                      });
+                    } else {
+                      // Non-auth errors - show toast with retry option
+                      toasts.raw.error('Failed to upload logo', {
+                        action: {
+                          label: 'Retry',
+                          onClick: () => {
+                            if (e.target instanceof HTMLInputElement && e.target.files?.[0]) {
+                              handleLogoUpload(e.target.files[0]);
+                            }
+                          },
+                        },
+                      });
+                    }
                   });
                   e.target.value = '';
                 }

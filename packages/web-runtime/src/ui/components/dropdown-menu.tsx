@@ -11,6 +11,7 @@
  * - Respects prefers-reduced-motion
  */
 
+import { STAGGER } from '../../design-system/index.ts';
 import { Check, ChevronRight, Circle } from '../../icons.tsx';
 import { DIMENSIONS, POSITION_PATTERNS, UI_CLASSES } from '../constants.ts';
 import { cn } from '../utils.ts';
@@ -90,8 +91,8 @@ const DropdownMenuContent = ({
       opacity: 1,
       scale: 1,
       transition: {
-        staggerChildren: 0.05, // 50ms delay between each child
-        delayChildren: 0.1, // Initial 100ms delay before first child
+        staggerChildren: STAGGER.micro,
+        delayChildren: STAGGER.fast,
       },
     },
   };

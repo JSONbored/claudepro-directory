@@ -22,6 +22,8 @@ import Link from 'next/link';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 
+import { SignInButton } from '@/src/components/core/auth/sign-in-button';
+
 import Loading from './loading';
 
 /**
@@ -146,9 +148,9 @@ async function SponsorshipsPageContent({
             <CardDescription>Please sign in to manage your sponsorship campaigns.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild>
-              <Link href={ROUTES.LOGIN}>Go to login</Link>
-            </Button>
+            <SignInButton valueProposition="Sign in to manage your sponsorship campaigns" redirectTo="/account/sponsorships">
+              Go to login
+            </SignInButton>
           </CardContent>
         </Card>
       </div>

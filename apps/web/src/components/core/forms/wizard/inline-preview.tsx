@@ -18,7 +18,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
-import { SPRING } from '@heyclaude/web-runtime/design-system';
+import { SPRING, DURATION } from '@heyclaude/web-runtime/design-system';
 import { AnimatePresence, motion } from 'motion/react';
 import { useState } from 'react';
 
@@ -71,7 +71,7 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${qualityScore}%` }}
-                  transition={{ duration: 0.5, ease: 'easeOut' }}
+                  transition={{ duration: DURATION.moderate, ease: 'easeOut' }}
                   className={cn(
                     'h-full rounded-full',
                     qualityScore >= 80

@@ -5,6 +5,7 @@
 'use client';
 
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 
 import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';
@@ -26,7 +27,7 @@ export function AuthMobileHeader() {
       style={{ backgroundColor: 'oklch(74% 0.2 35)' }}
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: DURATION.moderate }}
     >
       <div className="flex items-center gap-3">
         <HeyClaudeLogo size="md" inView duration={1.2} />
@@ -36,7 +37,7 @@ export function AuthMobileHeader() {
         className="mt-2 text-xs text-white/90"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
+        transition={{ duration: DURATION.moderate, delay: STAGGER.default }}
       >
         Claude Pro Directory
       </motion.p>

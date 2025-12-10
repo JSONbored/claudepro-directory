@@ -17,7 +17,7 @@
 
 import { type Database } from '@heyclaude/database-types';
 import { createCollection, updateCollection } from '@heyclaude/web-runtime/actions';
-import { useFormSubmit } from '@heyclaude/web-runtime/hooks';
+import { useAuthenticatedUser, useFormSubmit } from '@heyclaude/web-runtime/hooks';
 import {
   toasts,
   UI_CLASSES,
@@ -27,7 +27,10 @@ import {
   Checkbox,
   Label,
 } from '@heyclaude/web-runtime/ui';
+import { usePathname } from 'next/navigation';
 import { useId, useState } from 'react';
+
+import { useAuthModal } from '@/src/hooks/use-auth-modal';
 
 type Bookmark = Database['public']['Tables']['bookmarks']['Row'];
 type CollectionData = Database['public']['Tables']['user_collections']['Row'];
@@ -59,6 +62,9 @@ interface CollectionFormProps {
  */
 export function CollectionForm({ bookmarks, mode, collection }: CollectionFormProps) {
   const [selectedBookmarks, setSelectedBookmarks] = useState<string[]>([]);
+  const pathname = usePathname();
+  const { user, status } = useAuthenticatedUser({ context: 'CollectionForm' });
+  const { openAuthModal } = useAuthModal();
 
   // Use standardized form submission hook
   const { isPending, handleSubmit, router } = useFormSubmit<CollectionData>({
@@ -103,6 +109,21 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    // Proactive auth check - show modal before attempting action
+    if (status === 'loading') {
+      // Wait for auth check to complete
+      return;
+    }
+
+    if (!user) {
+      // User is not authenticated - show auth modal
+      openAuthModal({
+        valueProposition: 'Sign in to create collections',
+        redirectTo: pathname ?? undefined,
+      });
+      return;
+    }
 
     // Client-side validation
     if (!name.trim()) {

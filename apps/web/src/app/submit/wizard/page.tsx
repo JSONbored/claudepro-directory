@@ -60,7 +60,7 @@ import {
   toasts,
 } from '@heyclaude/web-runtime/ui';
 import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/design-tokens';
-import { SPRING } from '@heyclaude/web-runtime/design-system';
+import { SPRING, STAGGER } from '@heyclaude/web-runtime/design-system';
 import { AnimatePresence, motion } from 'motion/react';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
@@ -521,10 +521,26 @@ export default function WizardSubmissionPage() {
           };
           return newData;
         });
-        toasts.error.fromError(
-          normalizeError(error, 'Failed to generate thumbnail'),
-          'Failed to generate thumbnail'
-        );
+        const normalized = normalizeError(error, 'Failed to generate thumbnail');
+        const errorMessage = normalized.message;
+        
+        // Check if error is auth-related and show modal if so
+        if (errorMessage.includes('signed in') || errorMessage.includes('auth') || errorMessage.includes('unauthorized')) {
+          openAuthModal({
+            valueProposition: 'Sign in to upload images',
+            redirectTo: pathname ?? undefined,
+          });
+        } else {
+          // Non-auth errors - show toast with retry option
+          toasts.raw.error('Failed to generate thumbnail', {
+            action: {
+              label: 'Retry',
+              onClick: () => {
+                handleImageUpload(file);
+              },
+            },
+          });
+        }
       } finally {
         setIsUploadingThumbnail(false);
       }
@@ -801,14 +817,50 @@ export default function WizardSubmissionPage() {
           router.push('/submit?success=true');
         }, 3000);
       } else {
-        toasts.error.submissionFailed(result.serverError);
+        // Check if server error is auth-related
+        const serverError = result.serverError || '';
+        if (serverError.includes('signed in') || serverError.includes('auth') || serverError.includes('unauthorized')) {
+          openAuthModal({
+            valueProposition: 'Sign in to submit content',
+            redirectTo: pathname ?? undefined,
+          });
+        } else {
+          // Non-auth errors - show toast with retry option
+          toasts.raw.error('Failed to submit content', {
+            action: {
+              label: 'Retry',
+              onClick: () => {
+                handleSubmit();
+              },
+            },
+          });
+        }
       }
     } catch (error) {
       log.error('Submission failed', error, 'handleSubmit', {
         submissionType: formData.submission_type,
         qualityScore,
       });
-      toasts.error.submissionFailed();
+      const normalized = normalizeError(error, 'Failed to submit content');
+      const errorMessage = normalized.message;
+      
+      // Check if error is auth-related and show modal if so
+      if (errorMessage.includes('signed in') || errorMessage.includes('auth') || errorMessage.includes('unauthorized')) {
+        openAuthModal({
+          valueProposition: 'Sign in to submit content',
+          redirectTo: pathname ?? undefined,
+        });
+      } else {
+        // Non-auth errors - show toast with retry option
+        toasts.raw.error('Failed to submit content', {
+          action: {
+            label: 'Retry',
+            onClick: () => {
+              handleSubmit();
+            },
+          },
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -965,7 +1017,7 @@ function StepTypeSelection({
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ ...SPRING.bouncy, delay: 0.2 }}
+          transition={{ ...SPRING.bouncy, delay: STAGGER.default }}
           className="mb-4 inline-flex"
         >
           <Sparkles className="h-12 w-12" style={{ color: TOKENS.colors.accent.primary }} />
@@ -1059,7 +1111,7 @@ function StepBasicInfo({
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ ...SPRING.bouncy, delay: 0.2 }}
+          transition={{ ...SPRING.bouncy, delay: STAGGER.default }}
           className="mb-4 inline-flex"
         >
           <FileText className="h-12 w-12" style={{ color: TOKENS.colors.accent.primary }} />
@@ -1073,7 +1125,7 @@ function StepBasicInfo({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ ...SPRING.smooth, delay: 0.1 }}
+        transition={{ ...SPRING.smooth, delay: STAGGER.fast }}
       >
         <Card
           style={{
@@ -1297,7 +1349,7 @@ function StepConfiguration({
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ ...SPRING.bouncy, delay: 0.2 }}
+          transition={{ ...SPRING.bouncy, delay: STAGGER.default }}
           className="mb-4 inline-flex"
         >
           <Code className="h-12 w-12" style={{ color: TOKENS.colors.accent.primary }} />
@@ -1316,7 +1368,7 @@ function StepConfiguration({
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ ...SPRING.smooth, delay: 0.15 }}
+          transition={{ ...SPRING.smooth, delay: STAGGER.medium }}
         >
           <TemplateQuickSelectSkeleton />
         </motion.div>
@@ -1326,7 +1378,7 @@ function StepConfiguration({
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ ...SPRING.smooth, delay: 0.15 }}
+          transition={{ ...SPRING.smooth, delay: STAGGER.medium }}
         >
           <TemplateQuickSelect
             templates={templates}
@@ -1340,7 +1392,7 @@ function StepConfiguration({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ ...SPRING.smooth, delay: 0.1 }}
+        transition={{ ...SPRING.smooth, delay: STAGGER.fast }}
       >
         <Card
           style={{
@@ -1578,7 +1630,7 @@ function StepExamplesTags({
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ ...SPRING.bouncy, delay: 0.2 }}
+          transition={{ ...SPRING.bouncy, delay: STAGGER.default }}
           className="mb-4 inline-flex"
         >
           <Sparkles className="h-12 w-12" style={{ color: TOKENS.colors.accent.primary }} />
@@ -1595,7 +1647,7 @@ function StepExamplesTags({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ ...SPRING.smooth, delay: 0.1 }}
+        transition={{ ...SPRING.smooth, delay: STAGGER.fast }}
         className="space-y-6"
       >
         {/* Examples Section */}
@@ -1712,7 +1764,7 @@ function StepExamplesTags({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ ...SPRING.smooth, delay: 0.2 }}
+        transition={{ ...SPRING.smooth, delay: STAGGER.default }}
       >
         <Card
           style={{

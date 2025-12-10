@@ -3,10 +3,8 @@ import {
   getAuthenticatedUser,
   getUserIdentitiesData,
 } from '@heyclaude/web-runtime/data';
-import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  Button,
   Card,
   CardContent,
   CardDescription,
@@ -15,10 +13,10 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
-import Link from 'next/link';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 
+import { SignInButton } from '@/src/components/core/auth/sign-in-button';
 import { ConnectedAccountsClient } from '@/src/components/features/account/connected-accounts-client';
 
 import Loading from './loading';
@@ -115,9 +113,9 @@ async function ConnectedAccountsPageContent() {
             <CardDescription>Please sign in to manage your connected accounts.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild>
-              <Link href={ROUTES.LOGIN}>Go to login</Link>
-            </Button>
+            <SignInButton valueProposition="Sign in to manage your connected accounts" redirectTo="/account/connected-accounts">
+              Go to login
+            </SignInButton>
           </CardContent>
         </Card>
       </div>

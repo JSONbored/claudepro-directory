@@ -8,7 +8,7 @@
  */
 
 import { TypingPlaceholder, cn } from '@heyclaude/web-runtime/ui';
-import { MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
+import { MICROINTERACTIONS, DURATION } from '@heyclaude/web-runtime/design-system';
 import { motion, AnimatePresence } from 'motion/react';
 import React, { useState, useRef, useEffect } from 'react';
 
@@ -93,7 +93,7 @@ export function AnimatedSearchInput({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: DURATION.quick }}
           >
             <TypingPlaceholder
               texts={placeholderTexts}

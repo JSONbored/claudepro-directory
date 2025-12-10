@@ -5,6 +5,7 @@ import { logClientWarn } from '@heyclaude/web-runtime/logging/client';
 import { useLoggedAsync, useButtonSuccess } from '@heyclaude/web-runtime/hooks';
 import { type ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
 import { toasts, Button } from '@heyclaude/web-runtime/ui';
+import { DURATION } from '@heyclaude/web-runtime/design-system';
 import { Check, type LucideIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useState } from 'react';
@@ -143,8 +144,17 @@ export function ContentActionButton({
         }
       );
     } catch (error) {
-      // Error already logged by useLoggedAsync, just show user-friendly message
-      toasts.raw.error(normalizeError(error, 'Action failed').message);
+      // Error already logged by useLoggedAsync
+      const normalized = normalizeError(error, 'Action failed');
+      // Show error toast with "Retry" button
+      toasts.raw.error(normalized.message, {
+        action: {
+          label: 'Retry',
+          onClick: () => {
+            handleClick();
+          },
+        },
+      });
     } finally {
       setIsLoading(false);
     }
@@ -164,7 +174,7 @@ export function ContentActionButton({
       {showIcon ? (
         <motion.div
           animate={isSuccess ? { scale: [1, 1.2, 1] } : {}}
-          transition={{ duration: 0.3 }}
+          transition={{ duration: DURATION.default }}
         >
           <DisplayIcon className="h-4 w-4" />
         </motion.div>

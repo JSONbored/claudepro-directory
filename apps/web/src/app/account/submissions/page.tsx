@@ -26,6 +26,7 @@ import Link from 'next/link';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 
+import { SignInButton } from '@/src/components/core/auth/sign-in-button';
 import { SubmissionCard } from '@/src/components/core/domain/submissions/submission-card';
 
 import Loading from './loading';
@@ -314,9 +315,9 @@ async function SubmissionsPageContent({
             <CardDescription>Please sign in to view and manage your submissions.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild>
-              <Link href={ROUTES.LOGIN}>Go to login</Link>
-            </Button>
+            <SignInButton valueProposition="Sign in to view and manage your submissions" redirectTo="/account/submissions">
+              Go to login
+            </SignInButton>
           </CardContent>
         </Card>
       </div>

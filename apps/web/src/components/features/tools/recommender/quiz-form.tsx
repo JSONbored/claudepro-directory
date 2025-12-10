@@ -25,7 +25,7 @@ import {
   InlineSpinner,
 } from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, useTransition } from 'react';
+import { useCallback, useEffect, useState, useTransition } from 'react';
 import { z } from 'zod';
 
 import { QuestionCard } from './question-card';
@@ -128,34 +128,19 @@ export function QuizForm() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  useEffect(() => {
-    getQuizConfigurationAction({})
-      .then((result) => {
-        if (result?.data) {
-          const mapped = mapQuizConfigToQuestions(result.data);
-          setQuizConfig(mapped);
-        }
-        if (result?.serverError) {
-          // Error already logged by safe-action middleware
-          const normalized = normalizeError(
-            result.serverError,
-            'Failed to load quiz configuration'
-          );
-          logClientError(
-            '[Quiz] Failed to load quiz configuration',
-            normalized,
-            'QuizForm.loadConfig',
-            {
-              component: 'QuizForm',
-              action: 'load-config',
-              category: 'quiz',
-            }
-          );
-          toasts.error.actionFailed('load quiz');
-        }
-      })
-      .catch((error) => {
-        const normalized = normalizeError(error, 'Failed to load quiz configuration');
+  const loadConfig = useCallback(async () => {
+    try {
+      const result = await getQuizConfigurationAction({});
+      if (result?.data) {
+        const mapped = mapQuizConfigToQuestions(result.data);
+        setQuizConfig(mapped);
+      }
+      if (result?.serverError) {
+        // Error already logged by safe-action middleware
+        const normalized = normalizeError(
+          result.serverError,
+          'Failed to load quiz configuration'
+        );
         logClientError(
           '[Quiz] Failed to load quiz configuration',
           normalized,
@@ -166,9 +151,43 @@ export function QuizForm() {
             category: 'quiz',
           }
         );
-        toasts.error.actionFailed('load quiz');
+        // Show error toast with "Retry" button
+        toasts.raw.error('Failed to load quiz', {
+          action: {
+            label: 'Retry',
+            onClick: () => {
+              loadConfig();
+            },
+          },
+        });
+      }
+    } catch (error) {
+      const normalized = normalizeError(error, 'Failed to load quiz configuration');
+      logClientError(
+        '[Quiz] Failed to load quiz configuration',
+        normalized,
+        'QuizForm.loadConfig',
+        {
+          component: 'QuizForm',
+          action: 'load-config',
+          category: 'quiz',
+        }
+      );
+      // Show error toast with "Retry" button
+      toasts.raw.error('Failed to load quiz', {
+        action: {
+          label: 'Retry',
+          onClick: () => {
+            loadConfig();
+          },
+        },
       });
+    }
   }, []);
+
+  useEffect(() => {
+    loadConfig();
+  }, [loadConfig]);
 
   const updateAnswer = <K extends keyof QuizAnswers>(key: K, value: QuizAnswers[K]) => {
     setAnswers((prev) => ({ ...prev, [key]: value }));
@@ -283,7 +302,15 @@ export function QuizForm() {
           );
         } catch {
           // Error already logged by useLoggedAsync
-          toasts.error.actionFailed('generate recommendations');
+          // Show error toast with "Retry" button
+          toasts.raw.error('Failed to generate recommendations', {
+            action: {
+              label: 'Retry',
+              onClick: () => {
+                handleSubmit();
+              },
+            },
+          });
         }
       });
     } catch (error) {

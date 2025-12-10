@@ -15,7 +15,7 @@ import { Constants, type Database } from '@heyclaude/database-types';
 import { submitContentForReview } from '@heyclaude/web-runtime/actions';
 import { checkConfettiEnabled } from '@heyclaude/web-runtime/config/static-configs';
 import { ParseStrategy, safeParse } from '@heyclaude/web-runtime/core';
-import { SPRING } from '@heyclaude/web-runtime/design-system';
+import { SPRING, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
 import { useLoggedAsync, useConfetti } from '@heyclaude/web-runtime/hooks';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
 import { usePathname } from 'next/navigation';
@@ -468,7 +468,21 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
         );
         } catch (error) {
           // Error already logged by useLoggedAsync
-          toasts.error.submissionFailed(normalizeError(error, 'Failed to submit content').message);
+          const normalized = normalizeError(error, 'Failed to submit content');
+          const errorMessage = normalized.message;
+          
+          // Check if error is auth-related and show modal if so
+          if (errorMessage.includes('signed in') || errorMessage.includes('auth') || errorMessage.includes('unauthorized')) {
+            openAuthModal({
+              valueProposition: 'Sign in to submit content',
+              redirectTo: pathname ?? undefined,
+            });
+          } else {
+            // Non-auth errors - show toast with retry option
+            // Note: Can't retry directly as handleSubmit needs form event
+            // User will need to click submit button again
+            toasts.error.submissionFailed(normalizeError(error, 'Failed to submit content').message);
+          }
         }
       });
     },
@@ -504,7 +518,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                 <motion.div
                   initial={{ scale: 0, rotate: -180 }}
                   animate={{ scale: 1, rotate: 0 }}
-                  transition={{ ...springBouncy, delay: 0.2 }}
+                  transition={{ ...springBouncy, delay: STAGGER.default }}
                 >
                   <CheckCircle
                     className={`h-6 w-6 text-green-500 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
@@ -515,7 +529,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                     className="text-lg font-semibold text-green-600 dark:text-green-400"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ delay: 0.3 }}
+                    transition={{ delay: STAGGER.slow }}
                   >
                     Submission Successful! 🎉
                   </motion.p>
@@ -523,7 +537,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                     className="text-muted-foreground mt-1 text-sm"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ delay: 0.4 }}
+                    transition={{ delay: STAGGER.relaxed }}
                   >
                     {submissionResult.message}
                   </motion.p>
@@ -531,7 +545,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                     className="text-muted-foreground mt-1 text-xs"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ delay: 0.5 }}
+                    transition={{ delay: STAGGER.loose }}
                   >
                     Status: {submissionResult.status} • ID:{' '}
                     {submissionResult.submission_id.slice(0, 8)}...
@@ -740,7 +754,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                   className="mr-2"
                   animate={{ opacity: [1, 0.5, 1], rotate: [0, 360] }}
                   transition={{
-                    duration: 1,
+                    duration: DURATION.veryLong,
                     repeat: Number.POSITIVE_INFINITY,
                     ease: 'easeInOut',
                   }}

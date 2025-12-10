@@ -15,6 +15,7 @@ import {
 import { ErrorBoundary } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { cacheLife, cacheTag } from 'next/cache';
+import { connection } from 'next/server';
 import localFont from 'next/font/local';
 import { ThemeProvider } from 'next-themes';
 import { Suspense } from 'react';
@@ -119,7 +120,9 @@ function getHomeMetadata() {
 export async function generateMetadata(): Promise<Metadata> {
   // Note: This metadata fetch is intentional in layout for site-wide SEO
   // The data is cached and shared across all pages
+  // We await connection() first to ensure non-deterministic operations are allowed
   // eslint-disable-next-line architectural-rules/no-blocking-operations-in-layouts -- Site-wide metadata, cached and necessary for SEO
+  await connection();
   const homeMetadata = await getHomeMetadata();
 
   return {
@@ -214,6 +217,9 @@ function LayoutFallback({ children }: { children: React.ReactNode }) {
  
  * @returns {Promise<unknown>} Description of return value*/
 async function LayoutDataWrapper({ children }: { children: React.ReactNode }) {
+  // Await connection() first to ensure non-deterministic operations are allowed
+  // This prevents "Uncached data was accessed outside of <Suspense>" errors
+  await connection();
   const [layoutDataResult] = await Promise.allSettled([getLayoutData()]);
 
   // Extract layout data with fallbacks

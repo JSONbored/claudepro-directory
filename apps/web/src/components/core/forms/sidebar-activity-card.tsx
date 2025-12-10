@@ -21,6 +21,7 @@ import {
   TabsList,
   TabsTrigger,
 } from '@heyclaude/web-runtime/ui';
+import { DURATION } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 
 interface SidebarActivityCardProps {
@@ -44,7 +45,7 @@ const tabContentVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.3, ease: 'easeOut' as const },
+    transition: { duration: DURATION.default, ease: 'easeOut' as const },
   },
 } as const;
 

@@ -42,7 +42,7 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { SPRING } from '../../../design-system/index.ts';
+import { SPRING, DURATION } from '../../../design-system/index.ts';
 import { Star, TrendingUp, Zap } from '../../../icons.tsx';
 import { ANIMATION_CONSTANTS, UI_CLASSES } from '../../constants.ts';
 import { cn } from '../../utils.ts';
@@ -309,7 +309,7 @@ const PulseWrapper = ({
       scale: [1, 1.02, 1],
     }}
     transition={{
-      duration: 2.5,
+      duration: DURATION.extraLong,
       repeat: Infinity,
       ease: "easeInOut",
     }}

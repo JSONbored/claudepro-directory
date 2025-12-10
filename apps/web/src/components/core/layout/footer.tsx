@@ -23,6 +23,7 @@ import {
   Sparkles,
 } from '@heyclaude/web-runtime/icons';
 import { UnifiedBadge, ThemeToggle } from '@heyclaude/web-runtime/ui';
+import { STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -164,7 +165,7 @@ function FooterComponent() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.4 }}
+              transition={{ duration: DURATION.slow }}
             >
               {/* Logo */}
               <div>
@@ -257,7 +258,7 @@ function FooterComponent() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: 0.1 }}
+              transition={{ duration: DURATION.slow, delay: STAGGER.fast }}
             >
               {/* Browse column */}
               <div>
@@ -409,7 +410,7 @@ function FooterComponent() {
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.3 }}
+            transition={{ delay: STAGGER.slow }}
           >
             <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
               {/* Left - Copyright with heart and version */}

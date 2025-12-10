@@ -383,9 +383,8 @@ function BlobShape({
         d={currentPath}
         animate={{ d: nextPath }}
         transition={{
-          duration: 5,
+          ...SPRING.shimmer,
           repeat: Infinity,
-          ease: [0.4, 0, 0.2, 1], // Smooth cubic bezier for liquid feel
         }}
         style={{
           fill: `url(#${gradientId})`,

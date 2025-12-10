@@ -18,7 +18,6 @@
  */
 
 import { createContext, useCallback, useContext, useState, type ReactNode } from 'react';
-import { usePathname, useSearchParams } from 'next/navigation';
 
 import { AuthModal } from './auth-modal';
 
@@ -53,8 +52,21 @@ export function AuthModalProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [valueProposition, setValueProposition] = useState<string>('Sign in to continue');
   const [redirectTo, setRedirectTo] = useState<string | undefined>();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+
+  // Lazy-load pathname and searchParams only when needed (inside openAuthModal)
+  // This prevents "Uncached data was accessed outside of <Suspense>" errors
+  // by deferring route data access until the modal is actually opened
+  const getPathname = useCallback(() => {
+    // Access pathname lazily via a function to avoid blocking render
+    if (typeof window === 'undefined') return '/';
+    return window.location.pathname;
+  }, []);
+
+  const getSearchParams = useCallback(() => {
+    // Access search params lazily via a function to avoid blocking render
+    if (typeof window === 'undefined') return '';
+    return window.location.search;
+  }, []);
 
   const openAuthModal = useCallback(
     (options?: AuthModalOptions) => {
@@ -74,15 +86,16 @@ export function AuthModalProvider({ children }: { children: ReactNode }) {
       if (options?.redirectTo) {
         setRedirectTo(options.redirectTo);
       } else {
-        // Default to current pathname with search params
-        const search = searchParams?.toString();
-        const defaultRedirect = search ? `${pathname}?${search}` : pathname;
+        // Default to current pathname with search params (lazy-loaded)
+        const pathname = getPathname();
+        const search = getSearchParams();
+        const defaultRedirect = search ? `${pathname}${search}` : pathname;
         setRedirectTo(defaultRedirect);
       }
 
       setIsOpen(true);
     },
-    [pathname, searchParams]
+    [getPathname, getSearchParams]
   );
 
   const closeAuthModal = useCallback(() => {
@@ -137,6 +150,9 @@ export function AuthModalProvider({ children }: { children: ReactNode }) {
 export function useAuthModal(): AuthModalContextType {
   const context = useContext(AuthModalContext);
   if (!context) {
+    // This is a development-time error that should be caught during development
+    // We can't import logging here without circular dependency, so we just throw
+    // The error will be caught by React error boundaries or development tools
     throw new Error('useAuthModal must be used within AuthModalProvider');
   }
   return context;

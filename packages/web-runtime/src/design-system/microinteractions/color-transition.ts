@@ -6,6 +6,8 @@
  * @module web-runtime/design-system/microinteractions/color-transition
  */
 
+import { DURATION } from '../animations/duration.ts';
+
 /**
  * Color Transitions
  */
@@ -14,7 +16,7 @@ export const COLOR_TRANSITION = {
    * Default color transition
    */
   default: {
-    duration: 0.3,
+    duration: DURATION.default,
     ease: 'easeOut',
   },
 
@@ -22,7 +24,7 @@ export const COLOR_TRANSITION = {
    * Fast color transition (for icon state changes)
    */
   fast: {
-    duration: 0.2,
+    duration: DURATION.quick,
     ease: 'easeOut',
   },
 
@@ -30,7 +32,7 @@ export const COLOR_TRANSITION = {
    * Slow color transition (for subtle state changes)
    */
   slow: {
-    duration: 0.5,
+    duration: DURATION.moderate,
     ease: 'easeOut',
   },
 } as const;

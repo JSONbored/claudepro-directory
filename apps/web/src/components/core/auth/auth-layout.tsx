@@ -8,6 +8,7 @@
 
 'use client';
 
+import { SPRING, STAGGER } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 import { type ReactNode } from 'react';
 
@@ -49,7 +50,7 @@ export function SplitAuthLayout({ brandPanel, authPanel, mobileHeader }: SplitAu
           className="flex min-h-dvh min-h-screen items-center justify-center px-12 xl:px-16"
           initial={{ opacity: 0, x: -30 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          transition={SPRING.smooth}
         >
           {brandPanel}
         </motion.div>
@@ -61,7 +62,7 @@ export function SplitAuthLayout({ brandPanel, authPanel, mobileHeader }: SplitAu
             style={cardBorderStyle}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+            transition={{ ...SPRING.smooth, delay: STAGGER.fast }}
           >
             {authPanel}
           </motion.div>

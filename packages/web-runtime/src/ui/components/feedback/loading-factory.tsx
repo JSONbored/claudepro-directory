@@ -10,7 +10,7 @@
  */
 
 import { UI_CLASSES } from '../../constants.ts';
-import { SPRING } from '../../../design-system/index.ts';
+import { SPRING, STAGGER } from '../../../design-system/index.ts';
 import { getSkeletonKeys } from '../../../skeleton-keys.ts';
 import {
   ConfigCardSkeleton,
@@ -439,7 +439,7 @@ export function SubmitPageLoading() {
                       ? {
                           ...SPRING.default,
                           mass: 0.5,
-                          delay: i * 0.05,
+                          delay: i * STAGGER.micro,
                         }
                       : {}
                   }
@@ -463,7 +463,7 @@ export function SubmitPageLoading() {
                 ? {
                     ...SPRING.default,
                     mass: 0.5,
-                    delay: 0.2,
+                    delay: STAGGER.default,
                   }
                 : {}
             }
@@ -543,7 +543,7 @@ export function CompanyProfileLoading() {
                   ? {
                       ...SPRING.default,
                       mass: 0.5,
-                      delay: 0.1,
+                      delay: STAGGER.fast,
                     }
                   : {}
               }
@@ -561,7 +561,7 @@ export function CompanyProfileLoading() {
                         ? {
                             ...SPRING.default,
                             mass: 0.5,
-                            delay: 0.2 + i * 0.05,
+                            delay: STAGGER.default + i * STAGGER.micro,
                           }
                         : {}
                     }
@@ -586,7 +586,7 @@ export function CompanyProfileLoading() {
                   ? {
                   ...SPRING.default,
                   mass: 0.5,
-                  delay: 0.3,
+                  delay: STAGGER.slow,
                     }
                   : {}
               }
@@ -1050,7 +1050,7 @@ export function createListPageLoading(config: ListPageLoadingConfig = {}) {
                       ? {
                           ...SPRING.default,
                           mass: 0.5,
-                          delay: i * 0.05,
+                          delay: i * STAGGER.micro,
                         }
                       : {}
                   }
@@ -1078,7 +1078,7 @@ export function createListPageLoading(config: ListPageLoadingConfig = {}) {
                       ? {
                           ...SPRING.default,
                           mass: 0.5,
-                          delay: i * 0.05,
+                          delay: i * STAGGER.micro,
                         }
                       : {}
                   }
@@ -1123,7 +1123,7 @@ export function createListPageLoading(config: ListPageLoadingConfig = {}) {
                     ? {
                         ...SPRING.loading,
                         mass: 0.5,
-                        delay: i * 0.05,
+                        delay: i * STAGGER.micro,
                       }
                     : {}
                 }
@@ -1613,7 +1613,7 @@ export function createDashboardPageLoading(config: DashboardPageLoadingConfig = 
                     ? {
                         ...SPRING.loading,
                         mass: 0.5,
-                        delay: i * 0.05,
+                        delay: i * STAGGER.micro,
                       }
                     : {}
                 }
@@ -1645,7 +1645,7 @@ export function createDashboardPageLoading(config: DashboardPageLoadingConfig = 
                 ? {
                     ...SPRING.default,
                     mass: 0.5,
-                    delay: 0.2,
+                    delay: STAGGER.default,
                   }
                 : {}
             }
@@ -1666,7 +1666,7 @@ export function createDashboardPageLoading(config: DashboardPageLoadingConfig = 
                       ? {
                         ...SPRING.default,
                         mass: 0.5,
-                        delay: 0.3 + i * 0.05,
+                        delay: STAGGER.slow + i * STAGGER.micro,
                         }
                       : {}
                   }
@@ -1696,7 +1696,7 @@ export function createDashboardPageLoading(config: DashboardPageLoadingConfig = 
                     ? {
                         ...SPRING.default,
                         mass: 0.5,
-                        delay: 0.3 + i * 0.1,
+                        delay: STAGGER.slow + i * STAGGER.fast,
                       }
                     : {}
                 }
@@ -1853,7 +1853,7 @@ export function createProfilePageLoading(config: ProfilePageLoadingConfig = {}) 
                     ? {
                         ...SPRING.loading,
                         mass: 0.5,
-                        delay: i * 0.05,
+                        delay: i * STAGGER.micro,
                       }
                     : {}
                 }
@@ -1882,7 +1882,7 @@ export function createProfilePageLoading(config: ProfilePageLoadingConfig = {}) 
                       ? {
                         ...SPRING.default,
                         mass: 0.5,
-                        delay: 0.2 + cardIndex * 0.1,
+                        delay: STAGGER.default + cardIndex * STAGGER.fast,
                         }
                       : {}
                   }
@@ -2034,7 +2034,7 @@ export function createContactPageLoading(config: ContactPageLoadingConfig = {}) 
                     ? {
                         ...SPRING.loading,
                         mass: 0.5,
-                        delay: i * 0.05,
+                        delay: i * STAGGER.micro,
                       }
                     : {}
                 }
@@ -2061,7 +2061,7 @@ export function createContactPageLoading(config: ContactPageLoadingConfig = {}) 
                     ? {
                         ...SPRING.default,
                         mass: 0.5,
-                        delay: 0.3 + i * 0.1,
+                        delay: STAGGER.slow + i * STAGGER.fast,
                       }
                     : {}
                 }

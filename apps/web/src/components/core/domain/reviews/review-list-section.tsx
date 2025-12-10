@@ -105,7 +105,17 @@ export function ReviewListSection({
             page: pageNum,
           }
         );
-        toasts.error.reviewActionFailed('load');
+        // Show error toast with "Retry" button
+        toasts.raw.error('Failed to load reviews', {
+          action: {
+            label: 'Retry',
+            onClick: () => {
+              loadReviewsWithStats(pageNum, sort).catch(() => {
+                // Error already handled in loadReviewsWithStats
+              });
+            },
+          },
+        });
       } finally {
         setIsLoading(false);
       }

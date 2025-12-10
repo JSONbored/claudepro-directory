@@ -27,6 +27,7 @@ import Link from 'next/link';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 
+import { SignInButton } from '@/src/components/core/auth/sign-in-button';
 import { RecentlySavedGrid } from '@/src/components/features/account/recently-saved-grid';
 
 import Loading from './loading';
@@ -92,9 +93,9 @@ export default async function AccountDashboard() {
             <CardDescription>Please sign in to view your dashboard.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild>
-              <Link href={ROUTES.LOGIN}>Go to login</Link>
-            </Button>
+            <SignInButton valueProposition="Sign in to view your dashboard" redirectTo="/account">
+              Go to login
+            </SignInButton>
           </CardContent>
         </Card>
       </div>

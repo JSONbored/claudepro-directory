@@ -28,6 +28,7 @@
  * @module web-runtime/hooks/use-field-highlight
  */
 
+import { DURATION } from '../design-system/index.ts';
 import { useCallback, useState } from 'react';
 
 /** Default duration for highlight animation in milliseconds */
@@ -185,7 +186,7 @@ export const highlightAnimationVariants = {
       '0 0 0 0 rgba(245, 158, 11, 0)',
     ],
     transition: {
-      duration: 0.6,
+      duration: DURATION.extended,
       ease: 'easeOut',
     },
   },

@@ -6,10 +6,11 @@
 
 import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
 import { DiscordBrandIcon, GithubBrandIcon, GoogleBrandIcon } from '@heyclaude/web-runtime/icons';
+import { logClientError, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { cn, toasts } from '@heyclaude/web-runtime/ui';
-import { MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
+import { MICROINTERACTIONS, DURATION } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 
 interface OAuthProviderButtonProps {
   className?: string;
@@ -60,7 +61,7 @@ export function OAuthProviderButton({
   const config = PROVIDER_CONFIG[provider];
   const IconComponent = config.icon;
 
-  const handleSignIn = async () => {
+  const handleSignIn = useCallback(async () => {
     setLoading(true);
 
     const callbackUrl = new URL(`${globalThis.location.origin}/auth/callback`);
@@ -77,10 +78,34 @@ export function OAuthProviderButton({
     });
 
     if (error) {
-      toasts.error.authFailed(`Sign in failed: ${error.message}`);
+      // Log error for observability
+      const normalized = normalizeError(error, 'OAuth sign-in failed');
+      logClientError(
+        'OAuth sign-in failed',
+        normalized,
+        'OAuthProviderButton.handleSignIn',
+        {
+          component: 'OAuthProviderButton',
+          action: 'sign-in',
+          provider,
+          redirectTo: redirectTo ?? undefined,
+          newsletterOptIn,
+          category: 'auth',
+        }
+      );
+
+      // Show error toast with "Retry" button
+      toasts.raw.error(`Sign in failed: ${error.message}`, {
+        action: {
+          label: 'Retry',
+          onClick: () => {
+            handleSignIn();
+          },
+        },
+      });
       setLoading(false);
     }
-  };
+  }, [provider, redirectTo, newsletterOptIn, supabase]);
 
   return (
     <button
@@ -115,7 +140,7 @@ export function OAuthProviderButton({
           <motion.div
             className="h-7 w-7 rounded-full border-2 border-white/20 border-t-white/80"
             animate={{ rotate: 360 }}
-            transition={{ duration: 0.8, repeat: Number.POSITIVE_INFINITY, ease: 'linear' }}
+            transition={{ duration: DURATION.long, repeat: Number.POSITIVE_INFINITY, ease: 'linear' }}
           />
         ) : (
           <div style={{ width: '28px', height: '28px' }} className="text-foreground">

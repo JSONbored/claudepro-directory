@@ -19,7 +19,7 @@ import {
   CardContent,
   Input,
 } from '@heyclaude/web-runtime/ui';
-import { SPRING } from '@heyclaude/web-runtime/design-system';
+import { SPRING, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
 import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
 import { useId, useMemo, useState } from 'react';
@@ -80,7 +80,7 @@ export function JobsPromo() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.2, ...SPRING.smooth }}
+      transition={{ duration: DURATION.moderate, delay: STAGGER.default, ...SPRING.smooth }}
     >
       <Card
         className={cn(
@@ -103,7 +103,7 @@ export function JobsPromo() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
+            transition={{ delay: STAGGER.slow }}
           >
             <h3 className={cn(UI_CLASSES.MARGIN_TIGHT, 'text-xl leading-tight font-bold')}>
               Hire Claude Developers
@@ -122,7 +122,7 @@ export function JobsPromo() {
             )}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.4, ...SPRING.smooth }}
+            transition={{ delay: STAGGER.relaxed, ...SPRING.smooth }}
           >
             <div className={cn(UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN, UI_CLASSES.TEXT_SM)}>
               <span className={UI_CLASSES.TEXT_MUTED}>Active community</span>
@@ -130,7 +130,7 @@ export function JobsPromo() {
                 className="font-semibold"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
+                transition={{ delay: STAGGER.loose }}
               >
                 1,700/month
               </motion.span>
@@ -145,7 +145,7 @@ export function JobsPromo() {
                 )}
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.6 }}
+                transition={{ delay: STAGGER.extended }}
               >
                 <TrendingUp className={UI_CLASSES.ICON_XS} />
                 Month 2
@@ -165,7 +165,7 @@ export function JobsPromo() {
                 className={UI_CLASSES.FLEX_ITEMS_START_GAP_2}
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5 + i * 0.1 }}
+                transition={{ delay: STAGGER.loose + i * STAGGER.fast }}
               >
                 <Check
                   className={cn(UI_CLASSES.FLEX_SHRINK_0_MT_0_5, UI_CLASSES.ICON_SM, 'text-accent')}
@@ -237,7 +237,7 @@ export function JobsPromo() {
                           initial={{ opacity: 0, scale: 0.8 }}
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0, scale: 0.8 }}
-                          transition={{ duration: 0.2 }}
+                          transition={{ duration: DURATION.quick }}
                           aria-label="Subscribing..."
                         >
                           <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
@@ -284,7 +284,7 @@ export function JobsPromo() {
                       initial={{ opacity: 0, y: -4 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -4 }}
-                      transition={{ duration: 0.2 }}
+                      transition={{ duration: DURATION.quick }}
                     >
                       {error}
                     </motion.p>
@@ -304,7 +304,7 @@ export function JobsPromo() {
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8 }}
+              transition={{ delay: STAGGER.maximum }}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
@@ -347,7 +347,7 @@ export function JobsPromo() {
             className={cn('text-center', UI_CLASSES.TEXT_XS_MUTED)}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 1 }}
+            transition={{ delay: STAGGER.ultimate }}
           >
             Live in 5 minutes • Growing community
           </motion.p>

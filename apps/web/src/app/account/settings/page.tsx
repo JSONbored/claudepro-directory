@@ -26,6 +26,7 @@ import { cacheLife } from 'next/cache';
 import Image from 'next/image';
 import Link from 'next/link';
 
+import { SignInButton } from '@/src/components/core/auth/sign-in-button';
 import {
   ProfileEditForm,
   RefreshProfileButton,
@@ -88,9 +89,9 @@ export default async function SettingsPage() {
             <CardDescription>Please sign in to manage your account settings.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild>
-              <Link href={ROUTES.LOGIN}>Go to login</Link>
-            </Button>
+            <SignInButton valueProposition="Sign in to manage your account settings" redirectTo="/account/settings">
+              Go to login
+            </SignInButton>
           </CardContent>
         </Card>
       </div>

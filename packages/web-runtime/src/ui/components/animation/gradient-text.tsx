@@ -21,6 +21,7 @@
  * ```
  */
 
+import { DURATION } from '../../../design-system/index.ts';
 import { cn } from '../../utils.ts';
 import { motion } from 'motion/react';
 import type { ReactNode } from 'react';
@@ -104,7 +105,7 @@ export function ShimmeringGradientText({
         backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
       }}
       transition={{
-        duration: 3,
+        duration: DURATION.extreme,
         repeat: Number.POSITIVE_INFINITY,
         ease: 'linear',
       }}
@@ -118,7 +119,7 @@ export function ShimmeringGradientText({
           ],
         }}
         transition={{
-          duration: 2,
+          duration: DURATION.maximum,
           repeat: Number.POSITIVE_INFINITY,
           ease: 'easeInOut',
         }}

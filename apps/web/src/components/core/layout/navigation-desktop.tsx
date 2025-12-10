@@ -8,7 +8,7 @@
 
 import { type Database } from '@heyclaude/database-types';
 import { PRIMARY_NAVIGATION, SECONDARY_NAVIGATION } from '@heyclaude/web-runtime/config/navigation';
-import { SPRING, MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
+import { SPRING, MICROINTERACTIONS, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
 import { Bookmark, ChevronDown, Github, MessageSquare, PlusCircle } from '@heyclaude/web-runtime/icons';
 import {
   ANIMATION_CONSTANTS,
@@ -157,7 +157,7 @@ function ConfigsDropdown({ link, getCategoryFromHref }: ConfigsDropdownProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.1 }}
+              transition={{ duration: DURATION.micro }}
               className={cn('relative z-10 grid grid-cols-[.6fr_1.4fr]', UI_CLASSES.SPACE_COMFORTABLE)}
             >
               {/* Left Column: Hero Card */}
@@ -216,7 +216,7 @@ function ConfigsDropdown({ link, getCategoryFromHref }: ConfigsDropdownProps) {
                                   animate={{ opacity: 1, y: 0 }}
                                   transition={{
                                     ...SPRING.smooth,
-                                    delay: (colIndex * itemsPerColumn + childIndex) * 0.02,
+                                    delay: (colIndex * itemsPerColumn + childIndex) * STAGGER.micro, // Using micro for 20ms
                                   }}
                                 >
                                   <motion.div
@@ -346,7 +346,7 @@ function DiscoverResourcesContributeDropdown({ link, getCategoryFromHref }: Disc
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.1 }}
+              transition={{ duration: DURATION.micro }}
               className={cn('relative z-10 grid', UI_CLASSES.SPACE_DEFAULT, DIMENSIONS.NAV_DROPDOWN_INNER_SM, DIMENSIONS.NAV_DROPDOWN_BASE_MD, 'md:grid-cols-2', DIMENSIONS.NAV_DROPDOWN_INNER_LG)}
             >
               {link.sections!.map((section, sectionIndex) => {
@@ -369,7 +369,7 @@ function DiscoverResourcesContributeDropdown({ link, getCategoryFromHref }: Disc
                               animate={{ opacity: 1, y: 0 }}
                               transition={{
                                 ...SPRING.smooth,
-                                delay: childIndex * 0.03,
+                                delay: childIndex * STAGGER.micro, // Using micro for 30ms
                               }}
                             >
                               <motion.div
@@ -506,7 +506,7 @@ function FallbackDropdown({ link, getCategoryFromHref }: FallbackDropdownProps) 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.1 }}
+              transition={{ duration: DURATION.micro }}
               className="relative z-10"
             >
               {link.sections ? (
@@ -532,7 +532,7 @@ function FallbackDropdown({ link, getCategoryFromHref }: FallbackDropdownProps) 
                               animate={{ opacity: 1, y: 0 }}
                               transition={{
                                 ...SPRING.smooth,
-                                delay: childIndex * 0.03,
+                                delay: childIndex * STAGGER.micro, // Using micro for 30ms
                               }}
                             >
                               <motion.div
@@ -607,7 +607,7 @@ function FallbackDropdown({ link, getCategoryFromHref }: FallbackDropdownProps) 
                         animate={{ opacity: 1, y: 0 }}
                         transition={{
                           ...SPRING.smooth,
-                          delay: childIndex * 0.03,
+                          delay: childIndex * STAGGER.micro, // Using micro for 30ms
                         }}
                       >
                         <motion.div

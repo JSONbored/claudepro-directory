@@ -145,7 +145,15 @@ export function ReviewForm({
         } else if (error instanceof Error && error.message.includes('already reviewed')) {
           toasts.error.validation('You have already reviewed this content');
         } else {
-          toasts.error.reviewActionFailed('submit');
+          // Non-auth errors - show toast with retry option
+          toasts.raw.error('Failed to submit review', {
+            action: {
+              label: 'Retry',
+              onClick: () => {
+                handleSubmit(e);
+              },
+            },
+          });
         }
       }
     });

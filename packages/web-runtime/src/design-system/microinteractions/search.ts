@@ -57,7 +57,6 @@ export const SEARCH = {
     scale: [1, 1.1, 1],
     transition: {
       ...SPRING.smooth,
-      duration: 0.6,
       mass: 0.8,
       repeat: Infinity,
     },

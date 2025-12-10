@@ -104,7 +104,15 @@ export function SimpleCopyButton({
           label: label ?? 'unnamed',
         }
       );
-      toasts.raw.error(errorMessage);
+      // Show error toast with "Retry" button
+      toasts.raw.error(errorMessage, {
+        action: {
+          label: 'Retry',
+          onClick: () => {
+            handleCopy();
+          },
+        },
+      });
     }
   };
 

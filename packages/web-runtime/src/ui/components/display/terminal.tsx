@@ -1,5 +1,6 @@
 'use client';
 
+import { DURATION } from '../../../design-system/index.ts';
 import { cn } from '../../utils.ts';
 import { type MotionProps, motion } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
@@ -14,7 +15,7 @@ export const AnimatedSpan = ({ children, delay = 0, className, ...props }: Anima
   <motion.div
     initial={{ opacity: 0, y: -5 }}
     animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.3, delay: delay / 1000 }}
+    transition={{ duration: DURATION.default, delay: delay / 1000 }}
     className={cn('grid font-normal text-sm tracking-tight', className)}
     {...props}
   >

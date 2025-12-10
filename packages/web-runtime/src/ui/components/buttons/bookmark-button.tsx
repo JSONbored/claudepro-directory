@@ -90,8 +90,8 @@ export function BookmarkButton({
     defaultRethrow: false,
   });
 
-  const handleToggle = async (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleToggle = async (e?: React.MouseEvent) => {
+    e?.stopPropagation();
 
     if (!isValidCategory(contentType)) {
       toasts.error.fromError(new Error(`Invalid content type: ${contentType}`));
@@ -236,7 +236,16 @@ export function BookmarkButton({
           }
         } else {
           // Non-auth errors (network, server, etc.)
-          toasts.error.fromError(normalizeError(error, 'Failed to update bookmark'));
+          normalizeError(error, 'Failed to update bookmark'); // Normalize for logging
+          // Show error toast with "Retry" button
+          toasts.raw.error('Failed to update bookmark', {
+            action: {
+              label: 'Retry',
+              onClick: () => {
+                handleToggle();
+              },
+            },
+          });
         }
       }
     });

@@ -48,7 +48,7 @@ import { MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 
 interface UserMenuProps {
   className?: string;
@@ -63,7 +63,7 @@ export function UserMenu({ className }: UserMenuProps) {
   const loading = status === 'loading';
   const supabase = supabaseClient;
 
-  const handleSignOut = async () => {
+  const handleSignOut = useCallback(async () => {
     setSigningOut(true);
 
     try {
@@ -72,18 +72,34 @@ export function UserMenu({ className }: UserMenuProps) {
       const { error } = await supabase.auth.signOut({ scope: 'local' });
 
       if (error) {
-        toasts.error.authFailed(`Sign out failed: ${error.message}`);
+        // Show error toast with "Retry" button
+        toasts.raw.error(`Sign out failed: ${error.message}`, {
+          action: {
+            label: 'Retry',
+            onClick: () => {
+              handleSignOut();
+            },
+          },
+        });
       } else {
         toasts.success.signedOut();
         router.push('/');
         router.refresh();
       }
-    } catch {
-      toasts.error.serverError('An unexpected error occurred');
+    } catch (error) {
+      // Show error toast with "Retry" button
+      toasts.raw.error('An unexpected error occurred', {
+        action: {
+          label: 'Retry',
+          onClick: () => {
+            handleSignOut();
+          },
+        },
+      });
     } finally {
       setSigningOut(false);
     }
-  };
+  }, [supabase, router]);
 
   // Loading state
   if (loading) {

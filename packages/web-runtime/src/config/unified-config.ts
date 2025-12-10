@@ -88,24 +88,14 @@ export const CLAUDE_DESKTOP_PATHS = {
 /** Animation settings */
 export const UI_ANIMATION = {
   'easing': 'ease-in-out',
-  'duration': 300,
-  'button.duration': 200,
   'button.hover_scale': 1.02,
-  'footer.duration': 300,
-  'modal.duration': 200,
   'card.hover_lift': '2px',
   // Animation ticker
   'ticker.default_ms': 1500,
   'ticker.fast_ms': 1000,
   'ticker.slow_ms': 2000,
-  // Stagger animations
-  'stagger.fast_ms': 100,
-  'stagger.medium_ms': 200,
-  'stagger.slow_ms': 300,
-  'card.stagger_ms': 100,
   // Border beam
   'beam.default_ms': 15000,
-  // Spring physics - REMOVED: Use SPRING from @heyclaude/web-runtime/design-system instead
 } as const;
 
 /** Confetti animation settings */

@@ -345,11 +345,21 @@ export const ConfigCard = memo(
         }
 
         if (!user) {
-          // User is not authenticated - use callback if provided, otherwise show toast
+          // User is not authenticated - use callback if provided, otherwise show toast with action button
           if (onAuthRequired) {
             onAuthRequired();
           } else {
-            toasts.error.authRequired();
+            // Fallback toast with "Sign In" button (for backwards compatibility)
+            toasts.raw.error('Please sign in to bookmark this', {
+              action: {
+                label: 'Sign In',
+                onClick: () => {
+                  if (typeof window !== 'undefined') {
+                    window.location.href = `/login?redirect=${window.location.pathname}`;
+                  }
+                },
+              },
+            });
           }
           return;
         }
@@ -401,14 +411,32 @@ export const ConfigCard = memo(
             contentType: validatedCategory,
             contentSlug: item.slug, }, 'ConfigCard: Failed to add bookmark via swipe');
           if (error instanceof Error && error.message.includes('signed in')) {
-            // Auth error - use callback if provided, otherwise show toast
+            // Auth error - use callback if provided, otherwise show toast with action button
             if (onAuthRequired) {
               onAuthRequired();
             } else {
-              toasts.error.authRequired();
+              // Fallback toast with "Sign In" button (for backwards compatibility)
+              toasts.raw.error('Please sign in to bookmark this', {
+                action: {
+                  label: 'Sign In',
+                  onClick: () => {
+                    if (typeof window !== 'undefined') {
+                      window.location.href = `/login?redirect=${window.location.pathname}`;
+                    }
+                  },
+                },
+              });
             }
           } else {
-            toasts.error.actionFailed('bookmark');
+            // Non-auth errors - show toast with retry option
+            toasts.raw.error('Failed to bookmark', {
+              action: {
+                label: 'Retry',
+                onClick: () => {
+                  handleSwipeLeftBookmark();
+                },
+              },
+            });
           }
         }
       }, [item.category, item.slug, router, pulse, user, status, onAuthRequired]);
@@ -447,7 +475,20 @@ export const ConfigCard = memo(
               component: 'ConfigCard',
               recoverable: true,
               userRetryable: true, }, '[Clipboard] Quick action copy failed');
-            toasts.raw.error('Copy failed', { description: 'Unable to copy to clipboard.' });
+            // Show error toast with "Retry" button
+            // Note: Retry will attempt to copy the same value again
+            toasts.raw.error('Copy failed', {
+              description: 'Unable to copy to clipboard.',
+              action: {
+                label: 'Retry',
+                onClick: () => {
+                  // Retry with the same value (user may need to click copy button again if value is not available)
+                  copyInlineValue(value, successDescription, metadata).catch(() => {
+                    // Error already handled in copyInlineValue
+                  });
+                },
+              },
+            });
           }
         },
         [cardCategory, cardSlug, copyLink, pulse]
@@ -482,8 +523,27 @@ export const ConfigCard = memo(
           } catch (error) {
             const normalized = normalizeError(error, 'ConfigCard: failed to toggle pinboard state');
             logger.error({ err: normalized, component: 'ConfigCard', }, 'ConfigCard: failed to toggle pinboard state');
+            // Show error toast with "Retry" button
             toasts.raw.error('Unable to update pinboard', {
               description: 'Please try again.',
+              action: {
+                label: 'Retry',
+                onClick: () => {
+                  // Retry with the same pin payload
+                  try {
+                    togglePin(pinPayload);
+                    toasts.raw.success(pinned ? 'Removed from pinboard' : 'Pinned for later', {
+                      description: pinned
+                        ? 'Removed from your local pinboard.'
+                        : 'Open the pinboard to review your saved configs.',
+                    });
+                  } catch (retryError) {
+                    // Error will be handled by the toast above if it fails again
+                    const retryNormalized = normalizeError(retryError, 'ConfigCard: retry pinboard toggle failed');
+                    logger.error({ err: retryNormalized, component: 'ConfigCard', }, 'ConfigCard: retry pinboard toggle failed');
+                  }
+                },
+              },
             });
           }
         },

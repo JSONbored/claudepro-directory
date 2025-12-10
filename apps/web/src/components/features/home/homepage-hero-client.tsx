@@ -145,7 +145,7 @@ function HomepageHeroClientComponent({
                   className="scrollbar-hide mt-4 overflow-x-auto md:hidden"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ ...SPRING.smooth, delay: 0.3 }}
+                  transition={{ ...SPRING.smooth, delay: STAGGER.slow }}
                 >
                   <div className="flex gap-2 px-4 pb-2">
                     {categoryStatsConfig.slice(0, 5).map(({ categoryId, delay }, index) => {

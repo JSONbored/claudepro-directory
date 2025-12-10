@@ -4,6 +4,7 @@
 
 'use client';
 
+import { STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 import { type ReactNode } from 'react';
 
@@ -37,7 +38,7 @@ export function AuthFormPanel({
         className="mb-12"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.3 }}
+        transition={{ duration: DURATION.moderate, delay: STAGGER.slow }}
       >
         <h2 className="mb-4 text-center text-3xl font-bold">{title}</h2>
         <p className="text-muted-foreground text-center text-sm">{description}</p>
@@ -48,7 +49,7 @@ export function AuthFormPanel({
         className="flex items-center justify-center gap-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.5, delay: 0.5 }}
+        transition={{ duration: DURATION.moderate, delay: STAGGER.loose }}
       >
         {children}
       </motion.div>
@@ -58,7 +59,7 @@ export function AuthFormPanel({
           className="mt-8"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.6 }}
+          transition={{ duration: DURATION.slow, delay: STAGGER.extended }}
         >
           {afterContent}
         </motion.div>

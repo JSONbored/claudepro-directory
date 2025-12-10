@@ -39,7 +39,7 @@ import {
   UnifiedBadge,
   Button,
 } from '@heyclaude/web-runtime/ui';
-import { MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
+import { MICROINTERACTIONS, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
 import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
 import { memo, useState, type MouseEvent } from 'react';
@@ -85,8 +85,8 @@ const RecentlyViewedItemComponent = memo(function RecentlyViewedItemComponent({
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -10 }}
       transition={{
-        duration: 0.2,
-        delay: index * 0.03, // Stagger by 30ms
+        duration: DURATION.quick,
+        delay: index * STAGGER.micro, // Stagger by 30ms (using micro for closest match)
         ease: 'easeOut',
       }}
       className="group relative"
@@ -155,7 +155,7 @@ const RecentlyViewedItemComponent = memo(function RecentlyViewedItemComponent({
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
-            transition={{ duration: 0.15 }}
+            transition={{ duration: DURATION.fast }}
             onClick={(e: MouseEvent<HTMLButtonElement>) => {
               e.preventDefault();
               e.stopPropagation();
@@ -187,7 +187,7 @@ export const RecentlyViewedSidebar = memo(function RecentlyViewedSidebar() {
     <motion.aside
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.3, delay: 0.1 }}
+      transition={{ duration: DURATION.default, delay: STAGGER.fast }}
       className={cn(
         'border-border/50 bg-card/50 sticky top-20 hidden h-fit max-h-[calc(100vh-6rem)] w-full flex-col gap-3 rounded-xl border p-4 backdrop-blur-sm xl:flex',
         'overflow-hidden'
@@ -232,7 +232,7 @@ export const RecentlyViewedSidebar = memo(function RecentlyViewedSidebar() {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: DURATION.quick }}
             className="flex flex-col gap-2 overflow-y-auto pr-1"
           >
             {!isLoaded ? (
@@ -245,7 +245,7 @@ export const RecentlyViewedSidebar = memo(function RecentlyViewedSidebar() {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: DURATION.default }}
                 className="border-border/30 text-muted-foreground flex flex-col items-center gap-3 rounded-lg border border-dashed p-6 text-center"
               >
                 <Clock className="h-8 w-8 opacity-50" />
@@ -278,7 +278,7 @@ export const RecentlyViewedSidebar = memo(function RecentlyViewedSidebar() {
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
+          transition={{ delay: STAGGER.slow }}
           className="border-border/30 text-muted-foreground border-t pt-3 text-center text-[10px]"
         >
           Showing {recentlyViewed.length} of 10 max

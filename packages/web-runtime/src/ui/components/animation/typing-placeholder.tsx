@@ -24,6 +24,7 @@
  * ```
  */
 
+import { DURATION } from '../../../design-system/index.ts';
 import { cn } from '../../utils.ts';
 import { motion } from 'motion/react';
 import { useEffect, useState, useRef } from 'react';
@@ -182,7 +183,7 @@ export function TypingPlaceholder({
           className="inline-block ml-0.5 text-accent"
           animate={{ opacity: [1, 0, 1] }}
           transition={{
-            duration: 0.8,
+            duration: DURATION.long,
             repeat: Infinity,
             ease: 'easeInOut',
           }}

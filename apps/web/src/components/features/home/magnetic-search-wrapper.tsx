@@ -15,7 +15,7 @@
  */
 
 import { type UnifiedSearchProps } from '@heyclaude/web-runtime/types/component.types';
-import { SPRING, MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
+import { SPRING, MICROINTERACTIONS, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
 import { motion, useMotionValue, useSpring, AnimatePresence } from 'motion/react';
 import dynamic from 'next/dynamic';
 import { useEffect, useRef, useState } from 'react';
@@ -301,9 +301,9 @@ export function MagneticSearchWrapper({
                   }}
                   exit={{ opacity: 0, scale: 0 }}
                   transition={{
-                    duration: 1.2,
+                    duration: DURATION.extendedLong,
                     repeat: Infinity,
-                    delay: i * 0.15,
+                    delay: i * STAGGER.medium,
                     ease: 'easeOut',
                   }}
                 />

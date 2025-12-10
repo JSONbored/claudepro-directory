@@ -14,8 +14,8 @@
     opacity: 0.7;
     transform: scale(0.98);
     transition:
-      opacity 0.1s ease,
-      transform 0.1s ease;
+      opacity var(--duration-micro) ease,
+      transform var(--duration-micro) ease;
   }
 
   /* Prevent double-tap zoom on buttons */
@@ -38,7 +38,7 @@ select,
 [role="button"],
 [role="link"] {
   transition-property: transform, opacity, box-shadow, background-color, border-color;
-  transition-duration: 0.2s;
+  transition-duration: var(--duration-quick);
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -46,7 +46,7 @@ select,
 *:focus-visible {
   outline: 2px solid hsl(var(--ring));
   outline-offset: 2px;
-  transition: outline-offset 0.2s ease;
+  transition: outline-offset var(--duration-quick) ease;
 }
 
 *:focus-visible:active {
@@ -103,7 +103,7 @@ a:not([class*="button"]):not([class*="btn"]):not(.no-underline)::after {
   background: hsl(var(--accent));
   transform: scaleX(0);
   transform-origin: right;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform var(--duration-default) cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 a:not([class*="button"]):not([class*="btn"]):not(.no-underline):hover::after {
@@ -133,7 +133,7 @@ a:not([class*="button"]):not([class*="btn"]):not(.no-underline):hover::after {
  */
 .hover-lift:hover {
   transform: translateY(-2px);
-  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform var(--duration-quick) cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ===========================
@@ -143,7 +143,7 @@ a:not([class*="button"]):not([class*="btn"]):not(.no-underline):hover::after {
 /* Checkbox and radio button scale on check */
 input[type="checkbox"]:checked,
 input[type="radio"]:checked {
-  animation: checkScale 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: checkScale var(--duration-quick) cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @keyframes checkScale {
@@ -170,7 +170,7 @@ select:focus {
 /* Subtle pulse for notification badges */
 [class*="badge"][data-notification="true"],
 [class*="Badge"][data-notification="true"] {
-  animation: badgePulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  animation: badgePulse var(--duration-maximum) cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 @keyframes badgePulse {
@@ -192,7 +192,7 @@ select:focus {
 /* Subtle pulse for loading elements */
 [aria-busy="true"],
 [data-loading="true"] {
-  animation: loadingPulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  animation: loadingPulse var(--duration-very-extended) cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 @keyframes loadingPulse {
@@ -211,7 +211,7 @@ select:focus {
 
 /* Smooth tooltip appearance */
 [role="tooltip"] {
-  animation: tooltipSlide 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: tooltipSlide var(--duration-quick) cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @keyframes tooltipSlide {
@@ -279,7 +279,7 @@ footer,
 aside,
 [data-theme-transition] {
   transition-property: background-color, border-color, color, fill, stroke;
-  transition-duration: 0.15s;
+  transition-duration: var(--duration-fast);
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -287,7 +287,7 @@ aside,
 [class*="card"]:not([data-no-transition]),
 [class*="Card"]:not([data-no-transition]) {
   transition-property: background-color, color, fill, stroke;
-  transition-duration: 0.15s;
+  transition-duration: var(--duration-fast);
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
