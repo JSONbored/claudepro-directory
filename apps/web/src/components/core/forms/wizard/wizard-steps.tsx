@@ -28,7 +28,7 @@ import {
   CardTitle,
   Input,
 } from '@heyclaude/web-runtime/ui';
-import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
+import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/design-tokens';
 import { AnimatePresence, motion } from 'motion/react';
 import { useCallback, useState } from 'react';
 

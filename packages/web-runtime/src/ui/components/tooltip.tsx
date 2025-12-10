@@ -4,7 +4,7 @@ import { cn } from '../utils.ts';
 import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 import { motion } from 'motion/react';
 import type * as React from 'react';
-import { MICROINTERACTIONS } from '../design-tokens/index.ts';
+import { MICROINTERACTIONS } from '../../design-system/index.ts';
 
 const TooltipProvider = ({ 
   children, 

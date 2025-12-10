@@ -48,10 +48,12 @@ import { POSITION_PATTERNS, UI_CLASSES } from '../../constants.ts';
 import { UnifiedBadge } from '../badges/unified-badge.tsx';
 import { SwipeableCardWrapper } from './swipeable-card.tsx';
 import { motion } from 'motion/react';
-import { MICROINTERACTIONS } from '../../design-tokens/index.ts';
+import { MICROINTERACTIONS } from '../../../design-system/index.ts';
 import { SponsoredPulse } from '../features/sponsored-pulse.tsx';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../card.tsx';
 import { type UseCardNavigationOptions, useCardNavigation } from '../../../hooks/use-card-navigation.ts';
+import { useTheme } from '../../../hooks/use-theme.ts';
+import { COLORS } from '../../../design-tokens/index.ts';
 import { logger } from '../../../logger.ts';
 import { normalizeError } from '../../../errors.ts';
 import type { ReactNode, HTMLAttributes } from 'react';
@@ -310,6 +312,9 @@ export const BaseCard = memo(
     const CardTitleComponent = CardTitle;
     const CardDescriptionComponent = CardDescription;
 
+    // Detect current theme for semantic color tokens
+    const theme = useTheme();
+
     try {
       const navigationParam: string | UseCardNavigationOptions | undefined =
         disableNavigation || !targetPath
@@ -365,7 +370,7 @@ export const BaseCard = memo(
 
                   {/* Title */}
                   <CardTitleComponent
-                    className={`${UI_CLASSES.TEXT_CARD_TITLE} text-foreground ${disableNavigation ? '' : 'transition-colors-smooth group-hover:text-accent'}`}
+                    className={`${UI_CLASSES.TEXT_CARD_TITLE} text-foreground ${disableNavigation ? '' : 'transition-colors-smooth'}`}
                   >
                     {displayTitle}
                   </CardTitleComponent>
@@ -480,8 +485,14 @@ export const BaseCard = memo(
 
       // Card wrapper - apply motion animations directly using design system tokens
       // For non-navigation cards, use CardComponent. For interactive cards, use motion.div with Card styling
+      // Motion.dev handles hover border color via whileHover - no CSS hover classes needed
+      // Base classes: layout, border width, background, text - border color comes from CARD_INTERACTIVE for interactive cards
       const cardBaseClasses = `${UI_CLASSES.FLEX_COL_GAP_6} rounded-xl border bg-card py-6 text-card-foreground shadow-sm`;
-      const cardClassName = `${cardBaseClasses} ${disableNavigation ? '' : UI_CLASSES.CARD_INTERACTIVE} ${variant === 'detailed' ? UI_CLASSES.CARD_PADDING_DEFAULT : ''} ${variant === 'review' ? `rounded-lg border ${UI_CLASSES.CARD_PADDING_COMPACT}` : ''} ${compactMode ? UI_CLASSES.CARD_PADDING_COMPACT : ''} ${className || ''} relative`;
+      // For non-interactive cards, add border color explicitly
+      // For interactive cards, CARD_INTERACTIVE provides border-border/50
+      const cardBorderColor = disableNavigation ? 'border-border/50' : '';
+      const cardInteractiveClasses = disableNavigation ? '' : UI_CLASSES.CARD_INTERACTIVE;
+      const cardClassName = `${cardBaseClasses} ${cardBorderColor} ${cardInteractiveClasses} ${variant === 'detailed' ? UI_CLASSES.CARD_PADDING_DEFAULT : ''} ${variant === 'review' ? `rounded-lg border border-border/50 ${UI_CLASSES.CARD_PADDING_COMPACT}` : ''} ${compactMode ? UI_CLASSES.CARD_PADDING_COMPACT : ''} ${className || ''} relative`;
       
       const cardElement = disableNavigation ? (
         <CardComponent
@@ -500,9 +511,18 @@ export const BaseCard = memo(
           className={cardClassName}
           style={{
             ...viewTransitionStyle,
-            contain: 'layout style',
+            // Use semantic design token for border color - theme-aware via useTheme hook
+            borderColor: COLORS.semantic.border[theme].default,
+            // 3D transform support for forward tilt animation
+            perspective: '1000px',
+            transformStyle: 'preserve-3d',
           }}
-          whileHover={MICROINTERACTIONS.card.hover}
+          initial={false}
+          whileHover={{
+            ...MICROINTERACTIONS.card.hover,
+            // Override borderColor with theme-aware semantic token
+            borderColor: COLORS.semantic.primary[theme].base,
+          }}
           whileTap={MICROINTERACTIONS.card.tap}
           transition={MICROINTERACTIONS.card.transition}
           onClick={handleCardClick}

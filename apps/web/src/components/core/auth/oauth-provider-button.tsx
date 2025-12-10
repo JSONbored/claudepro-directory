@@ -6,7 +6,8 @@
 
 import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
 import { DiscordBrandIcon, GithubBrandIcon, GoogleBrandIcon } from '@heyclaude/web-runtime/icons';
-import { cn, toasts, MICROINTERACTIONS } from '@heyclaude/web-runtime/ui';
+import { cn, toasts } from '@heyclaude/web-runtime/ui';
+import { MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 import { useState } from 'react';
 

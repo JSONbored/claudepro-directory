@@ -9,7 +9,7 @@
 import { type Database } from '@heyclaude/database-types';
 import { PRIMARY_NAVIGATION, SECONDARY_NAVIGATION } from '@heyclaude/web-runtime/config/navigation';
 import { ANIMATIONS, MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
-import { ChevronDown, PlusCircle } from '@heyclaude/web-runtime/icons';
+import { Bookmark, ChevronDown, Github, MessageSquare, PlusCircle } from '@heyclaude/web-runtime/icons';
 import {
   ANIMATION_CONSTANTS,
   DIMENSIONS,
@@ -27,6 +27,11 @@ import { AnimatedBorder } from '@heyclaude/web-runtime/ui';
 import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
 import { Fragment, useEffect, useState } from 'react';
+
+import { getSocialLinks, logUnhandledPromise } from '@heyclaude/web-runtime/core';
+import { usePulse } from '@heyclaude/web-runtime/hooks';
+import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
+import { Button } from '@heyclaude/web-runtime/ui';
 
 import { usePinboardDrawer } from '@/src/components/features/navigation/pinboard-drawer-provider';
 
@@ -654,6 +659,155 @@ interface NavigationDesktopProps {
   isActive: (path: string) => boolean;
 }
 
+/**
+ * Community Icons Row Component
+ * Horizontal row of icon-only buttons for Discord, Pinboard, and GitHub Stars
+ */
+function CommunityIconsRow({ openPinboardDrawer }: { openPinboardDrawer: () => void }) {
+  const pulse = usePulse();
+  const SOCIAL_LINK_SNAPSHOT = getSocialLinks();
+  const [githubStars, setGithubStars] = useState<number | null>(null);
+  
+  // Fetch GitHub star count
+  useEffect(() => {
+    const repoUrl = SOCIAL_LINK_SNAPSHOT.github;
+    const apiUrl = (() => {
+      try {
+        const { pathname, hostname } = new URL(repoUrl);
+        if (hostname === 'github.com') {
+          const [, owner, repo] = pathname.split('/');
+          if (owner && repo) {
+            return `https://api.github.com/repos/${owner}/${repo}`;
+          }
+        }
+      } catch {
+        // Fall back to default repo
+      }
+      return 'https://api.github.com/repos/JSONbored/claudepro-directory';
+    })();
+
+    fetch(apiUrl)
+      .then((res) => res.json())
+      .then((data) => {
+        const count =
+          data && typeof data.stargazers_count === 'number' ? data.stargazers_count : null;
+        setGithubStars(count);
+      })
+      .catch((error) => {
+        const normalized = normalizeError(error, 'Failed to fetch GitHub star count');
+        logClientWarn(
+          '[GitHub] Failed to fetch star count',
+          normalized,
+          'CommunityIconsRow.fetchStars',
+          {
+            component: 'CommunityIconsRow',
+            action: 'fetch-star-count',
+            category: 'external-api',
+            apiUrl,
+          }
+        );
+        setGithubStars(null);
+      });
+  }, []);
+  
+  const handleDiscordClick = () => {
+    pulse
+      .click({
+        category: null,
+        slug: null,
+        metadata: {
+          action: 'external_link',
+          link_type: 'discord',
+          target_url: 'https://discord.gg/Ax3Py4YDrq',
+        },
+      })
+      .catch((error) => {
+        logUnhandledPromise('CommunityIconsRow: Discord click pulse failed', error, {});
+      });
+    window.open('https://discord.gg/Ax3Py4YDrq', '_blank', 'noopener,noreferrer');
+  };
+  
+  const handleGitHubClick = () => {
+    const repoUrl = SOCIAL_LINK_SNAPSHOT.github;
+    pulse
+      .click({
+        category: null,
+        slug: null,
+        metadata: {
+          action: 'external_link',
+          link_type: 'github',
+          target_url: repoUrl,
+        },
+      })
+      .catch((error) => {
+        logUnhandledPromise('CommunityIconsRow: GitHub click pulse failed', error, { repoUrl });
+      });
+    window.open(repoUrl, '_blank', 'noopener,noreferrer');
+  };
+  
+  return (
+    <div className="border-t border-border/30 mt-4 pt-4">
+      <div className="flex items-center justify-center gap-3 px-2">
+        {/* Discord */}
+        <motion.div
+          whileHover={MICROINTERACTIONS.button.hover}
+          whileTap={MICROINTERACTIONS.button.tap}
+          transition={MICROINTERACTIONS.button.transition}
+        >
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleDiscordClick}
+            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+            aria-label="Join our Discord community"
+          >
+            <MessageSquare className="h-4 w-4" />
+          </Button>
+        </motion.div>
+        
+        {/* Pinboard */}
+        <motion.div
+          whileHover={MICROINTERACTIONS.button.hover}
+          whileTap={MICROINTERACTIONS.button.tap}
+          transition={MICROINTERACTIONS.button.transition}
+        >
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={openPinboardDrawer}
+            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+            aria-label="Open pinboard"
+          >
+            <Bookmark className="h-4 w-4" />
+          </Button>
+        </motion.div>
+        
+        {/* GitHub Stars */}
+        <motion.div
+          whileHover={MICROINTERACTIONS.button.hover}
+          whileTap={MICROINTERACTIONS.button.tap}
+          transition={MICROINTERACTIONS.button.transition}
+        >
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleGitHubClick}
+            className="h-8 w-8 text-muted-foreground hover:text-foreground relative"
+            aria-label={`Star us on GitHub${githubStars !== null ? ` - ${githubStars} stars` : ''}`}
+          >
+            <Github className="h-4 w-4" />
+            {githubStars !== null && (
+              <span className="absolute -top-1 -right-1 text-[10px] font-medium text-accent">
+                {githubStars > 999 ? `${(githubStars / 1000).toFixed(1)}k` : githubStars.toLocaleString()}
+              </span>
+            )}
+          </Button>
+        </motion.div>
+      </div>
+    </div>
+  );
+}
+
 export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
   // Client-side hydration state to prevent SSR hydration mismatch with Radix UI IDs
   const [isMounted, setIsMounted] = useState(false);
@@ -907,59 +1061,17 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
                     {group.heading}
                   </div>
                   <ul className="grid gap-1">
-                    {group.links.map((link, linkIndex) => {
+                    {group.links
+                      // Filter out Pinboard, Discord, and GitHub from vertical list (they'll be in horizontal icon row at bottom)
+                      .filter((link) => {
+                        if (group.heading === 'Community') {
+                          return link.label !== 'Pinboard' && link.label !== 'Discord' && link.label !== 'GitHub';
+                        }
+                        return true;
+                      })
+                      .map((link, linkIndex) => {
                       const LinkIcon = link.icon;
-                      const isLastLink = linkIndex === group.links.length - 1;
-                      // Special handling for Pinboard - opens drawer instead of navigating
-                      if (link.label === 'Pinboard' && link.href === '#') {
-                        return (
-                          <Fragment key={`${group.heading}-${link.label}-fragment`}>
-                            {linkIndex > 0 && (
-                              <li key={`${group.heading}-${link.label}-divider`}>
-                                <div className="h-px bg-border/30 my-1 mx-3" />
-                              </li>
-                            )}
-                            <li key={`${group.heading}-${link.label}`}>
-                              <motion.div
-                                whileHover={{
-                                  ...MICROINTERACTIONS.card.hover,
-                                  backgroundColor: 'rgba(249, 115, 22, 0.05)', // Preserve exact original background (accent/5)
-                                  y: 0, // Preserve original (no y movement for these links)
-                                }}
-                                whileTap={MICROINTERACTIONS.card.tap}
-                                transition={MICROINTERACTIONS.card.transition}
-                              >
-                                <button
-                                  type="button"
-                                  onClick={openPinboardDrawer}
-                                  className="group/item block w-full rounded-lg px-3 py-2.5 text-sm leading-none no-underline outline-none focus:bg-accent/5 text-left"
-                                >
-                                  <div className="flex items-start gap-3">
-                                    {LinkIcon && (
-                                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted/50 text-muted-foreground group-hover/item:bg-muted group-hover/item:text-foreground">
-                                        <LinkIcon className="h-4 w-4" />
-                                      </div>
-                                    )}
-                                    <div className="flex-1 min-w-0 overflow-hidden">
-                                      <div className="font-medium mb-0.5 break-words">{link.label}</div>
-                                      {link.description && (
-                                        <p className="text-muted-foreground text-xs leading-snug break-words line-clamp-2">
-                                          {link.description}
-                                        </p>
-                                      )}
-                                    </div>
-                                  </div>
-                                </button>
-                              </motion.div>
-                            </li>
-                            {!isLastLink && (
-                              <li key={`${group.heading}-${link.label}-divider-end`}>
-                                <div className="h-px bg-border/30 my-1 mx-3" />
-                              </li>
-                            )}
-                          </Fragment>
-                        );
-                      }
+                      
                   return (
                     <Fragment key={`${group.heading}-${link.label}-fragment`}>
                       {linkIndex > 0 && (
@@ -1003,7 +1115,7 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
                       </li>
                     </Fragment>
                   );
-                })}
+                  })}
                   </ul>
                   {!isLastGroup && (
                     <div className="h-px bg-border/40 my-4 mx-2" />
@@ -1012,6 +1124,9 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
               );
             })}
           </div>
+          
+          {/* Horizontal icon row at bottom: Discord, Pinboard, GitHub Stars */}
+          <CommunityIconsRow openPinboardDrawer={openPinboardDrawer} />
         </NavigationHoverCardContent>
       </NavigationHoverCard>
 

@@ -68,7 +68,7 @@ async function getCachedFeedPayload(
 /**
  * Generate an XML feed payload and accompanying metadata for the requested feed type and category.
  *
- * Selects the appropriate Supabase RPCs to produce either a changelog feed or a content feed in
+ * Uses ContentService RPC wrappers to produce either a changelog feed or a content feed in
  * RSS or Atom format, and returns the XML body together with the correct Content-Type and a
  * human-readable source label.
  *
@@ -77,7 +77,7 @@ async function getCachedFeedPayload(
  * @param supabase - Supabase anonymous client used to call database RPCs
  * @param reqLogger - Optional request-scoped logger used for RPC call logging and error context
  * @returns An object containing `xml` (the feed XML string), `contentType` (HTTP Content-Type header value), and `source` (a short label describing the feed origin)
- * @see executeRpcWithLogging
+ * @see ContentService
  * @see toContentCategory
  */
 async function generateFeedPayload(

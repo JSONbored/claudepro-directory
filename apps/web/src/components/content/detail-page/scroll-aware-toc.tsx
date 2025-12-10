@@ -11,9 +11,8 @@
  */
 
 import { motion, AnimatePresence } from 'motion/react';
-import { useScrollDirection } from '@heyclaude/web-runtime/ui';
-import { ANIMATIONS } from '@heyclaude/web-runtime/ui';
-import { cn } from '@heyclaude/web-runtime/ui';
+import { useScrollDirection, cn } from '@heyclaude/web-runtime/ui';
+import { ANIMATIONS } from '@heyclaude/web-runtime/design-system';
 import { useEffect, useState } from 'react';
 
 interface ScrollAwareTocProps {

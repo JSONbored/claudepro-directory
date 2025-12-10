@@ -14,10 +14,9 @@ import {
   TooltipProvider, 
   TooltipTrigger,
   UnifiedBadge,
-  MICROINTERACTIONS,
-  ANIMATIONS,
 } from '@heyclaude/web-runtime/ui';
-import { SCROLL_ANIMATIONS, VIEWPORT, STAGGER } from '@heyclaude/web-runtime/ui';
+import { MICROINTERACTIONS, ANIMATIONS } from '@heyclaude/web-runtime/design-system';
+import { SCROLL_ANIMATIONS, VIEWPORT, STAGGER } from '@heyclaude/web-runtime/design-system';
 import { getCategoryConfigs, getCategoryStatsConfig } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { motion, useScroll, useTransform, useSpring } from 'motion/react';

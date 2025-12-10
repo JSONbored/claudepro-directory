@@ -72,12 +72,15 @@ const dangerousCharsSet = new Set([
 // Shared regex patterns for PR URL validation
 // Owner: GitHub usernames are 1-39 chars, alphanumeric + hyphens only (no underscores)
 // Must not have consecutive hyphens or trailing hyphens
-// Pattern: starts with alphanumeric, optional middle (alphanumeric or single hyphens), ends with alphanumeric
-const OWNER_REGEX = /^[a-zA-Z0-9](?:[a-zA-Z0-9]|(?:[a-zA-Z0-9]-[a-zA-Z0-9]))*[a-zA-Z0-9]?$/;
+// Pattern: starts with alphanumeric, then allows any number of either alphanumeric characters
+// or a hyphen only when that hyphen is immediately followed by an alphanumeric
+// This ensures: no consecutive hyphens, no trailing hyphens, always starts and ends with alphanumeric
+// For single character usernames, the start character also serves as the end character
+const OWNER_REGEX = /^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9]))*$/;
 // Repo: 1-100 chars, alphanumeric + underscores + dots + hyphens
 // Must not end in .git, and must not be . or ..
-// Pattern: must not be .git, ., or .., and must match valid repo name pattern
-const REPO_REGEX = /^(?!\.git$|^\.\.?$)(?!.*\.git$)[\w.-]{1,100}$/;
+// Pattern: must not be ., .., or end in .git, and must match valid repo name pattern
+const REPO_REGEX = /^(?!\.\.?$|.*\.git$)[\w.-]{1,100}$/;
 const PR_NUMBER_REGEX = /^\d+$/;
 // Full path pattern: /owner/repo/pull/number
 // Uses loose capture groups, then validates components separately to avoid duplication

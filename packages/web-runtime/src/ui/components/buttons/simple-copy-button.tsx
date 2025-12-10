@@ -44,7 +44,7 @@ import { logger, normalizeError } from '../../../entries/core.ts';
 import { UI_TIMEOUTS } from '../../../config/unified-config.ts';
 import type { ButtonStyleProps } from '../../../types/component.types.ts';
 import { toasts } from '../../../client/toast.ts';
-import { MICROINTERACTIONS } from '../../design-tokens/index.ts';
+import { MICROINTERACTIONS } from '../../../design-system/index.ts';
 import { COLORS } from '../../../design-tokens/index.ts';
 import { Check, Copy } from 'lucide-react';
 import { useState } from 'react';

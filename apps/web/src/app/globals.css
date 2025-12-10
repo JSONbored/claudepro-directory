@@ -866,9 +866,11 @@
     transition: var(--transition-normal);
   }
 
+  /* Removed .card-gradient:hover border-color to prevent conflicts with motion.dev whileHover */
+  /* Motion.dev handles hover border color via inline styles for better control */
   .card-gradient:hover {
     background: var(--color-bg-tertiary);
-    border-color: color-mix(in oklch, var(--color-primary), transparent 70%);
+    /* border-color removed - handled by motion.dev whileHover */
     box-shadow: var(--shadow-sm);
   }
 
@@ -892,7 +894,7 @@
 
   .claude-card:hover {
     background-color: var(--color-bg-tertiary);
-    border-color: var(--color-border-medium);
+    /* border-color removed - handled by motion.dev whileHover for interactive cards */
     box-shadow: var(--shadow-md);
   }
 

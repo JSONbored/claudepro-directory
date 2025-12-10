@@ -12,7 +12,7 @@
 
 import { Award, CheckCircle, Sparkles, TrendingUp, Users } from '@heyclaude/web-runtime/icons';
 import { cn } from '@heyclaude/web-runtime/ui';
-import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
+import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/design-tokens';
 import { motion } from 'motion/react';
 
 interface SocialProofBadgeProps {

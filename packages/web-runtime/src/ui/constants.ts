@@ -201,7 +201,7 @@ export const UI_CLASSES = {
   TEXT_PRICE_STRIKETHROUGH: 'font-bold text-xl line-through text-muted-foreground',
 
   CARD_INTERACTIVE:
-    'card-gradient transition-smooth group cursor-pointer border-border/50 hover:border-accent/20',
+    'card-gradient transition-smooth group cursor-pointer border-border/50',
   CARD_GRADIENT_HOVER: 'card-gradient transition-smooth group',
 
   CARD_PADDING_DEFAULT: 'p-6',

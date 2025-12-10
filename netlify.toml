@@ -24,6 +24,11 @@
   # pnpm flags for monorepo compatibility
   # shamefully-hoist helps with dependency resolution in monorepos
   PNPM_FLAGS = "--shamefully-hoist"
+  # Next.js static generation concurrency limit
+  # Reduced from default (12) to 4 to prevent database connection pool exhaustion
+  # This allows more pages to be generated in the same worker, improving cache hit rates
+  # after pre-fetching in generateStaticParams
+  NEXT_STATIC_GENERATION_MAX_CONCURRENCY = "4"
 
 # Next.js plugin configuration
 # Explicitly add the plugin (required for Next.js on Netlify)

@@ -80,7 +80,7 @@ import { BaseCard, type BaseCardProps } from './base-card.tsx';
 import { HighlightedText } from '../highlighted-text.tsx';
 import { UnifiedBadge } from '../badges/unified-badge.tsx';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../tooltip.tsx';
-import { MICROINTERACTIONS } from '../../design-tokens/index.ts';
+import { MICROINTERACTIONS } from '../../../design-system/index.ts';
 import {
   getSafeRepositoryUrl,
   isSafeCategoryAndSlug,
@@ -668,6 +668,7 @@ export const ConfigCard = memo(
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div
+                        className="isolate"
                         style={{
                           color: COLORS.semantic.featured.dark.text,
                           borderColor: COLORS.semantic.featured.dark.border,

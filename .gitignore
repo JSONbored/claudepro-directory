@@ -137,3 +137,6 @@ config/tools/SAFE_AUTOFIX_RULES_RESEARCH.md
 config/tools/SAFE_AUTOFIX_RULES_SUMMARY.md
 config/tools/AUTOFIX_RULES_FINAL_SUMMARY.md
 config/tools/eslint-tests/
+
+# Local Netlify folder
+.netlify

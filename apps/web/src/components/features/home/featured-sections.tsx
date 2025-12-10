@@ -10,7 +10,8 @@ import {
   type DisplayableContent,
   type UnifiedCategoryConfig,
 } from '@heyclaude/web-runtime/types/component.types';
-import { UI_CLASSES, UnifiedBadge, UnifiedCardGrid, ConfigCard, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, BlurText, ANIMATIONS, TEXT_ANIMATIONS, STAGGER, VIEWPORT } from '@heyclaude/web-runtime/ui';
+import { UI_CLASSES, UnifiedBadge, UnifiedCardGrid, ConfigCard, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, BlurText } from '@heyclaude/web-runtime/ui';
+import { ANIMATIONS, TEXT_ANIMATIONS, STAGGER, VIEWPORT } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { type FC, memo, useEffect, useMemo } from 'react';

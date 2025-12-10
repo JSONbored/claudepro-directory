@@ -7,7 +7,8 @@
  * Shows animated typing placeholder when input is empty and not focused.
  */
 
-import { TypingPlaceholder, MICROINTERACTIONS, cn } from '@heyclaude/web-runtime/ui';
+import { TypingPlaceholder, cn } from '@heyclaude/web-runtime/ui';
+import { MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
 import { motion, AnimatePresence } from 'motion/react';
 import React, { useState, useRef, useEffect } from 'react';
 

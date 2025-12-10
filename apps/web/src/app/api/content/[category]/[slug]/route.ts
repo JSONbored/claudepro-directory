@@ -71,6 +71,14 @@ function getProperty(obj: unknown, key: string): unknown {
   return desc?.value;
 }
 
+function getStringProperty(obj: unknown, key: string): string | undefined {
+  if (typeof obj !== 'object' || obj === null) {
+    return undefined;
+  }
+  const desc = Object.getOwnPropertyDescriptor(obj, key);
+  return desc && typeof desc.value === 'string' ? desc.value : undefined;
+}
+
 /**
  * Removes control characters (CR, LF, tab, backspace, form feed, vertical tab) and trims surrounding whitespace from a header value.
  *
@@ -579,14 +587,6 @@ async function handleStorageFormat(
     const result = data;
     const location = Array.isArray(result) ? result[0] : result;
 
-    const getStringProperty = (obj: unknown, key: string): string | undefined => {
-      if (typeof obj !== 'object' || obj === null) {
-        return undefined;
-      }
-      const desc = Object.getOwnPropertyDescriptor(obj, key);
-      return desc && typeof desc.value === 'string' ? desc.value : undefined;
-    };
-
     const bucket = getStringProperty(location, 'bucket');
     const objectPath = getStringProperty(location, 'object_path');
 
@@ -681,14 +681,6 @@ async function handleStorageFormat(
 
     const result = data;
     const location = Array.isArray(result) ? result[0] : result;
-
-    const getStringProperty = (obj: unknown, key: string): string | undefined => {
-      if (typeof obj !== 'object' || obj === null) {
-        return undefined;
-      }
-      const desc = Object.getOwnPropertyDescriptor(obj, key);
-      return desc && typeof desc.value === 'string' ? desc.value : undefined;
-    };
 
     const bucket = getStringProperty(location, 'bucket');
     const objectPath = getStringProperty(location, 'object_path');

@@ -30,15 +30,24 @@ const SPRING_SNAPPY: Transition = SPRING.snappy;
 export const CARD = {
   /**
    * Hover state for cards
-   * Subtle lift and border color change
-   * Uses COLORS tokens for consistent brand color (orange with 50% opacity)
+   * Forward tilt animation creates "entering" feeling with 3D perspective
+   * Uses semantic design tokens for consistent colors
+   * 
+   * IMPORTANT: This borderColor is applied via motion.dev whileHover and takes precedence
+   * over CSS hover classes. Ensure no conflicting hover:border-* classes are applied.
+   * 
+   * Requires parent container with perspective: '1000px' and transformStyle: 'preserve-3d'
    */
   hover: {
-    borderColor: `${COLORS.semantic.primary.dark.base} / 0.5`, // Orange border with 50% opacity - matches rgba(249, 115, 22, 0.5)
-    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-    scale: 1.02,
+    // Use semantic primary color token - theme-aware (component must use useTheme hook)
+    // Note: This is a static value - components using this should override with theme-aware value
+    borderColor: COLORS.semantic.primary.dark.base, // Orange border from semantic tokens
+    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)', // Enhanced shadow for depth
+    scale: 1.01, // Subtle scale (reduced from 1.02)
+    rotateX: -8, // Forward tilt (negative = forward, creates "entering" effect)
+    z: 8, // Move forward in 3D space
     transition: SPRING_SMOOTH,
-    y: -2, // Slight lift
+    // No y movement - forward tilt replaces lift animation
   },
 
   /**

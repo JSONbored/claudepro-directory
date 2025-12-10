@@ -49,7 +49,8 @@ import { useRouter } from 'next/navigation';
 import { usePostCopyEmail } from '@/src/components/core/infra/providers/email-capture-modal-provider';
 import { usePinboardDrawer } from '@/src/components/features/navigation/pinboard-drawer-provider';
 import { ExploreDropdown } from '@/src/components/content/explore-dropdown';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, MICROINTERACTIONS } from '@heyclaude/web-runtime/ui';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@heyclaude/web-runtime/ui';
+import { MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
 
 /**
  * Validate and return a safe path segment for use in URLs.

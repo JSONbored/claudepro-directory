@@ -28,10 +28,11 @@ import { AccountSidebarSkeleton } from '@/src/components/features/account/accoun
 /**
  * Authenticates the current user, ensures a valid session, prepares per-user sidebar metadata, and renders the account layout.
  *
- * If the user is unauthenticated, the component redirects to `/login`. When a session is present and expires within one hour, it attempts a session refresh but continues rendering if refresh fails. Extracted user metadata (display name and image) is passed to the sidebar; the main content is protected by the MFA guard.
+ * If the user is unauthenticated, getAuthenticatedUser with requireUser: true redirects to `/login`.
+ * When a session is present and expires within one hour, it attempts a session refresh but continues rendering if refresh fails.
+ * Extracted user metadata (display name and image) is passed to the sidebar; the main content is protected by the MFA guard.
  *
  * @param children - Content to render inside the account layout's protected main area
- * @param children.children
  * @returns The account layout element containing top navigation, a sidebar (loaded via Suspense), and an MFA-protected content region
  *
  * @see AccountSidebar
@@ -41,13 +42,13 @@ import { AccountSidebarSkeleton } from '@/src/components/features/account/accoun
  */
 async function AccountAuthWrapper({ children }: { children: React.ReactNode }) {
   // Authentication check - required in layout for route protection
-  // Wrap in try-catch to handle expected AuthSessionMissingError gracefully
   const result = await getAuthenticatedUser({
     requireUser: true,
     context: 'AccountLayout',
   });
-  // getAuthenticatedUser with requireUser: true guarantees user is defined (throws if null)
-  // TypeScript doesn't understand the control flow, so we assert non-null
+  // getAuthenticatedUser with requireUser: true is expected to either:
+  // - return a non-null user
+  // - or throw/redirect when unauthenticated
   const user = result.user!;
 
   // Explicitly defer to request time before using non-deterministic operations (Date.now())
@@ -145,8 +146,8 @@ async function AccountAuthWrapper({ children }: { children: React.ReactNode }) {
 /**
  * Renders the account dashboard layout and enforces user authentication for its children.
  *
- * This server component ensures a user is authenticated (redirecting to /login if not), attempts a session
- * refresh when the current session is near expiry, and derives user metadata (display name and avatar)
+ * This server component ensures a user is authenticated (via getAuthenticatedUser, which redirects to /login if needed),
+ * attempts a session refresh when the current session is near expiry, and derives user metadata (display name and avatar)
  * to pass to the sidebar. The layout renders a top navigation bar, a Suspense-wrapped sidebar (non-blocking),
  * and a main content area guarded by multi-factor authentication.
  *
@@ -154,7 +155,6 @@ async function AccountAuthWrapper({ children }: { children: React.ReactNode }) {
  * All blocking operations are moved inside the Suspense boundary to comply with architectural rules.
  *
  * @param children - Content rendered inside the layout's main area
- * @param children.children
  * @returns The account layout element containing the top bar, Suspense-wrapped sidebar, and MFA-protected main content
  *
  * @see getAuthenticatedUser

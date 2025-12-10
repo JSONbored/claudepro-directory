@@ -185,14 +185,14 @@ export async function GET(
     try {
       data = await getCachedCategoryLlmsTxt(category);
     } catch (error) {
+      const normalized = normalizeError(error, 'Category LLMs.txt fetch error');
       reqLogger.error(
         {
-          err: normalizeError(error),
+          err: normalized,
           category,
         },
         'Category LLMs.txt fetch error'
       );
-      const normalized = normalizeError(error, 'Category LLMs.txt fetch error');
       return createErrorResponse(normalized, {
         route: '/api/content/[category]',
         operation: 'ContentCategoryAPI',
@@ -241,7 +241,7 @@ export function OPTIONS() {
   return new NextResponse(null, {
     status: 204,
     headers: {
-      ...getOnlyCorsHeaders,
+      ...CORS,
     },
   });
 }

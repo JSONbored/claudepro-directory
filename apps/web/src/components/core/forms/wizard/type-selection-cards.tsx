@@ -17,8 +17,9 @@
 
 import { Bot, Brain, Code, FileCode, Sparkles, Terminal, Zap } from '@heyclaude/web-runtime/icons';
 import { type SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
-import { cn, MICROINTERACTIONS } from '@heyclaude/web-runtime/ui';
-import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
+import { cn } from '@heyclaude/web-runtime/ui';
+import { MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
+import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/design-tokens';
 import { motion } from 'motion/react';
 import { useCallback, useState } from 'react';
 

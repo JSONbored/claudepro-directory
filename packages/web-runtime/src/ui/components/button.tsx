@@ -16,7 +16,7 @@
 
 import { cn } from '../../ui/utils.ts';
 import { STATE_PATTERNS, UI_CLASSES } from '../../ui/constants.ts';
-import { MICROINTERACTIONS } from '../../ui/design-tokens/index.ts';
+import { MICROINTERACTIONS } from '../../design-system/index.ts';
 import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { AnimatePresence, motion } from 'motion/react';

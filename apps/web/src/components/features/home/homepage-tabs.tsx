@@ -20,8 +20,8 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-  MICROINTERACTIONS,
 } from '@heyclaude/web-runtime/ui';
+import { MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { type FC, memo, useEffect, useMemo, useState } from 'react';

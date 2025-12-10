@@ -7,16 +7,16 @@ import { cacheLife } from 'next/cache';
 import { connection } from 'next/server';
 
 /**
- * Static Generation: Accessibility page is fully static and rarely changes.
- * Page content is generated at build time with no dynamic operations.
- * Metadata generation still uses connection() because generatePageMetadata internally uses Date.now().
+ * Cache Components: Page uses request-time rendering with caching.
+ * Content is static, but rendering happens at request time because generatePageMetadata
+ * uses Date.now() internally. The 'use cache' directive caches the rendered output.
  */
 
 /**
  * Produce page metadata for the /accessibility route.
  *
- * Note: generatePageMetadata internally uses Date.now() via getSEOMetadata, so connection() is required.
- * However, the page content itself is fully static.
+ * Note: generatePageMetadata internally uses Date.now() via getSEOMetadata, so connection() is required
+ * to defer to request time. This opts into dynamic rendering for metadata generation.
  *
  * @returns The Metadata object for the /accessibility route.
  * @see generatePageMetadata
@@ -24,16 +24,16 @@ import { connection } from 'next/server';
  */
 export async function generateMetadata(): Promise<Metadata> {
   // generatePageMetadata internally uses Date.now() via getSEOMetadata
-  // So we need connection() here, but the page content itself is static
+  // connection() defers to request time for non-deterministic operations
   await connection();
   return await generatePageMetadata('/accessibility');
 }
 
 /**
- * Render the site's Accessibility Statement page as a static Next.js server component.
+ * Render the site's Accessibility Statement page with request-time caching.
  *
- * This page is fully static - no dynamic operations, no logging, no request-time data fetching.
- * The content is generated at build time and cached indefinitely.
+ * Content is static but rendered at request time with caching via 'use cache' directive.
+ * The cacheLife profile controls how long the cached output is reused.
  *
  * @returns A React element that renders the Accessibility Statement page.
  *

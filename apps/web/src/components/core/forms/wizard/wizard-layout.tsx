@@ -20,7 +20,7 @@ import { ArrowLeft, ArrowRight, Save, X } from '@heyclaude/web-runtime/icons';
 import { logClientError, logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { type SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
 import { cn, Button } from '@heyclaude/web-runtime/ui';
-import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
+import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/design-tokens';
 import { AnimatePresence, motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { type ReactNode, useCallback, useEffect, useState } from 'react';

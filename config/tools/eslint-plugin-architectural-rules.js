@@ -7704,49 +7704,8 @@ export default {
               context.report({
                 node: asyncFunctionNode || ast,
                 messageId: 'missingChildLogger',
-                fix(fixer) {
-                  const fixes = [];
-
-                  // Step 1: Add logger import if missing
-                  if (!hasLoggerImport && lastImportNode) {
-                    const importPath = filename.includes('apps/web/src/')
-                      ? '@heyclaude/web-runtime/logging/server'
-                      : '@heyclaude/shared-runtime/logger';
-                    fixes.push(
-                      fixer.insertTextAfter(
-                        lastImportNode,
-                        `\nimport { logger } from '${importPath}';`
-                      )
-                    );
-                  } else if (!hasLoggerImport) {
-                    // No imports at all - add at top
-                    const importPath = filename.includes('apps/web/src/')
-                      ? '@heyclaude/web-runtime/logging/server'
-                      : '@heyclaude/shared-runtime/logger';
-                    fixes.push(
-                      fixer.insertTextBefore(
-                        ast.body[0] || asyncFunctionNode,
-                        `import { logger } from '${importPath}';\n`
-                      )
-                    );
-                  }
-
-                  // Step 2: Add logger.child() call at start of function
-                  // NOTE: requestId was removed from codebase - do NOT add it
-                  if (asyncFunctionNode && asyncFunctionNode.body) {
-                    const childLoggerCode = `const reqLogger = logger.child({\n  operation: '${operationName}',\n  route: '${route}',\n  module: '${modulePath}',\n});\n\n`;
-                    
-                    if (firstStatementNode) {
-                      fixes.push(fixer.insertTextBefore(firstStatementNode, childLoggerCode));
-                    } else {
-                      // Empty function body - add after opening brace
-                      const bodyStart = asyncFunctionNode.body.range[0] + 1; // After {
-                      fixes.push(fixer.insertTextAfterRange([bodyStart, bodyStart], `\n${childLoggerCode}`));
-                    }
-                  }
-
-                  return fixes;
-                },
+                // NOTE: Autofix disabled (fixable: null) - complex logger.child() insertion could break TypeScript or create incorrect context
+                // Manual fix required: Add `const reqLogger = logger.child({ operation, route, module });` at start of async function
               });
             }
             // NOTE: Removed requestId check - requestId was removed from codebase

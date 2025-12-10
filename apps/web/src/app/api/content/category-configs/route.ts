@@ -19,8 +19,10 @@ const CORS = getOnlyCorsHeaders;
 
 /**
  * Cached helper function to fetch category configs.
- 
- * @returns {Promise<unknown>} Description of return value*/
+ * Uses Cache Components to reduce function invocations.
+ *
+ * @returns {Promise<unknown>} Category configs with features from the database RPC
+ */
 async function getCachedCategoryConfigs() {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
@@ -55,7 +57,7 @@ export async function GET(_request: NextRequest) {
     });
   } catch (error) {
     const normalized = normalizeError(error, 'Operation failed');
-    reqLogger.error({ err: normalizeError(error) }, 'Category configs API error');
+    reqLogger.error({ err: normalized }, 'Category configs API error');
     return createErrorResponse(normalized, {
       route: '/api/content/category-configs',
       operation: 'CategoryConfigsAPI',

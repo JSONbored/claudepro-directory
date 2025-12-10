@@ -2,7 +2,7 @@
 
 import * as CollapsiblePrimitive from '@radix-ui/react-collapsible';
 import { motion } from 'motion/react';
-import { ANIMATIONS } from '../design-tokens/index.ts';
+import { ANIMATIONS } from '../../design-system/index.ts';
 import { cn } from '../utils.ts';
 
 const Collapsible = CollapsiblePrimitive.Root;

@@ -43,8 +43,8 @@ import {
   NavigationHoverCard,
   NavigationHoverCardContent,
   NavigationHoverCardTrigger,
-  MICROINTERACTIONS,
 } from '@heyclaude/web-runtime/ui';
+import { MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';

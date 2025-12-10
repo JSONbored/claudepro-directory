@@ -17,7 +17,7 @@
 
 import { AlertCircle, AlertTriangle, CheckCircle, Info } from '@heyclaude/web-runtime/icons';
 import { cn, Label } from '@heyclaude/web-runtime/ui';
-import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
+import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/design-tokens';
 import { AnimatePresence, motion } from 'motion/react';
 import { type FocusEvent, type ReactNode, useCallback, useState } from 'react';
 

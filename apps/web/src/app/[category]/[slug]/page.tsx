@@ -106,6 +106,100 @@ export async function generateStaticParams() {
     }
   }
 
+  // OPTIMIZATION: Pre-fetch all content details during generateStaticParams
+  // This populates the Next.js Cache Components cache so that when pages are generated,
+  // they can reuse the cached data instead of making separate database calls.
+  // This reduces database calls from 357 (one per page) to 357 (one batch in generateStaticParams),
+  // but more importantly, it ensures cache is populated before parallel page generation.
+  // With reduced concurrency, more pages will be generated in the same worker, resulting in cache hits.
+  if (parameters.length > 0) {
+    const operation = 'generateStaticParams';
+    const route = '/[category]/[slug]';
+    const modulePath = 'apps/web/src/app/[category]/[slug]/page';
+    const reqLogger = logger.child({
+      operation,
+      route,
+      module: modulePath,
+    });
+
+    reqLogger.info(
+      {
+        section: 'data-prefetch',
+        totalParams: parameters.length,
+      },
+      'generateStaticParams: Pre-fetching all content details to populate cache'
+    );
+
+    // Pre-fetch all content details in batches to populate cache
+    // Batched fetching prevents connection pool exhaustion while still being efficient
+    // Each call will populate the Next.js Cache Components cache
+    // Batch size of 10 allows concurrent fetching without overwhelming the database
+    const BATCH_SIZE = 10;
+    const batches: Array<Array<{ category: string; slug: string }>> = [];
+    for (let i = 0; i < parameters.length; i += BATCH_SIZE) {
+      batches.push(parameters.slice(i, i + BATCH_SIZE));
+    }
+
+    let totalProcessed = 0;
+    const prefetchResults: Array<PromiseSettledResult<void>> = [];
+
+    for (const batch of batches) {
+      // Process each batch concurrently (up to BATCH_SIZE concurrent requests)
+      const batchResults = await Promise.allSettled(
+        batch.map(async ({ category, slug }) => {
+          try {
+            // Call getContentDetailCore to populate cache
+            // This will make the database call and cache the result
+            await getContentDetailCore({
+              category: category as Database['public']['Enums']['content_category'],
+              slug,
+            });
+          } catch (error) {
+            // Log error but continue - individual page generation will handle missing content
+            const normalized = normalizeError(error, 'Failed to pre-fetch content detail');
+            reqLogger.warn(
+              {
+                section: 'data-prefetch',
+                err: normalized,
+                category,
+                slug,
+              },
+              'generateStaticParams: Failed to pre-fetch content detail (will be handled during page generation)'
+            );
+            throw error; // Re-throw to mark as rejected in Promise.allSettled
+          }
+        })
+      );
+
+      prefetchResults.push(...batchResults);
+      totalProcessed += batch.length;
+
+      // Log progress after each batch
+      reqLogger.info(
+        {
+          section: 'data-prefetch',
+          progress: `${totalProcessed}/${parameters.length}`,
+          percentage: Math.round((totalProcessed / parameters.length) * 100),
+          batchSize: batch.length,
+        },
+        `generateStaticParams: Pre-fetched batch ${totalProcessed}/${parameters.length} content details`
+      );
+    }
+
+    const prefetchSuccessCount = prefetchResults.filter((r) => r.status === 'fulfilled').length;
+    const prefetchFailureCount = prefetchResults.filter((r) => r.status === 'rejected').length;
+
+    reqLogger.info(
+      {
+        section: 'data-prefetch',
+        total: parameters.length,
+        success: prefetchSuccessCount,
+        failures: prefetchFailureCount,
+      },
+      `generateStaticParams: Pre-fetch completed - ${prefetchSuccessCount}/${parameters.length} successful`
+    );
+  }
+
   // Return empty array if no parameters found - Suspense boundaries will handle dynamic rendering
   // This follows Next.js best practices by avoiding placeholder patterns
   return parameters;

@@ -4,8 +4,20 @@
  * Design system tokens specifically for the enhanced submission form.
  * Matches Claude Desktop aesthetic (coffee/warm brown theme).
  *
+ * Architecture:
+ * - Part of the comprehensive design-tokens system
+ * - Uses OKLCH color space for consistency
+ * - Self-contained semantic values
+ * - Type-safe with const assertions
+ *
  * Usage:
- * import { SUBMISSION_FORM_TOKENS } from '@/src/lib/design-tokens/submission-form';
+ * ```tsx
+ * import { SUBMISSION_FORM_TOKENS } from '@heyclaude/web-runtime/design-tokens';
+ *
+ * <div style={{ backgroundColor: SUBMISSION_FORM_TOKENS.colors.background.primary }}>
+ * ```
+ *
+ * @module web-runtime/design-tokens/submission-form
  */
 
 export const SUBMISSION_FORM_TOKENS = {

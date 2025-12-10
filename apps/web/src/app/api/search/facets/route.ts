@@ -20,7 +20,7 @@ const CORS = getWithAuthCorsHeaders;
  * 
  * Cache configuration: Uses 'static' profile (1 day stale, 6hr revalidate, 30 days expire)
  * defined in next.config.mjs. Search facets are public data that changes infrequently.
- 
+ *
  * @returns {Promise<unknown[]>} Array of formatted search facet objects from the database RPC
  */
 async function getCachedSearchFacetsFormatted() {
@@ -54,7 +54,7 @@ export async function GET(_request: NextRequest) {
         route: '/api/search/facets',
         operation: 'get_search_facets_formatted',
         method: 'GET',
-        logContext: {},
+        logContext: { facetType: 'all' },
       });
     }
 

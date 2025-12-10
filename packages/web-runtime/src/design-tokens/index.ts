@@ -57,3 +57,7 @@ export { ACCESSIBILITY } from './accessibility/index.ts';
 // Responsive
 export * from './responsive/index.ts';
 export { RESPONSIVE } from './responsive/index.ts';
+
+// Submission Form Tokens (specialized tokens for submission wizard)
+export * from './submission-form.ts';
+export { SUBMISSION_FORM_TOKENS } from './submission-form.ts';

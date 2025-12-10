@@ -8,7 +8,7 @@
 
 import { motion } from 'motion/react';
 import type { ReactNode } from 'react';
-import { MICROINTERACTIONS } from '../../design-tokens/index.ts';
+import { MICROINTERACTIONS } from '../../../design-system/index.ts';
 
 interface HoverCardProps {
   children: ReactNode;
@@ -19,23 +19,26 @@ interface HoverCardProps {
 
 /**
  * Card hover variants using design tokens
+ * Uses OKLCH color space for consistent hover border colors
  */
 const VARIANTS = {
   gentle: {
     hover: {
       scale: MICROINTERACTIONS.card.hover.scale,
-      y: MICROINTERACTIONS.card.hover.y,
-      borderColor: 'rgba(249, 115, 22, 0.3)', // Subtle orange border
+      rotateX: MICROINTERACTIONS.card.hover.rotateX,
+      z: MICROINTERACTIONS.card.hover.z,
+      borderColor: 'oklch(74% 0.2 35 / 0.3)', // Subtle orange border (30% opacity)
       transition: MICROINTERACTIONS.card.hover.transition,
     },
     tap: MICROINTERACTIONS.card.tap,
   },
   strong: {
     hover: {
-      scale: 1.03,
-      y: -4,
-      borderColor: 'rgba(249, 115, 22, 0.5)', // More visible orange border
-      boxShadow: '0 8px 16px rgba(0, 0, 0, 0.15)',
+      scale: 1.02,
+      rotateX: -12, // Stronger forward tilt
+      z: 12, // More forward movement
+      borderColor: 'oklch(74% 0.2 35 / 0.5)', // More visible orange border (50% opacity) - matches CARD.hover
+      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
       transition: MICROINTERACTIONS.card.hover.transition,
     },
     tap: MICROINTERACTIONS.card.tap,
@@ -51,7 +54,8 @@ export function HoverCard({ children, variant = 'gentle', className, disabled }:
 
   return (
     <motion.div 
-      className={className} 
+      className={className}
+      initial={false}
       whileHover={config.hover} 
       whileTap={config.tap}
       transition={MICROINTERACTIONS.card.transition}

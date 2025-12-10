@@ -15,7 +15,7 @@
  */
 
 import { type UnifiedSearchProps } from '@heyclaude/web-runtime/types/component.types';
-import { ANIMATIONS, MICROINTERACTIONS } from '@heyclaude/web-runtime/ui';
+import { ANIMATIONS, MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
 import { motion, useMotionValue, useSpring, AnimatePresence } from 'motion/react';
 import dynamic from 'next/dynamic';
 import { useEffect, useRef, useState } from 'react';

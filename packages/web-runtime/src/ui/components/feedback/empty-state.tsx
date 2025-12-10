@@ -45,7 +45,7 @@ import {
 } from '../../../icons.tsx';
 import { UI_CLASSES } from '../../constants.ts';
 import { cn } from '../../utils.ts';
-import { SUBMISSION_FORM_TOKENS as TOKENS } from '../../design-tokens/submission-form.ts';
+import { SUBMISSION_FORM_TOKENS as TOKENS } from '../../../design-tokens/submission-form.ts';
 import type { LucideIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import Link from 'next/link';

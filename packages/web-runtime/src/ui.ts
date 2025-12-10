@@ -71,4 +71,5 @@ export * from './ui/components/display/horizontal-bar-chart.tsx';
 export * from './ui/components/navigation/breadcrumbs.tsx';
 export * from './ui/components/theme/theme-toggle.tsx';
 export * from './ui/components/scroll/scroll-direction-detector.tsx';
-export * from './ui/design-tokens/index.ts';
+// Re-export SUBMISSION_FORM_TOKENS from new design-tokens system
+export { SUBMISSION_FORM_TOKENS } from './design-tokens/submission-form.ts';

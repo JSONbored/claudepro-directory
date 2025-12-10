@@ -176,7 +176,7 @@
     "eslint-plugin-vitest": "^0.5.4",
     "inngest-cli": "^1.14.3",
     "jsdom": "^27.3.0",
-    "knip": "^5.73.0",
+    "knip": "^5.73.1",
     "lefthook": "^2.0.9",
     "ora": "^9.0.0",
     "prettier": "^3.7.4",

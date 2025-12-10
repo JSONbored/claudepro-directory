@@ -2,13 +2,14 @@ import { OG_DEFAULTS, OG_DIMENSIONS } from '@heyclaude/shared-runtime';
 import { logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
 import { buildCacheHeaders } from '@heyclaude/web-runtime/server';
 import { ImageResponse } from 'next/og';
-import { cacheLife, cacheTag } from 'next/cache';
 import { type NextRequest } from 'next/server';
 
 /**
- * Cached helper function to generate OG image
- * Uses Cache Components to cache the entire ImageResponse generation
- * This prevents function execution when cached (30-50% CPU savings)
+ * Helper function to generate OG image
+ * 
+ * Note: ImageResponse cannot be cached via Next.js Cache Components APIs.
+ * Caching is handled via HTTP cache headers (7-day TTL with 30-day stale-while-revalidate)
+ * configured in the route handler for proper CDN/browser caching.
  * 
  * @param title - Title text to render
  * @param description - Descriptive subtitle
@@ -22,13 +23,6 @@ async function getCachedOgImage(
   type: string,
   tags: string[]
 ): Promise<ImageResponse> {
-  'use cache';
-  
-  // Configure cache - OG images rarely change, use static profile
-  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
-  // Include all parameters in cache tag for proper cache key generation
-  cacheTag('og-image');
-  cacheTag(`og-image-${title}-${type}-${tags.join('-')}`);
 
   // Construct JSX element
   const ogImageJSX = (
@@ -237,9 +231,6 @@ export async function GET(request: NextRequest) {
     reqLogger.error(
       {
         err: normalized,
-        route: '/api/og',
-        operation: 'OGImageAPI',
-        method: 'GET',
       },
       'OG image generation failed'
     );

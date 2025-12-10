@@ -38,8 +38,8 @@ import {
   UI_CLASSES,
   UnifiedBadge,
   Button,
-  MICROINTERACTIONS,
 } from '@heyclaude/web-runtime/ui';
+import { MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
 import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
 import { memo, useState, type MouseEvent } from 'react';

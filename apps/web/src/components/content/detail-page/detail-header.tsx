@@ -8,7 +8,6 @@ import {
   type ContentItem,
   type UnifiedCategoryConfig,
 } from '@heyclaude/web-runtime/types/component.types';
-import { Breadcrumbs } from '@heyclaude/web-runtime/ui';
 
 import { DetailHeaderActions, type SerializableAction } from './detail-header-actions';
 
@@ -23,17 +22,16 @@ export interface DetailHeaderProps {
 }
 
 /**
- * Renders the header for a content detail view, including breadcrumbs and client-driven action controls.
+ * Renders the header for a content detail view with client-driven action controls.
  *
- * This is a server component that renders static header content (title and breadcrumbs) and delegates interactive controls
- * to a client component (DetailHeaderActions). The header derives a pluralized category label from the provided config.
+ * This is a server component that renders the header structure and delegates interactive controls
+ * to a client component (DetailHeaderActions). Breadcrumbs are handled globally by the sub-menu bar.
  *
- * @param displayTitle - The title to display in the header and breadcrumbs
+ * @param displayTitle - The title to display in the header
  * @param item - The content item being viewed (includes content/detail fields used by actions)
  * @param config - Category configuration used for labels and serializable action definitions
  * @param onCopyContent - Optional callback invoked by client actions to copy content; may return a Promise
  *
- * @see Breadcrumbs
  * @see DetailHeaderActions
  * @see isValidCategory
  */
@@ -53,15 +51,9 @@ export function DetailHeader({ displayTitle, item, config, onCopyContent }: Deta
     | SerializableAction[]
     | undefined;
 
-  // Category label for breadcrumbs (pluralized type name)
-  const categoryLabel = config.typeName.endsWith('s') ? config.typeName : `${config.typeName}s`;
-
   return (
     <div className="border-border bg-code/50 border-b backdrop-blur-sm">
       <div className="container mx-auto px-4 py-8">
-        {/* Breadcrumbs - minimal navigation trail */}
-        <Breadcrumbs categoryLabel={categoryLabel} currentTitle={displayTitle} className="mb-2" />
-
         {/* Client component for back button and actions */}
         <DetailHeaderActions
           item={item}

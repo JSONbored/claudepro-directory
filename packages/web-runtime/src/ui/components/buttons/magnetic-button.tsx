@@ -20,7 +20,7 @@
  * ```
  */
 
-import { ANIMATIONS } from '../../design-tokens/index.ts';
+import { ANIMATIONS } from '../../../design-system/index.ts';
 import { motion, useMotionValue, useSpring } from 'motion/react';
 import { useEffect, useRef } from 'react';
 

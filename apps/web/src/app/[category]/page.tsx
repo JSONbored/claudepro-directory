@@ -46,7 +46,7 @@ import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { Suspense } from 'react';
+import React, { Suspense } from 'react';
 
 import { ContentSearchSkeleton } from '@/src/components/content/content-grid-list';
 import { ContentSearchClient } from '@/src/components/content/content-search';
@@ -60,6 +60,18 @@ import { ContentSidebar } from '@/src/components/core/layout/content-sidebar';
  *
  * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
  */
+
+/**
+ * Get icon name from component by reverse lookup in ICON_NAME_MAP
+ * @param icon - Icon component to look up
+ * @returns Icon name string or 'sparkles' as fallback
+ */
+function getIconNameFromComponent(icon: React.ComponentType): string {
+  const iconEntry = Object.entries(ICON_NAME_MAP).find(
+    ([, IconComponent]) => IconComponent === icon
+  );
+  return iconEntry?.[0] ?? 'sparkles';
+}
 
 /**
  * Produce page Metadata for a category list, using the route category or error metadata when invalid.
@@ -121,7 +133,8 @@ export async function generateMetadata({
  */
 export default async function CategoryPage({ params }: { params: Promise<{ category: string }> }) {
   'use cache';
-  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
+  // Use 'static' preset: 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
+  cacheLife('static');
 
   // Params is runtime data - cache key includes params, so different categories create different cache entries
   const { category } = await params;
@@ -166,10 +179,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
 
   // Get icon name from component by finding it in ICON_NAME_MAP
   // Reverse lookup: find the key in ICON_NAME_MAP that has the same component reference
-  const iconEntry = Object.entries(ICON_NAME_MAP).find(
-    ([, IconComponent]) => IconComponent === config.icon
-  );
-  const iconName = iconEntry?.[0] ?? 'sparkles';
+  const iconName = getIconNameFromComponent(config.icon);
 
   // OPTIMIZATION: Fetch content once at page level to avoid duplicate calls
   // Both CategoryBadges and CategoryPageContent need the same data
@@ -322,7 +332,8 @@ function CategoryHeroShell({
  *
  * @see CategoryBadges
  
- * @returns {unknown} Description of return value*/
+ * @returns JSX.Element - A skeleton placeholder with three animated pill-shaped divs
+ */
 function CategoryBadgesSkeleton() {
   return (
     <div className="flex list-none flex-wrap justify-center gap-2">
@@ -388,10 +399,12 @@ function CategoryBadges({
       {displayBadges.map((badge, idx) => (
         <li key={badge.text || `badge-${idx}`}>
           <UnifiedBadge variant="base" style={idx === 0 ? 'secondary' : 'outline'}>
-            {badge.icon && typeof badge.icon === 'string' && (() => {
-              const BadgeIconComponent = ICON_NAME_MAP[badge.icon] ?? HelpCircle;
-              return <BadgeIconComponent className="h-3 w-3 leading-none" aria-hidden="true" />;
-            })()}
+            {badge.icon && typeof badge.icon === 'string' &&
+              React.createElement(
+                ICON_NAME_MAP[badge.icon] ?? HelpCircle,
+                { className: "h-3 w-3 leading-none", "aria-hidden": true }
+              )
+            }
             {badge.text}
           </UnifiedBadge>
         </li>
@@ -419,7 +432,8 @@ function CategoryBadges({
  * @see ContentSidebar
  * @see ICON_NAME_MAP
  
- * @returns {Promise<unknown>} Description of return value*/
+ * @returns JSX.Element - The category page content with search interface and sidebar
+ */
 function CategoryPageContent({
   category,
   items,
@@ -433,10 +447,7 @@ function CategoryPageContent({
   // This eliminates duplicate getContentByCategory() calls
 
   // Get icon name from component by finding it in ICON_NAME_MAP
-  const iconEntry = Object.entries(ICON_NAME_MAP).find(
-    ([, IconComponent]) => IconComponent === config.icon
-  );
-  const iconName = iconEntry?.[0] ?? 'sparkles';
+  const iconName = getIconNameFromComponent(config.icon);
 
   return (
     <>

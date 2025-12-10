@@ -40,7 +40,7 @@ import { getTimeoutConfig } from '../../../config/static-configs.ts';
 import { useViewTransition } from '../../../hooks/use-view-transition.ts';
 import { Moon, Sun } from '../../../icons.tsx';
 import { UI_CLASSES } from '../../constants.ts';
-import { Switch } from '../switch.tsx';
+import { ThemeToggleLayout } from './theme-toggle-layout.tsx';
 
 /**
  * Type guard for theme validation
@@ -143,14 +143,24 @@ export function ThemeToggle() {
    * - Tracks animation start/end timing
    * - Measures total interaction latency
    */
-  const handleToggle = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleThemeChange = (checked: boolean, event?: React.MouseEvent) => {
     const startTime = performance.now();
-    const newTheme = theme === 'light' ? 'dark' : 'light';
+    const newTheme = checked ? 'dark' : 'light';
 
     // If View Transitions API is supported, use it
     if (isSupported) {
-      const { x, y } = getClickPosition(event);
-      setAnimationOrigin(x, y);
+      // Use click position if available, otherwise use center
+      if (event) {
+        const { x, y } = getClickPosition(event);
+        setAnimationOrigin(x, y);
+      } else {
+        const rect = containerRef.current?.getBoundingClientRect();
+        if (rect) {
+          const x = ((rect.left + rect.width / 2) / window.innerWidth) * 100;
+          const y = ((rect.top + rect.height / 2) / window.innerHeight) * 100;
+          setAnimationOrigin(x, y);
+        }
+      }
 
       // Start view transition with DOM-only updates (no React state yet)
       const transition = startTransition(() => {
@@ -197,42 +207,11 @@ export function ThemeToggle() {
   return (
     <div ref={containerRef} className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
       <Sun className={`${UI_CLASSES.ICON_SM} text-muted-foreground`} aria-hidden="true" />
-      <Switch
+      <ThemeToggleLayout
         checked={theme === 'dark'}
         onCheckedChange={(checked) => {
-          // Fallback for keyboard/programmatic changes without click event
-          const newTheme = checked ? 'dark' : 'light';
-
-          if (isSupported) {
-            // Use center of switch for keyboard navigation
-            const rect = containerRef.current?.getBoundingClientRect();
-            if (rect) {
-              const x = ((rect.left + rect.width / 2) / window.innerWidth) * 100;
-              const y = ((rect.top + rect.height / 2) / window.innerHeight) * 100;
-              setAnimationOrigin(x, y);
-            }
-
-            startTransition(() => {
-              document.documentElement.setAttribute('data-theme', newTheme);
-            });
-
-            // Defer localStorage write to prevent blocking
-            saveThemeToStorage(newTheme);
-
-            requestAnimationFrame(() => {
-              setTheme(newTheme);
-            });
-          } else {
-            document.documentElement.classList.add('theme-transition');
-            setTheme(newTheme);
-            saveThemeToStorage(newTheme);
-            document.documentElement.setAttribute('data-theme', newTheme);
-            setTimeout(() => {
-              document.documentElement.classList.remove('theme-transition');
-            }, transitionMs);
-          }
+          handleThemeChange(checked);
         }}
-        onClick={handleToggle}
         aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
       />
       <Moon className={`${UI_CLASSES.ICON_SM} text-muted-foreground`} aria-hidden="true" />

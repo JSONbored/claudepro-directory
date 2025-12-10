@@ -44,7 +44,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { Button } from '../button.tsx';
 import { AnimatePresence, motion } from 'motion/react';
-import { MICROINTERACTIONS } from '../../design-tokens/index.ts';
+import { MICROINTERACTIONS } from '../../../design-system/index.ts';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../tooltip.tsx';
 
 /**
