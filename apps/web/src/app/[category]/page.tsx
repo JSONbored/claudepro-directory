@@ -179,7 +179,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
     items = await getContentByCategory(typedCategory);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load category content');
-      reqLogger.error(
+    reqLogger.error(
       {
         section: 'data-fetch',
         err: normalized,
@@ -191,7 +191,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
     hadError = true;
   }
   if (items.length === 0 && !hadError) {
-      reqLogger.warn(
+    reqLogger.warn(
       {
         section: 'data-fetch',
         category: typedCategory,

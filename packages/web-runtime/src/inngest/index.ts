@@ -79,8 +79,8 @@ import { handlePolarWebhook } from './functions/polar/webhook';
 // Supabase database webhook functions
 import { handleSupabaseContentChanged } from './functions/supabase/content-changed';
 
-// IndexNow functions
-import { submitIndexNow } from './functions/indexnow/submit';
+  // IndexNow functions
+  import { submitIndexNow } from './functions/indexnow/submit';
 
 /**
  * All Inngest functions that should be served.

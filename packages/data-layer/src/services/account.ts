@@ -506,4 +506,30 @@ export class AccountService {
       args
     );
   }
+
+  /**
+   * Calls the database RPC: batch_insert_user_interactions
+   * Batch inserts user interactions with error handling
+   * Returns result with inserted/failed counts and error details
+   * Note: This is a mutation, so it does NOT use request-scoped caching
+   */
+  async batchInsertUserInteractions(
+    args: Database['public']['Functions']['batch_insert_user_interactions']['Args']
+  ): Promise<Database['public']['Functions']['batch_insert_user_interactions']['Returns']> {
+    try {
+      const { data, error } = await this.supabase.rpc('batch_insert_user_interactions', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'batch_insert_user_interactions',
+          operation: 'AccountService.batchInsertUserInteractions',
+          args: args,
+        });
+        throw error;
+      }
+      return data;
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
+  }
 }

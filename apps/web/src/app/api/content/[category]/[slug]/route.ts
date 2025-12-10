@@ -23,10 +23,11 @@ import { NextRequest, NextResponse } from 'next/server';
 /**
  * Cached helper function to fetch full content record
  * Uses Cache Components to reduce function invocations
- * @param category
- * @param slug
- 
- * @returns {Promise<unknown>} Description of return value*/
+ * 
+ * @param {DatabaseGenerated['public']['Enums']['content_category']} category - Content category enum value
+ * @param {string} slug - Content slug to identify the record
+ * @returns {Promise<unknown>} Full content record from the database (JSON object with content details)
+ */
 async function getCachedContentFull(
   category: DatabaseGenerated['public']['Enums']['content_category'],
   slug: string
@@ -124,7 +125,7 @@ async function handleJsonFormat(
     const normalized = normalizeError(error, 'Operation failed');
     reqLogger.error(
       {
-        err: normalizeError(error),
+        err: normalized,
         rpcName: 'get_api_content_full',
         category,
         slug,

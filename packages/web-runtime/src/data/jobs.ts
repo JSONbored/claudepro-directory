@@ -57,6 +57,9 @@ async function getFilteredJobsDirect(options: JobsFilterOptions): Promise<JobsFi
 
     // OPTIMIZATION: Use type guards instead of type assertions for runtime validation
     // Build RPC args with proper type narrowing
+    // filter_jobs has two overloads - one with p_highlight_query and one without
+    // We omit p_highlight_query when not needed, which selects the 6-parameter overload
+    // PostgREST will automatically select the correct overload based on which properties are present
     const rpcArguments: Database['public']['Functions']['filter_jobs']['Args'] = {};
 
     if (searchQuery) {
@@ -135,6 +138,9 @@ async function getJobsListCached(limit: number, offset: number): Promise<JobsFil
       client = createSupabaseAnonClient();
     }
 
+    // filter_jobs has two overloads - one with p_highlight_query and one without
+    // We omit p_highlight_query when not needed, which selects the 6-parameter overload
+    // PostgREST will automatically select the correct overload based on which properties are present
     const rpcArgs: Database['public']['Functions']['filter_jobs']['Args'] = {};
     if (limit !== undefined) {
       rpcArgs.p_limit = limit;
@@ -333,6 +339,9 @@ export async function getFilteredJobs(
 
     // OPTIMIZATION: Use type guards instead of type assertions for runtime validation
     // Build RPC args with proper type narrowing
+    // filter_jobs has two overloads - one with p_highlight_query and one without
+    // We omit p_highlight_query when not needed, which selects the 6-parameter overload
+    // PostgREST will automatically select the correct overload based on which properties are present
     const rpcArguments: Database['public']['Functions']['filter_jobs']['Args'] = {};
 
     if (searchQuery) {

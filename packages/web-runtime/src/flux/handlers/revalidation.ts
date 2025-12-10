@@ -91,9 +91,15 @@ function timingSafeEqual(a: string, b: string): boolean {
 /**
  * POST /api/flux/revalidation
  * Process revalidation queue and invalidate Next.js cache tags
+ * 
+ * NOTE: revalidateTag() must be called from Next.js server context, so this
+ * cannot be moved to Inngest. The handler processes the queue synchronously
+ * which is necessary for revalidateTag() to work correctly.
+ * 
+ * This endpoint is called infrequently (only when content changes via database triggers),
+ * so it's not a major source of function invocations. The current approach is optimal.
  */
 export async function handleRevalidation(_request: NextRequest): Promise<NextResponse> {
-  const startTime = Date.now();
   const logContext = createWebAppContextWithId(
     '/api/flux/revalidation',
     'handleRevalidation'
@@ -205,9 +211,7 @@ export async function handleRevalidation(_request: NextRequest): Promise<NextRes
       }
     }
 
-    const durationMs = Date.now() - startTime;
     logger.info({ ...logContext,
-      durationMs,
       processed: messages.length,
       results, }, 'Revalidation processing completed');
 

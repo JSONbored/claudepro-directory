@@ -21,7 +21,7 @@ const CORS = getOnlyCorsHeaders;
  * Cached helper function to fetch category configs.
  
  * @returns {Promise<unknown>} Description of return value*/
-function getCachedCategoryConfigs() {
+async function getCachedCategoryConfigs() {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 

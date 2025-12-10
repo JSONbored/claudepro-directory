@@ -68,7 +68,7 @@ export async function generateMetadata(): Promise<Metadata> {
  *
  * @see QuizForm
  */
-export default function ConfigRecommenderPage() {
+export default async function ConfigRecommenderPage() {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 

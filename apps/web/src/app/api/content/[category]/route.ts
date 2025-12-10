@@ -22,16 +22,18 @@ const CORS = getOnlyCorsHeaders;
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
 
 /**
- * Cached helper function to fetch category content list
- * Uses Cache Components to reduce function invocations
- * @param category
- 
- * @returns {Promise<unknown>} Description of return value*/
+ * Cached helper function to fetch category content list.
+ * Uses Cache Components to reduce function invocations.
+ * The category parameter becomes part of the cache key, so different categories have different cache entries.
+ * 
+ * @param {DatabaseGenerated['public']['Enums']['content_category']} category - Content category enum value
+ * @returns {Promise<unknown[]>} Category content list from the database (typically an array of content item objects)
+ */
 async function getCachedCategoryContent(
   category: DatabaseGenerated['public']['Enums']['content_category']
 ) {
   'use cache';
-  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire (defined in next.config.mjs)
 
   const supabase = createSupabaseAnonClient();
   const service = new ContentService(supabase);
@@ -41,9 +43,10 @@ async function getCachedCategoryContent(
 /**
  * Cached helper function to fetch category LLMs.txt
  * Uses Cache Components to reduce function invocations
- * @param category
- 
- * @returns {Promise<unknown>} Description of return value*/
+ * 
+ * @param {DatabaseGenerated['public']['Enums']['content_category']} category - Content category enum value
+ * @returns {Promise<string | null>} Category LLMs.txt content from the database
+ */
 async function getCachedCategoryLlmsTxt(
   category: DatabaseGenerated['public']['Enums']['content_category']
 ) {
@@ -134,7 +137,7 @@ export async function GET(
         const normalized = normalizeError(error, 'Operation failed');
         reqLogger.error(
           {
-            err: normalizeError(error),
+            err: normalized,
             category,
             format,
           },

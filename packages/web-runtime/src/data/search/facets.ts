@@ -1,13 +1,14 @@
 'use server';
 
+import { SearchService } from '@heyclaude/data-layer';
 import { type Database } from '@heyclaude/database-types';
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { logger } from '../../index.ts';
 
-/***
+/**
  * Normalizes error to Error | string for logging
- * @param {unknown} error - Error to normalize
+ * @param error - Error to normalize
  * @returns Error instance or string representation
  */
 function normalizeErrorForLogging(error: unknown): Error | string {
@@ -49,11 +50,11 @@ function normalizeFacetRow(row: SearchFacetsRow): SearchFacetSummary {
   };
 }
 
-/***
+/**
  * Extracts aggregated arrays from RPC result
  * The RPC now returns pre-aggregated arrays in each row (same values)
  * We use the first row's aggregated values for efficiency
- * @param {SearchFacetsRow[]} data - Array of facet rows from RPC (each row contains aggregated arrays)
+ * @param data - Array of facet rows from RPC (each row contains aggregated arrays)
  * @returns Pre-aggregated arrays from database (already sorted and deduplicated)
  */
 function extractAggregatedArrays(data: SearchFacetsRow[]): {
@@ -127,19 +128,9 @@ export async function getSearchFacets(): Promise<SearchFacetAggregate> {
       client = createSupabaseAnonClient();
     }
 
-    const { data, error } = await client.rpc('get_search_facets');
-    if (error) {
-      // logger.error() normalizes errors internally, so pass raw error
-      const errorForLogging = normalizeErrorForLogging(error);
-      requestLogger.error(
-        {
-          err: errorForLogging,
-          rpcName: 'get_search_facets',
-        },
-        'getSearchFacets: RPC call failed'
-      );
-      throw error;
-    }
+    // Use SearchService for proper data layer architecture
+    const service = new SearchService(client);
+    const data = await service.getSearchFacets();
 
     const facets = data.map((row) => normalizeFacetRow(row));
 
@@ -214,22 +205,11 @@ export async function getPopularSearches(
       client = createSupabaseAnonClient();
     }
 
-    const { data, error } = await client.rpc('get_trending_searches', {
+    // Use SearchService for proper data layer architecture
+    const service = new SearchService(client);
+    const data = await service.getTrendingSearches({
       limit_count: limit,
     });
-
-    if (error) {
-      const errorForLogging = normalizeErrorForLogging(error);
-      requestLogger.error(
-        {
-          err: errorForLogging,
-          limit,
-          rpcName: 'get_trending_searches',
-        },
-        'getPopularSearches: RPC call failed'
-      );
-      throw error;
-    }
 
     requestLogger.info(
       {

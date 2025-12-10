@@ -676,6 +676,7 @@ async function sendEmailInternal(
     from: string;
     tags?: Array<{ name: string; value: string }>;
     replyTo?: string;
+    idempotencyKey?: string;
   },
   timeoutMessage = 'Resend email send timed out',
   resendClient?: Resend
@@ -687,15 +688,23 @@ async function sendEmailInternal(
     to: options.to,
   };
 
+  // Build email options with optional idempotency key for safe retries
+  const emailOptions = {
+    from: options.from,
+    to: options.to,
+    subject: options.subject,
+    html: options.html,
+    ...(options.tags && { tags: options.tags }),
+    ...(options.replyTo && { replyTo: options.replyTo }),
+  };
+
+  // Use idempotency key if provided (prevents duplicate sends on retry)
+  const sendOptions = options.idempotencyKey
+    ? { idempotencyKey: options.idempotencyKey }
+    : undefined;
+
   const { data, error } = (await withTimeout(
-    resend.emails.send({
-      from: options.from,
-      to: options.to,
-      subject: options.subject,
-      html: options.html,
-      ...(options.tags && { tags: options.tags }),
-      ...(options.replyTo && { replyTo: options.replyTo }),
-    }),
+    resend.emails.send(emailOptions, sendOptions),
     TIMEOUT_PRESETS.external,
     timeoutMessage
   )) as { data: { id: string } | null; error: { message: string } | null };
@@ -750,6 +759,7 @@ export async function sendEmail(
     from: string;
     tags?: Array<{ name: string; value: string }>;
     replyTo?: string;
+    idempotencyKey?: string;
   },
   timeoutMessage = 'Resend email send timed out',
   resendClient?: Resend
@@ -939,7 +949,7 @@ export async function syncContactToResend(
 
 /**
  * Enrolls an email address into the onboarding email sequence.
- * Uses the Supabase RPC to enroll the email in the sequence.
+ * Uses EmailService to enroll the email in the sequence (follows data layer architecture).
  */
 export async function enrollInOnboardingSequence(email: string): Promise<void> {
   const logContext: LogContext = {
@@ -951,20 +961,16 @@ export async function enrollInOnboardingSequence(email: string): Promise<void> {
   try {
     // Dynamically import to avoid circular dependency issues
     const { createSupabaseAdminClient } = await import('../supabase/admin');
+    const { EmailService } = await import('@heyclaude/data-layer');
     const supabase = createSupabaseAdminClient();
+    const service = new EmailService(supabase);
 
     const enrollArgs = {
       p_email: email,
     } satisfies DatabaseGenerated['public']['Functions']['enroll_in_email_sequence']['Args'];
 
-    const { error } = await supabase.rpc('enroll_in_email_sequence', enrollArgs);
-
-    if (error) {
-      logger.warn({ ...logContext,
-        errorMessage: error.message, }, 'Sequence enrollment RPC failed');
-    } else {
-      logger.info(logContext, 'Enrolled in onboarding sequence');
-    }
+    await service.enrollInEmailSequence(enrollArgs);
+    logger.info(logContext, 'Enrolled in onboarding sequence');
   } catch (sequenceError) {
     const errorObj = normalizeError(sequenceError, 'Sequence enrollment failed');
     logger.warn({ ...logContext,

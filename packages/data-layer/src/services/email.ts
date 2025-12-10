@@ -9,7 +9,6 @@ import { type Database } from '@heyclaude/database-types';
 import { type SupabaseClient } from '@supabase/supabase-js';
 
 import { logRpcError } from '../utils/rpc-error-logging.ts';
-import { withSmartCache } from '../utils/request-cache.ts';
 
 export class EmailService {
   constructor(private supabase: SupabaseClient<Database>) {}
@@ -17,32 +16,27 @@ export class EmailService {
   /**
    * Calls the database RPC: get_due_sequence_emails
    * Returns array of due sequence emails that need to be sent
-   * Uses request-scoped caching to avoid duplicate calls within the same request
+   * 
+   * Note: This method is primarily used in Inngest functions where request-scoped
+   * caching provides no benefit. Direct RPC call for optimal performance.
    */
   async getDueSequenceEmails(): Promise<
     Database['public']['Functions']['get_due_sequence_emails']['Returns']
   > {
-    return withSmartCache(
-      'get_due_sequence_emails',
-      'getDueSequenceEmails',
-      async () => {
-        try {
-          const { data, error } = await this.supabase.rpc('get_due_sequence_emails');
-          if (error) {
-            logRpcError(error, {
-              rpcName: 'get_due_sequence_emails',
-              operation: 'EmailService.getDueSequenceEmails',
-            });
-            throw error;
-          }
-          return data ?? [];
-        } catch (error) {
-          // Error already logged above
-          throw error;
-        }
-      },
-      undefined
-    );
+    try {
+      const { data, error } = await this.supabase.rpc('get_due_sequence_emails');
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_due_sequence_emails',
+          operation: 'EmailService.getDueSequenceEmails',
+        });
+        throw error;
+      }
+      return data ?? [];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
@@ -103,6 +97,31 @@ export class EmailService {
           rpcName: 'email_sequences.update',
           operation: 'EmailService.updateEmailSequenceLastSent',
           args: { sequenceId },
+        });
+        throw error;
+      }
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
+  }
+
+  /**
+   * Enrolls an email address into the onboarding email sequence
+   * Uses the database RPC to create/update the email sequence record
+   * This is a mutation, so it does NOT use request-scoped caching
+   */
+  async enrollInEmailSequence(
+    args: Database['public']['Functions']['enroll_in_email_sequence']['Args']
+  ): Promise<void> {
+    try {
+      const { error } = await this.supabase.rpc('enroll_in_email_sequence', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'enroll_in_email_sequence',
+          operation: 'EmailService.enrollInEmailSequence',
+          args: args,
+          isMutation: true, // This is a mutation (creates/updates sequence)
         });
         throw error;
       }

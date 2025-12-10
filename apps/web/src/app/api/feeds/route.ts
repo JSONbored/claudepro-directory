@@ -46,25 +46,22 @@ function toContentCategory(value: null | string): ContentCategory | null {
 /**
  * Cached helper function to generate feed payload.
  * All parameters become part of the cache key, so different feed types/categories have different cache entries.
- * @param type
- * @param category
- 
- * @returns {unknown} Description of return value*/
+ * 
+ * @param {FeedType} type - Feed format to generate: 'rss' or 'atom'
+ * @param {string | null} category - Content category name, 'changelog' for changelog feeds, null for all content
+ * @param {ReturnType<typeof logger.child> | undefined} reqLogger - Optional request-scoped logger for error logging
+ * @returns Promise resolving to an object with contentType (HTTP Content-Type header), source (feed origin label), and xml (feed XML string)
+ */
 async function getCachedFeedPayload(
   type: FeedType,
-  category: null | string
+  category: null | string,
+  reqLogger?: ReturnType<typeof logger.child>
 ): Promise<{ contentType: string; source: string; xml: string }> {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
   const supabase = createSupabaseAnonClient();
-  // Create a minimal logger for the cached helper
-  const reqLogger = logger.child({
-    operation: 'getCachedFeedPayload',
-    route: '/api/feeds',
-    module: 'apps/web/src/app/api/feeds',
-  });
-
+  // Pass request-scoped logger down to generateFeedPayload
   return generateFeedPayload(type, category, supabase, reqLogger);
 }
 
@@ -78,7 +75,7 @@ async function getCachedFeedPayload(
  * @param type - Feed format to generate: 'rss' or 'atom'
  * @param category - Content category name, `'changelog'` for changelog feeds, `null` for all content
  * @param supabase - Supabase anonymous client used to call database RPCs
- * @param reqLogger - Request-scoped logger used for RPC call logging and error context
+ * @param reqLogger - Optional request-scoped logger used for RPC call logging and error context
  * @returns An object containing `xml` (the feed XML string), `contentType` (HTTP Content-Type header value), and `source` (a short label describing the feed origin)
  * @see executeRpcWithLogging
  * @see toContentCategory
@@ -87,7 +84,7 @@ async function generateFeedPayload(
   type: FeedType,
   category: null | string,
   supabase: ReturnType<typeof createSupabaseAnonClient>,
-  reqLogger: ReturnType<typeof logger.child>
+  reqLogger?: ReturnType<typeof logger.child>
 ): Promise<{ contentType: string; source: string; xml: string }> {
   const service = new ContentService(supabase);
 
@@ -105,7 +102,7 @@ async function generateFeedPayload(
         };
       } catch (error) {
         const normalized = normalizeError(error, 'generate_changelog_rss_feed failed');
-        reqLogger.error({ err: normalized, rpcName: 'generate_changelog_rss_feed' }, 'RPC call failed');
+        reqLogger?.error({ err: normalized, rpcName: 'generate_changelog_rss_feed' }, 'RPC call failed');
         throw normalized;
       }
     }
@@ -121,7 +118,7 @@ async function generateFeedPayload(
       };
     } catch (error) {
       const normalized = normalizeError(error, 'generate_changelog_atom_feed failed');
-      reqLogger.error({ err: normalized, rpcName: 'generate_changelog_atom_feed' }, 'RPC call failed');
+      reqLogger?.error({ err: normalized, rpcName: 'generate_changelog_atom_feed' }, 'RPC call failed');
       throw normalized;
     }
   }
@@ -142,7 +139,7 @@ async function generateFeedPayload(
       };
     } catch (error) {
       const normalized = normalizeError(error, 'generate_content_rss_feed failed');
-      reqLogger.error({ err: normalized, rpcName: 'generate_content_rss_feed' }, 'RPC call failed');
+      reqLogger?.error({ err: normalized, rpcName: 'generate_content_rss_feed' }, 'RPC call failed');
       throw normalized;
     }
   }
@@ -160,7 +157,7 @@ async function generateFeedPayload(
     };
   } catch (error) {
     const normalized = normalizeError(error, 'generate_content_atom_feed failed');
-    reqLogger.error({ err: normalized, rpcName: 'generate_content_atom_feed' }, 'RPC call failed');
+    reqLogger?.error({ err: normalized, rpcName: 'generate_content_atom_feed' }, 'RPC call failed');
     throw normalized;
   }
 }
@@ -199,7 +196,7 @@ export async function GET(request: NextRequest) {
       'Feeds request received'
     );
 
-    const payload = await getCachedFeedPayload(type, category);
+    const payload = await getCachedFeedPayload(type, category, reqLogger);
 
     reqLogger.info(
       {

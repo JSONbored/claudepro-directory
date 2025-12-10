@@ -8,6 +8,7 @@
 import { createHmac, timingSafeEqual } from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 
+import { MiscService } from '@heyclaude/data-layer';
 import type { Database as DatabaseGenerated, Json } from '@heyclaude/database-types';
 import { normalizeError, verifySvixSignature } from '@heyclaude/shared-runtime';
 
@@ -339,12 +340,13 @@ async function ingestWebhookEvent(
   
   if (svixId) {
     const supabase = createSupabaseAdminClient();
-    const { data: existing } = await supabase
-      .from('webhook_events')
-      .select('id')
-      .eq('svix_id', svixId)
-      .eq('source', source)
-      .maybeSingle();
+    const miscService = new MiscService(supabase);
+    
+    // Use MiscService for proper data layer architecture
+    const existing = await miscService.getWebhookEventBySvixId({
+      p_svix_id: svixId,
+      p_source: source,
+    });
 
     if (existing) {
       duplicate = true;
@@ -354,27 +356,20 @@ async function ingestWebhookEvent(
       const webhookEventType = mapEventType(source, eventTypeRaw);
       const now = new Date().toISOString();
       
-      const insertData: DatabaseGenerated['public']['Tables']['webhook_events']['Insert'] = {
-        svix_id: svixId,
-        source,
-        type: webhookEventType,
-        data: payload as Json,
-        direction: 'inbound',
-        received_at: now,
-        created_at: now,
-      };
-      
-      const { data: insertedEvent, error: insertError } = await supabase
-        .from('webhook_events')
-        .insert(insertData)
-        .select('id')
-        .single();
-        
-      if (insertError) {
-        throw new Error(`Failed to record webhook event: ${insertError.message}`);
+      // Use MiscService for proper data layer architecture
+      try {
+        webhookId = await miscService.insertWebhookEvent({
+          p_svix_id: svixId,
+          p_source: source,
+          p_type: webhookEventType,
+          p_data: payload as Json,
+          p_direction: 'inbound',
+          p_received_at: now,
+        });
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        throw new Error(`Failed to record webhook event: ${errorMessage}`);
       }
-      
-      webhookId = insertedEvent?.id ?? null;
     }
   }
 

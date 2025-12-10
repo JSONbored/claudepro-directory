@@ -8,7 +8,9 @@
  * - Total user count
  *
  * Runtime: Node.js (required for Supabase client)
- * Caching: 5 minutes via Cache-Control headers (s-maxage=300)
+ * Caching: Two-layer caching strategy:
+ * - Next.js Cache Components: 15min stale, 5min revalidate, 2hr expire (cacheLife('quarter'))
+ * - HTTP Cache-Control: 5 minutes via Cache-Control headers (s-maxage=300)
  */
 import { MiscService } from '@heyclaude/data-layer';
 import { type Database } from '@heyclaude/database-types';
@@ -135,8 +137,9 @@ export async function GET() {
     );
 
     // Generate ETag from timestamp and stats hash for conditional requests
+    // Using simple string concatenation instead of base64 to avoid potential collisions
     const statsHash = `${stats.contributors.count}-${stats.submissions}-${stats.successRate}-${stats.totalUsers}`;
-    const etag = `"${Buffer.from(`${timestamp}-${statsHash}`).toString('base64').slice(0, 16)}"`;
+    const etag = `"${timestamp}-${statsHash}"`;
 
     // Return stats with ETag and Last-Modified headers
     return NextResponse.json(

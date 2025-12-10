@@ -45,7 +45,7 @@ import Loading from './loading';
  * @see getPartnerCtas
  * @see logger
  */
-export default function PartnerPage() {
+export default async function PartnerPage() {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 

@@ -22,8 +22,9 @@ const CORS = getOnlyCorsHeaders;
 /**
  * Cached helper function to fetch sitewide content list
  * Uses Cache Components to reduce function invocations
- 
- * @returns {Promise<unknown>} Description of return value*/
+ * 
+ * @returns {Promise<unknown[]>} Sitewide content list from the database (typically an array of content item objects)
+ */
 async function getCachedSitewideContent() {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
@@ -80,7 +81,7 @@ export async function GET(request: NextRequest) {
         const normalized = normalizeError(error, 'Operation failed');
         reqLogger.error(
           {
-            err: normalizeError(error),
+            err: normalized,
             format,
           },
           'Sitewide JSON query error'

@@ -17,7 +17,6 @@ import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { createSupabaseServerClient, getAuthenticatedUser } from '@heyclaude/web-runtime/server';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 
@@ -47,14 +46,9 @@ async function AccountAuthWrapper({ children }: { children: React.ReactNode }) {
     requireUser: true,
     context: 'AccountLayout',
   });
-  const user = result.user;
-  
-  // getAuthenticatedUser with requireUser: true guarantees user is defined
-  // If no user, it throws AuthSessionMissingError which we handle above
-  if (!user) {
-    // This should never happen with requireUser: true, but TypeScript needs the check
-    redirect('/login');
-  }
+  // getAuthenticatedUser with requireUser: true guarantees user is defined (throws if null)
+  // TypeScript doesn't understand the control flow, so we assert non-null
+  const user = result.user!;
 
   // Explicitly defer to request time before using non-deterministic operations (Date.now())
   // This is required by Cache Components for non-deterministic operations

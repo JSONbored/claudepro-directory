@@ -577,4 +577,62 @@ export class MiscService {
       throw error;
     }
   }
+
+  /**
+   * Calls the database RPC: get_webhook_event_by_svix_id
+   * Returns webhook event ID if found (for duplicate detection)
+   * Uses request-scoped caching to avoid duplicate calls within the same request
+   */
+  async getWebhookEventBySvixId(
+    args: Database['public']['Functions']['get_webhook_event_by_svix_id']['Args']
+  ) {
+    return withSmartCache(
+      'get_webhook_event_by_svix_id',
+      'getWebhookEventBySvixId',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_webhook_event_by_svix_id', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_webhook_event_by_svix_id',
+              operation: 'MiscService.getWebhookEventBySvixId',
+              args: args,
+            });
+            throw error;
+          }
+          // Returns array, get first result or null
+          return Array.isArray(data) && data.length > 0 ? data[0] : null;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
+  }
+
+  /**
+   * Calls the database RPC: insert_webhook_event
+   * Inserts a webhook event and returns the inserted event ID
+   * Note: This is a mutation, so it does NOT use request-scoped caching
+   */
+  async insertWebhookEvent(
+    args: Database['public']['Functions']['insert_webhook_event']['Args']
+  ): Promise<Database['public']['Functions']['insert_webhook_event']['Returns']> {
+    try {
+      const { data, error } = await this.supabase.rpc('insert_webhook_event', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'insert_webhook_event',
+          operation: 'MiscService.insertWebhookEvent',
+          args: args,
+        });
+        throw error;
+      }
+      return data;
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
+  }
 }

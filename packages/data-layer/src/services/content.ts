@@ -499,6 +499,22 @@ export class ContentService {
       'getEnrichedContentList',
       async () => {
         try {
+          // Log database RPC call - this indicates a cache miss at the data layer level
+          // Import logger dynamically to avoid circular dependencies
+          const { logger: dataLayerLogger } = await import('../utils/rpc-error-logging.ts');
+          dataLayerLogger.info(
+            'Database RPC call: get_enriched_content_list (cache miss)',
+            {
+              rpcName: 'get_enriched_content_list',
+              operation: 'ContentService.getEnrichedContentList',
+              args: { p_category: args.p_category, p_limit: args.p_limit },
+              cacheStatus: 'miss',
+              cacheType: 'request-scoped-cache',
+              dbCall: true,
+              note: 'RPC call executed = cache miss. If this log appears, Next.js cache also missed.',
+            }
+          );
+          
           const { data, error } = await this.supabase.rpc('get_enriched_content_list', args);
           if (error) {
             logRpcError(error, {
@@ -957,6 +973,38 @@ export class ContentService {
             logRpcError(error, {
               rpcName: 'generate_content_atom_feed',
               operation: 'ContentService.generateContentAtomFeed',
+              args: args ?? {},
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args ?? {}
+    );
+  }
+
+  /**
+   * Calls the database RPC: get_weekly_digest
+   * Returns weekly digest content (new content and trending content for a given week)
+   * Uses request-scoped caching to avoid duplicate calls within the same request
+   */
+  async getWeeklyDigest(
+    args?: Database['public']['Functions']['get_weekly_digest']['Args']
+  ) {
+    return withSmartCache(
+      'get_weekly_digest',
+      'getWeeklyDigest',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_weekly_digest', args ?? {});
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_weekly_digest',
+              operation: 'ContentService.getWeeklyDigest',
               args: args ?? {},
             });
             throw error;

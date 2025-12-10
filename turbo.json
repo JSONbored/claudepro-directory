@@ -146,11 +146,6 @@
       "cache": false,
       "passThroughEnv": ["SUPABASE_SERVICE_ROLE_KEY", "NEXT_PUBLIC_SUPABASE_URL"]
     },
-    "verify:mcpb:exec": {
-      "dependsOn": ["generators:build"],
-      "cache": false,
-      "passThroughEnv": ["SUPABASE_SERVICE_ROLE_KEY", "NEXT_PUBLIC_SUPABASE_URL"]
-    },
     "generate:readme:exec": {
       "dependsOn": ["generators:build"],
       "cache": false
@@ -190,11 +185,6 @@
     "cache:clear:exec": {
       "dependsOn": ["generators:build"],
       "cache": false
-    },
-    "webhooks:backlog:exec": {
-      "dependsOn": ["generators:build"],
-      "cache": false,
-      "passThroughEnv": ["SUPABASE_SERVICE_ROLE_KEY", "NEXT_PUBLIC_SUPABASE_URL"]
     },
     "webhooks:replay:exec": {
       "dependsOn": ["generators:build"],

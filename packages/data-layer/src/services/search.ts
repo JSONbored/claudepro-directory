@@ -250,4 +250,36 @@ export class SearchService {
       throw error;
     }
   }
+
+  /**
+   * Calls the database RPC: get_trending_searches
+   * Returns trending search queries with counts
+   * Uses request-scoped caching to avoid duplicate calls within the same request
+   */
+  async getTrendingSearches(
+    args?: Database['public']['Functions']['get_trending_searches']['Args']
+  ) {
+    return withSmartCache(
+      'get_trending_searches',
+      'getTrendingSearches',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_trending_searches', args ?? {});
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_trending_searches',
+              operation: 'SearchService.getTrendingSearches',
+              args: args ?? {},
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args ?? {}
+    );
+  }
 }

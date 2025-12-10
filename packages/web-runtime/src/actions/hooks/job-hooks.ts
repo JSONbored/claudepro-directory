@@ -1,3 +1,4 @@
+import { JobsService } from '@heyclaude/data-layer';
 import type { Database } from '@heyclaude/database-types';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
 import { normalizeError } from '../../errors';
@@ -132,16 +133,15 @@ export async function onJobUpdated(
       let jobTitle = result.title || String(input.updates['title'] || '');
       
       if (!jobTitle) {
-        // Fetch the actual title from the database
+        // Fetch the actual title from the database using JobsService
         try {
           const { createSupabaseAdminClient } = await import('../../supabase/admin.ts');
           const supabase = createSupabaseAdminClient();
-          const { data: job } = await supabase
-            .from('jobs')
-            .select('title')
-            .eq('id', result.job_id)
-            .single();
-          jobTitle = job?.title || 'Job Listing';
+          const jobsService = new JobsService(supabase);
+          const title = await jobsService.getJobTitleById({
+            p_job_id: result.job_id,
+          });
+          jobTitle = title || 'Job Listing';
         } catch {
           jobTitle = 'Job Listing';
         }

@@ -7,11 +7,11 @@
  * Runs every 30 minutes to keep trending rankings fresh.
  */
 
+import { TrendingService } from '@heyclaude/data-layer';
 import { inngest } from '../../client';
 import { createSupabaseAdminClient } from '../../../supabase/admin';
 import { logger, createWebAppContextWithId } from '../../../logging/server';
 import { normalizeError } from '@heyclaude/shared-runtime';
-import type { Database } from '@heyclaude/database-types';
 
 /**
  * Calculate trending metrics and refresh materialized view
@@ -33,6 +33,7 @@ export const calculateTrendingMetrics = inngest.createFunction(
     logger.info(logContext, 'Trending metrics calculation started');
 
     const supabase = createSupabaseAdminClient();
+    const trendingService = new TrendingService(supabase);
 
     // Step 1: Calculate time-windowed metrics from user_interactions
     const metricsResult = await step.run('calculate-time-metrics', async (): Promise<{
@@ -40,16 +41,8 @@ export const calculateTrendingMetrics = inngest.createFunction(
       created: number;
     }> => {
       try {
-        const { data, error } = await supabase.rpc('calculate_content_time_metrics');
-
-        if (error) {
-          throw error;
-        }
-
-        // Handle RPC return type: returns TABLE(updated_count, created_count)
-        // Type: { created_count: number; updated_count: number }[]
-        const result: Database['public']['Functions']['calculate_content_time_metrics']['Returns'] = 
-          (data as Database['public']['Functions']['calculate_content_time_metrics']['Returns']) ?? [];
+        // Use TrendingService for proper data layer architecture
+        const result = await trendingService.calculateContentTimeMetrics();
         
         // Function returns a single row, so take first element
         const firstRow = result[0];
@@ -85,11 +78,8 @@ export const calculateTrendingMetrics = inngest.createFunction(
     // Step 2: Refresh materialized view with updated metrics
     await step.run('refresh-materialized-view', async () => {
       try {
-        const { error } = await supabase.rpc('refresh_trending_metrics_view');
-
-        if (error) {
-          throw error;
-        }
+        // Use TrendingService for proper data layer architecture
+        await trendingService.refreshTrendingMetricsView();
 
         logger.info(logContext, 'Materialized view refreshed successfully');
       } catch (error) {

@@ -8,7 +8,7 @@
  * Runs on a cron schedule (Mondays at 9am UTC)
  */
 
-import { MiscService, NewsletterService } from '@heyclaude/data-layer';
+import { ContentService, MiscService, NewsletterService } from '@heyclaude/data-layer';
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { normalizeError } from '@heyclaude/shared-runtime';
 
@@ -86,17 +86,18 @@ export const sendWeeklyDigest = inngest.createFunction(
     const digestData = await step.run('fetch-digest-content', async (): Promise<WeeklyDigestData | null> => {
       const previousWeekStart = getPreviousWeekStart();
       
-      const { data: digest, error: digestError } = await supabase.rpc('get_weekly_digest', {
-        p_week_start: previousWeekStart,
-      });
-
-      if (digestError) {
+      try {
+        const contentService = new ContentService(supabase);
+        const digest = await contentService.getWeeklyDigest({
+          p_week_start: previousWeekStart,
+        });
+        return digest;
+      } catch (error) {
+        const normalized = normalizeError(error, 'Failed to fetch weekly digest');
         logger.warn({ ...logContext,
-          errorMessage: digestError.message, }, 'Failed to fetch weekly digest');
+          err: normalized, }, 'Failed to fetch weekly digest');
         return null;
       }
-
-      return digest;
     });
 
     if (!digestData) {

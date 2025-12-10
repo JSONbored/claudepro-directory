@@ -16,9 +16,6 @@ import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { notFound } from 'next/navigation';
 import { NextResponse } from 'next/server';
 
-// Force dynamic rendering - this route should not be statically generated
-export const dynamic = 'force-dynamic';
-
 /**
  * Dynamic templates page route
  *

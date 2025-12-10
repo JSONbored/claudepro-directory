@@ -21,13 +21,19 @@ import { cacheLife } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
- * Cached helper function to fetch sitemap URLs
- * Uses Cache Components to reduce function invocations
- 
- * @returns {Promise<unknown>} Description of return value*/
+ * Cached helper function to fetch sitemap URLs.
+ * Uses Cache Components + `cacheLife('static')` to cache `get_site_urls` results
+ * while still surfacing RPC failures (errors are not cached).
+ * 
+ * Cache configuration: Uses 'static' profile (1 day stale, 6hr revalidate, 30 days expire)
+ * defined in next.config.mjs. The cache key is based on the function signature, ensuring
+ * consistent caching across requests.
+ *
+ * @returns {Promise<unknown[]>} Cached array of site URL rows from the `get_site_urls` RPC
+ */
 async function getCachedSiteUrls() {
   'use cache';
-  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire (defined in next.config.mjs)
 
   const supabase = createSupabaseAnonClient();
   const service = new MiscService(supabase);
@@ -287,11 +293,11 @@ export async function POST(request: NextRequest) {
   const service = new MiscService(supabase);
 
   try {
-    // Database RPC returns fully formatted URLs (no client-side mapping needed)
-    // This eliminates CPU-intensive URL formatting (5-10% CPU savings)
-    let data;
+    // Database RPC returns string[] directly (SETOF text) - no client-side extraction needed
+    // This eliminates CPU-intensive map/filter operations (5-10% CPU savings)
+    let urlList: string[];
     try {
-      data = await service.getSiteUrlsFormatted({
+      urlList = await service.getSiteUrlsFormatted({
         p_site_url: SITE_URL,
         p_limit: 10_000,
       });
@@ -315,20 +321,8 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    if (!Array.isArray(data) || data.length === 0) {
+    if (!Array.isArray(urlList) || urlList.length === 0) {
       reqLogger.warn({}, 'No URLs returned, skipping IndexNow');
-      return jsonResponse({ error: 'No URLs to submit' }, 500, CORS);
-    }
-
-    // RPC returns array of { url } - extract URLs directly
-    const urlList = data
-      .map((row) => {
-        const url = getStringProperty(row, 'url');
-        return url || null;
-      })
-      .filter((url): url is string => url !== null);
-
-    if (urlList.length === 0) {
       return jsonResponse({ error: 'No URLs to submit' }, 500, CORS);
     }
 

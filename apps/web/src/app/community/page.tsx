@@ -88,7 +88,7 @@ function formatStatValue(value: null | number | undefined): string {
  * @see getHomepageData
  * @see CommunityPageContent
  */
-export default function CommunityPage() {
+export default async function CommunityPage() {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 

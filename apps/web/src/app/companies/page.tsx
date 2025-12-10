@@ -59,7 +59,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see connection from next/server
  * @see logger
  */
-export default function CompaniesPage() {
+export default async function CompaniesPage() {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 

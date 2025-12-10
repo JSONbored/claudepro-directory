@@ -289,4 +289,49 @@ export class TrendingService {
       args
     );
   }
+
+  /**
+   * Calls the database RPC: calculate_content_time_metrics
+   * Calculates time-windowed metrics for content (created/updated counts)
+   * Note: This is a mutation (updates metrics), so it does NOT use request-scoped caching
+   */
+  async calculateContentTimeMetrics(): Promise<
+    Database['public']['Functions']['calculate_content_time_metrics']['Returns']
+  > {
+    try {
+      const { data, error } = await this.supabase.rpc('calculate_content_time_metrics');
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'calculate_content_time_metrics',
+          operation: 'TrendingService.calculateContentTimeMetrics',
+        });
+        throw error;
+      }
+      return data ?? [];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
+  }
+
+  /**
+   * Calls the database RPC: refresh_trending_metrics_view
+   * Refreshes the materialized view for trending metrics
+   * Note: This is a mutation, so it does NOT use request-scoped caching
+   */
+  async refreshTrendingMetricsView(): Promise<void> {
+    try {
+      const { error } = await this.supabase.rpc('refresh_trending_metrics_view');
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'refresh_trending_metrics_view',
+          operation: 'TrendingService.refreshTrendingMetricsView',
+        });
+        throw error;
+      }
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
+  }
 }

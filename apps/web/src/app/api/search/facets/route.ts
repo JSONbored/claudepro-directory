@@ -14,14 +14,18 @@ import { type NextRequest } from 'next/server';
 const CORS = getWithAuthCorsHeaders;
 
 /**
- * Cached helper function to fetch search facets
- * Uses Cache Components to reduce function invocations
- * Database RPC returns frontend-ready data (no client-side mapping needed)
+ * Cached helper function to fetch search facets.
+ * Uses Cache Components to reduce function invocations.
+ * Database RPC returns frontend-ready data (no client-side mapping needed).
+ * 
+ * Cache configuration: Uses 'static' profile (1 day stale, 6hr revalidate, 30 days expire)
+ * defined in next.config.mjs. Search facets are public data that changes infrequently.
  
- * @returns {Promise<unknown>} Description of return value*/
+ * @returns {Promise<unknown[]>} Array of formatted search facet objects from the database RPC
+ */
 async function getCachedSearchFacetsFormatted() {
   'use cache';
-  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire (defined in next.config.mjs)
 
   const supabase = createSupabaseAnonClient();
   const service = new SearchService(supabase);

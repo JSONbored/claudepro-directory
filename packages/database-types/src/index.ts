@@ -4691,6 +4691,23 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      get_job_billing_summaries: {
+        Args: { p_job_ids: string[] }
+        Returns: {
+          billing_cycle_days: number
+          is_subscription: boolean
+          job_expiry_days: number
+          job_id: string
+          last_payment_amount: number
+          last_payment_at: string
+          last_payment_status: Database["public"]["Enums"]["payment_transaction_status"]
+          plan: Database["public"]["Enums"]["job_plan"]
+          price_cents: number
+          subscription_renews_at: string
+          subscription_status: Database["public"]["Enums"]["subscription_status"]
+          tier: Database["public"]["Enums"]["job_tier"]
+        }[]
+      }
       get_job_detail: {
         Args: { p_slug: string }
         Returns: Database["public"]["CompositeTypes"]["job_detail_result"]
@@ -4701,6 +4718,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      get_job_title_by_id: { Args: { p_job_id: string }; Returns: string }
       get_jobs_by_category: {
         Args: { p_category: Database["public"]["Enums"]["job_category"] }
         Returns: {
@@ -4836,6 +4854,20 @@ export type Database = {
       get_or_create_company: {
         Args: { p_company_name: string; p_user_id: string }
         Returns: string
+      }
+      get_payment_plan_catalog: {
+        Args: never
+        Returns: {
+          benefits: Json
+          billing_cycle_days: number
+          description: string
+          is_subscription: boolean
+          job_expiry_days: number
+          plan: Database["public"]["Enums"]["job_plan"]
+          price_cents: number
+          product_type: Database["public"]["Enums"]["payment_product_type"]
+          tier: Database["public"]["Enums"]["job_tier"]
+        }[]
       }
       get_pending_resend_syncs: {
         Args: { p_limit?: number }
@@ -5150,9 +5182,7 @@ export type Database = {
       }
       get_site_urls_formatted: {
         Args: { p_limit?: number; p_site_url: string }
-        Returns: {
-          url: string
-        }[]
+        Returns: string[]
       }
       get_sitewide_content_list: {
         Args: { p_limit?: number }
@@ -5493,6 +5523,15 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      get_webhook_event_by_svix_id: {
+        Args: {
+          p_source: Database["public"]["Enums"]["webhook_source"]
+          p_svix_id: string
+        }
+        Returns: {
+          id: string
+        }[]
+      }
       get_week_end: { Args: { week_start: string }; Returns: string }
       get_weekly_digest: {
         Args: { p_week_start?: string }
@@ -5596,6 +5635,17 @@ export type Database = {
           submission_id: string
           success: boolean
         }[]
+      }
+      insert_webhook_event: {
+        Args: {
+          p_data: Json
+          p_direction: Database["public"]["Enums"]["webhook_direction"]
+          p_received_at?: string
+          p_source: Database["public"]["Enums"]["webhook_source"]
+          p_svix_id: string
+          p_type: Database["public"]["Enums"]["webhook_event_type"]
+        }
+        Returns: string
       }
       invoke_edge_function: {
         Args: { action_header: string; function_name: string; payload?: Json }

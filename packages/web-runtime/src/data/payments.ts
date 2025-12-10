@@ -1,5 +1,6 @@
 'use server';
 
+import { JobsService } from '@heyclaude/data-layer';
 import { type Database } from '@heyclaude/database-types';
 import { cacheLife, cacheTag } from 'next/cache';
 
@@ -75,27 +76,9 @@ export async function getPaymentPlanCatalog(): Promise<PaymentPlanCatalogEntry[]
   const supabase = createSupabaseAnonClient();
 
   try {
-    const { data, error } = await supabase
-      .from('payment_plan_catalog')
-      .select(
-        [
-          'plan',
-          'tier',
-          'price_cents',
-          'is_subscription',
-          'billing_cycle_days',
-          'job_expiry_days',
-          'description',
-          'benefits',
-          'product_type',
-        ].join(',')
-      )
-      .order('plan')
-      .order('tier');
-
-    if (error) {
-      throw error;
-    }
+    // Use JobsService for proper data layer architecture
+    const jobsService = new JobsService(supabase);
+    const data = await jobsService.getPaymentPlanCatalog();
 
     // Type guard: Validate that data is an array and has expected structure
     if (!Array.isArray(data)) {
@@ -179,29 +162,11 @@ export async function getJobBillingSummaries(jobIds: string[]): Promise<JobBilli
   const supabase = await createSupabaseServerClient();
 
   try {
-    const { data, error } = await supabase
-      .from('job_billing_summary')
-      .select(
-        [
-          'job_id',
-          'plan',
-          'tier',
-          'price_cents',
-          'is_subscription',
-          'billing_cycle_days',
-          'job_expiry_days',
-          'last_payment_amount',
-          'last_payment_at',
-          'last_payment_status',
-          'subscription_status',
-          'subscription_renews_at',
-        ].join(',')
-      )
-      .in('job_id', jobIds);
-
-    if (error) {
-      throw error;
-    }
+    // Use JobsService for proper data layer architecture
+    const jobsService = new JobsService(supabase);
+    const data = await jobsService.getJobBillingSummaries({
+      p_job_ids: jobIds,
+    });
 
     // Type guard: Validate that data is an array
     if (!Array.isArray(data)) {

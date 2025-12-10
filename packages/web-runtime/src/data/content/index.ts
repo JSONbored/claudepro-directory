@@ -33,6 +33,18 @@ export async function getContentByCategory(
     module: 'data/content/index',
   });
 
+  // Log cache miss - function execution means cache miss (Next.js Cache Components skip execution on cache hit)
+  // If you don't see this log, it means cache hit (function didn't execute)
+  reqLogger.info(
+    { 
+      category, 
+      cacheStatus: 'miss',
+      cacheType: 'nextjs-cache-components',
+      note: 'Function execution = cache miss. No logs = cache hit (function skipped by Next.js)',
+    },
+    'getContentByCategory: cache miss - executing database call'
+  );
+
   try {
     // Use admin client during build for better performance, anon client at runtime
     let client;
@@ -50,8 +62,14 @@ export async function getContentByCategory(
     });
 
     reqLogger.info(
-      { category, count: result.length },
-      'getContentByCategory: fetched successfully'
+      { 
+        category, 
+        count: result.length, 
+        cacheStatus: 'miss',
+        cacheType: 'nextjs-cache-components',
+        dbCall: true,
+      },
+      'getContentByCategory: fetched successfully (cache miss - database call made)'
     );
 
     return result;

@@ -351,6 +351,8 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
                               // Remove all potentially dangerous components
                               parsed.username = '';
                               parsed.password = '';
+                              // Remove query and hash for security (defense-in-depth)
+                              // Note: This may break legitimate websites that require query params
                               parsed.search = '';
                               parsed.hash = '';
                               // Normalize hostname (remove trailing dots, lowercase)

@@ -35,7 +35,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see NavLink
  * @see generatePageMetadata
  */
-export default function CookiesPage() {
+export default async function CookiesPage() {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 

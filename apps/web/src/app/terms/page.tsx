@@ -47,7 +47,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see NavLink
  * @see APP_CONFIG
  */
-export default function TermsPage() {
+export default async function TermsPage() {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 

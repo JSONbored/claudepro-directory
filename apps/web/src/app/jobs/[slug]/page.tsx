@@ -120,8 +120,19 @@ export async function generateStaticParams() {
     const jobsResult = await getFilteredJobs({ limit: MAX_STATIC_JOBS });
     const jobs = jobsResult?.jobs ?? [];
 
-    // Return empty array if no jobs found - Suspense boundaries will handle dynamic rendering
-    // This follows Next.js best practices by avoiding placeholder patterns
+    // Cache Components requires at least one result for build-time validation
+    // If no jobs found, return a placeholder that will be handled gracefully by the page component
+    if (jobs.length === 0) {
+      reqLogger.warn(
+        {
+          section: 'data-fetch',
+        },
+        'JobPage: No jobs found in generateStaticParams, returning placeholder'
+      );
+      // Return placeholder slug - page component will handle 404 gracefully
+      return [{ slug: '__placeholder__' }];
+    }
+
     return jobs.map((job) => ({ slug: job.slug }));
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load jobs for static params');
@@ -132,8 +143,9 @@ export async function generateStaticParams() {
       },
       'JobPage: getFilteredJobs threw in generateStaticParams'
     );
-    // Return empty array on error - Suspense boundaries will handle dynamic rendering
-    return [];
+    // Cache Components requires at least one result - return placeholder on error
+    // Page component will handle 404 gracefully for placeholder slug
+    return [{ slug: '__placeholder__' }];
   }
 }
 
@@ -188,6 +200,13 @@ export default async function JobPage({ params }: PageProps) {
   }
 
   const validatedSlug = validationResult.data.slug;
+
+  // Handle placeholder slug from generateStaticParams (used when no jobs found at build time)
+  // This satisfies Cache Components requirement for at least one static param
+  if (validatedSlug === '__placeholder__') {
+    reqLogger.warn({ section: 'data-fetch' }, 'Placeholder slug detected, returning 404');
+    notFound();
+  }
 
   return (
     <Suspense fallback={<Loading />}>

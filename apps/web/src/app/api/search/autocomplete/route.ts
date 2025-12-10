@@ -17,17 +17,21 @@ import { type NextRequest } from 'next/server';
 const CORS = getWithAuthCorsHeaders;
 
 /**
- * Cached helper function to fetch search autocomplete suggestions
- * Uses Cache Components to reduce function invocations
- * Cache key includes query and limit for per-query caching
- * Database RPC returns frontend-ready data (no client-side mapping needed)
- * @param query
- * @param limit
- 
- * @returns {Promise<unknown>} Description of return value*/
+ * Cached helper function to fetch search autocomplete suggestions.
+ * Uses Cache Components to reduce function invocations.
+ * Cache key includes query and limit for per-query caching.
+ * Database RPC returns frontend-ready data (no client-side mapping needed).
+ * 
+ * Cache configuration: Uses 'quarter' profile (15min stale, 5min revalidate, 2hr expire)
+ * defined in next.config.mjs. Autocomplete suggestions are more dynamic than static content.
+ * 
+ * @param {string} query - Search query string to get autocomplete suggestions for
+ * @param {number} limit - Maximum number of suggestions to return
+ * @returns {Promise<unknown[]>} Array of formatted autocomplete suggestion objects from the database RPC
+ */
 async function getCachedSearchSuggestionsFormatted(query: string, limit: number) {
   'use cache';
-  cacheLife('quarter'); // 15min stale, 5min revalidate, 2hr expire - More dynamic than static content
+  cacheLife('quarter'); // 15min stale, 5min revalidate, 2hr expire (defined in next.config.mjs)
 
   const supabase = createSupabaseAnonClient();
   const service = new SearchService(supabase);

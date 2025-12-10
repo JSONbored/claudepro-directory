@@ -21,7 +21,7 @@ import { type NextRequest, NextResponse } from 'next/server';
  * @param category - The content category to fetch templates for
  * @returns Promise resolving to an array of template objects for the specified category
  */
-function getCachedTemplatesForAPI(category: Database['public']['Enums']['content_category']) {
+async function getCachedTemplatesForAPI(category: Database['public']['Enums']['content_category']) {
   'use cache';
   cacheTag('templates');
   cacheTag(`templates-${category}`);

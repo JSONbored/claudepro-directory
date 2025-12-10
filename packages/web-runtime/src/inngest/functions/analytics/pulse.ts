@@ -11,7 +11,7 @@ import type { Database as DatabaseGenerated, Json } from '@heyclaude/database-ty
 import { Constants } from '@heyclaude/database-types';
 import { normalizeError } from '@heyclaude/shared-runtime';
 
-import { SearchService } from '@heyclaude/data-layer';
+import { AccountService, SearchService } from '@heyclaude/data-layer';
 import { inngest } from '../../client';
 import { createSupabaseAdminClient } from '../../../supabase/admin';
 import { pgmqRead, pgmqDelete, type PgmqMessage } from '../../../supabase/pgmq-client';
@@ -230,13 +230,11 @@ export const processPulseQueue = inngest.createFunction(
             return { inserted: 0, failed: invalidMsgIds.length };
           }
 
-          const { data: result, error } = await supabase.rpc('batch_insert_user_interactions', {
+          // Use AccountService for proper data layer architecture
+          const accountService = new AccountService(supabase);
+          const result = await accountService.batchInsertUserInteractions({
             p_interactions: interactions,
           });
-
-          if (error) {
-            throw error;
-          }
 
           // Mark valid messages as processed (invalid ones already added)
           for (const msgId of validMsgIds) {
