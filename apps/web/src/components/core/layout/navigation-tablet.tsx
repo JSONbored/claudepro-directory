@@ -24,7 +24,7 @@ import {
   UnifiedBadge,
   cn,
 } from '@heyclaude/web-runtime/ui';
-import { ANIMATIONS, MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
+import { SPRING, MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
 import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -315,7 +315,7 @@ export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTable
                                   initial={{ opacity: 0, y: 4 }}
                                   animate={{ opacity: 1, y: 0 }}
                                   transition={{
-                                    ...ANIMATIONS.spring.smooth,
+                                    ...SPRING.smooth,
                                     delay: childIndex * 0.03,
                                   }}
                                 >
@@ -458,7 +458,7 @@ export function NavigationTablet({ isActive, onMobileMenuOpen }: NavigationTable
                                       initial={{ opacity: 0, y: 4 }}
                                       animate={{ opacity: 1, y: 0 }}
                                       transition={{
-                                        ...ANIMATIONS.spring.smooth,
+                                        ...SPRING.smooth,
                                         delay: childIndex * 0.03,
                                       }}
                                       >

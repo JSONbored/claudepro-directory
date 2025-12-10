@@ -24,7 +24,7 @@
  * <motion.button
  *   whileHover={MICROINTERACTIONS.button.hover}
  *   whileTap={MICROINTERACTIONS.button.tap}
- *   transition={ANIMATIONS.spring.smooth}
+ *   transition={SPRING.smooth}
  * />
  * ```
  *

@@ -11,7 +11,7 @@ import {
 } from '@heyclaude/web-runtime/data';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import type { DisplayableContent } from '@heyclaude/web-runtime';
-import { Constants } from '@heyclaude/database-types';
+import type { SearchFilters } from '@heyclaude/web-runtime/core';
 import { getCachedSearchResults } from '@/src/app/api/search/route';
 
 // Use generated database types - no custom types
@@ -71,7 +71,6 @@ const FALLBACK_SUGGESTION_LIMIT = 18;
 
 type SearchFacetAggregate = Awaited<ReturnType<typeof getSearchFacets>>;
 type SearchFacetSummary = SearchFacetAggregate['facets'][number];
-type ContentCategory = Database['public']['Enums']['content_category'];
 
 /**
  * Type guard that checks whether a string corresponds to one of the allowed sort options.
@@ -167,14 +166,7 @@ async function SearchResultsSection({
     tags: string[];
   };
   fallbackSuggestions: DisplayableContent[];
-  filters: {
-    sort?: SortType;
-    p_categories?: ContentCategory[]; // Use generated enum type
-    p_tags?: string[];
-    p_authors?: string[];
-    p_limit?: number;
-    p_offset?: number;
-  };
+  filters: SearchFilters;
   hasUserFilters: boolean;
   query: string;
   quickAuthors: string[];
@@ -366,14 +358,7 @@ async function SearchPageContent({
   const validatedSort = isValidSort(resolvedParameters.sort) ? resolvedParameters.sort : undefined;
   const categoryEnums = toContentCategoryArray(categoryStrings); // Convert to enum array
 
-  const filters: {
-    sort?: SortType;
-    p_categories?: ContentCategory[]; // Use generated enum type
-    p_tags?: string[];
-    p_authors?: string[];
-    p_limit?: number;
-    p_offset?: number;
-  } = {};
+  const filters: SearchFilters = {};
 
   if (validatedSort) {
     filters.sort = validatedSort;

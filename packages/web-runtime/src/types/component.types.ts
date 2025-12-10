@@ -8,8 +8,9 @@
 import type { Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 
-// Use generated type from database instead of legacy SearchResult
-type SearchResult = Database['public']['Functions']['search_content_optimized']['Returns'][number];
+// Use generated type from database - search_content_optimized now returns composite type
+// Extract the row type from the results array in the composite type
+type SearchResult = Database['public']['CompositeTypes']['search_content_optimized_row'];
 import type { LucideIcon } from '../icons.tsx';
 import type { ReactNode } from 'react';
 import type {

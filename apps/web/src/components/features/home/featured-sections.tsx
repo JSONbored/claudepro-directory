@@ -11,7 +11,7 @@ import {
   type UnifiedCategoryConfig,
 } from '@heyclaude/web-runtime/types/component.types';
 import { UI_CLASSES, UnifiedBadge, UnifiedCardGrid, ConfigCard, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, BlurText } from '@heyclaude/web-runtime/ui';
-import { ANIMATIONS, TEXT_ANIMATIONS, STAGGER, VIEWPORT } from '@heyclaude/web-runtime/design-system';
+import { SPRING, TEXT_ANIMATIONS, STAGGER, VIEWPORT } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -97,7 +97,7 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{
                   delay: index * STAGGER.default,
-                  ...ANIMATIONS.spring.smooth,
+                  ...SPRING.smooth,
                 }}
               >
                 {showNew || showTrending ? (
@@ -279,7 +279,7 @@ const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{
                   delay: index * STAGGER.default,
-                  ...ANIMATIONS.spring.smooth,
+                  ...SPRING.smooth,
                 }}
               >
                 <JobCard job={job} />

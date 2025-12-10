@@ -99,7 +99,7 @@ function SlidingNumberDisplay({
       data-slot="sliding-number-display"
       style={{ y }}
       className="absolute inset-0 flex items-center justify-center"
-      transition={{ ...transition, type: 'spring' }}
+      transition={transition}
     >
       {number}
     </motion.span>

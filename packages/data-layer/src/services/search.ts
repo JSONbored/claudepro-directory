@@ -17,6 +17,8 @@ export class SearchService {
   /**
    * Calls the database RPC: search_unified
    * Uses request-scoped caching to avoid duplicate calls within the same request
+   * 
+   * The database function now returns a composite type with results array and total_count
    */
   async searchUnified(args: Database['public']['Functions']['search_unified']['Args']) {
     return withSmartCache(
@@ -33,9 +35,11 @@ export class SearchService {
             });
             throw error;
           }
-          // RPC can return null if no results or on error - normalize to empty array
-          const rows = Array.isArray(data) ? data : (data === null || data === undefined ? [] : [data]);
-          return { data: rows, total_count: rows.length };
+          // Database now returns composite type: { results: search_unified_row[], total_count: bigint }
+          const result = data as Database['public']['CompositeTypes']['search_unified_result'] | null;
+          const rows = result?.results ?? [];
+          const totalCount = result?.total_count ?? rows.length;
+          return { data: rows, total_count: totalCount };
         } catch (error) {
           // Error already logged above
           throw error;
@@ -48,6 +52,8 @@ export class SearchService {
   /**
    * Calls the database RPC: search_content_optimized
    * Uses request-scoped caching to avoid duplicate calls within the same request
+   * 
+   * The database function now returns a composite type with results array and total_count
    */
   async searchContent(args: Database['public']['Functions']['search_content_optimized']['Args']) {
     return withSmartCache(
@@ -64,8 +70,11 @@ export class SearchService {
             });
             throw error;
           }
-          const rows = data;
-          return { data: rows, total_count: rows?.length ?? 0 };
+          // Database now returns composite type: { results: search_content_optimized_row[], total_count: bigint }
+          const result = data as Database['public']['CompositeTypes']['search_content_optimized_result'] | null;
+          const rows = result?.results ?? [];
+          const totalCount = result?.total_count ?? rows.length;
+          return { data: rows, total_count: totalCount };
         } catch (error) {
           // Error already logged above
           throw error;

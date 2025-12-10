@@ -182,7 +182,6 @@ function LazySectionComponent({
   // Build transition configuration
   const transition = useSpring
     ? {
-        type: 'spring' as const,
         ...spring,
         delay,
       }

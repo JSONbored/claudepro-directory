@@ -5937,33 +5937,13 @@ export type Database = {
           p_sort?: string
           p_tags?: string[]
         }
-        Returns: {
-          _featured: Json
-          author: string
-          author_highlighted: string
-          author_profile_url: string
-          bookmark_count: number
-          category: Database["public"]["Enums"]["content_category"]
-          combined_score: number
-          copyCount: number
-          created_at: string
-          date_added: string
-          description: string
-          description_highlighted: string
-          examples: Json
-          features: string[]
-          id: string
-          relevance_score: number
-          slug: string
-          source: string
-          tags: string[]
-          tags_highlighted: string[]
-          title: string
-          title_highlighted: string
-          updated_at: string
-          use_cases: string[]
-          viewCount: number
-        }[]
+        Returns: Database["public"]["CompositeTypes"]["search_content_optimized_result"]
+        SetofOptions: {
+          from: "*"
+          to: "search_content_optimized_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       search_jobs: {
         Args: { result_limit?: number; search_query: string }
@@ -6014,52 +5994,22 @@ export type Database = {
         }
       }
       search_mv: { Args: never; Returns: undefined }
-      search_unified:
-        | {
-            Args: {
-              p_entities?: string[]
-              p_limit?: number
-              p_offset?: number
-              p_query: string
-            }
-            Returns: {
-              category: string
-              created_at: string
-              description: string
-              engagement_score: number
-              entity_type: string
-              id: string
-              relevance_score: number
-              slug: string
-              tags: string[]
-              title: string
-            }[]
-          }
-        | {
-            Args: {
-              p_entities?: string[]
-              p_highlight_query?: string
-              p_limit?: number
-              p_offset?: number
-              p_query: string
-            }
-            Returns: {
-              author_highlighted: string
-              category: string
-              created_at: string
-              description: string
-              description_highlighted: string
-              engagement_score: number
-              entity_type: string
-              id: string
-              relevance_score: number
-              slug: string
-              tags: string[]
-              tags_highlighted: string[]
-              title: string
-              title_highlighted: string
-            }[]
-          }
+      search_unified: {
+        Args: {
+          p_entities?: string[]
+          p_highlight_query?: string
+          p_limit?: number
+          p_offset?: number
+          p_query: string
+        }
+        Returns: Database["public"]["CompositeTypes"]["search_unified_result"]
+        SetofOptions: {
+          from: "*"
+          to: "search_unified_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       search_users: {
         Args: { result_limit?: number; search_query: string }
         Returns: {

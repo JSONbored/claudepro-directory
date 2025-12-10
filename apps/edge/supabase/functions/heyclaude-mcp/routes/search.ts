@@ -13,9 +13,9 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { getSearchUsageHints } from '../lib/usage-hints.ts';
 import type { SearchContentInput } from '../lib/types.ts';
 
-// Use generated types from database
-type UnifiedSearchResult = Database['public']['Functions']['search_unified']['Returns'][number];
-type ContentSearchResult = Database['public']['Functions']['search_content_optimized']['Returns'][number];
+// Use generated types from database - functions now return composite types
+type UnifiedSearchResult = Database['public']['CompositeTypes']['search_unified_row'];
+type ContentSearchResult = Database['public']['CompositeTypes']['search_content_optimized_row'];
 
 /**
  * Fetches unified search results matching the given search filters and returns a text summary plus metadata.

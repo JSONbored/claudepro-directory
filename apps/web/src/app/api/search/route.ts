@@ -13,7 +13,6 @@ import {
 import {
   logger,
   createErrorResponse,
-  toLogContextValue,
 } from '@heyclaude/web-runtime/logging/server';
 import {
   createSupabaseAnonClient,
@@ -45,14 +44,15 @@ type JobExperience = DatabaseGenerated['public']['Enums']['experience_level'];
 type SearchType = 'content' | 'jobs' | 'unified';
 
 // Use generated database types directly - no custom types
-type SearchResultRow = DatabaseGenerated['public']['Functions']['search_unified']['Returns'][number] | DatabaseGenerated['public']['Functions']['search_content_optimized']['Returns'][number];
+// Functions now return composite types, so we extract the row types from the results array
+// Also include jobs table row type for filter_jobs results
+type SearchResultRow = 
+  DatabaseGenerated['public']['CompositeTypes']['search_unified_row'] | 
+  DatabaseGenerated['public']['CompositeTypes']['search_content_optimized_row'] |
+  DatabaseGenerated['public']['Tables']['jobs']['Row'];
 
-type HighlightedSearchResult = Record<string, unknown> & {
-  author_highlighted?: string;
-  description_highlighted?: string;
-  tags_highlighted?: string[];
-  title_highlighted?: string;
-};
+// HighlightedSearchResult is now just SearchResultRow since database provides highlighted fields
+type HighlightedSearchResult = SearchResultRow;
 
 /**
  * Convert string array to content_category enum array
@@ -467,28 +467,20 @@ async function executeSearch(params: {
     const jobs = result.jobs ?? [];
     const totalCount = typeof result.total_count === 'number' ? result.total_count : jobs.length;
     return {
-      results: jobs as SearchResultRow[],
+      results: jobs as SearchResultRow[], // Jobs table row is part of SearchResultRow union type
       totalCount,
     };
   }
 
   if (searchType === 'unified') {
-    // Create args object with proper type narrowing for the two search_unified overloads
-    const baseArgs = {
+    // Create args object - search_unified now has single function with optional p_highlight_query
+    const unifiedArgs: DatabaseGenerated['public']['Functions']['search_unified']['Args'] = {
       p_query: query,
       p_entities: entities && entities.length > 0 ? entities : [...DEFAULT_ENTITIES],
       p_limit: limit,
       p_offset: offset,
+      ...(query && query.trim() ? { p_highlight_query: query } : {}),
     };
-
-    // Use the overload with p_highlight_query when query is provided
-    const unifiedArgs: DatabaseGenerated['public']['Functions']['search_unified']['Args'] =
-      query && query.trim()
-        ? {
-            ...baseArgs,
-            p_highlight_query: query,
-          }
-        : baseArgs;
 
     const unifiedResult = await searchService.searchUnified(unifiedArgs);
 
@@ -553,16 +545,8 @@ function highlightResults(results: SearchResultRow[], query: string): Highlighte
   // Database RPCs always provide highlighting when p_highlight_query is passed
   // Simply pass through the database-provided highlighted fields
   // This eliminates CPU-intensive client-side string processing (20-30% CPU savings)
-  return results.map((result) => {
-    const highlighted: HighlightedSearchResult = { ...result };
-
-    // Use database-provided highlighting directly (no client-side processing)
-    // Database RPCs return: title_highlighted, description_highlighted, author_highlighted, tags_highlighted
-    // These fields are already present in the result from the RPC call
-    // We just ensure they're properly typed in the return value
-
-    return highlighted;
-  });
+  // SearchResultRow already includes highlighted fields, so we can return it directly
+  return results;
 }
 
 async function trackSearchAnalytics(

@@ -8,7 +8,7 @@
 
 import { type Database } from '@heyclaude/database-types';
 import { PRIMARY_NAVIGATION, SECONDARY_NAVIGATION } from '@heyclaude/web-runtime/config/navigation';
-import { ANIMATIONS, MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
+import { SPRING, MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
 import { Bookmark, ChevronDown, Github, MessageSquare, PlusCircle } from '@heyclaude/web-runtime/icons';
 import {
   ANIMATION_CONSTANTS,
@@ -215,7 +215,7 @@ function ConfigsDropdown({ link, getCategoryFromHref }: ConfigsDropdownProps) {
                                   initial={{ opacity: 0, y: 4 }}
                                   animate={{ opacity: 1, y: 0 }}
                                   transition={{
-                                    ...ANIMATIONS.spring.smooth,
+                                    ...SPRING.smooth,
                                     delay: (colIndex * itemsPerColumn + childIndex) * 0.02,
                                   }}
                                 >
@@ -368,7 +368,7 @@ function DiscoverResourcesContributeDropdown({ link, getCategoryFromHref }: Disc
                               initial={{ opacity: 0, y: 4 }}
                               animate={{ opacity: 1, y: 0 }}
                               transition={{
-                                ...ANIMATIONS.spring.smooth,
+                                ...SPRING.smooth,
                                 delay: childIndex * 0.03,
                               }}
                             >
@@ -531,7 +531,7 @@ function FallbackDropdown({ link, getCategoryFromHref }: FallbackDropdownProps) 
                               initial={{ opacity: 0, y: 4 }}
                               animate={{ opacity: 1, y: 0 }}
                               transition={{
-                                ...ANIMATIONS.spring.smooth,
+                                ...SPRING.smooth,
                                 delay: childIndex * 0.03,
                               }}
                             >
@@ -606,7 +606,7 @@ function FallbackDropdown({ link, getCategoryFromHref }: FallbackDropdownProps) 
                         initial={{ opacity: 0, y: 4 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{
-                          ...ANIMATIONS.spring.smooth,
+                          ...SPRING.smooth,
                           delay: childIndex * 0.03,
                         }}
                       >

@@ -399,6 +399,7 @@ function ReviewCardItem({
   onDelete,
   isEditing,
   onCancelEdit,
+  onMarkHelpful,
 }: {
   contentSlug: string;
   contentType: Database['public']['Enums']['content_category'];

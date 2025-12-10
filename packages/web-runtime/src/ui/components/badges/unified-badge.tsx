@@ -285,10 +285,7 @@ const BadgeWrapper = ({
       whileHover={{
         scale: 1.05,
         y: -1,
-        transition: {
-          ...springDefault,
-          duration: 0.2,
-        },
+        transition: springDefault,
       }}
       whileTap={{ scale: 0.95 }}
     >

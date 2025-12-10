@@ -20,7 +20,7 @@
  * ```
  */
 
-import { ANIMATIONS } from '../../../design-system/index.ts';
+import { SPRING } from '../../../design-system/index.ts';
 import { motion, useMotionValue, useSpring } from 'motion/react';
 import { useEffect, useRef } from 'react';
 
@@ -49,8 +49,8 @@ export function MagneticButton({
   // Motion values for magnetic effect
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
-  const rotateX = useSpring(0, ANIMATIONS.spring.smooth);
-  const rotateY = useSpring(0, ANIMATIONS.spring.smooth);
+  const rotateX = useSpring(0, SPRING.smooth);
+  const rotateY = useSpring(0, SPRING.smooth);
 
   // Track mouse position relative to container
   useEffect(() => {
@@ -111,7 +111,7 @@ export function MagneticButton({
         rotateY,
         willChange: 'transform',
       }}
-      transition={ANIMATIONS.spring.smooth}
+      transition={SPRING.smooth}
     >
       {children}
     </motion.div>

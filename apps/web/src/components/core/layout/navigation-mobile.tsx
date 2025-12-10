@@ -12,7 +12,7 @@ import {
   SECONDARY_NAVIGATION,
 } from '@heyclaude/web-runtime/config/navigation';
 import { getContactChannels } from '@heyclaude/web-runtime/core';
-import { ANIMATIONS, MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
+import { SPRING, MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
 import { DiscordIcon, Github, Menu } from '@heyclaude/web-runtime/icons';
 import {
   ANIMATION_CONSTANTS,
@@ -119,7 +119,7 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
             if (info.offset.y > 100) onOpenChange(false);
           }}
           whileDrag={{ scale: 1.2, backgroundColor: 'rgb(249, 115, 22)' }} // Claude orange (was hsl(var(--accent)))
-          transition={ANIMATIONS.spring.smooth}
+          transition={SPRING.smooth}
         />
 
         <SheetTitle className="sr-only">Navigation Menu</SheetTitle>

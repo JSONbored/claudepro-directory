@@ -15,11 +15,9 @@ import {
   TooltipTrigger,
   UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
-import { MICROINTERACTIONS, ANIMATIONS } from '@heyclaude/web-runtime/design-system';
-import { SCROLL_ANIMATIONS, VIEWPORT, STAGGER } from '@heyclaude/web-runtime/design-system';
+import { MICROINTERACTIONS, SPRING, SCROLL_ANIMATIONS, VIEWPORT, STAGGER } from '@heyclaude/web-runtime/design-system';
 import { getCategoryConfigs, getCategoryStatsConfig } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { motion, useScroll, useTransform, useSpring } from 'motion/react';
 import dynamicImport from 'next/dynamic';
 import Link from 'next/link';
@@ -147,7 +145,7 @@ function HomepageHeroClientComponent({
                   className="scrollbar-hide mt-4 overflow-x-auto md:hidden"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ ...ANIMATIONS.spring.smooth, delay: 0.3 }}
+                  transition={{ ...SPRING.smooth, delay: 0.3 }}
                 >
                   <div className="flex gap-2 px-4 pb-2">
                     {categoryStatsConfig.slice(0, 5).map(({ categoryId, delay }, index) => {
@@ -173,7 +171,7 @@ function HomepageHeroClientComponent({
                                 viewport={VIEWPORT.default}
                                 transition={{
                                   delay: index * STAGGER.fast,
-                                  ...ANIMATIONS.spring.smooth,
+                                  ...SPRING.smooth,
                                 }}
                                 whileHover={{
                                   scale: MICROINTERACTIONS.button.hover.scale,
@@ -239,7 +237,7 @@ function HomepageHeroClientComponent({
                               viewport={VIEWPORT.default}
                               transition={{
                                 delay: index * STAGGER.fast,
-                                ...ANIMATIONS.spring.smooth,
+                                ...SPRING.smooth,
                               }}
                               whileHover={{
                                 scale: MICROINTERACTIONS.button.hover.scale,

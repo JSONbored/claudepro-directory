@@ -12,7 +12,7 @@
 
 import { motion, AnimatePresence } from 'motion/react';
 import { useScrollDirection, cn } from '@heyclaude/web-runtime/ui';
-import { ANIMATIONS } from '@heyclaude/web-runtime/design-system';
+import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { useEffect, useState } from 'react';
 
 interface ScrollAwareTocProps {
@@ -48,7 +48,7 @@ export function ScrollAwareToc({ children, className }: ScrollAwareTocProps) {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: 20 }}
-          transition={ANIMATIONS.spring.smooth}
+          transition={SPRING.smooth}
           className={cn('lg:sticky lg:top-24', className)}
         >
           {children}

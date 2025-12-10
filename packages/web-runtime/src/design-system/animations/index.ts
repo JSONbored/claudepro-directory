@@ -17,7 +17,7 @@
  *
  * <motion.div
  *   animate={{ x: 100 }}
- *   transition={ANIMATIONS.spring.smooth}
+ *   transition={SPRING.smooth}
  * />
  * ```
  *

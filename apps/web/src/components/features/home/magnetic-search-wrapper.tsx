@@ -15,7 +15,7 @@
  */
 
 import { type UnifiedSearchProps } from '@heyclaude/web-runtime/types/component.types';
-import { ANIMATIONS, MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
+import { SPRING, MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
 import { motion, useMotionValue, useSpring, AnimatePresence } from 'motion/react';
 import dynamic from 'next/dynamic';
 import { useEffect, useRef, useState } from 'react';
@@ -58,9 +58,9 @@ export function MagneticSearchWrapper({
   // Motion values for magnetic effect
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
-  const rotateX = useSpring(0, ANIMATIONS.spring.smooth);
-  const rotateY = useSpring(0, ANIMATIONS.spring.smooth);
-  const scale = useSpring(1, ANIMATIONS.spring.default);
+  const rotateX = useSpring(0, SPRING.smooth);
+  const rotateY = useSpring(0, SPRING.smooth);
+  const scale = useSpring(1, SPRING.default);
 
   // Forward ref to context - find input and set ref
   useEffect(() => {
@@ -244,7 +244,7 @@ export function MagneticSearchWrapper({
         willChange: enableMagnetic ? 'transform' : 'auto',
       }}
       transition={{
-        ...ANIMATIONS.spring.smooth,
+        ...SPRING.smooth,
         mass: 0.5,
       }}
     >

@@ -2,7 +2,7 @@
 
 import * as CollapsiblePrimitive from '@radix-ui/react-collapsible';
 import { motion } from 'motion/react';
-import { ANIMATIONS } from '../../design-system/index.ts';
+import { SPRING } from '../../design-system/index.ts';
 import { cn } from '../utils.ts';
 
 const Collapsible = CollapsiblePrimitive.Root;
@@ -28,7 +28,7 @@ const CollapsibleContent = ({
           opacity: 0,
         }}
         transition={{
-          height: ANIMATIONS.spring.smooth,
+          height: SPRING.smooth,
           opacity: {
             duration: 0.15,
             ease: 'easeOut',
