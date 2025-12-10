@@ -45,7 +45,7 @@ import { UI_TIMEOUTS } from '../../../config/unified-config.ts';
 import type { ButtonStyleProps } from '../../../types/component.types.ts';
 import { toasts } from '../../../client/toast.ts';
 import { MICROINTERACTIONS } from '../../design-tokens/index.ts';
-import { SEMANTIC_COLORS } from '../../colors.ts';
+import { COLORS } from '../../../design-tokens/index.ts';
 import { Check, Copy } from 'lucide-react';
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
@@ -133,7 +133,7 @@ export function SimpleCopyButton({
               animate={MICROINTERACTIONS.iconTransition.animate}
               exit={MICROINTERACTIONS.iconTransition.exit}
               transition={MICROINTERACTIONS.iconTransition.transition}
-              className={SEMANTIC_COLORS.SOCIAL_COPY}
+              style={{ color: COLORS.semantic.social.copy.dark.text }}
             >
               <Check className={iconClassName} aria-hidden="true" />
             </motion.div>

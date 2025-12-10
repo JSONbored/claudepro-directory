@@ -46,7 +46,7 @@ import { getAnimationConfig } from '../../../config/static-configs.ts';
 import { Star, TrendingUp, Zap } from '../../../icons.tsx';
 import { ANIMATION_CONSTANTS, UI_CLASSES } from '../../constants.ts';
 import { cn } from '../../utils.ts';
-import { SEMANTIC_COLORS } from '../../colors.ts';
+import { COLORS } from '../../../design-tokens/index.ts';
 import { cva } from 'class-variance-authority';
 import { motion } from 'motion/react';
 import type * as React from 'react';
@@ -635,9 +635,9 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
 
     // Minimal semantic colors - just the text color, no background
     const colorStyles = {
-      view: SEMANTIC_COLORS.SOCIAL_VIEW,
-      copy: SEMANTIC_COLORS.SOCIAL_COPY,
-      bookmark: SEMANTIC_COLORS.SOCIAL_BOOKMARK,
+      view: COLORS.semantic.social.view.dark.text,
+      copy: COLORS.semantic.social.copy.dark.text,
+      bookmark: COLORS.semantic.social.bookmark.dark.text,
     };
 
     // Custom font size: text-[10px] instead of text-xs (12px) for minimal badge overlays
@@ -648,9 +648,9 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
           '-top-1 -right-1 absolute',
           'font-semibold text-[10px] tabular-nums leading-none',
           'pointer-events-none',
-          colorStyles[type],
           props.className
         )}
+        style={{ color: colorStyles[type] }}
         aria-hidden="true"
       >
         {displayCount}

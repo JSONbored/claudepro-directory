@@ -6,6 +6,7 @@
  * Architecture:
  * - Self-contained semantic values (v2 design system)
  * - Reuses SPRING from animations design system
+ * - Uses COLORS tokens for consistent brand color
  * - More pronounced than regular buttons (icon-only needs stronger feedback)
  *
  * @module web-runtime/design-system/microinteractions/icon-button
@@ -14,6 +15,7 @@
 import { type Transition } from 'motion/react';
 
 import { SPRING } from '../animations/spring.ts';
+import { COLORS } from '../../design-tokens/index.ts';
 
 /**
  * Spring transitions for icon button interactions
@@ -29,9 +31,10 @@ export const ICON_BUTTON = {
   /**
    * Active state (when icon button is toggled on)
    * Example: Bookmark button when bookmarked, Pin button when pinned
+   * Uses COLORS tokens for consistent brand color (matches var(--claude-orange))
    */
   active: {
-    color: 'var(--claude-orange)', // Brand orange
+    color: COLORS.semantic.primary.dark.base, // Brand orange - matches var(--claude-orange) = oklch(74% 0.2 35)
     scale: 1.05,
     transition: SPRING_SMOOTH,
   },

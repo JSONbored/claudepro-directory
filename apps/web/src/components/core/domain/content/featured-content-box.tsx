@@ -16,8 +16,6 @@ import {
 } from '@heyclaude/web-runtime/types/component.types';
 import {
   cn,
-  INFOBOX_COLORS,
-  INFOBOX_ICON_COLORS,
   UI_CLASSES,
   Alert,
   AlertDescription,
@@ -27,6 +25,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
+import { COLORS } from '@heyclaude/web-runtime/design-tokens';
 import { useCallback, useState } from 'react';
 
 export type AccordionVariant = AccordionProps & {
@@ -249,20 +248,49 @@ function InfoBoxComponent(props: InfoBoxVariant) {
   const { title, children, variant } = props;
 
   const currentVariant = variant || 'info';
-  const variantKey = currentVariant.toUpperCase() as keyof typeof INFOBOX_COLORS;
+
+  // Map variant to semantic color tokens
+  const colorMap = {
+    info: {
+      border: COLORS.semantic.info.dark.border,
+      background: COLORS.semantic.info.dark.background,
+      icon: COLORS.semantic.info.dark.text,
+    },
+    warning: {
+      border: COLORS.semantic.warning.dark.border,
+      background: COLORS.semantic.warning.dark.background,
+      icon: COLORS.semantic.warning.dark.text,
+    },
+    success: {
+      border: COLORS.semantic.success.dark.border,
+      background: COLORS.semantic.success.dark.background,
+      icon: COLORS.semantic.success.dark.text,
+    },
+    error: {
+      border: COLORS.semantic.error.dark.border,
+      background: COLORS.semantic.error.dark.background,
+      icon: COLORS.semantic.error.dark.text,
+    },
+  } as const;
+
+  const colors = colorMap[currentVariant];
 
   const iconMap: Record<'error' | 'info' | 'success' | 'warning', React.ReactElement> = {
-    info: <Info className={cn(UI_CLASSES.ICON_MD, INFOBOX_ICON_COLORS.INFO)} />,
-    warning: <AlertTriangle className={cn(UI_CLASSES.ICON_MD, INFOBOX_ICON_COLORS.WARNING)} />,
-    success: <CheckCircle className={cn(UI_CLASSES.ICON_MD, INFOBOX_ICON_COLORS.SUCCESS)} />,
-    error: <AlertTriangle className={cn(UI_CLASSES.ICON_MD, INFOBOX_ICON_COLORS.ERROR)} />,
+    info: <Info className={UI_CLASSES.ICON_MD} style={{ color: colorMap.info.icon }} />,
+    warning: <AlertTriangle className={UI_CLASSES.ICON_MD} style={{ color: colorMap.warning.icon }} />,
+    success: <CheckCircle className={UI_CLASSES.ICON_MD} style={{ color: colorMap.success.icon }} />,
+    error: <AlertTriangle className={UI_CLASSES.ICON_MD} style={{ color: colorMap.error.icon }} />,
   };
 
   return (
     <div
       itemScope
       itemType="https://schema.org/Note"
-      className={cn('my-6 rounded-r-lg border-l-4 p-6', INFOBOX_COLORS[variantKey])}
+      className="my-6 rounded-r-lg border-l-4 p-6"
+      style={{
+        borderLeftColor: colors.border,
+        backgroundColor: colors.background,
+      }}
     >
       {title ? (
         <div className={cn(UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2, 'mb-3')}>

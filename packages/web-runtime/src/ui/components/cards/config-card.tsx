@@ -73,7 +73,7 @@ import {
 } from '../../../icons.tsx';
 import type { ConfigCardProps, ContentItem } from '../../../types/component.types.ts';
 import { BADGE_COLORS, UI_CLASSES } from '../../constants.ts';
-import { SEMANTIC_COLORS } from '../../colors.ts';
+import { COLORS } from '../../../design-tokens/index.ts';
 import { getDisplayTitle } from '../../utils.ts';
 import { toasts } from '../../../client/toast.ts';
 import { BaseCard, type BaseCardProps } from './base-card.tsx';
@@ -667,11 +667,17 @@ export const ConfigCard = memo(
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div>
+                      <div
+                        style={{
+                          color: COLORS.semantic.featured.dark.text,
+                          borderColor: COLORS.semantic.featured.dark.border,
+                          background: `linear-gradient(to right, ${COLORS.semantic.featured.dark.gradientFrom}, ${COLORS.semantic.featured.dark.gradientTo})`,
+                        }}
+                      >
                         <UnifiedBadge
                           variant="base"
                           style="secondary"
-                          className={`fade-in slide-in-from-top-2 animate-in ${UI_CLASSES.SPACE_TIGHT} font-semibold shadow-sm transition-all duration-300 hover:from-amber-500/15 hover:to-yellow-500/15 hover:shadow-md ${SEMANTIC_COLORS.FEATURED}`}
+                          className={`fade-in slide-in-from-top-2 animate-in ${UI_CLASSES.SPACE_TIGHT} font-semibold shadow-sm transition-all duration-300 hover:from-amber-500/15 hover:to-yellow-500/15 hover:shadow-md`}
                         >
                           {featuredRank && featuredRank <= 3 ? (
                             <Award

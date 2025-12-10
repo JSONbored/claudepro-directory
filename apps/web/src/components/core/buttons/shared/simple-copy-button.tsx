@@ -3,7 +3,8 @@
 import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { type ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
-import { toasts, Button, cn, SEMANTIC_COLORS } from '@heyclaude/web-runtime/ui';
+import { toasts, Button } from '@heyclaude/web-runtime/ui';
+import { COLORS } from '@heyclaude/web-runtime/design-tokens';
 import { Check, Copy } from 'lucide-react';
 import { useState } from 'react';
 
@@ -118,7 +119,7 @@ export function SimpleCopyButton({
     >
       {showIcon ? (
         copied ? (
-          <Check className={cn(iconClassName, SEMANTIC_COLORS.SOCIAL_COPY)} aria-hidden="true" />
+          <Check className={iconClassName} style={{ color: COLORS.semantic.social.copy.dark.text }} aria-hidden="true" />
         ) : (
           <Copy className={iconClassName} aria-hidden="true" />
         )

@@ -50,3 +50,13 @@ export { LAYOUT_ANIMATIONS } from './layout/index.ts';
 // Text animations
 export * from './text/index.ts';
 export { TEXT_ANIMATIONS } from './text/index.ts';
+
+// Design Tokens (V2 - Colors, Typography, Spacing, Shadows, States, Accessibility, Responsive)
+export * from '../design-tokens/index.ts';
+export { COLORS } from '../design-tokens/index.ts';
+export { TYPOGRAPHY } from '../design-tokens/index.ts';
+export { SPACING } from '../design-tokens/index.ts';
+export { SHADOWS } from '../design-tokens/index.ts';
+export { STATES } from '../design-tokens/index.ts';
+export { ACCESSIBILITY } from '../design-tokens/index.ts';
+export { RESPONSIVE } from '../design-tokens/index.ts';

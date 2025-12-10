@@ -1,5 +1,4 @@
 export * from './ui/constants.ts';
-export * from './ui/colors.ts';
 export * from './ui/utils.ts';
 export * from './ui/components/highlighted-text.tsx';
 export * from './ui/components/navigation/nav-link.tsx';

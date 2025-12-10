@@ -41,7 +41,7 @@ import { normalizeError } from '../../../errors.ts';
 import { getAnimationConfig } from '../../../config/static-configs.ts';
 import { Bookmark, Copy as CopyIcon } from '../../../icons.tsx';
 import { POSITION_PATTERNS, UI_CLASSES } from '../../constants.ts';
-import { SEMANTIC_COLORS } from '../../colors.ts';
+import { COLORS } from '../../../design-tokens/index.ts';
 import { motion, useMotionValue, useTransform } from 'motion/react';
 import type { ReactNode } from 'react';
 import { useEffect, useMemo, useState } from 'react';
@@ -165,7 +165,14 @@ export function SwipeableCardWrapper({
         className={`pointer-events-none ${POSITION_PATTERNS.ABSOLUTE_INSET_Y_LEFT} z-0 flex w-20 items-center justify-start pl-4`}
         style={{ opacity: copyIndicatorOpacity }}
       >
-        <div className={`rounded-lg p-3 ${SEMANTIC_COLORS.SWIPE_COPY}`}>
+        <div
+          className="rounded-lg p-3"
+          style={{
+            color: COLORS.semantic.swipe.copy.dark.text,
+            borderColor: COLORS.semantic.swipe.copy.dark.border,
+            backgroundColor: COLORS.semantic.swipe.copy.dark.background,
+          }}
+        >
           <CopyIcon className={UI_CLASSES.ICON_MD} aria-hidden="true" />
         </div>
       </motion.div>
@@ -175,7 +182,14 @@ export function SwipeableCardWrapper({
         className={`pointer-events-none ${POSITION_PATTERNS.ABSOLUTE_INSET_Y_RIGHT} z-0 flex w-20 items-center justify-end pr-4`}
         style={{ opacity: bookmarkIndicatorOpacity }}
       >
-        <div className={`rounded-lg p-3 ${SEMANTIC_COLORS.SWIPE_BOOKMARK}`}>
+        <div
+          className="rounded-lg p-3"
+          style={{
+            color: COLORS.semantic.swipe.bookmark.dark.text,
+            borderColor: COLORS.semantic.swipe.bookmark.dark.border,
+            backgroundColor: COLORS.semantic.swipe.bookmark.dark.background,
+          }}
+        >
           <Bookmark className={UI_CLASSES.ICON_MD} aria-hidden="true" />
         </div>
       </motion.div>
