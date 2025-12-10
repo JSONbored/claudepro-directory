@@ -93,6 +93,12 @@ type Events = {
       action?: string;
     };
   };
+  'discord/direct': {
+    data: {
+      notificationType: string;
+      payload: Record<string, unknown>;
+    };
+  };
 
   // Image generation events
   'image-generation/process': {
@@ -207,6 +213,16 @@ type Events = {
   // Supabase database webhook events (content changes)
   'supabase/content-changed': {
     data: SupabaseContentChangedEventData;
+  };
+
+  // IndexNow events
+  'indexnow/submit': {
+    data: {
+      urlList: string[];
+      host: string;
+      key: string;
+      keyLocation: string;
+    };
   };
 };
 

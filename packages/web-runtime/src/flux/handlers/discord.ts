@@ -7,10 +7,11 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 
-import { getEnvVar, normalizeError } from '@heyclaude/shared-runtime';
+import { normalizeError } from '@heyclaude/shared-runtime';
 
 import { logger, createWebAppContextWithId } from '../../logging/server';
 import { createErrorResponse } from '../../utils/error-handler';
+import { inngest } from '../../inngest';
 
 // CORS headers for Discord routes
 const DISCORD_CORS_HEADERS = {
@@ -44,7 +45,6 @@ interface DiscordPayload {
  * Send a direct Discord notification via webhook
  */
 export async function handleDiscordDirect(request: NextRequest): Promise<NextResponse> {
-  const startTime = Date.now();
   const notificationType = request.headers.get('X-Discord-Notification-Type');
   
   const logContext = createWebAppContextWithId(
@@ -72,64 +72,44 @@ export async function handleDiscordDirect(request: NextRequest): Promise<NextRes
   try {
     const body = await request.json() as DiscordPayload;
 
-    // Get appropriate webhook URL based on notification type
-    const webhookUrl = getWebhookUrl(notificationType);
-    if (!webhookUrl) {
-      logger.warn({ ...logContext,
-        notificationType, }, 'Discord webhook URL not configured');
-      return NextResponse.json(
-        { error: `Webhook not configured for type: ${notificationType}` },
-        { status: 400, headers: DISCORD_CORS_HEADERS }
-      );
-    }
-
-    // Send to Discord with timeout
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
-
-    let response: Response;
+    // Trigger Inngest function to handle Discord notification asynchronously
+    // This eliminates blocking external API call from Vercel function (reduces CPU/bandwidth usage)
     try {
-      response = await fetch(webhookUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-        signal: controller.signal,
+      await inngest.send({
+        name: 'discord/direct',
+        data: {
+          notificationType,
+          payload: body as Record<string, unknown>,
+        },
       });
-    } catch (fetchError) {
-      clearTimeout(timeoutId);
-      if (fetchError instanceof Error && fetchError.name === 'AbortError') {
-        logger.warn({ ...logContext,
-          notificationType, }, 'Discord webhook timed out');
-        return NextResponse.json(
-          { error: 'Discord webhook timed out' },
-          { status: 504, headers: DISCORD_CORS_HEADERS }
-        );
-      }
-      throw fetchError;
-    }
-    clearTimeout(timeoutId);
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      logger.warn({ ...logContext,
-        notificationType,
-        status: response.status,
-        errorText: errorText.slice(0, 200), }, 'Discord webhook failed');
+      logger.info(
+        {
+          ...logContext,
+          notificationType,
+        },
+        'Discord notification enqueued to Inngest'
+      );
+
       return NextResponse.json(
-        { error: 'Discord webhook failed', status: response.status },
-        { status: 502, headers: DISCORD_CORS_HEADERS }
+        { success: true, notificationType, message: 'Notification enqueued' },
+        { status: 200, headers: DISCORD_CORS_HEADERS }
+      );
+    } catch (error) {
+      const normalized = normalizeError(error, 'Failed to enqueue Discord notification');
+      logger.error(
+        {
+          err: normalized,
+          ...logContext,
+          notificationType,
+        },
+        'Failed to enqueue Discord notification to Inngest'
+      );
+      return NextResponse.json(
+        { error: 'Failed to enqueue Discord notification' },
+        { status: 500, headers: DISCORD_CORS_HEADERS }
       );
     }
-
-    const durationMs = Date.now() - startTime;
-    logger.info({ ...logContext,
-      durationMs,
-      notificationType, }, 'Discord notification sent');
-
-    return NextResponse.json(
-      { success: true, notificationType },
-      { status: 200, headers: DISCORD_CORS_HEADERS }
-    );
   } catch (error) {
     const normalized = normalizeError(error, 'Discord notification failed');
     logger.error({ err: normalized, ...logContext }, 'Discord notification failed');
@@ -143,24 +123,5 @@ export async function handleDiscordDirect(request: NextRequest): Promise<NextRes
   }
 }
 
-/**
- * Get the appropriate Discord webhook URL based on notification type
- */
-function getWebhookUrl(notificationType: string): string | undefined {
-  switch (notificationType) {
-    case 'jobs':
-    case 'job':
-      return getEnvVar('DISCORD_JOBS_WEBHOOK_URL');
-    case 'submissions':
-    case 'submission':
-      return getEnvVar('DISCORD_SUBMISSIONS_WEBHOOK_URL');
-    case 'announcements':
-    case 'announcement':
-      return getEnvVar('DISCORD_ANNOUNCEMENTS_WEBHOOK_URL');
-    case 'changelog':
-      return getEnvVar('DISCORD_CHANGELOG_WEBHOOK_URL');
-    case 'general':
-    default:
-      return getEnvVar('DISCORD_GENERAL_WEBHOOK_URL');
-  }
-}
+// All Discord webhook URL resolution moved to Inngest function
+// This eliminates blocking external API calls from Vercel functions

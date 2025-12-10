@@ -187,6 +187,35 @@ export class MiscService {
   }
 
   /**
+   * Calls the database RPC: get_api_health_formatted
+   * Returns API health status in camelCase format (frontend-ready)
+   * Uses request-scoped caching to avoid duplicate calls within the same request
+   */
+  async getApiHealthFormatted() {
+    return withSmartCache(
+      'get_api_health_formatted',
+      'getApiHealthFormatted',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_api_health_formatted');
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_api_health_formatted',
+              operation: 'MiscService.getApiHealthFormatted',
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      undefined
+    );
+  }
+
+  /**
    * Calls the database RPC: get_site_urls
    * Returns array of site URLs with metadata (path, lastmod, changefreq, priority) for sitemap generation
    * Uses request-scoped caching to avoid duplicate calls within the same request
@@ -212,6 +241,38 @@ export class MiscService {
         }
       },
       undefined
+    );
+  }
+
+  /**
+   * Calls the database RPC: get_site_urls_formatted
+   * Returns array of fully formatted URLs (frontend-ready) for IndexNow submission
+   * Uses request-scoped caching to avoid duplicate calls within the same request
+   */
+  async getSiteUrlsFormatted(
+    args: Database['public']['Functions']['get_site_urls_formatted']['Args']
+  ) {
+    return withSmartCache(
+      'get_site_urls_formatted',
+      'getSiteUrlsFormatted',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_site_urls_formatted', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_site_urls_formatted',
+              operation: 'MiscService.getSiteUrlsFormatted',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
     );
   }
 

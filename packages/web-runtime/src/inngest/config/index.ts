@@ -163,6 +163,11 @@ export const RETRY_CONFIGS = {
   WEBHOOK: 2,
 
   /**
+   * External API calls - Moderate retries for network issues
+   */
+  externalApi: 3,
+
+  /**
    * Critical operations - Maximum attempts
    */
   CRITICAL: 10,

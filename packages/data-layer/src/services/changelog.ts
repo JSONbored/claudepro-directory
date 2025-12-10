@@ -125,4 +125,30 @@ export class ChangelogService {
       throw error;
     }
   }
+
+  /**
+   * Calls the database RPC: sync_changelog_entry
+   * Handles all changelog sync transformations (slug generation, section conversion) in the database
+   * Returns the upserted changelog entry
+   */
+  async syncChangelogEntry(
+    args: Database['public']['Functions']['sync_changelog_entry']['Args']
+  ) {
+    try {
+      const { data, error } = await this.supabase.rpc('sync_changelog_entry', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'sync_changelog_entry',
+          operation: 'ChangelogService.syncChangelogEntry',
+          args: args,
+        });
+        throw error;
+      }
+      // RPC returns array, return first row (or null if empty)
+      return Array.isArray(data) && data.length > 0 ? data[0] : null;
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
+  }
 }

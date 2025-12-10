@@ -134,6 +134,35 @@ export class SearchService {
   }
 
   /**
+   * Calls the database RPC: get_search_facets_formatted
+   * Returns search facets in frontend-ready format (filtered arrays, proper types)
+   * Uses request-scoped caching to avoid duplicate calls within the same request
+   */
+  async getSearchFacetsFormatted() {
+    return withSmartCache(
+      'get_search_facets_formatted',
+      'getSearchFacetsFormatted',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_search_facets_formatted');
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_search_facets_formatted',
+              operation: 'SearchService.getSearchFacetsFormatted',
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      undefined
+    );
+  }
+
+  /**
    * Calls the database RPC: get_search_suggestions_from_history
    * Returns search suggestions based on historical search queries
    * Uses request-scoped caching to avoid duplicate calls within the same request
@@ -151,6 +180,38 @@ export class SearchService {
             logRpcError(error, {
               rpcName: 'get_search_suggestions_from_history',
               operation: 'SearchService.getSearchSuggestions',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
+  }
+
+  /**
+   * Calls the database RPC: get_search_suggestions_formatted
+   * Returns search suggestions in frontend-ready format (with text, search_count, is_popular)
+   * Uses request-scoped caching to avoid duplicate calls within the same request
+   */
+  async getSearchSuggestionsFormatted(
+    args: Database['public']['Functions']['get_search_suggestions_formatted']['Args']
+  ) {
+    return withSmartCache(
+      'get_search_suggestions_formatted',
+      'getSearchSuggestionsFormatted',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_search_suggestions_formatted', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_search_suggestions_formatted',
+              operation: 'SearchService.getSearchSuggestionsFormatted',
               args: args,
             });
             throw error;

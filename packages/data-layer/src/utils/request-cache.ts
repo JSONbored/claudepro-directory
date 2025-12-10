@@ -180,11 +180,13 @@ function isMutation(rpcName: string, methodName?: string): boolean {
     lowerName.includes('remove') ||
     lowerName.includes('batch_insert') ||
     lowerName.includes('subscribe') || // subscribe_newsletter is a mutation
+    lowerName.includes('sync') || // sync operations are mutations (e.g., sync_changelog_entry)
     lowerName.includes('upsert_') ||
     rpcName.includes('_insert') ||
     rpcName.includes('_update') ||
     rpcName.includes('_delete') ||
-    rpcName.includes('_upsert')
+    rpcName.includes('_upsert') ||
+    rpcName.includes('_sync') // RPC names like sync_changelog_entry
   );
 }
 

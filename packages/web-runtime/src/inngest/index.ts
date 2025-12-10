@@ -68,6 +68,7 @@ import { processChangelogNotifyQueue } from './functions/changelog/notify';
 import { processDiscordJobsQueue } from './functions/discord/jobs';
 import { processDiscordSubmissionsQueue } from './functions/discord/submissions';
 import { processDiscordErrorsQueue } from './functions/discord/errors';
+import { sendDiscordDirect } from './functions/discord/direct';
 
 // Notification functions (Phase 3)
 import { createNotification, broadcastNotification } from './functions/notifications/create';
@@ -77,6 +78,9 @@ import { handlePolarWebhook } from './functions/polar/webhook';
 
 // Supabase database webhook functions
 import { handleSupabaseContentChanged } from './functions/supabase/content-changed';
+
+// IndexNow functions
+import { submitIndexNow } from './functions/indexnow/submit';
 
 /**
  * All Inngest functions that should be served.
@@ -114,6 +118,7 @@ export const functions = [
   processDiscordJobsQueue, // Cron: Every 30 minutes
   processDiscordSubmissionsQueue, // Cron: Every 30 minutes
   processDiscordErrorsQueue, // Cron: Every 15 minutes (webhook error alerts)
+  sendDiscordDirect, // Event: discord/direct (sends direct Discord notifications)
 
   // Notification functions (Phase 3) - COMPLETE
   createNotification, // Event: notification/create
@@ -124,6 +129,9 @@ export const functions = [
 
   // Supabase database webhook functions
   handleSupabaseContentChanged, // Event: supabase/content-changed (triggers GitHub Actions)
+
+  // IndexNow functions
+  submitIndexNow, // Event: indexnow/submit (submits URLs to IndexNow API)
 ];
 
 // Re-export individual functions for direct imports
@@ -157,6 +165,7 @@ export { processChangelogNotifyQueue };
 export { processDiscordJobsQueue };
 export { processDiscordSubmissionsQueue };
 export { processDiscordErrorsQueue };
+export { sendDiscordDirect };
 
 // Notification functions
 export { createNotification };
@@ -167,6 +176,9 @@ export { handlePolarWebhook };
 
 // Supabase database webhook functions
 export { handleSupabaseContentChanged };
+
+// IndexNow functions
+export { submitIndexNow };
 
 // Import the client for serve handler
 import { inngest } from './client';

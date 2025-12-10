@@ -3826,6 +3826,7 @@ export type Database = {
           needs_vacuum: boolean
         }[]
       }
+      convert_sections_to_changes: { Args: { p_sections: Json }; Returns: Json }
       create_job_with_payment: {
         Args: {
           p_job_data: Database["public"]["CompositeTypes"]["job_create_input"]
@@ -4012,6 +4013,10 @@ export type Database = {
       generate_changelog_llms_txt: { Args: never; Returns: string }
       generate_changelog_rss_feed: {
         Args: { p_limit?: number }
+        Returns: string
+      }
+      generate_changelog_slug: {
+        Args: { p_date: string; p_version: string }
         Returns: string
       }
       generate_command_installation: {
@@ -4242,6 +4247,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      get_api_health_formatted: { Args: never; Returns: Json }
       get_bookmark_counts_by_category: {
         Args: {
           category_filter: Database["public"]["Enums"]["content_category"]
@@ -5066,10 +5072,27 @@ export type Database = {
           tag_count: number
         }[]
       }
+      get_search_facets_formatted: {
+        Args: never
+        Returns: {
+          authors: string[]
+          category: string
+          content_count: number
+          tags: string[]
+        }[]
+      }
       get_search_suggestions: {
         Args: { p_limit?: number; p_query: string }
         Returns: {
           suggestion: string
+        }[]
+      }
+      get_search_suggestions_formatted: {
+        Args: { p_limit?: number; p_query: string }
+        Returns: {
+          is_popular: boolean
+          search_count: number
+          text: string
         }[]
       }
       get_search_suggestions_from_history: {
@@ -5123,6 +5146,12 @@ export type Database = {
           lastmod: string
           path: string
           priority: number
+        }[]
+      }
+      get_site_urls_formatted: {
+        Args: { p_limit?: number; p_site_url: string }
+        Returns: {
+          url: string
         }[]
       }
       get_sitewide_content_list: {
@@ -6132,6 +6161,31 @@ export type Database = {
           dead_tuples: number
           tablename: string
           vacuum_command: string
+        }[]
+      }
+      sync_changelog_entry: {
+        Args: {
+          p_content: string
+          p_date: string
+          p_metadata?: Json
+          p_raw_content?: string
+          p_sections?: Json
+          p_tldr?: string
+          p_version: string
+          p_what_changed?: string
+        }
+        Returns: {
+          changes: Json
+          content: string
+          created_at: string
+          date: string
+          id: string
+          raw_content: string
+          slug: string
+          tldr: string
+          updated_at: string
+          version: string
+          what_changed: string
         }[]
       }
       test_enriched_content_list_minimal: {
