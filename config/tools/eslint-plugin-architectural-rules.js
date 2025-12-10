@@ -9651,7 +9651,7 @@ export default {
         }
 
         // Public routes/actions that don't require auth
-        const publicApiRoutes = ['/api/content', '/api/company', '/api/og', '/api/feeds', '/api/sitemap', '/api/stats/social-proof', '/api/templates', '/api/search', '/api/trending', '/api/status', '/api/seo', '/api/flux'];
+        const publicApiRoutes = ['/api/content', '/api/company', '/api/og', '/api/feeds', '/api/sitemap', '/api/stats/social-proof', '/api/templates', '/api/search', '/api/trending', '/api/status', '/api/flux'];
         const publicActions = ['searchContent', 'getContent', 'getContentBySlug', 'getTemplates'];
         
         let isPublic = false;

@@ -74,11 +74,6 @@ type Events = {
   };
 
   // Changelog events
-  'changelog/process': {
-    data: {
-      source?: string;
-    };
-  };
   'changelog/notify': {
     data: {
       changelogId?: string;

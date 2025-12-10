@@ -605,6 +605,7 @@ export type Database = {
           has_troubleshooting: boolean | null
           id: string
           json_ld: Json | null
+          keywords: string[] | null
           mcpb_build_hash: string | null
           mcpb_last_built_at: string | null
           mcpb_storage_url: string | null
@@ -616,6 +617,7 @@ export type Database = {
           review_count: number
           robots_follow: boolean | null
           robots_index: boolean | null
+          seo_description: string | null
           seo_title: string | null
           slug: string
           source: Database["public"]["Enums"]["content_source"] | null
@@ -652,6 +654,7 @@ export type Database = {
           has_troubleshooting?: boolean | null
           id?: string
           json_ld?: Json | null
+          keywords?: string[] | null
           mcpb_build_hash?: string | null
           mcpb_last_built_at?: string | null
           mcpb_storage_url?: string | null
@@ -663,6 +666,7 @@ export type Database = {
           review_count?: number
           robots_follow?: boolean | null
           robots_index?: boolean | null
+          seo_description?: string | null
           seo_title?: string | null
           slug: string
           source?: Database["public"]["Enums"]["content_source"] | null
@@ -699,6 +703,7 @@ export type Database = {
           has_troubleshooting?: boolean | null
           id?: string
           json_ld?: Json | null
+          keywords?: string[] | null
           mcpb_build_hash?: string | null
           mcpb_last_built_at?: string | null
           mcpb_storage_url?: string | null
@@ -710,6 +715,7 @@ export type Database = {
           review_count?: number
           robots_follow?: boolean | null
           robots_index?: boolean | null
+          seo_description?: string | null
           seo_title?: string | null
           slug?: string
           source?: Database["public"]["Enums"]["content_source"] | null
@@ -4898,6 +4904,7 @@ export type Database = {
           has_troubleshooting: boolean | null
           id: string
           json_ld: Json | null
+          keywords: string[] | null
           mcpb_build_hash: string | null
           mcpb_last_built_at: string | null
           mcpb_storage_url: string | null
@@ -4909,6 +4916,7 @@ export type Database = {
           review_count: number
           robots_follow: boolean | null
           robots_index: boolean | null
+          seo_description: string | null
           seo_title: string | null
           slug: string
           source: Database["public"]["Enums"]["content_source"] | null
@@ -5134,6 +5142,7 @@ export type Database = {
           has_troubleshooting: boolean | null
           id: string
           json_ld: Json | null
+          keywords: string[] | null
           mcpb_build_hash: string | null
           mcpb_last_built_at: string | null
           mcpb_storage_url: string | null
@@ -5145,6 +5154,7 @@ export type Database = {
           review_count: number
           robots_follow: boolean | null
           robots_index: boolean | null
+          seo_description: string | null
           seo_title: string | null
           slug: string
           source: Database["public"]["Enums"]["content_source"] | null

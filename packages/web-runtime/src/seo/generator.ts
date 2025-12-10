@@ -1,5 +1,7 @@
 /**
- * Metadata Generator - Unified SEO API Architecture
+ * Metadata Generator - Builds Next.js Metadata from SEO data
+ * 
+ * Simplified version that directly uses getSEOMetadata() and builds Metadata objects.
  */
 
 import { getSEOMetadata } from '../data/seo/client.ts';
@@ -12,6 +14,16 @@ interface MetadataContext {
   [key: string]: unknown;
 }
 
+/**
+ * Generate page metadata for a route
+ * 
+ * Resolves route parameters, fetches SEO metadata from the database RPC,
+ * and builds a Next.js Metadata object.
+ * 
+ * @param route - Route pattern (e.g., '/changelog/:slug' or '/changelog/[slug]')
+ * @param context - Optional context with params to resolve route
+ * @returns Next.js Metadata object
+ */
 export async function generatePageMetadata(
   route: string,
   context?: MetadataContext
@@ -28,100 +40,62 @@ export async function generatePageMetadata(
     }
   }
 
-  // Fetch metadata from RPC (data layer)
+  // Fetch metadata from RPC (build-time cached)
   const seoData = await getSEOMetadata(resolvedRoute);
-
-  if (!seoData) {
-    // Fallback to default metadata if RPC returns null
-    const canonicalUrl = buildCanonicalUrl(resolvedRoute);
-    const ogImageUrl = generateOGImageUrl(resolvedRoute);
-    return {
-      title: APP_CONFIG.name,
-      description: APP_CONFIG.description,
-      metadataBase: new URL(APP_CONFIG.url),
-      alternates: { canonical: canonicalUrl },
-      openGraph: {
-        type: 'website',
-        title: APP_CONFIG.name,
-        description: APP_CONFIG.description,
-        url: canonicalUrl,
-        siteName: APP_CONFIG.name,
-        locale: 'en_US',
-        images: [
-          {
-            url: ogImageUrl,
-            width: OG_IMAGE_DIMENSIONS.width,
-            height: OG_IMAGE_DIMENSIONS.height,
-            alt: APP_CONFIG.name,
-          },
-        ],
-      },
-      twitter: {
-        card: 'summary',
-        title: APP_CONFIG.name,
-        description: APP_CONFIG.description,
-        images: [ogImageUrl],
-        creator: '@JSONbored',
-        site: '@JSONbored',
-      },
-    };
-  }
-
-  // getSEOMetadata() now always returns the unwrapped metadata object (no discriminated union)
-  // The function handles the unified structure internally
-  const config = seoData;
-
-  if (!config || typeof config !== 'object') {
-    // Fallback if structure is invalid
-    const canonicalUrl = buildCanonicalUrl(resolvedRoute);
-    const ogImageUrl = generateOGImageUrl(resolvedRoute);
-    return {
-      title: APP_CONFIG.name,
-      description: APP_CONFIG.description,
-      metadataBase: new URL(APP_CONFIG.url),
-      alternates: { canonical: canonicalUrl },
-      openGraph: {
-        type: 'website',
-        title: APP_CONFIG.name,
-        description: APP_CONFIG.description,
-        url: canonicalUrl,
-        siteName: APP_CONFIG.name,
-        locale: 'en_US',
-        images: [
-          {
-            url: ogImageUrl,
-            width: OG_IMAGE_DIMENSIONS.width,
-            height: OG_IMAGE_DIMENSIONS.height,
-            alt: APP_CONFIG.name,
-          },
-        ],
-      },
-      twitter: {
-        card: 'summary',
-        title: APP_CONFIG.name,
-        description: APP_CONFIG.description,
-        images: [ogImageUrl],
-        creator: '@JSONbored',
-        site: '@JSONbored',
-      },
-    };
-  }
 
   const canonicalUrl = buildCanonicalUrl(resolvedRoute);
   const ogImageUrl = generateOGImageUrl(resolvedRoute);
 
+  // Fallback to default metadata if RPC returns null
+  if (!seoData) {
+    return {
+      title: APP_CONFIG.name,
+      description: APP_CONFIG.description,
+      metadataBase: new URL(APP_CONFIG.url),
+      alternates: { canonical: canonicalUrl },
+      openGraph: {
+        type: 'website',
+        title: APP_CONFIG.name,
+        description: APP_CONFIG.description,
+        url: canonicalUrl,
+        siteName: APP_CONFIG.name,
+        locale: 'en_US',
+        images: [
+          {
+            url: ogImageUrl,
+            width: OG_IMAGE_DIMENSIONS.width,
+            height: OG_IMAGE_DIMENSIONS.height,
+            alt: APP_CONFIG.name,
+          },
+        ],
+      },
+      twitter: {
+        card: 'summary',
+        title: APP_CONFIG.name,
+        description: APP_CONFIG.description,
+        images: [ogImageUrl],
+        creator: '@JSONbored',
+        site: '@JSONbored',
+      },
+    };
+  }
+
+  // Build Metadata from SEO data
   const metadata: Metadata = {
-    title: config.title,
-    description: config.description,
-    keywords: config.keywords,
-    robots: config.robots,
+    title: seoData.title,
+    description: seoData.description,
+    keywords: seoData.keywords,
+    robots: {
+      index: seoData.robots.index,
+      follow: seoData.robots.follow,
+    },
     alternates: {
       canonical: canonicalUrl,
     },
     openGraph: {
-      type: config.openGraphType === 'profile' ? 'profile' : 'website',
-      title: config.title,
-      description: config.description,
+      type: seoData.openGraphType === 'profile' ? 'profile' : 'website',
+      title: seoData.title,
+      description: seoData.description,
       url: canonicalUrl,
       siteName: APP_CONFIG.name,
       locale: 'en_US',
@@ -130,31 +104,19 @@ export async function generatePageMetadata(
           url: ogImageUrl,
           width: OG_IMAGE_DIMENSIONS.width,
           height: OG_IMAGE_DIMENSIONS.height,
-          alt: config.title,
+          alt: seoData.title,
         },
       ],
     },
     twitter: {
       card: 'summary_large_image',
-      title: config.title,
-      description: config.description,
+      title: seoData.title,
+      description: seoData.description,
       images: [ogImageUrl],
       creator: '@JSONbored',
       site: '@JSONbored',
     },
   };
-
-  // Removed development logging to avoid Date.now() violations in Cache Components
-  // Pino internally uses Date.now() for timestamps, which violates Next.js Cache Components rules
-  // when called before accessing request data (cookies(), headers(), connection(), etc.)
-  // Callers should call connection() before generatePageMetadata if they need logging,
-  // but we don't log here to keep generatePageMetadata compatible with cached contexts
-  // if (isDevelopment) {
-  //   logger.info(`✅ Metadata generated for ${resolvedRoute}`, {
-  //     titleLength: metadata.title ? String(metadata.title).length : 0,
-  //     descLength: metadata.description?.length || 0,
-  //   });
-  // }
 
   return metadata;
 }
