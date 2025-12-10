@@ -29,16 +29,8 @@ async function getCachedSitewideContent() {
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
 
   const supabase = createSupabaseAnonClient();
-  const { data, error } = await supabase
-    .from('content')
-    .select(
-      'slug, title, category, description, tags, author, date_added, view_count, bookmark_count'
-    )
-    .order('date_added', { ascending: false })
-    .limit(5000);
-
-  if (error) throw error;
-  return data;
+  const service = new ContentService(supabase);
+  return await service.getSitewideContentList({ p_limit: 5000 });
 }
 
 /**
@@ -107,7 +99,7 @@ export async function GET(request: NextRequest) {
         status: 200,
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
-          'X-Generated-By': 'supabase.from(content).select()',
+          'X-Generated-By': 'supabase.rpc.get_sitewide_content_list',
           ...buildSecurityHeaders(),
           ...CORS,
           // Hyper-optimized caching: 7 days TTL, 14 days stale (matches content_export preset)

@@ -68,6 +68,29 @@ export class ContentService {
   }
 
   /**
+   * Calls the database RPC: get_sitewide_content_list
+   */
+  async getSitewideContentList(
+    args?: Database['public']['Functions']['get_sitewide_content_list']['Args']
+  ) {
+    try {
+      const { data, error } = await this.supabase.rpc('get_sitewide_content_list', args ?? {});
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_sitewide_content_list',
+          operation: 'ContentService.getSitewideContentList',
+          args: args ?? {},
+        });
+        throw error;
+      }
+      return data;
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
+  }
+
+  /**
    * Calls the database RPC: generate_sitewide_llms_txt
    */
   async getSitewideLlmsTxt() {
@@ -200,6 +223,96 @@ export class ContentService {
         logRpcError(error, {
           rpcName: 'get_api_content_full',
           operation: 'ContentService.getApiContentFull',
+          args: args,
+        });
+        throw error;
+      }
+      return data;
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
+  }
+
+  /**
+   * Calls the database RPC: generate_markdown_export
+   */
+  async generateMarkdownExport(
+    args: Database['public']['Functions']['generate_markdown_export']['Args']
+  ) {
+    try {
+      const { data, error } = await this.supabase.rpc('generate_markdown_export', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'generate_markdown_export',
+          operation: 'ContentService.generateMarkdownExport',
+          args: args,
+        });
+        throw error;
+      }
+      return data;
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
+  }
+
+  /**
+   * Calls the database RPC: generate_item_llms_txt
+   */
+  async getItemLlmsTxt(args: Database['public']['Functions']['generate_item_llms_txt']['Args']) {
+    try {
+      const { data, error } = await this.supabase.rpc('generate_item_llms_txt', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'generate_item_llms_txt',
+          operation: 'ContentService.getItemLlmsTxt',
+          args: args,
+        });
+        throw error;
+      }
+      return data;
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
+  }
+
+  /**
+   * Calls the database RPC: get_skill_storage_path
+   */
+  async getSkillStoragePath(
+    args: Database['public']['Functions']['get_skill_storage_path']['Args']
+  ) {
+    try {
+      const { data, error } = await this.supabase.rpc('get_skill_storage_path', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_skill_storage_path',
+          operation: 'ContentService.getSkillStoragePath',
+          args: args,
+        });
+        throw error;
+      }
+      return data;
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
+  }
+
+  /**
+   * Calls the database RPC: get_mcpb_storage_path
+   */
+  async getMcpbStoragePath(
+    args: Database['public']['Functions']['get_mcpb_storage_path']['Args']
+  ) {
+    try {
+      const { data, error } = await this.supabase.rpc('get_mcpb_storage_path', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_mcpb_storage_path',
+          operation: 'ContentService.getMcpbStoragePath',
           args: args,
         });
         throw error;

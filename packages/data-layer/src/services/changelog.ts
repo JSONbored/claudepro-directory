@@ -75,4 +75,29 @@ export class ChangelogService {
       throw error;
     }
   }
+
+  /**
+   * Calls the database RPC: upsert_changelog_entry
+   * Atomically checks if entry exists by slug and inserts if not, returns existing entry if found
+   */
+  async upsertChangelogEntry(
+    args: Database['public']['Functions']['upsert_changelog_entry']['Args']
+  ) {
+    try {
+      const { data, error } = await this.supabase.rpc('upsert_changelog_entry', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'upsert_changelog_entry',
+          operation: 'ChangelogService.upsertChangelogEntry',
+          args: args,
+        });
+        throw error;
+      }
+      // RPC returns array, return first row (or null if empty)
+      return Array.isArray(data) && data.length > 0 ? data[0] : null;
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
+  }
 }

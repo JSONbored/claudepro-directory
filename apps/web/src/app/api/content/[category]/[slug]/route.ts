@@ -5,6 +5,7 @@
  */
 
 import 'server-only';
+import { ContentService } from '@heyclaude/data-layer';
 import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { APP_CONFIG, buildSecurityHeaders } from '@heyclaude/shared-runtime';
@@ -35,15 +36,14 @@ async function getCachedContentFull(
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
 
   const supabase = createSupabaseAnonClient();
+  const service = new ContentService(supabase);
   const rpcArgs = {
     p_category: category,
     p_slug: slug,
     p_base_url: SITE_URL,
   } satisfies DatabaseGenerated['public']['Functions']['get_api_content_full']['Args'];
 
-  const { data, error } = await supabase.rpc('get_api_content_full', rpcArgs);
-  if (error) throw error;
-  return data;
+  return await service.getApiContentFull(rpcArgs);
 }
 
 const CORS_JSON = getOnlyCorsHeaders;
@@ -283,6 +283,7 @@ async function handleMarkdownFormat(
   const includeFooter = url.searchParams.get('includeFooter') === 'true';
 
   const supabase = createSupabaseAnonClient();
+  const service = new ContentService(supabase);
   const rpcArgs = {
     p_category: category,
     p_slug: slug,
@@ -290,19 +291,20 @@ async function handleMarkdownFormat(
     p_include_footer: includeFooter,
   } satisfies DatabaseGenerated['public']['Functions']['generate_markdown_export']['Args'];
 
-  const { data, error } = await supabase.rpc('generate_markdown_export', rpcArgs);
-
-  if (error) {
+  let data;
+  try {
+    data = await service.generateMarkdownExport(rpcArgs);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Content Markdown RPC error');
     reqLogger.error(
       {
-        err: normalizeError(error),
+        err: normalized,
         rpcName: 'generate_markdown_export',
         category,
         slug,
       },
       'Content Markdown RPC error'
     );
-    const normalized = normalizeError(error, 'Content Markdown RPC error');
     return createErrorResponse(normalized, {
       route: '/api/content/[category]/[slug]',
       operation: 'ContentRecordAPI',
@@ -314,6 +316,7 @@ async function handleMarkdownFormat(
       },
     });
   }
+
 
   const success = getProperty(data, 'success');
   if (typeof success !== 'boolean' || !success) {
@@ -435,24 +438,26 @@ async function handleItemLlmsTxt(
   reqLogger: ReturnType<typeof logger.child>
 ) {
   const supabase = createSupabaseAnonClient();
+  const service = new ContentService(supabase);
   const rpcArgs = {
     p_category: category,
     p_slug: slug,
   } satisfies DatabaseGenerated['public']['Functions']['generate_item_llms_txt']['Args'];
 
-  const { data, error } = await supabase.rpc('generate_item_llms_txt', rpcArgs);
-
-  if (error) {
+  let data;
+  try {
+    data = await service.getItemLlmsTxt(rpcArgs);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Content LLMs.txt RPC error');
     reqLogger.error(
       {
-        err: normalizeError(error),
+        err: normalized,
         rpcName: 'generate_item_llms_txt',
         category,
         slug,
       },
       'Content LLMs.txt RPC error'
     );
-    const normalized = normalizeError(error, 'Content LLMs.txt RPC error');
     return createErrorResponse(normalized, {
       route: '/api/content/[category]/[slug]',
       operation: 'ContentRecordAPI',
@@ -497,11 +502,18 @@ async function handleItemLlmsTxt(
         );
         // Convert JSON to a readable format (fallback)
         formatted = JSON.stringify(parsed, null, 2);
-      } catch {
-        // Not valid JSON, treat as plain text
-
-        const normalized = normalizeError(error, 'Operation failed');
-        logger.error({ err: normalized }, 'Operation failed');
+      } catch (error) {
+        // Not valid JSON, treat as plain text (graceful fallback)
+        const normalized = normalizeError(error, 'JSON parse failed, treating as plain text');
+        reqLogger.debug(
+          {
+            err: normalized,
+            category,
+            slug,
+            dataType: 'string',
+          },
+          'Content LLMs.txt: Data looked like JSON but parse failed, treating as plain text'
+        );
         formatted = data;
       }
     } else {
@@ -559,24 +571,27 @@ async function handleStorageFormat(
   reqLogger.info({ category, slug, metadataMode }, 'Handling storage format');
 
   const supabase = createSupabaseAnonClient();
+  const service = new ContentService(supabase);
 
   // Support both 'skills' and 'mcp' categories for storage format
   if (category === 'skills') {
     const rpcArgs = {
       p_slug: slug,
     } satisfies DatabaseGenerated['public']['Functions']['get_skill_storage_path']['Args'];
-    const { data, error } = await supabase.rpc('get_skill_storage_path', rpcArgs);
-
-    if (error) {
+    
+    let data;
+    try {
+      data = await service.getSkillStoragePath(rpcArgs);
+    } catch (error) {
+      const normalized = normalizeError(error, 'Skill storage path RPC error');
       reqLogger.error(
         {
-          err: normalizeError(error),
+          err: normalized,
           rpcName: 'get_skill_storage_path',
           slug,
         },
         'Skill storage path RPC error'
       );
-      const normalized = normalizeError(error, 'Skill storage path RPC error');
       return createErrorResponse(normalized, {
         route: '/api/content/[category]/[slug]',
         operation: 'ContentRecordAPI',
@@ -642,18 +657,20 @@ async function handleStorageFormat(
     const rpcArgs = {
       p_slug: slug,
     } satisfies DatabaseGenerated['public']['Functions']['get_mcpb_storage_path']['Args'];
-    const { data, error } = await supabase.rpc('get_mcpb_storage_path', rpcArgs);
-
-    if (error) {
+    
+    let data;
+    try {
+      data = await service.getMcpbStoragePath(rpcArgs);
+    } catch (error) {
+      const normalized = normalizeError(error, 'MCPB storage path RPC error');
       reqLogger.error(
         {
-          err: normalizeError(error),
+          err: normalized,
           rpcName: 'get_mcpb_storage_path',
           slug,
         },
         'MCPB storage path RPC error'
       );
-      const normalized = normalizeError(error, 'MCPB storage path RPC error');
       return createErrorResponse(normalized, {
         route: '/api/content/[category]/[slug]',
         operation: 'ContentRecordAPI',

@@ -5057,6 +5057,20 @@ export type Database = {
           priority: number
         }[]
       }
+      get_sitewide_content_list: {
+        Args: { p_limit?: number }
+        Returns: {
+          author: string
+          bookmark_count: number
+          category: Database["public"]["Enums"]["content_category"]
+          date_added: string
+          description: string
+          slug: string
+          tags: string[]
+          title: string
+          view_count: number
+        }[]
+      }
       get_skill_storage_path: {
         Args: { p_slug: string }
         Returns: {
@@ -6152,16 +6166,16 @@ export type Database = {
       }
       upsert_changelog_entry: {
         Args: {
-          p_canonical_url: string
+          p_canonical_url?: string
           p_changes: Json
           p_content: string
           p_date: string
-          p_keywords: string[]
+          p_keywords?: string[]
           p_metadata?: Json
-          p_og_image_url: string
+          p_og_image_url?: string
           p_raw_content: string
-          p_seo_description: string
-          p_seo_title: string
+          p_seo_description?: string
+          p_seo_title?: string
           p_slug: string
           p_tldr: string
           p_version: string
