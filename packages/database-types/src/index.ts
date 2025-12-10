@@ -4881,6 +4881,23 @@ export type Database = {
           view_count: number
         }[]
       }
+      get_popular_content_formatted: {
+        Args: {
+          p_category?: Database["public"]["Enums"]["content_category"]
+          p_limit?: number
+        }
+        Returns: {
+          author: string
+          category: Database["public"]["Enums"]["content_category"]
+          copy_count: number
+          description: string
+          popularity: number
+          slug: string
+          tags: string[]
+          title: string
+          view_count: number
+        }[]
+      }
       get_quiz_configuration: {
         Args: never
         Returns: Database["public"]["CompositeTypes"]["quiz_configuration_question"][]
@@ -4948,6 +4965,22 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      get_recent_content_formatted: {
+        Args: {
+          p_category?: Database["public"]["Enums"]["content_category"]
+          p_days?: number
+          p_limit?: number
+        }
+        Returns: {
+          author: string
+          category: Database["public"]["Enums"]["content_category"]
+          created_at: string
+          description: string
+          slug: string
+          tags: string[]
+          title: string
+        }[]
       }
       get_recommendations: {
         Args: {
@@ -5044,6 +5077,29 @@ export type Database = {
         Returns: {
           search_count: number
           suggestion: string
+        }[]
+      }
+      get_sidebar_recent_formatted: {
+        Args: {
+          p_category?: Database["public"]["Enums"]["content_category"]
+          p_days?: number
+          p_limit?: number
+        }
+        Returns: {
+          date: string
+          slug: string
+          title: string
+        }[]
+      }
+      get_sidebar_trending_formatted: {
+        Args: {
+          p_category?: Database["public"]["Enums"]["content_category"]
+          p_limit?: number
+        }
+        Returns: {
+          slug: string
+          title: string
+          views: string
         }[]
       }
       get_similar_content: {
@@ -5200,6 +5256,27 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      get_trending_metrics_formatted: {
+        Args: {
+          p_category?: Database["public"]["Enums"]["content_category"]
+          p_limit?: number
+        }
+        Returns: {
+          author: string
+          bookmark_count: number
+          category: Database["public"]["Enums"]["content_category"]
+          copy_count: number
+          description: string
+          engagement_score: number
+          freshness_score: number
+          popularity: number
+          slug: string
+          source: string
+          tags: string[]
+          title: string
+          view_count: number
+        }[]
       }
       get_trending_metrics_with_content: {
         Args: {
