@@ -1,7 +1,7 @@
 'use client';
 
 import { usePulse } from '@heyclaude/web-runtime/hooks';
-import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
+import { logClientWarn, logClientInfo, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 
 import { PinboardDrawer } from '@/src/components/features/navigation/pinboard-drawer';
@@ -34,9 +34,44 @@ export function PinboardDrawerProvider({ children }: { children: React.ReactNode
   );
 
   const openDrawer = useCallback(() => {
-    setIsOpen(true);
-    trackDrawerEvent('open');
-  }, [trackDrawerEvent]);
+    try {
+      logClientInfo(
+        '[PinboardDrawerProvider] Opening drawer - BEFORE setState',
+        'PinboardDrawerProvider.openDrawer.before',
+        {
+          component: 'PinboardDrawerProvider',
+          action: 'open-drawer-before',
+          category: 'navigation',
+          currentState: isOpen,
+          willSetTo: true,
+        }
+      );
+      setIsOpen(true);
+      logClientInfo(
+        '[PinboardDrawerProvider] Opening drawer - AFTER setState',
+        'PinboardDrawerProvider.openDrawer.after',
+        {
+          component: 'PinboardDrawerProvider',
+          action: 'open-drawer-after',
+          category: 'navigation',
+          stateSetTo: true,
+        }
+      );
+      trackDrawerEvent('open');
+    } catch (error) {
+      const normalized = normalizeError(error, 'Failed to open pinboard drawer');
+      logClientWarn(
+        '[Navigation] Failed to open pinboard drawer',
+        normalized,
+        'pinboard.openDrawer.error',
+        {
+          component: 'PinboardDrawerProvider',
+          action: 'openDrawer',
+          category: 'navigation',
+        }
+      );
+    }
+  }, [trackDrawerEvent, isOpen]);
   const closeDrawer = useCallback(() => {
     setIsOpen(false);
     trackDrawerEvent('close');

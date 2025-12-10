@@ -56,6 +56,9 @@ import {
 // Analytics functions (Phase 3)
 import { processPulseQueue } from './functions/analytics/pulse';
 
+// Trending functions (Phase 3)
+import { calculateTrendingMetrics } from './functions/trending/calculate-metrics';
+
 // Changelog functions (Phase 3)
 // Note: processChangelogQueue removed - replaced by /api/changelog/sync endpoint
 // (Vercel free tier doesn't support webhooks, so we use GitHub Actions → API endpoint instead)
@@ -100,6 +103,9 @@ export const functions = [
   // Analytics functions (Phase 3) - COMPLETE
   processPulseQueue, // Cron: Every 30 minutes
 
+  // Trending functions (Phase 3) - COMPLETE
+  calculateTrendingMetrics, // Cron: Every 30 minutes (calculates time-windowed metrics and refreshes materialized view)
+
   // Changelog functions (Phase 3) - COMPLETE
   // processChangelogQueue removed - replaced by /api/changelog/sync endpoint
   processChangelogNotifyQueue, // Cron: Every 30 minutes (processes notifications from API endpoint)
@@ -139,6 +145,9 @@ export { jobPostingDripCampaign };
 
 // Analytics functions
 export { processPulseQueue };
+
+// Trending functions
+export { calculateTrendingMetrics };
 
 // Changelog functions
 // processChangelogQueue removed - replaced by /api/changelog/sync endpoint

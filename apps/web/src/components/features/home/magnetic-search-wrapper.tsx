@@ -15,7 +15,8 @@
  */
 
 import { type UnifiedSearchProps } from '@heyclaude/web-runtime/types/component.types';
-import { motion, useMotionValue, useSpring } from 'motion/react';
+import { ANIMATIONS, MICROINTERACTIONS } from '@heyclaude/web-runtime/ui';
+import { motion, useMotionValue, useSpring, AnimatePresence } from 'motion/react';
 import dynamic from 'next/dynamic';
 import { useEffect, useRef, useState } from 'react';
 
@@ -52,13 +53,14 @@ export function MagneticSearchWrapper({
   const containerRef = useRef<HTMLDivElement>(null);
   const { searchRef } = useHeroSearchConnection();
   const [isFocused, setIsFocused] = useState(false);
+  const [hasValue, setHasValue] = useState(false);
 
   // Motion values for magnetic effect
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
-  const rotateX = useSpring(0, { stiffness: 300, damping: 30 });
-  const rotateY = useSpring(0, { stiffness: 300, damping: 30 });
-  const scale = useSpring(1, { stiffness: 400, damping: 25 });
+  const rotateX = useSpring(0, ANIMATIONS.spring.smooth);
+  const rotateY = useSpring(0, ANIMATIONS.spring.smooth);
+  const scale = useSpring(1, ANIMATIONS.spring.default);
 
   // Forward ref to context - find input and set ref
   useEffect(() => {
@@ -163,12 +165,22 @@ export function MagneticSearchWrapper({
         onFocusChange?.(false);
       };
 
+      const handleInput = () => {
+        const inputValue = (input as HTMLInputElement).value;
+        setHasValue(inputValue.length > 0);
+      };
+
       input.addEventListener('focus', handleFocus);
       input.addEventListener('blur', handleBlur);
+      input.addEventListener('input', handleInput);
+
+      // Set initial value state
+      setHasValue((input as HTMLInputElement).value.length > 0);
 
       cleanupFn = () => {
         input.removeEventListener('focus', handleFocus);
         input.removeEventListener('blur', handleBlur);
+        input.removeEventListener('input', handleInput);
       };
 
       return true;
@@ -217,24 +229,22 @@ export function MagneticSearchWrapper({
         cleanupFn();
       }
     };
-  }, [enableExpansion, enableMagnetic, onFocusChange, scale, rotateX, rotateY]);
+  }, [enableExpansion, enableMagnetic, onFocusChange, scale, rotateX, rotateY, isFocused, hasValue]);
 
   return (
     <motion.div
       ref={containerRef}
       className="relative"
       style={{
+        perspective: '1000px',
+        transformStyle: 'preserve-3d',
         scale,
         rotateX: enableMagnetic ? rotateX : 0,
         rotateY: enableMagnetic ? rotateY : 0,
-        transformStyle: 'preserve-3d',
-        perspective: '1000px',
         willChange: enableMagnetic ? 'transform' : 'auto',
       }}
       transition={{
-        type: 'spring',
-        stiffness: 300,
-        damping: 30,
+        ...ANIMATIONS.spring.smooth,
         mass: 0.5,
       }}
     >
@@ -242,22 +252,66 @@ export function MagneticSearchWrapper({
       <motion.div
         className="relative rounded-xl border backdrop-blur-xl"
         animate={{
+          scale: isFocused ? MICROINTERACTIONS.search.focus.scale : 1,
           borderColor: isFocused
-            ? 'rgba(249, 115, 22, 0.6)' // HeyClaude orange when active
+            ? MICROINTERACTIONS.search.focus.borderColor
             : 'rgba(255, 255, 255, 0.15)',
           backgroundColor: isFocused
             ? 'rgba(0, 0, 0, 0.4)' // Darker when focused
             : 'rgba(0, 0, 0, 0.25)', // Darker default for better glassmorphism
           boxShadow: isFocused
-            ? '0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(249, 115, 22, 0.4)'
+            ? `${MICROINTERACTIONS.search.focus.boxShadow}, 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(249, 115, 22, 0.4)`
             : '0 4px 16px rgba(0, 0, 0, 0.15)',
         }}
-        transition={{
-          type: 'spring',
-          stiffness: 400,
-          damping: 30,
-        }}
+        transition={MICROINTERACTIONS.search.focus.transition}
       >
+        {/* Focus glow effect */}
+        <AnimatePresence>
+          {isFocused && (
+            <motion.div
+              className="absolute -inset-1 -z-10 rounded-xl bg-gradient-to-r from-accent/30 via-accent/20 to-transparent blur-xl"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={MICROINTERACTIONS.search.transition}
+            />
+          )}
+        </AnimatePresence>
+
+        {/* Particle effects when typing */}
+        <AnimatePresence>
+          {isFocused && hasValue && (
+            <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-xl">
+              {[...Array(5)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="absolute rounded-full bg-accent/20"
+                  style={{
+                    width: 4,
+                    height: 4,
+                    left: '50%',
+                    top: '50%',
+                  }}
+                  initial={{ opacity: 0, scale: 0, x: 0, y: 0 }}
+                  animate={{
+                    opacity: [0, 1, 0],
+                    scale: [0, 1, 0],
+                    x: Math.cos((i * Math.PI * 2) / 5) * (30 + Math.random() * 20),
+                    y: Math.sin((i * Math.PI * 2) / 5) * (30 + Math.random() * 20),
+                  }}
+                  exit={{ opacity: 0, scale: 0 }}
+                  transition={{
+                    duration: 1.2,
+                    repeat: Infinity,
+                    delay: i * 0.15,
+                    ease: 'easeOut',
+                  }}
+                />
+              ))}
+            </div>
+          )}
+        </AnimatePresence>
+
         {/* Search component */}
         <div className={className}>
           <UnifiedSearch {...searchProps} />

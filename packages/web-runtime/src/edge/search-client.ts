@@ -8,6 +8,40 @@ type ContentSearchResult =
   Database['public']['Functions']['search_content_optimized']['Returns'][number];
 type UnifiedSearchResult = Database['public']['Functions']['search_unified']['Returns'][number];
 
+/**
+ * Type guard for UnifiedSearchResult
+ * Validates that an item matches the common structure of both variants
+ * (with or without highlighted fields)
+ */
+function isUnifiedSearchResult(
+  item: unknown
+): item is UnifiedSearchResult {
+  return (
+    item !== null &&
+    typeof item === 'object' &&
+    'id' in item &&
+    typeof (item as { id: unknown }).id === 'string' &&
+    'entity_type' in item &&
+    typeof (item as { entity_type: unknown }).entity_type === 'string' &&
+    'title' in item &&
+    typeof (item as { title: unknown }).title === 'string' &&
+    'description' in item &&
+    typeof (item as { description: unknown }).description === 'string' &&
+    'slug' in item &&
+    typeof (item as { slug: unknown }).slug === 'string' &&
+    'category' in item &&
+    typeof (item as { category: unknown }).category === 'string' &&
+    'tags' in item &&
+    Array.isArray((item as { tags: unknown }).tags) &&
+    'created_at' in item &&
+    typeof (item as { created_at: unknown }).created_at === 'string' &&
+    'relevance_score' in item &&
+    typeof (item as { relevance_score: unknown }).relevance_score === 'number' &&
+    'engagement_score' in item &&
+    typeof (item as { engagement_score: unknown }).engagement_score === 'number'
+  );
+}
+
 export type SearchEntity = 'content' | 'company' | 'job' | 'user';
 
 export interface UnifiedSearchFilters {
@@ -148,14 +182,12 @@ async function executeSearchDirect<T>(
     let results: UnifiedSearchResult[] = [];
     if (Array.isArray(data)) {
       // Filter out null/undefined items, but keep all valid objects
-      // UnifiedSearchResult from search_unified has: entity_type, id, title, description, slug, category, tags, created_at, relevance_score, engagement_score
+      // UnifiedSearchResult from search_unified has two variants:
+      // 1. Without highlighted fields: entity_type, id, title, description, slug, category, tags, created_at, relevance_score, engagement_score
+      // 2. With highlighted fields: same as above + title_highlighted, description_highlighted, tags_highlighted, author_highlighted
+      // Use proper type guard to validate structure matches UnifiedSearchResult union type
       const beforeFilter = data.length;
-      results = data.filter((item): item is UnifiedSearchResult => 
-        item !== null && 
-        typeof item === 'object' && 
-        'id' in item &&
-        'entity_type' in item
-      );
+      results = data.filter(isUnifiedSearchResult);
       
       reqLogger.info({ beforeFilter,
         afterFilter: results.length,

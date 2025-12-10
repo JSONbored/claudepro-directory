@@ -266,7 +266,7 @@ function CategoryHeroShell({
   return (
     <section
       className="border-border border-b backdrop-blur-sm"
-      style={{ backgroundColor: 'rgba(var(--code), 0.3)' }}
+      style={{ backgroundColor: 'color-mix(in srgb, var(--code-bg) 30%, transparent)' }}
       aria-labelledby="category-title"
     >
       <div className="container mx-auto px-4 py-20">
@@ -388,17 +388,10 @@ function CategoryBadges({
       {displayBadges.map((badge, idx) => (
         <li key={badge.text || `badge-${idx}`}>
           <UnifiedBadge variant="base" style={idx === 0 ? 'secondary' : 'outline'}>
-            {badge.icon
-              ? (() => {
-                  if (typeof badge.icon === 'string') {
-                    const BadgeIconComponent = ICON_NAME_MAP[badge.icon] ?? HelpCircle;
-                    return (
-                      <BadgeIconComponent className="h-3 w-3 leading-none" aria-hidden="true" />
-                    );
-                  }
-                  return null;
-                })()
-              : null}
+            {badge.icon && typeof badge.icon === 'string' && (() => {
+              const BadgeIconComponent = ICON_NAME_MAP[badge.icon] ?? HelpCircle;
+              return <BadgeIconComponent className="h-3 w-3 leading-none" aria-hidden="true" />;
+            })()}
             {badge.text}
           </UnifiedBadge>
         </li>

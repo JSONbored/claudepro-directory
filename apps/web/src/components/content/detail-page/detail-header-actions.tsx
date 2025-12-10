@@ -49,6 +49,7 @@ import { useRouter } from 'next/navigation';
 import { usePostCopyEmail } from '@/src/components/core/infra/providers/email-capture-modal-provider';
 import { usePinboardDrawer } from '@/src/components/features/navigation/pinboard-drawer-provider';
 import { ExploreDropdown } from '@/src/components/content/explore-dropdown';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, MICROINTERACTIONS } from '@heyclaude/web-runtime/ui';
 
 /**
  * Validate and return a safe path segment for use in URLs.
@@ -410,17 +411,31 @@ export function DetailHeaderActions({
   return (
     <>
       {/* Back navigation - minimal */}
-      <motion.div whileHover={{ x: -2 }} whileTap={{ scale: 0.97 }} className="mb-4 inline-block">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => router.back()}
-          className={`text-muted-foreground ${STATE_PATTERNS.HOVER_TEXT_FOREGROUND} -ml-2`}
-        >
-          <ArrowLeft className={UI_CLASSES.ICON_SM_LEADING} />
-          Back
-        </Button>
-      </motion.div>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <motion.div 
+              whileHover={MICROINTERACTIONS.button.hover} 
+              whileTap={MICROINTERACTIONS.button.tap}
+              transition={MICROINTERACTIONS.button.transition}
+              className="mb-4 inline-block"
+            >
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => router.back()}
+                className={`text-muted-foreground ${STATE_PATTERNS.HOVER_TEXT_FOREGROUND} -ml-2`}
+              >
+                <ArrowLeft className={UI_CLASSES.ICON_SM_LEADING} />
+                Back
+              </Button>
+            </motion.div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Go back to previous page</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
 
       {/* Two-column hero layout for desktop */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_300px] lg:gap-10">
@@ -457,59 +472,110 @@ export function DetailHeaderActions({
         <aside className="border-border/50 bg-card/50 space-y-3 rounded-lg border p-4 lg:sticky lg:top-24 lg:self-start">
           {/* Primary CTA - Full width */}
           {!(primaryAction.type === 'download') || hasDownloadAvailable ? (
-            <motion.div whileTap={{ scale: 0.98 }} whileHover={{ scale: 1.01 }}>
-              <Button onClick={() => handleActionClick(primaryAction)} className="w-full">
-                {primaryAction.label}
-              </Button>
-            </motion.div>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <motion.div 
+                    whileTap={MICROINTERACTIONS.button.tap} 
+                    whileHover={MICROINTERACTIONS.button.hover}
+                    transition={MICROINTERACTIONS.button.transition}
+                  >
+                    <Button onClick={() => handleActionClick(primaryAction)} className="w-full">
+                      {primaryAction.label}
+                    </Button>
+                  </motion.div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{primaryAction.label}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {primaryAction.type === 'copy_command' || primaryAction.type === 'copy_script'
+                      ? 'Copy content to clipboard'
+                      : primaryAction.type === 'download'
+                      ? 'Download configuration file'
+                      : 'Primary action for this item'}
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           ) : null}
 
           {/* Conditional download button */}
           {hasDownloadAvailable && primaryAction.type !== 'download' ? (
-            <motion.div whileTap={{ scale: 0.98 }} whileHover={{ scale: 1.01 }}>
-              <Button
-                onClick={() => {
-                  if (hasMcpbDownload) {
-                    handleDownload('mcpb', contentItem, category, pulse);
-                  } else if (hasStorageDownload) {
-                    handleDownload('zip', contentItem, category, pulse);
-                  }
-                }}
-                className="w-full"
-              >
-                <Download className={UI_CLASSES.ICON_SM_LEADING} />
-                {category === Constants.public.Enums.content_category[1]
-                  ? 'Download .mcpb'
-                  : 'Download'}
-              </Button>
-            </motion.div>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <motion.div 
+                    whileTap={MICROINTERACTIONS.button.tap} 
+                    whileHover={MICROINTERACTIONS.button.hover}
+                    transition={MICROINTERACTIONS.button.transition}
+                  >
+                    <Button
+                      onClick={() => {
+                        if (hasMcpbDownload) {
+                          handleDownload('mcpb', contentItem, category, pulse);
+                        } else if (hasStorageDownload) {
+                          handleDownload('zip', contentItem, category, pulse);
+                        }
+                      }}
+                      className="w-full"
+                    >
+                      <Download className={UI_CLASSES.ICON_SM_LEADING} />
+                      {category === Constants.public.Enums.content_category[1]
+                        ? 'Download .mcpb'
+                        : 'Download'}
+                    </Button>
+                  </motion.div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Download configuration</p>
+                  <p className="text-xs text-muted-foreground">
+                    {category === Constants.public.Enums.content_category[1]
+                      ? 'Download as .mcpb file for Claude Desktop'
+                      : 'Download as ZIP archive'}
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           ) : null}
 
           {/* Actions Dropdown - Consolidated all actions */}
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <motion.div whileTap={{ scale: 0.97 }}>
-                <Button variant="outline" size="sm" className="w-full">
-                  <Menu className={UI_CLASSES.ICON_SM_LEADING} />
-                  Actions
-                </Button>
-              </motion.div>
-            </DropdownMenuTrigger>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <DropdownMenuTrigger asChild>
+                    <motion.div 
+                      whileTap={MICROINTERACTIONS.button.tap}
+                      transition={MICROINTERACTIONS.button.transition}
+                    >
+                      <Button variant="outline" size="sm" className="w-full">
+                        <Menu className={UI_CLASSES.ICON_SM_LEADING} />
+                        Actions
+                      </Button>
+                    </motion.div>
+                  </DropdownMenuTrigger>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>More actions</p>
+                  <p className="text-xs text-muted-foreground">Pin, share, and copy options</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <DropdownMenuContent align="end" className="w-56">
-              {/* Pin */}
-              <DropdownMenuItem onClick={handleTogglePin}>
-                {pinned ? (
-                  <>
-                    <Bookmark className={UI_CLASSES.ICON_SM_LEADING} />
-                    Unpin
-                  </>
-                ) : (
-                  <>
-                    <BookmarkPlus className={UI_CLASSES.ICON_SM_LEADING} />
-                    Pin
-                  </>
-                )}
-              </DropdownMenuItem>
+                    {/* Pin */}
+                    <DropdownMenuItem onClick={handleTogglePin}>
+                      {pinned ? (
+                        <>
+                          <Bookmark className={UI_CLASSES.ICON_SM_LEADING} />
+                          Unpin
+                        </>
+                      ) : (
+                        <>
+                          <BookmarkPlus className={UI_CLASSES.ICON_SM_LEADING} />
+                          Pin
+                        </>
+                      )}
+                    </DropdownMenuItem>
 
               {/* Share - inline menu items */}
               <DropdownMenuSeparator />

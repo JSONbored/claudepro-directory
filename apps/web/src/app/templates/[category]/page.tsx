@@ -29,9 +29,9 @@ export const dynamic = 'force-dynamic';
  */
 export default async function TemplatesPage({ params }: { params: Promise<{ category: string }> }) {
   const reqLogger = logger.child({
+    module: 'app/templates/[category]/page.tsx',
     operation: 'TemplatesPage',
     route: 'templates/[category]',
-    module: 'app/templates/[category]/page.tsx',
   });
 
   const { category } = await params;
@@ -62,9 +62,9 @@ export default async function TemplatesPage({ params }: { params: Promise<{ cate
   const serializedTemplates = JSON.parse(JSON.stringify(templates)) as typeof templates;
 
   return NextResponse.json({
-    success: true,
-    templates: serializedTemplates,
     category: validCategory,
     count: serializedTemplates.length,
+    success: true,
+    templates: serializedTemplates,
   });
 }

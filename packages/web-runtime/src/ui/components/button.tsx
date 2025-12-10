@@ -14,9 +14,9 @@
  * - Works with all variants (default, destructive, outline, secondary, ghost, link)
  */
 
-import { UI_ANIMATION } from '../../config/unified-config.ts';
 import { cn } from '../../ui/utils.ts';
 import { STATE_PATTERNS, UI_CLASSES } from '../../ui/constants.ts';
+import { MICROINTERACTIONS } from '../../ui/design-tokens/index.ts';
 import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { AnimatePresence, motion } from 'motion/react';
@@ -61,13 +61,6 @@ export interface ButtonProps
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
 }
-
-/** Spring animation config from unified config */
-const springDefault = {
-  type: 'spring' as const,
-  stiffness: UI_ANIMATION['spring.default.stiffness'],
-  damping: UI_ANIMATION['spring.default.damping'],
-};
 
 const Button = ({
   className,
@@ -115,10 +108,15 @@ const Button = ({
 
   const Comp = asChild ? Slot : 'button';
 
-  // Skip animations if asChild (for Link wrappers, etc.)
+  // Skip animations if asChild (for Link wrappers, TooltipTrigger, etc.)
+  // This prevents hydration mismatches when Button is used with Radix UI components
   if (asChild) {
     return (
-      <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />
+      <Comp 
+        className={cn(buttonVariants({ variant, size, className }))} 
+        ref={ref} 
+        {...props}
+      />
     );
   }
 
@@ -143,10 +141,10 @@ const Button = ({
               width: ripple.size,
               height: ripple.size,
             }}
-            initial={{ scale: 0, opacity: 1 }}
-            animate={{ scale: 2, opacity: 0 }}
+            initial={MICROINTERACTIONS.ripple.initial}
+            animate={MICROINTERACTIONS.ripple.animate}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.6, ease: 'easeOut' }}
+            transition={MICROINTERACTIONS.ripple.transition}
           />
         ))}
       </AnimatePresence>
@@ -160,9 +158,9 @@ const Button = ({
 
   return (
     <motion.div
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-      transition={springDefault}
+      whileHover={MICROINTERACTIONS.button.hover}
+      whileTap={MICROINTERACTIONS.button.tap}
+      transition={MICROINTERACTIONS.button.transition}
       style={{ display: 'inline-block' }}
     >
       {buttonElement}
@@ -171,4 +169,4 @@ const Button = ({
 };
 Button.displayName = 'Button';
 
-export { Button };
+export { Button, buttonVariants };

@@ -3,6 +3,7 @@
 import { type Database } from '@heyclaude/database-types';
 import { logUnhandledPromise, NEWSLETTER_CTA_CONFIG } from '@heyclaude/web-runtime/core';
 import { usePulse, useNewsletter } from '@heyclaude/web-runtime/hooks';
+import { logClientInfo } from '@heyclaude/web-runtime/logging/client';
 import {
   cn,
   toasts,
@@ -60,13 +61,54 @@ export function NewsletterModal({
     },
   });
 
+  // DEBUG: Log modal open/close state
+  useEffect(() => {
+    logClientInfo(
+      '[NewsletterModal] State changed',
+      'NewsletterModal.stateChange',
+      {
+        component: 'NewsletterModal',
+        action: 'state-change',
+        category: 'newsletter',
+        open,
+        source,
+        contentCategory: category ?? null,
+        copyType,
+        slug: slug ?? null,
+        hasInputRef: Boolean(inputRef.current),
+      }
+    );
+  }, [open, source, category, copyType, slug]);
+
   useEffect(() => {
     if (open) {
       const now = Date.now();
       setShowTime(now);
 
+      logClientInfo(
+        '[NewsletterModal] Opening modal, setting focus timer',
+        'NewsletterModal.open',
+        {
+          component: 'NewsletterModal',
+          action: 'modal-open',
+          category: 'newsletter',
+          source,
+          copyType,
+        }
+      );
+
       // Focus input field after modal animation completes
       const focusTimer = setTimeout(() => {
+        logClientInfo(
+          '[NewsletterModal] Focus timer fired, attempting to focus input',
+          'NewsletterModal.focus',
+          {
+            component: 'NewsletterModal',
+            action: 'input-focus',
+            category: 'newsletter',
+            hasInputRef: Boolean(inputRef.current),
+          }
+        );
         inputRef.current?.focus();
         setIsInputFocused(true);
       }, 300); // Wait for dialog animation
@@ -163,6 +205,23 @@ export function NewsletterModal({
       setEmail('');
     }
   };
+
+  // DEBUG: Log render (use useEffect to avoid conditional hook call)
+  useEffect(() => {
+    logClientInfo(
+      '[NewsletterModal] Rendering',
+      'NewsletterModal.render',
+      {
+        component: 'NewsletterModal',
+        action: 'render',
+        category: 'newsletter',
+        open,
+        hasContext: Boolean(category || copyType || slug),
+        source,
+        copyType,
+      }
+    );
+  }, [open, category, copyType, slug, source]);
 
   return (
     <Dialog open={open} onOpenChange={handleDismiss}>

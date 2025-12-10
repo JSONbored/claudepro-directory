@@ -8,6 +8,7 @@
  */
 
 import { createContext, useContext, useRef, useState, type ReactNode } from 'react';
+import type { UnifiedSearchProps } from '@heyclaude/web-runtime/types/component.types';
 
 interface HeroSearchConnectionContextValue {
   /** Search input ref for blob targeting */
@@ -16,6 +17,13 @@ interface HeroSearchConnectionContextValue {
   isSearchFocused: boolean;
   /** Set search focus state */
   setSearchFocused: (focused: boolean) => void;
+  /** Search props for rendering search in hero */
+  searchProps?: Omit<UnifiedSearchProps, 'placeholder'> & {
+    placeholder?: string;
+    onFocusChange?: (isFocused: boolean) => void;
+  } | undefined;
+  /** Set search props */
+  setSearchProps: (props: HeroSearchConnectionContextValue['searchProps']) => void;
 }
 
 const HeroSearchConnectionContext = createContext<HeroSearchConnectionContextValue | null>(null);
@@ -23,6 +31,7 @@ const HeroSearchConnectionContext = createContext<HeroSearchConnectionContextVal
 export function HeroSearchConnectionProvider({ children }: { children: ReactNode }) {
   const searchRef = useRef<HTMLInputElement | null>(null);
   const [isSearchFocused, setSearchFocused] = useState(false);
+  const [searchProps, setSearchProps] = useState<HeroSearchConnectionContextValue['searchProps']>();
 
   return (
     <HeroSearchConnectionContext.Provider
@@ -30,6 +39,8 @@ export function HeroSearchConnectionProvider({ children }: { children: ReactNode
         searchRef: searchRef as React.MutableRefObject<HTMLInputElement | null>,
         isSearchFocused,
         setSearchFocused,
+        searchProps,
+        setSearchProps,
       }}
     >
       {children}

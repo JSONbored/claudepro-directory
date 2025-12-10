@@ -72,4 +72,24 @@ export const SCROLL_PRESETS = {
     input: [0, 0.25] as const,
     output: [50, 0] as const,
   },
+
+  /**
+   * Hero fade out - Hero content fades as user scrolls down
+   * Input: [0, 0.3] means animation happens in first 30% of scroll
+   * Output: [1, 0] means opacity goes from 1 to 0
+   */
+  heroFade: {
+    input: [0, 0.3] as const,
+    output: [1, 0] as const,
+  },
+
+  /**
+   * Hero scale down - Hero content scales down as user scrolls
+   * Input: [0, 0.3] means animation happens in first 30% of scroll
+   * Output: [1, 0.95] means scale goes from 1 to 0.95
+   */
+  heroScale: {
+    input: [0, 0.3] as const,
+    output: [1, 0.95] as const,
+  },
 } as const;

@@ -113,7 +113,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     const normalized = normalizeError(error, 'Operation failed');
-    reqLogger.error({ err: normalizeError(error) }, 'Company API error');
+    reqLogger.error({ err: normalized }, 'Company API error');
     return createErrorResponse(normalized, {
       route: '/api/company',
       operation: 'CompanyAPI',

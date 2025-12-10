@@ -23,10 +23,10 @@ import {
   NavigationHoverCardContent,
   cn,
 } from '@heyclaude/web-runtime/ui';
-import { BorderBeam } from '@heyclaude/web-runtime/ui';
+import { AnimatedBorder } from '@heyclaude/web-runtime/ui';
 import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 
 import { usePinboardDrawer } from '@/src/components/features/navigation/pinboard-drawer-provider';
 
@@ -138,12 +138,11 @@ function ConfigsDropdown({ link, getCategoryFromHref }: ConfigsDropdownProps) {
         )}
         sideOffset={8}
       >
-        {/* Border beam effect with heyclaude orange */}
-        <BorderBeam
-          size={300}
-          duration={15}
+        {/* Animated gradient border with heyclaude orange */}
+        <AnimatedBorder
           colorFrom="#F97316"
           colorTo="#FB923C"
+          duration={3}
           borderWidth={2}
         />
         <AnimatePresence mode="wait">
@@ -328,12 +327,11 @@ function DiscoverResourcesContributeDropdown({ link, getCategoryFromHref }: Disc
         )}
         sideOffset={8}
       >
-        {/* Border beam effect with heyclaude orange */}
-        <BorderBeam
-          size={300}
-          duration={15}
+        {/* Animated gradient border with heyclaude orange */}
+        <AnimatedBorder
           colorFrom="#F97316"
           colorTo="#FB923C"
+          duration={3}
           borderWidth={2}
         />
         <AnimatePresence mode="wait">
@@ -489,12 +487,11 @@ function FallbackDropdown({ link, getCategoryFromHref }: FallbackDropdownProps) 
         )}
         sideOffset={8}
       >
-        {/* Border beam effect with heyclaude orange */}
-        <BorderBeam
-          size={300}
-          duration={15}
+        {/* Animated gradient border with heyclaude orange */}
+        <AnimatedBorder
           colorFrom="#F97316"
           colorTo="#FB923C"
+          duration={3}
           borderWidth={2}
         />
         <AnimatePresence mode="wait">
@@ -719,12 +716,11 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
                 )}
                 sideOffset={8}
               >
-                {/* Subtle border beam effect */}
-                <BorderBeam
-                  size={250}
-                  duration={20}
-                  colorFrom="rgba(249, 115, 22, 0.3)"
-                  colorTo="rgba(249, 115, 22, 0.1)"
+                {/* Subtle animated gradient border */}
+                <AnimatedBorder
+                  colorFrom="rgba(249, 115, 22, 0.4)"
+                  colorTo="rgba(249, 115, 22, 0.2)"
+                  duration={4}
                   borderWidth={1.5}
                 />
                 <div className={cn('relative z-10 grid grid-cols-2', UI_CLASSES.SPACE_COMFORTABLE)}>
@@ -766,14 +762,17 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
                         return (
                           <motion.div
                             key={`${link.label}-${child.label}`}
-                            whileHover={MICROINTERACTIONS.button.hover}
+                            whileHover={{
+                              ...MICROINTERACTIONS.button.hover,
+                              backgroundColor: 'rgba(249, 115, 22, 0.05)', // Preserve exact original background (accent/5)
+                            }}
                             whileTap={MICROINTERACTIONS.button.tap}
                             transition={MICROINTERACTIONS.button.transition}
                           >
                             <Link
                               href={child.href}
                               prefetch
-                              className="flex items-center gap-2 px-2 py-1.5 text-sm rounded-md hover:bg-accent/5 group/item"
+                              className="flex items-center gap-2 px-2 py-1.5 text-sm rounded-md group/item"
                             >
                               {ChildIcon && (
                                 <ChildIcon className="h-4 w-4 text-muted-foreground group-hover/item:text-accent" />
@@ -891,14 +890,13 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
           )}
           sideOffset={8}
         >
-          {/* Subtle border beam effect */}
-          <BorderBeam
-            size={200}
-            duration={20}
-            colorFrom="rgba(249, 115, 22, 0.3)"
-            colorTo="rgba(249, 115, 22, 0.1)"
-            borderWidth={1.5}
-          />
+                {/* Subtle animated gradient border */}
+                <AnimatedBorder
+                  colorFrom="rgba(249, 115, 22, 0.4)"
+                  colorTo="rgba(249, 115, 22, 0.2)"
+                  duration={4}
+                  borderWidth={1.5}
+                />
           {/* Support group with enhanced layout */}
           <div className={cn('relative z-10', UI_CLASSES.SPACE_Y_DEFAULT)}>
             {SECONDARY_NAVIGATION.map((group, groupIndex) => {
@@ -915,22 +913,26 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
                       // Special handling for Pinboard - opens drawer instead of navigating
                       if (link.label === 'Pinboard' && link.href === '#') {
                         return (
-                          <>
+                          <Fragment key={`${group.heading}-${link.label}-fragment`}>
                             {linkIndex > 0 && (
-                              <li>
+                              <li key={`${group.heading}-${link.label}-divider`}>
                                 <div className="h-px bg-border/30 my-1 mx-3" />
                               </li>
                             )}
                             <li key={`${group.heading}-${link.label}`}>
                               <motion.div
-                                whileHover={MICROINTERACTIONS.card.hover}
+                                whileHover={{
+                                  ...MICROINTERACTIONS.card.hover,
+                                  backgroundColor: 'rgba(249, 115, 22, 0.05)', // Preserve exact original background (accent/5)
+                                  y: 0, // Preserve original (no y movement for these links)
+                                }}
                                 whileTap={MICROINTERACTIONS.card.tap}
                                 transition={MICROINTERACTIONS.card.transition}
                               >
                                 <button
                                   type="button"
                                   onClick={openPinboardDrawer}
-                                  className="group/item block w-full rounded-lg px-3 py-2.5 text-sm leading-none no-underline outline-none hover:bg-accent/5 focus:bg-accent/5 text-left"
+                                  className="group/item block w-full rounded-lg px-3 py-2.5 text-sm leading-none no-underline outline-none focus:bg-accent/5 text-left"
                                 >
                                   <div className="flex items-start gap-3">
                                     {LinkIcon && (
@@ -951,23 +953,27 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
                               </motion.div>
                             </li>
                             {!isLastLink && (
-                              <li>
+                              <li key={`${group.heading}-${link.label}-divider-end`}>
                                 <div className="h-px bg-border/30 my-1 mx-3" />
                               </li>
                             )}
-                          </>
+                          </Fragment>
                         );
                       }
                   return (
-                    <>
+                    <Fragment key={`${group.heading}-${link.label}-fragment`}>
                       {linkIndex > 0 && (
-                        <li>
+                        <li key={`${group.heading}-${link.label}-divider`}>
                           <div className="h-px bg-border/30 my-1 mx-3" />
                         </li>
                       )}
                       <li key={`${group.heading}-${link.label}`}>
                         <motion.div
-                          whileHover={MICROINTERACTIONS.card.hover}
+                          whileHover={{
+                            ...MICROINTERACTIONS.card.hover,
+                            backgroundColor: 'rgba(249, 115, 22, 0.05)', // Preserve exact original background (accent/5)
+                            y: 0, // Preserve original (no y movement for these links)
+                          }}
                           whileTap={MICROINTERACTIONS.card.tap}
                           transition={MICROINTERACTIONS.card.transition}
                         >
@@ -975,7 +981,7 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
                             href={link.href}
                             prefetch={!link.external}
                             {...(link.external && { target: '_blank', rel: 'noopener noreferrer' })}
-                            className="group/item block rounded-lg px-3 py-2.5 text-sm leading-none no-underline outline-none hover:bg-accent/5 focus:bg-accent/5"
+                            className="group/item block rounded-lg px-3 py-2.5 text-sm leading-none no-underline outline-none focus:bg-accent/5"
                           >
                             <div className="flex items-start gap-3">
                               {LinkIcon && (
@@ -995,7 +1001,7 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
                           </Link>
                         </motion.div>
                       </li>
-                    </>
+                    </Fragment>
                   );
                 })}
                   </ul>

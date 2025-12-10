@@ -19,7 +19,6 @@
  * @module components/layout/user-menu
  */
 
-import { getAnimationConfig } from '@heyclaude/web-runtime/data';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
 import {
   Activity,
@@ -40,14 +39,16 @@ import {
   AvatarFallback,
   AvatarImage,
   Button,
+  MagneticButton,
   NavigationHoverCard,
   NavigationHoverCardContent,
   NavigationHoverCardTrigger,
+  MICROINTERACTIONS,
 } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 interface UserMenuProps {
   className?: string;
@@ -55,26 +56,12 @@ interface UserMenuProps {
 
 export function UserMenu({ className }: UserMenuProps) {
   const [signingOut, setSigningOut] = useState(false);
-  const [springDefault, setSpringDefault] = useState({
-    type: 'spring' as const,
-    stiffness: 400,
-    damping: 17,
-  });
   const router = useRouter();
   const { user, status, supabaseClient } = useAuthenticatedUser({
     context: 'UserMenu',
   });
   const loading = status === 'loading';
   const supabase = supabaseClient;
-
-  useEffect(() => {
-    const config = getAnimationConfig();
-    setSpringDefault({
-      type: 'spring' as const,
-      stiffness: config['animation.spring.default.stiffness'],
-      damping: config['animation.spring.default.damping'],
-    });
-  }, []);
 
   const handleSignOut = async () => {
     setSigningOut(true);
@@ -111,17 +98,19 @@ export function UserMenu({ className }: UserMenuProps) {
   if (!user) {
     return (
       <div className={className}>
-        <Button
-          asChild
-          variant="default"
-          size="sm"
-          className="font-semibold shadow-sm hover:shadow-md transition-all hover:opacity-90"
-          style={{ backgroundColor: '#F6F8F4', color: '#141816' }}
-        >
-          <Link href="/login" aria-label="Get started - Sign in with GitHub">
-            <span>Get Started</span>
-          </Link>
-        </Button>
+        <MagneticButton>
+          <Button
+            asChild
+            variant="default"
+            size="sm"
+            className="font-semibold shadow-sm"
+            style={{ backgroundColor: '#F6F8F4', color: '#141816' }}
+          >
+            <Link href="/login" aria-label="Get started - Sign in with GitHub">
+              <span>Get Started</span>
+            </Link>
+          </Button>
+        </MagneticButton>
       </div>
     );
   }
@@ -144,9 +133,9 @@ export function UserMenu({ className }: UserMenuProps) {
       <NavigationHoverCard openDelay={150} closeDelay={300}>
         <NavigationHoverCardTrigger asChild>
           <motion.div
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            transition={springDefault}
+            whileHover={MICROINTERACTIONS.iconButton.hover}
+            whileTap={MICROINTERACTIONS.iconButton.tap}
+            transition={MICROINTERACTIONS.iconButton.transition}
           >
             <Button
               variant="ghost"
@@ -183,13 +172,19 @@ export function UserMenu({ className }: UserMenuProps) {
           </div>
 
           {/* Dashboard Link */}
-          <Link
-            href="/account"
-            className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-accent/5 transition-colors group/item mb-2"
+          <motion.div
+            whileHover={{ backgroundColor: 'rgba(249, 115, 22, 0.05)' }}
+            transition={MICROINTERACTIONS.colorTransition.default}
+            className="mb-2"
           >
-            <User className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors" />
-            <span className="flex-1 text-sm font-medium">Dashboard</span>
-          </Link>
+            <Link
+              href="/account"
+              className="flex items-center gap-3 px-3 py-2 rounded-md group/item"
+            >
+              <User className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors" />
+              <span className="flex-1 text-sm font-medium">Dashboard</span>
+            </Link>
+          </motion.div>
 
           {/* My Content Section */}
           <div className="mb-2">
@@ -199,34 +194,54 @@ export function UserMenu({ className }: UserMenuProps) {
               </p>
             </div>
             <div className="space-y-0.5">
-              <Link
-                href="/account/library"
-                className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-accent/5 transition-colors group/item"
+              <motion.div
+                whileHover={{ backgroundColor: 'rgba(249, 115, 22, 0.05)' }}
+                transition={MICROINTERACTIONS.colorTransition.default}
               >
-                <BookOpen className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors" />
-                <span className="flex-1 text-sm">Library</span>
-              </Link>
-              <Link
-                href="/account/bookmarks"
-                className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-accent/5 transition-colors group/item"
+                <Link
+                  href="/account/library"
+                  className="flex items-center gap-3 px-3 py-2 rounded-md group/item"
+                >
+                  <BookOpen className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors" />
+                  <span className="flex-1 text-sm">Library</span>
+                </Link>
+              </motion.div>
+              <motion.div
+                whileHover={{ backgroundColor: 'rgba(249, 115, 22, 0.05)' }}
+                transition={MICROINTERACTIONS.colorTransition.default}
               >
-                <Bookmark className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors" />
-                <span className="flex-1 text-sm">Bookmarks</span>
-              </Link>
-              <Link
-                href="/account/submissions"
-                className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-accent/5 transition-colors group/item"
+                <Link
+                  href="/account/bookmarks"
+                  className="flex items-center gap-3 px-3 py-2 rounded-md group/item"
+                >
+                  <Bookmark className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors" />
+                  <span className="flex-1 text-sm">Bookmarks</span>
+                </Link>
+              </motion.div>
+              <motion.div
+                whileHover={{ backgroundColor: 'rgba(249, 115, 22, 0.05)' }}
+                transition={MICROINTERACTIONS.colorTransition.default}
               >
-                <Rocket className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors" />
-                <span className="flex-1 text-sm">Submissions</span>
-              </Link>
-              <Link
-                href="/account/activity"
-                className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-accent/5 transition-colors group/item"
+                <Link
+                  href="/account/submissions"
+                  className="flex items-center gap-3 px-3 py-2 rounded-md group/item"
+                >
+                  <Rocket className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors" />
+                  <span className="flex-1 text-sm">Submissions</span>
+                </Link>
+              </motion.div>
+              <motion.div
+                whileHover={{ backgroundColor: 'rgba(249, 115, 22, 0.05)' }}
+                transition={MICROINTERACTIONS.colorTransition.default}
               >
-                <Activity className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors" />
-                <span className="flex-1 text-sm">Activity</span>
-              </Link>
+                <Link
+                  href="/account/activity"
+                  className="flex items-center gap-3 px-3 py-2 rounded-md group/item"
+                >
+                  <Activity className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors" />
+                  <span className="flex-1 text-sm">Activity</span>
+                </Link>
+              </motion.div>
             </div>
           </div>
 
@@ -238,40 +253,62 @@ export function UserMenu({ className }: UserMenuProps) {
               </p>
             </div>
             <div className="space-y-0.5">
-              <Link
-                href="/account/companies"
-                className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-accent/5 transition-colors group/item"
+              <motion.div
+                whileHover={{ backgroundColor: 'rgba(249, 115, 22, 0.05)' }}
+                transition={MICROINTERACTIONS.colorTransition.default}
               >
-                <Building className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors" />
-                <span className="flex-1 text-sm">Companies</span>
-              </Link>
-              <Link
-                href="/account/jobs"
-                className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-accent/5 transition-colors group/item"
+                <Link
+                  href="/account/companies"
+                  className="flex items-center gap-3 px-3 py-2 rounded-md group/item"
+                >
+                  <Building className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors" />
+                  <span className="flex-1 text-sm">Companies</span>
+                </Link>
+              </motion.div>
+              <motion.div
+                whileHover={{ backgroundColor: 'rgba(249, 115, 22, 0.05)' }}
+                transition={MICROINTERACTIONS.colorTransition.default}
               >
-                <Briefcase className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors" />
-                <span className="flex-1 text-sm">Jobs</span>
-              </Link>
+                <Link
+                  href="/account/jobs"
+                  className="flex items-center gap-3 px-3 py-2 rounded-md group/item"
+                >
+                  <Briefcase className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors" />
+                  <span className="flex-1 text-sm">Jobs</span>
+                </Link>
+              </motion.div>
             </div>
           </div>
 
           <div className="mt-2 pt-2 border-t border-border">
-            <Link
-              href="/account/settings"
-              className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-accent/5 transition-colors group/item mb-2"
+            <motion.div
+              whileHover={{ backgroundColor: 'rgba(249, 115, 22, 0.05)' }}
+              transition={MICROINTERACTIONS.colorTransition.default}
+              className="mb-2"
             >
-              <Settings className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors" />
-              <span className="flex-1 text-sm">Settings</span>
-            </Link>
+              <Link
+                href="/account/settings"
+                className="flex items-center gap-3 px-3 py-2 rounded-md group/item"
+              >
+                <Settings className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors" />
+                <span className="flex-1 text-sm">Settings</span>
+              </Link>
+            </motion.div>
 
-            <button
+            <motion.button
               onClick={handleSignOut}
               disabled={signingOut}
-              className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-destructive/10 transition-colors group/item w-full text-left text-destructive"
+              {...(signingOut
+                ? {}
+                : {
+                    whileHover: { backgroundColor: 'rgba(239, 68, 68, 0.1)' },
+                  })}
+              transition={MICROINTERACTIONS.colorTransition.default}
+              className="flex items-center gap-3 px-3 py-2 rounded-md group/item w-full text-left text-destructive"
             >
               <LogOut className="h-4 w-4 group-hover/item:text-destructive transition-colors" />
               <span className="flex-1 text-sm">{signingOut ? 'Signing out...' : 'Sign out'}</span>
-            </button>
+            </motion.button>
           </div>
         </NavigationHoverCardContent>
       </NavigationHoverCard>

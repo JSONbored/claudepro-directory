@@ -122,7 +122,6 @@ export default async function CompaniesPage() {
  * - Renders a responsive list of company cards when companies exist, including logo handling, sanitized external website links, stats, and action buttons.
  *
  * @param reqLogger - A request-scoped logger created via logger.child used for contextual logging and redaction of user identifiers.
- * @param reqLogger.reqLogger
  * @returns A JSX element representing the companies page content.
  *
  * @see getAuthenticatedUser

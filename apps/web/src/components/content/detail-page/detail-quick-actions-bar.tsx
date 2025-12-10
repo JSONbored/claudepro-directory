@@ -2,7 +2,7 @@
 
 import { Sparkles } from '@heyclaude/web-runtime/icons';
 import { type ContentItem } from '@heyclaude/web-runtime/types/component.types';
-import { cn, Button } from '@heyclaude/web-runtime/ui';
+import { cn, Button, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@heyclaude/web-runtime/ui';
 
 import { useDetailQuickActions } from './use-detail-quick-actions';
 
@@ -74,17 +74,28 @@ export function DetailQuickActionsBar({
         </div>
         <div className="flex flex-wrap gap-2">
           {quickActions.map((action) => (
-            <Button
-              key={action.key}
-              type="button"
-              variant="secondary"
-              size="sm"
-              className="grow basis-[10rem] justify-center gap-2 whitespace-nowrap"
-              onClick={action.onClick}
-            >
-              <span className="bg-primary/70 h-1.5 w-1.5 rounded-full" aria-hidden="true" />
-              <span className="text-sm font-semibold">{action.label}</span>
-            </Button>
+            <TooltipProvider key={action.key}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    className="grow basis-[10rem] justify-center gap-2 whitespace-nowrap"
+                    onClick={action.onClick}
+                  >
+                    <span className="bg-primary/70 h-1.5 w-1.5 rounded-full" aria-hidden="true" />
+                    <span className="text-sm font-semibold">{action.label}</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{action.label}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {action.description || 'Quick action for this item'}
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           ))}
         </div>
       </div>

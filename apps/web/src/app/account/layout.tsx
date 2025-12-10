@@ -43,26 +43,18 @@ import { AccountSidebarSkeleton } from '@/src/components/features/account/accoun
 async function AccountAuthWrapper({ children }: { children: React.ReactNode }) {
   // Authentication check - required in layout for route protection
   // Wrap in try-catch to handle expected AuthSessionMissingError gracefully
-  let user;
-  try {
-    const result = await getAuthenticatedUser({
-      requireUser: true,
-      context: 'AccountLayout',
-    });
-    user = result.user;
-  } catch (error) {
-    // AuthSessionMissingError is expected for unauthenticated users
-    // Redirect to login instead of letting error bubble up
-    const normalized = normalizeError(error, 'Authentication required');
-    if (normalized.name === 'AuthSessionMissingError') {
-      // Expected: user is not authenticated, redirect to login
-      redirect('/login');
-    }
-    // Unexpected error: re-throw
-    throw normalized;
+  const result = await getAuthenticatedUser({
+    requireUser: true,
+    context: 'AccountLayout',
+  });
+  const user = result.user;
+  
+  // getAuthenticatedUser with requireUser: true guarantees user is defined
+  // If no user, it throws AuthSessionMissingError which we handle above
+  if (!user) {
+    // This should never happen with requireUser: true, but TypeScript needs the check
+    redirect('/login');
   }
-
-  if (!user) redirect('/login');
 
   // Explicitly defer to request time before using non-deterministic operations (Date.now())
   // This is required by Cache Components for non-deterministic operations

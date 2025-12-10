@@ -2,7 +2,7 @@
 
 import * as Icons from '@heyclaude/web-runtime/icons';
 import { getCommandMenuNavigationData } from '@heyclaude/web-runtime/config/navigation';
-import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
+import { logClientWarn, logClientInfo, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import {
   UI_CLASSES,
   CommandDialog,
@@ -42,6 +42,33 @@ export function NavigationCommandMenu({
 
   const open = controlledOpen === undefined ? internalOpen : controlledOpen;
   const setOpen = onOpenChange || setInternalOpen;
+
+  // CRITICAL FIX: Ensure onOpenChange is called when controlledOpen changes
+  useEffect(() => {
+    if (controlledOpen !== undefined && onOpenChange) {
+      // Sync internal state with controlled state
+      if (internalOpen !== controlledOpen) {
+        setInternalOpen(controlledOpen);
+      }
+    }
+  }, [controlledOpen, onOpenChange, internalOpen]);
+
+  // DEBUG: Log command menu state changes
+  useEffect(() => {
+    logClientInfo(
+      '[NavigationCommandMenu] State changed',
+      'NavigationCommandMenu.stateChange',
+      {
+        component: 'NavigationCommandMenu',
+        action: 'state-change',
+        category: 'navigation',
+        open,
+        controlledOpen: controlledOpen ?? null,
+        internalOpen,
+        hasOnOpenChange: Boolean(onOpenChange),
+      }
+    );
+  }, [open, controlledOpen, internalOpen, onOpenChange]);
 
   // Get navigation data from static config (no RPC needed)
   const navigationData = useMemo(() => getCommandMenuNavigationData(), []);
@@ -106,11 +133,14 @@ export function NavigationCommandMenu({
     return null;
   };
 
-  const renderItem = (item: NavigationMenuItem) => {
+  const renderItem = (item: NavigationMenuItem, index: number, groupName: string) => {
     if (!item.path) return null;
     const path = item.path; // Type narrowing: path is now definitely string
+    // CRITICAL FIX: Include groupName in key to ensure uniqueness across groups
+    // This prevents duplicate keys when the same path appears in multiple groups
+    const uniqueKey = `${groupName}-${path}-${item.title}-${index}`;
     return (
-      <CommandItem key={path} onSelect={() => handleSelect(path)} className="group cursor-pointer">
+      <CommandItem key={uniqueKey} onSelect={() => handleSelect(path)} className="group cursor-pointer">
         <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
           {getIcon(item.icon_name)}
           <div className="flex flex-col items-start">
@@ -137,7 +167,7 @@ export function NavigationCommandMenu({
         {navigationData.primary && navigationData.primary.length > 0 ? (
           <>
             <CommandGroup heading="Primary Navigation">
-              {navigationData.primary.map(renderItem).filter(Boolean)}
+              {navigationData.primary.map((item, index) => renderItem(item, index, 'primary')).filter(Boolean)}
             </CommandGroup>
             <CommandSeparator />
           </>
@@ -146,7 +176,7 @@ export function NavigationCommandMenu({
         {navigationData.secondary && navigationData.secondary.length > 0 ? (
           <>
             <CommandGroup heading="More">
-              {navigationData.secondary.map(renderItem).filter(Boolean)}
+              {navigationData.secondary.map((item, index) => renderItem(item, index, 'secondary')).filter(Boolean)}
             </CommandGroup>
             <CommandSeparator />
           </>
@@ -154,7 +184,7 @@ export function NavigationCommandMenu({
 
         {navigationData.actions && navigationData.actions.length > 0 ? (
           <CommandGroup heading="Actions">
-            {navigationData.actions.map(renderItem).filter(Boolean)}
+            {navigationData.actions.map((item, index) => renderItem(item, index, 'actions')).filter(Boolean)}
           </CommandGroup>
         ) : null}
       </CommandList>

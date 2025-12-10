@@ -13,7 +13,7 @@ import {
   type DisplayableContent,
   type HomepageContentItem,
 } from '@heyclaude/web-runtime/types/component.types';
-import { UI_CLASSES, UnifiedBadge } from '@heyclaude/web-runtime/ui';
+import { UI_CLASSES, UnifiedBadge, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { Suspense } from 'react';
 
@@ -184,22 +184,58 @@ async function TrendingPageContent({
 
             <ul className={`${UI_CLASSES.FLEX_WRAP_GAP_2} list-none justify-center`}>
               <li>
-                <UnifiedBadge variant="base" style="secondary">
-                  <Clock className="mr-1 h-3 w-3" aria-hidden="true" />
-                  Real-time updates
-                </UnifiedBadge>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div>
+                        <UnifiedBadge variant="base" style="secondary">
+                          <Clock className="mr-1 h-3 w-3" aria-hidden="true" />
+                          Real-time updates
+                        </UnifiedBadge>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Real-time updates</p>
+                      <p className="text-xs text-muted-foreground">Trending data refreshes automatically</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </li>
               <li>
-                <UnifiedBadge variant="base" style="secondary">
-                  <Star className="mr-1 h-3 w-3" aria-hidden="true" />
-                  Based on views
-                </UnifiedBadge>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div>
+                        <UnifiedBadge variant="base" style="secondary">
+                          <Star className="mr-1 h-3 w-3" aria-hidden="true" />
+                          Based on views
+                        </UnifiedBadge>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Based on views</p>
+                      <p className="text-xs text-muted-foreground">Ranked by view count and engagement</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </li>
               <li>
-                <UnifiedBadge variant="base" style="secondary">
-                  <Users className="mr-1 h-3 w-3" aria-hidden="true" />
-                  {trendingDisplay.length} total configs
-                </UnifiedBadge>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div>
+                        <UnifiedBadge variant="base" style="secondary">
+                          <Users className="mr-1 h-3 w-3" aria-hidden="true" />
+                          {trendingDisplay.length} total configs
+                        </UnifiedBadge>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Community-driven</p>
+                      <p className="text-xs text-muted-foreground">Rankings reflect community usage and engagement</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </li>
             </ul>
           </div>

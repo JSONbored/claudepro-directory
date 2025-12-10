@@ -17,6 +17,7 @@
 
 import { type Database } from '@heyclaude/database-types';
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from 'react';
+import { logClientInfo, logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 
 import { NewsletterModal } from '@/src/components/features/growth/newsletter/newsletter-modal';
 
@@ -97,6 +98,29 @@ export function PostCopyEmailProvider({ children }: PostCopyEmailProviderProps) 
   const [modalContext, setModalContext] = useState<ModalContext | null>(null);
   const [hasShownThisSession, setHasShownThisSession] = useState(false);
   const [copyCount, setCopyCount] = useState(0);
+
+  // DEBUG: Log all state changes
+  useEffect(() => {
+    logClientInfo(
+      '[PostCopyEmailProvider] State changed',
+      'PostCopyEmailProvider.stateChange',
+      {
+        component: 'PostCopyEmailProvider',
+        action: 'state-change',
+        category: 'newsletter',
+        isOpen,
+        hasModalContext: Boolean(modalContext),
+        modalContext: modalContext ? {
+          copyType: modalContext.copyType,
+          category: modalContext.category,
+          hasSlug: Boolean(modalContext.slug),
+          hasReferrer: Boolean(modalContext.referrer),
+        } : null,
+        hasShownThisSession,
+        copyCount,
+      }
+    );
+  }, [isOpen, modalContext, hasShownThisSession, copyCount]);
 
   // Check if modal has been shown this session on mount
   useEffect(() => {
@@ -182,6 +206,48 @@ export function PostCopyEmailProvider({ children }: PostCopyEmailProviderProps) 
       setModalContext(null);
     }
   }, []);
+
+  // Safety: Ensure modal closes on unmount or if context is cleared
+  useEffect(() => {
+    if (!modalContext && isOpen) {
+      logClientWarn(
+        '[PostCopyEmailProvider] Modal context cleared but isOpen=true, closing modal',
+        normalizeError(new Error('Modal state mismatch'), 'Modal context cleared'),
+        'PostCopyEmailProvider.safetyCheck',
+        {
+          component: 'PostCopyEmailProvider',
+          action: 'modal-close-safety',
+          category: 'newsletter',
+          isOpen,
+          hasModalContext: Boolean(modalContext),
+        }
+      );
+      setIsOpen(false);
+    }
+  }, [modalContext, isOpen]);
+
+  // Safety: Close modal on page unload to prevent stuck backdrop
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (isOpen) {
+        logClientInfo(
+          '[PostCopyEmailProvider] Closing modal on beforeunload',
+          'PostCopyEmailProvider.beforeUnload',
+          {
+            component: 'PostCopyEmailProvider',
+            action: 'beforeunload-cleanup',
+            category: 'newsletter',
+          }
+        );
+        setIsOpen(false);
+        setModalContext(null);
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [isOpen]);
 
   return (
     <PostCopyEmailContext.Provider value={{ showModal, hasShownThisSession }}>

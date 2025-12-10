@@ -1,6 +1,7 @@
 'use client';
 
-import { motion, Transition, Easing } from 'motion/react';
+import { motion } from 'motion/react';
+import type { Transition, Easing } from 'motion/react';
 import * as React from 'react';
 import { useEffect, useRef, useState, useMemo } from 'react';
 
@@ -27,7 +28,10 @@ const buildKeyframes = (
 
   const keyframes: Record<string, Array<string | number>> = {};
   keys.forEach(k => {
-    keyframes[k] = [from[k], ...steps.map(s => s[k])];
+    const fromValue = from[k];
+    if (fromValue === undefined) return;
+    const stepValues = steps.map(s => s[k]).filter((v): v is string | number => v !== undefined);
+    keyframes[k] = [fromValue, ...stepValues];
   });
   return keyframes;
 };
@@ -53,8 +57,9 @@ export const BlurText: React.FC<BlurTextProps> = ({
   useEffect(() => {
     if (!ref.current) return;
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
+      (entries) => {
+        const entry = entries[0];
+        if (entry && entry.isIntersecting) {
           setInView(true);
           observer.unobserve(ref.current as Element);
         }
@@ -102,18 +107,26 @@ export const BlurText: React.FC<BlurTextProps> = ({
           ease: easing
         };
 
+        const isLastElement = index === elements.length - 1;
+        const motionProps: Omit<React.ComponentProps<typeof motion.span>, 'key'> = {
+          initial: fromSnapshot,
+          animate: inView ? animateKeyframes : fromSnapshot,
+          transition: spanTransition,
+          style: {
+            display: 'inline-block',
+            willChange: 'transform, filter, opacity'
+          },
+          ...(isLastElement && onAnimationComplete
+            ? {
+                onAnimationComplete: () => {
+                  onAnimationComplete();
+                }
+              }
+            : {})
+        };
+
         return (
-          <motion.span
-            key={index}
-            initial={fromSnapshot}
-            animate={inView ? animateKeyframes : fromSnapshot}
-            transition={spanTransition}
-            onAnimationComplete={index === elements.length - 1 ? onAnimationComplete : undefined}
-            style={{
-              display: 'inline-block',
-              willChange: 'transform, filter, opacity'
-            }}
-          >
+          <motion.span key={index} {...motionProps}>
             {segment === ' ' ? '\u00A0' : segment}
             {animateBy === 'words' && index < elements.length - 1 && '\u00A0'}
           </motion.span>

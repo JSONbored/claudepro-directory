@@ -14,7 +14,12 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
 } from '@heyclaude/web-runtime/ui';
+import { Award } from '@heyclaude/web-runtime/icons';
 import { useId } from 'react';
 
 interface TabConfig {
@@ -76,15 +81,31 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
       >
         {TAB_CONFIGS.map((config) => {
           const Icon = config.icon;
+          const tooltipContent = 
+            config.value === 'trending'
+              ? 'Most viewed and copied configurations this week'
+              : config.value === 'popular'
+              ? 'All-time most popular configurations based on views and engagement'
+              : 'Recently added or updated configurations';
+          
           return (
-            <TabsTrigger
-              key={config.value}
-              value={config.value}
-              aria-label={`View ${config.label.toLowerCase()} configurations`}
-            >
-              <Icon className="mr-2 h-4 w-4" aria-hidden="true" />
-              {config.label}
-            </TabsTrigger>
+            <TooltipProvider key={config.value}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <TabsTrigger
+                    value={config.value}
+                    aria-label={`View ${config.label.toLowerCase()} configurations`}
+                  >
+                    <Icon className="mr-2 h-4 w-4" aria-hidden="true" />
+                    {config.label}
+                  </TabsTrigger>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{config.heading}</p>
+                  <p className="text-xs text-muted-foreground">{tooltipContent}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           );
         })}
       </TabsList>
@@ -121,14 +142,33 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
                   return (
                     <div key={item.slug} className="relative">
                       {showRankBadge && index < 3 ? (
-                        <UnifiedBadge
-                          className="absolute -top-2 -right-2 z-10"
-                          variant="base"
-                          style="default"
-                          aria-label={`Rank ${index + 1}`}
-                        >
-                          #{index + 1}
-                        </UnifiedBadge>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div>
+                                <UnifiedBadge
+                                  className="absolute -top-2 -right-2 z-10"
+                                  variant="base"
+                                  style="default"
+                                  aria-label={`Rank ${index + 1}`}
+                                >
+                                  <Award className="mr-1 h-3 w-3" aria-hidden="true" />
+                                  #{index + 1}
+                                </UnifiedBadge>
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Rank #{index + 1}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {index === 0 
+                                  ? 'Most trending this week'
+                                  : index === 1
+                                  ? 'Second most trending'
+                                  : 'Third most trending'}
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       ) : null}
                       <ConfigCard item={cardItem} variant="default" showCategory showActions />
                     </div>

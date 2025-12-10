@@ -20,6 +20,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
+  MICROINTERACTIONS,
 } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import Link from 'next/link';
@@ -45,11 +46,6 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
   weekStart,
 }) => {
   const [tabCategories, setTabCategories] = useState<readonly string[]>([]);
-  const [springDefault, setSpringDefault] = useState({
-    type: 'spring' as const,
-    stiffness: 400,
-    damping: 17,
-  });
 
   // Get static config bundle
   useEffect(() => {
@@ -60,13 +56,6 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
       ? bundle.homepageConfig['homepage.tab_categories']
       : [];
     setTabCategories(categories.map(String));
-
-    // Extract animation config
-    setSpringDefault({
-      type: 'spring' as const,
-      stiffness: bundle.animationConfig['animation.spring.default.stiffness'],
-      damping: bundle.animationConfig['animation.spring.default.damping'],
-    });
   }, []);
 
   const contentTabs = useMemo(
@@ -97,7 +86,7 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
             }
 
             return (
-              <motion.div key={tab} whileTap={{ scale: 0.95 }} transition={springDefault}>
+              <motion.div key={tab} whileTap={MICROINTERACTIONS.button.tap} transition={MICROINTERACTIONS.button.transition}>
                 <TabsTrigger
                   value={tab}
                   className="px-3 text-xs whitespace-nowrap sm:px-4 sm:text-sm"

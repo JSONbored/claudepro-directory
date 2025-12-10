@@ -17,6 +17,10 @@ import {
   ErrorBoundary,
   UnifiedCardGrid,
   ICON_NAME_MAP,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
 } from '@heyclaude/web-runtime/ui';
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
@@ -694,37 +698,64 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
               <p className="text-muted-foreground text-xs tracking-wide uppercase">Quick filters</p>
               <div className="flex flex-wrap justify-center gap-2">
                 {resolvedQuickTagOptions.map((tag) => (
-                  <Button
-                    key={`tag-${tag}`}
-                    variant="outline"
-                    size="sm"
-                    aria-label={`Filter by tag ${tag}`}
-                    onClick={() => handleQuickFilter('tag', tag)}
-                  >
-                    #{tag}
-                  </Button>
+                  <TooltipProvider key={`tag-${tag}`}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          aria-label={`Filter by tag ${tag}`}
+                          onClick={() => handleQuickFilter('tag', tag)}
+                        >
+                          #{tag}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Filter by tag: {tag}</p>
+                        <p className="text-xs text-muted-foreground">Show only items with this tag</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 ))}
                 {resolvedQuickAuthorOptions.map((author) => (
-                  <Button
-                    key={`author-${author}`}
-                    variant="outline"
-                    size="sm"
-                    aria-label={`Filter by author ${author}`}
-                    onClick={() => handleQuickFilter('author', author)}
-                  >
-                    {author}
-                  </Button>
+                  <TooltipProvider key={`author-${author}`}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          aria-label={`Filter by author ${author}`}
+                          onClick={() => handleQuickFilter('author', author)}
+                        >
+                          {author}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Filter by author: {author}</p>
+                        <p className="text-xs text-muted-foreground">Show only items by this author</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 ))}
                 {resolvedQuickCategoryOptions.map((cat) => (
-                  <Button
-                    key={`category-${cat}`}
-                    variant="outline"
-                    size="sm"
-                    aria-label={`Filter by category ${cat}`}
-                    onClick={() => handleQuickFilter('category', cat)}
-                  >
-                    {cat}
-                  </Button>
+                  <TooltipProvider key={`category-${cat}`}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          aria-label={`Filter by category ${cat}`}
+                          onClick={() => handleQuickFilter('category', cat)}
+                        >
+                          {cat}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Filter by category: {cat}</p>
+                        <p className="text-xs text-muted-foreground">Show only items in this category</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 ))}
               </div>
             </div>

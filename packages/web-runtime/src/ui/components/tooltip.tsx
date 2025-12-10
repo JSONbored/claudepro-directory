@@ -4,10 +4,31 @@ import { cn } from '../utils.ts';
 import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 import { motion } from 'motion/react';
 import type * as React from 'react';
+import { MICROINTERACTIONS } from '../design-tokens/index.ts';
 
-const TooltipProvider = TooltipPrimitive.Provider;
+const TooltipProvider = ({ 
+  children, 
+  delayDuration = 300,
+  skipDelayDuration = 0,
+  ...props 
+}: React.ComponentProps<typeof TooltipPrimitive.Provider>) => {
+  // Ensure consistent defaults to prevent hydration mismatches
+  return (
+    <TooltipPrimitive.Provider
+      delayDuration={delayDuration}
+      skipDelayDuration={skipDelayDuration}
+      {...props}
+    >
+      {children}
+    </TooltipPrimitive.Provider>
+  );
+};
 
-const Tooltip = TooltipPrimitive.Root;
+const Tooltip = ({ children, defaultOpen = false, ...props }: React.ComponentProps<typeof TooltipPrimitive.Root>) => (
+  <TooltipPrimitive.Root defaultOpen={defaultOpen} {...props}>
+    {children}
+  </TooltipPrimitive.Root>
+);
 
 const TooltipTrigger = TooltipPrimitive.Trigger;
 
@@ -22,17 +43,12 @@ const TooltipContent = ({
     {...props}
   >
     <motion.div
-      initial={{ opacity: 0, y: -10, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: -5, scale: 0.95 }}
-      transition={{
-        type: 'spring',
-        stiffness: 300,
-        damping: 25,
-        mass: 0.5,
-      }}
+      initial={MICROINTERACTIONS.tooltip.initial}
+      animate={MICROINTERACTIONS.tooltip.animate}
+      exit={MICROINTERACTIONS.tooltip.exit}
+      transition={MICROINTERACTIONS.tooltip.transition}
       className={cn(
-        'z-50 overflow-hidden rounded-md border bg-popover px-3 py-1.5 text-popover-foreground text-sm shadow-md',
+        'z-50 overflow-hidden rounded-md border border-border/50 bg-popover px-3 py-1.5 text-popover-foreground text-sm shadow-lg shadow-black/20 dark:shadow-black/40 backdrop-blur-sm',
         className
       )}
     >

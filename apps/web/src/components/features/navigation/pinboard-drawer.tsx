@@ -3,6 +3,7 @@
 import { formatRelativeDate } from '@heyclaude/web-runtime';
 import { usePinboard } from '@heyclaude/web-runtime/hooks';
 import { BookmarkMinus, BookmarkPlus } from '@heyclaude/web-runtime/icons';
+import { logClientInfo } from '@heyclaude/web-runtime/logging/client';
 import {
   UI_CLASSES,
   Button,
@@ -13,6 +14,7 @@ import {
   SheetTitle,
 } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
+import { useEffect } from 'react';
 
 interface PinboardDrawerProps {
   onOpenChange: (open: boolean) => void;
@@ -23,8 +25,29 @@ export function PinboardDrawer({ open, onOpenChange }: PinboardDrawerProps) {
   const { pinnedItems, isLoaded, unpinItem, clearAll } = usePinboard();
   const hasPins = pinnedItems.length > 0;
 
+  // CRITICAL: Ensure open is explicitly boolean (Radix UI requires this)
+  const isOpen = open === true;
+
+  // Log drawer state for debugging
+  useEffect(() => {
+    logClientInfo(
+      '[PinboardDrawer] Render',
+      'PinboardDrawer.render',
+      {
+        component: 'PinboardDrawer',
+        action: 'render',
+        category: 'navigation',
+        open,
+        isOpen,
+        isLoaded,
+        pinnedItemsCount: pinnedItems.length,
+        hasOnOpenChange: Boolean(onOpenChange),
+      }
+    );
+  }, [open, isOpen, isLoaded, pinnedItems.length, onOpenChange]);
+
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="sm:max-w-lg">
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2 text-left">

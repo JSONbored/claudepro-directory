@@ -40,9 +40,12 @@ import type { ButtonStyleProps } from '../../../types/component.types.ts';
 import { cn } from '../../../ui/utils.ts';
 import { UI_CLASSES } from '../../../ui/constants.ts';
 import { toasts } from '../../../client/toast.ts';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { Button } from '../button.tsx';
+import { AnimatePresence, motion } from 'motion/react';
+import { MICROINTERACTIONS } from '../../design-tokens/index.ts';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../tooltip.tsx';
 
 /**
  * BookmarkButton Props
@@ -73,6 +76,7 @@ export function BookmarkButton({
   const [isBookmarked, setIsBookmarked] = useState(initialBookmarked);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
+  const pathname = usePathname();
   const { celebrateBookmark } = useConfetti();
   const pulse = usePulse();
   const runLoggedAsync = useLoggedAsync({
@@ -176,7 +180,11 @@ export function BookmarkButton({
           );
         }
 
-        router.refresh();
+        // Only refresh router on account/library pages where bookmark state affects displayed content
+        // Skip refresh on homepage and other pages to prevent full page reload
+        if (pathname?.startsWith('/account') || pathname?.startsWith('/u/')) {
+          router.refresh();
+        }
       } catch (error) {
         // Error already logged by useLoggedAsync
         if (error instanceof Error && error.message.includes('signed in')) {
@@ -196,28 +204,66 @@ export function BookmarkButton({
   };
 
   return (
-    <Button
-      variant={variant}
-      size={size}
-      className={cn(UI_CLASSES.ICON_BUTTON_SM, className)}
-      onClick={handleToggle}
-      disabled={disabled || isPending}
-      aria-label={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}
-      title={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}
-    >
-      {isPending ? (
-        <Loader2 className={`${UI_CLASSES.ICON_XS} animate-spin`} aria-hidden="true" />
-      ) : isBookmarked ? (
-        <BookmarkCheck
-          className={`${UI_CLASSES.ICON_XS} fill-current text-primary`}
-          aria-hidden="true"
-        />
-      ) : (
-        <Bookmark className={UI_CLASSES.ICON_XS} aria-hidden="true" />
-      )}
-      {showLabel && !isPending && (
-        <span className={`ml-1 ${UI_CLASSES.TEXT_BADGE}`}>{isBookmarked ? 'Saved' : 'Save'}</span>
-      )}
-    </Button>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant={variant}
+            size={size}
+            className={cn(UI_CLASSES.ICON_BUTTON_SM, className)}
+            onClick={handleToggle}
+            disabled={disabled || isPending}
+            aria-label={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}
+          >
+            <AnimatePresence mode="wait">
+              {isPending ? (
+                <motion.div
+                  key="loading"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  exit={{ scale: 0 }}
+                  transition={MICROINTERACTIONS.iconTransition.transition}
+                >
+                  <Loader2 className={`${UI_CLASSES.ICON_XS} animate-spin`} aria-hidden="true" />
+                </motion.div>
+              ) : isBookmarked ? (
+                <motion.div
+                  key="bookmarked"
+                  initial={MICROINTERACTIONS.iconTransition.initial}
+                  animate={MICROINTERACTIONS.iconTransition.animate}
+                  exit={MICROINTERACTIONS.iconTransition.exit}
+                  transition={MICROINTERACTIONS.iconTransition.transition}
+                  style={{ color: 'var(--claude-orange)' }}
+                >
+                  <BookmarkCheck
+                    className={`${UI_CLASSES.ICON_XS} fill-current`}
+                    aria-hidden="true"
+                  />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="unbookmarked"
+                  initial={MICROINTERACTIONS.iconTransition.initial}
+                  animate={MICROINTERACTIONS.iconTransition.animate}
+                  exit={MICROINTERACTIONS.iconTransition.exit}
+                  transition={MICROINTERACTIONS.iconTransition.transition}
+                >
+                  <Bookmark className={UI_CLASSES.ICON_XS} aria-hidden="true" />
+                </motion.div>
+              )}
+            </AnimatePresence>
+            {showLabel && !isPending && (
+              <span className={`ml-1 ${UI_CLASSES.TEXT_BADGE}`}>{isBookmarked ? 'Saved' : 'Save'}</span>
+            )}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{isBookmarked ? 'Remove from library' : 'Save to library'}</p>
+          <p className="text-xs text-muted-foreground">
+            {isBookmarked ? 'Unsave this item' : 'Requires account'}
+          </p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }

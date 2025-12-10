@@ -10,17 +10,18 @@
  * Runtime: Node.js (required for Supabase client)
  * Caching: 5 minutes via Cache-Control headers (s-maxage=300)
  */
-// Constants import removed - not used
-import { logger, normalizeError, createErrorResponse, toLogContextValue } from '@heyclaude/web-runtime/logging/server';
+import { type Database } from '@heyclaude/database-types';
+import { logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
 import { createSupabaseAdminClient } from '@heyclaude/web-runtime/server';
 import { cacheLife } from 'next/cache';
 import { connection, NextResponse } from 'next/server';
 
 /**
  * Cached helper function to fetch social proof stats.
- * Note: This uses Date.now() for timestamp, so we cache the data fetching but generate timestamp at request time.
- 
- * @returns {unknown} Description of return value*/
+ * Uses database RPC function to do all aggregations in the database.
+ * 
+ * @returns A promise resolving to social proof stats: contributors (count and names), submissions count, successRate (percentage or null), and totalUsers (count or null).
+ */
 async function getCachedSocialProofData(): Promise<{
   contributors: { count: number; names: string[] };
   submissions: number;
@@ -28,156 +29,49 @@ async function getCachedSocialProofData(): Promise<{
   totalUsers: null | number;
 }> {
   'use cache';
-  cacheLife('quarter'); // 15min stale, 1hr revalidate, 1 day expire - Stats change frequently
-
-  // NOTE: Admin client bypasses RLS and is required here because:
-  // 1. This is a public stats API endpoint that aggregates data from content_submissions
-  // 2. The RLS policy on content_submissions checks auth.users table which anon client cannot access
-  // 3. Admin client bypasses RLS to allow read-only aggregation queries for public stats
+  cacheLife('quarter'); // 15min stale, 5min revalidate, 2hr expire - Stats change frequently (defined in next.config.mjs)
 
   const supabase = createSupabaseAdminClient();
 
-  // Calculate date ranges
-  const weekAgo = new Date();
-  weekAgo.setDate(weekAgo.getDate() - 7);
-  const monthAgo = new Date();
-  monthAgo.setDate(monthAgo.getDate() - 30);
+  // Use database RPC to do all aggregations in database (much faster than multiple queries + client-side processing)
+  // RPC has two overloads - we're calling with no args, so we get the first overload's return type
+  const { data, error } = await supabase.rpc('get_social_proof_stats');
 
-  // Execute all queries in parallel
-  const [recentResult, monthResult, contentResult] = await Promise.allSettled([
-    supabase
-      .from('content_submissions')
-      .select('id, status, created_at, author')
-      .gte('created_at', weekAgo.toISOString())
-      .order('created_at', { ascending: false }),
-    supabase.from('content_submissions').select('status').gte('created_at', monthAgo.toISOString()),
-    supabase.from('content').select('id', { count: 'exact', head: true }),
-  ]);
-
-  // Extract results and handle errors
-  interface SubmissionRow {
-    author: null | string;
-    created_at: string;
-    id: string;
-    status: string;
-  }
-  interface StatusRow {
-    status: string;
+  if (error) {
+    throw error;
   }
 
-  // Log errors from Promise.allSettled results
-  if (recentResult.status === 'rejected') {
-    logger.error(
-      {
-        query: 'stats:social-proof:recent',
-        error: toLogContextValue(recentResult.reason),
-      },
-      'stats:social-proof:recent query failed'
-    );
-  }
-  if (monthResult.status === 'rejected') {
-    logger.error(
-      {
-        query: 'stats:social-proof:month',
-        error: toLogContextValue(monthResult.reason),
-      },
-      'stats:social-proof:month query failed'
-    );
-  }
-  if (contentResult.status === 'rejected') {
-    logger.error(
-      {
-        query: 'stats:social-proof:content',
-        error: toLogContextValue(contentResult.reason),
-      },
-      'stats:social-proof:content query failed'
-    );
+  // Extract the first overload's return type (no args version)
+  // The function has two overloads, but when called with no args, TypeScript infers the first one
+  type SocialProofStatsFunction = Database['public']['Functions']['get_social_proof_stats'];
+  type NoArgsOverload = Extract<SocialProofStatsFunction, { Args: never }>;
+  type SocialProofStatsRow = NoArgsOverload['Returns'][number];
+  
+  const result = (data as NoArgsOverload['Returns']) ?? [];
+  const row = Array.isArray(result) && result.length > 0 ? (result[0] as SocialProofStatsRow) : null;
+  
+  if (!row) {
+    // Return defaults if no data
+    return {
+      contributors: { count: 0, names: [] },
+      submissions: 0,
+      successRate: null,
+      totalUsers: null,
+    };
   }
 
-  let recentSubmissions: null | SubmissionRow[] = null;
-  if (recentResult.status === 'fulfilled') {
-    const response = recentResult.value as { data: null | SubmissionRow[]; error: unknown };
-    if (response.error) {
-      logger.error(
-        {
-          query: 'stats:social-proof:recent',
-          error: toLogContextValue(response.error),
-        },
-        'stats:social-proof:recent query returned error'
-      );
-    }
-    recentSubmissions = response.data;
-  }
-
-  let monthSubmissions: null | StatusRow[] = null;
-  if (monthResult.status === 'fulfilled') {
-    const response = monthResult.value as { data: null | StatusRow[]; error: unknown };
-    if (response.error) {
-      logger.error(
-        {
-          query: 'stats:social-proof:month',
-          error: toLogContextValue(response.error),
-        },
-        'stats:social-proof:month query returned error'
-      );
-    }
-    monthSubmissions = response.data;
-  }
-
-  let contentCount: null | number = null;
-  if (contentResult.status === 'fulfilled') {
-    const response = contentResult.value as { count: null | number; error: unknown };
-    if (response.error) {
-      logger.error(
-        {
-          query: 'stats:social-proof:content',
-          error: toLogContextValue(response.error),
-        },
-        'stats:social-proof:content query returned error'
-      );
-    }
-    contentCount = response.count;
-  }
-
-  const submissionCount = recentSubmissions?.length ?? 0;
-  const total = monthSubmissions?.length ?? 0;
-  const approved = monthSubmissions ? monthSubmissions.filter((s) => s.status === 'merged').length : 0;
-  const successRate = total > 0 ? Math.round((approved / total) * 100) : null;
-
-  // Get top contributors this week (unique authors with most submissions)
-  const contributorCounts = new Map<string, number>();
-  if (recentSubmissions) {
-    for (const sub of recentSubmissions) {
-      if (sub.author) {
-        contributorCounts.set(sub.author, (contributorCounts.get(sub.author) ?? 0) + 1);
-      }
-    }
-  }
-
-  const topContributors = [...contributorCounts.entries()]
-    .toSorted((a, b) => b[1] - a[1])
-    .slice(0, 5)
-    .map(([name]) => {
-      // Defensively extract username: handle both email and non-email formats
-      const atIndex = name.indexOf('@');
-      if (atIndex !== -1) {
-        // Email format: extract username part before '@'
-        return name.slice(0, Math.max(0, atIndex));
-      }
-      // Non-email format: return trimmed original name
-      return name.trim();
-    });
-
-  const totalUsers = contentCount ?? null;
-
+  // Map database return type to expected format
+  // TypeScript now knows row has the correct shape from the first overload
   return {
     contributors: {
-      count: topContributors.length,
-      names: topContributors,
+      count: row.contributor_count ?? 0,
+      names: Array.isArray(row.contributor_names) ? row.contributor_names : [],
     },
-    submissions: submissionCount,
-    successRate,
-    totalUsers,
+    submissions: row.submission_count ?? 0,
+    successRate: row.success_rate !== null && row.success_rate !== undefined 
+      ? Number(row.success_rate) 
+      : null,
+    totalUsers: row.total_users ?? null,
   };
 }
 

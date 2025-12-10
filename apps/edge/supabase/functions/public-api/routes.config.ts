@@ -16,12 +16,6 @@ export interface RouteConfig {
 
 export const ROUTES: RouteConfig[] = [
   {
-    name: 'og-image',
-    path: '/og',
-    methods: ['GET', 'HEAD', 'OPTIONS'],
-    handler: { import: './routes/og/index.ts', function: 'handleOGImageRequest' },
-  },
-  {
     name: 'transform-image',
     path: '/transform/image',
     methods: ['GET', 'HEAD', 'POST', 'OPTIONS'],

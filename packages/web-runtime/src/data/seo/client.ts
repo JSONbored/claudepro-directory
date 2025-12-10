@@ -57,8 +57,8 @@ export async function getSEOMetadata(route: string): Promise<null | {
   cacheTag(`seo-${route}`);
 
   const reqLogger = logger.child({
-    operation: 'getSEOMetadata',
     module: 'data/seo/client',
+    operation: 'getSEOMetadata',
   });
 
   try {
@@ -78,7 +78,7 @@ export async function getSEOMetadata(route: string): Promise<null | {
     }
 
     const service = new SeoService(client);
-    const result = await service.generateMetadata({ p_route: route, p_include: 'metadata' });
+    const result = await service.generateMetadata({ p_include: 'metadata', p_route: route });
 
     if (!result.metadata) {
       reqLogger.debug({ route }, 'getSEOMetadata: no metadata returned');
@@ -109,20 +109,20 @@ export async function getSEOMetadata(route: string): Promise<null | {
     }
 
     reqLogger.info(
-      { route, hasMetadata: Boolean(metadata) },
+      { hasMetadata: Boolean(metadata), route },
       'getSEOMetadata: fetched successfully'
     );
 
     return {
-      title: metadata.title ?? '',
       description: metadata.description ?? '',
       keywords: metadata.keywords ?? [],
       openGraphType: metadata.open_graph_type === 'profile' ? 'profile' : 'website',
-      twitterCard: 'summary_large_image',
       robots: {
-        index: metadata.robots?.index ?? true,
         follow: metadata.robots?.follow ?? true,
+        index: metadata.robots?.index ?? true,
       },
+      title: metadata.title ?? '',
+      twitterCard: 'summary_large_image',
       ...(metadata.debug ? { _debug: debugObject } : {}),
     };
   } catch (error) {
@@ -174,8 +174,8 @@ export async function getSEOMetadataWithSchemas(route: string): Promise<null | {
   cacheTag('structured-data');
 
   const reqLogger = logger.child({
-    operation: 'getSEOMetadataWithSchemas',
     module: 'data/seo/client',
+    operation: 'getSEOMetadataWithSchemas',
   });
 
   try {
@@ -196,8 +196,8 @@ export async function getSEOMetadataWithSchemas(route: string): Promise<null | {
 
     const service = new SeoService(client);
     const result = await service.generateMetadata({
-      p_route: route,
       p_include: 'metadata,schemas',
+      p_route: route,
     });
 
     if (!result.metadata) {
@@ -229,21 +229,21 @@ export async function getSEOMetadataWithSchemas(route: string): Promise<null | {
     }
 
     reqLogger.info(
-      { route, hasMetadata: Boolean(metadata), hasSchemas: Boolean(result.schemas) },
+      { hasMetadata: Boolean(metadata), hasSchemas: Boolean(result.schemas), route },
       'getSEOMetadataWithSchemas: fetched successfully'
     );
 
     return {
       metadata: {
-        title: metadata.title ?? '',
         description: metadata.description ?? '',
         keywords: metadata.keywords ?? [],
         openGraphType: metadata.open_graph_type === 'profile' ? 'profile' : 'website',
-        twitterCard: 'summary_large_image',
         robots: {
-          index: metadata.robots?.index ?? true,
           follow: metadata.robots?.follow ?? true,
+          index: metadata.robots?.index ?? true,
         },
+        title: metadata.title ?? '',
+        twitterCard: 'summary_large_image',
         ...(metadata.debug ? { _debug: debugObject } : {}),
       },
       schemas: result.schemas,

@@ -10,7 +10,8 @@ import {
   type DisplayableContent,
   type UnifiedCategoryConfig,
 } from '@heyclaude/web-runtime/types/component.types';
-import { UI_CLASSES, UnifiedBadge, UnifiedCardGrid, ConfigCard, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, BlurText } from '@heyclaude/web-runtime/ui';
+import { UI_CLASSES, UnifiedBadge, UnifiedCardGrid, ConfigCard, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, BlurText, ANIMATIONS, TEXT_ANIMATIONS, STAGGER, VIEWPORT } from '@heyclaude/web-runtime/ui';
+import { motion } from 'motion/react';
 import Link from 'next/link';
 import { type FC, memo, useEffect, useMemo } from 'react';
 
@@ -57,14 +58,11 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
             delay={50}
             animateBy="words"
             direction="top"
-            threshold={0.1}
-            rootMargin="0px"
+            threshold={VIEWPORT.default.amount}
+            rootMargin={VIEWPORT.default.margin}
             className="text-2xl font-bold"
-            animationFrom={{ filter: 'blur(10px)', opacity: 0, y: -20 }}
-            animationTo={[
-              { filter: 'blur(5px)', opacity: 0.7, y: 0 },
-              { filter: 'blur(0px)', opacity: 1, y: 0 }
-            ]}
+            animationFrom={TEXT_ANIMATIONS.blur.from}
+            animationTo={[...TEXT_ANIMATIONS.blur.to]}
             stepDuration={0.35}
           />
           <Link href={href} className="text-accent flex items-center gap-2 hover:underline">
@@ -79,7 +77,16 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
             const showTrending = Boolean(slug && trendingSlugs.has(slug));
 
             return (
-              <div className="relative h-full">
+              <motion.div
+                key={`card-${item.slug || index}`}
+                className="relative h-full"
+                initial={{ opacity: 0, y: 20, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{
+                  delay: index * STAGGER.default,
+                  ...ANIMATIONS.spring.smooth,
+                }}
+              >
                 {showNew || showTrending ? (
                   <TooltipProvider delayDuration={300}>
                     <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
@@ -123,7 +130,7 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
                   </TooltipProvider>
                 ) : null}
                 <ConfigCard item={item} showBorderBeam={index < 3} />
-              </div>
+              </motion.div>
             );
           }}
           variant="normal"
@@ -248,8 +255,18 @@ const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({
             </Link>
           </div>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {featuredJobs.slice(0, 6).map((job) => (
-              <JobCard key={job.slug} job={job} />
+            {featuredJobs.slice(0, 6).map((job, index) => (
+              <motion.div
+                key={job.slug}
+                initial={{ opacity: 0, y: 20, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{
+                  delay: index * STAGGER.default,
+                  ...ANIMATIONS.spring.smooth,
+                }}
+              >
+                <JobCard job={job} />
+              </motion.div>
             ))}
           </div>
         </div>

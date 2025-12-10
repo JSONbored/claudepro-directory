@@ -7,6 +7,8 @@ import type { DialogProps } from '@radix-ui/react-dialog';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { Command as CommandPrimitive } from 'cmdk';
 import type * as React from 'react';
+import { useEffect } from 'react';
+import { logClientInfo } from '@heyclaude/web-runtime/logging/client';
 import {
   Dialog,
   DialogContent,
@@ -32,9 +34,36 @@ const Command = ({
 );
 Command.displayName = CommandPrimitive.displayName;
 
-const CommandDialog = ({ children, ...props }: DialogProps) => {
+const CommandDialog = ({ children, open, onOpenChange, ...props }: DialogProps) => {
+  // DEBUG: Log command dialog state
+  useEffect(() => {
+    logClientInfo(
+      '[CommandDialog] State changed',
+      'CommandDialog.stateChange',
+      {
+        component: 'CommandDialog',
+        action: 'state-change',
+        category: 'navigation',
+        open: open ?? false,
+        hasOnOpenChange: Boolean(onOpenChange),
+      }
+    );
+  }, [open, onOpenChange]);
+
+  // CRITICAL: Ensure open is explicitly boolean (Radix UI requires this)
+  const isOpen = open === true;
+
+  // Build dialog props - only include onOpenChange if provided (exactOptionalPropertyTypes)
+  const dialogProps: DialogProps = {
+    ...props,
+    open: isOpen,
+  };
+  if (onOpenChange) {
+    dialogProps.onOpenChange = onOpenChange;
+  }
+
   return (
-    <Dialog {...props}>
+    <Dialog {...dialogProps}>
       <DialogContent className="overflow-hidden p-0 shadow-lg">
         <VisuallyHidden>
           <DialogTitle>Command Menu</DialogTitle>

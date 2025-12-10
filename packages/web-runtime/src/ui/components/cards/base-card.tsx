@@ -47,7 +47,8 @@ import { getViewTransitionName } from '../../utils.ts';
 import { POSITION_PATTERNS, UI_CLASSES } from '../../constants.ts';
 import { UnifiedBadge } from '../badges/unified-badge.tsx';
 import { SwipeableCardWrapper } from './swipeable-card.tsx';
-import { HoverCard } from '../animation/hover-card.tsx';
+import { motion } from 'motion/react';
+import { MICROINTERACTIONS } from '../../design-tokens/index.ts';
 import { SponsoredPulse } from '../features/sponsored-pulse.tsx';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../card.tsx';
 import { type UseCardNavigationOptions, useCardNavigation } from '../../../hooks/use-card-navigation.ts';
@@ -335,20 +336,9 @@ export const BaseCard = memo(
           ? { viewTransitionName: getViewTransitionName('card', viewTransitionSlug) }
           : undefined;
 
-      // Card content wrapper - conditionally render with or without motion animations
-      const cardElement = (
-        <CardComponent
-          className={`${disableNavigation ? '' : UI_CLASSES.CARD_INTERACTIVE} ${variant === 'detailed' ? UI_CLASSES.CARD_PADDING_DEFAULT : ''} ${variant === 'review' ? `rounded-lg border ${UI_CLASSES.CARD_PADDING_COMPACT}` : ''} ${compactMode ? UI_CLASSES.CARD_PADDING_COMPACT : ''} ${className || ''} relative`}
-          style={{
-            ...viewTransitionStyle,
-            contain: 'paint',
-          }}
-          onClick={disableNavigation ? undefined : handleCardClick}
-          role="article"
-          aria-label={ariaLabel}
-          tabIndex={disableNavigation ? undefined : 0}
-          onKeyDown={disableNavigation ? undefined : handleKeyDown}
-        >
+      // Card content - shared between both CardComponent and motion.div
+      const cardContent = (
+        <>
           {/* Top accent border for related content */}
           {topAccent && (
             <div
@@ -364,11 +354,11 @@ export const BaseCard = memo(
 
             {/* Standard header (config/collection cards) */}
             {!renderHeader && (
-              <div className={'flex items-start justify-between'}>
-                <div className="flex-1">
+              <div className={'flex items-start justify-between overflow-visible'}>
+                <div className="flex-1 overflow-visible">
                   {/* Top badges slot (type, difficulty, sponsored, etc.) */}
                   {renderTopBadges && (
-                    <div className={`mb-1 flex items-center ${UI_CLASSES.SPACE_COMPACT}`}>
+                    <div className={`mb-1 flex items-center flex-wrap gap-1 ${UI_CLASSES.SPACE_COMPACT} overflow-visible`}>
                       {renderTopBadges()}
                     </div>
                   )}
@@ -485,29 +475,58 @@ export const BaseCard = memo(
               </div>
             </div>
           </CardContentComponent>
-        </CardComponent>
+        </>
       );
 
-      // Wrap card with hover animation if navigation is enabled
-      const motionCard = disableNavigation ? (
-        cardElement
+      // Card wrapper - apply motion animations directly using design system tokens
+      // For non-navigation cards, use CardComponent. For interactive cards, use motion.div with Card styling
+      const cardBaseClasses = `${UI_CLASSES.FLEX_COL_GAP_6} rounded-xl border bg-card py-6 text-card-foreground shadow-sm`;
+      const cardClassName = `${cardBaseClasses} ${disableNavigation ? '' : UI_CLASSES.CARD_INTERACTIVE} ${variant === 'detailed' ? UI_CLASSES.CARD_PADDING_DEFAULT : ''} ${variant === 'review' ? `rounded-lg border ${UI_CLASSES.CARD_PADDING_COMPACT}` : ''} ${compactMode ? UI_CLASSES.CARD_PADDING_COMPACT : ''} ${className || ''} relative`;
+      
+      const cardElement = disableNavigation ? (
+        <CardComponent
+          className={cardClassName}
+          style={{
+            ...viewTransitionStyle,
+            contain: 'layout style',
+          }}
+          role="article"
+          aria-label={ariaLabel}
+        >
+          {cardContent}
+        </CardComponent>
       ) : (
-        <HoverCard variant="gentle" disabled={disableNavigation}>
-          {cardElement}
-        </HoverCard>
+        <motion.div
+          className={cardClassName}
+          style={{
+            ...viewTransitionStyle,
+            contain: 'layout style',
+          }}
+          whileHover={MICROINTERACTIONS.card.hover}
+          whileTap={MICROINTERACTIONS.card.tap}
+          transition={MICROINTERACTIONS.card.transition}
+          onClick={handleCardClick}
+          role="article"
+          aria-label={ariaLabel}
+          tabIndex={0}
+          onKeyDown={handleKeyDown}
+          data-slot="card"
+        >
+          {cardContent}
+        </motion.div>
       );
 
       // Optionally wrap with swipeable gestures for mobile quick actions
-      const cardContent = enableSwipeGestures ? (
+      const finalCardContent = enableSwipeGestures ? (
         <SwipeableCardWrapper
           onSwipeRight={onSwipeRight}
           onSwipeLeft={onSwipeLeft}
           enableGestures={enableSwipeGestures}
         >
-          {motionCard}
+          {cardElement}
         </SwipeableCardWrapper>
       ) : (
-        motionCard
+        cardElement
       );
 
       // Wrap in sponsored tracker if this is sponsored content
@@ -519,12 +538,12 @@ export const BaseCard = memo(
             position={position}
             pageUrl={typeof window !== 'undefined' ? window.location.href : undefined}
           >
-            {cardContent}
+            {finalCardContent}
           </SponsoredPulse>
         );
       }
 
-      return cardContent;
+      return finalCardContent;
     } catch (error) {
       const normalized = normalizeError(error, 'BaseCard: Rendering failed');
       logger.warn({ err: normalized,

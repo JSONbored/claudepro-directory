@@ -132,3 +132,8 @@ config/tools/LINTING.md
 config/tools/TYPE-CHECK-QUICK-REFERENCE.md
 config/tools/TYPE-CHECKING.md
 config/tools/NEW-ESLINT-RULES.md
+config/tools/ESLINT_AUTOFIX_AUDIT.md
+config/tools/SAFE_AUTOFIX_RULES_RESEARCH.md
+config/tools/SAFE_AUTOFIX_RULES_SUMMARY.md
+config/tools/AUTOFIX_RULES_FINAL_SUMMARY.md
+config/tools/eslint-tests/

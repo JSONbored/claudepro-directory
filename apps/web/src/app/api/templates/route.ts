@@ -17,15 +17,15 @@ import { type NextRequest, NextResponse } from 'next/server';
 /**
  * Cached helper function to fetch content templates
  * Uses Cache Components to reduce function invocations
- * Note: getContentTemplates already has caching in data layer, but page-level caching adds another layer
- * @param category
- 
- * @returns {Promise<unknown>} Description of return value*/
+ * 
+ * @param category - The content category to fetch templates for
+ * @returns Promise resolving to an array of template objects for the specified category
+ */
 function getCachedTemplatesForAPI(category: Database['public']['Enums']['content_category']) {
   'use cache';
   cacheTag('templates');
   cacheTag(`templates-${category}`);
-  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
+  cacheLife('static'); // 5min stale, 1day revalidate, 1week expire
 
   return getContentTemplates(category);
 }

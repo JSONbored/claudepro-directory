@@ -181,34 +181,37 @@ export default async function SettingsPage() {
     !Array.isArray(profile) && // Profile is an object - ensure display_name is a string, not a serialized tuple
     profile.display_name
   ) {
-    // Check if display_name is a PostgreSQL tuple string
-    if (isPostgresTupleString(profile.display_name)) {
-      const originalLength = profile.display_name?.length ?? 0;
-      const extracted = extractFirstFieldFromTuple(profile.display_name);
-      if (extracted === null) {
-        userLogger.warn({ section: 'data-fetch', tupleString: profile.display_name.slice(0, 100) }, 'SettingsPage: failed to extract display_name from tuple');
-        profile.display_name = '';
-      } else {
-        profile = {
-          ...profile,
-          display_name: extracted,
-        };
-        userLogger.info(
-          {
-            section: 'data-fetch',
-            extracted: profile.display_name,
-            originalLength,
-          },
-          'SettingsPage: extracted display_name from tuple string'
-        );
+    // First check if display_name is a string before processing
+    if (typeof profile.display_name === 'string') {
+      // Check if display_name is a PostgreSQL tuple string
+      if (isPostgresTupleString(profile.display_name)) {
+        const originalLength = profile.display_name?.length ?? 0;
+        const extracted = extractFirstFieldFromTuple(profile.display_name);
+        if (extracted === null) {
+          userLogger.warn({ section: 'data-fetch', tupleString: profile.display_name.slice(0, 100) }, 'SettingsPage: failed to extract display_name from tuple');
+          profile.display_name = '';
+        } else {
+          profile = {
+            ...profile,
+            display_name: extracted,
+          };
+          userLogger.info(
+            {
+              section: 'data-fetch',
+              extracted: profile.display_name,
+              originalLength,
+            },
+            'SettingsPage: extracted display_name from tuple string'
+          );
+        }
       }
-    } else if (typeof profile.display_name !== 'string') {
-      // Not a tuple string, but also not a string - convert to string or empty
+      // If it's already a string and not a tuple, keep it as is
+    } else {
+      // Not a string - convert to string or empty
       userLogger.warn({ section: 'data-fetch', displayNameType: typeof profile.display_name,
         displayNameValue: String(profile.display_name).slice(0, 100) }, 'SettingsPage: display_name is not a string');
       profile.display_name = '';
     }
-    // If it's already a string and not a tuple, keep it as is
   }
 
   // Initialize user if missing (consolidated - no more profiles table)

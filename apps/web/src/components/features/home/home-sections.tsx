@@ -9,8 +9,7 @@ import {
   trackHomepageSectionError,
   trackMissingData,
 } from '@heyclaude/web-runtime/core';
-import { getCategoryConfigs, getCategoryStatsConfig } from '@heyclaude/web-runtime/data';
-import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { getCategoryConfigs } from '@heyclaude/web-runtime/data';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import {
@@ -18,17 +17,6 @@ import {
   type FilterState,
   type HomePageClientProps,
 } from '@heyclaude/web-runtime/types/component.types';
-import {
-  NumberTicker,
-  UnifiedBadge,
-  HomepageStatsSkeleton,
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@heyclaude/web-runtime/ui';
-import { motion } from 'motion/react';
-import Link from 'next/link';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
@@ -36,7 +24,6 @@ import {
   LazySearchSection,
   LazyTabsSection,
 } from '@/src/components/features/home/lazy-home-sections';
-import { MagneticSearchWrapper } from '@/src/components/features/home/magnetic-search-wrapper';
 import { useHeroSearchConnection } from '@/src/components/features/home/hero-search-connection';
 import { searchCache } from '@/src/utils/search-cache';
 
@@ -51,7 +38,7 @@ function HomePageClientComponent({
   weekStart,
   serverCategoryIds,
 }: HomePageClientProps) {
-  const { setSearchFocused } = useHeroSearchConnection();
+  const { setSearchFocused, setSearchProps } = useHeroSearchConnection();
   const [allConfigs, setAllConfigs] = useState<DisplayableContent[]>([]);
   const [isLoadingAllConfigs, setIsLoadingAllConfigs] = useState(false);
   const [hasMoreAllConfigs, setHasMoreAllConfigs] = useState(true);
@@ -91,24 +78,17 @@ function HomePageClientComponent({
     // Final fallback: empty array
     return [] as readonly Database['public']['Enums']['content_category'][];
   });
-  const [, setSpringDefault] = useState({
-    type: 'spring' as const,
-    stiffness: 400,
-    damping: 17,
-  });
 
-  const categoryStatsConfig = useMemo(() => getCategoryStatsConfig(), []);
   const categoryConfigs = useMemo(() => getCategoryConfigs(), []);
 
   // Track missing stats data
   useEffect(() => {
     if (stats && Object.keys(stats).length === 0) {
       trackMissingData('stats', 'stats-data', {
-        categoryStatsConfigCount: categoryStatsConfig.length,
-        expectedCategories: categoryStatsConfig.map((c) => c.categoryId),
+        note: 'Stats data is empty',
       });
     }
-  }, [stats, categoryStatsConfig]);
+  }, [stats]);
 
   // Get static config bundle
   useEffect(() => {
@@ -152,13 +132,6 @@ function HomePageClientComponent({
     setFeaturedCategories(
       validCategories as readonly Database['public']['Enums']['content_category'][]
     );
-
-    // Extract animation config with fallbacks
-    setSpringDefault({
-      type: 'spring' as const,
-      stiffness: bundle?.animationConfig?.['animation.spring.default.stiffness'] ?? 400,
-      damping: bundle?.animationConfig?.['animation.spring.default.damping'] ?? 17,
-    });
   }, [serverCategoryIds, initialData]);
 
   const fetchAllConfigs = useCallback(
@@ -565,6 +538,19 @@ function HomePageClientComponent({
             searchCache.set(trimmedQuery, cacheKey, results);
 
             // Update state
+            logClientWarn(
+              '[HomePageClient] Setting search results',
+              null,
+              'HomePageClient.handleSearch.setResults',
+              {
+                component: 'HomePageClient',
+                action: 'set-search-results',
+                category: 'search',
+                query: trimmedQuery,
+                resultsLength: results.length,
+                willUpdateState: true,
+              }
+            );
             setSearchResults(results);
           },
           {
@@ -639,7 +625,21 @@ function HomePageClientComponent({
   const filteredResults = useMemo((): DisplayableContent[] => {
     // Show search results if there's an active search query
     if (currentSearchQuery.length > 0) {
-      return searchResults || [];
+      const results = searchResults || [];
+      logClientWarn(
+        '[HomePageClient] Computing filteredResults for search',
+        null,
+        'HomePageClient.filteredResults.search',
+        {
+          component: 'HomePageClient',
+          action: 'compute-filtered-results',
+          category: 'search',
+          currentSearchQuery,
+          searchResultsLength: searchResults.length,
+          filteredResultsLength: results.length,
+        }
+      );
+      return results;
     }
 
     // Not searching - filter allConfigs by tab
@@ -705,199 +705,49 @@ function HomePageClientComponent({
     };
   }, []);
 
+  // Set search props in context so hero can render the search bar
+  useEffect(() => {
+    setSearchProps({
+      onSearch: (query) => {
+        // UnifiedSearch already debounces (400ms), so this will be called after debounce
+        // Create new AbortController for this search
+        const controller = new AbortController();
+        abortControllerRef.current = controller;
+        // handleSearch will cancel previous request if still pending
+        handleSearch(query, undefined, controller.signal).catch((error) => {
+          // Ignore abort errors (expected when canceling)
+          if (error instanceof Error && error.name !== 'AbortError') {
+            const normalized = normalizeError(error, 'Search handler failed');
+            logClientWarn(
+              '[HomePageClient] handleSearch error',
+              normalized,
+              'HomePageClient.onSearch.error',
+              {
+                component: 'HomePageClient',
+                action: 'on-search-error',
+                category: 'search',
+                query: query.trim(),
+              }
+            );
+            trackHomepageSectionError('search', 'search-handler', error, {
+              query: query.trim(),
+            });
+          }
+        });
+      },
+      onFiltersChange: handleFiltersChange,
+      filters,
+      availableTags: filterOptions.tags,
+      availableAuthors: filterOptions.authors,
+      availableCategories: filterOptions.categories,
+      resultCount: filteredResults.length,
+      onFocusChange: setSearchFocused,
+    });
+  }, [handleSearch, handleFiltersChange, filters, filterOptions, filteredResults.length, setSearchFocused, setSearchProps]);
+
   return (
     <>
-      {/* Search Section */}
-      <section className="container mx-auto px-4 pt-8 pb-12">
-        <div className="mx-auto max-w-4xl">
-          <MagneticSearchWrapper
-            placeholder="Search for rules, MCP servers, agents, commands, and more..."
-            onSearch={(query) => {
-              // UnifiedSearch already debounces (400ms), so this will be called after debounce
-              // Create new AbortController for this search
-              const controller = new AbortController();
-              abortControllerRef.current = controller;
-              // handleSearch will cancel previous request if still pending
-              handleSearch(query, undefined, controller.signal).catch((error) => {
-                // Ignore abort errors (expected when canceling)
-                if (error instanceof Error && error.name !== 'AbortError') {
-                  const normalized = normalizeError(error, 'Search handler failed');
-                  logClientWarn(
-                    '[HomePageClient] handleSearch error',
-                    normalized,
-                    'HomePageClient.onSearch.error',
-                    {
-                      component: 'HomePageClient',
-                      action: 'on-search-error',
-                      category: 'search',
-                      query: query.trim(),
-                    }
-                  );
-                  trackHomepageSectionError('search', 'search-handler', error, {
-                    query: query.trim(),
-                  });
-                }
-              });
-            }}
-            onFiltersChange={handleFiltersChange}
-            filters={filters}
-            availableTags={filterOptions.tags}
-            availableAuthors={filterOptions.authors}
-            availableCategories={filterOptions.categories}
-            resultCount={filteredResults.length}
-            onFocusChange={setSearchFocused}
-            enableMagnetic={true}
-            enableExpansion={true}
-          />
-
-          {/* Quick Stats - Below Search Bar - ENHANCED mobile version */}
-          {/* Modern 2025 Architecture: Configuration-Driven Stats Display with Motion.dev */}
-          {stats && Object.keys(stats).length > 0 ? (
-            <>
-              {/* Mobile Stats - Compact horizontal scroll carousel */}
-              <TooltipProvider delayDuration={300}>
-                <motion.div
-                  className="scrollbar-hide mt-6 overflow-x-auto md:hidden"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                >
-                  <div className="flex gap-3 px-4 pb-2">
-                    {categoryStatsConfig.slice(0, 5).map(({ categoryId, delay }, index) => {
-                      const categoryRoute = ROUTES[categoryId.toUpperCase() as keyof typeof ROUTES];
-                      const count =
-                        typeof stats[categoryId] === 'number'
-                          ? stats[categoryId]
-                          : stats[categoryId]?.total || 0;
-                      const categoryConfig = categoryConfigs[categoryId];
-                      const tooltipText = categoryConfig?.description || `View all ${categoryId} configurations`;
-
-                      return (
-                        <Tooltip key={categoryId}>
-                          <TooltipTrigger asChild>
-                            <Link href={categoryRoute}>
-                              <motion.div
-                                className="backdrop-blur-sm flex min-w-fit items-center gap-2 rounded-lg border px-3 py-2 whitespace-nowrap transition-colors cursor-help"
-                                initial={{ opacity: 0, x: -8 }}
-                                animate={{ 
-                                  opacity: 1, 
-                                  x: 0,
-                                  borderColor: 'rgba(255, 255, 255, 0.15)',
-                                  backgroundColor: 'rgba(0, 0, 0, 0.3)',
-                                }}
-                                transition={{
-                                  delay: index * 0.03,
-                                  type: 'spring',
-                                  stiffness: 300,
-                                  damping: 25,
-                                }}
-                                whileHover={{
-                                  scale: 1.02,
-                                  borderColor: 'rgba(249, 115, 22, 0.5)',
-                                  backgroundColor: 'rgba(249, 115, 22, 0.1)',
-                                }}
-                                whileTap={{ scale: 0.98 }}
-                              >
-                                <UnifiedBadge
-                                  variant="category"
-                                  category={categoryId}
-                                  href={null}
-                                  className="shrink-0"
-                                />
-                                <NumberTicker
-                                  value={count}
-                                  delay={delay}
-                                  className="text-sm font-semibold tabular-nums"
-                                />
-                              </motion.div>
-                            </Link>
-                          </TooltipTrigger>
-                          <TooltipContent side="bottom" className="max-w-xs text-center">
-                            {tooltipText}
-                          </TooltipContent>
-                        </Tooltip>
-                      );
-                    })}
-                  </div>
-                </motion.div>
-              </TooltipProvider>
-
-              {/* Desktop Stats - Minimal 2025 design with UnifiedBadge + CountingNumber */}
-              <TooltipProvider delayDuration={300}>
-                <div className="mt-6 hidden flex-wrap justify-center gap-2 md:flex lg:gap-3">
-                  {categoryStatsConfig.map(({ categoryId, delay }, index) => {
-                    // Get category route from ROUTES constant
-                    const categoryRoute = ROUTES[categoryId.toUpperCase() as keyof typeof ROUTES];
-                    const count =
-                      typeof stats[categoryId] === 'number'
-                        ? stats[categoryId]
-                        : stats[categoryId]?.total || 0;
-                    const categoryConfig = categoryConfigs[categoryId];
-                    const tooltipText = categoryConfig?.description || `View all ${categoryId} configurations`;
-
-                    return (
-                      <Tooltip key={categoryId}>
-                        <TooltipTrigger asChild>
-                          <Link
-                            href={categoryRoute}
-                            className="group no-underline"
-                            aria-label={`View all ${categoryId} configurations`}
-                          >
-                            <motion.div
-                              className="group flex items-center gap-2 rounded-lg border backdrop-blur-sm px-3 py-2 transition-colors cursor-help"
-                              initial={{ opacity: 0, y: 8 }}
-                              animate={{ 
-                                opacity: 1, 
-                                y: 0,
-                                borderColor: 'rgba(255, 255, 255, 0.15)',
-                                backgroundColor: 'rgba(0, 0, 0, 0.3)',
-                              }}
-                              transition={{
-                                delay: index * 0.03,
-                                type: 'spring',
-                                stiffness: 300,
-                                damping: 25,
-                              }}
-                              whileHover={{
-                                scale: 1.02,
-                                borderColor: 'rgba(249, 115, 22, 0.5)',
-                                backgroundColor: 'rgba(249, 115, 22, 0.1)',
-                                transition: { type: 'spring', stiffness: 400, damping: 25 },
-                              }}
-                              whileTap={{
-                                scale: 0.98,
-                                transition: { type: 'spring', stiffness: 400, damping: 25 },
-                              }}
-                            >
-                              <UnifiedBadge
-                                variant="category"
-                                category={categoryId}
-                                href={null} // Badge is inside Link, so href=null
-                                className="shrink-0"
-                              />
-                              <NumberTicker
-                                value={count}
-                                delay={delay}
-                                className="text-sm font-semibold tabular-nums"
-                              />
-                            </motion.div>
-                          </Link>
-                        </TooltipTrigger>
-                        <TooltipContent side="bottom" className="max-w-xs text-center">
-                          {tooltipText}
-                        </TooltipContent>
-                      </Tooltip>
-                    );
-                  })}
-                </div>
-              </TooltipProvider>
-            </>
-          ) : (
-            <HomepageStatsSkeleton className="mt-6" />
-          )}
-        </div>
-      </section>
-
+      {/* Search Section and Stats removed - now rendered in hero */}
       <section className="container mx-auto px-4 pb-16">
         {/* Search Results Section - Show when there's an active search query */}
         {currentSearchQuery.length > 0 && (

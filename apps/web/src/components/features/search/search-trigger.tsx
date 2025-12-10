@@ -2,6 +2,7 @@
 
 import { Search } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES, Button } from '@heyclaude/web-runtime/ui';
+import { logClientInfo } from '@heyclaude/web-runtime/logging/client';
 
 interface SearchTriggerProps {
   className?: string;
@@ -18,6 +19,19 @@ export function SearchTrigger({
   showShortcut = true,
   className = '',
 }: SearchTriggerProps) {
+  const handleClick = () => {
+    logClientInfo(
+      '[SearchTrigger] Clicked',
+      'SearchTrigger.onClick',
+      {
+        component: 'SearchTrigger',
+        action: 'click',
+        category: 'navigation',
+        hasOnClick: Boolean(onClick),
+      }
+    );
+    onClick?.();
+  };
   const sizeClasses = {
     sm: 'h-8 px-3 text-xs',
     md: 'h-10 px-4 text-sm',
@@ -28,7 +42,7 @@ export function SearchTrigger({
     return (
       <button
         type="button"
-        onClick={onClick}
+        onClick={handleClick}
         className={`group border-border bg-background text-muted-foreground hover:border-border/80 hover:text-foreground flex w-full max-w-md cursor-pointer items-center gap-3 rounded-lg border px-4 py-2.5 transition-colors ${className}`}
       >
         <Search
@@ -45,7 +59,7 @@ export function SearchTrigger({
   }
 
   return (
-    <Button variant={variant} onClick={onClick} className={`${sizeClasses[size]} ${className}`}>
+    <Button variant={variant} onClick={handleClick} className={`${sizeClasses[size]} ${className}`}>
       <Search className={UI_CLASSES.ICON_SM} />
       <span className="sr-only">Search</span>
       {showShortcut && size !== 'sm' ? (

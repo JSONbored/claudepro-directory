@@ -1,6 +1,6 @@
 'use client';
 
-import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
+import { logClientWarn, logClientInfo, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 
 interface CommandPaletteContextValue {
@@ -16,6 +16,17 @@ export function CommandPaletteProvider({ children }: { children: React.ReactNode
   const [isOpen, setIsOpen] = useState(false);
 
   const openPalette = useCallback(() => {
+    logClientInfo(
+      '[CommandPaletteProvider] Opening palette',
+      'CommandPaletteProvider.openPalette',
+      {
+        component: 'CommandPaletteProvider',
+        action: 'open-palette',
+        category: 'navigation',
+        previousState: false,
+        newState: true,
+      }
+    );
     setIsOpen(true);
   }, []);
 

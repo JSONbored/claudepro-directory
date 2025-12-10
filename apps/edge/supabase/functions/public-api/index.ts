@@ -17,7 +17,6 @@ import { handlePackageGenerationQueue } from './routes/content-generate/queue-wo
 import { handleUploadPackage } from './routes/content-generate/upload.ts';
 import { handleEmbeddingGenerationQueue, handleEmbeddingWebhook } from './routes/embedding/index.ts';
 import { handleImageGenerationQueue } from './routes/image-generation/index.ts';
-import { handleOGImageRequest } from './routes/og/index.ts';
 import { handleTransformImageRoute } from './routes/transform/index.ts';
 
 import { ROUTES } from './routes.config.ts';
@@ -85,7 +84,6 @@ async function withRateLimit(
 
 // Define handlers map
 const ROUTE_HANDLERS: Record<string, (ctx: PublicApiContext) => Promise<Response>> = {
-  'og-image': (ctx) => handleOGImageRequest(ctx.request),
   'transform-image': (ctx) =>
     handleTransformImageRoute({
       request: ctx.request,

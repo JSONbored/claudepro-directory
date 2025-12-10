@@ -1196,6 +1196,30 @@
     scrollbar-color: var(--color-border-medium) transparent;
   }
 
+  /* Hide scrollbars for navigation dropdowns - prevent flash on load */
+  .scrollbar-hide {
+    -ms-overflow-style: none !important; /* IE and Edge */
+    scrollbar-width: none !important; /* Firefox */
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none !important; /* Chrome, Safari, Opera */
+    width: 0 !important;
+    height: 0 !important;
+  }
+
+  /* Prevent scrollbar flash during animations */
+  [data-radix-hover-card-content] .scrollbar-hide {
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
+  }
+
+  [data-radix-hover-card-content] .scrollbar-hide::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+
   /* Claude Navigation */
   .claude-nav-item {
     padding: var(--spacing-2) var(--spacing-3);
@@ -1275,78 +1299,60 @@
   }
 
   /* Category Badge Utilities */
-  /* Premium Category Badges - Enhanced colors with better contrast and saturation */
+  /* Premium Category Badges - Border and text only, no background */
   .badge-category-agents {
-    background-color: var(--color-category-agents-bg);
+    background-color: transparent;
     color: var(--color-category-agents);
     border-color: var(--color-category-agents-border);
     font-weight: 600;
-    backdrop-filter: blur(8px);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
   .badge-category-mcp {
-    background-color: var(--color-category-mcp-bg);
+    background-color: transparent;
     color: var(--color-category-mcp);
     border-color: var(--color-category-mcp-border);
     font-weight: 600;
-    backdrop-filter: blur(8px);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
   .badge-category-rules {
-    background-color: var(--color-category-rules-bg);
+    background-color: transparent;
     color: var(--color-category-rules);
     border-color: var(--color-category-rules-border);
     font-weight: 600;
-    backdrop-filter: blur(8px);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
   .badge-category-commands {
-    background-color: var(--color-category-commands-bg);
+    background-color: transparent;
     color: var(--color-category-commands);
     border-color: var(--color-category-commands-border);
     font-weight: 600;
-    backdrop-filter: blur(8px);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
   .badge-category-hooks {
-    background-color: var(--color-category-hooks-bg);
+    background-color: transparent;
     color: var(--color-category-hooks);
     border-color: var(--color-category-hooks-border);
     font-weight: 600;
-    backdrop-filter: blur(8px);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
   .badge-category-statuslines {
-    background-color: var(--color-category-statuslines-bg);
+    background-color: transparent;
     color: var(--color-category-statuslines);
     border-color: var(--color-category-statuslines-border);
     font-weight: 600;
-    backdrop-filter: blur(8px);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
   .badge-category-collections {
-    background-color: var(--color-category-collections-bg);
+    background-color: transparent;
     color: var(--color-category-collections);
     border-color: var(--color-category-collections-border);
     font-weight: 600;
-    backdrop-filter: blur(8px);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
   .badge-category-guides {
-    background-color: var(--color-category-guides-bg);
+    background-color: transparent;
     color: var(--color-category-guides);
     border-color: var(--color-category-guides-border);
     font-weight: 600;
-    backdrop-filter: blur(8px);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
   .badge-category-skills {
-    background-color: var(--color-category-skills-bg);
+    background-color: transparent;
     color: var(--color-category-skills);
     border-color: var(--color-category-skills-border);
     font-weight: 600;
-    backdrop-filter: blur(8px);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
 
   /* Micro Font Sizes */
@@ -1712,6 +1718,18 @@
   }
   100% {
     transform: translate(40px, 40px);
+  }
+}
+
+@keyframes animated-border-gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
   }
 }
 

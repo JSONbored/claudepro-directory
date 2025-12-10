@@ -33,20 +33,11 @@ export async function GET(request: NextRequest, context: unknown) {
     route: '/api/inngest',
     method: 'GET',
   });
-  reqLogger.debug({}, 'Inngest GET request (introspection)');
+  reqLogger.debug({ url: request.url }, 'Inngest GET request (introspection)');
   try {
     return await inngestGET(request, context);
   } catch (error) {
     const normalized = normalizeError(error, 'Inngest GET request failed');
-    reqLogger.error(
-      {
-        err: normalized,
-        route: '/api/inngest',
-        operation: 'InngestAPI',
-        method: 'GET',
-      },
-      'Inngest GET request failed'
-    );
     reqLogger.error(
       {
         err: normalized,
@@ -83,7 +74,7 @@ export async function POST(request: NextRequest, context: unknown) {
     route: '/api/inngest',
     method: 'POST',
   });
-  reqLogger.debug({}, 'Inngest POST request (function invocation)');
+  reqLogger.debug({ url: request.url }, 'Inngest POST request (function invocation)');
   try {
     return await inngestPOST(request, context);
   } catch (error) {
@@ -116,7 +107,7 @@ export async function PUT(request: NextRequest, context: unknown) {
     route: '/api/inngest',
     method: 'PUT',
   });
-  reqLogger.debug({}, 'Inngest PUT request (sync)');
+  reqLogger.debug({ url: request.url }, 'Inngest PUT request (sync)');
   try {
     return await inngestPUT(request, context);
   } catch (error) {

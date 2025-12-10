@@ -5,6 +5,21 @@ import { cacheLife, cacheTag } from 'next/cache';
 
 import { logger } from '../../index.ts';
 
+/***
+ * Normalizes error to Error | string for logging
+ * @param {unknown} error - Error to normalize
+ * @returns Error instance or string representation
+ */
+function normalizeErrorForLogging(error: unknown): Error | string {
+  if (error instanceof Error) {
+    return error;
+  }
+  if (typeof error === 'string') {
+    return error;
+  }
+  return String(error);
+}
+
 type SearchFacetsRow = Database['public']['Functions']['get_search_facets']['Returns'][number];
 
 export interface SearchFacetSummary {
@@ -16,49 +31,62 @@ export interface SearchFacetSummary {
 
 export interface SearchFacetAggregate {
   authors: string[];
-  categories: Database['public']['Enums']['content_category'][];
+  categories: Array<Database['public']['Enums']['content_category']>;
   facets: SearchFacetSummary[];
   tags: string[];
 }
 
 function normalizeFacetRow(row: SearchFacetsRow): SearchFacetSummary {
   return {
+    authors: Array.isArray(row.authors)
+      ? row.authors.filter((author): author is string => typeof author === 'string')
+      : [],
     category: row.category,
     contentCount: row.content_count,
     tags: Array.isArray(row.all_tags)
       ? row.all_tags.filter((tag): tag is string => typeof tag === 'string')
       : [],
-    authors: Array.isArray(row.authors)
-      ? row.authors.filter((author): author is string => typeof author === 'string')
-      : [],
   };
 }
 
-/**
- * Aggregates unique tags, authors, and categories from facet summaries
- * @param facets - Array of normalized facet summaries
- * @returns Object containing sets of unique tags, authors, and categories
+/***
+ * Extracts aggregated arrays from RPC result
+ * The RPC now returns pre-aggregated arrays in each row (same values)
+ * We use the first row's aggregated values for efficiency
+ * @param {SearchFacetsRow[]} data - Array of facet rows from RPC (each row contains aggregated arrays)
+ * @returns Pre-aggregated arrays from database (already sorted and deduplicated)
  */
-function aggregateFacetData(facets: SearchFacetSummary[]): {
-  authors: Set<string>;
-  categories: Set<Database['public']['Enums']['content_category']>;
-  tags: Set<string>;
+function extractAggregatedArrays(data: SearchFacetsRow[]): {
+  authors: string[];
+  categories: Array<Database['public']['Enums']['content_category']>;
+  tags: string[];
 } {
-  const tags = new Set<string>();
-  const authors = new Set<string>();
-  const categories = new Set<Database['public']['Enums']['content_category']>();
+  // RPC returns aggregated arrays in each row (same values)
+  // Use first row's aggregated arrays (most efficient)
+  const firstRow = data[0];
 
-  for (const facet of facets) {
-    categories.add(facet.category);
-    for (const tag of facet.tags) {
-      tags.add(tag);
-    }
-    for (const author of facet.authors) {
-      authors.add(author);
-    }
+  if (!firstRow) {
+    return {
+      authors: [],
+      categories: [],
+      tags: [],
+    };
   }
 
-  return { tags, authors, categories };
+  // Extract pre-aggregated arrays from RPC (already sorted and deduplicated in database)
+  return {
+    authors: Array.isArray(firstRow.all_authors_aggregated)
+      ? firstRow.all_authors_aggregated.filter(
+          (author): author is string => typeof author === 'string'
+        )
+      : [],
+    categories: Array.isArray(firstRow.all_categories_aggregated)
+      ? firstRow.all_categories_aggregated.filter(Boolean)
+      : [],
+    tags: Array.isArray(firstRow.all_tags_aggregated)
+      ? firstRow.all_tags_aggregated.filter((tag): tag is string => typeof tag === 'string')
+      : [],
+  };
 }
 
 /**
@@ -79,8 +107,8 @@ export async function getSearchFacets(): Promise<SearchFacetAggregate> {
 
   // Create request-scoped child logger to avoid race conditions
   const requestLogger = logger.child({
-    operation: 'getSearchFacets',
     module: 'data/search/facets',
+    operation: 'getSearchFacets',
   });
 
   try {
@@ -102,8 +130,7 @@ export async function getSearchFacets(): Promise<SearchFacetAggregate> {
     const { data, error } = await client.rpc('get_search_facets');
     if (error) {
       // logger.error() normalizes errors internally, so pass raw error
-      const errorForLogging: Error | string =
-        error instanceof Error ? error : (typeof error === 'string' ? error : String(error));
+      const errorForLogging = normalizeErrorForLogging(error);
       requestLogger.error(
         {
           err: errorForLogging,
@@ -115,28 +142,31 @@ export async function getSearchFacets(): Promise<SearchFacetAggregate> {
     }
 
     const facets = data.map((row) => normalizeFacetRow(row));
-    const { tags, authors, categories } = aggregateFacetData(facets);
+
+    // Use pre-aggregated arrays from database (already sorted and deduplicated)
+    // This eliminates client-side Set operations and sorting
+    const { authors, categories, tags } = extractAggregatedArrays(data);
 
     requestLogger.info(
       {
+        authorCount: authors.length,
+        categoryCount: categories.length,
         facetCount: facets.length,
-        tagCount: tags.size,
-        authorCount: authors.size,
-        categoryCount: categories.size,
+        tagCount: tags.length,
       },
       'getSearchFacets: fetched successfully'
     );
 
     return {
+      authors,
+      categories,
       facets,
-      tags: [...tags].toSorted((a, b) => a.localeCompare(b)),
-      authors: [...authors].toSorted((a, b) => a.localeCompare(b)),
-      categories: [...categories].toSorted((a, b) => a.localeCompare(b)),
+      // Arrays are already sorted and deduplicated by database
+      tags,
     };
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : (typeof error === 'string' ? error : String(error));
+    const errorForLogging = normalizeErrorForLogging(error);
     requestLogger.error({ err: errorForLogging }, 'getSearchFacets: failed');
     throw error;
   }
@@ -164,8 +194,8 @@ export async function getPopularSearches(
   cacheTag(`popular-searches-${limit}`);
 
   const requestLogger = logger.child({
-    operation: 'getPopularSearches',
     module: 'data/search/facets',
+    operation: 'getPopularSearches',
   });
 
   try {
@@ -189,13 +219,12 @@ export async function getPopularSearches(
     });
 
     if (error) {
-      const errorForLogging: Error | string =
-        error instanceof Error ? error : (typeof error === 'string' ? error : String(error));
+      const errorForLogging = normalizeErrorForLogging(error);
       requestLogger.error(
         {
           err: errorForLogging,
-          rpcName: 'get_trending_searches',
           limit,
+          rpcName: 'get_trending_searches',
         },
         'getPopularSearches: RPC call failed'
       );
@@ -212,8 +241,7 @@ export async function getPopularSearches(
 
     return data;
   } catch (error) {
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : (typeof error === 'string' ? error : String(error));
+    const errorForLogging = normalizeErrorForLogging(error);
     requestLogger.error({ err: errorForLogging, limit }, 'getPopularSearches: failed');
     return [];
   }

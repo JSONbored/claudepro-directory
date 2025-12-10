@@ -17,7 +17,7 @@
 
 import { Bot, Brain, Code, FileCode, Sparkles, Terminal, Zap } from '@heyclaude/web-runtime/icons';
 import { type SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
-import { cn } from '@heyclaude/web-runtime/ui';
+import { cn, MICROINTERACTIONS } from '@heyclaude/web-runtime/ui';
 import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
 import { motion } from 'motion/react';
 import { useCallback, useState } from 'react';
@@ -139,10 +139,15 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
                 hidden: { opacity: 0, y: 20 },
                 visible: { opacity: 1, y: 0 },
               }}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.98 }}
+              whileHover={{
+                ...MICROINTERACTIONS.card.hover,
+                scale: 1.03, // Preserve exact original scale (design token is 1.02, but original was 1.03)
+                y: 0, // Preserve original (no y movement in original)
+              }}
+              whileTap={MICROINTERACTIONS.card.tap}
+              transition={MICROINTERACTIONS.card.transition}
               className={cn(
-                'group relative overflow-hidden rounded-xl border-2 p-6 text-left transition-all',
+                'group relative overflow-hidden rounded-xl border-2 p-6 text-left',
                 'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
                 isSelected
                   ? 'border-accent-primary bg-accent-primary/10'

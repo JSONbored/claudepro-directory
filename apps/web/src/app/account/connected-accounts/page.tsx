@@ -100,10 +100,6 @@ async function ConnectedAccountsPageContent() {
   const { user } = await getAuthenticatedUser({ context: 'ConnectedAccountsPage' });
 
   if (!user) {
-    reqLogger.warn(
-      { section: 'data-fetch' },
-      'ConnectedAccountsPage: unauthenticated access attempt detected'
-    );
     reqLogger.info(
       {
         section: 'data-fetch',

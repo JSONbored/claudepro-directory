@@ -71,9 +71,11 @@ const dangerousCharsSet = new Set([
 
 // Shared regex patterns for PR URL validation
 // Owner: GitHub usernames are 1-39 chars, alphanumeric + hyphens only (no underscores)
-const OWNER_REGEX = /^[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,38})?$/;
+// Must not have consecutive hyphens or trailing hyphens
+const OWNER_REGEX = /^[a-zA-Z0-9](?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)?$/;
 // Repo: 1-100 chars, alphanumeric + underscores + dots + hyphens
-const REPO_REGEX = /^[\w.-]{1,100}$/;
+// Must not end in .git, and must not be . or ..
+const REPO_REGEX = /^(?!\.git$|^\.\.?$)[\w.-]{1,100}$/;
 const PR_NUMBER_REGEX = /^\d+$/;
 // Full path pattern: /owner/repo/pull/number
 // Uses loose capture groups, then validates components separately to avoid duplication

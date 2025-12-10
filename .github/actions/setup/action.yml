@@ -52,6 +52,11 @@ runs:
         node-version: ${{ inputs.node-version }}
         cache: 'pnpm'
 
+    - name: Setup Deno
+      uses: denoland/setup-deno@v2
+      with:
+        deno-version: v2.2.0
+
     - name: Install dependencies
       if: inputs.install-deps == 'true'
       run: pnpm install ${{ inputs.install-args }}

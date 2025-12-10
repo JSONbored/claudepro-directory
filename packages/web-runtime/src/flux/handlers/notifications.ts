@@ -8,6 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { cacheLife, cacheTag } from 'next/cache';
 
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
@@ -51,6 +52,30 @@ function createNotificationTraceId(): string {
 }
 
 /**
+ * Cached helper function to fetch active notifications for a user
+ * Uses Cache Components to reduce function invocations
+ * @param userId - The user ID to fetch notifications for
+ * @returns Promise resolving to an array of active notifications
+ */
+async function getCachedActiveNotifications(userId: string) {
+  'use cache';
+  cacheTag(`notifications-${userId}`);
+  cacheTag('notifications'); // Global tag for invalidation on create
+  cacheLife({ stale: 60, revalidate: 300, expire: 900 }); // 1min stale, 5min revalidate, 15min expire
+
+  const supabase = createSupabaseAdminClient();
+  const { data, error } = await supabase.rpc('get_active_notifications_for_user', {
+    p_user_id: userId,
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  return data || [];
+}
+
+/**
  * GET /api/flux/notifications/active
  * Fetch active notifications for the authenticated user
  */
@@ -73,34 +98,8 @@ export async function handleActiveNotifications(_request: NextRequest): Promise<
       );
     }
 
-    // Fetch active notifications using admin client
-    const supabase = createSupabaseAdminClient();
-    
-    // Fetch dismissed notification IDs from database (source of truth)
-    const { data: dismissedRecords } = await supabase
-      .from('notification_dismissals')
-      .select('notification_id')
-      .eq('user_id', user.id);
-
-    const dismissedIds = (dismissedRecords || []).map((r) => r.notification_id);
-
-    // Get notifications that are active and not expired
-    const { data: notifications, error: queryError } = await supabase
-      .from('notifications')
-      .select('*')
-      .eq('active', true)
-      .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
-      .order('created_at', { ascending: false })
-      .limit(10);
-
-    if (queryError) {
-      throw queryError;
-    }
-
-    // Filter out dismissed notifications
-    const filteredNotifications = (notifications || []).filter(
-      (n) => !dismissedIds.includes(n.id)
-    );
+    // Fetch active notifications using RPC (with caching)
+    const notifications = await getCachedActiveNotifications(user.id);
 
     const traceId = createNotificationTraceId();
     const durationMs = Date.now() - startTime;
@@ -108,11 +107,10 @@ export async function handleActiveNotifications(_request: NextRequest): Promise<
     logger.info({ ...logContext,
       durationMs,
       userId: user.id,
-      count: filteredNotifications.length,
-      dismissedCount: dismissedIds.length, }, 'Active notifications retrieved');
+      count: notifications.length, }, 'Active notifications retrieved');
 
     return NextResponse.json(
-      { notifications: filteredNotifications, traceId },
+      { notifications, traceId },
       { status: 200, headers: NOTIFICATION_CORS_HEADERS }
     );
   } catch (error) {
@@ -182,36 +180,25 @@ export async function handleDismissNotifications(request: NextRequest): Promise<
       );
     }
 
-    // Record dismissals in database
+    // Record dismissals in database using RPC
     const supabase = createSupabaseAdminClient();
-    
-    // Insert dismissal records (upsert to handle duplicates)
-    const dismissals = sanitizedIds.map((notificationId) => ({
-      user_id: user.id,
-      notification_id: notificationId,
-      dismissed_at: new Date().toISOString(),
-    }));
-
-    const { error: dismissError } = await supabase
-      .from('notification_dismissals')
-      .upsert(dismissals, { onConflict: 'user_id,notification_id' });
+    const { data: dismissedCount, error: dismissError } = await supabase.rpc('dismiss_notifications', {
+      p_user_id: user.id,
+      p_notification_ids: sanitizedIds,
+    });
 
     if (dismissError) {
-      // Upsert handles duplicates via onConflict, so any error is a real problem
-      // Check for specific error codes that might be tolerable
-      const errorCode = (dismissError as { code?: string }).code;
-      if (errorCode === '23505') {
-        // Unique violation - shouldn't happen with upsert but tolerate it
-        logger.warn({ ...logContext,
-          errorMessage: dismissError.message,
-          errorCode, }, 'Notification dismissal duplicate (unexpected)');
-      } else {
-        // Real error - log and throw
-        const normalized = normalizeError(dismissError, 'Notification dismissal failed');
-        logger.error({ err: normalized, ...logContext,
-          errorCode, }, 'Notification dismissal failed');
-        throw dismissError;
-      }
+      const normalized = normalizeError(dismissError, 'Notification dismissal failed');
+      logger.error({ err: normalized, ...logContext }, 'Notification dismissal failed');
+      throw dismissError;
+    }
+
+    // Invalidate cache for this user's notifications
+    const { revalidateTag } = await import('next/cache');
+    try {
+      revalidateTag(`notifications-${user.id}`, 'max');
+    } catch {
+      // revalidateTag may fail in some contexts, but that's okay
     }
 
     const traceId = createNotificationTraceId();
@@ -220,10 +207,10 @@ export async function handleDismissNotifications(request: NextRequest): Promise<
     logger.info({ ...logContext,
       durationMs,
       userId: user.id,
-      dismissedCount: sanitizedIds.length, }, 'Notifications dismissed');
+      dismissedCount: dismissedCount || sanitizedIds.length, }, 'Notifications dismissed');
 
     return NextResponse.json(
-      { dismissed: sanitizedIds.length, traceId },
+      { dismissed: dismissedCount || sanitizedIds.length, traceId },
       { status: 200, headers: NOTIFICATION_CORS_HEADERS }
     );
   } catch (error) {
@@ -367,6 +354,16 @@ export async function handleCreateNotification(request: NextRequest): Promise<Ne
 
     if (insertError) {
       throw insertError;
+    }
+
+    // Invalidate all notification caches since new notification affects all users
+    // Note: We can't invalidate all user-specific tags, so we invalidate a global tag
+    // Individual user caches will expire naturally (5min revalidate)
+    const { revalidateTag } = await import('next/cache');
+    try {
+      revalidateTag('notifications', 'max');
+    } catch {
+      // revalidateTag may fail in some contexts, but that's okay
     }
 
     const traceId = createNotificationTraceId();

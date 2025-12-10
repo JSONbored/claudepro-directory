@@ -44,8 +44,11 @@ import { logger, normalizeError } from '../../../entries/core.ts';
 import { UI_TIMEOUTS } from '../../../config/unified-config.ts';
 import type { ButtonStyleProps } from '../../../types/component.types.ts';
 import { toasts } from '../../../client/toast.ts';
+import { MICROINTERACTIONS } from '../../design-tokens/index.ts';
+import { SEMANTIC_COLORS } from '../../colors.ts';
 import { Check, Copy } from 'lucide-react';
 import { useState } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
 import { Button } from '../button.tsx';
 
 /**
@@ -121,12 +124,32 @@ export function SimpleCopyButton({
       disabled={disabled || copied}
       aria-label={ariaLabel || (copied ? 'Copied to clipboard' : `Copy ${label || 'content'}`)}
     >
-      {showIcon &&
-        (copied ? (
-          <Check className={iconClassName} aria-hidden="true" />
-        ) : (
-          <Copy className={iconClassName} aria-hidden="true" />
-        ))}
+      {showIcon && (
+        <AnimatePresence mode="wait">
+          {copied ? (
+            <motion.div
+              key="check"
+              initial={MICROINTERACTIONS.iconTransition.initial}
+              animate={MICROINTERACTIONS.iconTransition.animate}
+              exit={MICROINTERACTIONS.iconTransition.exit}
+              transition={MICROINTERACTIONS.iconTransition.transition}
+              className={SEMANTIC_COLORS.SOCIAL_COPY}
+            >
+              <Check className={iconClassName} aria-hidden="true" />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="copy"
+              initial={MICROINTERACTIONS.iconTransition.initial}
+              animate={MICROINTERACTIONS.iconTransition.animate}
+              exit={MICROINTERACTIONS.iconTransition.exit}
+              transition={MICROINTERACTIONS.iconTransition.transition}
+            >
+              <Copy className={iconClassName} aria-hidden="true" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      )}
       {label && (copied ? 'Copied!' : label)}
     </Button>
   );

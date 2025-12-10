@@ -17,11 +17,13 @@ import {
 import { DIMENSIONS, toasts } from '@heyclaude/web-runtime/ui';
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
+import { logClientInfo } from '@heyclaude/web-runtime/logging/client';
 
 import { AnnouncementBannerClient } from '@/src/components/core/layout/announcement-banner-client';
 import { Navigation } from '@/src/components/core/layout/navigation';
-import { CommandPaletteProvider } from '@/src/components/features/navigation/command-palette-provider';
+import { NavigationCommandMenu } from '@/src/components/core/layout/navigation-command-menu';
+import { CommandPaletteProvider, useCommandPalette } from '@/src/components/features/navigation/command-palette-provider';
 import { PinboardDrawerProvider } from '@/src/components/features/navigation/pinboard-drawer-provider';
 import { RecentlyViewedMobileTray } from '@/src/components/features/navigation/recently-viewed-mobile';
 
@@ -42,6 +44,54 @@ const NewsletterFooterBar = dynamic(
     loading: () => null,
   }
 );
+
+/**
+ * Wrapper component to access CommandPalette context and render NavigationCommandMenu
+ */
+function CommandMenuWrapper({ children }: { children: React.ReactNode }) {
+  const { isOpen, openPalette, closePalette } = useCommandPalette();
+  
+  // CRITICAL FIX: onOpenChange needs to handle both open and close
+  const handleOpenChange = useCallback((open: boolean) => {
+    logClientInfo(
+      '[CommandMenuWrapper] onOpenChange called',
+      'CommandMenuWrapper.handleOpenChange',
+      {
+        component: 'CommandMenuWrapper',
+        action: 'on-open-change',
+        category: 'navigation',
+        open,
+        currentIsOpen: isOpen,
+      }
+    );
+    if (open) {
+      openPalette();
+    } else {
+      closePalette();
+    }
+  }, [openPalette, closePalette, isOpen]);
+  
+  // DEBUG: Log when isOpen changes
+  useEffect(() => {
+    logClientInfo(
+      '[CommandMenuWrapper] isOpen state changed',
+      'CommandMenuWrapper.stateChange',
+      {
+        component: 'CommandMenuWrapper',
+        action: 'state-change',
+        category: 'navigation',
+        isOpen,
+      }
+    );
+  }, [isOpen]);
+  
+  return (
+    <>
+      {children}
+      <NavigationCommandMenu open={isOpen} onOpenChange={handleOpenChange} />
+    </>
+  );
+}
 
 const NEWSLETTER_OPT_IN_COOKIE = 'newsletter_opt_in';
 const NEWSLETTER_OPT_IN_SEEN_FLAG = 'newsletter_opt_in_seen';
@@ -203,16 +253,18 @@ export function LayoutContent({ children, announcement }: LayoutContentProps) {
       </a>
       <CommandPaletteProvider>
         <PinboardDrawerProvider>
-          <div className="bg-background flex min-h-screen flex-col">
-            {announcement ? <AnnouncementBannerClient announcement={announcement} /> : null}
-            <Navigation />
-          <main id="main-content" className="flex-1">
-            {children}
-          </main>
-          <Footer />
-          <RecentlyViewedMobileTray />
-          <NewsletterFooterBar source="footer" showAfterDelay={delayMs} ctaVariant={ctaVariant} />
-          </div>
+          <CommandMenuWrapper>
+            <div className="bg-background flex min-h-screen flex-col">
+              {announcement ? <AnnouncementBannerClient announcement={announcement} /> : null}
+              <Navigation />
+            <main id="main-content" className="flex-1">
+              {children}
+            </main>
+            <Footer />
+            <RecentlyViewedMobileTray />
+            <NewsletterFooterBar source="footer" showAfterDelay={delayMs} ctaVariant={ctaVariant} />
+            </div>
+          </CommandMenuWrapper>
         </PinboardDrawerProvider>
       </CommandPaletteProvider>
     </>

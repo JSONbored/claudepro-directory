@@ -25,10 +25,12 @@
 import { PARALLAX } from './parallax.ts';
 import { SCROLL_PRESETS } from './presets.ts';
 import { PROGRESS } from './progress.ts';
+import { VIEWPORT } from './viewport.ts';
 
 export * from './presets.ts';
 export * from './parallax.ts';
 export * from './progress.ts';
+export * from './viewport.ts';
 
 /**
  * Complete Scroll Animation Design Tokens
@@ -37,4 +39,5 @@ export const SCROLL_ANIMATIONS = {
   parallax: PARALLAX,
   presets: SCROLL_PRESETS,
   progress: PROGRESS,
+  viewport: VIEWPORT,
 } as const;

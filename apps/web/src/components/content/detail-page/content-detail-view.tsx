@@ -41,6 +41,7 @@ import { DetailMetadata } from './detail-metadata';
 import { DetailQuickActionsBar } from './detail-quick-actions-bar';
 import { DetailSidebar } from './sidebar/navigation-sidebar';
 import { SidebarToc } from './sidebar-toc';
+import { ScrollAwareToc } from './scroll-aware-toc';
 
 /**
  * UnifiedDetailPage is only used for content detail pages, never for jobs.
@@ -1002,12 +1003,14 @@ export async function UnifiedDetailPage({
               />
             </div>
 
-            {/* Sidebars - TOC + Related content + Recently Viewed */}
-            <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
-              {/* On This Page - Supabase-style minimal TOC */}
-              {headingMetadata && headingMetadata.length >= 2 ? (
+          {/* Sidebars - TOC + Related content + Recently Viewed */}
+          <aside className="space-y-6 lg:self-start">
+            {/* On This Page - Scroll-aware TOC (hides on scroll down, shows on scroll up) */}
+            {headingMetadata && headingMetadata.length >= 2 ? (
+              <ScrollAwareToc>
                 <SidebarToc headings={headingMetadata} />
-              ) : null}
+              </ScrollAwareToc>
+            ) : null}
 
               {/* Detail Sidebar - Related content */}
               {relatedItemsPromise && config ? (

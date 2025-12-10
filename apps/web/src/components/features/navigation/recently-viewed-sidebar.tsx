@@ -34,11 +34,11 @@ import { getCategoryConfig } from '@heyclaude/web-runtime/data';
 import { isValidCategory } from '@heyclaude/web-runtime/core';
 import { ChevronDown, ChevronUp, Clock, Trash, X } from '@heyclaude/web-runtime/icons';
 import {
-  ANIMATION_CONSTANTS,
   cn,
   UI_CLASSES,
   UnifiedBadge,
   Button,
+  MICROINTERACTIONS,
 } from '@heyclaude/web-runtime/ui';
 import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
@@ -93,10 +93,20 @@ const RecentlyViewedItemComponent = memo(function RecentlyViewedItemComponent({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <Link
-        href={href}
-        className={`border-border/50 bg-card flex flex-col gap-1.5 rounded-lg border px-3 py-2.5 ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:border-accent/50 hover:bg-accent/5`}
+      <motion.div
+        whileHover={{
+          ...MICROINTERACTIONS.card.hover,
+          borderColor: 'rgba(249, 115, 22, 0.5)', // Preserve exact original border color (accent/50)
+          backgroundColor: 'rgba(249, 115, 22, 0.05)', // Preserve exact original background (accent/5)
+          y: 0, // Preserve original (no y movement in original)
+        }}
+        whileTap={MICROINTERACTIONS.card.tap}
+        transition={MICROINTERACTIONS.card.transition}
       >
+        <Link
+          href={href}
+          className="border-border/50 bg-card flex flex-col gap-1.5 rounded-lg border px-3 py-2.5"
+        >
         {/* Header: Badge + Time */}
         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
           <UnifiedBadge variant="base" style="outline" className="text-[10px]">
@@ -134,7 +144,8 @@ const RecentlyViewedItemComponent = memo(function RecentlyViewedItemComponent({
             )}
           </div>
         ) : null}
-      </Link>
+        </Link>
+      </motion.div>
 
       {/* Remove button (shows on hover) */}
       <AnimatePresence>

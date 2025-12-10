@@ -48,25 +48,26 @@ export class NewsletterService {
     }
   }
   
-  // Helper to fetch subscription by ID (used in edge handler after RPC)
+  /**
+   * Calls the database RPC: get_newsletter_subscription_by_id
+   */
   async getSubscriptionById(id: string) {
     try {
-      const { data, error } = await this.supabase
-        .from('newsletter_subscriptions')
-        .select('*')
-        .eq('id', id)
-        .single();
-        
+      const { data, error } = await this.supabase.rpc('get_newsletter_subscription_by_id', {
+        p_id: id,
+      });
+      
       if (error) {
-        // Log table query errors (not RPC, but similar pattern)
         logRpcError(error, {
-          rpcName: 'newsletter_subscriptions.select',
+          rpcName: 'get_newsletter_subscription_by_id',
           operation: 'NewsletterService.getSubscriptionById',
           args: { id },
         });
         throw error;
       }
-      return data;
+      
+      // RPC returns SETOF (array), but we expect single row - return first element or null
+      return Array.isArray(data) && data.length > 0 ? data[0] : null;
     } catch (error) {
       // Error already logged above
       throw error;

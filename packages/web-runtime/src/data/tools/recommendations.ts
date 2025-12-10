@@ -9,8 +9,8 @@ import { createSupabaseServerClient } from '../../supabase/server.ts';
 
 export interface RecommendationInput {
   experienceLevel: Database['public']['Enums']['experience_level'];
-  focusAreas?: Database['public']['Enums']['focus_area_type'][];
-  integrations?: Database['public']['Enums']['integration_type'][];
+  focusAreas?: Array<Database['public']['Enums']['focus_area_type']>;
+  integrations?: Array<Database['public']['Enums']['integration_type']>;
   limit?: number;
   toolPreferences: string[];
   useCase: Database['public']['Enums']['use_case_type'];
@@ -28,7 +28,8 @@ export interface RecommendationInput {
  * - Minimum 30 seconds stale time (required for runtime prefetch)
  * - Cache keys include all input parameters
  * - Not prerendered (runs at request time)
- * @param input
+ * @param input - Recommendation input parameters
+ * @returns Promise resolving to recommendations result or null on error
  */
 export async function getConfigRecommendations(
   input: RecommendationInput
@@ -36,25 +37,25 @@ export async function getConfigRecommendations(
   'use cache: private';
 
   const {
-    useCase,
     experienceLevel,
-    toolPreferences,
-    integrations = [],
     focusAreas = [],
+    integrations = [],
     limit = 20,
+    toolPreferences,
+    useCase,
     viewerId,
   } = input;
 
   // Configure cache
-  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`recommendations-${useCase}-${experienceLevel}`);
   if (viewerId) {
     cacheTag(`recommendations-viewer-${viewerId}`);
   }
 
   const reqLogger = logger.child({
-    operation: 'getConfigRecommendations',
     module: 'data/tools/recommendations',
+    operation: 'getConfigRecommendations',
   });
 
   try {
@@ -63,21 +64,21 @@ export async function getConfigRecommendations(
     const service = new QuizService(client);
 
     const result = await service.getRecommendations({
-      p_use_case: useCase,
       p_experience_level: experienceLevel,
-      p_tool_preferences: toolPreferences,
-      p_integrations: integrations,
       p_focus_areas: focusAreas,
+      p_integrations: integrations,
       p_limit: limit,
+      p_tool_preferences: toolPreferences,
+      p_use_case: useCase,
       ...(viewerId ? { p_viewer_id: viewerId } : {}),
     });
 
     reqLogger.info(
       {
-        useCase,
         experienceLevel,
-        resultCount: result.results?.length ?? 0,
         hasViewer: Boolean(viewerId),
+        resultCount: result.results?.length ?? 0,
+        useCase,
       },
       'getConfigRecommendations: fetched successfully'
     );
@@ -87,7 +88,7 @@ export async function getConfigRecommendations(
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error(
-      { err: errorForLogging, useCase, experienceLevel, hasViewer: Boolean(viewerId) },
+      { err: errorForLogging, experienceLevel, hasViewer: Boolean(viewerId), useCase },
       'getConfigRecommendations: unexpected error'
     );
     return null;

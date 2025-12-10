@@ -2,27 +2,24 @@
  * Changelog Detail Page
  *
  * Individual changelog entry page with full content and metadata.
- * Follows existing [category]/[slug]/page.tsx pattern with ISR.
+ * Follows existing [category]/[slug]/page.tsx pattern with use cache + Suspense.
  *
  * Architecture:
- * - Server component with ISR (2-hour revalidation)
- * - Static generation for recent entries, older ones via on-demand ISR
+ * - Server component with 'use cache' directive and Suspense boundaries
+ * - Static generation for recent entries, dynamic rendering via Suspense fallback
  * - SEO-optimized with metadata and structured data
  * - View tracking integration
  *
  * Performance:
- * - ISR: 7200s (2 hours) for stable changelog content
+ * - cacheLife('static'): 5min stale, 1day revalidate, 1week expire
  * - Database-cached entry loading
  * - Static params generation for recent entries only
  *
  * Production Standards:
- * - Type-safe with Next.js 15.5.4
+ * - Type-safe with Next.js 16.0.7
  * - Proper error handling with notFound()
  * - Accessibility support
  * - Responsive design
- */
-/**
- * ISR: 2 hours (7200s) - Changelog entries are stable after publication
  */
 import { Constants } from '@heyclaude/database-types';
 import {
@@ -243,7 +240,7 @@ async function ChangelogEntryPageContent({
       {/* View Tracker - Track page views */}
       <Pulse
         variant="view"
-        category={Constants.public.Enums.content_category[10]} // 'changelog'
+        category={'changelog' as typeof Constants.public.Enums.content_category[number]}
         slug={entry.slug}
       />
 

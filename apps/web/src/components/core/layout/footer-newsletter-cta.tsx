@@ -190,11 +190,14 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
                   {/* Email Input */}
                   <input
                     type="email"
+                    id="newsletter-email"
+                    name="email"
                     placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     disabled={isSubmitting}
+                    autoComplete="email"
                     className={cn(
                       'h-14 w-full rounded-lg border px-4 pr-14 text-base',
                       'border-border bg-background',

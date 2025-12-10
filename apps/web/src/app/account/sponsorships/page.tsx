@@ -117,7 +117,6 @@ export default async function SponsorshipsPage() {
  * - or a list of sponsorship cards (with status, metrics, progress, and analytics links) when sponsorships exist.
  *
  * @param reqLogger - A request-scoped logger (used to create a user-scoped child logger for per-request telemetry).
- * @param reqLogger.reqLogger
  * @returns The server-rendered React element for the sponsorships page content.
  *
  * @see getAuthenticatedUser
@@ -332,7 +331,7 @@ async function SponsorshipsPageContent({
                   <div
                     className="bg-muted h-2 w-full rounded-full"
                     role="progressbar"
-                    aria-valuenow={impressionCount}
+                    aria-valuenow={Math.min(impressionCount, sponsorship.impression_limit)}
                     aria-valuemin={0}
                     aria-valuemax={sponsorship.impression_limit}
                     aria-label={`Impressions: ${impressionCount} of ${sponsorship.impression_limit}`}

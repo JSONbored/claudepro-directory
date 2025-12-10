@@ -1,12 +1,11 @@
 /**
  * OpenGraph Image URL Generator
  *
- * Generates URLs for the unified OG image API endpoint.
+ * Generates URLs for the static OG image.
  * Used in metadata configuration across the application.
  */
 
 import { APP_CONFIG } from '@heyclaude/shared-runtime';
-// import { env } from '@heyclaude/shared-runtime/schemas/env'; // Reserved for future dynamic OG image generation
 
 /**
  * OpenGraph image dimensions
@@ -20,28 +19,19 @@ export const OG_IMAGE_DIMENSIONS = {
 /**
  * Generate OpenGraph image URL for any page path
  *
- * Returns the dynamic OG image from the Next.js API route, which generates
- * images based on route metadata (title, description, category, tags).
- * Falls back to static image if dynamic generation is unavailable.
+ * Returns the static OG image URL. Currently using a single static image
+ * for all pages. The path parameter is accepted for API consistency but
+ * is not used (reserved for future dynamic OG image generation if needed).
  *
  * @param path - The page path (e.g., '/agents/code-reviewer' or '/')
- * @returns Full URL to the dynamic OG image API route or static fallback
+ * @returns Full URL to the static OG image
  */
 export function generateOGImageUrl(path: string): string {
-  // Use Next.js API route for dynamic OG image generation
-  // The /api/og route generates images on-demand with proper parameters
   const baseUrl = APP_CONFIG.url;
   
-  // For now, use static image as primary (dynamic route can be enabled later)
-  // TODO: Enable dynamic OG image generation once /api/og route is fully tested
-  // When enabled, use path parameter to generate dynamic OG images:
-  // const route = path || '/';
-  // const encodedRoute = encodeURIComponent(route);
-  // return `${baseUrl}/api/og?route=${encodedRoute}`;
-  
-  // Path parameter is part of the public API signature but currently unused
-  // (reserved for future dynamic OG image generation)
-  void path; // Mark as intentionally unused for now
+  // Path parameter is accepted for API consistency but currently unused
+  // (reserved for future dynamic OG image generation if needed)
+  void path;
   
   return `${baseUrl}/og-images/og-image.webp`;
 }
@@ -61,7 +51,7 @@ export function generateOGMetadata(path: string, alt: string) {
         width: OG_IMAGE_DIMENSIONS.width,
         height: OG_IMAGE_DIMENSIONS.height,
         alt,
-        type: 'image/png', // Edge function returns PNG, not WebP
+        type: 'image/webp',
       },
     ],
   };

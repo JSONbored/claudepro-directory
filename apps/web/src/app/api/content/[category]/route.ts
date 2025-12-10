@@ -34,14 +34,11 @@ async function getCachedCategoryContent(
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
 
   const supabase = createSupabaseAnonClient();
-  const { data, error } = await supabase
-    .from('content')
-    .select(
-      'slug, title, category, description, tags, author, date_added, view_count, bookmark_count'
-    )
-    .eq('category', category)
-    .order('date_added', { ascending: false })
-    .limit(1000);
+  // Use RPC function for better performance and consistent architecture
+  // Use generated types directly from database
+  const { data, error } = await supabase.rpc('get_category_content_list', {
+    p_category: category,
+  });
 
   if (error) throw error;
   return data;
@@ -135,7 +132,7 @@ export async function GET(
         reqLogger.info(
           {
             category,
-            itemCount: data.length,
+            itemCount: Array.isArray(data) ? data.length : 0,
           },
           'Category JSON generated'
         );
@@ -160,11 +157,11 @@ export async function GET(
         });
       }
 
-      return NextResponse.json(data, {
+      return NextResponse.json(Array.isArray(data) ? data : [], {
         status: 200,
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
-          'X-Generated-By': 'supabase.from(content).select()',
+          'X-Generated-By': 'supabase.rpc.get_category_content_list',
           ...buildSecurityHeaders(),
           ...CORS,
           // Hyper-optimized caching: 7 days TTL, 14 days stale (matches content_export preset)

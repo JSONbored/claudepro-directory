@@ -190,8 +190,18 @@ async function HomepageHeroWithMemberCount() {
   });
 
   const memberCount = homepageResult?.member_count ?? 0;
+  
+  // Extract stats from homepage result
+  let stats: Record<string, { featured: number; total: number } | number> = {};
+  if (homepageResult?.content && typeof homepageResult.content === 'object' && !Array.isArray(homepageResult.content)) {
+    const content = homepageResult.content as Record<string, unknown>;
+    if ('stats' in content && typeof content['stats'] === 'object' && content['stats'] !== null) {
+      stats = content['stats'] as Record<string, { featured: number; total: number } | number>;
+    }
+  }
+  
   // Hero will get search ref from context via client wrapper
-  return <HomepageHeroServer memberCount={memberCount} />;
+  return <HomepageHeroServer memberCount={memberCount} stats={stats} />;
 }
 
 /**

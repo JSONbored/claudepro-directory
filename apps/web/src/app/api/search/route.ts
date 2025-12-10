@@ -375,8 +375,8 @@ function validateEnumValue<T extends string>(
  * @param params.searchType
  * @param params.sort
  * @param params.tags
- 
- * @returns {unknown} Description of return value*/
+ * @returns A promise resolving to an object with `results` (array of search result rows) and `totalCount` (total matching items).
+ */
 async function getCachedSearchResults(params: {
   authors?: string[] | undefined;
   categories?: string[] | undefined;
@@ -393,7 +393,7 @@ async function getCachedSearchResults(params: {
   tags?: string[] | undefined;
 }): Promise<{ results: SearchResultRow[]; totalCount: number }> {
   'use cache';
-  cacheLife('quarter'); // 15min stale, 5min revalidate, 2hr expire - Search results change frequently
+  cacheLife('quarter'); // 15min stale, 5min revalidate, 2hr expire - Search results change frequently (defined in next.config.mjs)
 
   const supabase = createSupabaseAnonClient();
   const searchService = new SearchService(supabase);
@@ -490,12 +490,24 @@ async function executeSearch(params: {
   }
 
   if (searchType === 'unified') {
-    const unifiedResult = await searchService.searchUnified({
+    // Create args object with proper type narrowing for the two search_unified overloads
+    const baseArgs = {
       p_query: query,
       p_entities: entities && entities.length > 0 ? entities : [...DEFAULT_ENTITIES],
       p_limit: limit,
       p_offset: offset,
-    });
+    };
+
+    // Use the overload with p_highlight_query when query is provided
+    const unifiedArgs: DatabaseGenerated['public']['Functions']['search_unified']['Args'] =
+      query && query.trim()
+        ? {
+            ...baseArgs,
+            p_highlight_query: query,
+          }
+        : baseArgs;
+
+    const unifiedResult = await searchService.searchUnified(unifiedArgs);
 
     const rows = Array.isArray(unifiedResult.data) ? unifiedResult.data : [];
     const totalCount =
@@ -523,6 +535,11 @@ async function executeSearch(params: {
     args.p_authors = authors;
   }
 
+  // Add highlighting parameter when query is provided
+  if (query && query.trim()) {
+    args.p_highlight_query = query;
+  }
+
   const result = await searchService.searchContent(args);
   const rows = Array.isArray(result.data) ? result.data : [];
   const totalCount = typeof result.total_count === 'number' ? result.total_count : rows.length;
@@ -534,9 +551,13 @@ async function executeSearch(params: {
 
 /**
  * Produces search-term-highlighted copies of result rows when a query is provided.
+ * 
+ * Now uses database-provided highlighting when available (from RPC functions),
+ * falling back to client-side highlighting for fields not highlighted by database
+ * or when database highlighting is not available.
  *
- * @param results - Array of search result rows to process; each row may include `title`, `description`, `author`, and `tags`.
- * @param query - The search query used to generate highlights; ignored when empty or whitespace-only.
+ * @param results - Array of search result rows to process; each row may include `title`, `description`, `author`, `tags`, and their highlighted counterparts from database.
+ * @param query - The search query used to generate highlights; ignored when empty or whitespace-only. Used for fallback client-side highlighting.
  * @returns An array of results where each item is a shallow copy of the input row and, when applicable, contains highlighted fields: `title_highlighted`, `description_highlighted`, `author_highlighted`, and `tags_highlighted`.
  * @see highlightSearchTerms
  * @see highlightSearchTermsArray
@@ -548,6 +569,12 @@ function highlightResults(results: SearchResultRow[], query: string): Highlighte
 
   return results.map((result) => {
     const highlighted: HighlightedSearchResult = { ...result };
+
+    // Check if database-provided highlighting exists
+    const dbTitleHighlighted = result['title_highlighted'];
+    const dbDescriptionHighlighted = result['description_highlighted'];
+    const dbAuthorHighlighted = result['author_highlighted'];
+    const dbTagsHighlighted = result['tags_highlighted'];
 
     const titleValue = result['title'];
     const descriptionValue = result['description'];
@@ -561,26 +588,48 @@ function highlightResults(results: SearchResultRow[], query: string): Highlighte
       ? tagsValue.filter((tag: unknown): tag is string => typeof tag === 'string')
       : undefined;
 
+    // Use database-provided highlighting if available, otherwise fall back to client-side
     if (title) {
-      highlighted.title_highlighted = highlightSearchTerms(title, query, { wholeWordsOnly: true });
+      highlighted.title_highlighted =
+        typeof dbTitleHighlighted === 'string' && dbTitleHighlighted.trim()
+          ? dbTitleHighlighted
+          : highlightSearchTerms(title, query, { wholeWordsOnly: true });
     }
 
     if (description) {
-      highlighted.description_highlighted = highlightSearchTerms(description, query, {
-        wholeWordsOnly: true,
-      });
+      highlighted.description_highlighted =
+        typeof dbDescriptionHighlighted === 'string' && dbDescriptionHighlighted.trim()
+          ? dbDescriptionHighlighted
+          : highlightSearchTerms(description, query, {
+              wholeWordsOnly: true,
+            });
     }
 
     if (author) {
-      highlighted.author_highlighted = highlightSearchTerms(author, query, {
-        wholeWordsOnly: false,
-      });
+      highlighted.author_highlighted =
+        typeof dbAuthorHighlighted === 'string' && dbAuthorHighlighted.trim()
+          ? dbAuthorHighlighted
+          : highlightSearchTerms(author, query, {
+              wholeWordsOnly: false,
+            });
     }
 
     if (tags && tags.length > 0) {
-      highlighted.tags_highlighted = highlightSearchTermsArray(tags, query, {
-        wholeWordsOnly: false,
-      });
+      // Database returns highlighted tags as array, use if available
+      if (
+        Array.isArray(dbTagsHighlighted) &&
+        dbTagsHighlighted.length === tags.length &&
+        dbTagsHighlighted.some((tag) => typeof tag === 'string' && tag.includes('<mark'))
+      ) {
+        highlighted.tags_highlighted = dbTagsHighlighted.filter(
+          (tag): tag is string => typeof tag === 'string'
+        );
+      } else {
+        // Fallback to client-side highlighting
+        highlighted.tags_highlighted = highlightSearchTermsArray(tags, query, {
+          wholeWordsOnly: false,
+        });
+      }
     }
 
     return highlighted;

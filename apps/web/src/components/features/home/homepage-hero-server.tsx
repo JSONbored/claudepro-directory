@@ -27,14 +27,20 @@ const HomepageHeroClient = dynamicImport(
 /**
  * Homepage Hero Server Component
  *
- * OPTIMIZATION: No data fetching - renders immediately for streaming SSR
+ * OPTIMIZATION: Fetches stats data for hero section
  * This component streams the hero section immediately, improving TTFB
  *
- * The member count is passed as a prop from the parent page component
- * which can fetch it separately or use a default value
+ * The member count and stats are passed as props from the parent page component
+ * which can fetch them separately or use default values
  *
  * NOTE: Morphing blob background is handled in client component for interactivity
  */
-export async function HomepageHeroServer({ memberCount }: { memberCount: number }) {
-  return <HomepageHeroClient memberCount={memberCount} />;
+export async function HomepageHeroServer({ 
+  memberCount,
+  stats = {},
+}: { 
+  memberCount: number;
+  stats?: Record<string, { featured: number; total: number } | number>;
+}) {
+  return <HomepageHeroClient memberCount={memberCount} stats={stats} />;
 }

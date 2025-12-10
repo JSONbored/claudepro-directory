@@ -38,6 +38,8 @@ import { usePathname } from 'next/navigation';
 import { memo, useCallback, useEffect, useId, useRef, useState } from 'react';
 
 import { SearchFilterPanel } from '@/src/components/features/search/search-filter-panel';
+import { AnimatedSearchInput } from './animated-search-input';
+import { SearchIconAnimation } from './search-icon-animation';
 
 // Use enum values directly from @heyclaude/database-types Constants
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
@@ -84,6 +86,7 @@ function UnifiedSearchComponent({
   const [localSearchQuery, setLocalSearchQuery] = useState('');
   const [announcement, setAnnouncement] = useState('');
   const [isMounted, setIsMounted] = useState(false);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const pathname = usePathname();
 
   // Wait for client-side mount to prevent Radix UI ID hydration mismatch
@@ -295,7 +298,8 @@ function UnifiedSearchComponent({
               </div>
               <input
                 type="search"
-                name="search"
+                id="search-input-ssr"
+                name="q"
                 value={localSearchQuery}
                 onChange={(e) => setLocalSearchQuery(e.target.value)}
                 placeholder={placeholder}
@@ -316,11 +320,15 @@ function UnifiedSearchComponent({
       <search className={cn('w-full space-y-4', className)}>
         <div className="space-y-3">
           <div className="relative">
-            {/* Search icon on left */}
+            {/* Search icon on left - with typing pulse animation */}
             <div
               className={`pointer-events-none -translate-y-1/2 ${POSITION_PATTERNS.ABSOLUTE_TOP_HALF} left-4 z-10`}
             >
-              <Search className={`${UI_CLASSES.ICON_MD} text-accent`} aria-hidden="true" />
+              <SearchIconAnimation
+                isFocused={isSearchFocused}
+                isTyping={!!localSearchQuery}
+                iconSize={UI_CLASSES.ICON_MD}
+              />
             </div>
 
             {/* Sort and Filter controls on right (inside search bar) - Icon-only with tooltips */}
@@ -354,7 +362,7 @@ function UnifiedSearchComponent({
                         whileFocus={{
                           boxShadow: '0 0 0 2px rgba(249, 115, 22, 0.3)',
                         }}
-                        transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                        transition={{ type: 'spring', stiffness: 200, damping: 30, mass: 0.5 }}
                         onClick={(e) => {
                           e.stopPropagation();
                           setIsFilterOpen(!isFilterOpen);
@@ -400,21 +408,34 @@ function UnifiedSearchComponent({
               </TooltipProvider>
             ) : null}
 
-            <Input
-              id={searchInputId}
-              name="search"
-              type="search"
-              value={localSearchQuery}
-              onChange={(e) => setLocalSearchQuery(e.target.value)}
-              placeholder={placeholder}
-              className={cn(
-                "border-0 bg-transparent transition-smooth focus:ring-0 focus:ring-offset-0 h-14 w-full pl-12 text-base",
-                showFilters ? "pr-12" : "pr-4" // Padding for filter button
-              )}
-              aria-label="Search configurations"
-              aria-describedby={resultCount > 0 && localSearchQuery ? searchResultsId : undefined}
-              autoComplete="off"
-            />
+            <AnimatedSearchInput
+              placeholderTexts={[
+                'Search configurations...',
+                'Find MCP servers...',
+                'Discover commands...',
+                'Explore rules...',
+                'Browse hooks...',
+              ]}
+              enableTypingPlaceholder={true}
+            >
+              <Input
+                id={searchInputId}
+                name="q"
+                type="search"
+                value={localSearchQuery}
+                onChange={(e) => setLocalSearchQuery(e.target.value)}
+                onFocus={() => setIsSearchFocused(true)}
+                onBlur={() => setIsSearchFocused(false)}
+                placeholder={localSearchQuery ? placeholder : ''} // Hide placeholder when showing typing animation
+                autoComplete="off"
+                className={cn(
+                  "border-0 bg-transparent transition-smooth focus:ring-0 focus:ring-offset-0 h-14 w-full pl-12 text-base",
+                  showFilters ? "pr-12" : "pr-4" // Padding for filter button
+                )}
+                aria-label="Search configurations"
+                aria-describedby={resultCount > 0 && localSearchQuery ? searchResultsId : undefined}
+              />
+            </AnimatedSearchInput>
           </div>
 
           {showPresetRail ? (

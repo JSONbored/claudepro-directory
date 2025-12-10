@@ -11,18 +11,32 @@ reviews:
   suggested_reviewers: false
   path_filters:
     - apps/web/src/**
+    - apps/web/next.config.*
+    - apps/web/tsconfig.json
+    - apps/web/postcss.config.*
+    - apps/web/vercel.json
     - apps/edge/functions/**
+    - apps/edge/supabase/config.toml
+    - apps/edge/supabase/deno.json
     - packages/**/src/**
+    - packages/**/tsconfig.json
     - config/tools/**
     - config/coding-standards/**
+    - config/tests/playwright.config.ts
     - .github/workflows/**
     - .github/actions/**
     - lefthook.yml
     - .coderabbit.yaml
+    - .prettierrc.json
+    - .prettierignore
+    - components.json
     - package.json
     - pnpm-lock.yaml
+    - pnpm-workspace.yaml
     - tsconfig.json
     - turbo.json
+    - vitest.config.ts
+    - vitest.setup.ts
     - '!.next/**'
     - '!dist/**'
     - '!dist-ssr/**'
