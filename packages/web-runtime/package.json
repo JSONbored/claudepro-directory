@@ -202,6 +202,10 @@
       "types": "./src/design-system/styles/index.ts",
       "default": "./src/design-system/styles/index.ts"
     },
+    "./design-tokens": {
+      "types": "./src/design-tokens/index.ts",
+      "default": "./src/design-tokens/index.ts"
+    },
     "./flux": {
       "types": "./src/flux/index.ts",
       "default": "./src/flux/index.ts"

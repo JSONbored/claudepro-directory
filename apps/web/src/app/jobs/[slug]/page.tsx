@@ -129,8 +129,9 @@ export async function generateStaticParams() {
         },
         'JobPage: No jobs found in generateStaticParams, returning placeholder'
       );
-      // Return placeholder slug - page component will handle 404 gracefully
-      return [{ slug: '__placeholder__' }];
+      // Return placeholder slug (valid format: lowercase, numbers, single hyphens)
+      // Page component will handle 404 gracefully for placeholder slug
+      return [{ slug: 'placeholder' }];
     }
 
     return jobs.map((job) => ({ slug: job.slug }));
@@ -145,7 +146,7 @@ export async function generateStaticParams() {
     );
     // Cache Components requires at least one result - return placeholder on error
     // Page component will handle 404 gracefully for placeholder slug
-    return [{ slug: '__placeholder__' }];
+    return [{ slug: 'placeholder' }];
   }
 }
 
@@ -203,7 +204,7 @@ export default async function JobPage({ params }: PageProps) {
 
   // Handle placeholder slug from generateStaticParams (used when no jobs found at build time)
   // This satisfies Cache Components requirement for at least one static param
-  if (validatedSlug === '__placeholder__') {
+  if (validatedSlug === 'placeholder') {
     reqLogger.warn({ section: 'data-fetch' }, 'Placeholder slug detected, returning 404');
     notFound();
   }

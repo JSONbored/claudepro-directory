@@ -3943,44 +3943,24 @@ export type Database = {
         }[]
       }
       extract_tags_for_search: { Args: { tags: Json }; Returns: string }
-      filter_jobs:
-        | {
-            Args: {
-              p_category?: Database["public"]["Enums"]["job_category"]
-              p_employment_type?: Database["public"]["Enums"]["job_type"]
-              p_experience_level?: Database["public"]["Enums"]["experience_level"]
-              p_limit?: number
-              p_offset?: number
-              p_remote_only?: boolean
-              p_search_query?: string
-            }
-            Returns: Database["public"]["CompositeTypes"]["filter_jobs_result"]
-            SetofOptions: {
-              from: "*"
-              to: "filter_jobs_result"
-              isOneToOne: true
-              isSetofReturn: false
-            }
-          }
-        | {
-            Args: {
-              p_category?: Database["public"]["Enums"]["job_category"]
-              p_employment_type?: Database["public"]["Enums"]["job_type"]
-              p_experience_level?: Database["public"]["Enums"]["experience_level"]
-              p_highlight_query?: string
-              p_limit?: number
-              p_offset?: number
-              p_remote_only?: boolean
-              p_search_query?: string
-            }
-            Returns: Database["public"]["CompositeTypes"]["filter_jobs_result"]
-            SetofOptions: {
-              from: "*"
-              to: "filter_jobs_result"
-              isOneToOne: true
-              isSetofReturn: false
-            }
-          }
+      filter_jobs: {
+        Args: {
+          p_category?: Database["public"]["Enums"]["job_category"]
+          p_employment_type?: Database["public"]["Enums"]["job_type"]
+          p_experience_level?: Database["public"]["Enums"]["experience_level"]
+          p_limit?: number
+          p_offset?: number
+          p_remote_only?: boolean
+          p_search_query?: string
+        }
+        Returns: Database["public"]["CompositeTypes"]["filter_jobs_result"]
+        SetofOptions: {
+          from: "*"
+          to: "filter_jobs_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       finish_webhook_event_run: {
         Args: {
           p_error?: string
