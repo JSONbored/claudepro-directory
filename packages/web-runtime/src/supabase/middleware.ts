@@ -11,8 +11,12 @@ import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import type { Database } from '@heyclaude/database-types';
 import { getEnvVar } from '@heyclaude/shared-runtime';
-import { logger } from '../logger.ts';
-import { normalizeError } from '../errors.ts';
+import { normalizeErrorEdge as normalizeError } from '../errors-edge.ts';
+
+// Use console directly instead of logger to avoid pulling in pino
+// Middleware functions need to be lightweight and edge-compatible
+// Logger is only used for development/debugging, console is sufficient
+// IMPORTANT: Using normalizeErrorEdge (not errors.ts) to avoid pino dependency
 
 /**
  * Update Supabase Auth session in middleware
@@ -83,8 +87,11 @@ export async function updateSupabaseSession(
     // Log error for debugging but don't throw
     if (error instanceof Error) {
       const normalized = normalizeError(error, 'Supabase session update failed in middleware');
-      logger.warn({ err: normalized,
-        pathname: request.nextUrl.pathname, }, 'Supabase session update failed in middleware');
+      // Use console directly to avoid pulling in pino (edge-compatible)
+      console.warn('[Supabase] Session update failed in middleware', {
+        err: normalized.message,
+        pathname: request.nextUrl.pathname,
+      });
     }
     return null;
   }

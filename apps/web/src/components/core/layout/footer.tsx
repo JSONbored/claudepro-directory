@@ -133,6 +133,7 @@ function FooterComponent() {
     { href: ROUTES.SUBMIT, label: 'Submit' },
     { href: rssFeed.url, label: 'RSS', icon: Rss },
     { href: ROUTES.LLMS_TXT, label: 'LLMs.txt', icon: Sparkles },
+    { href: CONTACT_CHANNELS.github, label: 'View on GitHub', icon: Github },
   ];
 
   const supportLinks = [
@@ -281,17 +282,24 @@ function FooterComponent() {
               <div>
                 <h3 className="text-foreground mb-4 text-sm font-semibold">Resources</h3>
                 <ul className="space-y-2.5">
-                  {resourceLinks.map((link) => (
-                    <li key={`resources-${link.label}`}>
-                      <Link
-                        href={link.href}
-                        className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition-colors"
-                      >
-                        {link.icon ? <link.icon className="h-3.5 w-3.5" /> : null}
-                        <span>{link.label}</span>
-                      </Link>
-                    </li>
-                  ))}
+                  {resourceLinks.map((link) => {
+                    const isExternal = link.href.startsWith('http');
+                    return (
+                      <li key={`resources-${link.label}`}>
+                        <Link
+                          href={link.href}
+                          className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition-colors"
+                          {...(isExternal && {
+                            target: '_blank',
+                            rel: 'noopener noreferrer',
+                          })}
+                        >
+                          {link.icon ? <link.icon className="h-3.5 w-3.5" /> : null}
+                          <span>{link.label}</span>
+                        </Link>
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
 
@@ -352,17 +360,24 @@ function FooterComponent() {
               <div>
                 <h3 className="text-foreground mb-4 text-sm font-semibold">Resources</h3>
                 <ul className="space-y-2.5">
-                  {resourceLinks.map((link) => (
-                    <li key={`resources-${link.label}`}>
-                      <Link
-                        href={link.href}
-                        className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition-colors"
-                      >
-                        {link.icon ? <link.icon className="h-3.5 w-3.5" /> : null}
-                        <span>{link.label}</span>
-                      </Link>
-                    </li>
-                  ))}
+                  {resourceLinks.map((link) => {
+                    const isExternal = link.href.startsWith('http');
+                    return (
+                      <li key={`resources-${link.label}`}>
+                        <Link
+                          href={link.href}
+                          className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition-colors"
+                          {...(isExternal && {
+                            target: '_blank',
+                            rel: 'noopener noreferrer',
+                          })}
+                        >
+                          {link.icon ? <link.icon className="h-3.5 w-3.5" /> : null}
+                          <span>{link.label}</span>
+                        </Link>
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
 

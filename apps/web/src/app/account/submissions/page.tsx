@@ -166,11 +166,12 @@ function extractPrComponents(
  * Construct a safe GitHub PR URL from validated components
  * This ensures we're using only trusted, validated data instead of user-controlled URLs
  * Uses URL constructor for canonicalization to prevent encoding-based attacks
- * @param owner
- * @param repo
- * @param prNumber
+ * @param owner - GitHub repository owner name
+ * @param repo - GitHub repository name
+ * @param prNumber - Pull request number
  
- * @returns {unknown} Description of return value*/
+ * @returns {string} The constructed URL (or string result returned by the function)
+ */
 function buildSafePrUrl(owner: string, repo: string, prNumber: string): string {
   // Additional validation matching GitHub's rules using shared regex patterns
   if (!OWNER_REGEX.test(owner) || !REPO_REGEX.test(repo) || !PR_NUMBER_REGEX.test(prNumber)) {
@@ -280,8 +281,7 @@ export default async function SubmissionsPage() {
 /**
  * Render the authenticated user's submissions page content, including list, empty state, and error or sign-in prompts.
  *
- * @param reqLogger - Request-scoped logger used for telemetry and data-integrity warnings; a child logger is created with user context when available.
- * @param reqLogger.reqLogger
+ * @param reqLogger - Request-scoped logger used for telemetry and data-integrity warnings; a child logger is created with user context when available
  * @returns A React element containing the submissions UI: sign-in prompt when unauthenticated, an error message on fetch failure, an empty-state call-to-action when no submissions exist, or a grid of submission cards when submissions are available.
  *
  * @see getAuthenticatedUser

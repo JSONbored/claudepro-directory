@@ -1,10 +1,10 @@
 /**
  * Consulting Page - Database-First Architecture Specialist
  *
- * @todo Visual/UX Enhancement: Drastically improve visual design and UX/UI after navigation menu updates complete.
- *       This is a service offering page (advertising consulting services to visitors/users).
- *       Goals: Enhanced visual design, better conversion-focused layout, rich content cards (shadcn components),
- *       testimonials/case studies, improved CTAs, trust signals. See scratchpad.md for detailed enhancement plan.
+ * This is a hybrid page combining "about me" (the creator of the website/project) with consulting services solicitation.
+ * Comprehensive research and analysis has been conducted for modern consulting/about-me page patterns, motion.dev
+ * animations, shadcn components, and Dec 2025 UX/UI standards. See .cursor/consulting-page-research.md for detailed
+ * findings and implementation recommendations.
  */
 
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';

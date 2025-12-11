@@ -26,6 +26,8 @@ export * from './data/seo/client.ts';
 export * from './data/content/detail.ts'; // 'use server' but often used in server contexts directly
 export * from './cache-tags.ts';
 export * from './proxy/next.ts';
+// Export edge-safe error normalization for proxy/middleware files
+export { normalizeErrorEdge } from './errors-edge.ts';
 
 // Data Loaders (Server-Side)
 export * from './data/content-helpers.ts';

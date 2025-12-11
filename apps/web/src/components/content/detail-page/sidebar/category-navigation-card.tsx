@@ -127,11 +127,12 @@ export function CategoryNavigationCard({
               <TooltipTrigger asChild>
                 <Link
                   href={`${basePath}/${key}`}
-                  className={`rounded-lg p-2 transition-all duration-200 ${
+                  className={`rounded-lg p-2 transition-all ${
                     isActive
                       ? info.activeColor || 'bg-primary/10 text-primary'
                       : `text-muted-foreground ${info.color || 'hover:bg-muted/50 hover:text-primary'}`
                   }`}
+                  style={{ transitionDuration: 'var(--duration-quick)' }}
                 >
                   <Icon className={UI_CLASSES.ICON_SM} />
                 </Link>

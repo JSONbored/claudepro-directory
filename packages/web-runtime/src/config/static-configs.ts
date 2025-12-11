@@ -11,6 +11,7 @@ import {
   API_TIMEOUTS,
   COMPONENT_FLAGS,
   CONFETTI_CONFIG,
+  FEATURE_FLAGS,
   HOMEPAGE_CONFIG,
   INFINITE_SCROLL_CONFIG,
   NEWSLETTER_BEHAVIOR,
@@ -28,15 +29,25 @@ import { mapComponentCardConfig } from '../utils/component-card-config.ts';
 // =============================================================================
 
 /** Legacy app settings shape for backward compatibility */
+// Date values are computed lazily to prevent hydration mismatches between server and client
+const getCurrentDate = () => new Date();
 const APP_SETTINGS_COMPAT = {
   'newsletter.excluded_pages': NEWSLETTER_BEHAVIOR.excluded_pages,
   'hooks.infinite_scroll.batch_size': INFINITE_SCROLL_CONFIG.batch_size,
   'queue.pulse.batch_size': 100,
   'hooks.infinite_scroll.threshold': INFINITE_SCROLL_CONFIG.threshold,
-  'date.current_month': new Date().toISOString().slice(0, 7),
-  'date.current_year': new Date().getFullYear(),
-  'date.current_date': new Date().toISOString().split('T')[0],
-  'date.last_reviewed': new Date().toISOString().split('T')[0],
+  get 'date.current_month'() {
+    return getCurrentDate().toISOString().slice(0, 7);
+  },
+  get 'date.current_year'() {
+    return getCurrentDate().getFullYear();
+  },
+  get 'date.current_date'() {
+    return getCurrentDate().toISOString().split('T')[0];
+  },
+  get 'date.last_reviewed'() {
+    return getCurrentDate().toISOString().split('T')[0];
+  },
 } as const;
 
 /** Legacy animation config shape */
@@ -232,4 +243,21 @@ export function getRecentlyViewedConfig() {
  */
 export function checkConfettiEnabled() {
   return true;
+}
+
+/**
+ * Get feature flags
+ * Returns feature toggle settings
+ */
+export function getFeatureFlags() {
+  return FEATURE_FLAGS;
+}
+
+/**
+ * Get a specific feature flag value
+ * @param key - The feature flag key to retrieve
+ * @returns The feature flag value or false if not found
+ */
+export function getFeatureFlag(key: keyof typeof FEATURE_FLAGS): boolean | number | string {
+  return FEATURE_FLAGS[key] ?? false;
 }

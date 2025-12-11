@@ -14,6 +14,7 @@
  */
 
 import { type Database } from '@heyclaude/database-types';
+import { DURATION } from '@heyclaude/web-runtime/design-system';
 import {
   ArrowRight,
   CheckCircle,
@@ -255,11 +256,12 @@ function TemplateCard({ template, index, onApply }: TemplateCardProps) {
     >
       <Card
         className={cn(
-          'group relative overflow-hidden transition-all duration-300',
+          'group relative overflow-hidden transition-all',
           'hover:shadow-lg hover:shadow-amber-500/10',
           'hover:border-amber-500/50',
           'cursor-pointer'
         )}
+        style={{ transitionDuration: `${DURATION.default}s` }}
         onClick={onApply}
       >
         {/* Badges overlay */}
@@ -520,10 +522,11 @@ export function TemplateQuickSelect({
               onClick={() => onApplyTemplate(template)}
               className={cn(
                 'flex w-full items-start gap-3 rounded-lg border p-3',
-                'text-left transition-all duration-200',
+                'text-left transition-all',
                 'hover:bg-accent/50 hover:border-amber-500/50',
                 'group'
               )}
+              style={{ transitionDuration: `${DURATION.quick}s` }}
             >
               <CheckCircle
                 className={cn(

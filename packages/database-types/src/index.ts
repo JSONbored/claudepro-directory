@@ -585,6 +585,7 @@ export type Database = {
         Row: {
           author: string
           author_profile_url: string | null
+          author_user_id: string | null
           avg_rating: number | null
           bookmark_count: number
           category: Database["public"]["Enums"]["content_category"]
@@ -634,6 +635,7 @@ export type Database = {
         Insert: {
           author: string
           author_profile_url?: string | null
+          author_user_id?: string | null
           avg_rating?: number | null
           bookmark_count?: number
           category: Database["public"]["Enums"]["content_category"]
@@ -683,6 +685,7 @@ export type Database = {
         Update: {
           author?: string
           author_profile_url?: string | null
+          author_user_id?: string | null
           avg_rating?: number | null
           bookmark_count?: number
           category?: Database["public"]["Enums"]["content_category"]
@@ -729,7 +732,15 @@ export type Database = {
           use_count?: number
           view_count?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "content_author_user_id_fkey"
+            columns: ["author_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       content_embeddings: {
         Row: {
@@ -4931,6 +4942,7 @@ export type Database = {
         Returns: {
           author: string
           author_profile_url: string | null
+          author_user_id: string | null
           avg_rating: number | null
           bookmark_count: number
           category: Database["public"]["Enums"]["content_category"]
@@ -5243,6 +5255,7 @@ export type Database = {
         Returns: {
           author: string
           author_profile_url: string | null
+          author_user_id: string | null
           avg_rating: number | null
           bookmark_count: number
           category: Database["public"]["Enums"]["content_category"]

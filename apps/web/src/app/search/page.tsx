@@ -14,6 +14,8 @@ import type { DisplayableContent } from '@heyclaude/web-runtime';
 import type { SearchFilters } from '@heyclaude/web-runtime/core';
 import { getCachedSearchResults } from '@/src/app/api/search/route';
 
+type SearchType = 'content' | 'jobs' | 'unified';
+
 // Use generated database types - no custom types
 type ContentCategory = Database['public']['Enums']['content_category'];
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category as readonly ContentCategory[];
@@ -192,10 +194,14 @@ async function SearchResultsSection({
         )
       : undefined;
 
+    // Determine searchType based on entities (same logic as API route)
+    // When entities are specified, use 'unified' search
+    const searchType: SearchType = ['content'].length > 0 ? 'unified' : 'content';
+    
     const searchResult = await getCachedSearchResults({
       query,
-      searchType: 'unified',
-      entities: ['content'],
+      searchType, // Required parameter - determined by entities
+      entities: ['content'], // Use unified search when entities are specified
       categories: categoryEnums, // Use generated enum type
       tags: filters.p_tags,
       authors: filters.p_authors,

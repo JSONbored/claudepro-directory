@@ -41,7 +41,6 @@
  * ```
  */
 
-import { getSocialLinks } from '../../../data/marketing/contact.ts';
 import { APP_CONFIG } from '../../../data/config/constants.ts';
 import { getViewTransitionName } from '../../utils.ts';
 import { POSITION_PATTERNS, UI_CLASSES } from '../../constants.ts';
@@ -58,11 +57,6 @@ import { logger } from '../../../logger.ts';
 import { normalizeError } from '../../../errors.ts';
 import type { ReactNode, HTMLAttributes } from 'react';
 import { memo } from 'react';
-
-/**
- * Props for BaseCard component
- */
-const SOCIAL_LINK_SNAPSHOT = getSocialLinks();
 
 /**
  * Generic card component props - accepts any component that matches Card structure
@@ -450,20 +444,46 @@ export const BaseCard = memo(
               {/* Left side: Author and custom metadata */}
               {(showAuthor && author) || customMetadataText ? (
                 <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} ${UI_CLASSES.TEXT_METADATA}`}>
-                  {showAuthor && author && (
-                    <span>
-                      by{' '}
-                      <a
-                        href={authorProfileUrl || SOCIAL_LINK_SNAPSHOT.authorProfile}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="transition-colors hover:text-foreground hover:underline"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        {typeof author === 'string' ? author : author}
-                      </a>
-                    </span>
-                  )}
+                  {showAuthor && author && (() => {
+                    // Only show profile link if authorProfileUrl is explicitly provided
+                    // Don't fallback to default - if no profile URL exists, don't show a link
+                    if (authorProfileUrl) {
+                      // Check if this is an internal user profile link
+                      const isInternalProfile = authorProfileUrl.startsWith('/u/');
+                      
+                      return (
+                        <span>
+                          by{' '}
+                          {isInternalProfile ? (
+                            <a
+                              href={authorProfileUrl}
+                              className="transition-colors hover:text-foreground hover:underline"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              {typeof author === 'string' ? author : author}
+                            </a>
+                          ) : (
+                            <a
+                              href={authorProfileUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="transition-colors hover:text-foreground hover:underline"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              {typeof author === 'string' ? author : author}
+                            </a>
+                          )}
+                        </span>
+                      );
+                    }
+                    
+                    // No profile URL - just show author name without link
+                    return (
+                      <span>
+                        by {typeof author === 'string' ? author : author}
+                      </span>
+                    );
+                  })()}
                   {customMetadataText}
                 </div>
               ) : (

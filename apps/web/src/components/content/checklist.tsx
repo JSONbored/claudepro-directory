@@ -5,6 +5,7 @@
  * Used in 7+ MDX files across the codebase
  */
 
+import { DURATION } from '@heyclaude/web-runtime/design-system';
 import { AlertTriangle, BookOpen, CheckCircle } from '@heyclaude/web-runtime/icons';
 import { type ChecklistProps } from '@heyclaude/web-runtime/types/component.types';
 import {
@@ -81,8 +82,8 @@ export function Checklist(props: ChecklistProps) {
         <div className="mb-4">
           <div className="bg-muted h-2 w-full rounded-full">
             <div
-              className="bg-primary h-2 rounded-full transition-all duration-300"
-              style={{ width: `${progress}%` }}
+              className="bg-primary h-2 rounded-full transition-all"
+              style={{ width: `${progress}%`, transitionDuration: `${DURATION.default}s` }}
             />
           </div>
         </div>

@@ -12,9 +12,10 @@ import {
   CommandItem,
   CommandList,
   CommandSeparator,
+  ErrorBoundary,
 } from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';
-import { useMemo, useEffect, useId, useState } from 'react';
+import { useMemo, useEffect, useLayoutEffect, useId, useState } from 'react';
 
 type NavigationMenuItem = {
   path: string;
@@ -44,7 +45,8 @@ export function NavigationCommandMenu({
   const setOpen = onOpenChange || setInternalOpen;
 
   // CRITICAL FIX: Ensure onOpenChange is called when controlledOpen changes
-  useEffect(() => {
+  // Use useLayoutEffect for synchronous state sync (runs before paint)
+  useLayoutEffect(() => {
     if (controlledOpen !== undefined && onOpenChange) {
       // Sync internal state with controlled state
       if (internalOpen !== controlledOpen) {
@@ -158,36 +160,58 @@ export function NavigationCommandMenu({
     );
   };
 
+  // Early return if not open (prevents unnecessary renders)
+  if (!open) {
+    return null;
+  }
+
+  // Defensive check: Ensure navigationData is available
+  if (!navigationData) {
+    logClientWarn(
+      '[NavigationCommandMenu] navigationData is not available',
+      undefined,
+      'NavigationCommandMenu.missingData',
+      {
+        component: 'NavigationCommandMenu',
+        action: 'missing-data-check',
+        category: 'navigation',
+      }
+    );
+    return null;
+  }
+
   return (
-    <CommandDialog open={open} onOpenChange={setOpen}>
-      <CommandInput id={inputId} name="command-search" placeholder="Search navigation..." />
-      <CommandList>
-        <CommandEmpty>No results found.</CommandEmpty>
+    <ErrorBoundary>
+      <CommandDialog open={open} onOpenChange={setOpen}>
+        <CommandInput id={inputId} name="command-search" placeholder="Search navigation..." />
+        <CommandList>
+          <CommandEmpty>No results found.</CommandEmpty>
 
-        {navigationData.primary && navigationData.primary.length > 0 ? (
-          <>
-            <CommandGroup heading="Primary Navigation">
-              {navigationData.primary.map((item, index) => renderItem(item, index, 'primary')).filter(Boolean)}
+          {navigationData.primary && navigationData.primary.length > 0 ? (
+            <>
+              <CommandGroup heading="Primary Navigation">
+                {navigationData.primary.map((item, index) => renderItem(item, index, 'primary')).filter(Boolean)}
+              </CommandGroup>
+              <CommandSeparator />
+            </>
+          ) : null}
+
+          {navigationData.secondary && navigationData.secondary.length > 0 ? (
+            <>
+              <CommandGroup heading="More">
+                {navigationData.secondary.map((item, index) => renderItem(item, index, 'secondary')).filter(Boolean)}
+              </CommandGroup>
+              <CommandSeparator />
+            </>
+          ) : null}
+
+          {navigationData.actions && navigationData.actions.length > 0 ? (
+            <CommandGroup heading="Actions">
+              {navigationData.actions.map((item, index) => renderItem(item, index, 'actions')).filter(Boolean)}
             </CommandGroup>
-            <CommandSeparator />
-          </>
-        ) : null}
-
-        {navigationData.secondary && navigationData.secondary.length > 0 ? (
-          <>
-            <CommandGroup heading="More">
-              {navigationData.secondary.map((item, index) => renderItem(item, index, 'secondary')).filter(Boolean)}
-            </CommandGroup>
-            <CommandSeparator />
-          </>
-        ) : null}
-
-        {navigationData.actions && navigationData.actions.length > 0 ? (
-          <CommandGroup heading="Actions">
-            {navigationData.actions.map((item, index) => renderItem(item, index, 'actions')).filter(Boolean)}
-          </CommandGroup>
-        ) : null}
-      </CommandList>
-    </CommandDialog>
+          ) : null}
+        </CommandList>
+      </CommandDialog>
+    </ErrorBoundary>
   );
 }

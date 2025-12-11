@@ -46,6 +46,27 @@
       "import": "./dist/error-handling.js",
       "require": "./dist/error-handling.js",
       "default": "./dist/error-handling.js"
+    },
+    "./rate-limit": {
+      "development": "./src/rate-limit.ts",
+      "types": "./dist/rate-limit.d.ts",
+      "import": "./dist/rate-limit.js",
+      "require": "./dist/rate-limit.js",
+      "default": "./dist/rate-limit.js"
+    },
+    "./proxy/guards": {
+      "development": "./src/proxy/guards.ts",
+      "types": "./dist/proxy/guards.d.ts",
+      "import": "./dist/proxy/guards.js",
+      "require": "./dist/proxy/guards.js",
+      "default": "./dist/proxy/guards.js"
+    },
+    "./env": {
+      "development": "./src/env.ts",
+      "types": "./dist/env.d.ts",
+      "import": "./dist/env.js",
+      "require": "./dist/env.js",
+      "default": "./dist/env.js"
     }
   },
   "main": "./dist/index.js",

@@ -7,6 +7,7 @@
  * @see https://www.inngest.com/docs/reference/serve
  */
 
+import { connection } from 'next/server';
 import {
   GET as inngestGET,
   POST as inngestPOST,
@@ -28,6 +29,9 @@ import { type NextRequest } from 'next/server';
  * @see {@link @heyclaude/web-runtime/logging/server~logger} - Logger used to create a per-request child logger
  */
 export async function GET(request: NextRequest, context: unknown) {
+  // Defer to request time for non-deterministic operations (required for Cache Components)
+  await connection();
+
   const reqLogger = logger.child({
     operation: 'InngestAPI',
     route: '/api/inngest',
@@ -69,6 +73,9 @@ export async function GET(request: NextRequest, context: unknown) {
  * @see {@link logger}
  */
 export async function POST(request: NextRequest, context: unknown) {
+  // Defer to request time for non-deterministic operations (required for Cache Components)
+  await connection();
+
   const reqLogger = logger.child({
     operation: 'InngestAPI',
     route: '/api/inngest',
@@ -102,6 +109,9 @@ export async function POST(request: NextRequest, context: unknown) {
  * @see {@link @heyclaude/web-runtime/logging/server.logger}
  */
 export async function PUT(request: NextRequest, context: unknown) {
+  // Defer to request time for non-deterministic operations (required for Cache Components)
+  await connection();
+
   const reqLogger = logger.child({
     operation: 'InngestAPI',
     route: '/api/inngest',

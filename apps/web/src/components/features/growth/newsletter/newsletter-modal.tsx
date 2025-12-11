@@ -3,7 +3,7 @@
 import { type Database } from '@heyclaude/database-types';
 import { logUnhandledPromise, NEWSLETTER_CTA_CONFIG } from '@heyclaude/web-runtime/core';
 import { usePulse, useNewsletter } from '@heyclaude/web-runtime/hooks';
-import { logClientInfo } from '@heyclaude/web-runtime/logging/client';
+import { logClientInfo, logClientWarn } from '@heyclaude/web-runtime/logging/client';
 import {
   cn,
   toasts,
@@ -37,6 +37,26 @@ export function NewsletterModal({
   copyType,
   slug,
 }: NewsletterModalProps) {
+  // Defensive check: Ensure config is available
+  if (!NEWSLETTER_CTA_CONFIG) {
+    logClientWarn(
+      '[NewsletterModal] NEWSLETTER_CTA_CONFIG is undefined',
+      undefined,
+      'NewsletterModal.configMissing',
+      {
+        component: 'NewsletterModal',
+        action: 'config-check',
+        category: 'newsletter',
+      }
+    );
+    return null;
+  }
+
+  // Early return if not open (prevents unnecessary renders)
+  if (!open) {
+    return null;
+  }
+
   const [showTime, setShowTime] = useState<null | number>(null);
   const [isInputFocused, setIsInputFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);

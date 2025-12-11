@@ -3,7 +3,7 @@
 import { formatRelativeDate } from '@heyclaude/web-runtime';
 import { usePinboard } from '@heyclaude/web-runtime/hooks';
 import { BookmarkMinus, BookmarkPlus } from '@heyclaude/web-runtime/icons';
-import { logClientInfo } from '@heyclaude/web-runtime/logging/client';
+import { logClientInfo, logClientWarn } from '@heyclaude/web-runtime/logging/client';
 import {
   UI_CLASSES,
   Button,
@@ -16,12 +16,32 @@ import {
 import Link from 'next/link';
 import { useEffect } from 'react';
 
-interface PinboardDrawerProps {
+export interface PinboardDrawerProps {
   onOpenChange: (open: boolean) => void;
   open: boolean;
 }
 
 export function PinboardDrawer({ open, onOpenChange }: PinboardDrawerProps) {
+  // Early return if not open (prevents unnecessary renders)
+  if (!open) {
+    return null;
+  }
+
+  // Defensive check: Ensure onOpenChange is provided
+  if (!onOpenChange) {
+    logClientWarn(
+      '[PinboardDrawer] onOpenChange is required',
+      undefined,
+      'PinboardDrawer.missingOnOpenChange',
+      {
+        component: 'PinboardDrawer',
+        action: 'missing-prop-check',
+        category: 'navigation',
+      }
+    );
+    return null;
+  }
+
   const { pinnedItems, isLoaded, unpinItem, clearAll } = usePinboard();
   const hasPins = pinnedItems.length > 0;
 

@@ -14,7 +14,7 @@ import {
   logClientWarn,
   normalizeError,
 } from '@heyclaude/web-runtime/logging/client';
-import { DIMENSIONS, toasts } from '@heyclaude/web-runtime/ui';
+import { DIMENSIONS, toasts, ErrorBoundary } from '@heyclaude/web-runtime/ui';
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
 import { useEffect, useCallback } from 'react';
@@ -88,7 +88,9 @@ function CommandMenuWrapper({ children }: { children: React.ReactNode }) {
   return (
     <>
       {children}
-      <NavigationCommandMenu open={isOpen} onOpenChange={handleOpenChange} />
+      <ErrorBoundary>
+        <NavigationCommandMenu open={isOpen} onOpenChange={handleOpenChange} />
+      </ErrorBoundary>
     </>
   );
 }

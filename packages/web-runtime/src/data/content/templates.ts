@@ -29,7 +29,6 @@ export async function getContentTemplates(
   // Temporarily removed 'use cache' to fix serialization issues during prerendering
   // The issue is that Next.js tries to serialize the entire function closure when using 'use cache',
   // and class instances (Supabase client, ContentService) created inside the function are being captured.
-  // TODO: Re-implement caching with a pattern that doesn't capture class instances in the closure.
 
   // Configure cache - use 'hours' profile for templates (changes every 2 hours)
   // Note: cacheLife/cacheTag require 'use cache', so these are currently no-ops

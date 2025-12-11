@@ -127,10 +127,11 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
               batchSize={30}
               emptyMessage={`No ${categoryName} found. Try adjusting your filters.`}
               ariaLabel={`${categoryName} results`}
-              keyExtractor={(item) => {
+              keyExtractor={(item, index) => {
                 // Use slug for unique keys
                 // DisplayableContent doesn't have an id property
-                const uniqueId = item.slug ?? `unknown-${Math.random()}`;
+                // Use index as fallback instead of Math.random() to prevent hydration mismatches
+                const uniqueId = item.slug ?? `item-${index}`;
                 return `${tab}-${uniqueId}`;
               }}
               renderCard={(item) => {

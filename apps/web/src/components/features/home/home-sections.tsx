@@ -48,6 +48,7 @@ function HomePageClientComponent({
   const [filters, setFilters] = useState<FilterState>({});
   const [currentSearchQuery, setCurrentSearchQuery] = useState('');
   const abortControllerRef = useRef<AbortController | null>(null);
+  const hasInitialFetchRef = useRef(false);
 
   const runLoggedAsync = useLoggedAsync({
     scope: 'HomePageClient',
@@ -330,7 +331,7 @@ function HomePageClientComponent({
         setIsLoadingAllConfigs(false);
       }
     },
-    [isLoadingAllConfigs, hasMoreAllConfigs, runLoggedAsync]
+    [hasMoreAllConfigs, runLoggedAsync]
   );
 
   const handleFetchMore = useCallback(async () => {
@@ -350,10 +351,12 @@ function HomePageClientComponent({
         allConfigsLength: allConfigs.length,
         isLoadingAllConfigs,
         shouldFetch: activeTab === 'all' && allConfigs.length === 0 && !isLoadingAllConfigs,
+        hasInitialFetch: hasInitialFetchRef.current,
       }
     );
 
-    if (activeTab === 'all' && allConfigs.length === 0 && !isLoadingAllConfigs) {
+    if (activeTab === 'all' && allConfigs.length === 0 && !isLoadingAllConfigs && !hasInitialFetchRef.current) {
+      hasInitialFetchRef.current = true;
       logClientWarn(
         '[HomePageClient] Triggering fetchAllConfigs for All tab',
         null,
@@ -372,7 +375,7 @@ function HomePageClientComponent({
         logUnhandledPromise('HomePageClient: initial fetchAllConfigs failed', error);
       });
     }
-  }, [activeTab, allConfigs.length, fetchAllConfigs, isLoadingAllConfigs]);
+  }, [activeTab, allConfigs.length, isLoadingAllConfigs, fetchAllConfigs]);
 
   const handleSearch = useCallback(
     async (query: string, categoryOverride?: string, signal?: AbortSignal) => {
@@ -429,10 +432,10 @@ function HomePageClientComponent({
 
             // Build query parameters for API route
             // Follows architectural strategy: API route -> data layer -> database RPC -> DB
+            // Note: API determines searchType internally based on entities and job filters
             const searchParams = new URLSearchParams({
               q: trimmedQuery,
-              searchType: 'unified',
-              entities: 'content',
+              entities: 'content', // Use unified search when entities are specified
               limit: '50',
             });
 
@@ -469,7 +472,7 @@ function HomePageClientComponent({
 
             logClientWarn(
               '[HomePageClient] Calling /api/search',
-              null,
+              undefined,
               'HomePageClient.handleSearch.call',
               {
                 component: 'HomePageClient',
@@ -499,13 +502,21 @@ function HomePageClientComponent({
             }
 
             // Extract results - ensure we have an array
-            const results = Array.isArray(result.results) 
-              ? (result.results as DisplayableContent[])
-              : [];
+            // Defensive: Handle various response formats
+            let results: DisplayableContent[] = [];
+            if (result && typeof result === 'object') {
+              if (Array.isArray(result.results)) {
+                results = result.results as DisplayableContent[];
+              } else if (result.results && typeof result.results === 'object' && 'data' in result.results) {
+                // Handle nested results structure if database returns it differently
+                const nestedResults = (result.results as { data?: unknown[] }).data;
+                results = Array.isArray(nestedResults) ? (nestedResults as DisplayableContent[]) : [];
+              }
+            }
             
             logClientWarn(
               '[HomePageClient] /api/search result received',
-              null,
+              undefined,
               'HomePageClient.handleSearch.result',
               {
                 component: 'HomePageClient',
@@ -513,20 +524,21 @@ function HomePageClientComponent({
                 category: 'search',
                 query: trimmedQuery,
                 hasResult: Boolean(result),
-                resultsType: typeof result.results,
-                resultsIsArray: Array.isArray(result.results),
-                resultsLength: Array.isArray(result.results) ? result.results.length : 0,
+                resultType: typeof result,
+                resultsType: result?.results ? typeof result.results : 'undefined',
+                resultsIsArray: Array.isArray(result?.results),
+                resultsLength: Array.isArray(result?.results) ? result.results.length : 0,
                 extractedLength: results.length,
                 firstResultSlug: results[0]?.slug,
-                searchType: result.searchType,
+                searchType: result?.searchType,
               }
             );
             
             // Log if we got unexpected results structure
-            if (!Array.isArray(result.results) && result.results !== null && result.results !== undefined) {
+            if (result && !Array.isArray(result.results) && result.results !== null && result.results !== undefined) {
               logClientWarn(
                 '[HomePageClient] Search returned non-array results',
-                null,
+                undefined,
                 'HomePageClient.handleSearch.unexpectedResults',
                 {
                   component: 'HomePageClient',
@@ -535,6 +547,7 @@ function HomePageClientComponent({
                   query: trimmedQuery,
                   resultsType: typeof result.results,
                   hasResults: result.results !== null && result.results !== undefined,
+                  resultKeys: result ? Object.keys(result) : [],
                 }
               );
             }
@@ -545,7 +558,7 @@ function HomePageClientComponent({
             // Update state
             logClientWarn(
               '[HomePageClient] Setting search results',
-              null,
+              undefined,
               'HomePageClient.handleSearch.setResults',
               {
                 component: 'HomePageClient',
@@ -556,7 +569,8 @@ function HomePageClientComponent({
                 willUpdateState: true,
               }
             );
-            setSearchResults(results);
+            // Ensure we always set an array, never null or undefined
+            setSearchResults(Array.isArray(results) ? results : []);
           },
           {
             message: 'Search operation failed',
@@ -628,36 +642,64 @@ function HomePageClientComponent({
   // Performance: When searching, DB filters by category (no client-side filtering needed)
   // When not searching, use Set lookups for O(1) filtering
   const filteredResults = useMemo((): DisplayableContent[] => {
-    // Show search results if there's an active search query
-    if (currentSearchQuery.length > 0) {
-      const results = searchResults || [];
+    try {
+      // Show search results if there's an active search query
+      if (currentSearchQuery.length > 0) {
+        // Ensure searchResults is an array and handle null/undefined
+        const results = Array.isArray(searchResults) ? searchResults : [];
+        logClientWarn(
+          '[HomePageClient] Computing filteredResults for search',
+          undefined,
+          'HomePageClient.filteredResults.search',
+          {
+            component: 'HomePageClient',
+            action: 'compute-filtered-results',
+            category: 'search',
+            currentSearchQuery,
+            searchResultsLength: Array.isArray(searchResults) ? searchResults.length : 0,
+            filteredResultsLength: results.length,
+            searchResultsIsArray: Array.isArray(searchResults),
+            searchResultsType: typeof searchResults,
+          }
+        );
+        return results;
+      }
+
+      // Not searching - filter allConfigs by tab
+      const dataSource = Array.isArray(allConfigs) ? allConfigs : [];
+
+      if (activeTab === 'all' || activeTab === 'community') {
+        return dataSource;
+      }
+
+      const lookupSet = slugLookupMaps[activeTab];
+      if (!lookupSet) {
+        return dataSource;
+      }
+
+      return dataSource.filter((item) => {
+        if (!item || typeof item !== 'object') return false;
+        const slug = 'slug' in item ? item.slug : null;
+        return slug && typeof slug === 'string' && lookupSet.has(slug);
+      });
+    } catch (error) {
+      // Catch any errors in filteredResults computation to prevent crashes
+      const normalized = normalizeError(error, 'filteredResults computation failed');
       logClientWarn(
-        '[HomePageClient] Computing filteredResults for search',
-        null,
-        'HomePageClient.filteredResults.search',
+        '[HomePageClient] filteredResults computation error',
+        normalized,
+        'HomePageClient.filteredResults.error',
         {
           component: 'HomePageClient',
-          action: 'compute-filtered-results',
+          action: 'compute-filtered-results-error',
           category: 'search',
           currentSearchQuery,
-          searchResultsLength: searchResults.length,
-          filteredResultsLength: results.length,
+          activeTab,
         }
       );
-      return results;
+      // Return empty array on error to prevent crashes
+      return [];
     }
-
-    // Not searching - filter allConfigs by tab
-    const dataSource = allConfigs;
-
-    if (activeTab === 'all' || activeTab === 'community') {
-      return dataSource || [];
-    }
-
-    const lookupSet = slugLookupMaps[activeTab];
-    return lookupSet
-      ? (dataSource || []).filter((item) => item.slug && lookupSet.has(item.slug))
-      : dataSource || [];
   }, [searchResults, allConfigs, activeTab, slugLookupMaps, currentSearchQuery]);
 
   // Handle tab change - re-trigger search if currently searching
@@ -710,10 +752,10 @@ function HomePageClientComponent({
     };
   }, []);
 
-  // Set search props in context so hero can render the search bar
-  useEffect(() => {
-    setSearchProps({
-      onSearch: (query) => {
+  // Memoize search props to prevent unnecessary re-renders
+  const searchPropsMemo = useMemo(
+    () => ({
+      onSearch: (query: string) => {
         // UnifiedSearch already debounces (400ms), so this will be called after debounce
         // Create new AbortController for this search
         const controller = new AbortController();
@@ -747,8 +789,14 @@ function HomePageClientComponent({
       availableCategories: filterOptions.categories,
       resultCount: filteredResults.length,
       onFocusChange: setSearchFocused,
-    });
-  }, [handleSearch, handleFiltersChange, filters, filterOptions, filteredResults.length, setSearchFocused, setSearchProps]);
+    }),
+    [handleSearch, handleFiltersChange, filters, filterOptions.tags, filterOptions.authors, filterOptions.categories, filteredResults.length, setSearchFocused]
+  );
+
+  // Set search props in context so hero can render the search bar
+  useEffect(() => {
+    setSearchProps(searchPropsMemo);
+  }, [searchPropsMemo, setSearchProps]);
 
   return (
     <>

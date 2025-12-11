@@ -31,14 +31,7 @@ const NEXT_PUBLIC_ENV_VARS: EnvRecord = {
   // Supabase - required for client-side database access
   NEXT_PUBLIC_SUPABASE_URL: process.env['NEXT_PUBLIC_SUPABASE_URL'],
   NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY'],
-  // Analytics
-  NEXT_PUBLIC_UMAMI_WEBSITE_ID: process.env['NEXT_PUBLIC_UMAMI_WEBSITE_ID'],
-  NEXT_PUBLIC_UMAMI_SCRIPT_URL: process.env['NEXT_PUBLIC_UMAMI_SCRIPT_URL'],
-  // Feature flags
-  NEXT_PUBLIC_DEBUG_ANALYTICS: process.env['NEXT_PUBLIC_DEBUG_ANALYTICS'],
-  NEXT_PUBLIC_ENABLE_PWA: process.env['NEXT_PUBLIC_ENABLE_PWA'],
   // URLs
-  NEXT_PUBLIC_API_URL: process.env['NEXT_PUBLIC_API_URL'],
   NEXT_PUBLIC_SITE_URL: process.env['NEXT_PUBLIC_SITE_URL'],
   NEXT_PUBLIC_BASE_URL: process.env['NEXT_PUBLIC_BASE_URL'],
   NEXT_PUBLIC_APP_URL: process.env['NEXT_PUBLIC_APP_URL'],
@@ -126,8 +119,16 @@ export function getBooleanEnvVar(name: string, fallback?: boolean): boolean | un
 }
 
 export function getEnvObject(): EnvRecord {
-  // Start with NEXT_PUBLIC_* variables (inlined at build time, works on client)
-  const record: EnvRecord = { ...NEXT_PUBLIC_ENV_VARS };
+  // Check if we're in build phase - during build, Next.js may have inlined truncated values
+  // Read directly from process.env instead of using inlined NEXT_PUBLIC_ENV_VARS
+  const isBuildPhase = typeof process !== 'undefined' && process.env && (
+    process.env['NEXT_PHASE'] === 'phase-production-build' ||
+    process.env['NEXT_PHASE'] === 'phase-production-server'
+  );
+
+  // During build, read directly from process.env to avoid using truncated inlined values
+  // At runtime, use inlined values for client-side compatibility
+  const record: EnvRecord = isBuildPhase ? {} : { ...NEXT_PUBLIC_ENV_VARS };
 
   // Deno environment (edge functions)
   const denoEnv = globalEnv.Deno?.env;
@@ -140,9 +141,16 @@ export function getEnvObject(): EnvRecord {
   }
 
   // Node.js environment (server-side) - merge with NEXT_PUBLIC_* vars
+  // Normalize all values to convert empty strings to undefined
   const nodeEnv = globalEnv.process?.env;
   if (nodeEnv) {
-    return { ...record, ...nodeEnv };
+    const normalized: EnvRecord = {};
+    for (const [key, value] of Object.entries(nodeEnv)) {
+      normalized[key] = normalizeValue(value);
+    }
+    // During build, use process.env directly (avoids truncated inlined values)
+    // At runtime, merge with inlined values for client compatibility
+    return isBuildPhase ? normalized : { ...record, ...normalized };
   }
 
   return record;

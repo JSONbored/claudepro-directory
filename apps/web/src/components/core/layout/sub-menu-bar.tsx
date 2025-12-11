@@ -12,14 +12,15 @@
 
 import { type Database } from '@heyclaude/database-types';
 import { isValidCategory } from '@heyclaude/web-runtime/core';
-import { Bookmark } from '@heyclaude/web-runtime/icons';
-import { Breadcrumbs, Button } from '@heyclaude/web-runtime/ui';
+import { Bookmark, Search } from '@heyclaude/web-runtime/icons';
+import { Breadcrumbs, Button, cn } from '@heyclaude/web-runtime/ui';
 import { usePathname } from 'next/navigation';
 import { useMemo } from 'react';
 
 import { GitHubStarsButton } from '@/src/components/core/buttons/external/github-stars-button';
 import { ExploreDropdown } from '@/src/components/content/explore-dropdown';
 import { usePinboardDrawer } from '@/src/components/features/navigation/pinboard-drawer-provider';
+import { useCommandPalette } from '@/src/components/features/navigation/command-palette-provider';
 
 /**
  * Determines if sub-menu bar should be shown based on pathname
@@ -104,7 +105,8 @@ function extractRouteInfo(pathname: string): {
 
 export function SubMenuBar() {
   const pathname = usePathname();
-  const { openDrawer: openPinboardDrawer } = usePinboardDrawer();
+  const { openDrawer: openPinboardDrawer, isOpen: isPinboardOpen } = usePinboardDrawer();
+  const { openPalette, isOpen: isCommandMenuOpen } = useCommandPalette();
   const isHomepage = pathname === '/';
   
   const { shouldShow, category, slug, pageType, isChangelog, isTools } = useMemo(() => {
@@ -141,16 +143,32 @@ export function SubMenuBar() {
             <div className="flex-1" /> // Spacer to push right content to the right
           )}
           
-          {/* Right side: Pinboard + GitHub Stars icons + Explore here dropdown */}
+          {/* Right side: Search + Pinboard + GitHub Stars icons + Explore here dropdown */}
           <div className="flex items-center gap-2 flex-shrink-0">
             <Button
               variant="ghost"
               size="sm"
-              onClick={openPinboardDrawer}
-              className="text-muted-foreground hover:text-foreground"
-              aria-label="Open pinboard"
+              onClick={openPalette}
+              className={cn(
+                "text-muted-foreground hover:text-foreground",
+                isCommandMenuOpen && "text-accent bg-accent/10"
+              )}
+              aria-label={isCommandMenuOpen ? "Close command menu" : "Open command menu"}
+              title="Search navigation (⌘K)"
             >
-              <Bookmark className="h-4 w-4" />
+              <Search className={cn("h-4 w-4", isCommandMenuOpen && "fill-current")} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={openPinboardDrawer}
+              className={cn(
+                "text-muted-foreground hover:text-foreground",
+                isPinboardOpen && "text-accent bg-accent/10"
+              )}
+              aria-label={isPinboardOpen ? "Close pinboard" : "Open pinboard"}
+            >
+              <Bookmark className={cn("h-4 w-4", isPinboardOpen && "fill-current")} />
             </Button>
             <GitHubStarsButton size="sm" variant="ghost" />
             <ExploreDropdown

@@ -5,7 +5,7 @@ import { ImageResponse } from 'next/og';
 import { type NextRequest } from 'next/server';
 
 /**
- * Helper function to generate OG image
+ * Generate an Open Graph image
  * 
  * Note: ImageResponse cannot be cached via Next.js Cache Components APIs.
  * Caching is handled via HTTP cache headers (7-day TTL with 30-day stale-while-revalidate)
@@ -17,7 +17,7 @@ import { type NextRequest } from 'next/server';
  * @param tags - Array of tags to render (up to 5)
  * @returns ImageResponse containing the rendered Open Graph image
  */
-async function getCachedOgImage(
+async function generateOgImage(
   title: string,
   description: string,
   type: string,
@@ -201,9 +201,9 @@ export async function GET(request: NextRequest) {
   );
 
   try {
-    // Use cached function to generate ImageResponse (prevents function execution when cached)
-    // This provides 30-50% CPU savings by caching the entire image generation
-    const imageResponse = await getCachedOgImage(title, description, type, tags);
+    // Generate ImageResponse - CPU savings come from HTTP response caching below
+    // (7-day TTL with 30-day stale-while-revalidate) rather than function-level caching
+    const imageResponse = await generateOgImage(title, description, type, tags);
 
     // Add aggressive caching headers (7+ days) to reduce CPU usage
     // OG images rarely change, so long cache is safe (30-50% CPU savings)

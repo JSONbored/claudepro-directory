@@ -8,7 +8,7 @@ import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { Command as CommandPrimitive } from 'cmdk';
 import type * as React from 'react';
 import { useEffect } from 'react';
-import { logClientInfo } from '@heyclaude/web-runtime/logging/client';
+import { logClientInfo, logClientWarn } from '@heyclaude/web-runtime/logging/client';
 import {
   Dialog,
   DialogContent,
@@ -52,6 +52,26 @@ const CommandDialog = ({ children, open, onOpenChange, ...props }: DialogProps) 
 
   // CRITICAL: Ensure open is explicitly boolean (Radix UI requires this)
   const isOpen = open === true;
+
+  // Early return if not open (prevents unnecessary renders)
+  if (!isOpen) {
+    return null;
+  }
+
+  // Defensive check: Ensure children are defined
+  if (!children) {
+    logClientWarn(
+      '[CommandDialog] children is not defined',
+      undefined,
+      'CommandDialog.missingChildren',
+      {
+        component: 'CommandDialog',
+        action: 'missing-children-check',
+        category: 'navigation',
+      }
+    );
+    return null;
+  }
 
   // Build dialog props - only include onOpenChange if provided (exactOptionalPropertyTypes)
   const dialogProps: DialogProps = {

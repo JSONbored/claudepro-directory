@@ -70,18 +70,14 @@ export * from './content.ts';
 export * from './notifications.ts';
 export * from './ui.ts';
 export * from './trace.ts';
-// Supabase server exports moved to @heyclaude/web-runtime/server to prevent client bundle inclusion
-// export * from './supabase/index.ts';
 export * from './auth/mfa.ts';
 export * from './auth/aal.ts';
 export * from './auth/oauth-providers.ts';
 export * from './storage/image-utils.ts';
 export * from './edge/call-edge-function.ts';
 export * from './edge/transform.ts';
-// Removed search-client.ts export - all search functions migrated to /api/search route
 export * from './utils/markdown-code-extractor.ts';
 export * from './seo/og.ts';
-// changelog-seo.ts removed - SEO generation now handled by database trigger generate_changelog_seo_fields_trigger()
 export * from './pulse-client.ts';
 // Export all icons except Command (which conflicts with Command component from ui.ts)
 export {

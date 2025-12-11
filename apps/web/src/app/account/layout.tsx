@@ -97,7 +97,8 @@ async function AccountAuthWrapper({ children }: { children: React.ReactNode }) {
   }
 
   // Extract user metadata for sidebar (non-blocking, passed as props)
-  const userMetadata = user.user_metadata;
+  // Defensive coalesce: user_metadata can be null if user signs up without metadata
+  const userMetadata = (user.user_metadata ?? {}) as Record<string, unknown>;
   const fullName = typeof userMetadata['full_name'] === 'string' ? userMetadata['full_name'] : null;
   const name = typeof userMetadata['name'] === 'string' ? userMetadata['name'] : null;
   const avatarUrl =

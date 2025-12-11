@@ -111,6 +111,6 @@ export function POST(request: NextRequest, context: RouteContext) {
  * @returns A Response configured for CORS preflight (allowed methods and headers).
  * @see {@link @heyclaude/web-runtime/flux~handleOptions}
  */
-export function OPTIONS() {
+export function OPTIONS(): Response {
   return handleOptions();
 }

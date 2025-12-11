@@ -450,8 +450,6 @@ async function DetailPageContent({
   }).then((result) => result.items);
 
   // Content detail tabs - currently hardcoded to true
-  // TODO: Implement lazy-loading feature flag pattern to avoid Edge Config access during builds
-  // See: https://github.com/vercel/next.js/issues/XXX (ticket reference TBD)
   const tabsEnabled = true;
 
   // No transformation needed - displayTitle computed at build time

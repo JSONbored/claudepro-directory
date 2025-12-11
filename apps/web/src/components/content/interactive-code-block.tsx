@@ -6,6 +6,7 @@
 
 import { type Database } from '@heyclaude/database-types';
 import { isValidCategory, logUnhandledPromise, type SharePlatform } from '@heyclaude/web-runtime/core';
+import { DURATION } from '@heyclaude/web-runtime/design-system';
 import { VALID_CATEGORIES } from '@heyclaude/web-runtime';
 import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
@@ -33,7 +34,6 @@ import {
   toasts,
   UI_CLASSES,
 } from '@heyclaude/web-runtime/ui';
-import { DURATION } from '@heyclaude/web-runtime/design-system';
 // DOMPurify will be dynamically imported
 import { motion } from 'motion/react';
 import { usePathname } from 'next/navigation';
@@ -733,9 +733,10 @@ export function ProductionCodeBlock({
       {/* Code block container - Polar-style clean design */}
       <div
         ref={codeBlockRef}
-        className="border-border relative overflow-hidden rounded-lg border transition-[height] duration-300 ease-in-out"
+        className="border-border relative overflow-hidden rounded-lg border transition-[height] ease-in-out"
         style={{
           height: needsCollapse && !isExpanded ? maxHeight : 'auto',
+          transitionDuration: `${DURATION.default}s`,
         }}
       >
         {/* Top-right action buttons + badge (when no filename header) */}
@@ -839,7 +840,8 @@ export function ProductionCodeBlock({
           className="border-border/40 text-muted-foreground hover:text-foreground flex w-full items-center justify-center gap-1.5 border-t py-2 text-xs transition-colors"
         >
           <ChevronDown
-            className={`h-3.5 w-3.5 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+            className={`h-3.5 w-3.5 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+            style={{ transitionDuration: `${DURATION.quick}s` }}
           />
           <span>{isExpanded ? 'Collapse' : `Show ${code.split('\n').length} lines`}</span>
         </button>

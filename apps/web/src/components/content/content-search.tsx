@@ -296,10 +296,10 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
 
           // Build query parameters for API route
           // Follows architectural strategy: API route -> data layer -> database RPC -> DB
+          // Note: API determines searchType internally based on entities and job filters
           const searchParams = new URLSearchParams({
             q: sanitizedQuery,
-            searchType: 'unified',
-            entities: 'content',
+            entities: 'content', // Use unified search when entities are specified
             limit: '100',
           });
 

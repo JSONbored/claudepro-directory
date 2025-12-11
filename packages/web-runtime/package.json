@@ -13,6 +13,10 @@
       "types": "./src/server.ts",
       "default": "./src/server.ts"
     },
+    "./server-edge": {
+      "types": "./src/server-edge.ts",
+      "default": "./src/server-edge.ts"
+    },
     "./actions": {
       "types": "./src/entries/actions.ts",
       "default": "./src/entries/actions.ts"
@@ -262,12 +266,17 @@
     "type-check": "tsc --noEmit",
     "lint": "eslint --config ../../config/tools/eslint.config.mjs src --ignore-pattern '**/*.generated.ts' --ignore-pattern '**/*.generated.tsx'"
   },
+  "peerDependencies": {
+    "next": "^16.0.9",
+    "react": "^19.2.2",
+    "react-dom": "^19.2.2"
+  },
   "devDependencies": {
     "@types/canvas-confetti": "^1.6.4",
     "@types/react": "19.2.7",
-    "next": "16.0.8",
+    "next": "16.0.9",
     "pino-pretty": "^13.1.2",
-    "react": "19.2.1",
-    "react-dom": "19.2.1"
+    "react": "19.2.2",
+    "react-dom": "19.2.2"
   }
 }

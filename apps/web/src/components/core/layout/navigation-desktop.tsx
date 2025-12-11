@@ -9,7 +9,7 @@
 import { type Database } from '@heyclaude/database-types';
 import { PRIMARY_NAVIGATION, SECONDARY_NAVIGATION } from '@heyclaude/web-runtime/config/navigation';
 import { SPRING, MICROINTERACTIONS, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
-import { Bookmark, ChevronDown, Github, MessageSquare, PlusCircle } from '@heyclaude/web-runtime/icons';
+import { Bookmark, ChevronDown, Github, MessageSquare, PlusCircle, Search } from '@heyclaude/web-runtime/icons';
 import {
   ANIMATION_CONSTANTS,
   DIMENSIONS,
@@ -34,6 +34,7 @@ import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/cl
 import { Button } from '@heyclaude/web-runtime/ui';
 
 import { usePinboardDrawer } from '@/src/components/features/navigation/pinboard-drawer-provider';
+import { useCommandPalette } from '@/src/components/features/navigation/command-palette-provider';
 
 
 /**
@@ -661,9 +662,19 @@ interface NavigationDesktopProps {
 
 /**
  * Community Icons Row Component
- * Horizontal row of icon-only buttons for Discord, Pinboard, and GitHub Stars
+ * Horizontal row of icon-only buttons for Search, Discord, Pinboard, and GitHub Stars
  */
-function CommunityIconsRow({ openPinboardDrawer }: { openPinboardDrawer: () => void }) {
+function CommunityIconsRow({ 
+  openPinboardDrawer, 
+  isPinboardOpen,
+  openCommandPalette,
+  isCommandMenuOpen,
+}: { 
+  openPinboardDrawer: () => void;
+  isPinboardOpen: boolean;
+  openCommandPalette: () => void;
+  isCommandMenuOpen: boolean;
+}) {
   const pulse = usePulse();
   const SOCIAL_LINK_SNAPSHOT = getSocialLinks();
   const [githubStars, setGithubStars] = useState<number | null>(null);
@@ -748,6 +759,27 @@ function CommunityIconsRow({ openPinboardDrawer }: { openPinboardDrawer: () => v
   return (
     <div className="border-t border-border/30 mt-4 pt-4">
       <div className="flex items-center justify-center gap-3 px-2">
+        {/* Search / Command Menu */}
+        <motion.div
+          whileHover={MICROINTERACTIONS.button.hover}
+          whileTap={MICROINTERACTIONS.button.tap}
+          transition={MICROINTERACTIONS.button.transition}
+        >
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={openCommandPalette}
+            className={cn(
+              "h-8 w-8 text-muted-foreground hover:text-foreground",
+              isCommandMenuOpen && "text-accent bg-accent/10"
+            )}
+            aria-label={isCommandMenuOpen ? "Close command menu" : "Open command menu"}
+            title="Search navigation (⌘K)"
+          >
+            <Search className={cn("h-4 w-4", isCommandMenuOpen && "fill-current")} />
+          </Button>
+        </motion.div>
+
         {/* Discord */}
         <motion.div
           whileHover={MICROINTERACTIONS.button.hover}
@@ -775,10 +807,13 @@ function CommunityIconsRow({ openPinboardDrawer }: { openPinboardDrawer: () => v
             variant="ghost"
             size="icon"
             onClick={openPinboardDrawer}
-            className="h-8 w-8 text-muted-foreground hover:text-foreground"
-            aria-label="Open pinboard"
+            className={cn(
+              "h-8 w-8 text-muted-foreground hover:text-foreground",
+              isPinboardOpen && "text-accent bg-accent/10"
+            )}
+            aria-label={isPinboardOpen ? "Close pinboard" : "Open pinboard"}
           >
-            <Bookmark className="h-4 w-4" />
+            <Bookmark className={cn("h-4 w-4", isPinboardOpen && "fill-current")} />
           </Button>
         </motion.div>
         
@@ -811,7 +846,8 @@ function CommunityIconsRow({ openPinboardDrawer }: { openPinboardDrawer: () => v
 export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
   // Client-side hydration state to prevent SSR hydration mismatch with Radix UI IDs
   const [isMounted, setIsMounted] = useState(false);
-  const { openDrawer: openPinboardDrawer } = usePinboardDrawer();
+  const { openDrawer: openPinboardDrawer, isOpen: isPinboardOpen } = usePinboardDrawer();
+  const { openPalette, isOpen: isCommandMenuOpen } = useCommandPalette();
 
   useEffect(() => {
     setIsMounted(true);
@@ -1125,8 +1161,13 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
             })}
           </div>
           
-          {/* Horizontal icon row at bottom: Discord, Pinboard, GitHub Stars */}
-          <CommunityIconsRow openPinboardDrawer={openPinboardDrawer} />
+          {/* Horizontal icon row at bottom: Search, Discord, Pinboard, GitHub Stars */}
+          <CommunityIconsRow 
+            openPinboardDrawer={openPinboardDrawer}
+            isPinboardOpen={isPinboardOpen}
+            openCommandPalette={openPalette}
+            isCommandMenuOpen={isCommandMenuOpen}
+          />
         </NavigationHoverCardContent>
       </NavigationHoverCard>
 

@@ -5,6 +5,7 @@
  * Zero initial bundle impact - all services lazy-loaded
  */
 
+import { getFeatureFlag } from '@heyclaude/web-runtime/config/static-configs';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
@@ -17,9 +18,14 @@ import { useEffect, useState } from 'react';
 // eslint-disable-next-line architectural-rules/require-env-validation-schema -- NODE_ENV is inlined by Next.js at build time, not a runtime lookup
 const isProduction = process.env.NODE_ENV === 'production';
 
+// Conditionally load Vercel Analytics only if feature flag is enabled
 const VercelPulse = dynamic(
-  () =>
-    import('@vercel/analytics/next')
+  () => {
+    const vercelEnabled = getFeatureFlag('analytics.vercel_enabled');
+    if (!vercelEnabled) {
+      return Promise.resolve(() => null);
+    }
+    return import('@vercel/analytics/next')
       .then((mod) => mod.Analytics)
       .catch((error) => {
         const normalized = normalizeError(error, 'Failed to load Vercel pulse');
@@ -35,15 +41,21 @@ const VercelPulse = dynamic(
           }
         );
         return () => null;
-      }),
+      });
+  },
   {
     ssr: false,
   }
 );
 
+// Conditionally load Speed Insights only if feature flag is enabled
 const SpeedInsights = dynamic(
-  () =>
-    import('@vercel/speed-insights/next')
+  () => {
+    const vercelEnabled = getFeatureFlag('analytics.vercel_enabled');
+    if (!vercelEnabled) {
+      return Promise.resolve(() => null);
+    }
+    return import('@vercel/speed-insights/next')
       .then((mod) => mod.SpeedInsights)
       .catch((error) => {
         const normalized = normalizeError(error, 'Failed to load Speed Insights');
@@ -59,7 +71,8 @@ const SpeedInsights = dynamic(
           }
         );
         return () => null;
-      }),
+      });
+  },
   {
     ssr: false,
   }
@@ -148,10 +161,12 @@ export function PulseCannon() {
     return null;
   }
 
+  const vercelEnabled = getFeatureFlag('analytics.vercel_enabled');
+
   return (
     <>
-      <VercelPulse />
-      <SpeedInsights />
+      {vercelEnabled && <VercelPulse />}
+      {vercelEnabled && <SpeedInsights />}
     </>
   );
 }

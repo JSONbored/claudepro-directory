@@ -4,3 +4,11 @@ lifecycle-scripts-allow-list[]=sharp
 lifecycle-scripts-allow-list[]=esbuild
 lifecycle-scripts-allow-list[]=msw
 lifecycle-scripts-allow-list[]=lefthook
+
+# Hoist Next.js and React to root for type compatibility
+# This ensures all packages use the same Next.js installation
+# Fixes TypeScript type compatibility issues in monorepo
+# See PNPM_HOISTING_EXPLANATION.md for details
+public-hoist-pattern[]=next
+public-hoist-pattern[]=react
+public-hoist-pattern[]=react-dom

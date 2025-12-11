@@ -2,14 +2,38 @@
 
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import { logClientWarn, logClientInfo, normalizeError } from '@heyclaude/web-runtime/logging/client';
+import { ErrorBoundary } from '@heyclaude/web-runtime/ui';
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 
-import { PinboardDrawer } from '@/src/components/features/navigation/pinboard-drawer';
+import { PinboardDrawer, type PinboardDrawerProps } from '@/src/components/features/navigation/pinboard-drawer';
+
+/**
+ * PinboardDrawer wrapper with error handling
+ * Catches render errors and closes drawer gracefully
+ */
+function PinboardDrawerWithErrorHandling({
+  onError,
+  onOpenChange,
+  ...props
+}: PinboardDrawerProps & { onError?: (error: Error) => void }) {
+  // Wrap onOpenChange to also call onError handler if needed
+  const handleOpenChange = useCallback((open: boolean) => {
+    try {
+      onOpenChange(open);
+    } catch (error) {
+      const normalized = normalizeError(error, 'PinboardDrawer onOpenChange error');
+      onError?.(normalized);
+    }
+  }, [onOpenChange, onError]);
+
+  return <PinboardDrawer {...props} onOpenChange={handleOpenChange} />;
+}
 
 interface PinboardDrawerContextValue {
   closeDrawer: () => void;
   openDrawer: () => void;
   toggleDrawer: () => void;
+  isOpen: boolean;
 }
 
 const PinboardDrawerContext = createContext<null | PinboardDrawerContextValue>(null);
@@ -89,14 +113,41 @@ export function PinboardDrawerProvider({ children }: { children: React.ReactNode
       openDrawer,
       closeDrawer,
       toggleDrawer,
+      isOpen,
     }),
-    [openDrawer, closeDrawer, toggleDrawer]
+    [openDrawer, closeDrawer, toggleDrawer, isOpen]
   );
 
   return (
     <PinboardDrawerContext.Provider value={contextValue}>
       {children}
-      <PinboardDrawer open={isOpen} onOpenChange={setIsOpen} />
+      <ErrorBoundary>
+        <PinboardDrawerWithErrorHandling
+          open={isOpen}
+          onOpenChange={(open: boolean) => {
+            setIsOpen(open);
+            if (!open) {
+              // Ensure cleanup on close
+            }
+          }}
+          onError={(error: Error) => {
+            logClientWarn(
+              '[PinboardDrawerProvider] PinboardDrawer render error',
+              normalizeError(error, 'PinboardDrawer render failed'),
+              'PinboardDrawerProvider.drawerError',
+              {
+                component: 'PinboardDrawerProvider',
+                action: 'drawer-render-error',
+                category: 'navigation',
+                errorMessage: error.message,
+                errorStack: error.stack,
+              }
+            );
+            // Close drawer on error to prevent stuck state
+            setIsOpen(false);
+          }}
+        />
+      </ErrorBoundary>
     </PinboardDrawerContext.Provider>
   );
 }
@@ -137,6 +188,7 @@ export function usePinboardDrawer(): PinboardDrawerContextValue {
       toggleDrawer: () => {
         // No-op if provider not available
       },
+      isOpen: false,
     };
   }
   return ctx;

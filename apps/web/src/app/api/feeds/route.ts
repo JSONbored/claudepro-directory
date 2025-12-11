@@ -49,20 +49,18 @@ function toContentCategory(value: null | string): ContentCategory | null {
  * 
  * @param {FeedType} type - Feed format to generate: 'rss' or 'atom'
  * @param {string | null} category - Content category name, 'changelog' for changelog feeds, null for all content
- * @param {ReturnType<typeof logger.child> | undefined} reqLogger - Optional request-scoped logger for error logging
  * @returns Promise resolving to an object with contentType (HTTP Content-Type header), source (feed origin label), and xml (feed XML string)
  */
 async function getCachedFeedPayload(
   type: FeedType,
-  category: null | string,
-  reqLogger?: ReturnType<typeof logger.child>
+  category: null | string
 ): Promise<{ contentType: string; source: string; xml: string }> {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
   const supabase = createSupabaseAnonClient();
-  // Pass request-scoped logger down to generateFeedPayload
-  return generateFeedPayload(type, category, supabase, reqLogger);
+  // Use module-level logger since this runs in cached context
+  return generateFeedPayload(type, category, supabase, logger);
 }
 
 /**
@@ -196,7 +194,7 @@ export async function GET(request: NextRequest) {
       'Feeds request received'
     );
 
-    const payload = await getCachedFeedPayload(type, category, reqLogger);
+    const payload = await getCachedFeedPayload(type, category);
 
     reqLogger.info(
       {

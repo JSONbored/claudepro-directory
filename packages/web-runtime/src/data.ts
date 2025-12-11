@@ -235,6 +235,16 @@ export interface RelativeDateOptions {
   maxDays?: number;
 }
 
+/**
+ * Format a date deterministically using UTC to prevent hydration mismatches.
+ * 
+ * This function uses UTC methods to ensure server and client produce identical output,
+ * preventing React hydration errors caused by timezone differences.
+ * 
+ * @param date - Date string or Date object to format
+ * @param style - Format style ('long', 'short', or 'iso')
+ * @returns Formatted date string (e.g., "Jan 15, 2024" or "January 15, 2024")
+ */
 export function formatDate(date: string | Date, style: DateFormatStyle = 'long'): string {
   try {
     const dateObj = typeof date === 'string' ? new Date(date) : date;
@@ -244,11 +254,17 @@ export function formatDate(date: string | Date, style: DateFormatStyle = 'long')
       return isoDate ?? '';
     }
 
-    return dateObj.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: style === 'long' ? 'long' : 'short',
-      day: 'numeric',
-    });
+    // Use UTC methods for deterministic output (prevents hydration mismatches)
+    // This ensures server and client produce identical formatted dates
+    const year = dateObj.getUTCFullYear();
+    const month = dateObj.getUTCMonth(); // 0-11
+    const day = dateObj.getUTCDate();
+
+    const monthNames = style === 'long'
+      ? ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+      : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+    return `${monthNames[month]} ${day}, ${year}`;
   } catch (error) {
     const normalized = normalizeError(error, 'formatDate failed');
     logger.warn({ err: normalized,

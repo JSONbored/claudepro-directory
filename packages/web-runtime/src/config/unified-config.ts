@@ -186,6 +186,7 @@ export const FEATURE_FLAGS = {
   'intersection_observer.track_visibility': true,
   'intersection_observer.default_threshold': 0.1,
   'intersection_observer.default_root_margin': '0px',
+  'analytics.vercel_enabled': false,
 } as const;
 
 /** Security settings */
@@ -206,16 +207,6 @@ export const RATE_LIMIT_CONFIG = {
   window_ms: 60_000,
   block_duration_ms: 300_000,
   whitelist_ips: [] as string[],
-} as const;
-
-/** Analytics settings */
-export const ANALYTICS_CONFIG = {
-  enable_debug: false,
-  debug_enabled: false,
-  default_category: 'INTERACTION',
-  pii_keywords: [
-    'email', 'name', 'phone', 'address', 'ssn', 'credit', 'password',
-  ],
 } as const;
 
 /** Logger settings */

@@ -1,17 +1,25 @@
 
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
+// Import directly from specific files to avoid pulling in pino via barrel exports
+// The shared-runtime barrel exports schemas/env.ts which imports logger (pino)
 import {
   checkRateLimit,
   type RateLimitConfig,
   type RateLimitResult,
+} from '@heyclaude/shared-runtime/rate-limit';
+import {
   detectSuspiciousHeaders,
   getClientInfo,
   sanitizePathForLogging,
   DEFAULT_SUSPICIOUS_HEADERS,
-} from '@heyclaude/shared-runtime';
-import { logger } from '../logger.ts';
-import { normalizeError } from '../errors.ts';
+} from '@heyclaude/shared-runtime/proxy/guards';
+import { normalizeErrorEdge as normalizeError } from '../errors-edge.ts';
+
+// Use console directly instead of logger to avoid pulling in pino
+// Proxy functions need to be lightweight and edge-compatible
+// Logger is only used for development/debugging, console is sufficient
+// IMPORTANT: Using normalizeErrorEdge (not errors.ts) to avoid pino dependency
 
 export interface NextProxyRateLimitOptions {
   config: RateLimitConfig;
@@ -46,14 +54,18 @@ export function applyNextProxyGuards(
     const sanitizedPath = sanitizePath(pathname);
 
     for (const { header, value } of suspiciousHeaders) {
-      logger.error({ err: normalized, header,
-          value: value.substring(0, 100),
-          ip: clientInfo.ip,
-          userAgent: clientInfo.userAgent,
-          path: sanitizedPath,
-          type: 'security_bypass_attempt',
-          severity: 'critical',
-          cve: 'CVE-2025-29927', }, 'CVE-2025-29927: Middleware bypass attempt detected');
+      // Use console directly to avoid pulling in pino (edge-compatible)
+      console.error('[CVE-2025-29927] Middleware bypass attempt detected', {
+        err: normalized.message,
+        header,
+        value: value.substring(0, 100),
+        ip: clientInfo.ip,
+        userAgent: clientInfo.userAgent,
+        path: sanitizedPath,
+        type: 'security_bypass_attempt',
+        severity: 'critical',
+        cve: 'CVE-2025-29927',
+      });
     }
 
     const response = new NextResponse('Forbidden: Suspicious header detected', {
@@ -81,10 +93,13 @@ export function applyNextProxyGuards(
       if (!rateLimitResult.allowed) {
         const sanitizedPath = sanitizePath(pathname);
         const clientInfo = getClientInfo(request);
-        logger.warn({ path: sanitizedPath,
+        // Use console directly to avoid pulling in pino (edge-compatible)
+        console.warn('[Proxy] Rate limit exceeded', {
+          path: sanitizedPath,
           ip: clientInfo.ip,
           limit: rateLimitOptions.config.maxRequests,
-          windowMs: rateLimitOptions.config.windowMs, }, 'Proxy rate limit exceeded');
+          windowMs: rateLimitOptions.config.windowMs,
+        });
 
         const retryAfter =
           rateLimitResult.retryAfter ??

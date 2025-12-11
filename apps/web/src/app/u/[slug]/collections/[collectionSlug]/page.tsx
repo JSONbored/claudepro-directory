@@ -395,11 +395,15 @@ async function PublicCollectionPageContent({
               <CardContent>
                 <div className="text-base font-medium">
                   {collection?.created_at
-                    ? new Date(collection.created_at).toLocaleDateString('en-US', {
-                        month: 'long',
-                        day: 'numeric',
-                        year: 'numeric',
-                      })
+                    ? (() => {
+                        // Use UTC-based formatting for deterministic output (prevents hydration mismatches)
+                        const date = new Date(collection.created_at);
+                        const year = date.getUTCFullYear();
+                        const month = date.getUTCMonth();
+                        const day = date.getUTCDate();
+                        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                        return `${monthNames[month]} ${day}, ${year}`;
+                      })()
                     : 'N/A'}
                 </div>
               </CardContent>

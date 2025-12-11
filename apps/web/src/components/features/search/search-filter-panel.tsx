@@ -14,6 +14,7 @@
  */
 
 import { type Database } from '@heyclaude/database-types';
+import { DURATION } from '@heyclaude/web-runtime/design-system';
 import { isValidCategory } from '@heyclaude/web-runtime/core';
 import { getCategoryConfig } from '@heyclaude/web-runtime/data';
 import { type FilterState } from '@heyclaude/web-runtime/types/component.types';
@@ -221,7 +222,8 @@ function SearchFilterPanelComponent({
                     aria-pressed={filters.tags?.includes(tag)}
                     aria-label={`${filters.tags?.includes(tag) ? 'Remove' : 'Add'} ${tag} tag filter`}
                     type="button"
-                    className="cursor-pointer transition-all duration-200"
+                    className="cursor-pointer transition-all"
+                    style={{ transitionDuration: `${DURATION.quick}s` }}
                   >
                     <UnifiedBadge
                       variant="base"

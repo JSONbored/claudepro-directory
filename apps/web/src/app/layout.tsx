@@ -295,12 +295,9 @@ export default function RootLayout({
 
         {/* DNS Prefetch for faster resolution */}
         <link rel="dns-prefetch" href="https://umami.claudepro.directory" />
-        <link rel="dns-prefetch" href="https://vitals.vercel-insights.com" />
 
         {/* Preconnect for critical third-party resources */}
         <link rel="preconnect" href="https://umami.claudepro.directory" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://vitals.vercel-insights.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://va.vercel-scripts.com" />
       </head>
       <body className="font-sans">
         {/* Suspense boundary for structured data - streams after initial HTML */}

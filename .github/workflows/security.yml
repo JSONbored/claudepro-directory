@@ -20,7 +20,7 @@ on:
   workflow_dispatch:
 
 env:
-  PNPM_VERSION: 10.24.0
+  PNPM_VERSION: 10.25.0
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

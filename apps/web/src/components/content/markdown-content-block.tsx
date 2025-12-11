@@ -40,6 +40,7 @@
  * ```
  */
 
+import { DURATION } from '@heyclaude/web-runtime/design-system';
 import { BookOpen, CheckCircle, Zap } from '@heyclaude/web-runtime/icons';
 import {
   type CaseStudyProps,
@@ -290,13 +291,14 @@ function FeatureGridVariant(props: FeatureGridProps) {
             key={feature.title}
             itemScope
             itemType="https://schema.org/ListItem"
-            className="group border-border/50 from-card/30 via-card/50 to-card/30 hover:from-card/50 hover:via-card/70 hover:to-card/50 relative h-full overflow-hidden border bg-linear-to-br shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+            className="group border-border/50 from-card/30 via-card/50 to-card/30 hover:from-card/50 hover:via-card/70 hover:to-card/50 relative h-full overflow-hidden border bg-linear-to-br shadow-lg transition-all hover:-translate-y-1 hover:shadow-xl"
             style={{
               animationDelay: `${index * 50}ms`,
               animation: 'fadeInUp 0.5s ease-out forwards',
+              transitionDuration: `${DURATION.default}s`,
             }}
           >
-            <div className="from-primary/5 to-primary/5 pointer-events-none absolute inset-0 bg-linear-to-br via-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+            <div className="from-primary/5 to-primary/5 pointer-events-none absolute inset-0 bg-linear-to-br via-transparent opacity-0 transition-opacity group-hover:opacity-100" style={{ transitionDuration: `${DURATION.default}s` }} />
 
             <CardHeader>
               <CardTitle className="relative z-10 flex items-start justify-between" itemProp="name">

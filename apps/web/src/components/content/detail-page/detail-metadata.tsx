@@ -39,16 +39,22 @@ const SOCIAL_LINK_SNAPSHOT = getSocialLinks();
 // Helper to get a safe, sanitized href for the author profile.
 // Only allows strictly mapped profile URLs for allowed domains or fallback to default.
 /**
- * Produce a sanitized, canonical author profile href derived from a content item's `author_profile_url`.
+ * Produce a sanitized, canonical author profile href derived from a content item's `author_user_id` or `author_profile_url`.
+ *
+ * Priority:
+ * 1. If `author_user_id` and `author_user_slug` are present, link to internal user profile `/u/{slug}`
+ * 2. Otherwise, use `author_profile_url` with validation (GitHub, Twitter/X, LinkedIn, or safe relative paths)
+ * 3. Fallback to default author profile URL from `SOCIAL_LINK_SNAPSHOT`
  *
  * Valid outputs are:
+ * - Internal user profile URL `/u/{slug}` when `author_user_id` is set
  * - a canonical https URL for GitHub, Twitter/X, or LinkedIn when the input maps to those domains,
  * - an encoded safe local path when the input is a validated relative URL,
  * - otherwise the safe fallback author profile URL from `SOCIAL_LINK_SNAPSHOT`.
  *
  * This function rejects protocol-relative URLs and any input that could enable open-redirects or unsafe navigation.
  *
- * @param item - Content item object (may include RPC-composed fields); `author_profile_url` is read from this item when present.
+ * @param item - Content item object (may include RPC-composed fields); checks for `author_user_id`, `author_user_slug`, and `author_profile_url`.
  * @returns The sanitized author profile URL string; if the input is invalid or not allowed, returns the default author profile URL.
  *
  * @see SOCIAL_LINK_SNAPSHOT
@@ -59,8 +65,31 @@ function getSafeAuthorProfileHref(
     | (ContentItem &
         Database['public']['Functions']['get_content_detail_complete']['Returns']['content'])
 ): string {
-  // Cast item to ContentItem for property access (content is Json type from RPC)
-  const contentItem = item as ContentItem;
+  // Cast item to handle both ContentItem and RPC return types
+  const contentItem = item as ContentItem & {
+    author_user_id?: string | null;
+    author_user_slug?: string | null;
+  };
+
+  // Priority 1: If author_user_id is set, link to internal user profile
+  // Check for author_user_slug (from get_content_detail_complete RPC) or author_user_id (from direct content table access)
+  const authorUserSlug =
+    ('author_user_slug' in contentItem && typeof contentItem.author_user_slug === 'string'
+      ? contentItem.author_user_slug
+      : null) ||
+    ('author_user_id' in contentItem && contentItem.author_user_id
+      ? null // We'd need to query for slug, but RPC should provide it
+      : null);
+
+  if (authorUserSlug) {
+    // Validate slug format (alphanumeric, hyphens, underscores only)
+    if (/^[a-zA-Z0-9-_]+$/.test(authorUserSlug) && authorUserSlug.length > 0) {
+      // Construct safe internal profile URL
+      return `/u/${encodeURIComponent(authorUserSlug)}`;
+    }
+  }
+
+  // Priority 2: Use author_profile_url with validation
   // Only allow strictly mapped profile URLs for allowed domains or fallback to default.
   // Never use arbitrary user-supplied URLs.
   let handle: string | undefined;
@@ -192,17 +221,28 @@ export function DetailMetadata({ item, viewCount, copyCount }: DetailMetadataPro
                 // known social media domains with strict handle extraction, or safe relative paths
                 // At this point, safeAuthorUrl is validated and safe for use in external links
                 const validatedUrl: string = safeAuthorUrl;
+                // Check if this is an internal user profile link
+                const isInternalProfile = validatedUrl.startsWith('/u/');
                 return (
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                     <User className={UI_CLASSES.ICON_SM} />
-                    <a
-                      href={validatedUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:text-foreground transition-colors hover:underline"
-                    >
-                      {item.author}
-                    </a>
+                    {isInternalProfile ? (
+                      <a
+                        href={validatedUrl}
+                        className="hover:text-foreground transition-colors hover:underline"
+                      >
+                        {item.author}
+                      </a>
+                    ) : (
+                      <a
+                        href={validatedUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:text-foreground transition-colors hover:underline"
+                      >
+                        {item.author}
+                      </a>
+                    )}
                   </div>
                 );
               })()

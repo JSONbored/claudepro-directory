@@ -388,10 +388,14 @@ async function UserProfilePageContent({
                   <span className={UI_CLASSES.TEXT_SM_MUTED}>Member since</span>
                   <span className="text-sm">
                     {profile?.created_at
-                      ? new Date(profile.created_at).toLocaleDateString('en-US', {
-                          month: 'short',
-                          year: 'numeric',
-                        })
+                      ? (() => {
+                          // Use UTC-based formatting for deterministic output (prevents hydration mismatches)
+                          const date = new Date(profile.created_at);
+                          const year = date.getUTCFullYear();
+                          const month = date.getUTCMonth();
+                          const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                          return `${monthNames[month]} ${year}`;
+                        })()
                       : 'N/A'}
                   </span>
                 </div>
