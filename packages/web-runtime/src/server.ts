@@ -18,6 +18,7 @@ export * from './pulse.ts';
 export * from './supabase/pgmq-client.ts';
 export * from './auth/get-authenticated-user.ts';
 export * from './server/api-helpers.ts';
+export * from './server/not-found-response.ts';
 export * from './server/storage-proxy.ts';
 export * from './server/fetch-helpers.ts';
 export * from './rpc/run-rpc.ts';

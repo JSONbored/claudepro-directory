@@ -13,16 +13,16 @@ import {
 import { ArrowLeft, ExternalLink } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  UI_CLASSES,
-  NavLink,
-  UnifiedBadge,
   Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  NavLink,
   Separator,
+  UI_CLASSES,
+  UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
@@ -38,10 +38,10 @@ import Loading from './loading';
 // Whitelisted content types for outgoing links - use Constants from database types
 const ALLOWED_CONTENT_TYPES = Constants.public.Enums.content_category;
 
-/**
+/***
  * Checks whether a content category string is allowed for public collections.
  *
- * @param type - The content category identifier to validate (e.g., "article", "image")
+ * @param {string} type - The content category identifier to validate (e.g., "article", "image")
  * @returns `true` if `type` is listed in the module's allowed content types, `false` otherwise.
  *
  * @see ALLOWED_CONTENT_TYPES
@@ -50,10 +50,10 @@ function isValidContentType(type: string): boolean {
   return (ALLOWED_CONTENT_TYPES as readonly string[]).includes(type);
 }
 
-/**
+/***
  * Checks whether a slug contains only lowercase letters, digits, hyphens, or underscores.
  *
- * @param slug - The candidate slug to validate (no slashes, no protocol).
+ * @param {string} slug - The candidate slug to validate (no slashes, no protocol).
  * @returns `true` if `slug` is a non-empty string composed only of lowercase ASCII letters, digits, `-`, or `_`; `false` otherwise.
  *
  * @see getSafeContentLink
@@ -64,17 +64,21 @@ function isValidSlug(slug: string): boolean {
   return /^[a-zA-Z0-9-_]+$/.test(slug);
 }
 
-/**
+/*****
  * Produces an internal path for a content item when its content type and slug are valid.
  *
- * @param item - Object with `content_type` and `content_slug` fields to validate
- * @param item.content_slug
- * @param item.content_type
+ * @param {{ content_slug: string; content_type: string }} item - Object with `content_type` and `content_slug` fields to validate
+ * @param {{ content_slug: string; content_type: string }} item.content_slug
+ * @param {{ content_slug: string; content_type: string }} item.content_type
  * @returns The path `/content_type/content_slug` if both values are valid, `null` otherwise
  *
  * @see isValidContentType
  * @see isValidSlug
- */
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+  * @param {{ content_slug: string; content_type: string }} item Parameter description
+*/
 function getSafeContentLink(item: { content_slug: string; content_type: string }): null | string {
   if (isValidContentType(item.content_type) && isValidSlug(item.content_slug)) {
     return `/${item.content_type}/${item.content_slug}`;
@@ -101,7 +105,7 @@ interface PublicCollectionPageProperties {
 export async function generateMetadata({
   params,
 }: PublicCollectionPageProperties): Promise<Metadata> {
-  const { slug, collectionSlug } = await params;
+  const { collectionSlug, slug } = await params;
 
   // Explicitly defer to request time before using non-deterministic operations (Date.now())
   // This is required by Cache Components for non-deterministic operations
@@ -109,9 +113,9 @@ export async function generateMetadata({
 
   // Create request-scoped child logger to avoid race conditions
   const metadataLogger = logger.child({
+    module: 'apps/web/src/app/u/[slug]/collections/[collectionSlug]',
     operation: 'PublicCollectionPageMetadata',
     route: `/u/${slug}/collections/${collectionSlug}`,
-    module: 'apps/web/src/app/u/[slug]/collections/[collectionSlug]',
   });
 
   // Note: Removed getPublicCollectionDetail call from generateMetadata to avoid cookies() access during prerendering
@@ -122,9 +126,9 @@ export async function generateMetadata({
   );
 
   return generatePageMetadata('/u/:slug/collections/:collectionSlug', {
-    params: { slug, collectionSlug },
-    slug,
     collectionSlug,
+    params: { collectionSlug, slug },
+    slug,
   });
 }
 
@@ -144,13 +148,13 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
   // Params is runtime data - cache key includes params, so different collections create different cache entries
-  const { slug, collectionSlug } = await params;
+  const { collectionSlug, slug } = await params;
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
+    module: 'apps/web/src/app/u/[slug]/collections/[collectionSlug]',
     operation: 'PublicCollectionPage',
     route: `/u/${slug}/collections/${collectionSlug}`,
-    module: 'apps/web/src/app/u/[slug]/collections/[collectionSlug]',
   });
 
   return (
@@ -187,7 +191,7 @@ async function PublicCollectionPageContent({
   params: Promise<{ collectionSlug: string; slug: string }>;
   reqLogger: ReturnType<typeof logger.child>;
 }) {
-  const { slug, collectionSlug } = await params;
+  const { collectionSlug, slug } = await params;
   const route = `/u/${slug}/collections/${collectionSlug}`;
 
   // Create route-specific logger
@@ -195,8 +199,8 @@ async function PublicCollectionPageContent({
 
   // Get current user (if logged in) for ownership check
   const { user: currentUser } = await getAuthenticatedUser({
-    requireUser: false,
     context: 'PublicCollectionPage',
+    requireUser: false,
   });
 
   // Create child logger with viewer context if available
@@ -208,14 +212,14 @@ async function PublicCollectionPageContent({
   let collectionData: CollectionDetailData | null = null;
   try {
     collectionData = await getPublicCollectionDetail({
-      userSlug: slug,
       collectionSlug,
+      userSlug: slug,
       ...(currentUser?.id ? { viewerId: currentUser.id } : {}),
     });
     viewerLogger.info(
       {
-        section: 'collection-detail-fetch',
         hasData: !!collectionData,
+        section: 'collection-detail-fetch',
       },
       'PublicCollectionPage: collection detail loaded'
     );
@@ -239,25 +243,25 @@ async function PublicCollectionPageContent({
     notFound();
   }
 
-  const { user: profileUser, collection, items, is_owner } = collectionData;
+  const { collection, is_owner, items, user: profileUser } = collectionData;
 
   return (
     <div className="bg-background min-h-screen">
       {/* Track view - non-blocking */}
       <Pulse
-        variant="view"
         category="collections"
-        slug={collectionSlug}
         metadata={{
-          user_slug: slug,
           collection_slug: collectionSlug,
+          user_slug: slug,
         }}
+        slug={collectionSlug}
+        variant="view"
       />
       <div className="container mx-auto px-4 py-12">
         <div className="space-y-6">
           {/* Navigation */}
           <Link href={`/u/${slug}`}>
-            <Button variant="ghost" className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+            <Button className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} variant="ghost">
               <ArrowLeft className="h-4 w-4" />
               Back to {profileUser?.name ?? slug}&apos;s Profile
             </Button>
@@ -268,13 +272,13 @@ async function PublicCollectionPageContent({
             <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mb-2`}>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                 <h1 className="text-3xl font-bold">{collection?.name ?? 'Untitled Collection'}</h1>
-                <UnifiedBadge variant="base" style="outline">
+                <UnifiedBadge style="outline" variant="base">
                   Public
                 </UnifiedBadge>
               </div>
               {is_owner ? (
                 <Link href={`/account/library/${collection?.slug}`}>
-                  <Button variant="outline" size="sm">
+                  <Button size="sm" variant="outline">
                     Manage Collection
                   </Button>
                 </Link>
@@ -324,7 +328,7 @@ async function PublicCollectionPageContent({
                           </div>
                           <div className="flex-1">
                             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                              <UnifiedBadge variant="base" style="outline" className="capitalize">
+                              <UnifiedBadge className="capitalize" style="outline" variant="base">
                                 {item.content_type}
                               </UnifiedBadge>
                               <CardTitle className="text-lg">{item.content_slug}</CardTitle>
@@ -335,15 +339,15 @@ async function PublicCollectionPageContent({
                           </div>
                           {(() => {
                             const safeLink = getSafeContentLink({
-                              content_type: item.content_type,
                               content_slug: item.content_slug,
+                              content_type: item.content_type,
                             });
                             return safeLink ? (
                               <Link href={safeLink}>
                                 <Button
-                                  variant="ghost"
-                                  size="sm"
                                   className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
+                                  size="sm"
+                                  variant="ghost"
                                 >
                                   <ExternalLink className="h-4 w-4" />
                                   View
@@ -351,10 +355,10 @@ async function PublicCollectionPageContent({
                               </Link>
                             ) : (
                               <Button
-                                variant="ghost"
-                                size="sm"
-                                className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
                                 disabled
+                                className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
+                                size="sm"
+                                variant="ghost"
                               >
                                 <ExternalLink className="h-4 w-4" />
                                 View
@@ -401,7 +405,20 @@ async function PublicCollectionPageContent({
                         const year = date.getUTCFullYear();
                         const month = date.getUTCMonth();
                         const day = date.getUTCDate();
-                        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                        const monthNames = [
+                          'January',
+                          'February',
+                          'March',
+                          'April',
+                          'May',
+                          'June',
+                          'July',
+                          'August',
+                          'September',
+                          'October',
+                          'November',
+                          'December',
+                        ];
                         return `${monthNames[month]} ${day}, ${year}`;
                       })()
                     : 'N/A'}

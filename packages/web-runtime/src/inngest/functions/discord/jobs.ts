@@ -11,6 +11,7 @@ import { normalizeError, getEnvVar, sanitizeForDiscord } from '@heyclaude/shared
 import { inngest } from '../../client';
 import { pgmqRead, pgmqDelete, type PgmqMessage } from '../../../supabase/pgmq-client';
 import { logger, createWebAppContextWithId } from '../../../logging/server';
+import { sendCronSuccessHeartbeat } from '../../utils/monitoring';
 
 type JobRow = DatabaseGenerated['public']['Tables']['jobs']['Row'];
 
@@ -253,9 +254,19 @@ export const processDiscordJobsQueue = inngest.createFunction(
       processed: messages.length,
       sent: sentCount, }, 'Discord jobs queue processing completed');
 
-    return {
+    const result = {
       processed: messages.length,
       sent: sentCount,
     };
+
+    // BetterStack monitoring: Send success heartbeat (feature-flagged)
+    if (result.sent > 0) {
+      sendCronSuccessHeartbeat('BETTERSTACK_HEARTBEAT_INNGEST_CRON', {
+        functionName: 'processDiscordJobsQueue',
+        result: { sent: result.sent },
+      });
+    }
+
+    return result;
   }
 );

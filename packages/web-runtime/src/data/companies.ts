@@ -37,12 +37,12 @@ export async function getCompanyAdminProfile(
   }
 
   // Configure cache
-  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`company-admin-${companyId}`);
 
   const requestLogger = logger.child({
-    operation: 'getCompanyAdminProfile',
     module: 'data/companies',
+    operation: 'getCompanyAdminProfile',
   });
 
   try {
@@ -70,7 +70,7 @@ export async function getCompanyAdminProfile(
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    requestLogger.error({ err: errorForLogging, companyId }, 'getCompanyAdminProfile failed');
+    requestLogger.error({ companyId, err: errorForLogging }, 'getCompanyAdminProfile failed');
     throw error;
   }
 }
@@ -96,8 +96,8 @@ export async function getCompanyProfile(
   cacheTag(`company-${slug}`);
 
   const requestLogger = logger.child({
-    operation: 'getCompanyProfile',
     module: 'data/companies',
+    operation: 'getCompanyProfile',
   });
 
   try {
@@ -114,8 +114,8 @@ export async function getCompanyProfile(
 
     requestLogger.info(
       {
-        slug,
         hasResult: Boolean(result),
+        slug,
       },
       'getCompanyProfile: fetched successfully'
     );
@@ -151,8 +151,8 @@ export async function getCompaniesList(
   cacheTag(JOBS_CATEGORY);
 
   const requestLogger = logger.child({
-    operation: 'getCompaniesList',
     module: 'data/companies',
+    operation: 'getCompaniesList',
   });
 
   try {
@@ -172,9 +172,9 @@ export async function getCompaniesList(
 
     requestLogger.info(
       {
+        companyCount: result.companies?.length ?? 0,
         limit,
         offset,
-        companyCount: result.companies?.length ?? 0,
         total: result.total ?? 0,
       },
       'getCompaniesList: fetched successfully'
@@ -217,8 +217,8 @@ async function fetchCompanySearchResults(
   cacheTag('companies');
 
   const requestLogger = logger.child({
-    operation: 'fetchCompanySearchResults',
     module: 'data/companies',
+    operation: 'fetchCompanySearchResults',
   });
 
   try {
@@ -228,32 +228,32 @@ async function fetchCompanySearchResults(
     const searchService = new SearchService(supabase);
 
     const unifiedArgs: Database['public']['Functions']['search_unified']['Args'] = {
-      p_query: query,
       p_entities: ['company'],
+      p_highlight_query: query,
       p_limit: limit,
       p_offset: 0,
-      p_highlight_query: query,
+      p_query: query,
     };
 
     const searchResponse = await searchService.searchUnified(unifiedArgs);
     const results = searchResponse.data || [];
-    
+
     return results.map((entity) => ({
-      id: entity.id as string,
-      name: (entity.title || entity.slug || '') as string,
-      slug: entity.slug as string,
       description: entity.description as string,
+      id: entity.id as string,
+      name: entity.title || entity.slug || '',
+      slug: entity.slug as string,
     }));
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string =
-      error instanceof Error ? error : typeof error === 'string' ? error : String(error);
+      error instanceof Error ? error : (typeof error === 'string' ? error : String(error));
     requestLogger.warn(
       {
         err: errorForLogging,
-        query,
-        limit,
         fallbackStrategy: 'empty-array',
+        limit,
+        query,
       },
       'Company search failed, returning empty results'
     );
@@ -267,7 +267,7 @@ async function fetchCompanySearchResults(
  * Uses 'use cache' to cache search results. Query and limit become part of the cache key.
  * This data is public and same for all users with the same query, so it can be cached.
  * Company search results change frequently, so we use the 'quarter' cacheLife profile.
- * 
+ *
  * Follows architectural strategy: data layer -> database RPC -> DB
  * @param query
  * @param limit

@@ -11,6 +11,7 @@ import { normalizeError, getEnvVar } from '@heyclaude/shared-runtime';
 import { inngest } from '../../client';
 import { pgmqRead, pgmqDelete, type PgmqMessage } from '../../../supabase/pgmq-client';
 import { logger, createWebAppContextWithId } from '../../../logging/server';
+import { sendCronSuccessHeartbeat } from '../../utils/monitoring';
 
 type ContentSubmission = DatabaseGenerated['public']['Tables']['content_submissions']['Row'];
 
@@ -306,9 +307,19 @@ export const processDiscordSubmissionsQueue = inngest.createFunction(
       processed: messages.length,
       sent: sentCount, }, 'Discord submissions queue processing completed');
 
-    return {
+    const result = {
       processed: messages.length,
       sent: sentCount,
     };
+
+    // BetterStack monitoring: Send success heartbeat (feature-flagged)
+    if (result.sent > 0) {
+      sendCronSuccessHeartbeat('BETTERSTACK_HEARTBEAT_INNGEST_CRON', {
+        functionName: 'processDiscordSubmissionsQueue',
+        result: { sent: result.sent },
+      });
+    }
+
+    return result;
   }
 );

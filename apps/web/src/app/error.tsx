@@ -2,9 +2,9 @@
 
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { useCopyToClipboard } from '@heyclaude/web-runtime/hooks';
-import { AlertCircle, Home, RefreshCw, Search, Copy, Check } from '@heyclaude/web-runtime/icons';
+import { AlertCircle, Check, Copy, Home, RefreshCw, Search } from '@heyclaude/web-runtime/icons';
 import { logClientErrorBoundary } from '@heyclaude/web-runtime/logging/client';
-import { UI_CLASSES, Button, Card } from '@heyclaude/web-runtime/ui';
+import { Button, Card, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { useEffect } from 'react';
 
@@ -24,7 +24,7 @@ const isDevelopment = process.env.NODE_ENV === 'development';
  * @returns {unknown} Description of return value*/
 function ErrorCodeBlock({ content }: { content: string }) {
   const { copied, copy } = useCopyToClipboard({
-    context: { component: 'ErrorBoundary', action: 'copy-error' },
+    context: { action: 'copy-error', component: 'ErrorBoundary' },
   });
 
   return (
@@ -33,18 +33,18 @@ function ErrorCodeBlock({ content }: { content: string }) {
         {content}
       </pre>
       <Button
-        variant="ghost"
-        size="sm"
+        aria-label={copied ? 'Copied!' : 'Copy error message'}
         className="absolute top-2 right-2 h-6 w-6 p-0"
         onClick={() => {
           void copy(content);
         }}
-        aria-label={copied ? 'Copied!' : 'Copy error message'}
+        size="sm"
+        variant="ghost"
       >
         {copied ? (
-          <Check className="h-3 w-3 text-green-500" aria-hidden="true" />
+          <Check aria-hidden="true" className="h-3 w-3 text-green-500" />
         ) : (
-          <Copy className="h-3 w-3" aria-hidden="true" />
+          <Copy aria-hidden="true" className="h-3 w-3" />
         )}
       </Button>
     </div>
@@ -81,9 +81,9 @@ export default function ErrorBoundary({
       error.stack ?? '',
       {
         errorDigest: error.digest,
-        userAgent: globalThis.navigator.userAgent,
-        url: globalThis.location.href,
         segment: 'global-error',
+        url: globalThis.location.href,
+        userAgent: globalThis.navigator.userAgent,
       }
     );
   }, [error]);
@@ -94,7 +94,7 @@ export default function ErrorBoundary({
         <div className="mb-6">
           <div className="mb-4 flex justify-center">
             <div className="bg-destructive/10 rounded-full p-3">
-              <AlertCircle className="text-destructive h-12 w-12" aria-hidden="true" />
+              <AlertCircle aria-hidden="true" className="text-destructive h-12 w-12" />
             </div>
           </div>
           <h1 className="mb-2 text-2xl font-bold">Something went wrong</h1>
@@ -124,12 +124,12 @@ export default function ErrorBoundary({
         ) : null}
 
         <div className={UI_CLASSES.FLEX_COL_SM_ROW_GAP_3}>
-          <Button onClick={reset} size="lg">
+          <Button size="lg" onClick={reset}>
             <RefreshCw className="mr-2 h-4 w-4" />
             Try Again
           </Button>
           <Link href={ROUTES.HOME}>
-            <Button variant="outline" size="lg">
+            <Button size="lg" variant="outline">
               <Home className="mr-2 h-4 w-4" />
               Back to Home
             </Button>
@@ -139,15 +139,15 @@ export default function ErrorBoundary({
         <div className="text-muted-foreground mt-8 text-sm">
           <p className="mb-2">Or explore:</p>
           <div className={`flex ${UI_CLASSES.FLEX_WRAP_GAP_2} justify-center`}>
-            <Link href={ROUTES.AGENTS} className="hover:text-primary">
+            <Link className="hover:text-primary" href={ROUTES.AGENTS}>
               Agents
             </Link>
             <span>•</span>
-            <Link href={ROUTES.MCP} className="hover:text-primary">
+            <Link className="hover:text-primary" href={ROUTES.MCP}>
               MCP Servers
             </Link>
             <span>•</span>
-            <Link href={ROUTES.GUIDES} className="hover:text-primary">
+            <Link className="hover:text-primary" href={ROUTES.GUIDES}>
               <Search className="mr-1 inline h-3 w-3" />
               Guides
             </Link>

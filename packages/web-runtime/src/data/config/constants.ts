@@ -17,15 +17,15 @@ import { type SocialLinkKey } from '../../config/social-links.ts';
  * For admin/export use cases, use MAX_* constants or pass explicit limits.
  */
 export const QUERY_LIMITS = {
-  // Content list queries
-  content: {
-    default: 50, // Default for category pages, search results, etc.
-    max: 1000, // Maximum for admin/export scenarios
-  },
   // Changelog queries
   changelog: {
     default: 50, // Default for changelog pages, recent entries, etc.
     max: 10_000, // Maximum for admin/export scenarios (e.g., getAllChangelogEntries)
+  },
+  // Content list queries
+  content: {
+    default: 50, // Default for category pages, search results, etc.
+    max: 1000, // Maximum for admin/export scenarios
   },
   // Pagination
   pagination: {

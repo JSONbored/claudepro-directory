@@ -19,9 +19,9 @@ const changesSchema = z
   .object({
     Added: z.array(changeItemSchemaTransformed).optional(),
     Changed: z.array(changeItemSchemaTransformed).optional(),
+    Deprecated: z.array(changeItemSchemaTransformed).optional(),
     Fixed: z.array(changeItemSchemaTransformed).optional(),
     Removed: z.array(changeItemSchemaTransformed).optional(),
-    Deprecated: z.array(changeItemSchemaTransformed).optional(),
     Security: z.array(changeItemSchemaTransformed).optional(),
   })
   .refine(
@@ -43,9 +43,9 @@ export function parseChangelogChanges(changes: unknown): ChangelogChanges {
   } catch (error) {
     // Only create logger on error to avoid wasting work on successful path
     const reqLogger = logger.child({
+      module: 'packages/web-runtime/src/data/changelog',
       operation: 'parseChangelogChanges',
       route: 'utility-function', // Utility function - no specific route
-      module: 'packages/web-runtime/src/data/changelog',
     });
     const normalized = normalizeError(error, 'Failed to parse changelog changes');
     reqLogger.error({ err: normalized }, 'Failed to parse changelog changes');

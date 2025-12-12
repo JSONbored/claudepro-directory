@@ -10,6 +10,7 @@ import { normalizeError, getEnvVar } from '@heyclaude/shared-runtime';
 import { inngest } from '../../client';
 import { pgmqRead, pgmqDelete } from '../../../supabase/pgmq-client';
 import { logger, createWebAppContextWithId } from '../../../logging/server';
+import { sendCronSuccessHeartbeat } from '../../utils/monitoring';
 
 const DISCORD_ERRORS_QUEUE = 'discord_errors';
 const BATCH_SIZE = 10;
@@ -173,11 +174,21 @@ export const processDiscordErrorsQueue = inngest.createFunction(
       failedCount,
       totalProcessed: messages.length, }, 'Discord errors queue processing complete');
 
-    return {
+    const result = {
       processed: messages.length,
       success: successCount,
       failed: failedCount,
       results,
     };
+
+    // BetterStack monitoring: Send success heartbeat (feature-flagged)
+    if (result.success > 0) {
+      sendCronSuccessHeartbeat('BETTERSTACK_HEARTBEAT_INNGEST_CRON', {
+        functionName: 'processDiscordErrorsQueue',
+        result: { success: result.success },
+      });
+    }
+
+    return result;
   }
 );

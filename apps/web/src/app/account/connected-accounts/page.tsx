@@ -89,9 +89,9 @@ async function ConnectedAccountsPageContent() {
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
+    module: modulePath,
     operation,
     route,
-    module: modulePath,
   });
 
   // Section: Authentication
@@ -100,8 +100,8 @@ async function ConnectedAccountsPageContent() {
   if (!user) {
     reqLogger.info(
       {
-        section: 'data-fetch',
         outcome: 'unauthenticated',
+        section: 'data-fetch',
       },
       'ConnectedAccountsPage: page render completed (unauthenticated)'
     );
@@ -113,7 +113,10 @@ async function ConnectedAccountsPageContent() {
             <CardDescription>Please sign in to manage your connected accounts.</CardDescription>
           </CardHeader>
           <CardContent>
-            <SignInButton valueProposition="Sign in to manage your connected accounts" redirectTo="/account/connected-accounts">
+            <SignInButton
+              redirectTo="/account/connected-accounts"
+              valueProposition="Sign in to manage your connected accounts"
+            >
               Go to login
             </SignInButton>
           </CardContent>
@@ -136,13 +139,16 @@ async function ConnectedAccountsPageContent() {
   let identitiesData: Awaited<ReturnType<typeof getUserIdentitiesData>>;
   try {
     identitiesData = await getUserIdentitiesData(user.id);
-    userLogger.info({ section: 'data-fetch', hasData: Boolean(identitiesData) }, 'ConnectedAccountsPage: identities data loaded');
+    userLogger.info(
+      { hasData: Boolean(identitiesData), section: 'data-fetch' },
+      'ConnectedAccountsPage: identities data loaded'
+    );
   } catch (error) {
     const normalized = normalizeError(error, 'getUserIdentitiesData invocation failed');
     userLogger.error(
       {
-        section: 'data-fetch',
         err: normalized,
+        section: 'data-fetch',
       },
       'ConnectedAccountsPage: getUserIdentitiesData threw'
     );
@@ -163,7 +169,10 @@ async function ConnectedAccountsPageContent() {
   }
 
   // Final summary log
-  userLogger.info({ section: 'data-fetch', identitiesCount: identities.length }, 'ConnectedAccountsPage: page render completed');
+  userLogger.info(
+    { identitiesCount: identities.length, section: 'data-fetch' },
+    'ConnectedAccountsPage: page render completed'
+  );
 
   return (
     <div className="space-y-6">

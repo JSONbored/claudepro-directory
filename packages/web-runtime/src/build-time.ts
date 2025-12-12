@@ -1,4 +1,5 @@
 import { env } from '@heyclaude/shared-runtime/schemas/env';
+import { detectPlatform, getDeploymentEnv } from '@heyclaude/shared-runtime/platform';
 
 /**
  * Detects if code is running during Next.js build time (static generation)
@@ -9,7 +10,7 @@ import { env } from '@heyclaude/shared-runtime/schemas/env';
  * Detection methods (in order of reliability):
  * 1. NEXT_PHASE === 'phase-production-build' (most reliable - set by Next.js)
  * 2. process.argv contains 'next' and 'build' (works for direct next build commands)
- * 3. NODE_ENV === 'production' but not on Vercel (local build)
+ * 3. Deployment env is 'build' (platform-agnostic detection)
  * 
  * @returns true if running during build time, false otherwise
  */
@@ -37,27 +38,33 @@ export function isBuildTime(): boolean {
     }
   }
 
-  // Method 3: Check if NODE_ENV is production but we're not on Vercel (local build)
+  // Method 3: Check deployment environment (platform-agnostic)
+  // If env is 'build', we're definitely in a build phase
+  const deploymentEnv = getDeploymentEnv();
+  if (deploymentEnv === 'build') {
+    return true;
+  }
+
+  // Method 4: Check if NODE_ENV is production but we're not on a known platform (local build)
   // Next.js sets NODE_ENV=production during build, even locally
-  // If we're not on Vercel and NODE_ENV is production, this is likely a local build
+  // If we're not on a known platform and NODE_ENV is production, this is likely a local build
   const nodeEnv = typeof process.env !== 'undefined' ? process.env['NODE_ENV'] : undefined;
-  const isVercel = typeof process.env !== 'undefined' && 
-    (process.env['VERCEL'] === '1' || process.env['VERCEL_ENV'] || process.env['VERCEL_URL']);
+  const platform = detectPlatform();
   
-  if (nodeEnv === 'production' && !isVercel) {
+  if (nodeEnv === 'production' && platform === 'unknown') {
     // Additional check: if we have Supabase env vars, this is likely a build
     // (builds need database access, so env vars should be present)
     const hasSupabaseEnv =
       env.NEXT_PUBLIC_SUPABASE_URL && env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     
     if (hasSupabaseEnv) {
-      // We have Supabase env but not on Vercel and NODE_ENV is production
+      // We have Supabase env but not on a known platform and NODE_ENV is production
       // This is most likely a local build
       return true;
     }
   }
 
-  // Method 4: Fallback - if we don't have Supabase env, assume build (will fail anyway)
+  // Method 5: Fallback - if we don't have Supabase env, assume build (will fail anyway)
   const hasSupabaseEnv =
     env.NEXT_PUBLIC_SUPABASE_URL && env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 

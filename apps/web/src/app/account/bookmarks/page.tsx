@@ -55,17 +55,17 @@ export default async function BookmarksPage() {
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
+    module: modulePath,
     operation,
     route,
-    module: modulePath,
   });
 
   reqLogger.info(
     {
+      redirectReason: 'legacy-route-compatibility',
       section: 'data-fetch',
       sourceRoute: SOURCE_ROUTE,
       targetRoute: TARGET_ROUTE,
-      redirectReason: 'legacy-route-compatibility',
     },
     `BookmarksPage: redirecting legacy ${SOURCE_ROUTE} to ${TARGET_ROUTE}`
   );

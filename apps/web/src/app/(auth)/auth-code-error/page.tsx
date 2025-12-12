@@ -4,13 +4,13 @@ import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { AlertCircle } from '@heyclaude/web-runtime/icons';
 import { logger } from '@heyclaude/web-runtime/logging/server';
 import {
-  UI_CLASSES,
   Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  UI_CLASSES,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import Link from 'next/link';
@@ -61,7 +61,7 @@ export default function AuthCodeError(properties: PagePropsWithSearchParams) {
             <Button asChild>
               <Link href={ROUTES.LOGIN}>Try Again</Link>
             </Button>
-            <Button variant="outline" asChild>
+            <Button asChild variant="outline">
               <Link href={ROUTES.HOME}>Return Home</Link>
             </Button>
           </CardContent>
@@ -97,9 +97,9 @@ async function AuthCodeErrorContent({
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
+    module: modulePath,
     operation,
     route,
-    module: modulePath,
   });
 
   const searchParameters = await searchParams;
@@ -116,12 +116,12 @@ async function AuthCodeErrorContent({
   // Log page render (informational)
   reqLogger.info(
     {
-      section: 'data-fetch',
       // Redact sensitive code/provider values
       hasCode: Boolean(code && code !== 'unknown'),
-      provider: provider === 'unknown' ? 'unknown' : 'redacted',
       hasMessage: Boolean(message),
       hasSearchParams: Boolean(searchParameters),
+      provider: provider === 'unknown' ? 'unknown' : 'redacted',
+      section: 'data-fetch',
     },
     'AuthCodeErrorPage rendered'
   );
@@ -141,7 +141,7 @@ async function AuthCodeErrorContent({
         <Button asChild>
           <Link href={ROUTES.LOGIN}>Try Again</Link>
         </Button>
-        <Button variant="outline" asChild>
+        <Button asChild variant="outline">
           <Link href={ROUTES.HOME}>Return Home</Link>
         </Button>
       </CardContent>

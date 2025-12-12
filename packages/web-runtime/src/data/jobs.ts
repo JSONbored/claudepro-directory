@@ -7,9 +7,9 @@ import { cacheLife, cacheTag } from 'next/cache';
 import { logger } from '../logger.ts';
 import { pulseJobSearch } from '../pulse.ts';
 import {
+  isValidExperienceLevel,
   isValidJobCategory,
   isValidJobType,
-  isValidExperienceLevel,
 } from '../utils/type-guards.ts';
 
 export type JobsFilterResult = Database['public']['Functions']['filter_jobs']['Returns'];
@@ -25,30 +25,30 @@ export interface JobsFilterOptions {
   sort?: 'newest' | 'oldest' | 'salary';
 }
 
-/**
+/***
  * Fetches jobs matching the provided filter options directly from the data source without using cache.
  *
- * @param options - Filtering options (may include `searchQuery`, `category`, `employment`, `experience`, `remote`, `limit`, `offset`, `sort`)
+ * @param {JobsFilterOptions} options - Filtering options (may include `searchQuery`, `category`, `employment`, `experience`, `remote`, `limit`, `offset`, `sort`)
  * @returns The filtered jobs result, or `null` if an error occurs
  */
 async function getFilteredJobsDirect(options: JobsFilterOptions): Promise<JobsFilterResult | null> {
   // Create request-scoped child logger
   const reqLogger = logger.child({
-    operation: 'getFilteredJobsDirect',
     module: 'data/jobs',
+    operation: 'getFilteredJobsDirect',
   });
 
   const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
-  const { searchQuery, category, employment, experience, remote, limit, offset, sort } = options;
+  const { category, employment, experience, limit, offset, remote, searchQuery, sort } = options;
 
   const filtersLog: Record<string, boolean | null | number | string> = {
-    searchQuery: searchQuery ?? null,
     category: category ?? null,
     employment: employment ?? null,
     experience: experience ?? null,
-    remote: remote ?? null,
     limit: limit ?? null,
     offset: offset ?? null,
+    remote: remote ?? null,
+    searchQuery: searchQuery ?? null,
     sort: sort ?? null,
   };
 
@@ -100,12 +100,12 @@ async function getFilteredJobsDirect(options: JobsFilterOptions): Promise<JobsFi
   }
 }
 
-/**
+/****
  * Get jobs list without filters (cached)
  * Uses 'use cache' to cache jobs lists. This data is public and same for all users.
  * Jobs lists change periodically, so we use the 'half' cacheLife profile.
- * @param limit
- * @param offset
+ * @param {number} limit
+ * @param {number} offset
  
  * @returns {unknown} Description of return value*/
 async function getJobsListCached(limit: number, offset: number): Promise<JobsFilterResult | null> {
@@ -119,8 +119,8 @@ async function getJobsListCached(limit: number, offset: number): Promise<JobsFil
   cacheTag('jobs-list');
 
   const reqLogger = logger.child({
-    operation: 'getJobsListCached',
     module: 'data/jobs',
+    operation: 'getJobsListCached',
   });
 
   try {
@@ -145,7 +145,7 @@ async function getJobsListCached(limit: number, offset: number): Promise<JobsFil
     const result = await new SearchService(client).filterJobs(rpcArgs);
 
     reqLogger.info(
-      { limit, offset, hasResult: Boolean(result) },
+      { hasResult: Boolean(result), limit, offset },
       'getJobsListCached: fetched successfully'
     );
 
@@ -158,19 +158,19 @@ async function getJobsListCached(limit: number, offset: number): Promise<JobsFil
   }
 }
 
-/**
+/***********
  * Get filtered jobs with search/filters (cached)
  * Uses 'use cache' to cache filtered jobs. This data is public and same for all users.
  * Filtered jobs change periodically, so we use the 'half' cacheLife profile.
- * @param rpcArguments
- * @param searchQuery
- * @param category
- * @param employment
- * @param experience
- * @param remote
- * @param limit
- * @param offset
- * @param sort
+ * @param {Database['public']['Functions']['filter_jobs']['Args']} rpcArguments
+ * @param {string} searchQuery
+ * @param {string} category
+ * @param {string} employment
+ * @param {string} experience
+ * @param {boolean} remote
+ * @param {number} limit
+ * @param {number} offset
+ * @param {string} sort
  
  * @returns {unknown} Description of return value*/
 async function getFilteredJobsCached(
@@ -194,8 +194,8 @@ async function getFilteredJobsCached(
   cacheTag('jobs-search');
 
   const reqLogger = logger.child({
-    operation: 'getFilteredJobsCached',
     module: 'data/jobs',
+    operation: 'getFilteredJobsCached',
   });
 
   try {
@@ -214,15 +214,15 @@ async function getFilteredJobsCached(
 
     reqLogger.info(
       {
-        searchQuery,
         category,
         employment,
         experience,
-        remote,
+        hasResult: Boolean(result),
         limit,
         offset,
+        remote,
+        searchQuery,
         sort,
-        hasResult: Boolean(result),
       },
       'getFilteredJobsCached: fetched successfully'
     );
@@ -233,14 +233,14 @@ async function getFilteredJobsCached(
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error(
       {
-        err: errorForLogging,
-        searchQuery,
         category,
         employment,
+        err: errorForLogging,
         experience,
-        remote,
         limit,
         offset,
+        remote,
+        searchQuery,
         sort,
       },
       'getFilteredJobsCached: failed'
@@ -262,11 +262,11 @@ export async function getFilteredJobs(
 ): Promise<JobsFilterResult | null> {
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    operation: 'getFilteredJobs',
     module: 'data/jobs',
+    operation: 'getFilteredJobs',
   });
 
-  const { searchQuery, category, employment, experience, remote, limit, offset, sort } = options;
+  const { category, employment, experience, limit, offset, remote, searchQuery, sort } = options;
   const hasFilters = Boolean(
     (searchQuery ?? '') !== '' ||
     (category !== undefined && category !== 'all') ||
@@ -276,13 +276,13 @@ export async function getFilteredJobs(
   );
 
   const filtersLog: Record<string, boolean | null | number | string> = {
-    searchQuery: searchQuery ?? null,
     category: category ?? null,
     employment: employment ?? null,
     experience: experience ?? null,
-    remote: remote ?? null,
     limit: limit ?? null,
     offset: offset ?? null,
+    remote: remote ?? null,
+    searchQuery: searchQuery ?? null,
     sort: sort ?? null,
   };
 
@@ -309,7 +309,7 @@ export async function getFilteredJobs(
       void pulseJobSearch(searchQuery, {}, 0).catch((error: unknown) => {
         const normalized = normalizeError(error, 'Failed to pulse job search');
         logger.error(
-          { err: normalized, operation: 'pulseJobSearch', module: 'data/jobs', searchQuery },
+          { err: normalized, module: 'data/jobs', operation: 'pulseJobSearch', searchQuery },
           'Failed to pulse job search'
         );
       });
@@ -325,7 +325,7 @@ export async function getFilteredJobs(
       void pulseJobSearch(searchQuery, {}, 0).catch((error: unknown) => {
         const normalized = normalizeError(error, 'Failed to pulse job search');
         logger.error(
-          { err: normalized, operation: 'pulseJobSearch', module: 'data/jobs', searchQuery },
+          { err: normalized, module: 'data/jobs', operation: 'pulseJobSearch', searchQuery },
           'Failed to pulse job search'
         );
       });
@@ -398,8 +398,8 @@ export async function getJobBySlug(slug: string) {
   cacheTag('jobs');
 
   const reqLogger = logger.child({
-    operation: 'getJobBySlug',
     module: 'data/jobs',
+    operation: 'getJobBySlug',
   });
 
   try {
@@ -416,7 +416,7 @@ export async function getJobBySlug(slug: string) {
 
     const result = await new JobsService(client).getJobBySlug({ p_slug: slug });
 
-    reqLogger.info({ slug, hasResult: Boolean(result) }, 'getJobBySlug: fetched successfully');
+    reqLogger.info({ hasResult: Boolean(result), slug }, 'getJobBySlug: fetched successfully');
 
     return result;
   } catch (error) {
@@ -448,8 +448,8 @@ export async function getFeaturedJobs(limit = 5) {
   cacheTag('jobs');
 
   const reqLogger = logger.child({
-    operation: 'getFeaturedJobs',
     module: 'data/jobs',
+    operation: 'getFeaturedJobs',
   });
 
   try {
@@ -467,7 +467,7 @@ export async function getFeaturedJobs(limit = 5) {
     const result = await new JobsService(client).getFeaturedJobs();
 
     reqLogger.info(
-      { limit, count: result !== null && result !== undefined ? result.length : 0 },
+      { count: result !== null && result !== undefined ? result.length : 0, limit },
       'getFeaturedJobs: fetched successfully'
     );
 

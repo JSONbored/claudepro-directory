@@ -70,9 +70,9 @@ export default async function OAuthConsentPage({
 
   // Create request-scoped child logger
   const reqLogger = logger.child({
+    module: modulePath,
     operation,
     route,
-    module: modulePath,
   });
 
   try {
@@ -85,8 +85,6 @@ export default async function OAuthConsentPage({
       );
       return (
         <SplitAuthLayout
-          brandPanel={<AuthBrandPanel />}
-          mobileHeader={<AuthMobileHeader />}
           authPanel={
             <div className="flex min-h-[400px] flex-col items-center justify-center p-6">
               <h1 className="mb-4 text-2xl font-semibold">Invalid Authorization Request</h1>
@@ -95,6 +93,8 @@ export default async function OAuthConsentPage({
               </p>
             </div>
           }
+          brandPanel={<AuthBrandPanel />}
+          mobileHeader={<AuthMobileHeader />}
         />
       );
     }
@@ -110,10 +110,10 @@ export default async function OAuthConsentPage({
       const loginUrl = `/login?redirect=/oauth/consent?authorization_id=${encodeURIComponent(authorizationId)}`;
       reqLogger.info(
         {
-          section: 'data-fetch',
           authorizationId,
-          redirectTo: loginUrl,
           error: authResult.error?.message,
+          redirectTo: loginUrl,
+          section: 'data-fetch',
         },
         'User not authenticated, redirecting to login'
       );
@@ -130,9 +130,9 @@ export default async function OAuthConsentPage({
     if (authError !== null) {
       reqLogger.error(
         {
-          section: 'data-fetch',
-          err: normalizeError(authError),
           authorizationId,
+          err: normalizeError(authError),
+          section: 'data-fetch',
           userId: user.id,
         },
         'Failed to get authorization details'
@@ -140,8 +140,6 @@ export default async function OAuthConsentPage({
 
       return (
         <SplitAuthLayout
-          brandPanel={<AuthBrandPanel />}
-          mobileHeader={<AuthMobileHeader />}
           authPanel={
             <div className="flex min-h-[400px] flex-col items-center justify-center p-6">
               <h1 className="mb-4 text-2xl font-semibold">Authorization Error</h1>
@@ -152,6 +150,8 @@ export default async function OAuthConsentPage({
               </p>
             </div>
           }
+          brandPanel={<AuthBrandPanel />}
+          mobileHeader={<AuthMobileHeader />}
         />
       );
     }
@@ -159,9 +159,9 @@ export default async function OAuthConsentPage({
     if (!authDetails) {
       reqLogger.error(
         {
-          section: 'data-fetch',
-          err: normalizeError(new Error('No auth details')),
           authorizationId,
+          err: normalizeError(new Error('No auth details')),
+          section: 'data-fetch',
           userId: user.id,
         },
         'Failed to get authorization details'
@@ -169,8 +169,6 @@ export default async function OAuthConsentPage({
 
       return (
         <SplitAuthLayout
-          brandPanel={<AuthBrandPanel />}
-          mobileHeader={<AuthMobileHeader />}
           authPanel={
             <div className="flex min-h-[400px] flex-col items-center justify-center p-6">
               <h1 className="mb-4 text-2xl font-semibold">Authorization Error</h1>
@@ -179,18 +177,20 @@ export default async function OAuthConsentPage({
               </p>
             </div>
           }
+          brandPanel={<AuthBrandPanel />}
+          mobileHeader={<AuthMobileHeader />}
         />
       );
     }
 
     reqLogger.info(
       {
-        section: 'data-fetch',
         authorizationId,
-        userId: user.id,
         clientId: authDetails.client.id,
         clientName: authDetails.client.name,
-          scopes: authDetails.scope,
+        scopes: authDetails.scope,
+        section: 'data-fetch',
+        userId: user.id,
       },
       'OAuth consent page loaded'
     );
@@ -207,34 +207,32 @@ export default async function OAuthConsentPage({
 
     return (
       <SplitAuthLayout
-        brandPanel={<AuthBrandPanel />}
-        mobileHeader={<AuthMobileHeader />}
         authPanel={
           <Suspense
             fallback={
               <div className="flex min-h-[400px] items-center justify-center">Loading...</div>
             }
           >
-            <OAuthConsentClient authorizationId={authorizationId} authDetails={clientAuthDetails} />
+            <OAuthConsentClient authDetails={clientAuthDetails} authorizationId={authorizationId} />
           </Suspense>
         }
+        brandPanel={<AuthBrandPanel />}
+        mobileHeader={<AuthMobileHeader />}
       />
     );
   } catch (error) {
     const normalized = normalizeError(error, 'OAuth consent page error');
     reqLogger.error(
       {
-        section: 'data-fetch',
-        err: normalized,
         duration: Date.now() - startTime,
+        err: normalized,
+        section: 'data-fetch',
       },
       'OAuth consent page error'
     );
 
     return (
       <SplitAuthLayout
-        brandPanel={<AuthBrandPanel />}
-        mobileHeader={<AuthMobileHeader />}
         authPanel={
           <div className="flex min-h-[400px] flex-col items-center justify-center p-6">
             <h1 className="mb-4 text-2xl font-semibold">Error</h1>
@@ -243,6 +241,8 @@ export default async function OAuthConsentPage({
             </p>
           </div>
         }
+        brandPanel={<AuthBrandPanel />}
+        mobileHeader={<AuthMobileHeader />}
       />
     );
   }

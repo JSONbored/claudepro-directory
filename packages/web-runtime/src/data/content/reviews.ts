@@ -34,18 +34,18 @@ export async function getReviewsWithStatsData(
 ): Promise<Database['public']['Functions']['get_reviews_with_stats']['Returns'] | null> {
   'use cache: private';
 
-  const { contentType, contentSlug, sortBy, limit, offset, userId } = parameters;
+  const { contentSlug, contentType, limit, offset, sortBy, userId } = parameters;
 
   // Configure cache
-  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`reviews-${contentType}-${contentSlug}`);
   if (userId) {
     cacheTag(`reviews-user-${userId}`);
   }
 
   const reqLogger = logger.child({
-    operation: 'getReviewsWithStatsData',
     module: 'data/content/reviews',
+    operation: 'getReviewsWithStatsData',
   });
 
   try {
@@ -54,8 +54,8 @@ export async function getReviewsWithStatsData(
     const service = new ContentService(client);
 
     const result = await service.getReviewsWithStats({
-      p_content_type: contentType,
       p_content_slug: contentSlug,
+      p_content_type: contentType,
       ...(sortBy ? { p_sort_by: sortBy } : {}),
       ...(limit ? { p_limit: limit } : {}),
       ...(offset ? { p_offset: offset } : {}),
@@ -63,7 +63,7 @@ export async function getReviewsWithStatsData(
     });
 
     reqLogger.info(
-      { contentType, contentSlug, hasUser: Boolean(userId), hasResult: Boolean(result) },
+      { contentSlug, contentType, hasResult: Boolean(result), hasUser: Boolean(userId) },
       'getReviewsWithStatsData: fetched successfully'
     );
 
@@ -72,7 +72,7 @@ export async function getReviewsWithStatsData(
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error(
-      { err: errorForLogging, contentType, contentSlug, hasUser: Boolean(userId) },
+      { contentSlug, contentType, err: errorForLogging, hasUser: Boolean(userId) },
       'getReviewsWithStatsData: unexpected error'
     );
     return null;

@@ -30,20 +30,20 @@ type RecommendationResponse = Database['public']['Functions']['get_recommendatio
 // Type matching QuizAnswers from quiz-form.tsx
 interface DecodedQuizAnswers {
   experienceLevel: Database['public']['Enums']['experience_level'];
-  p_focus_areas?: Database['public']['Enums']['focus_area_type'][];
-  p_integrations?: Database['public']['Enums']['integration_type'][];
+  p_focus_areas?: Array<Database['public']['Enums']['focus_area_type']>;
+  p_integrations?: Array<Database['public']['Enums']['integration_type']>;
   teamSize?: string;
   timestamp?: string;
   toolPreferences: string[];
   useCase: Database['public']['Enums']['use_case_type'];
 }
 
-/**
+/*****
  * Decode and validate a base64url-encoded JSON string of quiz answers into a typed DecodedQuizAnswers object.
  *
- * @param encoded - The base64url-encoded JSON payload containing quiz answers.
- * @param resultId - Identifier used to annotate logs when decoding fails.
- * @param parentLogger
+ * @param {string} encoded - The base64url-encoded JSON payload containing quiz answers.
+ * @param {string} resultId - Identifier used to annotate logs when decoding fails.
+ * @param {ReturnType<typeof logger.child>} parentLogger
  * @returns The decoded answers containing required fields `useCase`, `experienceLevel`, and `toolPreferences`, and optionally `p_integrations`, `p_focus_areas`, `teamSize`, and `timestamp`.
  * @throws An error normalized by `normalizeError` when the input cannot be decoded or fails validation.
  *
@@ -62,14 +62,14 @@ function decodeQuizAnswers(
         operation: 'decodeQuizAnswers',
       })
     : logger.child({
-        route: 'utility-function',
         module: 'apps/web/src/app/tools/config-recommender/results/[id]',
         operation: 'decodeQuizAnswers',
+        route: 'utility-function',
       });
 
   try {
     const json = Buffer.from(encoded, 'base64url').toString('utf8');
-    const parsed = JSON.parse(json) as unknown;
+    const parsed = JSON.parse(json);
 
     // Type guard to validate the parsed object structure
     if (typeof parsed !== 'object' || parsed === null) {
@@ -142,18 +142,20 @@ function decodeQuizAnswers(
     }
 
     return {
-      useCase: data['useCase'] as Database['public']['Enums']['use_case_type'],
       experienceLevel: data['experienceLevel'] as Database['public']['Enums']['experience_level'],
       toolPreferences: data['toolPreferences'] as string[],
+      useCase: data['useCase'] as Database['public']['Enums']['use_case_type'],
       ...(Array.isArray(data['p_integrations']) &&
         data['p_integrations'].length > 0 && {
-          p_integrations: data[
-            'p_integrations'
-          ] as Database['public']['Enums']['integration_type'][],
+          p_integrations: data['p_integrations'] as Array<
+            Database['public']['Enums']['integration_type']
+          >,
         }),
       ...(Array.isArray(data['p_focus_areas']) &&
         data['p_focus_areas'].length > 0 && {
-          p_focus_areas: data['p_focus_areas'] as Database['public']['Enums']['focus_area_type'][],
+          p_focus_areas: data['p_focus_areas'] as Array<
+            Database['public']['Enums']['focus_area_type']
+          >,
         }),
       ...(typeof data['teamSize'] === 'string' && data['teamSize'] !== ''
         ? { teamSize: data['teamSize'] }
@@ -166,9 +168,9 @@ function decodeQuizAnswers(
     const normalized = normalizeError(error, 'Invalid quiz answers encoding');
     utilityLogger.error(
       {
+        encodedLength: encoded.length,
         err: normalized,
         resultId,
-        encodedLength: encoded.length,
       },
       'ConfigRecommenderResults: decodeQuizAnswers failed'
     );
@@ -176,12 +178,12 @@ function decodeQuizAnswers(
   }
 }
 
-/**
+/*****
  * Filters and validates recommendation items, returning only those that include `category`, `slug`, and `title`.
  *
- * @param results - Raw recommendation items returned by the RPC; may be `null` or `undefined`.
- * @param resultId - Identifier included in logs when items are filtered.
- * @param parentLogger - Optional parent logger used to create an operation-scoped logger for warnings.
+ * @param {Database['public']['Functions']['get_recommendations']['Returns']['results']} results - Raw recommendation items returned by the RPC; may be `null` or `undefined`.
+ * @param {string} resultId - Identifier included in logs when items are filtered.
+ * @param {ReturnType<typeof logger.child>} parentLogger - Optional parent logger used to create an operation-scoped logger for warnings.
  * @returns An array of recommendation items guaranteed to have `category`, `slug`, and `title`.
  *
  * @see getConfigRecommendations
@@ -204,9 +206,9 @@ function normalizeRecommendationResults(
         operation: 'normalizeRecommendationResults',
       })
     : logger.child({
-        route: 'utility-function',
         module: 'apps/web/src/app/tools/config-recommender/results/[id]',
         operation: 'normalizeRecommendationResults',
+        route: 'utility-function',
       });
 
   if (!results) return [];
@@ -223,9 +225,9 @@ function normalizeRecommendationResults(
   if (normalized.length < results.length) {
     utilityLogger.warn(
       {
-        resultId,
-        originalCount: results.length,
         filteredCount: normalized.length,
+        originalCount: results.length,
+        resultId,
       },
       'ConfigRecommenderResults: filtered incomplete recommendation items'
     );
@@ -259,8 +261,8 @@ export async function generateMetadata({ params }: PageProperties): Promise<Meta
   return {
     ...baseMetadata,
     robots: {
-      index: false,
       follow: true,
+      index: false,
     },
   };
 }
@@ -292,13 +294,13 @@ export default async function ResultsPage({ params, searchParams }: PageProperti
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    operation: 'ConfigRecommenderResults',
     module: 'apps/web/src/app/tools/config-recommender/results/[id]',
+    operation: 'ConfigRecommenderResults',
   });
 
   return (
     <Suspense fallback={<ResultsLoading />}>
-      <ResultsPageContent params={params} searchParams={searchParams} reqLogger={reqLogger} />
+      <ResultsPageContent params={params} reqLogger={reqLogger} searchParams={searchParams} />
     </Suspense>
   );
 }
@@ -326,8 +328,8 @@ export default async function ResultsPage({ params, searchParams }: PageProperti
  */
 async function ResultsPageContent({
   params,
-  searchParams,
   reqLogger,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
   reqLogger: ReturnType<typeof logger.child>;
@@ -359,9 +361,9 @@ async function ResultsPageContent({
     );
     routeLogger.info(
       {
+        experienceLevel: answers.experienceLevel,
         section: 'data-fetch',
         useCase: answers.useCase,
-        experienceLevel: answers.experienceLevel,
       },
       'ConfigRecommenderResults: answers decoded successfully'
     );
@@ -369,10 +371,10 @@ async function ResultsPageContent({
     const normalized = normalizeError(error, 'Failed to decode quiz answers');
     routeLogger.error(
       {
-        section: 'data-fetch',
         err: normalized,
-        route: `/tools/config-recommender/results/${resolvedParameters.id}`,
         operation: 'ConfigRecommenderResults',
+        route: `/tools/config-recommender/results/${resolvedParameters.id}`,
+        section: 'data-fetch',
       },
       'ConfigRecommenderResults: failed to decode quiz answers'
     );
@@ -381,18 +383,18 @@ async function ResultsPageContent({
 
   // Section: Recommendations Fetch
   const enrichedResult = await getConfigRecommendations({
-    useCase: answers.useCase,
     experienceLevel: answers.experienceLevel,
     toolPreferences: answers.toolPreferences,
+    useCase: answers.useCase,
     ...(answers.p_integrations && { integrations: answers.p_integrations }),
     ...(answers.p_focus_areas && { focusAreas: answers.p_focus_areas }),
   });
   routeLogger.info(
     {
-      section: 'data-fetch',
-      useCase: answers.useCase,
       experienceLevel: answers.experienceLevel,
       resultCount: enrichedResult?.results?.length ?? 0,
+      section: 'data-fetch',
+      useCase: answers.useCase,
     },
     'ConfigRecommenderResults: recommendations fetched'
   );
@@ -401,8 +403,8 @@ async function ResultsPageContent({
     // logger.error() normalizes errors internally, so pass raw error
     routeLogger.error(
       {
-        section: 'data-fetch',
         err: new Error('Recommendations result is null'),
+        section: 'data-fetch',
         useCase: answers.useCase,
       },
       'ConfigRecommenderResults: get_recommendations returned no data'
@@ -412,24 +414,24 @@ async function ResultsPageContent({
 
   const recommendations: RecommendationResponse = {
     ...enrichedResult,
+    answers,
+    generatedAt: new Date().toISOString(),
+    id: resolvedParameters.id,
     results: normalizeRecommendationResults(
       enrichedResult.results,
       resolvedParameters.id,
       routeLogger
     ),
-    answers,
-    id: resolvedParameters.id,
-    generatedAt: new Date().toISOString(),
   };
 
   const shareUrl = `${APP_CONFIG.url}/tools/config-recommender/results/${resolvedParameters.id}?answers=${resolvedSearchParameters.answers}`;
 
   routeLogger.info(
     {
-      section: 'data-fetch',
-      useCase: answers.useCase,
       experienceLevel: answers.experienceLevel,
       resultCount: recommendations.results?.length ?? 0,
+      section: 'data-fetch',
+      useCase: answers.useCase,
     },
     'ConfigRecommenderResults: page viewed'
   );

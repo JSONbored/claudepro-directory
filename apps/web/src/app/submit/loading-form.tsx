@@ -15,7 +15,7 @@ export default function SubmitFormLoading() {
       </div>
       <div className="space-y-4">
         {Array.from({ length: 6 }, (_, i) => (
-          <div key={`field-${i}`} className="space-y-2">
+          <div className="space-y-2" key={`field-${i}`}>
             <Skeleton size="sm" width="xs" />
             <Skeleton size="lg" width="3xl" />
           </div>

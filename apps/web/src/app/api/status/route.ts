@@ -5,12 +5,12 @@
 
 import 'server-only';
 import { MiscService } from '@heyclaude/data-layer';
-import { logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
+import { createErrorResponse, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  createSupabaseAnonClient,
-  jsonResponse,
-  getOnlyCorsHeaders,
   buildCacheHeaders,
+  createSupabaseAnonClient,
+  getOnlyCorsHeaders,
+  jsonResponse,
 } from '@heyclaude/web-runtime/server';
 import { cacheLife } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
@@ -21,7 +21,7 @@ const CORS = getOnlyCorsHeaders;
  * Cached helper function to fetch API health status
  * Uses Cache Components to reduce function invocations
  * Database RPC returns frontend-ready camelCase data (no client-side transformation needed)
- * 
+ *
  * @returns {Promise<unknown>} API health status data
  */
 async function getCachedApiHealthFormatted() {
@@ -49,9 +49,9 @@ async function getCachedApiHealthFormatted() {
  */
 export async function GET(_request: NextRequest) {
   const reqLogger = logger.child({
+    method: 'GET',
     operation: 'StatusAPI',
     route: '/api/status',
-    method: 'GET',
   });
 
   try {
@@ -72,19 +72,20 @@ export async function GET(_request: NextRequest) {
         'Health check RPC error'
       );
       return createErrorResponse(normalized, {
-        route: '/api/status',
-        operation: 'StatusAPI',
-        method: 'GET',
         logContext: {
           rpcName: 'get_api_health_formatted',
         },
+        method: 'GET',
+        operation: 'StatusAPI',
+        route: '/api/status',
       });
     }
 
     // Determine HTTP status code based on health status
-    const status = typeof data === 'object' && data !== null && 'status' in data
-      ? String(data['status'])
-      : 'unhealthy';
+    const status =
+      typeof data === 'object' && data !== null && 'status' in data
+        ? String(data['status'])
+        : 'unhealthy';
     const statusCode = status === 'healthy' ? 200 : status === 'degraded' ? 200 : 503;
 
     reqLogger.info(
@@ -103,9 +104,9 @@ export async function GET(_request: NextRequest) {
     const normalized = normalizeError(error, 'Operation failed');
     reqLogger.error({ err: normalizeError(error) }, 'Status API error');
     return createErrorResponse(normalized, {
-      route: '/api/status',
-      operation: 'StatusAPI',
       method: 'GET',
+      operation: 'StatusAPI',
+      route: '/api/status',
     });
   }
 }
@@ -120,9 +121,9 @@ export async function GET(_request: NextRequest) {
  */
 export function OPTIONS() {
   return new NextResponse(null, {
-    status: 204,
     headers: {
       ...getOnlyCorsHeaders,
     },
+    status: 204,
   });
 }

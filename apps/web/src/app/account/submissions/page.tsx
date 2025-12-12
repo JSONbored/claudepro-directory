@@ -3,22 +3,22 @@ import { isValidCategory } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
-  getUserDashboard,
   getCategoryConfig,
+  getUserDashboard,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { CheckCircle, Clock, GitPullRequest, Send, XCircle } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   BADGE_COLORS,
-  UI_CLASSES,
-  UnifiedBadge,
   Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  UI_CLASSES,
+  UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
@@ -87,10 +87,10 @@ const PR_NUMBER_REGEX = /^\d+$/;
 // Uses loose capture groups, then validates components separately to avoid duplication
 const PR_PATH_REGEX = /^\/([^/]+)\/([^/]+)\/pull\/(\d+)$/;
 
-/**
+/***
  * Formats a parseable date string to the en-US "MMM d, yyyy" style or returns "-" for missing/invalid input.
  *
- * @param dateString - The date string to format.
+ * @param {string} dateString - The date string to format.
  * @returns The formatted date (e.g., "Jan 2, 2024"), or "-" if `dateString` is missing or invalid.
  */
 function formatSubmissionDate(dateString: string): string {
@@ -102,16 +102,16 @@ function formatSubmissionDate(dateString: string): string {
     return '-';
   }
   return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
     day: 'numeric',
+    month: 'short',
+    year: 'numeric',
   });
 }
 
-/**
+/***
  * Parse a GitHub pull request URL and return its owner, repository, and PR number when the URL is a safe, well-formed GitHub PR link.
  *
- * @param url - Candidate URL string to validate and parse.
+ * @param {null | string | undefined} url - Candidate URL string to validate and parse.
  * @returns An object `{ owner, repo, prNumber }` when `url` is a valid `https://github.com/:owner/:repo/pull/:number` URL; `null` otherwise.
  *
  * @see buildSafePrUrl
@@ -156,19 +156,19 @@ function extractPrComponents(
     if (!repo || !REPO_REGEX.test(repo)) return null;
     if (!prNumber || !PR_NUMBER_REGEX.test(prNumber)) return null;
 
-    return { owner, repo, prNumber };
+    return { owner, prNumber, repo };
   } catch {
     return null;
   }
 }
 
-/**
+/*****
  * Construct a safe GitHub PR URL from validated components
  * This ensures we're using only trusted, validated data instead of user-controlled URLs
  * Uses URL constructor for canonicalization to prevent encoding-based attacks
- * @param owner - GitHub repository owner name
- * @param repo - GitHub repository name
- * @param prNumber - Pull request number
+ * @param {string} owner - GitHub repository owner name
+ * @param {string} repo - GitHub repository name
+ * @param {string} prNumber - Pull request number
  
  * @returns {string} The constructed URL (or string result returned by the function)
  */
@@ -194,12 +194,14 @@ function buildSafePrUrl(owner: string, repo: string, prNumber: string): string {
 const ALLOWED_TYPES = Constants.public.Enums.submission_type;
 
 // Typed copy for use as submission_type array
-const ALLOWED_TYPES_ARRAY: Database['public']['Enums']['submission_type'][] = [...ALLOWED_TYPES];
+const ALLOWED_TYPES_ARRAY: Array<Database['public']['Enums']['submission_type']> = [
+  ...ALLOWED_TYPES,
+];
 
-/**
+/***
  * Validates that a content slug contains only lowercase letters, digits, hyphens, or underscores.
  *
- * @param slug - Candidate slug to validate (no dots, slashes, spaces, percent-encoding, or uppercase letters).
+ * @param {string} slug - Candidate slug to validate (no dots, slashes, spaces, percent-encoding, or uppercase letters).
  * @returns `true` if `slug` matches `/^[a-z0-9-_]+$/`, `false` otherwise.
  *
  * @see getSafeContentUrl
@@ -210,10 +212,10 @@ function isValidSlug(slug: string): boolean {
   return /^[a-z0-9-_]+$/.test(slug);
 }
 
-/**
+/***
  * Checks whether a string is one of the allowed submission_type values.
  *
- * @param type - Candidate submission type string to validate
+ * @param {string} type - Candidate submission type string to validate
  * @returns `true` if `type` is one of the allowed submission_type values, `false` otherwise.
  *
  * @see ALLOWED_TYPES
@@ -222,14 +224,14 @@ function isSafeType(type: string): type is Database['public']['Enums']['submissi
   return (ALLOWED_TYPES as readonly string[]).includes(type);
 }
 
-/**
+/****
  * Constructs a safe internal content URL for a validated submission type and slug.
  *
  * Validates that `type` is an allowed submission_type and `slug` matches the expected
  * pattern before constructing the path.
  *
- * @param type - The submission type to use in the URL (must be an allowed `submission_type`)
- * @param slug - The content slug (must match `^[a-z0-9-_]+$`)
+ * @param {Database['public']['Enums']['submission_type']} type - The submission type to use in the URL (must be an allowed `submission_type`)
+ * @param {string} slug - The content slug (must match `^[a-z0-9-_]+$`)
  * @returns The internal URL path in the form `/type/slug` if both inputs are valid, `null` otherwise.
  *
  * @see isSafeType
@@ -266,9 +268,9 @@ export default async function SubmissionsPage() {
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
+    module: 'apps/web/src/app/account/submissions',
     operation: 'SubmissionsPage',
     route: '/account/submissions',
-    module: 'apps/web/src/app/account/submissions',
   });
 
   return (
@@ -282,6 +284,7 @@ export default async function SubmissionsPage() {
  * Render the authenticated user's submissions page content, including list, empty state, and error or sign-in prompts.
  *
  * @param reqLogger - Request-scoped logger used for telemetry and data-integrity warnings; a child logger is created with user context when available
+ * @param reqLogger.reqLogger
  * @returns A React element containing the submissions UI: sign-in prompt when unauthenticated, an error message on fetch failure, an empty-state call-to-action when no submissions exist, or a grid of submission cards when submissions are available.
  *
  * @see getAuthenticatedUser
@@ -315,7 +318,10 @@ async function SubmissionsPageContent({
             <CardDescription>Please sign in to view and manage your submissions.</CardDescription>
           </CardHeader>
           <CardContent>
-            <SignInButton valueProposition="Sign in to view and manage your submissions" redirectTo="/account/submissions">
+            <SignInButton
+              redirectTo="/account/submissions"
+              valueProposition="Sign in to view and manage your submissions"
+            >
               Go to login
             </SignInButton>
           </CardContent>
@@ -342,8 +348,8 @@ async function SubmissionsPageContent({
     } else {
       userLogger.error(
         {
-          section: 'data-fetch',
           err: new Error('getUserDashboard returned null'),
+          section: 'data-fetch',
         },
         'SubmissionsPage: getUserDashboard returned null'
       );
@@ -353,8 +359,8 @@ async function SubmissionsPageContent({
     const normalized = normalizeError(error, 'Failed to load submissions from dashboard');
     userLogger.error(
       {
-        section: 'data-fetch',
         err: normalized,
+        section: 'data-fetch',
       },
       'SubmissionsPage: getUserDashboard threw'
     );
@@ -384,10 +390,10 @@ async function SubmissionsPageContent({
   // Valid enum values for validation - use Constants from database types
   const VALID_SUBMISSION_STATUSES = Constants.public.Enums.submission_status;
 
-  /**
+  /***
    * Validate submission status against enum values
    *
-   * @param status - The status value to validate
+   * @param {unknown} status - The status value to validate
    * @returns True if status is a valid submission_status enum value, false otherwise
    */
   function isValidSubmissionStatus(
@@ -397,10 +403,10 @@ async function SubmissionsPageContent({
     return (VALID_SUBMISSION_STATUSES as readonly string[]).includes(status);
   }
 
-  /**
+  /***
    * Validate submission type against enum values
    *
-   * @param type - The type value to validate
+   * @param {unknown} type - The type value to validate
    * @returns True if type is a valid submission_type enum value, false otherwise
    */
   function isValidSubmissionType(
@@ -414,11 +420,11 @@ async function SubmissionsPageContent({
   // Use string literals directly to avoid unsafe assignment from array index access
   // Enum values: 'pending', 'approved', 'rejected', 'spam', 'merged'
   const SUBMISSION_STATUS_VARIANTS = {
-    pending: { icon: Clock, label: 'Pending Review' },
     approved: { icon: CheckCircle, label: 'Approved' },
+    merged: { icon: CheckCircle, label: 'Merged ✓' },
+    pending: { icon: Clock, label: 'Pending Review' },
     rejected: { icon: XCircle, label: 'Rejected' },
     spam: { icon: XCircle, label: 'Spam' },
-    merged: { icon: CheckCircle, label: 'Merged ✓' },
   } satisfies Record<
     Database['public']['Enums']['submission_status'],
     { icon: typeof Clock; label: string }
@@ -430,7 +436,7 @@ async function SubmissionsPageContent({
     const colorClass = BADGE_COLORS.submissionStatus[status];
 
     return (
-      <UnifiedBadge variant="base" style="outline" className={colorClass}>
+      <UnifiedBadge className={colorClass} style="outline" variant="base">
         <Icon className="mr-1 h-3 w-3" />
         {variant.label}
       </UnifiedBadge>
@@ -445,12 +451,12 @@ async function SubmissionsPageContent({
       Database['public']['Enums']['content_category']
     > = {
       agents: 'agents',
-      mcp: 'mcp',
-      rules: 'rules',
       commands: 'commands',
       hooks: 'hooks',
-      statuslines: 'statuslines',
+      mcp: 'mcp',
+      rules: 'rules',
       skills: 'skills',
+      statuslines: 'statuslines',
     };
 
     const category = categoryMap[type];
@@ -463,22 +469,22 @@ async function SubmissionsPageContent({
     // Use explicit enum string values instead of fragile numeric indexing
     const fallbackLabels: Record<Database['public']['Enums']['submission_type'], string> = {
       agents: 'Claude Agent',
-      mcp: 'MCP Server',
-      rules: 'CLAUDE.md',
       commands: 'Command',
       hooks: 'Hook',
-      statuslines: 'Statusline',
+      mcp: 'MCP Server',
+      rules: 'CLAUDE.md',
       skills: 'Skill',
+      statuslines: 'Statusline',
     };
     return fallbackLabels[type];
   };
 
-  /**
+  /***
    * Produce safe GitHub PR link properties for a submission when its PR reference is valid.
    *
    * Validates and normalizes a submission's PR reference and returns an object suitable for link props.
    *
-   * @param submission - A submission record (one element from `submissions`) that may contain `pr_url` and/or `pr_number`.
+   * @param {(typeof submissions)[number]} submission - A submission record (one element from `submissions`) that may contain `pr_url` and/or `pr_number`.
    * @returns `{ href: string }` with a canonical, validated GitHub PR URL if a safe PR link can be constructed, `null` otherwise.
    *
    * @see extractPrComponents
@@ -498,12 +504,12 @@ async function SubmissionsPageContent({
     return safePrUrl && safePrUrl !== '#' ? { href: safePrUrl } : null;
   }
 
-  /**
+  /*****
    * Return a safe internal content link when the submission is merged and inputs are valid.
    *
-   * @param type - The submission's type (one of Database.public.Enums.submission_type)
-   * @param slug - The content slug to link to; must match the internal slug pattern
-   * @param status - The submission's status (one of Database.public.Enums.submission_status)
+   * @param {Database['public']['Enums']['submission_type']} type - The submission's type (one of Database.public.Enums.submission_type)
+   * @param {string} slug - The content slug to link to; must match the internal slug pattern
+   * @param {Database['public']['Enums']['submission_status']} status - The submission's status (one of Database.public.Enums.submission_status)
    * @returns `{ href: string }` containing a safe `/type/slug` URL when `status` equals the merged status and `type`/`slug` validate; otherwise `null`
    *
    * @see getSafeContentUrl
@@ -521,7 +527,7 @@ async function SubmissionsPageContent({
   // Log any submissions with missing IDs for data integrity monitoring
   for (const [index, sub] of submissions.entries()) {
     if (!sub.id) {
-      userLogger.warn({ section: 'data-fetch', index: index }, 'SubmissionsPage: submission missing ID');
+      userLogger.warn({ index, section: 'data-fetch' }, 'SubmissionsPage: submission missing ID');
     }
   }
 
@@ -563,16 +569,16 @@ async function SubmissionsPageContent({
         <div className="grid gap-4">
           {submissions.map((submission, index) => (
             <SubmissionCard
-              key={submission.id ?? `submission-${index}`}
-              submission={submission}
-              index={index}
+              formatSubmissionDate={formatSubmissionDate}
+              getContentLinkProps={getContentLinkProperties}
+              getPrLinkProps={getPrLinkProperties}
               getStatusBadge={getStatusBadge}
               getTypeLabel={getTypeLabel}
-              formatSubmissionDate={formatSubmissionDate}
-              getPrLinkProps={getPrLinkProperties}
-              getContentLinkProps={getContentLinkProperties}
+              index={index}
               isValidSubmissionStatus={isValidSubmissionStatus}
               isValidSubmissionType={isValidSubmissionType}
+              key={submission.id ?? `submission-${index}`}
+              submission={submission}
               VALID_SUBMISSION_STATUSES={[...VALID_SUBMISSION_STATUSES]}
               VALID_SUBMISSION_TYPES={ALLOWED_TYPES_ARRAY}
             />

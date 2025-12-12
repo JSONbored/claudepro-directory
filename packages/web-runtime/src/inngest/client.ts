@@ -14,6 +14,11 @@
 
 import { EventSchemas, Inngest } from 'inngest';
 import type { Database } from '@heyclaude/database-types';
+import {
+  getDeploymentEnv,
+  getDeploymentPullRequestId,
+  getDeploymentCommit,
+} from '@heyclaude/shared-runtime/platform';
 
 /**
  * Event type definitions for type-safe event sending.
@@ -311,13 +316,14 @@ function getInngestEnv(): string | undefined {
     return undefined;
   }
 
-  const vercelEnv = process.env['VERCEL_ENV'];
-  const prId = process.env['VERCEL_GIT_PULL_REQUEST_ID'];
-  const commitSha = process.env['VERCEL_GIT_COMMIT_SHA'];
+  // Use platform-agnostic deployment environment detection
+  const deploymentEnv = getDeploymentEnv();
+  const prId = getDeploymentPullRequestId();
+  const commitSha = getDeploymentCommit();
 
   // Preview environment: Use PR ID if available, otherwise use commit SHA
   // This creates isolated branch environments for each preview deployment
-  if (vercelEnv === 'preview') {
+  if (deploymentEnv === 'preview') {
     if (prId) {
       // PR-based preview: Use PR ID for consistent environment across PR deployments
       return `preview-${prId}`;

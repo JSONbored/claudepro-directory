@@ -13,16 +13,16 @@ import {
 } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  RESPONSIVE_PATTERNS,
-  UI_CLASSES,
-  UnifiedBadge,
-  HoverCard,
   Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  HoverCard,
+  RESPONSIVE_PATTERNS,
+  UI_CLASSES,
+  UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
 import { cacheLife } from 'next/cache';
 import { Suspense } from 'react';
@@ -51,9 +51,9 @@ export default async function PartnerPage() {
 
   // Create request-scoped child logger
   const reqLogger = logger.child({
+    module: 'app/partner',
     operation: 'PartnerPage',
     route: '/partner',
-    module: 'app/partner',
   });
 
   return (
@@ -98,18 +98,18 @@ async function PartnerPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
     // Use defaults instead of throwing to prevent page crash
     pricing = {
       jobs: {
-        regular: 99,
         discounted: 79,
         durationDays: 30,
-      },
-      sponsored: {
-        regular: 199,
-        discounted: 149,
+        regular: 99,
       },
       launch: {
         discountPercent: 20,
         enabled: false,
         endDate: '',
+      },
+      sponsored: {
+        discounted: 149,
+        regular: 199,
       },
     };
   }
@@ -125,9 +125,9 @@ async function PartnerPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
       'PartnerPage: getPartnerHeroStats failed'
     );
     heroStats = {
-      monthlyVisitors: 10_000,
-      monthlyPageViews: 50_000,
       configurationCount: 500,
+      monthlyPageViews: 50_000,
+      monthlyVisitors: 10_000,
     };
   }
   const configCount = heroStats.configurationCount;
@@ -144,10 +144,10 @@ async function PartnerPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
     // Use empty defaults instead of throwing to prevent page crash
     // Match the expected shape: partnerEmail, hiEmail, supportEmail, securityEmail
     partnerContacts = {
-      partnerEmail: '',
       hiEmail: '',
-      supportEmail: '',
+      partnerEmail: '',
       securityEmail: '',
+      supportEmail: '',
     };
   }
 
@@ -164,8 +164,8 @@ async function PartnerPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
     // All CTAs must exist with safe values (empty hrefs) to match expected structure
     partnerCtas = {
       jobListing: { href: '', subject: '' },
-      sponsoredListing: { href: '', subject: '' },
       partnershipInquiry: { href: '', subject: '' },
+      sponsoredListing: { href: '', subject: '' },
     };
   }
 
@@ -236,7 +236,7 @@ async function PartnerPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
                 </p>
               </div>
             </div>
-            <UnifiedBadge variant="base" className="border-primary/20 bg-primary/10 text-primary">
+            <UnifiedBadge className="border-primary/20 bg-primary/10 text-primary" variant="base">
               <Clock className="mr-1 h-3 w-3" />
               Limited Time
             </UnifiedBadge>
@@ -257,9 +257,9 @@ async function PartnerPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
                     <Briefcase className={`${UI_CLASSES.ICON_LG} ${UI_CLASSES.ICON_INFO}`} />
                   </div>
                   <UnifiedBadge
-                    variant="base"
-                    style="outline"
                     className="border-blue-500/20 bg-blue-500/5"
+                    style="outline"
+                    variant="base"
                   >
                     Most Popular
                   </UnifiedBadge>
@@ -311,7 +311,7 @@ async function PartnerPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
                 </div>
 
                 {/* CTA */}
-                <Button className="w-full" size="lg" asChild>
+                <Button asChild className="w-full" size="lg">
                   <a href={partnerCtas.jobListing.href}>
                     <Mail className="mr-2 h-4 w-4" />
                     Post a Job
@@ -330,9 +330,9 @@ async function PartnerPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
                     <Megaphone className={`${UI_CLASSES.ICON_LG} text-purple-500`} />
                   </div>
                   <UnifiedBadge
-                    variant="base"
-                    style="outline"
                     className="border-purple-500/20 bg-purple-500/5"
+                    style="outline"
+                    variant="base"
                   >
                     High ROI
                   </UnifiedBadge>
@@ -382,7 +382,7 @@ async function PartnerPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
                 </div>
 
                 {/* CTA */}
-                <Button className="w-full" size="lg" variant="default" asChild>
+                <Button asChild className="w-full" size="lg" variant="default">
                   <a href={partnerCtas.sponsoredListing.href}>
                     <Mail className="mr-2 h-4 w-4" />
                     Get Featured
@@ -473,7 +473,7 @@ async function PartnerPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
               Get started with launch pricing ({pricing.launch.discountPercent}% off)
               {pricing.launch.endDate ? ` before ${pricing.launch.endDate}` : null}
             </p>
-            <Button size="lg" asChild>
+            <Button asChild size="lg">
               <a href={partnerCtas.partnershipInquiry.href}>
                 <Mail className="mr-2 h-4 w-4" />
                 {partnerContacts.partnerEmail

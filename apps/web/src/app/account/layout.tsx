@@ -33,6 +33,7 @@ import { AccountSidebarSkeleton } from '@/src/components/features/account/accoun
  * Extracted user metadata (display name and image) is passed to the sidebar; the main content is protected by the MFA guard.
  *
  * @param children - Content to render inside the account layout's protected main area
+ * @param children.children
  * @returns The account layout element containing top navigation, a sidebar (loaded via Suspense), and an MFA-protected content region
  *
  * @see AccountSidebar
@@ -43,8 +44,8 @@ import { AccountSidebarSkeleton } from '@/src/components/features/account/accoun
 async function AccountAuthWrapper({ children }: { children: React.ReactNode }) {
   // Authentication check - required in layout for route protection
   const result = await getAuthenticatedUser({
-    requireUser: true,
     context: 'AccountLayout',
+    requireUser: true,
   });
   // getAuthenticatedUser with requireUser: true is expected to either:
   // - return a non-null user
@@ -70,9 +71,9 @@ async function AccountAuthWrapper({ children }: { children: React.ReactNode }) {
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
+    module: 'apps/web/src/app/account/layout',
     operation: 'AccountLayout',
     route: '/account',
-    module: 'apps/web/src/app/account/layout',
     userId: user.id, // Automatically hashed by redaction
   });
 
@@ -85,10 +86,7 @@ async function AccountAuthWrapper({ children }: { children: React.ReactNode }) {
       const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
       if (refreshError) {
         const normalized = normalizeError(refreshError, 'Session refresh failed');
-        reqLogger.warn(
-          { err: normalized },
-          'AccountLayout: session refresh failed'
-        );
+        reqLogger.warn({ err: normalized }, 'AccountLayout: session refresh failed');
         // Continue with existing session - user may need to re-authenticate on next request
       } else if (refreshData.session) {
         reqLogger.debug({}, 'AccountLayout: session refreshed successfully');
@@ -112,7 +110,7 @@ async function AccountAuthWrapper({ children }: { children: React.ReactNode }) {
       <div className="border-b px-4 py-4">
         <div className="container mx-auto flex items-center justify-between">
           <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} group`}>
-            <Link href="/" className="transition-colors-smooth group-hover:text-accent">
+            <Link className="transition-colors-smooth group-hover:text-accent" href="/">
               ← Back to Directory
             </Link>
           </div>
@@ -130,8 +128,8 @@ async function AccountAuthWrapper({ children }: { children: React.ReactNode }) {
           <Suspense fallback={<AccountSidebarSkeleton />}>
             <AccountSidebar
               user={user}
-              userNameMetadata={userNameMetadata}
               userImageMetadata={userImageMetadata}
+              userNameMetadata={userNameMetadata}
             />
           </Suspense>
 
@@ -156,6 +154,7 @@ async function AccountAuthWrapper({ children }: { children: React.ReactNode }) {
  * All blocking operations are moved inside the Suspense boundary to comply with architectural rules.
  *
  * @param children - Content rendered inside the layout's main area
+ * @param children.children
  * @returns The account layout element containing the top bar, Suspense-wrapped sidebar, and MFA-protected main content
  *
  * @see getAuthenticatedUser
@@ -177,7 +176,7 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
           <div className="border-b px-4 py-4">
             <div className="container mx-auto flex items-center justify-between">
               <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} group`}>
-                <Link href="/" className="transition-colors-smooth group-hover:text-accent">
+                <Link className="transition-colors-smooth group-hover:text-accent" href="/">
                   ← Back to Directory
                 </Link>
               </div>

@@ -27,6 +27,7 @@ import { inngest } from '../../client';
 import { createSupabaseAdminClient } from '../../../supabase/admin';
 import { logger, createWebAppContextWithId } from '../../../logging/server';
 import { CONCURRENCY_LIMITS, RETRY_CONFIGS, ACCOUNT_CONCURRENCY_KEYS } from '../../config';
+import { sendCriticalFailureHeartbeat } from '../../utils/monitoring';
 
 /**
  * Polar event types that trigger database RPC functions
@@ -71,6 +72,29 @@ export const handlePolarWebhook = inngest.createFunction(
     concurrency: {
       limit: CONCURRENCY_LIMITS.POLAR_API,
       key: ACCOUNT_CONCURRENCY_KEYS.POLAR,
+    },
+    // BetterStack monitoring: Send heartbeat on failure (feature-flagged)
+    onFailure: async ({ event, error }) => {
+      const eventData = event?.data as { eventType?: string } | undefined;
+      const context: { functionName?: string; eventType?: string; error?: string } = {
+        functionName: 'handlePolarWebhook',
+      };
+      if (eventData?.eventType) {
+        context.eventType = eventData.eventType;
+      }
+      if (error) {
+        context.error = error instanceof Error ? error.message : String(error);
+      }
+      sendCriticalFailureHeartbeat('BETTERSTACK_HEARTBEAT_CRITICAL_FAILURE', context);
+      
+      // Log for observability
+      logger.error(
+        { 
+          event: event ? JSON.stringify(event) : 'unknown',
+          error: error ? (error instanceof Error ? error.message : String(error)) : 'unknown',
+        },
+        'Polar webhook handler failed after all retries'
+      );
     },
   },
   { event: 'polar/webhook' },

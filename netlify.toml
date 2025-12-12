@@ -35,14 +35,16 @@
   # shamefully-hoist helps with dependency resolution in monorepos
   PNPM_FLAGS = "--shamefully-hoist"
   # Next.js static generation concurrency limit
-  # Reduced from default (12) to 4 to prevent database connection pool exhaustion
-  # This allows more pages to be generated in the same worker, improving cache hit rates
-  # after pre-fetching in generateStaticParams
-  NEXT_STATIC_GENERATION_MAX_CONCURRENCY = "4"
-  # CRITICAL: Disable Turbo remote cache to prevent build hangs
-  # When TURBO_TOKEN/TURBO_TEAM aren't set, Turbo tries to connect to remote cache
-  # and hangs indefinitely. This forces local-only cache.
-  TURBO_REMOTE_CACHE_ENABLED = "false"
+  # Optimized to 8 for better balance between build speed and database load
+  # 8 pages × 4-5 queries = 32-40 concurrent queries (manageable)
+  # Higher than 4 improves build speed while still preventing connection pool exhaustion
+  NEXT_STATIC_GENERATION_MAX_CONCURRENCY = "8"
+  # Turbo remote cache configuration
+  # Enable remote cache for faster builds (50-70% faster on cache hits)
+  # Requires TURBO_TOKEN and TURBO_TEAM to be set in Netlify UI (Build environment variables)
+  # If these are not set, Turbo will fall back to local cache (no hang)
+  # Set in Netlify UI: Site settings > Environment variables > Build settings
+  TURBO_REMOTE_CACHE_ENABLED = "true"
   # Disable Netlify Edge Functions for Next.js Middleware
   # Our middleware/proxy.ts uses Node.js-only dependencies (pino via logger) that don't work in edge runtimes.
   # Setting this to true forces middleware to use regular serverless functions instead of edge functions.
@@ -54,14 +56,20 @@
 # The plugin handles Next.js-specific optimizations, routing, and ISR
 [[plugins]]
 package = "@netlify/plugin-nextjs"
-# Note: The Next.js plugin generates ISR cache blobs that fail to upload with 400 errors
-# We clean these blobs in postbuild script (apps/web/package.json) to prevent upload failures
-# ISR will still work via HTTP cache headers, but cache won't persist between deployments
 
-# Note: netlify-plugin-inngest and netlify-purge-cloudflare-on-deploy
-# are installed via UI but may be causing build hangs.
-# If builds continue to hang, consider temporarily disabling these plugins
-# in the Netlify UI to isolate the issue.
+# Clean ISR blobs plugin - removes blobs after build to prevent 400 upload errors
+# The Next.js plugin generates large ISR cache blobs that fail to upload
+# Path must be absolute relative to base directory (root) for monorepos
+[[plugins]]
+package = "/netlify/plugins/clean-blobs"
+
+# Inngest plugin - registers serverless Inngest functions
+# Configured to use /api/inngest endpoint (default)
+[[plugins]]
+package = "netlify-plugin-inngest"
+  [plugins.inputs]
+  host = "https://claudepro.directory"
+  path = "/api/inngest"
 
 # Build cache directories for faster rebuilds
 # These directories persist between builds to speed up subsequent deployments
@@ -96,10 +104,47 @@ package = "@netlify/plugin-nextjs"
 # [build.edge_functions]
 #   directory = "apps/edge/functions"
 
-# Functions (if using Netlify Functions)
-# Uncomment if you have serverless functions to deploy
-# [build.functions]
-#   directory = "netlify/functions"
+# Functions configuration
+# Exclude large dependencies to reduce function size (250MB limit)
+[functions]
+  # Exclude unnecessary Sharp platform binaries
+  # Netlify Functions run on Linux x64 only, so we only need sharp-libvips-linux-x64
+  # Excluding all other platform binaries saves ~130MB
+  # Note: pnpm uses @img+sharp-* format in .pnpm directory
+  included_files = [
+    # Exclude .env files (should use Netlify UI for env vars, not bundled files)
+    # These files are automatically included by Next.js plugin but shouldn't be in function bundle
+    # Environment variables should be set in Netlify UI with proper scoping (Build vs Functions)
+    # Use absolute paths relative to base directory (root) for monorepos
+    "!apps/web/.env",
+    "!apps/web/.env.local",
+    "!apps/web/.env.production",
+    "!apps/web/.env.production.local",
+    "!.env",
+    "!.env.local",
+    "!.env.production",
+    "!.env.production.local",
+    "!**/.env",
+    "!**/.env.local",
+    "!**/.env.production",
+    "!**/.env.production.local",
+    # Exclude macOS Sharp binaries (pnpm format: @img+sharp-libvips-darwin-*)
+    "!node_modules/.pnpm/@img+sharp-libvips-darwin-*/**/*",
+    "!node_modules/.pnpm/@img+sharp-darwin-*/**/*",
+    # Exclude Linux ARM variants
+    "!node_modules/.pnpm/@img+sharp-libvips-linux-arm*/**/*",
+    # Exclude Linux non-x64 architectures
+    "!node_modules/.pnpm/@img+sharp-libvips-linux-ppc64*/**/*",
+    "!node_modules/.pnpm/@img+sharp-libvips-linux-s390x*/**/*",
+    "!node_modules/.pnpm/@img+sharp-libvips-linux-riscv64*/**/*",
+    # Exclude Linux musl variants
+    "!node_modules/.pnpm/@img+sharp-libvips-linuxmusl-*/**/*",
+    # Exclude Sharp WASM (not needed for server-side)
+    "!node_modules/.pnpm/@img+sharp-wasm32*/**/*",
+    # Exclude TypeScript (shouldn't be in production function bundle)
+    "!node_modules/.pnpm/typescript@*/**/*",
+    "!node_modules/typescript/**/*"
+  ]
 
 # Context-specific configurations
 # These inherit from [build] by default, but can be overridden per context

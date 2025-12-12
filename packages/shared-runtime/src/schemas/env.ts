@@ -57,6 +57,16 @@ const serverEnvSchema = z
     BETTERSTACK_HEARTBEAT_WEEKLY_TASKS: optionalUrlString
       .describe('BetterStack heartbeat URL for weekly tasks cron monitoring'),
 
+    BETTERSTACK_HEARTBEAT_CRITICAL_FAILURE: optionalUrlString
+      .describe('BetterStack heartbeat URL for critical Inngest function failures'),
+
+    BETTERSTACK_HEARTBEAT_INNGEST_CRON: optionalUrlString
+      .describe('BetterStack heartbeat URL for Inngest cron function success monitoring'),
+
+    BETTERSTACK_API_TOKEN: nonEmptyString
+      .optional()
+      .describe('BetterStack API token for programmatic monitor creation (optional)'),
+
     RESEND_API_KEY: nonEmptyString
       .optional()
       .describe('Resend API key for transactional email and newsletter subscriptions'),

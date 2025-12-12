@@ -67,9 +67,9 @@ export default async function EditCollectionPage({ params }: EditCollectionPageP
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
+    module: 'apps/web/src/app/account/library/[slug]/edit',
     operation: 'EditCollectionPage',
     route: '/account/library/[slug]/edit',
-    module: 'apps/web/src/app/account/library/[slug]/edit',
   });
 
   return (
@@ -139,13 +139,16 @@ async function EditCollectionPageContent({
   let collectionData: Awaited<ReturnType<typeof getCollectionDetail>> = null;
   try {
     collectionData = await getCollectionDetail(user.id, slug);
-    userLogger.info({ section: 'data-fetch', hasData: !!collectionData }, 'EditCollectionPage: collection data loaded');
+    userLogger.info(
+      { hasData: !!collectionData, section: 'data-fetch' },
+      'EditCollectionPage: collection data loaded'
+    );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load collection detail');
     userLogger.error(
       {
-        section: 'data-fetch',
         err: normalized,
+        section: 'data-fetch',
       },
       'EditCollectionPage: getCollectionDetail threw'
     );
@@ -153,14 +156,20 @@ async function EditCollectionPageContent({
   }
 
   if (!collectionData) {
-    userLogger.warn({ section: 'data-fetch' }, 'EditCollectionPage: collection not found or inaccessible');
+    userLogger.warn(
+      { section: 'data-fetch' },
+      'EditCollectionPage: collection not found or inaccessible'
+    );
     notFound();
   }
 
-  const { collection, bookmarks } = collectionData;
+  const { bookmarks, collection } = collectionData;
 
   if (!collection) {
-    userLogger.warn({ section: 'data-fetch' }, 'EditCollectionPage: collection is null in response');
+    userLogger.warn(
+      { section: 'data-fetch' },
+      'EditCollectionPage: collection is null in response'
+    );
     notFound();
   }
 
@@ -171,7 +180,7 @@ async function EditCollectionPageContent({
     <div className="space-y-6">
       <div>
         <Link href={`/account/library/${slug}`}>
-          <Button variant="ghost" className="mb-4 flex items-center gap-2">
+          <Button className="mb-4 flex items-center gap-2" variant="ghost">
             <ArrowLeft className="h-4 w-4" />
             Back to Collection
           </Button>
@@ -187,8 +196,8 @@ async function EditCollectionPageContent({
         <CardContent>
           <CollectionForm
             bookmarks={(bookmarks ?? []).map((b) => ({ ...b, notes: b.notes ?? '' }))}
-            mode="edit"
             collection={{ ...collection, description: collection.description ?? '' }}
+            mode="edit"
           />
         </CardContent>
       </Card>

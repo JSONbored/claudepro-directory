@@ -49,9 +49,9 @@ import { ChangelogTimelineView } from '@/src/components/features/changelog/chang
 export async function generateMetadata(): Promise<Metadata> {
   // Create request-scoped child logger
   const metadataLogger = logger.child({
+    module: 'apps/web/src/app/changelog',
     operation: 'ChangelogPageMetadata',
     route: '/changelog',
-    module: 'apps/web/src/app/changelog',
   });
 
   try {
@@ -62,8 +62,8 @@ export async function generateMetadata(): Promise<Metadata> {
       ...baseMetadata,
       alternates: {
         types: {
-          'application/rss+xml': `${APP_CONFIG.url}/changelog/rss.xml`,
           'application/atom+xml': `${APP_CONFIG.url}/changelog/atom.xml`,
+          'application/rss+xml': `${APP_CONFIG.url}/changelog/rss.xml`,
         },
       },
     };
@@ -77,14 +77,14 @@ export async function generateMetadata(): Promise<Metadata> {
       'Failed to generate changelog metadata'
     );
     return {
-      title: 'Changelog - Claude Pro Directory',
-      description: 'Track all updates, features, and improvements to Claude Pro Directory.',
       alternates: {
         types: {
-          'application/rss+xml': `${APP_CONFIG.url}/changelog/rss.xml`,
           'application/atom+xml': `${APP_CONFIG.url}/changelog/atom.xml`,
+          'application/rss+xml': `${APP_CONFIG.url}/changelog/rss.xml`,
         },
       },
+      description: 'Track all updates, features, and improvements to Claude Pro Directory.',
+      title: 'Changelog - Claude Pro Directory',
     };
   }
 }
@@ -109,9 +109,9 @@ export default async function ChangelogPage() {
 
   // Create request-scoped child logger
   const reqLogger = logger.child({
+    module: 'apps/web/src/app/changelog',
     operation: 'ChangelogPage',
     route: '/changelog',
-    module: 'apps/web/src/app/changelog',
   });
 
   return (
@@ -156,16 +156,16 @@ async function ChangelogContentWithData({
   reqLogger: ReturnType<typeof logger.child>;
 }) {
   // Fetch data outside JSX construction - handle errors before rendering
-  let sortedEntries: Database['public']['Tables']['changelog']['Row'][] = [];
+  let sortedEntries: Array<Database['public']['Tables']['changelog']['Row']> = [];
   let hasError = false;
 
   try {
     // Load changelog overview with entries, metadata, and featured (database-cached)
     // This replaces getAllChangelogEntries() + client-side category counting
     const overview = await getChangelogOverview({
-      publishedOnly: true, // Only get published entries
       limit: QUERY_LIMITS.changelog.max,
       offset: 0,
+      publishedOnly: true, // Only get published entries
     });
 
     // Normalize entries: ensure contributors and keywords are arrays (never null)
@@ -179,8 +179,11 @@ async function ChangelogContentWithData({
       return {
         ...entry,
         canonical_url: null,
+        changes: entry.changes ?? {},
         commit_count: null,
+        content: entry.content ?? '',
         contributors,
+        created_at: entry.created_at ?? '',
         git_commit_sha: null,
         json_ld: null,
         keywords,
@@ -190,9 +193,6 @@ async function ChangelogContentWithData({
         robots_index: null,
         source: null,
         twitter_card: null,
-        content: entry.content ?? '',
-        changes: entry.changes ?? {},
-        created_at: entry.created_at ?? '',
         updated_at: entry.updated_at ?? '',
       } as Database['public']['Tables']['changelog']['Row'];
     });
@@ -207,8 +207,8 @@ async function ChangelogContentWithData({
     const normalized = normalizeError(error, 'Failed to load changelog content');
     reqLogger.error(
       {
-        section: 'data-fetch',
         err: normalized,
+        section: 'data-fetch',
       },
       'Failed to load changelog content'
     );

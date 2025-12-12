@@ -24,6 +24,7 @@ interface LoginPanelClientProperties {
  * Displays a newsletter opt-in tile (including a formatted subscriber count when available) alongside OAuth provider buttons.
  *
  * @param redirectTo - Optional URL to navigate to after successful OAuth sign-in.
+ * @param redirectTo.redirectTo
  * @returns The JSX element containing the sign-in panel with provider buttons and the newsletter opt-in tile.
  *
  * @see AuthFormPanel
@@ -53,9 +54,9 @@ export function LoginPanelClient({ redirectTo }: LoginPanelClientProperties) {
             normalized,
             'LoginPanelClient.loadNewsletterConfig',
             {
-              component: 'LoginPanelClient',
               action: 'load-newsletter-config',
               category: 'config',
+              component: 'LoginPanelClient',
             }
           );
         }
@@ -86,31 +87,31 @@ export function LoginPanelClient({ redirectTo }: LoginPanelClientProperties) {
       newsletterConfig['newsletter.login_tile.badge_prefix'],
       '✨ Trusted by'
     );
-    return { tileHeadline, tileDescription, tileBenefits, tileSafety, badgePrefix };
+    return { badgePrefix, tileBenefits, tileDescription, tileHeadline, tileSafety };
   }, [newsletterConfig]);
 
   return (
     <AuthFormPanel
-      title="Sign in"
-      description="Choose your preferred sign-in method"
       afterContent={
         <NewsletterOptInTile
-          checked={newsletterOptIn}
-          onChange={setNewsletterOptIn}
-          subscriberCountLabel={subscriberCountLabel}
-          isLoadingCount={isLoading}
-          headline={tileProperties.tileHeadline}
-          safetyCopy={tileProperties.tileSafety}
           badgePrefix={tileProperties.badgePrefix}
+          checked={newsletterOptIn}
+          headline={tileProperties.tileHeadline}
+          isLoadingCount={isLoading}
+          safetyCopy={tileProperties.tileSafety}
+          subscriberCountLabel={subscriberCountLabel}
+          onChange={setNewsletterOptIn}
         />
       }
+      description="Choose your preferred sign-in method"
+      title="Sign in"
     >
       {VALID_PROVIDERS.map((provider) => (
         <OAuthProviderButton
           key={provider}
+          newsletterOptIn={newsletterOptIn}
           provider={provider}
           redirectTo={redirectTo}
-          newsletterOptIn={newsletterOptIn}
         />
       ))}
     </AuthFormPanel>

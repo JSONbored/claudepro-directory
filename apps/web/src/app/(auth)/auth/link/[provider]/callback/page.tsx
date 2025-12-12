@@ -11,13 +11,13 @@ import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks';
 import { AlertCircle, Loader2 } from '@heyclaude/web-runtime/icons';
 import { logClientError, logClientWarn } from '@heyclaude/web-runtime/logging/client';
 import {
-  UI_CLASSES,
   Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  UI_CLASSES,
 } from '@heyclaude/web-runtime/ui';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { use, useEffect, useRef, useState } from 'react';
@@ -51,10 +51,10 @@ export default function OAuthLinkCallbackPage({
   const [provider, setProvider] = useState<null | string>(null);
   const hasAttempted = useRef<boolean>(false);
   const {
-    user,
     isAuthenticated,
     isLoading: isAuthLoading,
     supabaseClient,
+    user,
   } = useAuthenticatedUser({ context: 'OAuthLinkCallback' });
 
   useEffect(() => {
@@ -118,12 +118,12 @@ export default function OAuthLinkCallbackPage({
           setStatus('error');
           setErrorMessage('You must be signed in to link an account. Redirecting to login...');
           logClientWarn('[OAuth] User not authenticated', undefined, operation, {
-            component: 'OAuthLinkCallback',
             action: 'check-auth',
             category: 'auth',
-            route,
+            component: 'OAuthLinkCallback',
             module: modulePath,
             provider: rawProvider,
+            route,
           });
           // Guard redirect with mounted check and store timeout ID for cleanup
           redirectTimeoutId = setTimeout(() => {
@@ -151,22 +151,22 @@ export default function OAuthLinkCallbackPage({
 
         // Call linkIdentity() to initiate OAuth flow
         const { data, error } = await supabaseClient.auth.linkIdentity({
-          provider: rawProvider,
           options: {
             redirectTo: callbackUrl.toString(),
           },
+          provider: rawProvider,
         });
 
         if (error) {
           if (!mounted) return;
           const normalized = normalizeError(error, 'Failed to link identity');
           logClientError('[OAuth] Link identity failed', normalized, operation, {
-            component: 'OAuthLinkCallback',
             action: 'link-identity',
             category: 'auth',
-            route,
+            component: 'OAuthLinkCallback',
             module: modulePath,
             provider: rawProvider,
+            route,
           });
           setStatus('error');
           setErrorMessage(
@@ -189,12 +189,12 @@ export default function OAuthLinkCallbackPage({
         if (!mounted) return;
         const normalized = normalizeError(caughtError, 'Unexpected OAuth link callback error');
         logClientError('[OAuth] Unexpected error', normalized, operation, {
-          component: 'OAuthLinkCallback',
           action: 'oauth-callback',
           category: 'auth',
-          route,
+          component: 'OAuthLinkCallback',
           module: modulePath,
           provider: resolvedParameters.provider,
+          route,
         });
         setStatus('error');
         setErrorMessage('An unexpected error occurred. Please try again.');

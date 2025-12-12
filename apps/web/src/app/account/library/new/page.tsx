@@ -60,9 +60,9 @@ export default async function NewCollectionPage() {
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
+    module: 'apps/web/src/app/account/library/new',
     operation: 'NewCollectionPage',
     route: '/account/library/new',
-    module: 'apps/web/src/app/account/library/new',
   });
 
   return (
@@ -115,7 +115,10 @@ async function NewCollectionPageContent({
 
   // Section: Bookmarks Data Fetch
   const bookmarks = await getUserBookmarksForCollections(user.id);
-  userLogger.info({ section: 'data-fetch', bookmarksCount: bookmarks.length }, 'NewCollectionPage: bookmarks data loaded');
+  userLogger.info(
+    { bookmarksCount: bookmarks.length, section: 'data-fetch' },
+    'NewCollectionPage: bookmarks data loaded'
+  );
 
   // Final summary log
   userLogger.info({ section: 'data-fetch' }, 'NewCollectionPage: page render completed');
@@ -124,7 +127,7 @@ async function NewCollectionPageContent({
     <div className="space-y-6">
       <div>
         <Link href={ROUTES.ACCOUNT_LIBRARY}>
-          <Button variant="ghost" className="mb-4 flex items-center gap-2">
+          <Button className="mb-4 flex items-center gap-2" variant="ghost">
             <ArrowLeft className="h-4 w-4" />
             Back to Library
           </Button>

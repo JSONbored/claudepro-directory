@@ -21,13 +21,13 @@ import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { BarChart, Clock, Sparkles, Target, Zap } from '@heyclaude/web-runtime/icons';
 import { logger } from '@heyclaude/web-runtime/logging/server';
 import {
-  UI_CLASSES,
-  UnifiedBadge,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  UI_CLASSES,
+  UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
@@ -74,9 +74,9 @@ export default async function ConfigRecommenderPage() {
 
   // Create request-scoped child logger for log correlation
   const reqLogger = logger.child({
+    module: 'apps/web/src/app/tools/config-recommender/page',
     operation: 'ConfigRecommenderPage',
     route: '/tools/config-recommender',
-    module: 'apps/web/src/app/tools/config-recommender/page',
   });
 
   reqLogger.info({ section: 'data-fetch' }, 'ConfigRecommenderPage: rendering page');
@@ -90,11 +90,11 @@ export default async function ConfigRecommenderPage() {
         <div className="container mx-auto max-w-4xl text-center">
           {/* Badge */}
           <UnifiedBadge
-            variant="base"
-            style="outline"
             className="border-primary/20 bg-accent/5 text-primary mb-6"
+            style="outline"
+            variant="base"
           >
-            <Sparkles className="mr-1 h-3 w-3" aria-hidden="true" />
+            <Sparkles aria-hidden="true" className="mr-1 h-3 w-3" />
             AI-Powered Recommendations
           </UnifiedBadge>
 
@@ -111,15 +111,15 @@ export default async function ConfigRecommenderPage() {
 
           {/* Stats */}
           <div className="flex flex-wrap justify-center gap-3">
-            <UnifiedBadge variant="base" style="secondary" className="text-sm">
-              <Clock className="mr-1 h-3 w-3" aria-hidden="true" />2 minutes
+            <UnifiedBadge className="text-sm" style="secondary" variant="base">
+              <Clock aria-hidden="true" className="mr-1 h-3 w-3" />2 minutes
             </UnifiedBadge>
-            <UnifiedBadge variant="base" style="secondary" className="text-sm">
-              <Target className="mr-1 h-3 w-3" aria-hidden="true" />
+            <UnifiedBadge className="text-sm" style="secondary" variant="base">
+              <Target aria-hidden="true" className="mr-1 h-3 w-3" />
               147+ configs analyzed
             </UnifiedBadge>
-            <UnifiedBadge variant="base" style="secondary" className="text-sm">
-              <Zap className="mr-1 h-3 w-3" aria-hidden="true" />
+            <UnifiedBadge className="text-sm" style="secondary" variant="base">
+              <Zap aria-hidden="true" className="mr-1 h-3 w-3" />
               Instant results
             </UnifiedBadge>
           </div>

@@ -11,14 +11,14 @@ import {
 } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  UI_CLASSES,
-  UnifiedBadge,
   Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  UI_CLASSES,
+  UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
@@ -65,9 +65,9 @@ export default async function CompaniesPage() {
 
   // Create request-scoped child logger
   const reqLogger = logger.child({
+    module: 'apps/web/src/app/companies',
     operation: 'CompaniesPage',
     route: '/companies',
-    module: 'apps/web/src/app/companies',
   });
 
   return (
@@ -100,8 +100,8 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
     companiesResponse = await getCompaniesList(50, 0);
     reqLogger.info(
       {
-        section: 'data-fetch',
         companiesCount: companiesResponse.companies?.length ?? 0,
+        section: 'data-fetch',
       },
       'CompaniesPage: companies list loaded'
     );
@@ -109,8 +109,8 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
     const normalized = normalizeError(error, 'Failed to load companies list');
     reqLogger.error(
       {
-        section: 'data-fetch',
         err: normalized,
+        section: 'data-fetch',
       },
       'CompaniesPage: getCompaniesList failed'
     );
@@ -126,8 +126,8 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
   // Final summary log
   reqLogger.info(
     {
-      section: 'data-fetch',
       companiesCount: companies.length,
+      section: 'data-fetch',
     },
     'CompaniesPage: page render completed'
   );
@@ -151,16 +151,16 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
             </p>
 
             <div className="mb-8 flex justify-center gap-2">
-              <UnifiedBadge variant="base" style="secondary">
+              <UnifiedBadge style="secondary" variant="base">
                 <Building className="mr-1 h-3 w-3" />
                 {companies.length} Companies
               </UnifiedBadge>
-              <UnifiedBadge variant="base" style="outline">
+              <UnifiedBadge style="outline" variant="base">
                 Verified Profiles
               </UnifiedBadge>
             </div>
 
-            <Button variant="outline" asChild>
+            <Button asChild variant="outline">
               <Link href={ROUTES.ACCOUNT_COMPANIES}>
                 <Plus className="mr-2 h-4 w-4" />
                 Add Your Company
@@ -191,10 +191,10 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
         ) : (
           <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
             {companies.map((company, index) => (
-              <Card key={company.id} className={UI_CLASSES.CARD_GRADIENT_HOVER}>
+              <Card className={UI_CLASSES.CARD_GRADIENT_HOVER} key={company.id}>
                 {company.featured ? (
                   <div className="absolute -top-2 -right-2 z-10">
-                    <UnifiedBadge variant="base" className="bg-accent text-accent-foreground">
+                    <UnifiedBadge className="bg-accent text-accent-foreground" variant="base">
                       <Star className="mr-1 h-3 w-3" />
                       Featured
                     </UnifiedBadge>
@@ -205,19 +205,19 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
                   <div className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
                     {company.logo ? (
                       <Image
-                        src={company.logo}
                         alt={`${company.name} logo`}
-                        width={48}
-                        height={48}
                         className="h-12 w-12 rounded-lg object-cover"
+                        height={48}
                         priority={index < 6}
+                        src={company.logo}
+                        width={48}
                       />
                     ) : null}
                     <div className="flex-1">
                       <CardTitle>
                         <Link
-                          href={`/companies/${company.slug}`}
                           className="transition-colors-smooth group-hover:text-accent"
+                          href={`/companies/${company.slug}`}
                         >
                           {company.name}
                         </Link>
@@ -239,21 +239,21 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
                   {/* Job Statistics from RPC/data layer (getCompanyProfile RPC) */}
                   {company.stats && (company.stats.active_jobs ?? 0) > 0 ? (
                     <div className="mb-4 flex flex-wrap gap-2">
-                      <UnifiedBadge variant="base" style="secondary" className="text-xs">
+                      <UnifiedBadge className="text-xs" style="secondary" variant="base">
                         <Briefcase className="mr-1 h-3 w-3" />
                         {company.stats.active_jobs ?? 0} Active{' '}
                         {(company.stats.active_jobs ?? 0) === 1 ? 'Job' : 'Jobs'}
                       </UnifiedBadge>
 
                       {(company.stats.total_views ?? 0) > 0 && (
-                        <UnifiedBadge variant="base" style="outline" className="text-xs">
+                        <UnifiedBadge className="text-xs" style="outline" variant="base">
                           <TrendingUp className="mr-1 h-3 w-3" />
                           {(company.stats.total_views ?? 0).toLocaleString()} views
                         </UnifiedBadge>
                       )}
 
                       {(company.stats.remote_jobs ?? 0) > 0 && (
-                        <UnifiedBadge variant="base" style="outline" className="text-xs">
+                        <UnifiedBadge className="text-xs" style="outline" variant="base">
                           {company.stats.remote_jobs ?? 0} Remote
                         </UnifiedBadge>
                       )}
@@ -263,7 +263,7 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                     {/* eslint-disable-next-line unicorn/explicit-length-check -- company.size is an enum value, not a Set/Map */}
                     {company.size ? (
-                      <UnifiedBadge variant="base" style="outline" className="text-xs">
+                      <UnifiedBadge className="text-xs" style="outline" variant="base">
                         {company.size} employees
                       </UnifiedBadge>
                     ) : null}
@@ -277,8 +277,8 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
                       // At this point, safeWebsiteUrl is validated and safe for use in external links
                       const validatedUrl: string = safeWebsiteUrl;
                       return (
-                        <Button variant="ghost" size="sm" asChild>
-                          <a href={validatedUrl} target="_blank" rel="noopener noreferrer">
+                        <Button asChild size="sm" variant="ghost">
+                          <a href={validatedUrl} rel="noopener noreferrer" target="_blank">
                             <ExternalLink className="h-3 w-3" />
                           </a>
                         </Button>

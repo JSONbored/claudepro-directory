@@ -8,12 +8,12 @@ import { ContentService } from '@heyclaude/data-layer';
 import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
-import { logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
+import { createErrorResponse, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  createSupabaseAnonClient,
   badRequestResponse,
-  getOnlyCorsHeaders,
   buildCacheHeaders,
+  createSupabaseAnonClient,
+  getOnlyCorsHeaders,
 } from '@heyclaude/web-runtime/server';
 import { cacheLife } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
@@ -25,7 +25,7 @@ const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
  * Cached helper function to fetch category content list.
  * Uses Cache Components to reduce function invocations.
  * The category parameter becomes part of the cache key, so different categories have different cache entries.
- * 
+ *
  * @param {DatabaseGenerated['public']['Enums']['content_category']} category - Content category enum value
  * @returns {Promise<unknown[]>} Category content list from the database (typically an array of content item objects)
  */
@@ -43,7 +43,7 @@ async function getCachedCategoryContent(
 /**
  * Cached helper function to fetch category LLMs.txt
  * Uses Cache Components to reduce function invocations
- * 
+ *
  * @param {DatabaseGenerated['public']['Enums']['content_category']} category - Content category enum value
  * @returns {Promise<string | null>} Category LLMs.txt content from the database
  */
@@ -58,10 +58,10 @@ async function getCachedCategoryLlmsTxt(
   return await service.getCategoryLlmsTxt({ p_category: category });
 }
 
-/**
+/***
  * Checks whether a string is a valid content category value.
  *
- * @param value - The string to validate as a content category
+ * @param {string} value - The string to validate as a content category
  * @returns `true` if `value` is one of the allowed `content_category` enum values, `false` otherwise
  * @see CONTENT_CATEGORY_VALUES
  * @see DatabaseGenerated['public']['Enums']['content_category']
@@ -105,9 +105,9 @@ export async function GET(
   { params }: { params: Promise<{ category: string }> }
 ) {
   const reqLogger = logger.child({
+    method: 'GET',
     operation: 'ContentCategoryAPI',
     route: '/api/content/[category]',
-    method: 'GET',
   });
 
   try {
@@ -137,32 +137,31 @@ export async function GET(
         const normalized = normalizeError(error, 'Operation failed');
         reqLogger.error(
           {
-            err: normalized,
             category,
+            err: normalized,
             format,
           },
           'Category JSON query error'
         );
         return createErrorResponse(normalized, {
-          route: '/api/content/[category]',
-          operation: 'ContentCategoryAPI',
-          method: 'GET',
           logContext: {
             category,
             format,
           },
+          method: 'GET',
+          operation: 'ContentCategoryAPI',
+          route: '/api/content/[category]',
         });
       }
 
       // Next.js automatically compresses JSON responses (gzip/brotli)
       // Aggressive caching ensures most requests are served from CDN cache
       return NextResponse.json(Array.isArray(data) ? data : [], {
-        status: 200,
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
-          'X-Generated-By': 'supabase.rpc.get_category_content_list',
           // Compression hint (Next.js/Vercel handles actual compression automatically)
-          'Vary': 'Accept-Encoding',
+          Vary: 'Accept-Encoding',
+          'X-Generated-By': 'supabase.rpc.get_category_content_list',
           ...buildSecurityHeaders(),
           ...CORS,
           // Hyper-optimized caching: 7 days TTL, 14 days stale (matches content_export preset)
@@ -170,6 +169,7 @@ export async function GET(
           // This reduces bandwidth usage by serving cached responses from CDN
           ...buildCacheHeaders('content_export'),
         },
+        status: 200,
       });
     }
 
@@ -188,16 +188,16 @@ export async function GET(
       const normalized = normalizeError(error, 'Category LLMs.txt fetch error');
       reqLogger.error(
         {
-          err: normalized,
           category,
+          err: normalized,
         },
         'Category LLMs.txt fetch error'
       );
       return createErrorResponse(normalized, {
-        route: '/api/content/[category]',
-        operation: 'ContentCategoryAPI',
-        method: 'GET',
         logContext: { category, format: 'llms-category' },
+        method: 'GET',
+        operation: 'ContentCategoryAPI',
+        route: '/api/content/[category]',
       });
     }
 
@@ -210,14 +210,13 @@ export async function GET(
     // This eliminates CPU-intensive string replacement (5-10% CPU savings)
     reqLogger.info(
       {
-        category,
         bytes: typeof data === 'string' ? data.length : 0,
+        category,
       },
       'Category LLMs.txt generated'
     );
 
     return new NextResponse(data, {
-      status: 200,
       headers: {
         'Content-Type': 'text/plain; charset=utf-8',
         'X-Generated-By': 'supabase.rpc.generate_category_llms_txt',
@@ -225,23 +224,24 @@ export async function GET(
         ...CORS,
         ...buildCacheHeaders('content_export'),
       },
+      status: 200,
     });
   } catch (error) {
     const normalized = normalizeError(error, 'Category API error');
     reqLogger.error({ err: normalized }, 'Category API error');
     return createErrorResponse(normalized, {
-      route: '/api/content/[category]',
-      operation: 'ContentCategoryAPI',
       method: 'GET',
+      operation: 'ContentCategoryAPI',
+      route: '/api/content/[category]',
     });
   }
 }
 
 export function OPTIONS() {
   return new NextResponse(null, {
-    status: 204,
     headers: {
       ...CORS,
     },
+    status: 204,
   });
 }

@@ -58,8 +58,8 @@ export async function getPaginatedContent({
   }
 
   const reqLogger = logger.child({
-    operation: 'getPaginatedContent',
     module: 'data/content/paginated',
+    operation: 'getPaginatedContent',
   });
 
   try {
@@ -88,12 +88,12 @@ export async function getPaginatedContent({
     reqLogger.info(
       {
         category: normalizedCategory ?? category ?? 'all',
+        hasItems: Boolean(result?.items),
+        hasPagination: Boolean(result?.pagination),
+        hasResult: Boolean(result),
+        itemsLength: Array.isArray(result?.items) ? result.items.length : 0,
         limit,
         offset,
-        hasResult: Boolean(result),
-        hasItems: Boolean(result?.items),
-        itemsLength: Array.isArray(result?.items) ? result.items.length : 0,
-        hasPagination: Boolean(result?.pagination),
         paginationTotal: result?.pagination?.total_count ?? null,
         resultKeys: result ? Object.keys(result) : [],
       },
@@ -105,7 +105,7 @@ export async function getPaginatedContent({
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error(
-      { err: errorForLogging, category: normalizedCategory ?? category ?? 'all', limit, offset },
+      { category: normalizedCategory ?? category ?? 'all', err: errorForLogging, limit, offset },
       'getPaginatedContent: failed'
     );
     return null;

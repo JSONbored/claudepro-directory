@@ -12,6 +12,7 @@
  * - Escape hatch for integration testing
  */
 
+import { getDeploymentEnv } from '@heyclaude/shared-runtime/platform';
 import { logger as pinoLogger } from '../../logging/server';
 
 /**
@@ -53,12 +54,12 @@ export interface EmailSafetyConfig {
  */
 export function getEmailSafetyConfig(): EmailSafetyConfig {
   const nodeEnv = process.env['NODE_ENV'];
-  const vercelEnv = process.env['VERCEL_ENV'];
+  const deploymentEnv = getDeploymentEnv();
 
-  // Determine if production
+  // Determine if production (platform-agnostic)
   const isProduction =
     nodeEnv === 'production' ||
-    vercelEnv === 'production';
+    deploymentEnv === 'production';
 
   // Check for dev email override
   const allowDevEmails =

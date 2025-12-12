@@ -16,6 +16,7 @@ import { inngest } from '../../client';
 import { createSupabaseAdminClient } from '../../../supabase/admin';
 import { pgmqRead, pgmqDelete, type PgmqMessage } from '../../../supabase/pgmq-client';
 import { logger, createWebAppContextWithId } from '../../../logging/server';
+import { sendCronSuccessHeartbeat } from '../../utils/monitoring';
 
 const PULSE_BATCH_SIZE = 100;
 const MAX_RETRY_ATTEMPTS = 5;
@@ -302,10 +303,20 @@ export const processPulseQueue = inngest.createFunction(
       inserted: totalInserted,
       failed: totalFailed, }, 'Pulse queue processing completed');
 
-    return {
+    const result = {
       processed: messages.length,
       inserted: totalInserted,
       failed: totalFailed,
     };
+
+    // BetterStack monitoring: Send success heartbeat (feature-flagged)
+    if (result.inserted > 0) {
+      sendCronSuccessHeartbeat('BETTERSTACK_HEARTBEAT_INNGEST_CRON', {
+        functionName: 'processPulseQueue',
+        result: { inserted: result.inserted },
+      });
+    }
+
+    return result;
   }
 );

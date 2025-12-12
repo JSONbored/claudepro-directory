@@ -3,27 +3,36 @@
  */
 
 import { Constants, type Database } from '@heyclaude/database-types';
+import { type DisplayableContent } from '@heyclaude/web-runtime';
+import { type SearchFilters } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
+  getHomepageCategoryIds,
   getHomepageData,
   getSearchFacets,
-  getHomepageCategoryIds,
 } from '@heyclaude/web-runtime/data';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import type { DisplayableContent } from '@heyclaude/web-runtime';
-import type { SearchFilters } from '@heyclaude/web-runtime/core';
+import { type Metadata } from 'next';
+import { Suspense } from 'react';
+
 import { getCachedSearchResults } from '@/src/app/api/search/route';
+import { ContentSearchClient } from '@/src/components/content/content-search';
+import { ContentSidebar } from '@/src/components/core/layout/content-sidebar';
 
 type SearchType = 'content' | 'jobs' | 'unified';
 
 // Use generated database types - no custom types
 type ContentCategory = Database['public']['Enums']['content_category'];
-const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category as readonly ContentCategory[];
+const CONTENT_CATEGORY_VALUES = Constants.public.Enums
+  .content_category as readonly ContentCategory[];
 
-type SortType = 'relevance' | 'popularity' | 'newest' | 'alphabetical';
+type SortType = 'alphabetical' | 'newest' | 'popularity' | 'relevance';
 
-/**
+/***
+ *
  * Convert string to content_category enum
+ * @param {string | undefined} value
+ * @returns {ContentCategory | undefined} Return value description
  */
 function toContentCategory(value: string | undefined): ContentCategory | undefined {
   if (!value) return undefined;
@@ -33,23 +42,19 @@ function toContentCategory(value: string | undefined): ContentCategory | undefin
     : undefined;
 }
 
-/**
+/***
+ *
  * Convert string array to content_category enum array
+ * @param {string[] | undefined} categories
+ * @returns {ContentCategory[] | undefined} Return value description
  */
-function toContentCategoryArray(
-  categories: string[] | undefined
-): ContentCategory[] | undefined {
+function toContentCategoryArray(categories: string[] | undefined): ContentCategory[] | undefined {
   if (!categories || categories.length === 0) return undefined;
   const valid = categories
     .map(toContentCategory)
     .filter((cat): cat is ContentCategory => cat !== undefined);
   return valid.length > 0 ? valid : undefined;
 }
-import { type Metadata } from 'next';
-import { Suspense } from 'react';
-
-import { ContentSearchClient } from '@/src/components/content/content-search';
-import { ContentSidebar } from '@/src/components/core/layout/content-sidebar';
 
 /**
  * Dynamic Rendering Required
@@ -59,12 +64,7 @@ import { ContentSidebar } from '@/src/components/core/layout/content-sidebar';
  * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
  */
 
-const VALID_SORT_OPTIONS = new Set<SortType>([
-  'relevance',
-  'popularity',
-  'newest',
-  'alphabetical',
-]);
+const VALID_SORT_OPTIONS = new Set<SortType>(['relevance', 'popularity', 'newest', 'alphabetical']);
 
 const QUICK_TAG_LIMIT = 8;
 const QUICK_AUTHOR_LIMIT = 6;
@@ -74,10 +74,10 @@ const FALLBACK_SUGGESTION_LIMIT = 18;
 type SearchFacetAggregate = Awaited<ReturnType<typeof getSearchFacets>>;
 type SearchFacetSummary = SearchFacetAggregate['facets'][number];
 
-/**
+/***
  * Type guard that checks whether a string corresponds to one of the allowed sort options.
  *
- * @param value - The candidate sort value to validate.
+ * @param {string | undefined} value - The candidate sort value to validate.
  * @returns `true` if `value` is one of the entries in `VALID_SORT_OPTIONS`, `false` otherwise.
  *
  * @see VALID_SORT_OPTIONS
@@ -112,11 +112,11 @@ export async function generateMetadata({ searchParams }: SearchPageProperties): 
   const query = resolvedParameters.q ?? '';
 
   return generatePageMetadata('/search', {
-    params: { q: query },
-    title: query ? `Search results for "${query}"` : 'Search',
     description: query
       ? `Find agents, MCP servers, rules, commands, and more matching "${query}"`
       : 'Search the Claude Code directory',
+    params: { q: query },
+    title: query ? `Search results for "${query}"` : 'Search',
   });
 }
 
@@ -153,14 +153,14 @@ export async function generateMetadata({ searchParams }: SearchPageProperties): 
  * @see normalizeError
  */
 async function SearchResultsSection({
-  query,
-  filters,
-  hasUserFilters,
   facetOptions,
   fallbackSuggestions,
-  quickTags,
+  filters,
+  hasUserFilters,
+  query,
   quickAuthors,
   quickCategories,
+  quickTags,
 }: {
   facetOptions: {
     authors: string[];
@@ -177,9 +177,9 @@ async function SearchResultsSection({
 }) {
   // Create request-scoped child logger
   const sectionLogger = logger.child({
+    module: 'apps/web/src/app/search',
     operation: 'SearchResultsSection',
     route: '/search',
-    module: 'apps/web/src/app/search',
   });
 
   // Section: Search Results
@@ -197,28 +197,28 @@ async function SearchResultsSection({
     // Determine searchType based on entities (same logic as API route)
     // When entities are specified, use 'unified' search
     const searchType: SearchType = ['content'].length > 0 ? 'unified' : 'content';
-    
+
     const searchResult = await getCachedSearchResults({
-      query,
-      searchType, // Required parameter - determined by entities
-      entities: ['content'], // Use unified search when entities are specified
-      categories: categoryEnums, // Use generated enum type
-      tags: filters.p_tags,
       authors: filters.p_authors,
-      sort: filters.sort || 'relevance',
+      categories: categoryEnums, // Use generated enum type
+      entities: ['content'], // Use unified search when entities are specified
       limit: filters.p_limit || 50,
       offset: filters.p_offset || 0,
+      query,
+      searchType, // Required parameter - determined by entities
+      sort: filters.sort || 'relevance',
+      tags: filters.p_tags,
     });
-    
+
     // search_unified returns content items compatible with DisplayableContent
     results = searchResult.results as DisplayableContent[];
-    
+
     sectionLogger.info(
       {
-        section: 'data-fetch',
-        queryLength: query.length,
         hasFilters: hasUserFilters,
+        queryLength: query.length,
         resultsCount: results.length,
+        section: 'data-fetch',
         totalCount: searchResult.totalCount,
       },
       'SearchPage: search results loaded'
@@ -226,7 +226,7 @@ async function SearchResultsSection({
   } catch (error) {
     const normalized = normalizeError(error, 'Search content fetch failed');
     sectionLogger.error(
-      { err: normalized, section: 'data-fetch', query, hasFilters: hasUserFilters },
+      { err: normalized, hasFilters: hasUserFilters, query, section: 'data-fetch' },
       'SearchPage: getCachedSearchResults invocation failed'
     );
     throw normalized;
@@ -234,19 +234,19 @@ async function SearchResultsSection({
 
   return (
     <ContentSearchClient
-      items={results}
-      type={Constants.public.Enums.content_category[0]}
-      searchPlaceholder="Search agents, MCP servers, rules, commands..."
-      title="Results"
-      icon="Search"
-      availableTags={facetOptions.tags}
       availableAuthors={facetOptions.authors}
       availableCategories={facetOptions.categories}
-      zeroStateSuggestions={fallbackSuggestions}
+      availableTags={facetOptions.tags}
       fallbackSuggestions={fallbackSuggestions}
-      quickTags={quickTags}
+      icon="Search"
+      items={results}
       quickAuthors={quickAuthors}
       quickCategories={quickCategories}
+      quickTags={quickTags}
+      searchPlaceholder="Search agents, MCP servers, rules, commands..."
+      title="Results"
+      type={Constants.public.Enums.content_category[0]}
+      zeroStateSuggestions={fallbackSuggestions}
     />
   );
 }
@@ -272,9 +272,9 @@ export default function SearchPage({ searchParams }: SearchPageProperties) {
 
   // Create request-scoped child logger
   const reqLogger = logger.child({
+    module: 'apps/web/src/app/search',
     operation: 'SearchPage',
     route: '/search',
-    module: 'apps/web/src/app/search',
   });
 
   // Static shell - renders immediately for PPR
@@ -284,7 +284,7 @@ export default function SearchPage({ searchParams }: SearchPageProperties) {
       <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_18rem]">
         {/* Dynamic content streams in Suspense */}
         <Suspense fallback={<SearchResultsSkeleton />}>
-          <SearchPageContent searchParams={searchParams} reqLogger={reqLogger} />
+          <SearchPageContent reqLogger={reqLogger} searchParams={searchParams} />
         </Suspense>
         {/* Sidebar - Unified ContentSidebar with JobsPromo + RecentlyViewed */}
         <ContentSidebar />
@@ -306,19 +306,19 @@ export default function SearchPage({ searchParams }: SearchPageProperties) {
 function SearchResultsSkeleton() {
   return (
     <ContentSearchClient
-      items={[]}
-      type={Constants.public.Enums.content_category[0]}
-      searchPlaceholder="Search agents, MCP servers, rules, commands..."
-      title="Results"
-      icon="Search"
-      availableTags={[]}
       availableAuthors={[]}
       availableCategories={[]}
-      zeroStateSuggestions={[]}
+      availableTags={[]}
       fallbackSuggestions={[]}
-      quickTags={[]}
+      icon="Search"
+      items={[]}
       quickAuthors={[]}
       quickCategories={[]}
+      quickTags={[]}
+      searchPlaceholder="Search agents, MCP servers, rules, commands..."
+      title="Results"
+      type={Constants.public.Enums.content_category[0]}
+      zeroStateSuggestions={[]}
     />
   );
 }
@@ -340,8 +340,8 @@ function SearchResultsSkeleton() {
  * @see isValidSort
  */
 async function SearchPageContent({
-  searchParams,
   reqLogger,
+  searchParams,
 }: {
   reqLogger: ReturnType<typeof logger.child>;
   searchParams: Promise<{
@@ -383,10 +383,10 @@ async function SearchPageContent({
   // Load facets and results - facets are cached but still need to load
   return (
     <SearchFacetsAndResults
-      query={query}
       filters={filters}
-      hasUserFilters={hasUserFilters}
       hasQueryOrFilters={hasQueryOrFilters}
+      hasUserFilters={hasUserFilters}
+      query={query}
       reqLogger={reqLogger}
     />
   );
@@ -411,10 +411,10 @@ async function SearchPageContent({
  * @see getSearchFacets
  */
 async function SearchFacetsAndResults({
-  query,
   filters,
-  hasUserFilters,
   hasQueryOrFilters,
+  hasUserFilters,
+  query,
   reqLogger,
 }: {
   filters: SearchFilters;
@@ -426,23 +426,23 @@ async function SearchFacetsAndResults({
   // Load facets (cached, but still needs to fetch)
   let facetAggregate: null | SearchFacetAggregate = null;
   let facetOptions = {
-    tags: [] as string[],
     authors: [] as string[],
     categories: [] as ContentCategory[],
+    tags: [] as string[],
   };
   try {
     facetAggregate = await getSearchFacets();
     facetOptions = {
-      tags: facetAggregate.tags,
       authors: facetAggregate.authors,
       categories: facetAggregate.categories,
+      tags: facetAggregate.tags,
     };
     reqLogger.info(
       {
-        section: 'data-fetch',
-        tagsCount: facetOptions.tags.length,
         authorsCount: facetOptions.authors.length,
         categoriesCount: facetOptions.categories.length,
+        section: 'data-fetch',
+        tagsCount: facetOptions.tags.length,
       },
       'SearchPage: facets loaded'
     );
@@ -505,10 +505,10 @@ async function SearchFacetsAndResults({
   // Final summary log
   reqLogger.info(
     {
-      section: 'data-fetch',
-      hasQuery: query.length > 0,
-      hasFilters: hasUserFilters,
       facetsLoaded: !!facetAggregate,
+      hasFilters: hasUserFilters,
+      hasQuery: query.length > 0,
+      section: 'data-fetch',
       suggestionsCount: zeroStateSuggestions.length,
     },
     'SearchPage: facets and suggestions loaded'
@@ -518,14 +518,14 @@ async function SearchFacetsAndResults({
   return (
     <Suspense fallback={<SearchResultsSkeleton />}>
       <SearchResultsSection
-        query={query}
-        filters={filters}
-        hasUserFilters={hasUserFilters}
         facetOptions={facetOptions}
         fallbackSuggestions={fallbackSuggestions}
-        quickTags={quickTags}
+        filters={filters}
+        hasUserFilters={hasUserFilters}
+        query={query}
         quickAuthors={quickAuthors}
         quickCategories={quickCategories}
+        quickTags={quickTags}
       />
     </Suspense>
   );
@@ -579,13 +579,13 @@ function deriveQuickCategories(
     .slice(0, limit);
 }
 
-/**
+/****
  * Produce an ordered list of suggestions with duplicate `slug` values removed and capped to a maximum length.
  *
  * If `items` is not an array or is empty, an empty array is returned.
  *
- * @param items - Array of suggestion-like objects; each item may include an optional `slug` string used to detect duplicates. The first occurrence of a given `slug` is kept and later duplicates are dropped.
- * @param limit - Maximum number of items to include in the returned array.
+ * @param {T[]} items - Array of suggestion-like objects; each item may include an optional `slug` string used to detect duplicates. The first occurrence of a given `slug` is kept and later duplicates are dropped.
+ * @param {number} limit - Maximum number of items to include in the returned array.
  * @returns An array containing up to `limit` items with duplicate `slug` values removed, preserving the original input order.
  *
  * @see rankFacetValues

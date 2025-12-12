@@ -7,13 +7,13 @@
  * @see https://www.inngest.com/docs/reference/serve
  */
 
-import { connection } from 'next/server';
 import {
   GET as inngestGET,
   POST as inngestPOST,
   PUT as inngestPUT,
 } from '@heyclaude/web-runtime/inngest';
-import { logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
+import { createErrorResponse, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { connection } from 'next/server';
 import { type NextRequest } from 'next/server';
 
 /**
@@ -33,9 +33,9 @@ export async function GET(request: NextRequest, context: unknown) {
   await connection();
 
   const reqLogger = logger.child({
+    method: 'GET',
     operation: 'InngestAPI',
     route: '/api/inngest',
-    method: 'GET',
   });
   reqLogger.debug({ url: request.url }, 'Inngest GET request (introspection)');
   try {
@@ -45,17 +45,17 @@ export async function GET(request: NextRequest, context: unknown) {
     reqLogger.error(
       {
         err: normalized,
-        route: '/api/inngest',
-        operation: 'InngestAPI',
         method: 'GET',
+        operation: 'InngestAPI',
+        route: '/api/inngest',
       },
       'Inngest GET request failed'
     );
     return createErrorResponse(normalized, {
-      route: '/api/inngest',
-      operation: 'InngestAPI',
-      method: 'GET',
       logContext: {},
+      method: 'GET',
+      operation: 'InngestAPI',
+      route: '/api/inngest',
     });
   }
 }
@@ -77,9 +77,9 @@ export async function POST(request: NextRequest, context: unknown) {
   await connection();
 
   const reqLogger = logger.child({
+    method: 'POST',
     operation: 'InngestAPI',
     route: '/api/inngest',
-    method: 'POST',
   });
   reqLogger.debug({ url: request.url }, 'Inngest POST request (function invocation)');
   try {
@@ -87,14 +87,14 @@ export async function POST(request: NextRequest, context: unknown) {
   } catch (error) {
     const normalized = normalizeError(error, 'Inngest POST request failed');
     reqLogger.error(
-      { err: normalized, route: '/api/inngest', operation: 'InngestAPI', method: 'POST' },
+      { err: normalized, method: 'POST', operation: 'InngestAPI', route: '/api/inngest' },
       'Inngest POST request failed'
     );
     return createErrorResponse(normalized, {
-      route: '/api/inngest',
-      operation: 'InngestAPI',
-      method: 'POST',
       logContext: {},
+      method: 'POST',
+      operation: 'InngestAPI',
+      route: '/api/inngest',
     });
   }
 }
@@ -113,9 +113,9 @@ export async function PUT(request: NextRequest, context: unknown) {
   await connection();
 
   const reqLogger = logger.child({
+    method: 'PUT',
     operation: 'InngestAPI',
     route: '/api/inngest',
-    method: 'PUT',
   });
   reqLogger.debug({ url: request.url }, 'Inngest PUT request (sync)');
   try {
@@ -123,14 +123,14 @@ export async function PUT(request: NextRequest, context: unknown) {
   } catch (error) {
     const normalized = normalizeError(error, 'Inngest PUT request failed');
     reqLogger.error(
-      { err: normalized, route: '/api/inngest', operation: 'InngestAPI', method: 'PUT' },
+      { err: normalized, method: 'PUT', operation: 'InngestAPI', route: '/api/inngest' },
       'Inngest PUT request failed'
     );
     return createErrorResponse(normalized, {
-      route: '/api/inngest',
-      operation: 'InngestAPI',
-      method: 'PUT',
       logContext: {},
+      method: 'PUT',
+      operation: 'InngestAPI',
+      route: '/api/inngest',
     });
   }
 }

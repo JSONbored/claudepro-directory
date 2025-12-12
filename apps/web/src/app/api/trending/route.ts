@@ -7,7 +7,7 @@ import 'server-only';
 import { TrendingService } from '@heyclaude/data-layer';
 import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
-import { logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
+import { createErrorResponse, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   badRequestResponse,
   buildCacheHeaders,
@@ -18,17 +18,14 @@ import {
 import { cacheLife } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
 
-/**
+/****
  * Cached helper function to fetch trending metrics
  * Uses Cache Components to reduce function invocations
- * @param category
- * @param limit
+ * @param {ContentCategory | null} category
+ * @param {number} limit
  
  * @returns {unknown} Description of return value*/
-async function getCachedTrendingMetricsFormatted(
-  category: ContentCategory | null,
-  limit: number
-) {
+async function getCachedTrendingMetricsFormatted(category: ContentCategory | null, limit: number) {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
 
@@ -40,17 +37,14 @@ async function getCachedTrendingMetricsFormatted(
   });
 }
 
-/**
+/****
  * Cached helper function to fetch popular content
  * Uses Cache Components to reduce function invocations
- * @param category
- * @param limit
+ * @param {ContentCategory | null} category
+ * @param {number} limit
  
  * @returns {unknown} Description of return value*/
-async function getCachedPopularContentFormatted(
-  category: ContentCategory | null,
-  limit: number
-) {
+async function getCachedPopularContentFormatted(category: ContentCategory | null, limit: number) {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
 
@@ -62,12 +56,12 @@ async function getCachedPopularContentFormatted(
   });
 }
 
-/**
+/*****
  * Cached helper function to fetch recent content
  * Uses Cache Components to reduce function invocations
- * @param category
- * @param limit
- * @param days
+ * @param {ContentCategory | null} category
+ * @param {number} limit
+ * @param {number} days
  
  * @returns {unknown} Description of return value*/
 async function getCachedRecentContentFormatted(
@@ -82,15 +76,12 @@ async function getCachedRecentContentFormatted(
   const service = new TrendingService(supabase);
   return service.getRecentContentFormatted({
     ...(category ? { p_category: category } : {}),
-    p_limit: limit,
     p_days: days,
+    p_limit: limit,
   });
 }
 
-async function getCachedSidebarTrendingFormatted(
-  category: ContentCategory | null,
-  limit: number
-) {
+async function getCachedSidebarTrendingFormatted(category: ContentCategory | null, limit: number) {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
 
@@ -114,8 +105,8 @@ async function getCachedSidebarRecentFormatted(
   const service = new TrendingService(supabase);
   return service.getSidebarRecentFormatted({
     ...(category ? { p_category: category } : {}),
-    p_limit: limit,
     p_days: days,
+    p_limit: limit,
   });
 }
 
@@ -157,7 +148,7 @@ async function handlePageTabs(url: URL, reqLogger: ReturnType<typeof logger.chil
   const limit = clampLimit(Number(url.searchParams.get('limit') ?? '12'));
   const category = parseCategory(url.searchParams.get('category'));
 
-  reqLogger.info({ tab, category: category ?? 'all', limit }, 'Processing trending page tabs');
+  reqLogger.info({ category: category ?? 'all', limit, tab }, 'Processing trending page tabs');
 
   try {
     if (tab === 'trending') {
@@ -165,8 +156,8 @@ async function handlePageTabs(url: URL, reqLogger: ReturnType<typeof logger.chil
       const trending = await getCachedTrendingMetricsFormatted(category, limit);
       return jsonResponse(
         {
-          trending: Array.isArray(trending) ? trending : [],
           totalCount: Array.isArray(trending) ? trending.length : 0,
+          trending: Array.isArray(trending) ? trending : [],
         },
         200,
         CORS,
@@ -207,9 +198,9 @@ async function handlePageTabs(url: URL, reqLogger: ReturnType<typeof logger.chil
     const normalized = normalizeError(error, 'Trending page tabs error');
     reqLogger.error({ err: normalized }, 'Trending page tabs error');
     return createErrorResponse(normalized, {
-      route: '/api/trending',
-      operation: 'TrendingAPI',
       method: 'GET',
+      operation: 'TrendingAPI',
+      route: '/api/trending',
     });
   }
 }
@@ -229,8 +220,8 @@ async function handleSidebar(url: URL, reqLogger: ReturnType<typeof logger.child
 
     return jsonResponse(
       {
-        trending: Array.isArray(trending) ? trending : [],
         recent: Array.isArray(recent) ? recent : [],
+        trending: Array.isArray(trending) ? trending : [],
       },
       200,
       CORS,
@@ -240,18 +231,18 @@ async function handleSidebar(url: URL, reqLogger: ReturnType<typeof logger.child
     const normalized = normalizeError(error, 'Trending sidebar error');
     reqLogger.error({ err: normalized }, 'Trending sidebar error');
     return createErrorResponse(normalized, {
-      route: '/api/trending',
-      operation: 'TrendingAPI',
       method: 'GET',
+      operation: 'TrendingAPI',
+      route: '/api/trending',
     });
   }
 }
 
 export function GET(request: NextRequest) {
   const reqLogger = logger.child({
+    method: 'GET',
     operation: 'TrendingAPI',
     route: '/api/trending',
-    method: 'GET',
   });
 
   try {
@@ -277,9 +268,9 @@ export function GET(request: NextRequest) {
     const normalized = normalizeError(error, 'Trending API error');
     reqLogger.error({ err: normalized }, 'Trending API error');
     return createErrorResponse(normalized, {
-      route: '/api/trending',
-      operation: 'TrendingAPI',
       method: 'GET',
+      operation: 'TrendingAPI',
+      route: '/api/trending',
     });
   }
 }
@@ -293,9 +284,9 @@ export function GET(request: NextRequest) {
  */
 export function OPTIONS() {
   return new NextResponse(null, {
-    status: 204,
     headers: {
       ...getOnlyCorsHeaders,
     },
+    status: 204,
   });
 }

@@ -35,8 +35,8 @@ export async function getLayoutData(): Promise<LayoutData> {
   cacheTag('announcements');
 
   const reqLogger = logger.child({
-    operation: 'getLayoutData',
     module: 'data/layout',
+    operation: 'getLayoutData',
   });
 
   try {
@@ -56,14 +56,14 @@ export async function getLayoutData(): Promise<LayoutData> {
           ? (reason as Error)
           : typeof reason === 'string'
             ? reason
-            : (typeof reason === 'object' &&
+            : typeof reason === 'object' &&
                 reason !== null &&
                 'toString' in reason &&
                 typeof reason.toString === 'function'
               ? reason.toString()
-              : String(reason));
+              : String(reason);
       reqLogger.error(
-        { err: errorForLogging, source: 'layout-data', component: 'announcement' },
+        { component: 'announcement', err: errorForLogging, source: 'layout-data' },
         'getLayoutData: announcement fetch failed'
       );
     }
@@ -83,11 +83,11 @@ export async function getLayoutData(): Promise<LayoutData> {
     const errorForLogging: Error | string =
       typeof error === 'object' && error !== null && 'message' in error && 'stack' in error
         ? (error as Error)
-        : typeof error === 'string'
+        : (typeof error === 'string'
           ? error
-          : String(error);
+          : String(error));
     reqLogger.error(
-      { err: errorForLogging, source: 'layout-data', fallbackStrategy: 'defaults' },
+      { err: errorForLogging, fallbackStrategy: 'defaults', source: 'layout-data' },
       'getLayoutData: catastrophic failure, using defaults'
     );
     return DEFAULT_LAYOUT_DATA;

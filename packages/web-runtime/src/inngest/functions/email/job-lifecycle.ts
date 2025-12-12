@@ -16,6 +16,7 @@ import { inngest } from '../../client';
 import { sendEmail } from '../../../integrations/resend';
 import { JOBS_FROM } from '../../../email/config/email-config';
 import { logger, createWebAppContextWithId } from '../../../logging/server';
+import { sendCriticalFailureHeartbeat } from '../../utils/monitoring';
 
 // Base URL for links - configurable via environment
 const BASE_URL = getEnvVar('NEXT_PUBLIC_SITE_URL') || 'https://claudepro.directory';
@@ -91,6 +92,29 @@ export const sendJobLifecycleEmail = inngest.createFunction(
     // Idempotency: Use action + jobId to prevent duplicate lifecycle emails
     // Same action for same job will only trigger email once
     idempotency: 'event.data.action + "-" + event.data.jobId',
+    // BetterStack monitoring: Send heartbeat on failure (feature-flagged)
+    onFailure: async ({ event, error }) => {
+      const eventData = event?.data as { action?: string } | undefined;
+      const context: { functionName?: string; eventType?: string; error?: string } = {
+        functionName: 'sendJobLifecycleEmail',
+      };
+      if (eventData?.action) {
+        context.eventType = eventData.action;
+      }
+      if (error) {
+        context.error = error instanceof Error ? error.message : String(error);
+      }
+      sendCriticalFailureHeartbeat('BETTERSTACK_HEARTBEAT_CRITICAL_FAILURE', context);
+      
+      // Log for observability
+      logger.error(
+        { 
+          functionName: 'sendJobLifecycleEmail',
+          errorMessage: error ? (error instanceof Error ? error.message : String(error)) : 'unknown',
+        },
+        'Job lifecycle email function failed after all retries'
+      );
+    },
   },
   { event: 'email/job-lifecycle' },
   async ({ event, step }) => {

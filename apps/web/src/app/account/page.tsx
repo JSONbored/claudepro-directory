@@ -11,15 +11,14 @@ import { Bookmark, Calendar } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { type HomepageContentItem } from '@heyclaude/web-runtime/types/component.types';
 import {
-  UI_CLASSES,
-  NavLink,
-  UnifiedBadge,
   Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  NavLink,
+  UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
@@ -28,6 +27,9 @@ import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { SignInButton } from '@/src/components/core/auth/sign-in-button';
+import { AnimatedCard } from '@/src/components/features/account/animated-card';
+import { AnimatedStatsCard } from '@/src/components/features/account/animated-stats-card';
+import { DashboardTabs } from '@/src/components/features/account/dashboard-tabs';
 import { RecentlySavedGrid } from '@/src/components/features/account/recently-saved-grid';
 
 import Loading from './loading';
@@ -72,9 +74,9 @@ export default async function AccountDashboard() {
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
+    module: 'apps/web/src/app/account',
     operation: 'AccountDashboard',
     route: '/account',
-    module: 'apps/web/src/app/account',
   });
 
   // Section: Authentication
@@ -93,7 +95,7 @@ export default async function AccountDashboard() {
             <CardDescription>Please sign in to view your dashboard.</CardDescription>
           </CardHeader>
           <CardContent>
-            <SignInButton valueProposition="Sign in to view your dashboard" redirectTo="/account">
+            <SignInButton redirectTo="/account" valueProposition="Sign in to view your dashboard">
               Go to login
             </SignInButton>
           </CardContent>
@@ -115,15 +117,21 @@ export default async function AccountDashboard() {
   let bundleData: Awaited<ReturnType<typeof getAccountDashboardBundle>> | null = null;
   try {
     bundleData = await getAccountDashboardBundle(user.id);
-    userLogger.info({ section: 'data-fetch', hasDashboard: !!bundleData.dashboard,
-      hasLibrary: !!bundleData.library,
-      hasHomepage: !!bundleData.homepage }, 'AccountDashboard: dashboard bundle loaded');
+    userLogger.info(
+      {
+        hasDashboard: !!bundleData.dashboard,
+        hasHomepage: !!bundleData.homepage,
+        hasLibrary: !!bundleData.library,
+        section: 'data-fetch',
+      },
+      'AccountDashboard: dashboard bundle loaded'
+    );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load account dashboard bundle');
     userLogger.error(
       {
-        section: 'data-fetch',
         err: normalized,
+        section: 'data-fetch',
       },
       'AccountDashboard: getAccountDashboardBundle failed'
     );
@@ -181,8 +189,8 @@ function DashboardHeaderAndStats({
     );
     userLogger.error(
       {
-        section: 'data-fetch',
         err: normalized,
+        section: 'data-fetch',
       },
       'AccountDashboard: dashboard data is null'
     );
@@ -232,77 +240,61 @@ function DashboardHeaderAndStats({
 
       {/* Stats cards */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm">Bookmarks</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-              <Bookmark className="text-primary h-5 w-5" />
-              <span className="text-3xl font-bold">{bookmarkCount ?? 0}</span>
-            </div>
-            <p className="text-muted-foreground mt-2 text-xs">Saved items</p>
-          </CardContent>
-        </Card>
+        <AnimatedStatsCard
+          description="Saved items"
+          icon={Bookmark}
+          title="Bookmarks"
+          value={bookmarkCount ?? 0}
+        />
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm">Tier</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <UnifiedBadge
-              variant="base"
-              style={profile?.tier === 'pro' ? 'default' : 'secondary'}
-              className="mt-2"
-            >
+        <AnimatedStatsCard
+          customContent={
+            <UnifiedBadge style={profile?.tier === 'pro' ? 'default' : 'secondary'} variant="base">
               {profile?.tier
                 ? profile.tier.charAt(0).toUpperCase() + profile.tier.slice(1)
                 : 'Free'}
             </UnifiedBadge>
-            <p className="text-muted-foreground mt-2 text-xs">Membership level</p>
-          </CardContent>
-        </Card>
+          }
+          description="Membership level"
+          title="Tier"
+        />
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm">Member Since</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-              <Calendar className="text-primary h-5 w-5" />
-              <span className="text-3xl font-bold">{accountAge}</span>
-            </div>
-            <p className="text-muted-foreground mt-2 text-xs">Days active</p>
-          </CardContent>
-        </Card>
+        <AnimatedStatsCard
+          description="Days active"
+          icon={Calendar}
+          title="Member Since"
+          value={accountAge}
+        />
       </div>
 
       {/* Quick actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-          <CardDescription>Common tasks and features</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {resumeBookmarkHref ? (
+      <AnimatedCard>
+        <Card>
+          <CardHeader>
+            <CardTitle>Quick Actions</CardTitle>
+            <CardDescription>Common tasks and features</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {resumeBookmarkHref ? (
+              <QuickActionRow
+                description="Continue where you left off"
+                href={resumeBookmarkHref}
+                title="Resume latest bookmark"
+              />
+            ) : null}
             <QuickActionRow
-              title="Resume latest bookmark"
-              description="Continue where you left off"
-              href={resumeBookmarkHref}
+              description={`You have ${bookmarkCount ?? 0} saved configurations`}
+              href={ROUTES.ACCOUNT_LIBRARY}
+              title="View all bookmarks"
             />
-          ) : null}
-          <QuickActionRow
-            title="View all bookmarks"
-            description={`You have ${bookmarkCount ?? 0} saved configurations`}
-            href={ROUTES.ACCOUNT_LIBRARY}
-          />
-          <QuickActionRow
-            title="Manage profile"
-            description="Update your settings and preferences"
-            href={ROUTES.ACCOUNT_SETTINGS}
-          />
-        </CardContent>
-      </Card>
+            <QuickActionRow
+              description="Update your settings and preferences"
+              href={ROUTES.ACCOUNT_SETTINGS}
+              title="Manage profile"
+            />
+          </CardContent>
+        </Card>
+      </AnimatedCard>
     </>
   );
 }
@@ -350,9 +342,15 @@ async function DashboardContent({
         return detail?.content ?? null;
       } catch (error) {
         const normalized = normalizeError(error, 'Failed to load bookmark content');
-        userLogger.warn({ section: 'data-fetch', err: normalized,
+        userLogger.warn(
+          {
+            category: bookmark.content_type,
+            err: normalized,
+            section: 'data-fetch',
             slug: bookmark.content_slug,
-            category: bookmark.content_type }, 'AccountDashboard: getContentDetailCore failed for bookmark');
+          },
+          'AccountDashboard: getContentDetailCore failed for bookmark'
+        );
         return null;
       }
     })
@@ -362,38 +360,79 @@ async function DashboardContent({
       item !== null && typeof item === 'object'
   );
 
-  // Section: Recent Bookmarks - in separate Suspense for streaming
+  // Section: Content organized in tabs
   return (
-    <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
-      <Suspense
-        fallback={
-          <Card>
-            <CardContent className="py-12">
-              <div className="h-48 animate-pulse" />
-            </CardContent>
-          </Card>
-        }
-      >
-        <RecentlySavedSection recentlySavedContent={recentlySavedContent} userLogger={userLogger} />
-      </Suspense>
+    <DashboardTabs
+      bookmarks={
+        <Suspense
+          fallback={
+            <Card>
+              <CardContent className="py-12">
+                <div className="h-48 animate-pulse" />
+              </CardContent>
+            </Card>
+          }
+        >
+          <RecentlySavedSection
+            recentlySavedContent={recentlySavedContent}
+            userLogger={userLogger}
+          />
+        </Suspense>
+      }
+      overview={
+        <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
+          <Suspense
+            fallback={
+              <Card>
+                <CardContent className="py-12">
+                  <div className="h-48 animate-pulse" />
+                </CardContent>
+              </Card>
+            }
+          >
+            <RecentlySavedSection
+              recentlySavedContent={recentlySavedContent}
+              userLogger={userLogger}
+            />
+          </Suspense>
 
-      <Suspense
-        fallback={
-          <Card>
-            <CardContent className="py-12">
-              <div className="h-48 animate-pulse" />
-            </CardContent>
-          </Card>
-        }
-      >
-        <RecommendationsSection
-          homepageData={homepageData}
-          bookmarkedSlugs={bookmarkedSlugs}
-          recentlySavedContent={recentlySavedContent}
-          userLogger={userLogger}
-        />
-      </Suspense>
-    </div>
+          <Suspense
+            fallback={
+              <Card>
+                <CardContent className="py-12">
+                  <div className="h-48 animate-pulse" />
+                </CardContent>
+              </Card>
+            }
+          >
+            <RecommendationsSection
+              bookmarkedSlugs={bookmarkedSlugs}
+              homepageData={homepageData}
+              recentlySavedContent={recentlySavedContent}
+              userLogger={userLogger}
+            />
+          </Suspense>
+        </div>
+      }
+      recommendations={
+        <Suspense
+          fallback={
+            <Card>
+              <CardContent className="py-12">
+                <div className="h-48 animate-pulse" />
+              </CardContent>
+            </Card>
+          }
+        >
+          <RecommendationsSection
+            bookmarkedSlugs={bookmarkedSlugs}
+            homepageData={homepageData}
+            recentlySavedContent={recentlySavedContent}
+            userLogger={userLogger}
+          />
+        </Suspense>
+      }
+    />
   );
 }
 
@@ -414,10 +453,13 @@ function RecentlySavedSection({
   recentlySavedContent,
   userLogger,
 }: {
-  recentlySavedContent: Database['public']['Tables']['content']['Row'][];
+  recentlySavedContent: Array<Database['public']['Tables']['content']['Row']>;
   userLogger: ReturnType<typeof logger.child>;
 }) {
-  userLogger.info({ section: 'data-fetch', itemCount: recentlySavedContent.length }, 'AccountDashboard: recent bookmarks displayed');
+  userLogger.info(
+    { itemCount: recentlySavedContent.length, section: 'data-fetch' },
+    'AccountDashboard: recent bookmarks displayed'
+  );
 
   return (
     <Card>
@@ -455,14 +497,14 @@ function RecentlySavedSection({
  * @see getAccountDashboardBundle
  */
 function RecommendationsSection({
-  homepageData,
   bookmarkedSlugs,
+  homepageData,
   recentlySavedContent,
   userLogger,
 }: {
   bookmarkedSlugs: Set<string>;
   homepageData: Awaited<ReturnType<typeof getAccountDashboardBundle>>['homepage'];
-  recentlySavedContent: Database['public']['Tables']['content']['Row'][];
+  recentlySavedContent: Array<Database['public']['Tables']['content']['Row']>;
   userLogger: ReturnType<typeof logger.child>;
 }) {
   const savedTags = new Set<string>();
@@ -475,10 +517,10 @@ function RecommendationsSection({
     }
   }
 
-  /**
+  /***
    * Extracts the `categoryData` map from dashboard homepage data, returning an empty map when the homepage structure is missing or invalid.
    *
-   * @param homepageData - The `homepage` slice returned by `getAccountDashboardBundle`
+   * @param {Awaited<ReturnType<typeof getAccountDashboardBundle>>['homepage']} homepageData - The `homepage` slice returned by `getAccountDashboardBundle`
    * @returns The `categoryData` map keyed by category name, or an empty object if none is present
    *
    * @see getAccountDashboardBundle
@@ -522,9 +564,15 @@ function RecommendationsSection({
         item.title !== ''
     )
     .slice(0, 3);
-  userLogger.info({ section: 'data-fetch', candidateCount: candidateRecommendations.length,
-    finalCount: recommendations.length,
-    savedTagsCount: savedTags.size }, 'AccountDashboard: recommendations generated');
+  userLogger.info(
+    {
+      candidateCount: candidateRecommendations.length,
+      finalCount: recommendations.length,
+      savedTagsCount: savedTags.size,
+      section: 'data-fetch',
+    },
+    'AccountDashboard: recommendations generated'
+  );
 
   return (
     <Card>
@@ -541,8 +589,8 @@ function RecommendationsSection({
               const similarHref = firstTag ? `/search?tags=${encodeURIComponent(firstTag)}` : null;
               return (
                 <li
-                  key={`${item.category}-${item.slug}`}
                   className="border-border/60 bg-muted/20 rounded-xl border p-3"
+                  key={`${item.category}-${item.slug}`}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
@@ -554,13 +602,13 @@ function RecommendationsSection({
                       ) : null}
                     </div>
                     <div className="flex flex-col items-end gap-2">
-                      <NavLink href={itemHref} className="text-sm font-medium">
+                      <NavLink className="text-sm font-medium" href={itemHref}>
                         Explore →
                       </NavLink>
                       {similarHref ? (
                         <NavLink
-                          href={similarHref}
                           className="text-muted-foreground hover:text-foreground text-xs"
+                          href={similarHref}
                         >
                           Explore similar →
                         </NavLink>
@@ -596,9 +644,9 @@ function RecommendationsSection({
  * @see RecentlySavedGrid
  */
 function QuickActionRow({
-  title,
   description,
   href,
+  title,
 }: {
   description: string;
   href: string;
@@ -610,7 +658,7 @@ function QuickActionRow({
         <p className="font-medium">{title}</p>
         <p className="text-muted-foreground text-sm">{description}</p>
       </div>
-      <NavLink href={href} className="text-sm font-semibold">
+      <NavLink className="text-sm font-semibold" href={href}>
         Open →
       </NavLink>
     </div>
@@ -635,7 +683,7 @@ function EmptyRecentlySavedState() {
       <p className="text-muted-foreground text-sm">
         Browse the directory and bookmark your favorite configurations to see them here.
       </p>
-      <NavLink href={ROUTES.HOME} className="mt-4 inline-flex font-semibold">
+      <NavLink className="mt-4 inline-flex font-semibold" href={ROUTES.HOME}>
         Explore directory →
       </NavLink>
     </div>

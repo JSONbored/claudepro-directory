@@ -6,12 +6,12 @@
 import 'server-only';
 import { ContentService } from '@heyclaude/data-layer';
 import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
-import { logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
+import { createErrorResponse, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  createSupabaseAnonClient,
   badRequestResponse,
-  getOnlyCorsHeaders,
   buildCacheHeaders,
+  createSupabaseAnonClient,
+  getOnlyCorsHeaders,
 } from '@heyclaude/web-runtime/server';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -36,9 +36,9 @@ const CORS = getOnlyCorsHeaders;
  */
 export async function GET(request: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   const reqLogger = logger.child({
+    method: 'GET',
     operation: 'ChangelogEntryAPI',
     route: '/api/content/changelog/[slug]',
-    method: 'GET',
   });
 
   try {
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return badRequestResponse(`Invalid format '${format}' for changelog entry`, CORS);
     }
 
-    reqLogger.info({ slug, format }, 'Changelog entry request received');
+    reqLogger.info({ format, slug }, 'Changelog entry request received');
 
     const supabase = createSupabaseAnonClient();
     const service = new ContentService(supabase);
@@ -62,12 +62,12 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json(
         { error: 'Changelog entry LLMs.txt not found' },
         {
-          status: 404,
           headers: {
             'Content-Type': 'application/json; charset=utf-8',
             ...buildSecurityHeaders(),
             ...CORS,
           },
+          status: 404,
         }
       );
     }
@@ -76,14 +76,13 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     reqLogger.info(
       {
-        slug,
         bytes: formatted.length,
+        slug,
       },
       'Changelog entry LLMs.txt generated'
     );
 
     return new NextResponse(formatted, {
-      status: 200,
       headers: {
         'Content-Type': 'text/plain; charset=utf-8',
         'X-Generated-By': 'supabase.rpc.generate_changelog_entry_llms_txt',
@@ -91,14 +90,15 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         ...CORS,
         ...buildCacheHeaders('content_export'),
       },
+      status: 200,
     });
   } catch (error) {
     const normalized = normalizeError(error, 'Operation failed');
     reqLogger.error({ err: normalizeError(error) }, 'Changelog entry API error');
     return createErrorResponse(normalized, {
-      route: '/api/content/changelog/[slug]',
-      operation: 'ChangelogEntryAPI',
       method: 'GET',
+      operation: 'ChangelogEntryAPI',
+      route: '/api/content/changelog/[slug]',
     });
   }
 }
@@ -112,9 +112,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
  */
 export function OPTIONS() {
   return new NextResponse(null, {
-    status: 204,
     headers: {
       ...CORS,
     },
+    status: 204,
   });
 }

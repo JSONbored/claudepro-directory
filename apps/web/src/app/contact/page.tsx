@@ -3,7 +3,7 @@ import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { DiscordIcon, Github, Mail, MessageSquare } from '@heyclaude/web-runtime/icons';
 import { logger } from '@heyclaude/web-runtime/logging/server';
-import { NavLink, Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
+import { Card, CardContent, CardHeader, CardTitle, NavLink } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import { Suspense } from 'react';
@@ -51,9 +51,9 @@ export default async function ContactPage() {
 
   // Create request-scoped child logger
   const reqLogger = logger.child({
+    module: 'apps/web/src/app/contact',
     operation: 'ContactPage',
     route: '/contact',
-    module: 'apps/web/src/app/contact',
   });
 
   return (
@@ -82,9 +82,9 @@ function ContactPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger
   if (!channels.email) {
     reqLogger.warn(
       {
-        section: 'data-fetch',
         channel: 'email',
         configKey: 'CONTACT_EMAIL',
+        section: 'data-fetch',
       },
       'ContactPage: email channel is not configured'
     );
@@ -92,9 +92,9 @@ function ContactPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger
   if (!channels.github) {
     reqLogger.warn(
       {
-        section: 'data-fetch',
         channel: 'github',
         configKey: 'GITHUB_URL',
+        section: 'data-fetch',
       },
       'ContactPage: github channel is not configured'
     );
@@ -102,9 +102,9 @@ function ContactPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger
   if (!channels.discord) {
     reqLogger.warn(
       {
-        section: 'data-fetch',
         channel: 'discord',
         configKey: 'DISCORD_INVITE_URL',
+        section: 'data-fetch',
       },
       'ContactPage: discord channel is not configured'
     );
@@ -167,9 +167,9 @@ function ContactPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger
                   Join the conversation, ask questions, and share ideas with the community.
                 </p>
                 <NavLink
-                  href={`${channels.github}/discussions`}
-                  external
                   className="inline-flex items-center gap-2"
+                  external
+                  href={`${channels.github}/discussions`}
                 >
                   Visit Discussions →
                 </NavLink>
@@ -191,9 +191,9 @@ function ContactPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger
                   Chat with other users, get help, and stay updated on the latest developments.
                 </p>
                 <NavLink
-                  href={channels.discord}
-                  external
                   className="inline-flex items-center gap-2"
+                  external
+                  href={channels.discord}
                 >
                   Join Discord →
                 </NavLink>
@@ -215,9 +215,9 @@ function ContactPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger
                   Found a bug or have a feature request? Open an issue on GitHub.
                 </p>
                 <NavLink
-                  href={`${channels.github}/issues/new`}
-                  external
                   className="inline-flex items-center gap-2"
+                  external
+                  href={`${channels.github}/issues/new`}
                 >
                   Create Issue →
                 </NavLink>
@@ -239,9 +239,9 @@ function ContactPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger
                   For private inquiries, partnerships, or other matters, reach us via email.
                 </p>
                 <NavLink
-                  href={`mailto:${channels.email}`}
-                  external
                   className="inline-flex items-center gap-2"
+                  external
+                  href={`mailto:${channels.email}`}
                 >
                   {channels.email} →
                 </NavLink>

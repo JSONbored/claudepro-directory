@@ -12,6 +12,7 @@ import { inngest } from '../../client';
 import { createSupabaseAdminClient } from '../../../supabase/admin';
 import { logger, createWebAppContextWithId } from '../../../logging/server';
 import { normalizeError } from '@heyclaude/shared-runtime';
+import { sendCronSuccessHeartbeat } from '../../utils/monitoring';
 
 /**
  * Calculate trending metrics and refresh materialized view
@@ -106,10 +107,20 @@ export const calculateTrendingMetrics = inngest.createFunction(
       'Trending metrics calculation completed'
     );
 
-    return {
+    const result = {
       updated: metricsResult.updated,
       created: metricsResult.created,
       durationMs,
     };
+
+    // BetterStack monitoring: Send success heartbeat (feature-flagged)
+    if (result.updated > 0 || result.created > 0) {
+      sendCronSuccessHeartbeat('BETTERSTACK_HEARTBEAT_INNGEST_CRON', {
+        functionName: 'calculateTrendingMetrics',
+        result: { updated: result.updated, created: result.created },
+      });
+    }
+
+    return result;
   }
 );

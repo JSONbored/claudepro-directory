@@ -46,7 +46,6 @@
     "dompurify": "^3.3.1",
     "embla-carousel-react": "^8.6.0",
     "geist": "^1.5.1",
-    "html2canvas-pro": "^1.5.13",
     "isomorphic-dompurify": "^2.34.0",
     "lucide-react": "^0.560.0",
     "marked": "^17.0.1",
@@ -72,7 +71,6 @@
   "devDependencies": {
     "@next/bundle-analyzer": "16.0.9",
     "@tailwindcss/postcss": "^4.1.18",
-    "@types/canvas-confetti": "^1.9.0",
     "@types/he": "^1.2.3",
     "@types/node": "^25.0.0",
     "@types/react": "19.2.7",

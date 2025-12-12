@@ -6,6 +6,7 @@
  * ISR: 2 hours (7200s) - Detail pages change less frequently than list pages
  */
 import { type Database } from '@heyclaude/database-types';
+import { getDeploymentEnv } from '@heyclaude/shared-runtime/platform';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
 import { ensureStringArray, isValidCategory } from '@heyclaude/web-runtime/core';
 import { type RecentlyViewedCategory } from '@heyclaude/web-runtime/hooks';
@@ -81,16 +82,16 @@ export async function generateStaticParams() {
         const route = `/${category}`;
         const modulePath = 'apps/web/src/app/[category]/[slug]/page';
         const reqLogger = logger.child({
+          module: modulePath,
           operation,
           route,
-          module: modulePath,
         });
         const normalized = normalizeError(error, 'Failed to load content for category');
         reqLogger.error(
           {
-            section: 'data-fetch',
-            err: normalized,
             category,
+            err: normalized,
+            section: 'data-fetch',
           },
           'generateStaticParams: failed to load content for category'
         );
@@ -117,9 +118,9 @@ export async function generateStaticParams() {
     const route = '/[category]/[slug]';
     const modulePath = 'apps/web/src/app/[category]/[slug]/page';
     const reqLogger = logger.child({
+      module: modulePath,
       operation,
       route,
-      module: modulePath,
     });
 
     reqLogger.info(
@@ -159,9 +160,9 @@ export async function generateStaticParams() {
             const normalized = normalizeError(error, 'Failed to pre-fetch content detail');
             reqLogger.warn(
               {
-                section: 'data-prefetch',
-                err: normalized,
                 category,
+                err: normalized,
+                section: 'data-prefetch',
                 slug,
               },
               'generateStaticParams: Failed to pre-fetch content detail (will be handled during page generation)'
@@ -177,10 +178,10 @@ export async function generateStaticParams() {
       // Log progress after each batch
       reqLogger.info(
         {
-          section: 'data-prefetch',
-          progress: `${totalProcessed}/${parameters.length}`,
-          percentage: Math.round((totalProcessed / parameters.length) * 100),
           batchSize: batch.length,
+          percentage: Math.round((totalProcessed / parameters.length) * 100),
+          progress: `${totalProcessed}/${parameters.length}`,
+          section: 'data-prefetch',
         },
         `generateStaticParams: Pre-fetched batch ${totalProcessed}/${parameters.length} content details`
       );
@@ -191,10 +192,10 @@ export async function generateStaticParams() {
 
     reqLogger.info(
       {
-        section: 'data-prefetch',
-        total: parameters.length,
-        success: prefetchSuccessCount,
         failures: prefetchFailureCount,
+        section: 'data-prefetch',
+        success: prefetchSuccessCount,
+        total: parameters.length,
       },
       `generateStaticParams: Pre-fetch completed - ${prefetchSuccessCount}/${parameters.length} successful`
     );
@@ -209,23 +210,23 @@ export async function generateStaticParams() {
 // Use explicit string keys instead of fragile array indexing to prevent breakage if enum order changes
 const CATEGORY_TO_RECENTLY_VIEWED: Record<string, RecentlyViewedCategory> = {
   agents: 'agent',
-  mcp: 'mcp',
-  rules: 'rule',
   commands: 'command',
   hooks: 'hook',
-  statuslines: 'statusline',
-  skills: 'skill',
-  jobs: 'job',
   job: 'job', // Alias for consistency
+  jobs: 'job',
+  mcp: 'mcp',
+  rules: 'rule',
+  skills: 'skill',
+  statuslines: 'statusline',
 } as const;
 
 // Stable constant for collections category (replaces brittle array index access)
 const COLLECTION_CATEGORY = 'collections' as const;
 
-/**
+/***
  * Map a category key to its RecentlyViewedCategory equivalent.
  *
- * @param category - The category key to map (for example, "articles" or "collections")
+ * @param {string} category - The category key to map (for example, "articles" or "collections")
  * @returns The corresponding `RecentlyViewedCategory`, or `null` if the category has no mapping
  *
  * @see CATEGORY_TO_RECENTLY_VIEWED
@@ -262,9 +263,9 @@ export async function generateMetadata({
   const config = getCategoryConfig(category);
 
   return generatePageMetadata('/:category/:slug', {
-    params: { category, slug },
-    categoryConfig: config ?? undefined,
     category,
+    categoryConfig: config ?? undefined,
+    params: { category, slug },
     slug,
   });
 }
@@ -304,9 +305,9 @@ export default async function DetailPage({
 
   // Create request-scoped child logger
   const reqLogger = logger.child({
+    module: modulePath,
     operation,
     route: `/${category}/${slug}`,
-    module: modulePath,
   });
 
   // Note: category and slug are already available from await params above
@@ -315,8 +316,8 @@ export default async function DetailPage({
   if (!isValidCategory(category)) {
     reqLogger.warn(
       {
-        section: 'data-fetch',
         category,
+        section: 'data-fetch',
       },
       'Invalid category in detail page'
     );
@@ -325,7 +326,7 @@ export default async function DetailPage({
 
   return (
     <Suspense fallback={<Loading />}>
-      <DetailPageContent category={category} slug={slug} reqLogger={reqLogger} />
+      <DetailPageContent category={category} reqLogger={reqLogger} slug={slug} />
     </Suspense>
   );
 }
@@ -351,8 +352,8 @@ export default async function DetailPage({
  */
 async function DetailPageContent({
   category,
-  slug,
   reqLogger,
+  slug,
 }: {
   category: string;
   reqLogger: ReturnType<typeof logger.child>;
@@ -376,8 +377,8 @@ async function DetailPageContent({
     // logger.error() normalizes errors internally, so pass raw error
     routeLogger.error(
       {
-        section: 'data-fetch',
         err: new Error('Category config is null'),
+        section: 'data-fetch',
       },
       'DetailPage: missing category config'
     );
@@ -396,13 +397,13 @@ async function DetailPageContent({
     // During build, missing content is expected - only log at debug level
     // During runtime, log at warn level to catch real issues (except in production where it's also expected)
     const suppressMissingContentWarning =
-      env.NEXT_PHASE === 'phase-production-build' || env.VERCEL_ENV === 'production';
+      env.NEXT_PHASE === 'phase-production-build' || getDeploymentEnv() === 'production';
 
     if (suppressMissingContentWarning) {
       routeLogger.debug(
         {
-          section: 'data-fetch',
           category,
+          section: 'data-fetch',
           slug,
         },
         'DetailPage: content not found during build/production (expected)'
@@ -410,8 +411,8 @@ async function DetailPageContent({
     } else {
       routeLogger.warn(
         {
-          section: 'data-fetch',
           category,
+          section: 'data-fetch',
           slug,
         },
         'DetailPage: get_content_detail_core returned null - content may not exist'
@@ -426,8 +427,8 @@ async function DetailPageContent({
   if (!fullItem) {
     routeLogger.warn(
       {
-        section: 'data-fetch',
         rpcFunction: 'get_content_detail_core',
+        section: 'data-fetch',
       },
       'Content not found in RPC response'
     );
@@ -444,8 +445,8 @@ async function DetailPageContent({
   const copyCountPromise = analyticsPromise.then((data) => data?.copy_count ?? 0);
 
   const relatedItemsPromise = getRelatedContent({
-    currentPath: `/${category}/${slug}`,
     currentCategory: category,
+    currentPath: `/${category}/${slug}`,
     currentTags: 'tags' in fullItem ? ensureStringArray(fullItem.tags) : [],
   }).then((result) => result.items);
 
@@ -458,8 +459,8 @@ async function DetailPageContent({
   // Final summary log
   routeLogger.info(
     {
-      section: 'data-fetch',
       category,
+      section: 'data-fetch',
       slug,
     },
     'DetailPage: page render completed'
@@ -472,7 +473,7 @@ async function DetailPageContent({
       {/* Read Progress Bar - Shows reading progress at top of page */}
       <ReadProgress />
 
-      <Pulse variant="view" category={validCategory} slug={slug} />
+      <Pulse category={validCategory} slug={slug} variant="view" />
       <StructuredData route={`/${category}/${slug}`} />
 
       {/* Recently Viewed Tracking - only for supported categories */}
@@ -501,20 +502,15 @@ async function DetailPageContent({
         return (
           <RecentlyViewedTracker
             category={recentlyViewedCategory}
+            description={itemDescription}
             slug={slug}
             title={itemTitle}
-            description={itemDescription}
             {...tagsProp}
           />
         );
       })()}
 
       <UnifiedDetailPage
-        item={fullItem}
-        viewCountPromise={viewCountPromise}
-        copyCountPromise={copyCountPromise}
-        relatedItemsPromise={relatedItemsPromise}
-        tabsEnabled={tabsEnabled}
         collectionSections={
           category === COLLECTION_CATEGORY && fullItem.category === COLLECTION_CATEGORY ? (
             <CollectionDetailView
@@ -526,6 +522,11 @@ async function DetailPageContent({
             />
           ) : undefined
         }
+        copyCountPromise={copyCountPromise}
+        item={fullItem}
+        relatedItemsPromise={relatedItemsPromise}
+        tabsEnabled={tabsEnabled}
+        viewCountPromise={viewCountPromise}
       />
     </>
   );

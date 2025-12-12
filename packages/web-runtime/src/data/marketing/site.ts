@@ -10,8 +10,8 @@ const DESCRIPTION_FALLBACK =
   'Open-source directory of Claude AI configurations. Community-driven collection of MCP servers, automation hooks, custom commands, agents, and rules.';
 
 const HERO_DEFAULTS = {
-  monthlyVisitors: 3000,
   monthlyPageViews: 16_000,
+  monthlyVisitors: 3000,
 };
 
 const VERCEL_ANALYTICS_TOKEN = (env as Record<string, unknown>)['VERCEL_WEB_ANALYTICS_TOKEN'] as
@@ -50,8 +50,8 @@ async function getVisitorStats(): Promise<VisitorStats> {
 
   // Create request-scoped child logger - do not mutate shared logger in cached function
   const requestLogger = logger.child({
-    operation: 'getVisitorStats',
     module: 'data/marketing/site',
+    operation: 'getVisitorStats',
   });
 
   if (!VERCEL_ANALYTICS_TOKEN || !VERCEL_PROJECT_ID) {
@@ -79,8 +79,8 @@ async function getVisitorStats(): Promise<VisitorStats> {
 
     const data = (await response.json()) as VercelAnalyticsResponse;
     return {
-      monthlyVisitors: Number(data.visitors?.value ?? HERO_DEFAULTS.monthlyVisitors),
       monthlyPageViews: Number(data.pageViews?.value ?? HERO_DEFAULTS.monthlyPageViews),
+      monthlyVisitors: Number(data.visitors?.value ?? HERO_DEFAULTS.monthlyVisitors),
     };
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
@@ -88,8 +88,8 @@ async function getVisitorStats(): Promise<VisitorStats> {
     requestLogger.warn(
       {
         err: errorForLogging,
-        source: 'vercel-analytics-api',
         fallbackStrategy: 'defaults',
+        source: 'vercel-analytics-api',
       },
       'Visitor stats fetch failed, using defaults'
     );
@@ -114,8 +114,8 @@ export async function getContentDescriptionCopy(): Promise<string> {
 
   // Create request-scoped child logger to avoid race conditions
   const requestLogger = logger.child({
-    operation: 'getContentDescriptionCopy',
     module: 'data/marketing/site',
+    operation: 'getContentDescriptionCopy',
   });
 
   try {
@@ -155,8 +155,8 @@ export async function getPartnerHeroStats(): Promise<PartnerHeroStats> {
 
   // Create request-scoped child logger to avoid race conditions
   const requestLogger = logger.child({
-    operation: 'getPartnerHeroStats',
     module: 'data/marketing/site',
+    operation: 'getPartnerHeroStats',
   });
 
   try {

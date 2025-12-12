@@ -43,12 +43,12 @@ import { timingSafeEqual } from 'node:crypto';
 import { ChangelogService } from '@heyclaude/data-layer';
 import { type Database } from '@heyclaude/database-types';
 import { buildSecurityHeaders, requireEnvVar } from '@heyclaude/shared-runtime';
-import { logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
+import { createErrorResponse, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  createSupabaseAdminClient,
   badRequestResponse,
-  postCorsHeaders,
+  createSupabaseAdminClient,
   pgmqSend,
+  postCorsHeaders,
 } from '@heyclaude/web-runtime/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
@@ -57,21 +57,21 @@ const CORS = postCorsHeaders;
 
 // Zod schema for request body validation
 const changelogSyncRequestSchema = z.object({
-  version: z.string().min(1),
-  date: z.string().min(1),
-  tldr: z.string().optional(),
-  whatChanged: z.string().optional(),
-  sections: z.record(z.string(), z.array(z.string())).optional(),
   content: z.string().min(1),
+  date: z.string().min(1),
   rawContent: z.string().optional(),
+  sections: z.record(z.string(), z.array(z.string())).optional(),
+  tldr: z.string().optional(),
+  version: z.string().min(1),
+  whatChanged: z.string().optional(),
 });
 
-/**
+/*****
  * Validates the authentication token using timing-safe comparison to prevent timing attacks.
  *
- * @param authHeader - The Authorization header value from the request
- * @param expectedToken - The expected token value from environment
- * @param reqLogger - Request-scoped logger for error logging
+ * @param {null | string} authHeader - The Authorization header value from the request
+ * @param {string} expectedToken - The expected token value from environment
+ * @param {ReturnType<typeof logger.child>} reqLogger - Request-scoped logger for error logging
  * @returns True if token is valid, false otherwise
  */
 function validateToken(
@@ -112,9 +112,9 @@ function validateToken(
  */
 export async function POST(request: NextRequest) {
   const reqLogger = logger.child({
+    method: 'POST',
     operation: 'ChangelogSyncAPI',
     route: '/api/changelog/sync',
-    method: 'POST',
   });
 
   try {
@@ -130,12 +130,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Server configuration error' },
         {
-          status: 500,
           headers: {
             'Content-Type': 'application/json',
             ...buildSecurityHeaders(),
             ...CORS,
           },
+          status: 500,
         }
       );
     }
@@ -147,12 +147,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         {
-          status: 401,
           headers: {
             'Content-Type': 'application/json',
             ...buildSecurityHeaders(),
             ...CORS,
           },
+          status: 401,
         }
       );
     }
@@ -166,9 +166,9 @@ export async function POST(request: NextRequest) {
       reqLogger.error(
         {
           err: normalized,
-          route: '/api/changelog/sync',
-          operation: 'POST',
           method: 'POST',
+          operation: 'POST',
+          route: '/api/changelog/sync',
         },
         'Invalid JSON in request body'
       );
@@ -188,14 +188,14 @@ export async function POST(request: NextRequest) {
       return badRequestResponse(`Invalid request body: ${errorMessages}`, CORS);
     }
 
-    const { version, date, tldr, whatChanged, sections, content, rawContent } = parseResult.data;
+    const { content, date, rawContent, sections, tldr, version, whatChanged } = parseResult.data;
 
     reqLogger.info(
       {
-        version,
-        date,
-        audit: true,
         action: 'changelog_sync_request',
+        audit: true,
+        date,
+        version,
       },
       'Changelog sync request received'
     );
@@ -217,22 +217,31 @@ export async function POST(request: NextRequest) {
     // Database RPC handles all transformations (slug generation, section conversion) internally
     // This eliminates CPU-intensive client-side processing (10-15% CPU savings)
     const baseArgs = {
-      p_version: version,
-      p_date: date,
       p_content: content,
+      p_date: date,
       p_metadata: {
         version,
       },
-    } satisfies Pick<Database['public']['Functions']['sync_changelog_entry']['Args'], 'p_version' | 'p_date' | 'p_content' | 'p_metadata'>;
+      p_version: version,
+    } satisfies Pick<
+      Database['public']['Functions']['sync_changelog_entry']['Args'],
+      'p_content' | 'p_date' | 'p_metadata' | 'p_version'
+    >;
 
-    const optionalArgs: Partial<Pick<Database['public']['Functions']['sync_changelog_entry']['Args'], 'p_tldr' | 'p_what_changed' | 'p_raw_content' | 'p_sections'>> = {};
+    const optionalArgs: Partial<
+      Pick<
+        Database['public']['Functions']['sync_changelog_entry']['Args'],
+        'p_raw_content' | 'p_sections' | 'p_tldr' | 'p_what_changed'
+      >
+    > = {};
     if (tldr) optionalArgs.p_tldr = tldr;
     if (whatChanged) optionalArgs.p_what_changed = whatChanged;
     if (rawContent) optionalArgs.p_raw_content = rawContent;
     if (sections && Object.keys(sections).length > 0) {
       // TypeScript needs explicit type assertion here because sections could be undefined
       // but we've already checked it exists and has keys
-      optionalArgs.p_sections = sections satisfies Database['public']['Functions']['sync_changelog_entry']['Args']['p_sections'];
+      optionalArgs.p_sections =
+        sections satisfies Database['public']['Functions']['sync_changelog_entry']['Args']['p_sections'];
     }
 
     const syncArgs = {
@@ -254,32 +263,32 @@ export async function POST(request: NextRequest) {
     if (isNewEntry) {
       reqLogger.info(
         {
+          action: 'changelog_insert',
+          audit: true,
           id: changelogData.id,
           slug,
-          audit: true,
-          action: 'changelog_insert',
         },
         'Changelog entry inserted'
       );
     } else {
       reqLogger.info(
         {
-          slug,
-          id: changelogData.id,
-          audit: true,
           action: 'changelog_sync_check',
+          audit: true,
+          id: changelogData.id,
+          slug,
         },
         'Changelog entry already exists'
       );
       return NextResponse.json(
-        { success: true, message: 'Entry already exists', id: changelogData.id },
+        { id: changelogData.id, message: 'Entry already exists', success: true },
         {
-          status: 200,
           headers: {
             'Content-Type': 'application/json',
             ...buildSecurityHeaders(),
             ...CORS,
           },
+          status: 200,
         }
       );
     }
@@ -288,20 +297,20 @@ export async function POST(request: NextRequest) {
     const tldrValue = changelogData.tldr ?? tldr ?? whatChanged ?? '';
     const notificationJob = {
       entryId: changelogData.id,
+      releaseDate: date,
+      sections: sections ?? {},
       slug,
       title: version,
       tldr: tldrValue,
-      sections: sections ?? {},
-      releaseDate: date,
     };
 
     try {
       await pgmqSend('changelog_notify', notificationJob);
       reqLogger.info(
         {
-          entryId: changelogData.id,
-          audit: true,
           action: 'notification_enqueued',
+          audit: true,
+          entryId: changelogData.id,
         },
         'Notification job enqueued'
       );
@@ -309,11 +318,11 @@ export async function POST(request: NextRequest) {
       // Notification is best-effort - log error but don't fail the request
       reqLogger.error(
         {
-          err: normalizeError(error),
-          entryId: changelogData.id,
-          slug,
-          audit: true,
           action: 'notification_enqueue_failed',
+          audit: true,
+          entryId: changelogData.id,
+          err: normalizeError(error),
+          slug,
         },
         'Failed to enqueue notification (non-fatal)'
       );
@@ -321,27 +330,27 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       {
-        success: true,
         id: changelogData.id,
-        slug,
         message: 'Changelog entry synced successfully',
+        slug,
+        success: true,
       },
       {
-        status: 200,
         headers: {
           'Content-Type': 'application/json',
           ...buildSecurityHeaders(),
           ...CORS,
         },
+        status: 200,
       }
     );
   } catch (error) {
     const normalized = normalizeError(error, 'Changelog sync API error');
     reqLogger.error({ err: normalized }, 'Changelog sync API error');
     return createErrorResponse(normalized, {
-      route: '/api/changelog/sync',
-      operation: 'ChangelogSyncAPI',
       method: 'POST',
+      operation: 'ChangelogSyncAPI',
+      route: '/api/changelog/sync',
     });
   }
 }
@@ -351,10 +360,10 @@ export async function POST(request: NextRequest) {
  */
 export function OPTIONS() {
   return new NextResponse(null, {
-    status: 204,
     headers: {
       ...buildSecurityHeaders(),
       ...CORS,
     },
+    status: 204,
   });
 }

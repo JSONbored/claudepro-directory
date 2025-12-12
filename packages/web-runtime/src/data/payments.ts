@@ -61,13 +61,13 @@ export async function getPaymentPlanCatalog(): Promise<PaymentPlanCatalogEntry[]
   'use cache';
 
   // Configure cache
-  cacheLife({ stale: 300, revalidate: 3600, expire: 7200 }); // 5min stale, 1hr revalidate, 2hr expire
+  cacheLife({ expire: 7200, revalidate: 3600, stale: 300 }); // 5min stale, 1hr revalidate, 2hr expire
   cacheTag('payment-plans');
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    operation: 'getPaymentPlanCatalog',
     module: 'data/payments',
+    operation: 'getPaymentPlanCatalog',
   });
 
   // Use anon client to avoid cookies() inside cache scope
@@ -103,15 +103,15 @@ export async function getPaymentPlanCatalog(): Promise<PaymentPlanCatalogEntry[]
     }
 
     const result = rows.map((entry) => ({
-      plan: entry.plan,
-      tier: entry.tier,
-      price_cents: entry.price_cents,
-      is_subscription: entry.is_subscription,
-      billing_cycle_days: entry.billing_cycle_days,
-      job_expiry_days: entry.job_expiry_days,
-      description: entry.description,
       benefits: sanitizeBenefits(entry.benefits),
+      billing_cycle_days: entry.billing_cycle_days,
+      description: entry.description,
+      is_subscription: entry.is_subscription,
+      job_expiry_days: entry.job_expiry_days,
+      plan: entry.plan,
+      price_cents: entry.price_cents,
       product_type: entry.product_type,
+      tier: entry.tier,
     }));
 
     reqLogger.info({ count: result.length }, 'getPaymentPlanCatalog: fetched successfully');
@@ -120,7 +120,7 @@ export async function getPaymentPlanCatalog(): Promise<PaymentPlanCatalogEntry[]
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string =
-      error instanceof Error ? error : typeof error === 'string' ? error : String(error);
+      error instanceof Error ? error : (typeof error === 'string' ? error : String(error));
     reqLogger.error({ err: errorForLogging }, 'getPaymentPlanCatalog failed');
     throw error;
   }
@@ -147,15 +147,15 @@ export async function getJobBillingSummaries(jobIds: string[]): Promise<JobBilli
   }
 
   // Configure cache
-  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
   // Create cache tag from sorted jobIds for stable cache key
   const sortedJobIds = [...jobIds].sort().join('-');
   cacheTag(`job-billing-${sortedJobIds}`);
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    operation: 'getJobBillingSummaries',
     module: 'data/payments',
+    operation: 'getJobBillingSummaries',
   });
 
   const { createSupabaseServerClient } = await import('../supabase/server.ts');
@@ -189,7 +189,7 @@ export async function getJobBillingSummaries(jobIds: string[]): Promise<JobBilli
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string =
-      error instanceof Error ? error : typeof error === 'string' ? error : String(error);
+      error instanceof Error ? error : (typeof error === 'string' ? error : String(error));
     reqLogger.error(
       { err: errorForLogging, jobCount: jobIds.length },
       'getJobBillingSummaries failed'

@@ -20,7 +20,7 @@ export async function getSimilarContent(input: {
 }): Promise<Database['public']['Functions']['get_similar_content']['Returns'] | null> {
   'use cache';
 
-  const { contentType, contentSlug, limit = 6 } = input;
+  const { contentSlug, contentType, limit = 6 } = input;
 
   const { isBuildTime } = await import('../../build-time.ts');
   const { createSupabaseAnonClient } = await import('../../supabase/server-anon.ts');
@@ -33,8 +33,8 @@ export async function getSimilarContent(input: {
   cacheTag(`content-${contentSlug}`);
 
   const reqLogger = logger.child({
-    operation: 'getSimilarContent',
     module: 'data/content/similar',
+    operation: 'getSimilarContent',
   });
 
   try {
@@ -48,13 +48,13 @@ export async function getSimilarContent(input: {
     }
 
     const result = await new ContentService(client).getSimilarContent({
-      p_content_type: contentType,
       p_content_slug: contentSlug,
+      p_content_type: contentType,
       p_limit: limit,
     });
 
     reqLogger.info(
-      { contentType, contentSlug, limit, hasResult: Boolean(result) },
+      { contentSlug, contentType, hasResult: Boolean(result), limit },
       'getSimilarContent: fetched successfully'
     );
 
@@ -63,7 +63,7 @@ export async function getSimilarContent(input: {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error(
-      { err: errorForLogging, contentType, contentSlug, limit },
+      { contentSlug, contentType, err: errorForLogging, limit },
       'getSimilarContent: failed'
     );
     return null;

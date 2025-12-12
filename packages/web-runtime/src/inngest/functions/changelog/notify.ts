@@ -14,6 +14,7 @@ import { inngest } from '../../client';
 import { createSupabaseAdminClient } from '../../../supabase/admin';
 import { pgmqRead, pgmqDelete, type PgmqMessage } from '../../../supabase/pgmq-client';
 import { logger, createWebAppContextWithId } from '../../../logging/server';
+import { sendCronSuccessHeartbeat } from '../../utils/monitoring';
 
 const CHANGELOG_NOTIFY_QUEUE = 'changelog_notify';
 const BATCH_SIZE = 5;
@@ -233,9 +234,19 @@ export const processChangelogNotifyQueue = inngest.createFunction(
       processed: messages.length,
       notified: notifiedCount, }, 'Changelog notify queue processing completed');
 
-    return {
+    const result = {
       processed: messages.length,
       notified: notifiedCount,
     };
+
+    // BetterStack monitoring: Send success heartbeat (feature-flagged)
+    if (result.notified > 0) {
+      sendCronSuccessHeartbeat('BETTERSTACK_HEARTBEAT_INNGEST_CRON', {
+        functionName: 'processChangelogNotifyQueue',
+        result: { notified: result.notified },
+      });
+    }
+
+    return result;
   }
 );

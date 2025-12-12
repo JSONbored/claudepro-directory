@@ -9,13 +9,13 @@ import { ContentService } from '@heyclaude/data-layer';
 import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { APP_CONFIG, buildSecurityHeaders } from '@heyclaude/shared-runtime';
-import { logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
+import { createErrorResponse, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  createSupabaseAnonClient,
   badRequestResponse,
+  buildCacheHeaders,
+  createSupabaseAnonClient,
   getOnlyCorsHeaders,
   getWithAcceptCorsHeaders,
-  buildCacheHeaders,
 } from '@heyclaude/web-runtime/server';
 import { cacheLife } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
@@ -23,7 +23,7 @@ import { NextRequest, NextResponse } from 'next/server';
 /**
  * Cached helper function to fetch full content record
  * Uses Cache Components to reduce function invocations
- * 
+ *
  * @param {DatabaseGenerated['public']['Enums']['content_category']} category - Content category enum value
  * @param {string} slug - Content slug to identify the record
  * @returns {Promise<unknown>} Full content record from the database (JSON object with content details)
@@ -38,9 +38,9 @@ async function getCachedContentFull(
   const supabase = createSupabaseAnonClient();
   const service = new ContentService(supabase);
   const rpcArgs = {
+    p_base_url: SITE_URL,
     p_category: category,
     p_slug: slug,
-    p_base_url: SITE_URL,
   } satisfies DatabaseGenerated['public']['Functions']['get_api_content_full']['Args'];
 
   return await service.getApiContentFull(rpcArgs);
@@ -79,10 +79,10 @@ function getStringProperty(obj: unknown, key: string): string | undefined {
   return desc && typeof desc.value === 'string' ? desc.value : undefined;
 }
 
-/**
+/***
  * Removes control characters (CR, LF, tab, backspace, form feed, vertical tab) and trims surrounding whitespace from a header value.
  *
- * @param val - The header value to sanitize (string)
+ * @param {string} val - The header value to sanitize (string)
  * @returns The sanitized header value (string) with control characters removed and trimmed
  */
 function sanitizeHeaderValue(val: string): string {
@@ -106,7 +106,7 @@ function sanitizeFilename(name: string): string {
   return cleaned;
 }
 
-/**
+/*****
  * Fetches a full content record for the given category and slug and returns it as an HTTP JSON response.
  *
  * Calls the `get_api_content_full` Supabase RPC and:
@@ -114,9 +114,9 @@ function sanitizeFilename(name: string): string {
  * - returns a 404 JSON response when no content is found,
  * - returns an error response produced by `createErrorResponse` when the RPC returns an error.
  *
- * @param category - Content category enum value used to scope the lookup
- * @param slug - Content slug to identify the record
- * @param reqLogger - Scoped request logger used to record RPC errors and context
+ * @param {DatabaseGenerated['public']['Enums']['content_category']} category - Content category enum value used to scope the lookup
+ * @param {string} slug - Content slug to identify the record
+ * @param {ReturnType<typeof logger.child>} reqLogger - Scoped request logger used to record RPC errors and context
  * @returns A NextResponse containing the exported JSON content on success, a 404 JSON response if not found, or an error response created from RPC errors
  * @see {@link createErrorResponse}
  * @see {@link get_api_content_full}
@@ -133,35 +133,43 @@ async function handleJsonFormat(
     const normalized = normalizeError(error, 'Operation failed');
     reqLogger.error(
       {
+        category,
         err: normalized,
         rpcName: 'get_api_content_full',
-        category,
         slug,
       },
       'Content JSON RPC error'
     );
     return createErrorResponse(normalized, {
-      route: '/api/content/[category]/[slug]',
-      operation: 'ContentRecordAPI',
-      method: 'GET',
       logContext: {
-        rpcName: 'get_api_content_full',
         category,
+        rpcName: 'get_api_content_full',
         slug,
       },
+      method: 'GET',
+      operation: 'ContentRecordAPI',
+      route: '/api/content/[category]/[slug]',
     });
   }
 
   if (!data) {
+    reqLogger.warn({ category, slug }, 'Content not found');
     return NextResponse.json(
-      { error: 'Content not found' },
       {
-        status: 404,
+        error: {
+          code: 'NOT_FOUND',
+          message: 'Content not found',
+        },
+        success: false,
+        timestamp: new Date().toISOString(),
+      },
+      {
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
           ...buildSecurityHeaders(),
           ...CORS_JSON,
         },
+        status: 404,
       }
     );
   }
@@ -178,20 +186,20 @@ async function handleJsonFormat(
       reqLogger.warn(
         {
           category,
-          slug,
           dataPreview: data.slice(0, 100),
+          slug,
         },
         'Content JSON: RPC returned non-JSON string'
       );
       return NextResponse.json(
         { error: 'Invalid JSON data from RPC' },
         {
-          status: 500,
           headers: {
             'Content-Type': 'application/json; charset=utf-8',
             ...buildSecurityHeaders(),
             ...CORS_JSON,
           },
+          status: 500,
         }
       );
     }
@@ -209,20 +217,20 @@ async function handleJsonFormat(
     reqLogger.warn(
       {
         category,
-        slug,
         dataType: typeof data,
+        slug,
       },
       'Content JSON: empty or null data returned from RPC'
     );
     return NextResponse.json(
       { error: 'Content data is empty' },
       {
-        status: 500,
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
           ...buildSecurityHeaders(),
           ...CORS_JSON,
         },
+        status: 500,
       }
     );
   }
@@ -231,7 +239,6 @@ async function handleJsonFormat(
   const jsonData = JSON.stringify(parsedData, null, 2);
 
   return new NextResponse(jsonData, {
-    status: 200,
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
       'X-Generated-By': 'supabase.rpc.get_api_content_full',
@@ -239,20 +246,21 @@ async function handleJsonFormat(
       ...CORS_JSON,
       ...buildCacheHeaders('content_export'),
     },
+    status: 200,
   });
 }
 
-/**
+/******
  * Produce a Markdown export for a content record.
  *
  * Parses `includeMetadata` and `includeFooter` from the provided `url`, invokes the
  * `generate_markdown_export` RPC for the given `category` and `slug`, and returns a
  * NextResponse containing the generated Markdown or a structured JSON error.
  *
- * @param category - DatabaseGenerated['public']['Enums']['content_category']: content category to export
- * @param slug - string: content record slug to export
- * @param url - URL: request URL used to read query params `includeMetadata` and `includeFooter`
- * @param reqLogger - ReturnType<typeof logger.child>: request-scoped logger for error and context logging
+ * @param {DatabaseGenerated['public']['Enums']['content_category']} category - DatabaseGenerated['public']['Enums']['content_category']: content category to export
+ * @param {string} slug - string: content record slug to export
+ * @param {URL} url - URL: request URL used to read query params `includeMetadata` and `includeFooter`
+ * @param {ReturnType<typeof logger.child>} reqLogger - ReturnType<typeof logger.child>: request-scoped logger for error and context logging
  * @returns A NextResponse containing the Markdown payload on success (status 200) or a JSON error payload on failure (status 400)
  *
  * @see generate_markdown_export RPC
@@ -272,9 +280,9 @@ async function handleMarkdownFormat(
   const service = new ContentService(supabase);
   const rpcArgs = {
     p_category: category,
-    p_slug: slug,
-    p_include_metadata: includeMetadata,
     p_include_footer: includeFooter,
+    p_include_metadata: includeMetadata,
+    p_slug: slug,
   } satisfies DatabaseGenerated['public']['Functions']['generate_markdown_export']['Args'];
 
   let data;
@@ -284,25 +292,24 @@ async function handleMarkdownFormat(
     const normalized = normalizeError(error, 'Content Markdown RPC error');
     reqLogger.error(
       {
+        category,
         err: normalized,
         rpcName: 'generate_markdown_export',
-        category,
         slug,
       },
       'Content Markdown RPC error'
     );
     return createErrorResponse(normalized, {
-      route: '/api/content/[category]/[slug]',
-      operation: 'ContentRecordAPI',
-      method: 'GET',
       logContext: {
-        rpcName: 'generate_markdown_export',
         category,
+        rpcName: 'generate_markdown_export',
         slug,
       },
+      method: 'GET',
+      operation: 'ContentRecordAPI',
+      route: '/api/content/[category]/[slug]',
     });
   }
-
 
   const success = getProperty(data, 'success');
   if (typeof success !== 'boolean' || !success) {
@@ -310,12 +317,12 @@ async function handleMarkdownFormat(
     return NextResponse.json(
       { error: typeof error === 'string' ? error : 'Markdown generation failed' },
       {
-        status: 400,
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
           ...buildSecurityHeaders(),
           ...CORS_MARKDOWN,
         },
+        status: 400,
       }
     );
   }
@@ -331,22 +338,22 @@ async function handleMarkdownFormat(
   ) {
     reqLogger.warn(
       {
-        hasMarkdown: typeof markdown === 'string',
-        hasFilename: typeof filename === 'string',
-        hasContentId: typeof contentId === 'string',
         dataKeys: data ? Object.keys(data) : [],
+        hasContentId: typeof contentId === 'string',
+        hasFilename: typeof filename === 'string',
+        hasMarkdown: typeof markdown === 'string',
       },
       'Content Markdown: invalid response structure'
     );
     return NextResponse.json(
       { error: 'Markdown generation failed: invalid response' },
       {
-        status: 400,
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
           ...buildSecurityHeaders(),
           ...CORS_MARKDOWN,
         },
+        status: 400,
       }
     );
   }
@@ -356,21 +363,21 @@ async function handleMarkdownFormat(
     reqLogger.warn(
       {
         category,
-        slug,
-        filename,
         contentId,
+        filename,
+        slug,
       },
       'Content Markdown: empty markdown content returned'
     );
     return NextResponse.json(
       { error: 'Markdown generation failed: empty content' },
       {
-        status: 400,
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
           ...buildSecurityHeaders(),
           ...CORS_MARKDOWN,
         },
+        status: 400,
       }
     );
   }
@@ -381,37 +388,37 @@ async function handleMarkdownFormat(
   reqLogger.info(
     {
       category,
-      slug,
-      filename: safeFilename,
       contentId: safeContentId,
+      filename: safeFilename,
       markdownLength: markdown.length,
+      slug,
     },
     'Content Markdown: markdown generated successfully'
   );
 
   return new NextResponse(markdown, {
-    status: 200,
     headers: {
-      'Content-Type': 'text/markdown; charset=utf-8',
       'Content-Disposition': `inline; filename="${safeFilename}"`,
-      'X-Generated-By': 'supabase.rpc.generate_markdown_export',
+      'Content-Type': 'text/markdown; charset=utf-8',
       'X-Content-ID': safeContentId,
+      'X-Generated-By': 'supabase.rpc.generate_markdown_export',
       ...buildSecurityHeaders(),
       ...CORS_MARKDOWN,
       ...buildCacheHeaders('content_export'),
     },
+    status: 200,
   });
 }
 
-/**
+/*****
  * Generate an LLMs.txt representation for a content item and return it as a plain text HTTP response.
  *
  * Calls the `generate_item_llms_txt` Supabase RPC with the provided category and slug and responds with
  * the RPC-produced text when found; returns a JSON error response when the item is not found or the RPC fails.
  *
- * @param category - Database content category enum identifying the type of content to export
- * @param slug - Content slug identifying the specific item to export
- * @param reqLogger - Scoped logger used for request-scoped logging and RPC error reporting
+ * @param {DatabaseGenerated['public']['Enums']['content_category']} category - Database content category enum identifying the type of content to export
+ * @param {string} slug - Content slug identifying the specific item to export
+ * @param {ReturnType<typeof logger.child>} reqLogger - Scoped logger used for request-scoped logging and RPC error reporting
  * @returns A NextResponse containing the LLMs.txt content as `text/plain; charset=utf-8` with appropriate security and cache headers on success, or a JSON error response (status 4xx/5xx) on RPC errors or when content is not found
  *
  * @see generate_item_llms_txt (Supabase RPC)
@@ -437,22 +444,22 @@ async function handleItemLlmsTxt(
     const normalized = normalizeError(error, 'Content LLMs.txt RPC error');
     reqLogger.error(
       {
+        category,
         err: normalized,
         rpcName: 'generate_item_llms_txt',
-        category,
         slug,
       },
       'Content LLMs.txt RPC error'
     );
     return createErrorResponse(normalized, {
-      route: '/api/content/[category]/[slug]',
-      operation: 'ContentRecordAPI',
-      method: 'GET',
       logContext: {
-        rpcName: 'generate_item_llms_txt',
         category,
+        rpcName: 'generate_item_llms_txt',
         slug,
       },
+      method: 'GET',
+      operation: 'ContentRecordAPI',
+      route: '/api/content/[category]/[slug]',
     });
   }
 
@@ -460,12 +467,12 @@ async function handleItemLlmsTxt(
     return NextResponse.json(
       { error: 'LLMs.txt content not found' },
       {
-        status: 404,
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
           ...buildSecurityHeaders(),
           ...CORS_JSON,
         },
+        status: 404,
       }
     );
   }
@@ -481,8 +488,8 @@ async function handleItemLlmsTxt(
         reqLogger.warn(
           {
             category,
-            slug,
             dataType: 'json',
+            slug,
           },
           'Content LLMs.txt: RPC returned JSON instead of plain text'
         );
@@ -493,10 +500,10 @@ async function handleItemLlmsTxt(
         const normalized = normalizeError(error, 'JSON parse failed, treating as plain text');
         reqLogger.debug(
           {
-            err: normalized,
             category,
-            slug,
             dataType: 'string',
+            err: normalized,
+            slug,
           },
           'Content LLMs.txt: Data looked like JSON but parse failed, treating as plain text'
         );
@@ -511,8 +518,8 @@ async function handleItemLlmsTxt(
     reqLogger.warn(
       {
         category,
-        slug,
         dataType: typeof data,
+        slug,
       },
       'Content LLMs.txt: RPC returned object instead of string'
     );
@@ -524,15 +531,14 @@ async function handleItemLlmsTxt(
   reqLogger.info(
     {
       category,
-      slug,
-      length: formatted.length,
       firstLine: formatted.split('\n')[0]?.slice(0, 50),
+      length: formatted.length,
+      slug,
     },
     'Content LLMs.txt: formatted successfully'
   );
 
   return new NextResponse(formatted, {
-    status: 200,
     headers: {
       'Content-Type': 'text/plain; charset=utf-8',
       'X-Generated-By': 'supabase.rpc.generate_item_llms_txt',
@@ -540,6 +546,7 @@ async function handleItemLlmsTxt(
       ...CORS_JSON,
       ...buildCacheHeaders('content_export'),
     },
+    status: 200,
   });
 }
 
@@ -549,7 +556,7 @@ async function handleStorageFormat(
   reqLogger: ReturnType<typeof logger.child>,
   metadataMode = false
 ) {
-  reqLogger.info({ category, slug, metadataMode }, 'Handling storage format');
+  reqLogger.info({ category, metadataMode, slug }, 'Handling storage format');
 
   const supabase = createSupabaseAnonClient();
   const service = new ContentService(supabase);
@@ -559,7 +566,7 @@ async function handleStorageFormat(
     const rpcArgs = {
       p_slug: slug,
     } satisfies DatabaseGenerated['public']['Functions']['get_skill_storage_path']['Args'];
-    
+
     let data;
     try {
       data = await service.getSkillStoragePath(rpcArgs);
@@ -574,13 +581,13 @@ async function handleStorageFormat(
         'Skill storage path RPC error'
       );
       return createErrorResponse(normalized, {
-        route: '/api/content/[category]/[slug]',
-        operation: 'ContentRecordAPI',
-        method: 'GET',
         logContext: {
           rpcName: 'get_skill_storage_path',
           slug,
         },
+        method: 'GET',
+        operation: 'ContentRecordAPI',
+        route: '/api/content/[category]/[slug]',
       });
     }
 
@@ -598,17 +605,16 @@ async function handleStorageFormat(
     if (metadataMode) {
       const metadata = {
         bucket,
-        object_path: objectPath,
         category,
-        slug,
         download_url: `${SITE_URL}/api/content/${category}/${slug}?format=storage`,
         note: 'Use download_url to fetch the actual binary file',
+        object_path: objectPath,
+        slug,
       };
 
       reqLogger.info({ bucket, objectPath }, 'Returning storage metadata');
 
       return NextResponse.json(metadata, {
-        status: 200,
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
           'X-Generated-By': 'supabase.rpc.get_skill_storage_path',
@@ -616,6 +622,7 @@ async function handleStorageFormat(
           ...CORS_JSON,
           ...buildCacheHeaders('content_export'),
         },
+        status: 200,
       });
     }
 
@@ -638,7 +645,6 @@ async function handleStorageFormat(
     // Permanent redirect (308) to Supabase Storage public URL
     // This bypasses Vercel Functions entirely for file downloads
     return NextResponse.redirect(publicUrl, {
-      status: 308, // Permanent redirect (preserves method)
       headers: {
         'Cache-Control': 'public, max-age=31536000, immutable',
         'X-Content-Source': 'supabase-storage:redirect',
@@ -647,6 +653,7 @@ async function handleStorageFormat(
         ...buildSecurityHeaders(),
         ...CORS_JSON,
       },
+      status: 308, // Permanent redirect (preserves method)
     });
   }
 
@@ -654,7 +661,7 @@ async function handleStorageFormat(
     const rpcArgs = {
       p_slug: slug,
     } satisfies DatabaseGenerated['public']['Functions']['get_mcpb_storage_path']['Args'];
-    
+
     let data;
     try {
       data = await service.getMcpbStoragePath(rpcArgs);
@@ -669,13 +676,13 @@ async function handleStorageFormat(
         'MCPB storage path RPC error'
       );
       return createErrorResponse(normalized, {
-        route: '/api/content/[category]/[slug]',
-        operation: 'ContentRecordAPI',
-        method: 'GET',
         logContext: {
           rpcName: 'get_mcpb_storage_path',
           slug,
         },
+        method: 'GET',
+        operation: 'ContentRecordAPI',
+        route: '/api/content/[category]/[slug]',
       });
     }
 
@@ -693,17 +700,16 @@ async function handleStorageFormat(
     if (metadataMode) {
       const metadata = {
         bucket,
-        object_path: objectPath,
         category,
-        slug,
         download_url: `${SITE_URL}/api/content/${category}/${slug}?format=storage`,
         note: 'Use download_url to fetch the actual binary file',
+        object_path: objectPath,
+        slug,
       };
 
       reqLogger.info({ bucket, objectPath }, 'Returning storage metadata');
 
       return NextResponse.json(metadata, {
-        status: 200,
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
           'X-Generated-By': 'supabase.rpc.get_mcpb_storage_path',
@@ -711,6 +717,7 @@ async function handleStorageFormat(
           ...CORS_JSON,
           ...buildCacheHeaders('content_export'),
         },
+        status: 200,
       });
     }
 
@@ -733,7 +740,6 @@ async function handleStorageFormat(
     // Permanent redirect (308) to Supabase Storage public URL
     // This bypasses Vercel Functions entirely for file downloads
     return NextResponse.redirect(publicUrl, {
-      status: 308, // Permanent redirect (preserves method)
       headers: {
         'Cache-Control': 'public, max-age=31536000, immutable',
         'X-Content-Source': 'supabase-storage:redirect',
@@ -742,6 +748,7 @@ async function handleStorageFormat(
         ...buildSecurityHeaders(),
         ...CORS_JSON,
       },
+      status: 308, // Permanent redirect (preserves method)
     });
   }
 
@@ -756,9 +763,9 @@ export async function GET(
   { params }: { params: Promise<{ category: string; slug: string }> }
 ) {
   const reqLogger = logger.child({
+    method: 'GET',
     operation: 'ContentRecordAPI',
     route: '/api/content/[category]/[slug]',
-    method: 'GET',
   });
 
   try {
@@ -777,8 +784,8 @@ export async function GET(
     reqLogger.info(
       {
         category,
-        slug,
         format,
+        slug,
       },
       'Content record export request received'
     );
@@ -787,13 +794,13 @@ export async function GET(
       case 'json': {
         return handleJsonFormat(category, slug, reqLogger);
       }
-      case 'markdown':
-      case 'md': {
-        return handleMarkdownFormat(category, slug, url, reqLogger);
-      }
       case 'llms':
       case 'llms-txt': {
         return handleItemLlmsTxt(category, slug, reqLogger);
+      }
+      case 'markdown':
+      case 'md': {
+        return handleMarkdownFormat(category, slug, url, reqLogger);
       }
       case 'storage': {
         // Check if metadata mode is requested (for MCP resources)
@@ -811,9 +818,9 @@ export async function GET(
     const normalized = normalizeError(error, 'Content record API error');
     reqLogger.error({ err: normalized }, 'Content record API error');
     return createErrorResponse(normalized, {
-      route: '/api/content/[category]/[slug]',
-      operation: 'ContentRecordAPI',
       method: 'GET',
+      operation: 'ContentRecordAPI',
+      route: '/api/content/[category]/[slug]',
     });
   }
 }
@@ -826,9 +833,9 @@ export async function GET(
  */
 export function OPTIONS() {
   return new NextResponse(null, {
-    status: 204,
     headers: {
       ...getOnlyCorsHeaders,
     },
+    status: 204,
   });
 }

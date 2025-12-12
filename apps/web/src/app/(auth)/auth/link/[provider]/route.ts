@@ -39,14 +39,14 @@ export async function GET(
   { params }: { params: Promise<{ provider: string }> }
 ) {
   const { provider: rawProvider } = await params;
-  const { searchParams, origin } = new URL(request.url);
+  const { origin, searchParams } = new URL(request.url);
   const next = validateNextParameter(searchParams.get('next'), '/account/connected-accounts');
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
+    module: 'app/(auth)/auth/link/[provider]',
     operation: 'OAuthLink',
     route: `/auth/link/${rawProvider}`,
-    module: 'app/(auth)/auth/link/[provider]',
   });
 
   // Validate provider
@@ -57,8 +57,8 @@ export async function GET(
 
   // Check if user is authenticated
   const authResult = await getAuthenticatedUser({
-    requireUser: false,
     context: 'OAuthLink',
+    requireUser: false,
   });
 
   if (!authResult.isAuthenticated || !authResult.user) {

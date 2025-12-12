@@ -29,7 +29,7 @@ export const getCategoryConfig = (
   };
 };
 
-export { VALID_CATEGORIES, isValidCategory } from '../../../utils/category-validation.ts';
+export { isValidCategory, VALID_CATEGORIES } from '../../../utils/category-validation.ts';
 
 export const getCategoryStatsConfig = (): readonly CategoryStatsConfig[] => {
   // Iterate over CATEGORY_CONFIGS entries directly to satisfy TypeScript's type system.
@@ -45,9 +45,9 @@ export const getCategoryStatsConfig = (): readonly CategoryStatsConfig[] => {
     // Explicitly type the return to ensure type safety
     const statsConfig: CategoryStatsConfig = {
       categoryId,
-      icon: config.icon,
-      displayText: config.pluralTitle,
       delay: index * 100,
+      displayText: config.pluralTitle,
+      icon: config.icon,
     };
     return statsConfig;
   });
@@ -66,9 +66,9 @@ export function getTotalResourceCount(stats: Record<string, number>): number {
 
 export {
   ALL_CATEGORY_IDS,
-  ALL_CATEGORY_IDS as getAllCategoryIds,
-  HOMEPAGE_CATEGORY_IDS,
-  HOMEPAGE_CATEGORY_IDS as getHomepageCategoryIds,
   CACHEABLE_CATEGORY_IDS,
+  ALL_CATEGORY_IDS as getAllCategoryIds,
   CACHEABLE_CATEGORY_IDS as getCacheableCategoryIds,
+  HOMEPAGE_CATEGORY_IDS as getHomepageCategoryIds,
+  HOMEPAGE_CATEGORY_IDS,
 } from './category-config.ts';

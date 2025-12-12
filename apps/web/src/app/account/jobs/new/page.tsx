@@ -49,9 +49,9 @@ export default async function NewJobPage() {
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
+    module: 'apps/web/src/app/account/jobs/new',
     operation: 'NewJobPage',
     route: '/account/jobs/new',
-    module: 'apps/web/src/app/account/jobs/new',
   });
 
   // Section: Plan Catalog Fetch
@@ -60,8 +60,8 @@ export default async function NewJobPage() {
     planCatalog = await getPaymentPlanCatalog();
     reqLogger.info(
       {
-        section: 'data-fetch',
         plansCount: planCatalog.length,
+        section: 'data-fetch',
       },
       'NewJobPage: plan catalog loaded'
     );
@@ -69,19 +69,19 @@ export default async function NewJobPage() {
     const normalized = normalizeError(error, 'NewJobPage: failed to fetch plan catalog');
     reqLogger.warn(
       {
-        section: 'data-fetch',
         err: normalized,
         name: normalized.name,
+        section: 'data-fetch',
       },
       'NewJobPage: failed to fetch plan catalog, using fallback'
     );
     // planCatalog remains [] - JobForm will use legacy fallback
   }
 
-  /**
+  /***
    * Create a job from submitted form data, initiating checkout if payment is required or redirecting to the jobs list when no payment is needed.
    *
-   * @param data - The payload from JobForm used to create the job
+   * @param {CreateJobInput} data - The payload from JobForm used to create the job
    * @returns An object describing the outcome:
    * - `{ success: true, requiresPayment: true, checkoutUrl: string, message: string }` when creation succeeded and a checkout URL is provided,
    * - `{ success: false, requiresPayment: true, message: string }` when creation indicates payment is required but no checkout URL could be started,
@@ -99,9 +99,9 @@ export default async function NewJobPage() {
 
     // Create request-scoped child logger for server action
     const actionLogger = logger.child({
+      module: 'apps/web/src/app/account/jobs/new',
       operation: 'NewJobPageAction',
       route: '/account/jobs/new',
-      module: 'apps/web/src/app/account/jobs/new',
     });
 
     let result: Awaited<ReturnType<typeof createJob>>;
@@ -146,25 +146,25 @@ export default async function NewJobPage() {
           );
           actionLogger.error(
             {
+              companyId: jobResult.company_id ?? 'unknown',
               err: normalized,
               jobId: jobResult.job_id ?? 'unknown',
-              companyId: jobResult.company_id ?? 'unknown',
             },
             'NewJobPage: missing checkout URL'
           );
           return {
-            success: false,
-            requiresPayment: true,
             message:
               'Unable to start checkout right now. Please try again shortly or contact support.',
+            requiresPayment: true,
+            success: false,
           };
         }
 
         return {
-          success: true,
-          requiresPayment: true,
           checkoutUrl: jobResult.checkoutUrl,
           message: 'Redirecting to payment...',
+          requiresPayment: true,
+          success: true,
         };
       }
 
@@ -179,16 +179,16 @@ export default async function NewJobPage() {
     );
     actionLogger.error(
       {
+        companyId: jobResult.company_id ?? 'unknown',
         err: normalized,
         jobId: jobResult.job_id ?? 'unknown',
-        companyId: jobResult.company_id ?? 'unknown',
         requiresPayment: jobResult.requires_payment ?? false,
       },
       'NewJobPage: createJob returned success=false'
     );
     return {
-      success: false,
       message: 'Job creation failed. Please try again or contact support.',
+      success: false,
     };
   }
 
@@ -201,7 +201,7 @@ export default async function NewJobPage() {
         </p>
       </div>
 
-      <JobForm onSubmit={handleSubmit} submitLabel="Create Job Listing" planCatalog={planCatalog} />
+      <JobForm planCatalog={planCatalog} submitLabel="Create Job Listing" onSubmit={handleSubmit} />
     </div>
   );
 }

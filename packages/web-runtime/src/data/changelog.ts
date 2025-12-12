@@ -19,17 +19,17 @@ function createEmptyOverview(
 ): Database['public']['Functions']['get_changelog_overview']['Returns'] {
   return {
     entries: [],
-    metadata: {
-      total_entries: 0,
-      date_range: { earliest: '', latest: '' },
-      category_counts: {},
-    },
     featured: [],
+    metadata: {
+      category_counts: {},
+      date_range: { earliest: '', latest: '' },
+      total_entries: 0,
+    },
     pagination: {
-      total: 0,
+      has_more: false,
       limit,
       offset,
-      has_more: false,
+      total: 0,
     },
   };
 }
@@ -55,7 +55,7 @@ export async function getChangelogOverview(
 ): Promise<Database['public']['Functions']['get_changelog_overview']['Returns']> {
   'use cache';
 
-  const { category, publishedOnly = true, featuredOnly = false, limit = 50, offset = 0 } = options;
+  const { category, featuredOnly = false, limit = 50, offset = 0, publishedOnly = true } = options;
 
   const { isBuildTime } = await import('../build-time.ts');
   const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
@@ -68,8 +68,8 @@ export async function getChangelogOverview(
   }
 
   const reqLogger = logger.child({
-    operation: 'getChangelogOverview',
     module: 'data/changelog',
+    operation: 'getChangelogOverview',
   });
 
   try {
@@ -84,20 +84,20 @@ export async function getChangelogOverview(
 
     const result = await new ChangelogService(client).getChangelogOverview({
       ...(category ? { p_category: category } : {}),
-      p_published_only: publishedOnly,
       p_featured_only: featuredOnly,
       p_limit: limit,
       p_offset: offset,
+      p_published_only: publishedOnly,
     });
 
     reqLogger.info(
       {
         ...(category ? { category } : {}),
-        publishedOnly,
+        entryCount: result.entries?.length ?? 0,
         featuredOnly,
         limit,
         offset,
-        entryCount: result.entries?.length ?? 0,
+        publishedOnly,
       },
       'getChangelogOverview: fetched successfully'
     );
@@ -110,10 +110,10 @@ export async function getChangelogOverview(
       {
         err: errorForLogging,
         ...(category ? { category } : {}),
-        publishedOnly,
         featuredOnly,
         limit,
         offset,
+        publishedOnly,
       },
       'getChangelogOverview: failed'
     );
@@ -145,8 +145,8 @@ export async function getChangelogEntryBySlug(
   cacheTag(`changelog-${slug}`);
 
   const reqLogger = logger.child({
-    operation: 'getChangelogEntryBySlug',
     module: 'data/changelog',
+    operation: 'getChangelogEntryBySlug',
   });
 
   try {
@@ -168,36 +168,36 @@ export async function getChangelogEntryBySlug(
 
     const entry = result.entry;
     const normalizedEntry = {
-      id: entry.id ?? '',
-      slug: entry.slug ?? '',
-      title: entry.title ?? '',
-      tldr: entry.tldr,
-      description: entry.description,
+      canonical_url: null,
+      changes: entry.changes ?? {},
+      commit_count: null,
       content: entry.content ?? '',
-      raw_content: entry.raw_content ?? '',
-      release_date: entry.release_date ?? '',
+      contributors: null,
+      created_at: entry.created_at ?? '',
+      description: entry.description,
       featured: entry.featured ?? false,
-      published: entry.published ?? false,
+      git_commit_sha: null,
+      id: entry.id ?? '',
+      json_ld: null,
       keywords: entry.keywords,
       metadata: entry.metadata,
-      changes: entry.changes ?? {},
-      created_at: entry.created_at ?? '',
-      updated_at: entry.updated_at ?? '',
-      canonical_url: null,
-      commit_count: null,
-      contributors: null,
-      git_commit_sha: null,
-      json_ld: null,
       og_image: null,
       og_type: null,
+      published: entry.published ?? false,
+      raw_content: entry.raw_content ?? '',
+      release_date: entry.release_date ?? '',
       robots_follow: null,
       robots_index: null,
+      slug: entry.slug ?? '',
       source: null,
+      title: entry.title ?? '',
+      tldr: entry.tldr,
       twitter_card: null,
+      updated_at: entry.updated_at ?? '',
     } as Database['public']['Tables']['changelog']['Row'];
 
     reqLogger.info(
-      { slug, hasEntry: Boolean(normalizedEntry) },
+      { hasEntry: Boolean(normalizedEntry), slug },
       'getChangelogEntryBySlug: fetched successfully'
     );
 
@@ -220,17 +220,17 @@ export async function getChangelog(): Promise<{
   // OPTIMIZATION: Use configurable limit instead of hardcoded 1000
   const limit = QUERY_LIMITS.changelog.default;
   const overview = await getChangelogOverview({
-    publishedOnly: true,
     limit,
     offset: 0,
+    publishedOnly: true,
   });
 
   return {
     entries: overview.entries ?? [],
-    total: overview.pagination?.total ?? 0,
+    hasMore: overview.pagination?.has_more ?? false,
     limit: overview.pagination?.limit ?? 0,
     offset: overview.pagination?.offset ?? 0,
-    hasMore: overview.pagination?.has_more ?? false,
+    total: overview.pagination?.total ?? 0,
   };
 }
 
@@ -245,8 +245,11 @@ function normalizeChangelogEntry(
   const fullEntry: Database['public']['Tables']['changelog']['Row'] = {
     ...entry,
     canonical_url: null,
+    changes: entry.changes ?? {},
     commit_count: null,
+    content: entry.content ?? '',
     contributors: null,
+    created_at: entry.created_at ?? '',
     git_commit_sha: null,
     json_ld: null,
     og_image: null,
@@ -255,9 +258,6 @@ function normalizeChangelogEntry(
     robots_index: null,
     source: null,
     twitter_card: null,
-    content: entry.content ?? '',
-    changes: entry.changes ?? {},
-    created_at: entry.created_at ?? '',
     updated_at: entry.updated_at ?? '',
   } as Database['public']['Tables']['changelog']['Row'];
 
@@ -279,9 +279,9 @@ export async function getAllChangelogEntries(): Promise<
   // OPTIMIZATION: Use max limit constant for admin/export scenario (getAllChangelogEntries)
   const limit = QUERY_LIMITS.changelog.max;
   const overview = await getChangelogOverview({
-    publishedOnly: false,
     limit,
     offset: 0,
+    publishedOnly: false,
   });
 
   return (overview.entries ?? []).map((entry) => normalizeChangelogEntry(entry));
@@ -296,9 +296,9 @@ export async function getRecentChangelogEntries(limit = 5): Promise<
   >
 > {
   const overview = await getChangelogOverview({
-    publishedOnly: true,
     limit,
     offset: 0,
+    publishedOnly: true,
   });
 
   return (overview.entries ?? []).map((entry) => normalizeChangelogEntry(entry));
@@ -318,9 +318,9 @@ export async function getChangelogEntriesByCategory(
   const limit = QUERY_LIMITS.changelog.default;
   const overview = await getChangelogOverview({
     category,
-    publishedOnly: true,
     limit,
     offset: 0,
+    publishedOnly: true,
   });
 
   return (overview.entries ?? []).map((entry) => normalizeChangelogEntry(entry));
@@ -335,10 +335,10 @@ export async function getFeaturedChangelogEntries(limit = 3): Promise<
   >
 > {
   const overview = await getChangelogOverview({
-    publishedOnly: true,
     featuredOnly: true,
     limit,
     offset: 0,
+    publishedOnly: true,
   });
 
   return (overview.featured ?? []).map((entry) => normalizeChangelogEntry(entry));
@@ -349,20 +349,20 @@ export async function getChangelogMetadata() {
   const metadata = overview.metadata;
   if (!metadata) {
     return {
-      totalEntries: 0,
-      dateRange: { earliest: '', latest: '' },
       categoryCounts: {},
+      dateRange: { earliest: '', latest: '' },
+      totalEntries: 0,
     };
   }
   const categoryCounts =
     metadata.category_counts == null ? {} : (metadata.category_counts as Record<string, number>);
 
   return {
-    totalEntries: metadata.total_entries ?? 0,
+    categoryCounts,
     dateRange: {
       earliest: metadata.date_range?.earliest ?? '',
       latest: metadata.date_range?.latest ?? '',
     },
-    categoryCounts,
+    totalEntries: metadata.total_entries ?? 0,
   };
 }

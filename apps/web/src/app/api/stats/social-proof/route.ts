@@ -14,7 +14,7 @@
  */
 import { MiscService } from '@heyclaude/data-layer';
 import { type Database } from '@heyclaude/database-types';
-import { logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
+import { createErrorResponse, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { createSupabaseAdminClient } from '@heyclaude/web-runtime/server';
 import { cacheLife } from 'next/cache';
 import { connection, NextResponse } from 'next/server';
@@ -22,7 +22,7 @@ import { connection, NextResponse } from 'next/server';
 /**
  * Cached helper function to fetch social proof stats.
  * Uses database RPC function to do all aggregations in the database.
- * 
+ *
  * @returns A promise resolving to social proof stats: contributors (count and names), submissions count, successRate (percentage or null), and totalUsers (count or null).
  */
 async function getCachedSocialProofData(): Promise<{
@@ -46,10 +46,11 @@ async function getCachedSocialProofData(): Promise<{
   type SocialProofStatsFunction = Database['public']['Functions']['get_social_proof_stats'];
   type NoArgsOverload = Extract<SocialProofStatsFunction, { Args: never }>;
   type SocialProofStatsRow = NoArgsOverload['Returns'][number];
-  
-  const result = (data as NoArgsOverload['Returns']) ?? [];
-  const row = Array.isArray(result) && result.length > 0 ? (result[0] as SocialProofStatsRow) : null;
-  
+
+  const result = data ?? [];
+  const row =
+    Array.isArray(result) && result.length > 0 ? (result[0] as SocialProofStatsRow) : null;
+
   if (!row) {
     // Return defaults if no data
     return {
@@ -68,9 +69,8 @@ async function getCachedSocialProofData(): Promise<{
       names: Array.isArray(row.contributor_names) ? row.contributor_names : [],
     },
     submissions: row.submission_count ?? 0,
-    successRate: row.success_rate !== null && row.success_rate !== undefined 
-      ? Number(row.success_rate) 
-      : null,
+    successRate:
+      row.success_rate !== null && row.success_rate !== undefined ? Number(row.success_rate) : null,
     totalUsers: row.total_users ?? null,
   };
 }
@@ -110,9 +110,9 @@ export async function GET() {
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
+    module: 'apps/web/src/app/api/stats/social-proof',
     operation: 'SocialProofStatsAPI',
     route: '/api/stats/social-proof',
-    module: 'apps/web/src/app/api/stats/social-proof',
   });
 
   try {
@@ -125,13 +125,13 @@ export async function GET() {
     // Structured logging with cache tags and stats
     reqLogger.info(
       {
+        cacheTags: ['stats', 'social-proof'],
         stats: {
           contributorCount: stats.contributors.count,
           submissionCount: stats.submissions,
           successRate: stats.successRate,
           totalUsers: stats.totalUsers,
         },
-        cacheTags: ['stats', 'social-proof'],
       },
       'Social proof stats retrieved'
     );
@@ -144,17 +144,17 @@ export async function GET() {
     // Return stats with ETag and Last-Modified headers
     return NextResponse.json(
       {
-        success: true,
         stats,
+        success: true,
         timestamp,
       },
       {
-        status: 200,
         headers: {
           'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
           ETag: etag,
           'Last-Modified': new Date(timestamp).toUTCString(),
         },
+        status: 200,
       }
     );
   } catch (error) {
@@ -167,9 +167,9 @@ export async function GET() {
       'Social proof stats API error'
     );
     return createErrorResponse(normalized, {
-      route: '/api/stats/social-proof',
-      operation: 'SocialProofStatsAPI',
       method: 'GET',
+      operation: 'SocialProofStatsAPI',
+      route: '/api/stats/social-proof',
     });
   }
 }

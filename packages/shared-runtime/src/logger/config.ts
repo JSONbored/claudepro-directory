@@ -223,51 +223,17 @@ function hashUserIdCensor(value: unknown, path: string[]): string {
  * 
  * @remarks
  * The `service` field is added dynamically by each package (web-runtime, edge-runtime, etc.)
- * The `env` field is automatically set from `VERCEL_ENV` (if available) or `NODE_ENV` as fallback
- * VERCEL_ENV correctly distinguishes between production, preview, and development
- * while NODE_ENV is always 'production' on Vercel for all environments
+ * The `env` field is automatically set using platform-agnostic environment detection
+ * which works across all deployment platforms (Vercel, Netlify, Cloudflare, AWS, etc.)
  * 
  * For local builds: NODE_ENV is 'production' (set by Next.js), but we detect this is a local build
  * and use 'build' instead to distinguish from actual production deployments
  */
+import { getDeploymentEnv } from '../platform/index.ts';
+
 export const BASE_CONTEXT = {
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-boolean-expressions -- Runtime check for Edge compatibility
-  env: (() => {
-    if (typeof process === 'undefined' || !process.env) {
-      return 'development';
-    }
-    
-    // Priority 1: VERCEL_ENV (most accurate - distinguishes production/preview/development on Vercel)
-    if (process.env['VERCEL_ENV']) {
-      return process.env['VERCEL_ENV'];
-    }
-    
-    // Priority 2: Detect local build (NODE_ENV=production but not on Vercel)
-    // Next.js sets NODE_ENV=production during build, even locally
-    // We detect this by checking if we're NOT on Vercel and NODE_ENV is production
-    const isVercel = process.env['VERCEL'] === '1' || process.env['VERCEL_URL'];
-    const isBuildPhase = process.env['NEXT_PHASE'] === 'phase-production-build' || 
-                         process.env['NEXT_PHASE'] === 'phase-production-server';
-    const nodeEnvIsProduction = process.env['NODE_ENV'] === 'production';
-    
-    // If NODE_ENV is production but we're not on Vercel, this is a local build
-    if (nodeEnvIsProduction && !isVercel) {
-      // Check if this is during build phase
-      if (isBuildPhase || (typeof process.argv !== 'undefined' && process.argv.some(arg => arg.includes('next') && (arg.includes('build') || arg.includes('export'))))) {
-        return 'build'; // Local build - distinguish from production
-      }
-      // Otherwise, it's local production mode (unlikely but possible)
-      return 'production';
-    }
-    
-    // Priority 3: NODE_ENV (fallback for non-Vercel environments)
-    if (process.env['NODE_ENV']) {
-      return process.env['NODE_ENV'];
-    }
-    
-    // Default: development
-    return 'development';
-  })(),
+  env: getDeploymentEnv(),
   // Service name will be overridden by each package
   // version: process.env?.npm_package_version || '0.0.0',
 } as const;

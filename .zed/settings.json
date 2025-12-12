@@ -9,18 +9,117 @@
     "unstable": true,
     "internal_debug": false
   },
+  "format_on_save": "on",
   "languages": {
     "Deno": {
       "language_servers": ["deno", "!typescript-language-server", "!vtsls"]
     },
     "TypeScript": {
-      "language_servers": ["vtsls", "typescript-language-server", "!deno"]
+      "language_servers": ["vtsls", "typescript-language-server", "!deno"],
+      "formatter": [
+        {
+          "code_action": "source.fixAll.eslint"
+        },
+        {
+          "external": {
+            "command": "npx",
+            "arguments": ["prettier", "--stdin-filepath", "{buffer_path}"]
+          }
+        }
+      ]
     },
     "JavaScript": {
-      "language_servers": ["vtsls", "typescript-language-server", "!deno"]
+      "language_servers": ["vtsls", "typescript-language-server", "!deno"],
+      "formatter": [
+        {
+          "code_action": "source.fixAll.eslint"
+        },
+        {
+          "external": {
+            "command": "npx",
+            "arguments": ["prettier", "--stdin-filepath", "{buffer_path}"]
+          }
+        }
+      ]
+    },
+    "TypeScript React": {
+      "language_servers": ["vtsls", "typescript-language-server", "!deno"],
+      "formatter": [
+        {
+          "code_action": "source.fixAll.eslint"
+        },
+        {
+          "external": {
+            "command": "npx",
+            "arguments": ["prettier", "--stdin-filepath", "{buffer_path}"]
+          }
+        }
+      ]
+    },
+    "JavaScript React": {
+      "language_servers": ["vtsls", "typescript-language-server", "!deno"],
+      "formatter": [
+        {
+          "code_action": "source.fixAll.eslint"
+        },
+        {
+          "external": {
+            "command": "npx",
+            "arguments": ["prettier", "--stdin-filepath", "{buffer_path}"]
+          }
+        }
+      ]
+    },
+    "CSS": {
+      "language_servers": ["eslint", "tailwindcss"],
+      "formatter": ["npx", "prettier", "--stdin-filepath"]
+    },
+    "JSON": {
+      "language_servers": ["eslint"],
+      "formatter": ["npx", "prettier", "--stdin-filepath"]
+    },
+    "Markdown": {
+      "language_servers": ["eslint"],
+      "formatter": ["npx", "prettier", "--stdin-filepath"]
+    },
+    "HTML": {
+      "language_servers": ["eslint"]
+    },
+    "YAML": {
+      "language_servers": ["eslint"]
     }
   },
   "lsp": {
+    "vtsls": {
+      "settings": {
+        "typescript": {
+          "tsdk": "./node_modules/typescript/lib",
+          "preferences": {
+            "includePackageJsonAutoImports": "on"
+          }
+        },
+        "javascript": {
+          "preferences": {
+            "includePackageJsonAutoImports": "on"
+          }
+        }
+      }
+    },
+    "typescript-language-server": {
+      "settings": {
+        "typescript": {
+          "tsdk": "./node_modules/typescript/lib",
+          "preferences": {
+            "includePackageJsonAutoImports": "on"
+          }
+        },
+        "javascript": {
+          "preferences": {
+            "includePackageJsonAutoImports": "on"
+          }
+        }
+      }
+    },
     "deno": {
       "settings": {
         "deno": {
@@ -28,6 +127,34 @@
           "config": "./apps/edge/functions/deno.json",
           "lint": true,
           "unstable": true
+        }
+      }
+    },
+    "eslint": {
+      "settings": {
+        "codeActionOnSave": {
+          "enable": true,
+          "mode": "all"
+        },
+        "validate": ["typescript", "typescriptreact", "javascript", "javascriptreact", "html", "css", "json", "jsonc", "markdown", "yaml"],
+        "run": "onType"
+      }
+    },
+    "tailwindcss": {
+      "binary": {
+        "path": "npx",
+        "arguments": ["@tailwindcss/language-server"]
+      },
+      "initialization_options": {
+        "experimental": {
+          "classRegex": [
+            ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+            ["cn\\(([^)]*)\\)", "(?:'|\"|`)([^\"'`]*)(?:'|\"|`)"]
+          ]
+        },
+        "userLanguages": {
+          "typescript": "javascript",
+          "typescriptreact": "javascriptreact"
         }
       }
     }

@@ -52,15 +52,15 @@ export async function getHomepageData(
     const { createLogger } = await import('@heyclaude/shared-runtime/logger/index.ts');
     const cacheLogger = createLogger({ timestamp: false });
     const reqLogger = cacheLogger.child({
+      module: 'packages/web-runtime/src/data/content/homepage',
       operation: 'getHomepageData',
       route: 'utility-function', // Utility function - no specific route
-      module: 'packages/web-runtime/src/data/content/homepage',
     });
 
     reqLogger.info(
       {
-        categoryIds: sortedCategoryIds,
         categoryCount: categoryIds.length,
+        categoryIds: sortedCategoryIds,
         limit: 6,
       },
       'getHomepageData: fetched successfully'
@@ -73,17 +73,17 @@ export async function getHomepageData(
       await import('@heyclaude/shared-runtime/logger/index.ts');
     const cacheLogger = createLogger({ timestamp: false });
     const reqLogger = cacheLogger.child({
+      module: 'packages/web-runtime/src/data/content/homepage',
       operation: 'getHomepageData',
       route: 'utility-function',
-      module: 'packages/web-runtime/src/data/content/homepage',
     });
 
     const normalized = normalizeError(error, 'getHomepageData failed');
     reqLogger.error(
       {
-        err: normalized,
-        categoryIds: sortedCategoryIds,
         categoryCount: categoryIds.length,
+        categoryIds: sortedCategoryIds,
+        err: normalized,
       },
       'getHomepageData failed'
     );

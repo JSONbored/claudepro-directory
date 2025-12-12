@@ -3,7 +3,7 @@
  */
 
 import { Constants } from '@heyclaude/database-types';
-import { getSafeWebsiteUrl, getSafeMailtoUrl, isValidCategory } from '@heyclaude/web-runtime/core';
+import { getSafeMailtoUrl, getSafeWebsiteUrl, isValidCategory } from '@heyclaude/web-runtime/core';
 import { getCategoryConfig } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
@@ -21,13 +21,13 @@ import { generatePageMetadata, getJobBySlug } from '@heyclaude/web-runtime/serve
 import { type PageProps } from '@heyclaude/web-runtime/types/app.schema';
 import { slugParamsSchema } from '@heyclaude/web-runtime/types/app.schema';
 import {
-  UI_CLASSES,
-  UnifiedBadge,
   Button,
   Card,
   CardContent,
   CardHeader,
   CardTitle,
+  UI_CLASSES,
+  UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
@@ -67,9 +67,9 @@ export async function generateMetadata({
 
   // Create request-scoped child logger
   const metadataLogger = logger.child({
+    module: 'apps/web/src/app/jobs/[slug]',
     operation: 'JobPageMetadata',
     route: `/jobs/${slug}`,
-    module: 'apps/web/src/app/jobs/[slug]',
   });
 
   let job: Awaited<ReturnType<typeof getJobBySlug>> = null;
@@ -87,8 +87,8 @@ export async function generateMetadata({
   }
 
   return generatePageMetadata('/jobs/:slug', {
-    params: { slug },
     item: job ? { ...job, tags: job.tags ?? [] } : undefined,
+    params: { slug },
     slug,
   });
 }
@@ -110,9 +110,9 @@ export async function generateStaticParams() {
 
   // Create request-scoped child logger
   const reqLogger = logger.child({
+    module: 'apps/web/src/app/jobs/[slug]',
     operation: 'JobPageStaticParams',
     route: '/jobs',
-    module: 'apps/web/src/app/jobs/[slug]',
   });
 
   const { getFilteredJobs } = await import('@heyclaude/web-runtime/server');
@@ -139,8 +139,8 @@ export async function generateStaticParams() {
     const normalized = normalizeError(error, 'Failed to load jobs for static params');
     reqLogger.error(
       {
-        section: 'data-fetch',
         err: normalized,
+        section: 'data-fetch',
       },
       'JobPage: getFilteredJobs threw in generateStaticParams'
     );
@@ -182,18 +182,18 @@ export default async function JobPage({ params }: PageProps) {
 
   // Create request-scoped child logger
   const reqLogger = logger.child({
+    module: 'apps/web/src/app/jobs/[slug]',
     operation: 'JobPage',
     route: `/jobs/${slug}`,
-    module: 'apps/web/src/app/jobs/[slug]',
   });
 
   // Section: Parameter Validation
   if (!validationResult.success) {
     reqLogger.error(
       {
-        section: 'data-fetch',
         err: new Error(validationResult.error.issues[0]?.message ?? 'Invalid slug'),
         errorCount: validationResult.error.issues.length,
+        section: 'data-fetch',
       },
       'Invalid slug parameter for job page'
     );
@@ -211,7 +211,7 @@ export default async function JobPage({ params }: PageProps) {
 
   return (
     <Suspense fallback={<Loading />}>
-      <JobPageContent slug={validatedSlug} reqLogger={reqLogger} />
+      <JobPageContent reqLogger={reqLogger} slug={validatedSlug} />
     </Suspense>
   );
 }
@@ -233,8 +233,8 @@ export default async function JobPage({ params }: PageProps) {
  * @see getSafeMailtoUrl
  */
 async function JobPageContent({
-  slug,
   reqLogger,
+  slug,
 }: {
   reqLogger: ReturnType<typeof logger.child>;
   slug: string;
@@ -247,8 +247,8 @@ async function JobPageContent({
     const normalized = normalizeError(error, 'Failed to load job detail');
     reqLogger.error(
       {
-        section: 'data-fetch',
         err: normalized,
+        section: 'data-fetch',
       },
       'JobPage: getJobBySlug threw'
     );
@@ -267,16 +267,16 @@ async function JobPageContent({
   return (
     <>
       <Pulse
-        variant="view"
         category={Constants.public.Enums.content_category[9]} // 'jobs'
         slug={slug}
+        variant="view"
       />
       <StructuredData route={`/jobs/${slug}`} />
 
       <div className="bg-background min-h-screen">
         <div className="border-border/50 bg-card/30 border-b">
           <div className="container mx-auto px-4 py-8">
-            <Button variant="ghost" asChild className="mb-6">
+            <Button asChild className="mb-6" variant="ghost">
               <Link href={ROUTES.JOBS}>
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Jobs
@@ -319,7 +319,7 @@ async function JobPageContent({
 
               <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
                 {tags.map((skill: string) => (
-                  <UnifiedBadge key={skill} variant="base" style="secondary">
+                  <UnifiedBadge key={skill} style="secondary" variant="base">
                     {skill}
                   </UnifiedBadge>
                 ))}
@@ -347,7 +347,7 @@ async function JobPageContent({
                 <CardContent>
                   <ul className="space-y-2">
                     {requirements.map((request: string) => (
-                      <li key={request} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
+                      <li className={UI_CLASSES.FLEX_ITEMS_START_GAP_3} key={request}>
                         <span className="text-accent mt-1">•</span>
                         <span>{request}</span>
                       </li>
@@ -364,7 +364,7 @@ async function JobPageContent({
                   <CardContent>
                     <ul className="space-y-2">
                       {benefits.map((benefit: string) => (
-                        <li key={benefit} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
+                        <li className={UI_CLASSES.FLEX_ITEMS_START_GAP_3} key={benefit}>
                           <span className="mt-1 text-green-500">✓</span>
                           <span>{benefit}</span>
                         </li>
@@ -391,8 +391,8 @@ async function JobPageContent({
                     // At this point, safeJobLink is validated and safe for use in external links
                     const validatedUrl: string = safeJobLink;
                     return (
-                      <Button className="w-full" asChild>
-                        <a href={validatedUrl} target="_blank" rel="noopener noreferrer">
+                      <Button asChild className="w-full">
+                        <a href={validatedUrl} rel="noopener noreferrer" target="_blank">
                           <ExternalLink className="mr-2 h-4 w-4" />
                           Apply Now
                         </a>
@@ -403,7 +403,7 @@ async function JobPageContent({
                     const safeMailtoUrl = getSafeMailtoUrl(job.contact_email);
                     if (!safeMailtoUrl) return null;
                     return (
-                      <Button variant="outline" className="w-full" asChild>
+                      <Button asChild className="w-full" variant="outline">
                         <a href={safeMailtoUrl}>
                           <Building2 className="mr-2 h-4 w-4" />
                           Contact Company

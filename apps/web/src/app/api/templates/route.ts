@@ -9,16 +9,16 @@
 import { type Database } from '@heyclaude/database-types';
 import { VALID_CATEGORIES } from '@heyclaude/web-runtime/core';
 import { getContentTemplates } from '@heyclaude/web-runtime/data';
-import { logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
+import { createErrorResponse, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { buildCacheHeaders } from '@heyclaude/web-runtime/server';
 import { cacheLife, cacheTag } from 'next/cache';
 import { type NextRequest, NextResponse } from 'next/server';
 
-/**
+/***
  * Cached helper function to fetch content templates
  * Uses Cache Components to reduce function invocations
- * 
- * @param category - The content category to fetch templates for
+ *
+ * @param {Database['public']['Enums']['content_category']} category - The content category to fetch templates for
  * @returns Promise resolving to an array of template objects for the specified category
  */
 async function getCachedTemplatesForAPI(category: Database['public']['Enums']['content_category']) {
@@ -51,9 +51,9 @@ async function getCachedTemplatesForAPI(category: Database['public']['Enums']['c
 export async function GET(request: NextRequest) {
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
+    module: 'apps/web/src/app/api/templates',
     operation: 'TemplatesAPI',
     route: '/api/templates',
-    module: 'apps/web/src/app/api/templates',
   });
 
   const searchParameters = request.nextUrl.searchParams;
@@ -89,9 +89,9 @@ export async function GET(request: NextRequest) {
     // Structured logging with cache tags
     reqLogger.info(
       {
+        cacheTags: ['templates', `templates-${validCategory}`],
         category: validCategory,
         count: templates.length,
-        cacheTags: ['templates', `templates-${validCategory}`],
       },
       'Templates API: success'
     );
@@ -100,16 +100,16 @@ export async function GET(request: NextRequest) {
     // Using 'config' preset: 1 day TTL, 2 days stale (templates change rarely)
     return NextResponse.json(
       {
-        success: true,
-        templates,
         category: validCategory,
         count: templates.length,
+        success: true,
+        templates,
       },
       {
-        status: 200,
         headers: {
           ...buildCacheHeaders('config'), // 1 day TTL, 2 days stale
         },
+        status: 200,
       }
     );
   } catch (error) {
@@ -123,10 +123,10 @@ export async function GET(request: NextRequest) {
       'Templates API error'
     );
     return createErrorResponse(normalized, {
-      route: '/api/templates',
-      operation: 'TemplatesAPI',
-      method: 'GET',
       logContext: category ? { category } : {},
+      method: 'GET',
+      operation: 'TemplatesAPI',
+      route: '/api/templates',
     });
   }
 }

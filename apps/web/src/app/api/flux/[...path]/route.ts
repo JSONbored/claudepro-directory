@@ -13,8 +13,8 @@
  */
 
 import { normalizeError } from '@heyclaude/shared-runtime';
-import { routeFluxRequest, handleOptions } from '@heyclaude/web-runtime/flux';
-import { logger, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
+import { handleOptions, routeFluxRequest } from '@heyclaude/web-runtime/flux';
+import { createErrorResponse, logger } from '@heyclaude/web-runtime/logging/server';
 import { type NextRequest } from 'next/server';
 
 interface RouteContext {
@@ -25,14 +25,14 @@ interface RouteContext {
 
 type HttpMethod = 'GET' | 'POST';
 
-/**
+/*****
  * Route a Flux API request to the Flux runtime, build per-request logging, and return the resulting HTTP response.
  *
  * Routes the incoming request to the runtime using the supplied HTTP method and the dynamic path segments resolved from `context.params.path`.
  *
- * @param method - 'GET' or 'POST' indicating the Flux operation to perform
- * @param request - The Next.js request object for the incoming HTTP request
- * @param context - Route context whose `params` promise resolves to an object containing `path: string[]` (dynamic route segments)
+ * @param {HttpMethod} method - 'GET' or 'POST' indicating the Flux operation to perform
+ * @param {NextRequest} request - The Next.js request object for the incoming HTTP request
+ * @param {RouteContext} context - Route context whose `params` promise resolves to an object containing `path: string[]` (dynamic route segments)
  * @returns A Response produced by the Flux runtime for the requested route and method, or an error Response when processing fails
  *
  * @see routeFluxRequest
@@ -48,9 +48,9 @@ async function handleFluxRequest(
   const params = await context.params;
   const route = `/api/flux/${params.path.join('/')}`;
   const reqLogger = logger.child({
+    method,
     operation: 'FluxAPI',
     route,
-    method,
   });
 
   try {
@@ -66,10 +66,10 @@ async function handleFluxRequest(
       `Flux ${method} request failed`
     );
     return createErrorResponse(normalized, {
-      route,
-      operation: `FluxAPI:${method}`,
-      method,
       logContext: { path: params.path.join('/') },
+      method,
+      operation: `FluxAPI:${method}`,
+      route,
     });
   }
 }

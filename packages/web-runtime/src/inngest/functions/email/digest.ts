@@ -17,6 +17,7 @@ import { createSupabaseAdminClient } from '../../../supabase/admin';
 import { getResendClient } from '../../../integrations/resend';
 import { HELLO_FROM } from '../../../email/config/email-config';
 import { logger, createWebAppContextWithId } from '../../../logging/server';
+import { sendCronSuccessHeartbeat } from '../../utils/monitoring';
 
 // Types for digest data
 type WeeklyDigestData = DatabaseGenerated['public']['Functions']['get_weekly_digest']['Returns'];
@@ -174,11 +175,21 @@ export const sendWeeklyDigest = inngest.createFunction(
       failed: sendResults.failed,
       successRate: sendResults.successRate, }, 'Weekly digest completed');
 
-    return {
+    const result = {
       sent: sendResults.success,
       failed: sendResults.failed,
       rate: sendResults.successRate,
     };
+
+    // BetterStack monitoring: Send success heartbeat (feature-flagged)
+    if (result.sent > 0) {
+      sendCronSuccessHeartbeat('BETTERSTACK_HEARTBEAT_INNGEST_CRON', {
+        functionName: 'sendWeeklyDigest',
+        result: { sent: result.sent },
+      });
+    }
+
+    return result;
   }
 );
 

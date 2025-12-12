@@ -2,7 +2,7 @@ import { getContactChannels, getLastUpdatedDate } from '@heyclaude/web-runtime/c
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { logger } from '@heyclaude/web-runtime/logging/server';
-import { UI_CLASSES, NavLink } from '@heyclaude/web-runtime/ui';
+import { NavLink, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import { Suspense } from 'react';
@@ -53,9 +53,9 @@ export default async function TermsPage() {
 
   // Create request-scoped child logger
   const reqLogger = logger.child({
+    module: 'apps/web/src/app/terms',
     operation: 'TermsPage',
     route: '/terms',
-    module: 'apps/web/src/app/terms',
   });
 
   return (
@@ -227,7 +227,7 @@ function TermsPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.c
           <h2 className={`${UI_CLASSES.MARGIN_DEFAULT} text-2xl font-semibold`}>11. Contact Us</h2>
           <p className={UI_CLASSES.MARGIN_DEFAULT}>
             If you have questions about these Terms of Service, please{' '}
-            <NavLink href={`mailto:${channels.email}`} external>
+            <NavLink external href={`mailto:${channels.email}`}>
               {channels.email}
             </NavLink>{' '}
             or <NavLink href="/contact">contact us</NavLink>.

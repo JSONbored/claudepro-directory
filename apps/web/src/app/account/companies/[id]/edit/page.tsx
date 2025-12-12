@@ -80,8 +80,8 @@ export default async function EditCompanyPage({ params }: EditCompanyPagePropert
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    operation,
     module: modulePath,
+    operation,
   });
 
   return (
@@ -124,8 +124,8 @@ async function EditCompanyPageContent({
   if (!user) {
     routeLogger.warn(
       {
-        section: 'data-fetch',
         companyId: id,
+        section: 'data-fetch',
       },
       'EditCompanyPage: unauthenticated access attempt'
     );
@@ -138,23 +138,28 @@ async function EditCompanyPageContent({
     userId: user.id, // Redaction will automatically hash this
   });
 
-  userLogger.info({ section: 'data-fetch', companyId: id }, 'EditCompanyPage: authentication successful');
+  userLogger.info(
+    { companyId: id, section: 'data-fetch' },
+    'EditCompanyPage: authentication successful'
+  );
 
   // Section: Company Data Fetch
   let company: Database['public']['CompositeTypes']['user_companies_company'] | null = null;
   let hasError = false;
   try {
     company = await getUserCompanyById(user.id, id);
-    userLogger.info({ section: 'data-fetch', hasCompany: !!company,
-      companyId: id }, 'EditCompanyPage: company data loaded');
+    userLogger.info(
+      { companyId: id, hasCompany: !!company, section: 'data-fetch' },
+      'EditCompanyPage: company data loaded'
+    );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load company for edit page');
     // Wrapper API: error(message, error, context) - wrapper internally calls Pino with (logData, message)
     userLogger.error(
       {
-        section: 'data-fetch',
-        err: normalized,
         companyId: id,
+        err: normalized,
+        section: 'data-fetch',
       },
       'EditCompanyPage: getUserCompanyById threw'
     );
@@ -182,12 +187,15 @@ async function EditCompanyPageContent({
   }
 
   if (!company) {
-    userLogger.warn({ section: 'data-fetch', companyId: id }, 'Company not found or access denied');
+    userLogger.warn({ companyId: id, section: 'data-fetch' }, 'Company not found or access denied');
     notFound();
   }
 
   // Final summary log
-  userLogger.info({ section: 'data-fetch', companyId: id }, 'EditCompanyPage: page execution completed');
+  userLogger.info(
+    { companyId: id, section: 'data-fetch' },
+    'EditCompanyPage: page execution completed'
+  );
 
   return (
     <div className="space-y-6">
@@ -196,7 +204,7 @@ async function EditCompanyPageContent({
         <p className="text-muted-foreground">Update your company profile information</p>
       </div>
 
-      <CompanyForm mode="edit" initialData={company} />
+      <CompanyForm initialData={company} mode="edit" />
     </div>
   );
 }

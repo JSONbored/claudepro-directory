@@ -61,8 +61,8 @@ export async function getRelatedContent(input: RelatedContentInput): Promise<Rel
   }
 
   const reqLogger = logger.child({
-    operation: 'getRelatedContent',
     module: 'data/content/related',
+    operation: 'getRelatedContent',
   });
 
   try {
@@ -77,16 +77,16 @@ export async function getRelatedContent(input: RelatedContentInput): Promise<Rel
 
     const data = await new ContentService(client).getRelatedContent({
       p_category: category,
+      p_exclude_slugs: input.exclude ?? [],
+      p_limit: input.limit ?? 3,
       p_slug: currentSlug,
       p_tags: input.currentTags ?? [],
-      p_limit: input.limit ?? 3,
-      p_exclude_slugs: input.exclude ?? [],
     });
 
     const items = data.filter((item) => Boolean(item.title && item.slug && item.category));
 
     reqLogger.info(
-      { category, slug: currentSlug, count: items.length },
+      { category, count: items.length, slug: currentSlug },
       'getRelatedContent: fetched successfully'
     );
 
@@ -97,7 +97,7 @@ export async function getRelatedContent(input: RelatedContentInput): Promise<Rel
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error(
-      { err: errorForLogging, category, slug: currentSlug },
+      { category, err: errorForLogging, slug: currentSlug },
       'getRelatedContent: failed'
     );
     return {

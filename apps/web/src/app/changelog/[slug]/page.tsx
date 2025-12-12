@@ -31,11 +31,11 @@ import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft, Calendar } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  UI_CLASSES,
-  NavLink,
-  Separator,
   ANIMATION_CONSTANTS,
   Breadcrumbs,
+  NavLink,
+  Separator,
+  UI_CLASSES,
 } from '@heyclaude/web-runtime/ui';
 import { formatChangelogDate, getChangelogUrl } from '@heyclaude/web-runtime/utils/changelog';
 import { type Metadata } from 'next';
@@ -67,9 +67,9 @@ export async function generateStaticParams() {
 
   // Create request-scoped child logger
   const reqLogger = logger.child({
+    module: 'apps/web/src/app/changelog/[slug]',
     operation: 'ChangelogEntryPageStaticParams',
     route: '/changelog',
-    module: 'apps/web/src/app/changelog/[slug]',
   });
 
   try {
@@ -86,8 +86,8 @@ export async function generateStaticParams() {
     const normalized = normalizeError(error, 'Failed to generate changelog static params');
     reqLogger.error(
       {
-        section: 'data-fetch',
         err: normalized,
+        section: 'data-fetch',
       },
       'ChangelogEntryPage: generateStaticParams threw'
     );
@@ -115,9 +115,9 @@ export async function generateMetadata({
 
   // Create request-scoped child logger
   const metadataLogger = logger.child({
+    module: 'apps/web/src/app/changelog/[slug]',
     operation: 'ChangelogEntryPageMetadata',
     route: `/changelog/${slug}`,
-    module: 'apps/web/src/app/changelog/[slug]',
   });
 
   let entry: Awaited<ReturnType<typeof getChangelogEntryBySlug>>;
@@ -136,8 +136,8 @@ export async function generateMetadata({
   }
 
   return generatePageMetadata('/changelog/:slug', {
-    params: { slug },
     item: entry,
+    params: { slug },
     slug,
   });
 }
@@ -158,15 +158,19 @@ export async function generateMetadata({
  * @see ChangelogContent
  * @see StructuredData
  */
-export default async function ChangelogEntryPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function ChangelogEntryPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
   // Create request-scoped child logger
   const reqLogger = logger.child({
+    module: 'apps/web/src/app/changelog/[slug]',
     operation: 'ChangelogEntryPage',
     route: '/changelog/[slug]',
-    module: 'apps/web/src/app/changelog/[slug]',
   });
 
   return (
@@ -217,8 +221,8 @@ async function ChangelogEntryPageContent({
     const normalized = normalizeError(error, 'Failed to load changelog entry');
     routeLogger.error(
       {
-        section: 'data-fetch',
         err: normalized,
+        section: 'data-fetch',
       },
       'ChangelogEntryPage: getChangelogEntryBySlug threw'
     );
@@ -239,9 +243,9 @@ async function ChangelogEntryPageContent({
 
       {/* View Tracker - Track page views */}
       <Pulse
-        variant="view"
-        category={'changelog' as typeof Constants.public.Enums.content_category[number]}
+        category={'changelog' as (typeof Constants.public.Enums.content_category)[number]}
         slug={entry.slug}
+        variant="view"
       />
 
       {/* Structured Data - Pre-generated schemas from database */}
@@ -255,8 +259,8 @@ async function ChangelogEntryPageContent({
 
         {/* Navigation */}
         <NavLink
-          href={ROUTES.CHANGELOG}
           className={`${UI_CLASSES.TEXT_HELPER} ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} ${UI_CLASSES.TEXT_BODY_SM}`}
+          href={ROUTES.CHANGELOG}
         >
           <ArrowLeft className={UI_CLASSES.ICON_SM} />
           <span>Back to Changelog</span>
@@ -277,8 +281,8 @@ async function ChangelogEntryPageContent({
           <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} ${UI_CLASSES.TEXT_BODY_SM}`}>
             <span className={UI_CLASSES.TEXT_HELPER}>Permanent link:</span>
             <a
-              href={canonicalUrl}
               className={`text-primary hover:text-primary/80 truncate ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT}`}
+              href={canonicalUrl}
             >
               {canonicalUrl}
             </a>

@@ -18,13 +18,13 @@ import {
 } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  UI_CLASSES,
-  UnifiedBadge,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  UI_CLASSES,
+  UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
@@ -51,9 +51,9 @@ import { StructuredData } from '@/src/components/core/infra/structured-data';
  * @see {@link @heyclaude/web-runtime/core#getSafeWebsiteUrl}
  */
 function SafeWebsiteLink({
-  url,
   children,
   className,
+  url,
 }: {
   children: React.ReactNode;
   className?: string;
@@ -63,7 +63,7 @@ function SafeWebsiteLink({
   if (!safeUrl) return null;
 
   return (
-    <a href={safeUrl} target="_blank" rel="noopener noreferrer" className={className}>
+    <a className={className} href={safeUrl} rel="noopener noreferrer" target="_blank">
       {children}
     </a>
   );
@@ -98,9 +98,9 @@ const MAX_STATIC_COMPANIES = 10;
 export async function generateStaticParams() {
   // Create request-scoped child logger
   const reqLogger = logger.child({
+    module: 'apps/web/src/app/companies/[slug]',
     operation: 'CompanyPageStaticParams',
     route: '/companies/[slug]',
-    module: 'apps/web/src/app/companies/[slug]',
   });
 
   const { getCompaniesList } = await import('@heyclaude/web-runtime/data');
@@ -122,8 +122,8 @@ export async function generateStaticParams() {
     const normalized = normalizeError(error, 'Failed to load companies for generateStaticParams');
     reqLogger.error(
       {
-        section: 'data-fetch',
         err: normalized,
+        section: 'data-fetch',
       },
       'generateStaticParams: failed to load companies'
     );
@@ -171,8 +171,8 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
 
   // Create request-scoped child logger
   const reqLogger = logger.child({
-    operation: 'CompanyPage',
     module: 'apps/web/src/app/companies/[slug]',
+    operation: 'CompanyPage',
   });
 
   const { slug } = await params;
@@ -257,12 +257,12 @@ function CompanyHeader({
       <div className="flex items-start gap-6">
         {company.logo ? (
           <Image
-            src={company.logo}
-            alt={`${company.name} logo`}
-            width={96}
-            height={96}
-            className="border-background h-24 w-24 rounded-lg border-4 object-cover"
             priority
+            alt={`${company.name} logo`}
+            className="border-background h-24 w-24 rounded-lg border-4 object-cover"
+            height={96}
+            src={company.logo}
+            width={96}
           />
         ) : (
           <div className="border-background bg-accent flex h-24 w-24 items-center justify-center rounded-lg border-4 text-2xl font-bold">
@@ -274,7 +274,7 @@ function CompanyHeader({
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3}>
             <h1 className="text-3xl font-bold">{company.name}</h1>
             {company.featured ? (
-              <UnifiedBadge variant="base" style="default">
+              <UnifiedBadge style="default" variant="base">
                 Featured
               </UnifiedBadge>
             ) : null}
@@ -286,8 +286,8 @@ function CompanyHeader({
 
           <div className="mt-4 flex flex-wrap items-center gap-4 text-sm">
             <SafeWebsiteLink
-              url={company.website}
               className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} ${UI_CLASSES.LINK_ACCENT}`}
+              url={company.website}
             >
               <Globe className="h-4 w-4" />
               Website
@@ -361,8 +361,8 @@ function CompanyJobsList({
         title: string;
         view_count: number;
         workplace: Database['public']['Enums']['workplace_type'];
-      } => {
-        return Boolean(
+      } =>
+        Boolean(
           job.id &&
           job.slug &&
           job.title &&
@@ -374,8 +374,7 @@ function CompanyJobsList({
           job.expires_at &&
           typeof job.view_count === 'number' &&
           typeof job.click_count === 'number'
-        );
-      }
+        )
     ) ?? [];
 
   return (
@@ -393,7 +392,7 @@ function CompanyJobsList({
               This company doesn&apos;t have any job openings at the moment. Check back later!
             </p>
             <Link href={ROUTES.JOBS}>
-              <UnifiedBadge variant="base" style="default">
+              <UnifiedBadge style="default" variant="base">
                 Browse All Jobs
               </UnifiedBadge>
             </Link>
@@ -401,36 +400,34 @@ function CompanyJobsList({
         </Card>
       ) : (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          {filteredActiveJobs.map((job) => {
-            return (
-              <JobCard
-                key={job.id}
-                job={{
-                  id: job.id,
-                  slug: job.slug,
-                  title: job.title,
-                  company: job.company,
-                  company_logo: job.company_logo,
-                  location: job.location,
-                  description: job.description,
-                  salary: job.salary,
-                  remote: job.remote ?? false,
-                  type: job.type,
-                  workplace: job.workplace,
-                  experience: job.experience,
-                  category: job.category,
-                  tags: job.tags ?? [],
-                  plan: job.plan,
-                  tier: job.tier,
-                  posted_at: job.posted_at,
-                  expires_at: job.expires_at,
-                  view_count: job.view_count,
-                  click_count: job.click_count,
-                  link: job.link,
-                }}
-              />
-            );
-          })}
+          {filteredActiveJobs.map((job) => (
+            <JobCard
+              job={{
+                category: job.category,
+                click_count: job.click_count,
+                company: job.company,
+                company_logo: job.company_logo,
+                description: job.description,
+                experience: job.experience,
+                expires_at: job.expires_at,
+                id: job.id,
+                link: job.link,
+                location: job.location,
+                plan: job.plan,
+                posted_at: job.posted_at,
+                remote: job.remote ?? false,
+                salary: job.salary,
+                slug: job.slug,
+                tags: job.tags ?? [],
+                tier: job.tier,
+                title: job.title,
+                type: job.type,
+                view_count: job.view_count,
+                workplace: job.workplace,
+              }}
+              key={job.id}
+            />
+          ))}
         </div>
       )}
     </>
@@ -503,8 +500,8 @@ function CompanyStats({
               <span className={UI_CLASSES.TEXT_SM_MUTED}>Latest Posting</span>
               <span className="text-sm font-semibold">
                 {new Date(stats.latest_job_posted_at).toLocaleDateString('en-US', {
-                  month: 'short',
                   day: 'numeric',
+                  month: 'short',
                   year: 'numeric',
                 })}
               </span>
@@ -531,7 +528,7 @@ function CompanyStats({
                     : 'Check back regularly for new opportunities!'}
                 </p>
                 {hasWebsite ? (
-                  <SafeWebsiteLink url={safeWebsiteUrl} className={UI_CLASSES.LINK_ACCENT}>
+                  <SafeWebsiteLink className={UI_CLASSES.LINK_ACCENT} url={safeWebsiteUrl}>
                     Visit Website
                   </SafeWebsiteLink>
                 ) : null}
@@ -621,7 +618,7 @@ function StatsSkeleton() {
       </CardHeader>
       <CardContent className="space-y-4">
         {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className="flex items-center justify-between">
+          <div className="flex items-center justify-between" key={i}>
             <div className="bg-muted h-4 w-24 animate-pulse rounded" />
             <div className="bg-muted h-4 w-12 animate-pulse rounded" />
           </div>

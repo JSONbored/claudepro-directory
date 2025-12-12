@@ -8,15 +8,15 @@ import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { ComponentConfigContextProvider } from '@heyclaude/web-runtime/hooks';
 import { logger } from '@heyclaude/web-runtime/logging/server';
 import {
+  DEFAULT_LAYOUT_DATA,
   generatePageMetadata,
   getLayoutData,
-  DEFAULT_LAYOUT_DATA,
 } from '@heyclaude/web-runtime/server';
 import { ErrorBoundary } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { cacheLife, cacheTag } from 'next/cache';
-import { connection } from 'next/server';
 import localFont from 'next/font/local';
+import { connection } from 'next/server';
 import { ThemeProvider } from 'next-themes';
 import { Suspense } from 'react';
 
@@ -32,10 +32,7 @@ import { Toaster } from '@/src/components/primitives/feedback/sonner';
 
 // Self-hosted fonts - no external requests, faster FCP, GDPR compliant
 const inter = localFont({
-  src: '../fonts/Inter-Variable.woff2',
-  variable: '--font-inter',
   display: 'optional',
-  preload: true,
   fallback: [
     'system-ui',
     '-apple-system',
@@ -45,24 +42,27 @@ const inter = localFont({
     'Arial',
     'sans-serif',
   ],
+  preload: true,
+  src: '../fonts/Inter-Variable.woff2',
+  variable: '--font-inter',
   weight: '100 900',
 });
 
 const geist = localFont({
+  display: 'optional',
+  fallback: ['system-ui', '-apple-system', 'sans-serif'],
+  preload: true,
   src: '../fonts/GeistVF.woff2',
   variable: '--font-geist',
-  display: 'optional',
-  preload: true,
-  fallback: ['system-ui', '-apple-system', 'sans-serif'],
   weight: '100 900',
 });
 
 const geistMono = localFont({
+  display: 'optional',
+  fallback: ['Menlo', 'Monaco', 'Courier New', 'monospace'],
+  preload: true,
   src: '../fonts/GeistMonoVF.woff2',
   variable: '--font-geist-mono',
-  display: 'optional',
-  preload: true,
-  fallback: ['Menlo', 'Monaco', 'Courier New', 'monospace'],
   weight: '100 900',
 });
 
@@ -127,8 +127,47 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     ...homeMetadata,
-    metadataBase: new URL(APP_CONFIG.url),
+    alternates: {
+      ...homeMetadata.alternates,
+      types: {
+        // LLMs.txt for AI-Optimized Plain Text Content (llmstxt.org)
+        'text/plain': '/llms.txt',
+      },
+    },
     authors: [{ name: APP_CONFIG.author, url: `${APP_CONFIG.url}/about` }],
+    icons: {
+      apple: '/assets/icons/apple-touch-icon.png',
+      icon: [
+        { url: '/assets/icons/claudepro-directory-icon.ico' },
+        {
+          sizes: '16x16',
+          type: 'image/png',
+          url: '/assets/icons/favicon-16x16.png',
+        },
+        {
+          sizes: '32x32',
+          type: 'image/png',
+          url: '/assets/icons/favicon-32x32.png',
+        },
+      ],
+      other: [
+        {
+          rel: 'icon',
+          sizes: '192x192',
+          type: 'image/png',
+          url: '/assets/icons/icon-192.png',
+        },
+        {
+          rel: 'icon',
+          sizes: '512x512',
+          type: 'image/png',
+          url: '/assets/icons/icon-512.png',
+        },
+      ],
+      shortcut: '/assets/icons/claudepro-directory-icon.ico',
+    },
+    manifest: '/manifest.webmanifest',
+    metadataBase: new URL(APP_CONFIG.url),
     openGraph: {
       ...homeMetadata.openGraph,
       locale: 'en_US',
@@ -139,45 +178,6 @@ export async function generateMetadata(): Promise<Metadata> {
       creator: '@JSONbored',
       // Static OG image served from /og-images/og-image.webp (included in homeMetadata)
     },
-    alternates: {
-      ...homeMetadata.alternates,
-      types: {
-        // LLMs.txt for AI-Optimized Plain Text Content (llmstxt.org)
-        'text/plain': '/llms.txt',
-      },
-    },
-    icons: {
-      icon: [
-        { url: '/assets/icons/claudepro-directory-icon.ico' },
-        {
-          url: '/assets/icons/favicon-16x16.png',
-          sizes: '16x16',
-          type: 'image/png',
-        },
-        {
-          url: '/assets/icons/favicon-32x32.png',
-          sizes: '32x32',
-          type: 'image/png',
-        },
-      ],
-      shortcut: '/assets/icons/claudepro-directory-icon.ico',
-      apple: '/assets/icons/apple-touch-icon.png',
-      other: [
-        {
-          rel: 'icon',
-          type: 'image/png',
-          sizes: '192x192',
-          url: '/assets/icons/icon-192.png',
-        },
-        {
-          rel: 'icon',
-          type: 'image/png',
-          sizes: '512x512',
-          url: '/assets/icons/icon-512.png',
-        },
-      ],
-    },
-    manifest: '/manifest.webmanifest',
   };
 }
 
@@ -194,7 +194,7 @@ export async function generateMetadata(): Promise<Metadata> {
 function LayoutFallback({ children }: { children: React.ReactNode }) {
   return (
     <div className="bg-background flex min-h-screen flex-col">
-      <main id="main-content" className="flex-1">
+      <main className="flex-1" id="main-content">
         {children}
       </main>
     </div>
@@ -230,9 +230,9 @@ async function LayoutDataWrapper({ children }: { children: React.ReactNode }) {
   // eslint-disable-next-line architectural-rules/no-hardcoded-enum-values -- PromiseSettledResult status is a standard JavaScript value, not a database enum
   if (layoutDataResult.status === 'rejected') {
     const reqLogger = logger.child({
+      module: 'apps/web/src/app/layout',
       operation: 'RootLayout',
       route: '/',
-      module: 'apps/web/src/app/layout',
     });
     // logger.error() normalizes errors internally, so pass raw error
     // Convert unknown error to Error | string for TypeScript
@@ -271,33 +271,33 @@ export default function RootLayout({
 
   return (
     <html
-      lang="en"
       suppressHydrationWarning
       className={`${inter.variable} ${geist.variable} ${geistMono.variable} font-sans`}
+      lang="en"
     >
       <head>
         {/* Viewport for responsive design */}
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+        <meta content="width=device-width, initial-scale=1, maximum-scale=5" name="viewport" />
 
         {/* PWA Manifest - Next.js generates at /manifest.webmanifest from src/app/manifest.ts */}
         {/* Manifest link is automatically injected by Next.js metadata API (line 109) */}
 
         {/* iOS Safari PWA Support */}
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="apple-mobile-web-app-title" content="ClaudePro" />
-        <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png" />
+        <meta content="yes" name="apple-mobile-web-app-capable" />
+        <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style" />
+        <meta content="ClaudePro" name="apple-mobile-web-app-title" />
+        <link href="/assets/icons/apple-touch-icon.png" rel="apple-touch-icon" />
 
         {/* Theme Color for Mobile Browsers */}
-        <meta name="theme-color" content="#000000" />
+        <meta content="#000000" name="theme-color" />
 
         {/* Strategic Resource Hints - Only for confirmed external connections */}
 
         {/* DNS Prefetch for faster resolution */}
-        <link rel="dns-prefetch" href="https://umami.claudepro.directory" />
+        <link href="https://umami.claudepro.directory" rel="dns-prefetch" />
 
         {/* Preconnect for critical third-party resources */}
-        <link rel="preconnect" href="https://umami.claudepro.directory" crossOrigin="anonymous" />
+        <link crossOrigin="anonymous" href="https://umami.claudepro.directory" rel="preconnect" />
       </head>
       <body className="font-sans">
         {/* Suspense boundary for structured data - streams after initial HTML */}
@@ -306,12 +306,12 @@ export default function RootLayout({
         </Suspense>
         <ComponentConfigContextProvider value={componentCardConfig}>
           <ThemeProvider
+            enableSystem
             attribute="data-theme"
             defaultTheme="dark"
-            enableSystem
-            storageKey="claudepro-theme"
             disableTransitionOnChange={false}
             enableColorScheme={false}
+            storageKey="claudepro-theme"
           >
             <PostCopyEmailProvider>
               <AuthModalProvider>
@@ -333,7 +333,7 @@ export default function RootLayout({
         <Pulse variant="pwa-install" />
         <Pulse variant="pwa-launch" />
         {/* Service Worker Registration for PWA Support */}
-        <script src="/scripts/service-worker-init.js" defer />
+        <script defer src="/scripts/service-worker-init.js" />
       </body>
     </html>
   );

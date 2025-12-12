@@ -63,8 +63,8 @@ async function TopContributorsServer() {
   const categoryIds = getHomepageCategoryIds;
   const homepageResult = await getHomepageData(categoryIds).catch((error: unknown) => {
     trackRPCFailure('get_homepage_optimized', error, {
-      section: 'top-contributors',
       categoryIds: categoryIds.length,
+      section: 'top-contributors',
     });
     return null;
   });
@@ -81,9 +81,10 @@ async function TopContributorsServer() {
   }
 
   const topContributors = (homepageResult?.top_contributors ?? [])
-    .filter((c): c is TopContributor => {
-      return 'id' in c && 'slug' in c && 'name' in c && Boolean(c.id && c.slug && c.name);
-    })
+    .filter(
+      (c): c is TopContributor =>
+        'id' in c && 'slug' in c && 'name' in c && Boolean(c.id && c.slug && c.name)
+    )
     .map((contributor) => {
       // Convert created_at to string - UserProfile requires created_at: string
       let created_at: string;
@@ -103,14 +104,14 @@ async function TopContributorsServer() {
       }
 
       return {
-        id: contributor.id,
-        slug: contributor.slug,
-        name: contributor.name,
-        image: contributor.image,
         bio: contributor.bio,
-        work: contributor.work,
-        tier: contributor.tier ?? 'free',
         created_at, // Always present as string
+        id: contributor.id,
+        image: contributor.image,
+        name: contributor.name,
+        slug: contributor.slug,
+        tier: contributor.tier ?? 'free',
+        work: contributor.work,
       };
     });
 
@@ -182,24 +183,28 @@ async function HomepageHeroWithMemberCount() {
   const categoryIds = getHomepageCategoryIds;
   const homepageResult = await getHomepageData(categoryIds).catch((error: unknown) => {
     trackRPCFailure('get_homepage_optimized', error, {
-      section: 'hero',
       categoryIds: categoryIds.length,
       purpose: 'member-count',
+      section: 'hero',
     });
     return null;
   });
 
   const memberCount = homepageResult?.member_count ?? 0;
-  
+
   // Extract stats from homepage result
-  let stats: Record<string, { featured: number; total: number } | number> = {};
-  if (homepageResult?.content && typeof homepageResult.content === 'object' && !Array.isArray(homepageResult.content)) {
+  let stats: Record<string, number | { featured: number; total: number }> = {};
+  if (
+    homepageResult?.content &&
+    typeof homepageResult.content === 'object' &&
+    !Array.isArray(homepageResult.content)
+  ) {
     const content = homepageResult.content as Record<string, unknown>;
     if ('stats' in content && typeof content['stats'] === 'object' && content['stats'] !== null) {
-      stats = content['stats'] as Record<string, { featured: number; total: number } | number>;
+      stats = content['stats'] as Record<string, number | { featured: number; total: number }>;
     }
   }
-  
+
   // Hero will get search ref from context via client wrapper
   return <HomepageHeroServer memberCount={memberCount} stats={stats} />;
 }

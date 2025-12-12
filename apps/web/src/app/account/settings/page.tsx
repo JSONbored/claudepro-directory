@@ -13,13 +13,13 @@ import {
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  UI_CLASSES,
   Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  UI_CLASSES,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
@@ -66,9 +66,9 @@ export default async function SettingsPage() {
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
+    module: 'apps/web/src/app/account/settings',
     operation: 'SettingsPage',
     route: '/account/settings',
-    module: 'apps/web/src/app/account/settings',
   });
   // Section: Authentication
   const { user } = await getAuthenticatedUser({ context: 'SettingsPage' });
@@ -89,7 +89,10 @@ export default async function SettingsPage() {
             <CardDescription>Please sign in to manage your account settings.</CardDescription>
           </CardHeader>
           <CardContent>
-            <SignInButton valueProposition="Sign in to manage your account settings" redirectTo="/account/settings">
+            <SignInButton
+              redirectTo="/account/settings"
+              valueProposition="Sign in to manage your account settings"
+            >
               Go to login
             </SignInButton>
           </CardContent>
@@ -115,8 +118,8 @@ export default async function SettingsPage() {
     const normalized = normalizeError(error, 'Failed to load user settings');
     userLogger.error(
       {
-        section: 'data-fetch',
         err: normalized,
+        section: 'data-fetch',
       },
       'SettingsPage: getUserSettings threw'
     );
@@ -157,10 +160,10 @@ export default async function SettingsPage() {
   if (profileValue && typeof profileValue === 'string') {
     userLogger.error(
       {
-        section: 'data-fetch',
         err: new Error('Profile data serialization error'),
-        profileType: typeof profileValue,
         profileSample: profileValue.slice(0, 100),
+        profileType: typeof profileValue,
+        section: 'data-fetch',
       },
       'SettingsPage: profile is a string (serialized tuple) - RPC return type issue'
     );
@@ -189,7 +192,10 @@ export default async function SettingsPage() {
         const originalLength = profile.display_name?.length ?? 0;
         const extracted = extractFirstFieldFromTuple(profile.display_name);
         if (extracted === null) {
-          userLogger.warn({ section: 'data-fetch', tupleString: profile.display_name.slice(0, 100) }, 'SettingsPage: failed to extract display_name from tuple');
+          userLogger.warn(
+            { section: 'data-fetch', tupleString: profile.display_name.slice(0, 100) },
+            'SettingsPage: failed to extract display_name from tuple'
+          );
           profile.display_name = '';
         } else {
           profile = {
@@ -198,9 +204,9 @@ export default async function SettingsPage() {
           };
           userLogger.info(
             {
-              section: 'data-fetch',
               extracted: profile.display_name,
               originalLength,
+              section: 'data-fetch',
             },
             'SettingsPage: extracted display_name from tuple string'
           );
@@ -209,8 +215,14 @@ export default async function SettingsPage() {
       // If it's already a string and not a tuple, keep it as is
     } else {
       // Not a string - convert to string or empty
-      userLogger.warn({ section: 'data-fetch', displayNameType: typeof profile.display_name,
-        displayNameValue: String(profile.display_name).slice(0, 100) }, 'SettingsPage: display_name is not a string');
+      userLogger.warn(
+        {
+          displayNameType: typeof profile.display_name,
+          displayNameValue: String(profile.display_name).slice(0, 100),
+          section: 'data-fetch',
+        },
+        'SettingsPage: display_name is not a string'
+      );
       profile.display_name = '';
     }
   }
@@ -231,10 +243,10 @@ export default async function SettingsPage() {
         typeof userMetadata['avatar_url'] === 'string' ? userMetadata['avatar_url'] : null;
       const picture = typeof userMetadata['picture'] === 'string' ? userMetadata['picture'] : null;
       await ensureUserRecord({
-        id: user.id,
         email: user.email ?? null,
-        name: fullName ?? name ?? null,
+        id: user.id,
         image: avatarUrl ?? picture ?? null,
+        name: fullName ?? name ?? null,
       });
       const refreshed = await getUserSettings(user.id);
       if (refreshed) {
@@ -250,8 +262,8 @@ export default async function SettingsPage() {
       const normalized = normalizeError(error, 'Failed to initialize user record');
       userLogger.error(
         {
-          section: 'data-fetch',
           err: normalized,
+          section: 'data-fetch',
         },
         'SettingsPage: ensureUserRecord failed'
       );
@@ -263,8 +275,8 @@ export default async function SettingsPage() {
     // No error object available, only context
     userLogger.error(
       {
-        section: 'data-fetch',
         err: new Error('Profile missing from response'),
+        section: 'data-fetch',
       },
       'SettingsPage: profile missing from getUserSettings response'
     );
@@ -292,7 +304,7 @@ export default async function SettingsPage() {
               <CardDescription>Update your public profile details</CardDescription>
             </div>
             {userData?.slug && typeof userData.slug === 'string' ? (
-              <Button asChild variant="outline" size="sm">
+              <Button asChild size="sm" variant="outline">
                 <Link href={`/u/${userData.slug}`}>View Profile</Link>
               </Button>
             ) : null}
@@ -320,9 +332,9 @@ export default async function SettingsPage() {
               <p className="text-muted-foreground">
                 {profile.created_at
                   ? new Date(profile.created_at).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
                       day: 'numeric',
+                      month: 'long',
+                      year: 'numeric',
                     })
                   : 'N/A'}
               </p>
@@ -342,11 +354,11 @@ export default async function SettingsPage() {
           {userData?.image && typeof userData.image === 'string' ? (
             <div className="flex items-center gap-4">
               <Image
-                src={userData.image}
                 alt={`${userData.name ?? 'User'}'s avatar`}
-                width={64}
-                height={64}
                 className="h-16 w-16 rounded-full object-cover"
+                height={64}
+                src={userData.image}
+                width={64}
               />
               <div>
                 <p className="text-sm">

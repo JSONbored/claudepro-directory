@@ -7,15 +7,15 @@ import { cacheLife, cacheTag } from 'next/cache';
 
 import { logger } from '../../logger.ts';
 import {
-  type SubmissionContentType,
-  type SubmissionFormConfig,
-  type SubmissionFormSection,
   type FieldDefinition,
-  type TextFieldDefinition,
-  type TextareaFieldDefinition,
   type NumberFieldDefinition,
   type SelectFieldDefinition,
   type SelectOption,
+  type SubmissionContentType,
+  type SubmissionFormConfig,
+  type SubmissionFormSection,
+  type TextareaFieldDefinition,
+  type TextFieldDefinition,
 } from '../../types/component.types.ts';
 
 const SUBMISSION_CONTENT_TYPES = Constants.public.Enums
@@ -31,46 +31,28 @@ function mapField(item: FormFieldConfigItem): FieldDefinition | null {
   }
 
   const base = {
-    name: item.name,
-    label: item.label,
-    placeholder: item.placeholder ?? undefined,
-    helpText: item.help_text ?? undefined,
-    required: item.required ?? false,
     gridColumn: item.grid_column ?? 'full',
+    helpText: item.help_text ?? undefined,
     iconName: item.icon_name ?? undefined,
     iconPosition: item.icon_position ?? undefined,
+    label: item.label,
+    name: item.name,
+    placeholder: item.placeholder ?? undefined,
+    required: item.required ?? false,
   };
 
   const fieldType = item.type;
 
   switch (fieldType) {
-    case 'text': {
-      return {
-        ...base,
-        type: 'text' as const,
-        defaultValue: item.default_value ?? undefined,
-      } as TextFieldDefinition;
-    }
-
-    case 'textarea': {
-      return {
-        ...base,
-        type: 'textarea' as const,
-        rows: item.rows ?? undefined,
-        monospace: item.monospace ?? false,
-        defaultValue: item.default_value ?? undefined,
-      } as TextareaFieldDefinition;
-    }
-
     case 'number': {
       return {
         ...base,
-        type: 'number' as const,
-        min: item.min_value ?? undefined,
-        max: item.max_value ?? undefined,
-        step: item.step_value ?? undefined,
         defaultValue:
           typeof item.default_value === 'number' ? (item.default_value as number) : undefined,
+        max: item.max_value ?? undefined,
+        min: item.min_value ?? undefined,
+        step: item.step_value ?? undefined,
+        type: 'number' as const,
       } as NumberFieldDefinition;
     }
 
@@ -88,17 +70,35 @@ function mapField(item: FormFieldConfigItem): FieldDefinition | null {
             const value = opt['value'];
             const label = opt['label'];
             if (typeof value === 'string' && typeof label === 'string') {
-              options.push({ value, label });
+              options.push({ label, value });
             }
           }
         }
       }
       return {
         ...base,
-        type: 'select' as const,
-        options,
         defaultValue: item.default_value ?? undefined,
+        options,
+        type: 'select' as const,
       } as SelectFieldDefinition;
+    }
+
+    case 'text': {
+      return {
+        ...base,
+        defaultValue: item.default_value ?? undefined,
+        type: 'text' as const,
+      } as TextFieldDefinition;
+    }
+
+    case 'textarea': {
+      return {
+        ...base,
+        defaultValue: item.default_value ?? undefined,
+        monospace: item.monospace ?? false,
+        rows: item.rows ?? undefined,
+        type: 'textarea' as const,
+      } as TextareaFieldDefinition;
     }
 
     default: {
@@ -109,17 +109,17 @@ function mapField(item: FormFieldConfigItem): FieldDefinition | null {
 
 function emptySection(): SubmissionFormSection {
   return {
-    nameField: null,
     common: [],
-    typeSpecific: [],
+    nameField: null,
     tags: [],
+    typeSpecific: [],
   };
 }
 
-/**
+/***
  * Fetch fields for a content type (cached)
  * Uses 'use cache' to cache form field configuration. This data is public and same for all users.
- * @param contentType
+ * @param {SubmissionContentType} contentType
  
  * @returns {unknown} Description of return value*/
 async function fetchFieldsForContentType(
@@ -137,9 +137,9 @@ async function fetchFieldsForContentType(
 
   // Create request-scoped child logger to avoid race conditions
   const requestLogger = logger.child({
+    module: 'data/forms/submission-form-fields',
     operation: 'fetchFieldsForContentType',
     route: 'utility-function', // Utility function - no specific route
-    module: 'data/forms/submission-form-fields',
   });
 
   try {
@@ -165,8 +165,8 @@ async function fetchFieldsForContentType(
       // logger.error() normalizes errors internally, so pass raw error
       requestLogger.error(
         {
-          err: new Error('RPC returned null or no fields'),
           contentType,
+          err: new Error('RPC returned null or no fields'),
           source: 'SubmissionFormConfig',
         },
         'Failed to load form fields'
@@ -190,17 +190,17 @@ async function fetchFieldsForContentType(
           section.common.push(field);
           break;
         }
-        case 'type_specific': {
-          section.typeSpecific.push(field);
+        case null: {
+          // Handle null field_group - add to common by default
+          section.common.push(field);
           break;
         }
         case 'tags': {
           section.tags.push(field);
           break;
         }
-        case null: {
-          // Handle null field_group - add to common by default
-          section.common.push(field);
+        case 'type_specific': {
+          section.typeSpecific.push(field);
           break;
         }
         default: {
@@ -224,8 +224,8 @@ async function fetchFieldsForContentType(
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     requestLogger.error(
       {
-        err: errorForLogging,
         contentType,
+        err: errorForLogging,
         source: 'SubmissionFormConfig',
       },
       'fetchFieldsForContentType: failed'
@@ -264,9 +264,9 @@ async function fetchSubmissionSections(
 export async function getSubmissionFormFields(): Promise<SubmissionFormConfig> {
   'use cache';
   cacheLife({
-    stale: FORM_FIELDS_CACHE_SECONDS / 2,
-    revalidate: FORM_FIELDS_CACHE_SECONDS,
     expire: FORM_FIELDS_CACHE_SECONDS * 2,
+    revalidate: FORM_FIELDS_CACHE_SECONDS,
+    stale: FORM_FIELDS_CACHE_SECONDS / 2,
   });
   cacheTag(FORM_FIELDS_CACHE_TAG);
 

@@ -26,12 +26,12 @@ export async function getQuizConfiguration(): Promise<null | QuizConfigurationRe
   'use cache: private';
 
   // Configure cache
-  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag('quiz-configuration');
 
   const reqLogger = logger.child({
-    operation: 'getQuizConfiguration',
     module: 'data/quiz',
+    operation: 'getQuizConfiguration',
   });
 
   try {

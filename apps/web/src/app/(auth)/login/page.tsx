@@ -61,14 +61,14 @@ export default async function LoginPage({
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
+    module: modulePath,
     operation,
     route,
-    module: modulePath,
   });
 
   return (
     <Suspense fallback={null}>
-      <LoginPageContent searchParams={searchParams} reqLogger={reqLogger} />
+      <LoginPageContent reqLogger={reqLogger} searchParams={searchParams} />
     </Suspense>
   );
 }
@@ -91,8 +91,8 @@ export default async function LoginPage({
  * @see normalizeError
  */
 async function LoginPageContent({
-  searchParams,
   reqLogger,
+  searchParams,
 }: {
   reqLogger: ReturnType<typeof logger.child>;
   searchParams: Promise<{ redirect?: string }>;
@@ -104,7 +104,7 @@ async function LoginPageContent({
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to resolve login search params');
     reqLogger.error(
-      { section: 'data-fetch', err: normalized },
+      { err: normalized, section: 'data-fetch' },
       'LoginPage: resolving searchParams failed'
     );
     redirectTo = undefined;
@@ -112,9 +112,9 @@ async function LoginPageContent({
 
   return (
     <SplitAuthLayout
+      authPanel={<LoginPanelClient {...(redirectTo ? { redirectTo } : {})} />}
       brandPanel={<AuthBrandPanel />}
       mobileHeader={<AuthMobileHeader />}
-      authPanel={<LoginPanelClient {...(redirectTo ? { redirectTo } : {})} />}
     />
   );
 }

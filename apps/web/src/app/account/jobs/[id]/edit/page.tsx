@@ -80,8 +80,8 @@ export default async function EditJobPage({ params }: EditJobPageProperties) {
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    operation: 'EditJobPage',
     module: 'apps/web/src/app/account/jobs/[id]/edit',
+    operation: 'EditJobPage',
   });
 
   return (
@@ -130,10 +130,7 @@ async function EditJobPageContent({
   const { user } = await getAuthenticatedUser({ context: 'EditJobPage' });
 
   if (!user) {
-    routeLogger.warn(
-      { section: 'data-fetch' },
-      'EditJobPage: unauthenticated access attempt'
-    );
+    routeLogger.warn({ section: 'data-fetch' }, 'EditJobPage: unauthenticated access attempt');
     redirect('/login');
   }
 
@@ -149,13 +146,13 @@ async function EditJobPageContent({
   let job: Database['public']['Tables']['jobs']['Row'] | null = null;
   try {
     job = await getUserJobById(user.id, id);
-    userLogger.info({ section: 'data-fetch', hasJob: !!job }, 'EditJobPage: job data loaded');
+    userLogger.info({ hasJob: !!job, section: 'data-fetch' }, 'EditJobPage: job data loaded');
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user job for edit page');
     userLogger.error(
       {
-        section: 'data-fetch',
         err: normalized,
+        section: 'data-fetch',
       },
       'EditJobPage: getUserJobById threw'
     );
@@ -170,13 +167,16 @@ async function EditJobPageContent({
   let planCatalog: Awaited<ReturnType<typeof getPaymentPlanCatalog>> = [];
   try {
     planCatalog = await getPaymentPlanCatalog();
-    userLogger.info({ section: 'data-fetch', plansCount: planCatalog.length }, 'EditJobPage: plan catalog loaded');
+    userLogger.info(
+      { plansCount: planCatalog.length, section: 'data-fetch' },
+      'EditJobPage: plan catalog loaded'
+    );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load payment plan catalog');
     userLogger.error(
       {
-        section: 'data-fetch',
         err: normalized,
+        section: 'data-fetch',
       },
       'EditJobPage: getPaymentPlanCatalog threw'
     );
@@ -187,9 +187,9 @@ async function EditJobPageContent({
 
     // Create request-scoped child logger for server action
     const actionLogger = logger.child({
+      module: 'apps/web/src/app/account/jobs/[id]/edit',
       operation: 'EditJobPageAction',
       route: `/account/jobs/${id}/edit`,
-      module: 'apps/web/src/app/account/jobs/[id]/edit',
     });
 
     let result: Awaited<ReturnType<typeof updateJob>>;
@@ -237,10 +237,16 @@ async function EditJobPageContent({
 
   // Log warnings for invalid enum values to help track data integrity issues
   if (!isValidJobType(job.type)) {
-    userLogger.warn({ section: 'data-fetch', type: job.type }, 'EditJobPage: encountered invalid job type');
+    userLogger.warn(
+      { section: 'data-fetch', type: job.type },
+      'EditJobPage: encountered invalid job type'
+    );
   }
   if (!isValidJobCategory(job.category)) {
-    userLogger.warn({ section: 'data-fetch', category: job.category }, 'EditJobPage: encountered invalid job category');
+    userLogger.warn(
+      { category: job.category, section: 'data-fetch' },
+      'EditJobPage: encountered invalid job category'
+    );
   }
 
   const hasInvalidData = !isValidJobType(job.type) || !isValidJobCategory(job.category);
@@ -260,27 +266,27 @@ async function EditJobPageContent({
       ) : null}
       <JobForm
         initialData={{
-          title: job.title,
           company: job.company,
           company_id: job.company_id,
-          location: job.location,
           description: job.description,
-          salary: job.salary,
+          location: job.location,
           remote: job.remote ?? undefined,
+          salary: job.salary,
+          title: job.title,
           ...(isValidJobType(job.type) && { type: job.type }),
-          workplace: job.workplace,
           experience: job.experience,
+          workplace: job.workplace,
           ...(isValidJobCategory(job.category) && { category: job.category }),
-          tags: job.tags,
-          requirements: job.requirements,
           benefits: job.benefits,
-          link: job.link,
-          contact_email: job.contact_email,
           company_logo: job.company_logo,
+          contact_email: job.contact_email,
+          link: job.link,
+          requirements: job.requirements,
+          tags: job.tags,
         }}
         onSubmit={handleSubmit}
-        submitLabel="Update Job Listing"
         planCatalog={planCatalog}
+        submitLabel="Update Job Listing"
       />
     </div>
   );

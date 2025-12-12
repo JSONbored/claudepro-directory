@@ -41,9 +41,9 @@ export default async function CookiesPage() {
 
   // Create request-scoped child logger
   const reqLogger = logger.child({
+    module: 'apps/web/src/app/cookies',
     operation: 'CookiesPage',
     route: '/cookies',
-    module: 'apps/web/src/app/cookies',
   });
 
   return (

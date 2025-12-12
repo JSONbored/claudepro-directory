@@ -8,12 +8,12 @@ import { ContentService } from '@heyclaude/data-layer';
 import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
-import { logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
+import { createErrorResponse, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  createSupabaseAnonClient,
   badRequestResponse,
-  getOnlyCorsHeaders,
   buildCacheHeaders,
+  createSupabaseAnonClient,
+  getOnlyCorsHeaders,
 } from '@heyclaude/web-runtime/server';
 import { cacheLife } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
@@ -26,14 +26,14 @@ type ContentCategory = DatabaseGenerated['public']['Enums']['content_category'];
 type FeedType = 'atom' | 'rss';
 const SUPPORTED_TYPES = new Set<FeedType>(['rss', 'atom']);
 
-/**
+/***
  * Convert a raw string to a validated ContentCategory or return null.
  *
  * Accepts a string or null and returns the matching ContentCategory when the
  * input matches one of the known CONTENT_CATEGORY_VALUES; returns `null` for
  * falsy or unrecognized inputs.
  *
- * @param value - The raw category value to validate (may be `null`)
+ * @param {null | string} value - The raw category value to validate (may be `null`)
  * @returns `ContentCategory` if `value` is a known category, `null` otherwise
  */
 function toContentCategory(value: null | string): ContentCategory | null {
@@ -46,7 +46,7 @@ function toContentCategory(value: null | string): ContentCategory | null {
 /**
  * Cached helper function to generate feed payload.
  * All parameters become part of the cache key, so different feed types/categories have different cache entries.
- * 
+ *
  * @param {FeedType} type - Feed format to generate: 'rss' or 'atom'
  * @param {string | null} category - Content category name, 'changelog' for changelog feeds, null for all content
  * @returns Promise resolving to an object with contentType (HTTP Content-Type header), source (feed origin label), and xml (feed XML string)
@@ -63,17 +63,17 @@ async function getCachedFeedPayload(
   return generateFeedPayload(type, category, supabase, logger);
 }
 
-/**
+/******
  * Generate an XML feed payload and accompanying metadata for the requested feed type and category.
  *
  * Uses ContentService RPC wrappers to produce either a changelog feed or a content feed in
  * RSS or Atom format, and returns the XML body together with the correct Content-Type and a
  * human-readable source label.
  *
- * @param type - Feed format to generate: 'rss' or 'atom'
- * @param category - Content category name, `'changelog'` for changelog feeds, `null` for all content
- * @param supabase - Supabase anonymous client used to call database RPCs
- * @param reqLogger - Optional request-scoped logger used for RPC call logging and error context
+ * @param {FeedType} type - Feed format to generate: 'rss' or 'atom'
+ * @param {null | string} category - Content category name, `'changelog'` for changelog feeds, `null` for all content
+ * @param {ReturnType<typeof createSupabaseAnonClient>} supabase - Supabase anonymous client used to call database RPCs
+ * @param {ReturnType<typeof logger.child>} reqLogger - Optional request-scoped logger used for RPC call logging and error context
  * @returns An object containing `xml` (the feed XML string), `contentType` (HTTP Content-Type header value), and `source` (a short label describing the feed origin)
  * @see ContentService
  * @see toContentCategory
@@ -94,13 +94,16 @@ async function generateFeedPayload(
       try {
         const feedData = await service.generateChangelogRssFeed(rpcArgs);
         return {
-          xml: feedData,
           contentType: 'application/rss+xml; charset=utf-8',
           source: 'PostgreSQL changelog (rss)',
+          xml: feedData,
         };
       } catch (error) {
         const normalized = normalizeError(error, 'generate_changelog_rss_feed failed');
-        reqLogger?.error({ err: normalized, rpcName: 'generate_changelog_rss_feed' }, 'RPC call failed');
+        reqLogger?.error(
+          { err: normalized, rpcName: 'generate_changelog_rss_feed' },
+          'RPC call failed'
+        );
         throw normalized;
       }
     }
@@ -110,13 +113,16 @@ async function generateFeedPayload(
     try {
       const feedData = await service.generateChangelogAtomFeed(rpcArgs2);
       return {
-        xml: feedData,
         contentType: 'application/atom+xml; charset=utf-8',
         source: 'PostgreSQL changelog (atom)',
+        xml: feedData,
       };
     } catch (error) {
       const normalized = normalizeError(error, 'generate_changelog_atom_feed failed');
-      reqLogger?.error({ err: normalized, rpcName: 'generate_changelog_atom_feed' }, 'RPC call failed');
+      reqLogger?.error(
+        { err: normalized, rpcName: 'generate_changelog_atom_feed' },
+        'RPC call failed'
+      );
       throw normalized;
     }
   }
@@ -131,13 +137,18 @@ async function generateFeedPayload(
     try {
       const feedData = await service.generateContentRssFeed(rpcArgs3);
       return {
-        xml: feedData,
         contentType: 'application/rss+xml; charset=utf-8',
-        source: category ? `PostgreSQL content (${category})` : 'PostgreSQL content (all categories)',
+        source: category
+          ? `PostgreSQL content (${category})`
+          : 'PostgreSQL content (all categories)',
+        xml: feedData,
       };
     } catch (error) {
       const normalized = normalizeError(error, 'generate_content_rss_feed failed');
-      reqLogger?.error({ err: normalized, rpcName: 'generate_content_rss_feed' }, 'RPC call failed');
+      reqLogger?.error(
+        { err: normalized, rpcName: 'generate_content_rss_feed' },
+        'RPC call failed'
+      );
       throw normalized;
     }
   }
@@ -149,9 +160,9 @@ async function generateFeedPayload(
   try {
     const feedData = await service.generateContentAtomFeed(rpcArgs4);
     return {
-      xml: feedData,
       contentType: 'application/atom+xml; charset=utf-8',
       source: category ? `PostgreSQL content (${category})` : 'PostgreSQL content (all categories)',
+      xml: feedData,
     };
   } catch (error) {
     const normalized = normalizeError(error, 'generate_content_atom_feed failed');
@@ -162,9 +173,9 @@ async function generateFeedPayload(
 
 export async function GET(request: NextRequest) {
   const reqLogger = logger.child({
+    method: 'GET',
     operation: 'FeedsAPI',
     route: '/api/feeds',
-    method: 'GET',
   });
 
   try {
@@ -188,8 +199,8 @@ export async function GET(request: NextRequest) {
 
     reqLogger.info(
       {
-        type,
         category: category ?? 'all',
+        type,
       },
       'Feeds request received'
     );
@@ -198,33 +209,33 @@ export async function GET(request: NextRequest) {
 
     reqLogger.info(
       {
-        type,
         category: category ?? 'all',
         contentType: payload.contentType,
         source: payload.source,
+        type,
       },
       'Feed delivery'
     );
 
     return new NextResponse(payload.xml, {
-      status: 200,
       headers: {
         'Content-Type': payload.contentType,
         'X-Content-Source': payload.source,
-        'X-Robots-Tag': 'index, follow',
         'X-Generated-By': 'supabase.functions.feeds',
+        'X-Robots-Tag': 'index, follow',
         ...buildSecurityHeaders(),
         ...CORS,
         ...buildCacheHeaders('feeds'),
       },
+      status: 200,
     });
   } catch (error) {
     const normalized = normalizeError(error, 'Feeds API error');
     reqLogger.error({ err: normalized }, 'Feeds API error');
     return createErrorResponse(normalized, {
-      route: '/api/feeds',
-      operation: 'FeedsAPI',
       method: 'GET',
+      operation: 'FeedsAPI',
+      route: '/api/feeds',
     });
   }
 }
@@ -237,9 +248,9 @@ export async function GET(request: NextRequest) {
  */
 export function OPTIONS() {
   return new NextResponse(null, {
-    status: 204,
     headers: {
       ...getOnlyCorsHeaders,
     },
+    status: 204,
   });
 }

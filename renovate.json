@@ -1,0 +1,96 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":dependencyDashboard",
+    ":semanticCommits",
+    ":semanticCommitTypeAll(chore)"
+  ],
+  "enabledManagers": ["npm", "github-actions"],
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["^react", "^react-dom", "@types/react"],
+      "groupName": "React ecosystem",
+      "schedule": ["before 10am on monday"]
+    },
+    {
+      "matchPackagePatterns": ["^next", "next-*"],
+      "groupName": "Next.js",
+      "schedule": ["before 10am on monday"]
+    },
+    {
+      "matchPackagePatterns": ["@radix-ui/*"],
+      "groupName": "Radix UI",
+      "schedule": ["before 10am on monday"]
+    },
+    {
+      "matchPackagePatterns": ["^typescript", "@types/*", "^tsx"],
+      "groupName": "TypeScript tooling",
+      "schedule": ["before 10am on monday"]
+    },
+    {
+      "matchPackagePatterns": ["^eslint", "eslint-*", "@typescript-eslint/*", "eslint-plugin-*"],
+      "groupName": "ESLint",
+      "schedule": ["before 10am on monday"]
+    },
+    {
+      "matchPackagePatterns": ["^tailwindcss", "@tailwindcss/*", "tailwind-*"],
+      "groupName": "Tailwind CSS",
+      "schedule": ["before 10am on monday"]
+    },
+    {
+      "matchPackagePatterns": ["@vercel/*", "@netlify/*"],
+      "groupName": "Deployment platform",
+      "schedule": ["before 10am on monday"]
+    },
+    {
+      "matchPackagePatterns": ["@supabase/*"],
+      "groupName": "Supabase",
+      "schedule": ["before 10am on monday"]
+    },
+    {
+      "matchPackagePatterns": ["@inngest/*"],
+      "groupName": "Inngest",
+      "schedule": ["before 10am on monday"]
+    },
+    {
+      "matchUpdateTypes": ["patch"],
+      "automerge": true,
+      "automergeType": "pr",
+      "automergeStrategy": "squash",
+      "minimumReleaseAge": "3 days"
+    },
+    {
+      "matchUpdateTypes": ["minor"],
+      "automerge": false,
+      "schedule": ["before 10am on monday"]
+    },
+    {
+      "matchUpdateTypes": ["major"],
+      "enabled": false
+    },
+    {
+      "matchPackageNames": ["@types/node"],
+      "matchUpdateTypes": ["version-update:semver-major"],
+      "enabled": false
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "groupName": "GitHub Actions",
+      "schedule": ["before 10am on monday"]
+    }
+  ],
+  "prConcurrentLimit": 5,
+  "prHourlyLimit": 2,
+  "schedule": ["before 10am on monday"],
+  "timezone": "America/Los_Angeles",
+  "labels": ["dependencies", "automated"],
+  "reviewers": ["JSONbored"],
+  "commitMessagePrefix": "chore",
+  "commitMessageAction": "update",
+  "commitMessageTopic": "{{depName}}",
+  "commitMessageExtra": "to {{newVersion}}",
+  "semanticCommits": "enabled",
+  "semanticCommitType": "chore",
+  "semanticCommitScope": "deps"
+}

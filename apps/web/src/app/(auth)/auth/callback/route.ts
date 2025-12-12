@@ -39,12 +39,12 @@ export async function GET(request: NextRequest) {
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
+    module: modulePath,
     operation,
     route,
-    module: modulePath,
   });
 
-  const { searchParams, origin } = new URL(request.url);
+  const { origin, searchParams } = new URL(request.url);
   const code = searchParams.get('code');
   const newsletterParameter = searchParams.get('newsletter');
   const shouldSubscribeToNewsletter = newsletterParameter === 'true';
@@ -146,20 +146,20 @@ export async function GET(request: NextRequest) {
 
       const redirectUrl = isLocalEnvironment
         ? `${origin}${next}`
-        : (forwardedHost && isValidHost
+        : forwardedHost && isValidHost
           ? `https://${forwardedHost}${next}`
-          : `${origin}${next}`);
+          : `${origin}${next}`;
 
       const response = NextResponse.redirect(redirectUrl);
       if (shouldSetNewsletterCookie) {
         response.cookies.set({
-          name: 'newsletter_opt_in',
-          value: 'success',
-          maxAge: 600, // 10 minutes
           httpOnly: false,
+          maxAge: 600, // 10 minutes
+          name: 'newsletter_opt_in',
+          path: '/',
           sameSite: 'lax',
           secure: env.NODE_ENV !== 'development',
-          path: '/',
+          value: 'success',
         });
       }
       response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');

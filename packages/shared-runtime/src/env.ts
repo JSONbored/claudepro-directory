@@ -166,4 +166,5 @@ export function getNodeEnv(): string | undefined {
 
 export const isDevelopment = getNodeEnv() === 'development';
 export const isProduction = getNodeEnv() === 'production';
-export const isVercel = readEnv('VERCEL') === '1';
+// Use platform detection utility for platform-agnostic checks
+export { isVercel } from './platform/index.ts';

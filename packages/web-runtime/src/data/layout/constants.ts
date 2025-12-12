@@ -20,8 +20,8 @@ export interface LayoutData {
 export const DEFAULT_LAYOUT_DATA: LayoutData = {
   announcement: null,
   navigationData: {
+    actions: null,
     primary: null,
     secondary: null,
-    actions: null,
   },
 };

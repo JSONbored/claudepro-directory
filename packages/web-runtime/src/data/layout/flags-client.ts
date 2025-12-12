@@ -27,16 +27,16 @@ export interface LayoutFlags {
  * Default flag values (primary source of truth - no external service dependency)
  */
 const DEFAULT_FLAGS: LayoutFlags = {
+  ctaVariant: 'value_focused' as const,
   fabNotifications: false,
+  fabNotificationsEnabled: false,
+  footerDelayVariant: '30s' as const,
+  notificationsEnabled: false,
   notificationsProvider: false,
   notificationsSheet: false,
-  notificationsToasts: false,
-  footerDelayVariant: '30s' as const,
-  ctaVariant: 'value_focused' as const,
-  notificationsEnabled: false,
   notificationsSheetEnabled: false,
+  notificationsToasts: false,
   notificationsToastsEnabled: false,
-  fabNotificationsEnabled: false,
 };
 
 /**
@@ -52,9 +52,9 @@ export function getLayoutFlags(): LayoutFlags {
 
   return {
     ...DEFAULT_FLAGS,
+    fabNotificationsEnabled,
     notificationsEnabled,
     notificationsSheetEnabled,
     notificationsToastsEnabled,
-    fabNotificationsEnabled,
   };
 }

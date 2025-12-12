@@ -1,10 +1,23 @@
 # PR Content Extraction
-# Optimizations: only on PR open/edit, shallow clone, cancels in-progress
+# Optimizations: path filtering, early exit, shallow clone, cancels in-progress
 # Uses actions/checkout@v6 with fetch-depth: 1 (only need current commit)
+#
+# **What it does:**
+# 1. Extracts plaintext content submissions from PR descriptions
+# 2. Validates extracted fields
+# 3. Inserts submission into Supabase via RPC
+# 4. Posts PR comments with success/error messages
+#
+# **Optimizations:**
+# - Only runs if PR description contains submission OR content files changed
+# - Early exit if no submission detected (skips dependency installation)
+# - Path-based filtering to avoid unnecessary runs
 name: PR Content Extraction
 
 on:
   # Only trigger on PR open/edit (not on every push to PR branch)
+  # Note: We don't use path filtering here because submissions come from PR descriptions,
+  # not file changes. The early exit check job handles filtering efficiently.
   pull_request:
     types: [opened, edited]
     branches: [main]
@@ -15,7 +28,31 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Fast check: Does PR description contain a submission?
+  check-submission:
+    name: Check for Submission
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    outputs:
+      has-submission: ${{ steps.check.outputs.has-submission }}
+    steps:
+      - name: Check PR description for submission
+        id: check
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const prBody = context.payload.pull_request.body || '';
+            // Check if PR description contains plaintext submission format
+            const hasSubmission = /Content-Type:\s*\w+/i.test(prBody);
+            console.log(`Submission detected: ${hasSubmission}`);
+            return { 'has-submission': hasSubmission };
+
+  # Main extraction job - only runs if submission detected
   extract-content:
+    name: Extract and Submit Content
+    needs: check-submission
+    # Only run if submission detected in PR description
+    if: needs.check-submission.outputs.has-submission == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:

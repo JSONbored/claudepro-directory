@@ -7,14 +7,14 @@ import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { BarChart, Eye, MousePointer, TrendingUp } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  UI_CLASSES,
-  UnifiedBadge,
   Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  UI_CLASSES,
+  UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
@@ -45,24 +45,27 @@ export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/sponsorships');
 }
 
-/**
+/*******
  * Determine whether a sponsorship is active at a given time.
  *
  * A sponsorship is considered active when its `active` flag is `true` and the
  * provided time falls between `start_date` and `end_date` (inclusive).
  *
- * @param sponsorship - Object containing sponsorship state and date range:
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship - Object containing sponsorship state and date range:
  *   - `active`: boolean or null indicating whether the sponsorship is enabled
  *   - `start_date`: ISO date string for the start of the sponsorship period
  *   - `end_date`: ISO date string for the end of the sponsorship period
- * @param sponsorship.start_date
- * @param sponsorship.end_date
- * @param sponsorship.active
- * @param now - Reference Date used to evaluate whether the sponsorship is within its active range
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship.start_date
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship.end_date
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship.active
+ * @param {Date} now - Reference Date used to evaluate whether the sponsorship is within its active range
  * @returns `true` if the sponsorship's `active` flag is `true` and `now` is between `start_date` and `end_date` (inclusive), `false` otherwise.
  *
  * @see SponsorshipsPage
- */
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
+  * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
+*/
 function isSponsorshipActive(
   sponsorship: { active: boolean | null; end_date: string; start_date: string },
   now: Date
@@ -97,9 +100,9 @@ export default async function SponsorshipsPage() {
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
+    module: 'apps/web/src/app/account/sponsorships',
     operation: 'SponsorshipsPage',
     route: '/account/sponsorships',
-    module: 'apps/web/src/app/account/sponsorships',
   });
 
   return (
@@ -119,6 +122,7 @@ export default async function SponsorshipsPage() {
  * - or a list of sponsorship cards (with status, metrics, progress, and analytics links) when sponsorships exist.
  *
  * @param reqLogger - A request-scoped logger (used to create a user-scoped child logger for per-request telemetry).
+ * @param reqLogger.reqLogger
  * @returns The server-rendered React element for the sponsorships page content.
  *
  * @see getAuthenticatedUser
@@ -148,7 +152,10 @@ async function SponsorshipsPageContent({
             <CardDescription>Please sign in to manage your sponsorship campaigns.</CardDescription>
           </CardHeader>
           <CardContent>
-            <SignInButton valueProposition="Sign in to manage your sponsorship campaigns" redirectTo="/account/sponsorships">
+            <SignInButton
+              redirectTo="/account/sponsorships"
+              valueProposition="Sign in to manage your sponsorship campaigns"
+            >
               Go to login
             </SignInButton>
           </CardContent>
@@ -171,8 +178,8 @@ async function SponsorshipsPageContent({
     const normalized = normalizeError(error, 'Failed to load user sponsorships');
     userLogger.error(
       {
-        section: 'data-fetch',
         err: normalized,
+        section: 'data-fetch',
       },
       'SponsorshipsPage: getUserSponsorships threw'
     );
@@ -192,7 +199,7 @@ async function SponsorshipsPageContent({
             <h1 className="mb-2 text-3xl font-bold">Sponsorships</h1>
             <p className="text-muted-foreground">No active campaigns yet</p>
           </div>
-          <Button variant="outline" asChild>
+          <Button asChild variant="outline">
             <Link href={ROUTES.PARTNER}>
               <TrendingUp className="mr-2 h-4 w-4" />
               Become a Sponsor
@@ -225,7 +232,7 @@ async function SponsorshipsPageContent({
             {activeCount} active {activeCount === 1 ? 'campaign' : 'campaigns'}
           </p>
         </div>
-        <Button variant="outline" asChild>
+        <Button asChild variant="outline">
           <Link href={ROUTES.PARTNER}>
             <TrendingUp className="mr-2 h-4 w-4" />
             Become a Sponsor
@@ -256,18 +263,18 @@ async function SponsorshipsPageContent({
                 <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
                   <div className="flex-1">
                     <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                      <UnifiedBadge variant="sponsored" tier={safeTier} showIcon />
+                      <UnifiedBadge showIcon tier={safeTier} variant="sponsored" />
                       {isActive ? (
-                        <UnifiedBadge variant="base" className={UI_CLASSES.STATUS_APPROVED}>
+                        <UnifiedBadge className={UI_CLASSES.STATUS_APPROVED} variant="base">
                           Active
                         </UnifiedBadge>
                       ) : (
-                        <UnifiedBadge variant="base" style="outline">
+                        <UnifiedBadge style="outline" variant="base">
                           Inactive
                         </UnifiedBadge>
                       )}
                       {hasHitLimit ? (
-                        <UnifiedBadge variant="base" className={UI_CLASSES.STATUS_WARNING}>
+                        <UnifiedBadge className={UI_CLASSES.STATUS_WARNING} variant="base">
                           Limit Reached
                         </UnifiedBadge>
                       ) : null}
@@ -280,7 +287,7 @@ async function SponsorshipsPageContent({
                       {new Date(sponsorship.end_date).toLocaleDateString()}
                     </CardDescription>
                   </div>
-                  <Button variant="outline" size="sm" asChild>
+                  <Button asChild size="sm" variant="outline">
                     <Link href={`/account/sponsorships/${sponsorship.id}/analytics`}>
                       <BarChart className="mr-1 h-3 w-3" />
                       Analytics
@@ -331,19 +338,19 @@ async function SponsorshipsPageContent({
                 {/* Progress bar if has limit */}
                 {sponsorship.impression_limit == null ? null : (
                   <div
+                    aria-label={`Impressions: ${impressionCount} of ${sponsorship.impression_limit}`}
+                    aria-valuemax={sponsorship.impression_limit}
+                    aria-valuemin={0}
+                    aria-valuenow={Math.min(impressionCount, sponsorship.impression_limit)}
                     className="bg-muted h-2 w-full rounded-full"
                     role="progressbar"
-                    aria-valuenow={Math.min(impressionCount, sponsorship.impression_limit)}
-                    aria-valuemin={0}
-                    aria-valuemax={sponsorship.impression_limit}
-                    aria-label={`Impressions: ${impressionCount} of ${sponsorship.impression_limit}`}
                   >
                     <div
+                      aria-hidden="true"
                       className="bg-primary h-2 rounded-full transition-all"
                       style={{
                         width: `${Math.min(100, (impressionCount / sponsorship.impression_limit) * 100)}%`,
                       }}
-                      aria-hidden="true"
                     />
                   </div>
                 )}

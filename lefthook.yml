@@ -1,6 +1,6 @@
 # Lefthook Configuration - Claude Pro Directory
-# Version: 3.0.0 (November 2025)
-# Enhanced with auto-format, edge function type-check, and tech debt tracking
+# Version: 4.0.0 (Optimized - December 2025)
+# Optimized for large codebase: Reduced from 18→5 pre-commit groups, 15→4 pre-push commands
 
 # ============================================================================
 # OUTPUT CONTROL
@@ -12,29 +12,61 @@ output:
   - failure       # Always show failures
 
 # ============================================================================
-# PRE-COMMIT: Fast checks on staged files only
-# Runs in parallel for speed, fails fast on critical issues
+# PRE-COMMIT: Fast, parallel, smart grouping
+# Reduced from 18 commands to 5 logical groups for better performance
 # ============================================================================
 pre-commit:
   parallel: true
   follow: true
   commands:
-    # 1. Type checking (Next.js/Node code - build dirs only)
-    type-check:
+    # GROUP 1: Critical blocking checks (must pass, fail fast)
+    critical:
       glob: "**/*.{ts,tsx}"
       exclude: 
         - "apps/edge/functions/**"
         - "packages/edge-runtime/src/utils/email/**"
       run: |
-        echo "🔍 Type checking build-critical code..."
-        pnpm type-check:build
-      fail_text: "❌ Type errors found in build-critical code. Fix them before committing."
+        echo "🚨 Running critical checks..."
+        START=$(date +%s%N)
+        
+        # Type check (exits if fails)
+        pnpm type-check:build || exit 1
+        
+        # Architecture validations (exits if fails)
+        pnpm validate:boundaries || exit 1
+        pnpm validate:api-routes || exit 1
+        pnpm validate:server-actions || exit 1
+        
+        # Client/server boundaries (exits if fails)
+        pnpm validate:client-server || exit 1
+        
+        # Database validations (exits if fails)
+        pnpm validate:database-queries || exit 1
+        pnpm validate:authentication || exit 1
+        
+        # RLS policies (exits if fails)
+        pnpm validate:rls-policies || exit 1
+        
+        # Performance validations (exits if fails)
+        pnpm validate:cache-components || exit 1
+        pnpm validate:nextresponse-promises || exit 1
+        
+        # Error handling validations (exits if fails)
+        pnpm validate:server-component-errors || exit 1
+        pnpm validate:client-component-errors || exit 1
+        
+        # Observability (exits if fails)
+        pnpm validate:logging-context || exit 1
+        
+        DURATION=$(( ($(date +%s%N) - START) / 1000000 ))
+        echo "✅ Critical checks passed (${DURATION}ms)"
+      fail_text: "❌ Critical validation failed. Fix before committing."
 
-    # 2. Type checking (Edge functions - Deno)
-    type-check-edge:
+    # GROUP 2: Edge functions (isolated, parallel with GROUP 1)
+    edge:
       glob: "apps/edge/functions/**/*.ts"
       run: |
-        echo "🦕 Type checking edge functions..."
+        echo "🦕 Checking edge functions..."
         if command -v deno &> /dev/null; then
           set +e
           OUTPUT=$(pnpm type-check:edge 2>&1)
@@ -42,7 +74,7 @@ pre-commit:
           echo "$OUTPUT"
           if [ $STATUS -ne 0 ]; then
             if echo "$OUTPUT" | grep -F "packages/edge-runtime/src/utils/email/" >/dev/null; then
-              echo "⚠️  Email template type errors detected but ignored (packages/edge-runtime/src/utils/email/**)."
+              echo "⚠️  Email template type errors ignored (packages/edge-runtime/src/utils/email/**)"
               exit 0
             fi
             exit $STATUS
@@ -50,422 +82,203 @@ pre-commit:
         else
           echo "⚠️  Deno not installed - skipping edge function type-check"
           echo "   Install: brew install deno"
+          exit 0
         fi
-      fail_text: "❌ Type errors found in edge functions. Fix them before committing."
+      fail_text: "❌ Edge function validation failed."
 
-    # 3. Lint and auto-fix with ESLint (build dirs only, non-blocking)
-    lint:
-      glob: "**/*.{ts,tsx}"
-      exclude: 
-        - "apps/edge/functions/**"
-        - "packages/edge-runtime/src/utils/email/**"
-      run: |
-        echo "🔍 Linting build-critical code (non-blocking)..."
-        set +e
-        pnpm lint:build --fix
-        LINT_STATUS=$?
-        git add -u
-        if [ $LINT_STATUS -ne 0 ]; then
-          echo "⚠️  ESLint found errors in build-critical code (not blocking - fix before merging)"
-          echo "   Run 'pnpm lint:build' to see full output"
-        else
-          echo "✅ Linting passed"
-        fi
-        exit 0
-      fail_text: "⚠️  ESLint found errors (not blocking - fix before merging)."
-      stage_fixed: true
-
-    # 4. Validate client/server boundaries (catches build-time import issues)
-    validate-client-server:
-      glob: "apps/web/src/**/*.{ts,tsx}"
-      run: |
-        echo "🔍 Validating client/server boundaries..."
-        pnpm validate:client-server
-      fail_text: "❌ Client/server boundary violations found. Fix them before committing."
-
-    # 6. Validate MCP tools (if MCP files changed)
-    validate-mcp-tools:
+    # GROUP 3: Schema validation (runs in parallel with GROUP 1 & 2)
+    schemas:
       glob: "apps/edge/supabase/functions/heyclaude-mcp/**/*.ts"
       run: |
-        echo "🔍 Validating MCP tools..."
-        pnpm validate:mcp-tools
-      fail_text: "❌ MCP tool validation failed. Fix errors before committing."
+        echo "📋 Validating schemas..."
+        set +e
+        pnpm validate:zod-schemas 2>&1 | tail -5
+        pnpm validate:mcp-tools 2>&1 | tail -5
+        exit 0
+      fail_text: "⚠️  Schema validation issues (review before merging)."
 
-    # 7. Validate Zod schemas (if MCP types changed)
-    validate-zod-schemas:
-      glob: "apps/edge/supabase/functions/heyclaude-mcp/lib/types.ts"
-      run: |
-        echo "🔍 Validating Zod schemas..."
-        pnpm validate:zod-schemas
-      fail_text: "❌ Zod schema validation failed. Fix errors before committing."
-
-    # 8. Validate API routes (if API routes changed)
-    validate-api-routes:
-      glob: "apps/web/src/app/api/**/route.ts"
-      run: |
-        echo "🔍 Validating API routes..."
-        pnpm validate:api-routes
-      fail_text: "❌ API route validation failed. Fix errors before committing."
-
-    # 9. Validate client/server boundaries (if components changed)
-    validate-boundaries:
-      glob: "apps/web/src/**/*.{tsx,ts}"
-      exclude:
-        - "apps/web/src/app/**"  # App router pages are server components by default
-      run: |
-        echo "🔍 Validating client/server boundaries..."
-        pnpm validate:boundaries
-      fail_text: "❌ Client/server boundary validation failed. Fix errors before committing."
-
-    # 10. Validate server actions (if actions changed)
-    validate-server-actions:
-      glob: "packages/web-runtime/src/actions/**/*.ts"
-      run: |
-        echo "🔍 Validating server actions..."
-        pnpm validate:server-actions
-      fail_text: "❌ Server action validation failed. Fix errors before committing."
-
-    # 11. Validate database queries (if data layer or app code changed)
-    validate-database-queries:
-      glob: "apps/web/src/**/*.{ts,tsx}"
-      exclude:
-        - "apps/web/src/components/**"  # Components shouldn't have direct queries
-      run: |
-        echo "🔍 Validating database queries..."
-        pnpm validate:database-queries
-      fail_text: "❌ Database query validation failed. Fix errors before committing."
-
-    # 12. Validate authentication checks (if API routes or actions changed)
-    validate-authentication:
-      glob: "apps/web/src/app/api/**/*.{ts,tsx}"
-      run: |
-        echo "🔍 Validating authentication checks..."
-        pnpm validate:authentication
-      fail_text: "❌ Authentication validation failed. Fix errors before committing."
-
-    # 13. Validate RLS policies (if migrations changed)
-    validate-rls-policies:
-      glob: "supabase/migrations/**/*.sql"
-      run: |
-        echo "🔍 Validating RLS policies..."
-        pnpm validate:rls-policies
-      fail_text: "❌ RLS policy validation failed. Fix errors before committing."
-
-    # 14. Validate Cache Components (if pages or API routes changed)
-    validate-cache-components:
-      glob: "apps/web/src/app/**/*.{tsx,ts}"
-      run: |
-        echo "🔍 Validating Cache Components usage..."
-        pnpm validate:cache-components
-      fail_text: "❌ Cache Components validation failed. Fix errors before committing."
-
-    # 15. Validate NextResponse promise handling (if API routes changed)
-    validate-nextresponse-promises:
-      glob: "apps/web/src/app/api/**/*.{ts,tsx}"
-      run: |
-        echo "🔍 Validating NextResponse promise handling..."
-        pnpm validate:nextresponse-promises
-      fail_text: "❌ NextResponse promise validation failed. Fix errors before committing."
-
-    # 16. Validate server component error handling (if pages changed)
-    validate-server-component-errors:
-      glob: "apps/web/src/app/**/page.{tsx,ts}"
-      run: |
-        echo "🔍 Validating server component error handling..."
-        pnpm validate:server-component-errors
-      fail_text: "❌ Server component error handling validation failed. Fix errors before committing."
-
-    # 17. Validate client component error handling (if components changed)
-    validate-client-component-errors:
-      glob: "apps/web/src/components/**/*.{tsx,ts}"
-      run: |
-        echo "🔍 Validating client component error handling..."
-        pnpm validate:client-component-errors
-      fail_text: "❌ Client component error handling validation failed. Fix errors before committing."
-
-    # 18. Validate logging context (if pages/routes/components changed)
-    validate-logging-context:
-      glob: "apps/web/src/app/**/*.{tsx,ts} apps/web/src/components/**/*.{tsx,ts}"
-      run: |
-        echo "🔍 Validating logging context and request ID usage..."
-        pnpm validate:logging-context
-      fail_text: "❌ Logging context validation failed. Fix errors before committing."
-
-    # 7. Run tests for changed files (non-blocking, warnings only)
-    test-affected:
+    # GROUP 4: Auto-fixable issues (non-blocking, fixes staged files)
+    auto-fix:
       glob: "**/*.{ts,tsx}"
       exclude: 
         - "apps/edge/functions/**"
         - "packages/edge-runtime/src/utils/email/**"
       run: |
-        echo "🧪 Running tests for changed files (non-blocking)..."
+        echo "🔧 Auto-fixing code..."
         set +e
-        # Run only tests related to changed files (vitest --changed)
-        # This is fast and only runs tests that might be affected by changes
-        pnpm test --run --changed 2>&1
-        TEST_STATUS=$?
-        if [ $TEST_STATUS -ne 0 ]; then
-          echo "⚠️  Tests failed for changed files, trying all tests..."
-          pnpm test --run 2>&1
-          ALL_TEST_STATUS=$?
-          if [ $ALL_TEST_STATUS -ne 0 ]; then
-            echo "⚠️  Some tests failed (not blocking - fix before merging)"
-            echo "   Run 'pnpm test' to see full output"
-          else
-            echo "✅ All tests passed"
-          fi
-        else
-          echo "✅ Tests for changed files passed"
-        fi
+        pnpm lint:build --fix 2>&1 | tail -3
+        git add -u
         exit 0
-      fail_text: "⚠️  Tests failed (not blocking - fix before merging)."
-      stage_fixed: false
+      stage_fixed: true
+
+    # GROUP 5: Tests (non-blocking, runs in parallel)
+    tests:
+      glob: "**/*.{ts,tsx}"
+      exclude: 
+        - "apps/edge/functions/**"
+        - "packages/edge-runtime/src/utils/email/**"
+      run: |
+        echo "🧪 Running affected tests..."
+        set +e
+        pnpm test --run --changed 2>&1 | tail -15
+        exit 0
+      fail_text: "⚠️  Tests failed (non-blocking - fix before merging)."
 
 # ============================================================================
-# PRE-PUSH: Comprehensive checks before code reaches remote
+# PRE-PUSH: Comprehensive but optimized
+# Reduced from 15 commands to 4 consolidated commands
 # ============================================================================
 pre-push:
   parallel: false
   commands:
-    # 1. Type checking (build-critical code only)
-    # Note: Only checks code that affects production build
-    type-check-all:
+    # Comprehensive validation (all critical checks in one command)
+    validate:
       run: |
-        echo "🔍 Type checking build-critical code..."
-        set +e
-        OUTPUT=$(pnpm type-check:build 2>&1)
-        STATUS=$?
-        echo "$OUTPUT"
-        if [ $STATUS -ne 0 ]; then
-          if echo "$OUTPUT" | grep -F "packages/edge-runtime/src/utils/email/" >/dev/null; then
-            echo "⚠️  Email template type errors detected but ignored (packages/edge-runtime/src/utils/email/**)."
-            exit 0
-          fi
-          exit $STATUS
-        fi
-      fail_text: "❌ Type errors found in build-critical code. Fix them before pushing."
+        echo "🔍 Running comprehensive validation..."
+        START=$(date +%s%N)
+        
+        echo "  ▶️  Type checking..."
+        pnpm type-check:build || exit 1
+        
+        echo "  ▶️  Architecture..."
+        pnpm validate:boundaries || exit 1
+        pnpm validate:api-routes || exit 1
+        pnpm validate:server-actions || exit 1
+        pnpm validate:client-server || exit 1
+        
+        echo "  ▶️  Data layer..."
+        pnpm validate:database-queries || exit 1
+        pnpm validate:authentication || exit 1
+        pnpm validate:rls-policies || exit 1
+        
+        echo "  ▶️  Performance..."
+        pnpm validate:cache-components || exit 1
+        pnpm validate:nextresponse-promises || exit 1
+        
+        echo "  ▶️  Error handling..."
+        pnpm validate:server-component-errors || exit 1
+        pnpm validate:client-component-errors || exit 1
+        
+        echo "  ▶️  Observability..."
+        pnpm validate:logging-context || exit 1
+        
+        echo "  ▶️  MCP tools..."
+        pnpm validate:mcp || exit 1
+        
+        DURATION=$(( ($(date +%s%N) - START) / 1000000 ))
+        echo "✅ Validation passed (${DURATION}ms)"
+      fail_text: "❌ Validation failed. Fix before pushing."
 
-    # 2. Lint check (non-blocking, warnings only)
-    lint-all:
-      run: |
-        echo "🔍 Running full lint check (non-blocking)..."
-        set +e
-        pnpm lint:build 2>&1
-        LINT_STATUS=$?
-        if [ $LINT_STATUS -ne 0 ]; then
-          echo "⚠️  ESLint found errors (not blocking - fix before merging)"
-          echo "   Run 'pnpm lint:build' to see full output"
-        else
-          echo "✅ Linting passed"
-        fi
-        exit 0
-      fail_text: "⚠️  ESLint found errors (not blocking - fix before merging)."
-
-    # 3. Validate MCP tools and schemas (comprehensive check)
-    validate-mcp-all:
-      run: |
-        echo "🔍 Validating MCP tools and schemas..."
-        pnpm validate:mcp
-      fail_text: "❌ MCP validation failed. Fix errors before pushing."
-
-    # 4. Analyze dependencies (non-blocking warnings)
-    analyze-dependencies:
-      run: |
-        echo "🔍 Analyzing dependencies..."
-        pnpm analyze:dependencies
-      fail_text: "⚠️  Dependency issues found (not blocking - fix iteratively)."
-
-    # 5. Validate API routes (comprehensive check)
-    validate-api-routes-all:
-      run: |
-        echo "🔍 Validating all API routes..."
-        pnpm validate:api-routes
-      fail_text: "❌ API route validation failed. Fix errors before pushing."
-
-    # 6. Validate client/server boundaries (comprehensive check)
-    validate-boundaries-all:
-      run: |
-        echo "🔍 Validating all client/server boundaries..."
-        pnpm validate:boundaries
-      fail_text: "❌ Client/server boundary validation failed. Fix errors before pushing."
-
-    # 7. Validate server actions (comprehensive check)
-    validate-server-actions-all:
-      run: |
-        echo "🔍 Validating all server actions..."
-        pnpm validate:server-actions
-      fail_text: "❌ Server action validation failed. Fix errors before pushing."
-
-    # 8. Validate database queries (comprehensive check)
-    validate-database-queries-all:
-      run: |
-        echo "🔍 Validating all database queries..."
-        pnpm validate:database-queries
-      fail_text: "❌ Database query validation failed. Fix errors before pushing."
-
-    # 9. Validate authentication checks (comprehensive check)
-    validate-authentication-all:
-      run: |
-        echo "🔍 Validating all authentication checks..."
-        pnpm validate:authentication
-      fail_text: "❌ Authentication validation failed. Fix errors before pushing."
-
-    # 10. Validate RLS policies (comprehensive check)
-    validate-rls-policies-all:
-      run: |
-        echo "🔍 Validating all RLS policies..."
-        pnpm validate:rls-policies
-      fail_text: "❌ RLS policy validation failed. Fix errors before pushing."
-
-    # 11. Validate Cache Components (comprehensive check)
-    validate-cache-components-all:
-      run: |
-        echo "🔍 Validating all Cache Components usage..."
-        pnpm validate:cache-components
-      fail_text: "❌ Cache Components validation failed. Fix errors before pushing."
-
-    # 12. Validate NextResponse promises (comprehensive check)
-    validate-nextresponse-promises-all:
-      run: |
-        echo "🔍 Validating all NextResponse promise handling..."
-        pnpm validate:nextresponse-promises
-      fail_text: "❌ NextResponse promise validation failed. Fix errors before pushing."
-
-    # 13. Validate server component error handling (comprehensive check)
-    validate-server-component-errors-all:
-      run: |
-        echo "🔍 Validating all server component error handling..."
-        pnpm validate:server-component-errors
-      fail_text: "❌ Server component error handling validation failed. Fix errors before pushing."
-
-    # 14. Validate client component error handling (comprehensive check)
-    validate-client-component-errors-all:
-      run: |
-        echo "🔍 Validating all client component error handling..."
-        pnpm validate:client-component-errors
-      fail_text: "❌ Client component error handling validation failed. Fix errors before pushing."
-
-    # 15. Validate logging context (comprehensive check)
-    validate-logging-context-all:
-      run: |
-        echo "🔍 Validating all logging context and request ID usage..."
-        pnpm validate:logging-context
-      fail_text: "❌ Logging context validation failed. Fix errors before pushing."
-
-    # 4. Production build verification (graceful)
+    # Build verification (with better env var handling)
     build:
       run: |
-        echo "🏗️  Verifying production build..."
-        if [ -z "$SUPABASE_URL" ] || [ -z "$NEXT_PUBLIC_SUPABASE_URL" ]; then
-          echo "⚠️  Supabase env vars not set - skipping build verification"
-          echo "   (CI will verify build with proper environment variables)"
-          echo ""
-          echo "   To run build locally, ensure these are set:"
-          echo "   - SUPABASE_URL"
-          echo "   - NEXT_PUBLIC_SUPABASE_URL"
-          echo "   - SUPABASE_ANON_KEY"
-          exit 0
+        echo "🏗️  Verifying build..."
+        START=$(date +%s%N)
+        
+        # Check for missing env vars
+        MISSING_VARS=()
+        for var in SUPABASE_URL NEXT_PUBLIC_SUPABASE_URL SUPABASE_ANON_KEY; do
+          if [ -z "$(eval echo \$$var)" ]; then
+            MISSING_VARS+=("$var")
+          fi
+        done
+        
+        if [ ${#MISSING_VARS[@]} -gt 0 ]; then
+          echo "⚠️  Missing env vars: ${MISSING_VARS[*]}"
+          echo "   Loading from .env.local..."
+          
+          if [ -f ".env.local" ]; then
+            set -a && source .env.local && set +a
+            echo "   ✅ Loaded .env.local"
+          else
+            echo "   ⚠️  .env.local not found - build verification skipped"
+            echo "   (CI will verify with proper environment)"
+            exit 0
+          fi
         fi
-        pnpm build
-      fail_text: "❌ Build failed. Fix errors before pushing."
+        
+        pnpm build || exit 1
+        
+        DURATION=$(( ($(date +%s%N) - START) / 1000000 ))
+        echo "✅ Build verified (${DURATION}ms)"
+      fail_text: "❌ Build failed."
 
-    # 4. Run full test suite (non-blocking, warnings only)
-    test-all:
+    # Tests (non-blocking)
+    tests:
       run: |
-        echo "🧪 Running full test suite (non-blocking)..."
+        echo "🧪 Running tests..."
         set +e
-        pnpm test --run 2>&1
-        TEST_STATUS=$?
-        if [ $TEST_STATUS -ne 0 ]; then
-          echo "⚠️  Some tests failed (not blocking - fix before merging)"
-          echo "   Run 'pnpm test' to see full output"
-        else
-          echo "✅ All tests passed"
-        fi
+        pnpm test --run 2>&1 | tail -20
         exit 0
-      fail_text: "⚠️  Tests failed (not blocking - fix before merging)."
+      fail_text: "⚠️  Tests failed (non-blocking)."
 
-    # 5. Technical debt analysis (non-blocking warnings)
+    # Tech debt (non-blocking, fast snapshot)
     tech-debt:
       run: |
-        echo "📊 Analyzing technical debt..."
+        echo "📊 Tech debt snapshot..."
         echo ""
-
-        # Check for unused exports (knip)
-        echo "🔍 Checking for unused exports..."
-        if command -v npx &> /dev/null; then
-          UNUSED=$(npx knip -c config/tools/knip.json --no-exit-code 2>/dev/null | grep -E "Unused (exports|types|dependencies)" | head -10 || true)
-          if [ -n "$UNUSED" ]; then
-            echo "$UNUSED"
-            echo "   ... (run 'pnpm analyze:unused' for full report)"
-          else
-            echo "   ✅ No unused exports detected"
-          fi
+        
+        # Unused exports (quick check)
+        echo "🔍 Checking unused exports..."
+        UNUSED_COUNT=$(npx knip -c config/tools/knip.json --no-exit-code 2>/dev/null | grep -c "Unused " || echo 0)
+        if [ "$UNUSED_COUNT" -gt 0 ]; then
+          echo "   ⚠️  Found $UNUSED_COUNT unused items"
+          echo "   Run: pnpm analyze:unused"
         else
-          echo "   ⚠️  npx not available - skipping"
+          echo "   ✅ No unused exports"
         fi
-
-        echo ""
-
-        # Check for circular dependencies
-        echo "🔄 Checking for circular dependencies..."
-          CIRCULAR=$(npx madge --circular --extensions ts,tsx apps/web/src/ 2>/dev/null || true)
-        if [ -n "$CIRCULAR" ]; then
-          echo "$CIRCULAR" | head -10
-          echo "   ... (run 'pnpm analyze:circular' for full report)"
+        
+        # Circular deps (quick check)
+        echo "🔄 Checking circular dependencies..."
+        CIRCULAR_COUNT=$(npx madge --circular --extensions ts,tsx apps/web/src 2>/dev/null | grep -c "↻" || echo 0)
+        if [ "$CIRCULAR_COUNT" -gt 0 ]; then
+          echo "   ⚠️  Found circular dependencies"
+          echo "   Run: pnpm analyze:circular"
         else
-          echo "   ✅ No circular dependencies detected"
+          echo "   ✅ No circular dependencies"
         fi
-
-        echo ""
-
-        # Check for large files (>500 lines)
-        echo "📏 Checking for large files (>500 LOC)..."
-          LARGE_FILES=$(find apps/web/src apps/edge/functions -name '*.ts' -o -name '*.tsx' 2>/dev/null | while read file; do
-          if [ -f "$file" ]; then
-            lines=$(wc -l < "$file" 2>/dev/null || echo 0)
-            if [ "$lines" -gt 500 ]; then
-              echo "   ⚠️  $file ($lines lines) - consider splitting"
-            fi
-          fi
-        done)
-
-        if [ -n "$LARGE_FILES" ]; then
-          echo "$LARGE_FILES" | head -10
+        
+        # Large files (quick check)
+        echo "📏 Checking for bloat..."
+        LARGE_FILES=$(find apps/web/src apps/edge/functions -name "*.ts" -o -name "*.tsx" 2>/dev/null | xargs wc -l 2>/dev/null | awk '$1 > 500 {print $2}' | wc -l)
+        if [ "$LARGE_FILES" -gt 0 ]; then
+          echo "   ⚠️  Found $LARGE_FILES files > 500 LOC"
+          echo "   Run: pnpm analyze:files"
         else
-          echo "   ✅ No large files detected"
+          echo "   ✅ No bloated files"
         fi
-
+        
         echo ""
-        echo "✅ Tech debt analysis complete (warnings only - not blocking)"
-      fail_text: "ℹ️  Technical debt detected (not blocking - address iteratively)."
+        echo "✅ Tech debt check complete (non-blocking)"
+        exit 0
+      fail_text: "ℹ️  Tech debt detected."
 
 # ============================================================================
 # COMMIT-MSG: Enforce conventional commits (with WIP support)
 # ============================================================================
 commit-msg:
   commands:
-    conventional-commits:
+    conventional:
       run: |
         MSG=$(cat {1})
-
+        
         # Skip merge commits
         if echo "$MSG" | grep -qE "^Merge (branch|pull request)"; then
           exit 0
         fi
-
+        
         # Skip fixup/squash commits
         if echo "$MSG" | grep -qE "^(fixup|squash)!"; then
           exit 0
         fi
-
+        
         # Allow WIP commits with reduced validation
         if echo "$MSG" | grep -qE "^wip"; then
           echo "ℹ️  WIP commit detected - reduced validation"
           echo "   Remember to use proper conventional commit format when squashing/rebasing"
           exit 0
         fi
-
+        
         # Validate conventional commit format
         if ! echo "$MSG" | grep -qE "^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.+\))?: .{1,}"; then
           echo "⚠️  Commit message doesn't follow Conventional Commits format"
@@ -488,7 +301,7 @@ commit-msg:
 post-merge:
   piped: true
   commands:
-    deps-install:
+    deps:
       files: git diff-tree -r --name-only --no-commit-id ORIG_HEAD HEAD
       glob: "{package.json,pnpm-lock.yaml}"
       run: |
@@ -507,7 +320,7 @@ min_version: 1.13.0
 # USAGE TIPS
 # ============================================================================
 # Skip specific commands:
-#   LEFTHOOK_EXCLUDE=type-check,lint git commit
+#   LEFTHOOK_EXCLUDE=critical,edge git commit
 #   LEFTHOOK_EXCLUDE=tech-debt git push
 #
 # Skip commit-msg validation:

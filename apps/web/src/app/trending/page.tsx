@@ -13,7 +13,14 @@ import {
   type DisplayableContent,
   type HomepageContentItem,
 } from '@heyclaude/web-runtime/types/component.types';
-import { UI_CLASSES, UnifiedBadge, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@heyclaude/web-runtime/ui';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+  UI_CLASSES,
+  UnifiedBadge,
+} from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { Suspense } from 'react';
 
@@ -68,9 +75,9 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
 
   // Create request-scoped child logger
   const reqLogger = logger.child({
+    module: 'apps/web/src/app/trending',
     operation: 'TrendingPage',
     route: '/trending',
-    module: 'apps/web/src/app/trending',
   });
 
   return (
@@ -78,8 +85,8 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
       fallback={<div className="container mx-auto px-4 py-8">Loading trending content...</div>}
     >
       <TrendingPageContent
-        searchParams={searchParams ?? Promise.resolve({})}
         reqLogger={reqLogger}
+        searchParams={searchParams ?? Promise.resolve({})}
       />
     </Suspense>
   );
@@ -106,8 +113,8 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
  * @see mapRecentContent
  */
 async function TrendingPageContent({
-  searchParams,
   reqLogger,
+  searchParams,
 }: {
   reqLogger: ReturnType<typeof logger.child>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -131,7 +138,7 @@ async function TrendingPageContent({
   // Section: Category Validation
   if (categoryParameter && !normalizedCategory) {
     reqLogger.warn(
-      { section: 'data-fetch', category: categoryParameter },
+      { category: categoryParameter, section: 'data-fetch' },
       'TrendingPage: invalid category parameter provided'
     );
   }
@@ -143,12 +150,12 @@ async function TrendingPageContent({
   });
   reqLogger.info(
     {
-      section: 'data-fetch',
       category: normalizedCategory ?? 'all',
       limit,
-      trendingCount: pageData.trending.length,
       popularCount: pageData.popular.length,
       recentCount: pageData.recent.length,
+      section: 'data-fetch',
+      trendingCount: pageData.trending.length,
     },
     'Trending page accessed'
   );
@@ -161,19 +168,19 @@ async function TrendingPageContent({
 
   return (
     <div className="bg-background min-h-screen">
-      <section className="relative overflow-hidden px-4 py-24" aria-labelledby={pageTitleId}>
+      <section aria-labelledby={pageTitleId} className="relative overflow-hidden px-4 py-24">
         <div className="container mx-auto text-center">
           <div className="mx-auto max-w-3xl">
             <UnifiedBadge
-              variant="base"
-              style="outline"
               className="border-accent/20 bg-accent/5 text-accent mb-6"
+              style="outline"
+              variant="base"
             >
-              <TrendingUp className="text-accent mr-1 h-3 w-3" aria-hidden="true" />
+              <TrendingUp aria-hidden="true" className="text-accent mr-1 h-3 w-3" />
               Trending
             </UnifiedBadge>
 
-            <h1 id={pageTitleId} className="mb-6 text-4xl font-bold md:text-6xl">
+            <h1 className="mb-6 text-4xl font-bold md:text-6xl" id={pageTitleId}>
               Trending Configurations
             </h1>
 
@@ -188,15 +195,17 @@ async function TrendingPageContent({
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div>
-                        <UnifiedBadge variant="base" style="secondary">
-                          <Clock className="mr-1 h-3 w-3" aria-hidden="true" />
+                        <UnifiedBadge style="secondary" variant="base">
+                          <Clock aria-hidden="true" className="mr-1 h-3 w-3" />
                           Real-time updates
                         </UnifiedBadge>
                       </div>
                     </TooltipTrigger>
                     <TooltipContent>
                       <p>Real-time updates</p>
-                      <p className="text-xs text-muted-foreground">Trending data refreshes automatically</p>
+                      <p className="text-muted-foreground text-xs">
+                        Trending data refreshes automatically
+                      </p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -206,15 +215,17 @@ async function TrendingPageContent({
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div>
-                        <UnifiedBadge variant="base" style="secondary">
-                          <Star className="mr-1 h-3 w-3" aria-hidden="true" />
+                        <UnifiedBadge style="secondary" variant="base">
+                          <Star aria-hidden="true" className="mr-1 h-3 w-3" />
                           Based on views
                         </UnifiedBadge>
                       </div>
                     </TooltipTrigger>
                     <TooltipContent>
                       <p>Based on views</p>
-                      <p className="text-xs text-muted-foreground">Ranked by view count and engagement</p>
+                      <p className="text-muted-foreground text-xs">
+                        Ranked by view count and engagement
+                      </p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -224,15 +235,17 @@ async function TrendingPageContent({
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div>
-                        <UnifiedBadge variant="base" style="secondary">
-                          <Users className="mr-1 h-3 w-3" aria-hidden="true" />
+                        <UnifiedBadge style="secondary" variant="base">
+                          <Users aria-hidden="true" className="mr-1 h-3 w-3" />
                           {trendingDisplay.length} total configs
                         </UnifiedBadge>
                       </div>
                     </TooltipTrigger>
                     <TooltipContent>
                       <p>Community-driven</p>
-                      <p className="text-xs text-muted-foreground">Rankings reflect community usage and engagement</p>
+                      <p className="text-muted-foreground text-xs">
+                        Rankings reflect community usage and engagement
+                      </p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -243,15 +256,15 @@ async function TrendingPageContent({
       </section>
 
       <section
-        className="container mx-auto px-4 py-16"
         aria-label="Trending configurations content"
+        className="container mx-auto px-4 py-16"
       >
         <Suspense fallback={null}>
-          <LazySection variant="slide-up" delay={0.1}>
+          <LazySection delay={0.1} variant="slide-up">
             <TrendingContent
-              trending={trendingDisplay}
               popular={popularDisplay}
               recent={recentDisplay}
+              trending={trendingDisplay}
             />
           </LazySection>
         </Suspense>
@@ -272,17 +285,17 @@ function mapTrendingMetrics(
     const resolvedCategory = category ?? row.category;
     const validCategory = isValidCategory(resolvedCategory) ? resolvedCategory : DEFAULT_CATEGORY;
     return toHomepageContentItem({
-      slug: row.slug,
-      category: validCategory,
-      title: row.title,
-      description: row.description,
       author: row.author,
-      tags: row.tags,
-      source: row.source,
-      viewCount: row.views_total,
+      category: validCategory,
       copyCount: row.copies_total,
-      featuredScore: row.trending_score,
+      description: row.description,
       featuredRank: index + 1,
+      featuredScore: row.trending_score,
+      slug: row.slug,
+      source: row.source,
+      tags: row.tags,
+      title: row.title,
+      viewCount: row.views_total,
     });
   });
 }
@@ -296,16 +309,16 @@ function mapPopularContent(
     const resolvedCategory = category ?? row.category;
     const validCategory = isValidCategory(resolvedCategory) ? resolvedCategory : DEFAULT_CATEGORY;
     return toHomepageContentItem({
-      slug: row.slug,
-      category: validCategory,
-      title: row.title,
-      description: row.description,
       author: row.author,
-      tags: row.tags,
-      viewCount: row.view_count,
+      category: validCategory,
       copyCount: row.copy_count,
-      featuredScore: row.popularity_score,
+      description: row.description,
       featuredRank: index + 1,
+      featuredScore: row.popularity_score,
+      slug: row.slug,
+      tags: row.tags,
+      title: row.title,
+      viewCount: row.view_count,
     });
   });
 }
@@ -319,36 +332,176 @@ function mapRecentContent(
     const resolvedCategory = category ?? row.category;
     const validCategory = isValidCategory(resolvedCategory) ? resolvedCategory : DEFAULT_CATEGORY;
     return toHomepageContentItem({
-      slug: row.slug,
-      category: validCategory,
-      title: row.title,
-      description: row.description,
       author: row.author,
-      tags: row.tags,
+      category: validCategory,
       created_at: row.created_at,
       date_added: row.created_at,
+      description: row.description,
       featuredRank: index + 1,
+      slug: row.slug,
+      tags: row.tags,
+      title: row.title,
     });
   });
 }
 
-/**
+/************
  * Normalize a raw content record into a HomepageContentItem suitable for display.
  *
- * @param input - Raw content fields; optional properties are normalized and given sensible defaults:
+ * @param {{
+  author?: null | string;
+  category: Database['public']['Enums']['content_category'];
+  copyCount?: null | number;
+  created_at?: null | string;
+  date_added?: null | string;
+  description?: null | string;
+  featuredRank?: null | number;
+  featuredScore?: null | number;
+  slug: string;
+  source?: null | string;
+  tags?: null | string[];
+  title?: null | string;
+  viewCount?: null | number;
+}} input - Raw content fields; optional properties are normalized and given sensible defaults:
  *                `title` defaults to `slug`, `description` defaults to an empty string,
  *                `author` defaults to `"Community"`, `tags` defaults to `[]`, `source` defaults to `"community"`,
  *                `created_at`/`date_added` default to the current ISO timestamp when both are missing,
  *                `viewCount`/`copyCount` default to `0`. The `featured` flag is set when `featuredScore` is provided.
- * @param input.author
- * @param input.category
- * @param input.copyCount
- * @param input.created_at
- * @param input.date_added
- * @param input.description
- * @param input.featuredRank
- * @param input.featuredScore
- * @param input.slug
+ * @param {{
+  author?: null | string;
+  category: Database['public']['Enums']['content_category'];
+  copyCount?: null | number;
+  created_at?: null | string;
+  date_added?: null | string;
+  description?: null | string;
+  featuredRank?: null | number;
+  featuredScore?: null | number;
+  slug: string;
+  source?: null | string;
+  tags?: null | string[];
+  title?: null | string;
+  viewCount?: null | number;
+}} input.author
+ * @param {{
+  author?: null | string;
+  category: Database['public']['Enums']['content_category'];
+  copyCount?: null | number;
+  created_at?: null | string;
+  date_added?: null | string;
+  description?: null | string;
+  featuredRank?: null | number;
+  featuredScore?: null | number;
+  slug: string;
+  source?: null | string;
+  tags?: null | string[];
+  title?: null | string;
+  viewCount?: null | number;
+}} input.category
+ * @param {{
+  author?: null | string;
+  category: Database['public']['Enums']['content_category'];
+  copyCount?: null | number;
+  created_at?: null | string;
+  date_added?: null | string;
+  description?: null | string;
+  featuredRank?: null | number;
+  featuredScore?: null | number;
+  slug: string;
+  source?: null | string;
+  tags?: null | string[];
+  title?: null | string;
+  viewCount?: null | number;
+}} input.copyCount
+ * @param {{
+  author?: null | string;
+  category: Database['public']['Enums']['content_category'];
+  copyCount?: null | number;
+  created_at?: null | string;
+  date_added?: null | string;
+  description?: null | string;
+  featuredRank?: null | number;
+  featuredScore?: null | number;
+  slug: string;
+  source?: null | string;
+  tags?: null | string[];
+  title?: null | string;
+  viewCount?: null | number;
+}} input.created_at
+ * @param {{
+  author?: null | string;
+  category: Database['public']['Enums']['content_category'];
+  copyCount?: null | number;
+  created_at?: null | string;
+  date_added?: null | string;
+  description?: null | string;
+  featuredRank?: null | number;
+  featuredScore?: null | number;
+  slug: string;
+  source?: null | string;
+  tags?: null | string[];
+  title?: null | string;
+  viewCount?: null | number;
+}} input.date_added
+ * @param {{
+  author?: null | string;
+  category: Database['public']['Enums']['content_category'];
+  copyCount?: null | number;
+  created_at?: null | string;
+  date_added?: null | string;
+  description?: null | string;
+  featuredRank?: null | number;
+  featuredScore?: null | number;
+  slug: string;
+  source?: null | string;
+  tags?: null | string[];
+  title?: null | string;
+  viewCount?: null | number;
+}} input.description
+ * @param {{
+  author?: null | string;
+  category: Database['public']['Enums']['content_category'];
+  copyCount?: null | number;
+  created_at?: null | string;
+  date_added?: null | string;
+  description?: null | string;
+  featuredRank?: null | number;
+  featuredScore?: null | number;
+  slug: string;
+  source?: null | string;
+  tags?: null | string[];
+  title?: null | string;
+  viewCount?: null | number;
+}} input.featuredRank
+ * @param {{
+  author?: null | string;
+  category: Database['public']['Enums']['content_category'];
+  copyCount?: null | number;
+  created_at?: null | string;
+  date_added?: null | string;
+  description?: null | string;
+  featuredRank?: null | number;
+  featuredScore?: null | number;
+  slug: string;
+  source?: null | string;
+  tags?: null | string[];
+  title?: null | string;
+  viewCount?: null | number;
+}} input.featuredScore
+ * @param {{
+  author?: null | string;
+  category: Database['public']['Enums']['content_category'];
+  copyCount?: null | number;
+  created_at?: null | string;
+  date_added?: null | string;
+  description?: null | string;
+  featuredRank?: null | number;
+  featuredScore?: null | number;
+  slug: string;
+  source?: null | string;
+  tags?: null | string[];
+  title?: null | string;
+  viewCount?: null | number;
+}} input.slug
  * @param input.source
  * @param input.tags
  * @param input.title
@@ -376,17 +529,17 @@ function toHomepageContentItem(input: {
   const timestamp = input.created_at ?? input.date_added ?? new Date().toISOString();
 
   return {
-    slug: input.slug,
-    title: input.title ?? input.slug,
-    description: input.description ?? '',
     author: input.author ?? 'Community',
-    tags: Array.isArray(input.tags) ? input.tags : [],
-    source: input.source ?? 'community',
+    category: input.category,
+    copy_count: input.copyCount ?? 0,
     created_at: input.created_at ?? timestamp,
     date_added: input.date_added ?? timestamp,
-    category: input.category,
-    view_count: input.viewCount ?? 0,
-    copy_count: input.copyCount ?? 0,
+    description: input.description ?? '',
     featured: input.featuredScore != null && typeof input.featuredScore === 'number',
+    slug: input.slug,
+    source: input.source ?? 'community',
+    tags: Array.isArray(input.tags) ? input.tags : [],
+    title: input.title ?? input.slug,
+    view_count: input.viewCount ?? 0,
   };
 }

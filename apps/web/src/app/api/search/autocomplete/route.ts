@@ -2,14 +2,14 @@ import 'server-only';
 import { SearchService } from '@heyclaude/data-layer';
 import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { validateLimit, validateQueryString } from '@heyclaude/shared-runtime';
-import { logger, createErrorResponse, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { createErrorResponse, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  createSupabaseAnonClient,
   badRequestResponse,
-  jsonResponse,
-  getWithAuthCorsHeaders,
   buildCacheHeaders,
+  createSupabaseAnonClient,
+  getWithAuthCorsHeaders,
   handleOptionsRequest,
+  jsonResponse,
 } from '@heyclaude/web-runtime/server';
 import { cacheLife } from 'next/cache';
 import { type NextRequest } from 'next/server';
@@ -21,10 +21,10 @@ const CORS = getWithAuthCorsHeaders;
  * Uses Cache Components to reduce function invocations.
  * Cache key includes query and limit for per-query caching.
  * Database RPC returns frontend-ready data (no client-side mapping needed).
- * 
+ *
  * Cache configuration: Uses 'quarter' profile (15min stale, 5min revalidate, 2hr expire)
  * defined in next.config.mjs. Autocomplete suggestions are more dynamic than static content.
- * 
+ *
  * @param {string} query - Search query string to get autocomplete suggestions for
  * @param {number} limit - Maximum number of suggestions to return
  * @returns {Promise<unknown[]>} Array of formatted autocomplete suggestion objects from the database RPC
@@ -37,8 +37,8 @@ async function getCachedSearchSuggestionsFormatted(query: string, limit: number)
   const service = new SearchService(supabase);
   const rpcArgs: DatabaseGenerated['public']['Functions']['get_search_suggestions_formatted']['Args'] =
     {
-      p_query: query,
       p_limit: limit,
+      p_query: query,
     };
 
   return await service.getSearchSuggestionsFormatted(rpcArgs);
@@ -61,9 +61,9 @@ async function getCachedSearchSuggestionsFormatted(query: string, limit: number)
  */
 export async function GET(request: NextRequest) {
   const reqLogger = logger.child({
+    method: 'GET',
     operation: 'SearchAutocompleteAPI',
     route: '/api/search/autocomplete',
-    method: 'GET',
   });
   const url = request.nextUrl;
 
@@ -95,12 +95,12 @@ export async function GET(request: NextRequest) {
       const normalized = normalizeError(error, 'Autocomplete RPC failed');
       reqLogger.error({ err: normalized }, 'Autocomplete RPC failed');
       return createErrorResponse(normalized, {
-        route: '/api/search/autocomplete',
-        operation: 'get_search_suggestions_formatted',
-        method: 'GET',
         logContext: {
           query,
         },
+        method: 'GET',
+        operation: 'get_search_suggestions_formatted',
+        route: '/api/search/autocomplete',
       });
     }
 
@@ -109,8 +109,8 @@ export async function GET(request: NextRequest) {
 
     return jsonResponse(
       {
-        suggestions,
         query,
+        suggestions,
       },
       200,
       {
@@ -122,12 +122,12 @@ export async function GET(request: NextRequest) {
     const normalized = normalizeError(error, 'Autocomplete handler failed');
     reqLogger.error({ err: normalized }, 'Autocomplete handler failed');
     return createErrorResponse(normalized, {
-      route: '/api/search/autocomplete',
-      operation: 'GET',
-      method: 'GET',
       logContext: {
         query,
       },
+      method: 'GET',
+      operation: 'GET',
+      route: '/api/search/autocomplete',
     });
   }
 }

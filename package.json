@@ -48,6 +48,7 @@
     "sync:db": "pnpm exec heyclaude-sync-db --skip-dump",
     "sync:db:full": "pnpm exec heyclaude-sync-db",
     "sync:db:types": "pnpm exec heyclaude-sync-db --only-types",
+    "setup:betterstack": "tsx scripts/setup-betterstack-monitors.ts",
     "cache:info": "turbo run cache:info:exec",
     "cache:clear": "turbo run cache:clear:exec",
     "webhooks:replay": "turbo run webhooks:replay:exec",
@@ -144,6 +145,7 @@
     "@react-email/components": "^1.0.1",
     "@react-email/render": "^2.0.0",
     "@supabase/supabase-js": "^2.87.1",
+    "@tailwindcss/language-server": "^0.14.29",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
@@ -174,6 +176,7 @@
     "eslint-plugin-turbo": "^2.6.3",
     "eslint-plugin-unicorn": "^62.0.0",
     "eslint-plugin-vitest": "^0.5.4",
+    "eslint_d": "^14.3.0",
     "inngest-cli": "^1.15.0",
     "jsdom": "^27.3.0",
     "knip": "^5.73.3",
@@ -191,7 +194,8 @@
     "typescript": "5.9.3",
     "typescript-eslint": "^8.49.0",
     "vercel": "^49.2.0",
-    "vitest": "^4.0.15"
+    "vitest": "^4.0.15",
+    "vscode-langservers-extracted": "^4.10.0"
   },
   "pnpm": {
     "overrides": {

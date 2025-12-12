@@ -30,21 +30,17 @@ import { submitContentForReview } from '@heyclaude/web-runtime/actions';
 import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
 import { checkConfettiEnabled } from '@heyclaude/web-runtime/config/static-configs';
 import { type DraftFormData, DraftManager } from '@heyclaude/web-runtime/data/drafts/draft-manager';
+import { SPRING, STAGGER } from '@heyclaude/web-runtime/design-system';
+import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/design-tokens';
 import {
+  useConfetti,
   useFieldHighlight,
   useFormTracking,
   useLoggedAsync,
-  useConfetti,
 } from '@heyclaude/web-runtime/hooks';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
 import {
-  Code,
-  FileText,
-  Camera as ImageIcon,
-  Plus,
-  Sparkles,
-  Tag,
-  X,
+  Camera as ImageIcon, Code, FileText, Plus, Sparkles, Tag, X,
 } from '@heyclaude/web-runtime/icons';
 import { useClientLogger } from '@heyclaude/web-runtime/logging/client';
 import { type SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
@@ -59,14 +55,10 @@ import {
   Textarea,
   toasts,
 } from '@heyclaude/web-runtime/ui';
-import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/design-tokens';
-import { SPRING, STAGGER } from '@heyclaude/web-runtime/design-system';
 import { AnimatePresence, motion } from 'motion/react';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-
-import { useAuthModal } from '@/src/hooks/use-auth-modal';
 
 import {
   AnimatedFormField,
@@ -85,6 +77,7 @@ import {
 import { TypeSelectionCards } from '@/src/components/core/forms/wizard/type-selection-cards';
 import { WizardLayout } from '@/src/components/core/forms/wizard/wizard-layout';
 import { StepReviewSubmit } from '@/src/components/core/forms/wizard/wizard-steps';
+import { useAuthModal } from '@/src/hooks/use-auth-modal';
 import { useOnboardingToasts } from '@/src/hooks/use-onboarding-toasts';
 import { useTemplateApplication } from '@/src/hooks/use-template-application';
 
@@ -125,16 +118,16 @@ const SUBMISSION_TYPE_RULES = Constants.public.Enums.submission_type[2]; // 'rul
 const SUBMISSION_TYPE_COMMANDS = Constants.public.Enums.submission_type[3]; // 'commands'
 
 const DEFAULT_FORM_DATA: FormData = {
-  submission_type: DEFAULT_SUBMISSION_TYPE,
-  name: '',
-  description: '',
   author: '',
   author_profile_url: '',
-  github_url: '',
-  type_specific: {},
-  tags: [],
-  examples: [],
   category: DEFAULT_CONTENT_CATEGORY, // Default to match submission_type
+  description: '',
+  examples: [],
+  github_url: '',
+  name: '',
+  submission_type: DEFAULT_SUBMISSION_TYPE,
+  tags: [],
+  type_specific: {},
   // thumbnail_url is optional, don't include in default
 };
 
@@ -149,10 +142,10 @@ const DEFAULT_FORM_DATA: FormData = {
  */
 export default function WizardSubmissionPage() {
   // Onboarding toasts
-  useOnboardingToasts({ enabled: true, context: 'wizard' });
+  useOnboardingToasts({ context: 'wizard', enabled: true });
   const router = useRouter();
   const pathname = usePathname();
-  const { user, status } = useAuthenticatedUser({
+  const { status, user } = useAuthenticatedUser({
     context: 'WizardSubmissionPage',
     subscribe: false,
   });
@@ -167,9 +160,9 @@ export default function WizardSubmissionPage() {
   });
 
   const runLoggedAsync = useLoggedAsync({
-    scope: 'WizardSubmissionPage',
     defaultMessage: 'Wizard submission operation failed',
     defaultRethrow: false,
+    scope: 'WizardSubmissionPage',
   }) as <T>(
     operation: () => Promise<T>,
     options?: {
@@ -199,7 +192,7 @@ export default function WizardSubmissionPage() {
   const [thumbnailPreview, setThumbnailPreview] = useState<null | string>(null);
 
   // Field highlighting for template application feedback
-  const { highlightFields, getHighlightClasses } = useFieldHighlight();
+  const { getHighlightClasses, highlightFields } = useFieldHighlight();
 
   // Draft manager
   const draftManager = useMemo(
@@ -223,6 +216,7 @@ export default function WizardSubmissionPage() {
 
   // Template application hook
   const { applyTemplate } = useTemplateApplication({
+    currentFormData: formData,
     onFormUpdate: (updates) => {
       // Use updateFormData to ensure category/submission_type sync is centralized
       // Filter out undefined values to satisfy exactOptionalPropertyTypes
@@ -243,7 +237,6 @@ export default function WizardSubmissionPage() {
         highlightFields(typeFields.map((f) => `type_specific.${f}`));
       }
     },
-    currentFormData: formData,
     onTrackEvent: (event, data) => {
       if (event === 'template_applied') {
         formTracking.trackFieldFocused('template_applied', { ...data }).catch((error) => {
@@ -287,8 +280,8 @@ export default function WizardSubmissionPage() {
           }
         },
         {
-          message: 'Failed to load templates',
           level: 'warn',
+          message: 'Failed to load templates',
           rethrow: false,
         }
       );
@@ -319,8 +312,8 @@ export default function WizardSubmissionPage() {
           }
         },
         {
-          message: 'Failed to load social proof stats',
           level: 'warn',
+          message: 'Failed to load social proof stats',
           rethrow: false,
         }
       );
@@ -341,8 +334,8 @@ export default function WizardSubmissionPage() {
       if (!user) {
         // User is not authenticated - show auth modal
         openAuthModal({
-          valueProposition: 'Sign in to upload images',
           redirectTo: pathname ?? undefined,
+          valueProposition: 'Sign in to upload images',
         });
         return;
       }
@@ -396,7 +389,7 @@ export default function WizardSubmissionPage() {
       // Check dimensions using createImageBitmap
       try {
         const bitmap = await createImageBitmap(file);
-        const { width, height } = bitmap;
+        const { height, width } = bitmap;
         bitmap.close(); // Release memory
 
         if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
@@ -446,11 +439,11 @@ export default function WizardSubmissionPage() {
             const response = await fetch(
               `${supabaseUrl}/functions/v1/public-api/transform/image/thumbnail`,
               {
-                method: 'POST',
+                body: formData,
                 headers: {
                   Authorization: `Bearer ${session.access_token}`,
                 },
-                body: formData,
+                method: 'POST',
               }
             );
 
@@ -483,11 +476,11 @@ export default function WizardSubmissionPage() {
             toasts.success.actionCompleted('Thumbnail generated successfully!');
           },
           {
-            message: 'Thumbnail generation failed',
             context: {
               fileName: file.name,
               fileSize: file.size,
             },
+            message: 'Thumbnail generation failed',
           }
         );
       } catch (error) {
@@ -496,39 +489,43 @@ export default function WizardSubmissionPage() {
         // Remove thumbnail_url from form data on error
         setFormData((previous) => {
           const {
-            submission_type,
-            name,
-            description,
             author,
             author_profile_url,
-            github_url,
-            type_specific,
-            tags,
-            examples,
             category,
+            description,
+            examples,
+            github_url,
+            name,
+            submission_type,
+            tags,
+            type_specific,
           } = previous;
           const newData: FormData = {
-            submission_type,
-            name,
-            description,
             author,
+            description,
+            name,
+            submission_type,
             ...(author_profile_url ? { author_profile_url } : {}),
             ...(github_url ? { github_url } : {}),
-            type_specific,
-            tags,
-            examples,
             category,
+            examples,
+            tags,
+            type_specific,
           };
           return newData;
         });
         const normalized = normalizeError(error, 'Failed to generate thumbnail');
         const errorMessage = normalized.message;
-        
+
         // Check if error is auth-related and show modal if so
-        if (errorMessage.includes('signed in') || errorMessage.includes('auth') || errorMessage.includes('unauthorized')) {
+        if (
+          errorMessage.includes('signed in') ||
+          errorMessage.includes('auth') ||
+          errorMessage.includes('unauthorized')
+        ) {
           openAuthModal({
-            valueProposition: 'Sign in to upload images',
             redirectTo: pathname ?? undefined,
+            valueProposition: 'Sign in to upload images',
           });
         } else {
           // Non-auth errors - show toast with retry option
@@ -575,20 +572,20 @@ export default function WizardSubmissionPage() {
   // Build draft payload helper - centralizes draft save logic
   const buildDraftPayload = useCallback(
     (step: number, score: number): Partial<DraftFormData> => ({
-      submission_type: formData.submission_type,
-      name: formData.name,
       description: formData.description,
-      type_specific: formData.type_specific,
       // Convert string[] examples to structured format for DraftFormData
       examples: formData.examples.map((ex, index) => ({
-        id: `ex-${index}`,
-        title: ex,
         code: '',
+        id: `ex-${index}`,
         language: 'typescript',
+        title: ex,
       })),
-      tags: formData.tags,
       last_step: step,
+      name: formData.name,
       quality_score: score,
+      submission_type: formData.submission_type,
+      tags: formData.tags,
+      type_specific: formData.type_specific,
     }),
     [formData]
   );
@@ -598,17 +595,17 @@ export default function WizardSubmissionPage() {
     const draft = draftManager.load();
     if (draft) {
       const loadedFormData: FormData = {
-        submission_type: draft.submission_type,
-        name: draft.name,
-        description: draft.description,
         author: user?.email ?? '',
         author_profile_url: '',
-        github_url: '',
-        type_specific: draft.type_specific,
-        tags: draft.tags,
+        category: draft.submission_type, // Use submission_type as category
+        description: draft.description,
         // Convert structured examples to string[] (extract title only for UI)
         examples: draft.examples.map((ex) => ex.title).filter(Boolean),
-        category: draft.submission_type, // Use submission_type as category
+        github_url: '',
+        name: draft.name,
+        submission_type: draft.submission_type,
+        tags: draft.tags,
+        type_specific: draft.type_specific,
       };
 
       setFormData(loadedFormData);
@@ -623,8 +620,8 @@ export default function WizardSubmissionPage() {
       }
 
       void formTracking.trackDraftLoaded({
-        submission_type: draft.submission_type,
         quality_score: draft.quality_score,
+        submission_type: draft.submission_type,
       });
     }
   }, [draftManager, user, formTracking, canProceedFromStep]);
@@ -672,54 +669,54 @@ export default function WizardSubmissionPage() {
   const steps: WizardStep[] = useMemo(
     () => [
       {
-        id: 'type',
-        number: 1,
-        label: 'Choose Type',
-        shortLabel: 'Type',
         description: 'Select submission type',
+        id: 'type',
+        isAccessible: true,
         isCompleted: currentStep > 1,
         isCurrent: currentStep === 1,
-        isAccessible: true,
+        label: 'Choose Type',
+        number: 1,
+        shortLabel: 'Type',
       },
       {
-        id: 'basic',
-        number: 2,
-        label: 'Basic Info',
-        shortLabel: 'Info',
         description: 'Name and description',
+        id: 'basic',
+        isAccessible: currentStep >= 1,
         isCompleted: currentStep > 2,
         isCurrent: currentStep === 2,
-        isAccessible: currentStep >= 1,
+        label: 'Basic Info',
+        number: 2,
+        shortLabel: 'Info',
       },
       {
-        id: 'config',
-        number: 3,
-        label: 'Configuration',
-        shortLabel: 'Config',
         description: 'Type-specific settings',
+        id: 'config',
+        isAccessible: currentStep >= 2 && canProceedFromCurrentStep(2),
         isCompleted: currentStep > 3,
         isCurrent: currentStep === 3,
-        isAccessible: currentStep >= 2 && canProceedFromCurrentStep(2),
+        label: 'Configuration',
+        number: 3,
+        shortLabel: 'Config',
       },
       {
-        id: 'examples',
-        number: 4,
-        label: 'Examples & Tags',
-        shortLabel: 'Examples',
         description: 'Add examples and tags',
+        id: 'examples',
+        isAccessible: currentStep >= 3 && canProceedFromCurrentStep(3),
         isCompleted: currentStep > 4,
         isCurrent: currentStep === 4,
-        isAccessible: currentStep >= 3 && canProceedFromCurrentStep(3),
+        label: 'Examples & Tags',
+        number: 4,
+        shortLabel: 'Examples',
       },
       {
-        id: 'review',
-        number: 5,
-        label: 'Review & Submit',
-        shortLabel: 'Submit',
         description: 'Review and submit',
+        id: 'review',
+        isAccessible: currentStep >= 4 && canProceedFromCurrentStep(4),
         isCompleted: false,
         isCurrent: currentStep === 5,
-        isAccessible: currentStep >= 4 && canProceedFromCurrentStep(4),
+        label: 'Review & Submit',
+        number: 5,
+        shortLabel: 'Submit',
       },
     ],
     [currentStep, canProceedFromCurrentStep]
@@ -765,8 +762,8 @@ export default function WizardSubmissionPage() {
     if (!user) {
       // User is not authenticated - show auth modal
       openAuthModal({
-        valueProposition: 'Sign in to submit content',
         redirectTo: pathname ?? undefined,
+        valueProposition: 'Sign in to submit content',
       });
       return;
     }
@@ -775,14 +772,9 @@ export default function WizardSubmissionPage() {
 
     try {
       const result = await submitContentForReview({
-        submission_type: formData.submission_type,
-        name: formData.name,
-        description: formData.description,
-        category: formData.category,
         author: formData.author || (user.email ?? 'Anonymous'),
         author_profile_url: formData.author_profile_url ?? '',
-        github_url: formData.github_url ?? '',
-        tags: formData.tags,
+        category: formData.category,
         content_data: {
           ...formData.type_specific,
           examples: formData.examples,
@@ -794,6 +786,11 @@ export default function WizardSubmissionPage() {
               }
             : {}),
         },
+        description: formData.description,
+        github_url: formData.github_url ?? '',
+        name: formData.name,
+        submission_type: formData.submission_type,
+        tags: formData.tags,
       });
 
       await formTracking.trackSubmitted(formData.submission_type, {
@@ -819,10 +816,14 @@ export default function WizardSubmissionPage() {
       } else {
         // Check if server error is auth-related
         const serverError = result.serverError || '';
-        if (serverError.includes('signed in') || serverError.includes('auth') || serverError.includes('unauthorized')) {
+        if (
+          serverError.includes('signed in') ||
+          serverError.includes('auth') ||
+          serverError.includes('unauthorized')
+        ) {
           openAuthModal({
-            valueProposition: 'Sign in to submit content',
             redirectTo: pathname ?? undefined,
+            valueProposition: 'Sign in to submit content',
           });
         } else {
           // Non-auth errors - show toast with retry option
@@ -838,17 +839,21 @@ export default function WizardSubmissionPage() {
       }
     } catch (error) {
       log.error('Submission failed', error, 'handleSubmit', {
-        submissionType: formData.submission_type,
         qualityScore,
+        submissionType: formData.submission_type,
       });
       const normalized = normalizeError(error, 'Failed to submit content');
       const errorMessage = normalized.message;
-      
+
       // Check if error is auth-related and show modal if so
-      if (errorMessage.includes('signed in') || errorMessage.includes('auth') || errorMessage.includes('unauthorized')) {
+      if (
+        errorMessage.includes('signed in') ||
+        errorMessage.includes('auth') ||
+        errorMessage.includes('unauthorized')
+      ) {
         openAuthModal({
-          valueProposition: 'Sign in to submit content',
           redirectTo: pathname ?? undefined,
+          valueProposition: 'Sign in to submit content',
         });
       } else {
         // Non-auth errors - show toast with retry option
@@ -864,7 +869,19 @@ export default function WizardSubmissionPage() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [user, status, openAuthModal, pathname, formData, formTracking, qualityScore, draftManager, router, log, celebrateSubmission]);
+  }, [
+    user,
+    status,
+    openAuthModal,
+    pathname,
+    formData,
+    formTracking,
+    qualityScore,
+    draftManager,
+    router,
+    log,
+    celebrateSubmission,
+  ]);
 
   // Render step content
   const renderStepContent = () => {
@@ -872,8 +889,8 @@ export default function WizardSubmissionPage() {
       case 1: {
         return (
           <StepTypeSelection
-            selected={formData.submission_type}
             onSelect={(type) => updateFormData({ submission_type: type })}
+            selected={formData.submission_type}
           />
         );
       }
@@ -881,10 +898,10 @@ export default function WizardSubmissionPage() {
         return (
           <StepBasicInfo
             data={formData}
-            onChange={updateFormData}
-            onImageUpload={handleImageUpload}
             isUploadingThumbnail={isUploadingThumbnail}
             thumbnailPreview={thumbnailPreview ?? formData.thumbnail_url ?? null}
+            onChange={updateFormData}
+            onImageUpload={handleImageUpload}
             onRemoveThumbnail={() => {
               setFormData((previous) => {
                 const {
@@ -921,13 +938,13 @@ export default function WizardSubmissionPage() {
       case 3: {
         return (
           <StepConfiguration
-            submissionType={formData.submission_type}
             data={formData.type_specific}
+            getHighlightClasses={getHighlightClasses}
+            onApplyTemplate={applyTemplate}
             onChange={(data) => updateFormData({ type_specific: data })}
+            submissionType={formData.submission_type}
             templates={templates}
             templatesLoading={templatesLoading}
-            onApplyTemplate={applyTemplate}
-            getHighlightClasses={getHighlightClasses}
           />
         );
       }
@@ -938,12 +955,12 @@ export default function WizardSubmissionPage() {
         return (
           <StepReviewSubmit
             data={formData}
+            isSubmitting={isSubmitting}
             qualityScore={qualityScore}
+            showCelebration={showCelebration}
             onSubmit={() => {
               void handleSubmit();
             }}
-            isSubmitting={isSubmitting}
-            showCelebration={showCelebration}
           />
         );
       }
@@ -960,16 +977,16 @@ export default function WizardSubmissionPage() {
         <InlinePreview formData={formData} qualityScore={qualityScore} />
       </div>
       <WizardLayout
-        steps={steps}
+        canGoNext={canProceedFromCurrentStep(currentStep)}
+        canGoPrevious={currentStep > 1}
         currentStep={currentStep}
-        onStepChange={handleStepChange}
+        isLastStep={currentStep === 5}
         onNext={handleNext}
         onPrevious={handlePrevious}
         onSave={handleSave}
-        canGoNext={canProceedFromCurrentStep(currentStep)}
-        canGoPrevious={currentStep > 1}
-        isLastStep={currentStep === 5}
+        onStepChange={handleStepChange}
         qualityScore={qualityScore}
+        steps={steps}
         submissionType={formData.submission_type}
       >
         {renderStepContent()}
@@ -1000,8 +1017,8 @@ export default function WizardSubmissionPage() {
  * @see WizardSubmissionPage
  */
 function StepTypeSelection({
-  selected,
   onSelect,
+  selected,
 }: {
   onSelect: (type: SubmissionContentType) => void;
   selected: SubmissionContentType;
@@ -1009,16 +1026,16 @@ function StepTypeSelection({
   return (
     <div className="space-y-8">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={SPRING.smooth}
         className="text-center"
+        initial={{ opacity: 0, y: 20 }}
+        transition={SPRING.smooth}
       >
         <motion.div
-          initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ ...SPRING.bouncy, delay: STAGGER.default }}
           className="mb-4 inline-flex"
+          initial={{ scale: 0 }}
+          transition={{ ...SPRING.bouncy, delay: STAGGER.default }}
         >
           <Sparkles className="h-12 w-12" style={{ color: TOKENS.colors.accent.primary }} />
         </motion.div>
@@ -1031,7 +1048,7 @@ function StepTypeSelection({
         </div>
       </motion.div>
 
-      <TypeSelectionCards selected={selected} onSelect={onSelect} />
+      <TypeSelectionCards onSelect={onSelect} selected={selected} />
     </div>
   );
 }
@@ -1063,11 +1080,11 @@ function StepTypeSelection({
  */
 function StepBasicInfo({
   data,
+  isUploadingThumbnail,
   onChange,
   onImageUpload,
-  isUploadingThumbnail,
-  thumbnailPreview,
   onRemoveThumbnail,
+  thumbnailPreview,
 }: {
   data: FormData;
   isUploadingThumbnail: boolean;
@@ -1103,16 +1120,16 @@ function StepBasicInfo({
   return (
     <div className="space-y-8">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={SPRING.smooth}
         className="text-center"
+        initial={{ opacity: 0, y: 20 }}
+        transition={SPRING.smooth}
       >
         <motion.div
-          initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ ...SPRING.bouncy, delay: STAGGER.default }}
           className="mb-4 inline-flex"
+          initial={{ scale: 0 }}
+          transition={{ ...SPRING.bouncy, delay: STAGGER.default }}
         >
           <FileText className="h-12 w-12" style={{ color: TOKENS.colors.accent.primary }} />
         </motion.div>
@@ -1123,8 +1140,8 @@ function StepBasicInfo({
       </motion.div>
 
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0, y: 20 }}
         transition={{ ...SPRING.smooth, delay: STAGGER.fast }}
       >
         <Card
@@ -1135,35 +1152,35 @@ function StepBasicInfo({
         >
           <CardContent className="space-y-6 pt-6">
             <AnimatedFormField
-              label="Name"
+              helpText="A clear, descriptive name"
               id="wizard-name"
+              label="Name"
               required
               validationState={nameValidation}
-              helpText="A clear, descriptive name"
               {...(nameValidation === 'invalid'
                 ? { errorMessage: 'Name must be at least 3 characters' }
                 : {})}
               {...(nameValidation === 'valid' ? { successMessage: 'Great name!' } : {})}
-              showCharCount
               currentLength={data.name.length}
               maxLength={100}
+              showCharCount
             >
               <Input
+                className="pr-12"
                 id="wizard-name"
-                value={data.name}
+                maxLength={100}
                 onChange={(event) => onChange({ name: event.target.value })}
                 placeholder="e.g., React Query Expert"
-                maxLength={100}
-                className="pr-12"
+                value={data.name}
               />
             </AnimatedFormField>
 
             <AnimatedFormField
-              label="Description"
+              helpText="Explain what your configuration does and how to use it"
               id="wizard-description"
+              label="Description"
               required
               validationState={descValidation}
-              helpText="Explain what your configuration does and how to use it"
               {...(descValidation === 'warning'
                 ? {
                     warningMessage: 'Add more details to help users understand',
@@ -1172,60 +1189,60 @@ function StepBasicInfo({
               {...(descValidation === 'valid' && data.description.length >= 50
                 ? { successMessage: 'Excellent description!' }
                 : {})}
-              showCharCount
               currentLength={data.description.length}
               maxLength={500}
+              showCharCount
             >
               <Textarea
                 id="wizard-description"
-                value={data.description}
-                onChange={(event) => onChange({ description: event.target.value })}
+                maxLength={500}
                 placeholder="Describe what your configuration does..."
                 rows={6}
-                maxLength={500}
+                value={data.description}
+                onChange={(event) => onChange({ description: event.target.value })}
               />
             </AnimatedFormField>
 
             <AnimatedFormField
-              label="Author Name"
-              id="wizard-author"
-              required
               helpText="Your name or username"
+              id="wizard-author"
+              label="Author Name"
+              required
             >
               <Input
                 id="wizard-author"
+                placeholder="Your name"
                 value={data.author}
                 onChange={(event) => onChange({ author: event.target.value })}
-                placeholder="Your name"
               />
             </AnimatedFormField>
 
             <AnimatedFormField
-              label="GitHub URL (Optional)"
-              id="wizard-github"
               helpText="Link to the repository or your profile"
+              id="wizard-github"
+              label="GitHub URL (Optional)"
             >
               <Input
                 id="wizard-github"
+                placeholder="https://github.com/..."
                 type="url"
                 value={data.github_url ?? ''}
                 onChange={(event) => onChange({ github_url: event.target.value })}
-                placeholder="https://github.com/..."
               />
             </AnimatedFormField>
 
             {/* Thumbnail Image Upload */}
             <AnimatedFormField
-              label="Thumbnail Image (Optional)"
-              id="wizard-thumbnail"
               helpText="Upload an image to generate an optimized thumbnail for your submission"
+              id="wizard-thumbnail"
+              label="Thumbnail Image (Optional)"
             >
               <div className="space-y-4">
                 {/* File Input */}
                 <div className="flex items-center gap-4">
                   <label
-                    htmlFor="thumbnail-upload"
                     className="hover:bg-accent/50 flex cursor-pointer items-center gap-2 rounded-lg border border-dashed px-4 py-3 transition-colors"
+                    htmlFor="thumbnail-upload"
                     style={{
                       borderColor: TOKENS.colors.border.light,
                       ...(isUploadingThumbnail && { opacity: 0.6, pointerEvents: 'none' }),
@@ -1236,11 +1253,10 @@ function StepBasicInfo({
                       {isUploadingThumbnail ? 'Generating thumbnail...' : 'Choose image'}
                     </span>
                     <input
-                      id="thumbnail-upload"
-                      type="file"
                       accept="image/jpeg,image/png,image/webp"
                       className="hidden"
                       disabled={isUploadingThumbnail}
+                      id="thumbnail-upload"
                       onChange={(event) => {
                         const file = event.target.files?.[0];
                         if (file) {
@@ -1249,6 +1265,7 @@ function StepBasicInfo({
                         // Reset input to allow re-selecting the same file
                         event.target.value = '';
                       }}
+                      type="file"
                     />
                   </label>
                 </div>
@@ -1257,31 +1274,31 @@ function StepBasicInfo({
                 <AnimatePresence mode="wait">
                   {thumbnailPreview ? (
                     <motion.div
-                      initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      transition={SPRING.smooth}
                       className="relative inline-block"
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      transition={SPRING.smooth}
                     >
                       <div
                         className="relative h-32 w-32 overflow-hidden rounded-lg border"
                         style={{ borderColor: TOKENS.colors.border.light }}
                       >
                         <Image
-                          src={thumbnailPreview}
                           alt="Thumbnail preview"
-                          fill
                           className="object-cover"
+                          fill
+                          src={thumbnailPreview}
                           unoptimized={thumbnailPreview.startsWith('blob:')}
                         />
                       </div>
                       <motion.button
-                        type="button"
-                        onClick={onRemoveThumbnail}
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
                         className="bg-destructive text-destructive-foreground absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full shadow-sm"
                         disabled={isUploadingThumbnail}
+                        onClick={onRemoveThumbnail}
+                        type="button"
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
                       >
                         <X className="h-4 w-4" />
                       </motion.button>
@@ -1321,13 +1338,13 @@ function StepBasicInfo({
  * @see AnimatedFormField
  */
 function StepConfiguration({
-  submissionType,
   data,
+  getHighlightClasses,
+  onApplyTemplate,
   onChange,
+  submissionType,
   templates,
   templatesLoading,
-  onApplyTemplate,
-  getHighlightClasses,
 }: {
   data: Record<string, unknown>;
   getHighlightClasses?: (field: string) => string;
@@ -1341,16 +1358,16 @@ function StepConfiguration({
   return (
     <div className="space-y-8">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={SPRING.smooth}
         className="text-center"
+        initial={{ opacity: 0, y: 20 }}
+        transition={SPRING.smooth}
       >
         <motion.div
-          initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ ...SPRING.bouncy, delay: STAGGER.default }}
           className="mb-4 inline-flex"
+          initial={{ scale: 0 }}
+          transition={{ ...SPRING.bouncy, delay: STAGGER.default }}
         >
           <Code className="h-12 w-12" style={{ color: TOKENS.colors.accent.primary }} />
         </motion.div>
@@ -1366,8 +1383,8 @@ function StepConfiguration({
       {/* Template Quick Select - Show at top of configuration step */}
       {templatesLoading ? (
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 10 }}
           transition={{ ...SPRING.smooth, delay: STAGGER.medium }}
         >
           <TemplateQuickSelectSkeleton />
@@ -1376,22 +1393,22 @@ function StepConfiguration({
 
       {hasTemplates && onApplyTemplate && !templatesLoading ? (
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 10 }}
           transition={{ ...SPRING.smooth, delay: STAGGER.medium }}
         >
           <TemplateQuickSelect
-            templates={templates}
             contentType={submissionType as Database['public']['Enums']['content_category']}
-            onApplyTemplate={onApplyTemplate}
             maxVisible={3}
+            onApplyTemplate={onApplyTemplate}
+            templates={templates}
           />
         </motion.div>
       ) : null}
 
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0, y: 20 }}
         transition={{ ...SPRING.smooth, delay: STAGGER.fast }}
       >
         <Card
@@ -1404,37 +1421,37 @@ function StepConfiguration({
             {submissionType === SUBMISSION_TYPE_AGENTS && (
               <>
                 <AnimatedFormField
-                  label="System Prompt"
-                  id="wizard-system-prompt"
-                  required
-                  helpText="The main prompt that defines the agent's behavior"
-                  showCharCount
                   currentLength={((data['systemPrompt'] as string) || '').length}
+                  helpText="The main prompt that defines the agent's behavior"
+                  id="wizard-system-prompt"
+                  label="System Prompt"
                   maxLength={2000}
+                  required
+                  showCharCount
                 >
                   <Textarea
+                    className={getHighlightClasses?.('type_specific.systemPrompt')}
                     id="wizard-system-prompt"
-                    value={(data['systemPrompt'] as string) || ''}
+                    maxLength={2000}
                     onChange={(event) => onChange({ ...data, systemPrompt: event.target.value })}
                     placeholder="You are an expert in..."
                     rows={8}
-                    maxLength={2000}
-                    className={getHighlightClasses?.('type_specific.systemPrompt')}
+                    value={(data['systemPrompt'] as string) || ''}
                   />
                 </AnimatedFormField>
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <AnimatedFormField
-                    label="Temperature"
-                    id="wizard-temperature"
                     helpText="0.0 to 1.0 (default: 0.7)"
+                    id="wizard-temperature"
+                    label="Temperature"
                   >
                     <Input
                       id="wizard-temperature"
-                      type="number"
-                      min={0}
                       max={1}
+                      min={0}
                       step={0.1}
+                      type="number"
                       value={(data['temperature'] as number | undefined) ?? 0.7}
                       onChange={(event) => {
                         const raw = event.target.value;
@@ -1448,16 +1465,16 @@ function StepConfiguration({
                   </AnimatedFormField>
 
                   <AnimatedFormField
-                    label="Max Tokens"
-                    id="wizard-max-tokens"
                     helpText="Maximum response length"
+                    id="wizard-max-tokens"
+                    label="Max Tokens"
                   >
                     <Input
                       id="wizard-max-tokens"
-                      type="number"
-                      min={100}
                       max={4096}
+                      min={100}
                       step={100}
+                      type="number"
                       value={(data['maxTokens'] as number | undefined) ?? 2048}
                       onChange={(event) => {
                         const raw = event.target.value;
@@ -1476,39 +1493,41 @@ function StepConfiguration({
             {submissionType === SUBMISSION_TYPE_MCP && (
               <>
                 <AnimatedFormField
-                  label="NPM Package"
-                  id="wizard-npm-package"
-                  required
                   helpText="The npm package name"
+                  id="wizard-npm-package"
+                  label="NPM Package"
+                  required
                 >
                   <Input
                     id="wizard-npm-package"
+                    placeholder="@modelcontextprotocol/server-..."
                     value={(data['npmPackage'] as string) || ''}
                     onChange={(event) => onChange({ ...data, npmPackage: event.target.value })}
-                    placeholder="@modelcontextprotocol/server-..."
                   />
                 </AnimatedFormField>
 
                 <AnimatedFormField
-                  label="Install Command"
-                  id="wizard-install-command"
                   helpText="How to install this MCP server"
+                  id="wizard-install-command"
+                  label="Install Command"
                 >
                   <Input
                     id="wizard-install-command"
+                    placeholder="npm install -g @modelcontextprotocol/..."
                     value={(data['installCommand'] as string) || ''}
                     onChange={(event) => onChange({ ...data, installCommand: event.target.value })}
-                    placeholder="npm install -g @modelcontextprotocol/..."
                   />
                 </AnimatedFormField>
 
                 <AnimatedFormField
-                  label="Tools Description"
-                  id="wizard-tools-description"
                   helpText="Describe the tools this MCP server provides"
+                  id="wizard-tools-description"
+                  label="Tools Description"
                 >
                   <Textarea
                     id="wizard-tools-description"
+                    placeholder="This server provides tools for..."
+                    rows={4}
                     value={(data['toolsDescription'] as string) || ''}
                     onChange={(event) =>
                       onChange({
@@ -1516,8 +1535,6 @@ function StepConfiguration({
                         toolsDescription: event.target.value,
                       })
                     }
-                    placeholder="This server provides tools for..."
-                    rows={4}
                   />
                 </AnimatedFormField>
               </>
@@ -1525,43 +1542,43 @@ function StepConfiguration({
 
             {submissionType === SUBMISSION_TYPE_RULES && (
               <AnimatedFormField
-                label="Rules Content"
-                id="wizard-rules-content"
-                required
-                helpText="The expertise rules or guidelines"
-                showCharCount
                 currentLength={((data['rulesContent'] as string) || '').length}
+                helpText="The expertise rules or guidelines"
+                id="wizard-rules-content"
+                label="Rules Content"
                 maxLength={3000}
+                required
+                showCharCount
               >
                 <Textarea
                   id="wizard-rules-content"
-                  value={(data['rulesContent'] as string) || ''}
-                  onChange={(event) => onChange({ ...data, rulesContent: event.target.value })}
+                  maxLength={3000}
                   placeholder="When working with TypeScript..."
                   rows={10}
-                  maxLength={3000}
+                  value={(data['rulesContent'] as string) || ''}
+                  onChange={(event) => onChange({ ...data, rulesContent: event.target.value })}
                 />
               </AnimatedFormField>
             )}
 
             {submissionType === SUBMISSION_TYPE_COMMANDS && (
               <AnimatedFormField
-                label="Command Content"
-                id="wizard-command-content"
-                required
-                helpText="The shell command or script"
-                showCharCount
                 currentLength={((data['commandContent'] as string) || '').length}
+                helpText="The shell command or script"
+                id="wizard-command-content"
+                label="Command Content"
                 maxLength={1000}
+                required
+                showCharCount
               >
                 <Textarea
+                  className="font-mono"
                   id="wizard-command-content"
-                  value={(data['commandContent'] as string) || ''}
+                  maxLength={1000}
                   onChange={(event) => onChange({ ...data, commandContent: event.target.value })}
                   placeholder="#!/bin/bash..."
                   rows={6}
-                  maxLength={1000}
-                  className="font-mono"
+                  value={(data['commandContent'] as string) || ''}
                 />
               </AnimatedFormField>
             )}
@@ -1622,16 +1639,16 @@ function StepExamplesTags({
   return (
     <div className="space-y-8">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={SPRING.smooth}
         className="text-center"
+        initial={{ opacity: 0, y: 20 }}
+        transition={SPRING.smooth}
       >
         <motion.div
-          initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ ...SPRING.bouncy, delay: STAGGER.default }}
           className="mb-4 inline-flex"
+          initial={{ scale: 0 }}
+          transition={{ ...SPRING.bouncy, delay: STAGGER.default }}
         >
           <Sparkles className="h-12 w-12" style={{ color: TOKENS.colors.accent.primary }} />
         </motion.div>
@@ -1645,10 +1662,10 @@ function StepExamplesTags({
       </motion.div>
 
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ ...SPRING.smooth, delay: STAGGER.fast }}
         className="space-y-6"
+        initial={{ opacity: 0, y: 20 }}
+        transition={{ ...SPRING.smooth, delay: STAGGER.fast }}
       >
         {/* Examples Section */}
         <Card
@@ -1671,7 +1688,7 @@ function StepExamplesTags({
             {/* Add Example Input */}
             <div className="flex gap-2">
               <Input
-                value={newExample}
+                className="flex-1"
                 onChange={(event) => setNewExample(event.target.value)}
                 onKeyDown={(event) => {
                   if (event.key === 'Enter') {
@@ -1680,15 +1697,15 @@ function StepExamplesTags({
                   }
                 }}
                 placeholder="e.g., 'Create a React component'"
-                className="flex-1"
+                value={newExample}
               />
               <Button
-                type="button"
-                onClick={addExample}
                 disabled={!newExample.trim()}
+                onClick={addExample}
                 style={{
                   backgroundColor: TOKENS.colors.accent.primary,
                 }}
+                type="button"
               >
                 <Plus className="h-4 w-4" />
               </Button>
@@ -1703,16 +1720,16 @@ function StepExamplesTags({
                     const exampleKey = `example-${example}`;
                     return (
                       <motion.div
-                        key={exampleKey}
-                        initial={{ opacity: 0, x: -20, scale: 0.9 }}
-                        animate={{ opacity: 1, x: 0, scale: 1 }}
-                        exit={{ opacity: 0, x: 20, scale: 0.9 }}
-                        transition={SPRING.snappy}
+                        animate={{ opacity: 1, scale: 1, x: 0 }}
                         className="group hover:border-accent/50 flex items-start gap-3 rounded-lg border p-3 transition-all"
+                        exit={{ opacity: 0, scale: 0.9, x: 20 }}
+                        initial={{ opacity: 0, scale: 0.9, x: -20 }}
+                        key={exampleKey}
                         style={{
                           backgroundColor: TOKENS.colors.background.primary,
                           borderColor: TOKENS.colors.border.default,
                         }}
+                        transition={SPRING.snappy}
                       >
                         <div
                           className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold"
@@ -1725,14 +1742,14 @@ function StepExamplesTags({
                         </div>
                         <span className="flex-1 text-sm leading-relaxed">{example}</span>
                         <motion.button
-                          type="button"
-                          onClick={() => removeExample(index)}
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
                           className="shrink-0 rounded-full p-1 opacity-0 transition-all group-hover:opacity-100"
+                          onClick={() => removeExample(index)}
                           style={{
                             color: TOKENS.colors.error.text,
                           }}
+                          type="button"
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
                         >
                           <X className="h-4 w-4" />
                         </motion.button>
@@ -1742,9 +1759,9 @@ function StepExamplesTags({
                 </div>
               ) : (
                 <motion.div
-                  initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   className="rounded-lg border border-dashed p-8 text-center"
+                  initial={{ opacity: 0 }}
                   style={{
                     borderColor: TOKENS.colors.border.light,
                   }}
@@ -1762,8 +1779,8 @@ function StepExamplesTags({
 
       {/* Tags Section */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0, y: 20 }}
         transition={{ ...SPRING.smooth, delay: STAGGER.default }}
       >
         <Card
@@ -1789,7 +1806,8 @@ function StepExamplesTags({
             {/* Add Tag Input */}
             <div className="flex gap-2">
               <Input
-                value={newTag}
+                className="flex-1"
+                maxLength={30}
                 onChange={(event) => setNewTag(event.target.value)}
                 onKeyDown={(event) => {
                   if (event.key === 'Enter') {
@@ -1798,18 +1816,17 @@ function StepExamplesTags({
                   }
                 }}
                 placeholder="e.g., 'react', 'typescript', 'api'"
-                className="flex-1"
-                maxLength={30}
+                value={newTag}
               />
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Button
-                  type="button"
-                  onClick={addTag}
-                  disabled={!newTag.trim()}
                   className="gap-2"
+                  disabled={!newTag.trim()}
+                  onClick={addTag}
                   style={{
                     backgroundColor: TOKENS.colors.accent.primary,
                   }}
+                  type="button"
                 >
                   <Plus className="h-4 w-4" />
                   Add
@@ -1826,32 +1843,32 @@ function StepExamplesTags({
                     const tagKey = `tag-${tag}`;
                     return (
                       <motion.div
-                        key={tagKey}
-                        initial={{ opacity: 0, scale: 0 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0 }}
+                        initial={{ opacity: 0, scale: 0 }}
+                        key={tagKey}
                         transition={SPRING.bouncy}
                         whileHover={{ scale: 1.05 }}
                       >
                         <Badge
-                          variant="secondary"
                           className="group gap-1.5 pr-1 text-sm"
                           style={{
                             backgroundColor: `${TOKENS.colors.accent.primary}15`,
                             borderColor: `${TOKENS.colors.accent.primary}30`,
                             color: TOKENS.colors.accent.primary,
                           }}
+                          variant="secondary"
                         >
                           {tag}
                           <button
-                            type="button"
+                            className="hover:bg-accent/20 ml-1 rounded-full p-0.5 transition-colors"
                             onClick={() => {
                               const tagIndex = data.tags.indexOf(tag);
                               if (tagIndex !== -1) {
                                 removeTag(tagIndex);
                               }
                             }}
-                            className="hover:bg-accent/20 ml-1 rounded-full p-0.5 transition-colors"
+                            type="button"
                           >
                             <X className="h-3 w-3" />
                           </button>
@@ -1862,9 +1879,9 @@ function StepExamplesTags({
                 </div>
               ) : (
                 <motion.div
-                  initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   className="rounded-lg border border-dashed p-6 text-center"
+                  initial={{ opacity: 0 }}
                   style={{
                     borderColor: TOKENS.colors.border.light,
                   }}

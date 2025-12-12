@@ -187,6 +187,13 @@ export const FEATURE_FLAGS = {
   'intersection_observer.default_threshold': 0.1,
   'intersection_observer.default_root_margin': '0px',
   'analytics.vercel_enabled': false,
+  // BetterStack Monitoring Feature Flags
+  'monitoring.betterstack.enabled': true,  // Master switch - disable all BetterStack monitoring
+  'monitoring.betterstack.inngest.enabled': true,  // Inngest function monitoring
+  'monitoring.betterstack.inngest.critical_failures': true,  // onFailure callbacks
+  'monitoring.betterstack.inngest.cron_success': true,  // Success heartbeats for cron functions
+  'monitoring.betterstack.api.endpoints': true,  // API endpoint monitoring
+  'monitoring.betterstack.vercel.cron': true,  // Existing Vercel cron monitoring (keep existing)
 } as const;
 
 /** Security settings */

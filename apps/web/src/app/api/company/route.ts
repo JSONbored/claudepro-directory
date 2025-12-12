@@ -6,13 +6,14 @@
 import 'server-only';
 import { CompaniesService } from '@heyclaude/data-layer';
 import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
-import { logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
+import { createErrorResponse, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   badRequestResponse,
-  jsonResponse,
-  getOnlyCorsHeaders,
   buildCacheHeaders,
   createSupabaseAnonClient,
+  getOnlyCorsHeaders,
+  jsonResponse,
+  notFoundResponse,
 } from '@heyclaude/web-runtime/server';
 import { cacheLife } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
@@ -22,7 +23,7 @@ const CORS = getOnlyCorsHeaders;
 /**
  * Cached helper function to fetch company profile by slug.
  * The slug parameter becomes part of the cache key, so different companies have different cache entries.
- * 
+ *
  * @param {string} slug - Company slug identifier
  * @returns Promise resolving to an object with the company profile data
  */
@@ -59,9 +60,9 @@ async function getCachedCompanyProfile(slug: string): Promise<{
  */
 export async function GET(request: NextRequest) {
   const reqLogger = logger.child({
+    method: 'GET',
     operation: 'CompanyAPI',
     route: '/api/company',
-    method: 'GET',
   });
 
   try {
@@ -90,14 +91,20 @@ export async function GET(request: NextRequest) {
         'Company profile RPC error'
       );
       return createErrorResponse(normalizedError, {
-        route: '/api/company',
-        operation: 'CompanyAPI',
-        method: 'GET',
         logContext: {
           rpcName: 'get_company_profile',
           slug,
         },
+        method: 'GET',
+        operation: 'CompanyAPI',
+        route: '/api/company',
       });
+    }
+
+    // Check if profile exists
+    if (!profile || (typeof profile === 'object' && Object.keys(profile).length === 0)) {
+      reqLogger.warn({ slug }, 'Company profile not found');
+      return notFoundResponse('Company not found', 'Company');
     }
 
     reqLogger.info({ slug }, 'Company profile retrieved');
@@ -110,9 +117,9 @@ export async function GET(request: NextRequest) {
     const normalized = normalizeError(error, 'Operation failed');
     reqLogger.error({ err: normalized }, 'Company API error');
     return createErrorResponse(normalized, {
-      route: '/api/company',
-      operation: 'CompanyAPI',
       method: 'GET',
+      operation: 'CompanyAPI',
+      route: '/api/company',
     });
   }
 }
@@ -127,9 +134,9 @@ export async function GET(request: NextRequest) {
  */
 export function OPTIONS() {
   return new NextResponse(null, {
-    status: 204,
     headers: {
       ...CORS,
     },
+    status: 204,
   });
 }

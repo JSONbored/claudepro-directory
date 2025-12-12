@@ -43,15 +43,15 @@ export async function getContentDetailComplete(input: {
 
   if (!isValidContentCategory(category)) {
     const reqLogger = logger.child({
-      operation: 'getContentDetailComplete',
       module: 'data/content/detail',
+      operation: 'getContentDetailComplete',
     });
     const normalized = normalizeError(
       'Invalid category',
       'Invalid category in getContentDetailComplete'
     );
     reqLogger.error(
-      { err: normalized, category, slug },
+      { category, err: normalized, slug },
       'Invalid category in getContentDetailComplete'
     );
     return null;
@@ -66,8 +66,8 @@ export async function getContentDetailComplete(input: {
   }
 
   const reqLogger = logger.child({
-    operation: 'getContentDetailComplete',
     module: 'data/content/detail',
+    operation: 'getContentDetailComplete',
   });
 
   try {
@@ -84,14 +84,14 @@ export async function getContentDetailComplete(input: {
     const result = await service.getContentDetailComplete({ p_category: category, p_slug: slug });
 
     reqLogger.info(
-      { category, slug, hasResult: Boolean(result) },
+      { category, hasResult: Boolean(result), slug },
       'getContentDetailComplete: fetched successfully'
     );
 
     return result;
   } catch (error) {
     const normalized = normalizeError(error, 'getContentDetailComplete failed');
-    reqLogger.error({ err: normalized, category, slug }, 'getContentDetailComplete failed');
+    reqLogger.error({ category, err: normalized, slug }, 'getContentDetailComplete failed');
     return null;
   }
 }
@@ -114,15 +114,15 @@ export async function getContentDetailCore(input: {
 
   if (!isValidContentCategory(category)) {
     const reqLogger = logger.child({
-      operation: 'getContentDetailCore',
       module: 'data/content/detail',
+      operation: 'getContentDetailCore',
     });
     const normalized = normalizeError(
       'Invalid category',
       'Invalid category in getContentDetailCore'
     );
     reqLogger.error(
-      { err: normalized, category, slug },
+      { category, err: normalized, slug },
       'Invalid category in getContentDetailCore'
     );
     return null;
@@ -137,8 +137,8 @@ export async function getContentDetailCore(input: {
   }
 
   const reqLogger = logger.child({
-    operation: 'getContentDetailCore',
     module: 'data/content/detail',
+    operation: 'getContentDetailCore',
   });
 
   try {
@@ -155,14 +155,14 @@ export async function getContentDetailCore(input: {
     const result = await service.getContentDetailCore({ p_category: category, p_slug: slug });
 
     reqLogger.info(
-      { category, slug, hasResult: Boolean(result) },
+      { category, hasResult: Boolean(result), slug },
       'getContentDetailCore: fetched successfully'
     );
 
     return result;
   } catch (error) {
     const normalized = normalizeError(error, 'getContentDetailCore failed');
-    reqLogger.error({ err: normalized, category, slug }, 'getContentDetailCore failed');
+    reqLogger.error({ category, err: normalized, slug }, 'getContentDetailCore failed');
     return null;
   }
 }
@@ -185,14 +185,14 @@ export async function getContentAnalytics(input: {
 
   if (!isValidContentCategory(category)) {
     const reqLogger = logger.child({
-      operation: 'getContentAnalytics',
       module: 'data/content/detail',
+      operation: 'getContentAnalytics',
     });
     const normalized = normalizeError(
       'Invalid category',
       'Invalid category in getContentAnalytics'
     );
-    reqLogger.error({ err: normalized, category, slug }, 'Invalid category in getContentAnalytics');
+    reqLogger.error({ category, err: normalized, slug }, 'Invalid category in getContentAnalytics');
     return null;
   }
 
@@ -205,8 +205,8 @@ export async function getContentAnalytics(input: {
   }
 
   const reqLogger = logger.child({
-    operation: 'getContentAnalytics',
     module: 'data/content/detail',
+    operation: 'getContentAnalytics',
   });
 
   try {
@@ -223,14 +223,14 @@ export async function getContentAnalytics(input: {
     const result = await service.getContentAnalytics({ p_category: category, p_slug: slug });
 
     reqLogger.info(
-      { category, slug, hasResult: Boolean(result) },
+      { category, hasResult: Boolean(result), slug },
       'getContentAnalytics: fetched successfully'
     );
 
     return result;
   } catch (error) {
     const normalized = normalizeError(error, 'getContentAnalytics failed');
-    reqLogger.error({ err: normalized, category, slug }, 'getContentAnalytics failed');
+    reqLogger.error({ category, err: normalized, slug }, 'getContentAnalytics failed');
     return null;
   }
 }

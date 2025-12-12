@@ -6,9 +6,9 @@ import { cacheLife, cacheTag } from 'next/cache';
 
 import { logger } from '../../index.ts';
 
-/**
+/***
  * Normalizes error to Error | string for logging
- * @param error - Error to normalize
+ * @param {unknown} error - Error to normalize
  * @returns Error instance or string representation
  */
 function normalizeErrorForLogging(error: unknown): Error | string {
@@ -50,11 +50,11 @@ function normalizeFacetRow(row: SearchFacetsRow): SearchFacetSummary {
   };
 }
 
-/**
+/***
  * Extracts aggregated arrays from RPC result
  * The RPC now returns pre-aggregated arrays in each row (same values)
  * We use the first row's aggregated values for efficiency
- * @param data - Array of facet rows from RPC (each row contains aggregated arrays)
+ * @param {SearchFacetsRow[]} data - Array of facet rows from RPC (each row contains aggregated arrays)
  * @returns Pre-aggregated arrays from database (already sorted and deduplicated)
  */
 function extractAggregatedArrays(data: SearchFacetsRow[]): {

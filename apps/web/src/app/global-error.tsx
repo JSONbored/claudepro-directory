@@ -1,9 +1,9 @@
 'use client';
 
 import { useCopyToClipboard } from '@heyclaude/web-runtime/hooks';
-import { Copy, Check } from '@heyclaude/web-runtime/icons';
+import { Check, Copy } from '@heyclaude/web-runtime/icons';
 import { logClientErrorBoundary } from '@heyclaude/web-runtime/logging/client';
-import { UI_CLASSES, Button } from '@heyclaude/web-runtime/ui';
+import { Button, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useEffect } from 'react';
 
 /**
@@ -21,7 +21,7 @@ const isDevelopment = process.env.NODE_ENV === 'development';
  * @returns {unknown} Description of return value*/
 function ErrorCodeBlock({ content }: { content: string }) {
   const { copied, copy } = useCopyToClipboard({
-    context: { component: 'GlobalError', action: 'copy-error' },
+    context: { action: 'copy-error', component: 'GlobalError' },
   });
 
   return (
@@ -30,18 +30,18 @@ function ErrorCodeBlock({ content }: { content: string }) {
         {content}
       </pre>
       <Button
-        variant="ghost"
-        size="sm"
+        aria-label={copied ? 'Copied!' : 'Copy error message'}
         className="absolute top-2 right-2 h-6 w-6 p-0"
         onClick={() => {
           void copy(content);
         }}
-        aria-label={copied ? 'Copied!' : 'Copy error message'}
+        size="sm"
+        variant="ghost"
       >
         {copied ? (
-          <Check className="h-3 w-3 text-green-500" aria-hidden="true" />
+          <Check aria-hidden="true" className="h-3 w-3 text-green-500" />
         ) : (
-          <Copy className="h-3 w-3" aria-hidden="true" />
+          <Copy aria-hidden="true" className="h-3 w-3" />
         )}
       </Button>
     </div>
@@ -75,9 +75,9 @@ export default function GlobalError({
       error.stack ?? '',
       {
         errorDigest: error.digest,
-        userAgent: globalThis.navigator.userAgent,
-        url: globalThis.location.href,
         segment: 'global-error',
+        url: globalThis.location.href,
+        userAgent: globalThis.navigator.userAgent,
       }
     );
   }, [error]);
@@ -109,9 +109,9 @@ export default function GlobalError({
               </div>
             ) : null}
             <button
-              type="button"
-              onClick={reset}
               className={`bg-primary cursor-pointer rounded-md border-none ${UI_CLASSES.CONTAINER_PADDING_SM} text-primary-foreground hover:bg-primary/90 text-base transition-colors`}
+              onClick={reset}
+              type="button"
             >
               Reset Application
             </button>

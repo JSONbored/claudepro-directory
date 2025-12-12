@@ -20,18 +20,18 @@ import {
 } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
   BADGE_COLORS,
-  UI_CLASSES,
-  UnifiedBadge,
   Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  Alert,
-  AlertDescription,
-  AlertTitle,
+  UI_CLASSES,
+  UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
@@ -40,7 +40,6 @@ import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { SignInButton } from '@/src/components/core/auth/sign-in-button';
-
 import { JobDeleteButton } from '@/src/components/core/buttons/jobs/job-delete-button';
 import { JobToggleButton } from '@/src/components/core/buttons/jobs/job-toggle-button';
 
@@ -58,20 +57,20 @@ const JOB_PLAN_LABELS: Record<Database['public']['Enums']['job_plan'], string> =
   subscription: 'Subscription',
 };
 const JOB_TIER_LABELS: Record<Database['public']['Enums']['job_tier'], string> = {
-  standard: 'Standard',
   featured: 'Featured',
+  standard: 'Standard',
 };
 const USD_FORMATTER = new Intl.NumberFormat('en-US', {
-  style: 'currency',
   currency: 'USD',
   maximumFractionDigits: 0,
+  style: 'currency',
 });
 
-/**
+/****
  * Format an amount in cents as a US dollar string, optionally appending a monthly suffix.
  *
- * @param cents - Monetary amount in integer cents (e.g., 2500 for $25.00)
- * @param isSubscription - When true, append `/month` to indicate a recurring monthly price
+ * @param {number} cents - Monetary amount in integer cents (e.g., 2500 for $25.00)
+ * @param {boolean | null} isSubscription - When true, append `/month` to indicate a recurring monthly price
  * @returns The formatted USD price string (e.g., "$25" or "$25/month")
  * @see USD_FORMATTER
  */
@@ -80,10 +79,10 @@ function formatPriceLabel(cents: number, isSubscription?: boolean | null): strin
   return isSubscription ? `${base}/month` : base;
 }
 
-/**
+/***
  * Convert a string to title case by capitalizing the first letter of each word.
  *
- * @param value - The input string to convert
+ * @param {string} value - The input string to convert
  * @returns The input string with each word capitalized and segments separated by single spaces
  *
  * @see humanizeStatus
@@ -95,10 +94,10 @@ function toTitleCase(value: string): string {
     .join(' ');
 }
 
-/**
+/***
  * Converts a job status string into a human-readable title-cased label.
  *
- * @param value - The raw status value (e.g., "active", "pending", or `null`/`undefined`).
+ * @param {null | string} value - The raw status value (e.g., "active", "pending", or `null`/`undefined`).
  * @returns The title-cased status (e.g., "Active") or `"Unknown"` when `value` is falsy.
  *
  * @see toTitleCase
@@ -108,10 +107,10 @@ function humanizeStatus(value?: null | string): string {
   return toTitleCase(value);
 }
 
-/**
+/***
  * Get the human-readable label for a job plan.
  *
- * @param plan - The job plan enum value; may be `undefined` or `null`
+ * @param {Database['public']['Enums']['job_plan'] | null} plan - The job plan enum value; may be `undefined` or `null`
  * @returns The human-readable label for `plan`; defaults to the One-Time label when `plan` is missing.
  *
  * @see JOB_PLAN_LABELS
@@ -123,10 +122,10 @@ function resolvePlanLabel(plan?: Database['public']['Enums']['job_plan'] | null)
   return JOB_PLAN_LABELS[plan];
 }
 
-/**
+/***
  * Resolve a human-readable label for a job tier.
  *
- * @param tier - The job tier enum value; when `undefined` or `null`, the standard tier label is used
+ * @param {Database['public']['Enums']['job_tier'] | null} tier - The job tier enum value; when `undefined` or `null`, the standard tier label is used
  * @returns The label corresponding to `tier`, or the Standard tier label when no tier is provided
  *
  * @see JOB_TIER_LABELS
@@ -138,10 +137,10 @@ function resolveTierLabel(tier?: Database['public']['Enums']['job_tier'] | null)
   return JOB_TIER_LABELS[tier];
 }
 
-/**
+/***
  * Maps a job status to its badge color token.
  *
- * @param status - The job status to map
+ * @param {JobStatus} status - The job status to map
  * @returns The color token string associated with the provided `status`
  *
  * @see BADGE_COLORS.jobStatus
@@ -199,9 +198,9 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
+    module: 'apps/web/src/app/account/jobs',
     operation: 'MyJobsPage',
     route: '/account/jobs',
-    module: 'apps/web/src/app/account/jobs',
   });
 
   const resolvedSearchParameters = searchParams ? await searchParams : {};
@@ -227,7 +226,10 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
             <CardDescription>Please sign in to manage your job listings.</CardDescription>
           </CardHeader>
           <CardContent>
-            <SignInButton valueProposition="Sign in to manage your job listings" redirectTo="/account/jobs">
+            <SignInButton
+              redirectTo="/account/jobs"
+              valueProposition="Sign in to manage your job listings"
+            >
               Go to login
             </SignInButton>
           </CardContent>
@@ -304,8 +306,8 @@ async function PaymentSuccessAlert({
     const normalized = normalizeError(error, 'Failed to load user dashboard for payment alert');
     userLogger.error(
       {
-        section: 'data-fetch',
         err: normalized,
+        section: 'data-fetch',
       },
       'MyJobsPage: getUserDashboard failed for payment alert'
     );
@@ -339,8 +341,8 @@ async function PaymentSuccessAlert({
       );
       userLogger.error(
         {
-          section: 'data-fetch',
           err: normalized,
+          section: 'data-fetch',
         },
         'MyJobsPage: getJobBillingSummaries failed for payment alert'
       );
@@ -424,13 +426,16 @@ async function JobsListWithHeader({
   let fetchError = false;
   try {
     data = await getUserDashboard(userId);
-    userLogger.info({ section: 'data-fetch', hasData: !!data }, 'MyJobsPage: dashboard data loaded');
+    userLogger.info(
+      { hasData: !!data, section: 'data-fetch' },
+      'MyJobsPage: dashboard data loaded'
+    );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user dashboard for jobs');
     userLogger.error(
       {
-        section: 'data-fetch',
         err: normalized,
+        section: 'data-fetch',
       },
       'MyJobsPage: getUserDashboard threw'
     );
@@ -468,10 +473,10 @@ async function JobsListWithHeader({
       return [];
     }
 
-    return jobsData.filter((item): item is Database['public']['Tables']['jobs']['Row'] => {
-      // Validate required fields for jobs table row
-      // Use bracket notation for index signature properties
-      return (
+    return jobsData.filter(
+      (item): item is Database['public']['Tables']['jobs']['Row'] =>
+        // Validate required fields for jobs table row
+        // Use bracket notation for index signature properties
         item !== null &&
         typeof item === 'object' &&
         'id' in item &&
@@ -494,8 +499,7 @@ async function JobsListWithHeader({
         (typeof item['plan'] === 'string' || item['plan'] === null) &&
         'type' in item &&
         typeof item['type'] === 'string'
-      );
-    });
+    );
   })();
 
   if (jobs.length === 0) {
@@ -539,7 +543,7 @@ async function JobsListWithHeader({
         </Card>
       ) : (
         <Suspense fallback={<JobsListLoading />}>
-          <JobsListWithBilling jobs={jobs} jobIds={jobIds} userLogger={userLogger} />
+          <JobsListWithBilling jobIds={jobIds} jobs={jobs} userLogger={userLogger} />
         </Suspense>
       )}
     </>
@@ -567,8 +571,8 @@ async function JobsListWithHeader({
  * @see PaymentSuccessAlert
  */
 async function JobsListWithBilling({
-  jobs,
   jobIds,
+  jobs,
   userLogger,
 }: {
   jobIds: string[];
@@ -583,8 +587,8 @@ async function JobsListWithBilling({
       const normalized = normalizeError(error, 'Failed to load job billing summaries');
       userLogger.error(
         {
-          section: 'data-fetch',
           err: normalized,
+          section: 'data-fetch',
         },
         'MyJobsPage: getJobBillingSummaries failed'
       );
@@ -603,14 +607,14 @@ async function JobsListWithBilling({
   ) => {
     if (tier === 'featured') {
       return (
-        <UnifiedBadge variant="base" className={UI_CLASSES.STATUS_PUBLISHED}>
+        <UnifiedBadge className={UI_CLASSES.STATUS_PUBLISHED} variant="base">
           Featured
         </UnifiedBadge>
       );
     }
     if (plan === 'subscription') {
       return (
-        <UnifiedBadge variant="base" className={UI_CLASSES.STATUS_PREMIUM}>
+        <UnifiedBadge className={UI_CLASSES.STATUS_PREMIUM} variant="base">
           Subscription
         </UnifiedBadge>
       );
@@ -660,9 +664,9 @@ async function JobsListWithBilling({
                 <div className="flex-1">
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                     <UnifiedBadge
-                      variant="base"
-                      style="outline"
                       className={getStatusColor(job.status)}
+                      style="outline"
+                      variant="base"
                     >
                       {job.status}
                     </UnifiedBadge>
@@ -689,7 +693,7 @@ async function JobsListWithBilling({
                 <div className="border-muted bg-muted/20 mb-4 rounded-lg border border-dashed p-3 text-xs sm:text-sm">
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                     <span className="text-foreground font-semibold">Billing</span>
-                    <UnifiedBadge variant="base" style="outline" className="capitalize">
+                    <UnifiedBadge className="capitalize" style="outline" variant="base">
                       {planLabel} • {tierLabel}
                     </UnifiedBadge>
                   </div>
@@ -702,14 +706,14 @@ async function JobsListWithBilling({
               ) : null}
 
               <div className={UI_CLASSES.FLEX_GAP_2}>
-                <Button variant="outline" size="sm" asChild>
+                <Button asChild size="sm" variant="outline">
                   <Link href={`/account/jobs/${job.id}/edit`}>
                     <Edit className="mr-1 h-3 w-3" />
                     Edit
                   </Link>
                 </Button>
 
-                <Button variant="outline" size="sm" asChild>
+                <Button asChild size="sm" variant="outline">
                   <Link href={`/account/jobs/${job.id}/analytics`}>
                     <BarChart className="mr-1 h-3 w-3" />
                     Analytics
@@ -717,7 +721,7 @@ async function JobsListWithBilling({
                 </Button>
 
                 {job.slug ? (
-                  <Button variant="ghost" size="sm" asChild>
+                  <Button asChild size="sm" variant="ghost">
                     <Link href={`/jobs/${job.slug}`}>
                       <ExternalLink className="mr-1 h-3 w-3" />
                       View
@@ -728,7 +732,7 @@ async function JobsListWithBilling({
                 {(() => {
                   const status = job.status;
                   return status === 'active' || status === 'draft' ? (
-                    <JobToggleButton jobId={job.id} currentStatus={status} />
+                    <JobToggleButton currentStatus={status} jobId={job.id} />
                   ) : null;
                 })()}
 

@@ -19,19 +19,19 @@ import {
 } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  UI_CLASSES,
-  NavLink,
-  UnifiedBadge,
   Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  NavLink,
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
+  UI_CLASSES,
+  UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
@@ -87,9 +87,9 @@ export default async function LibraryPage() {
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
+    module: 'apps/web/src/app/account/library',
     operation: 'LibraryPage',
     route: '/account/library',
-    module: 'apps/web/src/app/account/library',
   });
 
   return (
@@ -160,14 +160,17 @@ async function LibraryPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
     if (data === null) {
       userLogger.warn({ section: 'data-fetch' }, 'LibraryPage: getUserLibrary returned null');
     } else {
-      userLogger.info({ section: 'data-fetch', hasData: Boolean(data) }, 'LibraryPage: library data loaded');
+      userLogger.info(
+        { hasData: Boolean(data), section: 'data-fetch' },
+        'LibraryPage: library data loaded'
+      );
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user library');
     userLogger.error(
       {
-        section: 'data-fetch',
         err: normalized,
+        section: 'data-fetch',
       },
       'LibraryPage: getUserLibrary threw'
     );
@@ -205,12 +208,21 @@ async function LibraryPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
   const bookmarkCount = stats.bookmark_count ?? 0;
   const collectionCount = stats.collection_count ?? 0;
   if (bookmarks.length <= 0 && collections.length <= 0) {
-    userLogger.info({ section: 'data-fetch' }, 'LibraryPage: library returned no bookmarks or collections');
+    userLogger.info(
+      { section: 'data-fetch' },
+      'LibraryPage: library returned no bookmarks or collections'
+    );
   }
 
   // Final summary log
-  userLogger.info({ section: 'data-fetch', bookmarksCount: bookmarks.length,
-    collectionsCount: collections.length }, 'LibraryPage: page render completed');
+  userLogger.info(
+    {
+      bookmarksCount: bookmarks.length,
+      collectionsCount: collections.length,
+      section: 'data-fetch',
+    },
+    'LibraryPage: page render completed'
+  );
 
   return (
     <div className="space-y-6">
@@ -229,19 +241,19 @@ async function LibraryPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
         </Link>
       </div>
 
-      <Tabs defaultValue="bookmarks" className="w-full">
+      <Tabs className="w-full" defaultValue="bookmarks">
         <TabsList className="grid w-full max-w-md grid-cols-2">
-          <TabsTrigger value="bookmarks" className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+          <TabsTrigger className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} value="bookmarks">
             <BookmarkIcon className="h-4 w-4" />
             Bookmarks ({bookmarkCount})
           </TabsTrigger>
-          <TabsTrigger value={COLLECTIONS_TAB_VALUE} className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+          <TabsTrigger className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} value={COLLECTIONS_TAB_VALUE}>
             <FolderOpen className="h-4 w-4" />
             Collections ({collectionCount})
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="bookmarks" className="space-y-4">
+        <TabsContent className="space-y-4" value="bookmarks">
           {bookmarks.length === 0 ? (
             <Card>
               <CardContent className="flex flex-col items-center py-12">
@@ -251,7 +263,7 @@ async function LibraryPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
                   Start exploring the directory and bookmark your favorite agents, MCP servers,
                   rules, and more!
                 </p>
-                <NavLink href="/" className="mt-4">
+                <NavLink className="mt-4" href="/">
                   Browse Directory →
                 </NavLink>
               </CardContent>
@@ -264,7 +276,7 @@ async function LibraryPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
                     <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
                       <div className="flex-1">
                         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                          <UnifiedBadge variant="base" style="outline" className="capitalize">
+                          <UnifiedBadge className="capitalize" style="outline" variant="base">
                             {bookmark.content_type}
                           </UnifiedBadge>
                           <CardTitle className="text-lg">{bookmark.content_slug}</CardTitle>
@@ -274,8 +286,8 @@ async function LibraryPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
                         ) : null}
                       </div>
                       <NavLink
-                        href={`/${bookmark.content_type}/${bookmark.content_slug}`}
                         className="hover:text-primary/80"
+                        href={`/${bookmark.content_type}/${bookmark.content_slug}`}
                       >
                         <ExternalLink className="h-4 w-4" />
                       </NavLink>
@@ -295,7 +307,7 @@ async function LibraryPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
           )}
         </TabsContent>
 
-        <TabsContent value={COLLECTIONS_TAB_VALUE} className="space-y-4">
+        <TabsContent className="space-y-4" value={COLLECTIONS_TAB_VALUE}>
           {collections.length === 0 ? (
             <Card>
               <CardContent className="flex flex-col items-center py-12">
@@ -316,7 +328,7 @@ async function LibraryPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
           ) : (
             <div className="grid gap-4 sm:grid-cols-2">
               {collections.map((collection) => (
-                <Card key={collection.id} className={UI_CLASSES.CARD_INTERACTIVE}>
+                <Card className={UI_CLASSES.CARD_INTERACTIVE} key={collection.id}>
                   <Link href={`/account/library/${collection.slug}`}>
                     <CardHeader>
                       <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
@@ -324,7 +336,7 @@ async function LibraryPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
                           <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} mb-2`}>
                             <Layers className="text-primary h-4 w-4" />
                             {collection.is_public ? (
-                              <UnifiedBadge variant="base" style="outline" className="text-xs">
+                              <UnifiedBadge className="text-xs" style="outline" variant="base">
                                 Public
                               </UnifiedBadge>
                             ) : null}

@@ -14,13 +14,13 @@ import { TrendingUp } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { type SubmissionFormConfig } from '@heyclaude/web-runtime/types/component.types';
 import {
-  cn,
-  UI_CLASSES,
   Card,
   CardContent,
   CardHeader,
   CardTitle,
+  cn,
   Skeleton,
+  UI_CLASSES,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { connection } from 'next/server';
@@ -55,12 +55,12 @@ const SUBMISSION_TIPS = [
 
 const TYPE_LABELS: Record<Database['public']['Enums']['submission_type'], string> = {
   agents: 'Agent',
-  mcp: 'MCP',
-  rules: 'Rule',
   commands: 'Command',
   hooks: 'Hook',
-  statuslines: 'Statusline',
+  mcp: 'MCP',
+  rules: 'Rule',
   skills: 'Skill',
+  statuslines: 'Statusline',
 };
 
 function formatTimeAgo(dateString: string): string {
@@ -75,10 +75,10 @@ function formatTimeAgo(dateString: string): string {
   return `${Math.floor(seconds / 604_800)}w ago`;
 }
 
-/**
+/***
  * Determines whether a string is a valid `content_category` enum value.
  *
- * @param value - The string to validate as a content category
+ * @param {string} value - The string to validate as a content category
  * @returns `true` if `value` is a member of the `content_category` enum, `false` otherwise
  *
  * @see Constants.public.Enums.content_category
@@ -91,13 +91,13 @@ function isValidContentCategory(
   );
 }
 
-/**
+/***
  * Map a submission_type value to a valid content_category, returning a safe default when the input is null or invalid.
  *
  * If `submissionType` is `null` or not a recognized `content_category`, this function returns `DEFAULT_CONTENT_CATEGORY`
  * and logs a warning.
  *
- * @param submissionType - A `submission_type` enum value or `null`
+ * @param {Database['public']['Enums']['submission_type'] | null} submissionType - A `submission_type` enum value or `null`
  * @returns A `content_category` value corresponding to `submissionType`, or `DEFAULT_CONTENT_CATEGORY` as a fallback
  *
  * @see isValidContentCategory
@@ -119,20 +119,22 @@ function mapSubmissionTypeToContentCategory(
   // Fallback if somehow an invalid value gets through (should never happen)
   // Note: This is a module-level utility function, so it can't access component-level bindings
   // Log with minimal context (utility functions don't need full request context)
-  logger.warn({  section: 'data-fetch' , 
+  logger.warn(
+    {
       module: 'apps/web/src/app/submit',
       operation: 'mapSubmissionTypeToContentCategory',
+      section: 'data-fetch',
       submissionType,
-      },
-      'mapSubmissionTypeToContentCategory: invalid submission_type'
-    );
+    },
+    'mapSubmissionTypeToContentCategory: invalid submission_type'
+  );
   return DEFAULT_CONTENT_CATEGORY;
 }
 
-/**
+/***
  * Type guard that verifies an unknown value has the shape of a recent merged submission.
  *
- * @param submission - Value to check for the required recent-submission fields
+ * @param {unknown} submission - Value to check for the required recent-submission fields
  * @returns `true` if `submission` has non-null `id`, `content_name`, `content_type`, and `merged_at` properties (and therefore can be treated as a recent merged submission), `false` otherwise.
  *
  * @see mapSubmissionTypeToContentCategory
@@ -202,9 +204,9 @@ export default async function SubmitPage() {
 
   // Create request-scoped child logger
   const reqLogger = logger.child({
+    module: 'apps/web/src/app/submit',
     operation: 'SubmitPage',
     route: '/submit',
-    module: 'apps/web/src/app/submit',
   });
 
   return (
@@ -258,22 +260,22 @@ async function SubmitPageHeroWithStats({
   try {
     dashboardData = await getSubmissionDashboard(5, 5);
     reqLogger.info(
-      { section: 'data-fetch', recentCount: 5, statsCount: 5, hasData: !!dashboardData },
+      { hasData: !!dashboardData, recentCount: 5, section: 'data-fetch', statsCount: 5 },
       'SubmitPage: submission dashboard loaded'
     );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load submission dashboard');
     reqLogger.error(
-      { err: normalized, section: 'data-fetch', recentCount: 5, statsCount: 5 },
+      { err: normalized, recentCount: 5, section: 'data-fetch', statsCount: 5 },
       'SubmitPage: getSubmissionDashboard failed'
     );
     // Continue with null dashboardData - page will render with fallback empty data
   }
 
   const stats = {
-    total: dashboardData?.stats?.total ?? 0,
-    pending: dashboardData?.stats?.pending ?? 0,
     merged_this_week: dashboardData?.stats?.merged_this_week ?? 0,
+    pending: dashboardData?.stats?.pending ?? 0,
+    total: dashboardData?.stats?.total ?? 0,
   };
 
   return <SubmitPageHero stats={stats} />;
@@ -301,7 +303,7 @@ async function SubmitFormWithConfig({ reqLogger }: { reqLogger: ReturnType<typeo
   try {
     formConfig = await getSubmissionFormFields();
     reqLogger.info(
-      { section: 'data-fetch', hasConfig: Boolean(formConfig) },
+      { hasConfig: Boolean(formConfig), section: 'data-fetch' },
       'SubmitPage: form configuration loaded'
     );
   } catch (error) {
@@ -318,7 +320,7 @@ async function SubmitFormWithConfig({ reqLogger }: { reqLogger: ReturnType<typeo
   // Fetch templates for all supported submission types
   // submission_type enum values are a subset of content_category enum values
   // Map each element and validate using type guard to ensure type safety
-  const supportedCategories: Database['public']['Enums']['content_category'][] =
+  const supportedCategories: Array<Database['public']['Enums']['content_category']> =
     Constants.public.Enums.submission_type
       .map((type): string => {
         // Runtime validation: all submission_type values are valid content_category values
@@ -343,7 +345,7 @@ async function SubmitFormWithConfig({ reqLogger }: { reqLogger: ReturnType<typeo
       getContentTemplates(category).catch((error) => {
         const normalized = normalizeError(error, `Failed to load templates for ${category}`);
         reqLogger.error(
-          { err: normalized, section: 'data-fetch', category },
+          { category, err: normalized, section: 'data-fetch' },
           'SubmitPage: getContentTemplates failed for category'
         );
         return []; // Return empty array on error for this category
@@ -353,9 +355,9 @@ async function SubmitFormWithConfig({ reqLogger }: { reqLogger: ReturnType<typeo
     templates = templateResults.flat();
     reqLogger.info(
       {
+        categoriesCount: supportedCategories.length,
         section: 'data-fetch',
         templatesCount: templates.length,
-        categoriesCount: supportedCategories.length,
       },
       'SubmitPage: content templates loaded'
     );
@@ -371,35 +373,35 @@ async function SubmitFormWithConfig({ reqLogger }: { reqLogger: ReturnType<typeo
   if (templates.length === 0) {
     reqLogger.warn(
       {
+        categories: supportedCategories,
         section: 'data-fetch',
         supportedCategoriesCount: supportedCategories.length,
-        categories: supportedCategories,
       },
       'SubmitPage: no templates returned from getContentTemplates'
     );
   }
 
   // Serialize for Client Component compatibility - JSON round-trip ensures plain objects
-  const serializedTemplates = JSON.parse(JSON.stringify(templates)) as typeof templates;
+  const serializedTemplates = structuredClone(templates);
 
   if (!formConfig) {
     reqLogger.error(
       {
-        section: 'data-fetch',
         err: new Error('Form config is null'),
+        section: 'data-fetch',
       },
       'SubmitPage: formConfig is null'
     );
     // Provide minimal valid config with empty sections for all submission types
     // This ensures SubmitFormClient can render without crashing while showing an error state
     const emptyFormConfig: SubmissionFormConfig = {
-      agents: { nameField: null, common: [], typeSpecific: [], tags: [] },
-      mcp: { nameField: null, common: [], typeSpecific: [], tags: [] },
-      rules: { nameField: null, common: [], typeSpecific: [], tags: [] },
-      commands: { nameField: null, common: [], typeSpecific: [], tags: [] },
-      hooks: { nameField: null, common: [], typeSpecific: [], tags: [] },
-      statuslines: { nameField: null, common: [], typeSpecific: [], tags: [] },
-      skills: { nameField: null, common: [], typeSpecific: [], tags: [] },
+      agents: { common: [], nameField: null, tags: [], typeSpecific: [] },
+      commands: { common: [], nameField: null, tags: [], typeSpecific: [] },
+      hooks: { common: [], nameField: null, tags: [], typeSpecific: [] },
+      mcp: { common: [], nameField: null, tags: [], typeSpecific: [] },
+      rules: { common: [], nameField: null, tags: [], typeSpecific: [] },
+      skills: { common: [], nameField: null, tags: [], typeSpecific: [] },
+      statuslines: { common: [], nameField: null, tags: [], typeSpecific: [] },
     };
     return <SubmitFormClient formConfig={emptyFormConfig} templates={serializedTemplates} />;
   }
@@ -425,21 +427,21 @@ async function SubmitPageSidebar({ reqLogger }: { reqLogger: ReturnType<typeof l
   try {
     dashboardData = await getSubmissionDashboard(5, 5);
     reqLogger.info(
-      { section: 'data-fetch', recentCount: 5, statsCount: 5, hasData: !!dashboardData },
+      { hasData: !!dashboardData, recentCount: 5, section: 'data-fetch', statsCount: 5 },
       'SubmitPage: submission dashboard loaded for sidebar'
     );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load submission dashboard for sidebar');
     reqLogger.error(
-      { err: normalized, section: 'data-fetch', recentCount: 5, statsCount: 5 },
+      { err: normalized, recentCount: 5, section: 'data-fetch', statsCount: 5 },
       'SubmitPage: getSubmissionDashboard failed for sidebar'
     );
     // Continue with null dashboardData - page will render with fallback empty data
   }
   const stats = {
-    total: dashboardData?.stats?.total ?? 0,
-    pending: dashboardData?.stats?.pending ?? 0,
     merged_this_week: dashboardData?.stats?.merged_this_week ?? 0,
+    pending: dashboardData?.stats?.pending ?? 0,
+    total: dashboardData?.stats?.total ?? 0,
   };
   const recentMerged = (dashboardData?.recent ?? [])
     .filter((submission) => isValidRecentSubmission(submission))
@@ -456,9 +458,9 @@ async function SubmitPageSidebar({ reqLogger }: { reqLogger: ReturnType<typeof l
         return null;
       }
       return {
-        id,
         content_name: contentName,
         content_type: mapSubmissionTypeToContentCategory(submission.content_type),
+        id,
         merged_at: mergedAt,
         merged_at_formatted: formatTimeAgo(mergedAt),
         user:
@@ -570,7 +572,7 @@ function SubmitPageSidebarSkeleton() {
       </CardHeader>
       <CardContent className="space-y-4">
         {Array.from({ length: 3 }, (_, i) => (
-          <div key={`skeleton-${i}`} className="space-y-2">
+          <div className="space-y-2" key={`skeleton-${i}`}>
             <Skeleton className="h-4 w-3/4" />
             <Skeleton className="h-3 w-1/2" />
           </div>

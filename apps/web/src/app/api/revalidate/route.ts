@@ -15,15 +15,15 @@
  * Runtime: Node.js (required for revalidatePath/revalidateTag)
  */
 import { env } from '@heyclaude/shared-runtime/schemas/env';
-import { logger, normalizeError, handleApiError } from '@heyclaude/web-runtime/logging/server';
+import { handleApiError, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
 // Zod schema for revalidate request
 const RevalidateRequestSchema = z.object({
-  secret: z.string(),
   category: z.string().optional(),
+  secret: z.string(),
   slug: z.string().optional(),
   tags: z.array(z.string()).optional(),
 });
@@ -47,9 +47,9 @@ const RevalidateRequestSchema = z.object({
 export async function POST(request: NextRequest) {
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
+    module: 'apps/web/src/app/api/revalidate',
     operation: 'RevalidateAPI',
     route: '/api/revalidate',
-    module: 'apps/web/src/app/api/revalidate',
   });
 
   try {
@@ -60,8 +60,8 @@ export async function POST(request: NextRequest) {
       // Serialize Zod errors for logging (convert to JSON-serializable format)
       const zodErrors = parseResult.error.issues.map((issue) => ({
         code: issue.code,
-        path: issue.path.join('.'),
         message: issue.message,
+        path: issue.path.join('.'),
       }));
 
       reqLogger.warn(
@@ -71,12 +71,12 @@ export async function POST(request: NextRequest) {
         'Revalidate webhook invalid payload'
       );
       return NextResponse.json(
-        { error: 'Invalid request payload', details: parseResult.error.issues },
+        { details: parseResult.error.issues, error: 'Invalid request payload' },
         { status: 400 }
       );
     }
 
-    const { secret, category, slug, tags } = parseResult.data;
+    const { category, secret, slug, tags } = parseResult.data;
 
     // Verify secret from body (PostgreSQL trigger sends in payload)
     if (!secret || secret !== env.REVALIDATE_SECRET) {
@@ -144,14 +144,14 @@ export async function POST(request: NextRequest) {
         securityEvent: true,
         ...(category ? { category } : {}),
         ...(slug ? { slug } : {}),
-        paths, // Array of revalidated paths - better for querying
         pathCount: paths.length,
-        tags: invalidatedTags.length > 0 ? invalidatedTags : undefined, // Array support enables better log querying
-        tagCount: invalidatedTags.length,
+        paths, // Array of revalidated paths - better for querying
         revalidationTargets: {
           paths,
           tags: invalidatedTags,
         },
+        tagCount: invalidatedTags.length,
+        tags: invalidatedTags.length > 0 ? invalidatedTags : undefined, // Array support enables better log querying
       },
       'Cache revalidation completed'
     );
@@ -172,9 +172,9 @@ export async function POST(request: NextRequest) {
       'Revalidate API error'
     );
     return handleApiError(error, {
-      route: '/api/revalidate',
-      operation: 'RevalidateAPI',
       method: 'POST',
+      operation: 'RevalidateAPI',
+      route: '/api/revalidate',
     });
   }
 }

@@ -67,6 +67,13 @@
       "import": "./dist/env.js",
       "require": "./dist/env.js",
       "default": "./dist/env.js"
+    },
+    "./platform": {
+      "development": "./src/platform/index.ts",
+      "types": "./dist/platform/index.d.ts",
+      "import": "./dist/platform/index.js",
+      "require": "./dist/platform/index.js",
+      "default": "./dist/platform/index.js"
     }
   },
   "main": "./dist/index.js",

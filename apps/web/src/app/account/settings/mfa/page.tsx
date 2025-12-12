@@ -8,12 +8,12 @@ import { Shield } from '@heyclaude/web-runtime/icons';
 import { logger } from '@heyclaude/web-runtime/logging/server';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/server';
 import {
-  UI_CLASSES,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  UI_CLASSES,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
@@ -22,8 +22,8 @@ import { redirect } from 'next/navigation';
 import { MFAFactorsListClient } from './mfa-factors-list-client';
 
 export const metadata: Metadata = {
-  title: 'Two-Factor Authentication | Account Settings',
   description: 'Manage your two-factor authentication settings',
+  title: 'Two-Factor Authentication | Account Settings',
 };
 
 /**
@@ -46,22 +46,22 @@ export default async function MFASettingsPage() {
 
   // Create request-scoped child logger
   const reqLogger = logger.child({
+    module: 'apps/web/src/app/account/settings/mfa',
     operation: 'MFASettingsPage',
     route: '/account/settings/mfa',
-    module: 'apps/web/src/app/account/settings/mfa',
   });
   // getAuthenticatedUser with requireUser: true throws when no user is present,
   // so the null check below is unreachable
   const { user } = await getAuthenticatedUser({
-    requireUser: true,
     context: 'MFASettingsPage',
+    requireUser: true,
   });
 
   if (!user) {
     reqLogger.error(
       {
-        section: 'data-fetch',
         err: new Error('User is null'),
+        section: 'data-fetch',
       },
       'MFASettingsPage: user is null despite requireUser: true'
     );

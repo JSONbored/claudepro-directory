@@ -84,10 +84,10 @@ function AccessibilityPageContent() {
           <p className="mb-4">
             We aim to conform to the{' '}
             <NavLink
-              href="https://www.w3.org/WAI/WCAG21/quickref/"
               external
-              target="_blank"
+              href="https://www.w3.org/WAI/WCAG21/quickref/"
               rel="noopener noreferrer"
+              target="_blank"
             >
               Web Content Accessibility Guidelines (WCAG) 2.1
             </NavLink>{' '}
@@ -188,7 +188,7 @@ function AccessibilityPageContent() {
           <ul className="list-disc space-y-2 pl-6">
             <li>
               Email:{' '}
-              <NavLink href={`mailto:${channels.email}`} external>
+              <NavLink external href={`mailto:${channels.email}`}>
                 {channels.email}
               </NavLink>
             </li>
@@ -197,7 +197,7 @@ function AccessibilityPageContent() {
             </li>
             <li>
               GitHub Issues:{' '}
-              <NavLink href={`${channels.github}/issues`} external>
+              <NavLink external href={`${channels.github}/issues`}>
                 Report an Issue
               </NavLink>
             </li>

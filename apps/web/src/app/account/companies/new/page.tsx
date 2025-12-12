@@ -69,9 +69,9 @@ async function NewCompanyPageContent() {
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
+    module: 'apps/web/src/app/account/companies/new/page',
     operation: 'NewCompanyPage',
     route: '/account/companies/new',
-    module: 'apps/web/src/app/account/companies/new/page',
   });
 
   const { user } = await getAuthenticatedUser({ context: 'NewCompanyPage' });

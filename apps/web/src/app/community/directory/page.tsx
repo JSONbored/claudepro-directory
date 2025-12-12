@@ -6,6 +6,7 @@ import { type Metadata } from 'next';
 import { Suspense } from 'react';
 
 import { ContributorsSidebar } from '@/src/components/features/community/contributors-sidebar';
+import { DirectoryTabs } from '@/src/components/features/community/directory-tabs';
 import { ProfileSearchClient } from '@/src/components/features/community/profile-search';
 
 /**
@@ -44,21 +45,21 @@ const DEFAULT_DIRECTORY_LIMIT = 100;
 async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string }) {
   // Create request-scoped child logger
   const reqLogger = logger.child({
+    module: 'apps/web/src/app/community/directory',
     operation: 'CommunityDirectoryContent',
     route: '/community/directory',
-    module: 'apps/web/src/app/community/directory',
   });
 
   let directoryData: Database['public']['Functions']['get_community_directory']['Returns'] | null =
     null;
   try {
-    directoryData = await getCommunityDirectory({ searchQuery, limit: DEFAULT_DIRECTORY_LIMIT });
+    directoryData = await getCommunityDirectory({ limit: DEFAULT_DIRECTORY_LIMIT, searchQuery });
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load community directory');
     reqLogger.error(
       {
-        section: 'data-fetch',
         err: normalized,
+        section: 'data-fetch',
       },
       'CommunityDirectoryContent: getCommunityDirectory failed'
     );
@@ -74,12 +75,12 @@ async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string 
 
   const {
     all_users: allUsersRaw,
-    top_contributors: topContributorsRaw,
     new_members: newMembersRaw,
+    top_contributors: topContributorsRaw,
   } = directoryData ?? {
     all_users: null,
-    top_contributors: null,
     new_members: null,
+    top_contributors: null,
   };
 
   // Filter out items with null required fields and ensure types match UserProfile
@@ -96,14 +97,14 @@ async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string 
       } => Boolean(u.id && u.slug && u.name && u.tier && u.created_at)
     )
     .map((u) => ({
-      id: u.id,
-      slug: u.slug,
-      name: u.name,
-      image: u.image,
       bio: u.bio,
-      work: u.work,
-      tier: u.tier,
       created_at: u.created_at,
+      id: u.id,
+      image: u.image,
+      name: u.name,
+      slug: u.slug,
+      tier: u.tier,
+      work: u.work,
     }));
 
   const topContributors = (topContributorsRaw ?? [])
@@ -119,14 +120,14 @@ async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string 
       } => Boolean(u.id && u.slug && u.name && u.tier && u.created_at)
     )
     .map((u) => ({
-      id: u.id,
-      slug: u.slug,
-      name: u.name,
-      image: u.image,
       bio: u.bio,
-      work: u.work,
-      tier: u.tier,
       created_at: u.created_at,
+      id: u.id,
+      image: u.image,
+      name: u.name,
+      slug: u.slug,
+      tier: u.tier,
+      work: u.work,
     }));
 
   const newMembers = (newMembersRaw ?? [])
@@ -142,14 +143,14 @@ async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string 
       } => Boolean(u.id && u.slug && u.name && u.tier && u.created_at)
     )
     .map((u) => ({
-      id: u.id,
-      slug: u.slug,
-      name: u.name,
-      image: u.image,
       bio: u.bio,
-      work: u.work,
-      tier: u.tier,
       created_at: u.created_at,
+      id: u.id,
+      image: u.image,
+      name: u.name,
+      slug: u.slug,
+      tier: u.tier,
+      work: u.work,
     }));
 
   return (
@@ -164,14 +165,18 @@ async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string 
 
       {/* Two-column layout: Main content + Sidebar */}
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
-        {/* Main Content - User Grid */}
+        {/* Main Content - Tabbed User Grid */}
         <div className="lg:col-span-3">
-          <ProfileSearchClient users={allUsers} />
+          <DirectoryTabs
+            allMembers={<ProfileSearchClient users={allUsers} />}
+            contributors={<ProfileSearchClient users={topContributors} />}
+            newMembers={<ProfileSearchClient users={newMembers} />}
+          />
         </div>
 
         {/* Sidebar - Desktop only */}
         <div className="hidden lg:block">
-          <ContributorsSidebar topContributors={topContributors} newMembers={newMembers} />
+          <ContributorsSidebar newMembers={newMembers} topContributors={topContributors} />
         </div>
       </div>
     </div>
@@ -200,7 +205,7 @@ export default function CommunityDirectoryPage({ searchParams }: CommunityDirect
   // Data layer caching is already in place for optimal performance
 
   return (
-    <Suspense fallback={<Skeleton size="xl" className="h-screen w-full" />}>
+    <Suspense fallback={<Skeleton className="h-screen w-full" size="xl" />}>
       <CommunityDirectoryPageContent searchParams={searchParams} />
     </Suspense>
   );

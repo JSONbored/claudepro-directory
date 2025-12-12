@@ -56,7 +56,7 @@ export default async function TemplatesPage({ params }: { params: Promise<{ cate
 
   // Pino serializers handle Date objects automatically via JSON.stringify
   // But for Client Components, we need plain objects - use JSON round-trip
-  const serializedTemplates = JSON.parse(JSON.stringify(templates)) as typeof templates;
+  const serializedTemplates = structuredClone(templates);
 
   return NextResponse.json({
     category: validCategory,

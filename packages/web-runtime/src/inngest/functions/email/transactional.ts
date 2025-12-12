@@ -11,6 +11,7 @@ import { inngest } from '../../client';
 import { sendEmail } from '../../../integrations/resend';
 import { HELLO_FROM, JOBS_FROM, COMMUNITY_FROM } from '../../../email/config/email-config';
 import { logger, createWebAppContextWithId } from '../../../logging/server';
+import { sendCriticalFailureHeartbeat } from '../../utils/monitoring';
 
 // Email type configurations
 const TRANSACTIONAL_EMAIL_CONFIGS: Record<string, {
@@ -53,6 +54,29 @@ export const sendTransactionalEmail = inngest.createFunction(
     // Idempotency: Use type + email + timestamp to prevent duplicates
     // Note: CEL doesn't support || for null coalescing
     idempotency: 'event.data.type + "-" + event.data.email + "-" + string(event.ts)',
+    // BetterStack monitoring: Send heartbeat on failure (feature-flagged)
+    onFailure: async ({ event, error }) => {
+      const eventData = event?.data as { type?: string } | undefined;
+      const context: { functionName?: string; eventType?: string; error?: string } = {
+        functionName: 'sendTransactionalEmail',
+      };
+      if (eventData?.type) {
+        context.eventType = eventData.type;
+      }
+      if (error) {
+        context.error = error instanceof Error ? error.message : String(error);
+      }
+      sendCriticalFailureHeartbeat('BETTERSTACK_HEARTBEAT_CRITICAL_FAILURE', context);
+      
+      // Log for observability
+      logger.error(
+        { 
+          functionName: 'sendTransactionalEmail',
+          errorMessage: error ? (error instanceof Error ? error.message : String(error)) : 'unknown',
+        },
+        'Transactional email function failed after all retries'
+      );
+    },
   },
   { event: 'email/transactional' },
   async ({ event, step }) => {

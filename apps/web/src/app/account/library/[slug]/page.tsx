@@ -8,15 +8,15 @@ import { APP_CONFIG, ROUTES } from '@heyclaude/web-runtime/data/config/constants
 import { ArrowLeft, Edit } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  UI_CLASSES,
-  UnifiedBadge,
-  SimpleCopyButton,
   Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  SimpleCopyButton,
+  UI_CLASSES,
+  UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
@@ -80,8 +80,8 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    operation: 'CollectionDetailPage',
     module: 'apps/web/src/app/account/library/[slug]',
+    operation: 'CollectionDetailPage',
   });
 
   return (
@@ -118,7 +118,7 @@ async function CollectionDetailPageContent({
   // Create route-specific logger
   const routeLogger = reqLogger.child({ route });
 
-  return <CollectionDetailContent slug={slug} reqLogger={routeLogger} />;
+  return <CollectionDetailContent reqLogger={routeLogger} slug={slug} />;
 }
 
 /**
@@ -141,8 +141,8 @@ async function CollectionDetailPageContent({
  * @see ROUTES.ACCOUNT_LIBRARY
  */
 async function CollectionDetailContent({
-  slug,
   reqLogger,
+  slug,
 }: {
   reqLogger: ReturnType<typeof logger.child>;
   slug: string;
@@ -172,13 +172,16 @@ async function CollectionDetailContent({
   let hasError = false;
   try {
     collectionData = await getCollectionDetail(user.id, slug);
-    userLogger.info({ section: 'data-fetch', hasData: !!collectionData }, 'CollectionDetailPage: collection data loaded');
+    userLogger.info(
+      { hasData: !!collectionData, section: 'data-fetch' },
+      'CollectionDetailPage: collection data loaded'
+    );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load collection detail');
     userLogger.error(
       {
-        section: 'data-fetch',
         err: normalized,
+        section: 'data-fetch',
       },
       'CollectionDetailPage: getCollectionDetail threw'
     );
@@ -213,10 +216,13 @@ async function CollectionDetailContent({
     notFound();
   }
 
-  const { collection, items, bookmarks } = collectionData;
+  const { bookmarks, collection, items } = collectionData;
 
   if (!collection) {
-    userLogger.warn({ section: 'data-fetch' }, 'CollectionDetailPage: collection is null in response');
+    userLogger.warn(
+      { section: 'data-fetch' },
+      'CollectionDetailPage: collection is null in response'
+    );
     notFound();
   }
 
@@ -232,11 +238,20 @@ async function CollectionDetailContent({
       if (userData?.user_settings?.user_data?.slug) {
         userSlug = userData.user_settings.user_data.slug;
       } else {
-        userLogger.warn({ section: 'data-fetch' }, 'CollectionDetailPage: user profile slug not found');
+        userLogger.warn(
+          { section: 'data-fetch' },
+          'CollectionDetailPage: user profile slug not found'
+        );
       }
     } catch (error) {
       const normalized = normalizeError(error, 'Failed to fetch user profile for share URL');
-      userLogger.warn({ section: 'data-fetch', error: normalized instanceof Error ? normalized.message : String(normalized) }, 'CollectionDetailPage: failed to fetch user profile slug');
+      userLogger.warn(
+        {
+          error: normalized instanceof Error ? normalized.message : String(normalized),
+          section: 'data-fetch',
+        },
+        'CollectionDetailPage: failed to fetch user profile slug'
+      );
     }
   }
 
@@ -250,7 +265,7 @@ async function CollectionDetailContent({
       {/* Header */}
       <div>
         <Link href={ROUTES.ACCOUNT_LIBRARY}>
-          <Button variant="ghost" className={`mb-4 ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}`}>
+          <Button className={`mb-4 ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}`} variant="ghost">
             <ArrowLeft className="h-4 w-4" />
             Back to Library
           </Button>
@@ -261,7 +276,7 @@ async function CollectionDetailContent({
             <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} mb-2`}>
               <h1 className="text-3xl font-bold">{collection.name}</h1>
               {collection.is_public ? (
-                <UnifiedBadge variant="base" style="outline" className="text-xs">
+                <UnifiedBadge className="text-xs" style="outline" variant="base">
                   Public
                 </UnifiedBadge>
               ) : null}
@@ -278,17 +293,17 @@ async function CollectionDetailContent({
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
             {shareUrl ? (
               <SimpleCopyButton
+                className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
                 content={shareUrl}
+                iconClassName="h-4 w-4"
                 label="Share"
+                size="sm"
                 successMessage="Link copied to clipboard!"
                 variant="outline"
-                size="sm"
-                className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
-                iconClassName="h-4 w-4"
               />
             ) : null}
             <Link href={`/account/library/${slug}/edit`}>
-              <Button variant="outline" size="sm" className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+              <Button className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} size="sm" variant="outline">
                 <Edit className="h-4 w-4" />
                 Edit
               </Button>
@@ -307,9 +322,9 @@ async function CollectionDetailContent({
         </CardHeader>
         <CardContent>
           <CollectionItemManager
+            availableBookmarks={(bookmarks ?? []).map((b) => ({ ...b, notes: b.notes ?? '' }))}
             collectionId={collection.id}
             items={(items ?? []).map((item) => ({ ...item, notes: item.notes ?? '' }))}
-            availableBookmarks={(bookmarks ?? []).map((b) => ({ ...b, notes: b.notes ?? '' }))}
           />
         </CardContent>
       </Card>

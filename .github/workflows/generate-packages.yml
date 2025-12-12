@@ -26,8 +26,10 @@ on:
   # Only runs if webhook system missed something
   schedule:
     - cron: '*/15 * * * *'
-  # Legacy: file-based triggers (kept for backward compatibility)
-  # Will be removed once webhook system is fully validated
+  # File-based trigger: Useful fallback for direct file edits
+  # Triggers when developers manually edit content files or generator scripts
+  # Webhook system (repository_dispatch) handles database changes automatically
+  # This push trigger ensures packages are generated even if webhook fails or files are edited directly
   push:
     branches: [main]
     paths:

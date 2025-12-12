@@ -14,14 +14,14 @@ import { ArrowLeft, ExternalLink } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   BADGE_COLORS,
-  UI_CLASSES,
-  UnifiedBadge,
   Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  UI_CLASSES,
+  UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
@@ -47,10 +47,10 @@ function formatStatus(rawStatus: string): string {
   return rawStatus.replaceAll('_', ' ').replaceAll(/\b\w/g, (c) => c.toUpperCase());
 }
 
-/**
+/***
  * Map a job status to its configured badge color.
  *
- * @param status - The job status to map
+ * @param {JobStatus} status - The job status to map
  * @returns The CSS/color token associated with `status`
  *
  * @see BADGE_COLORS.jobStatus
@@ -96,8 +96,8 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPagePrope
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    operation: 'JobAnalyticsPage',
     module: 'apps/web/src/app/account/jobs/[id]/analytics',
+    operation: 'JobAnalyticsPage',
   });
 
   return (
@@ -142,10 +142,7 @@ async function JobAnalyticsPageContent({
   const { user } = await getAuthenticatedUser({ context: 'JobAnalyticsPage' });
 
   if (!user) {
-    routeLogger.warn(
-      { section: 'data-fetch' },
-      'JobAnalyticsPage: unauthenticated access attempt'
-    );
+    routeLogger.warn({ section: 'data-fetch' }, 'JobAnalyticsPage: unauthenticated access attempt');
     redirect(ROUTES.LOGIN);
   }
 
@@ -161,19 +158,22 @@ async function JobAnalyticsPageContent({
   let job: Awaited<ReturnType<typeof getUserJobById>> = null;
   try {
     job = await getUserJobById(user.id, id);
-    userLogger.info({ section: 'data-fetch', hasJob: !!job }, 'JobAnalyticsPage: job data loaded');
+    userLogger.info({ hasJob: !!job, section: 'data-fetch' }, 'JobAnalyticsPage: job data loaded');
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load job analytics detail');
     userLogger.error(
       {
-        section: 'data-fetch',
         err: normalized,
+        section: 'data-fetch',
       },
       'JobAnalyticsPage: getUserJobById threw'
     );
   }
   if (!job) {
-    userLogger.warn({ section: 'data-fetch' }, 'JobAnalyticsPage: job not found or not owned by user');
+    userLogger.warn(
+      { section: 'data-fetch' },
+      'JobAnalyticsPage: job not found or not owned by user'
+    );
     return (
       <div className="space-y-6">
         <Card>
@@ -201,13 +201,15 @@ async function JobAnalyticsPageContent({
   const status: JobStatus = job.status;
 
   // Final summary log
-  userLogger.info({ section: 'data-fetch', jobId: id,
-    status }, 'JobAnalyticsPage: page render completed');
+  userLogger.info(
+    { jobId: id, section: 'data-fetch', status },
+    'JobAnalyticsPage: page render completed'
+  );
 
   return (
     <div className="space-y-6">
       <div>
-        <Button variant="ghost" size="sm" asChild className="mb-4">
+        <Button asChild className="mb-4" size="sm" variant="ghost">
           <Link href={ROUTES.ACCOUNT_JOBS}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Jobs
@@ -219,7 +221,7 @@ async function JobAnalyticsPageContent({
             <p className="text-muted-foreground">{job.title}</p>
           </div>
           {job.slug ? (
-            <Button variant="outline" asChild>
+            <Button asChild variant="outline">
               <Link href={`${ROUTES.JOBS}/${job.slug}`}>
                 <ExternalLink className="mr-2 h-4 w-4" />
                 View Listing
@@ -233,7 +235,7 @@ async function JobAnalyticsPageContent({
         <CardHeader>
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
             <CardTitle>Listing Details</CardTitle>
-            <UnifiedBadge variant="base" style="outline" className={getStatusColor(status)}>
+            <UnifiedBadge className={getStatusColor(status)} style="outline" variant="base">
               {formatStatus(status)}
             </UnifiedBadge>
           </div>
@@ -273,25 +275,23 @@ async function JobAnalyticsPageContent({
       </Card>
 
       <MetricsDisplay
-        title="Performance Metrics"
         description="Key metrics for your job listing"
         metrics={[
           {
-            label: 'Total Views',
-            value: viewCount.toLocaleString(),
             change: `Since ${job.posted_at ? formatRelativeDate(job.posted_at) : 'creation'}`,
+            label: 'Total Views',
             trend: viewCount > 0 ? 'up' : 'unchanged',
+            value: viewCount.toLocaleString(),
           },
           {
-            label: 'Clicks',
-            value: clickCount.toLocaleString(),
             change: 'Users who clicked to view',
+            label: 'Clicks',
             trend: clickCount > 0 ? 'up' : 'unchanged',
+            value: clickCount.toLocaleString(),
           },
           {
-            label: 'Click-Through Rate',
-            value: `${ctr}%`,
             change: 'Of viewers who clicked apply',
+            label: 'Click-Through Rate',
             trend: (() => {
               if (viewCount === 0) return 'unchanged';
               const ctrValue = Number.parseFloat(ctr);
@@ -299,8 +299,10 @@ async function JobAnalyticsPageContent({
               if (ctrValue > 0) return 'unchanged';
               return 'down';
             })(),
+            value: `${ctr}%`,
           },
         ]}
+        title="Performance Metrics"
       />
 
       <Card>

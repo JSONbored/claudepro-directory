@@ -1,5 +1,5 @@
 import 'server-only';
-import { ContentService, TrendingService, type ContentFilterOptions } from '@heyclaude/data-layer';
+import { type ContentFilterOptions, ContentService, TrendingService } from '@heyclaude/data-layer';
 import { type Database } from '@heyclaude/database-types';
 import { cacheLife, cacheTag } from 'next/cache';
 
@@ -29,17 +29,17 @@ export async function getContentByCategory(
   }
 
   const reqLogger = logger.child({
-    operation: 'getContentByCategory',
     module: 'data/content/index',
+    operation: 'getContentByCategory',
   });
 
   // Log cache miss - function execution means cache miss (Next.js Cache Components skip execution on cache hit)
   // If you don't see this log, it means cache hit (function didn't execute)
   reqLogger.info(
-    { 
-      category, 
+    {
       cacheStatus: 'miss',
       cacheType: 'nextjs-cache-components',
+      category,
       note: 'Function execution = cache miss. No logs = cache hit (function skipped by Next.js)',
     },
     'getContentByCategory: cache miss - executing database call'
@@ -62,11 +62,11 @@ export async function getContentByCategory(
     });
 
     reqLogger.info(
-      { 
-        category, 
-        count: result.length, 
+      {
         cacheStatus: 'miss',
         cacheType: 'nextjs-cache-components',
+        category,
+        count: result.length,
         dbCall: true,
       },
       'getContentByCategory: fetched successfully (cache miss - database call made)'
@@ -76,7 +76,7 @@ export async function getContentByCategory(
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error({ err: errorForLogging, category }, 'getContentByCategory: failed');
+    reqLogger.error({ category, err: errorForLogging }, 'getContentByCategory: failed');
     return [];
   }
 }
@@ -106,8 +106,8 @@ export async function getContentBySlug(
   }
 
   const reqLogger = logger.child({
-    operation: 'getContentBySlug',
     module: 'data/content/index',
+    operation: 'getContentBySlug',
   });
 
   try {
@@ -123,14 +123,14 @@ export async function getContentBySlug(
     // Manual service had getEnrichedContentBySlug which called get_enriched_content_list with p_slugs
     const data = await new ContentService(client).getEnrichedContentList({
       p_category: category,
-      p_slugs: [slug],
       p_limit: 1,
       p_offset: 0,
+      p_slugs: [slug],
     });
 
     const result = data[0] ?? null;
     reqLogger.info(
-      { category, slug, found: Boolean(result) },
+      { category, found: Boolean(result), slug },
       'getContentBySlug: fetched successfully'
     );
 
@@ -138,7 +138,7 @@ export async function getContentBySlug(
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error({ err: errorForLogging, category, slug }, 'getContentBySlug: failed');
+    reqLogger.error({ category, err: errorForLogging, slug }, 'getContentBySlug: failed');
     return null;
   }
 }
@@ -153,7 +153,7 @@ export async function getContentBySlug(
  */
 export async function getAllContent(
   filters?: ContentFilterOptions
-): Promise<Database['public']['CompositeTypes']['enriched_content_item'][]> {
+): Promise<Array<Database['public']['CompositeTypes']['enriched_content_item']>> {
   'use cache';
 
   const { isBuildTime } = await import('../../build-time.ts');
@@ -173,8 +173,8 @@ export async function getAllContent(
   }
 
   const reqLogger = logger.child({
-    operation: 'getAllContent',
     module: 'data/content/index',
+    operation: 'getAllContent',
   });
 
   try {
@@ -192,14 +192,15 @@ export async function getAllContent(
       ...(filters?.tags ? { p_tags: filters.tags } : {}),
       ...(filters?.search ? { p_search: filters.search } : {}),
       ...(filters?.author ? { p_author: filters.author } : {}),
-      p_order_by: filters?.orderBy ?? 'created_at',
-      p_order_direction: filters?.orderDirection ?? 'desc',
       p_limit: filters?.limit ?? QUERY_LIMITS.content.default,
       p_offset: 0,
+      p_order_by: filters?.orderBy ?? 'created_at',
+      p_order_direction: filters?.orderDirection ?? 'desc',
     });
 
-    const items = (result.items ??
-      []) as Database['public']['CompositeTypes']['enriched_content_item'][];
+    const items = (result.items ?? []) as Array<
+      Database['public']['CompositeTypes']['enriched_content_item']
+    >;
 
     reqLogger.info(
       {
@@ -216,8 +217,8 @@ export async function getAllContent(
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error(
       {
-        err: errorForLogging,
         category: category ?? 'all',
+        err: errorForLogging,
         ...(filters ? { filters: toLogContextValue(filters as Record<string, unknown>) } : {}),
       },
       'getAllContent: failed'
@@ -248,8 +249,8 @@ export async function getContentCount(
   }
 
   const reqLogger = logger.child({
-    operation: 'getContentCount',
     module: 'data/content/index',
+    operation: 'getContentCount',
   });
 
   try {
@@ -278,7 +279,7 @@ export async function getContentCount(
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error(
-      { err: errorForLogging, category: category ?? 'all' },
+      { category: category ?? 'all', err: errorForLogging },
       'getContentCount: failed'
     );
     return 0;
@@ -311,8 +312,8 @@ export async function getTrendingContent(
   }
 
   const reqLogger = logger.child({
-    operation: 'getTrendingContent',
     module: 'data/content/index',
+    operation: 'getTrendingContent',
   });
 
   try {
@@ -331,7 +332,7 @@ export async function getTrendingContent(
     });
 
     reqLogger.info(
-      { category: category ?? 'all', limit, count: result.length },
+      { category: category ?? 'all', count: result.length, limit },
       'getTrendingContent: fetched successfully'
     );
 
@@ -340,7 +341,7 @@ export async function getTrendingContent(
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error(
-      { err: errorForLogging, category: category ?? 'all', limit },
+      { category: category ?? 'all', err: errorForLogging, limit },
       'getTrendingContent: failed'
     );
     return [];
@@ -397,8 +398,8 @@ export async function getTrendingPageData(
   cacheTag('trending-page');
 
   const reqLogger = logger.child({
-    operation: 'getTrendingPageData',
     module: 'data/content/index',
+    operation: 'getTrendingPageData',
   });
 
   try {
@@ -424,8 +425,8 @@ export async function getTrendingPageData(
       }),
       trendingService.getRecentContent({
         ...(category ? { p_category: category } : {}),
-        p_limit: safeLimit,
         p_days: 30,
+        p_limit: safeLimit,
       }),
     ]);
 
@@ -433,31 +434,31 @@ export async function getTrendingPageData(
       {
         category: category ?? 'all',
         limit: safeLimit,
-        trendingCount: trending.length,
         popularCount: popular.length,
         recentCount: recent.length,
+        trendingCount: trending.length,
       },
       'getTrendingPageData: fetched successfully'
     );
 
     return {
-      trending,
       popular,
       recent,
       totalCount: trending.length,
+      trending,
     };
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error(
-      { err: errorForLogging, category: category ?? 'all', limit: safeLimit },
+      { category: category ?? 'all', err: errorForLogging, limit: safeLimit },
       'getTrendingPageData: failed'
     );
     return {
-      trending: [],
       popular: [],
       recent: [],
       totalCount: 0,
+      trending: [],
     };
   }
 }

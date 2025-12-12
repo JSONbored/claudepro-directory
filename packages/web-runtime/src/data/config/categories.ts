@@ -11,11 +11,13 @@ function isValidCategoryValue(
   return typeof value === 'string' && value.length > 0;
 }
 
-export function getHomepageFeaturedCategories(): readonly Database['public']['Enums']['content_category'][] {
+export function getHomepageFeaturedCategories(): ReadonlyArray<
+  Database['public']['Enums']['content_category']
+> {
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    operation: 'getHomepageFeaturedCategories',
     module: 'data/config/categories',
+    operation: 'getHomepageFeaturedCategories',
   });
 
   if (isBuildTime()) {
@@ -37,14 +39,14 @@ export function getHomepageFeaturedCategories(): readonly Database['public']['En
     'getHomepageFeaturedCategories: loaded categories'
   );
 
-  return categories as readonly Database['public']['Enums']['content_category'][];
+  return categories as ReadonlyArray<Database['public']['Enums']['content_category']>;
 }
 
 export function getHomepageTabCategories(): readonly string[] {
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    operation: 'getHomepageTabCategories',
     module: 'data/config/categories',
+    operation: 'getHomepageTabCategories',
   });
 
   if (isBuildTime()) {

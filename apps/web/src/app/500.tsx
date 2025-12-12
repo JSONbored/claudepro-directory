@@ -10,7 +10,7 @@
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { AlertCircle, Home, RefreshCw } from '@heyclaude/web-runtime/icons';
 import { logClientError, normalizeError } from '@heyclaude/web-runtime/logging/client';
-import { UI_CLASSES, Button, Card } from '@heyclaude/web-runtime/ui';
+import { Button, Card, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { useEffect } from 'react';
 
@@ -31,14 +31,14 @@ export default function ServerError() {
     const serverError = new Error('Server error (500)');
     const normalized = normalizeError(serverError, 'Server error page displayed');
     logClientError('[Error] Server error page displayed', normalized, operation, {
-      component: 'ServerError',
       action: 'display-error-page',
       category: 'error',
+      component: 'ServerError',
       route,
-      userAgent: globalThis.navigator.userAgent,
-      url: globalThis.location.href,
       segment: 'global',
       statusCode: 500,
+      url: globalThis.location.href,
+      userAgent: globalThis.navigator.userAgent,
     });
   }, []);
 
@@ -48,7 +48,7 @@ export default function ServerError() {
         <div className="mb-6">
           <div className="mb-4 flex justify-center">
             <div className="bg-destructive/10 rounded-full p-3">
-              <AlertCircle className="text-destructive h-12 w-12" aria-hidden="true" />
+              <AlertCircle aria-hidden="true" className="text-destructive h-12 w-12" />
             </div>
           </div>
           <h1 className="mb-2 text-2xl font-bold">Server Error</h1>
@@ -59,11 +59,11 @@ export default function ServerError() {
         </div>
 
         <div className={UI_CLASSES.FLEX_COL_SM_ROW_GAP_3}>
-          <Button onClick={() => globalThis.location.reload()} size="lg">
+          <Button size="lg" onClick={() => globalThis.location.reload()}>
             <RefreshCw className="mr-2 h-4 w-4" />
             Reload Page
           </Button>
-          <Button asChild variant="outline" size="lg">
+          <Button asChild size="lg" variant="outline">
             <Link href={ROUTES.HOME}>
               <Home className="mr-2 h-4 w-4" />
               Back to Home

@@ -41,7 +41,7 @@ import { getContentByCategory } from '@heyclaude/web-runtime/data/content';
 import { ExternalLink, HelpCircle } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
-import { ICON_NAME_MAP, UnifiedBadge, Button } from '@heyclaude/web-runtime/ui';
+import { Button, ICON_NAME_MAP, UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import Link from 'next/link';
@@ -61,9 +61,9 @@ import { ContentSidebar } from '@/src/components/core/layout/content-sidebar';
  * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
  */
 
-/**
+/***
  * Get icon name from component by reverse lookup in ICON_NAME_MAP
- * @param icon - Icon component to look up
+ * @param {React.ComponentType} icon - Icon component to look up
  * @returns Icon name string or 'sparkles' as fallback
  */
 function getIconNameFromComponent(icon: React.ComponentType): string {
@@ -96,8 +96,8 @@ export async function generateMetadata({
   // Validate category and load config
   if (!isValidCategory(category)) {
     return generatePageMetadata('/:category', {
-      params: { category },
       category,
+      params: { category },
     });
   }
 
@@ -107,9 +107,9 @@ export async function generateMetadata({
   const categoryConfig = getCategoryConfig(typedCategory);
 
   return generatePageMetadata('/:category', {
-    params: { category },
-    categoryConfig: categoryConfig ?? undefined,
     category,
+    categoryConfig: categoryConfig ?? undefined,
+    params: { category },
   });
 }
 
@@ -144,16 +144,16 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
 
   // Create request-scoped child logger
   const reqLogger = logger.child({
-    operation,
     module: modulePath,
+    operation,
     route: `/${category}`,
   });
 
   if (!isValidCategory(category)) {
     reqLogger.warn(
       {
-        section: 'data-fetch',
         category,
+        section: 'data-fetch',
       },
       'Invalid category in list page'
     );
@@ -168,9 +168,9 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
   if (!config) {
     reqLogger.error(
       {
-        section: 'data-fetch',
-        err: new Error('Category config is null'),
         category,
+        err: new Error('Category config is null'),
+        section: 'data-fetch',
       },
       'CategoryPage: missing category config'
     );
@@ -191,9 +191,9 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
     const normalized = normalizeError(error, 'Failed to load category content');
     reqLogger.error(
       {
-        section: 'data-fetch',
-        err: normalized,
         category: typedCategory,
+        err: normalized,
+        section: 'data-fetch',
       },
       'CategoryPage: getContentByCategory threw'
     );
@@ -203,8 +203,8 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
   if (items.length === 0 && !hadError) {
     reqLogger.warn(
       {
-        section: 'data-fetch',
         category: typedCategory,
+        section: 'data-fetch',
       },
       'CategoryPage: getContentByCategory returned no items'
     );
@@ -217,20 +217,20 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
     <div className="bg-background min-h-screen">
       {/* Static Hero Section - Renders immediately (config is from generated file) */}
       <CategoryHeroShell
-        title={config.pluralTitle}
+        category={category}
         description={config.description}
         icon={iconName}
-        category={category}
+        title={config.pluralTitle}
       >
         {/* Badges stream in Suspense */}
         <Suspense fallback={<CategoryBadgesSkeleton />}>
-          <CategoryBadges items={items} config={config} />
+          <CategoryBadges config={config} items={items} />
         </Suspense>
       </CategoryHeroShell>
 
       {/* Content section - Outside hero, streams separately */}
       <Suspense fallback={<ContentSearchSkeleton />}>
-        <CategoryPageContent category={typedCategory} items={items} config={config} />
+        <CategoryPageContent category={typedCategory} config={config} items={items} />
       </Suspense>
     </div>
   );
@@ -259,11 +259,11 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
  * @see CategoryPageContent
  */
 function CategoryHeroShell({
-  title,
-  description,
-  icon,
   category,
   children,
+  description,
+  icon,
+  title,
 }: {
   category: Database['public']['Enums']['content_category'];
   children: React.ReactNode;
@@ -275,22 +275,22 @@ function CategoryHeroShell({
 
   return (
     <section
+      aria-labelledby="category-title"
       className="border-border border-b backdrop-blur-sm"
       style={{ backgroundColor: 'color-mix(in srgb, var(--code-bg) 30%, transparent)' }}
-      aria-labelledby="category-title"
     >
       <div className="container mx-auto px-4 py-20">
         <div className="mx-auto max-w-3xl text-center">
           <div className="mb-6 flex justify-center">
-            <div className="bg-accent/10 rounded-full p-3" aria-hidden="true">
+            <div aria-hidden="true" className="bg-accent/10 rounded-full p-3">
               <IconComponent className="text-primary h-12 w-12" />
             </div>
           </div>
 
           <div className="flex items-center justify-center gap-4">
             <h1
-              id="category-title"
               className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl"
+              id="category-title"
             >
               {title}
             </h1>
@@ -305,13 +305,13 @@ function CategoryHeroShell({
           <div className="mb-8">{children}</div>
 
           <div className="flex items-center justify-center gap-2">
-            <Button variant="outline" size="sm" asChild>
+            <Button asChild size="sm" variant="outline">
               <Link
-                href={ROUTES.SUBMIT}
-                className="flex items-center gap-2"
                 aria-label={`Submit a new ${title.slice(0, -1).toLowerCase()}`}
+                className="flex items-center gap-2"
+                href={ROUTES.SUBMIT}
               >
-                <ExternalLink className="h-4 w-4" aria-hidden="true" />
+                <ExternalLink aria-hidden="true" className="h-4 w-4" />
                 Submit {title.slice(0, -1)}
               </Link>
             </Button>
@@ -362,8 +362,8 @@ function CategoryBadgesSkeleton() {
  * @see ICON_NAME_MAP
  */
 function CategoryBadges({
-  items,
   config,
+  items,
 }: {
   config: UnifiedCategoryConfig<Database['public']['Enums']['content_category']>;
   items: Awaited<ReturnType<typeof getContentByCategory>>;
@@ -398,13 +398,13 @@ function CategoryBadges({
     <ul className="flex list-none flex-wrap justify-center gap-2">
       {displayBadges.map((badge, idx) => (
         <li key={badge.text || `badge-${idx}`}>
-          <UnifiedBadge variant="base" style={idx === 0 ? 'secondary' : 'outline'}>
-            {badge.icon && typeof badge.icon === 'string' &&
-              React.createElement(
-                ICON_NAME_MAP[badge.icon] ?? HelpCircle,
-                { className: "h-3 w-3 leading-none", "aria-hidden": true }
-              )
-            }
+          <UnifiedBadge style={idx === 0 ? 'secondary' : 'outline'} variant="base">
+            {badge.icon && typeof badge.icon === 'string'
+              ? React.createElement(ICON_NAME_MAP[badge.icon] ?? HelpCircle, {
+                  'aria-hidden': true,
+                  className: 'h-3 w-3 leading-none',
+                })
+              : null}
             {badge.text}
           </UnifiedBadge>
         </li>
@@ -436,8 +436,8 @@ function CategoryBadges({
  */
 function CategoryPageContent({
   category,
-  items,
   config,
+  items,
 }: {
   category: Database['public']['Enums']['content_category'];
   config: UnifiedCategoryConfig<Database['public']['Enums']['content_category']>;
@@ -453,19 +453,19 @@ function CategoryPageContent({
     <>
       {/* Content section - Full width like homepage, sidebar on the side */}
       <section
-        className="container mx-auto px-4 py-12"
         aria-label={`${config.pluralTitle} content and search`}
+        className="container mx-auto px-4 py-12"
       >
         <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_18rem]">
           {/* Main content area - Full width within grid column */}
           <div className="min-w-0">
             <ContentSearchClient
-              items={items}
-              type={category}
               category={category}
+              icon={iconName}
+              items={items}
               searchPlaceholder={config.listPage.searchPlaceholder}
               title={config.pluralTitle}
-              icon={iconName}
+              type={category}
               zeroStateSuggestions={items.slice(0, 6)}
             />
           </div>

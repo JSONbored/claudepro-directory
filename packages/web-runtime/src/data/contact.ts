@@ -25,8 +25,8 @@ export async function fetchContactCommands(): Promise<ContactCommandsRow | null>
   cacheTag('contact');
 
   const reqLogger = logger.child({
-    operation: 'fetchContactCommands',
     module: 'data/contact',
+    operation: 'fetchContactCommands',
   });
 
   try {

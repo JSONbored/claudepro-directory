@@ -10,7 +10,7 @@
 import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { Button, UnifiedBadge } from '@heyclaude/web-runtime/ui';
-import { CheckCircle2, XCircle, Shield, ExternalLink, AlertCircle } from 'lucide-react';
+import { AlertCircle, CheckCircle2, ExternalLink, Shield, XCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -35,15 +35,15 @@ interface OAuthConsentClientProps {
  * @param root0.authorizationId
  * @param root0.authDetails
  */
-export function OAuthConsentClient({ authorizationId, authDetails }: OAuthConsentClientProps) {
+export function OAuthConsentClient({ authDetails, authorizationId }: OAuthConsentClientProps) {
   const router = useRouter();
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<null | string>(null);
 
   // Use useLoggedAsync for consistent error logging in async operations
   const runLoggedAsync = useLoggedAsync({
-    scope: 'OAuthConsentClient',
     defaultMessage: 'OAuth operation failed',
+    scope: 'OAuthConsentClient',
   });
 
   // Create Supabase browser client for client-side operations
@@ -65,9 +65,9 @@ export function OAuthConsentClient({ authorizationId, authDetails }: OAuthConsen
           const errorMessage =
             approveError instanceof Error
               ? approveError.message
-              : (typeof approveError === 'string'
+              : typeof approveError === 'string'
                 ? approveError
-                : 'Failed to approve authorization');
+                : 'Failed to approve authorization';
           setError(errorMessage);
           setIsProcessing(false);
           return;
@@ -113,9 +113,9 @@ export function OAuthConsentClient({ authorizationId, authDetails }: OAuthConsen
           const errorMessage =
             denyError instanceof Error
               ? denyError.message
-              : (typeof denyError === 'string'
+              : typeof denyError === 'string'
                 ? denyError
-                : 'Failed to deny authorization');
+                : 'Failed to deny authorization';
           setError(errorMessage);
           setIsProcessing(false);
           return;
@@ -153,19 +153,19 @@ export function OAuthConsentClient({ authorizationId, authDetails }: OAuthConsen
 
   // Map scope names to user-friendly descriptions
   const scopeDescriptions: Record<string, string> = {
-    openid: 'Access your basic profile information',
     email: 'Access your email address',
-    profile: 'Access your profile information (name, picture)',
-    phone: 'Access your phone number',
-    'mcp:tools': 'Access MCP tools on your behalf',
     'mcp:resources': 'Access MCP resources on your behalf',
+    'mcp:tools': 'Access MCP tools on your behalf',
+    openid: 'Access your basic profile information',
+    phone: 'Access your phone number',
+    profile: 'Access your profile information (name, picture)',
   };
 
   return (
     <div className="mx-auto flex min-h-[400px] max-w-2xl flex-col gap-6 p-6">
       <div className="flex flex-col gap-3 text-center">
         <div className="flex items-center justify-center">
-          <Shield className="text-accent h-12 w-12" aria-hidden="true" />
+          <Shield aria-hidden="true" className="text-accent h-12 w-12" />
         </div>
         <h1 className="text-3xl font-bold">Authorize Application</h1>
         <p className="text-muted-foreground text-base">
@@ -180,14 +180,14 @@ export function OAuthConsentClient({ authorizationId, authDetails }: OAuthConsen
             <h2 className="flex items-center gap-2 text-xl font-semibold">
               <span>{authDetails.client.name}</span>
             </h2>
-            <UnifiedBadge variant="base" style="secondary" className="text-xs">
+            <UnifiedBadge className="text-xs" style="secondary" variant="base">
               OAuth Client
             </UnifiedBadge>
           </div>
 
           <div className="text-muted-foreground flex flex-col gap-2 text-sm">
             <div className="flex items-center gap-2">
-              <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+              <ExternalLink aria-hidden="true" className="h-3.5 w-3.5" />
               <span className="font-medium">Redirect URI:</span>
               <span className="font-mono text-xs break-all">{authDetails.redirect_uri}</span>
             </div>
@@ -206,10 +206,10 @@ export function OAuthConsentClient({ authorizationId, authDetails }: OAuthConsen
             </h3>
             <ul className="flex list-none flex-col gap-1">
               {scopes.map((scope) => (
-                <li key={scope} className="flex items-start gap-2">
+                <li className="flex items-start gap-2" key={scope}>
                   <CheckCircle2
-                    className="text-accent mt-0.5 h-4 w-4 flex-shrink-0"
                     aria-hidden="true"
+                    className="text-accent mt-0.5 h-4 w-4 flex-shrink-0"
                   />
                   <span className="flex-1 text-sm">
                     <span className="font-semibold">{scope}</span>
@@ -229,8 +229,8 @@ export function OAuthConsentClient({ authorizationId, authDetails }: OAuthConsen
         {error ? (
           <div className="border-destructive/20 bg-destructive/10 flex items-start gap-2 rounded-md border p-4">
             <AlertCircle
-              className="text-destructive mt-0.5 h-5 w-5 flex-shrink-0"
               aria-hidden="true"
+              className="text-destructive mt-0.5 h-5 w-5 flex-shrink-0"
             />
             <div className="flex flex-1 flex-col gap-1">
               <p className="text-destructive text-sm font-semibold">Error</p>
@@ -242,27 +242,27 @@ export function OAuthConsentClient({ authorizationId, authDetails }: OAuthConsen
         {/* Action Buttons */}
         <div className="mt-6 flex items-center gap-3">
           <Button
-            variant="outline"
-            size="lg"
+            className="flex-1 transition-colors"
+            disabled={isProcessing}
             onClick={() => {
               void handleDeny();
             }}
-            disabled={isProcessing}
-            className="flex-1 transition-colors"
+            size="lg"
+            variant="outline"
           >
-            <XCircle className="mr-2 h-4 w-4" aria-hidden="true" />
+            <XCircle aria-hidden="true" className="mr-2 h-4 w-4" />
             Deny
           </Button>
           <Button
-            variant="default"
-            size="lg"
+            className="hover:bg-accent/20 flex-1 transition-colors"
+            disabled={isProcessing}
             onClick={() => {
               void handleApprove();
             }}
-            disabled={isProcessing}
-            className="hover:bg-accent/20 flex-1 transition-colors"
+            size="lg"
+            variant="default"
           >
-            <CheckCircle2 className="mr-2 h-4 w-4" aria-hidden="true" />
+            <CheckCircle2 aria-hidden="true" className="mr-2 h-4 w-4" />
             {isProcessing ? 'Processing...' : 'Approve'}
           </Button>
         </div>
@@ -270,12 +270,12 @@ export function OAuthConsentClient({ authorizationId, authDetails }: OAuthConsen
         {/* Security Notice */}
         <div className="bg-muted/20 mt-4 flex items-start gap-2 rounded-md p-3">
           <Shield
-            className="text-muted-foreground mt-0.5 h-4 w-4 flex-shrink-0"
             aria-hidden="true"
+            className="text-muted-foreground mt-0.5 h-4 w-4 flex-shrink-0"
           />
           <p className="text-muted-foreground text-xs">
             You can revoke access to this application at any time from your{' '}
-            <Link href="/account/connected-accounts" className="hover:text-foreground underline">
+            <Link className="hover:text-foreground underline" href="/account/connected-accounts">
               account settings
             </Link>
             .

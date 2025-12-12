@@ -42,9 +42,9 @@ export default async function PrivacyPage() {
 
   // Create request-scoped child logger
   const reqLogger = logger.child({
+    module: 'apps/web/src/app/privacy',
     operation: 'PrivacyPage',
     route: '/privacy',
-    module: 'apps/web/src/app/privacy',
   });
 
   return (

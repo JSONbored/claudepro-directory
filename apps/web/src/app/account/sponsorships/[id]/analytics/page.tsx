@@ -6,14 +6,14 @@ import {
 } from '@heyclaude/web-runtime/data';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  POSITION_PATTERNS,
-  UI_CLASSES,
-  UnifiedBadge,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  POSITION_PATTERNS,
+  UI_CLASSES,
+  UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
@@ -79,8 +79,8 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    operation: 'SponsorshipAnalyticsPage',
     module: 'apps/web/src/app/account/sponsorships/[id]/analytics',
+    operation: 'SponsorshipAnalyticsPage',
   });
 
   return (
@@ -157,8 +157,8 @@ async function SponsorshipAnalyticsPageContent({
     const normalized = normalizeError(error, 'Failed to load sponsorship analytics');
     userLogger.error(
       {
-        section: 'data-fetch',
         err: normalized,
+        section: 'data-fetch',
       },
       'SponsorshipAnalyticsPage: getSponsorshipAnalytics threw'
     );
@@ -183,8 +183,8 @@ async function SponsorshipAnalyticsPageContent({
   if (!sponsorship || !daily_stats || !computed_metrics) {
     userLogger.error(
       {
-        section: 'data-fetch',
         err: new Error('Null fields in analytics data'),
+        section: 'data-fetch',
       },
       'SponsorshipAnalyticsPage: unexpected null fields in analytics data'
     );
@@ -210,9 +210,15 @@ async function SponsorshipAnalyticsPageContent({
     : 'sponsored'; // Safe default for invalid values
 
   if (!isTierValid) {
-    userLogger.warn({ section: 'data-fetch', invalidTier: rawTier,
+    userLogger.warn(
+      {
         expectedTiers: validTiers, // Now supports arrays directly - better for log querying
-        fallbackTier: 'sponsored' }, 'SponsorshipAnalyticsPage: invalid tier value, using safe default');
+        fallbackTier: 'sponsored',
+        invalidTier: rawTier,
+        section: 'data-fetch',
+      },
+      'SponsorshipAnalyticsPage: invalid tier value, using safe default'
+    );
   }
 
   const impressionCount = sponsorship.impression_count ?? 0;
@@ -239,7 +245,7 @@ async function SponsorshipAnalyticsPageContent({
       {/* Header */}
       <div>
         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-          <UnifiedBadge variant="sponsored" tier={safeTier} showIcon />
+          <UnifiedBadge showIcon tier={safeTier} variant="sponsored" />
           <h1 className="text-3xl font-bold">Sponsorship Analytics</h1>
         </div>
         <p className="text-muted-foreground">
@@ -249,7 +255,6 @@ async function SponsorshipAnalyticsPageContent({
 
       {/* Overview Stats */}
       <MetricsDisplay
-        title="Campaign Performance"
         description="Key metrics for your sponsored content"
         metrics={[
           {
@@ -261,25 +266,26 @@ async function SponsorshipAnalyticsPageContent({
             trend: impressionCount > 0 ? 'up' : 'unchanged',
           },
           {
-            label: 'Total Clicks',
-            value: clickCount.toLocaleString(),
             change: 'User engagements',
+            label: 'Total Clicks',
             trend: clickCount > 0 ? 'up' : 'unchanged',
+            value: clickCount.toLocaleString(),
           },
           {
-            label: 'Click-Through Rate',
-            value: `${ctr}%`,
             change: 'Clicks / Impressions',
+            label: 'Click-Through Rate',
             trend:
               Number.parseFloat(ctr) > 2 ? 'up' : (Number.parseFloat(ctr) > 0 ? 'unchanged' : 'down'),
+            value: `${ctr}%`,
           },
           {
-            label: 'Avg. Daily Views',
-            value: avgImpressionsPerDay,
             change: `Over ${daysActive} days`,
+            label: 'Avg. Daily Views',
             trend: Number.parseFloat(avgImpressionsPerDay) > 0 ? 'up' : 'unchanged',
+            value: avgImpressionsPerDay,
           },
         ]}
+        title="Campaign Performance"
       />
 
       {/* Campaign Details */}
@@ -317,7 +323,7 @@ async function SponsorshipAnalyticsPageContent({
             <div>
               <p className="text-sm font-medium">Status</p>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <UnifiedBadge variant="base" style={sponsorship.active ? 'default' : 'outline'}>
+                <UnifiedBadge style={sponsorship.active ? 'default' : 'outline'} variant="base">
                   {sponsorship.active ? 'Active' : 'Inactive'}
                 </UnifiedBadge>
               </div>
@@ -326,7 +332,7 @@ async function SponsorshipAnalyticsPageContent({
             <div>
               <p className="text-sm font-medium">Tier</p>
               <div>
-                <UnifiedBadge variant="sponsored" tier={safeTier} showIcon />
+                <UnifiedBadge showIcon tier={safeTier} variant="sponsored" />
               </div>
             </div>
           </div>
@@ -350,9 +356,9 @@ async function SponsorshipAnalyticsPageContent({
               const maxImpressions = Math.max(...impressionsMap.values(), 1);
 
               return (
-                <div key={dayKey} className="grid grid-cols-12 items-center gap-2">
+                <div className="grid grid-cols-12 items-center gap-2" key={dayKey}>
                   <div className="text-muted-foreground col-span-2 text-xs">
-                    {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    {date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}
                   </div>
                   <div className="col-span-10 grid grid-cols-2 gap-1">
                     {/* Impressions bar */}

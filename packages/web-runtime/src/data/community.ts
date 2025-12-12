@@ -8,15 +8,19 @@ import { createSupabaseServerClient } from '../supabase/server.ts';
 
 const DEFAULT_DIRECTORY_LIMIT = 100;
 
-/**
+/****
+ *
  * Search users using unified search (cached)
  * Uses 'use cache' to cache search results. Query and limit become part of the cache key.
  * Follows architectural strategy: data layer -> database RPC -> DB
+ * @param {string} query
+ * @param {number} limit
+ * @returns {Promise<unknown>} Return value description
  */
 async function searchUsersUnified(
   query: string,
   limit: number
-): Promise<Database['public']['CompositeTypes']['community_directory_user'][]> {
+): Promise<Array<Database['public']['CompositeTypes']['community_directory_user']>> {
   'use cache';
   const { cacheLife, cacheTag } = await import('next/cache');
   const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
@@ -30,36 +34,36 @@ async function searchUsersUnified(
   const searchService = new SearchService(supabase);
 
   const unifiedArgs: Database['public']['Functions']['search_unified']['Args'] = {
-    p_query: query,
     p_entities: ['user'],
+    p_highlight_query: query,
     p_limit: limit,
     p_offset: 0,
-    p_highlight_query: query,
+    p_query: query,
   };
 
   const searchResponse = await searchService.searchUnified(unifiedArgs);
   const results = searchResponse.data || [];
 
   return results.map((result) => ({
-    id: result.id as string,
-    slug: result.slug as string,
-    name: (result.title || result.slug || '') as string,
-    image: null,
-    bio: (result.description || null) as string | null,
-    work: null,
-    tier: 'free',
+    bio: result.description || null,
     created_at: result.created_at as string,
+    id: result.id as string,
+    image: null,
+    name: result.title || result.slug || '',
+    slug: result.slug as string,
+    tier: 'free',
+    work: null,
   }));
 }
 
 export type CollectionDetailData =
   Database['public']['Functions']['get_user_collection_detail']['Returns'];
 
-/**
+/***
  * Get community directory via RPC (cached)
  * Uses 'use cache' to cache directory listings. This data is public and same for all users.
  * Community directory changes periodically, so we use the 'half' cacheLife profile.
- * @param limit
+ * @param {number} limit
  
  * @returns {unknown} Description of return value*/
 async function getCommunityDirectoryRpc(
@@ -77,8 +81,8 @@ async function getCommunityDirectoryRpc(
   cacheTag('users');
 
   const reqLogger = logger.child({
-    operation: 'getCommunityDirectoryRpc',
     module: 'data/community',
+    operation: 'getCommunityDirectoryRpc',
   });
 
   try {
@@ -94,7 +98,7 @@ async function getCommunityDirectoryRpc(
     const result = await new CommunityService(client).getCommunityDirectory({ p_limit: limit });
 
     reqLogger.info(
-      { limit, hasResult: Boolean(result) },
+      { hasResult: Boolean(result), limit },
       'getCommunityDirectoryRpc: fetched successfully'
     );
 
@@ -111,10 +115,10 @@ export async function getCommunityDirectory(options: {
   limit?: number;
   searchQuery?: string;
 }): Promise<Database['public']['Functions']['get_community_directory']['Returns'] | null> {
-  const { searchQuery, limit = DEFAULT_DIRECTORY_LIMIT } = options;
+  const { limit = DEFAULT_DIRECTORY_LIMIT, searchQuery } = options;
   const reqLogger = logger.child({
-    operation: 'getCommunityDirectory',
     module: 'data/community',
+    operation: 'getCommunityDirectory',
   });
 
   if (searchQuery?.trim()) {
@@ -129,19 +133,19 @@ export async function getCommunityDirectory(options: {
         const errorForLogging: Error | string =
           error instanceof Error
             ? error
-            : (error instanceof String
+            : error instanceof String
               ? error.toString()
-              : String(error));
+              : String(error);
         // Use child logger for callback to maintain isolation
         const callbackLogger = logger.child({
-          operation: 'pulseUserSearch',
           module: 'data/community',
+          operation: 'pulseUserSearch',
         });
         callbackLogger.warn(
           {
             err: errorForLogging,
-            searchQuery: searchQuery.trim(),
             resultCount: allUsers.length,
+            searchQuery: searchQuery.trim(),
           },
           'Failed to pulse user search'
         );
@@ -149,14 +153,14 @@ export async function getCommunityDirectory(options: {
 
       return {
         all_users: allUsers,
-        top_contributors: [],
         new_members: [],
+        top_contributors: [],
       };
     } catch (error) {
       // logger.error() normalizes errors internally, so pass raw error
       const errorForLogging: Error | string = error instanceof Error ? error : String(error);
       reqLogger.warn(
-        { err: errorForLogging, searchQuery: searchQuery.trim(), limit, fallbackStrategy: 'rpc' },
+        { err: errorForLogging, fallbackStrategy: 'rpc', limit, searchQuery: searchQuery.trim() },
         'Community directory search failed, using RPC fallback'
       );
       // Fall through to RPC fallback
@@ -193,15 +197,15 @@ export async function getPublicUserProfile(input: {
   const { cacheLife, cacheTag } = await import('next/cache');
 
   // Configure cache
-  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`user-profile-${slug}`);
   if (viewerId) {
     cacheTag(`user-profile-viewer-${viewerId}`);
   }
 
   const reqLogger = logger.child({
-    operation: 'getPublicUserProfile',
     module: 'data/community',
+    operation: 'getPublicUserProfile',
   });
 
   try {
@@ -215,7 +219,7 @@ export async function getPublicUserProfile(input: {
     });
 
     reqLogger.info(
-      { slug, hasViewer: Boolean(viewerId), hasProfile: Boolean(result) },
+      { hasProfile: Boolean(result), hasViewer: Boolean(viewerId), slug },
       'getPublicUserProfile: fetched successfully'
     );
 
@@ -258,19 +262,19 @@ export async function getPublicCollectionDetail(input: {
 }): Promise<CollectionDetailData | null> {
   'use cache: private';
 
-  const { userSlug, collectionSlug, viewerId } = input;
+  const { collectionSlug, userSlug, viewerId } = input;
   const { cacheLife, cacheTag } = await import('next/cache');
 
   // Configure cache
-  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`user-collection-${userSlug}-${collectionSlug}`);
   if (viewerId) {
     cacheTag(`user-collection-viewer-${viewerId}`);
   }
 
   const reqLogger = logger.child({
-    operation: 'getPublicCollectionDetail',
     module: 'data/community',
+    operation: 'getPublicCollectionDetail',
   });
 
   try {
@@ -279,13 +283,13 @@ export async function getPublicCollectionDetail(input: {
     const service = new CommunityService(client);
 
     const data = await service.getUserCollectionDetail({
-      p_user_slug: userSlug,
       p_collection_slug: collectionSlug,
+      p_user_slug: userSlug,
       ...(viewerId ? { p_viewer_id: viewerId } : {}),
     });
 
     reqLogger.info(
-      { slug: userSlug, collectionSlug, hasViewer: Boolean(viewerId), hasData: Boolean(data) },
+      { collectionSlug, hasData: Boolean(data), hasViewer: Boolean(viewerId), slug: userSlug },
       'getPublicCollectionDetail: fetched successfully'
     );
 
@@ -295,9 +299,9 @@ export async function getPublicCollectionDetail(input: {
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error(
       {
+        collectionSlug,
         err: errorForLogging,
         slug: userSlug,
-        collectionSlug,
         ...(viewerId ? { viewerId } : {}),
       },
       'getPublicCollectionDetail failed'

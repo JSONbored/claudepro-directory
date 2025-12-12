@@ -8,15 +8,15 @@ import {
   getNumberProperty,
   getStringProperty,
 } from '@heyclaude/shared-runtime';
-import { logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
-import {
-  createSupabaseAnonClient,
-  jsonResponse,
-  getOnlyCorsHeaders,
-  buildCacheHeaders,
-  handleOptionsRequest,
-} from '@heyclaude/web-runtime/server';
 import { inngest } from '@heyclaude/web-runtime/inngest';
+import { createErrorResponse, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import {
+  buildCacheHeaders,
+  createSupabaseAnonClient,
+  getOnlyCorsHeaders,
+  handleOptionsRequest,
+  jsonResponse,
+} from '@heyclaude/web-runtime/server';
 import { cacheLife } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -24,7 +24,7 @@ import { NextRequest, NextResponse } from 'next/server';
  * Cached helper function to fetch sitemap URLs.
  * Uses Cache Components + `cacheLife('static')` to cache `get_site_urls` results
  * while still surfacing RPC failures (errors are not cached).
- * 
+ *
  * Cache configuration: Uses 'static' profile (1 day stale, 6hr revalidate, 30 days expire)
  * defined in next.config.mjs. The cache key is based on the function signature, ensuring
  * consistent caching across requests.
@@ -66,9 +66,9 @@ function timingSafeEqual(a?: null | string, b?: null | string): boolean {
 
 export async function GET(request: NextRequest) {
   const reqLogger = logger.child({
+    method: 'GET',
     operation: 'SitemapAPI',
     route: '/api/sitemap',
-    method: 'GET',
   });
   const format = (request.nextUrl.searchParams.get('format') ?? 'xml').toLowerCase();
 
@@ -90,12 +90,12 @@ export async function GET(request: NextRequest) {
           'get_site_urls RPC failed'
         );
         return createErrorResponse(normalized, {
-          route: '/api/sitemap',
-          operation: 'get_site_urls',
-          method: 'GET',
           logContext: {
             rpcName: 'get_site_urls',
           },
+          method: 'GET',
+          operation: 'get_site_urls',
+          route: '/api/sitemap',
         });
       }
 
@@ -135,8 +135,8 @@ export async function GET(request: NextRequest) {
           path: string;
           priority?: number;
         } = {
-          path,
           loc: `${SITE_URL}${path}`,
+          path,
         };
 
         if (lastmod) {
@@ -161,11 +161,11 @@ export async function GET(request: NextRequest) {
 
       return jsonResponse(
         {
-          urls: mappedUrls,
           meta: {
-            total: mappedUrls.length,
             generated: new Date().toISOString(),
+            total: mappedUrls.length,
           },
+          urls: mappedUrls,
         },
         200,
         {
@@ -199,12 +199,12 @@ export async function GET(request: NextRequest) {
         'generate_sitemap_xml RPC failed'
       );
       return createErrorResponse(normalized, {
-        route: '/api/sitemap',
-        operation: 'generate_sitemap_xml',
-        method: 'GET',
         logContext: {
           rpcName: 'generate_sitemap_xml',
         },
+        method: 'GET',
+        operation: 'generate_sitemap_xml',
+        route: '/api/sitemap',
       });
     }
 
@@ -216,34 +216,34 @@ export async function GET(request: NextRequest) {
     reqLogger.info({}, 'Sitemap XML generated');
 
     return new NextResponse(data, {
-      status: 200,
       headers: {
         'Content-Type': 'application/xml; charset=utf-8',
-        'X-Robots-Tag': 'index, follow',
-        'X-Generated-By': 'supabase.rpc.generate_sitemap_xml',
         'X-Content-Source': 'supabase.mv_site_urls',
+        'X-Generated-By': 'supabase.rpc.generate_sitemap_xml',
+        'X-Robots-Tag': 'index, follow',
         ...buildSecurityHeaders(),
         ...CORS,
         ...buildCacheHeaders('sitemap'),
       },
+      status: 200,
     });
   } catch (error) {
     const normalized = normalizeError(error, 'Unhandled sitemap GET error');
     reqLogger.error({ err: normalized }, 'Unhandled sitemap GET error');
     return createErrorResponse(normalized, {
-      route: '/api/sitemap',
-      operation: 'SitemapAPI',
-      method: 'GET',
       logContext: {},
+      method: 'GET',
+      operation: 'SitemapAPI',
+      route: '/api/sitemap',
     });
   }
 }
 
 export async function POST(request: NextRequest) {
   const reqLogger = logger.child({
+    method: 'POST',
     operation: 'SitemapAPI',
     route: '/api/sitemap',
-    method: 'POST',
   });
 
   reqLogger.info(
@@ -298,8 +298,8 @@ export async function POST(request: NextRequest) {
     let urlList: string[];
     try {
       urlList = await service.getSiteUrlsFormatted({
-        p_site_url: SITE_URL,
         p_limit: 10_000,
+        p_site_url: SITE_URL,
       });
     } catch (error) {
       const normalized = normalizeError(error, 'get_site_urls_formatted RPC failed');
@@ -312,12 +312,12 @@ export async function POST(request: NextRequest) {
         'get_site_urls_formatted RPC failed'
       );
       return createErrorResponse(normalized, {
-        route: '/api/sitemap',
-        operation: 'get_site_urls_formatted',
-        method: 'POST',
         logContext: {
           rpcName: 'get_site_urls_formatted',
         },
+        method: 'POST',
+        operation: 'get_site_urls_formatted',
+        route: '/api/sitemap',
       });
     }
 
@@ -330,29 +330,29 @@ export async function POST(request: NextRequest) {
     // This eliminates blocking external API call from Vercel function (reduces CPU/bandwidth usage)
     try {
       await inngest.send({
-        name: 'indexnow/submit',
         data: {
-          urlList,
           host: new URL(SITE_URL).host,
           key: INDEXNOW_API_KEY,
           keyLocation: `${SITE_URL}/indexnow.txt`,
+          urlList,
         },
+        name: 'indexnow/submit',
       });
 
       reqLogger.info(
         {
           operation: 'indexnow_submission',
-          submitted: urlList.length,
           securityEvent: true,
+          submitted: urlList.length,
         },
         'IndexNow submission enqueued to Inngest'
       );
 
       return jsonResponse(
         {
+          message: 'IndexNow submission enqueued',
           ok: true,
           submitted: urlList.length,
-          message: 'IndexNow submission enqueued',
         },
         200,
         CORS
@@ -362,16 +362,16 @@ export async function POST(request: NextRequest) {
       reqLogger.error(
         {
           err: normalized,
-          submitted: urlList.length,
           securityEvent: true,
+          submitted: urlList.length,
         },
         'Failed to enqueue IndexNow submission to Inngest'
       );
       return jsonResponse(
         {
+          error: 'Failed to enqueue IndexNow submission',
           ok: false,
           submitted: 0,
-          error: 'Failed to enqueue IndexNow submission',
         },
         500,
         CORS
@@ -381,9 +381,9 @@ export async function POST(request: NextRequest) {
     reqLogger.error({ err: normalizeError(error) }, 'IndexNow submission error');
     return jsonResponse(
       {
+        error: 'IndexNow submission failed',
         ok: false,
         submitted: 0,
-        error: 'IndexNow submission failed',
       },
       500,
       CORS

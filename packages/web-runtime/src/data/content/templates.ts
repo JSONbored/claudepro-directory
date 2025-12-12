@@ -38,9 +38,9 @@ export async function getContentTemplates(
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
+    module: 'data/content/templates',
     operation: 'getContentTemplates',
     route: 'utility-function', // Utility function - no specific route
-    module: 'data/content/templates',
   });
 
   try {
@@ -145,7 +145,7 @@ export async function getContentTemplates(
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to fetch content templates');
     reqLogger.error(
-      { err: normalized, category, source: 'getContentTemplates' },
+      { category, err: normalized, source: 'getContentTemplates' },
       'getContentTemplates: failed'
     );
     // Return empty array on error to avoid breaking the build

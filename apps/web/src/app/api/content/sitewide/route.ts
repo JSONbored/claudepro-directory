@@ -6,12 +6,12 @@
 import 'server-only';
 import { ContentService } from '@heyclaude/data-layer';
 import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
-import { logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
+import { createErrorResponse, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  createSupabaseAnonClient,
   badRequestResponse,
-  getOnlyCorsHeaders,
   buildCacheHeaders,
+  createSupabaseAnonClient,
+  getOnlyCorsHeaders,
 } from '@heyclaude/web-runtime/server';
 import { cacheLife } from 'next/cache';
 import { type NextRequest } from 'next/server';
@@ -22,7 +22,7 @@ const CORS = getOnlyCorsHeaders;
 /**
  * Cached helper function to fetch sitewide content list
  * Uses Cache Components to reduce function invocations
- * 
+ *
  * @returns {Promise<unknown[]>} Sitewide content list from the database (typically an array of content item objects)
  */
 async function getCachedSitewideContent() {
@@ -52,9 +52,9 @@ async function getCachedSitewideContent() {
  */
 export async function GET(request: NextRequest) {
   const reqLogger = logger.child({
+    method: 'GET',
     operation: 'ContentSitewideAPI',
     route: '/api/content/sitewide',
-    method: 'GET',
   });
 
   try {
@@ -87,12 +87,12 @@ export async function GET(request: NextRequest) {
           'Sitewide JSON query error'
         );
         return createErrorResponse(normalized, {
-          route: '/api/content/sitewide',
-          operation: 'ContentSitewideAPI',
-          method: 'GET',
           logContext: {
             format,
           },
+          method: 'GET',
+          operation: 'ContentSitewideAPI',
+          route: '/api/content/sitewide',
         });
       }
 
@@ -100,12 +100,11 @@ export async function GET(request: NextRequest) {
       // Large payload optimization: 5000 items can be 5-15 MB uncompressed, ~1-3 MB compressed
       // Aggressive caching ensures most requests are served from CDN cache
       return NextResponse.json(data, {
-        status: 200,
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
-          'X-Generated-By': 'supabase.rpc.get_sitewide_content_list',
           // Compression hint (Next.js/Vercel handles actual compression automatically)
-          'Vary': 'Accept-Encoding',
+          Vary: 'Accept-Encoding',
+          'X-Generated-By': 'supabase.rpc.get_sitewide_content_list',
           ...buildSecurityHeaders(),
           ...CORS,
           // Hyper-optimized caching: 7 days TTL, 14 days stale (matches content_export preset)
@@ -113,6 +112,7 @@ export async function GET(request: NextRequest) {
           // This reduces bandwidth usage by serving cached responses from CDN
           ...buildCacheHeaders('content_export'),
         },
+        status: 200,
       });
     }
 
@@ -129,7 +129,6 @@ export async function GET(request: NextRequest) {
       );
 
       return NextResponse.json(data, {
-        status: 200,
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
           'X-Generated-By': 'supabase.rpc.generate_readme_data',
@@ -137,6 +136,7 @@ export async function GET(request: NextRequest) {
           ...CORS,
           ...buildCacheHeaders('content_export'),
         },
+        status: 200,
       });
     }
 
@@ -158,12 +158,12 @@ export async function GET(request: NextRequest) {
           message: 'RPC returned null or invalid',
         },
         {
-          status: 500,
           headers: {
             'Content-Type': 'application/json; charset=utf-8',
             ...buildSecurityHeaders(),
             ...CORS,
           },
+          status: 500,
         }
       );
     }
@@ -178,7 +178,6 @@ export async function GET(request: NextRequest) {
     );
 
     return new NextResponse(data, {
-      status: 200,
       headers: {
         'Content-Type': 'text/plain; charset=utf-8',
         'X-Generated-By': 'supabase.rpc.generate_sitewide_llms_txt',
@@ -186,14 +185,15 @@ export async function GET(request: NextRequest) {
         ...CORS,
         ...buildCacheHeaders('content_export'),
       },
+      status: 200,
     });
   } catch (error) {
     const normalized = normalizeError(error, 'Sitewide content API error');
     reqLogger.error({ err: normalized }, 'Sitewide content API error');
     return createErrorResponse(normalized, {
-      route: '/api/content/sitewide',
-      operation: 'ContentSitewideAPI',
       method: 'GET',
+      operation: 'ContentSitewideAPI',
+      route: '/api/content/sitewide',
     });
   }
 }
@@ -207,9 +207,9 @@ export async function GET(request: NextRequest) {
  */
 export function OPTIONS() {
   return new NextResponse(null, {
-    status: 204,
     headers: {
       ...CORS,
     },
+    status: 204,
   });
 }

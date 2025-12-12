@@ -13,6 +13,7 @@ import { createSupabaseAdminClient } from '../../../supabase/admin';
 import { sendEmail } from '../../../integrations/resend';
 import { ONBOARDING_FROM } from '../../../email/config/email-config';
 import { logger, createWebAppContextWithId } from '../../../logging/server';
+import { sendCronSuccessHeartbeat } from '../../utils/monitoring';
 
 // Type for sequence email - simplified based on RPC return
 interface SequenceEmailItem {
@@ -74,6 +75,7 @@ export const processEmailSequence = inngest.createFunction(
 
     if (dueEmails.length === 0) {
       logger.info(logContext, 'No due sequence emails');
+      // BetterStack monitoring: No heartbeat needed when no emails to send
       return { sent: 0, failed: 0 };
     }
 
@@ -125,7 +127,20 @@ export const processEmailSequence = inngest.createFunction(
       failed: failedCount,
       total: dueEmails.length, }, 'Email sequence processing completed');
 
-    return { sent: sentCount, failed: failedCount };
+    const result = {
+      sent: sentCount,
+      failed: failedCount,
+    };
+
+    // BetterStack monitoring: Send success heartbeat (feature-flagged)
+    if (result.sent > 0) {
+      sendCronSuccessHeartbeat('BETTERSTACK_HEARTBEAT_INNGEST_CRON', {
+        functionName: 'processEmailSequence',
+        result: { sent: result.sent },
+      });
+    }
+
+    return result;
   }
 );
 

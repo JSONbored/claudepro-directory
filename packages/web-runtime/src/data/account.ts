@@ -17,17 +17,17 @@ const accountDashboardSchema = z.object({
   // eslint-disable-next-line unicorn/prefer-top-level-await -- zod .catch() is not a promise, it's a schema method
   bookmark_count: z.number().catch(0),
   profile: z.object({
+    created_at: z.string(),
     // eslint-disable-next-line unicorn/prefer-top-level-await -- zod .catch() is not a promise, it's a schema method
     name: z.string().nullable().catch(null),
     tier: z
       .enum([...USER_TIER_VALUES] as [
         Database['public']['Enums']['user_tier'],
-        ...Database['public']['Enums']['user_tier'][],
+        ...Array<Database['public']['Enums']['user_tier']>,
       ])
       .nullable()
       // eslint-disable-next-line unicorn/prefer-top-level-await -- zod .catch() is not a promise, it's a schema method
       .catch(null),
-    created_at: z.string(),
   }),
 });
 
@@ -51,14 +51,14 @@ export async function getAccountDashboard(
   userId: string
 ): Promise<Database['public']['Functions']['get_account_dashboard']['Returns'] | null> {
   'use cache: private';
-  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`user-dashboard-${userId}`);
   // Also tag with complete data cache to share cache entry
   cacheTag(`user-complete-data-${userId}`);
 
   const reqLogger = logger.child({
-    operation: 'getAccountDashboard',
     module: 'data/account',
+    operation: 'getAccountDashboard',
   });
 
   try {
@@ -67,7 +67,7 @@ export async function getAccountDashboard(
 
     if (!completeData?.account_dashboard) {
       reqLogger.warn(
-        { userId, hasCompleteData: Boolean(completeData) },
+        { hasCompleteData: Boolean(completeData), userId },
         'getAccountDashboard: account_dashboard missing from complete data'
       );
       return null;
@@ -76,7 +76,7 @@ export async function getAccountDashboard(
     const result = accountDashboardSchema.parse(completeData.account_dashboard);
 
     reqLogger.info(
-      { userId, hasResult: Boolean(result) },
+      { hasResult: Boolean(result), userId },
       'getAccountDashboard: fetched successfully'
     );
 
@@ -109,14 +109,14 @@ export async function getUserLibrary(
   userId: string
 ): Promise<Database['public']['Functions']['get_user_library']['Returns'] | null> {
   'use cache: private';
-  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`user-library-${userId}`);
   // Also tag with complete data cache to share cache entry
   cacheTag(`user-complete-data-${userId}`);
 
   const reqLogger = logger.child({
-    operation: 'getUserLibrary',
     module: 'data/account',
+    operation: 'getUserLibrary',
   });
 
   try {
@@ -125,14 +125,14 @@ export async function getUserLibrary(
 
     if (!completeData?.user_library) {
       reqLogger.warn(
-        { userId, hasCompleteData: Boolean(completeData) },
+        { hasCompleteData: Boolean(completeData), userId },
         'getUserLibrary: user_library missing from complete data'
       );
       return null;
     }
 
     reqLogger.info(
-      { userId, hasResult: Boolean(completeData.user_library) },
+      { hasResult: Boolean(completeData.user_library), userId },
       'getUserLibrary: fetched successfully'
     );
 
@@ -147,7 +147,7 @@ export async function getUserLibrary(
 
 export async function getUserBookmarksForCollections(
   userId: string
-): Promise<Database['public']['Tables']['bookmarks']['Row'][]> {
+): Promise<Array<Database['public']['Tables']['bookmarks']['Row']>> {
   const data = await getUserLibrary(userId);
   const bookmarks = data?.bookmarks ?? [];
   return bookmarks
@@ -170,14 +170,14 @@ export async function getUserBookmarksForCollections(
         b.updated_at !== null
     )
     .map((b: (typeof bookmarks)[number]) => ({
-      id: b.id,
-      user_id: b.user_id,
-      content_type: b.content_type,
       content_slug: b.content_slug,
-      notes: b.notes,
+      content_type: b.content_type,
       created_at: b.created_at,
+      id: b.id,
+      notes: b.notes,
       updated_at: b.updated_at,
-    })) as Database['public']['Tables']['bookmarks']['Row'][];
+      user_id: b.user_id,
+    })) as Array<Database['public']['Tables']['bookmarks']['Row']>;
 }
 
 /**
@@ -200,14 +200,14 @@ export async function getUserDashboard(
   userId: string
 ): Promise<Database['public']['Functions']['get_user_dashboard']['Returns'] | null> {
   'use cache: private';
-  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`user-dashboard-${userId}`);
   // Also tag with complete data cache to share cache entry
   cacheTag(`user-complete-data-${userId}`);
 
   const reqLogger = logger.child({
-    operation: 'getUserDashboard',
     module: 'data/account',
+    operation: 'getUserDashboard',
   });
 
   try {
@@ -216,14 +216,14 @@ export async function getUserDashboard(
 
     if (!completeData?.user_dashboard) {
       reqLogger.warn(
-        { userId, hasCompleteData: Boolean(completeData) },
+        { hasCompleteData: Boolean(completeData), userId },
         'getUserDashboard: user_dashboard missing from complete data'
       );
       return null;
     }
 
     reqLogger.info(
-      { userId, hasResult: Boolean(completeData.user_dashboard) },
+      { hasResult: Boolean(completeData.user_dashboard), userId },
       'getUserDashboard: fetched successfully'
     );
 
@@ -283,12 +283,12 @@ export async function getUserCompleteData(
   }
 ): Promise<Database['public']['CompositeTypes']['user_complete_data_result'] | null> {
   'use cache: private';
-  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`user-complete-data-${userId}`);
 
   const reqLogger = logger.child({
-    operation: 'getUserCompleteData',
     module: 'data/account',
+    operation: 'getUserCompleteData',
   });
 
   try {
@@ -305,10 +305,10 @@ export async function getUserCompleteData(
     if (!authResult.isAuthenticated || !authResult.user) {
       reqLogger.warn(
         {
-          userId,
-          isAuthenticated: authResult.isAuthenticated,
-          hasUser: Boolean(authResult.user),
           error: authResult.error?.message,
+          hasUser: Boolean(authResult.user),
+          isAuthenticated: authResult.isAuthenticated,
+          userId,
         },
         'getUserCompleteData: authentication failed'
       );
@@ -318,7 +318,7 @@ export async function getUserCompleteData(
     // Verify the authenticated user matches the requested userId (security check)
     if (authResult.user.id !== userId) {
       reqLogger.warn(
-        { requestedUserId: userId, authenticatedUserId: authResult.user.id },
+        { authenticatedUserId: authResult.user.id, requestedUserId: userId },
         'getUserCompleteData: userId mismatch'
       );
       return null;
@@ -332,7 +332,7 @@ export async function getUserCompleteData(
 
     if (sessionError || !session) {
       reqLogger.warn(
-        { userId, sessionError: sessionError?.message, hasSession: Boolean(session) },
+        { hasSession: Boolean(session), sessionError: sessionError?.message, userId },
         'getUserCompleteData: no valid session after getUser'
       );
       return null;
@@ -341,7 +341,7 @@ export async function getUserCompleteData(
     // Verify the authenticated user matches the requested userId (security check)
     if (session.user.id !== userId) {
       reqLogger.warn(
-        { requestedUserId: userId, authenticatedUserId: session.user.id },
+        { authenticatedUserId: session.user.id, requestedUserId: userId },
         'getUserCompleteData: userId mismatch'
       );
       return null;
@@ -352,16 +352,16 @@ export async function getUserCompleteData(
 
     // Build RPC parameters - only include p_activity_type if it's provided (not null/undefined)
     const rpcParams: Database['public']['Functions']['get_user_complete_data']['Args'] = {
-      p_user_id: userId,
       p_activity_limit: options?.activityLimit ?? 20,
       p_activity_offset: options?.activityOffset ?? 0,
+      p_user_id: userId,
       ...(options?.activityType && { p_activity_type: options.activityType }),
     };
 
     const result = await service.getUserCompleteData(rpcParams);
 
     reqLogger.info(
-      { userId, hasResult: Boolean(result) },
+      { hasResult: Boolean(result), userId },
       'getUserCompleteData: fetched successfully'
     );
 
@@ -372,18 +372,18 @@ export async function getUserCompleteData(
     reqLogger.error(
       {
         err: normalizedError,
-        userId,
         options,
         // Include original error details if available
         originalError:
           error && typeof error === 'object' && 'code' in error
             ? {
                 code: (error as { code?: string }).code,
-                message: (error as { message?: string }).message,
                 details: (error as { details?: string }).details,
                 hint: (error as { hint?: string }).hint,
+                message: (error as { message?: string }).message,
               }
             : undefined,
+        userId,
       },
       'getUserCompleteData: unexpected error occurred'
     );
@@ -410,12 +410,12 @@ export async function getCollectionDetail(
   slug: string
 ): Promise<Database['public']['Functions']['get_collection_detail_with_items']['Returns'] | null> {
   'use cache: private';
-  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`user-collection-${userId}-${slug}`);
 
   const reqLogger = logger.child({
-    operation: 'getCollectionDetail',
     module: 'data/account',
+    operation: 'getCollectionDetail',
   });
 
   try {
@@ -423,12 +423,12 @@ export async function getCollectionDetail(
     const service = new AccountService(client);
 
     const result = await service.getCollectionDetailWithItems({
-      p_user_id: userId,
       p_slug: slug,
+      p_user_id: userId,
     });
 
     reqLogger.info(
-      { userId, slug, hasResult: Boolean(result) },
+      { hasResult: Boolean(result), slug, userId },
       'getCollectionDetail: fetched successfully'
     );
 
@@ -437,7 +437,7 @@ export async function getCollectionDetail(
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error(
-      { err: errorForLogging, userId, slug },
+      { err: errorForLogging, slug, userId },
       'getCollectionDetail: unexpected error'
     );
     return null;
@@ -479,14 +479,14 @@ export async function getUserSettings(
   userId: string
 ): Promise<Database['public']['Functions']['get_user_settings']['Returns'] | null> {
   'use cache: private';
-  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`user-settings-${userId}`);
   // Also tag with complete data cache to share cache entry
   cacheTag(`user-complete-data-${userId}`);
 
   const reqLogger = logger.child({
-    operation: 'getUserSettings',
     module: 'data/account',
+    operation: 'getUserSettings',
   });
 
   try {
@@ -495,14 +495,14 @@ export async function getUserSettings(
 
     if (!completeData?.user_settings) {
       reqLogger.warn(
-        { userId, hasCompleteData: Boolean(completeData) },
+        { hasCompleteData: Boolean(completeData), userId },
         'getUserSettings: user_settings missing from complete data'
       );
       return null;
     }
 
     reqLogger.info(
-      { userId, hasResult: Boolean(completeData.user_settings) },
+      { hasResult: Boolean(completeData.user_settings), userId },
       'getUserSettings: fetched successfully'
     );
 
@@ -534,12 +534,12 @@ export async function getSponsorshipAnalytics(
   sponsorshipId: string
 ): Promise<Database['public']['Functions']['get_sponsorship_analytics']['Returns'] | null> {
   'use cache: private';
-  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`user-sponsorship-analytics-${userId}-${sponsorshipId}`);
 
   const reqLogger = logger.child({
-    operation: 'getSponsorshipAnalytics',
     module: 'data/account',
+    operation: 'getSponsorshipAnalytics',
   });
 
   try {
@@ -547,12 +547,12 @@ export async function getSponsorshipAnalytics(
     const service = new AccountService(client);
 
     const result = await service.getSponsorshipAnalytics({
-      p_user_id: userId,
       p_sponsorship_id: sponsorshipId,
+      p_user_id: userId,
     });
 
     reqLogger.info(
-      { userId, sponsorshipId, hasResult: Boolean(result) },
+      { hasResult: Boolean(result), sponsorshipId, userId },
       'getSponsorshipAnalytics: fetched successfully'
     );
 
@@ -561,7 +561,7 @@ export async function getSponsorshipAnalytics(
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error(
-      { err: errorForLogging, userId, sponsorshipId },
+      { err: errorForLogging, sponsorshipId, userId },
       'getSponsorshipAnalytics: unexpected error'
     );
     return null;
@@ -588,14 +588,14 @@ export async function getUserCompanies(
   userId: string
 ): Promise<Database['public']['Functions']['get_user_companies']['Returns'] | null> {
   'use cache: private';
-  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`user-companies-${userId}`);
   // Also tag with complete data cache to share cache entry
   cacheTag(`user-complete-data-${userId}`);
 
   const reqLogger = logger.child({
-    operation: 'getUserCompanies',
     module: 'data/account',
+    operation: 'getUserCompanies',
   });
 
   try {
@@ -605,9 +605,9 @@ export async function getUserCompanies(
     if (!completeData?.user_dashboard?.companies) {
       reqLogger.warn(
         {
-          userId,
           hasCompleteData: completeData != null,
           hasUserDashboard: completeData?.user_dashboard != null,
+          userId,
         },
         'getUserCompanies: companies missing from complete data'
       );
@@ -621,15 +621,17 @@ export async function getUserCompanies(
 
     reqLogger.info(
       {
-        userId,
-        hasResult: Boolean(completeData.user_dashboard.companies),
         count: companiesArray.length,
+        hasResult: Boolean(completeData.user_dashboard.companies),
+        userId,
       },
       'getUserCompanies: fetched successfully'
     );
 
     return {
-      companies: companiesArray as Database['public']['CompositeTypes']['user_companies_company'][],
+      companies: companiesArray as Array<
+        Database['public']['CompositeTypes']['user_companies_company']
+      >,
     };
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
@@ -659,14 +661,14 @@ export async function getUserSponsorships(
   userId: string
 ): Promise<Database['public']['Functions']['get_user_sponsorships']['Returns']> {
   'use cache: private';
-  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`user-sponsorships-${userId}`);
   // Also tag with complete data cache to share cache entry
   cacheTag(`user-complete-data-${userId}`);
 
   const reqLogger = logger.child({
-    operation: 'getUserSponsorships',
     module: 'data/account',
+    operation: 'getUserSponsorships',
   });
 
   try {
@@ -675,7 +677,7 @@ export async function getUserSponsorships(
 
     if (!completeData?.sponsorships) {
       reqLogger.warn(
-        { userId, hasCompleteData: Boolean(completeData) },
+        { hasCompleteData: Boolean(completeData), userId },
         'getUserSponsorships: sponsorships missing from complete data'
       );
       return [];
@@ -683,9 +685,9 @@ export async function getUserSponsorships(
 
     reqLogger.info(
       {
-        userId,
-        hasResult: Boolean(completeData.sponsorships),
         count: completeData.sponsorships.length,
+        hasResult: Boolean(completeData.sponsorships),
+        userId,
       },
       'getUserSponsorships: fetched successfully'
     );
@@ -729,12 +731,12 @@ export async function getSubmissionDashboard(
   contributorsLimit = 5
 ): Promise<Database['public']['Functions']['get_submission_dashboard']['Returns'] | null> {
   'use cache: private';
-  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`submission-dashboard-${recentLimit}-${contributorsLimit}`);
 
   const reqLogger = logger.child({
-    operation: 'getSubmissionDashboard',
     module: 'data/account',
+    operation: 'getSubmissionDashboard',
   });
 
   try {
@@ -742,12 +744,12 @@ export async function getSubmissionDashboard(
     const service = new AccountService(client);
 
     const result = await service.getSubmissionDashboard({
-      p_recent_limit: recentLimit,
       p_contributors_limit: contributorsLimit,
+      p_recent_limit: recentLimit,
     });
 
     reqLogger.info(
-      { recentLimit, contributorsLimit, hasResult: Boolean(result) },
+      { contributorsLimit, hasResult: Boolean(result), recentLimit },
       'getSubmissionDashboard: fetched successfully'
     );
 
@@ -756,7 +758,7 @@ export async function getSubmissionDashboard(
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error(
-      { err: errorForLogging, recentLimit, contributorsLimit },
+      { contributorsLimit, err: errorForLogging, recentLimit },
       'getSubmissionDashboard: unexpected error'
     );
     return null;
@@ -800,14 +802,14 @@ export async function getUserActivitySummary(
   userId: string
 ): Promise<Database['public']['Functions']['get_user_activity_summary']['Returns'] | null> {
   'use cache: private';
-  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`user-activity-summary-${userId}`);
   // Also tag with complete data cache to share cache entry
   cacheTag(`user-complete-data-${userId}`);
 
   const reqLogger = logger.child({
-    operation: 'getUserActivitySummary',
     module: 'data/account',
+    operation: 'getUserActivitySummary',
   });
 
   try {
@@ -816,21 +818,21 @@ export async function getUserActivitySummary(
 
     if (!completeData?.activity_summary) {
       reqLogger.warn(
-        { userId, hasCompleteData: Boolean(completeData) },
+        { hasCompleteData: Boolean(completeData), userId },
         'getUserActivitySummary: activity_summary missing from complete data'
       );
       return {
-        total_posts: 0,
-        total_comments: 0,
-        total_votes: 0,
-        total_submissions: 0,
         merged_submissions: 0,
         total_activity: 0,
+        total_comments: 0,
+        total_posts: 0,
+        total_submissions: 0,
+        total_votes: 0,
       };
     }
 
     reqLogger.info(
-      { userId, hasResult: Boolean(completeData.activity_summary) },
+      { hasResult: Boolean(completeData.activity_summary), userId },
       'getUserActivitySummary: fetched successfully'
     );
 
@@ -840,12 +842,12 @@ export async function getUserActivitySummary(
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error({ err: errorForLogging, userId }, 'getUserActivitySummary: unexpected error');
     return {
-      total_posts: 0,
-      total_comments: 0,
-      total_votes: 0,
-      total_submissions: 0,
       merged_submissions: 0,
       total_activity: 0,
+      total_comments: 0,
+      total_posts: 0,
+      total_submissions: 0,
+      total_votes: 0,
     };
   }
 }
@@ -879,8 +881,8 @@ export async function getUserActivityTimeline(input: {
   userId: string;
 }): Promise<Database['public']['Functions']['get_user_activity_timeline']['Returns'] | null> {
   'use cache: private';
-  const { userId, type, limit = 20, offset = 0 } = input;
-  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  const { limit = 20, offset = 0, type, userId } = input;
+  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`user-activity-timeline-${userId}-${type ?? 'all'}-${limit}-${offset}`);
   // Also tag with complete data cache to share cache entry (if using default params)
   if (limit === 20 && offset === 0 && !type) {
@@ -888,8 +890,8 @@ export async function getUserActivityTimeline(input: {
   }
 
   const reqLogger = logger.child({
-    operation: 'getUserActivityTimeline',
     module: 'data/account',
+    operation: 'getUserActivityTimeline',
   });
 
   try {
@@ -902,7 +904,7 @@ export async function getUserActivityTimeline(input: {
 
     if (!completeData?.activity_timeline) {
       reqLogger.warn(
-        { userId, hasCompleteData: Boolean(completeData) },
+        { hasCompleteData: Boolean(completeData), userId },
         'getUserActivityTimeline: activity_timeline missing from complete data'
       );
       return {
@@ -914,11 +916,11 @@ export async function getUserActivityTimeline(input: {
 
     reqLogger.info(
       {
-        userId,
-        type: type ?? 'all',
+        hasResult: Boolean(completeData.activity_timeline),
         limit,
         offset,
-        hasResult: Boolean(completeData.activity_timeline),
+        type: type ?? 'all',
+        userId,
       },
       'getUserActivityTimeline: fetched successfully from complete data'
     );
@@ -928,7 +930,7 @@ export async function getUserActivityTimeline(input: {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error(
-      { err: errorForLogging, userId, type: type ?? 'all', limit, offset },
+      { err: errorForLogging, limit, offset, type: type ?? 'all', userId },
       'getUserActivityTimeline: unexpected error'
     );
     return {
@@ -959,14 +961,14 @@ export async function getUserIdentitiesData(
   userId: string
 ): Promise<Database['public']['Functions']['get_user_identities']['Returns'] | null> {
   'use cache: private';
-  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`user-identities-${userId}`);
   // Also tag with complete data cache to share cache entry
   cacheTag(`user-complete-data-${userId}`);
 
   const reqLogger = logger.child({
-    operation: 'getUserIdentitiesData',
     module: 'data/account',
+    operation: 'getUserIdentitiesData',
   });
 
   try {
@@ -975,14 +977,14 @@ export async function getUserIdentitiesData(
 
     if (!completeData?.user_identities) {
       reqLogger.warn(
-        { userId, hasCompleteData: Boolean(completeData) },
+        { hasCompleteData: Boolean(completeData), userId },
         'getUserIdentitiesData: user_identities missing from complete data'
       );
       return { identities: [] };
     }
 
     reqLogger.info(
-      { userId, hasResult: Boolean(completeData.user_identities) },
+      { hasResult: Boolean(completeData.user_identities), userId },
       'getUserIdentitiesData: fetched successfully'
     );
 
@@ -1010,30 +1012,30 @@ export async function isBookmarked(input: {
   userId: string;
 }): Promise<boolean> {
   'use cache: private';
-  const { userId, content_type, content_slug } = input;
+  const { content_slug, content_type, userId } = input;
 
-  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag('user-bookmarks');
   cacheTag(`user-${userId}`);
   cacheTag(`content-${content_slug}`);
 
   const reqLogger = logger.child({
-    operation: 'isBookmarked',
     module: 'data/account',
+    operation: 'isBookmarked',
   });
 
   try {
     const client = await createSupabaseServerClient();
     const service = new AccountService(client);
     return await service.isBookmarked({
-      p_user_id: userId,
-      p_content_type: content_type,
       p_content_slug: content_slug,
+      p_content_type: content_type,
+      p_user_id: userId,
     });
   } catch (error) {
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error(
-      { err: errorForLogging, userId, content_type, content_slug },
+      { content_slug, content_type, err: errorForLogging, userId },
       'isBookmarked: unexpected error'
     );
     return false;
@@ -1055,14 +1057,14 @@ export async function isFollowing(input: {
   'use cache: private';
   const { followerId, followingId } = input;
 
-  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag('users');
   cacheTag(`user-${followerId}`);
   cacheTag(`user-${followingId}`);
 
   const reqLogger = logger.child({
-    operation: 'isFollowing',
     module: 'data/account',
+    operation: 'isFollowing',
   });
 
   try {
@@ -1098,9 +1100,9 @@ export async function isBookmarkedBatch(input: {
   userId: string;
 }): Promise<Database['public']['Functions']['is_bookmarked_batch']['Returns']> {
   'use cache: private';
-  const { userId, items } = input;
+  const { items, userId } = input;
 
-  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag('user-bookmarks');
   cacheTag(`user-${userId}`);
   // Include sorted item keys in cache tag for proper cache key generation
@@ -1111,21 +1113,21 @@ export async function isBookmarkedBatch(input: {
   cacheTag(`bookmark-batch-${itemKey}`);
 
   const reqLogger = logger.child({
-    operation: 'isBookmarkedBatch',
     module: 'data/account',
+    operation: 'isBookmarkedBatch',
   });
 
   try {
     const client = await createSupabaseServerClient();
     const service = new AccountService(client);
     return await service.isBookmarkedBatch({
-      p_user_id: userId,
       p_items: items,
+      p_user_id: userId,
     });
   } catch (error) {
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error(
-      { err: errorForLogging, userId, itemCount: items.length },
+      { err: errorForLogging, itemCount: items.length, userId },
       'isBookmarkedBatch: unexpected error'
     );
     return [];
@@ -1145,9 +1147,9 @@ export async function isFollowingBatch(input: {
   followerId: string;
 }): Promise<Database['public']['Functions']['is_following_batch']['Returns']> {
   'use cache: private';
-  const { followerId, followedUserIds } = input;
+  const { followedUserIds, followerId } = input;
 
-  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag('users');
   cacheTag(`user-${followerId}`);
   // Include sorted user IDs in cache tag for proper cache key generation
@@ -1155,21 +1157,21 @@ export async function isFollowingBatch(input: {
   cacheTag(`follow-batch-${userIdsKey}`);
 
   const reqLogger = logger.child({
-    operation: 'isFollowingBatch',
     module: 'data/account',
+    operation: 'isFollowingBatch',
   });
 
   try {
     const client = await createSupabaseServerClient();
     const service = new AccountService(client);
     return await service.isFollowingBatch({
-      p_follower_id: followerId,
       p_followed_user_ids: followedUserIds,
+      p_follower_id: followerId,
     });
   } catch (error) {
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error(
-      { err: errorForLogging, followerId, followedUserCount: followedUserIds.length },
+      { err: errorForLogging, followedUserCount: followedUserIds.length, followerId },
       'isFollowingBatch: unexpected error'
     );
     return [];
@@ -1195,7 +1197,7 @@ export async function getAccountDashboardBundle(
   categoryIds?: readonly string[]
 ): Promise<AccountDashboardBundle> {
   'use cache: private';
-  cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`user-dashboard-bundle-${userId}`);
   if (categoryIds) {
     cacheTag(`dashboard-bundle-categories-${categoryIds.join(',')}`);
@@ -1216,7 +1218,7 @@ export async function getAccountDashboardBundle(
 
   return {
     dashboard,
-    library,
     homepage,
+    library,
   };
 }

@@ -5,12 +5,12 @@
 
 import 'server-only';
 import { ContentService } from '@heyclaude/data-layer';
-import { logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
+import { createErrorResponse, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  createSupabaseAnonClient,
-  jsonResponse,
-  getOnlyCorsHeaders,
   buildCacheHeaders,
+  createSupabaseAnonClient,
+  getOnlyCorsHeaders,
+  jsonResponse,
 } from '@heyclaude/web-runtime/server';
 import { cacheLife } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
@@ -34,9 +34,9 @@ async function getCachedCategoryConfigs() {
 
 export async function GET(_request: NextRequest) {
   const reqLogger = logger.child({
+    method: 'GET',
     operation: 'CategoryConfigsAPI',
     route: '/api/content/category-configs',
-    method: 'GET',
   });
 
   try {
@@ -59,18 +59,18 @@ export async function GET(_request: NextRequest) {
     const normalized = normalizeError(error, 'Operation failed');
     reqLogger.error({ err: normalized }, 'Category configs API error');
     return createErrorResponse(normalized, {
-      route: '/api/content/category-configs',
-      operation: 'CategoryConfigsAPI',
       method: 'GET',
+      operation: 'CategoryConfigsAPI',
+      route: '/api/content/category-configs',
     });
   }
 }
 
 export function OPTIONS() {
   return new NextResponse(null, {
-    status: 204,
     headers: {
       ...CORS,
     },
+    status: 204,
   });
 }

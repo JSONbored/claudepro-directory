@@ -8,13 +8,13 @@ import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { GitPullRequest } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  UI_CLASSES,
   Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  UI_CLASSES,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
@@ -69,9 +69,9 @@ export default async function ActivityPage() {
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
+    module: modulePath,
     operation,
     route,
-    module: modulePath,
   });
 
   return (
@@ -116,7 +116,10 @@ async function ActivityPageContent({ reqLogger }: { reqLogger: ReturnType<typeof
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <SignInButton valueProposition="Sign in to view your contribution history and activity metrics" redirectTo="/account/activity">
+            <SignInButton
+              redirectTo="/account/activity"
+              valueProposition="Sign in to view your contribution history and activity metrics"
+            >
               Go to login
             </SignInButton>
           </CardContent>
@@ -139,14 +142,14 @@ async function ActivityPageContent({ reqLogger }: { reqLogger: ReturnType<typeof
   // CRITICAL: Call data functions directly instead of actions to avoid cookies() access issues in Cache Components
   const [summaryResult, timelineResult] = await Promise.allSettled([
     getUserActivitySummary(user.id),
-    getUserActivityTimeline({ userId: user.id, limit: 50, offset: 0 }),
+    getUserActivityTimeline({ limit: 50, offset: 0, userId: user.id }),
   ]);
 
-  /**
+  /****
    * Normalize a settled activity-data result, log any rejection, and return the fulfilled value or `null`.
    *
-   * @param name - Human-readable name of the data being loaded (used in error messages and logs)
-   * @param result - The settled promise result to inspect
+   * @param {string} name - Human-readable name of the data being loaded (used in error messages and logs)
+   * @param {PromiseSettledResult<null | T>} result - The settled promise result to inspect
    * @returns The fulfilled value of type `T` if present, `null` if the promise was rejected
    *
    * @see normalizeError
@@ -157,7 +160,7 @@ async function ActivityPageContent({ reqLogger }: { reqLogger: ReturnType<typeof
       return result.value;
     }
     // result.status === 'rejected' at this point
-    const reason = result.reason as unknown;
+    const reason = result.reason;
     const normalized = normalizeError(reason, `Failed to load ${name}`);
     if (user) {
       userLogger.error(
@@ -209,10 +212,10 @@ async function ActivityPageContent({ reqLogger }: { reqLogger: ReturnType<typeof
   // Final summary log
   userLogger.info(
     {
-      section: 'data-fetch',
       activitiesCount: activities.length,
       hasSummary,
       hasTimeline,
+      section: 'data-fetch',
     },
     'ActivityPage: page render completed'
   );

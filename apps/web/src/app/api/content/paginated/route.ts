@@ -7,13 +7,13 @@ import 'server-only';
 import { ContentService } from '@heyclaude/data-layer';
 import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
-import { logger, normalizeError, createErrorResponse } from '@heyclaude/web-runtime/logging/server';
+import { createErrorResponse, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  createSupabaseAnonClient,
   badRequestResponse,
-  jsonResponse,
-  getOnlyCorsHeaders,
   buildCacheHeaders,
+  createSupabaseAnonClient,
+  getOnlyCorsHeaders,
+  jsonResponse,
 } from '@heyclaude/web-runtime/server';
 import { cacheLife } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
@@ -21,15 +21,61 @@ import { NextRequest, NextResponse } from 'next/server';
 const CORS = getOnlyCorsHeaders;
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
 
-/**
+/******
  * Cached helper function to fetch paginated content.
  * All parameters become part of the cache key, so different queries have different cache entries.
- * @param params
- * @param params.category
- * @param params.limit
- * @param params.offset
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params.category
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params.limit
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params.offset
  
- * @returns {unknown} Description of return value*/
+ * @returns {unknown} Description of return value * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+*/
 async function getCachedPaginatedContent(params: {
   category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
   limit: number;
@@ -39,7 +85,7 @@ async function getCachedPaginatedContent(params: {
   error: null | { code?: string; message: string };
 }> {
   'use cache';
-  cacheLife({ stale: 86400, revalidate: 21600, expire: 2592000 }); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
+  cacheLife({ expire: 2_592_000, revalidate: 21_600, stale: 86_400 }); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
   const supabase = createSupabaseAnonClient();
   const service = new ContentService(supabase);
@@ -59,7 +105,8 @@ async function getCachedPaginatedContent(params: {
     // Service method already logs the error, just return it in the expected format
     const normalized = normalizeError(error, 'Content paginated RPC error');
     // Extract code from original error if it's a Supabase error
-    const code = error && typeof error === 'object' && 'code' in error ? String(error.code) : undefined;
+    const code =
+      error && typeof error === 'object' && 'code' in error ? String(error.code) : undefined;
     return {
       data: null,
       error: {
@@ -70,13 +117,13 @@ async function getCachedPaginatedContent(params: {
   }
 }
 
-/**
+/***
  * Normalize and validate a content category string against the allowed enum values.
  *
  * The input is normalized (trimmed and lowercased) and returned if it matches one of
  * the known content category values; otherwise `undefined` is returned.
  *
- * @param value - `string | undefined` — the raw category value to normalize and validate
+ * @param {string | undefined} value - `string | undefined` — the raw category value to normalize and validate
  * @returns `DatabaseGenerated['public']['Enums']['content_category'] | undefined` — the normalized category when valid, or `undefined` when missing or invalid
  * @see CONTENT_CATEGORY_VALUES
  */
@@ -113,9 +160,9 @@ function toContentCategory(
  */
 export async function GET(request: NextRequest) {
   const reqLogger = logger.child({
+    method: 'GET',
     operation: 'ContentPaginatedAPI',
     route: '/api/content/paginated',
-    method: 'GET',
   });
 
   try {
@@ -143,9 +190,9 @@ export async function GET(request: NextRequest) {
 
     reqLogger.info(
       {
-        offset: offsetParam,
-        limit: limitParam,
         category: category ?? 'all',
+        limit: limitParam,
+        offset: offsetParam,
       },
       'Paginated content request received'
     );
@@ -160,24 +207,24 @@ export async function GET(request: NextRequest) {
       const normalizedError = normalizeError(error, 'Content paginated RPC error');
       reqLogger.error(
         {
-          err: normalizedError,
-          rpcName: 'get_content_paginated_slim',
-          offset: offsetParam,
-          limit: limitParam,
           category: category ?? 'all',
+          err: normalizedError,
+          limit: limitParam,
+          offset: offsetParam,
+          rpcName: 'get_content_paginated_slim',
         },
         'Content paginated RPC error'
       );
       return createErrorResponse(normalizedError, {
-        route: '/api/content/paginated',
-        operation: 'ContentPaginatedAPI',
-        method: 'GET',
         logContext: {
-          rpcName: 'get_content_paginated_slim',
-          offset: offsetParam,
-          limit: limitParam,
           category: category ?? 'all',
+          limit: limitParam,
+          offset: offsetParam,
+          rpcName: 'get_content_paginated_slim',
         },
+        method: 'GET',
+        operation: 'ContentPaginatedAPI',
+        route: '/api/content/paginated',
       });
     }
 
@@ -195,8 +242,8 @@ export async function GET(request: NextRequest) {
     reqLogger.info(
       {
         itemCount: items.length,
-        offset: offsetParam,
         limit: limitParam,
+        offset: offsetParam,
       },
       'Paginated content retrieved'
     );
@@ -209,9 +256,9 @@ export async function GET(request: NextRequest) {
     const normalized = normalizeError(error, 'Operation failed');
     reqLogger.error({ err: normalizeError(error) }, 'Content paginated API error');
     return createErrorResponse(normalized, {
-      route: '/api/content/paginated',
-      operation: 'ContentPaginatedAPI',
       method: 'GET',
+      operation: 'ContentPaginatedAPI',
+      route: '/api/content/paginated',
     });
   }
 }
@@ -225,9 +272,9 @@ export async function GET(request: NextRequest) {
  */
 export function OPTIONS() {
   return new NextResponse(null, {
-    status: 204,
     headers: {
       ...getOnlyCorsHeaders,
     },
+    status: 204,
   });
 }
