@@ -9,70 +9,95 @@ import  { type Database } from '@heyclaude/database-types';
 import  { type SupabaseClient } from '@supabase/supabase-js';
 
 import { logRpcError } from '../utils/rpc-error-logging.ts';
+import { withSmartCache } from '../utils/request-cache.ts';
 
 export class CompaniesService {
   constructor(private supabase: SupabaseClient<Database>) {}
 
   /**
    * Calls the database RPC: get_company_admin_profile
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getCompanyAdminProfile(args: Database['public']['Functions']['get_company_admin_profile']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('get_company_admin_profile', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_company_admin_profile',
-          operation: 'CompaniesService.getCompanyAdminProfile',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_company_admin_profile',
+      'getCompanyAdminProfile',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_company_admin_profile', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_company_admin_profile',
+              operation: 'CompaniesService.getCompanyAdminProfile',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: get_company_profile
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getCompanyProfile(args: Database['public']['Functions']['get_company_profile']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('get_company_profile', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_company_profile',
-          operation: 'CompaniesService.getCompanyProfile',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_company_profile',
+      'getCompanyProfile',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_company_profile', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_company_profile',
+              operation: 'CompaniesService.getCompanyProfile',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: get_companies_list
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getCompaniesList(args: Database['public']['Functions']['get_companies_list']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('get_companies_list', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_companies_list',
-          operation: 'CompaniesService.getCompaniesList',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_companies_list',
+      'getCompaniesList',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_companies_list', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_companies_list',
+              operation: 'CompaniesService.getCompaniesList',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 }

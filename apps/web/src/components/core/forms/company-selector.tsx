@@ -4,34 +4,54 @@
  * CompanySelector - Search or create companies (database-first via RPC)
  */
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import {
   createCompany,
   getCompanyByIdAction,
   searchCompaniesAction,
 } from '@heyclaude/web-runtime/actions';
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { logClientError, normalizeError } from '@heyclaude/web-runtime/logging/client';
+import {
+  UI_CLASSES,
+  Button,
+  Input,
+  Label,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@heyclaude/web-runtime/ui';
 import { Building2, Plus, Search } from 'lucide-react';
-import { useCallback, useEffect, useId, useState, useTransition } from 'react';
-import { Button } from '@heyclaude/web-runtime/ui';
-import { Input } from '@heyclaude/web-runtime/ui';
-import { Label } from '@heyclaude/web-runtime/ui';
-import { Popover, PopoverContent, PopoverTrigger } from '@heyclaude/web-runtime/ui';
+import { useCallback, useEffect, useId, useRef, useState, useTransition } from 'react';
 
 type Company = Pick<
   Database['public']['Tables']['companies']['Row'],
-  'id' | 'name' | 'slug' | 'website' | 'description' | 'logo'
+  'description' | 'id' | 'logo' | 'name' | 'slug' | 'website'
 >;
 
 interface CompanySelectorProps {
-  value?: string | null; // company_id
-  onChange: (companyId: string | null, companyName: string) => void;
   defaultCompanyName?: string | undefined; // For legacy text field migration
+  onChange: (companyId: null | string, companyName: string) => void;
+  value?: null | string; // company_id
 }
 
 const DEFAULT_DEBOUNCE_MS = 300;
 
+/**
+ * UI control that lets the user search for, select, or create a company and notifies the parent of the selection.
+ *
+ * Renders a combobox-like button that opens a popover containing a debounced search for companies, a selectable list of results,
+ * and a form to create a new company when needed. Maintains internal selection state and synchronizes the selected company id
+ * with the provided `value` and `onChange` callback.
+ *
+ * @param value - Currently selected company id, or `null`/`undefined` when none is selected.
+ * @param onChange - Callback invoked when the selection changes: `onChange(companyId, companyName)`.
+ * @param defaultCompanyName - Optional legacy display string used when no company is selected.
+ * @returns The JSX element representing the company selector control.
+ *
+ * @see searchCompaniesAction
+ * @see getCompanyByIdAction
+ * @see createCompany
+ */
 export function CompanySelector({ value, onChange, defaultCompanyName }: CompanySelectorProps) {
   const buttonId = useId();
   const nameInputId = useId();
@@ -61,18 +81,31 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
         }
         if (result?.serverError) {
           // Error already logged by safe-action middleware
-          logger.error(
-            'CompanySelector: failed to load selected company',
-            new Error(result.serverError),
-            { companyId: value }
+          const normalized = normalizeError(result.serverError, 'Failed to load selected company');
+          logClientError(
+            '[Form] Failed to load selected company',
+            normalized,
+            'CompanySelector.loadCompany',
+            {
+              component: 'CompanySelector',
+              action: 'load-company',
+              category: 'form',
+              companyId: value,
+            }
           );
         }
       })
       .catch((error) => {
-        logger.error(
-          'CompanySelector: failed to load selected company',
+        logClientError(
+          '[Form] Failed to load selected company',
           normalizeError(error, 'Failed to load company'),
-          { companyId: value }
+          'CompanySelector.loadCompany',
+          {
+            component: 'CompanySelector',
+            action: 'load-company',
+            category: 'form',
+            companyId: value,
+          }
         );
       });
 
@@ -80,6 +113,9 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
       cancelled = true;
     };
   }, [value]);
+
+  // Track latest query to prevent stale results
+  const latestQueryRef = useRef<string>('');
 
   // Debounced search
   const searchCompanies = useCallback(async (query: string) => {
@@ -90,10 +126,19 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
       return;
     }
 
+    // Update latest query before making request
+    latestQueryRef.current = trimmed;
+
     setIsSearching(true);
     try {
       const result = await searchCompaniesAction({ query: trimmed, limit: 10 });
-      const payload = result?.data as { companies?: Company[]; debounceMs?: number } | undefined;
+      
+      // Only apply results if this request's query still matches the latest query
+      if (latestQueryRef.current !== trimmed) {
+        return; // Stale request - ignore results
+      }
+      
+      const payload = result?.data as undefined | { companies?: Company[]; debounceMs?: number };
       const companies = payload?.companies ?? [];
       setCompanies(
         companies.map(
@@ -112,9 +157,17 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
         setDebounceMs(payload.debounceMs);
       }
     } catch (error) {
-      logger.error('CompanySelector: unified search failed', normalizeError(error), {
-        query: trimmed,
-      });
+      logClientError(
+        '[Form] Unified search failed',
+        normalizeError(error, 'Unified search failed'),
+        'CompanySelector.searchCompanies',
+        {
+          component: 'CompanySelector',
+          action: 'search-companies',
+          category: 'form',
+          query: trimmed,
+        }
+      );
       setCompanies([]);
     } finally {
       setIsSearching(false);
@@ -126,16 +179,24 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
     if (trimmed.length < 2) {
       setCompanies([]);
       setIsSearching(false);
-      return undefined;
+      return;
     }
 
     let cancelled = false;
     const timer = setTimeout(() => {
       if (cancelled) return;
       searchCompanies(searchQuery).catch((error) => {
-        logger.error('CompanySelector: search execution failed', normalizeError(error), {
-          query: searchQuery,
-        });
+        logClientError(
+          '[Form] Search execution failed',
+          normalizeError(error, 'Search execution failed'),
+          'CompanySelector.searchEffect',
+          {
+            component: 'CompanySelector',
+            action: 'search-effect',
+            category: 'form',
+            query: searchQuery,
+          }
+        );
       });
     }, debounceMs);
 
@@ -185,10 +246,16 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
           setShowCreateForm(false);
         }
       } catch (error) {
-        logger.error(
-          'CompanySelector: failed to create company',
+        logClientError(
+          '[Form] Failed to create company',
           normalizeError(error, 'Failed to create company'),
-          { name }
+          'CompanySelector.createCompany',
+          {
+            component: 'CompanySelector',
+            action: 'create-company',
+            category: 'form',
+            name,
+          }
         );
       }
     });
@@ -200,7 +267,7 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
         Company <span className="text-destructive">*</span>
       </Label>
       <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild={true}>
+        <PopoverTrigger asChild>
           <Button
             id={buttonId}
             variant="outline"
@@ -230,7 +297,7 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
                   id={nameInputId}
                   name="name"
                   placeholder="e.g., Acme Corp"
-                  required={true}
+                  required
                   defaultValue={searchQuery}
                 />
               </div>
@@ -277,7 +344,7 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
                       key={company.id}
                       type="button"
                       onClick={() => handleSelect(company)}
-                      className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm hover:bg-accent"
+                      className="hover:bg-accent flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm"
                     >
                       <Building2 className={UI_CLASSES.ICON_SM} />
                       <span>{company.name}</span>

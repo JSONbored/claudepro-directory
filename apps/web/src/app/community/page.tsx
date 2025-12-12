@@ -1,14 +1,7 @@
 import { getContactChannels } from '@heyclaude/web-runtime/core';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import {
-  Github,
-  Layers,
-  MessageCircle,
-  MessageSquare,
-  Twitter,
-  Users,
-} from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { Github, MessageSquare, Twitter, Users } from '@heyclaude/web-runtime/icons';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   generatePageMetadata,
   getCommunityDirectory,
@@ -17,107 +10,115 @@ import {
   getHomepageData,
 } from '@heyclaude/web-runtime/server';
 import {
-  UI_CLASSES,
-  UnifiedBadge,
   Button,
   Card,
   CardContent,
   CardHeader,
   CardTitle,
+  UI_CLASSES,
+  UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
-import dynamicImport from 'next/dynamic';
+import { cacheLife } from 'next/cache';
 import Link from 'next/link';
+import { connection } from 'next/server';
+import { Suspense } from 'react';
 
-const NewsletterCTAVariant = dynamicImport(
-  () =>
-    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then(
-      (module_) => ({
-        default: module_.NewsletterCTAVariant,
-      })
-    ),
-  {
-    loading: () => <div className="bg-muted/20 h-32 animate-pulse rounded-lg" />,
-  }
-);
+import { CommunityStatsCard } from '@/src/components/features/community/community-stats-card';
+
+import Loading from './loading';
 
 /**
- * Create the Next.js page metadata for the /community route.
+ * Dynamic Rendering
  *
- * Used by Next.js to supply route-specific metadata (title, description, open graph, etc.).
+ * This page uses connection() to defer non-deterministic operations to request time.
+ * Caching is handled by the data layer (getCommunityDirectory, getConfigurationCount, getHomepageData).
+ */
+
+/**
+ * Generate metadata for the /community route, deferring to request time to allow non-deterministic operations.
+ *
+ * Awaits connection() so metadata generation may use request-time values (for example Date-based or other non-deterministic data).
  *
  * @returns The metadata object for the community page.
  * @see {@link generatePageMetadata}
  */
+
 export async function generateMetadata(): Promise<Metadata> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
   return generatePageMetadata('/community');
 }
 
 /**
- * Incremental Static Regeneration (ISR)
+ * Render the Community page with hero content, aggregated stats, contribution guidance, and contact CTAs.
  *
- * This page uses ISR with a 24-hour revalidation period for better performance and SEO.
- * Data is fetched at build time and periodically refreshed.
- */
-export const revalidate = 86_400;
-
-/**
- * Format a numeric statistic for display using compact English notation.
- *
- * Accepts a number, `null`, or `undefined` and returns a human-readable compact string
- * (e.g., "1.2K"). If the input is `null`, `undefined`, or `NaN`, returns "0".
- *
- * @param value - The numeric value to format; `null`/`undefined`/`NaN` are treated as zero
- * @returns The formatted numeric string in compact `en` notation with up to one decimal place, or `"0"` for missing/invalid values
- */
-function formatStatValue(value: null | number | undefined): string {
-  if (value === null || value === undefined || Number.isNaN(value)) return '0';
-  return Intl.NumberFormat('en', {
-    notation: 'compact',
-    maximumFractionDigits: 1,
-  }).format(value);
-}
-
-/**
- * Render the Community page including hero content, aggregated stats, contribution guidance, and an email CTA.
- *
- * Fetches community directory, configuration count, and homepage metrics and uses safe defaults when those data sources are unavailable.
+ * This server component awaits `connection()` to allow non-deterministic operations (e.g., Date.now()),
+ * creates a request-scoped logger for the request, and renders `CommunityPageContent` inside a `Suspense`
+ * boundary with a loading fallback. Data used by the page (community directory, configuration counts,
+ * homepage metrics) are fetched by the child component and safe defaults are used when those sources are unavailable.
  *
  * @returns The React element tree for the Community page
  *
  * @see getCommunityDirectory
  * @see getConfigurationCount
  * @see getHomepageData
- * @see NewsletterCTAVariant
- * @see generateRequestId
+ * @see CommunityPageContent
  */
 export default async function CommunityPage() {
-  // Generate single requestId for this page request
-  const requestId = generateRequestId();
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    requestId,
+    module: 'apps/web/src/app/community',
     operation: 'CommunityPage',
     route: '/community',
-    module: 'apps/web/src/app/community',
   });
 
+  return (
+    <Suspense fallback={<Loading />}>
+      <CommunityPageContent reqLogger={reqLogger} />
+    </Suspense>
+  );
+}
+
+/**
+ * Renders the community page content: hero, channel links, community stats, and contribution instructions.
+ *
+ * This server component performs necessary data fetching (community directory, configuration count, and homepage metrics),
+ * logs configuration warnings for missing contact channels, and gracefully falls back when fetches fail.
+ *
+ * @param reqLogger - A request-scoped logger (child logger) used for warnings and error reporting during configuration checks and data fetches.
+ * @param reqLogger.reqLogger
+ * @returns The JSX element for the community page content.
+ *
+ * @see generateMetadata
+ * @see CommunityPage
+ */
+async function CommunityPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
   // Section: Configuration Check
   const channels = getContactChannels();
   if (!channels.discord) {
-    reqLogger.warn('CommunityPage: Discord channel is not configured', {
-      section: 'configuration-check',
-      channel: 'discord',
-      configKey: 'DISCORD_INVITE_URL',
-    });
+    reqLogger.warn(
+      {
+        channel: 'discord',
+        configKey: 'DISCORD_INVITE_URL',
+        section: 'data-fetch',
+      },
+      'CommunityPage: Discord channel is not configured'
+    );
   }
   if (!channels.twitter) {
-    reqLogger.warn('CommunityPage: Twitter channel is not configured', {
-      section: 'configuration-check',
-      channel: 'twitter',
-      configKey: 'TWITTER_URL',
-    });
+    reqLogger.warn(
+      {
+        channel: 'twitter',
+        configKey: 'TWITTER_URL',
+        section: 'data-fetch',
+      },
+      'CommunityPage: Twitter channel is not configured'
+    );
   }
 
   // Section: Data Fetch
@@ -125,21 +126,33 @@ export default async function CommunityPage() {
 
   const [communityDirectory, configurationCount, homepageData] = await Promise.all([
     getCommunityDirectory({ limit: 500 }).catch((error) => {
-      reqLogger.error('CommunityPage: failed to load community directory', normalizeError(error), {
-        section: 'data-fetch',
-      });
+      reqLogger.error(
+        {
+          err: normalizeError(error),
+          section: 'data-fetch',
+        },
+        'CommunityPage: failed to load community directory'
+      );
       return null;
     }),
     getConfigurationCount().catch((error) => {
-      reqLogger.error('CommunityPage: failed to load configuration count', normalizeError(error), {
-        section: 'data-fetch',
-      });
+      reqLogger.error(
+        {
+          err: normalizeError(error),
+          section: 'data-fetch',
+        },
+        'CommunityPage: failed to load configuration count'
+      );
       return 0;
     }),
     getHomepageData(categoryIds).catch((error) => {
-      reqLogger.error('CommunityPage: failed to load homepage metrics', normalizeError(error), {
-        section: 'data-fetch',
-      });
+      reqLogger.error(
+        {
+          err: normalizeError(error),
+          section: 'data-fetch',
+        },
+        'CommunityPage: failed to load homepage metrics'
+      );
       return null;
     }),
   ]);
@@ -150,22 +163,22 @@ export default async function CommunityPage() {
 
   const statCards = [
     {
-      icon: Layers,
-      title: 'Configurations',
-      value: formatStatValue(totalConfigurations),
       description: 'Published Claude setups in the directory',
+      iconId: 'layers' as const,
+      title: 'Configurations',
+      value: totalConfigurations,
     },
     {
-      icon: MessageCircle,
-      title: 'Contributors',
-      value: formatStatValue(totalContributors),
       description: 'Builders sharing agents, MCP servers, and hooks',
+      iconId: 'message-circle' as const,
+      title: 'Contributors',
+      value: totalContributors,
     },
     {
-      icon: Users,
-      title: 'Community Members',
-      value: formatStatValue(memberCount),
       description: 'Discord, newsletter, and directory members',
+      iconId: 'users' as const,
+      title: 'Community Members',
+      value: memberCount,
     },
   ];
 
@@ -176,9 +189,9 @@ export default async function CommunityPage() {
         <div className="container mx-auto text-center">
           <div className="mx-auto max-w-3xl">
             <UnifiedBadge
-              variant="base"
-              style="outline"
               className="border-accent/20 bg-accent/5 text-accent mb-6"
+              style="outline"
+              variant="base"
             >
               <Users className="text-accent mr-1 h-3 w-3" />
               Community
@@ -193,24 +206,24 @@ export default async function CommunityPage() {
 
             <div className="flex flex-wrap justify-center gap-4">
               {channels.github ? (
-                <Button size="lg" asChild>
-                  <a href={channels.github} target="_blank" rel="noopener noreferrer">
+                <Button asChild size="lg">
+                  <a href={channels.github} rel="noopener noreferrer" target="_blank">
                     <Github className="mr-2 h-5 w-5" />
                     GitHub
                   </a>
                 </Button>
               ) : null}
               {channels.discord ? (
-                <Button size="lg" variant="outline" asChild>
-                  <a href={channels.discord} target="_blank" rel="noopener noreferrer">
+                <Button asChild size="lg" variant="outline">
+                  <a href={channels.discord} rel="noopener noreferrer" target="_blank">
                     <MessageSquare className="mr-2 h-5 w-5" />
                     Discord
                   </a>
                 </Button>
               ) : null}
               {channels.twitter ? (
-                <Button size="lg" variant="outline" asChild>
-                  <a href={channels.twitter} target="_blank" rel="noopener noreferrer">
+                <Button asChild size="lg" variant="outline">
+                  <a href={channels.twitter} rel="noopener noreferrer" target="_blank">
                     <Twitter className="mr-2 h-5 w-5" />X (Twitter)
                   </a>
                 </Button>
@@ -224,19 +237,14 @@ export default async function CommunityPage() {
       <section className="px-4 py-16">
         <div className="container mx-auto">
           <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
-            {statCards.map(({ icon: Icon, title, value, description }) => (
-              <Card key={title}>
-                <CardHeader>
-                  <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                    <Icon className="text-primary h-5 w-5" />
-                    {title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold">{value}</div>
-                  <p className="text-muted-foreground">{description}</p>
-                </CardContent>
-              </Card>
+            {statCards.map(({ description, iconId, title, value }) => (
+              <CommunityStatsCard
+                description={description}
+                iconId={iconId}
+                key={title}
+                title={title}
+                value={value}
+              />
             ))}
           </div>
         </div>
@@ -277,11 +285,6 @@ export default async function CommunityPage() {
             </CardContent>
           </Card>
         </div>
-      </section>
-
-      {/* Email CTA - Footer section (matching homepage pattern) */}
-      <section className="container mx-auto px-4 py-12">
-        <NewsletterCTAVariant source="content_page" variant="hero" />
       </section>
     </div>
   );

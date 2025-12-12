@@ -1,23 +1,63 @@
+# Composite Action: Setup repository with pnpm and Node.js
+# Optimizations: skip-checkout option (avoids double checkout), install-deps option
+# Uses actions/checkout@v6 for improved performance and sparse checkout support
 name: 'Setup'
-description: 'Setup repository with pnpm and Node.js'
+description: 'Setup repository with pnpm and Node.js (optimized with caching)'
+
+inputs:
+  node-version:
+    description: 'Node.js version to use'
+    required: false
+    default: '22'
+  pnpm-version:
+    description: 'pnpm version to use'
+    required: false
+    default: '10.25.0'
+  install-args:
+    description: 'Additional arguments for pnpm install'
+    required: false
+    default: '--frozen-lockfile'
+  fetch-depth:
+    description: 'Git fetch depth (0 for full history, 1 for shallow)'
+    required: false
+    default: '1'
+  skip-checkout:
+    description: 'Skip checkout step (use when already checked out)'
+    required: false
+    default: 'false'
+  install-deps:
+    description: 'Whether to install dependencies'
+    required: false
+    default: 'true'
 
 runs:
   using: 'composite'
   steps:
-    - uses: actions/checkout@v4
-      shell: bash
+    - name: Checkout repository
+      if: inputs.skip-checkout != 'true'
+      uses: actions/checkout@v6
+      with:
+        fetch-depth: ${{ inputs.fetch-depth }}
       
-    - uses: pnpm/action-setup@v3
+    - name: Setup pnpm
+      if: inputs.install-deps == 'true'
+      uses: pnpm/action-setup@v4
       with:
-        version: 10.23.0
-      shell: bash
+        version: ${{ inputs.pnpm-version }}
           
-    - uses: actions/setup-node@v4
+    - name: Setup Node.js
+      if: inputs.install-deps == 'true'
+      uses: actions/setup-node@v6
       with:
-        node-version: '22'
+        node-version: ${{ inputs.node-version }}
         cache: 'pnpm'
-      shell: bash
+
+    - name: Setup Deno
+      uses: denoland/setup-deno@v2
+      with:
+        deno-version: v2.2.0
 
     - name: Install dependencies
-      run: pnpm install
+      if: inputs.install-deps == 'true'
+      run: pnpm install ${{ inputs.install-args }}
       shell: bash

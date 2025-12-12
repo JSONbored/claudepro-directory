@@ -25,22 +25,32 @@
  * ```
  */
 
+import {
+  type RecentlyViewedItem,
+  useRecentlyViewed,
+  getCategoryRoute,
+} from '@heyclaude/web-runtime/hooks';
+import { getCategoryConfig } from '@heyclaude/web-runtime/data';
+import { isValidCategory } from '@heyclaude/web-runtime/core';
 import { ChevronDown, ChevronUp, Clock, Trash, X } from '@heyclaude/web-runtime/icons';
-import { ANIMATION_CONSTANTS, cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import {
+  cn,
+  UI_CLASSES,
+  UnifiedBadge,
+  Button,
+} from '@heyclaude/web-runtime/ui';
+import { MICROINTERACTIONS, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
 import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
-import { memo, useState } from 'react';
-import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
-import { Button } from '@heyclaude/web-runtime/ui';
-import { type RecentlyViewedItem, useRecentlyViewed, getCategoryRoute } from '@heyclaude/web-runtime/hooks';
+import { memo, useState, type MouseEvent } from 'react';
 
 // =============================================================================
 // ITEM COMPONENT
 // =============================================================================
 
 interface RecentlyViewedItemProps {
-  item: RecentlyViewedItem;
   index: number;
+  item: RecentlyViewedItem;
   onRemove: (category: RecentlyViewedItem['category'], slug: string) => void;
 }
 
@@ -57,9 +67,9 @@ const RecentlyViewedItemComponent = memo(function RecentlyViewedItemComponent({
   const viewedDate = new Date(item.viewedAt);
   const now = new Date();
   const diffMs = now.getTime() - viewedDate.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMs / 3600000);
-  const diffDays = Math.floor(diffMs / 86400000);
+  const diffMins = Math.floor(diffMs / 60_000);
+  const diffHours = Math.floor(diffMs / 3_600_000);
+  const diffDays = Math.floor(diffMs / 86_400_000);
 
   let timeAgo = '';
   if (diffMins < 1) timeAgo = 'Just now';
@@ -75,36 +85,54 @@ const RecentlyViewedItemComponent = memo(function RecentlyViewedItemComponent({
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -10 }}
       transition={{
-        duration: 0.2,
-        delay: index * 0.03, // Stagger by 30ms
+        duration: DURATION.quick,
+        delay: index * STAGGER.micro, // Stagger by 30ms (using micro for closest match)
         ease: 'easeOut',
       }}
       className="group relative"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <Link
-        href={href}
-        className={`flex flex-col gap-1.5 rounded-lg border border-border/50 bg-card px-3 py-2.5 ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:border-accent/50 hover:bg-accent/5`}
+      <motion.div
+        whileHover={{
+          ...MICROINTERACTIONS.card.hover,
+          borderColor: 'rgba(249, 115, 22, 0.5)', // Preserve exact original border color (accent/50)
+          backgroundColor: 'rgba(249, 115, 22, 0.05)', // Preserve exact original background (accent/5)
+          y: 0, // Preserve original (no y movement in original)
+        }}
+        whileTap={MICROINTERACTIONS.card.tap}
+        transition={MICROINTERACTIONS.card.transition}
       >
+        <Link
+          href={href}
+          className="border-border/50 bg-card flex flex-col gap-1.5 rounded-lg border px-3 py-2.5"
+        >
         {/* Header: Badge + Time */}
         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-          <UnifiedBadge variant="base" style="outline" className="text-[10px] capitalize">
-            {item.category}
+          <UnifiedBadge variant="base" style="outline" className="text-[10px]">
+            {(() => {
+              // Convert RecentlyViewedCategory (singular) to content_category (plural) for config lookup
+              const routeCategory = getCategoryRoute(item.category);
+              if (isValidCategory(routeCategory)) {
+                const config = getCategoryConfig(routeCategory);
+                return config?.typeName ?? routeCategory;
+              }
+              return routeCategory;
+            })()}
           </UnifiedBadge>
-          <span className="text-[10px] text-muted-foreground">{timeAgo}</span>
+          <span className="text-muted-foreground text-[10px]">{timeAgo}</span>
         </div>
 
         {/* Title */}
-        <h4 className="line-clamp-1 font-medium text-foreground text-sm">{item.title}</h4>
+        <h4 className="text-foreground line-clamp-1 text-sm font-medium">{item.title}</h4>
 
         {/* Description */}
-        <p className="line-clamp-2 text-[11px] text-muted-foreground leading-tight">
+        <p className="text-muted-foreground line-clamp-2 text-[11px] leading-tight">
           {item.description}
         </p>
 
         {/* Tags (if present) */}
-        {item.tags && item.tags.length > 0 && (
+        {item.tags && item.tags.length > 0 ? (
           <div className="mt-1 flex flex-wrap gap-1">
             {item.tags.slice(0, 2).map((tag) => (
               <UnifiedBadge key={tag} variant="base" style="outline" className="text-[9px]">
@@ -112,32 +140,33 @@ const RecentlyViewedItemComponent = memo(function RecentlyViewedItemComponent({
               </UnifiedBadge>
             ))}
             {item.tags.length > 2 && (
-              <span className="text-[9px] text-muted-foreground">+{item.tags.length - 2}</span>
+              <span className="text-muted-foreground text-[9px]">+{item.tags.length - 2}</span>
             )}
           </div>
-        )}
-      </Link>
+        ) : null}
+        </Link>
+      </motion.div>
 
       {/* Remove button (shows on hover) */}
       <AnimatePresence>
-        {isHovered && (
+        {isHovered ? (
           <motion.button
             type="button"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
-            transition={{ duration: 0.15 }}
-            onClick={(e) => {
+            transition={{ duration: DURATION.fast }}
+            onClick={(e: MouseEvent<HTMLButtonElement>) => {
               e.preventDefault();
               e.stopPropagation();
               onRemove(item.category, item.slug);
             }}
-            className="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-md border border-border/50 bg-background/95 backdrop-blur-sm hover:border-destructive hover:bg-destructive/10 hover:text-destructive"
+            className="border-border/50 bg-background/95 hover:border-destructive hover:bg-destructive/10 hover:text-destructive absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-md border backdrop-blur-sm"
             aria-label={`Remove ${item.title} from recently viewed`}
           >
             <X className="h-3 w-3" />
           </motion.button>
-        )}
+        ) : null}
       </AnimatePresence>
     </motion.div>
   );
@@ -151,27 +180,24 @@ export const RecentlyViewedSidebar = memo(function RecentlyViewedSidebar() {
   const { recentlyViewed, isLoaded, removeItem, clearAll } = useRecentlyViewed();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  // Don't render until loaded (prevents flash of empty state)
-  if (!isLoaded) return null;
-
-  // Don't render if no items
-  if (recentlyViewed.length === 0) return null;
+  // Always render - show empty state if no items
+  // This ensures consistent sidebar layout across all pages
 
   return (
     <motion.aside
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.3, delay: 0.1 }}
+      transition={{ duration: DURATION.default, delay: STAGGER.fast }}
       className={cn(
-        'sticky top-20 hidden h-fit max-h-[calc(100vh-6rem)] w-72 flex-col gap-3 rounded-xl border border-border/50 bg-card/50 p-4 backdrop-blur-sm xl:flex',
+        'border-border/50 bg-card/50 sticky top-20 hidden h-fit max-h-[calc(100vh-6rem)] w-full flex-col gap-3 rounded-xl border p-4 backdrop-blur-sm xl:flex',
         'overflow-hidden'
       )}
     >
       {/* Header */}
       <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-          <Clock className="h-4 w-4 text-muted-foreground" />
-          <h3 className="font-semibold text-foreground text-sm">Recently Viewed</h3>
+          <Clock className="text-muted-foreground h-4 w-4" />
+          <h3 className="text-foreground text-sm font-semibold">Recently Viewed</h3>
         </div>
         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
           {/* Clear all button */}
@@ -199,37 +225,61 @@ export const RecentlyViewedSidebar = memo(function RecentlyViewedSidebar() {
         </div>
       </div>
 
-      {/* List */}
+      {/* List or Empty State */}
       <AnimatePresence mode="popLayout">
         {!isCollapsed && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: DURATION.quick }}
             className="flex flex-col gap-2 overflow-y-auto pr-1"
           >
-            <AnimatePresence mode="popLayout">
-              {recentlyViewed.map((item, index) => (
-                <RecentlyViewedItemComponent
-                  key={`${item.category}-${item.slug}`}
-                  item={item}
-                  index={index}
-                  onRemove={removeItem}
-                />
-              ))}
-            </AnimatePresence>
+            {!isLoaded ? (
+              // Loading state
+              <div className="text-muted-foreground py-8 text-center text-sm">
+                Loading...
+              </div>
+            ) : recentlyViewed.length === 0 ? (
+              // Empty state - always show to maintain consistent sidebar
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: DURATION.default }}
+                className="border-border/30 text-muted-foreground flex flex-col items-center gap-3 rounded-lg border border-dashed p-6 text-center"
+              >
+                <Clock className="h-8 w-8 opacity-50" />
+                <div className="space-y-1">
+                  <p className="text-foreground text-sm font-medium">No recent views</p>
+                  <p className="text-xs">
+                    Start browsing content to see your recently viewed items here
+                  </p>
+                </div>
+              </motion.div>
+            ) : (
+              // Items list
+              <AnimatePresence mode="popLayout">
+                {recentlyViewed.map((item, index) => (
+                  <RecentlyViewedItemComponent
+                    key={`${item.category}-${item.slug}`}
+                    item={item}
+                    index={index}
+                    onRemove={removeItem}
+                  />
+                ))}
+              </AnimatePresence>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Footer hint */}
-      {!isCollapsed && (
+      {/* Footer hint - only show when there are items */}
+      {!isCollapsed && isLoaded && recentlyViewed.length > 0 && (
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="border-border/30 border-t pt-3 text-center text-[10px] text-muted-foreground"
+          transition={{ delay: STAGGER.slow }}
+          className="border-border/30 text-muted-foreground border-t pt-3 text-center text-[10px]"
         >
           Showing {recentlyViewed.length} of 10 max
         </motion.p>

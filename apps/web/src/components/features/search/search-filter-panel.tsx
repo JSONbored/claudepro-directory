@@ -13,33 +13,37 @@
  * - Apply/Clear actions
  */
 
-import type { FilterState } from '@heyclaude/web-runtime/types/component.types';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { memo, useId } from 'react';
-import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
-import { Button } from '@heyclaude/web-runtime/ui';
-import { Label } from '@heyclaude/web-runtime/ui';
-import { ScrollArea } from '@heyclaude/web-runtime/ui';
+import { type Database } from '@heyclaude/database-types';
+import { DURATION } from '@heyclaude/web-runtime/design-system';
+import { isValidCategory } from '@heyclaude/web-runtime/core';
+import { getCategoryConfig } from '@heyclaude/web-runtime/data';
+import { type FilterState } from '@heyclaude/web-runtime/types/component.types';
 import {
+  UI_CLASSES,
+  UnifiedBadge,
+  Button,
+  Label,
+  ScrollArea,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Slider,
 } from '@heyclaude/web-runtime/ui';
-import { Slider } from '@heyclaude/web-runtime/ui';
+import { memo, useId } from 'react';
 
 export interface SearchFilterPanelProps {
-  filters: FilterState;
-  availableTags?: readonly string[];
+  activeFilterCount: number;
   availableAuthors?: readonly string[];
   availableCategories?: readonly string[];
-  activeFilterCount: number;
-  onFilterChange: (key: keyof FilterState, value: FilterState[keyof FilterState]) => void;
-  onToggleTag: (tag: string) => void;
-  onClearFilters: () => void;
+  availableTags?: readonly string[];
+  filters: FilterState;
   onApplyFilters?: () => void;
   onCancel?: () => void;
+  onClearFilters: () => void;
+  onFilterChange: (key: keyof FilterState, value: FilterState[keyof FilterState]) => void;
+  onToggleTag: (tag: string) => void;
   showActions?: boolean;
 }
 
@@ -62,9 +66,7 @@ function SearchFilterPanelComponent({
   const dateRangeSelectId = useId();
 
   return (
-    <section
-      className={'space-y-4 rounded-lg border border-border/50 bg-card/30 p-4 md:space-y-6 md:p-6'}
-    >
+    <section className="border-border/50 bg-[rgba(0,0,0,0.6)] backdrop-blur-xl space-y-4 rounded-lg border p-4 md:space-y-6 md:p-6 shadow-xl">
       {/* Main Filters */}
       <fieldset className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6 lg:grid-cols-3">
         <legend className="sr-only">Filter by category, author, and date range</legend>
@@ -89,11 +91,17 @@ function SearchFilterPanelComponent({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
-                {availableCategories.map((cat) => (
-                  <SelectItem key={cat} value={cat}>
-                    {cat}
-                  </SelectItem>
-                ))}
+                {availableCategories.map((cat) => {
+                  // Get display name from category config
+                  const displayName = isValidCategory(cat)
+                    ? getCategoryConfig(cat as Database['public']['Enums']['content_category'])?.typeName ?? cat
+                    : cat;
+                  return (
+                    <SelectItem key={cat} value={cat}>
+                      {displayName}
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
           </div>
@@ -158,7 +166,7 @@ function SearchFilterPanelComponent({
 
       {/* Popularity Slider */}
       <fieldset className="space-y-2">
-        <legend className="font-medium text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+        <legend className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
           Popularity Range ({filters.popularity?.[0] || 0} - {filters.popularity?.[1] || 100})
         </legend>
         <div className="px-2 py-4">
@@ -179,13 +187,13 @@ function SearchFilterPanelComponent({
       {/* Tags - Organized in Scrollable Area */}
       {availableTags.length > 0 && (
         <fieldset className="space-y-3">
-          <div className={'border-border/50 border-t pt-3'} />
+          <div className="border-border/50 border-t pt-3" />
           <div>
             <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mb-3`}>
-              <legend className="font-medium text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+              <legend className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                 Tags
               </legend>
-              {filters.tags && filters.tags.length > 0 && (
+              {filters.tags && filters.tags.length > 0 ? (
                 <Button
                   variant="ghost"
                   size="sm"
@@ -194,10 +202,10 @@ function SearchFilterPanelComponent({
                 >
                   Clear Tags ({filters.tags.length})
                 </Button>
-              )}
+              ) : null}
             </div>
             <ScrollArea
-              className={'h-40 w-full rounded-md border border-border/50 p-4 md:h-48'}
+              className="border-border/50 h-40 w-full rounded-md border p-4 md:h-48"
               aria-label="Select tags to filter by"
             >
               <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
@@ -214,7 +222,8 @@ function SearchFilterPanelComponent({
                     aria-pressed={filters.tags?.includes(tag)}
                     aria-label={`${filters.tags?.includes(tag) ? 'Remove' : 'Add'} ${tag} tag filter`}
                     type="button"
-                    className="cursor-pointer transition-all duration-200"
+                    className="cursor-pointer transition-all"
+                    style={{ transitionDuration: `${DURATION.quick}s` }}
                   >
                     <UnifiedBadge
                       variant="base"
@@ -232,8 +241,8 @@ function SearchFilterPanelComponent({
       )}
 
       {/* Action Buttons */}
-      {showActions && (
-        <fieldset className={'flex items-center justify-between border-border/50 border-t pt-6'}>
+      {showActions ? (
+        <fieldset className="border-border/50 flex items-center justify-between border-t pt-6">
           <legend className="sr-only">Filter actions</legend>
           <Button
             variant="ghost"
@@ -244,7 +253,7 @@ function SearchFilterPanelComponent({
             Clear All Filters
           </Button>
           <div className={UI_CLASSES.FLEX_GAP_2}>
-            {onCancel && (
+            {onCancel ? (
               <Button
                 variant="outline"
                 onClick={onCancel}
@@ -252,18 +261,18 @@ function SearchFilterPanelComponent({
               >
                 Cancel
               </Button>
-            )}
-            {onApplyFilters && (
+            ) : null}
+            {onApplyFilters ? (
               <Button
                 onClick={onApplyFilters}
-                aria-label={`Apply ${activeFilterCount} filter${activeFilterCount !== 1 ? 's' : ''}`}
+                aria-label={`Apply ${activeFilterCount} filter${activeFilterCount === 1 ? '' : 's'}`}
               >
                 Apply Filters
               </Button>
-            )}
+            ) : null}
           </div>
         </fieldset>
-      )}
+      ) : null}
     </section>
   );
 }

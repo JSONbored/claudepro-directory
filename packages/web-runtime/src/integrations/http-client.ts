@@ -7,7 +7,6 @@
  * @module packages/web-runtime/src/integrations/http-client
  */
 
-import { createUtilityContext } from '@heyclaude/shared-runtime';
 import { normalizeError } from '../errors';
 import { logger } from '../logger';
 
@@ -22,7 +21,7 @@ export interface FetchWithRetryOptions {
     retryOn?: number[];
     noRetryOn?: number[];
   };
-  logContext?: ReturnType<typeof createUtilityContext>;
+  logContext?: Record<string, unknown>;
 }
 
 export interface FetchWithRetryResult {
@@ -37,7 +36,7 @@ export interface RetryOptions {
   attempts?: number;
   baseDelayMs?: number;
   onRetry?: (attempt: number, error: Error, delay: number) => void;
-  logContext?: ReturnType<typeof createUtilityContext>;
+  logContext?: Record<string, unknown>;
 }
 
 export async function fetchWithRetry({
@@ -53,7 +52,12 @@ export async function fetchWithRetry({
   const retryOn = retry?.retryOn;
   const noRetryOn = retry?.noRetryOn;
 
-  const context = logContext ?? createUtilityContext('fetchWithRetry', 'fetch', { url, method });
+  const context = logContext ?? {
+    function: 'fetchWithRetry',
+    operation: 'fetch',
+    url,
+    method,
+  };
 
   let lastError: Error | null = null;
 
@@ -106,13 +110,11 @@ export async function fetchWithRetry({
 
     if (attempt < attempts - 1) {
       const delay = baseDelay * 2 ** attempt;
-      logger.warn('retrying request', {
-        ...context,
+      logger.warn({ ...context,
         attempt: attempt + 1,
         attempts,
         delay,
-        err: lastError || new Error('Unknown error'),
-      });
+        err: lastError || new Error('Unknown error'), }, 'retrying request');
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }
@@ -124,7 +126,10 @@ export async function runWithRetry<T>(
   fn: () => Promise<T>,
   { attempts = DEFAULT_ATTEMPTS, baseDelayMs = DEFAULT_BASE_DELAY_MS, onRetry, logContext }: RetryOptions = {}
 ): Promise<T> {
-  const context = logContext ?? createUtilityContext('runWithRetry', 'retry');
+  const context = logContext ?? {
+    function: 'runWithRetry',
+    operation: 'retry',
+  };
   let lastError: Error | null = null;
 
   for (let attempt = 0; attempt < attempts; attempt++) {
@@ -140,13 +145,11 @@ export async function runWithRetry<T>(
       if (onRetry) {
         onRetry(attempt + 1, errorForRetry, delay);
       } else {
-        logger.warn('retrying operation', {
-          ...context,
+        logger.warn({ ...context,
           attempt: attempt + 1,
           attempts,
           delay,
-          err: errorForRetry,
-        });
+          err: errorForRetry, }, 'retrying operation');
       }
 
       await new Promise((resolve) => setTimeout(resolve, delay));

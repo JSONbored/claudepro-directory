@@ -14,6 +14,7 @@
  * @module components/ui/magic/rolling-text
  */
 
+import { SPRING, STAGGER } from '../../../design-system/index.ts';
 import { cn } from '../../utils.ts';
 import { motion, type Transition, useInView } from 'motion/react';
 import * as React from 'react';
@@ -56,7 +57,7 @@ interface RollingTextProps extends Omit<React.ComponentProps<'span'>, 'children'
 export function RollingText({
   words,
   duration = 3000,
-  transition = { duration: 0.6, delay: 0.05, ease: [0.16, 1, 0.3, 1] },
+  transition = { ...SPRING.smooth, delay: STAGGER.micro },
   className,
   ...props
 }: RollingTextProps) {

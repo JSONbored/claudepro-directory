@@ -3,7 +3,7 @@
 import { z } from 'zod';
 import type { Database } from '@heyclaude/database-types';
 import { rateLimitedAction } from './safe-action.ts';
-import { logger, generateRequestId, createWebAppContextWithId } from '../logging/server.ts';
+import { logger, createWebAppContextWithId } from '../logging/server.ts';
 
 // Newsletter source enum from database types
 type NewsletterSource = Database['public']['Enums']['newsletter_source'];
@@ -61,15 +61,12 @@ export const subscribeNewsletterAction = rateLimitedAction
   .inputSchema(subscribeSchema)
   .metadata({ actionName: 'newsletter.subscribe', category: 'form' })
   .action(async ({ parsedInput }) => {
-    const requestId = generateRequestId();
-    const logContext = createWebAppContextWithId(requestId, 'action', 'subscribeNewsletterAction');
+    const logContext = createWebAppContextWithId('action', 'subscribeNewsletterAction');
     
     const normalizedEmail = parsedInput.email.toLowerCase().trim();
     
-    logger.info('Newsletter subscription requested', {
-      ...logContext,
-      source: parsedInput.source,
-    });
+    logger.info({ ...logContext,
+      source: parsedInput.source, }, 'Newsletter subscription requested');
 
     try {
       // Send event to Inngest for durable processing
@@ -85,10 +82,8 @@ export const subscribeNewsletterAction = rateLimitedAction
         },
       });
 
-      logger.info('Newsletter subscription event sent to Inngest', {
-        ...logContext,
-        source: parsedInput.source,
-      });
+      logger.info({ ...logContext,
+        source: parsedInput.source, }, 'Newsletter subscription event sent to Inngest');
 
       return { 
         success: true,
@@ -98,7 +93,7 @@ export const subscribeNewsletterAction = rateLimitedAction
       const { normalizeError } = await import('../errors.ts');
       const normalized = normalizeError(error, 'Newsletter subscription failed');
       
-      logger.error('Newsletter subscription failed', normalized, logContext);
+      logger.error({ err: normalized, ...logContext }, 'Newsletter subscription failed');
       
       throw new Error('Failed to process subscription. Please try again.');
     }
@@ -112,15 +107,12 @@ export const subscribeViaOAuthAction = rateLimitedAction
   .inputSchema(subscribeViaOAuthSchema)
   .metadata({ actionName: 'newsletter.subscribeViaOAuth', category: 'form' })
   .action(async ({ parsedInput }) => {
-    const requestId = generateRequestId();
-    const logContext = createWebAppContextWithId(requestId, 'action', 'subscribeViaOAuthAction');
+    const logContext = createWebAppContextWithId('action', 'subscribeViaOAuthAction');
     
     const normalizedEmail = parsedInput.email.toLowerCase().trim();
 
-    logger.info('OAuth newsletter subscription requested', {
-      ...logContext,
-      triggerSource: parsedInput.metadata?.trigger_source,
-    });
+    logger.info({ ...logContext,
+      triggerSource: parsedInput.metadata?.trigger_source, }, 'OAuth newsletter subscription requested');
 
     try {
       const { inngest } = await import('../inngest/client.ts');
@@ -137,14 +129,14 @@ export const subscribeViaOAuthAction = rateLimitedAction
         },
       });
 
-      logger.info('OAuth subscription event sent to Inngest', logContext);
+      logger.info(logContext, 'OAuth subscription event sent to Inngest');
 
       return { success: true };
     } catch (error) {
       const { normalizeError } = await import('../errors.ts');
       const normalized = normalizeError(error, 'OAuth subscription failed');
       
-      logger.error('OAuth subscription failed', normalized, logContext);
+      logger.error({ err: normalized, ...logContext }, 'OAuth subscription failed');
       
       throw new Error('Failed to process subscription. Please try again.');
     }

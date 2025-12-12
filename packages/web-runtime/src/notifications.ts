@@ -63,10 +63,8 @@ export async function dismissNotifications({
     return result.dismissed;
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to dismiss notifications via flux-station');
-    logger.error('Failed to dismiss notifications via flux-station', normalized, {
-      userId,
-      notificationIdsCount: notificationIds.length,
-    });
+    logger.error({ err: normalized, userId,
+      notificationIdsCount: notificationIds.length, }, 'Failed to dismiss notifications via flux-station');
     throw error;
   }
 }
@@ -99,10 +97,14 @@ export async function createNotification(
     return result.notification;
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to create notification via flux-station');
-    logger.error('Failed to create notification via flux-station', normalized, {
-      ...(input.id && { notificationId: input.id }),
-      title: input.title,
-    });
+    logger.error(
+      {
+        err: normalized,
+        ...(input.id && { notificationId: input.id }),
+        title: input.title,
+      },
+      'Failed to create notification via flux-station'
+    );
     throw error;
   }
 }

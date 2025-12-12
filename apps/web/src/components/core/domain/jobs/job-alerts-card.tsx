@@ -1,19 +1,23 @@
 'use client';
 
 import { Constants } from '@heyclaude/database-types';
-import { cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { useState } from 'react';
-import { Button } from '@heyclaude/web-runtime/ui';
-import { Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
-import { Input } from '@heyclaude/web-runtime/ui';
+import { useNewsletter } from '@heyclaude/web-runtime/hooks';
 import {
+  cn,
+  UI_CLASSES,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Input,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@heyclaude/web-runtime/ui';
-import { useNewsletter } from '@heyclaude/web-runtime/hooks';
+import { useState } from 'react';
 
 // Use Constants for enum values
 const EXPERIENCE_OPTIONS = [
@@ -48,9 +52,23 @@ const CATEGORY_OPTIONS = [
 interface JobAlertsCardProps {
   defaultCategory?: string;
   defaultExperience?: string;
-  defaultRemote?: 'remote' | 'any';
+  defaultRemote?: 'any' | 'remote';
 }
 
+/**
+ * Card UI that lets users create email job alerts filtered by category, experience, and remote preference.
+ *
+ * Renders a form with an email input and selects for preferred category, experience level, and location; submits preferences via the newsletter subscription hook.
+ *
+ * @param defaultCategory - Initial selected job category (defaults to "all")
+ * @param defaultExperience - Initial selected experience level (defaults to "any")
+ * @param defaultRemote - Initial selected remote preference, either "any" or "remote" (defaults to "any")
+ *
+ * @see useNewsletter - hook used to manage subscription state and send the subscription request
+ * @see CATEGORY_OPTIONS - available category choices shown in the category select
+ * @see EXPERIENCE_OPTIONS - available experience choices shown in the experience select
+ * @see REMOTE_OPTIONS - available location choices shown in the location select
+ */
 export function JobAlertsCard({
   defaultCategory = 'all',
   defaultExperience = 'any',
@@ -98,7 +116,7 @@ export function JobAlertsCard({
               placeholder="you@example.com"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              required={true}
+              required
               aria-describedby={error ? 'job-alert-error' : undefined}
             />
           </div>
@@ -163,11 +181,11 @@ export function JobAlertsCard({
             </Select>
           </div>
 
-          {error && (
+          {error ? (
             <p id="job-alert-error" className="text-destructive text-sm">
               {error}
             </p>
-          )}
+          ) : null}
 
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
             <Button type="submit" disabled={isSubmitting} className="flex-1">

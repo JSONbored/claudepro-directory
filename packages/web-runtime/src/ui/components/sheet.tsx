@@ -12,7 +12,7 @@
  * - Respects prefers-reduced-motion
  */
 
-import { UI_ANIMATION } from '../../config/unified-config.ts';
+import { SPRING } from '../../design-system/index.ts';
 import { X } from '../../icons.tsx';
 import { POSITION_PATTERNS, UI_CLASSES } from '../constants.ts';
 import { cn } from '../utils.ts';
@@ -38,7 +38,7 @@ const SheetOverlay = ({
 }) => (
   <SheetPrimitive.Overlay
     className={cn(
-      `data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 ${POSITION_PATTERNS.FIXED_INSET} z-50 bg-black/80 will-change-opacity data-[state=closed]:animate-out data-[state=open]:animate-in`,
+      `data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 ${POSITION_PATTERNS.FIXED_INSET} z-[60] bg-black/80 will-change-opacity data-[state=closed]:animate-out data-[state=open]:animate-in`,
       className
     )}
     {...props}
@@ -48,7 +48,7 @@ const SheetOverlay = ({
 SheetOverlay.displayName = SheetPrimitive.Overlay.displayName;
 
 const sheetVariants = cva(
-  'fixed z-50 gap-4 bg-background p-6 shadow-lg transition ease-in-out will-change-transform contain-paint data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500',
+  'fixed z-[61] gap-4 bg-background p-6 shadow-lg transition ease-in-out will-change-transform contain-paint data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500',
   {
     variants: {
       side: {
@@ -70,12 +70,8 @@ interface SheetContentProps
   extends React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>,
     VariantProps<typeof sheetVariants> {}
 
-/** Spring animation config from unified config */
-const springSmooth = {
-  type: 'spring' as const,
-  stiffness: UI_ANIMATION['spring.smooth.stiffness'],
-  damping: UI_ANIMATION['spring.smooth.damping'],
-};
+/** Spring animation config from design system */
+const springSmooth = SPRING.smooth;
 
 const SheetContent = ({
   side = 'right',

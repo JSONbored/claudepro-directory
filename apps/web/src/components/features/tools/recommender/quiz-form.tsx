@@ -5,17 +5,31 @@
  * All questions/options fetched from PostgreSQL.
  */
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { getQuizConfigurationAction } from '@heyclaude/web-runtime/actions';
-import { generateConfigRecommendations, logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { generateConfigRecommendations } from '@heyclaude/web-runtime/core';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
+import { ArrowLeft, ArrowRight, Sparkles } from '@heyclaude/web-runtime/icons';
+import { logClientError, logClientInfo, normalizeError } from '@heyclaude/web-runtime/logging/client';
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Separator,
+  DIMENSIONS,
+  toasts,
+  UI_CLASSES,
+  InlineSpinner,
+} from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, useTransition } from 'react';
+import { useCallback, useEffect, useState, useTransition } from 'react';
 import { z } from 'zod';
-import { Button } from '@heyclaude/web-runtime/ui';
-import { Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
-import { Separator } from '@heyclaude/web-runtime/ui';
+
+import { QuestionCard } from './question-card';
+import { QuizProgress } from './quiz-progress';
 
 // Use enum values directly from @heyclaude/database-types Constants
 const EXPERIENCE_LEVEL_VALUES = Constants.public.Enums.experience_level;
@@ -26,21 +40,21 @@ const USE_CASE_TYPE_VALUES = Constants.public.Enums.use_case_type;
 // Use generated type directly from @heyclaude/database-types
 type QuizConfigurationResult = Database['public']['Functions']['get_quiz_configuration']['Returns'];
 
-type QuizQuestion = {
-  id: string;
-  question: string;
-  description: string | null;
-  required: boolean;
+interface QuizQuestion {
+  description: null | string;
   displayOrder: number;
+  id: string;
   options: Array<{
-    value: string;
+    description: null | string;
+    iconName: null | string;
     label: string;
-    description: string | null;
-    iconName: string | null;
+    value: string;
   }>;
-};
+  question: string;
+  required: boolean;
+}
 
-function mapQuizConfigToQuestions(config: QuizConfigurationResult | null): QuizQuestion[] | null {
+function mapQuizConfigToQuestions(config: null | QuizConfigurationResult): null | QuizQuestion[] {
   if (!(config && Array.isArray(config)) || config.length === 0) {
     return null;
   }
@@ -59,12 +73,6 @@ function mapQuizConfigToQuestions(config: QuizConfigurationResult | null): QuizQ
     })),
   }));
 }
-
-import { ArrowLeft, ArrowRight, Sparkles } from '@heyclaude/web-runtime/icons';
-import { DIMENSIONS, toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { InlineSpinner } from '@heyclaude/web-runtime/ui';
-import { QuestionCard } from './question-card';
-import { QuizProgress } from './quiz-progress';
 
 // Manual Zod schema (database validates via RPC function)
 const quizAnswersSchema = z.object({
@@ -111,7 +119,7 @@ export function QuizForm() {
     defaultMessage: 'Quiz operation failed',
     defaultRethrow: false,
   });
-  const [quizConfig, setQuizConfig] = useState<QuizQuestion[] | null>(null);
+  const [quizConfig, setQuizConfig] = useState<null | QuizQuestion[]>(null);
   const [currentQuestion, setCurrentQuestion] = useState(1);
   const [answers, setAnswers] = useState<Partial<QuizAnswers>>({
     toolPreferences: [],
@@ -120,29 +128,66 @@ export function QuizForm() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  useEffect(() => {
-    getQuizConfigurationAction({})
-      .then((result) => {
-        if (result?.data) {
-          const mapped = mapQuizConfigToQuestions(result.data);
-          setQuizConfig(mapped);
+  const loadConfig = useCallback(async () => {
+    try {
+      const result = await getQuizConfigurationAction({});
+      if (result?.data) {
+        const mapped = mapQuizConfigToQuestions(result.data);
+        setQuizConfig(mapped);
+      }
+      if (result?.serverError) {
+        // Error already logged by safe-action middleware
+        const normalized = normalizeError(
+          result.serverError,
+          'Failed to load quiz configuration'
+        );
+        logClientError(
+          '[Quiz] Failed to load quiz configuration',
+          normalized,
+          'QuizForm.loadConfig',
+          {
+            component: 'QuizForm',
+            action: 'load-config',
+            category: 'quiz',
+          }
+        );
+        // Show error toast with "Retry" button
+        toasts.raw.error('Failed to load quiz', {
+          action: {
+            label: 'Retry',
+            onClick: () => {
+              loadConfig();
+            },
+          },
+        });
+      }
+    } catch (error) {
+      const normalized = normalizeError(error, 'Failed to load quiz configuration');
+      logClientError(
+        '[Quiz] Failed to load quiz configuration',
+        normalized,
+        'QuizForm.loadConfig',
+        {
+          component: 'QuizForm',
+          action: 'load-config',
+          category: 'quiz',
         }
-        if (result?.serverError) {
-          // Error already logged by safe-action middleware
-          const normalized = normalizeError(
-            result.serverError,
-            'Failed to load quiz configuration'
-          );
-          logger.error('Failed to load quiz configuration', normalized);
-          toasts.error.actionFailed('load quiz');
-        }
-      })
-      .catch((err) => {
-        const normalized = normalizeError(err, 'Failed to load quiz configuration');
-        logger.error('Failed to load quiz configuration', normalized);
-        toasts.error.actionFailed('load quiz');
+      );
+      // Show error toast with "Retry" button
+      toasts.raw.error('Failed to load quiz', {
+        action: {
+          label: 'Retry',
+          onClick: () => {
+            loadConfig();
+          },
+        },
       });
+    }
   }, []);
+
+  useEffect(() => {
+    loadConfig();
+  }, [loadConfig]);
 
   const updateAnswer = <K extends keyof QuizAnswers>(key: K, value: QuizAnswers[K]) => {
     setAnswers((prev) => ({ ...prev, [key]: value }));
@@ -184,10 +229,8 @@ export function QuizForm() {
   };
 
   const goToNext = () => {
-    if (validateCurrentQuestion()) {
-      if (quizConfig && currentQuestion < quizConfig.length) {
-        setCurrentQuestion((prev) => prev + 1);
-      }
+    if (validateCurrentQuestion() && quizConfig && currentQuestion < quizConfig.length) {
+      setCurrentQuestion((prev) => prev + 1);
     }
   };
 
@@ -233,11 +276,17 @@ export function QuizForm() {
                   `/tools/config-recommender/results/${result.recommendations.id}?answers=${encoded}`
                 );
 
-                logger.info('Quiz completed', {
-                  useCase: validatedAnswers.useCase,
-                  experienceLevel: validatedAnswers.experienceLevel,
-                  resultId: result.recommendations.id,
-                });
+                logClientInfo(
+                  'Quiz completed',
+                  'QuizForm.handleSubmit',
+                  {
+                    component: 'QuizForm',
+                    action: 'submit',
+                    useCase: validatedAnswers.useCase,
+                    experienceLevel: validatedAnswers.experienceLevel,
+                    resultId: result.recommendations.id,
+                  }
+                );
               } else {
                 throw new Error('Failed to generate recommendations');
               }
@@ -251,15 +300,32 @@ export function QuizForm() {
               },
             }
           );
-        } catch (error) {
+        } catch {
           // Error already logged by useLoggedAsync
-          toasts.error.actionFailed('generate recommendations');
+          // Show error toast with "Retry" button
+          toasts.raw.error('Failed to generate recommendations', {
+            action: {
+              label: 'Retry',
+              onClick: () => {
+                handleSubmit();
+              },
+            },
+          });
         }
       });
     } catch (error) {
       toasts.error.invalidInput();
       const normalized = normalizeError(error, 'Quiz validation failed');
-      logger.error('Quiz validation failed', normalized);
+      logClientError(
+        '[Quiz] Validation failed',
+        normalized,
+        'QuizForm.validate',
+        {
+          component: 'QuizForm',
+          action: 'validate',
+          category: 'quiz',
+        }
+      );
     }
   };
 
@@ -317,7 +383,7 @@ export function QuizForm() {
               })}
             >
               <div className="space-y-4">
-                <div className="space-y-2 rounded-lg bg-muted p-4">
+                <div className="bg-muted space-y-2 rounded-lg p-4">
                   <div>
                     <span className="font-medium">Use Case:</span>{' '}
                     <span className="text-muted-foreground">
@@ -334,28 +400,28 @@ export function QuizForm() {
                       {answers.toolPreferences?.join(', ')}
                     </span>
                   </div>
-                  {answers.p_integrations && answers.p_integrations.length > 0 && (
+                  {answers.p_integrations && answers.p_integrations.length > 0 ? (
                     <div>
                       <span className="font-medium">Integrations:</span>{' '}
                       <span className="text-muted-foreground">
                         {answers.p_integrations.join(', ')}
                       </span>
                     </div>
-                  )}
-                  {answers.p_focus_areas && answers.p_focus_areas.length > 0 && (
+                  ) : null}
+                  {answers.p_focus_areas && answers.p_focus_areas.length > 0 ? (
                     <div>
                       <span className="font-medium">Focus Areas:</span>{' '}
                       <span className="text-muted-foreground">
                         {answers.p_focus_areas.join(', ')}
                       </span>
                     </div>
-                  )}
-                  {answers.teamSize && (
+                  ) : null}
+                  {answers.teamSize ? (
                     <div>
                       <span className="font-medium">Team Size:</span>{' '}
                       <span className="text-muted-foreground">{answers.teamSize}</span>
                     </div>
-                  )}
+                  ) : null}
                 </div>
 
                 <Card className="border-primary/20 bg-primary/5">
@@ -366,7 +432,7 @@ export function QuizForm() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <ul className="space-y-2 text-muted-foreground text-sm">
+                    <ul className="text-muted-foreground space-y-2 text-sm">
                       <li>? We'll analyze 147+ configurations</li>
                       <li>? Match them to your specific needs</li>
                       <li>? Show you the top 8-10 best fits</li>
@@ -409,7 +475,7 @@ export function QuizForm() {
                         if (isMultiSelect && fieldKey) {
                           toggleArrayAnswer(fieldKey, option.value);
                         } else if (fieldKey) {
-                          updateAnswer(fieldKey, option.value as string);
+                          updateAnswer(fieldKey, option.value);
                         }
                       }}
                       disabled={!canSelect}
@@ -418,18 +484,18 @@ export function QuizForm() {
                           ? 'border-primary bg-primary/5'
                           : canSelect
                             ? 'border-border hover:border-primary/50'
-                            : 'cursor-not-allowed border-border opacity-50'
+                            : 'border-border cursor-not-allowed opacity-50'
                       }`}
                     >
                       <div className="font-medium">{option.label}</div>
-                      <div className="mt-1 text-muted-foreground text-sm">{option.description}</div>
+                      <div className="text-muted-foreground mt-1 text-sm">{option.description}</div>
                     </button>
                   );
                 })}
               </div>
-              {fieldKey && errors[fieldKey] && (
-                <p className="mt-2 text-destructive text-sm">{errors[fieldKey]}</p>
-              )}
+              {fieldKey && errors[fieldKey] ? (
+                <p className="text-destructive mt-2 text-sm">{errors[fieldKey]}</p>
+              ) : null}
             </QuestionCard>
           )}
 

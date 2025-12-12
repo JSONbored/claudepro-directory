@@ -1,37 +1,43 @@
 'use client';
 
 import { normalizeError } from '@heyclaude/shared-runtime';
-import { logClientWarning } from '@heyclaude/web-runtime/core';
+import { logClientWarn } from '@heyclaude/web-runtime/logging/client';
 import { useLoggedAsync, useButtonSuccess } from '@heyclaude/web-runtime/hooks';
-import type { ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
-import { toasts } from '@heyclaude/web-runtime/ui';
+import { type ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
+import { toasts, Button } from '@heyclaude/web-runtime/ui';
+import { DURATION } from '@heyclaude/web-runtime/design-system';
 import { Check, type LucideIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useState } from 'react';
-import { Button } from '@heyclaude/web-runtime/ui';
 
 interface ContentActionButtonProps extends ButtonStyleProps {
-  url: string;
   action: (content: string) => Promise<void>;
-  label: string;
-  successMessage: string;
   icon: LucideIcon;
+  label: string;
   showIcon?: boolean;
+  successMessage: string;
   trackAnalytics?: () => Promise<void>;
+  url: string;
 }
 
 /**
- * Validate URL is safe for fetch (prevents SSRF)
- * Only allows relative URLs or absolute URLs from same origin
+ * Determine whether a URL is safe to fetch to prevent server-side request forgery.
+ *
+ * Allows relative URLs (starting with "/") or absolute URLs that share the current origin.
+ * When running server-side, only relative URLs are permitted. Returns `false` for invalid
+ * or unparsable URLs.
+ *
+ * @param url - The URL to validate
+ * @returns `true` if the URL is safe to fetch, `false` otherwise
  */
 function isSafeFetchUrl(url: string): boolean {
   try {
     // Allow relative URLs
     if (url.startsWith('/')) return true;
     // For absolute URLs, must be same origin
-    if (typeof window !== 'undefined') {
-      const urlObj = new URL(url, window.location.origin);
-      return urlObj.origin === window.location.origin;
+    if (globalThis.window !== undefined) {
+      const urlObj = new URL(url, globalThis.location.origin);
+      return urlObj.origin === globalThis.location.origin;
     }
     // Server-side: only allow relative URLs
     return url.startsWith('/');
@@ -40,6 +46,28 @@ function isSafeFetchUrl(url: string): boolean {
   }
 }
 
+/**
+ * Renders a button that fetches content from a URL, runs an async action with that content, and surfaces success or error state to the user.
+ *
+ * The button validates the URL for safe fetching, prevents duplicate runs while loading or after success, executes the provided `action` with the fetched text, triggers a success state and toast on completion, and optionally fires analytics tracking without affecting the main action's outcome.
+ *
+ * @param url - The URL to fetch content from; must pass the internal safety check.
+ * @param action - Async callback invoked with the fetched content string.
+ * @param label - Text label displayed inside the button.
+ * @param successMessage - Message shown in a success toast after `action` completes.
+ * @param icon - Icon component to display when not in the success state.
+ * @param showIcon - Whether to render the icon; defaults to `true`.
+ * @param trackAnalytics - Optional async callback for analytics; failures are logged as warnings and do not change the primary success flow.
+ * @param variant - Button variant style.
+ * @param size - Button size.
+ * @param className - Additional CSS classes applied to the button.
+ * @param disabled - If true, disables the button.
+ * @returns The rendered button element.
+ *
+ * @see isSafeFetchUrl
+ * @see useLoggedAsync
+ * @see toasts
+ */
 export function ContentActionButton({
   url,
   action,
@@ -66,7 +94,18 @@ export function ContentActionButton({
     if (isLoading || isSuccess) return;
 
     if (!isSafeFetchUrl(url)) {
-      logClientWarning('ContentActionButton: Unsafe URL blocked', { url, label });
+      logClientWarn(
+        '[Security] Unsafe URL blocked',
+        new Error('Unsafe URL blocked'),
+        'ContentActionButton.handleClick',
+        {
+          component: 'ContentActionButton',
+          action: 'block-unsafe-url',
+          category: 'security',
+          url,
+          label,
+        }
+      );
       toasts.raw.error('Invalid or unsafe URL');
       return;
     }
@@ -105,8 +144,17 @@ export function ContentActionButton({
         }
       );
     } catch (error) {
-      // Error already logged by useLoggedAsync, just show user-friendly message
-      toasts.raw.error(normalizeError(error, 'Action failed').message);
+      // Error already logged by useLoggedAsync
+      const normalized = normalizeError(error, 'Action failed');
+      // Show error toast with "Retry" button
+      toasts.raw.error(normalized.message, {
+        action: {
+          label: 'Retry',
+          onClick: () => {
+            handleClick();
+          },
+        },
+      });
     } finally {
       setIsLoading(false);
     }
@@ -123,14 +171,14 @@ export function ContentActionButton({
       className={className}
       style={{ opacity: isLoading ? 0.7 : 1 }}
     >
-      {showIcon && (
+      {showIcon ? (
         <motion.div
           animate={isSuccess ? { scale: [1, 1.2, 1] } : {}}
-          transition={{ duration: 0.3 }}
+          transition={{ duration: DURATION.default }}
         >
           <DisplayIcon className="h-4 w-4" />
         </motion.div>
-      )}
+      ) : null}
       {label}
     </Button>
   );

@@ -5,13 +5,13 @@
  * Displays and links to GitHub repository with star count
  */
 
-import { getSocialLinks, logClientWarning, logUnhandledPromise } from '@heyclaude/web-runtime/core';
+import { getSocialLinks, logUnhandledPromise } from '@heyclaude/web-runtime/core';
+import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import { Github } from '@heyclaude/web-runtime/icons';
-import type { ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
-import { cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { type ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
+import { cn, UI_CLASSES, Button } from '@heyclaude/web-runtime/ui';
 import { useEffect, useState } from 'react';
-import { Button } from '@heyclaude/web-runtime/ui';
 
 export interface GitHubStarsButtonProps extends ButtonStyleProps {
   repoUrl?: string;
@@ -19,6 +19,22 @@ export interface GitHubStarsButtonProps extends ButtonStyleProps {
 
 const SOCIAL_LINK_SNAPSHOT = getSocialLinks();
 
+/**
+ * Renders a GitHub-styled button that opens the given repository URL, tracks click events, and optionally displays the repository's star count.
+ *
+ * The component fetches the repository's stargazer count from the GitHub API and shows it next to the GitHub icon when available. If the repo URL cannot be parsed or the fetch fails, the star count is omitted and a client warning is logged.
+ *
+ * @param repoUrl - Repository URL to open (defaults to project's configured GitHub link)
+ * @param size - Button size variant: 'default' | 'sm' | 'lg' | 'icon'
+ * @param variant - Button visual variant: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'
+ * @param className - Additional CSS class names applied to the button
+ * @param disabled - Whether the button is disabled
+ *
+ * @returns The rendered button element with GitHub icon and optional star count.
+ *
+ * @see usePulse
+ * @see getSocialLinks
+ */
 export function GitHubStarsButton({
   repoUrl = SOCIAL_LINK_SNAPSHOT.github,
   size = 'sm',
@@ -27,7 +43,7 @@ export function GitHubStarsButton({
   disabled = false,
 }: GitHubStarsButtonProps) {
   const pulse = usePulse();
-  const [stars, setStars] = useState<number | null>(null);
+  const [stars, setStars] = useState<null | number>(null);
 
   useEffect(() => {
     const apiUrl = (() => {
@@ -53,7 +69,18 @@ export function GitHubStarsButton({
         setStars(count);
       })
       .catch((error) => {
-        logClientWarning('GitHubStarsButton: failed to fetch star count', error, { apiUrl });
+        const normalized = normalizeError(error, 'Failed to fetch GitHub star count');
+        logClientWarn(
+          '[GitHub] Failed to fetch star count',
+          normalized,
+          'GitHubStarsButton.fetchStars',
+          {
+            component: 'GitHubStarsButton',
+            action: 'fetch-star-count',
+            category: 'external-api',
+            apiUrl,
+          }
+        );
         setStars(null);
       });
   }, [repoUrl]);
@@ -82,7 +109,7 @@ export function GitHubStarsButton({
       onClick={handleClick}
       disabled={disabled}
       className={cn('gap-2', className)}
-      aria-label={`Star us on GitHub${stars ? ` - ${stars} stars` : ''}`}
+      aria-label={`Star us on GitHub${stars !== null ? ` - ${stars} stars` : ''}`}
     >
       <Github className={UI_CLASSES.ICON_SM} aria-hidden="true" />
       {typeof stars === 'number' && (

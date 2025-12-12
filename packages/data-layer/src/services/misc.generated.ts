@@ -30,15 +30,6 @@ export class MiscService {
   }
 
   /**
-   * Calls the database RPC: get_navigation_menu
-   */
-  async getNavigationMenu(args: Database['public']['Functions']['get_navigation_menu']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_navigation_menu', args);
-    if (error) throw error;
-    return data;
-  }
-
-  /**
    * Calls the database RPC: get_contact_commands
    */
   async getContactCommands(args: Database['public']['Functions']['get_contact_commands']['Args']) {

@@ -1,13 +1,24 @@
 'use client';
 
 import { Star } from '@heyclaude/web-runtime/icons';
-import type { ReviewRatingInteractiveProps } from '@heyclaude/web-runtime/types/component.types';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { Rating, RatingButton } from '@heyclaude/web-runtime/ui';
+import { type ReviewRatingInteractiveProps } from '@heyclaude/web-runtime/types/component.types';
+import { UI_CLASSES, Rating, RatingButton } from '@heyclaude/web-runtime/ui';
 
 /**
- * Interactive star rating input component
- * Used for collecting user ratings
+ * Interactive star rating input for collecting and editing a numeric rating.
+ *
+ * @param value - Current rating value
+ * @param max - Maximum number of stars to display (default 5)
+ * @param onChange - Callback invoked with the new rating value when the selection changes
+ * @param size - Icon size preset: 'sm' | 'md' | 'lg' (default 'md')
+ * @param showValue - When true, displays the numeric rating next to the stars
+ * @param className - Additional container CSS classes
+ * @param aria-describedby - Forwarded to the inner rating `aria-describedby`
+ * @param aria-invalid - Forwarded to the inner rating `aria-invalid`
+ * @returns The rendered rating input element
+ *
+ * @see Rating
+ * @see RatingButton
  */
 export function ReviewRatingInteractive({
   value,
@@ -41,9 +52,9 @@ export function ReviewRatingInteractive({
           <RatingButton key={`star-${i + 1}`} size={iconSize} icon={<Star />} />
         ))}
       </Rating>
-      {showValue && (
-        <span className="ml-1 font-medium text-muted-foreground text-sm">{value.toFixed(1)}</span>
-      )}
+      {showValue ? (
+        <span className="text-muted-foreground ml-1 text-sm font-medium">{value.toFixed(1)}</span>
+      ) : null}
     </div>
   );
 }

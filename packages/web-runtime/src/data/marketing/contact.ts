@@ -5,15 +5,15 @@ import { getSocialLink } from '../config/constants.ts';
 type SocialLinkSnapshot = Record<SocialLinkKey, string>;
 
 const SOCIAL_LINK_FALLBACKS: SocialLinkSnapshot = {
-  github: 'https://github.com/JSONbored/claudepro-directory',
   authorProfile: 'https://github.com/JSONbored',
   discord: '#',
-  twitter: '#',
   email: 'contact@claudepro.directory',
+  github: 'https://github.com/JSONbored/claudepro-directory',
   hiEmail: 'hi@claudepro.directory',
   partnerEmail: 'partner@claudepro.directory',
-  supportEmail: 'support@claudepro.directory',
   securityEmail: 'security@claudepro.directory',
+  supportEmail: 'support@claudepro.directory',
+  twitter: '#',
 };
 
 function resolveSocialLink(key: SocialLinkKey): string {
@@ -22,11 +22,10 @@ function resolveSocialLink(key: SocialLinkKey): string {
     return link;
   }
 
-  logger.warn('marketing.contact.missing_social_link', {
-    operation: 'resolveSocialLink',
-    module: 'data/marketing/contact',
-    key,
-  });
+  logger.warn(
+    { key, module: 'data/marketing/contact', operation: 'resolveSocialLink' },
+    'marketing.contact.missing_social_link'
+  );
   return SOCIAL_LINK_FALLBACKS[key];
 }
 
@@ -40,12 +39,12 @@ export function getSocialLinks(): SocialLinkSnapshot {
 }
 
 export const NEWSLETTER_CTA_CONFIG = {
-  title: 'Get the latest Claude resources',
-  headline: 'Get the latest Claude resources',
-  description: 'Weekly roundup of the best Claude agents, tools, and guides.',
-  ctaText: 'Subscribe',
   buttonText: 'Subscribe',
+  ctaText: 'Subscribe',
+  description: 'Weekly roundup of the best Claude agents, tools, and guides.',
   footerText: 'No spam. Unsubscribe anytime.',
+  headline: 'Get the latest Claude resources',
+  title: 'Get the latest Claude resources',
 } as const;
 
 export interface ContactChannels {
@@ -58,8 +57,8 @@ export interface ContactChannels {
 export function getContactChannels(): ContactChannels {
   const links = getSocialLinks();
   return {
-    email: links.email,
     discord: links.discord,
+    email: links.email,
     github: links.github,
     twitter: links.twitter,
   };
@@ -75,17 +74,17 @@ export interface PartnerContactChannels {
 export function getPartnerContactChannels(): PartnerContactChannels {
   const links = getSocialLinks();
   return {
-    partnerEmail: links.partnerEmail,
     hiEmail: links.hiEmail,
-    supportEmail: links.supportEmail,
+    partnerEmail: links.partnerEmail,
     securityEmail: links.securityEmail,
+    supportEmail: links.supportEmail,
   };
 }
 
 const PARTNER_CTA_SUBJECTS = {
   jobListing: 'Job Listing - Get Started',
-  sponsoredListing: 'Sponsored Listing - Get Started',
   partnershipInquiry: 'Partnership Inquiry',
+  sponsoredListing: 'Sponsored Listing - Get Started',
 } as const;
 
 export type PartnerCtaKey = keyof typeof PARTNER_CTA_SUBJECTS;
@@ -106,8 +105,8 @@ export function getPartnerCtas(
   const result: PartnerCtas = {} as PartnerCtas;
   for (const [key, subject] of Object.entries(PARTNER_CTA_SUBJECTS)) {
     result[key as PartnerCtaKey] = {
-      subject,
       href: `mailto:${email}?subject=${encodeURIComponent(subject)}`,
+      subject,
     };
   }
   return result;

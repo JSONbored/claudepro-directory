@@ -1,6 +1,7 @@
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { type Metadata } from 'next';
+import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { AuthBrandPanel } from '@/src/components/core/auth/auth-brand-panel';
@@ -10,6 +11,12 @@ import { AuthMobileHeader } from '@/src/components/core/auth/auth-mobile-header'
 import { LoginPanelClient } from './login-panel-client';
 
 /**
+ * Dynamic Rendering Required
+ *
+ * This page is dynamic because searchParams is async (Next.js 15+) and requires runtime resolution.
+ */
+
+/**
  * Provide the page metadata for the login route.
  *
  * @returns The Next.js page `Metadata` object for the "/login" route.
@@ -17,22 +24,21 @@ import { LoginPanelClient } from './login-panel-client';
  * @see {@link Metadata}
  */
 export async function generateMetadata(): Promise<Metadata> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
   return generatePageMetadata('/login');
 }
 
 /**
- * Dynamic Rendering Required
+ * Render the login page layout and initialize request-scoped context for the login flow.
  *
- * This page is dynamic because searchParams is async (Next.js 15+) and requires runtime resolution.
- */
-export const dynamic = 'force-dynamic';
-
-/**
- * Render the login page layout and provide an optional redirect target to the client-side login panel.
+ * Awaits request-time connection setup, creates a request-scoped logger, and returns the page wrapped
+ * in a Suspense boundary that renders the login content component with the provided `searchParams`
+ * and `reqLogger`.
  *
- * Resolves the incoming `searchParams` promise to obtain an optional `redirect` value; if resolution fails or no `redirect` is present, the login panel receives no redirect target.
- *
- * @param props.searchParams - Promise that resolves to an object that may contain a `redirect` string (e.g., `{ redirect?: string }`)
+ * @param searchParams - Promise resolving to an object that may contain a `redirect` string (e.g., `{ redirect?: string }`)
+ * @param searchParams.searchParams
  * @returns The React element for the login page layout
  *
  * @see {@link LoginPanelClient}
@@ -45,37 +51,70 @@ export default async function LoginPage({
 }: {
   searchParams: Promise<{ redirect?: string }>;
 }) {
-  // Generate single requestId for this page request
-  const requestId = generateRequestId();
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
+
   const operation = 'LoginPage';
   const route = '/login';
-  const module = 'apps/web/src/app/(auth)/login/page';
+  const modulePath = 'apps/web/src/app/(auth)/login/page';
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    requestId,
+    module: modulePath,
     operation,
     route,
-    module,
   });
 
+  return (
+    <Suspense fallback={null}>
+      <LoginPageContent reqLogger={reqLogger} searchParams={searchParams} />
+    </Suspense>
+  );
+}
+
+/**
+ * Resolve the optional `redirect` search parameter and render the login layout.
+ *
+ * Attempts to read `redirect` from `searchParams`; on failure logs the normalized error
+ * with `reqLogger` and proceeds without a redirect. Renders a SplitAuthLayout where
+ * LoginPanelClient receives `redirectTo` only when a redirect value was successfully resolved.
+ *
+ * @param searchParams.reqLogger
+ * @param searchParams - A promise that should resolve to an object that may contain `redirect`.
+ * @param reqLogger - Request-scoped logger used to record resolution errors and contextual logs.
+ * @param searchParams.searchParams
+ * @returns A React element containing the composed login layout.
+ *
+ * @see LoginPanelClient
+ * @see SplitAuthLayout
+ * @see normalizeError
+ */
+async function LoginPageContent({
+  reqLogger,
+  searchParams,
+}: {
+  reqLogger: ReturnType<typeof logger.child>;
+  searchParams: Promise<{ redirect?: string }>;
+}) {
   let redirectTo: string | undefined;
   try {
     const resolvedSearchParameters = await searchParams;
     redirectTo = resolvedSearchParameters.redirect;
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to resolve login search params');
-    reqLogger.error('LoginPage: resolving searchParams failed', normalized);
+    reqLogger.error(
+      { err: normalized, section: 'data-fetch' },
+      'LoginPage: resolving searchParams failed'
+    );
     redirectTo = undefined;
   }
 
   return (
-    <Suspense fallback={null}>
-      <SplitAuthLayout
-        brandPanel={<AuthBrandPanel />}
-        mobileHeader={<AuthMobileHeader />}
-        authPanel={<LoginPanelClient {...(redirectTo ? { redirectTo } : {})} />}
-      />
-    </Suspense>
+    <SplitAuthLayout
+      authPanel={<LoginPanelClient {...(redirectTo ? { redirectTo } : {})} />}
+      brandPanel={<AuthBrandPanel />}
+      mobileHeader={<AuthMobileHeader />}
+    />
   );
 }

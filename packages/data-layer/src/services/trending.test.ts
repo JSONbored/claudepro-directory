@@ -25,18 +25,16 @@ describe('TrendingService', () => {
           id: 'content-1',
           title: 'Popular Agent',
           slug: 'popular-agent',
-          category: 'agents',
+          category: 'agents' as const,
           view_count: 1500,
-          trending_score: 0.95,
           created_at: '2024-01-01T00:00:00Z',
         },
         {
           id: 'content-2',
           title: 'Hot Skill',
           slug: 'hot-skill',
-          category: 'skills',
+          category: 'skills' as const,
           view_count: 1200,
-          trending_score: 0.88,
           created_at: '2024-01-02T00:00:00Z',
         },
       ];
@@ -47,14 +45,14 @@ describe('TrendingService', () => {
       } as any);
 
       const result = await service.getTrendingContent({
-        limit_count: 10,
-        time_window: '7d',
+        p_category: null,
+        p_limit: 10,
       });
 
       expect(result).toEqual(mockData);
       expect(mockSupabase.rpc).toHaveBeenCalledWith('get_trending_content', {
-        limit_count: 10,
-        time_window: '7d',
+        p_category: null,
+        p_limit: 10,
       });
     });
 
@@ -65,38 +63,38 @@ describe('TrendingService', () => {
       } as any);
 
       const result = await service.getTrendingContent({
-        limit_count: 10,
-        time_window: '24h',
+        p_category: null,
+        p_limit: 10,
       });
 
       expect(result).toEqual([]);
     });
 
-    it('handles different time windows', async () => {
-      const mockData = [{ id: 'content-1', trending_score: 0.95 }];
+    it('handles category filtering', async () => {
+      const mockData = [{ id: 'content-1', category: 'agents' as const }];
 
       vi.mocked(mockSupabase.rpc).mockResolvedValue({
         data: mockData,
         error: null,
       } as any);
 
-      // Test 24h window
-      await service.getTrendingContent({ limit_count: 5, time_window: '24h' });
+      // Test with category filter
+      await service.getTrendingContent({ p_category: 'agents', p_limit: 5 });
       expect(mockSupabase.rpc).toHaveBeenCalledWith('get_trending_content', {
-        limit_count: 5,
-        time_window: '24h',
+        p_category: 'agents',
+        p_limit: 5,
       });
 
-      // Test 30d window
-      await service.getTrendingContent({ limit_count: 5, time_window: '30d' });
+      // Test without category filter
+      await service.getTrendingContent({ p_category: null, p_limit: 5 });
       expect(mockSupabase.rpc).toHaveBeenCalledWith('get_trending_content', {
-        limit_count: 5,
-        time_window: '30d',
+        p_category: null,
+        p_limit: 5,
       });
     });
 
     it('throws error on database failure', async () => {
-      const mockError = { message: 'Analytics unavailable', code: 'ANALYTICS_ERROR' };
+      const mockError = { message: 'Database error', code: 'PGRST_ERROR' };
 
       vi.mocked(mockSupabase.rpc).mockResolvedValue({
         data: null,
@@ -105,17 +103,17 @@ describe('TrendingService', () => {
 
       await expect(
         service.getTrendingContent({
-          limit_count: 10,
-          time_window: '7d',
+          p_category: null,
+          p_limit: 10,
         })
       ).rejects.toEqual(mockError);
     });
 
-    it('sorts results by trending score', async () => {
+    it('returns results sorted by trending score from materialized view', async () => {
       const mockData = [
-        { id: '1', trending_score: 0.95 },
-        { id: '2', trending_score: 0.88 },
-        { id: '3', trending_score: 0.75 },
+        { id: '1', category: 'agents' as const, slug: 'item-1' },
+        { id: '2', category: 'agents' as const, slug: 'item-2' },
+        { id: '3', category: 'agents' as const, slug: 'item-3' },
       ];
 
       vi.mocked(mockSupabase.rpc).mockResolvedValue({
@@ -124,12 +122,13 @@ describe('TrendingService', () => {
       } as any);
 
       const result = await service.getTrendingContent({
-        limit_count: 10,
-        time_window: '7d',
+        p_category: null,
+        p_limit: 10,
       });
 
-      expect(result![0].trending_score).toBeGreaterThan(result![1].trending_score!);
-      expect(result![1].trending_score).toBeGreaterThan(result![2].trending_score!);
+      // Results are pre-sorted by database (trending_score DESC)
+      expect(result).toEqual(mockData);
+      expect(result).toHaveLength(3);
     });
   });
 });

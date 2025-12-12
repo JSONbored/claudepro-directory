@@ -1,0 +1,104 @@
+# Design System Violation Rules
+# Enforces design system usage from .cursor/rules/design-system.mdc
+
+---
+# Rule: Detect inline marginBottom classes (should use marginBottom.*)
+id: inline-margin-bottom
+language: typescript
+rule:
+  pattern: className={$QUOTE}mb-$SIZE$QUOTE}
+  kind: jsx_attribute
+message: "Use design system utility marginBottom.* instead of inline mb-* classes. Import marginBottom from @heyclaude/web-runtime/design-system"
+severity: warning
+fix: |
+  // Replace mb-1 with marginBottom.micro
+  // Replace mb-2 with marginBottom.tight
+  // Replace mb-4 with marginBottom.default
+  // Replace mb-6 with marginBottom.comfortable
+  // etc.
+
+---
+# Rule: Detect inline marginTop classes (should use marginTop.*)
+id: inline-margin-top
+language: typescript
+rule:
+  pattern: className={$QUOTE}mt-$SIZE$QUOTE}
+  kind: jsx_attribute
+message: "Use design system utility marginTop.* instead of inline mt-* classes. Import marginTop from @heyclaude/web-runtime/design-system"
+severity: warning
+
+---
+# Rule: Detect inline space-y classes (should use spaceY.*)
+id: inline-space-y
+language: typescript
+rule:
+  pattern: className={$QUOTE}space-y-$SIZE$QUOTE}
+  kind: jsx_attribute
+message: "Use design system utility spaceY.* instead of inline space-y-* classes. Import spaceY from @heyclaude/web-runtime/design-system"
+severity: warning
+
+---
+# Rule: Detect inline flex flex-col gap patterns (should use stack.*)
+id: inline-flex-col-gap
+language: typescript
+rule:
+  pattern: className={$QUOTE}flex flex-col gap-$SIZE$QUOTE}
+  kind: jsx_attribute
+message: "Use design system utility stack.* instead of inline flex flex-col gap-* classes. Import stack from @heyclaude/web-runtime/design-system"
+severity: warning
+
+---
+# Rule: Detect inline flex items-center gap patterns (should use cluster.*)
+id: inline-flex-center-gap
+language: typescript
+rule:
+  pattern: className={$QUOTE}flex items-center gap-$SIZE$QUOTE}
+  kind: jsx_attribute
+message: "Use design system utility cluster.* instead of inline flex items-center gap-* classes. Import cluster from @heyclaude/web-runtime/design-system"
+severity: warning
+
+---
+# Rule: Detect inline text-muted-foreground (should use muted.default)
+id: inline-muted-text
+language: typescript
+rule:
+  pattern: className={$QUOTE}text-muted-foreground$QUOTE}
+  kind: jsx_attribute
+message: "Use design system utility muted.default instead of inline text-muted-foreground. Import muted from @heyclaude/web-runtime/design-system"
+severity: warning
+
+---
+# Rule: Detect inline icon sizing (h-X w-X for icons, should use iconSize.*)
+id: inline-icon-sizing
+language: typescript
+rule:
+  all:
+    - pattern: className={$QUOTE}h-$SIZE w-$SIZE$QUOTE}
+      kind: jsx_attribute
+    - inside:
+        kind: jsx_opening_element
+        has:
+          pattern: <$ICON
+          regex: Icon|icon
+message: "Use design system utility iconSize.* instead of inline h-X w-X for icons. Import iconSize from @heyclaude/web-runtime/design-system"
+severity: warning
+
+---
+# Rule: Detect inline rounded classes (should use radius.*)
+id: inline-rounded
+language: typescript
+rule:
+  pattern: className={$QUOTE}rounded-$SIZE$QUOTE}
+  kind: jsx_attribute
+message: "Use design system utility radius.* instead of inline rounded-* classes. Import radius from @heyclaude/web-runtime/design-system"
+severity: warning
+
+---
+# Rule: Detect inline hover:bg classes (should use hoverBg.*)
+id: inline-hover-bg
+language: typescript
+rule:
+  pattern: className={$QUOTE}hover:bg-$VALUE$QUOTE}
+  kind: jsx_attribute
+message: "Use design system utility hoverBg.* instead of inline hover:bg-* classes. Import hoverBg from @heyclaude/web-runtime/design-system"
+severity: warning

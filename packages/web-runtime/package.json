@@ -1,6 +1,6 @@
 {
   "name": "@heyclaude/web-runtime",
-  "version": "0.0.0",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
   "sideEffects": false,
@@ -12,6 +12,10 @@
     "./server": {
       "types": "./src/server.ts",
       "default": "./src/server.ts"
+    },
+    "./server-edge": {
+      "types": "./src/server-edge.ts",
+      "default": "./src/server-edge.ts"
     },
     "./actions": {
       "types": "./src/entries/actions.ts",
@@ -46,10 +50,6 @@
       "react-server": "./src/entries/data-server.ts",
       "default": "./src/entries/data-client.ts"
     },
-    "./config/security": {
-      "types": "./src/config/security.ts",
-      "default": "./src/config/security.ts"
-    },
     "./config/static-configs": {
       "types": "./src/config/static-configs.ts",
       "default": "./src/config/static-configs.ts"
@@ -57,10 +57,6 @@
     "./types/app.schema": {
       "types": "./src/types/app.schema.ts",
       "default": "./src/types/app.schema.ts"
-    },
-    "./ui/design-tokens/submission-form": {
-      "types": "./src/ui/design-tokens/submission-form.ts",
-      "default": "./src/ui/design-tokens/submission-form.ts"
     },
     "./utils/changelog": {
       "types": "./src/utils/changelog.ts",
@@ -90,14 +86,6 @@
       "types": "./src/utils/error-handler.ts",
       "default": "./src/utils/error-handler.ts"
     },
-    "./utils/heading-normalization": {
-      "types": "./src/utils/heading-normalization.ts",
-      "default": "./src/utils/heading-normalization.ts"
-    },
-    "./utils/content-stats": {
-      "types": "./src/utils/content-stats.ts",
-      "default": "./src/utils/content-stats.ts"
-    },
     "./utils/request-context": {
       "types": "./src/utils/request-context.ts",
       "default": "./src/utils/request-context.ts"
@@ -108,15 +96,19 @@
     },
     "./logging/server": {
       "types": "./src/logging/server.ts",
-      "default": "./src/logging/server.ts"
+      "react-server": "./src/logging/server.ts"
     },
     "./data/config/constants": {
       "types": "./src/data/config/constants.ts",
       "default": "./src/data/config/constants.ts"
     },
-    "./edge/search-client": {
-      "types": "./src/edge/search-client.ts",
-      "default": "./src/edge/search-client.ts"
+    "./data/layout/flags": {
+      "types": "./src/data/layout/flags.ts",
+      "default": "./src/data/layout/flags.ts"
+    },
+    "./data/layout/flags-client": {
+      "types": "./src/data/layout/flags-client.ts",
+      "default": "./src/data/layout/flags-client.ts"
     },
     "./data/config/category": {
       "types": "./src/data/config/category/index.ts",
@@ -186,13 +178,9 @@
       "types": "./src/design-system/index.ts",
       "default": "./src/design-system/index.ts"
     },
-    "./design-system/tokens": {
-      "types": "./src/design-system/tokens.ts",
-      "default": "./src/design-system/tokens.ts"
-    },
-    "./design-system/styles": {
-      "types": "./src/design-system/styles/index.ts",
-      "default": "./src/design-system/styles/index.ts"
+    "./design-tokens": {
+      "types": "./src/design-tokens/index.ts",
+      "default": "./src/design-tokens/index.ts"
     },
     "./flux": {
       "types": "./src/flux/index.ts",
@@ -208,6 +196,7 @@
     "@radix-ui/react-collapsible": "^1.1.12",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
+    "@radix-ui/react-hover-card": "^1.1.15",
     "@radix-ui/react-label": "^2.1.8",
     "@radix-ui/react-popover": "^1.1.15",
     "@radix-ui/react-scroll-area": "^1.2.0",
@@ -221,8 +210,8 @@
     "@radix-ui/react-use-controllable-state": "^1.1.1",
     "@radix-ui/react-visually-hidden": "^1.2.4",
     "@react-email/components": "^1.0.1",
-    "@supabase/ssr": "^0.7.0",
-    "@supabase/supabase-js": "^2.84.0",
+    "@supabase/ssr": "^0.8.0",
+    "@supabase/supabase-js": "^2.86.2",
     "canvas-confetti": "^1.9.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -231,12 +220,14 @@
     "dompurify": "^3.3.0",
     "html2canvas-pro": "^1.5.13",
     "inngest": "^3.46.0",
-    "lucide-react": "^0.460.0",
-    "motion": "^12.23.24",
+    "lucide-react": "^0.555.0",
+    "motion": "^12.23.25",
     "next-safe-action": "^8.0.11",
     "pino": "^10.1.0",
     "react-error-boundary": "^6.0.0",
+    "react-use-measure": "^2.1.7",
     "resend": "^6.5.2",
+    "server-only": "^0.0.1",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0",
     "zod": "^4.1.12",
@@ -247,11 +238,17 @@
     "type-check": "tsc --noEmit",
     "lint": "eslint --config ../../config/tools/eslint.config.mjs src --ignore-pattern '**/*.generated.ts' --ignore-pattern '**/*.generated.tsx'"
   },
+  "peerDependencies": {
+    "next": "^16.0.9",
+    "react": "^19.2.2",
+    "react-dom": "^19.2.2"
+  },
   "devDependencies": {
     "@types/canvas-confetti": "^1.6.4",
-    "@types/react": "19.2.5",
-    "next": "16.0.7",
-    "react": "19.2.1",
-    "react-dom": "19.2.1"
+    "@types/react": "19.2.7",
+    "next": "16.0.9",
+    "pino-pretty": "^13.1.2",
+    "react": "19.2.2",
+    "react-dom": "19.2.2"
   }
 }

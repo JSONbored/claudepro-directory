@@ -15,18 +15,21 @@
 
 'use client';
 
-import type { Database } from '@heyclaude/database-types';
-import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from 'react';
-import { NewsletterModal } from '@/src/components/features/growth/newsletter/newsletter-modal';
+import { type Database } from '@heyclaude/database-types';
+import { createContext, type ReactNode, useCallback, useContext, useEffect, useLayoutEffect, useState } from 'react';
+import { logClientInfo, logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
+import { ErrorBoundary } from '@heyclaude/web-runtime/ui';
+
+import { NewsletterModal, type NewsletterModalProps } from '@/src/components/features/growth/newsletter/newsletter-modal';
 
 /**
  * Modal context data structure
  */
 interface ModalContext {
-  copyType: Database['public']['Enums']['copy_type'];
   category?: Database['public']['Enums']['content_category'];
-  slug?: string;
+  copyType: Database['public']['Enums']['copy_type'];
   referrer?: string;
+  slug?: string;
 }
 
 /**
@@ -34,14 +37,14 @@ interface ModalContext {
  */
 interface PostCopyEmailContextValue {
   /**
-   * Show the email capture modal
-   */
-  showModal: (context: ModalContext) => void;
-
-  /**
    * Whether modal has been shown this session
    */
   hasShownThisSession: boolean;
+
+  /**
+   * Show the email capture modal
+   */
+  showModal: (context: ModalContext) => void;
 }
 
 /**
@@ -58,6 +61,37 @@ const SESSION_KEY = 'newsletter-modal-shown';
  * Create context with undefined default (must use provider)
  */
 const PostCopyEmailContext = createContext<PostCopyEmailContextValue | undefined>(undefined);
+
+/**
+ * NewsletterModal wrapper with error handling
+ * Catches render errors and closes modal gracefully
+ */
+function NewsletterModalWithErrorHandling({
+  onError,
+  onOpenChange,
+  category,
+  slug,
+  ...props
+}: NewsletterModalProps & { onError?: (error: Error) => void }) {
+  // Wrap onOpenChange to also call onError handler if needed
+  const handleOpenChange = useCallback((open: boolean) => {
+    try {
+      onOpenChange(open);
+    } catch (error) {
+      const normalized = normalizeError(error, 'NewsletterModal onOpenChange error');
+      onError?.(normalized);
+    }
+  }, [onOpenChange, onError]);
+
+  return (
+    <NewsletterModal
+      {...props}
+      onOpenChange={handleOpenChange}
+      {...(category && { category })}
+      {...(slug && { slug })}
+    />
+  );
+}
 
 /**
  * Props for PostCopyEmailProvider
@@ -97,6 +131,29 @@ export function PostCopyEmailProvider({ children }: PostCopyEmailProviderProps) 
   const [hasShownThisSession, setHasShownThisSession] = useState(false);
   const [copyCount, setCopyCount] = useState(0);
 
+  // DEBUG: Log all state changes
+  useEffect(() => {
+    logClientInfo(
+      '[PostCopyEmailProvider] State changed',
+      'PostCopyEmailProvider.stateChange',
+      {
+        component: 'PostCopyEmailProvider',
+        action: 'state-change',
+        category: 'newsletter',
+        isOpen,
+        hasModalContext: Boolean(modalContext),
+        modalContext: modalContext ? {
+          copyType: modalContext.copyType,
+          category: modalContext.category,
+          hasSlug: Boolean(modalContext.slug),
+          hasReferrer: Boolean(modalContext.referrer),
+        } : null,
+        hasShownThisSession,
+        copyCount,
+      }
+    );
+  }, [isOpen, modalContext, hasShownThisSession, copyCount]);
+
   // Check if modal has been shown this session on mount
   useEffect(() => {
     const shown = sessionStorage.getItem(SESSION_KEY);
@@ -118,6 +175,7 @@ export function PostCopyEmailProvider({ children }: PostCopyEmailProviderProps) 
         if (dismissed === 'true') return;
 
         // Show modal with exit-intent context
+        // CRITICAL: Set context first, then open - ensures both are set together
         setModalContext({
           copyType: 'link',
           referrer: 'exit-intent',
@@ -129,11 +187,11 @@ export function PostCopyEmailProvider({ children }: PostCopyEmailProviderProps) 
     };
 
     // Only attach listener on high-value pages (content pages, not homepage)
-    if (typeof window !== 'undefined' && window.location.pathname.includes('/')) {
+    if (globalThis.window !== undefined && globalThis.location.pathname.includes('/')) {
       document.addEventListener('mouseleave', handleMouseLeave);
       return () => document.removeEventListener('mouseleave', handleMouseLeave);
     }
-    return undefined;
+    return;
   }, [hasShownThisSession]);
 
   /**
@@ -164,10 +222,27 @@ export function PostCopyEmailProvider({ children }: PostCopyEmailProviderProps) 
       }
 
       // Show modal and track in session
+      // CRITICAL: Set context first, then open - ensures both are set together
+      // Use functional updates to ensure state consistency
+      // Set both state updates in the same render cycle to prevent race conditions
       setModalContext(context);
       setIsOpen(true);
       setHasShownThisSession(true);
       sessionStorage.setItem(SESSION_KEY, 'true');
+      
+      logClientInfo(
+        '[PostCopyEmailProvider] Modal triggered',
+        'PostCopyEmailProvider.showModal',
+        {
+          component: 'PostCopyEmailProvider',
+          action: 'show-modal-triggered',
+          category: 'newsletter',
+          copyType: context.copyType,
+          hasCategory: Boolean(context.category),
+          hasSlug: Boolean(context.slug),
+          copyCount: newCount,
+        }
+      );
     },
     [hasShownThisSession, copyCount]
   );
@@ -182,19 +257,109 @@ export function PostCopyEmailProvider({ children }: PostCopyEmailProviderProps) 
     }
   }, []);
 
+  // Safety: Ensure modal closes on unmount or if context is cleared
+  // Use useLayoutEffect to run synchronously before paint (prevents backdrop flash)
+  useLayoutEffect(() => {
+    if (!modalContext && isOpen) {
+      logClientWarn(
+        '[PostCopyEmailProvider] Modal context cleared but isOpen=true, closing modal',
+        normalizeError(new Error('Modal state mismatch'), 'Modal context cleared'),
+        'PostCopyEmailProvider.safetyCheck',
+        {
+          component: 'PostCopyEmailProvider',
+          action: 'modal-close-safety',
+          category: 'newsletter',
+          isOpen,
+          hasModalContext: Boolean(modalContext),
+        }
+      );
+      setIsOpen(false);
+    }
+  }, [modalContext, isOpen]);
+
+  // Safety: Close modal on page unload to prevent stuck backdrop
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (isOpen) {
+        logClientInfo(
+          '[PostCopyEmailProvider] Closing modal on beforeunload',
+          'PostCopyEmailProvider.beforeUnload',
+          {
+            component: 'PostCopyEmailProvider',
+            action: 'beforeunload-cleanup',
+            category: 'newsletter',
+          }
+        );
+        setIsOpen(false);
+        setModalContext(null);
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [isOpen]);
+
+  // CRITICAL: Only render modal when BOTH conditions are met
+  // This prevents backdrop from rendering without content
+  const shouldRenderModal = Boolean(modalContext && isOpen);
+
+  // Log render decision for debugging
+  useEffect(() => {
+    if (isOpen || modalContext) {
+      logClientInfo(
+        '[PostCopyEmailProvider] Render decision',
+        'PostCopyEmailProvider.renderDecision',
+        {
+          component: 'PostCopyEmailProvider',
+          action: 'render-decision',
+          category: 'newsletter',
+          isOpen,
+          hasModalContext: Boolean(modalContext),
+          shouldRenderModal,
+        }
+      );
+    }
+  }, [isOpen, modalContext, shouldRenderModal]);
+
   return (
     <PostCopyEmailContext.Provider value={{ showModal, hasShownThisSession }}>
       {children}
-      {modalContext && (
-        <NewsletterModal
-          source="modal"
-          open={isOpen}
-          onOpenChange={handleOpenChange}
-          copyType={modalContext.copyType}
-          {...(modalContext.category && { category: modalContext.category })}
-          {...(modalContext.slug && { slug: modalContext.slug })}
-        />
-      )}
+      {shouldRenderModal && modalContext ? (
+        <ErrorBoundary>
+          <NewsletterModalWithErrorHandling
+            source="modal"
+            open={isOpen}
+            onOpenChange={(open) => {
+              handleOpenChange(open);
+              if (!open) {
+                // Ensure cleanup on close
+                setModalContext(null);
+              }
+            }}
+            copyType={modalContext.copyType}
+            {...(modalContext.category && { category: modalContext.category })}
+            {...(modalContext.slug && { slug: modalContext.slug })}
+            onError={(error) => {
+              logClientWarn(
+                '[PostCopyEmailProvider] NewsletterModal render error',
+                normalizeError(error, 'NewsletterModal render failed'),
+                'PostCopyEmailProvider.modalError',
+                {
+                  component: 'PostCopyEmailProvider',
+                  action: 'modal-render-error',
+                  category: 'newsletter',
+                  errorMessage: error.message,
+                  errorStack: error.stack,
+                }
+              );
+              // Close modal on error to prevent stuck state
+              setIsOpen(false);
+              setModalContext(null);
+            }}
+          />
+        </ErrorBoundary>
+      ) : null}
     </PostCopyEmailContext.Provider>
   );
 }

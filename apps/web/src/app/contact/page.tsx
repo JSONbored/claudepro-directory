@@ -2,25 +2,32 @@ import { getContactChannels } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { DiscordIcon, Github, Mail, MessageSquare } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
-import { NavLink, Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
+import { logger } from '@heyclaude/web-runtime/logging/server';
+import { Card, CardContent, CardHeader, CardTitle, NavLink } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
+import { Suspense } from 'react';
 
 import { ContactTerminal } from '@/src/components/features/contact/contact-terminal';
 import { ContactTerminalErrorBoundary } from '@/src/components/features/contact/contact-terminal-error-boundary';
 
+import Loading from './loading';
+
+/**
+ * Generate metadata for the Contact page while ensuring evaluation happens at request time.
+ *
+ * Awaits a server connection to defer non-deterministic operations (e.g., current date/time)
+ * to request time before delegating to the page metadata generator for the '/contact' route.
+ *
+ * @returns The Next.js Metadata object for the contact page.
+ *
+ * @see generatePageMetadata
+ * @see https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
+ */
+
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/contact');
 }
-
-/**
- * Dynamic Rendering Required
- *
- * This page uses dynamic rendering for server-side data fetching and user-specific content.
- *
- * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
- */
-export const revalidate = 86_400;
 
 /**
  * Renders the Contact page with available contact channels and supplemental information.
@@ -29,7 +36,7 @@ export const revalidate = 86_400;
  * (GitHub Discussions, GitHub Issues, Discord, and Email when configured), and additional FAQ,
  * response time, and contributing sections.
  *
- * This server-rendered component generates a request-scoped ID and logger and emits warnings
+ * This server-rendered component creates a request-scoped logger and emits warnings
  * when expected contact channels (email, github, discord) are not configured.
  *
  * @returns The React element for the Contact page.
@@ -38,36 +45,69 @@ export const revalidate = 86_400;
  * @see ContactTerminal
  * @see ContactTerminalErrorBoundary
  */
-export default function ContactPage() {
-  // Generate single requestId for this page request
-  const requestId = generateRequestId();
+export default async function ContactPage() {
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
-  // Create request-scoped child logger to avoid race conditions
+  // Create request-scoped child logger
   const reqLogger = logger.child({
-    requestId,
+    module: 'apps/web/src/app/contact',
     operation: 'ContactPage',
     route: '/contact',
-    module: 'apps/web/src/app/contact',
   });
 
+  return (
+    <Suspense fallback={<Loading />}>
+      <ContactPageContent reqLogger={reqLogger} />
+    </Suspense>
+  );
+}
+
+/**
+ * Render the contact page content: available contact channels, an optional interactive terminal, and supplemental information (FAQ, response time, contributing).
+ *
+ * Logs warnings via the provided request-scoped logger when expected contact channels (email, GitHub, Discord) are not configured.
+ *
+ * @param reqLogger - A request-scoped logger used to emit warnings and contextual log entries for this render.
+ * @param reqLogger.reqLogger
+ * @returns A React element containing the contact options UI and additional informational sections.
+ *
+ * @see ContactTerminal
+ * @see ContactTerminalErrorBoundary
+ * @see getContactChannels
+ * @see APP_CONFIG
+ */
+function ContactPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
   const channels = getContactChannels();
   if (!channels.email) {
-    reqLogger.warn('ContactPage: email channel is not configured', {
-      channel: 'email',
-      configKey: 'CONTACT_EMAIL',
-    });
+    reqLogger.warn(
+      {
+        channel: 'email',
+        configKey: 'CONTACT_EMAIL',
+        section: 'data-fetch',
+      },
+      'ContactPage: email channel is not configured'
+    );
   }
   if (!channels.github) {
-    reqLogger.warn('ContactPage: github channel is not configured', {
-      channel: 'github',
-      configKey: 'GITHUB_URL',
-    });
+    reqLogger.warn(
+      {
+        channel: 'github',
+        configKey: 'GITHUB_URL',
+        section: 'data-fetch',
+      },
+      'ContactPage: github channel is not configured'
+    );
   }
   if (!channels.discord) {
-    reqLogger.warn('ContactPage: discord channel is not configured', {
-      channel: 'discord',
-      configKey: 'DISCORD_INVITE_URL',
-    });
+    reqLogger.warn(
+      {
+        channel: 'discord',
+        configKey: 'DISCORD_INVITE_URL',
+        section: 'data-fetch',
+      },
+      'ContactPage: discord channel is not configured'
+    );
   }
 
   // Feature flags are now static defaults - no server/middleware dependency
@@ -108,7 +148,7 @@ export default function ContactPage() {
         </h2>
 
         <div className="grid gap-6 md:grid-cols-2">
-          {!(channels.github || channels.discord || channels.email) && (
+          {!channels.github && !channels.discord && !channels.email && (
             <div className="text-muted-foreground col-span-2 py-8 text-center">
               <p>Contact channels are currently being configured. Please check back soon.</p>
             </div>
@@ -127,9 +167,9 @@ export default function ContactPage() {
                   Join the conversation, ask questions, and share ideas with the community.
                 </p>
                 <NavLink
-                  href={`${channels.github}/discussions`}
-                  external
                   className="inline-flex items-center gap-2"
+                  external
+                  href={`${channels.github}/discussions`}
                 >
                   Visit Discussions →
                 </NavLink>
@@ -151,9 +191,9 @@ export default function ContactPage() {
                   Chat with other users, get help, and stay updated on the latest developments.
                 </p>
                 <NavLink
-                  href={channels.discord}
-                  external
                   className="inline-flex items-center gap-2"
+                  external
+                  href={channels.discord}
                 >
                   Join Discord →
                 </NavLink>
@@ -175,9 +215,9 @@ export default function ContactPage() {
                   Found a bug or have a feature request? Open an issue on GitHub.
                 </p>
                 <NavLink
-                  href={`${channels.github}/issues/new`}
-                  external
                   className="inline-flex items-center gap-2"
+                  external
+                  href={`${channels.github}/issues/new`}
                 >
                   Create Issue →
                 </NavLink>
@@ -199,9 +239,9 @@ export default function ContactPage() {
                   For private inquiries, partnerships, or other matters, reach us via email.
                 </p>
                 <NavLink
-                  href={`mailto:${channels.email}`}
-                  external
                   className="inline-flex items-center gap-2"
+                  external
+                  href={`mailto:${channels.email}`}
                 >
                   {channels.email} →
                 </NavLink>

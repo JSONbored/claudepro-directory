@@ -62,13 +62,11 @@ export function useConfetti() {
         confetti(variantConfig);
       } catch (error) {
         const normalized = normalizeError(error, `useConfetti: fireConfetti failed for variant ${variant}`);
-        logger.warn('[Animation] Confetti failed', {
-          err: normalized,
+        logger.warn({ err: normalized,
           category: 'animation',
           component: 'useConfetti',
           nonCritical: true,
-          variant,
-        });
+          variant, }, '[Animation] Confetti failed');
       }
     },
     []

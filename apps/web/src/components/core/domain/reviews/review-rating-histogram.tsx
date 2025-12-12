@@ -4,15 +4,27 @@
  */
 
 import { Star } from '@heyclaude/web-runtime/icons';
-import type { ReviewHistogramProps } from '@heyclaude/web-runtime/types/component.types';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { type ReviewHistogramProps } from '@heyclaude/web-runtime/types/component.types';
 import {
+  UI_CLASSES,
   ChartContainer,
   HorizontalBarChart,
   StarDisplay,
+  Card,
 } from '@heyclaude/web-runtime/ui';
-import { Card } from '@heyclaude/web-runtime/ui';
 
+/**
+ * Server component that renders an average rating and a horizontal bar chart showing the rating distribution.
+ *
+ * @param distribution - Object with counts for each rating key (e.g., `rating_5`, `rating_4`, ..., `rating_1`); may be undefined or partial.
+ * @param totalReviews - Total number of reviews used to compute percentages and pluralization.
+ * @param averageRating - Average rating value shown numerically and via the star display.
+ * @returns A React element showing the average rating and a rating-distribution chart, or a muted placeholder when `totalReviews` is 0.
+ *
+ * @see StarDisplay
+ * @see HorizontalBarChart
+ * @see Card
+ */
 export function ReviewRatingHistogram({
   distribution,
   totalReviews,
@@ -60,7 +72,7 @@ export function ReviewRatingHistogram({
       {/* Header: Average Rating */}
       <div className="mb-6">
         <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} mb-2`}>
-          <div className="font-bold text-4xl">{averageRating.toFixed(1)}</div>
+          <div className="text-4xl font-bold">{averageRating.toFixed(1)}</div>
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
             <StarDisplay rating={averageRating} size="md" />
           </div>
@@ -72,7 +84,7 @@ export function ReviewRatingHistogram({
 
       {/* Chart: Rating Distribution */}
       <div>
-        <h3 className="mb-3 font-semibold text-sm">Rating Distribution</h3>
+        <h3 className="mb-3 text-sm font-semibold">Rating Distribution</h3>
         <ChartContainer height="200px" className="w-full">
           <HorizontalBarChart
             data={chartData}

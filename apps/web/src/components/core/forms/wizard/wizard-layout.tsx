@@ -15,36 +15,37 @@
  * - Animated step transitions
  */
 
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { useFormTracking } from '@heyclaude/web-runtime/hooks';
 import { ArrowLeft, ArrowRight, Save, X } from '@heyclaude/web-runtime/icons';
-import type { SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
-import { cn } from '@heyclaude/web-runtime/ui';
-import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
+import { logClientError, logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
+import { type SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
+import { cn, Button } from '@heyclaude/web-runtime/ui';
+import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/design-tokens';
+import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { AnimatePresence, motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { type ReactNode, useCallback, useEffect, useState } from 'react';
-import { Button } from '@heyclaude/web-runtime/ui';
-import { useFormTracking } from '@heyclaude/web-runtime/hooks';
+
 import { ProgressIndicator, type WizardStep } from './progress-indicator';
 
 interface WizardLayoutProps {
-  children: ReactNode;
-  steps: WizardStep[];
-  currentStep: number;
-  onStepChange: (step: number) => void;
-  onNext?: () => void | Promise<void>;
-  onPrevious?: () => void;
-  onSave?: () => void | Promise<void>;
-  onExit?: () => void;
   canGoNext?: boolean;
   canGoPrevious?: boolean;
-  isLastStep?: boolean;
-  qualityScore?: number;
-  submissionType?: SubmissionContentType;
+  children: ReactNode;
   className?: string;
+  currentStep: number;
+  isLastStep?: boolean;
   nextLabel?: string;
+  onExit?: () => void;
+  onNext?: () => Promise<void> | void;
+  onPrevious?: () => void;
+  onSave?: () => Promise<void> | void;
+  onStepChange: (step: number) => void;
   previousLabel?: string;
+  qualityScore?: number;
   saveLabel?: string;
+  steps: WizardStep[];
+  submissionType?: SubmissionContentType;
 }
 
 export function WizardLayout({
@@ -79,7 +80,7 @@ export function WizardLayout({
       // Default: navigate back to submit page
       const hasChanges = qualityScore && qualityScore > 0;
       if (hasChanges) {
-        const confirmed = window.confirm(
+        const confirmed = globalThis.confirm(
           'You have unsaved changes. Your draft will be saved automatically. Continue?'
         );
         if (!confirmed) return;
@@ -98,11 +99,20 @@ export function WizardLayout({
       await formTracking.trackDraftSaved({
         submission_type: submissionType,
         step: currentStep,
-        ...(qualityScore !== undefined ? { quality_score: qualityScore } : {}),
+        ...(qualityScore === undefined ? {} : { quality_score: qualityScore }),
       });
     } catch (error) {
       const normalized = normalizeError(error, 'Failed to save draft');
-      logger.warn('Failed to save draft', { error: normalized.message });
+      logClientWarn(
+        'Failed to save draft',
+        normalized,
+        'WizardLayout.handleSave',
+        {
+          component: 'WizardLayout',
+          action: 'save-draft',
+          error: normalized.message,
+        }
+      );
     } finally {
       setIsSaving(false);
     }
@@ -117,11 +127,20 @@ export function WizardLayout({
       await onNext();
       await formTracking.trackStepCompleted(currentStep, steps[currentStep - 1]?.label || '', {
         submission_type: submissionType,
-        ...(qualityScore !== undefined ? { quality_score: qualityScore } : {}),
+        ...(qualityScore === undefined ? {} : { quality_score: qualityScore }),
       });
     } catch (error) {
       const normalized = normalizeError(error, 'Failed to navigate to next step');
-      logger.warn('Failed to navigate to next step', { error: normalized.message });
+      logClientWarn(
+        'Failed to navigate to next step',
+        normalized,
+        'WizardLayout.handleNext',
+        {
+          component: 'WizardLayout',
+          action: 'navigate-next',
+          error: normalized.message,
+        }
+      );
     } finally {
       setIsNavigating(false);
     }
@@ -145,7 +164,16 @@ export function WizardLayout({
             error,
             'WizardLayout: handleSave failed in keyboard shortcut'
           );
-          logger.error('WizardLayout: handleSave failed in keyboard shortcut', normalized);
+          logClientError(
+            '[Form] HandleSave failed in keyboard shortcut',
+            normalized,
+            'WizardLayout.handleKeyDown',
+            {
+              component: 'WizardLayout',
+              action: 'keyboard-shortcut-save',
+              category: 'form',
+            }
+          );
         });
       }
 
@@ -156,8 +184,8 @@ export function WizardLayout({
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    globalThis.addEventListener('keydown', handleKeyDown);
+    return () => globalThis.removeEventListener('keydown', handleKeyDown);
   }, [handleSave, handleExit]);
 
   return (
@@ -185,7 +213,7 @@ export function WizardLayout({
 
             {/* Title */}
             <div className="flex-1 text-center">
-              <h1 className="font-semibold text-lg">Submit Configuration</h1>
+              <h1 className="text-lg font-semibold">Submit Configuration</h1>
               <p className="text-muted-foreground text-sm">
                 {steps[currentStep - 1]?.label || 'Loading...'}
               </p>
@@ -211,7 +239,7 @@ export function WizardLayout({
               steps={steps}
               currentStep={currentStep}
               onStepClick={onStepChange}
-              {...(qualityScore !== undefined ? { qualityScore } : {})}
+              {...(qualityScore === undefined ? {} : { qualityScore })}
             />
           </div>
         </div>
@@ -225,7 +253,7 @@ export function WizardLayout({
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
-            transition={TOKENS.animations.spring.smooth}
+            transition={SPRING.smooth}
             className="min-h-[60vh]"
           >
             {children}
@@ -256,7 +284,7 @@ export function WizardLayout({
             </Button>
 
             {/* Step Indicator (Mobile) */}
-            <div className="text-center text-muted-foreground text-sm md:hidden">
+            <div className="text-muted-foreground text-center text-sm md:hidden">
               {currentStep} / {steps.length}
             </div>
 
@@ -281,7 +309,7 @@ export function WizardLayout({
           </div>
 
           {/* Help Text */}
-          <div className="mt-3 text-center text-muted-foreground text-xs">
+          <div className="text-muted-foreground mt-3 text-center text-xs">
             <kbd
               className="rounded border px-1.5 py-0.5 font-mono text-xs"
               style={{

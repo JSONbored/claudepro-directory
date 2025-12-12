@@ -1,11 +1,13 @@
 import { type Database } from '@heyclaude/database-types';
 import { type CreateJobInput } from '@heyclaude/web-runtime';
 import { createJob } from '@heyclaude/web-runtime/actions';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata, getPaymentPlanCatalog } from '@heyclaude/web-runtime/server';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { connection } from 'next/server';
 
 import { JobForm } from '@/src/components/core/forms/job-form';
 
@@ -13,17 +15,20 @@ import { JobForm } from '@/src/components/core/forms/job-form';
  * Dynamic Rendering Required
  * Authenticated route using cookies
  */
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
 
 /**
- * Generate metadata for the /account/jobs/new page.
+ * Produce the Metadata for the /account/jobs/new page.
  *
- * @returns Metadata for the new job creation page.
+ * Awaits a server connection to defer non-deterministic work to request time before generating page metadata.
+ *
+ * @returns The metadata object used by Next.js for the new job creation page.
  *
  * @see generatePageMetadata
  */
 export async function generateMetadata(): Promise<Metadata> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
   return generatePageMetadata('/account/jobs/new');
 }
 
@@ -39,39 +44,44 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see createJob
  */
 export default async function NewJobPage() {
-  // Generate single requestId for this page request
-  const requestId = generateRequestId();
+  'use cache: private';
+  cacheLife('userProfile'); // 1min stale, 5min revalidate, 30min expire - User-specific data
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    requestId,
+    module: 'apps/web/src/app/account/jobs/new',
     operation: 'NewJobPage',
     route: '/account/jobs/new',
-    module: 'apps/web/src/app/account/jobs/new',
   });
 
   // Section: Plan Catalog Fetch
   let planCatalog: Awaited<ReturnType<typeof getPaymentPlanCatalog>> = [];
   try {
     planCatalog = await getPaymentPlanCatalog();
-    reqLogger.info('NewJobPage: plan catalog loaded', {
-      section: 'plan-catalog-fetch',
-      plansCount: planCatalog.length,
-    });
+    reqLogger.info(
+      {
+        plansCount: planCatalog.length,
+        section: 'data-fetch',
+      },
+      'NewJobPage: plan catalog loaded'
+    );
   } catch (error) {
     const normalized = normalizeError(error, 'NewJobPage: failed to fetch plan catalog');
-    reqLogger.warn('NewJobPage: failed to fetch plan catalog, using fallback', {
-      err: normalized,
-      section: 'plan-catalog-fetch',
-      name: normalized.name,
-    });
+    reqLogger.warn(
+      {
+        err: normalized,
+        name: normalized.name,
+        section: 'data-fetch',
+      },
+      'NewJobPage: failed to fetch plan catalog, using fallback'
+    );
     // planCatalog remains [] - JobForm will use legacy fallback
   }
 
-  /**
+  /***
    * Create a job from submitted form data, initiating checkout if payment is required or redirecting to the jobs list when no payment is needed.
    *
-   * @param data - The payload from JobForm used to create the job
+   * @param {CreateJobInput} data - The payload from JobForm used to create the job
    * @returns An object describing the outcome:
    * - `{ success: true, requiresPayment: true, checkoutUrl: string, message: string }` when creation succeeded and a checkout URL is provided,
    * - `{ success: false, requiresPayment: true, message: string }` when creation indicates payment is required but no checkout URL could be started,
@@ -87,15 +97,11 @@ export default async function NewJobPage() {
   async function handleSubmit(data: CreateJobInput) {
     'use server';
 
-    // Generate requestId for server action (separate from page render)
-    const actionRequestId = generateRequestId();
-
     // Create request-scoped child logger for server action
     const actionLogger = logger.child({
-      requestId: actionRequestId,
+      module: 'apps/web/src/app/account/jobs/new',
       operation: 'NewJobPageAction',
       route: '/account/jobs/new',
-      module: 'apps/web/src/app/account/jobs/new',
     });
 
     let result: Awaited<ReturnType<typeof createJob>>;
@@ -104,13 +110,13 @@ export default async function NewJobPage() {
       result = await createJob(data);
     } catch (error) {
       const normalized = normalizeError(error, 'createJob server action failed');
-      actionLogger.error('NewJobPage: createJob threw', normalized);
+      actionLogger.error({ err: normalized }, 'NewJobPage: createJob threw');
       throw normalized;
     }
 
     if (result.serverError) {
       const normalized = normalizeError(result.serverError, 'NewJobPage: createJob failed');
-      actionLogger.error('NewJobPage: createJob failed', normalized);
+      actionLogger.error({ err: normalized }, 'NewJobPage: createJob failed');
       throw normalized;
     }
 
@@ -120,7 +126,7 @@ export default async function NewJobPage() {
         'createJob returned no data',
         'NewJobPage: createJob returned no data'
       );
-      actionLogger.error('NewJobPage: createJob returned no data', normalized);
+      actionLogger.error({ err: normalized }, 'NewJobPage: createJob returned no data');
       throw normalized;
     }
 
@@ -138,23 +144,27 @@ export default async function NewJobPage() {
             new Error('Missing checkout URL for paid job creation'),
             'NewJobPage: missing checkout URL'
           );
-          actionLogger.error('NewJobPage: missing checkout URL', normalized, {
-            jobId: jobResult.job_id ?? 'unknown',
-            companyId: jobResult.company_id ?? 'unknown',
-          });
+          actionLogger.error(
+            {
+              companyId: jobResult.company_id ?? 'unknown',
+              err: normalized,
+              jobId: jobResult.job_id ?? 'unknown',
+            },
+            'NewJobPage: missing checkout URL'
+          );
           return {
-            success: false,
-            requiresPayment: true,
             message:
               'Unable to start checkout right now. Please try again shortly or contact support.',
+            requiresPayment: true,
+            success: false,
           };
         }
 
         return {
-          success: true,
-          requiresPayment: true,
           checkoutUrl: jobResult.checkoutUrl,
           message: 'Redirecting to payment...',
+          requiresPayment: true,
+          success: true,
         };
       }
 
@@ -167,14 +177,18 @@ export default async function NewJobPage() {
       new Error('Job creation failed'),
       'NewJobPage: createJob returned success=false'
     );
-    actionLogger.error('NewJobPage: createJob returned success=false', normalized, {
-      jobId: jobResult.job_id ?? 'unknown',
-      companyId: jobResult.company_id ?? 'unknown',
-      requiresPayment: jobResult.requires_payment ?? false,
-    });
+    actionLogger.error(
+      {
+        companyId: jobResult.company_id ?? 'unknown',
+        err: normalized,
+        jobId: jobResult.job_id ?? 'unknown',
+        requiresPayment: jobResult.requires_payment ?? false,
+      },
+      'NewJobPage: createJob returned success=false'
+    );
     return {
-      success: false,
       message: 'Job creation failed. Please try again or contact support.',
+      success: false,
     };
   }
 
@@ -187,7 +201,7 @@ export default async function NewJobPage() {
         </p>
       </div>
 
-      <JobForm onSubmit={handleSubmit} submitLabel="Create Job Listing" planCatalog={planCatalog} />
+      <JobForm planCatalog={planCatalog} submitLabel="Create Job Listing" onSubmit={handleSubmit} />
     </div>
   );
 }

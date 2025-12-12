@@ -1,19 +1,23 @@
 'use client';
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { logUnhandledPromise, NEWSLETTER_CTA_CONFIG } from '@heyclaude/web-runtime/core';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { Mail } from '@heyclaude/web-runtime/icons';
-import { cn, DIMENSIONS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { motion } from 'motion/react';
-import { useEffect, useState } from 'react';
 import {
+  cn,
+  DIMENSIONS,
+  UI_CLASSES,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
+import { SPRING, STAGGER } from '@heyclaude/web-runtime/design-system';
+import { motion } from 'motion/react';
+import { useEffect, useState } from 'react';
+
 import { useNewsletterCount } from '@/src/hooks/use-newsletter-count';
 
 import { NewsletterForm } from './newsletter-form';
@@ -25,12 +29,12 @@ import {
 } from './newsletter-utils';
 
 export interface NewsletterCTABaseProps {
-  source: Database['public']['Enums']['newsletter_source'];
-  className?: string;
   category?: string;
-  headline?: string;
-  description?: string;
+  className?: string;
   ctaVariant?: 'aggressive' | 'social_proof' | 'value_focused';
+  description?: string;
+  headline?: string;
+  source: Database['public']['Enums']['newsletter_source'];
 }
 
 export interface NewsletterHeroProps extends NewsletterCTABaseProps {
@@ -50,10 +54,10 @@ export interface NewsletterCardProps extends NewsletterCTABaseProps {
 }
 
 export type NewsletterCTAVariantProps =
+  | NewsletterCardProps
   | NewsletterHeroProps
   | NewsletterInlineProps
-  | NewsletterMinimalProps
-  | NewsletterCardProps;
+  | NewsletterMinimalProps;
 
 /**
  * Renders a newsletter call-to-action in one of four visual variants and supplies the form and footer content.
@@ -138,72 +142,72 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
       <div
         className={cn(
           'w-full',
-          'rounded-xl border border-border/50',
-          'bg-card/50',
+          'border-border rounded-xl border',
+          'bg-card',
           'px-6 py-10 md:px-10 md:py-12 lg:px-12 lg:py-14',
           'text-center',
           className
         )}
       >
         {/* Icon */}
-        <motion.div 
+        <motion.div
           className="mb-5 inline-flex"
           initial={{ scale: 0.9, opacity: 0 }}
           whileInView={{ scale: 1, opacity: 1 }}
           viewport={{ once: true }}
-          transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+          transition={SPRING.smooth}
         >
-          <div className="rounded-xl border border-border bg-background p-3">
-            <Mail className="h-6 w-6 text-foreground md:h-7 md:w-7" aria-hidden="true" />
+          <div className="border-border bg-background rounded-xl border p-3">
+            <Mail className="text-foreground h-6 w-6 md:h-7 md:w-7" aria-hidden="true" />
           </div>
         </motion.div>
 
         {/* Headline */}
-        <motion.h2 
-          className="mx-auto mb-3 max-w-md font-semibold text-xl text-foreground leading-tight tracking-tight md:text-2xl"
+        <motion.h2
+          className="text-foreground mx-auto mb-3 max-w-md text-xl leading-tight font-semibold tracking-tight md:text-2xl"
           initial={{ y: 10, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.1 }}
+          transition={{ delay: STAGGER.fast }}
         >
           {finalHeadline}
         </motion.h2>
 
         {/* Description */}
-        <motion.p 
-          className="mx-auto mb-6 max-w-lg text-muted-foreground text-sm leading-relaxed md:text-base"
+        <motion.p
+          className="text-muted-foreground mx-auto mb-6 max-w-lg text-sm leading-relaxed md:text-base"
           initial={{ y: 10, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.15 }}
+          transition={{ delay: STAGGER.medium }}
         >
           {finalDescription}
         </motion.p>
 
         {/* Form */}
-        <motion.div 
+        <motion.div
           className="mx-auto max-w-sm"
           initial={{ y: 10, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.2 }}
+          transition={{ delay: STAGGER.default }}
         >
           <NewsletterForm source={source} className="w-full" />
         </motion.div>
 
         {/* Footer info */}
-        <motion.div 
+        <motion.div
           className="mt-5 flex flex-col items-center gap-2"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.25 }}
+          transition={{ delay: STAGGER.comfortable }}
         >
           <div className="flex items-center gap-2">
             <span className="inline-flex h-1.5 w-1.5 rounded-full bg-green-500" />
             {isLoading ? (
               <span className="text-muted-foreground text-xs">
-                <span className="inline-block h-3 w-14 animate-pulse rounded bg-muted/50" />
+                <span className="bg-muted/50 inline-block h-3 w-14 animate-pulse rounded" />
               </span>
             ) : (
               <span className="text-muted-foreground text-xs">{subscriberCount} subscribers</span>
@@ -219,17 +223,17 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
     return (
       <Card
         className={cn(
-          'border-primary/20 bg-linear-to-br from-primary/5 via-accent/5 to-background/95',
-          'shadow-lg backdrop-blur-sm',
+          'border-border bg-card',
+          'shadow-lg',
           className
         )}
       >
         <CardHeader className="pb-5">
           <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} mb-3`}>
-            <div className="rounded-lg border border-primary/20 bg-primary/10 p-2.5">
+            <div className="border-primary/20 bg-primary/10 rounded-lg border p-2.5">
               <Mail className={`${UI_CLASSES.ICON_MD} text-primary`} aria-hidden="true" />
             </div>
-            <CardTitle className="font-bold text-xl">{finalHeadline}</CardTitle>
+            <CardTitle className="text-xl font-bold">{finalHeadline}</CardTitle>
           </div>
           <CardDescription className="text-base leading-relaxed">
             {finalDescription}
@@ -237,7 +241,7 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           <NewsletterForm source={source} />
-          <div className="text-center text-muted-foreground text-xs">
+          <div className="text-muted-foreground text-center text-xs">
             <span>{NEWSLETTER_CTA_CONFIG.footerText}</span>
           </div>
         </CardContent>
@@ -250,15 +254,15 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
       <div
         className={cn(
           'flex flex-col items-stretch justify-between gap-4 p-4 sm:flex-row sm:items-center sm:p-5',
-          'rounded-lg border border-border/50 bg-accent/5',
+          'border-border/50 bg-accent/5 rounded-lg border',
           className
         )}
       >
         <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} min-w-0 flex-1`}>
-          <Mail className={`${UI_CLASSES.ICON_MD} shrink-0 text-primary`} aria-hidden="true" />
+          <Mail className={`${UI_CLASSES.ICON_MD} text-primary shrink-0`} aria-hidden="true" />
           <div className="min-w-0 flex-1">
-            <p className="truncate font-medium text-sm">{finalHeadline}</p>
-            <p className="truncate text-muted-foreground text-xs">{finalDescription}</p>
+            <p className="truncate text-sm font-medium">{finalHeadline}</p>
+            <p className="text-muted-foreground truncate text-xs">{finalDescription}</p>
           </div>
         </div>
         <NewsletterForm
@@ -273,18 +277,18 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
     return (
       <Card
         className={cn(
-          'flex h-full flex-col border-primary/20 bg-linear-to-br from-primary/5 via-accent/5 to-background/95',
-          'shadow-lg backdrop-blur-sm',
+          'border-border bg-card flex h-full flex-col',
+          'shadow-lg',
           className
         )}
       >
         <CardHeader className="flex-1">
           <div className="mb-4">
-            <div className="inline-flex rounded-lg border border-primary/20 bg-primary/10 p-3">
+            <div className="border-primary/20 bg-primary/10 inline-flex rounded-lg border p-3">
               <Mail className={`${UI_CLASSES.ICON_LG} text-primary`} aria-hidden="true" />
             </div>
           </div>
-          <CardTitle className="mb-3 font-bold text-xl">{finalHeadline}</CardTitle>
+          <CardTitle className="mb-3 text-xl font-bold">{finalHeadline}</CardTitle>
           <CardDescription className="text-sm leading-relaxed">{finalDescription}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

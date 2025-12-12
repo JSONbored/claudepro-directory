@@ -22,6 +22,20 @@ export default defineConfig({
     // Enable global test functions (describe, it, expect, vi)
     globals: true,
 
+    // Use threads pool for better performance (faster than default 'forks' pool)
+    pool: 'threads',
+    maxWorkers: '50%', // Use 50% of available CPU cores
+
+    // Optional: Enable profiling for performance debugging (set VITEST_PROFILE=1)
+    execArgv: process.env.VITEST_PROFILE
+      ? [
+          '--cpu-prof',
+          '--cpu-prof-dir=test-runner-profile',
+          '--heap-prof',
+          '--heap-prof-dir=test-runner-profile',
+        ]
+      : [],
+
     // Environment based on file extension
     // Component tests (.tsx) need jsdom, server tests (.ts) use node
     environment: 'node',
@@ -99,6 +113,8 @@ export default defineConfig({
           root: './packages/shared-runtime',
           include: ['src/**/*.{test,spec}.{ts,tsx}'],
           environment: 'node',
+          pool: 'threads',
+          maxWorkers: 2, // Smaller package, fewer workers needed
         },
       },
       {
@@ -107,6 +123,8 @@ export default defineConfig({
           root: './packages/data-layer',
           include: ['src/**/*.{test,spec}.{ts,tsx}'],
           environment: 'node',
+          pool: 'threads',
+          maxWorkers: 2, // Smaller package, fewer workers needed
         },
       },
       {
@@ -116,6 +134,8 @@ export default defineConfig({
           include: ['src/**/*.{test,spec}.ts'],
           exclude: ['src/**/*.{test,spec}.tsx'],
           environment: 'node',
+          pool: 'threads',
+          maxWorkers: 3, // Medium package
         },
       },
       {
@@ -124,6 +144,8 @@ export default defineConfig({
           root: './packages/web-runtime',
           include: ['src/**/*.{test,spec}.tsx'],
           environment: 'jsdom',
+          pool: 'threads',
+          maxWorkers: 3, // Medium package
         },
       },
       {
@@ -132,6 +154,8 @@ export default defineConfig({
           root: './packages/generators',
           include: ['src/**/*.{test,spec}.{ts,tsx}'],
           environment: 'node',
+          pool: 'threads',
+          maxWorkers: 2, // Smaller package, fewer workers needed
         },
       },
       {
@@ -145,6 +169,8 @@ export default defineConfig({
             ['**/*.test.ts', 'node'],
             ['**/*.spec.ts', 'node'],
           ],
+          pool: 'threads',
+          maxWorkers: '75%', // Larger app, can use more workers
         },
       },
     ],

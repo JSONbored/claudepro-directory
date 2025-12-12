@@ -4,31 +4,32 @@ import {
   getAuthenticatedUser,
   getSponsorshipAnalytics,
 } from '@heyclaude/web-runtime/data';
-import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  POSITION_PATTERNS,
-  UI_CLASSES,
-  UnifiedBadge,
-  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  POSITION_PATTERNS,
+  UI_CLASSES,
+  UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
-import Link from 'next/link';
+import { cacheLife } from 'next/cache';
 import { notFound } from 'next/navigation';
+import { connection } from 'next/server';
+import { Suspense } from 'react';
 
+import { SignInButton } from '@/src/components/core/auth/sign-in-button';
 import { MetricsDisplay } from '@/src/components/features/analytics/metrics-display';
+
+import Loading from './loading';
 
 /**
  * Dynamic Rendering Required
  * Authenticated route
  */
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
 
 type SponsorshipAnalytics = Database['public']['Functions']['get_sponsorship_analytics']['Returns'];
 
@@ -37,15 +38,22 @@ interface AnalyticsPageProperties {
 }
 
 /**
- * Generates metadata for the sponsorship analytics page for the given route `id`.
+ * Generate page metadata for the sponsorship analytics route identified by `id`.
  *
- * @param params - A promise resolving to route parameters; must resolve to an object containing `id`
- * @returns Metadata for the sponsorship analytics page corresponding to `id`
+ * This metadata generation defers non-deterministic operations to request time by awaiting the database
+ * `connection()`, ensuring compatibility with Next.js Cache Components.
+ *
+ * @param params - A promise that resolves to route parameters; must resolve to an object containing `id`
+ * @param params.params
+ * @returns The Metadata object for the sponsorship analytics page for `id`
  *
  * @see generatePageMetadata
  * @see https://nextjs.org/docs/app/api-reference/functions/generate-metadata
  */
 export async function generateMetadata({ params }: AnalyticsPageProperties): Promise<Metadata> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
   const { id } = await params;
   return generatePageMetadata('/account/sponsorships/:id/analytics', { params: { id } });
 }
@@ -53,40 +61,71 @@ export async function generateMetadata({ params }: AnalyticsPageProperties): Pro
 /**
  * Render the sponsorship analytics page for a given sponsorship id.
  *
- * Renders campaign overview metrics, campaign details, a 30-day daily performance chart,
- * and optimization tips. Enforces authentication (prompts sign-in if unauthenticated)
- * and fetches analytics data for the current user; if analytics are missing or invalid,
- * the page resolves to a not-found response.
+ * Displays campaign overview metrics, campaign details, a 30-day daily performance chart,
+ * and optimization tips. Enforces authentication and resolves to a not-found response when
+ * analytics data is missing or invalid.
  *
  * @param params - Route parameters object containing the `id` of the sponsorship to display.
- * @returns A React element displaying campaign metrics, daily performance visualization, and tips.
+ * @param params.params
+ * @returns A React element showing campaign metrics, daily performance visualization, and optimization tips.
  *
  * @see getSponsorshipAnalytics
  * @see getAuthenticatedUser
- * @see generateRequestId
  * @see notFound
  */
 export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPageProperties) {
-  const { id } = await params;
-
-  // Generate single requestId for this page request
-  const requestId = generateRequestId();
+  'use cache: private';
+  cacheLife('userProfile'); // 1min stale, 5min revalidate, 30min expire - User-specific data
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    requestId,
-    operation: 'SponsorshipAnalyticsPage',
-    route: `/account/sponsorships/${id}/analytics`,
     module: 'apps/web/src/app/account/sponsorships/[id]/analytics',
+    operation: 'SponsorshipAnalyticsPage',
   });
+
+  return (
+    <Suspense fallback={<Loading />}>
+      <SponsorshipAnalyticsPageContent params={params} reqLogger={reqLogger} />
+    </Suspense>
+  );
+}
+
+/**
+ * Render the sponsorship analytics page content for a given sponsorship id by fetching analytics, enforcing authentication, and displaying overview, campaign details, and a 30-day performance chart.
+ *
+ * Renders a sign-in prompt when no authenticated user is present and triggers Next.js `notFound()` when analytics or required fields are missing.
+ *
+ * @param params - Promise resolving to route parameters with an `id` property
+ * @param params.params
+ * @param reqLogger - Request-scoped logger (used to create route- and user-scoped child loggers)
+ * @param params.reqLogger
+ * @returns The React elements comprising the sponsorship analytics UI
+ * @throws Normalized error when fetching sponsorship analytics fails
+ * @see getSponsorshipAnalytics
+ * @see getAuthenticatedUser
+ * @see notFound
+ */
+async function SponsorshipAnalyticsPageContent({
+  params,
+  reqLogger,
+}: {
+  params: Promise<{ id: string }>;
+  reqLogger: ReturnType<typeof logger.child>;
+}) {
+  const { id } = await params;
+  const route = `/account/sponsorships/${id}/analytics`;
+
+  // Create route-specific logger
+  const routeLogger = reqLogger.child({ route });
 
   // Section: Authentication
   const { user } = await getAuthenticatedUser({ context: 'SponsorshipAnalyticsPage' });
 
   if (!user) {
-    reqLogger.warn('SponsorshipAnalyticsPage: unauthenticated access attempt', {
-      section: 'authentication',
-    });
+    routeLogger.warn(
+      { section: 'data-fetch' },
+      'SponsorshipAnalyticsPage: unauthenticated access attempt'
+    );
     return (
       <div className="space-y-6">
         <Card>
@@ -95,9 +134,9 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
             <CardDescription>Please sign in to view sponsorship analytics.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild>
-              <Link href={ROUTES.LOGIN}>Go to sign in</Link>
-            </Button>
+            <SignInButton valueProposition="Sign in to view sponsorship analytics">
+              Go to sign in
+            </SignInButton>
           </CardContent>
         </Card>
       </div>
@@ -106,7 +145,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
 
   // Create new child logger with user context
   // Redaction automatically hashes userId/user_id/user.id fields (configured in logger/config.ts)
-  const userLogger = reqLogger.child({
+  const userLogger = routeLogger.child({
     userId: user.id, // Redaction will automatically hash this
   });
 
@@ -116,14 +155,21 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
     analyticsData = await getSponsorshipAnalytics(user.id, id);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load sponsorship analytics');
-    userLogger.error('SponsorshipAnalyticsPage: getSponsorshipAnalytics threw', normalized, {
-      section: 'analytics-data-fetch',
-    });
+    userLogger.error(
+      {
+        err: normalized,
+        section: 'data-fetch',
+      },
+      'SponsorshipAnalyticsPage: getSponsorshipAnalytics threw'
+    );
     throw normalized;
   }
 
   if (!analyticsData) {
-    userLogger.warn('SponsorshipAnalyticsPage: analytics not found or inaccessible');
+    userLogger.warn(
+      { section: 'data-fetch' },
+      'SponsorshipAnalyticsPage: analytics not found or inaccessible'
+    );
     notFound();
   }
 
@@ -134,10 +180,13 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
   const computed_metrics = analyticsData.computed_metrics;
 
   // Handle nullability per generated types (composite types are nullable in generated types)
-  if (!(sponsorship && daily_stats && computed_metrics)) {
+  if (!sponsorship || !daily_stats || !computed_metrics) {
     userLogger.error(
-      'SponsorshipAnalyticsPage: unexpected null fields in analytics data',
-      new Error('Null fields in analytics data')
+      {
+        err: new Error('Null fields in analytics data'),
+        section: 'data-fetch',
+      },
+      'SponsorshipAnalyticsPage: unexpected null fields in analytics data'
     );
     notFound();
   }
@@ -161,11 +210,15 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
     : 'sponsored'; // Safe default for invalid values
 
   if (!isTierValid) {
-    userLogger.warn('SponsorshipAnalyticsPage: invalid tier value, using safe default', {
-      invalidTier: rawTier,
-      expectedTiers: validTiers, // Now supports arrays directly - better for log querying
-      fallbackTier: 'sponsored',
-    });
+    userLogger.warn(
+      {
+        expectedTiers: validTiers, // Now supports arrays directly - better for log querying
+        fallbackTier: 'sponsored',
+        invalidTier: rawTier,
+        section: 'data-fetch',
+      },
+      'SponsorshipAnalyticsPage: invalid tier value, using safe default'
+    );
   }
 
   const impressionCount = sponsorship.impression_count ?? 0;
@@ -192,7 +245,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
       {/* Header */}
       <div>
         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-          <UnifiedBadge variant="sponsored" tier={safeTier} showIcon />
+          <UnifiedBadge showIcon tier={safeTier} variant="sponsored" />
           <h1 className="text-3xl font-bold">Sponsorship Analytics</h1>
         </div>
         <p className="text-muted-foreground">
@@ -202,7 +255,6 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
 
       {/* Overview Stats */}
       <MetricsDisplay
-        title="Campaign Performance"
         description="Key metrics for your sponsored content"
         metrics={[
           {
@@ -214,25 +266,26 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
             trend: impressionCount > 0 ? 'up' : 'unchanged',
           },
           {
-            label: 'Total Clicks',
-            value: clickCount.toLocaleString(),
             change: 'User engagements',
+            label: 'Total Clicks',
             trend: clickCount > 0 ? 'up' : 'unchanged',
+            value: clickCount.toLocaleString(),
           },
           {
-            label: 'Click-Through Rate',
-            value: `${ctr}%`,
             change: 'Clicks / Impressions',
+            label: 'Click-Through Rate',
             trend:
-              Number.parseFloat(ctr) > 2 ? 'up' : Number.parseFloat(ctr) > 0 ? 'unchanged' : 'down',
+              Number.parseFloat(ctr) > 2 ? 'up' : (Number.parseFloat(ctr) > 0 ? 'unchanged' : 'down'),
+            value: `${ctr}%`,
           },
           {
-            label: 'Avg. Daily Views',
-            value: avgImpressionsPerDay,
             change: `Over ${daysActive} days`,
+            label: 'Avg. Daily Views',
             trend: Number.parseFloat(avgImpressionsPerDay) > 0 ? 'up' : 'unchanged',
+            value: avgImpressionsPerDay,
           },
         ]}
+        title="Campaign Performance"
       />
 
       {/* Campaign Details */}
@@ -270,7 +323,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
             <div>
               <p className="text-sm font-medium">Status</p>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <UnifiedBadge variant="base" style={sponsorship.active ? 'default' : 'outline'}>
+                <UnifiedBadge style={sponsorship.active ? 'default' : 'outline'} variant="base">
                   {sponsorship.active ? 'Active' : 'Inactive'}
                 </UnifiedBadge>
               </div>
@@ -279,7 +332,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
             <div>
               <p className="text-sm font-medium">Tier</p>
               <div>
-                <UnifiedBadge variant="sponsored" tier={safeTier} showIcon />
+                <UnifiedBadge showIcon tier={safeTier} variant="sponsored" />
               </div>
             </div>
           </div>
@@ -294,7 +347,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            {Array.from({ length: 30 }).map((_, index) => {
+            {Array.from({ length: 30 }, (_, index) => {
               const date = new Date();
               date.setDate(date.getDate() - (29 - index));
               const dayKey = date.toISOString().slice(0, 10); // Extract YYYY-MM-DD
@@ -303,9 +356,9 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
               const maxImpressions = Math.max(...impressionsMap.values(), 1);
 
               return (
-                <div key={dayKey} className="grid grid-cols-12 items-center gap-2">
+                <div className="grid grid-cols-12 items-center gap-2" key={dayKey}>
                   <div className="text-muted-foreground col-span-2 text-xs">
-                    {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    {date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}
                   </div>
                   <div className="col-span-10 grid grid-cols-2 gap-1">
                     {/* Impressions bar */}

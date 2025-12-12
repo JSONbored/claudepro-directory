@@ -585,6 +585,7 @@ export type Database = {
         Row: {
           author: string
           author_profile_url: string | null
+          author_user_id: string | null
           avg_rating: number | null
           bookmark_count: number
           category: Database["public"]["Enums"]["content_category"]
@@ -605,6 +606,7 @@ export type Database = {
           has_troubleshooting: boolean | null
           id: string
           json_ld: Json | null
+          keywords: string[] | null
           mcpb_build_hash: string | null
           mcpb_last_built_at: string | null
           mcpb_storage_url: string | null
@@ -616,6 +618,7 @@ export type Database = {
           review_count: number
           robots_follow: boolean | null
           robots_index: boolean | null
+          seo_description: string | null
           seo_title: string | null
           slug: string
           source: Database["public"]["Enums"]["content_source"] | null
@@ -632,6 +635,7 @@ export type Database = {
         Insert: {
           author: string
           author_profile_url?: string | null
+          author_user_id?: string | null
           avg_rating?: number | null
           bookmark_count?: number
           category: Database["public"]["Enums"]["content_category"]
@@ -652,6 +656,7 @@ export type Database = {
           has_troubleshooting?: boolean | null
           id?: string
           json_ld?: Json | null
+          keywords?: string[] | null
           mcpb_build_hash?: string | null
           mcpb_last_built_at?: string | null
           mcpb_storage_url?: string | null
@@ -663,6 +668,7 @@ export type Database = {
           review_count?: number
           robots_follow?: boolean | null
           robots_index?: boolean | null
+          seo_description?: string | null
           seo_title?: string | null
           slug: string
           source?: Database["public"]["Enums"]["content_source"] | null
@@ -679,6 +685,7 @@ export type Database = {
         Update: {
           author?: string
           author_profile_url?: string | null
+          author_user_id?: string | null
           avg_rating?: number | null
           bookmark_count?: number
           category?: Database["public"]["Enums"]["content_category"]
@@ -699,6 +706,7 @@ export type Database = {
           has_troubleshooting?: boolean | null
           id?: string
           json_ld?: Json | null
+          keywords?: string[] | null
           mcpb_build_hash?: string | null
           mcpb_last_built_at?: string | null
           mcpb_storage_url?: string | null
@@ -710,6 +718,7 @@ export type Database = {
           review_count?: number
           robots_follow?: boolean | null
           robots_index?: boolean | null
+          seo_description?: string | null
           seo_title?: string | null
           slug?: string
           source?: Database["public"]["Enums"]["content_source"] | null
@@ -723,7 +732,15 @@ export type Database = {
           use_count?: number
           view_count?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "content_author_user_id_fkey"
+            columns: ["author_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       content_embeddings: {
         Row: {
@@ -766,6 +783,13 @@ export type Database = {
             columns: ["content_id"]
             isOneToOne: true
             referencedRelation: "mv_content_list_slim"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_embeddings_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: true
+            referencedRelation: "trending_metrics_cache"
             referencedColumns: ["id"]
           },
         ]
@@ -985,6 +1009,73 @@ export type Database = {
         }
         Relationships: []
       }
+      content_time_metrics: {
+        Row: {
+          bookmarks_30d: number
+          bookmarks_7d: number
+          content_id: string
+          copies_30d: number
+          copies_7d: number
+          created_at: string
+          last_calculated_at: string
+          updated_at: string
+          velocity_7d: number
+          views_30d: number
+          views_7d: number
+          views_prev_7d: number
+        }
+        Insert: {
+          bookmarks_30d?: number
+          bookmarks_7d?: number
+          content_id: string
+          copies_30d?: number
+          copies_7d?: number
+          created_at?: string
+          last_calculated_at?: string
+          updated_at?: string
+          velocity_7d?: number
+          views_30d?: number
+          views_7d?: number
+          views_prev_7d?: number
+        }
+        Update: {
+          bookmarks_30d?: number
+          bookmarks_7d?: number
+          content_id?: string
+          copies_30d?: number
+          copies_7d?: number
+          created_at?: string
+          last_calculated_at?: string
+          updated_at?: string
+          velocity_7d?: number
+          views_30d?: number
+          views_7d?: number
+          views_prev_7d?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_time_metrics_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: true
+            referencedRelation: "content"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_time_metrics_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: true
+            referencedRelation: "mv_content_list_slim"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_time_metrics_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: true
+            referencedRelation: "trending_metrics_cache"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       content_votes: {
         Row: {
           content_slug: string
@@ -1016,6 +1107,13 @@ export type Database = {
             columns: ["content_slug", "content_type"]
             isOneToOne: false
             referencedRelation: "content"
+            referencedColumns: ["slug", "category"]
+          },
+          {
+            foreignKeyName: "fk_content_votes_content"
+            columns: ["content_slug", "content_type"]
+            isOneToOne: false
+            referencedRelation: "trending_metrics_cache"
             referencedColumns: ["slug", "category"]
           },
         ]
@@ -3072,6 +3170,7 @@ export type Database = {
           submission_count: number
           tier: Database["public"]["Enums"]["user_tier"] | null
           updated_at: string
+          username: string | null
           votes_received_count: number | null
           website: string | null
           work: string | null
@@ -3102,6 +3201,7 @@ export type Database = {
           submission_count?: number
           tier?: Database["public"]["Enums"]["user_tier"] | null
           updated_at?: string
+          username?: string | null
           votes_received_count?: number | null
           website?: string | null
           work?: string | null
@@ -3132,6 +3232,7 @@ export type Database = {
           submission_count?: number
           tier?: Database["public"]["Enums"]["user_tier"] | null
           updated_at?: string
+          username?: string | null
           votes_received_count?: number | null
           website?: string | null
           work?: string | null
@@ -3360,6 +3461,37 @@ export type Database = {
         }
         Relationships: []
       }
+      trending_metrics_cache: {
+        Row: {
+          all_time_popularity_score: number | null
+          author: string | null
+          bookmarks_30d: number | null
+          bookmarks_7d: number | null
+          bookmarks_total: number | null
+          category: Database["public"]["Enums"]["content_category"] | null
+          copies_30d: number | null
+          copies_7d: number | null
+          copies_total: number | null
+          created_at: string | null
+          date_added: string | null
+          description: string | null
+          engagement_score: number | null
+          freshness_score: number | null
+          id: string | null
+          popularity_score: number | null
+          review_count: number | null
+          slug: string | null
+          source: Database["public"]["Enums"]["content_source"] | null
+          tags: string[] | null
+          title: string | null
+          trending_score: number | null
+          velocity_7d: number | null
+          views_30d: number | null
+          views_7d: number | null
+          views_total: number | null
+        }
+        Relationships: []
+      }
       trending_searches: {
         Row: {
           last_searched: string | null
@@ -3453,6 +3585,18 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "batch_add_bookmarks_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      batch_insert_search_queries: {
+        Args: {
+          p_queries: Database["public"]["CompositeTypes"]["search_query_input"][]
+        }
+        Returns: Database["public"]["CompositeTypes"]["batch_insert_search_queries_result"]
+        SetofOptions: {
+          from: "*"
+          to: "batch_insert_search_queries_result"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -3635,14 +3779,41 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      calculate_content_popularity_score: {
+      calculate_all_time_popularity_score: {
         Args: {
           p_bookmark_count: number
-          p_created_at: string
+          p_copy_count: number
           p_review_count: number
           p_view_count: number
         }
         Returns: number
+      }
+      calculate_content_popularity_score:
+        | {
+            Args: {
+              p_bookmark_count: number
+              p_copy_count: number
+              p_created_at: string
+              p_review_count: number
+              p_view_count: number
+            }
+            Returns: number
+          }
+        | {
+            Args: {
+              p_bookmark_count: number
+              p_created_at: string
+              p_review_count: number
+              p_view_count: number
+            }
+            Returns: number
+          }
+      calculate_content_time_metrics: {
+        Args: never
+        Returns: {
+          created_count: number
+          updated_count: number
+        }[]
       }
       calculate_job_pricing: {
         Args: {
@@ -3666,6 +3837,7 @@ export type Database = {
           needs_vacuum: boolean
         }[]
       }
+      convert_sections_to_changes: { Args: { p_sections: Json }; Returns: Json }
       create_job_with_payment: {
         Args: {
           p_job_data: Database["public"]["CompositeTypes"]["job_create_input"]
@@ -3714,6 +3886,15 @@ export type Database = {
         Args: { p_section_index: number; p_slug: string }
         Returns: string
       }
+      dismiss_notifications:
+        | {
+            Args: { p_notification_ids: string[]; p_user_id: string }
+            Returns: number
+          }
+        | {
+            Args: { p_notification_ids: string[]; p_user_id: string }
+            Returns: number
+          }
       enroll_in_email_sequence: {
         Args: { p_email: string }
         Returns: undefined
@@ -3753,6 +3934,7 @@ export type Database = {
           submission_count: number
           tier: Database["public"]["Enums"]["user_tier"] | null
           updated_at: string
+          username: string | null
           votes_received_count: number | null
           website: string | null
           work: string | null
@@ -3824,6 +4006,10 @@ export type Database = {
         Args: { p_limit?: number }
         Returns: string
       }
+      generate_changelog_slug: {
+        Args: { p_date: string; p_version: string }
+        Returns: string
+      }
       generate_command_installation: {
         Args: { p_slug: string; p_title: string }
         Returns: Database["public"]["CompositeTypes"]["command_installation_result"]
@@ -3857,6 +4043,7 @@ export type Database = {
         }
         Returns: string
       }
+      generate_friendly_username: { Args: never; Returns: string }
       generate_item_llms_txt: {
         Args: {
           p_category: Database["public"]["Enums"]["content_category"]
@@ -3965,6 +4152,24 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      get_active_notifications_for_user: {
+        Args: { p_user_id: string }
+        Returns: {
+          action_href: string
+          action_label: string
+          action_onclick: string
+          active: boolean
+          created_at: string
+          expires_at: string
+          icon: string
+          id: string
+          message: string
+          priority: Database["public"]["Enums"]["notification_priority"]
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+          updated_at: string
+        }[]
+      }
       get_active_sponsored_content: {
         Args: {
           p_content_type?: Database["public"]["Enums"]["content_category"]
@@ -4033,6 +4238,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      get_api_health_formatted: { Args: never; Returns: Json }
       get_bookmark_counts_by_category: {
         Args: {
           category_filter: Database["public"]["Enums"]["content_category"]
@@ -4077,6 +4283,20 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      get_category_content_list: {
+        Args: { p_category: Database["public"]["Enums"]["content_category"] }
+        Returns: {
+          author: string
+          bookmark_count: number
+          category: Database["public"]["Enums"]["content_category"]
+          date_added: string
+          description: string
+          slug: string
+          tags: string[]
+          title: string
+          view_count: number
+        }[]
       }
       get_category_description: {
         Args: { p_category: string }
@@ -4462,6 +4682,23 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      get_job_billing_summaries: {
+        Args: { p_job_ids: string[] }
+        Returns: {
+          billing_cycle_days: number
+          is_subscription: boolean
+          job_expiry_days: number
+          job_id: string
+          last_payment_amount: number
+          last_payment_at: string
+          last_payment_status: Database["public"]["Enums"]["payment_transaction_status"]
+          plan: Database["public"]["Enums"]["job_plan"]
+          price_cents: number
+          subscription_renews_at: string
+          subscription_status: Database["public"]["Enums"]["subscription_status"]
+          tier: Database["public"]["Enums"]["job_tier"]
+        }[]
+      }
       get_job_detail: {
         Args: { p_slug: string }
         Returns: Database["public"]["CompositeTypes"]["job_detail_result"]
@@ -4472,6 +4709,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      get_job_title_by_id: { Args: { p_job_id: string }; Returns: string }
       get_jobs_by_category: {
         Args: { p_category: Database["public"]["Enums"]["job_category"] }
         Returns: {
@@ -4548,16 +4786,6 @@ export type Database = {
           isSetofReturn: true
         }
       }
-      get_navigation_menu: {
-        Args: never
-        Returns: Database["public"]["CompositeTypes"]["navigation_menu_result"]
-        SetofOptions: {
-          from: "*"
-          to: "navigation_menu_result"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
       get_new_content_for_week: {
         Args: { p_limit?: number; p_week_start: string }
         Returns: {
@@ -4569,9 +4797,68 @@ export type Database = {
           url: string
         }[]
       }
+      get_newsletter_subscription_by_id: {
+        Args: { p_id: string }
+        Returns: {
+          categories_visited: string[] | null
+          confirmation_token: string | null
+          confirmed: boolean | null
+          confirmed_at: string | null
+          consent_given: boolean | null
+          copy_category: Database["public"]["Enums"]["content_category"] | null
+          copy_slug: string | null
+          copy_type: Database["public"]["Enums"]["copy_type"] | null
+          created_at: string
+          email: string
+          engagement_score: number | null
+          id: string
+          ip_address: unknown
+          last_active_at: string | null
+          last_email_sent_at: string | null
+          last_sync_at: string | null
+          preferred_email_frequency:
+            | Database["public"]["Enums"]["email_frequency"]
+            | null
+          primary_interest:
+            | Database["public"]["Enums"]["newsletter_interest"]
+            | null
+          referrer: string | null
+          resend_contact_id: string | null
+          resend_topics: string[] | null
+          source: Database["public"]["Enums"]["newsletter_source"] | null
+          status: Database["public"]["Enums"]["newsletter_subscription_status"]
+          subscribed_at: string | null
+          sync_error: string | null
+          sync_status: Database["public"]["Enums"]["newsletter_sync_status"]
+          total_copies: number | null
+          unsubscribed_at: string | null
+          updated_at: string
+          user_agent: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "newsletter_subscriptions"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_or_create_company: {
         Args: { p_company_name: string; p_user_id: string }
         Returns: string
+      }
+      get_payment_plan_catalog: {
+        Args: never
+        Returns: {
+          benefits: Json
+          billing_cycle_days: number
+          description: string
+          is_subscription: boolean
+          job_expiry_days: number
+          plan: Database["public"]["Enums"]["job_plan"]
+          price_cents: number
+          product_type: Database["public"]["Enums"]["payment_product_type"]
+          tier: Database["public"]["Enums"]["job_tier"]
+        }[]
       }
       get_pending_resend_syncs: {
         Args: { p_limit?: number }
@@ -4623,6 +4910,23 @@ export type Database = {
           view_count: number
         }[]
       }
+      get_popular_content_formatted: {
+        Args: {
+          p_category?: Database["public"]["Enums"]["content_category"]
+          p_limit?: number
+        }
+        Returns: {
+          author: string
+          category: Database["public"]["Enums"]["content_category"]
+          copy_count: number
+          description: string
+          popularity: number
+          slug: string
+          tags: string[]
+          title: string
+          view_count: number
+        }[]
+      }
       get_quiz_configuration: {
         Args: never
         Returns: Database["public"]["CompositeTypes"]["quiz_configuration_question"][]
@@ -4638,6 +4942,7 @@ export type Database = {
         Returns: {
           author: string
           author_profile_url: string | null
+          author_user_id: string | null
           avg_rating: number | null
           bookmark_count: number
           category: Database["public"]["Enums"]["content_category"]
@@ -4658,6 +4963,7 @@ export type Database = {
           has_troubleshooting: boolean | null
           id: string
           json_ld: Json | null
+          keywords: string[] | null
           mcpb_build_hash: string | null
           mcpb_last_built_at: string | null
           mcpb_storage_url: string | null
@@ -4669,6 +4975,7 @@ export type Database = {
           review_count: number
           robots_follow: boolean | null
           robots_index: boolean | null
+          seo_description: string | null
           seo_title: string | null
           slug: string
           source: Database["public"]["Enums"]["content_source"] | null
@@ -4688,6 +4995,22 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      get_recent_content_formatted: {
+        Args: {
+          p_category?: Database["public"]["Enums"]["content_category"]
+          p_days?: number
+          p_limit?: number
+        }
+        Returns: {
+          author: string
+          category: Database["public"]["Enums"]["content_category"]
+          created_at: string
+          description: string
+          slug: string
+          tags: string[]
+          title: string
+        }[]
       }
       get_recommendations: {
         Args: {
@@ -4762,12 +5085,24 @@ export type Database = {
       get_search_facets: {
         Args: never
         Returns: {
+          all_authors_aggregated: string[]
+          all_categories_aggregated: Database["public"]["Enums"]["content_category"][]
           all_tags: string[]
+          all_tags_aggregated: string[]
           author_count: number
           authors: string[]
           category: Database["public"]["Enums"]["content_category"]
           content_count: number
           tag_count: number
+        }[]
+      }
+      get_search_facets_formatted: {
+        Args: never
+        Returns: {
+          authors: string[]
+          category: string
+          content_count: number
+          tags: string[]
         }[]
       }
       get_search_suggestions: {
@@ -4776,11 +5111,42 @@ export type Database = {
           suggestion: string
         }[]
       }
+      get_search_suggestions_formatted: {
+        Args: { p_limit?: number; p_query: string }
+        Returns: {
+          is_popular: boolean
+          search_count: number
+          text: string
+        }[]
+      }
       get_search_suggestions_from_history: {
         Args: { p_limit?: number; p_query: string }
         Returns: {
           search_count: number
           suggestion: string
+        }[]
+      }
+      get_sidebar_recent_formatted: {
+        Args: {
+          p_category?: Database["public"]["Enums"]["content_category"]
+          p_days?: number
+          p_limit?: number
+        }
+        Returns: {
+          date: string
+          slug: string
+          title: string
+        }[]
+      }
+      get_sidebar_trending_formatted: {
+        Args: {
+          p_category?: Database["public"]["Enums"]["content_category"]
+          p_limit?: number
+        }
+        Returns: {
+          slug: string
+          title: string
+          views: string
         }[]
       }
       get_similar_content: {
@@ -4806,6 +5172,24 @@ export type Database = {
           priority: number
         }[]
       }
+      get_site_urls_formatted: {
+        Args: { p_limit?: number; p_site_url: string }
+        Returns: string[]
+      }
+      get_sitewide_content_list: {
+        Args: { p_limit?: number }
+        Returns: {
+          author: string
+          bookmark_count: number
+          category: Database["public"]["Enums"]["content_category"]
+          date_added: string
+          description: string
+          slug: string
+          tags: string[]
+          title: string
+          view_count: number
+        }[]
+      }
       get_skill_storage_path: {
         Args: { p_slug: string }
         Returns: {
@@ -4813,15 +5197,26 @@ export type Database = {
           object_path: string
         }[]
       }
-      get_social_proof_stats: {
-        Args: { p_month_ago: string; p_week_ago: string }
-        Returns: {
-          content_count: number
-          month_submissions: Json
-          recent_submissions: Json
-          top_contributors: string[]
-        }[]
-      }
+      get_social_proof_stats:
+        | {
+            Args: never
+            Returns: {
+              contributor_count: number
+              contributor_names: string[]
+              submission_count: number
+              success_rate: number
+              total_users: number
+            }[]
+          }
+        | {
+            Args: { p_month_ago: string; p_week_ago: string }
+            Returns: {
+              content_count: number
+              month_submissions: Json
+              recent_submissions: Json
+              top_contributors: string[]
+            }[]
+          }
       get_sponsorship_analytics: {
         Args: { p_sponsorship_id: string; p_user_id: string }
         Returns: Database["public"]["CompositeTypes"]["sponsorship_analytics_result"]
@@ -4860,6 +5255,7 @@ export type Database = {
         Returns: {
           author: string
           author_profile_url: string | null
+          author_user_id: string | null
           avg_rating: number | null
           bookmark_count: number
           category: Database["public"]["Enums"]["content_category"]
@@ -4880,6 +5276,7 @@ export type Database = {
           has_troubleshooting: boolean | null
           id: string
           json_ld: Json | null
+          keywords: string[] | null
           mcpb_build_hash: string | null
           mcpb_last_built_at: string | null
           mcpb_storage_url: string | null
@@ -4891,6 +5288,7 @@ export type Database = {
           review_count: number
           robots_follow: boolean | null
           robots_index: boolean | null
+          seo_description: string | null
           seo_title: string | null
           slug: string
           source: Database["public"]["Enums"]["content_source"] | null
@@ -4911,25 +5309,25 @@ export type Database = {
           isSetofReturn: true
         }
       }
-      get_trending_metrics: {
+      get_trending_metrics_formatted: {
         Args: {
           p_category?: Database["public"]["Enums"]["content_category"]
           p_limit?: number
         }
         Returns: {
-          bookmarks_total: number
+          author: string
+          bookmark_count: number
           category: Database["public"]["Enums"]["content_category"]
-          copies_total: number
-          created_at: string
-          days_old: number
+          copy_count: number
+          description: string
           engagement_score: number
           freshness_score: number
-          last_refreshed: string
+          popularity: number
           slug: string
-          trending_score: number
-          views_7d: number
-          views_prev_7d: number
-          views_total: number
+          source: string
+          tags: string[]
+          title: string
+          view_count: number
         }[]
       }
       get_trending_metrics_with_content: {
@@ -5010,6 +5408,21 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      get_user_complete_data: {
+        Args: {
+          p_activity_limit?: number
+          p_activity_offset?: number
+          p_activity_type?: string
+          p_user_id: string
+        }
+        Returns: Database["public"]["CompositeTypes"]["user_complete_data_result"]
+        SetofOptions: {
+          from: "*"
+          to: "user_complete_data_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       get_user_content_vote: {
         Args: {
           p_content_slug: string
@@ -5071,10 +5484,10 @@ export type Database = {
       }
       get_user_settings: {
         Args: { p_user_id: string }
-        Returns: Database["public"]["CompositeTypes"]["user_settings_result"]
+        Returns: Database["public"]["CompositeTypes"]["user_settings_result_v2"]
         SetofOptions: {
           from: "*"
-          to: "user_settings_result"
+          to: "user_settings_result_v2"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -5102,6 +5515,15 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      get_webhook_event_by_svix_id: {
+        Args: {
+          p_source: Database["public"]["Enums"]["webhook_source"]
+          p_svix_id: string
+        }
+        Returns: {
+          id: string
+        }[]
       }
       get_week_end: { Args: { week_start: string }; Returns: string }
       get_weekly_digest: {
@@ -5206,6 +5628,17 @@ export type Database = {
           submission_id: string
           success: boolean
         }[]
+      }
+      insert_webhook_event: {
+        Args: {
+          p_data: Json
+          p_direction: Database["public"]["Enums"]["webhook_direction"]
+          p_received_at?: string
+          p_source: Database["public"]["Enums"]["webhook_source"]
+          p_svix_id: string
+          p_type: Database["public"]["Enums"]["webhook_event_type"]
+        }
+        Returns: string
       }
       invoke_edge_function: {
         Args: { action_header: string; function_name: string; payload?: Json }
@@ -5373,6 +5806,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      refresh_trending_metrics_view: { Args: never; Returns: undefined }
       reindex_content_embeddings: { Args: never; Returns: string }
       reject_submission: {
         Args: { p_moderator_notes: string; p_submission_id: string }
@@ -5509,35 +5943,20 @@ export type Database = {
         Args: {
           p_authors?: string[]
           p_categories?: Database["public"]["Enums"]["content_category"][]
+          p_highlight_query?: string
           p_limit?: number
           p_offset?: number
           p_query?: string
           p_sort?: string
           p_tags?: string[]
         }
-        Returns: {
-          _featured: Json
-          author: string
-          author_profile_url: string
-          bookmark_count: number
-          category: Database["public"]["Enums"]["content_category"]
-          combined_score: number
-          copyCount: number
-          created_at: string
-          date_added: string
-          description: string
-          examples: Json
-          features: string[]
-          id: string
-          relevance_score: number
-          slug: string
-          source: string
-          tags: string[]
-          title: string
-          updated_at: string
-          use_cases: string[]
-          viewCount: number
-        }[]
+        Returns: Database["public"]["CompositeTypes"]["search_content_optimized_result"]
+        SetofOptions: {
+          from: "*"
+          to: "search_content_optimized_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       search_jobs: {
         Args: { result_limit?: number; search_query: string }
@@ -5591,22 +6010,18 @@ export type Database = {
       search_unified: {
         Args: {
           p_entities?: string[]
+          p_highlight_query?: string
           p_limit?: number
           p_offset?: number
           p_query: string
         }
-        Returns: {
-          category: string
-          created_at: string
-          description: string
-          engagement_score: number
-          entity_type: string
-          id: string
-          relevance_score: number
-          slug: string
-          tags: string[]
-          title: string
-        }[]
+        Returns: Database["public"]["CompositeTypes"]["search_unified_result"]
+        SetofOptions: {
+          from: "*"
+          to: "search_unified_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       search_users: {
         Args: { result_limit?: number; search_query: string }
@@ -5636,6 +6051,7 @@ export type Database = {
           submission_count: number
           tier: Database["public"]["Enums"]["user_tier"] | null
           updated_at: string
+          username: string | null
           votes_received_count: number | null
           website: string | null
           work: string | null
@@ -5738,6 +6154,31 @@ export type Database = {
           dead_tuples: number
           tablename: string
           vacuum_command: string
+        }[]
+      }
+      sync_changelog_entry: {
+        Args: {
+          p_content: string
+          p_date: string
+          p_metadata?: Json
+          p_raw_content?: string
+          p_sections?: Json
+          p_tldr?: string
+          p_version: string
+          p_what_changed?: string
+        }
+        Returns: {
+          changes: Json
+          content: string
+          created_at: string
+          date: string
+          id: string
+          raw_content: string
+          slug: string
+          tldr: string
+          updated_at: string
+          version: string
+          what_changed: string
         }[]
       }
       test_enriched_content_list_minimal: {
@@ -5847,16 +6288,43 @@ export type Database = {
           p_profile_public?: boolean
           p_social_x_link?: string
           p_user_id: string
+          p_username?: string
           p_website?: string
           p_work?: string
         }
-        Returns: Database["public"]["CompositeTypes"]["update_user_profile_result"]
+        Returns: Database["public"]["CompositeTypes"]["update_user_profile_result_v2"]
         SetofOptions: {
           from: "*"
-          to: "update_user_profile_result"
+          to: "update_user_profile_result_v2"
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      upsert_changelog_entry: {
+        Args: {
+          p_canonical_url?: string
+          p_changes: Json
+          p_content: string
+          p_date: string
+          p_keywords?: string[]
+          p_metadata?: Json
+          p_og_image_url?: string
+          p_raw_content: string
+          p_seo_description?: string
+          p_seo_title?: string
+          p_slug: string
+          p_tldr: string
+          p_version: string
+          p_what_changed: string
+        }
+        Returns: {
+          created_at: string
+          id: string
+          release_date: string
+          slug: string
+          title: string
+          updated_at: string
+        }[]
       }
       upsert_content_by_slug: {
         Args: {
@@ -6292,6 +6760,12 @@ export type Database = {
         saved_count: number | null
         total_requested: number | null
       }
+      batch_insert_search_queries_result: {
+        inserted: number | null
+        failed: number | null
+        total: number | null
+        errors: Json | null
+      }
       batch_insert_user_interactions_result: {
         inserted: number | null
         failed: number | null
@@ -6354,6 +6828,7 @@ export type Database = {
         section_examples: boolean | null
         section_requirements: boolean | null
         metadata_show_github_link: boolean | null
+        section_description: boolean | null
       }
       category_config_with_features: {
         category: Database["public"]["Enums"]["content_category"] | null
@@ -7171,24 +7646,6 @@ export type Database = {
         created_at: string | null
         moderated_at: string | null
       }
-      navigation_menu_item: {
-        path: string | null
-        title: string | null
-        description: string | null
-        icon_name: string | null
-        group: string | null
-      }
-      navigation_menu_result: {
-        primary:
-          | Database["public"]["CompositeTypes"]["navigation_menu_item"][]
-          | null
-        secondary:
-          | Database["public"]["CompositeTypes"]["navigation_menu_item"][]
-          | null
-        actions:
-          | Database["public"]["CompositeTypes"]["navigation_menu_item"][]
-          | null
-      }
       pending_submissions_item: {
         id: string | null
         submission_type: Database["public"]["Enums"]["submission_type"] | null
@@ -7354,6 +7811,68 @@ export type Database = {
         name: string | null
         image: string | null
         tier: Database["public"]["Enums"]["user_tier"] | null
+      }
+      search_content_optimized_result: {
+        results:
+          | Database["public"]["CompositeTypes"]["search_content_optimized_row"][]
+          | null
+        total_count: number | null
+      }
+      search_content_optimized_row: {
+        id: string | null
+        slug: string | null
+        title: string | null
+        description: string | null
+        category: Database["public"]["Enums"]["content_category"] | null
+        author: string | null
+        author_profile_url: string | null
+        date_added: string | null
+        tags: string[] | null
+        source: string | null
+        created_at: string | null
+        updated_at: string | null
+        features: string[] | null
+        use_cases: string[] | null
+        examples: Json | null
+        relevance_score: number | null
+        viewCount: number | null
+        copyCount: number | null
+        bookmark_count: number | null
+        combined_score: number | null
+        _featured: Json | null
+        title_highlighted: string | null
+        description_highlighted: string | null
+        author_highlighted: string | null
+        tags_highlighted: string[] | null
+      }
+      search_query_input: {
+        query: string | null
+        filters: Json | null
+        result_count: number | null
+        user_id: string | null
+        session_id: string | null
+      }
+      search_unified_result: {
+        results:
+          | Database["public"]["CompositeTypes"]["search_unified_row"][]
+          | null
+        total_count: number | null
+      }
+      search_unified_row: {
+        entity_type: string | null
+        id: string | null
+        title: string | null
+        description: string | null
+        slug: string | null
+        category: string | null
+        tags: string[] | null
+        created_at: string | null
+        relevance_score: number | null
+        engagement_score: number | null
+        title_highlighted: string | null
+        description_highlighted: string | null
+        author_highlighted: string | null
+        tags_highlighted: string[] | null
       }
       seo_metadata: {
         title: string | null
@@ -7612,6 +8131,12 @@ export type Database = {
         profile_public: boolean | null
         follow_email: boolean | null
       }
+      update_user_profile_result_v2: {
+        success: boolean | null
+        profile:
+          | Database["public"]["CompositeTypes"]["update_user_profile_result_profile"]
+          | null
+      }
       user_activity_summary: {
         total_posts: number | null
         total_comments: number | null
@@ -7712,6 +8237,32 @@ export type Database = {
         total_views: number | null
         total_clicks: number | null
         latest_job_posted_at: string | null
+      }
+      user_complete_data_result: {
+        account_dashboard:
+          | Database["public"]["CompositeTypes"]["account_dashboard_result"]
+          | null
+        user_dashboard:
+          | Database["public"]["CompositeTypes"]["user_dashboard_result"]
+          | null
+        user_settings:
+          | Database["public"]["CompositeTypes"]["user_settings_result_v2"]
+          | null
+        activity_summary:
+          | Database["public"]["CompositeTypes"]["user_activity_summary"]
+          | null
+        activity_timeline:
+          | Database["public"]["CompositeTypes"]["user_activity_timeline_result"]
+          | null
+        user_library:
+          | Database["public"]["CompositeTypes"]["user_library_result"]
+          | null
+        user_identities:
+          | Database["public"]["CompositeTypes"]["user_identities_result"]
+          | null
+        sponsorships:
+          | Database["public"]["Tables"]["sponsored_content"]["Row"][]
+          | null
       }
       user_dashboard_result: {
         submissions:
@@ -7874,6 +8425,15 @@ export type Database = {
         user_data:
           | Database["public"]["CompositeTypes"]["user_settings_user_data"]
           | null
+      }
+      user_settings_result_v2: {
+        profile:
+          | Database["public"]["CompositeTypes"]["user_settings_profile"]
+          | null
+        user_data:
+          | Database["public"]["CompositeTypes"]["user_settings_user_data"]
+          | null
+        username: string | null
       }
       user_settings_user_data: {
         slug: string | null

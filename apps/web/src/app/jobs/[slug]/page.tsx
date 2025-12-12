@@ -3,7 +3,8 @@
  */
 
 import { Constants } from '@heyclaude/database-types';
-import { getSafeWebsiteUrl, getSafeMailtoUrl } from '@heyclaude/web-runtime/core';
+import { getSafeMailtoUrl, getSafeWebsiteUrl, isValidCategory } from '@heyclaude/web-runtime/core';
+import { getCategoryConfig } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
   ArrowLeft,
@@ -15,31 +16,36 @@ import {
   MapPin,
   Users,
 } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata, getJobBySlug } from '@heyclaude/web-runtime/server';
 import { type PageProps } from '@heyclaude/web-runtime/types/app.schema';
 import { slugParamsSchema } from '@heyclaude/web-runtime/types/app.schema';
 import {
-  UI_CLASSES,
-  UnifiedBadge,
   Button,
   Card,
   CardContent,
   CardHeader,
   CardTitle,
+  UI_CLASSES,
+  UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { Suspense } from 'react';
 
 import { Pulse } from '@/src/components/core/infra/pulse';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 
+import Loading from './loading';
+
 /**
- * ISR: 2 hours (7200s) - Job postings are relatively stable
+ * Dynamic Rendering: Job detail pages are rendered at request time
+ * Uses connection() to defer non-deterministic operations (e.g., Date.now()) to request time
+ * Caching behavior is handled by the data layer (getJobBySlug)
+ * Remaining job pages are handled via dynamic routing on-demand
  */
-export const revalidate = 7200;
-export const dynamicParams = true; // Allow jobs not pre-rendered to be rendered on-demand
 
 /**
  * Builds page metadata for a job detail page from the provided route params and the job record.
@@ -47,6 +53,7 @@ export const dynamicParams = true; // Allow jobs not pre-rendered to be rendered
  * If the job cannot be loaded, returns metadata without the job `item` and logs the failure.
  *
  * @param params - Promise resolving to route params; must include `slug`.
+ * @param params.params
  * @returns The page Metadata populated with the job data when available, otherwise metadata without `item`.
  * @see getJobBySlug
  * @see generatePageMetadata
@@ -57,15 +64,12 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  // Generate requestId for metadata generation (separate from page render)
-  const metadataRequestId = generateRequestId();
 
-  // Create request-scoped child logger to avoid race conditions
+  // Create request-scoped child logger
   const metadataLogger = logger.child({
-    requestId: metadataRequestId,
+    module: 'apps/web/src/app/jobs/[slug]',
     operation: 'JobPageMetadata',
     route: `/jobs/${slug}`,
-    module: 'apps/web/src/app/jobs/[slug]',
   });
 
   let job: Awaited<ReturnType<typeof getJobBySlug>> = null;
@@ -73,43 +77,42 @@ export async function generateMetadata({
     job = await getJobBySlug(slug);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load job for metadata');
-    metadataLogger.error('JobPage: getJobBySlug threw in generateMetadata', normalized, {
-      operation: 'generateMetadata',
-    });
+    metadataLogger.error(
+      {
+        err: normalized,
+        operation: 'generateMetadata',
+      },
+      'JobPage: getJobBySlug threw in generateMetadata'
+    );
   }
 
   return generatePageMetadata('/jobs/:slug', {
-    params: { slug },
     item: job ? { ...job, tags: job.tags ?? [] } : undefined,
+    params: { slug },
     slug,
   });
 }
 
 /**
- * Produce static route parameters (slugs) for pre-rendering a subset of job pages at build time.
+ * Produce a bounded set of static route parameters (job slugs) for build-time pre-rendering.
  *
- * Generates an array of parameter objects used by Next.js to statically pre-render job pages.
- * Only a limited number of jobs are returned to bound build-time work; remaining jobs are handled on demand.
+ * Returns up to 10 `{ slug: string }` objects to limit build-time work. If no jobs are available or an error occurs,
+ * returns an empty array. Suspense boundaries will handle dynamic rendering for remaining job pages on-demand.
  *
- * @returns An array of parameter objects `{ slug: string }` for up to 10 jobs; returns an empty array if no jobs are available or if an error occurs.
+ * @returns An array of parameter objects where each item is `{ slug: string }`; returns an empty array when no jobs are available or when fetching jobs fails.
  *
  * @see getFilteredJobs - source of job listings used to derive slugs
- * @see export const dynamicParams - remaining job pages are rendered on-demand when not pre-rendered
  */
 export async function generateStaticParams() {
   // Limit to top 10 jobs to optimize build time
-  // ISR with dynamicParams=true handles remaining jobs on-demand
+  // Remaining jobs are handled via dynamic routing on-demand
   const MAX_STATIC_JOBS = 10;
 
-  // Generate requestId for static params generation (build-time)
-  const staticParametersRequestId = generateRequestId();
-
-  // Create request-scoped child logger to avoid race conditions
+  // Create request-scoped child logger
   const reqLogger = logger.child({
-    requestId: staticParametersRequestId,
+    module: 'apps/web/src/app/jobs/[slug]',
     operation: 'JobPageStaticParams',
     route: '/jobs',
-    module: 'apps/web/src/app/jobs/[slug]',
   });
 
   const { getFilteredJobs } = await import('@heyclaude/web-runtime/server');
@@ -117,86 +120,143 @@ export async function generateStaticParams() {
     const jobsResult = await getFilteredJobs({ limit: MAX_STATIC_JOBS });
     const jobs = jobsResult?.jobs ?? [];
 
+    // Cache Components requires at least one result for build-time validation
+    // If no jobs found, return a placeholder that will be handled gracefully by the page component
     if (jobs.length === 0) {
-      reqLogger.warn('generateStaticParams: no jobs available, returning no static params');
-      return [];
+      reqLogger.warn(
+        {
+          section: 'data-fetch',
+        },
+        'JobPage: No jobs found in generateStaticParams, returning placeholder'
+      );
+      // Return placeholder slug (valid format: lowercase, numbers, single hyphens)
+      // Page component will handle 404 gracefully for placeholder slug
+      return [{ slug: 'placeholder' }];
     }
 
     return jobs.map((job) => ({ slug: job.slug }));
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load jobs for static params');
-    reqLogger.error('JobPage: getFilteredJobs threw in generateStaticParams', normalized);
-    return [];
+    reqLogger.error(
+      {
+        err: normalized,
+        section: 'data-fetch',
+      },
+      'JobPage: getFilteredJobs threw in generateStaticParams'
+    );
+    // Cache Components requires at least one result - return placeholder on error
+    // Page component will handle 404 gracefully for placeholder slug
+    return [{ slug: 'placeholder' }];
   }
 }
 
 /**
- * Render the job detail page for a given route slug.
+ * Render the job detail page for the given route slug.
  *
- * Validates the incoming `slug`, loads the corresponding job record, and returns the server-rendered UI
- * containing header, metadata, description, requirements, benefits, apply actions, and job details.
- * Triggers next/navigation.notFound() when slug validation fails or the job cannot be found.
+ * Validates the incoming `slug`, loads the matching job record, and renders the server-side UI
+ * including metadata, structured data, header, description, requirements, benefits, apply actions,
+ * and job details. Calls `notFound()` when slug validation fails or no job is found.
  *
  * @param props.params - Route parameters containing the `slug` for the job to display.
- * @returns The React element representing the server-rendered job detail page.
+ * @param root0
+ * @param root0.params
+ * @returns The server-rendered React element for the job detail page.
  *
  * @see getJobBySlug
  * @see getSafeWebsiteUrl
  * @see getSafeMailtoUrl
  */
 export default async function JobPage({ params }: PageProps) {
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
+
   if (!params) {
     notFound();
   }
 
   const rawParameters = await params;
   const validationResult = slugParamsSchema.safeParse(rawParameters);
-
-  // Generate single requestId for this page request
-  const requestId = generateRequestId();
   const slug = validationResult.success
     ? validationResult.data.slug
     : String(rawParameters['slug']);
 
-  // Create request-scoped child logger to avoid race conditions
+  // Create request-scoped child logger
   const reqLogger = logger.child({
-    requestId,
+    module: 'apps/web/src/app/jobs/[slug]',
     operation: 'JobPage',
     route: `/jobs/${slug}`,
-    module: 'apps/web/src/app/jobs/[slug]',
   });
 
   // Section: Parameter Validation
   if (!validationResult.success) {
     reqLogger.error(
-      'Invalid slug parameter for job page',
-      new Error(validationResult.error.issues[0]?.message ?? 'Invalid slug'),
       {
-        section: 'parameter-validation',
+        err: new Error(validationResult.error.issues[0]?.message ?? 'Invalid slug'),
         errorCount: validationResult.error.issues.length,
-      }
+        section: 'data-fetch',
+      },
+      'Invalid slug parameter for job page'
     );
     notFound();
   }
 
   const validatedSlug = validationResult.data.slug;
 
+  // Handle placeholder slug from generateStaticParams (used when no jobs found at build time)
+  // This satisfies Cache Components requirement for at least one static param
+  if (validatedSlug === 'placeholder') {
+    reqLogger.warn({ section: 'data-fetch' }, 'Placeholder slug detected, returning 404');
+    notFound();
+  }
+
+  return (
+    <Suspense fallback={<Loading />}>
+      <JobPageContent reqLogger={reqLogger} slug={validatedSlug} />
+    </Suspense>
+  );
+}
+
+/**
+ * Renders the job detail page content for a given slug.
+ *
+ * Fetches the job data in a Suspense boundary to enable progressive rendering.
+ * If the job is not found, calls `notFound()` to trigger a 404 response.
+ *
+ * @param slug.reqLogger
+ * @param slug - The validated job slug
+ * @param reqLogger - Request-scoped logger for structured logging
+ * @param slug.slug
+ * @returns The server-rendered React element for the job detail page
+ *
+ * @see getJobBySlug
+ * @see getSafeWebsiteUrl
+ * @see getSafeMailtoUrl
+ */
+async function JobPageContent({
+  reqLogger,
+  slug,
+}: {
+  reqLogger: ReturnType<typeof logger.child>;
+  slug: string;
+}) {
   // Section: Job Data Fetch
   let job: Awaited<ReturnType<typeof getJobBySlug>>;
   try {
-    job = await getJobBySlug(validatedSlug);
+    job = await getJobBySlug(slug);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load job detail');
-    reqLogger.error('JobPage: getJobBySlug threw', normalized, {
-      section: 'job-data-fetch',
-    });
+    reqLogger.error(
+      {
+        err: normalized,
+        section: 'data-fetch',
+      },
+      'JobPage: getJobBySlug threw'
+    );
     throw normalized;
   }
 
   if (!job) {
-    reqLogger.warn('JobPage: job not found', {
-      section: 'job-data-fetch',
-    });
+    reqLogger.warn({ section: 'data-fetch' }, 'JobPage: job not found');
     notFound();
   }
 
@@ -207,16 +267,16 @@ export default async function JobPage({ params }: PageProps) {
   return (
     <>
       <Pulse
-        variant="view"
         category={Constants.public.Enums.content_category[9]} // 'jobs'
         slug={slug}
+        variant="view"
       />
       <StructuredData route={`/jobs/${slug}`} />
 
       <div className="bg-background min-h-screen">
         <div className="border-border/50 bg-card/30 border-b">
           <div className="container mx-auto px-4 py-8">
-            <Button variant="ghost" asChild className="mb-6">
+            <Button asChild className="mb-6" variant="ghost">
               <Link href={ROUTES.JOBS}>
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Jobs
@@ -259,7 +319,7 @@ export default async function JobPage({ params }: PageProps) {
 
               <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
                 {tags.map((skill: string) => (
-                  <UnifiedBadge key={skill} variant="base" style="secondary">
+                  <UnifiedBadge key={skill} style="secondary" variant="base">
                     {skill}
                   </UnifiedBadge>
                 ))}
@@ -287,7 +347,7 @@ export default async function JobPage({ params }: PageProps) {
                 <CardContent>
                   <ul className="space-y-2">
                     {requirements.map((request: string) => (
-                      <li key={request} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
+                      <li className={UI_CLASSES.FLEX_ITEMS_START_GAP_3} key={request}>
                         <span className="text-accent mt-1">•</span>
                         <span>{request}</span>
                       </li>
@@ -304,7 +364,7 @@ export default async function JobPage({ params }: PageProps) {
                   <CardContent>
                     <ul className="space-y-2">
                       {benefits.map((benefit: string) => (
-                        <li key={benefit} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
+                        <li className={UI_CLASSES.FLEX_ITEMS_START_GAP_3} key={benefit}>
                           <span className="mt-1 text-green-500">✓</span>
                           <span>{benefit}</span>
                         </li>
@@ -331,8 +391,8 @@ export default async function JobPage({ params }: PageProps) {
                     // At this point, safeJobLink is validated and safe for use in external links
                     const validatedUrl: string = safeJobLink;
                     return (
-                      <Button className="w-full" asChild>
-                        <a href={validatedUrl} target="_blank" rel="noopener noreferrer">
+                      <Button asChild className="w-full">
+                        <a href={validatedUrl} rel="noopener noreferrer" target="_blank">
                           <ExternalLink className="mr-2 h-4 w-4" />
                           Apply Now
                         </a>
@@ -343,7 +403,7 @@ export default async function JobPage({ params }: PageProps) {
                     const safeMailtoUrl = getSafeMailtoUrl(job.contact_email);
                     if (!safeMailtoUrl) return null;
                     return (
-                      <Button variant="outline" className="w-full" asChild>
+                      <Button asChild className="w-full" variant="outline">
                         <a href={safeMailtoUrl}>
                           <Building2 className="mr-2 h-4 w-4" />
                           Contact Company
@@ -374,8 +434,9 @@ export default async function JobPage({ params }: PageProps) {
                   <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-sm`}>
                     <Users className="text-muted-foreground h-4 w-4" />
                     <span>
-                      {(job.category ?? 'General').charAt(0).toUpperCase() +
-                        (job.category ?? 'General').slice(1)}
+                      {job.category && isValidCategory(job.category)
+                        ? (getCategoryConfig(job.category)?.typeName ?? job.category)
+                        : (job.category ?? 'General')}
                     </span>
                   </div>
                 </CardContent>

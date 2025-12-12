@@ -63,7 +63,6 @@ export * from './logger.ts';
 export * from './errors.ts';
 export * from './build-time.ts';
 export * from './data.ts';
-export * from './privacy.ts';
 export * from './pulse.ts';
 export * from './skeleton-keys.ts';
 export * from './error-utils.ts';
@@ -71,15 +70,12 @@ export * from './content.ts';
 export * from './notifications.ts';
 export * from './ui.ts';
 export * from './trace.ts';
-// Supabase server exports moved to @heyclaude/web-runtime/server to prevent client bundle inclusion
-// export * from './supabase/index.ts';
 export * from './auth/mfa.ts';
 export * from './auth/aal.ts';
 export * from './auth/oauth-providers.ts';
 export * from './storage/image-utils.ts';
 export * from './edge/call-edge-function.ts';
 export * from './edge/transform.ts';
-export * from './edge/search-client.ts';
 export * from './utils/markdown-code-extractor.ts';
 export * from './seo/og.ts';
 export * from './pulse-client.ts';
@@ -205,6 +201,8 @@ export * from './integrations/polar.ts';
 export * from './utils/auth-redirect.ts';
 export * from './utils/category-validation.ts';
 export * from './utils/content-highlights.ts';
+export * from './utils/deserialize-postgres-tuple.ts';
+export * from './utils/placeholder-images.ts';
 
 // Actions (Isomorphic exports)
 export * from './entries/actions.ts';

@@ -174,18 +174,13 @@ export function useLocalStorage<T>(
   // Warn developers if they accidentally try to store sensitive data in localStorage
   if (isDevelopment && typeof window !== 'undefined') {
     if (containsSensitivePattern(key)) {
-      logger.warn(
-        'localStorage key matches sensitive pattern. Avoid storing secrets in localStorage.',
-        {
-          component: 'useLocalStorage',
+      logger.warn({ component: 'useLocalStorage',
           key,
           matchedPatterns: PROHIBITED_LOCALSTORAGE_PATTERNS.filter((p) =>
             key.toLowerCase().includes(p)
           ).join(', '),
           guidance:
-            'localStorage is not encrypted; use HttpOnly cookies or server-side sessions for secrets.',
-        }
-      );
+            'localStorage is not encrypted; use HttpOnly cookies or server-side sessions for secrets.', }, 'localStorage key matches sensitive pattern. Avoid storing secrets in localStorage.');
     }
   }
 
@@ -208,15 +203,13 @@ export function useLocalStorage<T>(
     } catch (err) {
       const errorObj = err instanceof Error ? err : new Error(String(err));
       const itemValue = window.localStorage.getItem(key);
-      logger.warn('[Storage] Failed to read from localStorage', {
-        err: errorObj,
+      logger.warn({ err: errorObj,
         category: 'storage',
         component: 'useLocalStorage',
         recoverable: true,
         action: 'initialize',
         key,
-        item: itemValue ?? 'null',
-      });
+        item: itemValue ?? 'null', }, '[Storage] Failed to read from localStorage');
       setError(errorObj);
       return defaultValue as T;
     }
@@ -233,10 +226,8 @@ export function useLocalStorage<T>(
 
         // SSR check
         if (typeof window === 'undefined') {
-          logger.warn('Attempted to write to localStorage during SSR', {
-            component: 'useLocalStorage',
-            key,
-          });
+          logger.warn({ component: 'useLocalStorage',
+            key, }, 'Attempted to write to localStorage during SSR');
           return;
         }
 
@@ -256,15 +247,13 @@ export function useLocalStorage<T>(
           errorType = 'SERIALIZATION_ERROR';
         }
 
-        logger.warn('[Storage] Failed to write to localStorage', {
-          err: errorObj,
+        logger.warn({ err: errorObj,
           category: 'storage',
           component: 'useLocalStorage',
           recoverable: true,
           action: 'setValue',
           key,
-          errorType,
-        });
+          errorType, }, '[Storage] Failed to write to localStorage');
         setError(errorObj);
       }
     },
@@ -276,10 +265,8 @@ export function useLocalStorage<T>(
     try {
       // SSR check
       if (typeof window === 'undefined') {
-        logger.warn('Attempted to remove from localStorage during SSR', {
-          component: 'useLocalStorage',
-          key,
-        });
+        logger.warn({ component: 'useLocalStorage',
+          key, }, 'Attempted to remove from localStorage during SSR');
         return;
       }
 
@@ -288,14 +275,12 @@ export function useLocalStorage<T>(
       setError(null);
     } catch (err) {
       const errorObj = err instanceof Error ? err : new Error(String(err));
-      logger.warn('[Storage] Failed to remove from localStorage', {
-        err: errorObj,
+      logger.warn({ err: errorObj,
         category: 'storage',
         component: 'useLocalStorage',
         recoverable: true,
         action: 'removeValue',
-        key,
-      });
+        key, }, '[Storage] Failed to remove from localStorage');
       setError(errorObj);
     }
   }, [key, defaultValue]);
@@ -329,16 +314,19 @@ export function useLocalStorage<T>(
           const errorType =
             errorObj.name === 'SyntaxError' ? 'JSON_PARSE_ERROR' : 'DESERIALIZE_ERROR';
 
-          logger.warn('[Storage] Failed to sync localStorage across tabs', {
-            err: errorObj,
-            category: 'storage',
-            component: 'useLocalStorage',
-            recoverable: true,
-            action: 'sync',
-            key,
-            errorType,
-            newValue: e.newValue?.substring(0, 100), // Truncate for privacy
-          });
+          logger.warn(
+            {
+              err: errorObj,
+              category: 'storage',
+              component: 'useLocalStorage',
+              recoverable: true,
+              action: 'sync',
+              key,
+              errorType,
+              newValue: e.newValue?.substring(0, 100), // Truncate for privacy
+            },
+            '[Storage] Failed to sync localStorage across tabs'
+          );
 
           // Update state with error and fallback (isMounted already checked in early return)
           setError(errorObj);
@@ -356,14 +344,17 @@ export function useLocalStorage<T>(
       window.addEventListener('storage', handleStorageChange);
     } catch (err) {
       const errorObj = err instanceof Error ? err : new Error(String(err));
-      logger.warn('[Storage] Failed to add storage event listener', {
-        err: errorObj,
-        category: 'storage',
-        component: 'useLocalStorage',
-        recoverable: true,
-        action: 'addEventListener',
-        key,
-      });
+      logger.warn(
+        {
+          err: errorObj,
+          category: 'storage',
+          component: 'useLocalStorage',
+          recoverable: true,
+          action: 'addEventListener',
+          key,
+        },
+        '[Storage] Failed to add storage event listener'
+      );
       setError(errorObj);
     }
 
@@ -373,10 +364,10 @@ export function useLocalStorage<T>(
         window.removeEventListener('storage', handleStorageChange);
       } catch {
         // Silently handle removeEventListener errors (should never happen)
-        logger.warn('Failed to remove storage event listener', {
-          component: 'useLocalStorage',
-          key,
-        });
+        logger.warn(
+          { component: 'useLocalStorage', key },
+          'Failed to remove storage event listener'
+        );
       }
     };
   }, [key, defaultValue, deserialize, syncAcrossTabs]);

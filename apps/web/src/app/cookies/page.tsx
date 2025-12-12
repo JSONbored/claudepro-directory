@@ -1,40 +1,72 @@
 import { getLastUpdatedDate } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
+import { logger } from '@heyclaude/web-runtime/logging/server';
 import { NavLink } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
+import { Suspense } from 'react';
+
+import CookiesLoading from './loading';
 
 /**
- * Provides page metadata for the Cookies page used by Next.js.
+ * Produce page metadata for the Cookies page.
  *
- * Metadata is generated at build time for the '/cookies' route; revalidation is disabled (static generation, no ISR).
+ * Awaits `connection()` so Cache Components can safely use non-deterministic helpers
+ * during metadata generation for the '/cookies' route.
  *
- * @returns Metadata object describing the Cookies page.
- *
+ * @returns The Next.js Metadata object for the Cookies page.
  * @see generatePageMetadata
- * @see {@link https://nextjs.org/docs/app/api-reference/functions/generate-metadata Next.js generate metadata}
+ * @see connection
  */
+
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/cookies');
 }
 
 /**
- * Static Generation: Legal pages are fully static and never change
- * revalidate: false = Static generation at build time (no automatic revalidation)
- */
-export const revalidate = false;
-
-/**
- * Renders the Cookie Policy page and displays the current "Last updated" date.
+ * Server component that renders the Cookie Policy page, showing the current "Last updated" date.
+ *
+ * This async component defers non-deterministic operations to request time, establishes a
+ * request-scoped logger, and renders the page content inside a Suspense boundary.
  *
  * @returns The React element for the Cookie Policy page.
  *
  * @see getLastUpdatedDate
  * @see NavLink
  * @see generatePageMetadata
- * @see revalidate
  */
-export default function CookiesPage() {
+export default async function CookiesPage() {
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
+
+  // Create request-scoped child logger
+  const reqLogger = logger.child({
+    module: 'apps/web/src/app/cookies',
+    operation: 'CookiesPage',
+    route: '/cookies',
+  });
+
+  return (
+    <Suspense fallback={<CookiesLoading />}>
+      <CookiesPageContent reqLogger={reqLogger} />
+    </Suspense>
+  );
+}
+
+/**
+ * Renders the Cookie Policy page content and logs a page-render event.
+ *
+ * @param reqLogger - Request-scoped logger (result of `logger.child`) used to record rendering telemetry.
+ * @param reqLogger.reqLogger
+ * @returns The JSX element containing the Cookie Policy content, including the last-updated date and internal navigation links.
+ *
+ * @see getLastUpdatedDate
+ * @see CookiesPage
+ */
+function CookiesPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
   const lastUpdated = getLastUpdatedDate();
+
+  reqLogger.info({ section: 'data-fetch' }, 'CookiesPage: rendering page');
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8 sm:py-12">
@@ -176,7 +208,7 @@ export default function CookiesPage() {
           <h2 className="mb-4 text-2xl font-semibold">7. Updates to This Policy</h2>
           <p className="mb-4">
             We may update this Cookie Policy from time to time. Any changes will be posted on this
-            page with an updated "Last updated" date.
+            page with an updated &quot;Last updated&quot; date.
           </p>
         </section>
 

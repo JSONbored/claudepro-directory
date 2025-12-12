@@ -11,35 +11,22 @@ import { NewsletterService } from '@heyclaude/data-layer';
 import { normalizeError } from '@heyclaude/shared-runtime';
 
 import { createSupabaseAdminClient } from '../../supabase/admin';
-import { logger, generateRequestId, createWebAppContextWithId } from '../../logging/server';
+import { logger, createWebAppContextWithId } from '../../logging/server';
 import { createErrorResponse } from '../../utils/error-handler';
-
-// Cache TTL in seconds (5 minutes)
-const NEWSLETTER_COUNT_TTL_SECONDS = 300;
-
-// In-memory cache for serverless
-let newsletterCountCache: { value: number; expiresAt: number } | null = null;
+import { cacheLife } from 'next/cache';
 
 /**
- * Get cached newsletter count
+ * Cached helper function to fetch newsletter subscriber count
+ * Uses Cache Components to reduce function invocations (replaces broken in-memory cache)
+ * Newsletter count changes frequently, so we use the 'quarter' cacheLife profile
  */
 async function getCachedNewsletterCount(): Promise<number> {
-  const now = Date.now();
-
-  if (newsletterCountCache && newsletterCountCache.expiresAt > now) {
-    return newsletterCountCache.value;
-  }
+  'use cache';
+  cacheLife('quarter'); // 15min stale, 5min revalidate, 2hr expire - Newsletter count changes frequently
 
   const supabase = createSupabaseAdminClient();
   const service = new NewsletterService(supabase);
-  const count = await service.getNewsletterSubscriberCount();
-
-  newsletterCountCache = {
-    value: count,
-    expiresAt: now + NEWSLETTER_COUNT_TTL_SECONDS * 1000,
-  };
-
-  return count;
+  return await service.getNewsletterSubscriberCount();
 }
 
 /**
@@ -48,9 +35,7 @@ async function getCachedNewsletterCount(): Promise<number> {
  */
 export async function handleEmailCount(_request: NextRequest): Promise<NextResponse> {
   const startTime = Date.now();
-  const requestId = generateRequestId();
   const logContext = createWebAppContextWithId(
-    requestId,
     '/api/flux/email/count',
     'handleEmailCount'
   );
@@ -59,22 +44,17 @@ export async function handleEmailCount(_request: NextRequest): Promise<NextRespo
     const count = await getCachedNewsletterCount();
 
     const durationMs = Date.now() - startTime;
-    logger.info('Newsletter count retrieved', {
-      ...logContext,
+    logger.info({ ...logContext,
       durationMs,
-      count,
-    });
+      count, }, 'Newsletter count retrieved');
 
-    const cacheControl = `public, max-age=${NEWSLETTER_COUNT_TTL_SECONDS}, stale-while-revalidate=${NEWSLETTER_COUNT_TTL_SECONDS}`;
-
+    // Cache Components handles HTTP-level caching automatically
+    // Additional cache headers for CDN/edge caching
     return NextResponse.json(
       { count },
       {
         status: 200,
         headers: {
-          'Cache-Control': cacheControl,
-          'CDN-Cache-Control': cacheControl,
-          'Vercel-CDN-Cache-Control': `public, s-maxage=${NEWSLETTER_COUNT_TTL_SECONDS}, stale-while-revalidate=${NEWSLETTER_COUNT_TTL_SECONDS}`,
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Methods': 'GET, OPTIONS',
           'Access-Control-Allow-Headers': 'Content-Type',
@@ -83,13 +63,13 @@ export async function handleEmailCount(_request: NextRequest): Promise<NextRespo
     );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to get newsletter count');
-    logger.error('Newsletter count failed', normalized, logContext);
+    logger.error({ err: normalized, ...logContext }, 'Newsletter count failed');
 
     return createErrorResponse(error, {
       route: '/api/flux/email/count',
       operation: 'GET',
       method: 'GET',
-      logContext: { requestId },
+      logContext: {},
     });
   }
 }

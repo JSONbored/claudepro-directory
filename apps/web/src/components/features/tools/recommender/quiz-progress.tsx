@@ -6,13 +6,12 @@
  */
 
 import { CheckCircle } from '@heyclaude/web-runtime/icons';
-import { POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
+import { POSITION_PATTERNS, UI_CLASSES, UnifiedBadge } from '@heyclaude/web-runtime/ui';
 
 interface QuizProgressProps {
   currentQuestion: number;
-  totalQuestions: number;
   percentComplete: number;
+  totalQuestions: number;
 }
 
 export function QuizProgress({
@@ -25,7 +24,7 @@ export function QuizProgress({
       {/* Question counter */}
       <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-          <span className="font-medium text-sm">Progress</span>
+          <span className="text-sm font-medium">Progress</span>
           <UnifiedBadge variant="base" style="secondary">
             {currentQuestion} / {totalQuestions}
           </UnifiedBadge>
@@ -39,9 +38,9 @@ export function QuizProgress({
       </div>
 
       {/* Progress bar */}
-      <div className="relative h-2 w-full overflow-hidden rounded-full bg-muted">
+      <div className="bg-muted relative h-2 w-full overflow-hidden rounded-full">
         <div
-          className={`${POSITION_PATTERNS.ABSOLUTE_TOP_LEFT} h-full bg-primary transition-all duration-300 ease-in-out`}
+          className={`${POSITION_PATTERNS.ABSOLUTE_TOP_LEFT} bg-primary h-full transition-all duration-300 ease-in-out`}
           style={{ width: `${percentComplete}%` }}
           role="progressbar"
           aria-valuenow={percentComplete}
@@ -56,11 +55,11 @@ export function QuizProgress({
         {Array.from({ length: totalQuestions }, (_, i) => i + 1).map((step) => (
           <div
             key={step}
-            className={`flex h-8 w-8 items-center justify-center rounded-full font-medium text-xs transition-colors ${
+            className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-medium transition-colors ${
               step < currentQuestion
                 ? 'bg-primary text-primary-foreground'
                 : step === currentQuestion
-                  ? 'border-2 border-primary bg-primary/20 text-primary'
+                  ? 'border-primary bg-primary/20 text-primary border-2'
                   : 'bg-muted text-muted-foreground'
             }`}
             title={`Question ${step}${step < currentQuestion ? ' (completed)' : step === currentQuestion ? ' (current)' : ''}`}

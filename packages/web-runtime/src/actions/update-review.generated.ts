@@ -15,7 +15,6 @@ const updateReviewSchema = z.object({
   rating: z.number().nullable().optional(),
   review_text: z.string().nullable().optional()
 });
-export type UpdateReviewInput = z.infer<typeof updateReviewSchema>;
 
 export const updateReview = authedAction
   .metadata({ actionName: 'updateReview', category: 'user' })
@@ -46,11 +45,7 @@ export const updateReview = authedAction
       
       
       // Lazy import server-only dependencies
-      // const { logActionFailure } = await import('../errors');
       const { revalidatePath, revalidateTag } = await import('next/cache');
-      
-      const { nextInvalidateByKeys } = await import('../cache-tags');
-      const { getCacheConfigSnapshot } = await import('../cache-config');
 
       // Simple success check?
       // Some RPCs return void, some return { success: boolean }?
@@ -59,11 +54,7 @@ export const updateReview = authedAction
       revalidatePath(`/${result?.review?.content_type}/${result?.review?.content_slug}`);
       revalidatePath(`/${result?.review?.content_type}`);
       revalidateTag(`reviews:${result?.review?.content_type}:${result?.review?.content_slug}`, 'default');
-      
-      await nextInvalidateByKeys({
-        cacheConfig: getCacheConfigSnapshot(),
-        invalidateKeys: ['cache.invalidate.review_update']
-      });
+      revalidateTag(`content`, 'default');
 
       
 

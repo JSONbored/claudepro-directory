@@ -41,26 +41,26 @@
  */
 
 import { ChevronDown, ChevronUp, Code, Plus, Trash } from '@heyclaude/web-runtime/icons';
-import { cn, DIMENSIONS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { useId, useState } from 'react';
-import { Button } from '@heyclaude/web-runtime/ui';
 import {
+  cn,
+  DIMENSIONS,
+  UI_CLASSES,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@heyclaude/web-runtime/ui';
-import { Input } from '@heyclaude/web-runtime/ui';
-import { Label } from '@heyclaude/web-runtime/ui';
-import {
+  Input,
+  Label,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Textarea,
 } from '@heyclaude/web-runtime/ui';
-import { Textarea } from '@heyclaude/web-runtime/ui';
+import { useId, useState } from 'react';
 
 // Supported languages for syntax highlighting
 const SUPPORTED_LANGUAGES = [
@@ -78,24 +78,31 @@ const SUPPORTED_LANGUAGES = [
 type ExampleLanguage = (typeof SUPPORTED_LANGUAGES)[number]['value'];
 
 interface UsageExample {
-  id: string; // Unique ID for React key (not submitted to form)
-  title: string;
   code: string;
-  language: ExampleLanguage;
   description?: string;
+  id: string; // Unique ID for React key (not submitted to form)
+  language: ExampleLanguage;
+  title: string;
 }
 
 interface ExamplesArrayInputProps {
-  name: string;
   defaultValue?: UsageExample[];
   maxExamples?: number;
+  name: string;
 }
 
 /**
- * Validate a single example
- * Replaces Zod validation for bundle size optimization
+ * Validates a UsageExample object against the component's content and length constraints.
+ *
+ * Ensures the title is present and at most 100 characters, the code is present and at most 10,000 characters, the language is one of SUPPORTED_LANGUAGES, and the optional description is at most 500 characters.
+ *
+ * @param example - The UsageExample to validate
+ * @returns An object with `valid: true` when all checks pass; otherwise `valid: false` and `error` containing a short message describing the first failing rule.
+ *
+ * @see ExamplesArrayInput
+ * @see SUPPORTED_LANGUAGES
  */
-function validateExample(example: UsageExample): { valid: boolean; error?: string } {
+function validateExample(example: UsageExample): { error?: string; valid: boolean } {
   // Validate title
   if (!example.title || example.title.trim().length === 0) {
     return { valid: false, error: 'Title is required' };
@@ -108,7 +115,7 @@ function validateExample(example: UsageExample): { valid: boolean; error?: strin
   if (!example.code || example.code.length === 0) {
     return { valid: false, error: 'Code is required' };
   }
-  if (example.code.length > 10000) {
+  if (example.code.length > 10_000) {
     return { valid: false, error: 'Code must be 10,000 characters or less' };
   }
 
@@ -127,10 +134,18 @@ function validateExample(example: UsageExample): { valid: boolean; error?: strin
 }
 
 /**
- * ExamplesArrayInput Component
+ * Renders a UI for managing a dynamic list of usage examples and serializes them to a hidden JSON input for form submission.
  *
- * Manages a dynamic array of usage examples with validation.
- * Serializes to JSON and stores in hidden input for form submission.
+ * Each example contains title, code, language, and optional description; the component strips internal IDs before serializing.
+ *
+ * @param name - The HTML form field name to use for the hidden JSON input (required).
+ * @param defaultValue - Initial array of examples to populate the UI. Missing `id` values are auto-generated.
+ * @param maxExamples - Maximum number of examples allowed (defaults to 10).
+ *
+ * @returns The ExamplesArrayInput React element.
+ *
+ * @see validateExample
+ * @see SUPPORTED_LANGUAGES
  */
 export function ExamplesArrayInput({
   name,
@@ -205,7 +220,7 @@ export function ExamplesArrayInput({
       {/* Header */}
       <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
         <div>
-          <Label className="font-semibold text-base">Usage Examples (optional)</Label>
+          <Label className="text-base font-semibold">Usage Examples (optional)</Label>
           <p className={cn('text-sm', 'text-muted-foreground', 'mt-1')}>
             Add code examples to help users understand how to use this configuration. Max{' '}
             {maxExamples} examples.
@@ -230,7 +245,7 @@ export function ExamplesArrayInput({
           <Card className="border-dashed">
             <CardContent className="py-8">
               <div className="space-y-2 text-center">
-                <Code className="mx-auto h-8 w-8 text-muted-foreground" />
+                <Code className="text-muted-foreground mx-auto h-8 w-8" />
                 <p className={cn('text-sm', 'text-muted-foreground')}>
                   No examples added yet. Click "Add Example" to get started.
                 </p>
@@ -281,7 +296,7 @@ export function ExamplesArrayInput({
                 )}
               </CardHeader>
 
-              {isExpanded && (
+              {isExpanded ? (
                 <CardContent className="space-y-4">
                   {/* Title */}
                   <div className="space-y-2">
@@ -295,7 +310,7 @@ export function ExamplesArrayInput({
                       onChange={(e) => updateExample(index, 'title', e.target.value)}
                       placeholder="Basic Setup"
                       maxLength={100}
-                      required={true}
+                      required
                     />
                   </div>
 
@@ -334,8 +349,8 @@ export function ExamplesArrayInput({
                       onChange={(e) => updateExample(index, 'code', e.target.value)}
                       placeholder="export default { ... }"
                       className={`${DIMENSIONS.INPUT_LG} font-mono text-sm`}
-                      maxLength={10000}
-                      required={true}
+                      maxLength={10_000}
+                      required
                     />
                     <p className={cn('text-xs', 'text-muted-foreground')}>
                       {example.code.length} / 10,000 characters
@@ -358,7 +373,7 @@ export function ExamplesArrayInput({
                     </p>
                   </div>
                 </CardContent>
-              )}
+              ) : null}
             </Card>
           );
         })}

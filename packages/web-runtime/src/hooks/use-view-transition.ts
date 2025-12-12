@@ -90,9 +90,7 @@ export function useViewTransition(): UseViewTransitionReturn {
       } catch (error) {
         if (isDevelopment) {
           const normalized = normalizeError(error, 'View Transition failed');
-          logger.warn('View Transition failed, falling back to instant update', {
-            err: normalized,
-          });
+          logger.warn({ err: normalized, }, 'View Transition failed, falling back to instant update');
         }
         Promise.resolve(updateCallback()).catch((fallbackError) => {
           logClientWarn(

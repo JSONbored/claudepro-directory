@@ -5,19 +5,30 @@
  * Used in 7+ MDX files across the codebase
  */
 
+import { DURATION } from '@heyclaude/web-runtime/design-system';
 import { AlertTriangle, BookOpen, CheckCircle } from '@heyclaude/web-runtime/icons';
-import type { ChecklistProps } from '@heyclaude/web-runtime/types/component.types';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import React from 'react';
-import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
+import { type ChecklistProps } from '@heyclaude/web-runtime/types/component.types';
 import {
+  UI_CLASSES,
+  UnifiedBadge,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
+import React from 'react';
 
+/**
+ * Render an interactive checklist UI that displays tasks, a progress indicator, optional description, and toggleable completion state.
+ *
+ * @param props - Component props (see ChecklistProps) containing `title`, `items`, `description`, and `type`.
+ * @returns The rendered Checklist React element showing progress and item controls.
+ *
+ * @see ChecklistProps
+ * @see UnifiedBadge
+ * @see Card
+ */
 export function Checklist(props: ChecklistProps) {
   // Database CHECK constraint validates structure - no runtime validation needed
   const { title, items, description, type } = props;
@@ -54,7 +65,7 @@ export function Checklist(props: ChecklistProps) {
   };
 
   return (
-    <Card itemScope={true} itemType="https://schema.org/ItemList" className="my-8">
+    <Card itemScope itemType="https://schema.org/ItemList" className="my-8">
       <CardHeader>
         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
           <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
@@ -65,14 +76,14 @@ export function Checklist(props: ChecklistProps) {
             {progress}% Complete
           </UnifiedBadge>
         </div>
-        {description && <CardDescription>{description}</CardDescription>}
+        {description ? <CardDescription>{description}</CardDescription> : null}
       </CardHeader>
       <CardContent>
         <div className="mb-4">
-          <div className={'h-2 w-full rounded-full bg-muted'}>
+          <div className="bg-muted h-2 w-full rounded-full">
             <div
-              className={'h-2 rounded-full bg-primary transition-all duration-300'}
-              style={{ width: `${progress}%` }}
+              className="bg-primary h-2 rounded-full transition-all"
+              style={{ width: `${progress}%`, transitionDuration: `${DURATION.default}s` }}
             />
           </div>
         </div>
@@ -80,11 +91,9 @@ export function Checklist(props: ChecklistProps) {
           {validItems.map((item, index) => (
             <div
               key={`${item.task}-${index}`}
-              itemScope={true}
+              itemScope
               itemType="https://schema.org/ListItem"
-              className={
-                'flex items-start gap-3 rounded-lg bg-muted/30 p-3 transition-colors hover:bg-muted/50'
-              }
+              className="bg-muted/30 hover:bg-muted/50 flex items-start gap-3 rounded-lg p-3 transition-colors"
             >
               <button
                 type="button"
@@ -112,17 +121,17 @@ export function Checklist(props: ChecklistProps) {
                   >
                     {item.task}
                   </span>
-                  {item.priority && (
-                    <span className={`font-medium text-xs ${priorityColors[item.priority]}`}>
+                  {item.priority ? (
+                    <span className={`text-xs font-medium ${priorityColors[item.priority]}`}>
                       {item.priority.toUpperCase()}
                     </span>
-                  )}
+                  ) : null}
                 </div>
-                {item.description && (
-                  <p className="mt-1 text-muted-foreground text-sm" itemProp="description">
+                {item.description ? (
+                  <p className="text-muted-foreground mt-1 text-sm" itemProp="description">
                     {item.description}
                   </p>
-                )}
+                ) : null}
               </div>
             </div>
           ))}

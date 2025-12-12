@@ -8,245 +8,166 @@
  * - Total user count
  *
  * Runtime: Node.js (required for Supabase client)
- * ISR: 5 minutes (300s) - Social proof updates frequently
+ * Caching: Two-layer caching strategy:
+ * - Next.js Cache Components: 15min stale, 5min revalidate, 2hr expire (cacheLife('quarter'))
+ * - HTTP Cache-Control: 5 minutes via Cache-Control headers (s-maxage=300)
+ * 
+ * @example
+ * ```ts
+ * // Request
+ * GET /api/stats/social-proof
+ * 
+ * // Response (200)
+ * {
+ *   "success": true,
+ *   "stats": {
+ *     "contributors": { "count": 42, "names": ["user1", "user2"] },
+ *     "submissions": 150,
+ *     "successRate": 85.5,
+ *     "totalUsers": 1000
+ *   },
+ *   "timestamp": "2025-01-11T12:00:00Z"
+ * }
+ * ```
  */
-import { Constants } from '@heyclaude/database-types';
-import {
-  generateRequestId,
-  logger,
-  normalizeError,
-  createErrorResponse,
-} from '@heyclaude/web-runtime/logging/server';
+import 'server-only';
+import { MiscService } from '@heyclaude/data-layer';
+import { type Database } from '@heyclaude/database-types';
+import { createApiRoute, createApiOptionsHandler } from '@heyclaude/web-runtime/server';
 import { createSupabaseAdminClient } from '@heyclaude/web-runtime/server';
+import { cacheLife } from 'next/cache';
+import { connection } from 'next/server';
 import { NextResponse } from 'next/server';
 
-export const runtime = 'nodejs';
-export const revalidate = 300;
+/**
+ * Cached helper function to fetch social proof stats.
+ * Uses database RPC function to do all aggregations in the database.
+ *
+ * @returns A promise resolving to social proof stats: contributors (count and names), submissions count, successRate (percentage or null), and totalUsers (count or null).
+ */
+async function getCachedSocialProofData(): Promise<{
+  contributors: { count: number; names: string[] };
+  submissions: number;
+  successRate: null | number;
+  totalUsers: null | number;
+}> {
+  'use cache';
+  cacheLife('quarter'); // 15min stale, 5min revalidate, 2hr expire - Stats change frequently (defined in next.config.mjs)
+
+  const supabase = createSupabaseAdminClient();
+  const service = new MiscService(supabase);
+
+  // Use database RPC to do all aggregations in database (much faster than multiple queries + client-side processing)
+  // RPC has two overloads - we're calling with no args, so we get the first overload's return type
+  const data = await service.getSocialProofStats();
+
+  // Extract the first overload's return type (no args version)
+  // The function has two overloads, but when called with no args, TypeScript infers the first one
+  type SocialProofStatsFunction = Database['public']['Functions']['get_social_proof_stats'];
+  type NoArgsOverload = Extract<SocialProofStatsFunction, { Args: never }>;
+  type SocialProofStatsRow = NoArgsOverload['Returns'][number];
+
+  const result = data ?? [];
+  const row =
+    Array.isArray(result) && result.length > 0 ? (result[0] as SocialProofStatsRow) : null;
+
+  if (!row) {
+    // Return defaults if no data
+    return {
+      contributors: { count: 0, names: [] },
+      submissions: 0,
+      successRate: null,
+      totalUsers: null,
+    };
+  }
+
+  // Map database return type to expected format
+  // TypeScript now knows row has the correct shape from the first overload
+  return {
+    contributors: {
+      count: row.contributor_count ?? 0,
+      names: Array.isArray(row.contributor_names) ? row.contributor_names : [],
+    },
+    submissions: row.submission_count ?? 0,
+    successRate:
+      row.success_rate !== null && row.success_rate !== undefined ? Number(row.success_rate) : null,
+    totalUsers: row.total_users ?? null,
+  };
+}
 
 /**
- * Provide live social proof metrics: top contributors this week, recent submission count,
- * success rate for the last 30 days, and total user count.
- *
- * Uses an admin Supabase client to query submissions and content, computes:
- * - top contributors (up to 5 usernames derived from `author`),
- * - `submissions` (count over the past 7 days),
- * - `successRate` (percentage of submissions with status 'merged' over the past 30 days, or `null` if no data),
- * - `totalUsers` (content count, or `null` if unavailable),
- * and returns the results with caching headers and an ETag for conditional requests.
- *
- * Response headers:
- * - Cache-Control: public, s-maxage=300, stale-while-revalidate=600
- * - ETag: generated from timestamp and a compact stats hash
- * - Last-Modified: derived from the response timestamp
- *
- * ISR / revalidation: cache TTL and revalidate value set to 300 seconds (s-maxage=300).
- *
- * @returns A NextResponse containing a JSON body with:
- *  - `success`: `true`
- *  - `stats`:
- *    - `contributors`: `{ count: number, names: string[] }`
- *    - `submissions`: number
- *    - `successRate`: number | null
- *    - `totalUsers`: number | null
- *  - `timestamp`: ISO 8601 string
- * The response status is 200 on success. In case of an internal error, the route returns a standardized error response produced by `createErrorResponse`.
- *
- * @see createSupabaseAdminClient
- * @see generateRequestId
- * @see normalizeError
- * @see createErrorResponse
- * @see Constants.public.Enums.submission_status
+ * GET /api/stats/social-proof - Get social proof statistics
+ * 
+ * Returns aggregated social proof metrics: top contributors this week (up to 5 usernames),
+ * submissions count in the past 7 days, success rate percentage over the past 30 days,
+ * and total user count. Includes ETag and Last-Modified headers for conditional requests.
  */
-export async function GET() {
-  // Generate single requestId for this API request
-  const requestId = generateRequestId();
+export const GET = createApiRoute({
+  route: '/api/stats/social-proof',
+  operation: 'SocialProofStatsAPI',
+  method: 'GET',
+  cors: 'anon',
+  openapi: {
+    summary: 'Get social proof statistics',
+    description: 'Returns aggregated social proof metrics for the submission wizard: top contributors this week, recent submission count, success rate, and total user count. Includes ETag and Last-Modified headers for conditional requests.',
+    tags: ['stats', 'social-proof'],
+    operationId: 'getSocialProofStats',
+    responses: {
+      200: {
+        description: 'Social proof statistics retrieved successfully',
+      },
+    },
+  },
+  handler: async ({ logger }) => {
+    // Explicitly defer to request time before using non-deterministic operations (Date.now())
+    // This is required by Cache Components for non-deterministic operations
+    await connection();
 
-  // Create request-scoped child logger to avoid race conditions
-  const reqLogger = logger.child({
-    requestId,
-    operation: 'SocialProofStatsAPI',
-    route: '/api/stats/social-proof',
-    module: 'apps/web/src/app/api/stats/social-proof',
-  });
+    // Fetch cached stats data
+    const stats = await getCachedSocialProofData();
 
-  try {
-    // Use admin client to bypass RLS for public stats API
-    // The RLS policy on content_submissions checks auth.users table which anon client cannot access
-    // Use admin client to bypass RLS for aggregated stats
-    // Security posture: Least-privilege
-    // - Admin client uses service-role key with strictly necessary privileges
-    // - Handler is restricted to read-only queries with minimal selects (id, status, created_at, author)
-    // - Returns only derived aggregates/usernames (no sensitive data)
-    // - No additional sensitive columns can be pulled accidentally (read-only, minimal selects enforced)
-    const supabase = createSupabaseAdminClient();
-
-    // Calculate date ranges
-    const weekAgo = new Date();
-    weekAgo.setDate(weekAgo.getDate() - 7);
-    const monthAgo = new Date();
-    monthAgo.setDate(monthAgo.getDate() - 30);
-
-    // Execute all queries in parallel
-    const [recentResult, monthResult, contentResult] = await Promise.allSettled([
-      supabase
-        .from('content_submissions')
-        .select('id, status, created_at, author')
-        .gte('created_at', weekAgo.toISOString())
-        .order('created_at', { ascending: false }),
-      supabase
-        .from('content_submissions')
-        .select('status')
-        .gte('created_at', monthAgo.toISOString()),
-      supabase.from('content').select('id', { count: 'exact', head: true }),
-    ]);
-
-    // Extract results and handle errors
-    interface SubmissionRow {
-      author: null | string;
-      created_at: string;
-      id: string;
-      status: string;
-    }
-    interface StatusRow {
-      status: string;
-    }
-
-    let recentSubmissions: null | SubmissionRow[] = null;
-    let submissionsError: unknown = null;
-    if (recentResult.status === 'fulfilled') {
-      const response = recentResult.value as { data: null | SubmissionRow[]; error: unknown };
-      recentSubmissions = response.data;
-      submissionsError = response.error ?? null;
-    } else {
-      submissionsError = recentResult.reason;
-    }
-
-    if (submissionsError !== null && submissionsError !== undefined) {
-      const normalized = normalizeError(submissionsError, 'Failed to fetch recent submissions');
-      reqLogger.warn('Failed to fetch recent submissions', {
-        err: normalized,
-      });
-    }
-
-    let monthSubmissions: null | StatusRow[] = null;
-    let monthError: unknown = null;
-    if (monthResult.status === 'fulfilled') {
-      const response = monthResult.value as { data: null | StatusRow[]; error: unknown };
-      monthSubmissions = response.data;
-      monthError = response.error ?? null;
-    } else {
-      monthError = monthResult.reason;
-    }
-
-    if (monthError !== null && monthError !== undefined) {
-      const normalized = normalizeError(monthError, 'Failed to fetch month submissions');
-      reqLogger.warn('Failed to fetch month submissions', {
-        err: normalized,
-      });
-    }
-
-    let contentCount: null | number = null;
-    let contentError: unknown = null;
-    if (contentResult.status === 'fulfilled') {
-      const response = contentResult.value as { count: null | number; error: unknown };
-      contentCount = response.count;
-      contentError = response.error ?? null;
-    } else {
-      contentError = contentResult.reason;
-    }
-
-    if (contentError !== null && contentError !== undefined) {
-      const normalized = normalizeError(contentError, 'Failed to fetch content count');
-      reqLogger.warn('Failed to fetch content count', {
-        err: normalized,
-      });
-    }
-
-    const submissionCount = recentSubmissions?.length ?? 0;
-    const total = monthSubmissions?.length ?? 0;
-    const approved =
-      monthSubmissions?.filter(
-        (s) => s.status === Constants.public.Enums.submission_status[4] // 'merged'
-      ).length ?? 0;
-    const successRate = total > 0 ? Math.round((approved / total) * 100) : null;
-
-    // Get top contributors this week (unique authors with most submissions)
-    const contributorCounts = new Map<string, number>();
-    if (recentSubmissions) {
-      for (const sub of recentSubmissions) {
-        if (sub.author) {
-          contributorCounts.set(sub.author, (contributorCounts.get(sub.author) ?? 0) + 1);
-        }
-      }
-    }
-
-    const topContributors = [...contributorCounts.entries()]
-      .toSorted((a, b) => b[1] - a[1])
-      .slice(0, 5)
-      .map(([name]) => {
-        // Defensively extract username: handle both email and non-email formats
-        const atIndex = name.indexOf('@');
-        if (atIndex !== -1) {
-          // Email format: extract username part before '@'
-          return name.slice(0, Math.max(0, atIndex));
-        }
-        // Non-email format: return trimmed original name
-        return name.trim();
-      });
-
-    const totalUsers = contentCount ?? null;
+    // Generate timestamp at request time (not cached)
     const timestamp = new Date().toISOString();
 
     // Structured logging with cache tags and stats
-    reqLogger.info('Social proof stats API: success', {
-      stats: {
-        contributorCount: topContributors.length,
-        submissionCount,
-        successRate,
-        totalUsers,
+    logger.info(
+      {
+        cacheTags: ['stats', 'social-proof'],
+        stats: {
+          contributorCount: stats.contributors.count,
+          submissionCount: stats.submissions,
+          successRate: stats.successRate,
+          totalUsers: stats.totalUsers,
+        },
       },
-      cacheTags: ['stats', 'social-proof'],
-      cacheTTL: 300,
-      revalidate: 300,
-    });
+      'Social proof stats retrieved'
+    );
 
     // Generate ETag from timestamp and stats hash for conditional requests
-    const statsHash = `${submissionCount}-${successRate}-${totalUsers}`;
-    const etag = `"${Buffer.from(`${timestamp}-${statsHash}`).toString('base64').slice(0, 16)}"`;
+    // Using simple string concatenation instead of base64 to avoid potential collisions
+    const statsHash = `${stats.contributors.count}-${stats.submissions}-${stats.successRate}-${stats.totalUsers}`;
+    const etag = `"${timestamp}-${statsHash}"`;
 
     // Return stats with ETag and Last-Modified headers
     return NextResponse.json(
       {
+        stats,
         success: true,
-        stats: {
-          contributors: {
-            count: topContributors.length,
-            names: topContributors,
-          },
-          submissions: submissionCount,
-          successRate,
-          totalUsers,
-        },
         timestamp,
       },
       {
-        status: 200,
         headers: {
           'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
           ETag: etag,
           'Last-Modified': new Date(timestamp).toUTCString(),
         },
+        status: 200,
       }
     );
-  } catch (error) {
-    const normalized = normalizeError(error, 'Social proof stats API error');
-    reqLogger.error('Social proof stats API error', normalized, {
-      section: 'error-handling',
-    });
-    return createErrorResponse(error, {
-      route: '/api/stats/social-proof',
-      operation: 'SocialProofStatsAPI',
-      method: 'GET',
-    });
-  }
-}
+  },
+});
+
+/**
+ * OPTIONS handler for CORS preflight requests
+ */
+export const OPTIONS = createApiOptionsHandler('anon');

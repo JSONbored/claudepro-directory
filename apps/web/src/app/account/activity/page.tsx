@@ -6,44 +6,51 @@ import {
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { GitPullRequest } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  UI_CLASSES,
   Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  UI_CLASSES,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import Link from 'next/link';
+import { connection } from 'next/server';
+import { Suspense } from 'react';
 
+import { SignInButton } from '@/src/components/core/auth/sign-in-button';
 import { ActivityTimeline } from '@/src/components/features/user-activity/activity-timeline';
 
-/**
- * Dynamic Rendering Required
- * Authenticated user activity
- */
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
+import Loading from './loading';
 
 /**
- * Generates page metadata for the account Activity page.
+ * Produce the Metadata for the account Activity route.
  *
- * @returns The Next.js `Metadata` object for the "/account/activity" route.
+ * Waits for a Next.js server connection to satisfy cache-component nondeterminism requirements,
+ * then delegates to `generatePageMetadata('/account/activity')` to build the route metadata.
+ *
+ * @returns The `Metadata` for the "/account/activity" route
  * @see generatePageMetadata
+ * @see connection
  */
 export async function generateMetadata(): Promise<Metadata> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
   return generatePageMetadata('/account/activity');
 }
 
 /**
- * Render the Account Activity page for the authenticated user.
+ * Renders the Account Activity page for the authenticated user.
  *
- * Requires authentication and displays the user's activity summary and timeline.
- * If one data source fails the page shows available data and a localized fallback for the failed section;
- * if both sources fail, a global "Activity unavailable" fallback is rendered.
+ * Awaits a server connection to defer non-deterministic operations, creates a request-scoped logger,
+ * and renders ActivityPageContent inside a Suspense boundary. Displays the user's activity summary
+ * and timeline when available; if one data source fails the page shows available data with a localized
+ * fallback for the failed section, and if both fail a global "Activity unavailable" fallback is shown.
  *
  * @returns The React element tree for the Account Activity page.
  *
@@ -53,27 +60,52 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see ActivityTimeline
  */
 export default async function ActivityPage() {
-  // Generate single requestId for this page request
-  const requestId = generateRequestId();
+  'use cache: private';
+  cacheLife('userProfile'); // 1min stale, 5min revalidate, 30min expire - User-specific data
+
   const operation = 'ActivityPage';
   const route = '/account/activity';
-  const module = 'apps/web/src/app/account/activity/page';
+  const modulePath = 'apps/web/src/app/account/activity/page';
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    requestId,
+    module: modulePath,
     operation,
     route,
-    module,
   });
 
+  return (
+    <Suspense fallback={<Loading />}>
+      <ActivityPageContent reqLogger={reqLogger} />
+    </Suspense>
+  );
+}
+
+/**
+ * Renders the authenticated user's Account Activity page content, including a stats overview and activity timeline, and provides appropriate fallbacks for unauthenticated access or unavailable activity data.
+ *
+ * This server component fetches the user's activity summary and timeline concurrently and tolerates partial failures: it will render available data when one source succeeds, show a global fallback when both fail, or prompt for sign-in when no user is authenticated.
+ *
+ * @param reqLogger - A request-scoped logger (created via `logger.child`) used for structured, request-scoped logging and error reporting.
+ * @param reqLogger.reqLogger
+ * @returns The JSX content for the Account Activity page.
+ *
+ * @see getAuthenticatedUser
+ * @see getUserActivitySummary
+ * @see getUserActivityTimeline
+ * @see ActivityTimeline
+ */
+async function ActivityPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
   // Section: Authentication
   const { user } = await getAuthenticatedUser({ context: 'ActivityPage' });
 
   if (!user) {
-    reqLogger.warn('ActivityPage: unauthenticated access attempt detected', {
-      section: 'authentication',
-    });
+    reqLogger.warn(
+      {
+        section: 'data-fetch',
+      },
+      'ActivityPage: unauthenticated access attempt detected'
+    );
     return (
       <div className="space-y-6">
         <Card>
@@ -84,9 +116,12 @@ export default async function ActivityPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild>
-              <Link href={ROUTES.LOGIN}>Go to login</Link>
-            </Button>
+            <SignInButton
+              redirectTo="/account/activity"
+              valueProposition="Sign in to view your contribution history and activity metrics"
+            >
+              Go to login
+            </SignInButton>
           </CardContent>
         </Card>
       </div>
@@ -100,23 +135,21 @@ export default async function ActivityPage() {
     userId: user.id, // Redaction automatically hashes this via hashUserIdCensor
   });
 
-  userLogger.info('ActivityPage: authentication successful', {
-    section: 'authentication',
-  });
+  userLogger.info({ section: 'data-fetch' }, 'ActivityPage: authentication successful');
 
   // Section: Activity Data Fetch
   // Fetch activity data - use Promise.allSettled for partial success handling
-  // CRITICAL: Call data functions directly instead of actions to avoid cookies() in unstable_cache() error
+  // CRITICAL: Call data functions directly instead of actions to avoid cookies() access issues in Cache Components
   const [summaryResult, timelineResult] = await Promise.allSettled([
     getUserActivitySummary(user.id),
-    getUserActivityTimeline({ userId: user.id, limit: 50, offset: 0 }),
+    getUserActivityTimeline({ limit: 50, offset: 0, userId: user.id }),
   ]);
 
-  /**
+  /****
    * Normalize a settled activity-data result, log any rejection, and return the fulfilled value or `null`.
    *
-   * @param name - Human-readable name of the data being loaded (used in error messages and logs)
-   * @param result - The settled promise result to inspect
+   * @param {string} name - Human-readable name of the data being loaded (used in error messages and logs)
+   * @param {PromiseSettledResult<null | T>} result - The settled promise result to inspect
    * @returns The fulfilled value of type `T` if present, `null` if the promise was rejected
    *
    * @see normalizeError
@@ -127,12 +160,16 @@ export default async function ActivityPage() {
       return result.value;
     }
     // result.status === 'rejected' at this point
-    const reason = result.reason as unknown;
+    const reason = result.reason;
     const normalized = normalizeError(reason, `Failed to load ${name}`);
     if (user) {
-      userLogger.error(`ActivityPage: ${name} failed`, normalized, {
-        section: 'activity-data-fetch',
-      });
+      userLogger.error(
+        {
+          err: normalized,
+          section: 'activity-data-fetch',
+        },
+        `ActivityPage: ${name} failed`
+      );
     }
     return null;
   }
@@ -144,7 +181,7 @@ export default async function ActivityPage() {
   const hasTimeline = !!timeline;
 
   // Only show global fallback when both fail
-  if (!(hasSummary || hasTimeline)) {
+  if (!hasSummary && !hasTimeline) {
     return (
       <div className="space-y-6">
         <Card>
@@ -166,18 +203,22 @@ export default async function ActivityPage() {
 
   const activities = timeline?.activities ?? [];
   if (hasTimeline && activities.length === 0) {
-    userLogger.warn('ActivityPage: activity timeline returned no activities', {
-      section: 'activity-data-fetch',
-    });
+    userLogger.warn(
+      { section: 'data-fetch' },
+      'ActivityPage: activity timeline returned no activities'
+    );
   }
 
   // Final summary log
-  userLogger.info('ActivityPage: page render completed', {
-    section: 'page-render',
-    activitiesCount: activities.length,
-    hasSummary,
-    hasTimeline,
-  });
+  userLogger.info(
+    {
+      activitiesCount: activities.length,
+      hasSummary,
+      hasTimeline,
+      section: 'data-fetch',
+    },
+    'ActivityPage: page render completed'
+  );
 
   return (
     <div className="space-y-6">

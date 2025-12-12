@@ -26,6 +26,7 @@ import { logger } from '../logger.ts';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createWebAppContext } from './log-context.ts';
+import { ApiErrorCode, determineErrorCode } from './api-error-codes.ts';
 
 /**
  * Create standardized error response with proper logging
@@ -49,7 +50,7 @@ export async function createErrorResponse(
     logContext?: Record<string, string | number | boolean>;
   } = {}
 ): Promise<NextResponse> {
-  // Create standardized log context with single requestId
+  // Create standardized log context
   const logContext = createWebAppContext(
     context.route || 'unknown',
     context.operation || 'unknown',
@@ -63,18 +64,45 @@ export async function createErrorResponse(
   
   // Log error with full context - Pino logger outputs to stdout (Vercel captures these logs)
   const normalized = normalizeError(error, 'API error occurred');
-  logger.error('API error occurred', normalized, logContext);
+  logger.error({ err: normalized, ...logContext }, 'API error occurred');
 
+  // Determine status code and error code
+  let statusCode = 500;
+  let errorCode = ApiErrorCode.INTERNAL_ERROR;
+  
   // Handle Zod validation errors
   if (error instanceof z.ZodError) {
+    statusCode = 400;
+    errorCode = ApiErrorCode.VALIDATION_ERROR;
+    
     return NextResponse.json(
       {
         success: false,
-        error: 'Validation failed',
-        details: formatZodError(error),
+        error: {
+          code: errorCode,
+          message: 'Validation failed',
+          details: formatZodError(error),
+        },
+        timestamp: new Date().toISOString(),
       },
-      { status: 400 }
+      { status: statusCode }
     );
+  }
+
+  // Determine error code from error and status
+  errorCode = determineErrorCode(error, statusCode);
+  
+  // Adjust status code based on error code
+  if (errorCode === ApiErrorCode.NOT_FOUND) {
+    statusCode = 404;
+  } else if (errorCode === ApiErrorCode.UNAUTHORIZED || errorCode === ApiErrorCode.AUTHENTICATION_REQUIRED) {
+    statusCode = 401;
+  } else if (errorCode === ApiErrorCode.VALIDATION_ERROR || errorCode === ApiErrorCode.INVALID_PARAMETER) {
+    statusCode = 400;
+  } else if (errorCode === ApiErrorCode.RATE_LIMIT_EXCEEDED) {
+    statusCode = 429;
+  } else if (errorCode === ApiErrorCode.SERVICE_UNAVAILABLE) {
+    statusCode = 503;
   }
 
   // Handle generic errors
@@ -83,12 +111,16 @@ export async function createErrorResponse(
   return NextResponse.json(
     {
       success: false,
-      error: isDevelopment ? sanitizeError(error) : 'Internal server error',
-      message: isDevelopment ? errorMessage : 'An unexpected error occurred',
+      error: {
+        code: errorCode,
+        message: isDevelopment ? errorMessage : 'An unexpected error occurred',
+        ...(isDevelopment && { details: sanitizeError(error) }),
+      },
+      timestamp: new Date().toISOString(),
       ...(isDevelopment && normalized.stack && { stack: normalized.stack }),
     },
     {
-      status: 500,
+      status: statusCode,
       headers: {
         'Cache-Control': 'no-cache, no-store, must-revalidate',
       },

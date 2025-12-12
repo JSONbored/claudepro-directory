@@ -1,4 +1,4 @@
-import { createUtilityContext, logError } from '../logging.ts';
+import { logger, normalizeError } from '../logger/index.ts';
 
 type GlobalWithBuffer = typeof globalThis & {
   Buffer?: {
@@ -113,8 +113,12 @@ export async function verifySvixSignature({
 
     return signatures.includes(expectedSignature);
   } catch (error) {
-    const logContext = createUtilityContext('webhook-crypto', 'verify-svix-signature');
-    await logError('Svix signature verification error', logContext, error);
+    const normalized = normalizeError(error, 'Svix signature verification error');
+    logger.error({
+      err: normalized,
+      function: 'webhook-crypto',
+      operation: 'verify-svix-signature',
+    }, 'Svix signature verification error');
     return false;
   }
 }
@@ -180,8 +184,12 @@ export async function verifySupabaseDatabaseWebhook({
 
     return result === 0;
   } catch (error) {
-    const logContext = createUtilityContext('webhook-crypto', 'verify-supabase-database-webhook');
-    await logError('Supabase database webhook verification error', logContext, error);
+    const normalized = normalizeError(error, 'Supabase database webhook verification error');
+    logger.error({
+      err: normalized,
+      function: 'webhook-crypto',
+      operation: 'verify-supabase-database-webhook',
+    }, 'Supabase database webhook verification error');
     return false;
   }
 }
@@ -253,8 +261,12 @@ export async function verifyDiscordWebhookSignature({
 
     return isValid;
   } catch (error) {
-    const logContext = createUtilityContext('webhook-crypto', 'verify-discord-webhook-signature');
-    await logError('Discord webhook signature verification error', logContext, error);
+    const normalized = normalizeError(error, 'Discord webhook signature verification error');
+    logger.error({
+      err: normalized,
+      function: 'webhook-crypto',
+      operation: 'verify-discord-webhook-signature',
+    }, 'Discord webhook signature verification error');
     return false;
   }
 }

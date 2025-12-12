@@ -30,17 +30,18 @@
  * @module components/infra/lazy-section
  */
 
+import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
-import type { ReactNode } from 'react';
-import { memo } from 'react';
+import { type ReactNode } from 'react';
+import { memo, useEffect, useState } from 'react';
 
 export type AnimationVariant =
   | 'fade-in'
-  | 'slide-up'
-  | 'slide-down'
   | 'scale'
+  | 'slide-down'
   | 'slide-left'
-  | 'slide-right';
+  | 'slide-right'
+  | 'slide-up';
 
 export interface LazySectionProps {
   /**
@@ -49,10 +50,15 @@ export interface LazySectionProps {
   children: ReactNode;
 
   /**
-   * Animation variant to use when content enters viewport
-   * @default 'fade-in'
+   * Optional className for wrapper
    */
-  variant?: AnimationVariant;
+  className?: string;
+
+  /**
+   * Delay before animation starts (in seconds)
+   * @default 0
+   */
+  delay?: number;
 
   /**
    * Animation duration in seconds (for non-spring animations)
@@ -61,18 +67,30 @@ export interface LazySectionProps {
   duration?: number;
 
   /**
-   * Use spring physics for natural motion
-   * @default true
+   * Whether to render immediately without animation (useful for above-fold)
+   * @default false
    */
-  useSpring?: boolean;
+  eager?: boolean;
+
+  /**
+   * Whether to animate only once or every time element enters viewport
+   * @default true (animate once)
+   */
+  once?: boolean;
+
+  /**
+   * Root margin for viewport detection
+   * @default '0px 0px -100px 0px' (start 100px before entering)
+   */
+  rootMargin?: string;
 
   /**
    * Spring configuration (only used if useSpring=true)
    */
   spring?: {
-    stiffness?: number;
     damping?: number;
     mass?: number;
+    stiffness?: number;
   };
 
   /**
@@ -82,33 +100,16 @@ export interface LazySectionProps {
   threshold?: number;
 
   /**
-   * Root margin for viewport detection
-   * @default '0px 0px -100px 0px' (start 100px before entering)
+   * Use spring physics for natural motion
+   * @default true
    */
-  rootMargin?: string;
+  useSpring?: boolean;
 
   /**
-   * Whether to animate only once or every time element enters viewport
-   * @default true (animate once)
+   * Animation variant to use when content enters viewport
+   * @default 'fade-in'
    */
-  once?: boolean;
-
-  /**
-   * Delay before animation starts (in seconds)
-   * @default 0
-   */
-  delay?: number;
-
-  /**
-   * Optional className for wrapper
-   */
-  className?: string;
-
-  /**
-   * Whether to render immediately without animation (useful for above-fold)
-   * @default false
-   */
-  eager?: boolean;
+  variant?: AnimationVariant;
 }
 
 /**
@@ -118,8 +119,8 @@ export interface LazySectionProps {
 const ANIMATION_VARIANTS: Record<
   AnimationVariant,
   {
-    initial: Record<string, number>;
     animate: Record<string, number>;
+    initial: Record<string, number>;
   }
 > = {
   'fade-in': {
@@ -153,8 +154,7 @@ const ANIMATION_VARIANTS: Record<
  * Tuned for natural, bouncy motion that feels premium
  */
 const DEFAULT_SPRING = {
-  stiffness: 100,
-  damping: 15,
+  ...SPRING.bouncy,
   mass: 0.8,
 };
 
@@ -171,12 +171,17 @@ function LazySectionComponent({
   className = '',
   eager = false,
 }: LazySectionProps) {
+  const [isMounted, setIsMounted] = useState(false);
   const variantConfig = ANIMATION_VARIANTS[variant];
+
+  // Wait for client-side mount to prevent hydration mismatch with Motion.dev attributes
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Build transition configuration
   const transition = useSpring
     ? {
-        type: 'spring' as const,
         ...spring,
         delay,
       }
@@ -189,6 +194,20 @@ function LazySectionComponent({
   // Eager rendering (no animation)
   if (eager) {
     return <div className={className}>{children}</div>;
+  }
+
+  // During SSR, render a div that matches Motion.dev's initial structure
+  // Motion.dev does NOT add data-aria-hidden or aria-hidden attributes
+  // We match the client structure exactly to prevent hydration mismatch
+  if (!isMounted) {
+    return (
+      <div
+        className={className}
+        style={{ opacity: variantConfig.initial['opacity'] ?? 1 }}
+      >
+        {children}
+      </div>
+    );
   }
 
   return (

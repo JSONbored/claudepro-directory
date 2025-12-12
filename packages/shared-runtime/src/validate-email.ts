@@ -3,7 +3,7 @@
  * Validates email format and normalizes for storage
  */
 
-import { createUtilityContext, logWarn } from './logging.ts';
+import { logger } from './logger/index.ts';
 
 export interface ValidateEmailResult {
   error?: string;
@@ -73,11 +73,12 @@ export function validateEmail(
 
   // Check length
   if (trimmed.length > maxLength) {
-    const logContext = createUtilityContext('validate-email', 'email-too-long', {
+    logger.warn({
+      function: 'validate-email',
+      operation: 'email-too-long',
       email_length: trimmed.length,
       max_length: maxLength,
-    });
-    logWarn('Email address too long', logContext);
+    }, 'Email address too long');
     return {
       valid: false,
       error: `Email address too long (max ${maxLength} characters)`,
@@ -86,10 +87,11 @@ export function validateEmail(
 
   // Validate format
   if (!EMAIL_REGEX.test(trimmed)) {
-    const logContext = createUtilityContext('validate-email', 'invalid-format', {
+    logger.warn({
+      function: 'validate-email',
+      operation: 'invalid-format',
       email_preview: trimmed.slice(0, 50), // Log first 50 chars for debugging
-    });
-    logWarn('Invalid email format', logContext);
+    }, 'Invalid email format');
     return {
       valid: false,
       error: 'Invalid email address format',
@@ -102,10 +104,11 @@ export function validateEmail(
   // Additional security checks
   // Prevent null bytes
   if (normalized.includes('\0')) {
-    const logContext = createUtilityContext('validate-email', 'security-check-failed', {
+    logger.warn({
+      function: 'validate-email',
+      operation: 'security-check-failed',
       check: 'null_bytes',
-    });
-    logWarn('Security check failed: null bytes detected', logContext);
+    }, 'Security check failed: null bytes detected');
     return {
       valid: false,
       error: 'Email address contains invalid characters',
@@ -114,10 +117,11 @@ export function validateEmail(
 
   // Prevent path traversal attempts
   if (normalized.includes('..') || normalized.includes('//')) {
-    const logContext = createUtilityContext('validate-email', 'security-check-failed', {
+    logger.warn({
+      function: 'validate-email',
+      operation: 'security-check-failed',
       check: 'path_traversal',
-    });
-    logWarn('Security check failed: path traversal detected', logContext);
+    }, 'Security check failed: path traversal detected');
     return {
       valid: false,
       error: 'Email address contains invalid characters',

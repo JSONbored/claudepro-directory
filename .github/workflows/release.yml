@@ -1,0 +1,145 @@
+# Create Release (Manual Tag-Based)
+# Optimizations: specific trigger (tag pushes only), continues on non-critical errors
+# Uses actions/checkout@v6 with fetch-depth: 0 (required for changelog generation)
+#
+# **When to use this workflow:**
+# - Emergency hotfix releases (bypass PR process)
+# - Manual releases from non-main branches
+# - When you need precise control over release timing
+#
+# **When to use auto-release.yml instead:**
+# - Normal releases (PR → merge → auto-release)
+# - Automated releases on PR merge to main
+#
+# **What it does:**
+# 1. Extracts version from tag name
+# 2. Generates changelog entry for the release (if git-cliff is available)
+# 3. Creates GitHub Release with release notes
+#
+# **Complete Workflow:**
+# 1. Developer generates changelog: `pnpm changelog:generate`
+# 2. Developer bumps version: `pnpm bump:minor`
+# 3. Developer commits: `git commit -m "chore: bump version to X.Y.Z"`
+# 4. Developer tags: `git tag vX.Y.Z && git push origin main --tags`
+# 5. This workflow automatically creates the GitHub release
+#
+# **Related Files:**
+# - packages/generators/src/commands/bump-version.ts - Version bump script
+# - packages/generators/src/commands/changelog.ts - Changelog generation
+# - apps/web/src/components/core/layout/footer.tsx - Version display in footer
+# - .github/workflows/auto-release.yml - Auto-release on PR merge (primary workflow)
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Matches v1.2.3 format
+  # Manual trigger for easier manual releases (alternative to tag push)
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number (e.g., 1.2.3)'
+        required: true
+        type: string
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Required to create releases and tags
+    
+    steps:
+      # Checkout first to make composite action files available
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # fetch-depth: 0 needed for changelog generation (requires git history)
+          token: ${{ secrets.GITHUB_TOKEN }}  # Required for tag creation in workflow_dispatch
+      - uses: ./.github/actions/setup
+        with:
+          skip-checkout: true # Already checked out above
+      
+      - name: Extract version from tag or input
+        id: tag_version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            # Manual trigger: use input version
+            VERSION="${{ github.event.inputs.version }}"
+            # Remove 'v' prefix if present
+            VERSION="${VERSION#v}"
+            echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+            echo "Tag will be created: v$VERSION"
+          else
+            # Tag push: extract from ref
+            echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Verify changelog command exists
+        run: |
+          if ! grep -q '"changelog:generate"' package.json; then
+            echo "❌ changelog:generate script not found in package.json" >&2
+            exit 1
+          fi
+          echo "✅ changelog:generate command verified in package.json"
+      
+      - name: Generate changelog for release
+        id: changelog
+        run: |
+          # Generate changelog entry
+          pnpm changelog:generate --tag v${{ steps.tag_version.outputs.VERSION }} || {
+            echo "⚠️ Changelog generation failed (non-critical - will use auto-generated notes)" >&2
+            echo "CHANGELOG_GENERATED=false" >> $GITHUB_OUTPUT
+            exit 0
+          }
+          echo "CHANGELOG_GENERATED=true" >> $GITHUB_OUTPUT
+        continue-on-error: true  # Don't fail workflow if changelog generation fails (auto-generated notes are fallback)
+      
+      - name: Verify CHANGELOG.md exists and prepare release body
+        id: release_body
+        run: |
+          # Check if CHANGELOG.md exists
+          if [ ! -f "CHANGELOG.md" ]; then
+            echo "⚠️ CHANGELOG.md not found - release will use auto-generated notes only" >&2
+            echo "USE_CHANGELOG=false" >> $GITHUB_OUTPUT
+            echo "BODY_PATH=" >> $GITHUB_OUTPUT
+          else
+            echo "✅ CHANGELOG.md found"
+            # Only use CHANGELOG.md if it was generated successfully in this run
+            if [ "${{ steps.changelog.outputs.CHANGELOG_GENERATED }}" == "true" ]; then
+              echo "USE_CHANGELOG=true" >> $GITHUB_OUTPUT
+              echo "BODY_PATH=CHANGELOG.md" >> $GITHUB_OUTPUT
+            else
+              echo "USE_CHANGELOG=false" >> $GITHUB_OUTPUT
+              echo "BODY_PATH=" >> $GITHUB_OUTPUT
+            fi
+          fi
+        continue-on-error: true  # Don't fail if CHANGELOG.md is missing (auto-generated notes are fallback)
+      
+      - name: Create tag (if workflow_dispatch)
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "v${{ steps.tag_version.outputs.VERSION }}" -m "Release v${{ steps.tag_version.outputs.VERSION }}"
+          git push origin "v${{ steps.tag_version.outputs.VERSION }}"
+      
+      - name: Create GitHub Release (with CHANGELOG.md)
+        if: steps.release_body.outputs.BODY_PATH != ''
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.tag_version.outputs.VERSION }}
+          name: Release v${{ steps.tag_version.outputs.VERSION }}
+          body_path: ${{ steps.release_body.outputs.BODY_PATH }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true  # Also generate notes (will be merged with body_path content)
+      
+      - name: Create GitHub Release (without CHANGELOG.md)
+        if: steps.release_body.outputs.BODY_PATH == ''
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.tag_version.outputs.VERSION }}
+          name: Release v${{ steps.tag_version.outputs.VERSION }}
+          # body_path omitted - will use generate_release_notes as primary source
+          draft: false
+          prerelease: false
+          generate_release_notes: true  # Primary source when CHANGELOG.md is missing or generation failed

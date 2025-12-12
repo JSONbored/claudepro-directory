@@ -14,7 +14,6 @@ const reorderCollectionItemsSchema = z.object({
   collection_id: z.string().uuid(),
   items: z.array(z.any())
 });
-export type ReorderCollectionItemsInput = z.infer<typeof reorderCollectionItemsSchema>;
 
 export const reorderCollectionItems = authedAction
   .metadata({ actionName: 'reorderCollectionItems', category: 'user' })
@@ -39,22 +38,15 @@ export const reorderCollectionItems = authedAction
       
       
       // Lazy import server-only dependencies
-      // const { logActionFailure } = await import('../errors');
-      const { revalidatePath } = await import('next/cache');
-      
-      const { nextInvalidateByKeys } = await import('../cache-tags');
-      const { getCacheConfigSnapshot } = await import('../cache-config');
+      const { revalidatePath, revalidateTag } = await import('next/cache');
 
       // Simple success check?
       // Some RPCs return void, some return { success: boolean }?
       // We assume implicit success if no error thrown by runRpc.
       
       revalidatePath(`/account/library`);
-      
-      await nextInvalidateByKeys({
-        cacheConfig: getCacheConfigSnapshot(),
-        invalidateKeys: ['cache.invalidate.collection_items']
-      });
+      revalidateTag(`collections`, 'default');
+      revalidateTag(`users`, 'default');
 
       
 

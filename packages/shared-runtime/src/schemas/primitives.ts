@@ -10,7 +10,13 @@ import { SECURITY_CONFIG } from '../config/security.ts';
 
 export const nonEmptyString = z.string().min(1);
 export const shortString = z.string().min(1).max(100);
+// urlString: validates URLs, but treats empty strings as invalid (they should be normalized to undefined first)
 export const urlString = z.string().url();
+// Preprocess empty strings to undefined for optional URL fields (handles Netlify edge cases)
+export const optionalUrlString = z.preprocess(
+  (val) => (val === '' || val === null ? undefined : val),
+  z.string().url().optional()
+);
 export const isoDateString = z.string();
 export const isoDatetimeString = z.string().datetime();
 export const slugString = z
@@ -22,7 +28,6 @@ export const slugString = z
     'Invalid slug: use lowercase letters, numbers, and single hyphens'
   )
   .transform((val: string) => val.toLowerCase());
-export const optionalUrlString = z.string().url().optional();
 
 export const githubUrl = z
   .string()

@@ -20,12 +20,16 @@
  */
 
 import { X } from '@heyclaude/web-runtime/icons';
-import { cn, toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import {
+  cn,
+  toasts,
+  UI_CLASSES,
+  UnifiedBadge,
+  Button,
+  Input,
+  Label,
+} from '@heyclaude/web-runtime/ui';
 import { useState } from 'react';
-import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
-import { Button } from '@heyclaude/web-runtime/ui';
-import { Input } from '@heyclaude/web-runtime/ui';
-import { Label } from '@heyclaude/web-runtime/ui';
 
 // =============================================================================
 // TYPES
@@ -35,43 +39,43 @@ import { Label } from '@heyclaude/web-runtime/ui';
  * Base props shared across all variants
  */
 interface ListItemManagerBaseProps {
-  /** Field label */
-  label: string;
-  /** Current list of items */
-  items: string[];
-  /** Callback when items change */
-  onChange: (items: string[]) => void;
-  /** Placeholder text for input */
-  placeholder?: string;
-  /** Helper text / description */
-  description?: string;
   /** Additional CSS classes */
   className?: string;
+  /** Helper text / description */
+  description?: string;
   /** Disabled state */
   disabled?: boolean;
-  /** Minimum number of items (shows error if below) */
-  minItems?: number;
+  /** Error message to display */
+  errorMessage?: string;
+  /** Current list of items */
+  items: string[];
+  /** Field label */
+  label: string;
   /** Maximum number of items (prevents adding more) */
   maxItems?: number;
   /** Maximum character length per item */
   maxLength?: number;
+  /** Minimum number of items (shows error if below) */
+  minItems?: number;
   /** Prevent duplicate items */
   noDuplicates?: boolean;
-  /** Show item counter (e.g., "5/10 items") */
-  showCounter?: boolean;
-  /** Error message to display */
-  errorMessage?: string;
+  /** Callback when items change */
+  onChange: (items: string[]) => void;
   /** Callback when field changes (for parent form state tracking) */
   onFieldChange?: () => void;
+  /** Placeholder text for input */
+  placeholder?: string;
+  /** Show item counter (e.g., "5/10 items") */
+  showCounter?: boolean;
 }
 
 /**
  * Badge variant props
  */
 export interface ListItemManagerBadgeProps extends ListItemManagerBaseProps {
-  variant: 'badge';
   /** Badge style variant */
-  badgeStyle?: 'secondary' | 'outline' | 'default';
+  badgeStyle?: 'default' | 'outline' | 'secondary';
+  variant: 'badge';
 }
 
 /**
@@ -85,9 +89,9 @@ export interface ListItemManagerListProps extends ListItemManagerBaseProps {
  * Custom render variant props
  */
 export interface ListItemManagerCustomProps extends ListItemManagerBaseProps {
-  variant: 'custom';
   /** Custom render function for each item */
   renderItem: (item: string, index: number, onRemove: () => void) => React.ReactNode;
+  variant: 'custom';
 }
 
 /**
@@ -95,59 +99,38 @@ export interface ListItemManagerCustomProps extends ListItemManagerBaseProps {
  */
 export type ListItemManagerProps =
   | ListItemManagerBadgeProps
-  | ListItemManagerListProps
-  | ListItemManagerCustomProps;
+  | ListItemManagerCustomProps
+  | ListItemManagerListProps;
 
 // =============================================================================
 // LIST ITEM MANAGER COMPONENT
 // =============================================================================
 
 /**
- * ListItemManager Component
+ * Manage a dynamic list of string items with add/remove controls, validation, and multiple render variants.
  *
- * Manages dynamic string arrays in forms with add/remove/validation.
+ * Supports adding items via button or Enter, removing items, validation (min/max count, max length, duplicate prevention),
+ * an optional counter, and three render modes: "badge", "list", and "custom".
  *
- * @example
- * ```tsx
- * // Badge variant (interests, tags)
- * <ListItemManager
- *   variant="badge"
- *   label="Interests & Skills"
- *   items={interests}
- *   onChange={setInterests}
- *   onFieldChange={() => setHasChanges(true)}
- *   placeholder="Add an interest..."
- *   maxItems={10}
- *   maxLength={30}
- *   noDuplicates
- *   showCounter
- *   badgeStyle="secondary"
- * />
+ * @param props.variant - Display variant: "badge" renders pills, "list" renders stacked entries, "custom" delegates item rendering to `renderItem`
+ * @param props.label - Visible field label used in UI text and accessibility labels
+ * @param props.items - Current array of string items managed by the component
+ * @param props.onChange - Callback invoked with the updated items array after add/remove operations
+ * @param props.onFieldChange - Optional callback invoked whenever the field value changes (useful to mark form dirty state)
+ * @param props.placeholder - Placeholder text for the input used to add new items
+ * @param props.description - Optional helper text shown below the input
+ * @param props.className - Optional container CSS class names
+ * @param props.disabled - When true, disables input and remove controls
+ * @param props.minItems - Optional minimum number of items required (triggers a validation message when below threshold)
+ * @param props.maxItems - Optional maximum number of items allowed (prevents adding above this limit)
+ * @param props.maxLength - Optional maximum length for each item string
+ * @param props.noDuplicates - When true, prevents adding duplicate item values
+ * @param props.showCounter - When true and `maxItems` is set, shows an items/count counter
+ * @param props.errorMessage - Optional custom error message to display (renders with role="alert")
+ * @param props.badgeStyle - When `variant` is "badge", selects the visual style: "default" | "outline" | "secondary"
+ * @param props.renderItem - Required when `variant` is "custom"; called as (item, index, onRemove) => ReactNode to render each item
  *
- * // List variant (requirements)
- * <ListItemManager
- *   variant="list"
- *   label="Requirements"
- *   items={requirements}
- *   onChange={setRequirements}
- *   placeholder="e.g., 5+ years of Python experience"
- *   maxItems={20}
- * />
- *
- * // Custom variant
- * <ListItemManager
- *   variant="custom"
- *   label="Custom Items"
- *   items={customItems}
- *   onChange={setCustomItems}
- *   renderItem={(item, index, onRemove) => (
- *     <div key={index}>
- *       {item}
- *       <button onClick={onRemove}>Remove</button>
- *     </div>
- *   )}
- * />
- * ```
+ * @see UnifiedBadge, Button, Input, Label
  */
 export function ListItemManager(props: ListItemManagerProps) {
   const {
@@ -170,7 +153,7 @@ export function ListItemManager(props: ListItemManagerProps) {
   const [currentInput, setCurrentInput] = useState('');
 
   // Validation helper
-  const validateItem = (value: string): { valid: boolean; error?: string } => {
+  const validateItem = (value: string): { error?: string; valid: boolean } => {
     const trimmed = value.trim();
 
     if (!trimmed) {
@@ -251,14 +234,14 @@ export function ListItemManager(props: ListItemManagerProps) {
       </div>
 
       {/* Description */}
-      {description && <p className="text-muted-foreground text-xs">{description}</p>}
+      {description ? <p className="text-muted-foreground text-xs">{description}</p> : null}
 
       {/* Counter */}
-      {showCounter && maxItems && (
+      {showCounter && maxItems ? (
         <p className="text-muted-foreground text-xs">
           {items.length}/{maxItems} {label.toLowerCase()} {items.length === 1 ? 'item' : 'items'}
         </p>
-      )}
+      ) : null}
 
       {/* Items Display */}
       {items.length > 0 && (
@@ -277,7 +260,7 @@ export function ListItemManager(props: ListItemManagerProps) {
                   <button
                     type="button"
                     onClick={() => handleRemove(index)}
-                    className="ml-1 hover:text-destructive"
+                    className="hover:text-destructive ml-1"
                     aria-label={`Remove ${item}`}
                     disabled={disabled}
                   >
@@ -326,25 +309,25 @@ export function ListItemManager(props: ListItemManagerProps) {
       )}
 
       {/* Min items error */}
-      {showMinError && (
+      {showMinError ? (
         <p className="text-destructive text-xs">
           At least {minItems} {label.toLowerCase()} {minItems === 1 ? 'is' : 'are'} required
         </p>
-      )}
+      ) : null}
 
       {/* Custom error message */}
-      {errorMessage && (
+      {errorMessage ? (
         <p className="text-destructive text-xs" role="alert">
           {errorMessage}
         </p>
-      )}
+      ) : null}
 
       {/* Empty state message for required fields */}
-      {minItems && items.length === 0 && (
+      {minItems && items.length === 0 ? (
         <p className="text-destructive text-xs">
           At least {minItems} {label.toLowerCase()} {minItems === 1 ? 'is' : 'are'} required
         </p>
-      )}
+      ) : null}
     </div>
   );
 }

@@ -2,10 +2,65 @@
   "$schema": "https://unpkg.com/knip@5/schema.json",
   "ignoreDependencies": [
     "tailwindcss",
-    "@asteasolutions/zod-to-openapi",
-    "postcss",
-    "ajv",
-    "ajv-formats"
+    "postcss", // Used in apps/web/postcss.config.js and by @tailwindcss/postcss
+    // Radix UI components - used via packages/web-runtime/src/ui/components/*.tsx
+    // Tree-shaken by Next.js optimizePackageImports, Knip can't detect
+    "@radix-ui/react-avatar",
+    "@radix-ui/react-collapsible",
+    "@radix-ui/react-dialog",
+    "@radix-ui/react-dropdown-menu",
+    "@radix-ui/react-label",
+    "@radix-ui/react-popover",
+    "@radix-ui/react-scroll-area",
+    "@radix-ui/react-select",
+    "@radix-ui/react-separator",
+    "@radix-ui/react-slider",
+    "@radix-ui/react-slot",
+    "@radix-ui/react-switch",
+    "@radix-ui/react-tabs",
+    "@radix-ui/react-tooltip",
+    "@radix-ui/react-use-controllable-state",
+    "@radix-ui/react-visually-hidden",
+    // Dependencies used but Knip can't detect (dynamic imports, tree-shaking, etc.)
+    "@supabase/ssr", // Used in apps/web/src/proxy.ts
+    "canvas-confetti", // Used in content-submission-form.tsx
+    "class-variance-authority", // Used via web-runtime/ui (Button variants)
+    "clsx", // Used extensively via web-runtime/ui (cn utility)
+    "cmdk", // Used in packages/web-runtime/src/ui/components/command.tsx
+    "devalue", // Used in Next.js server actions (serialization)
+    "embla-carousel-react", // Used in footer-newsletter-cta.tsx, unified-section.tsx
+    "geist", // Used in apps/web/src/app/layout.tsx (font loading)
+    "next-safe-action", // Used in form components
+    "pino", // Used via packages/web-runtime/src/logger.ts (logging infrastructure)
+    "react-error-boundary", // Used in content-search.tsx
+    "sanitize-html", // Used in markdown/content processing
+    "sugar-high", // Used in interactive-code-block.tsx (syntax highlighting)
+    "tailwind-merge", // Used via web-runtime/ui (cn utility)
+    "zustand", // Used for state management
+    // Workspace dependencies - used but not in individual package.json (monorepo pattern)
+    "@heyclaude/*", // All workspace packages (shared-runtime, web-runtime, data-layer, database-types, edge-runtime, generators)
+    // Edge function dependencies - used via Deno imports
+    "zod", // Used in edge functions
+    "hono", // Used in edge functions
+    "mcp-lite", // Used in edge functions
+    "@imagemagick/magick-wasm", // Used in edge functions for image processing
+    "npm", // Used in edge-runtime email common-styles (npm: protocol)
+    "zod-to-json-schema", // Used in edge functions (heyclaude-mcp/index.ts)
+    // Verified false positives (2025-12-11 validation)
+    "@types/sanitize-html", // sanitize-html is used, types needed
+    "pino-pretty", // Used in logger configs for dev pretty-printing (3 locations)
+    "@react-email/components", // Used extensively in email templates
+    "@react-email/render", // Used via Resend (dependency)
+    "@tailwindcss/language-server", // Used in .zed/settings.json (IDE tooling)
+    "@testing-library/react", // Used in vitest.setup.ts
+    "@testing-library/user-event", // Used in test files
+    "archiver", // Used in generate-skill-packages.ts
+    "eslint-config-next", // Referenced in ESLint config docs (config package)
+    "ora", // Used in multiple generator commands
+    "react-dom", // React peer dependency
+    "server-only", // Used in multiple API routes
+    "openapi-typescript", // Being implemented (generate-openapi script)
+    "@anthropic-ai/mcpb" // Used via npx mcpb pack CLI command (package dependency, not just binary)
   ],
   "ignoreExportsUsedInFile": true,
   "ignore": [
@@ -24,22 +79,108 @@
     "config/tools/disable-server-only.cjs",
     "content/skills/**/*.zip",
     "reports/knip/**/*.json",
+    "vitest.setup.ts",
+    "vitest.config.ts",
     "**/.next/**",
     "**/build/**",
     "**/dist/**",
     "**/node_modules/**",
     "**/*.generated.ts",
-    "**/*.generated.tsx"
+    "**/*.generated.tsx",
+    // Netlify auto-generated configs
+    "apps/web/.netlify/**"
   ],
-  "ignoreBinaries": ["skott", "madge"],
+  "ignoreFiles": [
+    // Files that should be excluded from "Unused files" report only
+    // (still analyzed for other issues like unused exports)
+    "apps/web/src/lib/constants.ts",
+    "apps/web/src/lib/icons.tsx",
+    "apps/web/src/lib/ui-constants.ts"
+  ],
+  "ignoreIssues": {
+    // Intentional duplicate exports (both named and default) - valid pattern
+    "apps/web/src/components/content/read-progress.tsx": ["exports"],
+    "packages/edge-runtime/src/utils/email/theme.ts": ["exports"],
+    "packages/web-runtime/src/email/base-template.tsx": ["exports"],
+    "packages/web-runtime/src/email/templates/newsletter-welcome.tsx": ["exports"],
+    "packages/web-runtime/src/email/theme.ts": ["exports"],
+    "packages/web-runtime/src/utils/category-validation.ts": ["exports"],
+    // False positives - config file paths, not binaries
+    "lefthook.yml": ["binaries"],
+    "package.json": ["binaries"]
+  },
+  "ignoreBinaries": [
+    "skott",
+    "madge",
+    // Verified false positives (2025-12-11 validation)
+    "supabase", // Supabase CLI tool
+    "next", // Next.js CLI tool
+    "email", // React Email CLI tool (used in email:dev script)
+    // False positives - these are npm scripts, not binaries
+    "validate:zod-schemas", // npm script in lefthook.yml
+    "validate:mcp-tools", // npm script in lefthook.yml
+    "sync:types", // npm script in .migration/neon-auth/sync-system/package.json
+    "sync:full", // npm script in .migration/neon-auth/sync-system/package.json
+    "sync:dump", // npm script in .migration/neon-auth/sync-system/package.json
+    "sync:force", // npm script in .migration/neon-auth/sync-system/package.json
+    // False positive - config file path referenced in scripts, not a binary
+    "config/tools/knip.json" // Referenced in package.json and lefthook.yml as config file path
+  ],
+  "ignoreUnresolved": [
+    // Verified false positives (2025-12-11 validation)
+    "next" // TypeScript plugin name in tsconfig.json, not an import
+  ],
+  "workspaces": {
+    ".": {
+      "entry": [
+        "scripts/**/*.ts",
+        "config/**/*.ts"
+      ],
+      "project": ["config/**/*.ts", "scripts/**/*.ts"]
+    },
+    "apps/web": {
+      "entry": [
+        "src/**/*.{ts,tsx}",
+        "src/proxy.ts",
+        "next.config.mjs"
+      ],
+      "project": ["src/**/*.{ts,tsx}"]
+    },
+    "apps/edge": {
+      "entry": ["supabase/functions/**/*.{ts,tsx}"],
+      "project": ["supabase/functions/**/*.{ts,tsx}"]
+    },
+    "packages/*": {
+      "entry": ["src/**/*.{ts,tsx}"],
+      "project": ["src/**/*.{ts,tsx}"]
+    }
+  },
+  // Top-level entry/project patterns are needed for files outside workspaces
+  // (config/ and scripts/ directories at root level)
+  // Workspaces handle entry/project patterns per workspace, but don't cover root-level files
+  // This is intentional - not redundant
   "entry": [
-    "apps/edge/functions/**/*.{ts,tsx}",
-    "apps/*/src/**/*.{ts,tsx}",
-    "apps/web/src/**/*.{ts,tsx}",
-    "apps/web/src/proxy.ts",
     "config/**/*.ts",
-    "packages/*/scripts/**/*.{ts,tsx}",
-    "packages/*/src/**/*.{ts,tsx}"
+    "scripts/**/*.ts"
   ],
-  "project": ["**/*.{ts,tsx,cts,mts,js,jsx,cjs,mjs}", "!config/tools/disable-server-only.cjs"]
+  "project": [
+    "config/**/*.ts",
+    "scripts/**/*.ts",
+    "!config/tools/disable-server-only.cjs"
+  ],
+  "eslint": {
+    "config": [
+      "apps/**/.eslintrc.*",
+      "apps/**/eslint.config.*",
+      "packages/**/.eslintrc.*",
+      "packages/**/eslint.config.*",
+      "config/tools/eslint.config.mjs"
+    ]
+  },
+  "vitest": {
+    "config": ["vitest.config.ts"],
+    "entry": [
+      "**/*.{test,spec}.{ts,tsx}"
+    ]
+  }
 }

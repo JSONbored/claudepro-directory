@@ -9,7 +9,7 @@ This document defines the standards and patterns for logging and error handling 
 1. **Structured Logging**: Always use structured logging (logger.*), never raw console.*
 2. **Request Correlation**: Always include requestId for log correlation
 3. **Context**: Always include route, operation, and relevant metadata
-4. **Duration Tracking**: Always track duration for performance-critical operations
+4. **Performance Tracking**: Track performance metrics when needed (duration tracking removed - use external monitoring)
 5. **Error Normalization**: Always use `normalizeError()` for error handling
 
 ---
@@ -24,7 +24,6 @@ import {
   generateRequestId,
   logger,
   normalizeError,
-  withDuration,
 } from '@heyclaude/web-runtime/core';
 
 export default async function MyPage() {
@@ -38,7 +37,6 @@ export default async function MyPage() {
     
     logger.info(
       'MyPage: data loaded',
-      withDuration(
         {
           ...logContext,
           dataCount: data.length,
@@ -51,7 +49,7 @@ export default async function MyPage() {
     logger.error(
       'MyPage: data load failed',
       normalized,
-      withDuration(logContext, startTime)
+logContext, startTime)
     );
     throw normalized;
   }
@@ -59,7 +57,6 @@ export default async function MyPage() {
   // Final summary log
   logger.info(
     'MyPage: page render completed',
-    withDuration(logContext, startTime)
   );
 }
 ```
@@ -68,9 +65,9 @@ export default async function MyPage() {
 - ✅ `startTime = Date.now()` at page start
 - ✅ Single `requestId` per request
 - ✅ `logContext` with route, operation, requestId
-- ✅ All logs use `withDuration(logContext, startTime)`
+- ✅ Performance metrics tracked via external monitoring (duration tracking removed)
 - ✅ All errors use `normalizeError()` and include context
-- ✅ Final summary log with total duration
+- ✅ Final summary log
 
 ---
 
@@ -250,7 +247,7 @@ async function callExternalApi() {
 **Required Elements**:
 - ✅ Use `withExternalApiLogging` wrapper (when available)
 - ✅ Log API name, method, path
-- ✅ Log duration
+- ✅ Track performance via external monitoring
 - ✅ Log status code
 - ✅ Log request/response size (if applicable)
 
@@ -334,7 +331,6 @@ All logs should include:
   requestId: string;        // Required: For log correlation
   route: string;            // Required: Current route/pathname
   operation: string;        // Required: Function/component name
-  duration_ms?: number;     // Optional: Duration in milliseconds
   [key: string]: unknown;   // Optional: Additional context
 }
 ```
@@ -350,29 +346,9 @@ All logs should include:
 
 ---
 
-## Duration Tracking
+## Performance Tracking
 
-### Server Pages
-```typescript
-const startTime = Date.now();
-// ... operations ...
-logger.info('Operation completed', withDuration(logContext, startTime));
-```
-
-### Performance-Critical Operations
-```typescript
-import { trackPerformance } from '@heyclaude/web-runtime/utils/performance-metrics';
-
-const { result, duration, requestId } = await trackPerformance(
-  async () => {
-    // Your operation
-  },
-  {
-    operation: 'myOperation',
-    logMeta: { additional: 'context' },
-  }
-);
-```
+Duration tracking has been removed from the codebase. Use external monitoring tools (e.g., Vercel Analytics, DataDog, etc.) for performance metrics instead of logging duration in application code.
 
 ---
 
@@ -396,7 +372,6 @@ const actionRequestId = generateRequestId();
 The following ESLint rules enforce these standards:
 
 - `require-error-logging-in-catch`: Ensures all catch blocks log errors
-- `require-duration-tracking`: Ensures performance-critical operations track duration
 - `require-use-logged-async-in-client`: Ensures client async operations use useLoggedAsync
 - `require-normalize-error-before-logging`: Ensures errors are normalized before logging
 - `require-record-string-unknown-for-log-context`: Enforces proper log context types
@@ -413,7 +388,6 @@ See [ESLint Architectural Rules](../tools/ESLINT_RULES.md) for complete document
 - Use `console.*` instead of `logger.*`
 - Generate multiple requestIds in same request lifecycle
 - Skip error logging in catch blocks
-- Skip duration tracking in server pages
 - Use empty catch blocks
 - Log without context
 
@@ -421,7 +395,6 @@ See [ESLint Architectural Rules](../tools/ESLINT_RULES.md) for complete document
 - Use structured logging (`logger.*`)
 - Use single requestId per request
 - Always log errors in catch blocks
-- Always track duration in server pages
 - Always include context in logs
 - Use `normalizeError()` for all errors
 
@@ -434,7 +407,6 @@ When updating existing code:
 - [ ] Replace `console.*` with `logger.*`
 - [ ] Add `requestId` to all logs
 - [ ] Add `route` and `operation` to all logs
-- [ ] Add duration tracking to server pages
 - [ ] Add error logging to all catch blocks
 - [ ] Use `normalizeError()` for all errors
 - [ ] Use `useLoggedAsync` in client components

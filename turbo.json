@@ -1,7 +1,8 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "remoteCache": {
-    "signature": true
+    "signature": true,
+    "enabled": true
   },
   "tasks": {
     "build:skills:exec": {
@@ -146,11 +147,6 @@
       "cache": false,
       "passThroughEnv": ["SUPABASE_SERVICE_ROLE_KEY", "NEXT_PUBLIC_SUPABASE_URL"]
     },
-    "verify:mcpb:exec": {
-      "dependsOn": ["generators:build"],
-      "cache": false,
-      "passThroughEnv": ["SUPABASE_SERVICE_ROLE_KEY", "NEXT_PUBLIC_SUPABASE_URL"]
-    },
     "generate:readme:exec": {
       "dependsOn": ["generators:build"],
       "cache": false
@@ -183,11 +179,6 @@
         "SUPABASE_PROJECT_REF"
       ]
     },
-    "backup:db:exec": {
-      "dependsOn": ["generators:build"],
-      "cache": false,
-      "passThroughEnv": ["SUPABASE_SERVICE_ROLE_KEY", "NEXT_PUBLIC_SUPABASE_URL"]
-    },
     "cache:info:exec": {
       "dependsOn": ["generators:build"],
       "cache": false
@@ -195,11 +186,6 @@
     "cache:clear:exec": {
       "dependsOn": ["generators:build"],
       "cache": false
-    },
-    "webhooks:backlog:exec": {
-      "dependsOn": ["generators:build"],
-      "cache": false,
-      "passThroughEnv": ["SUPABASE_SERVICE_ROLE_KEY", "NEXT_PUBLIC_SUPABASE_URL"]
     },
     "webhooks:replay:exec": {
       "dependsOn": ["generators:build"],
@@ -266,10 +252,6 @@
     "POSTGRES_PRISMA_URL",
     "POSTGRES_URL_NON_POOLING",
     "POSTGRES_PASSWORD",
-    "RATE_LIMIT_SECRET",
-    "CACHE_WARM_AUTH_TOKEN",
-    "VIEW_COUNT_SALT",
-    "WEBHOOK_SECRET",
     "GITHUB_TOKEN",
     "GITHUB_REPO_OWNER",
     "GITHUB_REPO_NAME",
@@ -279,9 +261,7 @@
     "RESEND_AUDIENCE_ID",
     "RESEND_FROM_EMAIL",
     "RESEND_WEBHOOK_SECRET",
-    "CRON_SECRET",
     "BETTERSTACK_HEARTBEAT_WEEKLY_TASKS",
-    "BETTERSTACK_HEARTBEAT_DAILY_MAINTENANCE",
     "REVALIDATE_SECRET",
     "R2_ACCESS_KEY_ID",
     "R2_SECRET_ACCESS_KEY",

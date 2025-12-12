@@ -21,9 +21,16 @@ import { DISCORD_LIMITS } from './constants.ts';
 export function sanitizeForDiscord(str: string | null | undefined, maxLength = 200): string {
   if (!str) return '';
   
+  // Limit input length before regex processing to prevent ReDoS attacks
+  // This ensures regex operations complete in reasonable time even on malicious input
+  const inputLimit = maxLength * 10; // Allow 10x the output limit for processing
+  const limitedStr = str.length > inputLimit ? str.slice(0, inputLimit) : str;
+  
   // Remove markdown link syntax [text](url) to prevent link injection
   // Keep the text part, discard the URL
-  let sanitized = str.replace(/\[([^\]]*)\]\([^)]+\)/g, '$1');
+  // Using [^\]]+ instead of [^\]]* to avoid ambiguous matching and reduce backtracking
+  // The + quantifier requires at least one character, making the match more specific
+  let sanitized = limitedStr.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
   
   // Remove any remaining raw URLs that could be misleading
   // This is optional - uncomment if needed

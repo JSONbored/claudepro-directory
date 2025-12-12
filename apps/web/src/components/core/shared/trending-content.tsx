@@ -5,19 +5,29 @@
  */
 
 import { Clock, Star, TrendingUp } from '@heyclaude/web-runtime/icons';
-import type { TrendingContentProps } from '@heyclaude/web-runtime/types/component.types';
+import { type TrendingContentProps } from '@heyclaude/web-runtime/types/component.types';
+import {
+  UnifiedBadge,
+  UnifiedCardGrid,
+  ConfigCard,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@heyclaude/web-runtime/ui';
+import { Award } from '@heyclaude/web-runtime/icons';
 import { useId } from 'react';
-import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
-import { UnifiedCardGrid } from '@heyclaude/web-runtime/ui';
-import { ConfigCard } from '@heyclaude/web-runtime/ui';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@heyclaude/web-runtime/ui';
 
 interface TabConfig {
-  value: string;
-  label: string;
+  emptyMessage: string;
   heading: string;
   icon: typeof TrendingUp;
-  emptyMessage: string;
+  label: string;
+  value: string;
 }
 
 const TAB_CONFIGS: TabConfig[] = [
@@ -71,15 +81,31 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
       >
         {TAB_CONFIGS.map((config) => {
           const Icon = config.icon;
+          const tooltipContent = 
+            config.value === 'trending'
+              ? 'Most viewed and copied configurations this week'
+              : config.value === 'popular'
+              ? 'All-time most popular configurations based on views and engagement'
+              : 'Recently added or updated configurations';
+          
           return (
-            <TabsTrigger
-              key={config.value}
-              value={config.value}
-              aria-label={`View ${config.label.toLowerCase()} configurations`}
-            >
-              <Icon className="mr-2 h-4 w-4" aria-hidden="true" />
-              {config.label}
-            </TabsTrigger>
+            <TooltipProvider key={config.value}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <TabsTrigger
+                    value={config.value}
+                    aria-label={`View ${config.label.toLowerCase()} configurations`}
+                  >
+                    <Icon className="mr-2 h-4 w-4" aria-hidden="true" />
+                    {config.label}
+                  </TabsTrigger>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{config.heading}</p>
+                  <p className="text-xs text-muted-foreground">{tooltipContent}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           );
         })}
       </TabsList>
@@ -98,7 +124,7 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
             aria-labelledby={headingId}
           >
             <div>
-              <h2 id={headingId} className="mb-4 font-bold text-2xl">
+              <h2 id={headingId} className="mb-4 text-2xl font-bold">
                 {config.heading}
               </h2>
               <UnifiedCardGrid
@@ -107,6 +133,7 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
                 emptyMessage={config.emptyMessage}
                 ariaLabel={`${config.label} content`}
                 prefetchCount={3}
+                keyExtractor={(item) => `${config.value}-${item.slug ?? ''}`}
                 renderCard={(item, index) => {
                   // ConfigCard accepts DisplayableContent union type
                   // ContentItem is part of that union, so spread is type-safe
@@ -114,22 +141,36 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
 
                   return (
                     <div key={item.slug} className="relative">
-                      {showRankBadge && index < 3 && (
-                        <UnifiedBadge
-                          className="-top-2 -right-2 absolute z-10"
-                          variant="base"
-                          style="default"
-                          aria-label={`Rank ${index + 1}`}
-                        >
-                          #{index + 1}
-                        </UnifiedBadge>
-                      )}
-                      <ConfigCard
-                        item={cardItem}
-                        variant="default"
-                        showCategory={true}
-                        showActions={true}
-                      />
+                      {showRankBadge && index < 3 ? (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div>
+                                <UnifiedBadge
+                                  className="absolute -top-2 -right-2 z-10"
+                                  variant="base"
+                                  style="default"
+                                  aria-label={`Rank ${index + 1}`}
+                                >
+                                  <Award className="mr-1 h-3 w-3" aria-hidden="true" />
+                                  #{index + 1}
+                                </UnifiedBadge>
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Rank #{index + 1}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {index === 0 
+                                  ? 'Most trending this week'
+                                  : index === 1
+                                  ? 'Second most trending'
+                                  : 'Third most trending'}
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      ) : null}
+                      <ConfigCard item={cardItem} variant="default" showCategory showActions />
                     </div>
                   );
                 }}

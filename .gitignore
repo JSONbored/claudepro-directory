@@ -95,7 +95,13 @@ manifest.json
 
 # Supabase schema dump (contains secrets in trigger definitions)
 apps/edge/schema.sql
-supabase/migrations/*
+# Migration files are tracked in git for GitHub integration
+# IMPORTANT: Override global gitignore (*.sql) to allow migration files
+!supabase/migrations/*.sql
+# Only ignore backup/temp migration files
+supabase/migrations/*.backup
+supabase/migrations/*.tmp
+supabase/migrations/*.orig
 
 .launchd/com.claudepro.backup.plist
 
@@ -126,3 +132,17 @@ config/tools/LINTING.md
 config/tools/TYPE-CHECK-QUICK-REFERENCE.md
 config/tools/TYPE-CHECKING.md
 config/tools/NEW-ESLINT-RULES.md
+config/tools/ESLINT_AUTOFIX_AUDIT.md
+config/tools/SAFE_AUTOFIX_RULES_RESEARCH.md
+config/tools/SAFE_AUTOFIX_RULES_SUMMARY.md
+config/tools/AUTOFIX_RULES_FINAL_SUMMARY.md
+config/tools/eslint-tests/
+
+# Local Netlify folder
+.netlify
+BUG_ANALYSIS.md
+SEARCH_CACHING_ANALYSIS.md
+SEARCH_OPTIMIZATION_ANALYSIS.md
+SEARCH_SYSTEM_ARCHITECTURE.md
+SEARCH_UNIFICATION_TODO.md
+VERIFY_INNGEST_DEPLOYMENT.md

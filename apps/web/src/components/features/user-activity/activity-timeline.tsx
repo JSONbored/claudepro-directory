@@ -3,13 +3,12 @@
  * Uses Activity type from user.actions (based on get_user_activity_timeline RPC)
  */
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
+import { GitPullRequest } from '@heyclaude/web-runtime/icons';
+import { logger } from '@heyclaude/web-runtime/logging/server';
 import { Card, CardContent } from '@heyclaude/web-runtime/ui';
 
 type Activity = Database['public']['CompositeTypes']['user_activity_timeline_item'];
-
-import { logger } from '@heyclaude/web-runtime/core';
-import { GitPullRequest } from '@heyclaude/web-runtime/icons';
 
 interface ActivityTimelineProps {
   activities: Activity[];
@@ -26,7 +25,7 @@ export function ActivityTimeline({ activities, limit }: ActivityTimelineProps) {
   if (!displayActivities || displayActivities.length === 0) {
     return (
       <Card>
-        <CardContent className="py-12 text-center text-muted-foreground">
+        <CardContent className="text-muted-foreground py-12 text-center">
           No activity yet
         </CardContent>
       </Card>
@@ -40,9 +39,9 @@ export function ActivityTimeline({ activities, limit }: ActivityTimelineProps) {
           (
             activity
           ): activity is Activity & {
+            created_at: string;
             id: string;
             type: string;
-            created_at: string;
           } =>
             activity !== null &&
             activity.id !== null &&
@@ -56,7 +55,7 @@ export function ActivityTimeline({ activities, limit }: ActivityTimelineProps) {
 
           // Guard against unknown activity types
           if (!config) {
-            logger.warn('Unknown activity type', { type: activity.type });
+            logger.warn({ type: activity.type }, 'Unknown activity type');
             return null;
           }
 
@@ -72,15 +71,15 @@ export function ActivityTimeline({ activities, limit }: ActivityTimelineProps) {
           }
 
           return (
-            <Card key={activity.id} className="transition-colors hover:bg-accent/5">
+            <Card key={activity.id} className="hover:bg-accent/5 transition-colors">
               <CardContent className="flex items-start gap-3 p-4">
-                <Icon className="mt-1 h-5 w-5 shrink-0 text-muted-foreground" />
+                <Icon className="text-muted-foreground mt-1 h-5 w-5 shrink-0" />
                 <div className="min-w-0 flex-1">
                   <p className="text-sm">
                     <span className="text-muted-foreground">{config.label}</span>{' '}
                     <span className="font-medium">{title}</span>
                   </p>
-                  <p className="mt-1 text-muted-foreground text-xs">
+                  <p className="text-muted-foreground mt-1 text-xs">
                     {new Date(activity.created_at).toLocaleDateString('en-US', {
                       month: 'short',
                       day: 'numeric',

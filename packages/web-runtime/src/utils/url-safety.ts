@@ -65,6 +65,22 @@ export function getSafeWebsiteUrl(url: null | string | undefined): null | string
 }
 
 /**
+ * Validate and canonicalize an external URL for safe use in href attributes.
+ *
+ * Alias for getSafeWebsiteUrl - provides consistent naming across codebase.
+ * Only allows HTTPS URLs (or HTTP for localhost in development).
+ * Returns canonicalized URL or null if invalid.
+ *
+ * @param url - The input URL to validate; may be `null` or `undefined`.
+ * @returns A canonicalized, safe href string when the input is an allowed URL, `null` otherwise.
+ *
+ * @see getSafeWebsiteUrl
+ */
+export function getSafeExternalUrl(url: null | string | undefined): null | string {
+  return getSafeWebsiteUrl(url);
+}
+
+/**
  * Validate and sanitize email address for safe use in mailto links.
  * Returns safe mailto URL or null if email is invalid.
  *

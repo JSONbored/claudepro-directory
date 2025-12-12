@@ -9,11 +9,10 @@ import { normalizeError } from '@heyclaude/shared-runtime';
 import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { LogOut } from '@heyclaude/web-runtime/icons';
-import type { ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
-import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { type ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
+import { toasts, UI_CLASSES, Button } from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import { Button } from '@heyclaude/web-runtime/ui';
+import { useCallback, useState } from 'react';
 
 export type AuthSignOutScope = 'global' | 'local' | 'others';
 
@@ -43,7 +42,7 @@ export function AuthSignOutButton({
     defaultRethrow: false,
   });
 
-  const handleSignOut = async () => {
+  const handleSignOut = useCallback(async () => {
     setLoading(true);
     try {
       await runLoggedAsync(
@@ -65,11 +64,20 @@ export function AuthSignOutButton({
       );
     } catch (error) {
       // Error already logged by useLoggedAsync
-      toasts.error.authFailed(normalizeError(error, 'Sign out failed').message);
+      const normalized = normalizeError(error, 'Sign out failed');
+      // Show error toast with "Retry" button
+      toasts.raw.error(normalized.message, {
+        action: {
+          label: 'Retry',
+          onClick: () => {
+            handleSignOut();
+          },
+        },
+      });
     } finally {
       setLoading(false);
     }
-  };
+  }, [scope, supabase, router, runLoggedAsync]);
 
   return (
     <Button

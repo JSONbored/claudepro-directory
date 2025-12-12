@@ -11,96 +11,163 @@ import {
   MousePointer,
   Sparkles,
 } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  RESPONSIVE_PATTERNS,
-  UI_CLASSES,
-  UnifiedBadge,
-  HoverCard,
   Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  HoverCard,
+  RESPONSIVE_PATTERNS,
+  UI_CLASSES,
+  UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
+import { cacheLife } from 'next/cache';
+import { Suspense } from 'react';
+
+import Loading from './loading';
 
 /**
- * Dynamic Rendering Required
+ * Render the Partner marketing page showing pricing, benefits, real-time stats, and CTAs.
  *
- * This page uses dynamic rendering for server-side data fetching and user-specific content.
+ * Fetches partner pricing, hero statistics, contact channels, and CTA links on the server.
+ * If pricing or hero-stat fetches fail, built-in default values are used to ensure the page renders.
+ * A request-scoped logger is created for telemetry and error reporting. The component leverages
+ * Cache Components for efficient, streaming-friendly data loading with Suspense boundaries.
  *
- * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
- */
-export const revalidate = 86_400;
-
-/**
- * Renders the Partner marketing page that presents pricing, benefits, and CTAs for advertising.
- *
- * Fetches partner pricing, hero statistics, contact channels, and CTA links on the server,
- * and renders a multi-section page with a hero banner, real-time stats, launch pricing banner,
- * pricing options (job and sponsored listings), benefits, FAQ, and a final CTA.
- *
- * If loading the pricing configuration fails, the component falls back to built-in default pricing
- * values to avoid a page error. A request-scoped logger and single requestId are created for the
- * page request to scope telemetry and error reporting.
- *
- * This is a server component that uses server-side data and participates in ISR; the module
- * exports the revalidation interval.
- *
- * @returns The rendered React element for the partner page.
+ * @returns The React element for the partner marketing page.
  *
  * @see getPartnerPricing
  * @see getPartnerHeroStats
  * @see getPartnerContactChannels
  * @see getPartnerCtas
- * @see generateRequestId
  * @see logger
  */
 export default async function PartnerPage() {
-  // Generate single requestId for this page request
-  const requestId = generateRequestId();
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
-  // Create request-scoped child logger to avoid race conditions
+  // Create request-scoped child logger
   const reqLogger = logger.child({
-    requestId,
+    module: 'app/partner',
     operation: 'PartnerPage',
     route: '/partner',
-    module: 'app/partner',
   });
 
+  return (
+    <Suspense fallback={<Loading />}>
+      <PartnerPageContent reqLogger={reqLogger} />
+    </Suspense>
+  );
+}
+
+/**
+ * Renders the partner landing page content — loads pricing, hero statistics, contact channels,
+ * and CTAs, falling back to safe defaults on fetch failures and emitting request-scoped logs.
+ *
+ * Fetch behavior:
+ * - Attempts to load partner pricing and hero stats; on failure each falls back to built-in defaults
+ *   and logs the error via `reqLogger`.
+ * - Retrieves contact channels and CTA links for page CTAs.
+ *
+ * @param props.reqLogger - A request-scoped logger created via `logger.child` used for telemetry
+ *                          and error reporting during data fetches.
+ * @param root0
+ * @param root0.reqLogger
+ * @returns The JSX element tree for the Partner page content.
+ *
+ * @see getPartnerPricing
+ * @see getPartnerHeroStats
+ * @see getPartnerContactChannels
+ * @see getPartnerCtas
+ * @see logger
+ */
+async function PartnerPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
   let pricing: ReturnType<typeof getPartnerPricing>;
   try {
     pricing = getPartnerPricing();
+    reqLogger.info({ section: 'data-fetch' }, 'PartnerPage: pricing config loaded');
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load pricing config');
-    reqLogger.error('PartnerPage: getPartnerPricing failed', normalized, {
-      section: 'pricing-config',
-    });
+    reqLogger.error(
+      { err: normalized, section: 'data-fetch' },
+      'PartnerPage: getPartnerPricing failed'
+    );
     // Use defaults instead of throwing to prevent page crash
     pricing = {
       jobs: {
-        regular: 99,
         discounted: 79,
         durationDays: 30,
-      },
-      sponsored: {
-        regular: 199,
-        discounted: 149,
+        regular: 99,
       },
       launch: {
         discountPercent: 20,
         enabled: false,
         endDate: '',
       },
+      sponsored: {
+        discounted: 149,
+        regular: 199,
+      },
     };
   }
 
-  const heroStats = await getPartnerHeroStats();
+  let heroStats: Awaited<ReturnType<typeof getPartnerHeroStats>>;
+  try {
+    heroStats = await getPartnerHeroStats();
+    reqLogger.info({ section: 'data-fetch' }, 'PartnerPage: hero stats loaded');
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load hero stats');
+    reqLogger.error(
+      { err: normalized, section: 'data-fetch' },
+      'PartnerPage: getPartnerHeroStats failed'
+    );
+    heroStats = {
+      configurationCount: 500,
+      monthlyPageViews: 50_000,
+      monthlyVisitors: 10_000,
+    };
+  }
   const configCount = heroStats.configurationCount;
 
-  const partnerContacts = getPartnerContactChannels();
-  const partnerCtas = getPartnerCtas();
+  let partnerContacts: ReturnType<typeof getPartnerContactChannels>;
+  try {
+    partnerContacts = getPartnerContactChannels();
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load partner contact channels');
+    reqLogger.error(
+      { err: normalized, section: 'data-fetch' },
+      'PartnerPage: getPartnerContactChannels failed'
+    );
+    // Use empty defaults instead of throwing to prevent page crash
+    // Match the expected shape: partnerEmail, hiEmail, supportEmail, securityEmail
+    partnerContacts = {
+      hiEmail: '',
+      partnerEmail: '',
+      securityEmail: '',
+      supportEmail: '',
+    };
+  }
+
+  let partnerCtas: ReturnType<typeof getPartnerCtas>;
+  try {
+    partnerCtas = getPartnerCtas();
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load partner CTAs');
+    reqLogger.error(
+      { err: normalized, section: 'data-fetch' },
+      'PartnerPage: getPartnerCtas failed'
+    );
+    // Use safe default shape instead of empty object to prevent runtime TypeErrors
+    // All CTAs must exist with safe values (empty hrefs) to match expected structure
+    partnerCtas = {
+      jobListing: { href: '', subject: '' },
+      partnershipInquiry: { href: '', subject: '' },
+      sponsoredListing: { href: '', subject: '' },
+    };
+  }
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -169,7 +236,7 @@ export default async function PartnerPage() {
                 </p>
               </div>
             </div>
-            <UnifiedBadge variant="base" className="border-primary/20 bg-primary/10 text-primary">
+            <UnifiedBadge className="border-primary/20 bg-primary/10 text-primary" variant="base">
               <Clock className="mr-1 h-3 w-3" />
               Limited Time
             </UnifiedBadge>
@@ -190,9 +257,9 @@ export default async function PartnerPage() {
                     <Briefcase className={`${UI_CLASSES.ICON_LG} ${UI_CLASSES.ICON_INFO}`} />
                   </div>
                   <UnifiedBadge
-                    variant="base"
-                    style="outline"
                     className="border-blue-500/20 bg-blue-500/5"
+                    style="outline"
+                    variant="base"
                   >
                     Most Popular
                   </UnifiedBadge>
@@ -244,7 +311,7 @@ export default async function PartnerPage() {
                 </div>
 
                 {/* CTA */}
-                <Button className="w-full" size="lg" asChild>
+                <Button asChild className="w-full" size="lg">
                   <a href={partnerCtas.jobListing.href}>
                     <Mail className="mr-2 h-4 w-4" />
                     Post a Job
@@ -263,9 +330,9 @@ export default async function PartnerPage() {
                     <Megaphone className={`${UI_CLASSES.ICON_LG} text-purple-500`} />
                   </div>
                   <UnifiedBadge
-                    variant="base"
-                    style="outline"
                     className="border-purple-500/20 bg-purple-500/5"
+                    style="outline"
+                    variant="base"
                   >
                     High ROI
                   </UnifiedBadge>
@@ -298,7 +365,7 @@ export default async function PartnerPage() {
                   </div>
                   <div className="flex items-start gap-2">
                     <Check className={`mt-0.5 ${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_SUCCESS}`} />
-                    <p className={UI_CLASSES.TEXT_SM}>"Sponsored" badge</p>
+                    <p className={UI_CLASSES.TEXT_SM}>&quot;Sponsored&quot; badge</p>
                   </div>
                   <div className="flex items-start gap-2">
                     <Check className={`mt-0.5 ${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_SUCCESS}`} />
@@ -315,7 +382,7 @@ export default async function PartnerPage() {
                 </div>
 
                 {/* CTA */}
-                <Button className="w-full" size="lg" variant="default" asChild>
+                <Button asChild className="w-full" size="lg" variant="default">
                   <a href={partnerCtas.sponsoredListing.href}>
                     <Mail className="mr-2 h-4 w-4" />
                     Get Featured
@@ -369,7 +436,7 @@ export default async function PartnerPage() {
             <CardContent className="pt-6">
               <p className="mb-2 font-semibold">How quickly can I get started?</p>
               <p className={UI_CLASSES.TEXT_SM_MUTED}>
-                Email us today, and we'll have your listing live within 24 hours. No lengthy
+                Email us today, and we&apos;ll have your listing live within 24 hours. No lengthy
                 onboarding process.
               </p>
             </CardContent>
@@ -378,8 +445,8 @@ export default async function PartnerPage() {
             <CardContent className="pt-6">
               <p className="mb-2 font-semibold">Can I cancel anytime?</p>
               <p className={UI_CLASSES.TEXT_SM_MUTED}>
-                Yes, absolutely. No contracts, no commitments. Just email us and we'll process your
-                cancellation immediately.
+                Yes, absolutely. No contracts, no commitments. Just email us and we&apos;ll process
+                your cancellation immediately.
               </p>
             </CardContent>
           </Card>
@@ -406,10 +473,12 @@ export default async function PartnerPage() {
               Get started with launch pricing ({pricing.launch.discountPercent}% off)
               {pricing.launch.endDate ? ` before ${pricing.launch.endDate}` : null}
             </p>
-            <Button size="lg" asChild>
+            <Button asChild size="lg">
               <a href={partnerCtas.partnershipInquiry.href}>
                 <Mail className="mr-2 h-4 w-4" />
-                Email: {partnerContacts.partnerEmail}
+                {partnerContacts.partnerEmail
+                  ? `Email: ${partnerContacts.partnerEmail}`
+                  : 'Contact Us'}
               </a>
             </Button>
             <p className={`${UI_CLASSES.TEXT_XS_MUTED} mt-4`}>

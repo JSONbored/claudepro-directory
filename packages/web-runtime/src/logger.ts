@@ -33,7 +33,6 @@
  */
 import pino from 'pino';
 import { createPinoConfig } from '@heyclaude/shared-runtime';
-import { normalizeError } from './errors';
 
 /**
  * Creates a Node.js destination stream that routes JSON log chunks to console methods so Vercel detects log levels correctly.
@@ -83,71 +82,185 @@ function createVercelCompatibleDestination(): pino.DestinationStream | undefined
   } as pino.DestinationStream;
 }
 
-const pinoConfig = createPinoConfig({
-  service: 'web-runtime',
-  // Browser configuration: Disable console in production, enable transmit
-  browser: (() => {
+// Singleton pattern to prevent multiple logger instances (fixes MaxListenersExceededWarning)
+// In Next.js/Turbopack, modules can be executed multiple times, creating multiple loggers
+// that all try to attach listeners to the same stdout/stderr stream
+// Use globalThis to ensure singleton works across module re-executions
+const GLOBAL_LOGGER_KEY = Symbol.for('@heyclaude/web-runtime/logger');
+
+function getGlobalLogger(): pino.Logger | null {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- globalThis access
+  return (globalThis as any)[GLOBAL_LOGGER_KEY] ?? null;
+}
+
+function setGlobalLogger(logger: pino.Logger): void {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- globalThis access
+  (globalThis as any)[GLOBAL_LOGGER_KEY] = logger;
+}
+
+function createLoggerInstance(): pino.Logger {
+  // Return existing instance if already created (singleton pattern)
+  const existing = getGlobalLogger();
+  if (existing) {
+    return existing;
+  }
+
+  const isDevelopment = typeof process !== 'undefined' && process.env?.['NODE_ENV'] !== 'production';
+  const isServer = typeof window === 'undefined';
+
+  const pinoConfig = createPinoConfig({
+    service: 'web-runtime',
+    // Browser configuration: Disable console in production, enable transmit
+    browser: (() => {
       const transmitConfig = (() => {
-      // Only enable in browser environment
-      if (typeof window === 'undefined') {
-        return undefined;
-      }
+        // Only enable in browser environment
+        if (typeof window === 'undefined') {
+          return undefined;
+        }
 
-      const isProduction = typeof process !== 'undefined' && process.env?.['NODE_ENV'] === 'production';
-      const consoleEnabled = typeof process !== 'undefined' && process.env?.['NEXT_PUBLIC_LOGGER_CONSOLE'] === 'true';
+        const isProduction = typeof process !== 'undefined' && process.env?.['NODE_ENV'] === 'production';
+        const consoleEnabled = typeof process !== 'undefined' && process.env?.['NEXT_PUBLIC_LOGGER_CONSOLE'] === 'true';
 
-      // Enable transmit in production (always) or development (if console enabled)
-      // This ensures we capture client-side errors even when console is disabled
-      if (!isProduction && !consoleEnabled) {
-        return undefined;
-      }
+        // Enable transmit in production (always) or development (if console enabled)
+        // This ensures we capture client-side errors even when console is disabled
+        if (!isProduction && !consoleEnabled) {
+          return undefined;
+        }
+
+        return {
+          level: 'warn' as pino.LevelOrString, // Only send warn and error logs (reduces network traffic)
+          send: (level: pino.Level, logEvent: pino.LogEvent) => {
+            // Fire-and-forget: Don't await, don't block UI
+            // Performance: Pino batches logs automatically, so this is efficient
+            // Security: Redaction happens before transmit, so no sensitive data sent
+            // Note: transmit.level: 'warn' already filters to warn (40) and above
+            fetch('/api/logs/client', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                ...logEvent,
+                level, // Include numeric level for server-side processing
+              }),
+              // Keepalive ensures request completes even if page unloads
+              keepalive: true,
+            }).catch(() => {
+              // Silently fail - don't log errors about logging
+              // Prevents infinite loops if logging endpoint fails
+            });
+          },
+        };
+      })();
 
       return {
-        level: 'warn' as pino.LevelOrString, // Only send warn and error logs (reduces network traffic)
-        send: (level: pino.Level, logEvent: pino.LogEvent) => {
-          // Fire-and-forget: Don't await, don't block UI
-          // Performance: Pino batches logs automatically, so this is efficient
-          // Security: Redaction happens before transmit, so no sensitive data sent
-          // Note: transmit.level: 'warn' already filters to warn (40) and above
-          fetch('/api/logs/client', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              ...logEvent,
-              level, // Include numeric level for server-side processing
-            }),
-            // Keepalive ensures request completes even if page unloads
-            keepalive: true,
-          }).catch(() => {
-            // Silently fail - don't log errors about logging
-            // Prevents infinite loops if logging endpoint fails
-          });
-        },
+        // Console logging: Only enabled if NEXT_PUBLIC_LOGGER_CONSOLE=true
+        // In production, this is false (users don't see logs in browser console)
+        disabled: typeof process !== 'undefined' && process.env?.['NEXT_PUBLIC_LOGGER_CONSOLE'] !== 'true',
+        // Serialize all objects for proper formatting
+        serialize: true,
+        // Enable transmit for error/warn logs (sends to /api/logs/client)
+        // This is the ONLY way logs appear in production (users don't see them)
+        ...(transmitConfig && { transmit: transmitConfig }),
       };
-    })();
+    })(),
+  });
 
-    return {
-      // Console logging: Only enabled if NEXT_PUBLIC_LOGGER_CONSOLE=true
-      // In production, this is false (users don't see logs in browser console)
-      disabled: typeof process !== 'undefined' && process.env?.['NEXT_PUBLIC_LOGGER_CONSOLE'] !== 'true',
-      // Serialize all objects for proper formatting
-      serialize: true,
-      // Enable transmit for error/warn logs (sends to /api/logs/client)
-      // This is the ONLY way logs appear in production (users don't see them)
-      ...(transmitConfig && { transmit: transmitConfig }),
-    };
-  })(),
-});
+  // Server-side: Use pino-pretty stream in development (avoids worker thread issues in Next.js)
+  // Client-side: Use browser config (no pino-pretty needed)
+  if (isServer && isDevelopment) {
+    // Try to load pino-pretty dynamically to avoid Next.js bundling issues
+    // Even though pino-pretty is in serverExternalPackages, Turbopack still tries to analyze require()
+    // Use a truly dynamic require that Next.js/Turbopack can't statically analyze
+    let prettyStream: ReturnType<typeof require> | null = null;
+    try {
+      // Split the module name to prevent static analysis
+      // Turbopack can't analyze string concatenation in this context
+      const moduleNameParts = ['pino', '-', 'pretty'];
+      const moduleName = moduleNameParts.join('');
+      
+      // Use eval to create a truly dynamic require that Next.js can't analyze
+      // This is safe because we're only requiring a known dev dependency
+      // eslint-disable-next-line @typescript-eslint/no-implied-eval, @typescript-eslint/no-require-imports, no-eval -- Dynamic require to avoid Next.js/Turbopack static analysis
+      const pretty = eval(`require('${moduleName}')`);
+      prettyStream = pretty({
+        colorize: true,
+        translateTime: 'SYS:standard',
+        ignore: 'pid,hostname',
+        messageFormat: '{msg}',
+        singleLine: false,
+        errorLikeObjectKeys: ['err', 'error'],
+      });
+    } catch (error) {
+      // pino-pretty not available - will fall back to Vercel destination
+      // Don't log here to avoid noise - only log if we actually try to use it
+      prettyStream = null;
+    }
 
-// Create pino instance with Vercel-compatible destination
-// This ensures Vercel properly detects log levels via console methods:
-// - console.error() → error (red)
-// - console.warn() → warning (orange in streaming functions)
-// - console.log() → info (gray)
-const vercelDest = createVercelCompatibleDestination();
-const pinoInstance = vercelDest 
-  ? pino(pinoConfig, vercelDest)
-  : pino(pinoConfig);
+    if (prettyStream) {
+      // Remove transport from config (we're using stream instead)
+      const configWithoutTransport = { ...pinoConfig };
+      delete configWithoutTransport.transport;
+
+      // Increase max listeners on the stream to prevent MaxListenersExceededWarning
+      // This is safe because we're using a singleton pattern - only one logger instance exists
+      if (typeof process !== 'undefined' && process.stdout && typeof process.stdout.setMaxListeners === 'function') {
+        process.stdout.setMaxListeners(20);
+      }
+      if (typeof process !== 'undefined' && process.stderr && typeof process.stderr.setMaxListeners === 'function') {
+        process.stderr.setMaxListeners(20);
+      }
+
+      // Create logger with pretty stream
+      const instance = pino(configWithoutTransport, prettyStream);
+      setGlobalLogger(instance);
+
+      // Debug: Log that pino-pretty stream is active (only once)
+      if (!(globalThis as { __pinoPrettyLogged?: boolean }).__pinoPrettyLogged) {
+        // eslint-disable-next-line no-console -- Debug logging for development
+        console.log('[Logger] Development mode: Using pino-pretty stream (colored)');
+        (globalThis as { __pinoPrettyLogged?: boolean }).__pinoPrettyLogged = true;
+      }
+
+      return instance;
+    } else {
+      // Fallback: Use Vercel destination
+      const configWithoutTransport = { ...pinoConfig };
+      delete configWithoutTransport.transport;
+      const vercelDest = createVercelCompatibleDestination();
+      const instance = vercelDest ? pino(configWithoutTransport, vercelDest) : pino(configWithoutTransport);
+      setGlobalLogger(instance);
+      return instance;
+    }
+  } else {
+    // Production or client-side: Use standard config
+    // Remove transport from config (not needed in production or client)
+    const configWithoutTransport = { ...pinoConfig };
+    delete configWithoutTransport.transport;
+
+    if (isServer) {
+      // Increase max listeners on stdout/stderr to prevent MaxListenersExceededWarning
+      if (typeof process !== 'undefined' && process.stdout && typeof process.stdout.setMaxListeners === 'function') {
+        process.stdout.setMaxListeners(20);
+      }
+      if (typeof process !== 'undefined' && process.stderr && typeof process.stderr.setMaxListeners === 'function') {
+        process.stderr.setMaxListeners(20);
+      }
+
+      // Server production: Use Vercel-compatible destination
+      const vercelDest = createVercelCompatibleDestination();
+      const instance = vercelDest ? pino(configWithoutTransport, vercelDest) : pino(configWithoutTransport);
+      setGlobalLogger(instance);
+      return instance;
+    } else {
+      // Client-side: Use browser config (no destination needed)
+      const instance = pino(configWithoutTransport);
+      setGlobalLogger(instance);
+      return instance;
+    }
+  }
+}
+
+// Create singleton logger instance (guaranteed to be non-null after this)
+const pinoInstance = createLoggerInstance();
 
 export type LogContextValue =
   | string
@@ -191,54 +304,51 @@ export function toLogContextValue(value: unknown): LogContextValue {
 // - Context sanitization (via redaction paths)
 
 class Logger {
-  debug(message: string, context?: LogContext, metadata?: LogContext): void {
-    // Pino handles redaction automatically via config
-    // Mixin automatically injects context from logger.bindings() (requestId, operation, userId, etc.)
-    pinoInstance.debug({ ...context, ...metadata }, message);
+  private get pino(): pino.Logger {
+    // Ensure singleton is initialized (should always be true, but TypeScript needs this)
+    return pinoInstance ?? createLoggerInstance();
   }
 
-  info(message: string, context?: LogContext, metadata?: LogContext): void {
+  debug(context: LogContext, message: string): void {
     // Pino handles redaction automatically via config
-    // Mixin automatically injects context from logger.bindings() (requestId, operation, userId, etc.)
-    pinoInstance.info({ ...context, ...metadata }, message);
+    // Mixin automatically injects context from logger.bindings() (operation, userId, etc.)
+    // Object-first API (Pino native): logger.debug({ ...context }, 'message')
+    this.pino.debug(context ?? {}, message);
   }
 
-  warn(message: string, context?: LogContext, metadata?: LogContext): void {
+  info(context: LogContext, message: string): void {
     // Pino handles redaction automatically via config
-    // Mixin automatically injects context from logger.bindings() (requestId, operation, userId, etc.)
-    pinoInstance.warn({ ...context, ...metadata }, message);
+    // Mixin automatically injects context from logger.bindings() (operation, userId, etc.)
+    // Object-first API (Pino native): logger.info({ ...context }, 'message')
+    this.pino.info(context ?? {}, message);
   }
 
-  error(message: string, error?: Error | string, context?: LogContext, metadata?: LogContext): void {
+  warn(context: LogContext, message: string): void {
+    // Pino handles redaction automatically via config
+    // Mixin automatically injects context from logger.bindings() (operation, userId, etc.)
+    // Object-first API (Pino native): logger.warn({ ...context }, 'message')
+    this.pino.warn(context ?? {}, message);
+  }
+
+  error(context: LogContext, message: string): void {
     // Pino's stdSerializers.err automatically handles error serialization
-    // Mixin automatically injects context from logger.bindings() (requestId, operation, userId, etc.)
+    // Mixin automatically injects context from logger.bindings() (operation, userId, etc.)
     // Pass error as 'err' key - Pino will serialize it properly
-    const logData: Record<string, unknown> = { ...context, ...metadata };
-    if (error !== undefined) {
-      // Use normalizeError() for consistent error normalization across codebase
-      // This handles Error instances, strings, objects, and unknown types
-      const normalized = normalizeError(error, message);
-      logData['err'] = normalized;
-    }
-    pinoInstance.error(logData, message);
+    // Object-first API (Pino native): logger.error({ err: normalized, ...context }, 'message')
+    this.pino.error(context ?? {}, message);
   }
 
-  fatal(message: string, error?: Error | string, context?: LogContext, metadata?: LogContext): void {
+  fatal(context: LogContext, message: string): void {
     // Pino's stdSerializers.err automatically handles error serialization
-    // Mixin automatically injects context from logger.bindings() (requestId, operation, userId, etc.)
-    const logData: Record<string, unknown> = { ...context, ...metadata };
-    if (error !== undefined) {
-      // Use normalizeError() for consistent error normalization across codebase
-      // This handles Error instances, strings, objects, and unknown types
-      const normalized = normalizeError(error, message);
-      logData['err'] = normalized;
-    }
-    pinoInstance.fatal(logData, message);
+    // Mixin automatically injects context from logger.bindings() (operation, userId, etc.)
+    // Object-first API (Pino native): logger.fatal({ err: normalized, ...context }, 'message')
+    this.pino.fatal(context ?? {}, message);
   }
 
-  trace(message: string, context?: LogContext, metadata?: LogContext): void {
+  trace(context: LogContext, message: string): void {
     // Trace level for finest-grained logging (detailed debugging, performance tracing)
-    pinoInstance.trace({ ...context, ...metadata }, message);
+    // Object-first API (Pino native): logger.trace({ ...context }, 'message')
+    this.pino.trace(context ?? {}, message);
   }
 
   /**
@@ -246,7 +356,7 @@ class Logger {
    * @returns Current bindings object
    */
   bindings(): Record<string, unknown> {
-    return pinoInstance.bindings();
+    return this.pino.bindings();
   }
 
   /**
@@ -256,7 +366,7 @@ class Logger {
    * @deprecated Use child() instead to avoid race conditions in concurrent environments
    */
   setBindings(bindings: Record<string, unknown>): void {
-    pinoInstance.setBindings(bindings);
+    this.pino.setBindings(bindings);
   }
 
   /**
@@ -266,7 +376,7 @@ class Logger {
    * @returns New Logger instance with merged context
    */
   child(bindings: Record<string, unknown>): Logger {
-    const childPino = pinoInstance.child(bindings);
+    const childPino = this.pino.child(bindings);
     return new RequestLogger(childPino);
   }
 
@@ -276,7 +386,7 @@ class Logger {
    * @param callback - Optional callback when flush completes
    */
   flush(callback?: (err?: Error) => void): void {
-    pinoInstance.flush(callback);
+    this.pino.flush(callback);
   }
 
   /**
@@ -286,7 +396,7 @@ class Logger {
    * @returns true if the level is enabled, false otherwise
    */
   isLevelEnabled(level: 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal'): boolean {
-    return pinoInstance.isLevelEnabled(level);
+    return this.pino.isLevelEnabled(level);
   }
 
   forRequest(request: Request): Logger {
@@ -294,7 +404,7 @@ class Logger {
     // Create child logger with request context
     // Pino's child() method creates a new logger with merged context
     // Mixin will automatically inject these bindings into all log calls
-    const childPino = pinoInstance.child({
+    const childPino = this.pino.child({
       method: request.method,
       url: url.pathname + url.search,
       userAgent: request.headers.get('user-agent') || '',
@@ -316,42 +426,36 @@ class RequestLogger extends Logger {
     this.childPino = childPino;
   }
 
-  override debug(message: string, context?: LogContext, metadata?: LogContext): void {
-    this.childPino.debug({ ...context, ...metadata }, message);
+  override debug(context: LogContext, message: string): void {
+    // Object-first API (Pino native): logger.debug({ ...context }, 'message')
+    this.childPino.debug(context ?? {}, message);
   }
 
-  override info(message: string, context?: LogContext, metadata?: LogContext): void {
-    this.childPino.info({ ...context, ...metadata }, message);
+  override info(context: LogContext, message: string): void {
+    // Object-first API (Pino native): logger.info({ ...context }, 'message')
+    this.childPino.info(context ?? {}, message);
   }
 
-  override warn(message: string, context?: LogContext, metadata?: LogContext): void {
-    this.childPino.warn({ ...context, ...metadata }, message);
+  override warn(context: LogContext, message: string): void {
+    // Object-first API (Pino native): logger.warn({ ...context }, 'message')
+    this.childPino.warn(context ?? {}, message);
   }
 
-  override error(message: string, error?: Error | string, context?: LogContext, metadata?: LogContext): void {
-    const logData: Record<string, unknown> = { ...context, ...metadata };
-    if (error !== undefined) {
-      // Use normalizeError() for consistent error normalization across codebase
-      // This handles Error instances, strings, objects, and unknown types
-      const normalized = normalizeError(error, message);
-      logData['err'] = normalized;
-    }
-    this.childPino.error(logData, message);
+  override error(context: LogContext, message: string): void {
+    // Object-first API (Pino native): logger.error({ err: normalized, ...context }, 'message')
+    // Error should be in context as 'err' key, normalized before calling
+    this.childPino.error(context ?? {}, message);
   }
 
-  override fatal(message: string, error?: Error | string, context?: LogContext, metadata?: LogContext): void {
-    const logData: Record<string, unknown> = { ...context, ...metadata };
-    if (error !== undefined) {
-      // Use normalizeError() for consistent error normalization across codebase
-      // This handles Error instances, strings, objects, and unknown types
-      const normalized = normalizeError(error, message);
-      logData['err'] = normalized;
-    }
-    this.childPino.fatal(logData, message);
+  override fatal(context: LogContext, message: string): void {
+    // Object-first API (Pino native): logger.fatal({ err: normalized, ...context }, 'message')
+    // Error should be in context as 'err' key, normalized before calling
+    this.childPino.fatal(context ?? {}, message);
   }
 
-  override trace(message: string, context?: LogContext, metadata?: LogContext): void {
-    this.childPino.trace({ ...context, ...metadata }, message);
+  override trace(context: LogContext, message: string): void {
+    // Object-first API (Pino native): logger.trace({ ...context }, 'message')
+    this.childPino.trace(context ?? {}, message);
   }
 
   override bindings(): Record<string, unknown> {

@@ -18,9 +18,7 @@ export const actionClient = createSafeActionClient({
   },
   handleServerError(error) {
     const normalized = normalizeError(error);
-    logger.error('Server action error', normalized, {
-      errorType: normalized.constructor?.name || 'Unknown',
-    });
+    logger.error({ err: normalized, errorType: normalized.constructor?.name || 'Unknown', }, 'Server action error');
     if (isProduction) {
       return DEFAULT_SERVER_ERROR_MESSAGE;
     }
@@ -44,10 +42,10 @@ const loggedAction = actionClient.use(async ({ next, metadata }) => {
     return await next();
   } catch (error) {
     const actionName = metadata?.actionName ?? 'unknown';
-    logActionFailure(actionName, error, {
+    const normalized = logActionFailure(actionName, error, {
       category: metadata?.category ?? 'uncategorized',
     });
-    throw error;
+    throw normalized;
   }
 });
 
@@ -55,9 +53,7 @@ export const rateLimitedAction = loggedAction.use(async ({ next, metadata }) => 
   const parsedMetadata = actionMetadataSchema.safeParse(metadata);
   if (!parsedMetadata.success) {
     const normalized = normalizeError(parsedMetadata.error, 'Invalid action metadata');
-    logger.error('Invalid action metadata', normalized, {
-      metadataProvided: toLogContextValue(metadata),
-    });
+    logger.error({ err: normalized, metadataProvided: toLogContextValue(metadata), }, 'Invalid action metadata');
     throw new Error('Invalid action configuration');
   }
 
@@ -84,14 +80,12 @@ export const authedAction = rateLimitedAction.use(async ({ next, metadata }) => 
       'unknown';
     const referer = headersList.get('referer') || 'unknown';
 
-    logger.warn('Auth failure - Unauthorized action attempt', {
-      securityEvent: true, // Structured tag for security event filtering
+    logger.warn({ securityEvent: true, // Structured tag for security event filtering
       clientIP,
       path: referer,
       actionName: metadata?.actionName || 'unknown',
       reason: authResult.error?.message || 'No valid session',
-      errorCode: authResult.error?.name || 'AUTH_REQUIRED',
-    });
+      errorCode: authResult.error?.name || 'AUTH_REQUIRED', }, 'Auth failure - Unauthorized action attempt');
 
     throw new Error('Unauthorized. Please sign in to continue.');
   }

@@ -6,7 +6,7 @@
 import { highlight } from 'sugar-high';
 
 import { normalizeError } from './error-handling.ts';
-import { createUtilityContext, logger } from './logging.ts';
+import { logger } from './logger/index.ts';
 
 export interface HighlightCodeOptions {
   maxVisibleLines?: number;
@@ -49,11 +49,13 @@ export function highlightCode(
 
     return `<div class="code-block-wrapper"><pre class="code-block-pre"><code class="sugar-high">${highlighted}</code></pre></div>`;
   } catch (error) {
-    const logContext = createUtilityContext('code-highlight', 'highlight-failed', {
-      code_preview: code.slice(0, 100),
-    });
     const errorObj = normalizeError(error, 'Code highlighting failed');
-    logger.warn('Highlighting failed, using fallback', { ...logContext, err: errorObj });
+    logger.warn({
+      err: errorObj,
+      function: 'code-highlight',
+      operation: 'highlight-failed',
+      code_preview: code.slice(0, 100),
+    }, 'Highlighting failed, using fallback');
 
     // Fallback: escape code
     const escapedCode = code

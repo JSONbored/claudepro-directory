@@ -15,6 +15,7 @@
 import { Users } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { memo } from 'react';
+
 import {
   ProfileCard,
   type UserProfile,
@@ -22,8 +23,8 @@ import {
 
 export interface TopContributorsProps {
   contributors: UserProfile[];
-  title?: string;
   showCount?: number;
+  title?: string;
 }
 
 function TopContributorsComponent({
@@ -41,7 +42,7 @@ function TopContributorsComponent({
     <section className="container mx-auto px-4 py-12">
       <div className="mb-6 flex items-center gap-3">
         <Users className={`${UI_CLASSES.ICON_LG} text-accent`} />
-        <h2 className="font-bold text-2xl">{title}</h2>
+        <h2 className="text-2xl font-bold">{title}</h2>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">

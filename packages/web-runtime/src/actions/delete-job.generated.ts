@@ -13,7 +13,6 @@ import type { Database } from '@heyclaude/database-types';
 const deleteJobSchema = z.object({
   job_id: z.string().uuid()
 });
-export type DeleteJobInput = z.infer<typeof deleteJobSchema>;
 
 export const deleteJob = authedAction
   .metadata({ actionName: 'deleteJob', category: 'content' })
@@ -37,11 +36,7 @@ export const deleteJob = authedAction
       
       
       // Lazy import server-only dependencies
-      // const { logActionFailure } = await import('../errors');
       const { revalidatePath, revalidateTag } = await import('next/cache');
-      
-      const { nextInvalidateByKeys } = await import('../cache-tags');
-      const { getCacheConfigSnapshot } = await import('../cache-config');
 
       // Simple success check?
       // Some RPCs return void, some return { success: boolean }?
@@ -50,12 +45,8 @@ export const deleteJob = authedAction
       revalidatePath(`/jobs`);
       revalidatePath(`/account/jobs`);
       revalidateTag(`job-${parsedInput.job_id}`, 'default');
-      
-      const cacheConfig = getCacheConfigSnapshot();
-      await nextInvalidateByKeys({
-        cacheConfig,
-        invalidateKeys: ['cache.invalidate.job_delete']
-      });
+      revalidateTag(`jobs`, 'default');
+      revalidateTag(`companies`, 'default');
 
       
 

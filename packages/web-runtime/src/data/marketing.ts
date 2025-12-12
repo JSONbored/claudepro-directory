@@ -26,18 +26,18 @@ export interface PartnerPricing {
 export function getPartnerPricing(): PartnerPricing {
   return {
     jobs: {
-      regular: PRICING_CONFIG['jobs.regular'],
       discounted: PRICING_CONFIG['jobs.discounted'],
       durationDays: PRICING_CONFIG['jobs.duration_days'],
-    },
-    sponsored: {
-      regular: PRICING_CONFIG['sponsored.regular'],
-      discounted: PRICING_CONFIG['sponsored.discounted'],
+      regular: PRICING_CONFIG['jobs.regular'],
     },
     launch: {
       discountPercent: PRICING_CONFIG.launch_discount_percent,
       enabled: PRICING_CONFIG.launch_discount_enabled,
       endDate: PRICING_CONFIG.launch_discount_end_date,
+    },
+    sponsored: {
+      discounted: PRICING_CONFIG['sponsored.discounted'],
+      regular: PRICING_CONFIG['sponsored.regular'],
     },
   };
 }

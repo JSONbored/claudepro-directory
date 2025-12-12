@@ -10,3 +10,4 @@ export * from './services/account.ts';
 export * from './services/community.ts';
 export * from './services/misc.ts';
 export * from './services/quiz.ts';
+export * from './services/email.ts';

@@ -5,11 +5,12 @@
  *
  * ISR: 2 hours (7200s) - Detail pages change less frequently than list pages
  */
-import { Constants, type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
+import { getDeploymentEnv } from '@heyclaude/shared-runtime/platform';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
 import { ensureStringArray, isValidCategory } from '@heyclaude/web-runtime/core';
 import { type RecentlyViewedCategory } from '@heyclaude/web-runtime/hooks';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   generatePageMetadata,
   getCategoryConfig,
@@ -18,7 +19,9 @@ import {
   getRelatedContent,
 } from '@heyclaude/web-runtime/server';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import { notFound } from 'next/navigation';
+import { Suspense } from 'react';
 
 import { CollectionDetailView } from '@/src/components/content/detail-page/collection-view';
 import { UnifiedDetailPage } from '@/src/components/content/detail-page/content-detail-view';
@@ -27,43 +30,43 @@ import { Pulse } from '@/src/components/core/infra/pulse';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { RecentlyViewedTracker } from '@/src/components/features/navigation/recently-viewed-tracker';
 
-export const revalidate = 7200;
-export const dynamicParams = true; // Allow unknown slugs to be rendered on demand (will 404 if invalid)
+import Loading from './loading';
 
 /**
- * Produce a list of static route params ({ category, slug }) for a subset of popular content to pre-render at build time.
+ * Produce static route parameters ({ category, slug }) for a subset of homepage categories to pre-render at build time.
  *
- * This selects up to MAX_ITEMS_PER_CATEGORY items per homepage category and returns their { category, slug } pairs. Pages not included in the returned list are served on-demand via Next.js dynamic params and ISR (revalidate = 7200).
+ * Selects up to MAX_ITEMS_PER_CATEGORY items per homepage category and returns their `{ category, slug }` pairs. If no valid parameters are found, returns a single placeholder entry to satisfy build-time requirements.
  *
  * @returns An array of objects each containing `category` and `slug` for use as static params
  *
  * @see getHomepageCategoryIds
  * @see getContentByCategory
- * @see dynamicParams
- * @see revalidate
  */
 export async function generateStaticParams() {
   // Dynamic imports only for data modules (category/content)
+  // Note: Server logging utilities are statically imported at the top of the file
+  // since this is a server component and can safely import server-only code
   const { getHomepageCategoryIds } = await import('@heyclaude/web-runtime/data/config/category');
   const { getContentByCategory } = await import('@heyclaude/web-runtime/data/content');
-  const { logger, generateRequestId, normalizeError } =
-    await import('@heyclaude/web-runtime/logging/server');
 
   const categories = getHomepageCategoryIds;
   const parameters: Array<{ category: string; slug: string }> = [];
 
-  // Limit to top 20 items per category to optimize build time
-  // Increased from 10 to 20 after database query optimizations (80% faster queries)
-  // ISR with dynamicParams=true handles remaining pages on-demand with 2hr revalidation
-  const MAX_ITEMS_PER_CATEGORY = 30;
+  // Limit to top items per category to optimize build time
+  // Increased from 30 to 50 after Cache Components optimization (more static generation)
+  // Cache Components with dynamicParams=true handles remaining pages on-demand
+  const MAX_ITEMS_PER_CATEGORY = 50;
 
   // Process all categories in parallel
   // OPTIMIZATION: Skip validation - rely on dynamicParams=true for on-demand rendering
   // This saves ~8-10s on every build. Invalid slugs will be handled on-demand via ISR.
   const categoryResults = await Promise.allSettled(
-    categories.map(async (category) => {
+    categories.map(async (category: string) => {
       try {
-        const items = await getContentByCategory(category);
+        // Type assertion: categories from getHomepageCategoryIds are valid category enum values
+        const items = await getContentByCategory(
+          category as Database['public']['Enums']['content_category']
+        );
         const topItems = items.slice(0, MAX_ITEMS_PER_CATEGORY);
 
         // Return all items with slugs - no validation needed
@@ -75,24 +78,23 @@ export async function generateStaticParams() {
         return { category, params: categoryParameters };
       } catch (error) {
         // Log error but continue with other categories
-        const requestId = generateRequestId();
         const operation = 'generateStaticParams';
         const route = `/${category}`;
-        const module = 'apps/web/src/app/[category]/[slug]/page';
+        const modulePath = 'apps/web/src/app/[category]/[slug]/page';
         const reqLogger = logger.child({
-          requestId,
+          module: modulePath,
           operation,
           route,
-          module,
         });
-        const normalized = normalizeError(
-          error,
-          'Failed to load content for category in generateStaticParams'
+        const normalized = normalizeError(error, 'Failed to load content for category');
+        reqLogger.error(
+          {
+            category,
+            err: normalized,
+            section: 'data-fetch',
+          },
+          'generateStaticParams: failed to load content for category'
         );
-        reqLogger.error('generateStaticParams: failed to load content for category', normalized, {
-          category,
-          section: 'static-params-generation',
-        });
         return { category, params: [] };
       }
     })
@@ -105,31 +107,126 @@ export async function generateStaticParams() {
     }
   }
 
+  // OPTIMIZATION: Pre-fetch all content details during generateStaticParams
+  // This populates the Next.js Cache Components cache so that when pages are generated,
+  // they can reuse the cached data instead of making separate database calls.
+  // This reduces database calls from 357 (one per page) to 357 (one batch in generateStaticParams),
+  // but more importantly, it ensures cache is populated before parallel page generation.
+  // With reduced concurrency, more pages will be generated in the same worker, resulting in cache hits.
+  if (parameters.length > 0) {
+    const operation = 'generateStaticParams';
+    const route = '/[category]/[slug]';
+    const modulePath = 'apps/web/src/app/[category]/[slug]/page';
+    const reqLogger = logger.child({
+      module: modulePath,
+      operation,
+      route,
+    });
+
+    reqLogger.info(
+      {
+        section: 'data-prefetch',
+        totalParams: parameters.length,
+      },
+      'generateStaticParams: Pre-fetching all content details to populate cache'
+    );
+
+    // Pre-fetch all content details in batches to populate cache
+    // Batched fetching prevents connection pool exhaustion while still being efficient
+    // Each call will populate the Next.js Cache Components cache
+    // Batch size of 10 allows concurrent fetching without overwhelming the database
+    const BATCH_SIZE = 10;
+    const batches: Array<Array<{ category: string; slug: string }>> = [];
+    for (let i = 0; i < parameters.length; i += BATCH_SIZE) {
+      batches.push(parameters.slice(i, i + BATCH_SIZE));
+    }
+
+    let totalProcessed = 0;
+    const prefetchResults: Array<PromiseSettledResult<void>> = [];
+
+    for (const batch of batches) {
+      // Process each batch concurrently (up to BATCH_SIZE concurrent requests)
+      const batchResults = await Promise.allSettled(
+        batch.map(async ({ category, slug }) => {
+          try {
+            // Call getContentDetailCore to populate cache
+            // This will make the database call and cache the result
+            await getContentDetailCore({
+              category: category as Database['public']['Enums']['content_category'],
+              slug,
+            });
+          } catch (error) {
+            // Log error but continue - individual page generation will handle missing content
+            const normalized = normalizeError(error, 'Failed to pre-fetch content detail');
+            reqLogger.warn(
+              {
+                category,
+                err: normalized,
+                section: 'data-prefetch',
+                slug,
+              },
+              'generateStaticParams: Failed to pre-fetch content detail (will be handled during page generation)'
+            );
+            throw error; // Re-throw to mark as rejected in Promise.allSettled
+          }
+        })
+      );
+
+      prefetchResults.push(...batchResults);
+      totalProcessed += batch.length;
+
+      // Log progress after each batch
+      reqLogger.info(
+        {
+          batchSize: batch.length,
+          percentage: Math.round((totalProcessed / parameters.length) * 100),
+          progress: `${totalProcessed}/${parameters.length}`,
+          section: 'data-prefetch',
+        },
+        `generateStaticParams: Pre-fetched batch ${totalProcessed}/${parameters.length} content details`
+      );
+    }
+
+    const prefetchSuccessCount = prefetchResults.filter((r) => r.status === 'fulfilled').length;
+    const prefetchFailureCount = prefetchResults.filter((r) => r.status === 'rejected').length;
+
+    reqLogger.info(
+      {
+        failures: prefetchFailureCount,
+        section: 'data-prefetch',
+        success: prefetchSuccessCount,
+        total: parameters.length,
+      },
+      `generateStaticParams: Pre-fetch completed - ${prefetchSuccessCount}/${parameters.length} successful`
+    );
+  }
+
+  // Return empty array if no parameters found - Suspense boundaries will handle dynamic rendering
+  // This follows Next.js best practices by avoiding placeholder patterns
   return parameters;
 }
 
 // Map route categories (plural) to RecentlyViewedCategory (singular)
-// Use Constants.public.Enums.content_category to avoid hardcoded enum values
-const CONTENT_CATEGORY_ENUMS = Constants.public.Enums.content_category;
+// Use explicit string keys instead of fragile array indexing to prevent breakage if enum order changes
 const CATEGORY_TO_RECENTLY_VIEWED: Record<string, RecentlyViewedCategory> = {
-  [CONTENT_CATEGORY_ENUMS[0]]: 'agent', // agents
-  [CONTENT_CATEGORY_ENUMS[3]]: 'command', // commands
-  [CONTENT_CATEGORY_ENUMS[4]]: 'hook', // hooks
-  [CONTENT_CATEGORY_ENUMS[1]]: 'mcp', // mcp
-  [CONTENT_CATEGORY_ENUMS[2]]: 'rule', // rules
-  [CONTENT_CATEGORY_ENUMS[5]]: 'statusline', // statuslines
-  [CONTENT_CATEGORY_ENUMS[6]]: 'skill', // skills
-  [CONTENT_CATEGORY_ENUMS[9]]: 'job', // jobs
+  agents: 'agent',
+  commands: 'command',
+  hooks: 'hook',
   job: 'job', // Alias for consistency
+  jobs: 'job',
+  mcp: 'mcp',
+  rules: 'rule',
+  skills: 'skill',
+  statuslines: 'statusline',
 } as const;
 
 // Stable constant for collections category (replaces brittle array index access)
 const COLLECTION_CATEGORY = 'collections' as const;
 
-/**
+/***
  * Map a category key to its RecentlyViewedCategory equivalent.
  *
- * @param category - The category key to map (for example, "articles" or "collections")
+ * @param {string} category - The category key to map (for example, "articles" or "collections")
  * @returns The corresponding `RecentlyViewedCategory`, or `null` if the category has no mapping
  *
  * @see CATEGORY_TO_RECENTLY_VIEWED
@@ -140,10 +237,11 @@ function mapCategoryToRecentlyViewed(category: string): null | RecentlyViewedCat
 }
 
 /**
- * Produce page metadata for a detail route based on the route params and category configuration.
+ * Generate page metadata for a detail route from route params and category configuration.
  *
- * @param params - Promise resolving to an object with `category` and `slug` route parameters.
- * @returns A Metadata object for the detail page. If `category` is invalid, returns the default metadata for `/:category/:slug`.
+ * @param params - An object containing `category` and `slug` route parameters.
+ * @param params.params
+ * @returns The Metadata for the detail page. If `category` is invalid, returns the default metadata for `/:category/:slug`.
  *
  * @see generatePageMetadata
  * @see getCategoryConfig
@@ -156,7 +254,6 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { category, slug } = await params;
 
-  // Validate category at compile time
   if (!isValidCategory(category)) {
     return generatePageMetadata('/:category/:slug', {
       params: { category, slug },
@@ -166,20 +263,24 @@ export async function generateMetadata({
   const config = getCategoryConfig(category);
 
   return generatePageMetadata('/:category/:slug', {
-    params: { category, slug },
-    categoryConfig: config ?? undefined,
     category,
+    categoryConfig: config ?? undefined,
+    params: { category, slug },
     slug,
   });
 }
 
 /**
- * Render the content detail page for a given category and slug.
+ * Render the detail page for a content item identified by `category` and `slug`.
  *
- * Validates the category and category configuration, fetches the core content (blocking for LCP), initiates analytics and related-item fetches for Suspense, and conditionally includes recently-viewed tracking and a collection-specific section. Triggers a 404 via `notFound()` when the category, category config, or core content is missing.
+ * Uses Suspense boundaries to defer non-deterministic operations to request time.
+ * Core content fetching is wrapped in Suspense to enable progressive rendering and
+ * avoid placeholder patterns. Analytics and related content are loaded in separate
+ * Suspense boundaries for optimal streaming.
  *
  * @param params - A promise that resolves to an object with `category` and `slug` route parameters
- * @returns A React element representing the content detail page for the requested category and slug
+ * @param params.params
+ * @returns A React element representing the detail page for the specified `category` and `slug`
  *
  * @see getContentDetailCore
  * @see getContentAnalytics
@@ -193,45 +294,100 @@ export default async function DetailPage({
 }: {
   params: Promise<{ category: string; slug: string }>;
 }) {
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
+
+  // Params is runtime data - cache key includes params, so different content items create different cache entries
   const { category, slug } = await params;
 
-  // Generate single requestId for this page request
-  const requestId = generateRequestId();
   const operation = 'DetailPage';
-  const route = `/${category}/${slug}`;
-  const module = 'apps/web/src/app/[category]/[slug]/page';
+  const modulePath = 'apps/web/src/app/[category]/[slug]/page';
 
-  // Create request-scoped child logger to avoid race conditions
+  // Create request-scoped child logger
   const reqLogger = logger.child({
-    requestId,
+    module: modulePath,
     operation,
-    route,
-    module,
+    route: `/${category}/${slug}`,
   });
 
-  // Section: Category Validation
+  // Note: category and slug are already available from await params above
+
+  // Validate category early (before Suspense boundary)
   if (!isValidCategory(category)) {
-    reqLogger.warn('Invalid category in detail page', {
-      section: 'category-validation',
-    });
+    reqLogger.warn(
+      {
+        category,
+        section: 'data-fetch',
+      },
+      'Invalid category in detail page'
+    );
     notFound();
   }
 
-  const config = getCategoryConfig(category);
+  return (
+    <Suspense fallback={<Loading />}>
+      <DetailPageContent category={category} reqLogger={reqLogger} slug={slug} />
+    </Suspense>
+  );
+}
+
+/**
+ * Render the detail page content for a given category and slug, fetching core content in a Suspense boundary.
+ *
+ * This component validates the category configuration, fetches core content necessary for LCP (404s if missing),
+ * starts non-blocking fetches for analytics and related items, and renders the unified detail UI including
+ * optional RecentlyViewed tracking and collection-specific sections.
+ *
+ * @param category - The content category identifying the type of content to display
+ * @param category.category
+ * @param category.reqLogger
+ * @param slug - The content slug identifying the specific item to display
+ * @param reqLogger - A request-scoped logger; a route-scoped child logger will be created for logging within this component.
+ * @param category.slug
+ * @returns A React fragment containing progress UI, structured data, optional recently-viewed tracking, and the unified detail page with deferred data promises.
+ *
+ * @see UnifiedDetailPage
+ * @see getContentDetailCore
+ * @see RecentlyViewedTracker
+ */
+async function DetailPageContent({
+  category,
+  reqLogger,
+  slug,
+}: {
+  category: string;
+  reqLogger: ReturnType<typeof logger.child>;
+  slug: string;
+}) {
+  const route = `/${category}/${slug}`;
+
+  // Create route-specific logger
+  const routeLogger = reqLogger.child({ route });
+
+  // Section: Category Validation
+  if (!isValidCategory(category)) {
+    routeLogger.warn({ section: 'data-fetch' }, 'Invalid category in detail page');
+    notFound();
+  }
+
+  // Type narrowing: category is now a valid category enum
+  const validCategory = category;
+  const config = getCategoryConfig(validCategory);
   if (!config) {
-    const normalized = normalizeError(
-      new Error('Category config is null'),
+    // logger.error() normalizes errors internally, so pass raw error
+    routeLogger.error(
+      {
+        err: new Error('Category config is null'),
+        section: 'data-fetch',
+      },
       'DetailPage: missing category config'
     );
-    reqLogger.error('DetailPage: missing category config', normalized, {
-      section: 'category-validation',
-    });
     notFound();
   }
 
   // Section: Core Content Fetch
-  // Optimized for PPR: Split core content (critical) from analytics/related (deferred)
-  // 1. Fetch Core Content (Blocking - for LCP)
+  // Fetch core content in Suspense boundary to enable progressive rendering
+  // This allows the page shell to render while content loads
   const coreData = await getContentDetailCore({ category, slug });
 
   if (!coreData) {
@@ -241,20 +397,26 @@ export default async function DetailPage({
     // During build, missing content is expected - only log at debug level
     // During runtime, log at warn level to catch real issues (except in production where it's also expected)
     const suppressMissingContentWarning =
-      env.NEXT_PHASE === 'phase-production-build' || env.VERCEL_ENV === 'production';
+      env.NEXT_PHASE === 'phase-production-build' || getDeploymentEnv() === 'production';
 
     if (suppressMissingContentWarning) {
-      reqLogger.debug('DetailPage: content not found during build/production (expected)', {
-        section: 'core-content-fetch',
-        category,
-        slug,
-      });
+      routeLogger.debug(
+        {
+          category,
+          section: 'data-fetch',
+          slug,
+        },
+        'DetailPage: content not found during build/production (expected)'
+      );
     } else {
-      reqLogger.warn('DetailPage: get_content_detail_core returned null - content may not exist', {
-        section: 'core-content-fetch',
-        category,
-        slug,
-      });
+      routeLogger.warn(
+        {
+          category,
+          section: 'data-fetch',
+          slug,
+        },
+        'DetailPage: get_content_detail_core returned null - content may not exist'
+      );
     }
     notFound();
   }
@@ -263,16 +425,17 @@ export default async function DetailPage({
 
   // Null safety: If content doesn't exist in database, return 404
   if (!fullItem) {
-    reqLogger.warn('Content not found in RPC response', {
-      section: 'core-content-fetch',
-      rpcFunction: 'get_content_detail_core',
-    });
+    routeLogger.warn(
+      {
+        rpcFunction: 'get_content_detail_core',
+        section: 'data-fetch',
+      },
+      'Content not found in RPC response'
+    );
     notFound();
   }
 
-  reqLogger.info('DetailPage: core content loaded', {
-    section: 'core-content-fetch',
-  });
+  routeLogger.info({ section: 'data-fetch' }, 'DetailPage: core content loaded');
 
   // Section: Analytics & Related Fetch (Non-blocking - for Suspense)
   // 2. Fetch Analytics & Related (Non-blocking promise - for Suspense)
@@ -282,25 +445,26 @@ export default async function DetailPage({
   const copyCountPromise = analyticsPromise.then((data) => data?.copy_count ?? 0);
 
   const relatedItemsPromise = getRelatedContent({
-    currentPath: `/${category}/${slug}`,
     currentCategory: category,
+    currentPath: `/${category}/${slug}`,
     currentTags: 'tags' in fullItem ? ensureStringArray(fullItem.tags) : [],
   }).then((result) => result.items);
 
   // Content detail tabs - currently hardcoded to true
-  // TODO: Implement lazy-loading feature flag pattern to avoid Edge Config access during builds
-  // See: https://github.com/vercel/next.js/issues/XXX (ticket reference TBD)
   const tabsEnabled = true;
 
   // No transformation needed - displayTitle computed at build time
   // This eliminates runtime overhead and follows DRY principles
 
   // Final summary log
-  reqLogger.info('DetailPage: page render completed', {
-    section: 'page-render',
-    category,
-    slug,
-  });
+  routeLogger.info(
+    {
+      category,
+      section: 'data-fetch',
+      slug,
+    },
+    'DetailPage: page render completed'
+  );
 
   // Unified rendering: All categories use UnifiedDetailPage
   // Collections pass their specialized sections via collectionSections prop
@@ -309,8 +473,7 @@ export default async function DetailPage({
       {/* Read Progress Bar - Shows reading progress at top of page */}
       <ReadProgress />
 
-      <Pulse variant="view" category={category} slug={slug} />
-      <Pulse variant="page-view" category={category} slug={slug} />
+      <Pulse category={validCategory} slug={slug} variant="view" />
       <StructuredData route={`/${category}/${slug}`} />
 
       {/* Recently Viewed Tracking - only for supported categories */}
@@ -339,20 +502,15 @@ export default async function DetailPage({
         return (
           <RecentlyViewedTracker
             category={recentlyViewedCategory}
+            description={itemDescription}
             slug={slug}
             title={itemTitle}
-            description={itemDescription}
             {...tagsProp}
           />
         );
       })()}
 
       <UnifiedDetailPage
-        item={fullItem}
-        viewCountPromise={viewCountPromise}
-        copyCountPromise={copyCountPromise}
-        relatedItemsPromise={relatedItemsPromise}
-        tabsEnabled={tabsEnabled}
         collectionSections={
           category === COLLECTION_CATEGORY && fullItem.category === COLLECTION_CATEGORY ? (
             <CollectionDetailView
@@ -364,6 +522,11 @@ export default async function DetailPage({
             />
           ) : undefined
         }
+        copyCountPromise={copyCountPromise}
+        item={fullItem}
+        relatedItemsPromise={relatedItemsPromise}
+        tabsEnabled={tabsEnabled}
+        viewCountPromise={viewCountPromise}
       />
     </>
   );

@@ -11,23 +11,23 @@ import {
   getAuthenticatedUser,
   getPublicUserProfile,
 } from '@heyclaude/web-runtime/data';
-import { FolderOpen, Globe, Users } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import {
-  UI_CLASSES,
-  NavLink,
-  UnifiedBadge,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@heyclaude/web-runtime/ui';
+import { Globe } from '@heyclaude/web-runtime/icons';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { NavLink, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
+import { Suspense } from 'react';
 
 import { FollowButton } from '@/src/components/core/buttons/social/follow-button';
+import { ProfileCollectionsSection } from '@/src/components/features/account/profile-collections-section';
+import { ProfileContributionsSection } from '@/src/components/features/account/profile-contributions-section';
+import { ProfileSocialStats } from '@/src/components/features/account/profile-social-stats';
+import { ProfileStatsCard } from '@/src/components/features/account/profile-stats-card';
+import { ProfileTabs } from '@/src/components/features/account/profile-tabs';
+
+import Loading from './loading';
 
 // Use enum values directly from @heyclaude/database-types Constants
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
@@ -41,23 +41,25 @@ function isContentCategory(
   );
 }
 
-/**
+/***
  * Validate slug is safe for use in URLs
  * Only allows alphanumeric characters, hyphens, and underscores
- */
+ * @param {string} slug
+ 
+ * @returns {unknown} Description of return value*/
 function isValidSlug(slug: string): boolean {
   if (typeof slug !== 'string' || slug.length === 0) return false;
   return /^[a-zA-Z0-9-_]+$/.test(slug);
 }
 
-/**
+/****
  * Build a validated, sanitized URL path for a content item.
  *
  * Validates that `type` is a recognized content category and that `slug`
  * can be sanitized into a valid path segment; returns `null` if validation fails.
  *
- * @param type - Content category (must be a valid content category string)
- * @param slug - Candidate slug to sanitize and validate for use in the path
+ * @param {string} type - Content category (must be a valid content category string)
+ * @param {string} slug - Candidate slug to sanitize and validate for use in the path
  * @returns The path in the form `/{type}/{sanitizedSlug}` when valid, `null` otherwise
  *
  * @see sanitizeSlug
@@ -74,11 +76,11 @@ function getSafeContentUrl(type: string, slug: string): null | string {
   return `/${type}/${sanitizedSlug}`;
 }
 
-/**
+/****
  * Constructs a safe collection URL for a user if both slugs are valid after sanitization.
  *
- * @param userSlug - The user-facing slug for the profile (sanitized before validation)
- * @param collectionSlug - The collection's slug (sanitized before validation)
+ * @param {string} userSlug - The user-facing slug for the profile (sanitized before validation)
+ * @param {string} collectionSlug - The collection's slug (sanitized before validation)
  * @returns The path `/u/{sanitizedUserSlug}/collections/{sanitizedCollectionSlug}` or `null` if either slug is invalid
  * @see sanitizeSlug
  * @see isValidSlug
@@ -88,19 +90,19 @@ function getSafeCollectionUrl(userSlug: string, collectionSlug: string): null | 
   // sanitizeSlug preserves already-valid slugs, so this catches any issues
   const sanitizedUserSlug = sanitizeSlug(userSlug);
   const sanitizedCollectionSlug = sanitizeSlug(collectionSlug);
-  if (!(isValidSlug(sanitizedUserSlug) && isValidSlug(sanitizedCollectionSlug))) return null;
+  if (!isValidSlug(sanitizedUserSlug) || !isValidSlug(sanitizedCollectionSlug)) return null;
   return `/u/${sanitizedUserSlug}/collections/${sanitizedCollectionSlug}`;
 }
 
-/**
+/****
  * Produce a plain-text-safe display string from arbitrary input.
  *
  * Sanitizes the input by stripping dangerous/control characters, trimming whitespace,
  * and truncating to 200 characters; if the input is missing or yields no content after
  * sanitization, the provided `fallback` is returned.
  *
- * @param text - The input text to sanitize.
- * @param fallback - Value to return when `text` is missing or sanitization produces no content.
+ * @param {null | string | undefined} text - The input text to sanitize.
+ * @param {string} fallback - Value to return when `text` is missing or sanitization produces no content.
  * @returns The sanitized display string, or `fallback` if no safe content remains.
  *
  * @see sanitizeSlug
@@ -145,14 +147,10 @@ interface UserProfilePageProperties {
 }
 
 /**
- * ISR revalidation interval for user profile pages
- */
-export const revalidate = false;
-
-/**
  * Produce page metadata for a user profile route using the provided slug.
  *
  * @param params - A promise resolving to an object with `slug`, the user identifier used to populate the route parameter.
+ * @param params.params
  * @returns The Next.js `Metadata` for the /u/:slug user profile page.
  *
  * @see generatePageMetadata
@@ -172,6 +170,7 @@ export async function generateMetadata({ params }: UserProfilePageProperties): P
  * is not found, the page will trigger Next.js not-found handling.
  *
  * @param params - Route parameters containing the `slug` of the user to display.
+ * @param params.params
  * @returns The React element for the user's profile page.
  *
  * @see getPublicUserProfile
@@ -180,34 +179,71 @@ export async function generateMetadata({ params }: UserProfilePageProperties): P
  * @see sanitizeDisplayText
  */
 export default async function UserProfilePage({ params }: UserProfilePageProperties) {
-  const { slug } = await params;
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
-  // Generate single requestId for this page request
-  const requestId = generateRequestId();
-
-  // Create request-scoped child logger to avoid race conditions
+  // Create request-scoped child logger
   const reqLogger = logger.child({
-    requestId,
-    operation: 'UserProfilePage',
-    route: `/u/${slug}`,
     module: 'apps/web/src/app/u/[slug]',
+    operation: 'UserProfilePage',
   });
+
+  return (
+    <Suspense fallback={<Loading />}>
+      <UserProfilePageContent params={params} reqLogger={reqLogger} />
+    </Suspense>
+  );
+}
+
+/**
+ * Renders the user profile page content for a given route slug, including profile header, activity stats, public collections, and contributions.
+ *
+ * @param params - Promise resolving to an object containing the route `slug`
+ * @param params.params
+ * @param reqLogger - Request-scoped logger used for route and fetch logging
+ *
+ * @param params.reqLogger
+ * @returns The server-rendered React element for the user profile page content
+ *
+ * @remarks
+ * - Performs server-side data fetching: authenticates the viewer (optional) and loads the public user profile.
+ * - Will invoke Next.js `notFound()` for invalid slugs or when the profile cannot be found.
+ * - Logs fetch results and errors; rethrows fetch errors after logging.
+ *
+ * @see getPublicUserProfile
+ * @see getAuthenticatedUser
+ * @see sanitizeDisplayText
+ * @see getSafeCollectionUrl
+ * @see getSafeContentUrl
+ */
+async function UserProfilePageContent({
+  params,
+  reqLogger,
+}: {
+  params: Promise<{ slug: string }>;
+  reqLogger: ReturnType<typeof logger.child>;
+}) {
+  const { slug } = await params;
+  const route = `/u/${slug}`;
+
+  // Create route-specific logger
+  const routeLogger = reqLogger.child({ route });
 
   // Section: Slug Validation
   if (!isValidSlug(slug)) {
-    reqLogger.warn('UserProfilePage: invalid user slug', {
-      section: 'slug-validation',
-    });
+    routeLogger.warn({ section: 'data-fetch' }, 'UserProfilePage: invalid user slug');
     notFound();
   }
 
   const { user: currentUser } = await getAuthenticatedUser({
-    requireUser: false,
     context: 'UserProfilePage',
+    requireUser: false,
   });
 
   // Create child logger with viewer context if available
-  const viewerLogger = currentUser?.id ? reqLogger.child({ viewerId: currentUser.id }) : reqLogger;
+  const viewerLogger = currentUser?.id
+    ? routeLogger.child({ viewerId: currentUser.id })
+    : routeLogger;
 
   // Section: User Profile Fetch
   let profileData: Database['public']['Functions']['get_user_profile']['Returns'] | null = null;
@@ -216,27 +252,32 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
       slug,
       ...(currentUser?.id ? { viewerId: currentUser.id } : {}),
     });
-    viewerLogger.info('UserProfilePage: user profile loaded', {
-      section: 'user-profile-fetch',
-      hasProfile: !!profileData,
-    });
+    viewerLogger.info(
+      {
+        hasProfile: !!profileData,
+        section: 'user-profile-fetch',
+      },
+      'UserProfilePage: user profile loaded'
+    );
   } catch (error) {
-    const normalized = normalizeError(error, 'Failed to load user profile detail');
-    viewerLogger.error('UserProfilePage: get_user_profile threw', normalized, {
-      section: 'user-profile-fetch',
-    });
+    const normalized = normalizeError(error, 'Failed to load user profile');
+    viewerLogger.error(
+      {
+        err: normalized,
+        section: 'user-profile-fetch',
+      },
+      'UserProfilePage: get_user_profile threw'
+    );
     throw normalized;
   }
 
   if (!profileData) {
-    viewerLogger.warn('UserProfilePage: user profile not found', {
-      section: 'user-profile-fetch',
-    });
+    viewerLogger.warn({ section: 'user-profile-fetch' }, 'UserProfilePage: user profile not found');
     notFound();
   }
 
   // Type-safe RPC return using centralized type definition
-  const { profile, stats, collections, contributions, is_following } = profileData;
+  const { collections, contributions, is_following, profile, stats } = profileData;
 
   const { follower_count, following_count } = stats ?? {};
 
@@ -249,12 +290,12 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
             <div className="flex items-start gap-4">
               {profile?.image ? (
                 <Image
-                  src={profile.image}
                   alt={`${sanitizeDisplayText(profile.name ?? slug, slug)}'s profile picture`}
-                  width={96}
-                  height={96}
                   className="border-background h-24 w-24 rounded-full border-4 object-cover"
+                  height={96}
                   priority
+                  src={profile.image}
+                  width={96}
                 />
               ) : (
                 <div className="border-background bg-accent flex h-24 w-24 items-center justify-center rounded-full border-4 text-2xl font-bold">
@@ -273,28 +314,23 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
                   ) : null;
                 })()}
 
-                <div className="mt-3 flex items-center gap-4 text-sm">
-                  <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
-                    <Users className="h-4 w-4" />
-                    {follower_count ?? 0} followers
+                <ProfileSocialStats
+                  followerCount={follower_count ?? 0}
+                  followingCount={following_count ?? 0}
+                />
+                {profile?.website ? (
+                  <div className="mt-2 flex items-center gap-4 text-sm">
+                    <span>•</span>
+                    <NavLink
+                      className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}
+                      external
+                      href={profile.website}
+                    >
+                      <Globe className="h-4 w-4" />
+                      Website
+                    </NavLink>
                   </div>
-                  <span>•</span>
-                  <div>{following_count ?? 0} following</div>
-
-                  {profile?.website ? (
-                    <>
-                      <span>•</span>
-                      <NavLink
-                        href={profile.website}
-                        external
-                        className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}
-                      >
-                        <Globe className="h-4 w-4" />
-                        Website
-                      </NavLink>
-                    </>
-                  ) : null}
-                </div>
+                ) : null}
               </div>
             </div>
 
@@ -304,9 +340,9 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
             profile.id &&
             profile.slug ? (
               <FollowButton
+                initialIsFollowing={is_following ?? false}
                 userId={profile.id}
                 userSlug={profile.slug}
-                initialIsFollowing={is_following ?? false}
               />
             ) : null}
           </div>
@@ -319,177 +355,94 @@ export default async function UserProfilePage({ params }: UserProfilePagePropert
           {/* Stats sidebar */}
           <div className="space-y-4">
             {/* Quick Stats Card */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">Activity Stats</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                  <span className={UI_CLASSES.TEXT_SM_MUTED}>Contributions</span>
-                  <UnifiedBadge variant="base" style="secondary">
-                    {contributions?.length ?? 0}
-                  </UnifiedBadge>
-                </div>
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                  <span className={UI_CLASSES.TEXT_SM_MUTED}>Collections</span>
-                  <UnifiedBadge variant="base" style="secondary">
-                    {collections?.length ?? 0}
-                  </UnifiedBadge>
-                </div>
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                  <span className={UI_CLASSES.TEXT_SM_MUTED}>Member since</span>
-                  <span className="text-sm">
-                    {profile?.created_at
-                      ? new Date(profile.created_at).toLocaleDateString('en-US', {
-                          month: 'short',
-                          year: 'numeric',
-                        })
-                      : 'N/A'}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
+            <ProfileStatsCard
+              stats={[
+                {
+                  animated: true,
+                  label: 'Contributions',
+                  value: contributions?.length ?? 0,
+                },
+                {
+                  animated: true,
+                  label: 'Collections',
+                  value: collections?.length ?? 0,
+                },
+                {
+                  animated: false,
+                  label: 'Member since',
+                  value: profile?.created_at
+                    ? (() => {
+                        // Use UTC-based formatting for deterministic output (prevents hydration mismatches)
+                        const date = new Date(profile.created_at);
+                        const year = date.getUTCFullYear();
+                        const month = date.getUTCMonth();
+                        const monthNames = [
+                          'Jan',
+                          'Feb',
+                          'Mar',
+                          'Apr',
+                          'May',
+                          'Jun',
+                          'Jul',
+                          'Aug',
+                          'Sep',
+                          'Oct',
+                          'Nov',
+                          'Dec',
+                        ];
+                        return `${monthNames[month]} ${year}`;
+                      })()
+                    : 'N/A',
+                },
+              ]}
+              title="Activity Stats"
+            />
           </div>
 
           {/* Main content */}
-          <div className="space-y-6 md:col-span-2">
-            {/* Public Collections */}
-            <div>
-              <h2 className="mb-4 text-2xl font-bold">Public Collections</h2>
-
-              {!collections || collections.length === 0 ? (
-                <Card>
-                  <CardContent className="flex flex-col items-center py-12">
-                    <FolderOpen className="text-muted-foreground mb-4 h-12 w-12" />
-                    <p className="text-muted-foreground">No public collections yet</p>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="grid gap-4 sm:grid-cols-2">
-                  {collections
-                    .filter(
-                      (
-                        collection
-                      ): collection is typeof collection & {
-                        id: string;
-                        name: null | string;
-                        slug: string;
-                      } =>
-                        collection.id !== null &&
-                        collection.slug !== null &&
-                        collection.name !== null
-                    )
-                    .map((collection) => {
-                      const safeCollectionUrl = getSafeCollectionUrl(slug, collection.slug);
-                      if (!safeCollectionUrl) {
-                        viewerLogger.warn(
-                          'UserProfilePage: skipping collection with invalid slug',
-                          {
-                            collectionId: collection.id,
-                            collectionName: collection.name ?? 'Unknown',
-                            collectionSlug: collection.slug,
-                          }
-                        );
-                        return null;
-                      }
-                      return (
-                        <Card key={collection.id} className={UI_CLASSES.CARD_INTERACTIVE}>
-                          <NavLink href={safeCollectionUrl}>
-                            <CardHeader>
-                              <CardTitle className="text-lg">{collection.name}</CardTitle>
-                              {collection.description ? (
-                                <CardDescription className="line-clamp-2">
-                                  {collection.description}
-                                </CardDescription>
-                              ) : null}
-                            </CardHeader>
-                            <CardContent>
-                              <div
-                                className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} text-sm`}
-                              >
-                                <span className="text-muted-foreground">
-                                  {collection.item_count ?? 0}{' '}
-                                  {(collection.item_count ?? 0) === 1 ? 'item' : 'items'}
-                                </span>
-                                <span className="text-muted-foreground">
-                                  {collection.view_count ?? 0} views
-                                </span>
-                              </div>
-                            </CardContent>
-                          </NavLink>
-                        </Card>
-                      );
-                    })}
+          <div className="md:col-span-2">
+            <ProfileTabs
+              collections={
+                <div>
+                  <h2 className="mb-4 text-2xl font-bold">Public Collections</h2>
+                  <ProfileCollectionsSection
+                    collections={collections}
+                    getSafeCollectionUrl={getSafeCollectionUrl}
+                    slug={slug}
+                  />
                 </div>
-              )}
-            </div>
-
-            {/* Content Contributions */}
-            {contributions && contributions.length > 0 ? (
-              <div>
-                <h2 className="mb-4 text-2xl font-bold">Contributions</h2>
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {contributions
-                    .filter(
-                      (
-                        item
-                      ): item is typeof item & {
-                        content_type: Database['public']['Enums']['content_category'];
-                        id: string;
-                        name: null | string;
-                        slug: string;
-                      } =>
-                        item.id !== null &&
-                        item.content_type !== null &&
-                        item.slug !== null &&
-                        item.name !== null
-                    )
-                    .map((item) => {
-                      const safeContentUrl = getSafeContentUrl(item.content_type, item.slug);
-                      if (!safeContentUrl) {
-                        viewerLogger.warn(
-                          'UserProfilePage: skipping contribution with invalid type or slug',
-                          {
-                            contentId: item.id,
-                            contentType: item.content_type,
-                            contentSlug: item.slug,
-                          }
-                        );
-                        return null;
-                      }
-                      return (
-                        <Card key={item.id} className={UI_CLASSES.CARD_INTERACTIVE}>
-                          <NavLink href={safeContentUrl}>
-                            <CardHeader>
-                              <div className="mb-2 flex items-center justify-between">
-                                <UnifiedBadge variant="base" style="secondary" className="text-xs">
-                                  {item.content_type}
-                                </UnifiedBadge>
-                                {item.featured ? (
-                                  <UnifiedBadge variant="base" style="default" className="text-xs">
-                                    Featured
-                                  </UnifiedBadge>
-                                ) : null}
-                              </div>
-                              <CardTitle className="text-base">{item.name}</CardTitle>
-                              <CardDescription className="line-clamp-2 text-xs">
-                                {item.description}
-                              </CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                              <div className="text-muted-foreground flex items-center gap-2 text-xs">
-                                <span>{item.view_count ?? 0} views</span>
-                                <span>•</span>
-                                <span>{item.download_count ?? 0} downloads</span>
-                              </div>
-                            </CardContent>
-                          </NavLink>
-                        </Card>
-                      );
-                    })}
+              }
+              contributions={
+                <div>
+                  <h2 className="mb-4 text-2xl font-bold">Contributions</h2>
+                  <ProfileContributionsSection
+                    contributions={contributions}
+                    getSafeContentUrl={getSafeContentUrl}
+                  />
                 </div>
-              </div>
-            ) : null}
+              }
+              overview={
+                <div className="space-y-6">
+                  <div>
+                    <h2 className="mb-4 text-2xl font-bold">Public Collections</h2>
+                    <ProfileCollectionsSection
+                      collections={collections}
+                      getSafeCollectionUrl={getSafeCollectionUrl}
+                      slug={slug}
+                    />
+                  </div>
+                  {contributions && contributions.length > 0 ? (
+                    <div>
+                      <h2 className="mb-4 text-2xl font-bold">Contributions</h2>
+                      <ProfileContributionsSection
+                        contributions={contributions}
+                        getSafeContentUrl={getSafeContentUrl}
+                      />
+                    </div>
+                  ) : null}
+                </div>
+              }
+            />
           </div>
         </div>
       </section>

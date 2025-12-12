@@ -8,6 +8,7 @@
  * Runs on a cron schedule (Mondays at 9am UTC)
  */
 
+import { ContentService, MiscService, NewsletterService } from '@heyclaude/data-layer';
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { normalizeError } from '@heyclaude/shared-runtime';
 
@@ -15,7 +16,8 @@ import { inngest } from '../../client';
 import { createSupabaseAdminClient } from '../../../supabase/admin';
 import { getResendClient } from '../../../integrations/resend';
 import { HELLO_FROM } from '../../../email/config/email-config';
-import { logger, generateRequestId, createWebAppContextWithId } from '../../../logging/server';
+import { logger, createWebAppContextWithId } from '../../../logging/server';
+import { sendCronSuccessHeartbeat } from '../../utils/monitoring';
 
 // Types for digest data
 type WeeklyDigestData = DatabaseGenerated['public']['Functions']['get_weekly_digest']['Returns'];
@@ -37,10 +39,9 @@ export const sendWeeklyDigest = inngest.createFunction(
   { cron: '0 9 * * 1' }, // Every Monday at 9:00 AM UTC
   async ({ step }) => {
     const startTime = Date.now();
-    const requestId = generateRequestId();
-    const logContext = createWebAppContextWithId(requestId, '/inngest/email/digest', 'sendWeeklyDigest');
+    const logContext = createWebAppContextWithId('/inngest/email/digest', 'sendWeeklyDigest');
 
-    logger.info('Weekly digest started', logContext);
+    logger.info(logContext, 'Weekly digest started');
 
     const supabase = createSupabaseAdminClient();
 
@@ -50,11 +51,8 @@ export const sendWeeklyDigest = inngest.createFunction(
       hoursSinceLastRun?: number;
       nextAllowedAt?: string;
     }> => {
-      const { data: lastRunData } = await supabase
-        .from('app_settings')
-        .select('setting_value, updated_at')
-        .eq('setting_key', 'last_digest_email_timestamp')
-        .single();
+      const service = new MiscService(supabase);
+      const lastRunData = await service.getAppSetting('last_digest_email_timestamp');
 
       if (lastRunData?.setting_value) {
         const lastRunTimestamp = new Date(lastRunData.setting_value as string);
@@ -74,11 +72,9 @@ export const sendWeeklyDigest = inngest.createFunction(
     });
 
     if (rateLimitCheck.rateLimited) {
-      logger.info('Digest rate limited', {
-        ...logContext,
+      logger.info({ ...logContext,
         hoursSinceLastRun: rateLimitCheck.hoursSinceLastRun?.toFixed(1),
-        nextAllowedAt: rateLimitCheck.nextAllowedAt,
-      });
+        nextAllowedAt: rateLimitCheck.nextAllowedAt, }, 'Digest rate limited');
       return {
         skipped: true,
         reason: 'rate_limited',
@@ -91,19 +87,18 @@ export const sendWeeklyDigest = inngest.createFunction(
     const digestData = await step.run('fetch-digest-content', async (): Promise<WeeklyDigestData | null> => {
       const previousWeekStart = getPreviousWeekStart();
       
-      const { data: digest, error: digestError } = await supabase.rpc('get_weekly_digest', {
-        p_week_start: previousWeekStart,
-      });
-
-      if (digestError) {
-        logger.warn('Failed to fetch weekly digest', {
-          ...logContext,
-          errorMessage: digestError.message,
+      try {
+        const contentService = new ContentService(supabase);
+        const digest = await contentService.getWeeklyDigest({
+          p_week_start: previousWeekStart,
         });
+        return digest;
+      } catch (error) {
+        const normalized = normalizeError(error, 'Failed to fetch weekly digest');
+        logger.warn({ ...logContext,
+          err: normalized, }, 'Failed to fetch weekly digest');
         return null;
       }
-
-      return digest;
     });
 
     if (!digestData) {
@@ -114,34 +109,32 @@ export const sendWeeklyDigest = inngest.createFunction(
     const hasTrendingContent = Array.isArray(digestData.trending_content) && digestData.trending_content.length > 0;
 
     if (!(hasNewContent || hasTrendingContent)) {
-      logger.info('Digest skipped - no content', logContext);
+      logger.info(logContext, 'Digest skipped - no content');
       return { skipped: true, reason: 'no_content' };
     }
 
     // Step 3: Fetch subscribers
     const subscribers = await step.run('fetch-subscribers', async (): Promise<string[]> => {
-      const { data, error } = await supabase.rpc('get_active_subscribers');
+      const newsletterService = new NewsletterService(supabase);
 
-      if (error) {
-        logger.warn('Failed to fetch subscribers', {
-          ...logContext,
-          errorMessage: error.message,
-        });
+      try {
+        const data = await newsletterService.getActiveSubscribers();
+        return data || [];
+      } catch (error) {
+        const normalized = normalizeError(error, 'Failed to fetch subscribers');
+        logger.warn({ ...logContext,
+          err: normalized, }, 'Failed to fetch subscribers');
         return [];
       }
-
-      return data || [];
     });
 
     if (subscribers.length === 0) {
-      logger.info('Digest skipped - no subscribers', logContext);
+      logger.info(logContext, 'Digest skipped - no subscribers');
       return { skipped: true, reason: 'no_subscribers' };
     }
 
-    logger.info('Sending digest to subscribers', {
-      ...logContext,
-      subscriberCount: subscribers.length,
-    });
+    logger.info({ ...logContext,
+      subscriberCount: subscribers.length, }, 'Sending digest to subscribers');
 
     // Step 4: Send batch digest emails
     const sendResults = await step.run('send-batch-emails', async (): Promise<{
@@ -154,41 +147,49 @@ export const sendWeeklyDigest = inngest.createFunction(
 
     // Step 5: Update last run timestamp
     await step.run('update-timestamp', async () => {
+      const service = new MiscService(supabase);
       const currentTimestamp = new Date().toISOString();
       
-      const { error } = await supabase.from('app_settings').upsert({
-        setting_key: 'last_digest_email_timestamp',
-        setting_value: currentTimestamp,
-        setting_type: 'string',
-        environment: 'production',
-        enabled: true,
-        description: 'Timestamp of last successful weekly digest email send',
-        category: 'config',
-        version: 1,
-      });
-
-      if (error) {
-        logger.warn('Failed to update digest timestamp', {
-          ...logContext,
-          errorMessage: error.message,
+      try {
+        await service.upsertAppSetting({
+          setting_key: 'last_digest_email_timestamp',
+          setting_value: currentTimestamp,
+          setting_type: 'string',
+          environment: 'production',
+          enabled: true,
+          description: 'Timestamp of last successful weekly digest email send',
+          category: 'config',
+          version: 1,
         });
+      } catch (error) {
+        const normalized = normalizeError(error, 'Failed to update digest timestamp');
+        logger.warn({ ...logContext,
+          err: normalized, }, 'Failed to update digest timestamp');
       }
     });
 
     const durationMs = Date.now() - startTime;
-    logger.info('Weekly digest completed', {
-      ...logContext,
+    logger.info({ ...logContext,
       durationMs,
       sent: sendResults.success,
       failed: sendResults.failed,
-      successRate: sendResults.successRate,
-    });
+      successRate: sendResults.successRate, }, 'Weekly digest completed');
 
-    return {
+    const result = {
       sent: sendResults.success,
       failed: sendResults.failed,
       rate: sendResults.successRate,
     };
+
+    // BetterStack monitoring: Send success heartbeat (feature-flagged)
+    if (result.sent > 0) {
+      sendCronSuccessHeartbeat('BETTERSTACK_HEARTBEAT_INNGEST_CRON', {
+        functionName: 'sendWeeklyDigest',
+        result: { sent: result.sent },
+      });
+    }
+
+    return result;
   }
 );
 
@@ -246,23 +247,19 @@ async function sendBatchDigest(
 
       if (result.error) {
         failed += batch.length;
-        logger.warn('Batch send failed', {
-          ...logContext,
+        logger.warn({ ...logContext,
           batchStart: i,
           batchSize: batch.length,
-          errorMessage: result.error.message,
-        });
+          errorMessage: result.error.message, }, 'Batch send failed');
       } else {
         success += batch.length;
       }
     } catch (error) {
       const normalized = normalizeError(error, 'Batch send failed');
-      logger.warn('Batch send exception', {
-        ...logContext,
+      logger.warn({ ...logContext,
         batchStart: i,
         batchSize: batch.length,
-        errorMessage: normalized.message,
-      });
+        errorMessage: normalized.message, }, 'Batch send exception');
       failed += batch.length;
     }
   }

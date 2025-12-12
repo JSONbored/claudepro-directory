@@ -9,17 +9,48 @@
 
 import { isDevelopment } from '@heyclaude/shared-runtime/schemas/env';
 
-import { AlertTriangle, Home, RefreshCw } from '../../icons.tsx';
+import { AlertTriangle, Home, RefreshCw, Copy, Check } from '../../icons.tsx';
 import type {
   ErrorBoundaryProps,
   ErrorFallbackProps,
 } from '../../types/component.types.ts';
 import { createErrorBoundaryFallback } from '../../client/error-handler.ts';
 import { UI_CLASSES } from '../../ui/constants.ts';
+import { useCopyToClipboard } from '../../hooks/index.ts';
 import { Button } from './button.tsx';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './card.tsx';
 import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary';
+import type { FallbackProps } from 'react-error-boundary';
 import { useCallback } from 'react';
+import type { ComponentType } from 'react';
+
+/**
+ * ErrorCodeBlock component with copy-to-clipboard functionality
+ */
+function ErrorCodeBlock({ content }: { content: string }) {
+  const { copied, copy } = useCopyToClipboard({
+    context: { component: 'ErrorBoundary', action: 'copy-error' },
+  });
+
+  return (
+    <div className="relative">
+      <pre className={'max-w-full overflow-auto break-all whitespace-pre-wrap text-xs bg-background/50 rounded border border-border p-3 pr-10'}>{content}</pre>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="absolute top-2 right-2 h-6 w-6 p-0"
+        onClick={() => copy(content)}
+        aria-label={copied ? 'Copied!' : 'Copy error message'}
+      >
+        {copied ? (
+          <Check className="h-3 w-3 text-green-500" aria-hidden="true" />
+        ) : (
+          <Copy className="h-3 w-3" aria-hidden="true" />
+        )}
+      </Button>
+    </div>
+  );
+}
 
 /**
  * ErrorFallback component using web-runtime UI primitives
@@ -56,11 +87,13 @@ function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
           {isDevelopment && error && (
             <div className={'space-y-2 rounded-lg bg-muted p-4'}>
               <p className={'font-semibold text-sm'}>Error Details:</p>
-              <pre className={'overflow-auto text-xs'}>{error.toString()}</pre>
+              <ErrorCodeBlock content={error.toString()} />
               {error.stack && (
                 <details className="text-xs">
-                  <summary className="cursor-pointer font-semibold">Stack Trace</summary>
-                  <pre className={'mt-2 overflow-auto'}>{error.stack}</pre>
+                  <summary className="cursor-pointer font-semibold">► Stack Trace</summary>
+                  <div className="mt-2">
+                    <ErrorCodeBlock content={error.stack} />
+                  </div>
                 </details>
               )}
             </div>
@@ -96,12 +129,24 @@ export function ErrorBoundary({ children, fallback }: ErrorBoundaryProps) {
     []
   );
 
+  const Fallback = fallback || ErrorFallback;
+
+  // Type assertion needed due to React 19 compatibility issue with react-error-boundary types
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const ErrorBoundaryComponent = ReactErrorBoundary as any as ComponentType<{
+    fallbackRender: (props: FallbackProps) => React.ReactElement;
+    onError: (error: Error, errorInfo: { componentStack?: string | null }) => void;
+    children: React.ReactNode;
+  }>;
+
   return (
-    <ReactErrorBoundary
-      FallbackComponent={fallback || ErrorFallback}
+    <ErrorBoundaryComponent
+      fallbackRender={({ error, resetErrorBoundary }: FallbackProps) => (
+        <Fallback error={error} resetErrorBoundary={resetErrorBoundary} />
+      )}
       onError={handleError}
     >
       {children}
-    </ReactErrorBoundary>
+    </ErrorBoundaryComponent>
   );
 }

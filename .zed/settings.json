@@ -9,18 +9,182 @@
     "unstable": true,
     "internal_debug": false
   },
+  "format_on_save": "on",
+  "inlay_hints": {
+    "enabled": true,
+    "show_type_hints": true,
+    "show_parameter_hints": true,
+    "show_other_hints": true,
+    "show_background": false,
+    "edit_debounce_ms": 700,
+    "scroll_debounce_ms": 50
+  },
   "languages": {
     "Deno": {
       "language_servers": ["deno", "!typescript-language-server", "!vtsls"]
     },
     "TypeScript": {
-      "language_servers": ["vtsls", "typescript-language-server", "!deno"]
+      "language_servers": ["vtsls", "typescript-language-server", "!deno"],
+      "formatter": [
+        {
+          "code_action": "source.fixAll.eslint"
+        },
+        {
+          "external": {
+            "command": "npx",
+            "arguments": ["prettier", "--stdin-filepath", "{buffer_path}"]
+          }
+        }
+      ]
     },
     "JavaScript": {
-      "language_servers": ["vtsls", "typescript-language-server", "!deno"]
+      "language_servers": ["vtsls", "typescript-language-server", "!deno"],
+      "formatter": [
+        {
+          "code_action": "source.fixAll.eslint"
+        },
+        {
+          "external": {
+            "command": "npx",
+            "arguments": ["prettier", "--stdin-filepath", "{buffer_path}"]
+          }
+        }
+      ]
+    },
+    "TypeScript React": {
+      "language_servers": ["vtsls", "typescript-language-server", "!deno"],
+      "formatter": [
+        {
+          "code_action": "source.fixAll.eslint"
+        },
+        {
+          "external": {
+            "command": "npx",
+            "arguments": ["prettier", "--stdin-filepath", "{buffer_path}"]
+          }
+        }
+      ]
+    },
+    "JavaScript React": {
+      "language_servers": ["vtsls", "typescript-language-server", "!deno"],
+      "formatter": [
+        {
+          "code_action": "source.fixAll.eslint"
+        },
+        {
+          "external": {
+            "command": "npx",
+            "arguments": ["prettier", "--stdin-filepath", "{buffer_path}"]
+          }
+        }
+      ]
+    },
+    "CSS": {
+      "language_servers": ["eslint", "tailwindcss"],
+      "formatter": ["npx", "prettier", "--stdin-filepath"]
+    },
+    "JSON": {
+      "language_servers": ["eslint"],
+      "formatter": ["npx", "prettier", "--stdin-filepath"]
+    },
+    "Markdown": {
+      "language_servers": ["eslint"],
+      "formatter": ["npx", "prettier", "--stdin-filepath"]
+    },
+    "HTML": {
+      "language_servers": ["eslint"]
+    },
+    "YAML": {
+      "language_servers": ["eslint"]
     }
   },
   "lsp": {
+    "vtsls": {
+      "settings": {
+        "typescript": {
+          "tsdk": "./node_modules/typescript/lib",
+          "preferences": {
+            "includePackageJsonAutoImports": "on"
+          },
+          "inlayHints": {
+            "parameterNames": {
+              "enabled": "all",
+              "suppressWhenArgumentMatchesName": false
+            },
+            "parameterTypes": {
+              "enabled": true
+            },
+            "variableTypes": {
+              "enabled": true,
+              "suppressWhenTypeMatchesName": true
+            },
+            "propertyDeclarationTypes": {
+              "enabled": true
+            },
+            "functionLikeReturnTypes": {
+              "enabled": true
+            },
+            "enumMemberValues": {
+              "enabled": true
+            }
+          }
+        },
+        "javascript": {
+          "preferences": {
+            "includePackageJsonAutoImports": "on"
+          },
+          "inlayHints": {
+            "parameterNames": {
+              "enabled": "all",
+              "suppressWhenArgumentMatchesName": false
+            },
+            "parameterTypes": {
+              "enabled": true
+            },
+            "variableTypes": {
+              "enabled": true,
+              "suppressWhenTypeMatchesName": true
+            },
+            "propertyDeclarationTypes": {
+              "enabled": true
+            },
+            "functionLikeReturnTypes": {
+              "enabled": true
+            },
+            "enumMemberValues": {
+              "enabled": true
+            }
+          }
+        }
+      }
+    },
+    "typescript-language-server": {
+      "initialization_options": {
+        "preferences": {
+          "includeInlayParameterNameHints": "all",
+          "includeInlayParameterNameHintsWhenArgumentMatchesName": true,
+          "includeInlayFunctionParameterTypeHints": true,
+          "includeInlayVariableTypeHints": true,
+          "includeInlayVariableTypeHintsWhenTypeMatchesName": true,
+          "includeInlayPropertyDeclarationTypeHints": true,
+          "includeInlayFunctionLikeReturnTypeHints": true,
+          "includeInlayEnumMemberValueHints": true
+        }
+      },
+      "settings": {
+        "typescript": {
+          "tsdk": "./node_modules/typescript/lib",
+          "preferences": {
+            "includePackageJsonAutoImports": "on"
+          }
+        },
+        "javascript": {
+          "preferences": {
+            "includePackageJsonAutoImports": "on"
+          }
+        }
+      }
+    },
     "deno": {
       "settings": {
         "deno": {
@@ -28,6 +192,34 @@
           "config": "./apps/edge/functions/deno.json",
           "lint": true,
           "unstable": true
+        }
+      }
+    },
+    "eslint": {
+      "settings": {
+        "codeActionOnSave": {
+          "enable": true,
+          "mode": "all"
+        },
+        "validate": ["typescript", "typescriptreact", "javascript", "javascriptreact", "html", "css", "json", "jsonc", "markdown", "yaml"],
+        "run": "onType"
+      }
+    },
+    "tailwindcss": {
+      "binary": {
+        "path": "npx",
+        "arguments": ["@tailwindcss/language-server"]
+      },
+      "initialization_options": {
+        "experimental": {
+          "classRegex": [
+            ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+            ["cn\\(([^)]*)\\)", "(?:'|\"|`)([^\"'`]*)(?:'|\"|`)"]
+          ]
+        },
+        "userLanguages": {
+          "typescript": "javascript",
+          "typescriptreact": "javascriptreact"
         }
       }
     }

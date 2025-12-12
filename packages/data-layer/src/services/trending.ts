@@ -9,67 +9,305 @@ import  { type Database } from '@heyclaude/database-types';
 import  { type SupabaseClient } from '@supabase/supabase-js';
 
 import { logRpcError } from '../utils/rpc-error-logging.ts';
+import { withSmartCache } from '../utils/request-cache.ts';
 
 export class TrendingService {
   constructor(private supabase: SupabaseClient<Database>) {}
 
   /**
    * Calls the database RPC: get_trending_metrics_with_content
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getTrendingMetrics(args: Database['public']['Functions']['get_trending_metrics_with_content']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('get_trending_metrics_with_content', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_trending_metrics_with_content',
-          operation: 'TrendingService.getTrendingMetrics',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_trending_metrics_with_content',
+      'getTrendingMetrics',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_trending_metrics_with_content', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_trending_metrics_with_content',
+              operation: 'TrendingService.getTrendingMetrics',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: get_popular_content
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getPopularContent(args: Database['public']['Functions']['get_popular_content']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('get_popular_content', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_popular_content',
-          operation: 'TrendingService.getPopularContent',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_popular_content',
+      'getPopularContent',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_popular_content', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_popular_content',
+              operation: 'TrendingService.getPopularContent',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: get_recent_content
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getRecentContent(args: Database['public']['Functions']['get_recent_content']['Args']) {
+    return withSmartCache(
+      'get_recent_content',
+      'getRecentContent',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_recent_content', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_recent_content',
+              operation: 'TrendingService.getRecentContent',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
+  }
+
+  /**
+   * Calls the database RPC: get_trending_content
+   * Uses request-scoped caching to avoid duplicate calls within the same request
+   */
+  async getTrendingContent(args: Database['public']['Functions']['get_trending_content']['Args']) {
+    return withSmartCache(
+      'get_trending_content',
+      'getTrendingContent',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_trending_content', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_trending_content',
+              operation: 'TrendingService.getTrendingContent',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
+  }
+
+  /**
+   * Calls the database RPC: get_trending_metrics_formatted
+   * Returns frontend-ready trending items (eliminates client-side mapping)
+   * Uses request-scoped caching to avoid duplicate calls within the same request
+   */
+  async getTrendingMetricsFormatted(
+    args: Database['public']['Functions']['get_trending_metrics_formatted']['Args']
+  ) {
+    return withSmartCache(
+      'get_trending_metrics_formatted',
+      'getTrendingMetricsFormatted',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_trending_metrics_formatted', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_trending_metrics_formatted',
+              operation: 'TrendingService.getTrendingMetricsFormatted',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
+  }
+
+  /**
+   * Calls the database RPC: get_popular_content_formatted
+   * Returns frontend-ready popular items (eliminates client-side mapping)
+   * Uses request-scoped caching to avoid duplicate calls within the same request
+   */
+  async getPopularContentFormatted(
+    args: Database['public']['Functions']['get_popular_content_formatted']['Args']
+  ) {
+    return withSmartCache(
+      'get_popular_content_formatted',
+      'getPopularContentFormatted',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_popular_content_formatted', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_popular_content_formatted',
+              operation: 'TrendingService.getPopularContentFormatted',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
+  }
+
+  /**
+   * Calls the database RPC: get_recent_content_formatted
+   * Returns frontend-ready recent items (eliminates client-side mapping)
+   * Uses request-scoped caching to avoid duplicate calls within the same request
+   */
+  async getRecentContentFormatted(
+    args: Database['public']['Functions']['get_recent_content_formatted']['Args']
+  ) {
+    return withSmartCache(
+      'get_recent_content_formatted',
+      'getRecentContentFormatted',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_recent_content_formatted', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_recent_content_formatted',
+              operation: 'TrendingService.getRecentContentFormatted',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
+  }
+
+  /**
+   * Calls the database RPC: get_sidebar_trending_formatted
+   * Returns sidebar-ready trending items with formatted views string (eliminates client-side mapping)
+   * Uses request-scoped caching to avoid duplicate calls within the same request
+   */
+  async getSidebarTrendingFormatted(
+    args: Database['public']['Functions']['get_sidebar_trending_formatted']['Args']
+  ) {
+    return withSmartCache(
+      'get_sidebar_trending_formatted',
+      'getSidebarTrendingFormatted',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_sidebar_trending_formatted', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_sidebar_trending_formatted',
+              operation: 'TrendingService.getSidebarTrendingFormatted',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
+  }
+
+  /**
+   * Calls the database RPC: get_sidebar_recent_formatted
+   * Returns sidebar-ready recent items with formatted date string (eliminates client-side mapping)
+   * Uses request-scoped caching to avoid duplicate calls within the same request
+   */
+  async getSidebarRecentFormatted(
+    args: Database['public']['Functions']['get_sidebar_recent_formatted']['Args']
+  ) {
+    return withSmartCache(
+      'get_sidebar_recent_formatted',
+      'getSidebarRecentFormatted',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_sidebar_recent_formatted', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_sidebar_recent_formatted',
+              operation: 'TrendingService.getSidebarRecentFormatted',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
+  }
+
+  /**
+   * Calls the database RPC: calculate_content_time_metrics
+   * Calculates time-windowed metrics for content (created/updated counts)
+   * Note: This is a mutation (updates metrics), so it does NOT use request-scoped caching
+   */
+  async calculateContentTimeMetrics(): Promise<
+    Database['public']['Functions']['calculate_content_time_metrics']['Returns']
+  > {
     try {
-      const { data, error } = await this.supabase.rpc('get_recent_content', args);
+      const { data, error } = await this.supabase.rpc('calculate_content_time_metrics');
       if (error) {
         logRpcError(error, {
-          rpcName: 'get_recent_content',
-          operation: 'TrendingService.getRecentContent',
-          args: args,
+          rpcName: 'calculate_content_time_metrics',
+          operation: 'TrendingService.calculateContentTimeMetrics',
         });
         throw error;
       }
-      return data;
+      return data ?? [];
     } catch (error) {
       // Error already logged above
       throw error;
@@ -77,20 +315,20 @@ export class TrendingService {
   }
 
   /**
-   * Calls the database RPC: get_trending_content
+   * Calls the database RPC: refresh_trending_metrics_view
+   * Refreshes the materialized view for trending metrics
+   * Note: This is a mutation, so it does NOT use request-scoped caching
    */
-  async getTrendingContent(args: Database['public']['Functions']['get_trending_content']['Args']) {
+  async refreshTrendingMetricsView(): Promise<void> {
     try {
-      const { data, error } = await this.supabase.rpc('get_trending_content', args);
+      const { error } = await this.supabase.rpc('refresh_trending_metrics_view');
       if (error) {
         logRpcError(error, {
-          rpcName: 'get_trending_content',
-          operation: 'TrendingService.getTrendingContent',
-          args: args,
+          rpcName: 'refresh_trending_metrics_view',
+          operation: 'TrendingService.refreshTrendingMetricsView',
         });
         throw error;
       }
-      return data;
     } catch (error) {
       // Error already logged above
       throw error;

@@ -90,11 +90,9 @@ function getSafeExternalUrl(url: string): string | null {
   } catch (error) {
     // Log URL parsing errors for debugging
     const normalized = normalizeError(error, 'NavLink: Failed to parse external URL');
-    logger.warn('NavLink: Invalid external URL', {
-      err: normalized,
+    logger.warn({ err: normalized,
       component: 'NavLink',
-      url: String(url),
-    });
+      url: String(url), }, 'NavLink: Invalid external URL');
     return null;
   }
 }
@@ -150,11 +148,14 @@ export function NavLink({
     const safeUrl = getSafeExternalUrl(href);
     if (!safeUrl) {
       // Don't render unsafe external links - log for debugging
-      logger.warn('NavLink: Unsafe external URL rejected', undefined, {
-        component: 'NavLink',
-        href: String(href),
-        external: true,
-      });
+      logger.warn(
+        {
+          component: 'NavLink',
+          href: String(href),
+          external: true,
+        },
+        'NavLink: Unsafe external URL rejected'
+      );
       return <span className={`group ${className}`}>{content}</span>;
     }
     return (
@@ -173,11 +174,14 @@ export function NavLink({
   // Validate internal path
   if (!isValidInternalPath(href)) {
     // Don't render unsafe internal links - log for debugging
-    logger.warn('NavLink: Unsafe internal path rejected', undefined, {
-      component: 'NavLink',
-      href: String(href),
-      external: false,
-    });
+      logger.warn(
+        {
+          component: 'NavLink',
+          href: String(href),
+          external: false,
+        },
+        'NavLink: Unsafe internal path rejected'
+      );
     return <span className={`group ${className}`}>{content}</span>;
   }
 

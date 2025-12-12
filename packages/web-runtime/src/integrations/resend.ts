@@ -7,7 +7,7 @@
 
 import { Resend } from 'resend';
 import { Constants, type Database, type Database as DatabaseGenerated } from '@heyclaude/database-types';
-import { createUtilityContext, withTimeout, TIMEOUT_PRESETS } from '@heyclaude/shared-runtime';
+import { withTimeout, TIMEOUT_PRESETS } from '@heyclaude/shared-runtime';
 import { normalizeError } from '../errors';
 import { logger, type LogContext } from '../logger';
 import { runWithRetry } from './http-client';
@@ -139,25 +139,27 @@ export async function callResendApi<T>({
     };
   } catch (error) {
     // Log all Resend API errors for observability
-    const logContext = createUtilityContext('resend', 'call-resend-api', {
+    const logContext = {
+      function: 'resend',
+      operation: 'call-resend-api',
       path: normalizedPath,
       method,
-    });
+    };
     const errorObj = normalizeError(error, 'Resend API error');
 
     if (error instanceof ResendApiError) {
       // Log Resend API errors with status and response body
-      logger.error('Resend API call failed', errorObj, {
-        ...toLogContext(logContext),
+      logger.error({ err: errorObj, ...toLogContext(logContext),
         status: error.status ?? 0,
-        responseBody: error.rawBody ?? '',
-      });
-      throw error;
+        responseBody: error.rawBody ?? '', }, 'Resend API call failed');
+      // normalizeError returns the error as-is if it's already an Error instance
+      // So errorObj is the same as error here, but we throw errorObj for consistency
+      throw errorObj;
     }
 
     // Log unexpected errors
-    logger.error('Resend API request error', errorObj, toLogContext(logContext));
-    throw new ResendApiError(normalizeError(error, 'Unknown Resend request error').message, null);
+    logger.error({ err: errorObj, ...toLogContext(logContext) }, 'Resend API request error');
+    throw new ResendApiError(errorObj.message, null);
   }
 }
 
@@ -293,30 +295,24 @@ async function assignTopicsToContact(
         attempts: 3,
         baseDelayMs: 500,
         onRetry(attempt, error, delay) {
-          logger.warn('[resend] topic assignment throttled', {
-            ...logContext,
+          logger.warn({ ...logContext,
             attempt,
             delay,
-            reason: error.message,
-          });
+            reason: error.message, }, '[resend] topic assignment throttled');
         },
       }
     );
 
-    logger.info('Topics assigned successfully', {
-      ...logContext,
-      topic_count: topicIds.length,
-    });
+    logger.info({ ...logContext,
+      topic_count: topicIds.length, }, 'Topics assigned successfully');
   } catch (error) {
     const errorObj = normalizeError(error, 'Failed to assign topics');
     if (error instanceof ResendApiError) {
-      logger.error('Failed to assign topics', errorObj, {
-        ...logContext,
+      logger.error({ err: errorObj, ...logContext,
         status: error.status ?? 0,
-        response_body: error.rawBody ?? '',
-      });
+        response_body: error.rawBody ?? '', }, 'Failed to assign topics');
     } else {
-      logger.error('Failed to assign topics', errorObj, logContext);
+      logger.error({ err: errorObj, ...logContext }, 'Failed to assign topics');
     }
   }
 }
@@ -477,12 +473,10 @@ export async function syncContactSegment(
         attempts: 3,
         baseDelayMs: 500,
         onRetry(attempt, error, delay) {
-          logger.warn('[resend] segment list throttled', {
-            ...logContext,
+          logger.warn({ ...logContext,
             attempt,
             delay,
-            reason: error.message,
-          });
+            reason: error.message, }, '[resend] segment list throttled');
         },
       });
 
@@ -503,12 +497,10 @@ export async function syncContactSegment(
               attempts: 3,
               baseDelayMs: 500,
               onRetry(attempt, error, delay) {
-                logger.warn('[resend] segment removal throttled', {
-                  ...logContext,
+                logger.warn({ ...logContext,
                   attempt,
                   delay,
-                  reason: error.message,
-                });
+                  reason: error.message, }, '[resend] segment removal throttled');
               },
             }
           );
@@ -535,12 +527,10 @@ export async function syncContactSegment(
           attempts: 3,
           baseDelayMs: 500,
           onRetry(attempt, error, delay) {
-            logger.warn('[resend] segment add throttled', {
-              ...logContext,
+            logger.warn({ ...logContext,
               attempt,
               delay,
-              reason: error.message,
-            });
+              reason: error.message, }, '[resend] segment add throttled');
           },
         }
       );
@@ -548,13 +538,11 @@ export async function syncContactSegment(
   } catch (err) {
     const errorObj = normalizeError(err, 'Segment sync failed');
     if (err instanceof ResendApiError) {
-      logger.error('Segment sync failed', errorObj, {
-        ...logContext,
+      logger.error({ err: errorObj, ...logContext,
         status: err.status ?? 0,
-        response_body: err.rawBody ?? '',
-      });
+        response_body: err.rawBody ?? '', }, 'Segment sync failed');
     } else {
-      logger.error('Segment sync failed', errorObj, logContext);
+      logger.error({ err: errorObj, ...logContext }, 'Segment sync failed');
     }
   }
 }
@@ -628,7 +616,7 @@ export async function updateContactEngagement(
     const { data: contact } = await runWithRetry(() => contactsApi.get({ email }), SEGMENT_RETRY);
 
     if (!contact?.['data']) {
-      logger.warn('contact not found', logContext);
+      logger.warn(logContext, 'contact not found');
       return;
     }
 
@@ -653,7 +641,7 @@ export async function updateContactEngagement(
     }
   } catch (error) {
     const errorObj = normalizeError(error, 'failed to update contact');
-    logger.error('failed to update contact', errorObj, logContext);
+    logger.error({ err: errorObj, ...logContext }, 'failed to update contact');
   }
 }
 
@@ -688,28 +676,41 @@ async function sendEmailInternal(
     from: string;
     tags?: Array<{ name: string; value: string }>;
     replyTo?: string;
+    idempotencyKey?: string;
   },
   timeoutMessage = 'Resend email send timed out',
   resendClient?: Resend
 ): Promise<{ data: { id: string } | null; error: { message: string } | null }> {
   const resend = resendClient ?? getResendClient();
-  const logContext = createUtilityContext('resend', 'send-email', { to: options.to });
+  const logContext = {
+    function: 'resend',
+    operation: 'send-email',
+    to: options.to,
+  };
+
+  // Build email options with optional idempotency key for safe retries
+  const emailOptions = {
+    from: options.from,
+    to: options.to,
+    subject: options.subject,
+    html: options.html,
+    ...(options.tags && { tags: options.tags }),
+    ...(options.replyTo && { replyTo: options.replyTo }),
+  };
+
+  // Use idempotency key if provided (prevents duplicate sends on retry)
+  const sendOptions = options.idempotencyKey
+    ? { idempotencyKey: options.idempotencyKey }
+    : undefined;
 
   const { data, error } = (await withTimeout(
-    resend.emails.send({
-      from: options.from,
-      to: options.to,
-      subject: options.subject,
-      html: options.html,
-      ...(options.tags && { tags: options.tags }),
-      ...(options.replyTo && { replyTo: options.replyTo }),
-    }),
+    resend.emails.send(emailOptions, sendOptions),
     TIMEOUT_PRESETS.external,
     timeoutMessage
   )) as { data: { id: string } | null; error: { message: string } | null };
 
   if (error) {
-    logger.error('Email send failed', new Error(error.message), toLogContext(logContext));
+    logger.error({ err: new Error(error.message), ...toLogContext(logContext) }, 'Email send failed');
   }
 
   return { data, error };
@@ -758,6 +759,7 @@ export async function sendEmail(
     from: string;
     tags?: Array<{ name: string; value: string }>;
     replyTo?: string;
+    idempotencyKey?: string;
   },
   timeoutMessage = 'Resend email send timed out',
   resendClient?: Resend
@@ -844,9 +846,13 @@ export async function syncContactToResend(
   const audienceId = resendEnv.audienceId;
 
   try {
-    logger.info('Creating Resend contact', logContext, {
-      contact_properties: JSON.stringify(contactProperties),
-    });
+    logger.info(
+      {
+        ...logContext,
+        contact_properties: JSON.stringify(contactProperties),
+      },
+      'Creating Resend contact'
+    );
 
     type ResendContactsCreateApi = {
       create: (args: {
@@ -873,30 +879,47 @@ export async function syncContactToResend(
 
     if (resendError) {
       if (resendError.message?.includes('already exists') || resendError.message?.includes('duplicate')) {
-        logger.info('Email already in Resend, skipping contact creation', logContext, {
-          sync_status: 'skipped',
-        });
+        logger.info(
+          {
+            ...logContext,
+            sync_status: 'skipped',
+          },
+          'Email already in Resend, skipping contact creation'
+        );
         syncStatus = 'skipped';
         syncError = 'Email already in audience';
       } else {
-        logger.error('Resend contact creation failed', new Error(resendError.message ?? 'Unknown error'), logContext, {
-          sync_status: 'failed',
-        });
+        logger.error(
+          {
+            err: new Error(resendError.message ?? 'Unknown error'),
+            ...logContext,
+            sync_status: 'failed',
+          },
+          'Resend contact creation failed'
+        );
         syncStatus = 'failed';
         syncError = resendError.message || 'Unknown Resend error';
       }
     } else if (contact?.id) {
       resendContactId = contact.id;
-      logger.info('Contact created', logContext, {
-        resend_contact_id: resendContactId,
-      });
+      logger.info(
+        {
+          ...logContext,
+          resend_contact_id: resendContactId,
+        },
+        'Contact created'
+      );
 
       // Assign topics based on signup context
       topicIds = inferInitialTopics(validatedSource, copy_category);
-      logger.info('Assigning topics', logContext, {
-        topic_count: topicIds.length,
-        topic_ids: topicIds.join(','),
-      });
+      logger.info(
+        {
+          ...logContext,
+          topic_count: topicIds.length,
+          topic_ids: topicIds.join(','),
+        },
+        'Assigning topics'
+      );
 
       await assignTopicsToContact(resend, resendContactId, topicIds, logContext);
 
@@ -908,15 +931,15 @@ export async function syncContactToResend(
           TIMEOUT_PRESETS.external,
           'Resend segment assignment timed out'
         );
-        logger.info('Segment assigned successfully', logContext);
+        logger.info(logContext, 'Segment assigned successfully');
       } catch (segmentException) {
         const errorObj = normalizeError(segmentException, 'Segment assignment exception');
-        logger.error('Segment assignment exception', errorObj, logContext);
+        logger.error({ err: errorObj, ...logContext }, 'Segment assignment exception');
       }
     }
   } catch (resendException) {
     const errorObj = normalizeError(resendException, 'Unexpected Resend error');
-    logger.error('Unexpected Resend error', errorObj, logContext);
+    logger.error({ err: errorObj, ...logContext }, 'Unexpected Resend error');
     syncStatus = 'failed';
     syncError = resendException instanceof Error ? resendException.message : 'Unknown error';
   }
@@ -926,7 +949,7 @@ export async function syncContactToResend(
 
 /**
  * Enrolls an email address into the onboarding email sequence.
- * Uses the Supabase RPC to enroll the email in the sequence.
+ * Uses EmailService to enroll the email in the sequence (follows data layer architecture).
  */
 export async function enrollInOnboardingSequence(email: string): Promise<void> {
   const logContext: LogContext = {
@@ -938,27 +961,19 @@ export async function enrollInOnboardingSequence(email: string): Promise<void> {
   try {
     // Dynamically import to avoid circular dependency issues
     const { createSupabaseAdminClient } = await import('../supabase/admin');
+    const { EmailService } = await import('@heyclaude/data-layer');
     const supabase = createSupabaseAdminClient();
+    const service = new EmailService(supabase);
 
     const enrollArgs = {
       p_email: email,
     } satisfies DatabaseGenerated['public']['Functions']['enroll_in_email_sequence']['Args'];
 
-    const { error } = await supabase.rpc('enroll_in_email_sequence', enrollArgs);
-
-    if (error) {
-      logger.warn('Sequence enrollment RPC failed', {
-        ...logContext,
-        errorMessage: error.message,
-      });
-    } else {
-      logger.info('Enrolled in onboarding sequence', logContext);
-    }
+    await service.enrollInEmailSequence(enrollArgs);
+    logger.info(logContext, 'Enrolled in onboarding sequence');
   } catch (sequenceError) {
     const errorObj = normalizeError(sequenceError, 'Sequence enrollment failed');
-    logger.warn('Sequence enrollment failed', {
-      ...logContext,
-      errorMessage: errorObj.message,
-    });
+    logger.warn({ ...logContext,
+      errorMessage: errorObj.message, }, 'Sequence enrollment failed');
   }
 }

@@ -17,6 +17,7 @@
  */
 
 import { memo } from 'react';
+
 import {
   ProfileCard,
   type UserProfile,

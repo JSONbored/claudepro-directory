@@ -1,10 +1,13 @@
+# Security Scanning
+# Optimizations: path-based filtering, conditional jobs, shallow clones, cancels in-progress
+# Uses actions/checkout@v6 (fetch-depth: 2 for PRs, 1 for others)
 name: Security
 
 on:
-  # Weekly scheduled scan (Monday 3am UTC)
+  # Weekly scheduled scan (Monday 3am UTC) - comprehensive analysis
   schedule:
     - cron: '0 3 * * 1'
-  # Only on PRs (not every push)
+  # Only on PRs (not every push) - path-based filtering
   pull_request:
     branches: [main]
     paths:
@@ -13,11 +16,11 @@ on:
       - 'package.json'
       - 'pnpm-lock.yaml'
       - '.github/workflows/security.yml'
-  # Manual trigger
+  # Manual trigger for on-demand scanning
   workflow_dispatch:
 
 env:
-  PNPM_VERSION: 10.23.0
+  PNPM_VERSION: 10.25.0
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -34,6 +37,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
+          # PRs need depth 2 for base comparison, others only need 1
           fetch-depth: ${{ github.event_name == 'pull_request' && 2 || 1 }}
 
       - name: Check for hardcoded secrets
@@ -58,6 +62,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1 # Shallow clone - CodeQL doesn't need full history
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
@@ -85,7 +91,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          fetch-depth: 1
+          fetch-depth: 1 # Shallow clone - dependency review only needs current state
 
       - name: Dependency Review
         uses: actions/dependency-review-action@v4

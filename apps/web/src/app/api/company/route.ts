@@ -1,115 +1,132 @@
 /**
  * Company Profile API Route
- * Migrated from public-api edge function
+ * 
+ * Returns company profile data by slug identifier.
+ * Used to display company information on company profile pages.
+ * 
+ * @example
+ * ```ts
+ * // Request
+ * GET /api/company?slug=acme-corp
+ * 
+ * // Response (200)
+ * {
+ *   "id": "...",
+ *   "name": "Acme Corp",
+ *   "slug": "acme-corp",
+ *   ...
+ * }
+ * ```
  */
 
 import 'server-only';
-
+import { CompaniesService } from '@heyclaude/data-layer';
 import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
+import { createApiRoute, createApiOptionsHandler, slugSchema } from '@heyclaude/web-runtime/server';
+import { normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  generateRequestId,
-  logger,
-  normalizeError,
-  createErrorResponse,
-} from '@heyclaude/web-runtime/logging/server';
-import {
-  badRequestResponse,
-  jsonResponse,
-  getOnlyCorsHeaders,
   buildCacheHeaders,
   createSupabaseAnonClient,
+  getOnlyCorsHeaders,
+  jsonResponse,
+  notFoundResponse,
 } from '@heyclaude/web-runtime/server';
-import { NextRequest, NextResponse } from 'next/server';
-
-const CORS = getOnlyCorsHeaders;
+import { cacheLife } from 'next/cache';
+import { z } from 'zod';
 
 /**
- * Handle GET /api/company requests and return the company profile identified by the `slug` query parameter.
+ * Cached helper function to fetch company profile by slug.
+ * The slug parameter becomes part of the cache key, so different companies have different cache entries.
  *
- * Reads the `slug` query parameter, calls the `get_company_profile` Supabase RPC, and responds with the profile
- * JSON including cache and metadata headers on success. Returns a 400 Bad Request when `slug` is missing, mirrors
- * RPC errors when the RPC returns an error, and returns a generic error response for unexpected exceptions.
- *
- * @param request - The incoming Next.js request containing query parameters (expects `slug`)
- * @returns The HTTP response: `200` with the company profile JSON and cache/metadata headers on success; `400` when
- * the `slug` parameter is missing; an error response mirroring RPC or internal errors otherwise.
- *
- * @see buildCacheHeaders
- * @see createErrorResponse
- * @see badRequestResponse
+ * @param {string} slug - Company slug identifier
+ * @returns Promise resolving to an object with the company profile data
  */
-export async function GET(request: NextRequest) {
-  const requestId = generateRequestId();
-  const reqLogger = logger.child({
-    requestId,
-    operation: 'CompanyAPI',
-    route: '/api/company',
-    method: 'GET',
-  });
+async function getCachedCompanyProfile(slug: string): Promise<{
+  data: DatabaseGenerated['public']['Functions']['get_company_profile']['Returns'];
+}> {
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
-  try {
-    const url = new URL(request.url);
-    const slug = url.searchParams.get('slug')?.trim();
+  const supabase = createSupabaseAnonClient();
+  const service = new CompaniesService(supabase);
+  const rpcArgs = {
+    p_slug: slug,
+  } satisfies DatabaseGenerated['public']['Functions']['get_company_profile']['Args'];
 
-    if (!slug) {
-      reqLogger.warn('Company slug missing');
-      return badRequestResponse('Company slug is required', CORS);
-    }
+  const data = await service.getCompanyProfile(rpcArgs);
+  return { data };
+}
 
-    reqLogger.info('Company request received', { slug });
+/**
+ * GET /api/company - Get company profile by slug
+ * 
+ * Returns company profile data by slug identifier.
+ * Validates slug parameter and returns company profile with cache headers.
+ */
+export const GET = createApiRoute({
+  route: '/api/company',
+  operation: 'CompanyAPI',
+  method: 'GET',
+  cors: 'anon',
+  querySchema: z.object({
+    slug: slugSchema.describe('Company slug identifier'),
+  }),
+  openapi: {
+    summary: 'Get company profile by slug',
+    description: 'Returns company profile data by slug identifier. Used to display company information on company profile pages.',
+    tags: ['company', 'profiles'],
+    operationId: 'getCompanyProfile',
+    responses: {
+      200: {
+        description: 'Company profile retrieved successfully',
+      },
+      400: {
+        description: 'Missing or invalid slug parameter',
+      },
+      404: {
+        description: 'Company not found',
+      },
+    },
+  },
+  handler: async ({ logger, query }) => {
+    // Zod schema ensures proper types
+    const { slug } = query;
 
-    const supabase = createSupabaseAnonClient();
-    const rpcArgs = {
-      p_slug: slug,
-    } satisfies DatabaseGenerated['public']['Functions']['get_company_profile']['Args'];
+    logger.info({ slug }, 'Company request received');
 
-    const { data: profile, error } = await supabase.rpc('get_company_profile', rpcArgs);
-
-    if (error) {
-      reqLogger.error('Company profile RPC error', normalizeError(error), {
-        rpcName: 'get_company_profile',
-        slug,
-      });
-      return createErrorResponse(error, {
-        route: '/api/company',
-        operation: 'CompanyAPI',
-        method: 'GET',
-        logContext: {
+    let profile;
+    try {
+      const result = await getCachedCompanyProfile(slug);
+      profile = result.data;
+    } catch (error) {
+      const normalizedError = normalizeError(error, 'Company profile RPC error');
+      logger.error(
+        {
+          err: normalizedError,
           rpcName: 'get_company_profile',
           slug,
         },
-      });
+        'Company profile RPC error'
+      );
+      throw normalizedError; // Factory will handle error response
     }
 
-    reqLogger.info('Company profile retrieved', { slug });
+    // Check if profile exists
+    if (!profile || (typeof profile === 'object' && Object.keys(profile).length === 0)) {
+      logger.warn({ slug }, 'Company profile not found');
+      return notFoundResponse('Company not found', 'Company');
+    }
 
-    return jsonResponse(profile, 200, CORS, {
+    logger.info({ slug }, 'Company profile retrieved');
+
+    return jsonResponse(profile, 200, getOnlyCorsHeaders, {
       'X-Generated-By': 'supabase.rpc.get_company_profile',
       ...buildCacheHeaders('company_profile'),
     });
-  } catch (error) {
-    reqLogger.error('Company API error', normalizeError(error));
-    return createErrorResponse(error, {
-      route: '/api/company',
-      operation: 'CompanyAPI',
-      method: 'GET',
-    });
-  }
-}
+  },
+});
 
 /**
- * Handle CORS preflight (OPTIONS) requests for the company API route.
- *
- * Responds with 204 No Content and includes only the configured CORS headers.
- *
- * @returns A NextResponse with HTTP status 204 and CORS headers applied.
- * @see {@link CORS}
+ * OPTIONS handler for CORS preflight requests
  */
-export function OPTIONS() {
-  return new NextResponse(null, {
-    status: 204,
-    headers: {
-      ...CORS,
-    },
-  });
-}
+export const OPTIONS = createApiOptionsHandler('anon');

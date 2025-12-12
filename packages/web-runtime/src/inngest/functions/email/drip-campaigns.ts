@@ -9,10 +9,11 @@
  * @see https://www.inngest.com/docs/features/inngest-functions/steps-workflows/wait-for-event
  */
 
+import { JobsService, NewsletterService } from '@heyclaude/data-layer';
 import { inngest } from '../../client';
 import { createSupabaseAdminClient } from '../../../supabase/admin';
 import { sendEmail } from '../../../integrations/resend';
-import { logger, generateRequestId, createWebAppContextWithId } from '../../../logging/server';
+import { logger, createWebAppContextWithId } from '../../../logging/server';
 import { getEnvVar, escapeHtml } from '@heyclaude/shared-runtime';
 
 const BASE_URL = getEnvVar('NEXT_PUBLIC_SITE_URL') || 'https://claudepro.directory';
@@ -52,25 +53,20 @@ export const newsletterDripCampaign = inngest.createFunction(
   },
   { event: 'email/welcome' },
   async ({ event, step }) => {
-    const requestId = generateRequestId();
-    const logContext = createWebAppContextWithId(requestId, 'inngest', 'newsletterDripCampaign');
+    const logContext = createWebAppContextWithId('inngest', 'newsletterDripCampaign');
 
     const { email, triggerSource } = event.data;
 
-    logger.info('Starting newsletter drip campaign', {
-      ...logContext,
+    logger.info({ ...logContext,
       email,
-      triggerSource,
-    });
+      triggerSource, }, 'Starting newsletter drip campaign');
 
     // Step 1: Welcome email is already sent by welcome.ts
     // We just note the campaign start time for tracking
     await step.run('record-campaign-start', async () => {
-      logger.info('Newsletter drip campaign started', {
-        ...logContext,
+      logger.info({ ...logContext,
         email,
-        triggerSource,
-      });
+        triggerSource, }, 'Newsletter drip campaign started');
     });
 
     // Step 2: Wait up to 3 days for user to click any link in emails
@@ -83,11 +79,9 @@ export const newsletterDripCampaign = inngest.createFunction(
 
     if (clickEvent) {
       // User is engaged! Send power user tips after 1 day
-      logger.info('User engaged with email, scheduling tips', {
-        ...logContext,
+      logger.info({ ...logContext,
         email,
-        clickedLink: clickEvent.data.click?.link,
-      });
+        clickedLink: clickEvent.data.click?.link, }, 'User engaged with email, scheduling tips');
 
       await step.sleep('delay-tips-email', '1 day');
 
@@ -100,21 +94,17 @@ export const newsletterDripCampaign = inngest.createFunction(
         });
 
         if (result.error) {
-          logger.warn('Failed to send power user tips email', {
-            ...logContext,
+          logger.warn({ ...logContext,
             email,
-            errorMessage: result.error.message,
-          });
+            errorMessage: result.error.message, }, 'Failed to send power user tips email');
         }
 
         return result.data?.id;
       });
     } else {
       // User didn't click - send a gentle nudge
-      logger.info('User not engaged, sending nudge email', {
-        ...logContext,
-        email,
-      });
+      logger.info({ ...logContext,
+        email, }, 'User not engaged, sending nudge email');
 
       await step.run('send-nudge-email', async () => {
         const result = await sendEmail({
@@ -125,11 +115,9 @@ export const newsletterDripCampaign = inngest.createFunction(
         });
 
         if (result.error) {
-          logger.warn('Failed to send nudge email', {
-            ...logContext,
+          logger.warn({ ...logContext,
             email,
-            errorMessage: result.error.message,
-          });
+            errorMessage: result.error.message, }, 'Failed to send nudge email');
         }
 
         return result.data?.id;
@@ -142,14 +130,11 @@ export const newsletterDripCampaign = inngest.createFunction(
 
     const stillSubscribed = await step.run('check-subscription', async () => {
       const supabase = createSupabaseAdminClient();
-      const { data } = await supabase
-        .from('newsletter_subscriptions')
-        .select('status')
-        .eq('email', email)
-        .single();
+      const newsletterService = new NewsletterService(supabase);
+      const subscription = await newsletterService.getSubscriptionStatusByEmail(email);
 
       // Check if status is a valid active status
-      const status = data?.status;
+      const status = subscription?.status;
       return status !== 'unsubscribed' && status !== 'bounced' && status !== 'complained';
     });
 
@@ -166,12 +151,10 @@ export const newsletterDripCampaign = inngest.createFunction(
       });
     }
 
-    logger.info('Newsletter drip campaign completed', {
-      ...logContext,
+    logger.info({ ...logContext,
       email,
       engaged: !!clickEvent,
-      stillSubscribed,
-    });
+      stillSubscribed, }, 'Newsletter drip campaign completed');
 
     return { email, engaged: !!clickEvent, completed: true };
   }
@@ -197,18 +180,15 @@ export const jobPostingDripCampaign = inngest.createFunction(
   },
   { event: 'job/published' },
   async ({ event, step }) => {
-    const requestId = generateRequestId();
-    const logContext = createWebAppContextWithId(requestId, 'inngest', 'jobPostingDripCampaign');
+    const logContext = createWebAppContextWithId('inngest', 'jobPostingDripCampaign');
 
     const { jobId, employerEmail, employerName, jobTitle, jobSlug } = event.data;
     const safeJobTitle = escapeHtml(jobTitle);
     const safeName = escapeHtml(employerName || 'there');
 
-    logger.info('Starting job posting drip campaign', {
-      ...logContext,
+    logger.info({ ...logContext,
       jobId,
-      employerEmail,
-    });
+      employerEmail, }, 'Starting job posting drip campaign');
 
     // Step 1: Send confirmation email
     await step.run('send-confirmation', async () => {
@@ -220,11 +200,9 @@ export const jobPostingDripCampaign = inngest.createFunction(
       });
 
       if (result.error) {
-        logger.warn('Failed to send job confirmation email', {
-          ...logContext,
+        logger.warn({ ...logContext,
           jobId,
-          errorMessage: result.error.message,
-        });
+          errorMessage: result.error.message, }, 'Failed to send job confirmation email');
       }
 
       return result.data?.id;
@@ -257,13 +235,8 @@ export const jobPostingDripCampaign = inngest.createFunction(
 
     const jobStats = await step.run('get-job-stats', async () => {
       const supabase = createSupabaseAdminClient();
-      const { data } = await supabase
-        .from('jobs')
-        .select('view_count, click_count, status')
-        .eq('id', jobId)
-        .single();
-
-      return data;
+      const jobsService = new JobsService(supabase);
+      return await jobsService.getJobStatsById(jobId);
     });
 
     if (jobStats && jobStats.status === 'active') {
@@ -290,11 +263,8 @@ export const jobPostingDripCampaign = inngest.createFunction(
       // Check if job is still active
       const stillActive = await step.run('check-job-status', async () => {
         const supabase = createSupabaseAdminClient();
-        const { data } = await supabase
-          .from('jobs')
-          .select('status, expires_at')
-          .eq('id', jobId)
-          .single();
+        const jobsService = new JobsService(supabase);
+        const data = await jobsService.getJobStatusById(jobId);
 
         return data?.status === 'active';
       });
@@ -313,11 +283,9 @@ export const jobPostingDripCampaign = inngest.createFunction(
       }
     }
 
-    logger.info('Job posting drip campaign completed', {
-      ...logContext,
+    logger.info({ ...logContext,
       jobId,
-      employerEmail,
-    });
+      employerEmail, }, 'Job posting drip campaign completed');
 
     return { jobId, employerEmail, completed: true };
   }

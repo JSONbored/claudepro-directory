@@ -9,109 +9,320 @@ import  { type Database } from '@heyclaude/database-types';
 import  { type SupabaseClient } from '@supabase/supabase-js';
 
 import { logRpcError } from '../utils/rpc-error-logging.ts';
+import { withSmartCache } from '../utils/request-cache.ts';
 
 export class JobsService {
   constructor(private supabase: SupabaseClient<Database>) {}
 
   /**
    * Calls the database RPC: get_jobs_list
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getJobs() {
-    try {
-      const { data, error } = await this.supabase.rpc('get_jobs_list');
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_jobs_list',
-          operation: 'JobsService.getJobs',
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_jobs_list',
+      'getJobs',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_jobs_list');
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_jobs_list',
+              operation: 'JobsService.getJobs',
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      undefined
+    );
   }
 
   /**
    * Calls the database RPC: get_job_detail
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getJobBySlug(args: Database['public']['Functions']['get_job_detail']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('get_job_detail', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_job_detail',
-          operation: 'JobsService.getJobBySlug',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_job_detail',
+      'getJobBySlug',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_job_detail', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_job_detail',
+              operation: 'JobsService.getJobBySlug',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: get_featured_jobs
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getFeaturedJobs() {
-    try {
-      const { data, error } = await this.supabase.rpc('get_featured_jobs');
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_featured_jobs',
-          operation: 'JobsService.getFeaturedJobs',
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_featured_jobs',
+      'getFeaturedJobs',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_featured_jobs');
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_featured_jobs',
+              operation: 'JobsService.getFeaturedJobs',
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      undefined
+    );
   }
 
   /**
    * Calls the database RPC: get_jobs_by_category
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getJobsByCategory(args: Database['public']['Functions']['get_jobs_by_category']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('get_jobs_by_category', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_jobs_by_category',
-          operation: 'JobsService.getJobsByCategory',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_jobs_by_category',
+      'getJobsByCategory',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_jobs_by_category', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_jobs_by_category',
+              operation: 'JobsService.getJobsByCategory',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: get_jobs_count
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getJobsCount() {
-    try {
-      const { data, error } = await this.supabase.rpc('get_jobs_count');
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_jobs_count',
-          operation: 'JobsService.getJobsCount',
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_jobs_count',
+      'getJobsCount',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_jobs_count');
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_jobs_count',
+              operation: 'JobsService.getJobsCount',
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      undefined
+    );
+  }
+
+  /**
+   * Gets job by ID with view_count, click_count, and status
+   * Uses request-scoped caching to avoid duplicate calls within the same request
+   */
+  async getJobStatsById(jobId: string): Promise<{
+    view_count: Database['public']['Tables']['jobs']['Row']['view_count'];
+    click_count: Database['public']['Tables']['jobs']['Row']['click_count'];
+    status: Database['public']['Tables']['jobs']['Row']['status'];
+  } | null> {
+    return withSmartCache(
+      'jobs.select',
+      'getJobStatsById',
+      async () => {
+        try {
+          const { data, error } = await this.supabase
+            .from('jobs')
+            .select('view_count, click_count, status')
+            .eq('id', jobId)
+            .single();
+
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'jobs.select',
+              operation: 'JobsService.getJobStatsById',
+              args: { jobId },
+            });
+            return null;
+          }
+
+          return data;
+        } catch (error) {
+          // Error already logged above
+          return null;
+        }
+      },
+      { jobId }
+    );
+  }
+
+  /**
+   * Gets job status and expires_at by ID
+   * Uses request-scoped caching to avoid duplicate calls within the same request
+   */
+  async getJobStatusById(jobId: string): Promise<{
+    status: Database['public']['Tables']['jobs']['Row']['status'];
+    expires_at: Database['public']['Tables']['jobs']['Row']['expires_at'];
+  } | null> {
+    return withSmartCache(
+      'jobs.select',
+      'getJobStatusById',
+      async () => {
+        try {
+          const { data, error } = await this.supabase
+            .from('jobs')
+            .select('status, expires_at')
+            .eq('id', jobId)
+            .single();
+
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'jobs.select',
+              operation: 'JobsService.getJobStatusById',
+              args: { jobId },
+            });
+            return null;
+          }
+
+          return data;
+        } catch (error) {
+          // Error already logged above
+          return null;
+        }
+      },
+      { jobId }
+    );
+  }
+
+  /**
+   * Calls the database RPC: get_payment_plan_catalog
+   * Returns all payment plans ordered by plan and tier
+   * Uses request-scoped caching to avoid duplicate calls within the same request
+   */
+  async getPaymentPlanCatalog() {
+    return withSmartCache(
+      'get_payment_plan_catalog',
+      'getPaymentPlanCatalog',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_payment_plan_catalog');
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_payment_plan_catalog',
+              operation: 'JobsService.getPaymentPlanCatalog',
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      undefined
+    );
+  }
+
+  /**
+   * Calls the database RPC: get_job_billing_summaries
+   * Returns billing summaries for multiple job IDs
+   * Uses request-scoped caching to avoid duplicate calls within the same request
+   */
+  async getJobBillingSummaries(
+    args: Database['public']['Functions']['get_job_billing_summaries']['Args']
+  ) {
+    return withSmartCache(
+      'get_job_billing_summaries',
+      'getJobBillingSummaries',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_job_billing_summaries', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_job_billing_summaries',
+              operation: 'JobsService.getJobBillingSummaries',
+              args: args,
+            });
+            throw error;
+          }
+          return data ?? [];
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
+  }
+
+  /**
+   * Calls the database RPC: get_job_title_by_id
+   * Returns job title by ID (lightweight lookup)
+   * Uses request-scoped caching to avoid duplicate calls within the same request
+   */
+  async getJobTitleById(
+    args: Database['public']['Functions']['get_job_title_by_id']['Args']
+  ) {
+    return withSmartCache(
+      'get_job_title_by_id',
+      'getJobTitleById',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_job_title_by_id', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_job_title_by_id',
+              operation: 'JobsService.getJobTitleById',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 }

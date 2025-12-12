@@ -14,22 +14,54 @@ import {
   EXTERNAL_SERVICES,
   ROUTES,
 } from '@heyclaude/web-runtime/data/config/constants';
-import { DiscordIcon, ExternalLink, Github, Heart, Rss, Sparkles } from '@heyclaude/web-runtime/icons';
+import {
+  DiscordIcon,
+  ExternalLink,
+  Github,
+  Heart,
+  Rss,
+  Sparkles,
+} from '@heyclaude/web-runtime/icons';
+import { UnifiedBadge, ThemeToggle } from '@heyclaude/web-runtime/ui';
+import { STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { memo, useEffect, useMemo, useState } from 'react';
 
+import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';
+import { NewsletterCTAVariant } from '@/src/components/features/growth/newsletter/newsletter-cta-variants';
+import { LazySection } from '@/src/components/core/infra/scroll-animated-section';
+
+/**
+ * Root package.json - Contains the application version for display in footer.
+ *
+ * The version is read from the root package.json (not apps/web/package.json) as this
+ * represents the overall application version. The footer displays this version and links
+ * to the changelog page where users can see all release entries.
+ *
+ * **Path Resolution:**
+ * From `apps/web/src/components/core/layout/footer.tsx`:
+ * - `../../../../../../` = 7 levels up to repository root
+ * - Resolves to root `package.json` (version: 1.1.0)
+ *
+ * **Version Management:**
+ * - Bump version: `pnpm bump:patch/minor/major`
+ * - Creates git tag: `git tag vX.Y.Z`
+ * - GitHub Actions auto-creates release when tag is pushed
+ *
+ * @see {@link ../../../../../../packages/generators/src/commands/bump-version.ts | Version Bump Script}
+ * @see {@link ../../../../../../.github/workflows/release.yml | GitHub Release Workflow}
+ */
+import packageJson from '../../../../../../package.json';
+
 // Type for resource links with optional icon
 interface ResourceLink {
   href: string;
-  label: string;
   icon?: typeof Rss;
+  label: string;
 }
-import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
-import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';
-import { ThemeToggle } from '@heyclaude/web-runtime/ui';
 
 /**
  * Footer Component
@@ -101,6 +133,7 @@ function FooterComponent() {
     { href: ROUTES.SUBMIT, label: 'Submit' },
     { href: rssFeed.url, label: 'RSS', icon: Rss },
     { href: ROUTES.LLMS_TXT, label: 'LLMs.txt', icon: Sparkles },
+    { href: CONTACT_CHANNELS.github, label: 'View on GitHub', icon: Github },
   ];
 
   const supportLinks = [
@@ -117,183 +150,402 @@ function FooterComponent() {
   ];
 
   return (
-    <footer className="border-border/50 border-t bg-background">
+    <footer className="border-border/50 bg-background border-t">
+      {/* Newsletter CTA - Full width above footer links, same as homepage */}
+      <LazySection rootMargin="0px 0px -500px 0px">
+        <NewsletterCTAVariant variant="hero" source="footer" />
+      </LazySection>
+
       <div className="container mx-auto px-4 py-10 lg:py-12">
         {/* Main footer content - Two section layout */}
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1.5fr_2.5fr] lg:gap-16">
-          
           {/* Left section - Brand & Social */}
-          <motion.div
-            className="space-y-6"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4 }}
-          >
-            {/* Logo */}
-            <div>
-              <HeyClaudeLogo size="md" inView={true} duration={1.5} />
-            </div>
-            
-            {/* Description */}
-            <p className="max-w-sm text-muted-foreground text-sm leading-relaxed">
-              {APP_CONFIG.description}
-            </p>
-
-            {/* Social links */}
-            <div className="flex items-center gap-4">
-              {[
-                { href: CONTACT_CHANNELS.github, icon: Github, label: 'GitHub' },
-                { href: CONTACT_CHANNELS.discord, icon: DiscordIcon, label: 'Discord' },
-              ].map((social) => (
-                <Link
-                  key={social.label}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-muted-foreground transition-colors hover:text-foreground"
-                  aria-label={social.label}
-                >
-                  <social.icon className="h-5 w-5" />
-                </Link>
-              ))}
-              <ThemeToggle />
-            </div>
-
-            {/* Badge */}
-            <UnifiedBadge
-              variant="base"
-              style="outline"
-              className="border-accent/20 bg-accent/5 text-accent"
+          {mounted ? (
+            <motion.div
+              className="space-y-6"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: DURATION.slow }}
             >
-              <ExternalLink className="mr-1.5 h-3 w-3" />
-              Open Source
-            </UnifiedBadge>
-          </motion.div>
+              {/* Logo */}
+              <div>
+                <HeyClaudeLogo size="md" inView duration={1.5} />
+              </div>
+
+              {/* Description */}
+              <p className="text-muted-foreground max-w-sm text-sm leading-relaxed">
+                {APP_CONFIG.description}
+              </p>
+
+              {/* Social links */}
+              <div className="flex items-center gap-4">
+                {[
+                  { href: CONTACT_CHANNELS.github, icon: Github, label: 'GitHub' },
+                  { href: CONTACT_CHANNELS.discord, icon: DiscordIcon, label: 'Discord' },
+                ].map((social) => (
+                  <Link
+                    key={social.label}
+                    href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                    aria-label={social.label}
+                  >
+                    <social.icon className="h-5 w-5" />
+                  </Link>
+                ))}
+                <ThemeToggle />
+              </div>
+
+              {/* Badge */}
+              <UnifiedBadge
+                variant="base"
+                style="outline"
+                className="border-accent/20 bg-accent/5 text-accent"
+              >
+                <ExternalLink className="mr-1.5 h-3 w-3" />
+                Open Source
+              </UnifiedBadge>
+            </motion.div>
+          ) : (
+            <div className="space-y-6">
+              {/* Logo */}
+              <div>
+                <HeyClaudeLogo size="md" inView duration={1.5} />
+              </div>
+
+              {/* Description */}
+              <p className="text-muted-foreground max-w-sm text-sm leading-relaxed">
+                {APP_CONFIG.description}
+              </p>
+
+              {/* Social links */}
+              <div className="flex items-center gap-4">
+                {[
+                  { href: CONTACT_CHANNELS.github, icon: Github, label: 'GitHub' },
+                  { href: CONTACT_CHANNELS.discord, icon: DiscordIcon, label: 'Discord' },
+                ].map((social) => (
+                  <Link
+                    key={social.label}
+                    href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                    aria-label={social.label}
+                  >
+                    <social.icon className="h-5 w-5" />
+                  </Link>
+                ))}
+                <ThemeToggle />
+              </div>
+
+              {/* Badge */}
+              <UnifiedBadge
+                variant="base"
+                style="outline"
+                className="border-accent/20 bg-accent/5 text-accent"
+              >
+                <ExternalLink className="mr-1.5 h-3 w-3" />
+                Open Source
+              </UnifiedBadge>
+            </div>
+          )}
 
           {/* Right section - Navigation grid */}
-          <motion.div
-            className="grid grid-cols-2 gap-8 sm:grid-cols-4"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4, delay: 0.1 }}
-          >
-            {/* Browse column */}
-            <div>
-              <h3 className="mb-4 font-semibold text-foreground text-sm">Browse</h3>
-              <ul className="space-y-2.5">
-                {browseLinks.map((link) => (
-                  <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      className="text-muted-foreground text-sm transition-colors hover:text-foreground"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+          {mounted ? (
+            <motion.div
+              className="grid grid-cols-2 gap-8 sm:grid-cols-4"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: DURATION.slow, delay: STAGGER.fast }}
+            >
+              {/* Browse column */}
+              <div>
+                <h3 className="text-foreground mb-4 text-sm font-semibold">Browse</h3>
+                <ul className="space-y-2.5">
+                  {browseLinks.map((link) => (
+                    <li key={`browse-${link.label}`}>
+                      <Link
+                        href={link.href}
+                        className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-            {/* Resources column */}
-            <div>
-              <h3 className="mb-4 font-semibold text-foreground text-sm">Resources</h3>
-              <ul className="space-y-2.5">
-                {resourceLinks.map((link) => (
-                  <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      className="inline-flex items-center gap-1.5 text-muted-foreground text-sm transition-colors hover:text-foreground"
-                    >
-                      {link.icon && <link.icon className="h-3.5 w-3.5" />}
-                      <span>{link.label}</span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+              {/* Resources column */}
+              <div>
+                <h3 className="text-foreground mb-4 text-sm font-semibold">Resources</h3>
+                <ul className="space-y-2.5">
+                  {resourceLinks.map((link) => {
+                    const isExternal = link.href.startsWith('http');
+                    return (
+                      <li key={`resources-${link.label}`}>
+                        <Link
+                          href={link.href}
+                          className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition-colors"
+                          {...(isExternal && {
+                            target: '_blank',
+                            rel: 'noopener noreferrer',
+                          })}
+                        >
+                          {link.icon ? <link.icon className="h-3.5 w-3.5" /> : null}
+                          <span>{link.label}</span>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
 
-            {/* Support column */}
-            <div>
-              <h3 className="mb-4 font-semibold text-foreground text-sm">Support</h3>
-              <ul className="space-y-2.5">
-                {supportLinks.map((link) => (
-                  <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      className="text-muted-foreground text-sm transition-colors hover:text-foreground"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+              {/* Support column */}
+              <div>
+                <h3 className="text-foreground mb-4 text-sm font-semibold">Support</h3>
+                <ul className="space-y-2.5">
+                  {supportLinks.map((link) => (
+                    <li key={`support-${link.label}`}>
+                      <Link
+                        href={link.href}
+                        className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-            {/* Legal column */}
-            <div>
-              <h3 className="mb-4 font-semibold text-foreground text-sm">Legal</h3>
-              <ul className="space-y-2.5">
-                {legalLinks.map((link) => (
-                  <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      className="text-muted-foreground text-sm transition-colors hover:text-foreground"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+              {/* Legal column */}
+              <div>
+                <h3 className="text-foreground mb-4 text-sm font-semibold">Legal</h3>
+                <ul className="space-y-2.5">
+                  {legalLinks.map((link) => (
+                    <li key={`legal-${link.label}`}>
+                      <Link
+                        href={link.href}
+                        className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </motion.div>
+          ) : (
+            <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
+              {/* Browse column */}
+              <div>
+                <h3 className="text-foreground mb-4 text-sm font-semibold">Browse</h3>
+                <ul className="space-y-2.5">
+                  {browseLinks.map((link) => (
+                    <li key={`browse-${link.label}`}>
+                      <Link
+                        href={link.href}
+                        className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Resources column */}
+              <div>
+                <h3 className="text-foreground mb-4 text-sm font-semibold">Resources</h3>
+                <ul className="space-y-2.5">
+                  {resourceLinks.map((link) => {
+                    const isExternal = link.href.startsWith('http');
+                    return (
+                      <li key={`resources-${link.label}`}>
+                        <Link
+                          href={link.href}
+                          className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition-colors"
+                          {...(isExternal && {
+                            target: '_blank',
+                            rel: 'noopener noreferrer',
+                          })}
+                        >
+                          {link.icon ? <link.icon className="h-3.5 w-3.5" /> : null}
+                          <span>{link.label}</span>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+
+              {/* Support column */}
+              <div>
+                <h3 className="text-foreground mb-4 text-sm font-semibold">Support</h3>
+                <ul className="space-y-2.5">
+                  {supportLinks.map((link) => (
+                    <li key={`support-${link.label}`}>
+                      <Link
+                        href={link.href}
+                        className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Legal column */}
+              <div>
+                <h3 className="text-foreground mb-4 text-sm font-semibold">Legal</h3>
+                <ul className="space-y-2.5">
+                  {legalLinks.map((link) => (
+                    <li key={`legal-${link.label}`}>
+                      <Link
+                        href={link.href}
+                        className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
-          </motion.div>
+          )}
         </div>
 
         {/* Bottom bar - Modern divider and layout */}
-        <motion.div
-          className="mt-12 border-border/30 border-t pt-8"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.3 }}
-        >
-          <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-            {/* Left - Copyright with heart */}
-            <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
-              <span>© {currentYear}</span>
-              <span className="text-border">•</span>
-              <span>Made with</span>
-              <Heart className="h-3.5 w-3.5 fill-red-500/80 text-red-500/80" />
-              <span>by</span>
-              <Link 
-                href="/consulting" 
-                className="font-medium text-foreground underline-offset-4 hover:underline"
-              >
-                JSONbored
-              </Link>
-            </div>
+        {mounted ? (
+          <motion.div
+            className="border-border/30 mt-12 border-t pt-8"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: STAGGER.slow }}
+          >
+            <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
+              {/* Left - Copyright with heart and version */}
+              <div className="text-muted-foreground flex items-center gap-1.5 text-sm">
+                <span>© {currentYear}</span>
+                <span className="text-border">•</span>
+                <span>Made with</span>
+                <Heart className="h-3.5 w-3.5 fill-red-500/80 text-red-500/80" />
+                <span>by</span>
+                <Link
+                  href="/consulting"
+                  className="text-foreground font-medium underline-offset-4 hover:underline"
+                >
+                  JSONbored
+                </Link>
+                <span className="text-border">•</span>
+                {/* 
+                  Version Display - Links to changelog page
+                  
+                  Displays the current application version from root package.json.
+                  The version links to /changelog where users can see all release entries.
+                  
+                  **Version Management Workflow:**
+                  1. Generate changelog: `pnpm changelog:generate`
+                  2. Bump version: `pnpm bump:patch/minor/major`
+                  3. Commit: `git commit -m "chore: bump version to X.Y.Z"`
+                  4. Tag: `git tag vX.Y.Z && git push origin main --tags`
+                  5. GitHub Actions automatically creates release
+                  
+                  **When to Bump:**
+                  - Patch: Bug fixes, small improvements, docs
+                  - Minor: New features, new pages, significant improvements
+                  - Major: Breaking changes, major redesigns, architecture changes
+                  
+                  @see {@link ../../../../../../packages/generators/src/commands/bump-version.ts | Version Bump Script}
+                  @see {@link ../../../../../../.github/workflows/release.yml | GitHub Release Workflow}
+                */}
+                <Link
+                  href="/changelog"
+                  className="font-mono text-xs hover:text-foreground transition-colors"
+                  title={`Version ${packageJson.version} - View changelog and release history`}
+                >
+                  v{packageJson.version}
+                </Link>
+              </div>
 
-            {/* Right - Status badge */}
-            <div className="flex items-center gap-4">
-              {mounted && (
-                <iframe
-                  src={`${EXTERNAL_SERVICES.betterstack.status}/badge?theme=${resolvedTheme === 'light' ? 'light' : 'dark'}`}
-                  width="250"
-                  height="30"
-                  title="System Status"
-                  className="rounded-md"
-                  loading="lazy"
-                  style={{ 
-                    colorScheme: 'normal',
-                    border: 0,
-                    overflow: 'hidden',
-                  }}
-                />
-              )}
+              {/* Right - Status badge */}
+              <div className="flex items-center gap-4">
+                {mounted ? (
+                  <iframe
+                    src={`${EXTERNAL_SERVICES.betterstack.status}/badge?theme=${resolvedTheme === 'light' ? 'light' : 'dark'}`}
+                    width="250"
+                    height="30"
+                    title="System Status"
+                    className="rounded-md"
+                    loading="lazy"
+                    style={{
+                      colorScheme: 'normal',
+                      border: 0,
+                      overflow: 'hidden',
+                    }}
+                  />
+                ) : null}
+              </div>
+            </div>
+          </motion.div>
+        ) : (
+          <div className="border-border/30 mt-12 border-t pt-8">
+            <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
+              {/* Left - Copyright with heart and version */}
+              <div className="text-muted-foreground flex items-center gap-1.5 text-sm">
+                <span>© {currentYear}</span>
+                <span className="text-border">•</span>
+                <span>Made with</span>
+                <Heart className="h-3.5 w-3.5 fill-red-500/80 text-red-500/80" />
+                <span>by</span>
+                <Link
+                  href="/consulting"
+                  className="text-foreground font-medium underline-offset-4 hover:underline"
+                >
+                  JSONbored
+                </Link>
+                <span className="text-border">•</span>
+                {/* 
+                  Version Display - Links to changelog page
+                  
+                  Displays the current application version from root package.json.
+                  The version links to /changelog where users can see all release entries.
+                  
+                  **Version Management Workflow:**
+                  1. Generate changelog: `pnpm changelog:generate`
+                  2. Bump version: `pnpm bump:patch/minor/major`
+                  3. Commit: `git commit -m "chore: bump version to X.Y.Z"`
+                  4. Tag: `git tag vX.Y.Z && git push origin main --tags`
+                  5. GitHub Actions automatically creates release
+                  
+                  **When to Bump:**
+                  - Patch: Bug fixes, small improvements, docs
+                  - Minor: New features, new pages, significant improvements
+                  - Major: Breaking changes, major redesigns, architecture changes
+                  
+                  @see {@link ../../../../../../packages/generators/src/commands/bump-version.ts | Version Bump Script}
+                  @see {@link ../../../../../../.github/workflows/release.yml | GitHub Release Workflow}
+                */}
+                <Link
+                  href="/changelog"
+                  className="font-mono text-xs hover:text-foreground transition-colors"
+                  title={`Version ${packageJson.version} - View changelog and release history`}
+                >
+                  v{packageJson.version}
+                </Link>
+              </div>
+
+              {/* Right - Status badge */}
+              <div className="flex items-center gap-4">
+                {/* Status badge only renders after mount */}
+              </div>
             </div>
           </div>
-        </motion.div>
+        )}
       </div>
     </footer>
   );

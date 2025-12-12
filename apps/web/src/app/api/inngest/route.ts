@@ -2,105 +2,146 @@
  * Inngest API Route Handler
  *
  * This is the endpoint that Inngest uses to invoke functions.
- * Wraps the Inngest serve handlers with logging for observability.
+ * Uses the API route factory for consistent error handling and logging.
  *
  * @see https://www.inngest.com/docs/reference/serve
  */
+
+import 'server-only';
 
 import {
   GET as inngestGET,
   POST as inngestPOST,
   PUT as inngestPUT,
 } from '@heyclaude/web-runtime/inngest';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { type NextRequest } from 'next/server';
+import { createApiRoute, createApiOptionsHandler } from '@heyclaude/web-runtime/server';
+import { connection } from 'next/server';
 
 /**
- * Forward incoming GET requests at /api/inngest to the Inngest runtime handler.
- *
- * Creates a per-request logger for tracing and delegates the Next.js request and context to the underlying Inngest GET handler.
- *
- * @param {NextRequest} request - The incoming Next.js request object for the route.
- * @param {unknown} context - Route handler context provided by Next.js (opaque; forwarded to the Inngest handler).
- * @returns {Promise<Response>} The Response produced by the Inngest runtime handler.
- *
- * @see {@link @heyclaude/web-runtime/inngest~GET} - Underlying Inngest GET handler
- * @see {@link @heyclaude/web-runtime/logging/server~generateRequestId} - Request ID generator used for tracing
- * @see {@link @heyclaude/web-runtime/logging/server~logger} - Logger used to create a per-request child logger
+ * GET /api/inngest - Inngest introspection endpoint
+ * 
+ * Handles GET requests from Inngest for function introspection.
+ * Delegates to Inngest's GET handler.
+ * 
+ * @example
+ * ```ts
+ * // Request - Inngest introspection
+ * GET /api/inngest
+ * 
+ * // Response (200) - Function definitions
+ * { functions: [...] }
+ * ```
  */
-export async function GET(request: NextRequest, context: unknown) {
-  const requestId = generateRequestId();
-  const reqLogger = logger.child({
-    requestId,
-    operation: 'InngestAPI',
-    route: '/api/inngest',
-    method: 'GET',
-  });
-  reqLogger.debug('Inngest GET request (introspection)');
-  try {
-    return await inngestGET(request, context);
-  } catch (error) {
-    const normalized = normalizeError(error, 'Inngest GET handler failed');
-    reqLogger.error('Inngest GET handler failed', normalized);
-    throw error;
-  }
-}
+export const GET = createApiRoute({
+  route: '/api/inngest',
+  operation: 'InngestAPI',
+  method: 'GET',
+  cors: 'anon',
+  openapi: {
+    summary: 'Inngest introspection endpoint',
+    description: 'Handles GET requests from Inngest for function introspection. Delegates to Inngest runtime.',
+    tags: ['inngest', 'webhooks'],
+    operationId: 'inngestIntrospection',
+    responses: {
+      200: {
+        description: 'Function definitions returned successfully',
+      },
+    },
+  },
+  handler: async ({ logger, request, nextContext }) => {
+    // Defer to request time for non-deterministic operations (required for Cache Components)
+    await connection();
+
+    logger.debug({ url: request.url }, 'Inngest GET request (introspection)');
+    // Delegate to Inngest handler with original request and context
+    return await inngestGET(request, nextContext);
+  },
+});
 
 /**
- * Forward POST requests to /api/inngest to the Inngest POST handler while creating a per-request logger.
- *
- * If the underlying handler throws, the error is normalized and logged before being re-thrown.
- *
- * @param request - NextRequest - The incoming request for the API route.
- * @param context - unknown - The Next.js route handler context provided to the API route.
- * @returns Promise<Response> - The HTTP response produced by the Inngest POST handler.
- * @throws Any error thrown by the underlying `inngestPOST` handler is normalized, logged, and then re-thrown.
- * @see {@link inngestPOST}
- * @see {@link generateRequestId}
- * @see {@link logger}
+ * POST /api/inngest - Inngest function invocation endpoint
+ * 
+ * Handles POST requests from Inngest to invoke functions.
+ * Delegates to Inngest's POST handler.
+ * 
+ * @example
+ * ```ts
+ * // Request - Inngest function invocation
+ * POST /api/inngest
+ * Body: { event: {...}, function_id: "..." }
+ * 
+ * // Response (200) - Function execution result
+ * { result: {...} }
+ * ```
  */
-export async function POST(request: NextRequest, context: unknown) {
-  const requestId = generateRequestId();
-  const reqLogger = logger.child({
-    requestId,
-    operation: 'InngestAPI',
-    route: '/api/inngest',
-    method: 'POST',
-  });
-  reqLogger.debug('Inngest POST request (function invocation)');
-  try {
-    return await inngestPOST(request, context);
-  } catch (error) {
-    const normalized = normalizeError(error, 'Inngest POST handler failed');
-    reqLogger.error('Inngest POST handler failed', normalized);
-    throw error;
-  }
-}
+export const POST = createApiRoute({
+  route: '/api/inngest',
+  operation: 'InngestAPI',
+  method: 'POST',
+  cors: 'anon',
+  openapi: {
+    summary: 'Inngest function invocation endpoint',
+    description: 'Handles POST requests from Inngest to invoke functions. Delegates to Inngest runtime.',
+    tags: ['inngest', 'webhooks'],
+    operationId: 'inngestInvoke',
+    responses: {
+      200: {
+        description: 'Function executed successfully',
+      },
+    },
+  },
+  handler: async ({ logger, request, nextContext }) => {
+    // Defer to request time for non-deterministic operations (required for Cache Components)
+    await connection();
+
+    logger.debug({ url: request.url }, 'Inngest POST request (function invocation)');
+    // Delegate to Inngest handler with original request and context
+    return await inngestPOST(request, nextContext);
+  },
+});
 
 /**
- * Forward PUT requests to the Inngest sync handler while scoping a per-request logger and normalizing errors.
- *
- * @param request - NextRequest: The Next.js request object for the incoming HTTP request
- * @param context - unknown: The route context forwarded to the Inngest handler
- * @returns The Response produced by the Inngest PUT handler
- * @see {@link @heyclaude/web-runtime/inngest#PUT}
- * @see {@link @heyclaude/web-runtime/logging/server.generateRequestId}
- * @see {@link @heyclaude/web-runtime/logging/server.logger}
+ * PUT /api/inngest - Inngest sync endpoint
+ * 
+ * Handles PUT requests from Inngest for function synchronization.
+ * Delegates to Inngest's PUT handler.
+ * 
+ * @example
+ * ```ts
+ * // Request - Inngest sync
+ * PUT /api/inngest
+ * 
+ * // Response (200) - Sync completed
+ * { synced: true }
+ * ```
  */
-export async function PUT(request: NextRequest, context: unknown) {
-  const requestId = generateRequestId();
-  const reqLogger = logger.child({
-    requestId,
-    operation: 'InngestAPI',
-    route: '/api/inngest',
-    method: 'PUT',
-  });
-  reqLogger.debug('Inngest PUT request (sync)');
-  try {
-    return await inngestPUT(request, context);
-  } catch (error) {
-    const normalized = normalizeError(error, 'Inngest PUT handler failed');
-    reqLogger.error('Inngest PUT handler failed', normalized);
-    throw error;
-  }
-}
+export const PUT = createApiRoute({
+  route: '/api/inngest',
+  operation: 'InngestAPI',
+  method: 'PUT',
+  cors: 'anon',
+  openapi: {
+    summary: 'Inngest sync endpoint',
+    description: 'Handles PUT requests from Inngest for function synchronization. Delegates to Inngest runtime.',
+    tags: ['inngest', 'webhooks'],
+    operationId: 'inngestSync',
+    responses: {
+      200: {
+        description: 'Sync completed successfully',
+      },
+    },
+  },
+  handler: async ({ logger, request, nextContext }) => {
+    // Defer to request time for non-deterministic operations (required for Cache Components)
+    await connection();
+
+    logger.debug({ url: request.url }, 'Inngest PUT request (sync)');
+    // Delegate to Inngest handler with original request and context
+    return await inngestPUT(request, nextContext);
+  },
+});
+
+/**
+ * OPTIONS handler for CORS preflight requests
+ */
+export const OPTIONS = createApiOptionsHandler('anon');

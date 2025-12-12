@@ -10,7 +10,8 @@ import { normalizeError, escapeHtml } from '@heyclaude/shared-runtime';
 import { inngest } from '../../client';
 import { sendEmail } from '../../../integrations/resend';
 import { HELLO_FROM, JOBS_FROM, COMMUNITY_FROM } from '../../../email/config/email-config';
-import { logger, generateRequestId, createWebAppContextWithId } from '../../../logging/server';
+import { logger, createWebAppContextWithId } from '../../../logging/server';
+import { sendCriticalFailureHeartbeat } from '../../utils/monitoring';
 
 // Email type configurations
 const TRANSACTIONAL_EMAIL_CONFIGS: Record<string, {
@@ -53,29 +54,48 @@ export const sendTransactionalEmail = inngest.createFunction(
     // Idempotency: Use type + email + timestamp to prevent duplicates
     // Note: CEL doesn't support || for null coalescing
     idempotency: 'event.data.type + "-" + event.data.email + "-" + string(event.ts)',
+    // BetterStack monitoring: Send heartbeat on failure (feature-flagged)
+    onFailure: async ({ event, error }) => {
+      const eventData = event?.data as { type?: string } | undefined;
+      const context: { functionName?: string; eventType?: string; error?: string } = {
+        functionName: 'sendTransactionalEmail',
+      };
+      if (eventData?.type) {
+        context.eventType = eventData.type;
+      }
+      if (error) {
+        context.error = error instanceof Error ? error.message : String(error);
+      }
+      sendCriticalFailureHeartbeat('BETTERSTACK_HEARTBEAT_CRITICAL_FAILURE', context);
+      
+      // Log for observability
+      logger.error(
+        { 
+          functionName: 'sendTransactionalEmail',
+          errorMessage: error ? (error instanceof Error ? error.message : String(error)) : 'unknown',
+        },
+        'Transactional email function failed after all retries'
+      );
+    },
   },
   { event: 'email/transactional' },
   async ({ event, step }) => {
     const startTime = Date.now();
-    const requestId = generateRequestId();
-    const logContext = createWebAppContextWithId(requestId, '/inngest/email/transactional', 'sendTransactionalEmail');
+    const logContext = createWebAppContextWithId('/inngest/email/transactional', 'sendTransactionalEmail');
 
     const { type, email, emailData } = event.data;
 
-    logger.info('Transactional email request received', {
-      ...logContext,
-      type,
-      email, // Auto-hashed by pino redaction
-    });
+    logger.info(
+      { ...logContext, type, email }, // Auto-hashed by pino redaction
+      'Transactional email request received'
+    );
 
     // Validate email type
     const config = TRANSACTIONAL_EMAIL_CONFIGS[type];
     if (!config) {
-      logger.warn('Unknown transactional email type', {
-        ...logContext,
+      logger.warn({ ...logContext,
         type,
-        availableTypes: Object.keys(TRANSACTIONAL_EMAIL_CONFIGS).join(', '),
-      });
+        availableTypes: Object.keys(TRANSACTIONAL_EMAIL_CONFIGS).join(', '), }, 'Unknown transactional email type');
       throw new Error(`Unknown transactional email type: ${type}`);
     }
 
@@ -100,34 +120,28 @@ export const sendTransactionalEmail = inngest.createFunction(
         );
 
         if (sendError) {
-          logger.warn('Transactional email failed', {
-            ...logContext,
+          logger.warn({ ...logContext,
             type,
-            errorMessage: sendError.message,
-          });
+            errorMessage: sendError.message, }, 'Transactional email failed');
           return { sent: false, emailId: null };
         }
 
         return { sent: true, emailId: sendData?.id ?? null };
       } catch (error) {
         const normalized = normalizeError(error, 'Transactional email failed');
-        logger.warn('Transactional email failed', {
-          ...logContext,
+        logger.warn({ ...logContext,
           type,
-          errorMessage: normalized.message,
-        });
+          errorMessage: normalized.message, }, 'Transactional email failed');
         return { sent: false, emailId: null };
       }
     });
 
     const durationMs = Date.now() - startTime;
-    logger.info('Transactional email completed', {
-      ...logContext,
+    logger.info({ ...logContext,
       durationMs,
       type,
       sent: emailResult.sent,
-      emailId: emailResult.emailId,
-    });
+      emailId: emailResult.emailId, }, 'Transactional email completed');
 
     return {
       success: emailResult.sent,

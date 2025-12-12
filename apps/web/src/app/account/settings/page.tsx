@@ -3,6 +3,7 @@
  */
 
 import { type Database } from '@heyclaude/database-types';
+import { extractFirstFieldFromTuple, isPostgresTupleString } from '@heyclaude/web-runtime';
 import { ensureUserRecord } from '@heyclaude/web-runtime/actions';
 import {
   generatePageMetadata,
@@ -10,36 +11,33 @@ import {
   getUserSettings,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  UI_CLASSES,
   Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  UI_CLASSES,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import Image from 'next/image';
 import Link from 'next/link';
 
+import { SignInButton } from '@/src/components/core/auth/sign-in-button';
 import {
   ProfileEditForm,
   RefreshProfileButton,
 } from '@/src/components/core/forms/profile-edit-form';
 
 /**
- * Dynamic Rendering Required
- * Authenticated user settings
- */
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
-
-/**
- * Generates metadata for the account settings page.
+ * Produce page metadata for the account settings route.
  *
- * @returns The Next.js page metadata for '/account/settings'.
+ * Awaits a server-side connection to ensure non-deterministic operations (e.g., timestamps) run at request time before delegating to generatePageMetadata.
+ *
+ * @returns The Next.js page metadata for "/account/settings".
  * @see generatePageMetadata
  */
 export async function generateMetadata(): Promise<Metadata> {
@@ -63,25 +61,26 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see RefreshProfileButton
  */
 export default async function SettingsPage() {
-  // Generate single requestId for this page request
-  const requestId = generateRequestId();
+  'use cache: private';
+  cacheLife('userProfile'); // 1min stale, 5min revalidate, 30min expire - User-specific data
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    requestId,
+    module: 'apps/web/src/app/account/settings',
     operation: 'SettingsPage',
     route: '/account/settings',
-    module: 'apps/web/src/app/account/settings',
   });
-
   // Section: Authentication
   const { user } = await getAuthenticatedUser({ context: 'SettingsPage' });
 
   if (!user) {
-    reqLogger.warn('SettingsPage: unauthenticated access attempt', {
-      section: 'authentication',
-      timestamp: new Date().toISOString(),
-    });
+    reqLogger.warn(
+      {
+        section: 'data-fetch',
+        timestamp: new Date().toISOString(),
+      },
+      'SettingsPage: unauthenticated access attempt'
+    );
     return (
       <div className="space-y-6">
         <Card>
@@ -90,9 +89,12 @@ export default async function SettingsPage() {
             <CardDescription>Please sign in to manage your account settings.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild>
-              <Link href={ROUTES.LOGIN}>Go to login</Link>
-            </Button>
+            <SignInButton
+              redirectTo="/account/settings"
+              valueProposition="Sign in to manage your account settings"
+            >
+              Go to login
+            </SignInButton>
           </CardContent>
         </Card>
       </div>
@@ -110,15 +112,17 @@ export default async function SettingsPage() {
   try {
     settingsData = await getUserSettings(user.id);
     if (!settingsData) {
-      userLogger.warn('SettingsPage: getUserSettings returned null', {
-        section: 'settings-data-fetch',
-      });
+      userLogger.warn({ section: 'data-fetch' }, 'SettingsPage: getUserSettings returned null');
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user settings');
-    userLogger.error('SettingsPage: getUserSettings threw', normalized, {
-      section: 'settings-data-fetch',
-    });
+    userLogger.error(
+      {
+        err: normalized,
+        section: 'data-fetch',
+      },
+      'SettingsPage: getUserSettings threw'
+    );
   }
 
   if (!settingsData) {
@@ -142,12 +146,93 @@ export default async function SettingsPage() {
   }
 
   // Type-safe RPC return using centralized type definition
-  let userData = settingsData.user_data;
-  let profile = settingsData.profile;
+  // get_user_settings now returns composite type user_settings_result_v2
+  // This provides automatic TypeScript type generation from the database
+  let userData = settingsData?.user_data ?? null;
+  let profile = settingsData?.profile ?? null;
+  const username = settingsData?.username ?? null;
+
+  // Defensive: If profile is a string (serialized tuple), we need to handle it differently
+  // This can happen if the RPC returns a composite type that gets serialized incorrectly
+  // Note: With composite types, this should not happen, but we keep defensive code
+  // Type assertion needed because TypeScript knows profile shouldn't be string from type definition
+  const profileValue: unknown = profile;
+  if (profileValue && typeof profileValue === 'string') {
+    userLogger.error(
+      {
+        err: new Error('Profile data serialization error'),
+        profileSample: profileValue.slice(0, 100),
+        profileType: typeof profileValue,
+        section: 'data-fetch',
+      },
+      'SettingsPage: profile is a string (serialized tuple) - RPC return type issue'
+    );
+    // Profile data is corrupted - cannot proceed
+    return (
+      <div className="space-y-6">
+        <h1 className="text-3xl font-bold">Settings</h1>
+        <p className="text-destructive">
+          Profile data format error. Please contact support if this persists.
+        </p>
+      </div>
+    );
+  }
+
+  // Ensure profile is an object with expected structure
+  if (
+    profile &&
+    typeof profile === 'object' &&
+    !Array.isArray(profile) && // Profile is an object - ensure display_name is a string, not a serialized tuple
+    profile.display_name
+  ) {
+    // First check if display_name is a string before processing
+    if (typeof profile.display_name === 'string') {
+      // Check if display_name is a PostgreSQL tuple string
+      if (isPostgresTupleString(profile.display_name)) {
+        const originalLength = profile.display_name?.length ?? 0;
+        const extracted = extractFirstFieldFromTuple(profile.display_name);
+        if (extracted === null) {
+          userLogger.warn(
+            { section: 'data-fetch', tupleString: profile.display_name.slice(0, 100) },
+            'SettingsPage: failed to extract display_name from tuple'
+          );
+          profile.display_name = '';
+        } else {
+          profile = {
+            ...profile,
+            display_name: extracted,
+          };
+          userLogger.info(
+            {
+              extracted: profile.display_name,
+              originalLength,
+              section: 'data-fetch',
+            },
+            'SettingsPage: extracted display_name from tuple string'
+          );
+        }
+      }
+      // If it's already a string and not a tuple, keep it as is
+    } else {
+      // Not a string - convert to string or empty
+      userLogger.warn(
+        {
+          displayNameType: typeof profile.display_name,
+          displayNameValue: String(profile.display_name).slice(0, 100),
+          section: 'data-fetch',
+        },
+        'SettingsPage: display_name is not a string'
+      );
+      profile.display_name = '';
+    }
+  }
 
   // Initialize user if missing (consolidated - no more profiles table)
   if (!userData) {
-    userLogger.warn('SettingsPage: user_data missing, invoking ensureUserRecord');
+    userLogger.warn(
+      { section: 'data-fetch' },
+      'SettingsPage: user_data missing, invoking ensureUserRecord'
+    );
     try {
       // Type-safe access to user_metadata (Record<string, unknown> from Supabase)
       const userMetadata = user.user_metadata;
@@ -158,21 +243,30 @@ export default async function SettingsPage() {
         typeof userMetadata['avatar_url'] === 'string' ? userMetadata['avatar_url'] : null;
       const picture = typeof userMetadata['picture'] === 'string' ? userMetadata['picture'] : null;
       await ensureUserRecord({
-        id: user.id,
         email: user.email ?? null,
-        name: fullName ?? name ?? null,
+        id: user.id,
         image: avatarUrl ?? picture ?? null,
+        name: fullName ?? name ?? null,
       });
       const refreshed = await getUserSettings(user.id);
       if (refreshed) {
         userData = refreshed.user_data;
         profile = refreshed.profile;
       } else {
-        userLogger.warn('SettingsPage: getUserSettings returned null after ensureUserRecord');
+        userLogger.warn(
+          { section: 'data-fetch' },
+          'SettingsPage: getUserSettings returned null after ensureUserRecord'
+        );
       }
     } catch (error) {
       const normalized = normalizeError(error, 'Failed to initialize user record');
-      userLogger.error('SettingsPage: ensureUserRecord failed', normalized);
+      userLogger.error(
+        {
+          err: normalized,
+          section: 'data-fetch',
+        },
+        'SettingsPage: ensureUserRecord failed'
+      );
       // Leave userData/profile undefined so page can render fallback UI
     }
   }
@@ -180,8 +274,11 @@ export default async function SettingsPage() {
   if (!profile) {
     // No error object available, only context
     userLogger.error(
-      'SettingsPage: profile missing from getUserSettings response',
-      new Error('Profile missing from response')
+      {
+        err: new Error('Profile missing from response'),
+        section: 'data-fetch',
+      },
+      'SettingsPage: profile missing from getUserSettings response'
     );
     return (
       <div className="space-y-6">
@@ -206,15 +303,15 @@ export default async function SettingsPage() {
               <CardTitle>Profile Information</CardTitle>
               <CardDescription>Update your public profile details</CardDescription>
             </div>
-            {userData?.slug ? (
-              <Button asChild variant="outline" size="sm">
+            {userData?.slug && typeof userData.slug === 'string' ? (
+              <Button asChild size="sm" variant="outline">
                 <Link href={`/u/${userData.slug}`}>View Profile</Link>
               </Button>
             ) : null}
           </div>
         </CardHeader>
         <CardContent>
-          <ProfileEditForm profile={profile} />
+          <ProfileEditForm profile={{ ...profile, username }} />
         </CardContent>
       </Card>
 
@@ -235,9 +332,9 @@ export default async function SettingsPage() {
               <p className="text-muted-foreground">
                 {profile.created_at
                   ? new Date(profile.created_at).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
                       day: 'numeric',
+                      month: 'long',
+                      year: 'numeric',
                     })
                   : 'N/A'}
               </p>
@@ -257,11 +354,11 @@ export default async function SettingsPage() {
           {userData?.image && typeof userData.image === 'string' ? (
             <div className="flex items-center gap-4">
               <Image
-                src={userData.image}
                 alt={`${userData.name ?? 'User'}'s avatar`}
-                width={64}
-                height={64}
                 className="h-16 w-16 rounded-full object-cover"
+                height={64}
+                src={userData.image}
+                width={64}
               />
               <div>
                 <p className="text-sm">

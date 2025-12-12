@@ -1,7 +1,8 @@
 'use client';
 
 import { VALID_PROVIDERS } from '@heyclaude/web-runtime';
-import { ensureString, logClientWarning } from '@heyclaude/web-runtime/core';
+import { ensureString } from '@heyclaude/web-runtime/core';
+import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { useEffect, useMemo, useState } from 'react';
 
 import { AuthFormPanel } from '@/src/components/core/auth/auth-form-panel';
@@ -18,12 +19,12 @@ interface LoginPanelClientProperties {
 }
 
 /**
- * Render a sign-in panel with OAuth provider buttons and an optional newsletter opt-in tile.
+ * Render the sign-in panel with OAuth provider buttons and an optional newsletter opt-in tile.
  *
- * Loads remote newsletter display configuration on mount, manages local newsletter opt-in state,
- * and displays a formatted subscriber count when available.
+ * Displays a newsletter opt-in tile (including a formatted subscriber count when available) alongside OAuth provider buttons.
  *
  * @param redirectTo - Optional URL to navigate to after successful OAuth sign-in.
+ * @param redirectTo.redirectTo
  * @returns The JSX element containing the sign-in panel with provider buttons and the newsletter opt-in tile.
  *
  * @see AuthFormPanel
@@ -47,7 +48,17 @@ export function LoginPanelClient({ redirectTo }: LoginPanelClientProperties) {
       })
       .catch((error) => {
         if (!cancelled) {
-          logClientWarning('LoginPanelClient: failed to load newsletter config', error);
+          const normalized = normalizeError(error, 'Failed to load newsletter config');
+          logClientWarn(
+            '[Config] Failed to load newsletter config',
+            normalized,
+            'LoginPanelClient.loadNewsletterConfig',
+            {
+              action: 'load-newsletter-config',
+              category: 'config',
+              component: 'LoginPanelClient',
+            }
+          );
         }
       });
     return () => {
@@ -76,31 +87,31 @@ export function LoginPanelClient({ redirectTo }: LoginPanelClientProperties) {
       newsletterConfig['newsletter.login_tile.badge_prefix'],
       '✨ Trusted by'
     );
-    return { tileHeadline, tileDescription, tileBenefits, tileSafety, badgePrefix };
+    return { badgePrefix, tileBenefits, tileDescription, tileHeadline, tileSafety };
   }, [newsletterConfig]);
 
   return (
     <AuthFormPanel
-      title="Sign in"
-      description="Choose your preferred sign-in method"
       afterContent={
         <NewsletterOptInTile
-          checked={newsletterOptIn}
-          onChange={setNewsletterOptIn}
-          subscriberCountLabel={subscriberCountLabel}
-          isLoadingCount={isLoading}
-          headline={tileProperties.tileHeadline}
-          safetyCopy={tileProperties.tileSafety}
           badgePrefix={tileProperties.badgePrefix}
+          checked={newsletterOptIn}
+          headline={tileProperties.tileHeadline}
+          isLoadingCount={isLoading}
+          safetyCopy={tileProperties.tileSafety}
+          subscriberCountLabel={subscriberCountLabel}
+          onChange={setNewsletterOptIn}
         />
       }
+      description="Choose your preferred sign-in method"
+      title="Sign in"
     >
       {VALID_PROVIDERS.map((provider) => (
         <OAuthProviderButton
           key={provider}
+          newsletterOptIn={newsletterOptIn}
           provider={provider}
           redirectTo={redirectTo}
-          newsletterOptIn={newsletterOptIn}
         />
       ))}
     </AuthFormPanel>

@@ -5,7 +5,8 @@
  * Zero initial bundle impact - all services lazy-loaded
  */
 
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { getFeatureFlag } from '@heyclaude/web-runtime/config/static-configs';
+import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 
@@ -17,33 +18,61 @@ import { useEffect, useState } from 'react';
 // eslint-disable-next-line architectural-rules/require-env-validation-schema -- NODE_ENV is inlined by Next.js at build time, not a runtime lookup
 const isProduction = process.env.NODE_ENV === 'production';
 
+// Conditionally load Vercel Analytics only if feature flag is enabled
 const VercelPulse = dynamic(
-  () =>
-    import('@vercel/analytics/next')
+  () => {
+    const vercelEnabled = getFeatureFlag('analytics.vercel_enabled');
+    if (!vercelEnabled) {
+      return Promise.resolve(() => null);
+    }
+    return import('@vercel/analytics/next')
       .then((mod) => mod.Analytics)
       .catch((error) => {
         const normalized = normalizeError(error, 'Failed to load Vercel pulse');
-        logger.warn('PulseCannon: Vercel pulse import failed', undefined, {
-          error: normalized.message,
-        });
+        logClientWarn(
+          '[Analytics] Vercel pulse import failed',
+          normalized,
+          'PulseCannon.loadVercelPulse',
+          {
+            component: 'PulseCannon',
+            action: 'load-vercel-pulse',
+            category: 'analytics',
+            error: normalized.message,
+          }
+        );
         return () => null;
-      }),
+      });
+  },
   {
     ssr: false,
   }
 );
 
+// Conditionally load Speed Insights only if feature flag is enabled
 const SpeedInsights = dynamic(
-  () =>
-    import('@vercel/speed-insights/next')
+  () => {
+    const vercelEnabled = getFeatureFlag('analytics.vercel_enabled');
+    if (!vercelEnabled) {
+      return Promise.resolve(() => null);
+    }
+    return import('@vercel/speed-insights/next')
       .then((mod) => mod.SpeedInsights)
       .catch((error) => {
         const normalized = normalizeError(error, 'Failed to load Speed Insights');
-        logger.warn('PulseCannon: Speed Insights import failed', undefined, {
-          error: normalized.message,
-        });
+        logClientWarn(
+          '[Analytics] Speed Insights import failed',
+          normalized,
+          'PulseCannon.loadSpeedInsights',
+          {
+            component: 'PulseCannon',
+            action: 'load-speed-insights',
+            category: 'analytics',
+            error: normalized.message,
+          }
+        );
         return () => null;
-      }),
+      });
+  },
   {
     ssr: false,
   }
@@ -57,19 +86,27 @@ function loadUmamiPulse(): void {
   try {
     const script = document.createElement('script');
     script.src = 'https://umami.claudepro.directory/script.js';
-    script.setAttribute('data-website-id', 'b734c138-2949-4527-9160-7fe5d0e81121');
+    script.dataset['websiteId'] = 'b734c138-2949-4527-9160-7fe5d0e81121';
     script.setAttribute(
       'integrity',
       'sha384-gW+82edTiLqRoEvPbT3xKDCYZ5M02YXbW4tA3gbojZWiiMYNJZb4YneJrS4ri3Rn'
     );
     script.setAttribute('crossorigin', 'anonymous');
     script.defer = true;
-    document.head.appendChild(script);
+    document.head.append(script);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to inject Umami pulse script');
-    logger.warn('PulseCannon: Umami pulse injection failed', undefined, {
-      error: normalized.message,
-    });
+    logClientWarn(
+      '[Analytics] Umami pulse injection failed',
+      normalized,
+      'PulseCannon.loadUmamiPulse',
+      {
+        component: 'PulseCannon',
+        action: 'load-umami-pulse',
+        category: 'analytics',
+        error: normalized.message,
+      }
+    );
   }
 }
 
@@ -81,7 +118,7 @@ export function PulseCannon() {
       return;
     }
 
-    if (typeof window === 'undefined') {
+    if (typeof globalThis.window === 'undefined') {
       return;
     }
 
@@ -91,16 +128,26 @@ export function PulseCannon() {
         setShouldLoadPulse(true);
       } catch (error) {
         const normalized = normalizeError(error, 'Failed to load pulse services');
-        logger.warn('PulseCannon: Pulse loading failed', undefined, { error: normalized.message });
+        logClientWarn(
+          '[Analytics] Pulse loading failed',
+          normalized,
+          'PulseCannon.loadAllPulse',
+          {
+            component: 'PulseCannon',
+            action: 'load-all-pulse',
+            category: 'analytics',
+            error: normalized.message,
+          }
+        );
       }
     };
 
-    if ('requestIdleCallback' in window) {
+    if ('requestIdleCallback' in globalThis) {
       requestIdleCallback(loadAllPulse, { timeout: 2000 });
     } else if (typeof document !== 'undefined' && document.readyState === 'complete') {
       setTimeout(loadAllPulse, 100);
     } else {
-      (window as Window).addEventListener(
+      (globalThis as unknown as Window).addEventListener(
         'load',
         () => {
           setTimeout(loadAllPulse, 100);
@@ -114,10 +161,12 @@ export function PulseCannon() {
     return null;
   }
 
+  const vercelEnabled = getFeatureFlag('analytics.vercel_enabled');
+
   return (
     <>
-      <VercelPulse />
-      <SpeedInsights />
+      {vercelEnabled && <VercelPulse />}
+      {vercelEnabled && <SpeedInsights />}
     </>
   );
 }

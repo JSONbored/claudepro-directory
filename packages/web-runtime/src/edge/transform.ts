@@ -72,11 +72,9 @@ export async function highlightCodeEdge(
     return highlightCode(code, language, { showLineNumbers });
   } catch (error) {
     const normalized = normalizeError(error, 'Local highlighting failed, using fallback');
-    logger.warn('Local highlighting failed, using fallback', {
-      err: normalized,
+    logger.warn({ err: normalized,
       language,
-      codePreview: code.slice(0, 80),
-    });
+      codePreview: code.slice(0, 80), }, 'Local highlighting failed, using fallback');
 
     const escapedCode = code
       .replace(/&/g, '&amp;')
@@ -190,7 +188,7 @@ export async function processContentEdge(
     return { html, language: highlightLanguage };
   } catch (error) {
     const normalized = normalizeError(error, 'processContentEdge failed');
-    logger.warn('processContentEdge error', { err: normalized });
+    logger.warn({ err: normalized }, 'processContentEdge error');
     throw normalized;
   }
 }

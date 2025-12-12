@@ -5,28 +5,38 @@ import {
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
+import { logger } from '@heyclaude/web-runtime/logging/server';
 import { Button, Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { connection } from 'next/server';
+import { Suspense } from 'react';
 
 import { CollectionForm } from '@/src/components/core/forms/collection-form';
+
+import Loading from './loading';
 
 /**
  * Dynamic Rendering Required
  * Authenticated route
  */
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
 
 /**
- * Provide page metadata for the account library "create collection" route.
+ * Generate metadata for the account library "Create Collection" page.
+ *
+ * This function ensures the request-scoped server connection is established before
+ * creating non-deterministic metadata (e.g., timestamps) and then builds metadata
+ * for the '/account/library/new' route.
  *
  * @returns Metadata for the '/account/library/new' page
  * @see generatePageMetadata
  */
 export async function generateMetadata(): Promise<Metadata> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
   return generatePageMetadata('/account/library/new');
 }
 
@@ -45,25 +55,53 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see ROUTES.ACCOUNT_LIBRARY
  */
 export default async function NewCollectionPage() {
-  // Generate single requestId for this page request
-  const requestId = generateRequestId();
+  'use cache: private';
+  cacheLife('userProfile'); // 1min stale, 5min revalidate, 30min expire - User-specific data
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    requestId,
+    module: 'apps/web/src/app/account/library/new',
     operation: 'NewCollectionPage',
     route: '/account/library/new',
-    module: 'apps/web/src/app/account/library/new',
   });
 
+  return (
+    <Suspense fallback={<Loading />}>
+      <NewCollectionPageContent reqLogger={reqLogger} />
+    </Suspense>
+  );
+}
+
+/**
+ * Renders the "Create Collection" page content after ensuring the request is authenticated and user bookmarks are loaded.
+ *
+ * This server component enforces authentication (redirecting to /login for unauthenticated requests), loads the current user's bookmarks for use by the collection form, and returns the page UI including back navigation, page title, and a CollectionForm prepopulated with the user's bookmarks.
+ *
+ * @param reqLogger - A request-scoped logger instance used to emit structured logs for authentication, data loading, and page render events.
+ * @param reqLogger.reqLogger
+ * @returns The page React element for creating a new collection.
+ *
+ * @see getAuthenticatedUser
+ * @see getUserBookmarksForCollections
+ * @see CollectionForm
+ * @see ROUTES.ACCOUNT_LIBRARY
+ */
+async function NewCollectionPageContent({
+  reqLogger,
+}: {
+  reqLogger: ReturnType<typeof logger.child>;
+}) {
   // Section: Authentication
   const { user } = await getAuthenticatedUser({ context: 'NewCollectionPage' });
 
   if (!user) {
-    reqLogger.warn('NewCollectionPage: unauthenticated access attempt', {
-      section: 'authentication',
-      timestamp: new Date().toISOString(),
-    });
+    reqLogger.warn(
+      {
+        section: 'data-fetch',
+        timestamp: new Date().toISOString(),
+      },
+      'NewCollectionPage: unauthenticated access attempt'
+    );
     redirect('/login');
   }
 
@@ -73,27 +111,23 @@ export default async function NewCollectionPage() {
     userId: user.id, // Redaction will automatically hash this
   });
 
-  userLogger.info('NewCollectionPage: authentication successful', {
-    section: 'authentication',
-  });
+  userLogger.info({ section: 'data-fetch' }, 'NewCollectionPage: authentication successful');
 
   // Section: Bookmarks Data Fetch
   const bookmarks = await getUserBookmarksForCollections(user.id);
-  userLogger.info('NewCollectionPage: bookmarks data loaded', {
-    section: 'bookmarks-data-fetch',
-    bookmarksCount: bookmarks.length,
-  });
+  userLogger.info(
+    { bookmarksCount: bookmarks.length, section: 'data-fetch' },
+    'NewCollectionPage: bookmarks data loaded'
+  );
 
   // Final summary log
-  userLogger.info('NewCollectionPage: page render completed', {
-    section: 'page-render',
-  });
+  userLogger.info({ section: 'data-fetch' }, 'NewCollectionPage: page render completed');
 
   return (
     <div className="space-y-6">
       <div>
         <Link href={ROUTES.ACCOUNT_LIBRARY}>
-          <Button variant="ghost" className="mb-4 flex items-center gap-2">
+          <Button className="mb-4 flex items-center gap-2" variant="ghost">
             <ArrowLeft className="h-4 w-4" />
             Back to Library
           </Button>

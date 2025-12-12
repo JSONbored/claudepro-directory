@@ -76,11 +76,6 @@ export function getAnimationDurations() {
       fast: config['animation.ticker.fast_ms'],
       slow: config['animation.ticker.slow_ms'],
     },
-    stagger: {
-      fast: config['animation.stagger.fast_ms'],
-      medium: config['animation.stagger.medium_ms'],
-      slow: config['animation.stagger.slow_ms'],
-    },
     beam: {
       default: config['animation.beam.default_ms'],
     },

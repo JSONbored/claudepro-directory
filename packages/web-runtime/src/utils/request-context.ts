@@ -11,7 +11,6 @@
  * 
  * **Client/Server Boundaries:**
  * - This module uses `require('next/headers')` which is server-only
- * - If you need request IDs in client components, use {@link ./request-id.generateRequestId | generateRequestId} from {@link ./request-id | request-id} instead
  * - For client-side logging, use {@link ../logging/client | Client Logging Barrel}
  * 
  * **Usage:**
@@ -20,14 +19,11 @@
  * - Client components: **DO NOT USE** - use {@link ../logging/client | Client Logging Barrel} instead
  * 
  * @module web-runtime/utils/request-context
- * @see {@link ./request-id | request-id} - Client-safe request ID generation
  * @see {@link ../logging/server | Server Logging Barrel} - Server-side logging utilities
  * @see {@link ../logging/client | Client Logging Barrel} - Client-side logging utilities
  */
 
 import 'server-only';
-
-import { generateRequestId } from './request-id';
 
 /**
  * Get request context from Next.js headers (App Router only)
@@ -41,10 +37,10 @@ import { generateRequestId } from './request-id';
  * - Uses `next/headers` which is server-only
  * 
  * **Fallback Behavior:**
- * - If `next/headers` is unavailable (Pages Router, Edge Runtime, build time), returns minimal context with just request ID
+ * - If `next/headers` is unavailable (Pages Router, Edge Runtime, build time), returns minimal context
  * - This ensures the function doesn't crash in non-App Router contexts
  * 
- * @returns Request context with requestId, userAgent, ip, referer, and path
+ * @returns Request context with userAgent, ip, referer, and path
  * 
  * @example
  * ```typescript
@@ -53,16 +49,14 @@ import { generateRequestId } from './request-id';
  * 
  * export default async function MyPage() {
  *   const context = await getRequestContext();
- *   logger.info('Page loaded', { ...context, userId: user.id });
+ *   logger.info({ ...context, userId: user.id }, 'Page loaded');
  * }
  * ```
  * 
- * @see {@link ./request-id.generateRequestId | generateRequestId} - Client-safe alternative for client components
  * @see {@link createLogContext} - Higher-level function that uses this
  * @see {@link ../logging/server | Server Logging Barrel} - Server-side logging utilities
  */
 export async function getRequestContext(): Promise<{
-  requestId: string;
   userAgent: string | undefined;
   ip: string | undefined;
   referer: string | undefined;
@@ -84,7 +78,6 @@ export async function getRequestContext(): Promise<{
     const path = headersList.get('x-pathname') ?? undefined;
     
     return {
-      requestId: generateRequestId(),
       userAgent,
       ip,
       referer,
@@ -92,9 +85,8 @@ export async function getRequestContext(): Promise<{
     };
   } catch {
     // next/headers not available (Pages Router, edge runtime, or build time)
-    // Return minimal context with just request ID
+    // Return minimal context
     return {
-      requestId: generateRequestId(),
       userAgent: undefined,
       ip: undefined,
       referer: undefined,

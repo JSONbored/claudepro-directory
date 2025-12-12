@@ -8,74 +8,85 @@ import {
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { Bookmark, Calendar } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { type HomepageContentItem } from '@heyclaude/web-runtime/types/component.types';
 import {
-  UI_CLASSES,
-  NavLink,
-  UnifiedBadge,
   Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  NavLink,
+  UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import Link from 'next/link';
+import { connection } from 'next/server';
+import { Suspense } from 'react';
 
+import { SignInButton } from '@/src/components/core/auth/sign-in-button';
+import { AnimatedCard } from '@/src/components/features/account/animated-card';
+import { AnimatedStatsCard } from '@/src/components/features/account/animated-stats-card';
+import { DashboardTabs } from '@/src/components/features/account/dashboard-tabs';
 import { RecentlySavedGrid } from '@/src/components/features/account/recently-saved-grid';
 
+import Loading from './loading';
+
+/**
+ * Generate metadata for the account page at request time.
+ *
+ * Awaits a server connection to ensure non-deterministic operations run at request time,
+ * then delegates to generatePageMetadata('/account') to produce the final Metadata.
+ *
+ * @returns Metadata for the account page.
+ *
+ * @see generatePageMetadata
+ * @see connection
+ */
+
 export async function generateMetadata(): Promise<Metadata> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
   return generatePageMetadata('/account');
 }
 
 /**
- * Dynamic Rendering Required
+ * Render the account dashboard for the authenticated user.
  *
- * This page is dynamic because it displays user-specific account data.
- * Runtime: Node.js (required for authenticated user data and Supabase server client)
- */
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
-
-/**
- * Render the account dashboard page for the authenticated user.
+ * Verifies authentication, loads the user's dashboard bundle (dashboard, library, homepage),
+ * computes metrics and recent bookmarks, resolves content details for recently saved items,
+ * and builds personalized recommendations before rendering the dashboard UI. Renders an
+ * authentication prompt when no user is signed in and a dashboard-unavailable fallback if
+ * required dashboard data cannot be loaded.
  *
- * This server component verifies authentication, loads the user's dashboard bundle
- * (dashboard, library, homepage), computes metrics and recent bookmarks, resolves
- * content details for recent bookmarks, and builds personalized recommendations
- * before returning the dashboard UI.
- *
- * The component returns a complete JSX page that includes stats, quick actions,
- * a recently saved grid, and recommended items. If the user is not authenticated
- * or required dashboard data cannot be loaded, it renders an appropriate fallback UI.
- *
- * @returns A JSX element representing the account dashboard page.
+ * @returns A JSX element representing the account dashboard page or an authentication/fallback UI.
  *
  * @see getAuthenticatedUser
  * @see getAccountDashboardBundle
  * @see RecentlySavedGrid
  */
 export default async function AccountDashboard() {
-  // Generate single requestId for this page request
-  const requestId = generateRequestId();
+  'use cache: private';
+  cacheLife('userProfile'); // 1min stale, 5min revalidate, 30min expire - User-specific data
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    requestId,
+    module: 'apps/web/src/app/account',
     operation: 'AccountDashboard',
     route: '/account',
-    module: 'apps/web/src/app/account',
   });
 
   // Section: Authentication
   const { user } = await getAuthenticatedUser({ context: 'AccountDashboard' });
 
   if (!user) {
-    reqLogger.warn('AccountDashboard: unauthenticated access attempt detected', {
-      section: 'authentication',
-    });
+    reqLogger.warn(
+      { section: 'data-fetch' },
+      'AccountDashboard: unauthenticated access attempt detected'
+    );
     return (
       <div className="space-y-6">
         <Card>
@@ -84,9 +95,9 @@ export default async function AccountDashboard() {
             <CardDescription>Please sign in to view your dashboard.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild>
-              <Link href={ROUTES.LOGIN}>Go to login</Link>
-            </Button>
+            <SignInButton redirectTo="/account" valueProposition="Sign in to view your dashboard">
+              Go to login
+            </SignInButton>
           </CardContent>
         </Card>
       </div>
@@ -99,74 +110,229 @@ export default async function AccountDashboard() {
     userId: user.id, // Redaction will automatically hash this
   });
 
-  userLogger.info('AccountDashboard: authentication successful', {
-    section: 'authentication',
-  });
+  userLogger.info({ section: 'data-fetch' }, 'AccountDashboard: authentication successful');
 
-  // Section: Dashboard Bundle
+  // Fetch bundle once at the top level to avoid duplicate fetches
+  // This ensures consistency and eliminates fetch waterfalls
   let bundleData: Awaited<ReturnType<typeof getAccountDashboardBundle>> | null = null;
   try {
     bundleData = await getAccountDashboardBundle(user.id);
-    userLogger.info('AccountDashboard: dashboard bundle loaded', {
-      section: 'dashboard-bundle',
-      hasDashboard: !!bundleData.dashboard,
-      hasLibrary: !!bundleData.library,
-      hasHomepage: !!bundleData.homepage,
-    });
+    userLogger.info(
+      {
+        hasDashboard: !!bundleData.dashboard,
+        hasHomepage: !!bundleData.homepage,
+        hasLibrary: !!bundleData.library,
+        section: 'data-fetch',
+      },
+      'AccountDashboard: dashboard bundle loaded'
+    );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load account dashboard bundle');
-    userLogger.error('AccountDashboard: getAccountDashboardBundle threw', normalized, {
-      section: 'dashboard-bundle',
-    });
+    userLogger.error(
+      {
+        err: normalized,
+        section: 'data-fetch',
+      },
+      'AccountDashboard: getAccountDashboardBundle failed'
+    );
     throw normalized;
   }
 
-  // bundleData is guaranteed to be non-null after successful await
-  // (getAccountDashboardBundle returns Promise<AccountDashboardBundle>, not Promise<AccountDashboardBundle | null>)
+  return (
+    <div className="space-y-6">
+      {/* Dashboard header and stats - streams in Suspense */}
+      <Suspense fallback={<Loading />}>
+        <DashboardHeaderAndStats bundleData={bundleData} userLogger={userLogger} />
+      </Suspense>
+
+      {/* Quick actions and content sections - data already fetched in DashboardContent */}
+      <DashboardContent bundleData={bundleData} userLogger={userLogger} />
+    </div>
+  );
+}
+
+/**
+ * Render the dashboard header, account statistics, and quick actions for a user.
+ *
+ * This server component receives the account dashboard bundle as a prop (fetched once in parent)
+ * and renders a header with a welcome message, stats cards (bookmarks, tier, member-since),
+ * and a quick actions card (resume latest bookmark, view all bookmarks, manage profile).
+ * When the dashboard data is missing it renders a fallback Card indicating the dashboard is unavailable.
+ *
+ * @param props.bundleData - The account dashboard bundle data (fetched once in parent component).
+ * @param root0
+ * @param root0.bundleData
+ * @param props.userLogger - A request-scoped logger child used for structured logging.
+ * @param root0.userLogger
+ * @returns The dashboard UI as JSX to be streamed to the client.
+ *
+ * @see QuickActionRow
+ */
+function DashboardHeaderAndStats({
+  bundleData,
+  userLogger,
+}: {
+  bundleData: NonNullable<Awaited<ReturnType<typeof getAccountDashboardBundle>>>;
+  userLogger: ReturnType<typeof logger.child>;
+}) {
+  // Calculate timestamp - safe to use Date.now() here because parent function uses 'use cache: private'
+  // which ensures this runs at request time, not during prerendering
+  const currentTimestamp = Date.now();
+
   const dashboardData = bundleData.dashboard;
   const libraryData = bundleData.library;
-  const homepageData = bundleData.homepage;
 
   if (!dashboardData) {
     const normalized = normalizeError(
       new Error('Dashboard data is null'),
       'AccountDashboard: dashboard data is null'
     );
-    userLogger.error('AccountDashboard: dashboard data is null', normalized, {
-      section: 'dashboard-bundle',
-    });
+    userLogger.error(
+      {
+        err: normalized,
+        section: 'data-fetch',
+      },
+      'AccountDashboard: dashboard data is null'
+    );
     return (
-      <div className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">Dashboard unavailable</CardTitle>
-            <CardDescription>
-              We couldn&apos;t load your account data. Please refresh the page or try again later.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button asChild>
-              <Link href={ROUTES.HOME}>Go to home</Link>
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl">Dashboard unavailable</CardTitle>
+          <CardDescription>
+            We couldn&apos;t load your account data. Please refresh the page or try again later.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button asChild>
+            <Link href={ROUTES.HOME}>Go to home</Link>
+          </Button>
+        </CardContent>
+      </Card>
     );
   }
 
   const { bookmark_count, profile } = dashboardData;
-
   const bookmarkCount = bookmark_count;
+  // Calculate account age in days - use timestamp calculated at request time (after connection())
+  // to ensure purity
   const accountAge = profile?.created_at
-    ? Math.floor((Date.now() - new Date(profile.created_at).getTime()) / (1000 * 60 * 60 * 24))
+    ? Math.floor(
+        (currentTimestamp - new Date(profile.created_at).getTime()) / (1000 * 60 * 60 * 24)
+      )
     : 0;
 
   const bookmarks = (libraryData?.bookmarks ?? []).filter(
     (bookmark) => bookmark.content_slug !== null && bookmark.content_type !== null
   );
   const recentBookmarks = bookmarks.slice(0, 3);
+  const latestBookmark = recentBookmarks[0];
+  const resumeBookmarkHref =
+    latestBookmark?.content_slug && latestBookmark.content_type
+      ? `/${latestBookmark.content_type}/${latestBookmark.content_slug}`
+      : null;
 
-  // Section: Recent Bookmarks
+  return (
+    <>
+      <div>
+        <h1 className="mb-2 text-3xl font-bold">Dashboard</h1>
+        <p className="text-muted-foreground">Welcome back, {profile?.name ?? 'User'}!</p>
+      </div>
+
+      {/* Stats cards */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <AnimatedStatsCard
+          description="Saved items"
+          icon={Bookmark}
+          title="Bookmarks"
+          value={bookmarkCount ?? 0}
+        />
+
+        <AnimatedStatsCard
+          customContent={
+            <UnifiedBadge style={profile?.tier === 'pro' ? 'default' : 'secondary'} variant="base">
+              {profile?.tier
+                ? profile.tier.charAt(0).toUpperCase() + profile.tier.slice(1)
+                : 'Free'}
+            </UnifiedBadge>
+          }
+          description="Membership level"
+          title="Tier"
+        />
+
+        <AnimatedStatsCard
+          description="Days active"
+          icon={Calendar}
+          title="Member Since"
+          value={accountAge}
+        />
+      </div>
+
+      {/* Quick actions */}
+      <AnimatedCard>
+        <Card>
+          <CardHeader>
+            <CardTitle>Quick Actions</CardTitle>
+            <CardDescription>Common tasks and features</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {resumeBookmarkHref ? (
+              <QuickActionRow
+                description="Continue where you left off"
+                href={resumeBookmarkHref}
+                title="Resume latest bookmark"
+              />
+            ) : null}
+            <QuickActionRow
+              description={`You have ${bookmarkCount ?? 0} saved configurations`}
+              href={ROUTES.ACCOUNT_LIBRARY}
+              title="View all bookmarks"
+            />
+            <QuickActionRow
+              description="Update your settings and preferences"
+              href={ROUTES.ACCOUNT_SETTINGS}
+              title="Manage profile"
+            />
+          </CardContent>
+        </Card>
+      </AnimatedCard>
+    </>
+  );
+}
+
+/**
+ * Render the account dashboard content area with recent bookmarks and personalized recommendations.
+ *
+ * Receives the account dashboard bundle as a prop (fetched once in parent) and renders two sections:
+ * a recently saved/bookmarks section and a recommendations section.
+ *
+ * @param bundleData - The account dashboard bundle data (fetched once in parent component).
+ * @param bundleData.bundleData
+ * @param userLogger - Request-scoped logger preconfigured for the current user/session
+ * @param bundleData.userLogger
+ * @returns The dashboard content element containing recent bookmarks and recommendations
+ *
+ * @see RecentlySavedSection
+ * @see RecommendationsSection
+ */
+async function DashboardContent({
+  bundleData,
+  userLogger,
+}: {
+  bundleData: NonNullable<Awaited<ReturnType<typeof getAccountDashboardBundle>>>;
+  userLogger: ReturnType<typeof logger.child>;
+}) {
+  const libraryData = bundleData.library;
+  const homepageData = bundleData.homepage;
+
+  const bookmarks = (libraryData?.bookmarks ?? []).filter(
+    (bookmark) => bookmark.content_slug !== null && bookmark.content_type !== null
+  );
+  const recentBookmarks = bookmarks.slice(0, 3);
+  const bookmarkedSlugs = new Set(
+    bookmarks.map((bookmark) => `${bookmark.content_type ?? ''}/${bookmark.content_slug ?? ''}`)
+  );
+
+  // Fetch content details once for both sections to avoid duplicate API calls
   const recentlySavedContentResults = await Promise.all(
     recentBookmarks.map(async (bookmark) => {
       try {
@@ -176,30 +342,171 @@ export default async function AccountDashboard() {
         return detail?.content ?? null;
       } catch (error) {
         const normalized = normalizeError(error, 'Failed to load bookmark content');
-        userLogger.warn('AccountDashboard: getContentDetailCore failed for bookmark', {
-          err: normalized,
-          section: 'recent-bookmarks',
-          slug: bookmark.content_slug,
-          category: bookmark.content_type,
-        });
+        userLogger.warn(
+          {
+            category: bookmark.content_type,
+            err: normalized,
+            section: 'data-fetch',
+            slug: bookmark.content_slug,
+          },
+          'AccountDashboard: getContentDetailCore failed for bookmark'
+        );
         return null;
       }
     })
   );
-  userLogger.info('AccountDashboard: recent bookmarks loaded', {
-    section: 'recent-bookmarks',
-    bookmarkCount: recentBookmarks.length,
-    loadedCount: recentlySavedContentResults.filter(Boolean).length,
-  });
   const recentlySavedContent = recentlySavedContentResults.filter(
     (item): item is Database['public']['Tables']['content']['Row'] =>
       item !== null && typeof item === 'object'
   );
 
-  const bookmarkedSlugs = new Set(
-    bookmarks.map((bookmark) => `${bookmark.content_type ?? ''}/${bookmark.content_slug ?? ''}`)
+  // Section: Content organized in tabs
+  return (
+    <DashboardTabs
+      bookmarks={
+        <Suspense
+          fallback={
+            <Card>
+              <CardContent className="py-12">
+                <div className="h-48 animate-pulse" />
+              </CardContent>
+            </Card>
+          }
+        >
+          <RecentlySavedSection
+            recentlySavedContent={recentlySavedContent}
+            userLogger={userLogger}
+          />
+        </Suspense>
+      }
+      overview={
+        <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
+          <Suspense
+            fallback={
+              <Card>
+                <CardContent className="py-12">
+                  <div className="h-48 animate-pulse" />
+                </CardContent>
+              </Card>
+            }
+          >
+            <RecentlySavedSection
+              recentlySavedContent={recentlySavedContent}
+              userLogger={userLogger}
+            />
+          </Suspense>
+
+          <Suspense
+            fallback={
+              <Card>
+                <CardContent className="py-12">
+                  <div className="h-48 animate-pulse" />
+                </CardContent>
+              </Card>
+            }
+          >
+            <RecommendationsSection
+              bookmarkedSlugs={bookmarkedSlugs}
+              homepageData={homepageData}
+              recentlySavedContent={recentlySavedContent}
+              userLogger={userLogger}
+            />
+          </Suspense>
+        </div>
+      }
+      recommendations={
+        <Suspense
+          fallback={
+            <Card>
+              <CardContent className="py-12">
+                <div className="h-48 animate-pulse" />
+              </CardContent>
+            </Card>
+          }
+        >
+          <RecommendationsSection
+            bookmarkedSlugs={bookmarkedSlugs}
+            homepageData={homepageData}
+            recentlySavedContent={recentlySavedContent}
+            userLogger={userLogger}
+          />
+        </Suspense>
+      }
+    />
+  );
+}
+
+/**
+ * Renders a "Recently Saved" card by displaying the provided resolved content items.
+ *
+ * Displays a RecentlySavedGrid when items are available or an empty-state when none are provided.
+ *
+ * @param recentlySavedContent - Array of resolved content items to display.
+ * @param recentlySavedContent.recentlySavedContent
+ * @param userLogger - Request-scoped logger already configured for the current user; used to record display metrics.
+ * @param recentlySavedContent.userLogger
+ * @returns A card element containing either a grid of resolved content items or an empty state message.
+ *
+ * @see RecentlySavedGrid
+ */
+function RecentlySavedSection({
+  recentlySavedContent,
+  userLogger,
+}: {
+  recentlySavedContent: Array<Database['public']['Tables']['content']['Row']>;
+  userLogger: ReturnType<typeof logger.child>;
+}) {
+  userLogger.info(
+    { itemCount: recentlySavedContent.length, section: 'data-fetch' },
+    'AccountDashboard: recent bookmarks displayed'
   );
 
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Recently Saved</CardTitle>
+        <CardDescription>Your latest bookmarks at a glance</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {recentlySavedContent.length > 0 ? (
+          <RecentlySavedGrid items={recentlySavedContent} />
+        ) : (
+          <EmptyRecentlySavedState />
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+/**
+ * Render a recommendations section suggesting next items based on the user's saved tags and homepage content.
+ *
+ * This server component selects up to three homepage items that match tags extracted from the user's recent saved content,
+ * excludes items that are already bookmarked, and renders a Card with links to explore each recommendation or explore similar items.
+ *
+ * @param homepageData.bookmarkedSlugs
+ * @param homepageData - The `homepage` payload from the account dashboard bundle; used to derive candidate recommendation items.
+ * @param bookmarkedSlugs - A set of strings in the form `"{category}/{slug}"` representing the user's already-bookmarked items to exclude.
+ * @param homepageData.homepageData
+ * @param recentlySavedContent - Resolved content items from recent bookmarks used to extract tags for recommendations.
+ * @param homepageData.recentlySavedContent
+ * @param userLogger - A request-scoped logger used to record recommendation-generation metrics.
+ * @param homepageData.userLogger
+ * @returns A Card element containing up to three recommended items (each with "Explore" and optional "Explore similar" links), or a fallback prompt encouraging the user to bookmark content.
+ *
+ * @see getAccountDashboardBundle
+ */
+function RecommendationsSection({
+  bookmarkedSlugs,
+  homepageData,
+  recentlySavedContent,
+  userLogger,
+}: {
+  bookmarkedSlugs: Set<string>;
+  homepageData: Awaited<ReturnType<typeof getAccountDashboardBundle>>['homepage'];
+  recentlySavedContent: Array<Database['public']['Tables']['content']['Row']>;
+  userLogger: ReturnType<typeof logger.child>;
+}) {
   const savedTags = new Set<string>();
   for (const contentItem of recentlySavedContent) {
     const tagList = ensureStringArray((contentItem as { tags?: string[] }).tags);
@@ -210,11 +517,11 @@ export default async function AccountDashboard() {
     }
   }
 
-  /**
-   * Safely extracts the `categoryData` map from account dashboard homepage data, returning an empty object if the structure is missing or invalid.
+  /***
+   * Extracts the `categoryData` map from dashboard homepage data, returning an empty map when the homepage structure is missing or invalid.
    *
-   * @param homepageData - The `homepage` field from the account dashboard bundle (may be null, undefined, or malformed)
-   * @returns A record mapping category keys to arrays of `HomepageContentItem`; an empty object if no valid `categoryData` is present
+   * @param {Awaited<ReturnType<typeof getAccountDashboardBundle>>['homepage']} homepageData - The `homepage` slice returned by `getAccountDashboardBundle`
+   * @returns The `categoryData` map keyed by category name, or an empty object if none is present
    *
    * @see getAccountDashboardBundle
    */
@@ -235,7 +542,6 @@ export default async function AccountDashboard() {
   }
 
   const homepageCategoryData = extractHomepageCategoryData(homepageData);
-
   const homepageItems = Object.values(homepageCategoryData).flatMap((bucket) =>
     Array.isArray(bucket) ? bucket : []
   );
@@ -258,196 +564,89 @@ export default async function AccountDashboard() {
         item.title !== ''
     )
     .slice(0, 3);
-  userLogger.info('AccountDashboard: recommendations generated', {
-    section: 'recommendations',
-    candidateCount: candidateRecommendations.length,
-    finalCount: recommendations.length,
-    savedTagsCount: savedTags.size,
-  });
-
-  const latestBookmark = recentBookmarks[0];
-  const resumeBookmarkHref =
-    latestBookmark?.content_slug && latestBookmark.content_type
-      ? `/${latestBookmark.content_type}/${latestBookmark.content_slug}`
-      : null;
-
-  // Final summary log
-  userLogger.info('AccountDashboard: page render completed', {
-    section: 'page-render',
-    bookmarkCount,
-    recommendationsCount: recommendations.length,
-    recentlySavedCount: recentlySavedContent.length,
-  });
+  userLogger.info(
+    {
+      candidateCount: candidateRecommendations.length,
+      finalCount: recommendations.length,
+      savedTagsCount: savedTags.size,
+      section: 'data-fetch',
+    },
+    'AccountDashboard: recommendations generated'
+  );
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="mb-2 text-3xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground">Welcome back, {profile?.name ?? 'User'}!</p>
-      </div>
-
-      {/* Stats cards */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm">Bookmarks</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-              <Bookmark className="text-primary h-5 w-5" />
-              <span className="text-3xl font-bold">{bookmarkCount ?? 0}</span>
-            </div>
-            <p className="text-muted-foreground mt-2 text-xs">Saved items</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm">Tier</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <UnifiedBadge
-              variant="base"
-              style={profile?.tier === 'pro' ? 'default' : 'secondary'}
-              className="mt-2"
-            >
-              {profile?.tier
-                ? profile.tier.charAt(0).toUpperCase() + profile.tier.slice(1)
-                : 'Free'}
-            </UnifiedBadge>
-            <p className="text-muted-foreground mt-2 text-xs">Membership level</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm">Member Since</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-              <Calendar className="text-primary h-5 w-5" />
-              <span className="text-3xl font-bold">{accountAge}</span>
-            </div>
-            <p className="text-muted-foreground mt-2 text-xs">Days active</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Quick actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-          <CardDescription>Common tasks and features</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {resumeBookmarkHref ? (
-            <QuickActionRow
-              title="Resume latest bookmark"
-              description="Continue where you left off"
-              href={resumeBookmarkHref}
-            />
-          ) : null}
-          <QuickActionRow
-            title="View all bookmarks"
-            description={`You have ${bookmarkCount ?? 0} saved configurations`}
-            href={ROUTES.ACCOUNT_LIBRARY}
-          />
-          <QuickActionRow
-            title="Manage profile"
-            description="Update your settings and preferences"
-            href={ROUTES.ACCOUNT_SETTINGS}
-          />
-        </CardContent>
-      </Card>
-
-      <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
-        <Card>
-          <CardHeader>
-            <CardTitle>Recently Saved</CardTitle>
-            <CardDescription>Your latest bookmarks at a glance</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {recentlySavedContent.length > 0 ? (
-              <RecentlySavedGrid items={recentlySavedContent} />
-            ) : (
-              <EmptyRecentlySavedState />
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Recommended next</CardTitle>
-            <CardDescription>Suggestions based on your saved tags</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {recommendations.length > 0 ? (
-              <ul className="space-y-3">
-                {recommendations.map((item) => {
-                  const firstTag = ensureStringArray(item.tags)[0];
-                  const itemHref = `/${item.category}/${item.slug}`;
-                  const similarHref = firstTag
-                    ? `/search?tags=${encodeURIComponent(firstTag)}`
-                    : null;
-                  return (
-                    <li
-                      key={`${item.category}-${item.slug}`}
-                      className="border-border/60 bg-muted/20 rounded-xl border p-3"
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="font-semibold">{item.title}</p>
-                          {item.description ? (
-                            <p className="text-muted-foreground line-clamp-2 text-sm">
-                              {item.description}
-                            </p>
-                          ) : null}
-                        </div>
-                        <div className="flex flex-col items-end gap-2">
-                          <NavLink href={itemHref} className="text-sm font-medium">
-                            Explore →
-                          </NavLink>
-                          {similarHref ? (
-                            <NavLink
-                              href={similarHref}
-                              className="text-muted-foreground hover:text-foreground text-xs"
-                            >
-                              Explore similar →
-                            </NavLink>
-                          ) : null}
-                        </div>
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            ) : (
-              <p className="text-muted-foreground text-sm">
-                Start bookmarking configs to receive personalized recommendations.
-              </p>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Recommended next</CardTitle>
+        <CardDescription>Suggestions based on your saved tags</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {recommendations.length > 0 ? (
+          <ul className="space-y-3">
+            {recommendations.map((item) => {
+              const firstTag = ensureStringArray(item.tags)[0];
+              const itemHref = `/${item.category}/${item.slug}`;
+              const similarHref = firstTag ? `/search?tags=${encodeURIComponent(firstTag)}` : null;
+              return (
+                <li
+                  className="border-border/60 bg-muted/20 rounded-xl border p-3"
+                  key={`${item.category}-${item.slug}`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="font-semibold">{item.title}</p>
+                      {item.description ? (
+                        <p className="text-muted-foreground line-clamp-2 text-sm">
+                          {item.description}
+                        </p>
+                      ) : null}
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                      <NavLink className="text-sm font-medium" href={itemHref}>
+                        Explore →
+                      </NavLink>
+                      {similarHref ? (
+                        <NavLink
+                          className="text-muted-foreground hover:text-foreground text-xs"
+                          href={similarHref}
+                        >
+                          Explore similar →
+                        </NavLink>
+                      ) : null}
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <p className="text-muted-foreground text-sm">
+            Start bookmarking configs to receive personalized recommendations.
+          </p>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 
 /**
  * Renders a compact action row with a title, description, and a right-aligned "Open" link.
  *
+ * @param title.description
+ * @param title.href
  * @param title - Short label for the action
  * @param description - One-line explanation of what the action does
  * @param href - Destination URL for the "Open" link
+ * @param title.title
  * @returns A JSX element representing the quick action row
  *
  * @see NavLink
  * @see RecentlySavedGrid
  */
 function QuickActionRow({
-  title,
   description,
   href,
+  title,
 }: {
   description: string;
   href: string;
@@ -459,7 +658,7 @@ function QuickActionRow({
         <p className="font-medium">{title}</p>
         <p className="text-muted-foreground text-sm">{description}</p>
       </div>
-      <NavLink href={href} className="text-sm font-semibold">
+      <NavLink className="text-sm font-semibold" href={href}>
         Open →
       </NavLink>
     </div>
@@ -484,7 +683,7 @@ function EmptyRecentlySavedState() {
       <p className="text-muted-foreground text-sm">
         Browse the directory and bookmark your favorite configurations to see them here.
       </p>
-      <NavLink href={ROUTES.HOME} className="mt-4 inline-flex font-semibold">
+      <NavLink className="mt-4 inline-flex font-semibold" href={ROUTES.HOME}>
         Explore directory →
       </NavLink>
     </div>

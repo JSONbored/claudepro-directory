@@ -5,6 +5,7 @@
  * Runs as a cron job to process notification queue.
  */
 
+import { MiscService } from '@heyclaude/data-layer';
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { normalizeError, getEnvVar } from '@heyclaude/shared-runtime';
 import { revalidateTag } from 'next/cache';
@@ -12,7 +13,8 @@ import { revalidateTag } from 'next/cache';
 import { inngest } from '../../client';
 import { createSupabaseAdminClient } from '../../../supabase/admin';
 import { pgmqRead, pgmqDelete, type PgmqMessage } from '../../../supabase/pgmq-client';
-import { logger, generateRequestId, createWebAppContextWithId } from '../../../logging/server';
+import { logger, createWebAppContextWithId } from '../../../logging/server';
+import { sendCronSuccessHeartbeat } from '../../utils/monitoring';
 
 const CHANGELOG_NOTIFY_QUEUE = 'changelog_notify';
 const BATCH_SIZE = 5;
@@ -82,10 +84,9 @@ export const processChangelogNotifyQueue = inngest.createFunction(
   { cron: '*/30 * * * *' }, // Every 30 minutes
   async ({ step }) => {
     const startTime = Date.now();
-    const requestId = generateRequestId();
-    const logContext = createWebAppContextWithId(requestId, '/inngest/changelog/notify', 'processChangelogNotifyQueue');
+    const logContext = createWebAppContextWithId('/inngest/changelog/notify', 'processChangelogNotifyQueue');
 
-    logger.info('Changelog notify queue processing started', logContext);
+    logger.info(logContext, 'Changelog notify queue processing started');
 
     const supabase = createSupabaseAdminClient();
 
@@ -108,16 +109,14 @@ export const processChangelogNotifyQueue = inngest.createFunction(
           typeof msg.message.slug === 'string'
         );
       } catch (error) {
-        logger.warn('Failed to read changelog notify queue', {
-          ...logContext,
-          errorMessage: normalizeError(error, 'Queue read failed').message,
-        });
+        logger.warn({ ...logContext,
+          errorMessage: normalizeError(error, 'Queue read failed').message, }, 'Failed to read changelog notify queue');
         return [];
       }
     });
 
     if (messages.length === 0) {
-      logger.info('No messages in changelog notify queue', logContext);
+      logger.info(logContext, 'No messages in changelog notify queue');
       return { processed: 0, notified: 0 };
     }
 
@@ -155,21 +154,15 @@ export const processChangelogNotifyQueue = inngest.createFunction(
 
               if (discordResponse.ok) {
                 discordSent = true;
-                logger.info('Discord webhook sent', {
-                  ...logContext,
-                  slug: job.slug,
-                });
+                logger.info({ ...logContext,
+                  slug: job.slug, }, 'Discord webhook sent');
               } else {
-                logger.warn('Discord webhook failed', {
-                  ...logContext,
-                  status: discordResponse.status,
-                });
+                logger.warn({ ...logContext,
+                  status: discordResponse.status, }, 'Discord webhook failed');
               }
             } catch (error) {
-              logger.warn('Discord webhook error', {
-                ...logContext,
-                errorMessage: normalizeError(error, 'Discord failed').message,
-              });
+              logger.warn({ ...logContext,
+                errorMessage: normalizeError(error, 'Discord failed').message, }, 'Discord webhook error');
             }
           }
 
@@ -184,44 +177,36 @@ export const processChangelogNotifyQueue = inngest.createFunction(
             action_href: `/changelog/${job.slug}`,
           };
 
-          const { error: notifyError } = await supabase
-            .from('notifications')
-            .upsert(notificationInsert, { onConflict: 'id' });
-
-          if (notifyError) {
-            throw new Error(`Notification insert failed: ${notifyError.message}`);
-          }
+          const service = new MiscService(supabase);
+          await service.upsertNotification(notificationInsert);
 
           notificationInserted = true;
-          logger.info('Notification inserted', {
-            ...logContext,
-            entryId: job.entryId,
-          });
+          logger.info({ ...logContext,
+            entryId: job.entryId, }, 'Notification inserted');
 
           // 3. Invalidate cache tags
           // Using 'max' profile for stale-while-revalidate semantics (Next.js 16+)
           try {
             revalidateTag('changelog', 'max');
             revalidateTag(`changelog-${job.slug}`, 'max');
-            logger.info('Cache invalidated', {
-              ...logContext,
-              tags: ['changelog', `changelog-${job.slug}`],
-            });
+            logger.info(
+              {
+                ...logContext,
+                tags: ['changelog', `changelog-${job.slug}`],
+              },
+              'Cache invalidated'
+            );
           } catch (error) {
-            logger.warn('Cache invalidation failed', {
-              ...logContext,
-              errorMessage: normalizeError(error, 'Cache invalidation failed').message,
-            });
+            logger.warn({ ...logContext,
+              errorMessage: normalizeError(error, 'Cache invalidation failed').message, }, 'Cache invalidation failed');
           }
 
           return { success: true, discordSent, notificationInserted };
         } catch (error) {
           const normalized = normalizeError(error, 'Changelog notification failed');
-          logger.warn('Changelog notification failed', {
-            ...logContext,
+          logger.warn({ ...logContext,
             entryId: job.entryId,
-            errorMessage: normalized.message,
-          });
+            errorMessage: normalized.message, }, 'Changelog notification failed');
           return { success: notificationInserted, discordSent, notificationInserted };
         }
       });
@@ -244,16 +229,24 @@ export const processChangelogNotifyQueue = inngest.createFunction(
     }
 
     const durationMs = Date.now() - startTime;
-    logger.info('Changelog notify queue processing completed', {
-      ...logContext,
+    logger.info({ ...logContext,
       durationMs,
       processed: messages.length,
-      notified: notifiedCount,
-    });
+      notified: notifiedCount, }, 'Changelog notify queue processing completed');
 
-    return {
+    const result = {
       processed: messages.length,
       notified: notifiedCount,
     };
+
+    // BetterStack monitoring: Send success heartbeat (feature-flagged)
+    if (result.notified > 0) {
+      sendCronSuccessHeartbeat('BETTERSTACK_HEARTBEAT_INNGEST_CRON', {
+        functionName: 'processChangelogNotifyQueue',
+        result: { notified: result.notified },
+      });
+    }
+
+    return result;
   }
 );

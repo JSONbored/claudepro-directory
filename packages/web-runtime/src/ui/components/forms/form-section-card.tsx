@@ -36,6 +36,7 @@
  * ```
  */
 
+import { SPRING } from '../../../design-system/index.ts';
 import type { LucideIcon } from '../../../icons.tsx';
 import { cn } from '../../utils.ts';
 import { UI_CLASSES } from '../../constants.ts';
@@ -113,10 +114,7 @@ const sectionVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: {
-      duration: 0.4,
-      ease: [0.4, 0, 0.2, 1] as const,
-    },
+    transition: SPRING.smooth,
   },
 };
 

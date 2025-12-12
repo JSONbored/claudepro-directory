@@ -1,8 +1,13 @@
+# Cache Maintenance
+# Optimizations: weekly schedule, shallow clone, minimal permissions
+# Uses actions/checkout@v6 with fetch-depth: 1 (only need current commit)
 name: Cache Maintenance
 
 on:
+  # Weekly scheduled cleanup (Sunday 2am UTC) - prevents cache bloat
   schedule:
-    - cron: '0 2 * * 0'  # Weekly on Sunday 2am UTC
+    - cron: '0 2 * * 0'
+  # Manual trigger for immediate cleanup if needed
   workflow_dispatch:
     inputs:
       delete_all:
@@ -27,7 +32,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
-          fetch-depth: 1  # Shallow clone for speed
+          fetch-depth: 1 # Shallow clone - only need current commit for cache operations
 
       - name: Cleanup old caches
         run: |

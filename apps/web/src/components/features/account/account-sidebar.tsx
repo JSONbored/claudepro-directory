@@ -4,7 +4,6 @@
  * Wrapped in Suspense by parent layout for non-blocking data fetching
  */
 
-import type { User } from '@supabase/supabase-js';
 import { ensureUserRecord } from '@heyclaude/web-runtime/actions';
 import { getUserSettings, getUserSponsorships } from '@heyclaude/web-runtime/data';
 import {
@@ -19,15 +18,16 @@ import {
   TrendingUp,
   User as UserIcon,
 } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { UI_CLASSES, Button, Card } from '@heyclaude/web-runtime/ui';
+import { type User } from '@supabase/supabase-js';
 import Image from 'next/image';
 import Link from 'next/link';
 
 interface AccountSidebarProps {
   user: User;
-  userNameMetadata: string | null;
-  userImageMetadata: string | null;
+  userImageMetadata: null | string;
+  userNameMetadata: null | string;
 }
 
 export async function AccountSidebar({
@@ -36,9 +36,7 @@ export async function AccountSidebar({
   userImageMetadata,
 }: AccountSidebarProps) {
   // Generate request-scoped logger for sidebar data fetching
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
     operation: 'AccountSidebar',
     route: '/account',
     module: 'apps/web/src/components/features/account/account-sidebar',
@@ -48,18 +46,20 @@ export async function AccountSidebar({
   // Fetch sponsorships in parallel with settings (they don't depend on each other)
   const sponsorshipsPromise = getUserSponsorships(user.id);
 
+  // getUserSettings now returns user_settings_result_v2 from get_user_complete_data
+  // This provides automatic TypeScript type generation from the database
   let settings: Awaited<ReturnType<typeof getUserSettings>> = null;
-  let profile: NonNullable<Awaited<ReturnType<typeof getUserSettings>>>['user_data'] = null;
+  let profile: NonNullable<Awaited<ReturnType<typeof getUserSettings>>>['user_data'] | null = null;
   try {
     settings = await getUserSettings(user.id);
     if (settings) {
       profile = settings.user_data;
     } else {
-      reqLogger.warn('AccountSidebar: getUserSettings returned null');
+      reqLogger.warn({}, 'AccountSidebar: getUserSettings returned null');
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user settings in account sidebar');
-    reqLogger.error('AccountSidebar: getUserSettings threw', normalized);
+    reqLogger.error({ err: normalized }, 'AccountSidebar: getUserSettings threw');
   }
 
   if (!profile) {
@@ -72,16 +72,16 @@ export async function AccountSidebar({
       });
       settings = await getUserSettings(user.id);
       if (settings) {
-        profile = settings.user_data ?? null;
+        profile = settings.user_data;
       } else {
-        reqLogger.warn('AccountSidebar: getUserSettings returned null after ensureUserRecord');
+        reqLogger.warn({}, 'AccountSidebar: getUserSettings returned null after ensureUserRecord');
       }
     } catch (error) {
       const normalized = normalizeError(
         error,
         'Failed to ensure user record or reload settings in account sidebar'
       );
-      reqLogger.error('AccountSidebar: ensureUserRecord or getUserSettings threw', normalized);
+      reqLogger.error({ err: normalized }, 'AccountSidebar: ensureUserRecord or getUserSettings threw');
     }
   }
 
@@ -91,7 +91,7 @@ export async function AccountSidebar({
     sponsorships = await sponsorshipsPromise;
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user sponsorships in account sidebar');
-    reqLogger.error('AccountSidebar: getUserSponsorships threw', normalized);
+    reqLogger.error({ err: normalized }, 'AccountSidebar: getUserSponsorships threw');
     sponsorships = [];
   }
 
@@ -111,13 +111,16 @@ export async function AccountSidebar({
     { name: 'Connected Accounts', href: '/account/connected-accounts', icon: Plug },
   ];
 
+  // Determine image source - prefer OAuth metadata over database
+  const imageSrc = userImageMetadata || profile?.image || null;
+
   return (
     <Card className="h-fit p-4 md:col-span-1">
       <div className="mb-6 flex items-center gap-3 border-b pb-4">
-        {profile?.image ? (
+        {imageSrc ? (
           <Image
-            src={profile.image}
-            alt={`${profile.name ?? 'User'}'s avatar`}
+            src={imageSrc}
+            alt={`${profile?.name ?? userNameMetadata ?? 'User'}'s avatar`}
             width={48}
             height={48}
             className="h-12 w-12 rounded-full object-cover"
@@ -125,7 +128,7 @@ export async function AccountSidebar({
             priority
           />
         ) : (
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent">
+          <div className="bg-accent flex h-12 w-12 items-center justify-center rounded-full">
             <UserIcon className="h-6 w-6" />
           </div>
         )}

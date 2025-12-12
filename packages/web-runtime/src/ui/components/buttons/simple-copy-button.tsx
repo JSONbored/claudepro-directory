@@ -44,8 +44,11 @@ import { logger, normalizeError } from '../../../entries/core.ts';
 import { UI_TIMEOUTS } from '../../../config/unified-config.ts';
 import type { ButtonStyleProps } from '../../../types/component.types.ts';
 import { toasts } from '../../../client/toast.ts';
+import { MICROINTERACTIONS } from '../../../design-system/index.ts';
+import { COLORS } from '../../../design-tokens/index.ts';
 import { Check, Copy } from 'lucide-react';
 import { useState } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
 import { Button } from '../button.tsx';
 
 /**
@@ -101,16 +104,22 @@ export function SimpleCopyButton({
       setTimeout(() => setCopied(false), UI_TIMEOUTS.clipboard_reset_delay_ms);
     } catch (error) {
       const normalized = normalizeError(error, 'SimpleCopyButton: clipboard write failed');
-      logger.warn('[Clipboard] Copy failed', {
-        err: normalized,
+      logger.warn({ err: normalized,
         category: 'clipboard',
         component: 'SimpleCopyButton',
         recoverable: true,
         userRetryable: true,
         hasContent: Boolean(content),
-        label: label ?? 'unnamed',
+        label: label ?? 'unnamed', }, '[Clipboard] Copy failed');
+      // Show error toast with "Retry" button
+      toasts.raw.error(errorMessage, {
+        action: {
+          label: 'Retry',
+          onClick: () => {
+            handleCopy();
+          },
+        },
       });
-      toasts.raw.error(errorMessage);
     }
   };
 
@@ -123,12 +132,32 @@ export function SimpleCopyButton({
       disabled={disabled || copied}
       aria-label={ariaLabel || (copied ? 'Copied to clipboard' : `Copy ${label || 'content'}`)}
     >
-      {showIcon &&
-        (copied ? (
-          <Check className={iconClassName} aria-hidden="true" />
-        ) : (
-          <Copy className={iconClassName} aria-hidden="true" />
-        ))}
+      {showIcon && (
+        <AnimatePresence mode="wait">
+          {copied ? (
+            <motion.div
+              key="check"
+              initial={MICROINTERACTIONS.iconTransition.initial}
+              animate={MICROINTERACTIONS.iconTransition.animate}
+              exit={MICROINTERACTIONS.iconTransition.exit}
+              transition={MICROINTERACTIONS.iconTransition.transition}
+              style={{ color: COLORS.semantic.social.copy.dark.text }}
+            >
+              <Check className={iconClassName} aria-hidden="true" />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="copy"
+              initial={MICROINTERACTIONS.iconTransition.initial}
+              animate={MICROINTERACTIONS.iconTransition.animate}
+              exit={MICROINTERACTIONS.iconTransition.exit}
+              transition={MICROINTERACTIONS.iconTransition.transition}
+            >
+              <Copy className={iconClassName} aria-hidden="true" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      )}
       {label && (copied ? 'Copied!' : label)}
     </Button>
   );

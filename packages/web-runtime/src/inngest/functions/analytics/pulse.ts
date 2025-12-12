@@ -11,10 +11,12 @@ import type { Database as DatabaseGenerated, Json } from '@heyclaude/database-ty
 import { Constants } from '@heyclaude/database-types';
 import { normalizeError } from '@heyclaude/shared-runtime';
 
+import { AccountService, SearchService } from '@heyclaude/data-layer';
 import { inngest } from '../../client';
 import { createSupabaseAdminClient } from '../../../supabase/admin';
 import { pgmqRead, pgmqDelete, type PgmqMessage } from '../../../supabase/pgmq-client';
-import { logger, generateRequestId, createWebAppContextWithId } from '../../../logging/server';
+import { logger, createWebAppContextWithId } from '../../../logging/server';
+import { sendCronSuccessHeartbeat } from '../../utils/monitoring';
 
 const PULSE_BATCH_SIZE = 100;
 const MAX_RETRY_ATTEMPTS = 5;
@@ -65,10 +67,9 @@ export const processPulseQueue = inngest.createFunction(
   { cron: '*/30 * * * *' }, // Every 30 minutes (batches queue events)
   async ({ step }) => {
     const startTime = Date.now();
-    const requestId = generateRequestId();
-    const logContext = createWebAppContextWithId(requestId, '/inngest/analytics/pulse', 'processPulseQueue');
+    const logContext = createWebAppContextWithId('/inngest/analytics/pulse', 'processPulseQueue');
 
-    logger.info('Pulse queue processing started', logContext);
+    logger.info(logContext, 'Pulse queue processing started');
 
     const supabase = createSupabaseAdminClient();
 
@@ -87,23 +88,19 @@ export const processPulseQueue = inngest.createFunction(
         // Filter valid pulse events
         return data.filter((msg) => isValidPulseEvent(msg.message));
       } catch (error) {
-        logger.warn('Failed to read pulse queue', {
-          ...logContext,
-          errorMessage: normalizeError(error, 'Queue read failed').message,
-        });
+        logger.warn({ ...logContext,
+          errorMessage: normalizeError(error, 'Queue read failed').message, }, 'Failed to read pulse queue');
         return [];
       }
     });
 
     if (messages.length === 0) {
-      logger.info('No messages in pulse queue', logContext);
+      logger.info(logContext, 'No messages in pulse queue');
       return { processed: 0, inserted: 0, failed: 0 };
     }
 
-    logger.info('Processing pulse events', {
-      ...logContext,
-      messageCount: messages.length,
-    });
+    logger.info({ ...logContext,
+      messageCount: messages.length, }, 'Processing pulse events');
 
     // Step 2: Separate events by type
     const { searchEvents, interactionEvents } = await step.run('categorize-events', async (): Promise<{
@@ -152,33 +149,34 @@ export const processPulseQueue = inngest.createFunction(
             };
           });
 
-          const insertData: DatabaseGenerated['public']['Tables']['search_queries']['Insert'][] =
+          // Prepare search query inputs for batch RPC
+          const searchQueryInputs: DatabaseGenerated['public']['CompositeTypes']['search_query_input'][] =
             searchQueries.map((q) => ({
               query: q.query,
+              filters: q.filters,
               result_count: q.result_count,
               user_id: q.user_id,
               session_id: q.session_id,
-              ...(q.filters ? { filters: q.filters } : {}),
             }));
 
-          const { error } = await supabase.from('search_queries').insert(insertData);
-
-          if (error) {
-            throw error;
-          }
+          const service = new SearchService(supabase);
+          const result = await service.batchInsertSearchQueries({
+            p_queries: searchQueryInputs,
+          });
 
           // Mark these messages as processed
           for (const msg of searchEvents) {
             processedMsgIds.push(msg.msg_id);
           }
 
-          return { inserted: searchQueries.length, failed: 0 };
+          const inserted = result?.inserted ?? 0;
+          const failed = result?.failed ?? 0;
+
+          return { inserted, failed };
         } catch (error) {
           const normalized = normalizeError(error, 'Search events batch insert failed');
-          logger.warn('Search events batch insert failed', {
-            ...logContext,
-            errorMessage: normalized.message,
-          });
+          logger.warn({ ...logContext,
+            errorMessage: normalized.message, }, 'Search events batch insert failed');
           return { inserted: 0, failed: searchEvents.length };
         }
       });
@@ -203,11 +201,9 @@ export const processPulseQueue = inngest.createFunction(
 
             if (!isValidInteractionType(event.interaction_type)) {
               // Log invalid interaction types and mark for cleanup
-              logger.warn('Invalid interaction type, marking for deletion', {
-                ...logContext,
+              logger.warn({ ...logContext,
                 msgId: String(msg.msg_id),
-                interactionType: String(event.interaction_type ?? 'undefined'),
-              });
+                interactionType: String(event.interaction_type ?? 'undefined'), }, 'Invalid interaction type, marking for deletion');
               invalidMsgIds.push(msg.msg_id);
               continue;
             }
@@ -235,13 +231,11 @@ export const processPulseQueue = inngest.createFunction(
             return { inserted: 0, failed: invalidMsgIds.length };
           }
 
-          const { data: result, error } = await supabase.rpc('batch_insert_user_interactions', {
+          // Use AccountService for proper data layer architecture
+          const accountService = new AccountService(supabase);
+          const result = await accountService.batchInsertUserInteractions({
             p_interactions: interactions,
           });
-
-          if (error) {
-            throw error;
-          }
 
           // Mark valid messages as processed (invalid ones already added)
           for (const msgId of validMsgIds) {
@@ -254,10 +248,8 @@ export const processPulseQueue = inngest.createFunction(
           return { inserted, failed };
         } catch (error) {
           const normalized = normalizeError(error, 'Interaction events batch insert failed');
-          logger.warn('Interaction events batch insert failed', {
-            ...logContext,
-            errorMessage: normalized.message,
-          });
+          logger.warn({ ...logContext,
+            errorMessage: normalized.message, }, 'Interaction events batch insert failed');
           return { inserted: 0, failed: interactionEvents.length };
         }
       });
@@ -273,10 +265,8 @@ export const processPulseQueue = inngest.createFunction(
           try {
             await pgmqDelete('pulse', msgId);
           } catch (error) {
-            logger.warn('Failed to delete pulse message', {
-              ...logContext,
-              msgId: msgId.toString(),
-            });
+            logger.warn({ ...logContext,
+              msgId: msgId.toString(), }, 'Failed to delete pulse message');
           }
         }
       });
@@ -296,11 +286,9 @@ export const processPulseQueue = inngest.createFunction(
         for (const msg of failedMessages) {
           try {
             await pgmqDelete('pulse', msg.msg_id);
-            logger.warn('Pulse event exceeded max retries, removed from queue', {
-              ...logContext,
+            logger.warn({ ...logContext,
               msgId: String(msg.msg_id),
-              readCount: msg.read_ct,
-            });
+              readCount: msg.read_ct, }, 'Pulse event exceeded max retries, removed from queue');
           } catch {
             // Silent fail
           }
@@ -309,18 +297,26 @@ export const processPulseQueue = inngest.createFunction(
     }
 
     const durationMs = Date.now() - startTime;
-    logger.info('Pulse queue processing completed', {
-      ...logContext,
+    logger.info({ ...logContext,
       durationMs,
       processed: messages.length,
       inserted: totalInserted,
-      failed: totalFailed,
-    });
+      failed: totalFailed, }, 'Pulse queue processing completed');
 
-    return {
+    const result = {
       processed: messages.length,
       inserted: totalInserted,
       failed: totalFailed,
     };
+
+    // BetterStack monitoring: Send success heartbeat (feature-flagged)
+    if (result.inserted > 0) {
+      sendCronSuccessHeartbeat('BETTERSTACK_HEARTBEAT_INNGEST_CRON', {
+        functionName: 'processPulseQueue',
+        result: { inserted: result.inserted },
+      });
+    }
+
+    return result;
   }
 );

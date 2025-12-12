@@ -36,15 +36,15 @@
  * Bundle Impact: +2 KB (Motion.dev drag utilities)
  */
 
+import { SPRING } from '../../../design-system/index.ts';
 import { logger } from '../../../logger.ts';
 import { normalizeError } from '../../../errors.ts';
-import { getAnimationConfig } from '../../../config/static-configs.ts';
 import { Bookmark, Copy as CopyIcon } from '../../../icons.tsx';
 import { POSITION_PATTERNS, UI_CLASSES } from '../../constants.ts';
-import { SEMANTIC_COLORS } from '../../colors.ts';
+import { COLORS } from '../../../design-tokens/index.ts';
 import { motion, useMotionValue, useTransform } from 'motion/react';
 import type { ReactNode } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export interface SwipeableCardWrapperProps {
   /** Child components to wrap with swipe gestures */
@@ -74,28 +74,8 @@ export function SwipeableCardWrapper({
 }: SwipeableCardWrapperProps) {
   const [isMobile, setIsMobile] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-  const springSmooth = useMemo(() => {
-    try {
-      const config = getAnimationConfig();
-      return {
-        type: 'spring' as const,
-        stiffness: config['animation.spring.smooth.stiffness'],
-        damping: config['animation.spring.smooth.damping'],
-      };
-    } catch (error) {
-      const normalized = normalizeError(error, 'SwipeableCardWrapper: Failed to load animation config');
-      logger.warn('SwipeableCardWrapper: Failed to load animation config', {
-        err: normalized,
-        component: 'SwipeableCardWrapper',
-      });
-      // Fallback to default values
-      return {
-        type: 'spring' as const,
-        stiffness: 300,
-        damping: 25,
-      };
-    }
-  }, []);
+  // Spring animation config from design system
+  const springSmooth = SPRING.smooth;
 
   // Detect mobile and reduced motion preference
   useEffect(() => {
@@ -107,10 +87,8 @@ export function SwipeableCardWrapper({
         setIsMobile(hasTouchScreen && isNarrowScreen);
       } catch (error) {
         const normalized = normalizeError(error, 'SwipeableCardWrapper: Mobile detection failed');
-        logger.warn('SwipeableCardWrapper: Mobile detection failed', {
-          err: normalized,
-          component: 'SwipeableCardWrapper',
-        });
+        logger.warn({ err: normalized,
+          component: 'SwipeableCardWrapper', }, 'SwipeableCardWrapper: Mobile detection failed');
         setIsMobile(false);
       }
     };
@@ -133,10 +111,8 @@ export function SwipeableCardWrapper({
       };
     } catch (error) {
       const normalized = normalizeError(error, 'SwipeableCardWrapper: Media query setup failed');
-      logger.warn('SwipeableCardWrapper: Media query setup failed', {
-        err: normalized,
-        component: 'SwipeableCardWrapper',
-      });
+      logger.warn({ err: normalized,
+        component: 'SwipeableCardWrapper', }, 'SwipeableCardWrapper: Media query setup failed');
       return () => {};
     }
   }, []);
@@ -171,7 +147,14 @@ export function SwipeableCardWrapper({
         className={`pointer-events-none ${POSITION_PATTERNS.ABSOLUTE_INSET_Y_LEFT} z-0 flex w-20 items-center justify-start pl-4`}
         style={{ opacity: copyIndicatorOpacity }}
       >
-        <div className={`rounded-lg p-3 ${SEMANTIC_COLORS.SWIPE_COPY}`}>
+        <div
+          className="rounded-lg p-3"
+          style={{
+            color: COLORS.semantic.swipe.copy.dark.text,
+            borderColor: COLORS.semantic.swipe.copy.dark.border,
+            backgroundColor: COLORS.semantic.swipe.copy.dark.background,
+          }}
+        >
           <CopyIcon className={UI_CLASSES.ICON_MD} aria-hidden="true" />
         </div>
       </motion.div>
@@ -181,7 +164,14 @@ export function SwipeableCardWrapper({
         className={`pointer-events-none ${POSITION_PATTERNS.ABSOLUTE_INSET_Y_RIGHT} z-0 flex w-20 items-center justify-end pr-4`}
         style={{ opacity: bookmarkIndicatorOpacity }}
       >
-        <div className={`rounded-lg p-3 ${SEMANTIC_COLORS.SWIPE_BOOKMARK}`}>
+        <div
+          className="rounded-lg p-3"
+          style={{
+            color: COLORS.semantic.swipe.bookmark.dark.text,
+            borderColor: COLORS.semantic.swipe.bookmark.dark.border,
+            backgroundColor: COLORS.semantic.swipe.bookmark.dark.background,
+          }}
+        >
           <Bookmark className={UI_CLASSES.ICON_MD} aria-hidden="true" />
         </div>
       </motion.div>
@@ -193,7 +183,10 @@ export function SwipeableCardWrapper({
         dragElastic={0.2}
         dragMomentum={false}
         style={{ x }}
-        onDragEnd={(_event, info) => {
+        onDragEnd={(
+          _event: MouseEvent | TouchEvent | PointerEvent,
+          info: { offset: { x: number; y: number }; velocity: { x: number; y: number } }
+        ) => {
           try {
             // Swipe right threshold: 100px
             if (info.offset.x > 100 && onSwipeRight) {
@@ -213,10 +206,8 @@ export function SwipeableCardWrapper({
             }
           } catch (error) {
             const normalized = normalizeError(error, 'SwipeableCardWrapper: Swipe action failed');
-            logger.error('SwipeableCardWrapper: Swipe action failed', normalized, {
-              component: 'SwipeableCardWrapper',
-              offsetX: info.offset.x,
-            });
+            logger.error({ err: normalized, component: 'SwipeableCardWrapper',
+              offsetX: info.offset.x, }, 'SwipeableCardWrapper: Swipe action failed');
             // Always snap back on error
             x.set(0);
           }

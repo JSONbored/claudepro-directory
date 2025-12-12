@@ -11,30 +11,33 @@ import {
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft, ExternalLink } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   BADGE_COLORS,
-  UI_CLASSES,
-  UnifiedBadge,
   Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  UI_CLASSES,
+  UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { connection } from 'next/server';
+import { Suspense } from 'react';
 
 import { MetricsDisplay } from '@/src/components/features/analytics/metrics-display';
+
+import Loading from './loading';
 
 /**
  * Dynamic Rendering Required
  * Authenticated route
  */
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
 
 interface JobAnalyticsPageProperties {
   params: Promise<{ id: string }>;
@@ -44,10 +47,10 @@ function formatStatus(rawStatus: string): string {
   return rawStatus.replaceAll('_', ' ').replaceAll(/\b\w/g, (c) => c.toUpperCase());
 }
 
-/**
+/***
  * Map a job status to its configured badge color.
  *
- * @param status - The job status to map
+ * @param {JobStatus} status - The job status to map
  * @returns The CSS/color token associated with `status`
  *
  * @see BADGE_COLORS.jobStatus
@@ -60,12 +63,16 @@ function getStatusColor(status: JobStatus): string {
  * Produce page metadata for the job analytics route using the provided route parameters.
  *
  * @param params - An object (as a promise) containing route params; `id` is the job identifier used to build the metadata.
+ * @param params.params
  * @returns A `Metadata` object for the "/account/jobs/:id/analytics" page scoped to the given job id.
  *
  * @see generatePageMetadata
  * @see JobAnalyticsPage
  */
 export async function generateMetadata({ params }: JobAnalyticsPageProperties): Promise<Metadata> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
   const { id } = await params;
   return generatePageMetadata('/account/jobs/:id/analytics', { params: { id } });
 }
@@ -76,6 +83,7 @@ export async function generateMetadata({ params }: JobAnalyticsPageProperties): 
  * The component redirects to the login route when no authenticated user is present and renders a "Job analytics unavailable" card when the job cannot be loaded or is not owned by the user.
  *
  * @param params - Route params; expects an object with `id` set to the job identifier to display analytics for.
+ * @param params.params
  * @returns The analytics page React element showing listing details, metrics, trends, and contextual insights.
  *
  * @see getAuthenticatedUser
@@ -83,57 +91,89 @@ export async function generateMetadata({ params }: JobAnalyticsPageProperties): 
  * @see MetricsDisplay
  */
 export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProperties) {
-  const { id } = await params;
-
-  // Generate single requestId for this page request
-  const requestId = generateRequestId();
+  'use cache: private';
+  cacheLife('userProfile'); // 1min stale, 5min revalidate, 30min expire - User-specific data
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    requestId,
-    operation: 'JobAnalyticsPage',
-    route: `/account/jobs/${id}/analytics`,
     module: 'apps/web/src/app/account/jobs/[id]/analytics',
+    operation: 'JobAnalyticsPage',
   });
+
+  return (
+    <Suspense fallback={<Loading />}>
+      <JobAnalyticsPageContent params={params} reqLogger={reqLogger} />
+    </Suspense>
+  );
+}
+
+/**
+ * Renders the authenticated Job Analytics page content for a specific job id.
+ *
+ * This server component verifies the current user, loads the requested job owned by that user,
+ * and renders listing details, performance metrics, and contextual insights. If the request is
+ * unauthenticated it redirects to the login route. If the job cannot be loaded or is not owned
+ * by the authenticated user, it renders a “Job analytics unavailable” message with a back link.
+ *
+ * @param params - A promise that resolves to an object containing the route parameter `id`.
+ * @param params.params
+ * @param reqLogger - A request-scoped logger; a route- and user-scoped child logger is created internally for structured logging.
+ * @param params.reqLogger
+ * @returns The React element tree for the job analytics page content.
+ *
+ * @see MetricsDisplay
+ * @see getAuthenticatedUser
+ * @see getUserJobById
+ */
+async function JobAnalyticsPageContent({
+  params,
+  reqLogger,
+}: {
+  params: Promise<{ id: string }>;
+  reqLogger: ReturnType<typeof logger.child>;
+}) {
+  const { id } = await params;
+  const route = `/account/jobs/${id}/analytics`;
+
+  // Create route-specific logger
+  const routeLogger = reqLogger.child({ route });
 
   // Section: Authentication
   const { user } = await getAuthenticatedUser({ context: 'JobAnalyticsPage' });
 
   if (!user) {
-    reqLogger.warn('JobAnalyticsPage: unauthenticated access attempt', {
-      section: 'authentication',
-    });
+    routeLogger.warn({ section: 'data-fetch' }, 'JobAnalyticsPage: unauthenticated access attempt');
     redirect(ROUTES.LOGIN);
   }
 
   // Create new child logger with user context
   // Redaction automatically hashes userId/user_id/user.id fields (configured in logger/config.ts)
-  const userLogger = reqLogger.child({
+  const userLogger = routeLogger.child({
     userId: user.id, // Redaction will automatically hash this
   });
 
-  userLogger.info('JobAnalyticsPage: authentication successful', {
-    section: 'authentication',
-  });
+  userLogger.info({ section: 'data-fetch' }, 'JobAnalyticsPage: authentication successful');
 
   // Section: Job Data Fetch
   let job: Awaited<ReturnType<typeof getUserJobById>> = null;
   try {
     job = await getUserJobById(user.id, id);
-    userLogger.info('JobAnalyticsPage: job data loaded', {
-      section: 'job-data-fetch',
-      hasJob: !!job,
-    });
+    userLogger.info({ hasJob: !!job, section: 'data-fetch' }, 'JobAnalyticsPage: job data loaded');
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load job analytics detail');
-    userLogger.error('JobAnalyticsPage: getUserJobById threw', normalized, {
-      section: 'job-data-fetch',
-    });
+    userLogger.error(
+      {
+        err: normalized,
+        section: 'data-fetch',
+      },
+      'JobAnalyticsPage: getUserJobById threw'
+    );
   }
   if (!job) {
-    userLogger.warn('JobAnalyticsPage: job not found or not owned by user', {
-      section: 'job-data-fetch',
-    });
+    userLogger.warn(
+      { section: 'data-fetch' },
+      'JobAnalyticsPage: job not found or not owned by user'
+    );
     return (
       <div className="space-y-6">
         <Card>
@@ -161,16 +201,15 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPagePrope
   const status: JobStatus = job.status;
 
   // Final summary log
-  userLogger.info('JobAnalyticsPage: page render completed', {
-    section: 'page-render',
-    jobId: id,
-    status,
-  });
+  userLogger.info(
+    { jobId: id, section: 'data-fetch', status },
+    'JobAnalyticsPage: page render completed'
+  );
 
   return (
     <div className="space-y-6">
       <div>
-        <Button variant="ghost" size="sm" asChild className="mb-4">
+        <Button asChild className="mb-4" size="sm" variant="ghost">
           <Link href={ROUTES.ACCOUNT_JOBS}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Jobs
@@ -182,7 +221,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPagePrope
             <p className="text-muted-foreground">{job.title}</p>
           </div>
           {job.slug ? (
-            <Button variant="outline" asChild>
+            <Button asChild variant="outline">
               <Link href={`${ROUTES.JOBS}/${job.slug}`}>
                 <ExternalLink className="mr-2 h-4 w-4" />
                 View Listing
@@ -196,7 +235,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPagePrope
         <CardHeader>
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
             <CardTitle>Listing Details</CardTitle>
-            <UnifiedBadge variant="base" style="outline" className={getStatusColor(status)}>
+            <UnifiedBadge className={getStatusColor(status)} style="outline" variant="base">
               {formatStatus(status)}
             </UnifiedBadge>
           </div>
@@ -236,25 +275,23 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPagePrope
       </Card>
 
       <MetricsDisplay
-        title="Performance Metrics"
         description="Key metrics for your job listing"
         metrics={[
           {
-            label: 'Total Views',
-            value: viewCount.toLocaleString(),
             change: `Since ${job.posted_at ? formatRelativeDate(job.posted_at) : 'creation'}`,
+            label: 'Total Views',
             trend: viewCount > 0 ? 'up' : 'unchanged',
+            value: viewCount.toLocaleString(),
           },
           {
-            label: 'Clicks',
-            value: clickCount.toLocaleString(),
             change: 'Users who clicked to view',
+            label: 'Clicks',
             trend: clickCount > 0 ? 'up' : 'unchanged',
+            value: clickCount.toLocaleString(),
           },
           {
-            label: 'Click-Through Rate',
-            value: `${ctr}%`,
             change: 'Of viewers who clicked apply',
+            label: 'Click-Through Rate',
             trend: (() => {
               if (viewCount === 0) return 'unchanged';
               const ctrValue = Number.parseFloat(ctr);
@@ -262,8 +299,10 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPagePrope
               if (ctrValue > 0) return 'unchanged';
               return 'down';
             })(),
+            value: `${ctr}%`,
           },
         ]}
+        title="Performance Metrics"
       />
 
       <Card>
@@ -275,8 +314,8 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPagePrope
             {viewCount === 0 && (
               <div className="bg-muted/50 rounded-lg p-4">
                 <p className="text-sm">
-                  Your job listing hasn't received any views yet. Try sharing it on social media or
-                  updating the description to make it more discoverable.
+                  Your job listing hasn&apos;t received any views yet. Try sharing it on social
+                  media or updating the description to make it more discoverable.
                 </p>
               </div>
             )}

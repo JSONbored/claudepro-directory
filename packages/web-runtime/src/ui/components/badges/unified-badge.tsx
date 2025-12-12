@@ -42,15 +42,67 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { getAnimationConfig } from '../../../config/static-configs.ts';
+import { SPRING, DURATION } from '../../../design-system/index.ts';
 import { Star, TrendingUp, Zap } from '../../../icons.tsx';
 import { ANIMATION_CONSTANTS, UI_CLASSES } from '../../constants.ts';
 import { cn } from '../../utils.ts';
-import { SEMANTIC_COLORS } from '../../colors.ts';
+import { COLORS } from '../../../design-tokens/index.ts';
 import { cva } from 'class-variance-authority';
 import { motion } from 'motion/react';
 import type * as React from 'react';
-import { useEffect, useState } from 'react';
+import Link from 'next/link';
+
+/**
+ * Get category route URL
+ * Maps category to route path, with special handling for CLAUDE.md → /rules
+ */
+function getCategoryRoute(
+  category: Database['public']['Enums']['content_category']
+): string {
+  // Special case: rules category (CLAUDE.md) maps to /rules
+  if (category === 'rules') {
+    return '/rules';
+  }
+  
+  // All other categories map directly: /{category}
+  return `/${category}`;
+}
+
+/**
+ * Get category display name (matches preview cards exactly)
+ * Maps category to display name, with special handling for rules → "CLAUDE.md"
+ * This matches the display names used in config-card.tsx for consistency
+ */
+function getCategoryDisplayName(
+  category: Database['public']['Enums']['content_category']
+): string {
+  switch (category) {
+    case 'mcp':
+      return 'MCP';
+    case 'agents':
+      return 'Agent';
+    case 'commands':
+      return 'Command';
+    case 'hooks':
+      return 'Hook';
+    case 'rules':
+      return 'CLAUDE.md'; // Special display name override (not "Rule")
+    case 'statuslines':
+      return 'Statusline';
+    case 'collections':
+      return 'Collection';
+    case 'guides':
+      return 'Guide';
+    case 'skills':
+      return 'Skill';
+    case 'jobs':
+      return 'Job';
+    case 'changelog':
+      return 'Changelog';
+    default:
+      return 'Agent';
+  }
+}
 
 /**
  * Base badge variants (from original badge.tsx)
@@ -144,8 +196,11 @@ export type UnifiedBadgeProps =
       /** Category/content-type badge */
       variant: 'category';
       category: Database['public']['Enums']['content_category'];
-      children: React.ReactNode;
+      /** Optional children. If not provided, automatically uses category display name (e.g., rules → "CLAUDE.md") */
+      children?: React.ReactNode;
       className?: string;
+      /** Optional href override. If not provided, automatically links to category route (e.g., /mcp, /agents). Set to null to disable linking. */
+      href?: string | null;
     }
   | {
       /** Source badge (official, partner, community, etc.) */
@@ -207,115 +262,164 @@ export type UnifiedBadgeProps =
     };
 
 /**
- * BadgeWrapper - Wrap badges with hover animation
+ * BadgeWrapper - Wrap badges with hover animation (ONLY for interactive badges)
  * Extracted to module scope to avoid nested component definition
  */
 const BadgeWrapper = ({
   children,
   springDefault,
+  isInteractive = false,
 }: {
   children: React.ReactNode;
   springDefault: { type: 'spring'; stiffness: number; damping: number };
+  isInteractive?: boolean;
+}) => {
+  // Only apply hover/tap animations for interactive badges
+  if (!isInteractive) {
+    return <>{children}</>;
+  }
+
+  return (
+    <motion.div
+      className="inline-block cursor-pointer"
+      whileHover={{
+        scale: 1.05,
+        y: -1,
+        transition: springDefault,
+      }}
+      whileTap={{ scale: 0.95 }}
+    >
+      {children}
+    </motion.div>
+  );
+};
+
+/**
+ * PulseWrapper - Subtle pulse animation for attention badges (new, trending)
+ * Respects prefers-reduced-motion via CSS class
+ */
+const PulseWrapper = ({
+  children,
+}: {
+  children: React.ReactNode;
 }) => (
   <motion.div
-    className="inline-block"
-    whileHover={{
-      y: -2,
-      transition: springDefault,
+    className="inline-block motion-reduce:animate-none"
+    animate={{
+      scale: [1, 1.02, 1],
     }}
-    whileTap={{ scale: 0.95 }}
+    transition={{
+      duration: DURATION.extraLong,
+      repeat: Infinity,
+      ease: "easeInOut",
+    }}
   >
     {children}
   </motion.div>
 );
 
 export function UnifiedBadge(props: UnifiedBadgeProps) {
-  const [springDefault, setSpringDefault] = useState({
-    type: 'spring' as const,
-    stiffness: 400,
-    damping: 17,
-  });
+  // Spring animation config from design system
+  const springDefault = SPRING.default;
 
-  useEffect(() => {
-    // Load animation config from static defaults
-    const config = getAnimationConfig();
-    setSpringDefault({
-      type: 'spring' as const,
-      stiffness: config['animation.spring.default.stiffness'],
-      damping: config['animation.spring.default.damping'],
-    });
-  }, []);
-
-  // Base badge variant
+  // Base badge variant (informational - no hover)
   if (props.variant === 'base') {
     return (
-      <BadgeWrapper springDefault={springDefault}>
-        <div
-          className={cn(
-            baseBadgeVariants({ variant: props.style }),
-            'hover:shadow-md hover:shadow-primary/20',
-            props.className
-          )}
-        >
-          {props.children}
-        </div>
-      </BadgeWrapper>
+      <div
+        className={cn(
+          baseBadgeVariants({ variant: props.style }),
+          props.className
+        )}
+      >
+        {props.children}
+      </div>
     );
   }
 
-  // Category badge variant
+  // Category badge variant (automatically links to category route unless href is null)
   if (props.variant === 'category') {
-    return (
-      <BadgeWrapper springDefault={springDefault}>
-        <div
-          className={cn(
-            `border font-medium text-xs ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:shadow-md hover:shadow-primary/20`,
-            categoryBadgeStyles[props.category as keyof typeof categoryBadgeStyles] ??
-              'badge-category-rules',
-            props.className
-          )}
-        >
-          {props.children}
-        </div>
-      </BadgeWrapper>
+    // Auto-generate href from category unless explicitly disabled (href === null)
+    const href = props.href === null ? undefined : (props.href ?? getCategoryRoute(props.category));
+    
+    // Use provided children if given, otherwise use category display name
+    const displayName = props.children ?? getCategoryDisplayName(props.category);
+    
+    const badgeContent = (
+      <div
+        className={cn(
+          `border font-medium text-xs rounded-full px-2 py-0.5 transition-colors`,
+          categoryBadgeStyles[props.category as keyof typeof categoryBadgeStyles] ??
+            'badge-category-rules',
+          href && 'cursor-pointer hover:opacity-80',
+          props.className
+        )}
+      >
+        {displayName}
+      </div>
     );
+
+    // If href exists, wrap in Next.js Link with hover animation
+    if (href) {
+      return (
+        <BadgeWrapper springDefault={springDefault} isInteractive={true}>
+          <Link
+            href={href}
+            className="no-underline"
+            onClick={(e) => {
+              // Allow parent handlers to work if needed
+              e.stopPropagation();
+            }}
+            prefetch
+          >
+            {badgeContent}
+          </Link>
+        </BadgeWrapper>
+      );
+    }
+
+    // No link - just informational badge
+    return badgeContent;
   }
 
-  // Source badge variant
+  // Source badge variant (informational - no hover)
   if (props.variant === 'source') {
     return (
-      <BadgeWrapper springDefault={springDefault}>
-        <div
-          className={cn(
-            `border font-medium text-xs ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:shadow-md hover:shadow-primary/20`,
-            sourceBadgeStyles[props.source],
-            props.className
-          )}
-        >
-          {props.children}
-        </div>
-      </BadgeWrapper>
+      <div
+        className={cn(
+          `border font-medium text-xs rounded-full px-2 py-0.5`,
+          sourceBadgeStyles[props.source],
+          props.className
+        )}
+      >
+        {props.children}
+      </div>
     );
   }
 
-  // Status badge variant
+  // Status badge variant (informational, but "new" and "trending" get subtle pulse)
   if (props.variant === 'status') {
-    return (
-      <BadgeWrapper springDefault={springDefault}>
-        <div
-          className={cn(
-            `border font-medium text-xs ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:shadow-md hover:shadow-primary/20`,
-            statusBadgeStyles[props.status],
-            props.className
-          )}
-        >
-          {props.children}
-        </div>
-      </BadgeWrapper>
+    const badgeContent = (
+      <div
+        className={cn(
+          `border font-medium text-xs rounded-full px-2 py-0.5`,
+          statusBadgeStyles[props.status],
+          props.className
+        )}
+      >
+        {props.children}
+      </div>
     );
+
+    // Add subtle pulse for "new" and "trending" status badges
+    if (props.status === 'new' || props.status === 'trending') {
+      return <PulseWrapper>{badgeContent}</PulseWrapper>;
+    }
+
+    // No animation for other status badges
+    return badgeContent;
   }
 
-  // Sponsored badge variant
+  // Sponsored badge variant (informational - no hover)
   if (props.variant === 'sponsored') {
     const getIcon = () => {
       if (!props.showIcon) return null;
@@ -346,18 +450,16 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
     };
 
     return (
-      <BadgeWrapper springDefault={springDefault}>
-        <div
-          className={cn(
-            'inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold text-xs transition-colors hover:shadow-md hover:shadow-primary/20',
-            sponsoredBadgeStyles[props.tier],
-            props.className
-          )}
-        >
-          {getIcon()}
-          {getLabel()}
-        </div>
-      </BadgeWrapper>
+      <div
+        className={cn(
+          'inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold text-xs',
+          sponsoredBadgeStyles[props.tier],
+          props.className
+        )}
+      >
+        {getIcon()}
+        {getLabel()}
+      </div>
     );
   }
 
@@ -395,12 +497,12 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
     }
 
     return (
-      <BadgeWrapper springDefault={springDefault}>
+      <BadgeWrapper springDefault={springDefault} isInteractive={true}>
         <button
           type="button"
           className={cn(
             'inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold text-xs transition-all duration-200',
-            'cursor-pointer border-muted-foreground/20 text-muted-foreground hover:border-accent/30 hover:bg-accent/10 hover:text-accent hover:shadow-md hover:shadow-primary/20',
+            'cursor-pointer border-muted-foreground/20 text-muted-foreground hover:border-accent/30 hover:bg-accent/10 hover:text-accent',
             props.className
           )}
           onClick={handleClick}
@@ -469,7 +571,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
     return IndicatorDot;
   }
 
-  // New badge variant (text-based "NEW")
+  // New badge variant (text-based "NEW" - gets subtle pulse)
   if (props.variant === 'new-badge') {
     const badgeVariant = props.badgeVariant || 'default';
     const children = props.children || 'NEW';
@@ -479,25 +581,24 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
       outline: 'bg-accent/10 text-accent border-accent/20',
     };
 
-    return (
-      <BadgeWrapper springDefault={springDefault}>
-        <output
-          className={cn(
-            'inline-flex items-center justify-center',
-            'px-2.5 py-0.5',
-            'font-semibold text-[10px] uppercase tracking-wider',
-            'rounded-full border',
-            ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT,
-            'hover:shadow-md hover:shadow-primary/20',
-            variantStyles[badgeVariant],
-            props.className
-          )}
-          aria-label="New"
-        >
-          {children}
-        </output>
-      </BadgeWrapper>
+    const badgeContent = (
+      <output
+        className={cn(
+          'inline-flex items-center justify-center',
+          'px-2.5 py-0.5',
+          'font-semibold text-[10px] uppercase tracking-wider',
+          'rounded-full border',
+          variantStyles[badgeVariant],
+          props.className
+        )}
+        aria-label="New"
+      >
+        {children}
+      </output>
     );
+
+    // Add subtle pulse for "new" badges
+    return <PulseWrapper>{badgeContent}</PulseWrapper>;
   }
 
   // Counter badge overlay variant (social proof)
@@ -517,9 +618,9 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
 
     // Minimal semantic colors - just the text color, no background
     const colorStyles = {
-      view: SEMANTIC_COLORS.SOCIAL_VIEW,
-      copy: SEMANTIC_COLORS.SOCIAL_COPY,
-      bookmark: SEMANTIC_COLORS.SOCIAL_BOOKMARK,
+      view: COLORS.semantic.social.view.dark.text,
+      copy: COLORS.semantic.social.copy.dark.text,
+      bookmark: COLORS.semantic.social.bookmark.dark.text,
     };
 
     // Custom font size: text-[10px] instead of text-xs (12px) for minimal badge overlays
@@ -530,9 +631,9 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
           '-top-1 -right-1 absolute',
           'font-semibold text-[10px] tabular-nums leading-none',
           'pointer-events-none',
-          colorStyles[type],
           props.className
         )}
+        style={{ color: colorStyles[type] }}
         aria-hidden="true"
       >
         {displayCount}

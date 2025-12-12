@@ -25,3 +25,4 @@ export * from './use-pulse.ts';
 export * from './use-recently-viewed.ts';
 export * from './use-unified-search.ts';
 export * from './use-view-transition.ts';
+export * from './motion';

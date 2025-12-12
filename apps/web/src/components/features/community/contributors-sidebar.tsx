@@ -14,13 +14,20 @@
 
 import { sanitizeSlug } from '@heyclaude/web-runtime/core';
 import { Award, Medal, TrendingUp } from '@heyclaude/web-runtime/icons';
-import { POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import {
+  POSITION_PATTERNS,
+  UI_CLASSES,
+  UnifiedBadge,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
 import Image from 'next/image';
 import Link from 'next/link';
 import { memo } from 'react';
-import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
-import type { UserProfile } from '@/src/components/core/domain/cards/user-profile-card';
-import { Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
+
+import { type UserProfile } from '@/src/components/core/domain/cards/user-profile-card';
 
 /**
  * Validate slug is safe for use in URLs
@@ -54,7 +61,7 @@ function isValidInternalPath(path: string): boolean {
  * Get safe user profile URL from slug
  * Returns null if slug is invalid or unsafe
  */
-function getSafeUserProfileUrl(slug: string | null | undefined): string | null {
+function getSafeUserProfileUrl(slug: null | string | undefined): null | string {
   if (!slug || typeof slug !== 'string') return null;
   // Validate slug format
   if (!isValidSlug(slug)) return null;
@@ -74,35 +81,33 @@ function getSafeUserProfileUrl(slug: string | null | undefined): string | null {
  * Removes HTML tags, script content, and dangerous characters
  * Limits length to prevent abuse
  */
-function sanitizeDisplayName(name: string | null | undefined, fallback: string): string {
+function sanitizeDisplayName(name: null | string | undefined, fallback: string): string {
   if (!name || typeof name !== 'string') return fallback;
   // Remove all < and > characters to fully prevent incomplete tag removal
   // This is the safest approach for display names which should never contain HTML
-  let sanitized = name.replace(/<|>/g, '');
+  let sanitized = name.replaceAll(/<|>/g, '');
   // Remove control characters and dangerous Unicode by filtering character codes
   // Control characters: 0x00-0x1F, 0x7F-0x9F
   // Dangerous Unicode: RTL override marks, directional isolates
-  const dangerousChars = [
-    0x202e,
-    0x202d,
-    0x202c,
-    0x202b,
-    0x202a, // RTL override marks
-    0x200e,
-    0x200f, // Left-to-right/right-to-left marks
-    0x2066,
-    0x2067,
-    0x2068,
-    0x2069, // Directional isolates
-  ];
+  const dangerousChars = new Set([
+    0x20_2e,
+    0x20_2d,
+    0x20_2c,
+    0x20_2b,
+    0x20_2a, // RTL override marks
+    0x20_0e,
+    0x20_0f, // Left-to-right/right-to-left marks
+    0x20_66,
+    0x20_67,
+    0x20_68,
+    0x20_69, // Directional isolates
+  ]);
   sanitized = sanitized
     .split('')
     .filter((char) => {
       const code = char.charCodeAt(0);
       // Filter out control characters (0x00-0x1F, 0x7F-0x9F) and dangerous Unicode
-      return (
-        (code < 0x20 || (code >= 0x7f && code <= 0x9f)) === false && !dangerousChars.includes(code)
-      );
+      return (code < 0x20 || (code >= 0x7f && code <= 0x9f)) === false && !dangerousChars.has(code);
     })
     .join('');
   // Trim and limit length (prevent extremely long names)
@@ -112,8 +117,8 @@ function sanitizeDisplayName(name: string | null | undefined, fallback: string):
 }
 
 export interface ContributorsSidebarProps {
-  topContributors: UserProfile[];
   newMembers: UserProfile[];
+  topContributors: UserProfile[];
 }
 
 function ContributorsSidebarComponent({ topContributors, newMembers }: ContributorsSidebarProps) {
@@ -146,7 +151,7 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
               <Link
                 key={slug}
                 href={validatedUrl}
-                className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-muted/50"
+                className="hover:bg-muted/50 flex items-center gap-3 rounded-lg p-2 transition-colors"
               >
                 <div className="relative shrink-0">
                   {contributor.image ? (
@@ -158,12 +163,12 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
                       className="h-10 w-10 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent font-bold text-sm">
+                    <div className="bg-accent flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold">
                       {displayName.charAt(0).toUpperCase()}
                     </div>
                   )}
                   {index < 3 && (
-                    <div className="-bottom-1 -right-1 absolute rounded-full bg-background p-1">
+                    <div className="bg-background absolute -right-1 -bottom-1 rounded-full p-1">
                       <Medal
                         className={`h-3 w-3 ${
                           index === 0
@@ -177,9 +182,9 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium text-sm">{displayName}</p>
+                  <p className="truncate text-sm font-medium">{displayName}</p>
                   {contributor.total_contributions !== undefined && (
-                    <div className="flex items-center gap-1 text-muted-foreground text-xs">
+                    <div className="text-muted-foreground flex items-center gap-1 text-xs">
                       <Award className={UI_CLASSES.ICON_XS} />
                       <span>{contributor.total_contributions} contributions</span>
                     </div>
@@ -216,7 +221,7 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
                 <Link
                   key={slug}
                   href={validatedUrl}
-                  className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-muted/50"
+                  className="hover:bg-muted/50 flex items-center gap-3 rounded-lg p-2 transition-colors"
                 >
                   {member.image ? (
                     <Image
@@ -227,15 +232,15 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
                       className={`${UI_CLASSES.ICON_XL} shrink-0 rounded-full object-cover`}
                     />
                   ) : (
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent font-bold text-xs">
+                    <div className="bg-accent flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold">
                       {displayName.charAt(0).toUpperCase()}
                     </div>
                   )}
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium text-sm">{displayName}</p>
-                    {member.work && (
-                      <p className="truncate text-muted-foreground text-xs">{member.work}</p>
-                    )}
+                    <p className="truncate text-sm font-medium">{displayName}</p>
+                    {member.work ? (
+                      <p className="text-muted-foreground truncate text-xs">{member.work}</p>
+                    ) : null}
                   </div>
                 </Link>
               );

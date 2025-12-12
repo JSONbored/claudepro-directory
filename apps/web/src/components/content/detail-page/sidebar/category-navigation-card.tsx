@@ -58,16 +58,17 @@
  */
 
 import { nonEmptyString } from '@heyclaude/shared-runtime';
-import type { LucideIcon } from '@heyclaude/web-runtime/icons';
-import { DIMENSIONS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import Link from 'next/link';
-import { z } from 'zod';
+import { type LucideIcon } from '@heyclaude/web-runtime/icons';
 import {
+  DIMENSIONS,
+  UI_CLASSES,
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@heyclaude/web-runtime/ui';
+import Link from 'next/link';
+import { z } from 'zod';
 
 /**
  * Schema for category info
@@ -92,11 +93,21 @@ const categoryNavigationCardPropsSchema = z.object({
 export type CategoryNavigationCardProps = z.infer<typeof categoryNavigationCardPropsSchema>;
 
 /**
- * CategoryNavigationCard Component (Server Component)
+ * Render a horizontal grid of category icons as navigable links with tooltips and active styling.
  *
- * Renders category navigation with icons and tooltips.
- * Supports active state highlighting and custom colors.
- * No React.memo needed - server components don't re-render
+ * Each entry displays an icon and a tooltip containing the category label and description.
+ * The active category is highlighted using the category's `activeColor` (or default active styles),
+ * while inactive categories use `color` (or default inactive styles).
+ *
+ * @param currentCategory - The key of the currently active category (if any).
+ * @param categories - A mapping of category keys to category info objects (label, `icon`, description, optional `color` and `activeColor`).
+ * @param basePath - Base path prefixed to category keys when building link URLs. Defaults to `'/guides'`.
+ * @returns A React element containing the category navigation grid.
+ *
+ * @see CategoryNavigationCardProps
+ * @see categoryInfoSchema
+ * @see Tooltip
+ * @see UI_CLASSES
  */
 export function CategoryNavigationCard({
   currentCategory,
@@ -113,21 +124,22 @@ export function CategoryNavigationCard({
 
           return (
             <Tooltip key={key}>
-              <TooltipTrigger asChild={true}>
+              <TooltipTrigger asChild>
                 <Link
                   href={`${basePath}/${key}`}
-                  className={`rounded-lg p-2 transition-all duration-200 ${
+                  className={`rounded-lg p-2 transition-all ${
                     isActive
                       ? info.activeColor || 'bg-primary/10 text-primary'
                       : `text-muted-foreground ${info.color || 'hover:bg-muted/50 hover:text-primary'}`
                   }`}
+                  style={{ transitionDuration: 'var(--duration-quick)' }}
                 >
                   <Icon className={UI_CLASSES.ICON_SM} />
                 </Link>
               </TooltipTrigger>
               <TooltipContent side="bottom" className={`${DIMENSIONS.TOOLTIP_MAX} text-xs`}>
                 <div className="font-semibold">{info.label}</div>
-                <div className="mt-0.5 text-muted-foreground">{info.description}</div>
+                <div className="text-muted-foreground mt-0.5">{info.description}</div>
               </TooltipContent>
             </Tooltip>
           );

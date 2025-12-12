@@ -8,102 +8,97 @@ import {
   Search,
 } from '@heyclaude/web-runtime/icons';
 import {
-  UI_CLASSES,
-  NavLink,
-  HoverCard,
   Card,
   CardContent,
   CardHeader,
   CardTitle,
+  HoverCard,
+  NavLink,
+  UI_CLASSES,
 } from '@heyclaude/web-runtime/ui';
+import { cacheLife } from 'next/cache';
 import Link from 'next/link';
-
-/**
- * Static Generation: Help page is fully static content
- * No dynamic data fetching - can be pre-rendered at build time
- */
-export const revalidate = false;
 
 const helpTopics = [
   {
-    title: 'Getting Started',
-    icon: BookOpen,
     description: 'Learn the basics of using ClaudePro Directory',
+    icon: BookOpen,
     links: [
-      { label: 'Browse Configurations', href: '/agents' },
-      { label: 'Understanding Categories', href: '/guides' },
-      { label: 'Search Tips', href: '/search' },
+      { href: '/agents', label: 'Browse Configurations' },
+      { href: '/guides', label: 'Understanding Categories' },
+      { href: '/search', label: 'Search Tips' },
     ],
+    title: 'Getting Started',
   },
   {
-    title: 'Submit Content',
-    icon: FileText,
     description: 'Share your configurations with the community',
+    icon: FileText,
     links: [
-      { label: 'Submission Guidelines', href: '/submit' },
-      { label: 'Content Standards', href: '/guides' },
-      { label: 'Review Process', href: '/submit' },
+      { href: '/submit', label: 'Submission Guidelines' },
+      { href: '/guides', label: 'Content Standards' },
+      { href: '/submit', label: 'Review Process' },
     ],
+    title: 'Submit Content',
   },
   {
-    title: 'Using Configurations',
-    icon: Code,
     description: 'How to implement and customize configurations',
+    icon: Code,
     links: [
-      { label: 'Agent Setup', href: '/agents' },
-      { label: 'MCP Servers', href: '/mcp' },
-      { label: 'Slash Commands', href: '/commands' },
-      { label: 'Project Rules', href: '/rules' },
+      { href: '/agents', label: 'Agent Setup' },
+      { href: '/mcp', label: 'MCP Servers' },
+      { href: '/commands', label: 'Slash Commands' },
+      { href: '/rules', label: 'Project Rules' },
     ],
+    title: 'Using Configurations',
   },
   {
-    title: 'Account & Settings',
-    icon: HelpCircle,
     description: 'Manage your account and preferences',
+    icon: HelpCircle,
     links: [
-      { label: 'Profile Settings', href: '/auth/signin' },
-      { label: 'Privacy Settings', href: '/privacy' },
-      { label: 'Notification Preferences', href: '/auth/signin' },
+      { href: '/auth/signin', label: 'Profile Settings' },
+      { href: '/privacy', label: 'Privacy Settings' },
+      { href: '/auth/signin', label: 'Notification Preferences' },
     ],
+    title: 'Account & Settings',
   },
 ];
 
 const commonQuestions = [
   {
-    question: 'How do I submit my own configuration?',
     answer:
       'Visit the Submit page and fill out the form with your configuration details. No JSON formatting required - our team will review and format your submission.',
-    link: { label: 'Go to Submit Page', href: '/submit' },
+    link: { href: '/submit', label: 'Go to Submit Page' },
+    question: 'How do I submit my own configuration?',
   },
   {
-    question: 'What types of content can I find here?',
     answer:
       'We host 8 types of content: Agents, MCP Servers, Commands, Rules, Hooks, Statuslines, Skills, and Collections. Each helps you enhance your Claude Code workflow in different ways.',
-    link: { label: 'Browse Categories', href: '/agents' },
+    link: { href: '/agents', label: 'Browse Categories' },
+    question: 'What types of content can I find here?',
   },
   {
-    question: 'How do I search for specific configurations?',
     answer:
       'Use the search bar (⌘K or Ctrl+K) or click the search icon in the navigation. You can filter by category, tags, and search terms to find exactly what you need.',
-    link: { label: 'Try Search', href: '/search' },
+    link: { href: '/search', label: 'Try Search' },
+    question: 'How do I search for specific configurations?',
   },
   {
-    question: 'Are all configurations free to use?',
     answer:
       'Yes! All content on ClaudePro Directory is free and open-source. We believe in making AI development tools accessible to everyone.',
     link: null,
+    question: 'Are all configurations free to use?',
   },
   {
-    question: 'How can I contribute to the project?',
     answer:
       'You can submit configurations, report issues on GitHub, join our Discord community, or become a partner. We welcome all forms of contribution!',
-    link: { label: 'Learn More', href: '/partner' },
+    link: { href: '/partner', label: 'Learn More' },
+    question: 'How can I contribute to the project?',
   },
   {
-    question: 'What is the difference between Agents and Skills?',
     answer:
       'Agents are autonomous task executors that handle complex workflows, while Skills are focused capabilities for specific tasks (like PDF processing or spreadsheet handling). Skills enhance Claude Code with new abilities.',
-    link: { label: 'Explore Skills', href: '/skills' },
+    link: { href: '/skills', label: 'Explore Skills' },
+    question: 'What is the difference between Agents and Skills?',
   },
 ];
 
@@ -121,7 +116,10 @@ const commonQuestions = [
  * @see Card
  * @see revalidate - page is statically generated (revalidation controlled by this module)
  */
-export default function HelpPage() {
+export default async function HelpPage() {
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
+
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8 sm:py-12">
       <div className="mb-12 text-center">
@@ -148,7 +146,7 @@ export default function HelpPage() {
                 <ul className="space-y-2">
                   {topic.links.map((link) => (
                     <li key={link.label}>
-                      <NavLink href={link.href} className="flex items-center gap-1 text-sm">
+                      <NavLink className="flex items-center gap-1 text-sm" href={link.href}>
                         {link.label} →
                       </NavLink>
                     </li>
@@ -175,7 +173,7 @@ export default function HelpPage() {
               <CardContent>
                 <p className="text-muted-foreground mb-3">{item.answer}</p>
                 {item.link ? (
-                  <NavLink href={item.link.href} className="inline-flex items-center gap-1">
+                  <NavLink className="inline-flex items-center gap-1" href={item.link.href}>
                     {item.link.label} →
                   </NavLink>
                 ) : null}
@@ -189,7 +187,7 @@ export default function HelpPage() {
       <section className="mb-8">
         <h2 className="mb-6 text-2xl font-semibold">Quick Actions</h2>
         <div className="grid gap-4 md:grid-cols-3">
-          <Link href="/search" className="block">
+          <Link className="block" href="/search">
             <HoverCard variant="strong">
               <Card className="h-full cursor-pointer">
                 <CardContent className="pt-6">
@@ -203,7 +201,7 @@ export default function HelpPage() {
             </HoverCard>
           </Link>
 
-          <Link href="/guides" className="block">
+          <Link className="block" href="/guides">
             <HoverCard variant="strong">
               <Card className="h-full cursor-pointer">
                 <CardContent className="pt-6">
@@ -217,7 +215,7 @@ export default function HelpPage() {
             </HoverCard>
           </Link>
 
-          <Link href="/contact" className="block">
+          <Link className="block" href="/contact">
             <HoverCard variant="strong">
               <Card className="h-full cursor-pointer">
                 <CardContent className="pt-6">
@@ -241,15 +239,15 @@ export default function HelpPage() {
             <p className="text-muted-foreground mb-4">Our community is here to assist you</p>
             <div className="flex justify-center gap-4">
               <NavLink
-                href="/contact"
                 className={`bg-accent inline-flex items-center gap-2 rounded-lg ${UI_CLASSES.CONTAINER_PADDING_SM} text-accent-foreground hover:bg-accent/90 transition-colors`}
+                href="/contact"
               >
                 <MessageSquare className="h-4 w-4" />
                 Contact Us
               </NavLink>
               <Link
-                href="/community"
                 className={`border-accent/20 inline-flex items-center gap-2 rounded-lg border ${UI_CLASSES.CONTAINER_PADDING_SM} hover:bg-accent/10 transition-colors`}
+                href="/community"
               >
                 Join Community
               </Link>

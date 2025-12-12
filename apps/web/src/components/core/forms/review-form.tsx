@@ -1,22 +1,35 @@
 'use client';
 
 import { createReview, updateReview } from '@heyclaude/web-runtime/actions';
-import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
+import { useAuthenticatedUser, useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import {
   MAX_REVIEW_LENGTH,
   type ReviewFormProps,
 } from '@heyclaude/web-runtime/types/component.types';
-import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { useRouter } from 'next/navigation';
-import { useId, useState, useTransition } from 'react';
+import { toasts, UI_CLASSES, Button, Label, Textarea } from '@heyclaude/web-runtime/ui';
+import { usePathname, useRouter } from 'next/navigation';
+import { useCallback, useId, useState, useTransition } from 'react';
+
+import { useAuthModal } from '@/src/hooks/use-auth-modal';
 import { ReviewRatingInteractive } from '@/src/components/core/domain/reviews/review-rating-interactive';
-import { Button } from '@heyclaude/web-runtime/ui';
-import { Label } from '@heyclaude/web-runtime/ui';
-import { Textarea } from '@heyclaude/web-runtime/ui';
 
 /**
- * Form for creating and editing reviews
- * Extracted from unified review component for better tree-shaking
+ * Renders a form for creating a new review or editing an existing review.
+ *
+ * The form manages rating and review text state, validates input, and calls the
+ * appropriate API action (create or update). On success it refreshes the router
+ * and invokes `onSuccess` if provided. On failure it displays contextual toasts.
+ *
+ * @param contentType - The content type identifier for the reviewed item
+ * @param contentSlug - The slug identifying the reviewed item
+ * @param existingReview - Optional existing review to edit; when provided the form initializes in edit mode
+ * @param onSuccess - Optional callback invoked after a successful create or update
+ * @param onCancel - Optional callback invoked when the user cancels the action
+ *
+ * @see ReviewRatingInteractive
+ * @see createReview
+ * @see updateReview
+ * @see useLoggedAsync
  */
 export function ReviewForm({
   contentType,
@@ -30,6 +43,9 @@ export function ReviewForm({
   const [isPending, startTransition] = useTransition();
   const [showRatingError, setShowRatingError] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
+  const { user, status } = useAuthenticatedUser({ context: 'ReviewForm' });
+  const { openAuthModal } = useAuthModal();
   const textareaId = useId();
   const ratingErrorId = useId();
   const textareaErrorId = useId();
@@ -44,18 +60,35 @@ export function ReviewForm({
   const isValid = rating > 0;
   const hasTextError = reviewText.length > MAX_REVIEW_LENGTH;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
 
-    if (!isValid) {
-      setShowRatingError(true);
-      toasts.error.validation('Please select a star rating');
-      return;
-    }
+      // Proactive auth check - show modal before attempting action
+      if (status === 'loading') {
+        // Wait for auth check to complete
+        return;
+      }
 
-    setShowRatingError(false);
+      if (!user) {
+        // User is not authenticated - show auth modal
+        openAuthModal({
+          valueProposition: 'Sign in to write a review',
+          redirectTo: pathname ?? undefined,
+        });
+        return;
+      }
 
-    startTransition(async () => {
+      if (!isValid) {
+        setShowRatingError(true);
+        toasts.error.validation('Please select a star rating');
+        return;
+      }
+
+      setShowRatingError(false);
+
+      // User is authenticated - proceed with review submission
+      startTransition(async () => {
       try {
         await runLoggedAsync(
           async () => {
@@ -104,20 +137,29 @@ export function ReviewForm({
       } catch (error) {
         // Error already logged by useLoggedAsync
         if (error instanceof Error && error.message.includes('signed in')) {
-          toasts.raw.error('Please sign in to write a review', {
-            action: {
-              label: 'Sign In',
-              onClick: () => router.push(`/login?redirect=${window.location.pathname}`),
-            },
+          // Auth error - show modal (shouldn't happen due to proactive check, but handle as fallback)
+          openAuthModal({
+            valueProposition: 'Sign in to write a review',
+            redirectTo: pathname ?? undefined,
           });
         } else if (error instanceof Error && error.message.includes('already reviewed')) {
           toasts.error.validation('You have already reviewed this content');
         } else {
-          toasts.error.reviewActionFailed('submit');
+          // Non-auth errors - show toast with retry option
+          toasts.raw.error('Failed to submit review', {
+            action: {
+              label: 'Retry',
+              onClick: () => {
+                handleSubmit(e);
+              },
+            },
+          });
         }
       }
     });
-  };
+    },
+    [user, status, openAuthModal, pathname, isValid, isEditing, contentType, contentSlug, rating, reviewText, existingReview, router, onSuccess, runLoggedAsync, setShowRatingError]
+  );
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -131,25 +173,25 @@ export function ReviewForm({
             value={rating}
             onChange={setRating}
             size="md"
-            showValue={true}
+            showValue
             {...(showRatingError ? { 'aria-describedby': ratingErrorId } : {})}
             {...(showRatingError ? { 'aria-invalid': 'true' as const } : {})}
           />
         </div>
         {rating === 0 && !showRatingError && (
-          <p className="mt-1 text-muted-foreground text-xs">Click a star to rate</p>
+          <p className="text-muted-foreground mt-1 text-xs">Click a star to rate</p>
         )}
-        {showRatingError && (
-          <p id={ratingErrorId} className="mt-1 text-destructive text-sm" role="alert">
+        {showRatingError ? (
+          <p id={ratingErrorId} className="text-destructive mt-1 text-sm" role="alert">
             Please select a star rating before submitting
           </p>
-        )}
+        ) : null}
       </div>
 
       {/* Review Text */}
       <div>
         <Label htmlFor={textareaId} className="mb-2 block">
-          Your Review <span className="font-normal text-muted-foreground text-xs">(optional)</span>
+          Your Review <span className="text-muted-foreground text-xs font-normal">(optional)</span>
         </Label>
         <Textarea
           id={textareaId}
@@ -162,11 +204,11 @@ export function ReviewForm({
           error={hasTextError}
           {...(hasTextError ? { errorId: textareaErrorId } : {})}
         />
-        {hasTextError && (
-          <p id={textareaErrorId} className="mt-1 text-destructive text-sm" role="alert">
+        {hasTextError ? (
+          <p id={textareaErrorId} className="text-destructive mt-1 text-sm" role="alert">
             Review text cannot exceed {MAX_REVIEW_LENGTH} characters
           </p>
-        )}
+        ) : null}
         <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mt-1`}>
           <p className="text-muted-foreground text-xs">
             Help others by sharing details about your experience
@@ -184,11 +226,11 @@ export function ReviewForm({
         <Button type="submit" disabled={!isValid || isPending}>
           {isPending ? 'Submitting...' : isEditing ? 'Update Review' : 'Submit Review'}
         </Button>
-        {onCancel && (
+        {onCancel ? (
           <Button type="button" variant="outline" onClick={onCancel} disabled={isPending}>
             Cancel
           </Button>
-        )}
+        ) : null}
       </div>
     </form>
   );

@@ -1,33 +1,34 @@
 import { getLastUpdatedDate } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
+import { logger } from '@heyclaude/web-runtime/logging/server';
 import { NavLink } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
+import { Suspense } from 'react';
+
+import PrivacyLoading from './loading';
 
 /**
- * Provide page metadata used by Next.js for the site's Privacy page.
+ * Provide Next.js metadata for the Privacy page, deferring non-deterministic operations to request time.
  *
- * @returns The Next.js Metadata object for the "/privacy" page.
+ * Awaits a server connection to allow safe use of non-deterministic values (e.g., current date) in Cache Components, then returns generated metadata for the '/privacy' route.
+ *
+ * @returns The page metadata for the privacy route.
  * @see generatePageMetadata
- * @see {@link Metadata}
+ * @see connection
  */
+
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/privacy');
 }
 
 /**
- * Static Generation: Legal pages are fully static and never change
- * revalidate: false = Static generation at build time (no automatic revalidation)
- */
-export const revalidate = false;
-
-/**
- * Render the Privacy Policy page displaying the site's last-updated date and policy sections.
+ * Render the Privacy Policy page with its last-updated date and policy sections.
  *
- * The component obtains the site's last-updated date, displays it, and presents policy sections
- * covering information collection, use, sharing, cookies, security, user rights, children's
- * privacy, changes, and contact information. Internal navigation links point to the Cookies and
- * Contact pages.
+ * This server component defers non-deterministic operations by awaiting the runtime
+ * connection, creates a request-scoped logger for the page request, and renders the
+ * Privacy Policy content within a Suspense boundary (fallback shown while loading).
  *
  * @returns The Privacy Policy page as a JSX element.
  *
@@ -35,8 +36,39 @@ export const revalidate = false;
  * @see APP_CONFIG
  * @see NavLink
  */
-export default function PrivacyPage() {
+export default async function PrivacyPage() {
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
+
+  // Create request-scoped child logger
+  const reqLogger = logger.child({
+    module: 'apps/web/src/app/privacy',
+    operation: 'PrivacyPage',
+    route: '/privacy',
+  });
+
+  return (
+    <Suspense fallback={<PrivacyLoading />}>
+      <PrivacyPageContent reqLogger={reqLogger} />
+    </Suspense>
+  );
+}
+
+/**
+ * Renders the Privacy Policy page content and emits a request-scoped render log.
+ *
+ * @param reqLogger - Request-scoped logger (created via `logger.child`) used to record structured log entries for this render.
+ * @param reqLogger.reqLogger
+ * @returns The JSX element containing the privacy policy content, including the last-updated date and sectioned policy text.
+ *
+ * @see getLastUpdatedDate
+ * @see NavLink
+ * @see APP_CONFIG
+ */
+function PrivacyPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
   const lastUpdated = getLastUpdatedDate();
+
+  reqLogger.info({ section: 'data-fetch' }, 'PrivacyPage: rendering page');
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8 sm:py-12">
@@ -115,7 +147,7 @@ export default function PrivacyPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="mb-4 text-2xl font-semibold">7. Children's Privacy</h2>
+          <h2 className="mb-4 text-2xl font-semibold">7. Children&apos;s Privacy</h2>
           <p className="mb-4">
             Our service is not directed to children under 13 years of age. We do not knowingly
             collect personal information from children under 13.
@@ -126,7 +158,8 @@ export default function PrivacyPage() {
           <h2 className="mb-4 text-2xl font-semibold">8. Changes to This Policy</h2>
           <p className="mb-4">
             We may update this Privacy Policy from time to time. We will notify you of any changes
-            by posting the new Privacy Policy on this page and updating the "Last updated" date.
+            by posting the new Privacy Policy on this page and updating the &quot;Last updated&quot;
+            date.
           </p>
         </section>
 

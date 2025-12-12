@@ -14,7 +14,6 @@
  * // Server component or API route
  * import {
  *   logger,
- *   generateRequestId,
  *   createWebAppContext,
  *   createWebAppContextWithId,
  *   getRequestContext,
@@ -26,14 +25,12 @@
  * 
  * **What's Included:**
  * - Main logger instance (`logger`)
- * - Request ID generation (`generateRequestId`) - client-safe function, but exported from server barrel
  * - Log context builders (`createWebAppContext`, `createWebAppContextWithId`)
  * - Request context utilities (`getRequestContext`, `createLogContext`) - server-only
  * - Error normalization (`normalizeError`)
  * - Error response utilities (`createErrorResponse`, `handleApiError`)
  * 
  * **Client/Server Boundaries:**
- * - `generateRequestId()` is client-safe, but exported from server barrel for convenience
  * - All other utilities are server-only (use `next/headers` or other server APIs)
  * - For client-side logging, use {@link ../logging/client | Client Logging Barrel} instead
  * 
@@ -44,7 +41,6 @@
  * 
  * @module web-runtime/logging/server
  * @see {@link ../logging/client | Client Logging Barrel} - Client-side logging utilities
- * @see {@link ../utils/request-id | request-id} - Client-safe request ID generation
  * @see {@link ../utils/request-context | request-context} - Server-only request context utilities
  * @see {@link ../utils/log-context | log-context} - Server-only log context builders
  */
@@ -54,8 +50,6 @@ import 'server-only';
 // Main logger instance
 export { logger, type LogContext, type LogContextValue, toLogContextValue } from '../logger.ts';
 
-// Request ID generation (client-safe, but exported from server barrel for convenience)
-export { generateRequestId } from '../utils/request-id.ts';
 
 // Server-only request context utilities
 export { getRequestContext, createLogContext } from '../utils/request-context.ts';

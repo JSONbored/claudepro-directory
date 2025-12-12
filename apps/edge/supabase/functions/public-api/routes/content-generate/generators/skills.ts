@@ -232,9 +232,8 @@ function escapeYamlString(str: string): string {
  * @returns A Uint8Array containing the bytes of the ZIP archive with one entry: `{slug}/SKILL.md`
  */
 function generateZipBuffer(slug: string, skillMdContent: string): Uint8Array {
-  // TODO: Replace with proper Deno-compatible ZIP library
-  // For now, create a minimal ZIP structure manually
-  // This is a simplified implementation - a proper ZIP library would be better
+  // Create a minimal ZIP structure manually
+  // This is a simplified implementation
 
   // Create ZIP file structure manually
   // ZIP format: [Local File Header][File Data][Central Directory][End of Central Directory]

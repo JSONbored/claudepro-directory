@@ -10,17 +10,33 @@ import {
   MapPin,
   Star,
 } from '@heyclaude/web-runtime/icons';
-import type { JobCardProps } from '@heyclaude/web-runtime/types/component.types';
-import { BADGE_COLORS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { type JobCardProps } from '@heyclaude/web-runtime/types/component.types';
+import {
+  BADGE_COLORS,
+  UI_CLASSES,
+  UnifiedBadge,
+  HighlightedText,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useMemo } from 'react';
-import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
-import { HighlightedText } from '@heyclaude/web-runtime/ui';
-import { Button } from '@heyclaude/web-runtime/ui';
-import { Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
 
-function getSafeJobLink(link?: string | null): string {
+/**
+ * Produce a sanitized, safe href for a job link or a fallback when the input is missing or invalid.
+ *
+ * Removes credentials, trims trailing dots from hostnames, lowercases the hostname, and omits default HTTPS port 443; only HTTPS URLs are accepted.
+ *
+ * @param link - The raw job URL (may be null or undefined) sourced from external data
+ * @returns The normalized `href` for a valid HTTPS URL, or `'#'` when the input is absent, invalid, or not HTTPS
+ *
+ * @see JobCard
+ */
+function getSafeJobLink(link?: null | string): string {
   if (!link || typeof link !== 'string') return '#';
   try {
     const url = new URL(link.trim());
@@ -41,6 +57,23 @@ function getSafeJobLink(link?: string | null): string {
   }
 }
 
+/**
+ * Renders a job listing card with metadata, badges, tags, description, and action buttons.
+ *
+ * Displays company logo, highlighted title and description when available, location, posted date,
+ * salary, job type and remote badges, up to four tags (with a "+N more" indicator), and two actions:
+ * "Apply Now" (opens the job link in a new tab) and "View Details" (navigates to the job details page).
+ *
+ * The component records click telemetry for the action buttons.
+ *
+ * @param job - The job data used to populate the card (title, company, logo, location, posted_at, salary, type, remote, tags, link, slug, tier, and optional highlighted fields).
+ * @returns The rendered JSX element for the job card.
+ *
+ * @see getSafeJobLink - used to produce a validated external URL for the "Apply Now" action.
+ * @see formatRelativeDate - used to render relative posted dates.
+ * @see HighlightedText - used to render pre-highlighted title/description HTML.
+ * @see UnifiedBadge - used for job type, remote, tag, and featured badges.
+ */
 export function JobCard({ job }: JobCardProps) {
   const pulse = usePulse();
   const isFeatured = job.tier === 'featured';
@@ -84,32 +117,32 @@ export function JobCard({ job }: JobCardProps) {
           : ''
       }`}
     >
-      {isFeatured && (
-        <div className="-top-2 -right-2 absolute z-10">
+      {isFeatured ? (
+        <div className="absolute -top-2 -right-2 z-10">
           <UnifiedBadge variant="base" style="default" className={UI_CLASSES.JOB_FEATURED_BADGE}>
             <Star className={UI_CLASSES.ICON_XS_LEADING} />
             Featured
           </UnifiedBadge>
         </div>
-      )}
+      ) : null}
 
       <CardHeader className={UI_CLASSES.CARD_HEADER_DEFAULT}>
-        <div className={'flex items-start justify-between'}>
+        <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} mb-2`}>
-              {job.company_logo && (
+              {job.company_logo ? (
                 <Image
                   src={job.company_logo}
                   alt={`${job.company} logo`}
                   width={48}
                   height={48}
-                  className={'rounded-lg object-cover'}
+                  className="rounded-lg object-cover"
                   loading="lazy"
                 />
-              )}
+              ) : null}
               <div>
                 <CardTitle
-                  className={`${UI_CLASSES.TEXT_CARD_TITLE} text-xl transition-colors-smooth group-hover:text-accent`}
+                  className={`${UI_CLASSES.TEXT_CARD_TITLE} transition-colors-smooth group-hover:text-accent text-xl`}
                 >
                   <Link href={`/jobs/${job.slug}`}>{highlightedTitle}</Link>
                 </CardTitle>
@@ -127,23 +160,23 @@ export function JobCard({ job }: JobCardProps) {
                 <MapPin className={UI_CLASSES.ICON_SM} />
                 {job.location}
               </div>
-              {job.posted_at && (
+              {job.posted_at ? (
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                   <Clock className={UI_CLASSES.ICON_SM} />
                   {formatRelativeDate(job.posted_at)}
                 </div>
-              )}
-              {job.salary && (
+              ) : null}
+              {job.salary ? (
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                   <DollarSign className={UI_CLASSES.ICON_SM} />
                   {job.salary}
                 </div>
-              )}
+              ) : null}
             </div>
           </div>
 
           <div className={`flex flex-col items-end ${UI_CLASSES.SPACE_COMPACT}`}>
-            {job.type && (
+            {job.type ? (
               <UnifiedBadge
                 variant="base"
                 style="default"
@@ -153,12 +186,12 @@ export function JobCard({ job }: JobCardProps) {
               >
                 {job.type.replace('-', ' ')}
               </UnifiedBadge>
-            )}
-            {job.remote && (
+            ) : null}
+            {job.remote ? (
               <UnifiedBadge variant="base" style="secondary">
                 Remote
               </UnifiedBadge>
-            )}
+            ) : null}
           </div>
         </div>
       </CardHeader>
@@ -188,7 +221,7 @@ export function JobCard({ job }: JobCardProps) {
 
         <div className={`flex ${UI_CLASSES.SPACE_DEFAULT}`}>
           <Button
-            asChild={true}
+            asChild
             className="flex-1"
             onClick={() => {
               pulse
@@ -210,9 +243,9 @@ export function JobCard({ job }: JobCardProps) {
           >
             {(() => {
               const safeJobLink = getSafeJobLink(job.link);
-              // Explicit validation: getSafeJobLink guarantees the URL is safe
-              // It validates protocol (HTTPS only), hostname (whitelisted job board domains only),
-              // and returns '#' for any invalid URLs. At this point, safeJobLink is validated
+              // Explicit validation: getSafeJobLink normalizes the URL and enforces HTTPS-only links.
+              // It strips credentials, normalizes the hostname, removes default port 443,
+              // and returns '#' for any invalid or non-HTTPS URLs. At this point, safeJobLink is sanitized.
               const validatedUrl: string = safeJobLink;
               return (
                 <a href={validatedUrl} target="_blank" rel="noopener noreferrer">
@@ -222,11 +255,8 @@ export function JobCard({ job }: JobCardProps) {
               );
             })()}
           </Button>
-          <Button
-            variant="outline"
-            asChild={true}
-          >
-            <Link 
+          <Button variant="outline" asChild>
+            <Link
               href={`/jobs/${job.slug}`}
               onClick={() => {
                 pulse

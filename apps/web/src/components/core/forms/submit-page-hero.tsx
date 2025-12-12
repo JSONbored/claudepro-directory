@@ -7,17 +7,17 @@
 'use client';
 
 import { CheckCircle, Clock, Send, Sparkles, Users } from '@heyclaude/web-runtime/icons';
-import { cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { cn, UI_CLASSES, BorderBeam } from '@heyclaude/web-runtime/ui';
+import { SPRING, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
-import { BorderBeam } from '@heyclaude/web-runtime/ui';
 
 interface SubmitPageHeroProps {
-  stats: {
-    total: number;
-    pending: number;
-    merged_this_week: number;
-  };
   className?: string;
+  stats: {
+    merged_this_week: number;
+    pending: number;
+    total: number;
+  };
 }
 
 /**
@@ -29,8 +29,8 @@ const containerVariants = {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.5,
-      staggerChildren: 0.1,
+      duration: DURATION.moderate,
+      staggerChildren: STAGGER.fast,
     },
   },
 };
@@ -43,7 +43,7 @@ const itemVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.4 },
+    transition: { duration: DURATION.slow },
   },
 };
 
@@ -54,19 +54,30 @@ const iconVariants = {
   hidden: { scale: 0 },
   visible: {
     scale: 1,
-    transition: {
-      type: 'spring' as const,
-      stiffness: 500,
-      damping: 15,
-    },
+    transition: SPRING.icon,
   },
 };
 
+/**
+ * Renders the animated hero section for the /submit page showing contribution messaging, feature badges, and a decorative illustration.
+ *
+ * @param stats - Aggregated contribution statistics
+ * @param stats.merged_this_week - Number of configurations merged this week
+ * @param stats.pending - Number of pending contributions
+ * @param stats.total - Total number of contributed configurations (displayed in the UI)
+ * @param className - Optional additional className applied to the root container
+ *
+ * @returns A React element representing the Submit page hero section
+ *
+ * @see BorderBeam
+ * @see UI_CLASSES
+ * @see cn
+ */
 export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
   return (
     <motion.div
       className={cn(
-        'relative overflow-hidden rounded-2xl border border-border/50 bg-card',
+        'border-border/50 bg-card relative overflow-hidden rounded-2xl border',
         UI_CLASSES.PADDING_RELAXED,
         UI_CLASSES.MARGIN_RELAXED,
         className
@@ -85,7 +96,7 @@ export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
           <motion.div variants={itemVariants}>
             <div
               className={cn(
-                'inline-flex rounded-full border border-primary/20 bg-primary/10',
+                'border-primary/20 bg-primary/10 inline-flex rounded-full border',
                 UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2,
                 UI_CLASSES.PADDING_X_DEFAULT,
                 'py-1.5',
@@ -95,12 +106,12 @@ export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
               <motion.div variants={iconVariants}>
                 <Sparkles className={cn(UI_CLASSES.ICON_SM, 'text-primary')} />
               </motion.div>
-              <span className="font-medium text-primary">Community Contributions</span>
+              <span className="text-primary font-medium">Community Contributions</span>
             </div>
           </motion.div>
 
           {/* Title */}
-          <motion.h1 className="font-bold text-4xl lg:text-5xl" variants={itemVariants}>
+          <motion.h1 className="text-4xl font-bold lg:text-5xl" variants={itemVariants}>
             Share Your Configuration
           </motion.h1>
 
@@ -141,27 +152,27 @@ export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
           <motion.div
             className="relative"
             whileHover={{ scale: 1.05 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+            transition={SPRING.smooth}
           >
             <div
               className={cn(
-                'h-32 w-32 rounded-2xl border border-primary/20 bg-primary/10',
+                'border-primary/20 bg-primary/10 h-32 w-32 rounded-2xl border',
                 UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_CENTER
               )}
             >
-              <Send className="h-16 w-16 text-primary" />
+              <Send className="text-primary h-16 w-16" />
             </div>
 
             {/* Animated pulse ring */}
             <motion.div
-              className="absolute inset-0 rounded-2xl border-2 border-primary/30"
+              className="border-primary/30 absolute inset-0 rounded-2xl border-2"
               initial={{ scale: 1, opacity: 1 }}
               animate={{
                 scale: [1, 1.2, 1],
                 opacity: [0.5, 0, 0.5],
               }}
               transition={{
-                duration: 2,
+                duration: DURATION.maximum,
                 repeat: Number.POSITIVE_INFINITY,
                 ease: 'easeInOut',
               }}

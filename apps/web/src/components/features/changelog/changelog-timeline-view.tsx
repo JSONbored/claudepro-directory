@@ -10,64 +10,15 @@
 
 'use client';
 
-import type { Database } from '@heyclaude/database-types';
-import { sanitizeSlug } from '@heyclaude/web-runtime/core';
-import { useEffect, useRef, useState } from 'react';
+import { type Database } from '@heyclaude/database-types';
+import { useInfiniteScroll } from '@heyclaude/web-runtime/hooks';
+import { getChangelogPath } from '@heyclaude/web-runtime/utils/changelog';
+import Link from 'next/link';
+
 import { ChangelogContent } from './changelog-content';
-import { TimelineMarker } from './timeline-marker';
 
 type ChangelogEntry = Database['public']['Tables']['changelog']['Row'];
 
-/**
- * Validates a changelog slug according to the project's allowed format.
- *
- * @param slug - The slug to validate; must be 3–100 characters long and use only lowercase letters (`a–z`), digits (`0–9`), or hyphens (`-`).
- * @returns `true` if `slug` meets the length and character constraints, `false` otherwise.
- *
- * @see getSafeChangelogPath
- * @see isValidInternalPath
- */
-function isValidChangelogSlug(slug: string): boolean {
-  if (typeof slug !== 'string' || slug.length < 3 || slug.length > 100) return false;
-  return /^[a-z0-9-]+$/.test(slug);
-}
-
-/**
- * Validate that a string is a safe internal path for in-app navigation (starts with a single `/` and contains only common path, query, or fragment characters).
- *
- * @param path - Candidate internal path (for example, `/changelog/my-entry`)
- * @returns `true` if `path` is a well-formed internal path starting with `/`, `false` otherwise.
- *
- * @see getSafeChangelogPath
- * @see isValidChangelogSlug
- */
-function isValidInternalPath(path: string): boolean {
-  if (typeof path !== 'string' || path.length === 0) return false;
-  if (!path.startsWith('/')) return false;
-  if (path.startsWith('//')) return false;
-  // Protocol check removed as redundant: paths starting with / cannot match protocol patterns (javascript:, data:, etc.)
-  return /^\/[a-zA-Z0-9/?#\-_.~!*'();:@&=+$,%[\]]*$/.test(path);
-}
-
-/**
- * Produce a safe internal changelog path for a given slug.
- *
- * @param slug - The candidate changelog slug (may be null or undefined).
- * @returns The internal path `/changelog/{sanitized-slug}` if the slug is valid and safe, `null` otherwise.
- *
- * @see isValidChangelogSlug
- * @see isValidInternalPath
- * @see sanitizeSlug
- */
-function getSafeChangelogPath(slug: string | null | undefined): string | null {
-  if (!slug || typeof slug !== 'string') return null;
-  if (!isValidChangelogSlug(slug)) return null;
-  const sanitized = sanitizeSlug(slug).toLowerCase();
-  if (!isValidChangelogSlug(sanitized) || sanitized.length === 0) return null;
-  const url = `/changelog/${sanitized}`;
-  if (!isValidInternalPath(url)) return null;
-  return url;
-}
 
 interface ChangelogTimelineViewProps {
   entries: ChangelogEntry[];
@@ -83,119 +34,121 @@ interface ChangelogTimelineViewProps {
  * @param entries - Ordered array of changelog entries used to render timeline markers and their corresponding content sections.
  *
  * @see ChangelogContent
- * @see TimelineMarker
- * @see getSafeChangelogPath
  */
 export function ChangelogTimelineView({ entries }: ChangelogTimelineViewProps) {
-  const [activeSlug, setActiveSlug] = useState<string | null>(entries[0]?.slug ?? null);
-  const contentRefs = useRef<Map<string, HTMLElement>>(new Map());
-  const observerRefs = useRef<Map<string, IntersectionObserver>>(new Map());
+  // Lazy loading: Only render first 10 entries initially, load more on scroll
+  const { displayCount, sentinelRef } = useInfiniteScroll({
+    totalItems: entries.length,
+    batchSize: 10,
+    rootMargin: '800px', // Load 800px before viewport
+  });
 
-  // Set up Intersection Observer for each content section
-  useEffect(() => {
-    if (typeof IntersectionObserver === 'undefined') {
-      return;
-    }
+  const displayedEntries = entries.slice(0, displayCount);
 
-    // Clean up existing observers
-    observerRefs.current.forEach((observer) => observer.disconnect());
-    observerRefs.current.clear();
-
-    // Create observers for each entry
-    entries.forEach((entry) => {
-      const element = contentRefs.current.get(entry.slug);
-      if (!element) return;
-
-      const observer = new IntersectionObserver(
-        ([intersectionEntry]) => {
-          if (intersectionEntry?.isIntersecting) {
-            // Calculate which section is most visible
-            const rect = intersectionEntry.boundingClientRect;
-            const viewportHeight = window.innerHeight;
-            const visibilityRatio = Math.max(
-              0,
-              Math.min(1, (viewportHeight - Math.max(0, -rect.top)) / viewportHeight)
-            );
-
-            // Only update if this section is significantly visible (at least 20% from top)
-            if (visibilityRatio > 0.2) {
-              setActiveSlug(entry.slug);
-            }
-          }
-        },
-        {
-          rootMargin: '-20% 0px -70% 0px', // Trigger when 20% from top
-          threshold: [0, 0.25, 0.5, 0.75, 1],
-        }
-      );
-
-      observer.observe(element);
-      observerRefs.current.set(entry.slug, observer);
+  // Format date helper - EXACTLY matches Magic UI template format
+  const formatDate = (date: Date): string => {
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
     });
-
-    // Cleanup on unmount
-    return () => {
-      observerRefs.current.forEach((observer) => observer.disconnect());
-      observerRefs.current.clear();
-    };
-  }, [entries]);
-
-  // Scroll to content handler
-  const scrollToContent = (slug: string) => {
-    const element = contentRefs.current.get(slug);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
   };
 
-  // Set ref for content section
-  const setContentRef = (slug: string) => (element: HTMLElement | null) => {
-    if (element) {
-      contentRefs.current.set(slug, element);
-    } else {
-      contentRefs.current.delete(slug);
+  // Extract tags from entry (if available in metadata or keywords)
+  const getTags = (entry: ChangelogEntry): string[] => {
+    // Try to get tags from metadata first
+    if (entry.metadata && typeof entry.metadata === 'object' && 'tags' in entry.metadata) {
+      const tags = (entry.metadata as { tags?: string[] }).tags;
+      if (Array.isArray(tags)) return tags;
     }
+    // Fallback to keywords if available
+    if (Array.isArray(entry.keywords) && entry.keywords.length > 0) {
+      return entry.keywords;
+    }
+    return [];
+  };
+
+  // Extract version from entry (if available in metadata)
+  const getVersion = (entry: ChangelogEntry): string | null => {
+    if (entry.metadata && typeof entry.metadata === 'object' && 'version' in entry.metadata) {
+      const version = (entry.metadata as { version?: string }).version;
+      if (typeof version === 'string') return version;
+    }
+    return null;
   };
 
   return (
-    <div className="grid grid-cols-1 gap-8 md:grid-cols-[240px_1fr] md:gap-8 lg:gap-12">
-      {/* Timeline Column (Left) - Minimal design */}
-      <div className="relative hidden md:block">
-        {/* Vertical timeline line - Subtle */}
-        <div className="absolute left-3 top-0 bottom-0 w-px bg-border/40" aria-hidden="true" />
+    <>
+      {displayedEntries.map((entry) => {
+        const date = new Date(entry.release_date);
+        const formattedDate = formatDate(date);
+        const tags = getTags(entry);
+        const version = getVersion(entry);
 
-        {/* Timeline markers */}
-        <div className="relative pl-8">
-          {entries.map((entry) => {
-            const targetPath = getSafeChangelogPath(entry.slug);
-            if (!targetPath) return null;
+        return (
+          <div key={entry.slug} className="relative">
+            <div className="flex flex-col md:flex-row gap-y-6">
+              <div className="md:w-48 flex-shrink-0">
+                <div className="md:sticky md:top-8 pb-10">
+                  <time className="text-sm font-medium text-muted-foreground block mb-3">
+                    {formattedDate}
+                  </time>
 
-            return (
-              <TimelineMarker
-                key={entry.slug}
-                entry={entry}
-                isActive={activeSlug === entry.slug}
-                targetPath={targetPath}
-                onClick={() => scrollToContent(entry.slug)}
-              />
-            );
-          })}
-        </div>
-      </div>
+                  {version && (
+                    <div className="inline-flex relative z-10 items-center justify-center w-10 h-10 text-foreground border border-border rounded-lg text-sm font-bold">
+                      {version}
+                    </div>
+                  )}
+                </div>
+              </div>
 
-      {/* Content Column (Right) - Aligned with timeline markers */}
-      <div className="space-y-0">
-        {entries.map((entry) => (
-          <section
-            key={entry.slug}
-            id={`changelog-entry-${entry.slug}`}
-            ref={setContentRef(entry.slug)}
-            className="scroll-mt-24 pt-6 md:pt-8 pb-12 md:pb-20 border-b border-border/20 last:border-b-0 last:pb-0"
-          >
-            <ChangelogContent entry={entry} hideHeader={true} />
-          </section>
-        ))}
-      </div>
-    </div>
+              {/* Right side - Content */}
+              <div className="flex-1 md:pl-8 relative pb-10">
+                {/* Vertical timeline line */}
+                <div className="hidden md:block absolute top-2 left-0 w-px h-full bg-border">
+                  {/* Timeline dot */}
+                  <div className="hidden md:block absolute -translate-x-1/2 size-3 bg-primary rounded-full z-10" />
+                </div>
+
+                <div className="space-y-6">
+                  <div className="relative z-10 flex flex-col gap-2">
+                    <Link
+                      href={getChangelogPath(entry.slug)}
+                      className="block hover:text-primary transition-colors"
+                    >
+                      <h2 className="text-2xl font-semibold tracking-tight text-balance">
+                        {entry.title}
+                      </h2>
+                    </Link>
+
+                    {/* Tags */}
+                    {tags.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {tags.map((tag: string) => (
+                          <span
+                            key={tag}
+                            className="h-6 w-fit px-2 text-xs font-medium bg-muted text-muted-foreground rounded-full border flex items-center justify-center"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <div className="prose dark:prose-invert max-w-none prose-headings:scroll-mt-8 prose-headings:font-semibold prose-a:no-underline prose-headings:tracking-tight prose-headings:text-balance prose-p:tracking-tight prose-p:text-balance">
+                    <ChangelogContent entry={entry} hideHeader={true} onHeaderRef={() => {}} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+
+      {/* Sentinel for infinite scroll - Load more entries when this comes into view */}
+      {displayCount < entries.length && (
+        <div ref={sentinelRef} className="h-4 w-full" aria-hidden="true" />
+      )}
+    </>
   );
 }

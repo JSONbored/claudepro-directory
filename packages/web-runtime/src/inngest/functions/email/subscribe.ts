@@ -27,7 +27,7 @@ import {
   sendEmail,
   enrollInOnboardingSequence,
 } from '../../../integrations/resend';
-import { logger, generateRequestId, createWebAppContextWithId } from '../../../logging/server';
+import { logger, createWebAppContextWithId } from '../../../logging/server';
 
 /**
  * Newsletter subscribe function
@@ -51,8 +51,7 @@ export const subscribeNewsletter = inngest.createFunction(
   { event: 'email/subscribe' },
   async ({ event, step }) => {
     const startTime = Date.now();
-    const requestId = generateRequestId();
-    const logContext = createWebAppContextWithId(requestId, '/inngest/email/subscribe', 'subscribeNewsletter');
+    const logContext = createWebAppContextWithId('/inngest/email/subscribe', 'subscribeNewsletter');
 
     const { email, source, referrer, copyType, copyCategory, copySlug } = event.data;
 
@@ -65,12 +64,10 @@ export const subscribeNewsletter = inngest.createFunction(
       return emailValidation.normalized;
     });
 
-    logger.info('Newsletter subscription started', {
-      ...logContext,
+    logger.info({ ...logContext,
       email: validatedEmail, // Auto-hashed by pino redaction config
       source: source ?? null,
-      copyCategory: copyCategory ?? null,
-    });
+      copyCategory: copyCategory ?? null, }, 'Newsletter subscription started');
 
     // Step 2: Resolve newsletter interest and build contact properties
     const { contactProperties, primaryInterest } = await step.run(
@@ -103,10 +100,8 @@ export const subscribeNewsletter = inngest.createFunction(
         );
       } catch (error) {
         const normalized = normalizeError(error, 'Failed to sync contact to Resend');
-        logger.warn('Resend sync failed, continuing with subscription', {
-          ...logContext,
-          errorMessage: normalized.message,
-        });
+        logger.warn({ ...logContext,
+          errorMessage: normalized.message, }, 'Resend sync failed, continuing with subscription');
         return {
           resendContactId: null,
           syncStatus: 'failed',
@@ -212,16 +207,12 @@ export const subscribeNewsletter = inngest.createFunction(
     await step.run('invalidate-cache', async () => {
       try {
         revalidateTag('newsletter', 'default');
-        logger.info('Cache invalidated', {
-          ...logContext,
-          tag: 'newsletter',
-        });
+        logger.info({ ...logContext,
+          tag: 'newsletter', }, 'Cache invalidated');
       } catch (error) {
         const normalized = normalizeError(error, 'Cache invalidation failed');
-        logger.warn('Cache invalidation failed', {
-          ...logContext,
-          errorMessage: normalized.message,
-        });
+        logger.warn({ ...logContext,
+          errorMessage: normalized.message, }, 'Cache invalidation failed');
       }
     });
 
@@ -247,21 +238,17 @@ export const subscribeNewsletter = inngest.createFunction(
         );
 
         if (emailError) {
-          logger.warn('Welcome email failed', {
-            ...logContext,
+          logger.warn({ ...logContext,
             subscriptionId: subscription.subscriptionId,
-            errorMessage: emailError.message,
-          });
+            errorMessage: emailError.message, }, 'Welcome email failed');
           return { sent: false, emailId: null };
         }
 
         return { sent: true, emailId: emailData?.id ?? null };
       } catch (error) {
         const normalized = normalizeError(error, 'Welcome email failed');
-        logger.warn('Welcome email failed', {
-          ...logContext,
-          errorMessage: normalized.message,
-        });
+        logger.warn({ ...logContext,
+          errorMessage: normalized.message, }, 'Welcome email failed');
         return { sent: false, emailId: null };
       }
     });
@@ -271,30 +258,24 @@ export const subscribeNewsletter = inngest.createFunction(
       await step.run('enroll-onboarding', async () => {
         try {
           await enrollInOnboardingSequence(validatedEmail);
-          logger.info('Enrolled in onboarding sequence', {
-            ...logContext,
-            email: validatedEmail,
-          });
+          logger.info({ ...logContext,
+            email: validatedEmail, }, 'Enrolled in onboarding sequence');
         } catch (error) {
           const normalized = normalizeError(error, 'Onboarding enrollment failed');
-          logger.warn('Onboarding enrollment failed', {
-            ...logContext,
-            errorMessage: normalized.message,
-          });
+          logger.warn({ ...logContext,
+            errorMessage: normalized.message, }, 'Onboarding enrollment failed');
         }
       });
     }
 
     const durationMs = Date.now() - startTime;
-    logger.info('Newsletter subscription completed', {
-      ...logContext,
+    logger.info({ ...logContext,
       durationMs,
       subscriptionId: subscription.subscriptionId,
       resendContactId: syncResult.resendContactId,
       syncStatus: syncResult.syncStatus,
       emailSent: welcomeEmailResult.sent,
-      emailId: welcomeEmailResult.emailId,
-    });
+      emailId: welcomeEmailResult.emailId, }, 'Newsletter subscription completed');
 
     return {
       success: true,

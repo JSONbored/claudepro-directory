@@ -2,29 +2,70 @@
 
 import { ContentService } from '@heyclaude/data-layer';
 import { type Database } from '@heyclaude/database-types';
+import { cacheLife, cacheTag } from 'next/cache';
 
-import { fetchCached } from '../../cache/fetch-cached.ts';
-
+/**
+ * Get similar content
+ * Uses 'use cache' to cache similar content. This data is public and same for all users.
+ * Similar content changes periodically, so we use the 'hours' cacheLife profile.
+ * @param input
+ * @param input.contentSlug
+ * @param input.contentType
+ * @param input.limit
+ */
 export async function getSimilarContent(input: {
   contentSlug: string;
   contentType: Database['public']['Enums']['content_category'];
   limit?: number;
 }): Promise<Database['public']['Functions']['get_similar_content']['Returns'] | null> {
-  const { contentType, contentSlug, limit = 6 } = input;
+  'use cache';
 
-  return fetchCached(
-    (client) =>
-      new ContentService(client).getSimilarContent({
-        p_content_type: contentType,
-        p_content_slug: contentSlug,
-        p_limit: limit,
-      }),
-    {
-      keyParts: ['similar-content', contentType, contentSlug, limit],
-      tags: ['content', 'similar', `content-${contentSlug}`],
-      ttlKey: 'cache.content_detail.ttl_seconds',
-      fallback: null,
-      logMeta: { contentType, contentSlug, limit },
+  const { contentSlug, contentType, limit = 6 } = input;
+
+  const { isBuildTime } = await import('../../build-time.ts');
+  const { createSupabaseAnonClient } = await import('../../supabase/server-anon.ts');
+  const { logger } = await import('../../logger.ts');
+
+  // Configure cache - use 'hours' profile for similar content
+  cacheLife('hours'); // 1hr stale, 15min revalidate, 1 day expire
+  cacheTag('content');
+  cacheTag('similar');
+  cacheTag(`content-${contentSlug}`);
+
+  const reqLogger = logger.child({
+    module: 'data/content/similar',
+    operation: 'getSimilarContent',
+  });
+
+  try {
+    // Use admin client during build for better performance, anon client at runtime
+    let client;
+    if (isBuildTime()) {
+      const { createSupabaseAdminClient } = await import('../../supabase/admin.ts');
+      client = createSupabaseAdminClient();
+    } else {
+      client = createSupabaseAnonClient();
     }
-  );
+
+    const result = await new ContentService(client).getSimilarContent({
+      p_content_slug: contentSlug,
+      p_content_type: contentType,
+      p_limit: limit,
+    });
+
+    reqLogger.info(
+      { contentSlug, contentType, hasResult: Boolean(result), limit },
+      'getSimilarContent: fetched successfully'
+    );
+
+    return result;
+  } catch (error) {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
+    reqLogger.error(
+      { contentSlug, contentType, err: errorForLogging, limit },
+      'getSimilarContent: failed'
+    );
+    return null;
+  }
 }

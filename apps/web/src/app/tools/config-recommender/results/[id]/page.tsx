@@ -6,17 +6,20 @@
 import { Constants, type Database } from '@heyclaude/database-types';
 import { generatePageMetadata, getConfigRecommendations } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { type Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { connection } from 'next/server';
+import { Suspense } from 'react';
 
 import { ResultsDisplay } from '@/src/components/features/tools/recommender/results-display';
+
+import ResultsLoading from './loading';
 
 /**
  * Dynamic Rendering Required
  * Results depend on search params (answers)
  */
-export const dynamic = 'force-dynamic';
 
 type RecommendationResponse = Database['public']['Functions']['get_recommendations']['Returns'] & {
   answers: DecodedQuizAnswers;
@@ -27,19 +30,20 @@ type RecommendationResponse = Database['public']['Functions']['get_recommendatio
 // Type matching QuizAnswers from quiz-form.tsx
 interface DecodedQuizAnswers {
   experienceLevel: Database['public']['Enums']['experience_level'];
-  p_focus_areas?: Database['public']['Enums']['focus_area_type'][];
-  p_integrations?: Database['public']['Enums']['integration_type'][];
+  p_focus_areas?: Array<Database['public']['Enums']['focus_area_type']>;
+  p_integrations?: Array<Database['public']['Enums']['integration_type']>;
   teamSize?: string;
   timestamp?: string;
   toolPreferences: string[];
   useCase: Database['public']['Enums']['use_case_type'];
 }
 
-/**
+/*****
  * Decode and validate a base64url-encoded JSON string of quiz answers into a typed DecodedQuizAnswers object.
  *
- * @param encoded - The base64url-encoded JSON payload containing quiz answers.
- * @param resultId - Identifier used to annotate logs when decoding fails.
+ * @param {string} encoded - The base64url-encoded JSON payload containing quiz answers.
+ * @param {string} resultId - Identifier used to annotate logs when decoding fails.
+ * @param {ReturnType<typeof logger.child>} parentLogger
  * @returns The decoded answers containing required fields `useCase`, `experienceLevel`, and `toolPreferences`, and optionally `p_integrations`, `p_focus_areas`, `teamSize`, and `timestamp`.
  * @throws An error normalized by `normalizeError` when the input cannot be decoded or fails validation.
  *
@@ -52,21 +56,20 @@ function decodeQuizAnswers(
   resultId: string,
   parentLogger?: ReturnType<typeof logger.child>
 ): DecodedQuizAnswers {
-  // Use parent logger if provided, otherwise create a child logger with generated requestId
+  // Use parent logger if provided, otherwise create a child logger
   const utilityLogger = parentLogger
     ? parentLogger.child({
         operation: 'decodeQuizAnswers',
       })
     : logger.child({
-        requestId: generateRequestId(),
-        route: 'utility-function',
         module: 'apps/web/src/app/tools/config-recommender/results/[id]',
         operation: 'decodeQuizAnswers',
+        route: 'utility-function',
       });
 
   try {
     const json = Buffer.from(encoded, 'base64url').toString('utf8');
-    const parsed = JSON.parse(json) as unknown;
+    const parsed = JSON.parse(json);
 
     // Type guard to validate the parsed object structure
     if (typeof parsed !== 'object' || parsed === null) {
@@ -139,18 +142,20 @@ function decodeQuizAnswers(
     }
 
     return {
-      useCase: data['useCase'] as Database['public']['Enums']['use_case_type'],
       experienceLevel: data['experienceLevel'] as Database['public']['Enums']['experience_level'],
       toolPreferences: data['toolPreferences'] as string[],
+      useCase: data['useCase'] as Database['public']['Enums']['use_case_type'],
       ...(Array.isArray(data['p_integrations']) &&
         data['p_integrations'].length > 0 && {
-          p_integrations: data[
-            'p_integrations'
-          ] as Database['public']['Enums']['integration_type'][],
+          p_integrations: data['p_integrations'] as Array<
+            Database['public']['Enums']['integration_type']
+          >,
         }),
       ...(Array.isArray(data['p_focus_areas']) &&
         data['p_focus_areas'].length > 0 && {
-          p_focus_areas: data['p_focus_areas'] as Database['public']['Enums']['focus_area_type'][],
+          p_focus_areas: data['p_focus_areas'] as Array<
+            Database['public']['Enums']['focus_area_type']
+          >,
         }),
       ...(typeof data['teamSize'] === 'string' && data['teamSize'] !== ''
         ? { teamSize: data['teamSize'] }
@@ -161,20 +166,24 @@ function decodeQuizAnswers(
     } as DecodedQuizAnswers;
   } catch (error) {
     const normalized = normalizeError(error, 'Invalid quiz answers encoding');
-    utilityLogger.error('ConfigRecommenderResults: decodeQuizAnswers failed', normalized, {
-      resultId,
-      encodedLength: encoded.length,
-    });
+    utilityLogger.error(
+      {
+        encodedLength: encoded.length,
+        err: normalized,
+        resultId,
+      },
+      'ConfigRecommenderResults: decodeQuizAnswers failed'
+    );
     throw normalized;
   }
 }
 
-/**
+/*****
  * Filters and validates recommendation items, returning only those that include `category`, `slug`, and `title`.
  *
- * @param results - Raw recommendation items returned by the RPC; may be `null` or `undefined`.
- * @param resultId - Identifier included in logs when items are filtered.
- * @param parentLogger - Optional parent logger used to create an operation-scoped logger for warnings.
+ * @param {Database['public']['Functions']['get_recommendations']['Returns']['results']} results - Raw recommendation items returned by the RPC; may be `null` or `undefined`.
+ * @param {string} resultId - Identifier included in logs when items are filtered.
+ * @param {ReturnType<typeof logger.child>} parentLogger - Optional parent logger used to create an operation-scoped logger for warnings.
  * @returns An array of recommendation items guaranteed to have `category`, `slug`, and `title`.
  *
  * @see getConfigRecommendations
@@ -191,16 +200,15 @@ function normalizeRecommendationResults(
     title: string;
   }
 > {
-  // Use parent logger if provided, otherwise create a child logger with generated requestId
+  // Use parent logger if provided, otherwise create a child logger
   const utilityLogger = parentLogger
     ? parentLogger.child({
         operation: 'normalizeRecommendationResults',
       })
     : logger.child({
-        requestId: generateRequestId(),
-        route: 'utility-function',
         module: 'apps/web/src/app/tools/config-recommender/results/[id]',
         operation: 'normalizeRecommendationResults',
+        route: 'utility-function',
       });
 
   if (!results) return [];
@@ -215,11 +223,14 @@ function normalizeRecommendationResults(
   );
 
   if (normalized.length < results.length) {
-    utilityLogger.warn('ConfigRecommenderResults: filtered incomplete recommendation items', {
-      resultId,
-      originalCount: results.length,
-      filteredCount: normalized.length,
-    });
+    utilityLogger.warn(
+      {
+        filteredCount: normalized.length,
+        originalCount: results.length,
+        resultId,
+      },
+      'ConfigRecommenderResults: filtered incomplete recommendation items'
+    );
   }
 
   return normalized;
@@ -250,23 +261,25 @@ export async function generateMetadata({ params }: PageProperties): Promise<Meta
   return {
     ...baseMetadata,
     robots: {
-      index: false,
       follow: true,
+      index: false,
     },
   };
 }
 
 /**
- * Render the Configuration Recommender results page for a given result ID.
+ * Renders the Configuration Recommender results page for a given result ID.
  *
  * Decodes and validates the base64url-encoded `answers` query parameter, fetches
  * personalized configuration recommendations, normalizes returned items, and
- * renders the results UI with a shareable URL. If `answers` is missing,
- * fails validation/decoding, or backend recommendations are absent, the page
- * responds with a 404.
+ * renders the results UI with a shareable URL; responds with a 404 if `answers`
+ * is missing, invalid, or backend recommendations are absent.
  *
  * @param props.params - Route parameters containing the `id` of the results set
+ * @param root0
+ * @param root0.params
  * @param props.searchParams - Query parameters; must include `answers` (base64url-encoded JSON)
+ * @param root0.searchParams
  * @returns The React element that displays the recommendations and a shareable URL
  *
  * @see decodeQuizAnswers
@@ -275,96 +288,153 @@ export async function generateMetadata({ params }: PageProperties): Promise<Meta
  * @see ResultsDisplay
  */
 export default async function ResultsPage({ params, searchParams }: PageProperties) {
-  const resolvedParameters = await params;
-  const resolvedSearchParameters = await searchParams;
-
-  // Generate single requestId for this page request
-  const requestId = generateRequestId();
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    requestId,
-    operation: 'ConfigRecommenderResults',
-    route: `/tools/config-recommender/results/${resolvedParameters.id}`,
     module: 'apps/web/src/app/tools/config-recommender/results/[id]',
+    operation: 'ConfigRecommenderResults',
   });
+
+  return (
+    <Suspense fallback={<ResultsLoading />}>
+      <ResultsPageContent params={params} reqLogger={reqLogger} searchParams={searchParams} />
+    </Suspense>
+  );
+}
+
+/**
+ * Renders the configuration recommender results page for a given result ID.
+ *
+ * Decodes base64url-encoded quiz answers from the `answers` search parameter, fetches and normalizes
+ * recommendations based on those answers, and returns the ResultsDisplay UI populated with the
+ * recommendations and a shareable URL. If the `answers` parameter is missing, cannot be decoded,
+ * or the recommendations RPC returns no results, this function calls `notFound()` (renders a 404).
+ *
+ * @param params - Promise resolving to route parameters containing `id`
+ * @param params.params
+ * @param params.reqLogger
+ * @param searchParams - Promise resolving to search parameters containing `answers` (base64url-encoded)
+ * @param reqLogger - Request-scoped logger; a route-scoped child logger is derived for internal logging
+ * @param params.searchParams
+ * @returns A JSX element rendering the results page with recommendations and share URL
+ *
+ * @see decodeQuizAnswers
+ * @see getConfigRecommendations
+ * @see normalizeRecommendationResults
+ * @see ResultsDisplay
+ */
+async function ResultsPageContent({
+  params,
+  reqLogger,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  reqLogger: ReturnType<typeof logger.child>;
+  searchParams: Promise<{ answers?: string }>;
+}) {
+  const resolvedParameters = await params;
+  const resolvedSearchParameters = await searchParams;
+  const route = `/tools/config-recommender/results/${resolvedParameters.id}`;
+
+  // Create route-specific logger
+  const routeLogger = reqLogger.child({ route });
 
   // Section: Answers Validation
   if (!resolvedSearchParameters.answers) {
-    reqLogger.warn('ConfigRecommenderResults: accessed without answers parameter', {
-      section: 'answers-validation',
-    });
+    routeLogger.warn(
+      { section: 'data-fetch' },
+      'ConfigRecommenderResults: accessed without answers parameter'
+    );
     notFound();
   }
 
   // Section: Answers Decoding
   let answers: DecodedQuizAnswers;
   try {
-    answers = decodeQuizAnswers(resolvedSearchParameters.answers, resolvedParameters.id, reqLogger);
-    reqLogger.info('ConfigRecommenderResults: answers decoded successfully', {
-      section: 'answers-decoding',
-      useCase: answers.useCase,
-      experienceLevel: answers.experienceLevel,
-    });
+    answers = decodeQuizAnswers(
+      resolvedSearchParameters.answers,
+      resolvedParameters.id,
+      routeLogger
+    );
+    routeLogger.info(
+      {
+        experienceLevel: answers.experienceLevel,
+        section: 'data-fetch',
+        useCase: answers.useCase,
+      },
+      'ConfigRecommenderResults: answers decoded successfully'
+    );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to decode quiz answers');
-    reqLogger.error('ConfigRecommenderResults: failed to decode quiz answers', normalized, {
-      section: 'answers-decoding',
-    });
+    routeLogger.error(
+      {
+        err: normalized,
+        operation: 'ConfigRecommenderResults',
+        route: `/tools/config-recommender/results/${resolvedParameters.id}`,
+        section: 'data-fetch',
+      },
+      'ConfigRecommenderResults: failed to decode quiz answers'
+    );
     notFound();
   }
 
   // Section: Recommendations Fetch
   const enrichedResult = await getConfigRecommendations({
-    useCase: answers.useCase,
     experienceLevel: answers.experienceLevel,
     toolPreferences: answers.toolPreferences,
+    useCase: answers.useCase,
     ...(answers.p_integrations && { integrations: answers.p_integrations }),
     ...(answers.p_focus_areas && { focusAreas: answers.p_focus_areas }),
   });
-  reqLogger.info('ConfigRecommenderResults: recommendations fetched', {
-    section: 'recommendations-fetch',
-    useCase: answers.useCase,
-    experienceLevel: answers.experienceLevel,
-    resultCount: enrichedResult?.results?.length ?? 0,
-  });
+  routeLogger.info(
+    {
+      experienceLevel: answers.experienceLevel,
+      resultCount: enrichedResult?.results?.length ?? 0,
+      section: 'data-fetch',
+      useCase: answers.useCase,
+    },
+    'ConfigRecommenderResults: recommendations fetched'
+  );
 
   if (!enrichedResult?.results) {
-    const recommendationsError = normalizeError(
-      new Error('Recommendations result is null'),
-      'get_recommendations returned no data'
-    );
-    reqLogger.error(
-      'ConfigRecommenderResults: get_recommendations returned no data',
-      recommendationsError,
+    // logger.error() normalizes errors internally, so pass raw error
+    routeLogger.error(
       {
-        section: 'recommendations-fetch',
+        err: new Error('Recommendations result is null'),
+        section: 'data-fetch',
         useCase: answers.useCase,
-      }
+      },
+      'ConfigRecommenderResults: get_recommendations returned no data'
     );
     notFound();
   }
 
   const recommendations: RecommendationResponse = {
     ...enrichedResult,
+    answers,
+    generatedAt: new Date().toISOString(),
+    id: resolvedParameters.id,
     results: normalizeRecommendationResults(
       enrichedResult.results,
       resolvedParameters.id,
-      reqLogger
+      routeLogger
     ),
-    answers,
-    id: resolvedParameters.id,
-    generatedAt: new Date().toISOString(),
   };
 
   const shareUrl = `${APP_CONFIG.url}/tools/config-recommender/results/${resolvedParameters.id}?answers=${resolvedSearchParameters.answers}`;
 
-  reqLogger.info('ConfigRecommenderResults: page viewed', {
-    section: 'page-render',
-    useCase: answers.useCase,
-    experienceLevel: answers.experienceLevel,
-    resultCount: recommendations.results?.length ?? 0,
-  });
+  routeLogger.info(
+    {
+      experienceLevel: answers.experienceLevel,
+      resultCount: recommendations.results?.length ?? 0,
+      section: 'data-fetch',
+      useCase: answers.useCase,
+    },
+    'ConfigRecommenderResults: page viewed'
+  );
 
   return (
     <div className="bg-background min-h-screen">

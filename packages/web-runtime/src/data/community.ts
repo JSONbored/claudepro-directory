@@ -1,231 +1,311 @@
 'use server';
 
-import { CommunityService } from '@heyclaude/data-layer';
+import { CommunityService, SearchService } from '@heyclaude/data-layer';
 import { type Database } from '@heyclaude/database-types';
-import { cache } from 'react';
 
-import { fetchCached } from '../cache/fetch-cached.ts';
-import { logger, normalizeError, pulseUserSearch, searchUsersUnified } from '../index.ts';
+import { logger, pulseUserSearch } from '../index.ts';
 import { createSupabaseServerClient } from '../supabase/server.ts';
-import { generateRequestId } from '../utils/request-id.ts';
 
 const DEFAULT_DIRECTORY_LIMIT = 100;
 
+/****
+ *
+ * Search users using unified search (cached)
+ * Uses 'use cache' to cache search results. Query and limit become part of the cache key.
+ * Follows architectural strategy: data layer -> database RPC -> DB
+ * @param {string} query
+ * @param {number} limit
+ * @returns {Promise<unknown>} Return value description
+ */
+async function searchUsersUnified(
+  query: string,
+  limit: number
+): Promise<Array<Database['public']['CompositeTypes']['community_directory_user']>> {
+  'use cache';
+  const { cacheLife, cacheTag } = await import('next/cache');
+  const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
+
+  // Configure cache - use 'quarter' profile for user search (same as API route)
+  cacheLife('quarter'); // 15min stale, 5min revalidate, 2hr expire
+  cacheTag('user-search');
+  cacheTag('community');
+
+  const supabase = createSupabaseAnonClient();
+  const searchService = new SearchService(supabase);
+
+  const unifiedArgs: Database['public']['Functions']['search_unified']['Args'] = {
+    p_entities: ['user'],
+    p_highlight_query: query,
+    p_limit: limit,
+    p_offset: 0,
+    p_query: query,
+  };
+
+  const searchResponse = await searchService.searchUnified(unifiedArgs);
+  const results = searchResponse.data || [];
+
+  return results.map((result) => ({
+    bio: result.description || null,
+    created_at: result.created_at as string,
+    id: result.id as string,
+    image: null,
+    name: result.title || result.slug || '',
+    slug: result.slug as string,
+    tier: 'free',
+    work: null,
+  }));
+}
+
 export type CollectionDetailData =
   Database['public']['Functions']['get_user_collection_detail']['Returns'];
+
+/***
+ * Get community directory via RPC (cached)
+ * Uses 'use cache' to cache directory listings. This data is public and same for all users.
+ * Community directory changes periodically, so we use the 'half' cacheLife profile.
+ * @param {number} limit
+ 
+ * @returns {unknown} Description of return value*/
+async function getCommunityDirectoryRpc(
+  limit: number
+): Promise<Database['public']['Functions']['get_community_directory']['Returns'] | null> {
+  'use cache';
+
+  const { cacheLife, cacheTag } = await import('next/cache');
+  const { isBuildTime } = await import('../build-time.ts');
+  const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
+
+  // Configure cache - use 'half' profile for community directory (changes every 30 minutes)
+  cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
+  cacheTag('community');
+  cacheTag('users');
+
+  const reqLogger = logger.child({
+    module: 'data/community',
+    operation: 'getCommunityDirectoryRpc',
+  });
+
+  try {
+    // Use admin client during build for better performance, anon client at runtime
+    let client;
+    if (isBuildTime()) {
+      const { createSupabaseAdminClient } = await import('../supabase/admin.ts');
+      client = createSupabaseAdminClient();
+    } else {
+      client = createSupabaseAnonClient();
+    }
+
+    const result = await new CommunityService(client).getCommunityDirectory({ p_limit: limit });
+
+    reqLogger.info(
+      { hasResult: Boolean(result), limit },
+      'getCommunityDirectoryRpc: fetched successfully'
+    );
+
+    return result;
+  } catch (error) {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
+    reqLogger.error({ err: errorForLogging, limit }, 'getCommunityDirectoryRpc failed');
+    throw error;
+  }
+}
 
 export async function getCommunityDirectory(options: {
   limit?: number;
   searchQuery?: string;
 }): Promise<Database['public']['Functions']['get_community_directory']['Returns'] | null> {
-  const { searchQuery, limit = DEFAULT_DIRECTORY_LIMIT } = options;
-  const requestId = generateRequestId();
+  const { limit = DEFAULT_DIRECTORY_LIMIT, searchQuery } = options;
   const reqLogger = logger.child({
-    requestId,
-    operation: 'getCommunityDirectory',
     module: 'data/community',
+    operation: 'getCommunityDirectory',
   });
 
   if (searchQuery?.trim()) {
-    const { trackPerformance } = await import('../utils/performance-metrics');
-
     try {
-      const { result: unifiedResults } = await trackPerformance(
-        async () => {
-          return await searchUsersUnified(searchQuery.trim(), limit);
-        },
-        {
-          operation: 'getCommunityDirectory-search',
-          logger: reqLogger, // Use child logger to avoid passing requestId/operation repeatedly
-          requestId, // Pass requestId for return value
-          logMeta: { query: searchQuery.trim(), limit },
-          logLevel: 'info',
-        }
-      );
+      // Use SearchService directly (same as API route)
+      // Follows architectural strategy: data layer -> database RPC -> DB
+      const allUsers = await searchUsersUnified(searchQuery.trim(), limit);
 
-      const allUsers: Database['public']['CompositeTypes']['community_directory_user'][] =
-        unifiedResults.map((result) => ({
-          id: result.id,
-          slug: result.slug,
-          name: result.title || result.slug || '',
-          image: null,
-          bio: result.description || null,
-          work: null,
-          tier: 'free',
-          created_at: result.created_at,
-        }));
-
-      // Fire-and-forget: Generate explicit requestId for traceability in async callback
-      const callbackRequestId = generateRequestId();
+      // Fire-and-forget: Pulse user search
       pulseUserSearch(searchQuery.trim(), allUsers.length).catch((error) => {
-        const normalized = normalizeError(error, 'Failed to pulse user search');
+        // logger.error() normalizes errors internally, so pass raw error
+        const errorForLogging: Error | string =
+          error instanceof Error
+            ? error
+            : error instanceof String
+              ? error.toString()
+              : String(error);
         // Use child logger for callback to maintain isolation
         const callbackLogger = logger.child({
-          requestId: callbackRequestId,
-          operation: 'pulseUserSearch',
           module: 'data/community',
+          operation: 'pulseUserSearch',
         });
-        callbackLogger.warn('Failed to pulse user search', {
-          err: normalized,
-          searchQuery: searchQuery.trim(),
-          resultCount: allUsers.length,
-        });
+        callbackLogger.warn(
+          {
+            err: errorForLogging,
+            resultCount: allUsers.length,
+            searchQuery: searchQuery.trim(),
+          },
+          'Failed to pulse user search'
+        );
       });
 
       return {
         all_users: allUsers,
-        top_contributors: [],
         new_members: [],
+        top_contributors: [],
       };
     } catch (error) {
-      // trackPerformance already logs the error, but we log again with context about fallback behavior
-      const normalized = normalizeError(
-        error,
-        'Community directory search failed, falling back to RPC'
+      // logger.error() normalizes errors internally, so pass raw error
+      const errorForLogging: Error | string = error instanceof Error ? error : String(error);
+      reqLogger.warn(
+        { err: errorForLogging, fallbackStrategy: 'rpc', limit, searchQuery: searchQuery.trim() },
+        'Community directory search failed, using RPC fallback'
       );
-      reqLogger.warn('Community directory search failed, using RPC fallback', {
-        err: normalized,
-        searchQuery: searchQuery.trim(),
-        limit,
-        fallbackStrategy: 'rpc',
-      });
       // Fall through to RPC fallback
     }
   }
 
-  try {
-    return await fetchCached(
-      (client) => new CommunityService(client).getCommunityDirectory({ p_limit: limit }),
-      {
-        keyParts: ['community-directory', 'all', limit],
-        tags: ['community', 'users'],
-        ttlKey: 'cache.community.ttl_seconds',
-        useAuth: false,
-        fallback: null,
-        logMeta: {
-          hasQuery: Boolean(searchQuery?.trim()),
-          limit,
-        },
-      }
-    );
-  } catch (error) {
-    const normalized = normalizeError(error, 'Failed to get community directory');
-    reqLogger.error('getCommunityDirectory failed', normalized, {
-      hasQuery: Boolean(searchQuery?.trim()),
-      limit,
-    });
-    throw normalized;
-  }
+  // If we have a search query, we already returned above, so this is the fallback RPC path
+  // Use cached RPC function
+  return await getCommunityDirectoryRpc(limit);
 }
 
 /**
  * Get public user profile
  *
- * CRITICAL: This function uses React.cache() for request-level deduplication only.
- * It does NOT use Next.js unstable_cache() because:
- * 1. User profiles require cookies() for auth when viewerId is provided
- * 2. cookies() cannot be called inside unstable_cache() (Next.js restriction)
- * 3. User-specific data should not be cached across requests anyway
+ * Uses 'use cache: private' to enable cross-request caching for user-specific data.
+ * This allows cookies() to be used inside the cache scope when viewerId is provided,
+ * while still providing per-user caching with TTL and cache invalidation support.
  *
- * React.cache() provides request-level deduplication within the same React Server Component tree,
- * which is safe and appropriate for user-specific data.
+ * Cache behavior:
+ * - Minimum 30 seconds stale time (required for runtime prefetch)
+ * - Per-user cache keys (slug and viewerId in cache tag)
+ * - Not prerendered (runs at request time)
+ * @param input
+ * @param input.slug
+ * @param input.viewerId
  */
-export const getPublicUserProfile = cache(
-  async (input: {
-    slug: string;
-    viewerId?: string;
-  }): Promise<Database['public']['Functions']['get_user_profile']['Returns'] | null> => {
-    const { slug, viewerId } = input;
-    const requestId = generateRequestId();
-    const reqLogger = logger.child({
-      requestId,
-      operation: 'getPublicUserProfile',
-      module: 'data/community',
+export async function getPublicUserProfile(input: {
+  slug: string;
+  viewerId?: string;
+}): Promise<Database['public']['Functions']['get_user_profile']['Returns'] | null> {
+  'use cache: private';
+
+  const { slug, viewerId } = input;
+  const { cacheLife, cacheTag } = await import('next/cache');
+
+  // Configure cache
+  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
+  cacheTag(`user-profile-${slug}`);
+  if (viewerId) {
+    cacheTag(`user-profile-viewer-${viewerId}`);
+  }
+
+  const reqLogger = logger.child({
+    module: 'data/community',
+    operation: 'getPublicUserProfile',
+  });
+
+  try {
+    // Can use cookies() inside 'use cache: private'
+    const client = await createSupabaseServerClient();
+    const service = new CommunityService(client);
+
+    const result = await service.getUserProfile({
+      p_user_slug: slug,
+      ...(viewerId ? { p_viewer_id: viewerId } : {}),
     });
 
-    try {
-      // Create authenticated client OUTSIDE of any cache scope
-      // This is safe because React.cache() only deduplicates within the same request
-      const client = await createSupabaseServerClient();
-      const service = new CommunityService(client);
+    reqLogger.info(
+      { hasProfile: Boolean(result), hasViewer: Boolean(viewerId), slug },
+      'getPublicUserProfile: fetched successfully'
+    );
 
-      const result = await service.getUserProfile({
-        p_user_slug: slug,
-        ...(viewerId ? { p_viewer_id: viewerId } : {}),
-      });
-
-      reqLogger.info('getPublicUserProfile: fetched successfully', {
-        slug,
-        hasViewer: Boolean(viewerId),
-        hasProfile: Boolean(result),
-      });
-
-      return result;
-    } catch (error) {
-      const normalized = normalizeError(error, 'Failed to load user profile detail');
-      reqLogger.error('getPublicUserProfile failed', normalized, {
+    return result;
+  } catch (error) {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
+    reqLogger.error(
+      {
+        err: errorForLogging,
         slug,
         ...(viewerId ? { viewerId } : {}),
-      });
-      throw normalized;
-    }
+      },
+      'getPublicUserProfile failed'
+    );
+    throw error;
   }
-);
+}
 
 /**
  * Get public collection detail
  *
- * CRITICAL: This function uses React.cache() for request-level deduplication only.
- * It does NOT use Next.js unstable_cache() because:
- * 1. Collection details require cookies() for auth when viewerId is provided
- * 2. cookies() cannot be called inside unstable_cache() (Next.js restriction)
- * 3. User-specific data should not be cached across requests anyway
+ * Uses 'use cache: private' to enable cross-request caching for user-specific data.
+ * This allows cookies() to be used inside the cache scope when viewerId is provided,
+ * while still providing per-user caching with TTL and cache invalidation support.
  *
- * React.cache() provides request-level deduplication within the same React Server Component tree,
- * which is safe and appropriate for user-specific data.
+ * Cache behavior:
+ * - Minimum 30 seconds stale time (required for runtime prefetch)
+ * - Per-user cache keys (userSlug, collectionSlug, and viewerId in cache tag)
+ * - Not prerendered (runs at request time)
+ * @param input
+ * @param input.collectionSlug
+ * @param input.userSlug
+ * @param input.viewerId
  */
-export const getPublicCollectionDetail = cache(
-  async (input: {
-    collectionSlug: string;
-    userSlug: string;
-    viewerId?: string;
-  }): Promise<CollectionDetailData | null> => {
-    const { userSlug, collectionSlug, viewerId } = input;
-    const requestId = generateRequestId();
-    const reqLogger = logger.child({
-      requestId,
-      operation: 'getPublicCollectionDetail',
-      module: 'data/community',
+export async function getPublicCollectionDetail(input: {
+  collectionSlug: string;
+  userSlug: string;
+  viewerId?: string;
+}): Promise<CollectionDetailData | null> {
+  'use cache: private';
+
+  const { collectionSlug, userSlug, viewerId } = input;
+  const { cacheLife, cacheTag } = await import('next/cache');
+
+  // Configure cache
+  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
+  cacheTag(`user-collection-${userSlug}-${collectionSlug}`);
+  if (viewerId) {
+    cacheTag(`user-collection-viewer-${viewerId}`);
+  }
+
+  const reqLogger = logger.child({
+    module: 'data/community',
+    operation: 'getPublicCollectionDetail',
+  });
+
+  try {
+    // Can use cookies() inside 'use cache: private'
+    const client = await createSupabaseServerClient();
+    const service = new CommunityService(client);
+
+    const data = await service.getUserCollectionDetail({
+      p_collection_slug: collectionSlug,
+      p_user_slug: userSlug,
+      ...(viewerId ? { p_viewer_id: viewerId } : {}),
     });
 
-    try {
-      // Create authenticated client OUTSIDE of any cache scope
-      // This is safe because React.cache() only deduplicates within the same request
-      const client = await createSupabaseServerClient();
-      const service = new CommunityService(client);
+    reqLogger.info(
+      { collectionSlug, hasData: Boolean(data), hasViewer: Boolean(viewerId), slug: userSlug },
+      'getPublicCollectionDetail: fetched successfully'
+    );
 
-      const data = await service.getUserCollectionDetail({
-        p_user_slug: userSlug,
-        p_collection_slug: collectionSlug,
-        ...(viewerId ? { p_viewer_id: viewerId } : {}),
-      });
-
-      reqLogger.info('getPublicCollectionDetail: fetched successfully', {
-        slug: userSlug,
+    return data;
+  } catch (error) {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
+    reqLogger.error(
+      {
         collectionSlug,
-        hasViewer: Boolean(viewerId),
-        hasData: Boolean(data),
-      });
-
-      return data;
-    } catch (error) {
-      const normalized = normalizeError(error, 'Failed to load user collection detail');
-      reqLogger.error('getPublicCollectionDetail failed', normalized, {
+        err: errorForLogging,
         slug: userSlug,
-        collectionSlug,
         ...(viewerId ? { viewerId } : {}),
-      });
-      throw normalized;
-    }
+      },
+      'getPublicCollectionDetail failed'
+    );
+    throw error;
   }
-);
+}

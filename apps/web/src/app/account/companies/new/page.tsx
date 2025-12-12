@@ -3,26 +3,35 @@
  */
 
 import { generatePageMetadata, getAuthenticatedUser } from '@heyclaude/web-runtime/data';
-import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
+import { logger } from '@heyclaude/web-runtime/logging/server';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { connection } from 'next/server';
+import { Suspense } from 'react';
 
 import { CompanyForm } from '@/src/components/core/forms/company-form';
+
+import Loading from './loading';
 
 /**
  * Dynamic Rendering Required
  * Authenticated route
  */
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
 
 /**
- * Provide page metadata for the '/account/companies/new' route.
+ * Generate metadata for the /account/companies/new route.
+ *
+ * Awaits a server connection to ensure non-deterministic operations (e.g., Date.now()) are evaluated at request time for cache components, then returns the page metadata.
  *
  * @returns The Metadata object for the Create Company page.
  * @see generatePageMetadata
+ * @see connection
  */
 export async function generateMetadata(): Promise<Metadata> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
   return generatePageMetadata('/account/companies/new');
 }
 
@@ -33,25 +42,42 @@ export async function generateMetadata(): Promise<Metadata> {
  *
  * @see getAuthenticatedUser
  * @see CompanyForm
- * @see generateRequestId
  * @see logger
  */
 export default async function NewCompanyPage() {
-  // Generate single requestId for this page request
-  const requestId = generateRequestId();
+  return (
+    <Suspense fallback={<Loading />}>
+      <NewCompanyPageContent />
+    </Suspense>
+  );
+}
+
+/**
+ * Server component that enforces authentication and renders the "Create Company" page content.
+ *
+ * If no authenticated user is found, logs a warning and redirects the request to `/login`.
+ *
+ * @returns The JSX for the page section containing the header, description, and the `CompanyForm` in create mode.
+ *
+ * @see CompanyForm
+ * @see getAuthenticatedUser
+ * @see redirect
+ */
+async function NewCompanyPageContent() {
+  'use cache: private';
+  cacheLife('userProfile'); // 1min stale, 5min revalidate, 30min expire - User-specific data
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    requestId,
+    module: 'apps/web/src/app/account/companies/new/page',
     operation: 'NewCompanyPage',
     route: '/account/companies/new',
-    module: 'apps/web/src/app/account/companies/new/page',
   });
 
   const { user } = await getAuthenticatedUser({ context: 'NewCompanyPage' });
 
   if (!user) {
-    reqLogger.warn('NewCompanyPage: unauthenticated access attempt');
+    reqLogger.warn({ section: 'data-fetch' }, 'NewCompanyPage: unauthenticated access attempt');
     redirect('/login');
   }
 

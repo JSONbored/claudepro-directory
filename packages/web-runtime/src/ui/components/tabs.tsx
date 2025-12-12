@@ -11,7 +11,7 @@
  * - Production-optimized: Radix handles state, Motion handles visuals
  */
 
-import { UI_ANIMATION } from '../../config/unified-config.ts';
+import { SPRING } from '../../design-system/index.ts';
 import { POSITION_PATTERNS, STATE_PATTERNS } from '../constants.ts';
 import { cn } from '../utils.ts';
 import * as TabsPrimitive from '@radix-ui/react-tabs';
@@ -38,12 +38,8 @@ const TabsList = ({
 );
 TabsList.displayName = TabsPrimitive.List.displayName;
 
-/** Spring animation config from unified config */
-const springBouncy = {
-  type: 'spring' as const,
-  stiffness: UI_ANIMATION['spring.bouncy.stiffness'],
-  damping: UI_ANIMATION['spring.bouncy.damping'],
-};
+/** Spring animation config from design system */
+const springBouncy = SPRING.bouncy;
 
 const TabsTrigger = ({
   className,

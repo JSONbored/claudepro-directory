@@ -1,0 +1,35 @@
+# NextResponse Promise Handling Rules
+# Enforces NextResponse promise handling from ESLint rule: require-nextresponse-await
+# Matches: config/tools/eslint-plugin-architectural-rules.js -> require-nextresponse-await
+
+---
+# Rule: Detect NextResponse promises not being awaited
+id: missing-await-nextresponse
+language: typescript
+rule:
+  all:
+    - pattern: return NextResponse.$METHOD($$$)
+      kind: return_statement
+    - inside:
+        pattern: async function $FUNC($$$) { $$$ }
+    - not:
+        has:
+          pattern: await NextResponse.$METHOD($$$)
+message: "NextResponse methods that return promises must be awaited in async functions. Use: return await NextResponse.json(...)"
+severity: error
+
+---
+# Rule: Detect missing error handling for NextResponse operations
+id: missing-nextresponse-error-handling
+language: typescript
+rule:
+  all:
+    - pattern: NextResponse.$METHOD($$$)
+      kind: call_expression
+    - inside:
+        pattern: async function $FUNC($$$) { $$$ }
+    - not:
+        inside:
+          pattern: try { $$$ } catch ($ERROR) { $$$ }
+message: "NextResponse operations should be wrapped in try/catch for error handling. Add error handling around NextResponse calls"
+severity: warning

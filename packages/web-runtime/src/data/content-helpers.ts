@@ -1,5 +1,4 @@
 import 'server-only';
-
 import { type Database } from '@heyclaude/database-types';
 
 export function generateContentTags(

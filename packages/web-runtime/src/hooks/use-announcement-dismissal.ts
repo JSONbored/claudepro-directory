@@ -136,9 +136,12 @@ export function clearAllAnnouncementDismissals(): void {
     window.localStorage.removeItem('announcement-dismissals');
   } catch (error) {
     logger.error(
-      'Failed to clear announcement dismissals',
-      normalizeError(error, 'Announcement dismissal operation failed'),
-      { component: 'useAnnouncementDismissal', action: 'clearAll' }
+      {
+        err: normalizeError(error, 'Announcement dismissal operation failed'),
+        component: 'useAnnouncementDismissal',
+        action: 'clearAll',
+      },
+      'Failed to clear announcement dismissals'
     );
   }
 }
@@ -179,9 +182,12 @@ export function getAnnouncementDismissalAnalytics(): DismissalState {
     });
   } catch (error) {
     logger.error(
-      'Failed to read dismissal analytics',
-      normalizeError(error, 'Announcement dismissal operation failed'),
-      { component: 'useAnnouncementDismissal', action: 'getAnalytics' }
+      {
+        err: normalizeError(error, 'Announcement dismissal operation failed'),
+        component: 'useAnnouncementDismissal',
+        action: 'getAnalytics',
+      },
+      'Failed to read dismissal analytics'
     );
     return {};
   }

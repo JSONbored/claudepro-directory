@@ -2,22 +2,22 @@ import { type PagePropsWithSearchParams } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { AlertCircle } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
+import { logger } from '@heyclaude/web-runtime/logging/server';
 import {
-  UI_CLASSES,
   Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  UI_CLASSES,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import Link from 'next/link';
+import { connection } from 'next/server';
+import { Suspense } from 'react';
 
 const AUTH_CODE_ERROR_PATH = ROUTES.AUTH_AUTH_CODE_ERROR;
-
-export const dynamic = 'force-dynamic';
 
 /**
  * Generate page metadata for the authentication code error route.
@@ -28,6 +28,9 @@ export const dynamic = 'force-dynamic';
  * @see {@link https://nextjs.org/docs/app/building-your-application/metadata Metadata (Next.js)}
  */
 export async function generateMetadata(): Promise<Metadata> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
   return generatePageMetadata(AUTH_CODE_ERROR_PATH);
 }
 
@@ -40,29 +43,70 @@ export async function generateMetadata(): Promise<Metadata> {
  * @returns The JSX element rendering the authentication error card with "Try Again" and "Return Home" actions
  *
  * @see ROUTES
- * @see generateRequestId
  * @see logger
  */
-export default async function AuthCodeError(properties: PagePropsWithSearchParams) {
-  // Generate single requestId for this page request
-  const requestId = generateRequestId();
+export default function AuthCodeError(properties: PagePropsWithSearchParams) {
+  return (
+    <Suspense
+      fallback={
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="bg-destructive/10 mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full">
+              <AlertCircle className="text-destructive h-6 w-6" />
+            </div>
+            <CardTitle className="text-2xl">Authentication Error</CardTitle>
+            <CardDescription>Loading error details...</CardDescription>
+          </CardHeader>
+          <CardContent className={UI_CLASSES.FLEX_COL_GAP_2}>
+            <Button asChild>
+              <Link href={ROUTES.LOGIN}>Try Again</Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href={ROUTES.HOME}>Return Home</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      }
+    >
+      <AuthCodeErrorContent searchParams={properties.searchParams ?? Promise.resolve({})} />
+    </Suspense>
+  );
+}
+
+/**
+ * Renders an authentication error card based on URL query parameters.
+ *
+ * @param searchParams - A Promise that resolves to a record of query parameters where values may be strings or string arrays. The component extracts optional `code`, `provider`, and `message` keys; `code` and `provider` default to `"unknown"` when absent and `message` may be `undefined`.
+ * @param searchParams.searchParams
+ * @returns A JSX element containing an authentication error card with actions to retry login or return home.
+ *
+ * @see AUTH_CODE_ERROR_PATH
+ */
+async function AuthCodeErrorContent({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
+
   const operation = 'AuthCodeErrorPage';
   const route = AUTH_CODE_ERROR_PATH;
-  const module = 'apps/web/src/app/(auth)/auth-code-error/page';
+  const modulePath = 'apps/web/src/app/(auth)/auth-code-error/page';
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    requestId,
+    module: modulePath,
     operation,
     route,
-    module,
   });
 
-  const searchParameters = await properties.searchParams;
+  const searchParameters = await searchParams;
 
-  const rawCode = searchParameters?.['code'];
-  const rawProvider = searchParameters?.['provider'];
-  const rawMessage = searchParameters?.['message'];
+  const rawCode = searchParameters['code'];
+  const rawProvider = searchParameters['provider'];
+  const rawMessage = searchParameters['message'];
 
   // Handle array or string, and ensure we get a string or default
   const code = (Array.isArray(rawCode) ? rawCode[0] : rawCode) ?? 'unknown';
@@ -70,13 +114,17 @@ export default async function AuthCodeError(properties: PagePropsWithSearchParam
   const message = Array.isArray(rawMessage) ? rawMessage[0] : rawMessage;
 
   // Log page render (informational)
-  reqLogger.info('AuthCodeErrorPage rendered', {
-    // Redact sensitive code/provider values
-    hasCode: Boolean(code && code !== 'unknown'),
-    provider: provider === 'unknown' ? 'unknown' : 'redacted',
-    hasMessage: Boolean(message),
-    hasSearchParams: Boolean(searchParameters),
-  });
+  reqLogger.info(
+    {
+      // Redact sensitive code/provider values
+      hasCode: Boolean(code && code !== 'unknown'),
+      hasMessage: Boolean(message),
+      hasSearchParams: Boolean(searchParameters),
+      provider: provider === 'unknown' ? 'unknown' : 'redacted',
+      section: 'data-fetch',
+    },
+    'AuthCodeErrorPage rendered'
+  );
 
   return (
     <Card className="w-full max-w-md">
@@ -93,7 +141,7 @@ export default async function AuthCodeError(properties: PagePropsWithSearchParam
         <Button asChild>
           <Link href={ROUTES.LOGIN}>Try Again</Link>
         </Button>
-        <Button variant="outline" asChild>
+        <Button asChild variant="outline">
           <Link href={ROUTES.HOME}>Return Home</Link>
         </Button>
       </CardContent>

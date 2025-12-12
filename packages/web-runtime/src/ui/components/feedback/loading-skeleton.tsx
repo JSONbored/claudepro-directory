@@ -29,6 +29,7 @@
  */
 
 import { POSITION_PATTERNS, UI_CLASSES } from '../../constants.ts';
+import { SPRING, STAGGER, DURATION } from '../../../design-system/index.ts';
 import { cn } from '../../utils.ts';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { motion } from 'motion/react';
@@ -94,11 +95,16 @@ export function Skeleton({
   noShimmer = false,
   ...props
 }: SkeletonProps) {
+  // Check for prefers-reduced-motion
+  const prefersReducedMotion =
+    typeof window !== 'undefined' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   return (
     <div
       className={cn(
         skeletonVariants({ variant, size, width, rounded }),
-        noShimmer && 'animate-pulse',
+        (noShimmer || prefersReducedMotion) && 'animate-pulse',
         className
       )}
       {...props}
@@ -106,14 +112,15 @@ export function Skeleton({
       {/* Shimmer wave effect - only if not disabled */}
       {!noShimmer && (
         <motion.div
-          className={`${POSITION_PATTERNS.ABSOLUTE_INSET} bg-linear-to-r from-transparent via-white/10 to-transparent`}
+          className={`${POSITION_PATTERNS.ABSOLUTE_INSET} bg-gradient-to-r from-transparent via-white/10 to-transparent`}
           animate={{
             x: ['-100%', '100%'],
           }}
           transition={{
+            ...SPRING.shimmer,
+            mass: 0.8,
             repeat: Number.POSITIVE_INFINITY,
-            duration: 1.5,
-            ease: 'linear',
+            duration: DURATION.veryExtended,
           }}
           style={{
             willChange: 'transform',
@@ -171,24 +178,30 @@ function ConfigGridSkeleton({
     <div className={cn('container mx-auto px-4 py-8', className)} {...props}>
       <PageHeaderSkeleton />
       <div className={UI_CLASSES.GRID_RESPONSIVE_3_TIGHT}>
-        {[...Array(count)].map((_, i) => (
-          <motion.div
-            key={`config-skeleton-${i + 1}`}
-            initial={stagger ? { opacity: 0, y: 20 } : false}
-            animate={stagger ? { opacity: 1, y: 0 } : {}}
-            transition={
-              stagger
-                ? {
-                    duration: 0.3,
-                    delay: i * 0.05, // Stagger by 50ms per card
-                    ease: 'easeOut',
-                  }
-                : {}
-            }
-          >
-            <ConfigCardSkeleton />
-          </motion.div>
-        ))}
+        {[...Array(count)].map((_, i) => {
+          const prefersReducedMotion =
+            typeof window !== 'undefined' &&
+            window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+          return (
+            <motion.div
+              key={`config-skeleton-${i + 1}`}
+              initial={stagger && !prefersReducedMotion ? { opacity: 0, y: 20 } : false}
+              animate={stagger && !prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+              transition={
+                stagger && !prefersReducedMotion
+                  ? {
+                ...SPRING.loading,
+                      mass: 0.5,
+                      delay: i * STAGGER.micro, // Stagger by 50ms per card
+                    }
+                  : {}
+              }
+            >
+              <ConfigCardSkeleton />
+            </motion.div>
+          );
+        })}
       </div>
     </div>
   );
@@ -205,22 +218,27 @@ function ContentListSkeleton({
 } & React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div className={cn('space-y-4', className)} {...props}>
-      {[...Array(count)].map((_, i) => (
-        <motion.div
-          key={`content-skeleton-${i + 1}`}
-          className="rounded-lg border p-4"
-          initial={stagger ? { opacity: 0, x: -20 } : false}
-          animate={stagger ? { opacity: 1, x: 0 } : {}}
-          transition={
-            stagger
-              ? {
-                  duration: 0.3,
-                  delay: i * 0.04, // Faster stagger for lists
-                  ease: 'easeOut',
-                }
-              : {}
-          }
-        >
+      {[...Array(count)].map((_, i) => {
+        const prefersReducedMotion =
+          typeof window !== 'undefined' &&
+          window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        return (
+          <motion.div
+            key={`content-skeleton-${i + 1}`}
+            className="rounded-lg border p-4"
+            initial={stagger && !prefersReducedMotion ? { opacity: 0, x: -20 } : false}
+            animate={stagger && !prefersReducedMotion ? { opacity: 1, x: 0 } : {}}
+            transition={
+              stagger && !prefersReducedMotion
+                ? {
+                ...SPRING.default,
+                    mass: 0.5,
+                    delay: i * STAGGER.micro, // Faster stagger for lists (using micro for 40ms)
+                  }
+                : {}
+            }
+          >
           <div className={'mb-3 flex items-start justify-between'}>
             <div className="flex-1">
               <Skeleton size="md" width="2/3" className="mb-2" />
@@ -234,7 +252,8 @@ function ContentListSkeleton({
             <Skeleton size="xs" width="xs" rounded="full" />
           </div>
         </motion.div>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -265,46 +284,58 @@ function FilterBarSkeleton({
         <Skeleton size="sm" width="sm" />
       </div>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {[...Array(4)].map((_, i) => (
-          <motion.div
-            key={`filter-skeleton-${i + 1}`}
-            className="space-y-2"
-            initial={stagger ? { opacity: 0, y: 10 } : false}
-            animate={stagger ? { opacity: 1, y: 0 } : {}}
-            transition={
-              stagger
-                ? {
-                    duration: 0.25,
-                    delay: i * 0.05, // 50ms stagger per filter
-                    ease: 'easeOut',
-                  }
-                : {}
-            }
-          >
+        {[...Array(4)].map((_, i) => {
+          const prefersReducedMotion =
+            typeof window !== 'undefined' &&
+            window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+          return (
+            <motion.div
+              key={`filter-skeleton-${i + 1}`}
+              className="space-y-2"
+              initial={stagger && !prefersReducedMotion ? { opacity: 0, y: 10 } : false}
+              animate={stagger && !prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+              transition={
+                stagger && !prefersReducedMotion
+                  ? {
+                ...SPRING.loading,
+                      mass: 0.5,
+                      delay: i * STAGGER.micro, // 50ms stagger per filter
+                    }
+                  : {}
+              }
+            >
             <Skeleton size="sm" width="sm" />
             <Skeleton size="lg" width="3xl" />
           </motion.div>
-        ))}
+          );
+        })}
       </div>
       <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
-        {[...Array(8)].map((_, i) => (
-          <motion.div
-            key={`tag-skeleton-${i + 1}`}
-            initial={stagger ? { opacity: 0, scale: 0.9 } : false}
-            animate={stagger ? { opacity: 1, scale: 1 } : {}}
-            transition={
-              stagger
-                ? {
-                    duration: 0.2,
-                    delay: 0.2 + i * 0.02, // Start after filters, 20ms stagger per tag
-                    ease: 'easeOut',
-                  }
-                : {}
-            }
-          >
+        {[...Array(8)].map((_, i) => {
+          const prefersReducedMotion =
+            typeof window !== 'undefined' &&
+            window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+          return (
+            <motion.div
+              key={`tag-skeleton-${i + 1}`}
+              initial={stagger && !prefersReducedMotion ? { opacity: 0, scale: 0.9 } : false}
+              animate={stagger && !prefersReducedMotion ? { opacity: 1, scale: 1 } : {}}
+              transition={
+                stagger && !prefersReducedMotion
+                  ? {
+                ...SPRING.loading,
+                      mass: 0.5,
+                      delay: STAGGER.default + i * STAGGER.micro, // Start after filters, 20ms stagger per tag (using micro for 20ms)
+                    }
+                  : {}
+              }
+            >
             <Skeleton size="sm" width="xs" rounded="full" />
           </motion.div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -330,29 +361,35 @@ function TableSkeleton({
           ))}
         </div>
       </div>
-      {[...Array(rows)].map((_, rowIndex) => (
-        <motion.div
-          key={`row-${rowIndex + 1}`}
-          className="border-b p-4 last:border-b-0"
-          initial={stagger ? { opacity: 0, x: -10 } : false}
-          animate={stagger ? { opacity: 1, x: 0 } : {}}
-          transition={
-            stagger
-              ? {
-                  duration: 0.25,
-                  delay: rowIndex * 0.03, // 30ms stagger per row
-                  ease: 'easeOut',
-                }
-              : {}
-          }
-        >
+      {[...Array(rows)].map((_, rowIndex) => {
+        const prefersReducedMotion =
+          typeof window !== 'undefined' &&
+          window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        return (
+          <motion.div
+            key={`row-${rowIndex + 1}`}
+            className="border-b p-4 last:border-b-0"
+            initial={stagger && !prefersReducedMotion ? { opacity: 0, x: -10 } : false}
+            animate={stagger && !prefersReducedMotion ? { opacity: 1, x: 0 } : {}}
+            transition={
+              stagger && !prefersReducedMotion
+                ? {
+                ...SPRING.default,
+                    mass: 0.5,
+                    delay: rowIndex * STAGGER.micro, // 30ms stagger per row (using micro for 30ms)
+                  }
+                : {}
+            }
+          >
           <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
             {[...Array(columns)].map((_, colIndex) => (
               <Skeleton key={`cell-${rowIndex + 1}-${colIndex + 1}`} size="sm" width="md" />
             ))}
           </div>
         </motion.div>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -396,24 +433,30 @@ function FeaturedSectionSkeleton({
       </div>
       {/* Card Grid with Stagger */}
       <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
-        {[...Array(count)].map((_, i) => (
-          <motion.div
-            key={`featured-skeleton-${i + 1}`}
-            initial={stagger ? { opacity: 0, y: 20 } : false}
-            animate={stagger ? { opacity: 1, y: 0 } : {}}
-            transition={
-              stagger
-                ? {
-                    duration: 0.3,
-                    delay: i * 0.05,
-                    ease: 'easeOut',
-                  }
-                : {}
-            }
-          >
+        {[...Array(count)].map((_, i) => {
+          const prefersReducedMotion =
+            typeof window !== 'undefined' &&
+            window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+          return (
+            <motion.div
+              key={`featured-skeleton-${i + 1}`}
+              initial={stagger && !prefersReducedMotion ? { opacity: 0, y: 20 } : false}
+              animate={stagger && !prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+              transition={
+                stagger && !prefersReducedMotion
+                  ? {
+                ...SPRING.loading,
+                      mass: 0.5,
+                      delay: i * STAGGER.micro,
+                    }
+                  : {}
+              }
+            >
             <ConfigCardSkeleton />
           </motion.div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -431,26 +474,32 @@ function HomepageStatsSkeleton({
       className={cn('flex-wrap justify-center gap-4 text-xs lg:gap-6 lg:text-sm', className)}
       {...props}
     >
-      {[...Array(7)].map((_, i) => (
-        <motion.div
-          key={`stat-skeleton-${i + 1}`}
-          className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
-          initial={stagger ? { opacity: 0, scale: 0.9 } : false}
-          animate={stagger ? { opacity: 1, scale: 1 } : {}}
-          transition={
-            stagger
-              ? {
-                  duration: 0.25,
-                  delay: i * 0.04, // 40ms stagger per stat
-                  ease: 'easeOut',
-                }
-              : {}
-          }
-        >
+      {[...Array(7)].map((_, i) => {
+        const prefersReducedMotion =
+          typeof window !== 'undefined' &&
+          window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        return (
+          <motion.div
+            key={`stat-skeleton-${i + 1}`}
+            className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
+            initial={stagger && !prefersReducedMotion ? { opacity: 0, scale: 0.9 } : false}
+            animate={stagger && !prefersReducedMotion ? { opacity: 1, scale: 1 } : {}}
+            transition={
+              stagger && !prefersReducedMotion
+                ? {
+                ...SPRING.default,
+                    mass: 0.5,
+                    delay: i * STAGGER.micro, // 40ms stagger per stat (using micro for 40ms)
+                  }
+                : {}
+            }
+          >
           <Skeleton size="sm" width="xs" rounded="full" />
           <Skeleton size="sm" width="sm" />
         </motion.div>
-      ))}
+        );
+      })}
     </div>
   );
 }

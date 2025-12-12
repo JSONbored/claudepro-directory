@@ -1,11 +1,9 @@
 import 'server-only';
-
 import { type Database } from '@heyclaude/database-types';
 
 import { isBuildTime } from '../../build-time.ts';
 import { getHomepageConfigBundle } from '../../config/static-configs.ts';
 import { logger } from '../../logger.ts';
-import { generateRequestId } from '../../utils/request-id.ts';
 
 function isValidCategoryValue(
   value: unknown
@@ -13,17 +11,17 @@ function isValidCategoryValue(
   return typeof value === 'string' && value.length > 0;
 }
 
-export function getHomepageFeaturedCategories(): readonly Database['public']['Enums']['content_category'][] {
+export function getHomepageFeaturedCategories(): ReadonlyArray<
+  Database['public']['Enums']['content_category']
+> {
   // Create request-scoped child logger to avoid race conditions
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
-    operation: 'getHomepageFeaturedCategories',
     module: 'data/config/categories',
+    operation: 'getHomepageFeaturedCategories',
   });
 
   if (isBuildTime()) {
-    reqLogger.debug('getHomepageFeaturedCategories: build time, returning empty array');
+    reqLogger.debug({}, 'getHomepageFeaturedCategories: build time, returning empty array');
     return [];
   }
 
@@ -36,24 +34,23 @@ export function getHomepageFeaturedCategories(): readonly Database['public']['En
     ? config['homepage.featured_categories'].filter((value) => isValidCategoryValue(value))
     : [];
 
-  reqLogger.debug('getHomepageFeaturedCategories: loaded categories', {
-    categoryCount: categories.length,
-  });
+  reqLogger.debug(
+    { categoryCount: categories.length },
+    'getHomepageFeaturedCategories: loaded categories'
+  );
 
-  return categories as readonly Database['public']['Enums']['content_category'][];
+  return categories as ReadonlyArray<Database['public']['Enums']['content_category']>;
 }
 
 export function getHomepageTabCategories(): readonly string[] {
   // Create request-scoped child logger to avoid race conditions
-  const requestId = generateRequestId();
   const reqLogger = logger.child({
-    requestId,
-    operation: 'getHomepageTabCategories',
     module: 'data/config/categories',
+    operation: 'getHomepageTabCategories',
   });
 
   if (isBuildTime()) {
-    reqLogger.debug('getHomepageTabCategories: build time, returning empty array');
+    reqLogger.debug({}, 'getHomepageTabCategories: build time, returning empty array');
     return [];
   }
 
@@ -65,9 +62,7 @@ export function getHomepageTabCategories(): readonly string[] {
   const categories = config['homepage.tab_categories'];
   const result = Array.isArray(categories) ? categories.map(String) : [];
 
-  reqLogger.debug('getHomepageTabCategories: loaded categories', {
-    categoryCount: result.length,
-  });
+  reqLogger.debug({ categoryCount: result.length }, 'getHomepageTabCategories: loaded categories');
 
   return result;
 }

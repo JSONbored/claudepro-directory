@@ -13,6 +13,12 @@
  */
 
 import { EventSchemas, Inngest } from 'inngest';
+import type { Database } from '@heyclaude/database-types';
+import {
+  getDeploymentEnv,
+  getDeploymentPullRequestId,
+  getDeploymentCommit,
+} from '@heyclaude/shared-runtime/platform';
 
 /**
  * Event type definitions for type-safe event sending.
@@ -73,11 +79,6 @@ type Events = {
   };
 
   // Changelog events
-  'changelog/process': {
-    data: {
-      source?: string;
-    };
-  };
   'changelog/notify': {
     data: {
       changelogId?: string;
@@ -95,6 +96,12 @@ type Events = {
     data: {
       submissionId?: string;
       action?: string;
+    };
+  };
+  'discord/direct': {
+    data: {
+      notificationType: string;
+      payload: Record<string, unknown>;
     };
   };
 
@@ -207,6 +214,21 @@ type Events = {
   'polar/webhook': {
     data: PolarWebhookEventData;
   };
+
+  // Supabase database webhook events (content changes)
+  'supabase/content-changed': {
+    data: SupabaseContentChangedEventData;
+  };
+
+  // IndexNow events
+  'indexnow/submit': {
+    data: {
+      urlList: string[];
+      host: string;
+      key: string;
+      keyLocation: string;
+    };
+  };
 };
 
 /**
@@ -243,6 +265,31 @@ export interface ResendEmailEventData {
 }
 
 /**
+ * Supabase database webhook event data structure
+ * @see https://supabase.com/docs/guides/database/webhooks
+ */
+export interface SupabaseContentChangedEventData {
+  /** Unique webhook event ID from database (for idempotency) */
+  webhookId: string;
+  /** Svix ID for deduplication */
+  svixId: string | null;
+  /** Database event type: INSERT, UPDATE, DELETE */
+  eventType: 'INSERT' | 'UPDATE' | 'DELETE';
+  /** Content category (all categories supported for README updates, package generation only for skills/mcp) */
+  category: Database['public']['Enums']['content_category'];
+  /** Content ID (UUID) */
+  contentId: string;
+  /** Content slug */
+  slug?: string | undefined;
+  /** New record data (partial ContentRow) */
+  record: Partial<Database['public']['Tables']['content']['Row']>;
+  /** Old record data (for UPDATE/DELETE) */
+  oldRecord?: Partial<Database['public']['Tables']['content']['Row']> | undefined;
+  /** Full webhook payload */
+  payload: Record<string, unknown>;
+}
+
+/**
  * Inngest client instance for the HeyClaude application.
  *
  * Configuration:
@@ -269,13 +316,14 @@ function getInngestEnv(): string | undefined {
     return undefined;
   }
 
-  const vercelEnv = process.env['VERCEL_ENV'];
-  const prId = process.env['VERCEL_GIT_PULL_REQUEST_ID'];
-  const commitSha = process.env['VERCEL_GIT_COMMIT_SHA'];
+  // Use platform-agnostic deployment environment detection
+  const deploymentEnv = getDeploymentEnv();
+  const prId = getDeploymentPullRequestId();
+  const commitSha = getDeploymentCommit();
 
   // Preview environment: Use PR ID if available, otherwise use commit SHA
   // This creates isolated branch environments for each preview deployment
-  if (vercelEnv === 'preview') {
+  if (deploymentEnv === 'preview') {
     if (prId) {
       // PR-based preview: Use PR ID for consistent environment across PR deployments
       return `preview-${prId}`;

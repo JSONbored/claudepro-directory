@@ -1,14 +1,12 @@
 import {
-  generateRequestId,
-  logger,
-  normalizeError,
   trackMissingData,
   trackRPCFailure,
   trackValidationFailure,
 } from '@heyclaude/web-runtime/core';
-import { createWebAppContextWithId } from '@heyclaude/web-runtime/logging/server';
 import { getHomepageCategoryIds, getHomepageData } from '@heyclaude/web-runtime/server';
-import type { SearchFilterOptions } from '@heyclaude/web-runtime/types/component.types';
+import { type SearchFilterOptions } from '@heyclaude/web-runtime/types/component.types';
+import { normalizeError } from '@heyclaude/shared-runtime/logger/index.ts';
+
 import { HomePageClient } from '@/src/components/features/home/home-sections';
 
 /**
@@ -18,9 +16,15 @@ import { HomePageClient } from '@/src/components/features/home/home-sections';
  * This allows the hero section and search facets to stream immediately while content loads
  */
 async function HomepageContentData() {
-  // Generate single requestId for this component
-  const requestId = generateRequestId();
-  const logContext = createWebAppContextWithId(requestId, '/', 'HomepageContentData');
+  // Use cache-safe logger for Suspense boundary components that run during prerendering
+  // Dynamically import to avoid serialization issues
+  const { createLogger } = await import('@heyclaude/shared-runtime/logger/index.ts');
+  const cacheLogger = createLogger({ timestamp: false });
+  const reqLogger = cacheLogger.child({
+    operation: 'HomepageContentData',
+    route: '/',
+    module: 'apps/web/src/components/features/home/homepage-content-server',
+  });
 
   const categoryIds = getHomepageCategoryIds;
 
@@ -36,6 +40,7 @@ async function HomepageContentData() {
     trackMissingData('featured', 'homepageResult', {
       categoryIds: categoryIds.length,
       categoryIdsList: categoryIds,
+      note: 'RPC returned null - this indicates either RPC failure or no data in database',
     });
     return {
       homepageContentData: {
@@ -49,6 +54,19 @@ async function HomepageContentData() {
     };
   }
 
+  // Log what we received from RPC for debugging
+  reqLogger.info(
+    {
+      hasContent: !!homepageResult.content,
+      contentType: typeof homepageResult.content,
+      memberCount: homepageResult.member_count ?? 0,
+      featuredJobsCount: Array.isArray(homepageResult.featured_jobs)
+        ? homepageResult.featured_jobs.length
+        : 0,
+    },
+    'HomepageContentData: RPC result received'
+  );
+
   const memberCount = homepageResult.member_count ?? 0;
   const featuredJobs = (homepageResult.featured_jobs as Array<unknown> | null) ?? [];
 
@@ -60,13 +78,10 @@ async function HomepageContentData() {
   if (typeof content === 'string') {
     try {
       content = JSON.parse(content);
-      logger.warn('HomepageContentData: Content was a string, parsed it', {
-        ...logContext,
-        note: 'Content was string, parsed to object',
-      });
+      reqLogger.warn({ note: 'Content was string, parsed to object' }, 'HomepageContentData: Content was a string, parsed it');
     } catch (parseError) {
       const normalized = normalizeError(parseError, 'Failed to parse content string');
-      logger.error('HomepageContentData: Failed to parse content string', normalized, logContext);
+      reqLogger.error({ err: normalized }, 'HomepageContentData: Failed to parse content string');
       content = null;
     }
   }
@@ -80,8 +95,54 @@ async function HomepageContentData() {
       'weekStart' in content
     ) {
       const categoryData = content['categoryData'] as Record<string, unknown>;
-      const stats = content['stats'] as Record<string, { total: number; featured: number }>;
+      const stats = content['stats'] as Record<string, { featured: number; total: number }>;
       const weekStart = content['weekStart'] as string;
+
+      // Log categoryData structure for debugging
+      const categoryKeys = Object.keys(categoryData);
+      const categoryCounts = Object.fromEntries(
+        categoryKeys.map((key) => [
+          key,
+          Array.isArray(categoryData[key]) ? (categoryData[key] as unknown[]).length : 0,
+        ])
+      );
+      const totalItems = Object.values(categoryCounts).reduce((sum, count) => sum + count, 0);
+
+      reqLogger.info(
+        {
+          categoryCount: categoryKeys.length,
+          categoryKeys,
+          categoryCounts,
+          totalItems,
+          expectedItems: categoryIds.length * 6, // 6 items per category
+          statsKeys: Object.keys(stats),
+          hasWeekStart: !!weekStart,
+        },
+        'HomepageContentData: Parsed categoryData'
+      );
+
+      // Validate that we have data for expected categories
+      if (categoryKeys.length === 0) {
+        reqLogger.warn(
+          {
+            expectedCategories: categoryIds.length,
+            categoryIds,
+            note: 'RPC returned empty categoryData - this may indicate a database or RPC issue',
+          },
+          'HomepageContentData: categoryData is empty'
+        );
+      } else if (totalItems < categoryIds.length * 3) {
+        // Warn if we have less than 3 items per category on average (should be 6)
+        reqLogger.warn(
+          {
+            expectedItems: categoryIds.length * 6,
+            actualItems: totalItems,
+            categoryCounts,
+            note: 'Expected 6 items per category, but received fewer',
+          },
+          'HomepageContentData: categoryData has fewer items than expected'
+        );
+      }
 
       return {
         categoryData: categoryData as Record<string, unknown[]>,
@@ -135,9 +196,15 @@ export async function HomepageContentServer({
 }: {
   searchFilters: SearchFilterOptions;
 }) {
-  // Generate single requestId for this component (parent of HomepageContentData)
-  const requestId = generateRequestId();
-  const logContext = createWebAppContextWithId(requestId, '/', 'HomepageContentServer');
+  // Use cache-safe logger for Server Components that run during prerendering
+  // Dynamically import to avoid serialization issues
+  const { createLogger } = await import('@heyclaude/shared-runtime/logger/index.ts');
+  const cacheLogger = createLogger({ timestamp: false });
+  const reqLogger = cacheLogger.child({
+    operation: 'HomepageContentServer',
+    route: '/',
+    module: 'apps/web/src/components/features/home/homepage-content-server',
+  });
 
   const { homepageContentData, featuredJobs, categoryIds } = await HomepageContentData();
 
@@ -150,32 +217,45 @@ export async function HomepageContentServer({
     if (Array.isArray(value)) {
       serializedCategoryData[key] = value;
     } else {
-      logger.warn('HomepageContentServer: Non-array categoryData value', {
-        ...logContext,
-        key,
-        valueType: typeof value,
-        value,
-      });
+      reqLogger.warn(
+        {
+          key,
+          valueType: typeof value,
+          value,
+        },
+        'HomepageContentServer: Non-array categoryData value'
+      );
       serializedCategoryData[key] = [];
     }
   }
 
-  logger.info('HomepageContentServer: Serialized data for client', {
-    ...logContext,
-    serializedKeys: Object.keys(serializedCategoryData),
-    serializedCounts: Object.fromEntries(
-      Object.keys(serializedCategoryData).map((key) => [
-        key,
-        Array.isArray(serializedCategoryData[key]) ? serializedCategoryData[key].length : 0,
-      ])
-    ),
-  });
+  reqLogger.info(
+    {
+      serializedKeys: Object.keys(serializedCategoryData),
+      serializedCounts: Object.fromEntries(
+        Object.keys(serializedCategoryData).map((key) => [
+          key,
+          Array.isArray(serializedCategoryData[key]) ? serializedCategoryData[key].length : 0,
+        ])
+      ),
+    },
+    'HomepageContentServer: Serialized data for client'
+  );
 
+  // Empty categoryData is NOT expected - featured sections should always have data
+  // This indicates either:
+  // 1. RPC returned empty data (database/RPC issue)
+  // 2. Cache returned stale empty data (cache invalidation issue)
+  // 3. No content exists in database (data issue)
   if (Object.keys(serializedCategoryData).length === 0) {
     trackMissingData('featured', 'categoryData', {
       originalCategoryDataKeys: Object.keys(homepageContentData.categoryData),
       categoryIds: categoryIds.length,
       statsKeys: Object.keys(homepageContentData.stats),
+      hasStats: Object.keys(homepageContentData.stats).length > 0,
+      expectedCategories: categoryIds.length,
+      expectedItemsPerCategory: 6,
+      expectedTotalItems: categoryIds.length * 6,
     });
   }
 

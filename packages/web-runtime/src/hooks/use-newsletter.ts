@@ -203,8 +203,15 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
         setError(errorMessage);
 
         if (showToasts) {
+          // Show error toast with "Retry" button
           toasts.raw.error(errorTitle, {
             description: errorMessage,
+            action: {
+              label: 'Retry',
+              onClick: () => {
+                subscribe();
+              },
+            },
           });
         }
 

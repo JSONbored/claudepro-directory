@@ -1,5 +1,6 @@
 'use client';
 
+import { DURATION } from '../../../design-system/index.ts';
 import { cn } from '../../utils.ts';
 import {
   type HTMLMotionProps,
@@ -25,7 +26,7 @@ function HighlightText({
   inView = false,
   inViewMargin = '0px',
   inViewOnce = true,
-  transition = { duration: 2, ease: 'easeInOut' },
+  transition = { duration: DURATION.maximum, ease: 'easeInOut' },
   ...props
 }: HighlightTextProps) {
   const localRef = React.useRef<HTMLSpanElement>(null);

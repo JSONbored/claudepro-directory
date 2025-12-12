@@ -5,35 +5,45 @@
  * Uses React Hook Form + generated Zod schema for validation.
  */
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { normalizeError } from '@heyclaude/shared-runtime';
 import { refreshProfileFromOAuth, updateProfile } from '@heyclaude/web-runtime';
-import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
-import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { useAuthenticatedUser, useLoggedAsync } from '@heyclaude/web-runtime/hooks';
+import {
+  extractFirstFieldFromTuple,
+  isPostgresTupleString,
+} from '@heyclaude/web-runtime';
+import { toasts, UI_CLASSES, FormField, ToggleField, Button } from '@heyclaude/web-runtime/ui';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useTransition } from 'react';
-import type { Resolver } from 'react-hook-form';
+import { usePathname } from 'next/navigation';
+import { useCallback, useTransition } from 'react';
+import { type Resolver } from 'react-hook-form';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { FormField, ToggleField } from '@heyclaude/web-runtime/ui';
+
+import { useAuthModal } from '@/src/hooks/use-auth-modal';
 import { ListItemManager } from '@/src/components/core/forms/list-items-editor';
-import { Button } from '@heyclaude/web-runtime/ui';
 
 // Profile data consolidated into users table - use generated types
 type ProfileData = Pick<
   Database['public']['Tables']['users']['Row'],
-  | 'display_name'
   | 'bio'
-  | 'work'
-  | 'website'
-  | 'social_x_link'
+  | 'display_name'
+  | 'follow_email'
   | 'interests'
   | 'profile_public'
-  | 'follow_email'
+  | 'social_x_link'
+  | 'website'
+  | 'work'
+  | 'username'
 >;
 
 const profileFormSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100),
+  // Username validation is handled by database constraint (users_username_format_check)
+  // Database enforces: lowercase alphanumeric + hyphens, 3-30 chars, no leading/trailing hyphens
+  // Client-side: basic string validation only, database will provide detailed error messages
+  username: z.string().optional(),
   bio: z.string().max(500).optional(),
   work: z.string().max(100).optional(),
   website: z
@@ -59,8 +69,24 @@ interface ProfileEditFormProps {
   profile: ProfileData;
 }
 
+/**
+ * Renders an editable profile form populated from `profile`, validates input, and submits updates to the server.
+ *
+ * The component manages form state, displays field-level validation errors, shows success/error toasts on submission,
+ * and resets the form to submitted values on successful update.
+ *
+ * @param props.profile - Initial profile values used to populate the form (bio, work, website, social_x_link, interests, profile_public, follow_email).
+ * @returns The profile edit form element.
+ *
+ * @see profileFormSchema
+ * @see updateProfile
+ * @see toasts
+ */
 export function ProfileEditForm({ profile }: ProfileEditFormProps) {
   const [isPending, startTransition] = useTransition();
+  const pathname = usePathname();
+  const { user, status } = useAuthenticatedUser({ context: 'ProfileEditForm' });
+  const { openAuthModal } = useAuthModal();
   const runLoggedAsync = useLoggedAsync({
     scope: 'ProfileEditForm',
     defaultMessage: 'Profile update failed',
@@ -82,14 +108,31 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
       profileFormSchema as unknown as Parameters<typeof zodResolver>[0]
     ) as unknown as Resolver<ProfileFormData>,
     defaultValues: {
-      name: profile.display_name || '',
-      bio: profile.bio || '',
-      work: profile.work || '',
-      website: profile.website || '',
-      social_x_link: profile.social_x_link || '',
-      interests: profile.interests || [],
-      public: profile.profile_public ?? true,
-      follow_email: profile.follow_email ?? true,
+      // Defensive: Ensure display_name is a string, not a serialized tuple
+      name: (() => {
+        if (!profile.display_name) {
+          return '';
+        }
+        // Check if it's a PostgreSQL tuple string
+        if (isPostgresTupleString(profile.display_name)) {
+          const extracted = extractFirstFieldFromTuple(profile.display_name);
+          return extracted ?? '';
+        }
+        // If it's already a string, use it
+        if (typeof profile.display_name === 'string') {
+          return profile.display_name;
+        }
+        // Otherwise, convert to string
+        return String(profile.display_name);
+      })(),
+      username: profile.username ?? undefined,
+      bio: typeof profile.bio === 'string' ? profile.bio : '',
+      work: typeof profile.work === 'string' ? profile.work : '',
+      website: typeof profile.website === 'string' ? profile.website : '',
+      social_x_link: typeof profile.social_x_link === 'string' ? profile.social_x_link : '',
+      interests: Array.isArray(profile.interests) ? profile.interests : [],
+      public: typeof profile.profile_public === 'boolean' ? profile.profile_public : true,
+      follow_email: typeof profile.follow_email === 'boolean' ? profile.follow_email : true,
     },
   });
 
@@ -97,13 +140,30 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
   const isPublic = watch('public');
   const followEmail = watch('follow_email');
 
-  const onSubmit = (data: ProfileFormData) => {
+  const onSubmit = useCallback((data: ProfileFormData) => {
+    // Proactive auth check - show modal before attempting action
+    if (status === 'loading') {
+      // Wait for auth check to complete
+      return;
+    }
+
+    if (!user) {
+      // User is not authenticated - show auth modal
+      openAuthModal({
+        valueProposition: 'Sign in to update your profile',
+        redirectTo: pathname ?? undefined,
+      });
+      return;
+    }
+
+    // User is authenticated - proceed with profile update
     startTransition(async () => {
       try {
         await runLoggedAsync(
           async () => {
             const result = await updateProfile({
               display_name: data.name || undefined,
+              ...(data.username && { username: data.username }),
               bio: data.bio || '',
               work: data.work || '',
               website: data.website || '',
@@ -132,10 +192,29 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
         );
       } catch (error) {
         // Error already logged by useLoggedAsync
-        toasts.error.serverError(normalizeError(error, 'Failed to update profile').message);
+        const normalized = normalizeError(error, 'Failed to update profile');
+        const errorMessage = normalized.message;
+        
+        // Check if error is auth-related and show modal if so
+        if (errorMessage.includes('signed in') || errorMessage.includes('auth') || errorMessage.includes('unauthorized')) {
+          openAuthModal({
+            valueProposition: 'Sign in to update your profile',
+            redirectTo: pathname ?? undefined,
+          });
+        } else {
+          // Non-auth errors - show toast with retry option
+          toasts.raw.error('Failed to update profile', {
+            action: {
+              label: 'Retry',
+              onClick: () => {
+                onSubmit(data);
+              },
+            },
+          });
+        }
       }
     });
-  };
+  }, [user, status, openAuthModal, pathname, runLoggedAsync, reset]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={UI_CLASSES.FORM_SECTION_SPACING}>
@@ -146,9 +225,21 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
         onChange={(e) => setValue('name', e.target.value, { shouldDirty: true })}
         placeholder="Your name"
         maxLength={100}
-        required={true}
+        required
         error={!!errors.name}
         {...(errors.name?.message && { errorMessage: errors.name.message })}
+      />
+
+      <FormField
+        variant="input"
+        label="Username"
+        value={watch('username') || ''}
+        onChange={(e) => setValue('username', e.target.value.toLowerCase(), { shouldDirty: true })}
+        placeholder="slick-rabbit29"
+        maxLength={30}
+        description="Your profile URL will be /u/your-username. Only lowercase letters, numbers, and hyphens."
+        error={!!errors.username}
+        {...(errors.username?.message && { errorMessage: errors.username.message })}
       />
 
       <FormField
@@ -158,7 +249,7 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
         onChange={(e) => setValue('bio', e.target.value, { shouldDirty: true })}
         placeholder="Tell us about yourself..."
         maxLength={500}
-        showCharCount={true}
+        showCharCount
         rows={4}
         error={!!errors.bio}
         {...(errors.bio?.message && { errorMessage: errors.bio.message })}
@@ -208,8 +299,8 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
         placeholder="Add an interest..."
         maxItems={10}
         maxLength={30}
-        noDuplicates={true}
-        showCounter={true}
+        noDuplicates
+        showCounter
         badgeStyle="secondary"
         description="Press Enter or click Add"
       />
@@ -236,11 +327,11 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
         <Button type="submit" disabled={isPending || !isDirty}>
           {isPending ? 'Saving...' : 'Save Changes'}
         </Button>
-        {isDirty && (
+        {isDirty ? (
           <Button type="button" variant="outline" onClick={() => reset()}>
             Cancel
           </Button>
-        )}
+        ) : null}
       </div>
     </form>
   );
@@ -248,6 +339,8 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
 
 export function RefreshProfileButton({ providerLabel }: { providerLabel: string }) {
   const [isPending, startTransition] = useTransition();
+  const pathname = usePathname();
+  const { openAuthModal } = useAuthModal();
 
   return (
     <Button
@@ -260,7 +353,16 @@ export function RefreshProfileButton({ providerLabel }: { providerLabel: string 
           if (result?.data?.success) {
             toasts.success.actionCompleted(`Refreshed from ${providerLabel}`);
           } else if (result?.serverError) {
-            toasts.error.serverError(result.serverError);
+            // Check if server error is auth-related
+            const serverError = result.serverError || '';
+            if (serverError.includes('signed in') || serverError.includes('auth') || serverError.includes('unauthorized')) {
+              openAuthModal({
+                valueProposition: 'Sign in to update your profile',
+                redirectTo: pathname ?? undefined,
+              });
+            } else {
+              toasts.error.serverError(result.serverError);
+            }
           } else {
             toasts.error.profileRefreshFailed();
           }

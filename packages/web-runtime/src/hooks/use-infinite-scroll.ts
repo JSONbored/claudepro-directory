@@ -78,12 +78,12 @@ export function useInfiniteScroll({
   const safeThreshold = useCallback(() => {
     if (finalThreshold < 0 || finalThreshold > 1) {
       logger.warn(
-        'Invalid threshold for infinite scroll',
-        { component: 'useInfiniteScroll' },
         {
+          component: 'useInfiniteScroll',
           receivedThreshold: finalThreshold,
           usingDefault: 0.1,
-        }
+        },
+        'Invalid threshold for infinite scroll'
       );
       return 0.1;
     }

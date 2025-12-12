@@ -309,18 +309,13 @@ export const trackSponsoredImpression = optionalAuthAction
 
     const { createSupabaseServerClient } = await import('../supabase/server.ts');
     const supabase = await createSupabaseServerClient();
+    const { MiscService } = await import('@heyclaude/data-layer');
+    const service = new MiscService(supabase);
 
-    const { data: sponsoredContent, error } = await supabase
-      .from('sponsored_content')
-      .select('content_type')
-      .eq('id', parsedInput.sponsoredId)
-      .single();
+    const sponsoredContent = await service.getSponsoredContentById(parsedInput.sponsoredId);
 
-    if (error || !sponsoredContent) {
-      logger.warn('Failed to fetch sponsored content for tracking', {
-        sponsored_id: parsedInput.sponsoredId,
-        error: error?.message ?? 'Not found',
-      });
+    if (!sponsoredContent) {
+      logger.warn({ sponsored_id: parsedInput.sponsoredId }, 'Failed to fetch sponsored content for tracking');
       return;
     }
 
@@ -350,18 +345,13 @@ export const trackSponsoredClick = optionalAuthAction
 
     const { createSupabaseServerClient } = await import('../supabase/server.ts');
     const supabase = await createSupabaseServerClient();
+    const { MiscService } = await import('@heyclaude/data-layer');
+    const service = new MiscService(supabase);
 
-    const { data: sponsoredContent, error } = await supabase
-      .from('sponsored_content')
-      .select('content_type')
-      .eq('id', parsedInput.sponsoredId)
-      .single();
+    const sponsoredContent = await service.getSponsoredContentById(parsedInput.sponsoredId);
 
-    if (error || !sponsoredContent) {
-      logger.warn('Failed to fetch sponsored content for tracking', {
-        sponsored_id: parsedInput.sponsoredId,
-        error: error?.message ?? 'Not found',
-      });
+    if (!sponsoredContent) {
+      logger.warn({ sponsored_id: parsedInput.sponsoredId }, 'Failed to fetch sponsored content for tracking');
       return;
     }
 
@@ -406,7 +396,7 @@ export const getSimilarConfigsAction = rateLimitedAction
       if (parsedInput['limit'] !== undefined) {
         logContext['limit'] = parsedInput['limit'];
       }
-      logger.error('getSimilarConfigsAction: getSimilarContent threw', normalized, logContext);
+      logger.error({ err: normalized, ...logContext }, 'getSimilarConfigsAction: getSimilarContent threw');
       return null;
     }
   });
@@ -465,13 +455,17 @@ export const generateConfigRecommendationsAction = rateLimitedAction
         });
       } catch (transformError) {
         const normalized = normalizeError(transformError, 'Failed to transform recommendations');
-        logger.error('generateConfigRecommendationsAction: transformation failed', normalized, {
-          quizInput: {
-            // Grouped quiz input values - better for structured logging
-            useCase: parsedInput.useCase,
-            experienceLevel: parsedInput.experienceLevel,
+        logger.error(
+          {
+            err: normalized,
+            quizInput: {
+              // Grouped quiz input values - better for structured logging
+              useCase: parsedInput.useCase,
+              experienceLevel: parsedInput.experienceLevel,
+            },
           },
-        });
+          'generateConfigRecommendationsAction: transformation failed'
+        );
         normalizedResults = [];
       }
 
@@ -504,23 +498,22 @@ export const generateConfigRecommendationsAction = rateLimitedAction
     } catch (error) {
       // If getConfigRecommendations throws, return error response
       const normalized = normalizeError(error, 'Failed to generate recommendations');
-      logger.error(
-        'generateConfigRecommendationsAction: getConfigRecommendations threw',
-        normalized,
-        {
-          useCase: parsedInput.useCase,
-          experienceLevel: parsedInput.experienceLevel,
-        }
-      );
+      logger.error({ err: normalized, useCase: parsedInput.useCase,
+          experienceLevel: parsedInput.experienceLevel, }, 'generateConfigRecommendationsAction: getConfigRecommendations threw');
 
       // Return error response instead of throwing (graceful degradation)
+      // Match the RecommendationsPayload type structure (snake_case)
       return {
         success: false,
         recommendations: {
-          results: [],
-          totalMatches: 0,
+          results: null,
+          total_matches: 0,
           algorithm: 'unknown',
-          summary: {},
+          summary: {
+            top_category: null,
+            avg_match_score: 0,
+            diversity_score: 0,
+          },
           answers: {
             useCase: parsedInput.useCase,
             experienceLevel: parsedInput.experienceLevel,

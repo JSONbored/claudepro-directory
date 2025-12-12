@@ -11,16 +11,9 @@
  * - UTM tracking parameters
  */
 
-import type { SharePlatform } from '@heyclaude/web-runtime/core';
+import { type SharePlatform } from '@heyclaude/web-runtime/core';
 import { useCopyToClipboard } from '@heyclaude/web-runtime/hooks';
-import {
-  ChevronDown,
-  Copy,
-  Linkedin,
-  Mail,
-  Share2,
-  Twitter,
-} from '@heyclaude/web-runtime/icons';
+import { ChevronDown, Copy, Linkedin, Mail, Share2, Twitter } from '@heyclaude/web-runtime/icons';
 import {
   Button,
   DropdownMenu,
@@ -33,28 +26,37 @@ import {
 import { motion } from 'motion/react';
 
 interface ShareMenuProps {
-  /** URL to share */
-  url: string;
-  /** Title/headline for the share */
-  title: string;
   /** Optional description for email/social */
   description?: string;
-  /** UTM campaign name */
-  utmCampaign?: string;
-  /** Optional callback when share completes */
-  onShare?: (platform: SharePlatform) => void;
-  /** Button variant */
-  variant?: 'default' | 'outline' | 'ghost';
-  /** Show dropdown chevron */
-  showChevron?: boolean;
   /** Custom trigger label */
   label?: string;
+  /** Optional callback when share completes */
+  onShare?: (platform: SharePlatform) => void;
+  /** Show dropdown chevron */
+  showChevron?: boolean;
+  /** Title/headline for the share */
+  title: string;
+  /** URL to share */
+  url: string;
+  /** UTM campaign name */
+  utmCampaign?: string;
+  /** Button variant */
+  variant?: 'default' | 'ghost' | 'outline';
 }
 
 /**
- * Build URL with UTM parameters
+ * Constructs a URL augmented with UTM tracking parameters.
+ *
+ * Adds `utm_source`, `utm_medium=share`, and `utm_campaign` to the provided base URL.
+ *
+ * @param baseUrl - The base URL to augment; existing query parameters are preserved.
+ * @param source - Value to set for `utm_source`.
+ * @param campaign - Value to set for `utm_campaign`. Defaults to `'content'`.
+ * @returns The resulting URL string with the UTM parameters applied.
+ *
+ * @see ShareMenu
  */
-function buildShareUrl(baseUrl: string, source: string, campaign: string = 'content'): string {
+function buildShareUrl(baseUrl: string, source: string, campaign = 'content'): string {
   const url = new URL(baseUrl);
   url.searchParams.set('utm_source', source);
   url.searchParams.set('utm_medium', 'share');
@@ -62,6 +64,21 @@ function buildShareUrl(baseUrl: string, source: string, campaign: string = 'cont
   return url.toString();
 }
 
+/**
+ * Renders a share menu button that opens a dropdown with options to share the provided URL via X (Twitter), LinkedIn, Email, copy-to-clipboard, or the native share sheet when available.
+ *
+ * @param props.url - The destination URL to share.
+ * @param props.title - The title used for share payloads (social text, email subject, native share title).
+ * @param props.description - Optional description used in social text, email body, and native share text.
+ * @param props.utmCampaign - Optional UTM campaign name appended to the shared URL; defaults to `"content"`.
+ * @param props.onShare - Optional callback invoked after a successful share action with a string identifying the platform (e.g., `"twitter"`, `"linkedin"`, `"copy_link"`, `"native"`).
+ * @param props.variant - Button visual variant (`"default" | "ghost" | "outline"`); defaults to `"outline"`.
+ * @param props.showChevron - Whether to display a chevron icon in the trigger button; defaults to `true`.
+ * @param props.label - Trigger button label text; defaults to `"Share"`.
+ * @returns The ShareMenu React element.
+ *
+ * @see buildShareUrl - Utility used to construct UTM-augmented share URLs.
+ */
 export function ShareMenu({
   url,
   title,
@@ -96,7 +113,7 @@ export function ShareMenu({
     const body = encodeURIComponent(
       description ? `${description}\n\n${shareUrl}` : `Check this out: ${shareUrl}`
     );
-    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+    globalThis.location.href = `mailto:?subject=${subject}&body=${body}`;
     // Email is not a tracked SharePlatform, skip analytics
   };
 
@@ -144,7 +161,7 @@ export function ShareMenu({
           <Button variant={variant} className="min-w-0 gap-2">
             <Share2 className="h-4 w-4" />
             <span>{label}</span>
-            {showChevron && <ChevronDown className="h-3 w-3 opacity-50" />}
+            {showChevron ? <ChevronDown className="h-3 w-3 opacity-50" /> : null}
           </Button>
         </motion.div>
       </DropdownMenuTrigger>
@@ -172,7 +189,7 @@ export function ShareMenu({
         </DropdownMenuItem>
 
         {/* Native share (mobile) */}
-        {hasNativeShare && (
+        {hasNativeShare ? (
           <>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleNativeShare} className="gap-2">
@@ -180,7 +197,7 @@ export function ShareMenu({
               <span>More options...</span>
             </DropdownMenuItem>
           </>
-        )}
+        ) : null}
       </DropdownMenuContent>
     </DropdownMenu>
   );

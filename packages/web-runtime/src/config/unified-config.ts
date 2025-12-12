@@ -88,30 +88,14 @@ export const CLAUDE_DESKTOP_PATHS = {
 /** Animation settings */
 export const UI_ANIMATION = {
   'easing': 'ease-in-out',
-  'duration': 300,
-  'button.duration': 200,
   'button.hover_scale': 1.02,
-  'footer.duration': 300,
-  'modal.duration': 200,
   'card.hover_lift': '2px',
   // Animation ticker
   'ticker.default_ms': 1500,
   'ticker.fast_ms': 1000,
   'ticker.slow_ms': 2000,
-  // Stagger animations
-  'stagger.fast_ms': 100,
-  'stagger.medium_ms': 200,
-  'stagger.slow_ms': 300,
-  'card.stagger_ms': 100,
   // Border beam
   'beam.default_ms': 15000,
-  // Spring physics
-  'spring.default.stiffness': 400,
-  'spring.default.damping': 17,
-  'spring.bouncy.stiffness': 500,
-  'spring.bouncy.damping': 20,
-  'spring.smooth.stiffness': 300,
-  'spring.smooth.damping': 25,
 } as const;
 
 /** Confetti animation settings */
@@ -202,6 +186,14 @@ export const FEATURE_FLAGS = {
   'intersection_observer.track_visibility': true,
   'intersection_observer.default_threshold': 0.1,
   'intersection_observer.default_root_margin': '0px',
+  'analytics.vercel_enabled': false,
+  // BetterStack Monitoring Feature Flags
+  'monitoring.betterstack.enabled': true,  // Master switch - disable all BetterStack monitoring
+  'monitoring.betterstack.inngest.enabled': true,  // Inngest function monitoring
+  'monitoring.betterstack.inngest.critical_failures': true,  // onFailure callbacks
+  'monitoring.betterstack.inngest.cron_success': true,  // Success heartbeats for cron functions
+  'monitoring.betterstack.api.endpoints': true,  // API endpoint monitoring
+  'monitoring.betterstack.vercel.cron': true,  // Existing Vercel cron monitoring (keep existing)
 } as const;
 
 /** Security settings */
@@ -222,16 +214,6 @@ export const RATE_LIMIT_CONFIG = {
   window_ms: 60_000,
   block_duration_ms: 300_000,
   whitelist_ips: [] as string[],
-} as const;
-
-/** Analytics settings */
-export const ANALYTICS_CONFIG = {
-  enable_debug: false,
-  debug_enabled: false,
-  default_category: 'INTERACTION',
-  pii_keywords: [
-    'email', 'name', 'phone', 'address', 'ssn', 'credit', 'password',
-  ],
 } as const;
 
 /** Logger settings */
@@ -302,120 +284,13 @@ export const RETRY_CONFIG = {
 } as const;
 
 // =============================================================================
-// CACHE CONFIGURATION
-// =============================================================================
-
-/** Cache TTL settings (in seconds) */
-export const CACHE_TTL = {
-  'homepage': 3600, // 1 hour
-  'content_detail': 14400, // 4 hours (increased from 2 hours to reduce slow query warnings)
-  'content_list': 1800, // 30 minutes
-  'content_trending': 1800, // 30 minutes
-  'content_paginated': 86400, // 1 day
-  'content_export': 604800, // 7 days
-  'config_detail': 7200, // 2 hours
-  'config_list': 1800, // 30 minutes
-  'tool_detail': 7200, // 2 hours
-  'tool_list': 1800, // 30 minutes
-  'company_detail': 1800, // 30 minutes
-  'company_list': 1800, // 30 minutes
-  'company_profile': 1800, // 30 minutes
-  'company_search': 300, // 5 minutes
-  'related_content': 3600, // 1 hour
-  'recommendations': 3600, // 1 hour
-  'feeds': 600, // 10 minutes
-  'seo': 86400, // 1 day
-  'sitemap': 86400, // 1 day
-  'status': 60, // 1 minute
-  'navigation': 7200, // 2 hours
-  'templates': 7200, // 2 hours
-  'submission_dashboard': 900, // 15 minutes
-  'user_profile': 1800, // 30 minutes
-  'user_activity': 900, // 15 minutes
-  'user_stats': 1800, // 30 minutes
-  'user_bookmarks': 300, // 5 minutes
-  'user_submissions': 300, // 5 minutes
-  'user_reviews': 300, // 5 minutes
-  'community': 1800, // 30 minutes
-  'article': 7200, // 2 hours
-  'boilerplate': 7200, // 2 hours
-  'course': 7200, // 2 hours
-  'book': 7200, // 2 hours
-  'quiz': 3600, // 1 hour
-  'search': 3600, // 1 hour
-  'search_autocomplete': 3600, // 1 hour
-  'search_facets': 3600, // 1 hour
-  'jobs': 1800, // 30 minutes
-  'jobs_detail': 1800, // 30 minutes
-  'changelog': 3600, // 1 hour
-  'changelog_detail': 7200, // 2 hours
-  'announcements': 1800, // 30 minutes
-  'account': 300, // 5 minutes
-  'newsletter_count': 300, // 5 minutes
-  'notifications': 300, // 5 minutes
-  'contact': 3600, // 1 hour
-} as const;
-
-/** Cache behavior settings (in milliseconds) */
-export const CACHE_BEHAVIOR = {
-  max_ttl_ms: 3_600_000,
-  default_ttl_ms: 900_000,
-  stale_while_revalidate_ms: 300_000,
-  enable_tags: true,
-  bypass_on_auth: false,
-  aggressive_mode: false,
-} as const;
-
-/** Cache invalidation tag mappings */
-export const CACHE_INVALIDATION = {
-  'content_create': ['content', 'homepage', 'trending'],
-  'content_update': ['content', 'homepage', 'trending'],
-  'content_delete': ['content', 'homepage', 'trending'],
-  'config_create': ['configs', 'homepage'],
-  'config_update': ['configs', 'homepage'],
-  'config_delete': ['configs', 'homepage'],
-  'tool_create': ['tools', 'homepage'],
-  'tool_update': ['tools', 'homepage'],
-  'tool_delete': ['tools', 'homepage'],
-  'company_create': ['companies'],
-  'company_update': ['companies'],
-  'company_delete': ['companies'],
-  'user_update': ['users'],
-  'user_profile_oauth': ['users'],
-  'bookmark_create': ['user-bookmarks', 'users'],
-  'bookmark_delete': ['user-bookmarks', 'users'],
-  'follow': ['users'],
-  'oauth_unlink': ['users'],
-  'vote': ['content', 'trending'],
-  'job_create': ['jobs', 'companies'],
-  'job_update': ['jobs', 'companies'],
-  'job_delete': ['jobs', 'companies'],
-  'job_status': ['jobs', 'companies'],
-  'sponsored_tracking': ['jobs', 'companies'],
-  'collection_create': ['collections', 'users'],
-  'collection_update': ['collections', 'users'],
-  'collection_delete': ['collections', 'users'],
-  'collection_items': ['collections', 'users'],
-  'review_create': ['content', 'homepage', 'trending'],
-  'review_update': ['content'],
-  'review_delete': ['content'],
-  'review_helpful': ['content'],
-  'notifications': ['notifications'],
-  'submission_create': ['submissions'],
-  'contact_submission': ['contact', 'submissions'],
-  'usage_tracking': ['content'],
-  'changelog': ['changelog'],
-  'newsletter_subscribe': ['newsletter'],
-} as const;
-
-// =============================================================================
 // QUEUE & BATCH SETTINGS
 // =============================================================================
 
 /** Queue batch sizes */
 export const QUEUE_CONFIG = {
   'pulse.batch_size': 100,
-  'changelog_process.batch_size': 5,
+  // 'changelog_process.batch_size': 5, // Removed - queue no longer used (replaced by /api/changelog/sync)
   'changelog_notify.batch_size': 5,
 } as const;
 
@@ -630,23 +505,3 @@ export const POLLING_CONFIG = {
   newsletter_count_ms: 300000,
 } as const;
 
-// =============================================================================
-// BACKWARD COMPATIBILITY EXPORTS
-// =============================================================================
-
-/**
- * Legacy GENERATED_CONFIG export for backward compatibility.
- * New code should import specific config objects above.
- * @deprecated Use specific config exports instead
- */
-export const GENERATED_CONFIG = {
-  ui_config: {
-    animation: { easing: UI_ANIMATION.easing, duration: UI_ANIMATION.duration },
-    pagination: PAGINATION_CONFIG,
-  },
-  app_config: APP_CONFIG,
-  date_config: DATE_CONFIG,
-  social_links: SOCIAL_LINKS,
-} as const;
-
-export type GeneratedConfig = typeof GENERATED_CONFIG;

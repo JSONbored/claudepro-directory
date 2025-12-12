@@ -5,8 +5,18 @@
 
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@heyclaude/database-types';
+import { getEnvVar } from '@heyclaude/shared-runtime';
+import { env } from '@heyclaude/shared-runtime/schemas/env';
 
 type SupabaseAdminClient = ReturnType<typeof createSupabaseClient<Database>>;
+
+/**
+ * Check if we're in build phase
+ */
+function isBuildPhase(): boolean {
+  const nextPhase = getEnvVar('NEXT_PHASE');
+  return nextPhase === 'phase-production-build' || nextPhase === 'phase-production-server';
+}
 
 /**
  * Creates a Supabase admin client with service role permissions.
@@ -17,17 +27,24 @@ type SupabaseAdminClient = ReturnType<typeof createSupabaseClient<Database>>;
  * invocation where modules may be loaded before Next.js injects env vars).
  */
 export function createSupabaseAdminClient(): SupabaseAdminClient {
-  // Read directly from process.env to avoid caching issues
-  const supabaseUrl = process.env['NEXT_PUBLIC_SUPABASE_URL'];
-  const supabaseServiceKey = process.env['SUPABASE_SERVICE_ROLE_KEY'];
+  // Use validated env schema (handles empty strings -> undefined)
+  // Fallback to process.env for SUPABASE_SERVICE_ROLE_KEY (not in public schema)
+  const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseServiceKey = process.env['SUPABASE_SERVICE_ROLE_KEY'] || getEnvVar('SUPABASE_SERVICE_ROLE_KEY');
 
-  if (!(supabaseUrl && supabaseServiceKey)) {
-    // Provide detailed debugging info
-    const hasUrl = !!supabaseUrl;
-    const hasKey = !!supabaseServiceKey;
+  const buildPhase = isBuildPhase() ? ' (BUILD PHASE)' : '';
+
+  if (!supabaseUrl) {
     throw new Error(
-      `Missing required Supabase environment variables: NEXT_PUBLIC_SUPABASE_URL (${hasUrl ? 'set' : 'MISSING'}) and SUPABASE_SERVICE_ROLE_KEY (${hasKey ? 'set' : 'MISSING'}). ` +
-      `Ensure these are set in your .env.local file and that the Next.js dev server has been restarted.`
+      `Missing or invalid NEXT_PUBLIC_SUPABASE_URL environment variable${buildPhase}. ` +
+      `Ensure this is set in your environment variables with a valid URL. During build, this must be available and valid.`
+    );
+  }
+
+  if (!supabaseServiceKey) {
+    throw new Error(
+      `Missing SUPABASE_SERVICE_ROLE_KEY environment variable${buildPhase}. ` +
+      `Ensure this is set in your environment variables. During build, this must be available.`
     );
   }
 

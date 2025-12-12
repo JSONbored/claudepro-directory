@@ -20,15 +20,19 @@
  */
 
 import { resolveFormIcon } from '@heyclaude/web-runtime/icons';
-import type {
-  FieldDefinition,
-  FormFieldConfig,
-  GridColumn,
+import {
+  type FieldDefinition,
+  type FormFieldConfig,
+  type GridColumn,
 } from '@heyclaude/web-runtime/types/component.types';
-import { getResponsiveGridClass, POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { Input } from '@heyclaude/web-runtime/ui';
-import { Label } from '@heyclaude/web-runtime/ui';
-import { Textarea } from '@heyclaude/web-runtime/ui';
+import {
+  getResponsiveGridClass,
+  POSITION_PATTERNS,
+  UI_CLASSES,
+  Input,
+  Label,
+  Textarea,
+} from '@heyclaude/web-runtime/ui';
 
 // ============================================================================
 // GRID LAYOUT SYSTEM
@@ -55,7 +59,14 @@ interface FieldRendererProps {
 }
 
 /**
- * Text input field renderer
+ * Render a text input form field according to the provided field configuration.
+ *
+ * @param field - Field configuration for a single text input (label, name, placeholder, defaultValue, required, icon settings, gridColumn, helpText, etc.)
+ * @param formId - Form-level identifier used to construct a unique input id (`${formId}-${field.name}`)
+ * @returns The rendered JSX element for the text input and its label/help text, or `null` if `field.type` is not `'text'`.
+ *
+ * @see SingleFieldRenderer
+ * @see TextareaFieldRenderer
  */
 function TextFieldRenderer({ field, formId }: FieldRendererProps) {
   if (field.type !== 'text') return null;
@@ -72,7 +83,7 @@ function TextFieldRenderer({ field, formId }: FieldRendererProps) {
         <div className="relative">
           {iconPosition === 'left' && (
             <div
-              className={`${POSITION_PATTERNS.ABSOLUTE_TOP_HALF_LEFT} -translate-y-1/2 text-muted-foreground`}
+              className={`${POSITION_PATTERNS.ABSOLUTE_TOP_HALF_LEFT} text-muted-foreground -translate-y-1/2`}
             >
               <Icon className={UI_CLASSES.ICON_SM} />
             </div>
@@ -87,7 +98,7 @@ function TextFieldRenderer({ field, formId }: FieldRendererProps) {
           />
           {iconPosition === 'right' && (
             <div
-              className={`${POSITION_PATTERNS.ABSOLUTE_TOP_HALF_RIGHT} -translate-y-1/2 text-muted-foreground`}
+              className={`${POSITION_PATTERNS.ABSOLUTE_TOP_HALF_RIGHT} text-muted-foreground -translate-y-1/2`}
             >
               <Icon className={UI_CLASSES.ICON_SM} />
             </div>
@@ -102,13 +113,26 @@ function TextFieldRenderer({ field, formId }: FieldRendererProps) {
           defaultValue={field.defaultValue}
         />
       )}
-      {field.helpText && <p className="text-muted-foreground text-xs">{field.helpText}</p>}
+      {field.helpText ? <p className="text-muted-foreground text-xs">{field.helpText}</p> : null}
     </div>
   );
 }
 
 /**
- * Textarea field renderer
+ * Renders a configured textarea form field for the given form.
+ *
+ * Renders nothing if `field.type` is not `"textarea"`. The rendered textarea's `id` is
+ * composed as `${formId}-${field.name}` and the container receives a grid class
+ * based on `field.gridColumn`. If `field.monospace` is true, monospace styling is applied.
+ *
+ * @param field - Field configuration; uses `name`, `label`, `placeholder`, `required`, `rows`
+ *   (defaults to 4), `defaultValue`, `monospace`, `helpText`, and `gridColumn` when present.
+ * @param formId - Form-level identifier used as the prefix for the field `id`.
+ * @returns The textarea field JSX element, or `null` when the field is not a textarea.
+ *
+ * @see TextFieldRenderer
+ * @see SingleFieldRenderer
+ * @see GRID_COLUMN_CLASSES
  */
 function TextareaFieldRenderer({ field, formId }: FieldRendererProps) {
   if (field.type !== 'textarea') return null;
@@ -129,13 +153,20 @@ function TextareaFieldRenderer({ field, formId }: FieldRendererProps) {
         defaultValue={field.defaultValue}
         className={`${monoClass} resize-y`}
       />
-      {field.helpText && <p className="text-muted-foreground text-xs">{field.helpText}</p>}
+      {field.helpText ? <p className="text-muted-foreground text-xs">{field.helpText}</p> : null}
     </div>
   );
 }
 
 /**
- * Number input field renderer
+ * Renders a labeled number input and optional help text for a numeric form field.
+ *
+ * @param props.field - Configuration for the field; must have `type: 'number'`. Relevant properties used: `name`, `label`, `min`, `max`, `step`, `defaultValue`, `placeholder`, `required`, `helpText`, and `gridColumn`.
+ * @param props.formId - Base ID for the form used to compose a stable HTML id for the input (`${formId}-${field.name}`).
+ * @returns A JSX element containing a label, a number input configured from `field`, and optional help text; returns `null` when `field.type` is not `'number'`.
+ *
+ * @see GRID_COLUMN_CLASSES
+ * @see SingleFieldRenderer
  */
 function NumberFieldRenderer({ field, formId }: FieldRendererProps) {
   if (field.type !== 'number') return null;
@@ -157,13 +188,20 @@ function NumberFieldRenderer({ field, formId }: FieldRendererProps) {
         placeholder={field.placeholder}
         required={field.required}
       />
-      {field.helpText && <p className="text-muted-foreground text-xs">{field.helpText}</p>}
+      {field.helpText ? <p className="text-muted-foreground text-xs">{field.helpText}</p> : null}
     </div>
   );
 }
 
 /**
- * Select dropdown field renderer
+ * Renders a labeled select dropdown for a field configured as a 'select'.
+ *
+ * @param field - The field configuration for the select input; must be a 'select' field and include an `options` array.
+ * @param formId - Base identifier used to compose the select element's id (prefixed to `field.name`).
+ * @returns A JSX element containing the label, native select with options, and optional help text, or `null` if `field.type` is not `'select'`.
+ *
+ * @see SingleFieldRenderer
+ * @see GRID_COLUMN_CLASSES
  */
 function SelectFieldRenderer({ field, formId }: FieldRendererProps) {
   if (field.type !== 'select') return null;
@@ -179,7 +217,7 @@ function SelectFieldRenderer({ field, formId }: FieldRendererProps) {
         name={field.name}
         required={field.required}
         defaultValue={field.defaultValue}
-        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+        className="border-input bg-background flex h-10 w-full rounded-md border px-3 py-2 text-sm"
       >
         {field.options.map((option) => (
           <option key={option.value} value={option.value}>
@@ -187,25 +225,37 @@ function SelectFieldRenderer({ field, formId }: FieldRendererProps) {
           </option>
         ))}
       </select>
-      {field.helpText && <p className="text-muted-foreground text-xs">{field.helpText}</p>}
+      {field.helpText ? <p className="text-muted-foreground text-xs">{field.helpText}</p> : null}
     </div>
   );
 }
 
 /**
- * Single field router component
- * Dispatches to appropriate renderer based on field type
+ * Renders the appropriate renderer for a single field definition.
+ *
+ * @param field - The field configuration that determines which renderer to use.
+ * @param formId - Prefix used to compose stable element IDs for the field.
+ * @returns A JSX element for the matched field renderer, or `null` if the field type is not supported.
+ *
+ * @see TextFieldRenderer
+ * @see TextareaFieldRenderer
+ * @see NumberFieldRenderer
+ * @see SelectFieldRenderer
  */
 function SingleFieldRenderer({ field, formId }: FieldRendererProps) {
   switch (field.type) {
-    case 'text':
+    case 'text': {
       return <TextFieldRenderer field={field} formId={formId} />;
-    case 'textarea':
+    }
+    case 'textarea': {
       return <TextareaFieldRenderer field={field} formId={formId} />;
-    case 'number':
+    }
+    case 'number': {
       return <NumberFieldRenderer field={field} formId={formId} />;
-    case 'select':
+    }
+    case 'select': {
       return <SelectFieldRenderer field={field} formId={formId} />;
+    }
   }
 }
 

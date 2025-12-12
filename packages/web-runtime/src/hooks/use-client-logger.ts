@@ -169,7 +169,7 @@ export function useClientLogger(options: UseClientLoggerOptions): ClientLogger {
           Object.entries(clientContext).map(([key, value]) => [key, toLogContextValue(value)])
         ) as LogContext;
         const normalized = normalizeError(error, message);
-        componentLogger.error(message, normalized, logContext);
+        componentLogger.error({ err: normalized, ...logContext }, message);
       },
 
       warn: (message: string, error?: unknown, action?: string, extraContext?: Record<string, unknown>) => {
@@ -187,12 +187,9 @@ export function useClientLogger(options: UseClientLoggerOptions): ClientLogger {
         ) as LogContext;
         if (error !== undefined) {
           const normalized = normalizeError(error, message);
-          componentLogger.warn(message, {
-            err: normalized,
-            ...logContext,
-          });
+          componentLogger.warn({ err: normalized, ...logContext }, message);
         } else {
-          componentLogger.warn(message, logContext);
+          componentLogger.warn(logContext, message);
         }
       },
 
@@ -209,7 +206,7 @@ export function useClientLogger(options: UseClientLoggerOptions): ClientLogger {
         const logContext: LogContext = Object.fromEntries(
           Object.entries(clientContext).map(([key, value]) => [key, toLogContextValue(value)])
         ) as LogContext;
-        componentLogger.info(message, logContext);
+        componentLogger.info(logContext, message);
       },
 
       debug: (message: string, action?: string, extraContext?: Record<string, unknown>) => {
@@ -225,7 +222,7 @@ export function useClientLogger(options: UseClientLoggerOptions): ClientLogger {
         const logContext: LogContext = Object.fromEntries(
           Object.entries(clientContext).map(([key, value]) => [key, toLogContextValue(value)])
         ) as LogContext;
-        componentLogger.debug(message, logContext);
+        componentLogger.debug(logContext, message);
       },
 
       getContext: (action?: string, extraContext?: Record<string, unknown>): ClientLogContext => {

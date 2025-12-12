@@ -13,31 +13,35 @@
  * ```
  */
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { normalizeError } from '@heyclaude/shared-runtime';
-import { FORM_CONFIG } from '@heyclaude/web-runtime/config/unified-config';
 import {
   createCompany,
   updateCompany,
   uploadCompanyLogoAction,
 } from '@heyclaude/web-runtime/actions';
-import { logClientError } from '@heyclaude/web-runtime/logging/client';
+import { FORM_CONFIG } from '@heyclaude/web-runtime/config/unified-config';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { useFormSubmit, useLoggedAsync, useSafeAction } from '@heyclaude/web-runtime/hooks';
+import { useAuthenticatedUser, useFormSubmit, useLoggedAsync, useSafeAction } from '@heyclaude/web-runtime/hooks';
 import { FileText, X } from '@heyclaude/web-runtime/icons';
-import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import Image from 'next/image';
-import { useEffect, useId, useState } from 'react';
-import { FormField } from '@heyclaude/web-runtime/ui';
-import { Button } from '@heyclaude/web-runtime/ui';
+import { logClientError } from '@heyclaude/web-runtime/logging/client';
 import {
+  toasts,
+  UI_CLASSES,
+  FormField,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  SelectItem,
 } from '@heyclaude/web-runtime/ui';
-import { SelectItem } from '@heyclaude/web-runtime/ui';
+import Image from 'next/image';
+import { usePathname } from 'next/navigation';
+import { useCallback, useEffect, useId, useState } from 'react';
+
+import { useAuthModal } from '@/src/hooks/use-auth-modal';
 
 // Use the generated composite type from the RPC return
 type CompanyCompositeType = Database['public']['CompositeTypes']['user_companies_company'];
@@ -68,7 +72,7 @@ async function fileToBase64(file: File) {
   const buffer = await file.arrayBuffer();
   let binary = '';
   const bytes = new Uint8Array(buffer);
-  const chunkSize = 0x8000;
+  const chunkSize = 0x80_00;
   for (let i = 0; i < bytes.length; i += chunkSize) {
     const chunk = bytes.subarray(i, i + chunkSize);
     binary += String.fromCharCode(...chunk);
@@ -93,13 +97,29 @@ async function fileToBase64(file: File) {
  */
 export function CompanyForm({ initialData, mode }: CompanyFormProps) {
   const logoUploadId = useId();
+  const pathname = usePathname();
+  const { user, status } = useAuthenticatedUser({ context: 'CompanyForm' });
+  const { openAuthModal } = useAuthModal();
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
-  const [logoUrl, setLogoUrl] = useState<string | null>(initialData?.logo || null);
-  const [logoPreview, setLogoPreview] = useState<string | null>(initialData?.logo || null);
+  const [logoUrl, setLogoUrl] = useState<null | string>(initialData?.logo || null);
+  const [logoPreview, setLogoPreview] = useState<null | string>(initialData?.logo || null);
   const [useCursorDate, setUseCursorDate] = useState<boolean>(!!initialData?.using_cursor_since);
   const [maxFileSize, setMaxFileSize] = useState(DEFAULT_MAX_FILE_SIZE);
   const [maxDimension, setMaxDimension] = useState(DEFAULT_MAX_DIMENSION);
   const { executeAsync: uploadLogo } = useSafeAction(uploadCompanyLogoAction);
+
+  // Custom error handler for form submission (handles auth errors)
+  const handleFormError = useCallback((error: Error) => {
+    // Custom error handling for auth errors
+    const errorMessage = error.message;
+    if (errorMessage.includes('signed in') || errorMessage.includes('auth') || errorMessage.includes('unauthorized')) {
+      openAuthModal({
+        valueProposition: 'Sign in to manage companies',
+        redirectTo: pathname ?? undefined,
+      });
+    }
+    // useFormSubmit already shows error toast, so we don't need to show another one
+  }, [openAuthModal, pathname]);
 
   // Use standardized form submission hook
   const { isPending, handleSubmit, router } = useFormSubmit({
@@ -115,6 +135,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
     logContext: {
       companyId: initialData?.id ?? undefined,
     },
+    onError: handleFormError,
   });
 
   // Logged async for logo upload (separate from main form submit)
@@ -130,7 +151,22 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
     setMaxDimension(FORM_CONFIG.max_image_dimension_px);
   }, []);
 
-  const handleLogoUpload = async (file: File) => {
+  const handleLogoUpload = useCallback(async (file: File) => {
+    // Proactive auth check - show modal before attempting action
+    if (status === 'loading') {
+      // Wait for auth check to complete
+      return;
+    }
+
+    if (!user) {
+      // User is not authenticated - show auth modal
+      openAuthModal({
+        valueProposition: 'Sign in to upload company logos',
+        redirectTo: pathname ?? undefined,
+      });
+      return;
+    }
+
     // Client-side validation
     if (file.size > maxFileSize) {
       toasts.error.actionFailed(`File too large. Maximum size is ${maxFileSize / 1024}KB.`);
@@ -230,17 +266,48 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
         }
       );
     } catch (error) {
-      toasts.error.fromError(
-        normalizeError(error, 'Failed to upload logo'),
-        'Failed to upload logo'
-      );
+      const normalized = normalizeError(error, 'Failed to upload logo');
+      const errorMessage = normalized.message;
+      
+      // Check if error is auth-related and show modal if so
+      if (errorMessage.includes('signed in') || errorMessage.includes('auth') || errorMessage.includes('unauthorized')) {
+        openAuthModal({
+          valueProposition: 'Sign in to upload company logos',
+          redirectTo: pathname ?? undefined,
+        });
+      } else {
+        // Non-auth errors - show toast with retry option
+        toasts.raw.error('Failed to upload logo', {
+          action: {
+            label: 'Retry',
+            onClick: () => {
+              handleLogoUpload(file);
+            },
+          },
+        });
+      }
     } finally {
       setIsUploadingLogo(false);
     }
-  };
+  }, [user, status, openAuthModal, pathname, maxFileSize, maxDimension, uploadLogo, runLoggedAsync, initialData?.id, logoUrl]);
 
-  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    // Proactive auth check - show modal before attempting action
+    if (status === 'loading') {
+      // Wait for auth check to complete
+      return;
+    }
+
+    if (!user) {
+      // User is not authenticated - show auth modal
+      openAuthModal({
+        valueProposition: 'Sign in to manage companies',
+        redirectTo: pathname ?? undefined,
+      });
+      return;
+    }
 
     const formData = new FormData(e.currentTarget);
 
@@ -257,6 +324,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
         : null,
     };
 
+    // User is authenticated - proceed with form submission
     await handleSubmit(async () => {
       if (mode === 'create') {
         const result = await createCompany(data);
@@ -284,7 +352,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
         return result;
       }
     });
-  };
+  }, [user, status, openAuthModal, pathname, mode, handleSubmit, logoUrl, useCursorDate, initialData?.id]);
 
   return (
     <form onSubmit={onSubmit} className="space-y-6">
@@ -299,7 +367,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
             label="Company Name"
             name="name"
             defaultValue={initialData?.name || ''}
-            required={true}
+            required
             placeholder="e.g., Acme Corporation"
           />
 
@@ -314,9 +382,9 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
           />
 
           <div className="space-y-2">
-            <label htmlFor={logoUploadId} className="font-medium text-sm">
+            <label htmlFor={logoUploadId} className="text-sm font-medium">
               Company Logo
-              <span className="ml-1 font-normal text-muted-foreground text-xs">
+              <span className="text-muted-foreground ml-1 text-xs font-normal">
                 (max 200KB, 512x512px, WebP/PNG/JPG)
               </span>
             </label>
@@ -327,7 +395,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
                   <Image
                     src={logoPreview}
                     alt="Company logo preview"
-                    fill={true}
+                    fill
                     className="object-cover"
                   />
                 </div>
@@ -362,9 +430,9 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
             ) : (
               <label htmlFor={logoUploadId} className={UI_CLASSES.UPLOAD_ZONE}>
                 <div className={`${UI_CLASSES.FLEX_COL_GAP_2} items-center text-center`}>
-                  <FileText className="h-8 w-8 text-muted-foreground" />
+                  <FileText className="text-muted-foreground h-8 w-8" />
                   <div>
-                    <p className="font-medium text-sm">
+                    <p className="text-sm font-medium">
                       {isUploadingLogo ? 'Uploading...' : 'Click to upload logo'}
                     </p>
                     <p className={UI_CLASSES.TEXT_SM_MUTED}>Max 200KB, 512x512px</p>
@@ -384,15 +452,37 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
                 if (file) {
                   handleLogoUpload(file).catch((error: unknown) => {
                     logClientError(
-                      'Logo upload failed',
+                      '[Form] Logo upload failed',
                       normalizeError(error, 'Logo upload failed'),
                       'CompanyForm.handleLogoUpload',
                       {
                         component: 'CompanyForm',
                         action: 'handleLogoUpload',
+                        category: 'form',
                       }
                     );
-                    toasts.error.fromError(error, 'Failed to upload logo');
+                    const normalized = normalizeError(error, 'Failed to upload logo');
+                    const errorMessage = normalized.message;
+                    
+                    // Check if error is auth-related and show modal if so
+                    if (errorMessage.includes('signed in') || errorMessage.includes('auth') || errorMessage.includes('unauthorized')) {
+                      openAuthModal({
+                        valueProposition: 'Sign in to upload company logos',
+                        redirectTo: pathname ?? undefined,
+                      });
+                    } else {
+                      // Non-auth errors - show toast with retry option
+                      toasts.raw.error('Failed to upload logo', {
+                        action: {
+                          label: 'Retry',
+                          onClick: () => {
+                            if (e.target instanceof HTMLInputElement && e.target.files?.[0]) {
+                              handleLogoUpload(e.target.files[0]);
+                            }
+                          },
+                        },
+                      });
+                    }
                   });
                   e.target.value = '';
                 }
@@ -443,7 +533,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
           />
 
           <div className="space-y-2">
-            <label className="flex items-center gap-2 font-medium text-sm">
+            <label className="flex items-center gap-2 text-sm font-medium">
               <input
                 type="checkbox"
                 checked={useCursorDate}
@@ -452,14 +542,14 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
               />
               Using Claude since specific date
             </label>
-            {useCursorDate && (
+            {useCursorDate ? (
               <input
                 type="date"
                 name="using_cursor_since"
                 defaultValue={initialData?.using_cursor_since || ''}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:font-medium file:text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
               />
-            )}
+            ) : null}
           </div>
         </CardContent>
       </Card>

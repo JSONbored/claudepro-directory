@@ -1,0 +1,282 @@
+# Auto Release
+# Optimizations: conditional execution (PR merged only), batch git ops, optimized tag fetching
+# Uses actions/checkout@v6 with fetch-depth: 0 (required for git log since last tag)
+#
+# **What it does:**
+# 1. Analyzes commits since last tag to determine version bump type
+# 2. Auto-bumps version in package.json
+# 3. Auto-generates changelog entry using git-cliff
+# 4. Commits version + changelog changes
+# 5. Creates and pushes tag
+# 6. Extracts changelog entry to JSON
+# 7. Syncs to database via API
+# 8. Creates GitHub Release
+#
+# **Related Files:**
+# - packages/generators/src/commands/bump-version.ts - Version bumping
+# - packages/generators/src/commands/changelog.ts - Changelog generation
+# - packages/generators/src/commands/analyze-commits.ts - Commit analysis
+# - packages/generators/src/commands/extract-changelog-entry.ts - Changelog extraction
+# - apps/web/src/app/api/changelog/sync/route.ts - Database sync API
+name: Auto Release
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+# Only run when PR is merged (not just closed)
+jobs:
+  auto-release:
+    # Skip if PR was closed without merging
+    if: github.event.pull_request.merged == true
+    
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    permissions:
+      contents: write  # Required to create tags and releases
+      pull-requests: read  # Required to read PR info
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          # fetch-depth: 0 needed for git log since last tag
+          fetch-depth: 0
+          ref: ${{ github.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.25.0
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      
+      - name: Get last tag
+        id: last_tag
+        run: |
+          # Fetch tags explicitly (optimized - only tags, not full history)
+          git fetch --tags --depth=1 || true
+          
+          # Get the most recent tag matching v*.*.* pattern
+          LAST_TAG=$(git describe --tags --match 'v*.*.*' --abbrev=0 2>/dev/null || echo "")
+          if [ -z "$LAST_TAG" ]; then
+            echo "No previous tag found, starting from v0.0.0"
+            echo "TAG=v0.0.0" >> $GITHUB_OUTPUT
+            echo "HAS_PREVIOUS=false" >> $GITHUB_OUTPUT
+          else
+            echo "Last tag: $LAST_TAG"
+            echo "TAG=$LAST_TAG" >> $GITHUB_OUTPUT
+            echo "HAS_PREVIOUS=true" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Get commits since last tag
+        id: commits
+        run: |
+          if [ "${{ steps.last_tag.outputs.HAS_PREVIOUS }}" == "true" ]; then
+            # Get commits since last tag
+            COMMITS=$(git log ${{ steps.last_tag.outputs.TAG }}..HEAD --pretty=format:"%s" --no-merges)
+          else
+            # Get all commits (no previous tag)
+            COMMITS=$(git log --pretty=format:"%s" --no-merges)
+          fi
+          
+          # Count commits
+          COMMIT_COUNT=$(echo "$COMMITS" | grep -c . || echo "0")
+          echo "COMMIT_COUNT=$COMMIT_COUNT" >> $GITHUB_OUTPUT
+          
+          # Store commits (base64 encoded to handle special chars)
+          echo "$COMMITS" | base64 -w 0 > /tmp/commits.txt
+          echo "COMMITS_FILE=/tmp/commits.txt" >> $GITHUB_OUTPUT
+          
+          # Log summary
+          echo "Found $COMMIT_COUNT commits since last tag"
+          if [ "$COMMIT_COUNT" -eq 0 ]; then
+            echo "⚠️ No commits found - skipping release"
+            echo "SKIP_RELEASE=true" >> $GITHUB_OUTPUT
+          else
+            echo "SKIP_RELEASE=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Analyze commits and determine version bump
+        id: version_bump
+        if: steps.commits.outputs.SKIP_RELEASE != 'true'
+        run: |
+          # Decode commits
+          COMMITS=$(cat ${{ steps.commits.outputs.COMMITS_FILE }} | base64 -d)
+          
+          # Analyze commits using our script (pipe commits to stdin)
+          # Use head -1 to get only first line, then strip whitespace
+          BUMP_TYPE=$(echo "$COMMITS" | pnpm exec heyclaude-analyze-commits | head -1 | tr -d '[:space:]')
+          
+          if [ -z "$BUMP_TYPE" ]; then
+            echo "❌ Failed to determine version bump type" >&2
+            exit 1
+          fi
+          
+          echo "BUMP_TYPE=$BUMP_TYPE" >> $GITHUB_OUTPUT
+          echo "Determined bump type: $BUMP_TYPE"
+      
+      - name: Get current version
+        id: current_version
+        if: steps.commits.outputs.SKIP_RELEASE != 'true'
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Current version: $VERSION"
+      
+      - name: Generate changelog
+        id: changelog
+        if: steps.commits.outputs.SKIP_RELEASE != 'true'
+        run: |
+          # Generate changelog entry (fail if this fails - we need changelog before bumping version)
+          pnpm changelog:generate --tag v${{ steps.current_version.outputs.VERSION }}
+          
+          # Verify changelog was updated
+          if git diff --quiet CHANGELOG.md; then
+            echo "⚠️ Changelog was not updated"
+            echo "CHANGELOG_UPDATED=false" >> $GITHUB_OUTPUT
+          else
+            echo "✅ Changelog updated"
+            echo "CHANGELOG_UPDATED=true" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Bump version
+        id: new_version
+        if: steps.commits.outputs.SKIP_RELEASE != 'true' && steps.changelog.outputs.CHANGELOG_UPDATED == 'true'
+        run: |
+          # Run bump-version and capture output
+          BUMP_OUTPUT=$(pnpm exec heyclaude-bump-version ${{ steps.version_bump.outputs.BUMP_TYPE }} 2>&1)
+          echo "$BUMP_OUTPUT"
+          
+          # Extract version from output (looks for "Version bumped to X.Y.Z")
+          NEW_VERSION=$(echo "$BUMP_OUTPUT" | grep -oE 'Version bumped to [0-9]+\.[0-9]+\.[0-9]+' | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+          
+          # Validate extracted version matches semver pattern
+          if [ -n "$NEW_VERSION" ] && ! echo "$NEW_VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "Error: extracted version '$NEW_VERSION' doesn't match semver pattern" >&2
+            NEW_VERSION=""
+          fi
+          
+          if [ -z "$NEW_VERSION" ]; then
+            # Fallback: read from package.json
+            NEW_VERSION=$(node -p "require('./package.json').version")
+            echo "⚠️ Version extraction failed, using package.json version: $NEW_VERSION" >&2
+          fi
+          
+          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "New version: $NEW_VERSION"
+      
+      - name: Configure git
+        if: steps.commits.outputs.SKIP_RELEASE != 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+      
+      - name: Commit version and changelog, then create and push tag
+        if: steps.commits.outputs.SKIP_RELEASE != 'true' && steps.changelog.outputs.CHANGELOG_UPDATED == 'true'
+        run: |
+          # Batch git operations for efficiency
+          git add package.json CHANGELOG.md
+          git commit -m "chore: bump version to ${{ steps.new_version.outputs.NEW_VERSION }}"
+          
+          # Create tag before pushing
+          git tag -a "v${{ steps.new_version.outputs.NEW_VERSION }}" -m "Release v${{ steps.new_version.outputs.NEW_VERSION }}"
+          
+          # Push commit and tag together (more efficient)
+          git push --force-with-lease origin main "v${{ steps.new_version.outputs.NEW_VERSION }}"
+          
+          # Verify push succeeded by comparing local HEAD to origin/main
+          git fetch origin main --depth=1
+          LOCAL_HEAD=$(git rev-parse HEAD)
+          REMOTE_HEAD=$(git rev-parse origin/main)
+          if [ "$LOCAL_HEAD" != "$REMOTE_HEAD" ]; then
+            echo "❌ Git push failed: local HEAD ($LOCAL_HEAD) does not match origin/main ($REMOTE_HEAD)" >&2
+            exit 1
+          fi
+          echo "✅ Git push verified: local and remote are in sync"
+      
+      - name: Extract changelog entry
+        id: changelog_entry
+        if: steps.commits.outputs.SKIP_RELEASE != 'true' && steps.changelog.outputs.CHANGELOG_UPDATED == 'true'
+        continue-on-error: true
+        run: |
+          # Extract latest changelog entry as JSON
+          CHANGELOG_JSON=$(pnpm exec heyclaude-extract-changelog-entry 2>/dev/null || echo "{}")
+          
+          # Validate JSON (basic check)
+          if [ "$CHANGELOG_JSON" = "{}" ] || ! echo "$CHANGELOG_JSON" | jq empty 2>/dev/null; then
+            echo "⚠️ Failed to extract changelog entry or invalid JSON"
+            echo "CHANGELOG_JSON={}" >> $GITHUB_OUTPUT
+          else
+            # Use multiline output for JSON
+            {
+              echo "CHANGELOG_JSON<<EOF"
+              echo "$CHANGELOG_JSON"
+              echo "EOF"
+            } >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Sync changelog to database
+        if: steps.commits.outputs.SKIP_RELEASE != 'true' && steps.changelog_entry.outputs.CHANGELOG_JSON != '{}'
+        continue-on-error: true
+        env:
+          CHANGELOG_SYNC_TOKEN: ${{ secrets.CHANGELOG_SYNC_TOKEN }}
+          NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
+        run: |
+          # Call API to sync changelog entry to database
+          API_URL="${NEXT_PUBLIC_APP_URL:-https://heyclaude.com}/api/changelog/sync"
+          echo "🔗 Syncing changelog to: $API_URL"
+          
+          if [ -z "$CHANGELOG_SYNC_TOKEN" ]; then
+            echo "⚠️ CHANGELOG_SYNC_TOKEN not set, skipping database sync"
+            exit 0
+          fi
+          
+          if [ -z "$NEXT_PUBLIC_APP_URL" ]; then
+            echo "⚠️ NEXT_PUBLIC_APP_URL not set, using fallback: https://heyclaude.com"
+          fi
+          
+          # Use a temporary file to avoid shell escaping issues
+          echo '${{ steps.changelog_entry.outputs.CHANGELOG_JSON }}' > /tmp/changelog.json
+          
+          curl -X POST "$API_URL" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $CHANGELOG_SYNC_TOKEN" \
+            -d @/tmp/changelog.json \
+            || echo "⚠️ Database sync failed (non-critical)"
+      
+      - name: Create GitHub Release
+        if: steps.commits.outputs.SKIP_RELEASE != 'true' && steps.changelog.outputs.CHANGELOG_UPDATED == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.new_version.outputs.NEW_VERSION }}
+          name: Release v${{ steps.new_version.outputs.NEW_VERSION }}
+          body_path: CHANGELOG.md
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+      
+      - name: Summary
+        if: always()
+        run: |
+          if [ "${{ steps.commits.outputs.SKIP_RELEASE }}" == "true" ]; then
+            echo "## ⏭️ Release Skipped" >> $GITHUB_STEP_SUMMARY
+            echo "No commits found since last tag. Release skipped." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## ✅ Release Created" >> $GITHUB_STEP_SUMMARY
+            echo "- **Version:** ${{ steps.new_version.outputs.NEW_VERSION }}" >> $GITHUB_STEP_SUMMARY
+            echo "- **Bump Type:** ${{ steps.version_bump.outputs.BUMP_TYPE }}" >> $GITHUB_STEP_SUMMARY
+            echo "- **Commits:** ${{ steps.commits.outputs.COMMIT_COUNT }}" >> $GITHUB_STEP_SUMMARY
+            echo "- **Tag:** v${{ steps.new_version.outputs.NEW_VERSION }}" >> $GITHUB_STEP_SUMMARY
+            echo "- **Changelog:** ${{ steps.changelog.outputs.CHANGELOG_UPDATED }}" >> $GITHUB_STEP_SUMMARY
+          fi

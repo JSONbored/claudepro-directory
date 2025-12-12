@@ -8,7 +8,7 @@ export * from '../storage/image-utils.ts';
 export * from '../supabase/server.ts'; // Export server client
 export * from '../edge/call-edge-function.ts';
 export * from '../edge/transform.ts';
-export * from '../edge/search-client.ts';
+// Removed search-client.ts export - all search functions migrated to /api/search route
 export * from '../seo/og.ts';
 export * from '../auth/get-authenticated-user.ts';
 
@@ -49,7 +49,6 @@ export * from '../data/jobs.ts';
 export * from '../data/payments.ts';
 export * from '../data/community.ts';
 export * from '../data/account.ts';
-export * from '../data/notifications.ts';
 export * from '../data/announcements.ts';
 export * from '../data/contact.ts';
 export { logActionFailure } from '../errors.ts';
@@ -86,5 +85,4 @@ export * from '../actions/contact.ts';
 export * from '../actions/submit-contact-form.generated.ts';
 export * from '../actions/content.ts';
 export * from '../actions/jobs.ts';
-export * from '../actions/notifications.ts';
 export * from '../actions/user.ts';

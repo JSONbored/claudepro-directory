@@ -1,5 +1,4 @@
 export * from './ui/constants.ts';
-export * from './ui/colors.ts';
 export * from './ui/utils.ts';
 export * from './ui/components/highlighted-text.tsx';
 export * from './ui/components/navigation/nav-link.tsx';
@@ -11,7 +10,10 @@ export * from './ui/components/button.tsx';
 export * from './ui/components/card.tsx';
 export * from './ui/components/buttons/simple-copy-button.tsx';
 export * from './ui/components/buttons/bookmark-button.tsx';
+export * from './ui/components/buttons/magnetic-button.tsx';
+export * from './ui/components/buttons/magnetic-button.tsx';
 export * from './ui/components/animation/border-beam.tsx';
+export * from './ui/components/animation/animated-border.tsx';
 export * from './ui/components/animation/hover-card.tsx';
 export * from './ui/components/feedback/review-rating-compact.tsx';
 export * from './ui/components/features/sponsored-pulse.tsx';
@@ -32,6 +34,12 @@ export * from './ui/components/collapsible.tsx';
 export * from './ui/components/command.tsx';
 export * from './ui/components/sheet.tsx';
 export * from './ui/components/dropdown-menu.tsx';
+// Navigation HoverCard (Radix UI) - exported with different names to avoid conflict with animation HoverCard
+export {
+  NavigationHoverCard,
+  NavigationHoverCardTrigger,
+  NavigationHoverCardContent,
+} from './ui/components/hover-card.tsx';
 export * from './ui/components/popover.tsx';
 export * from './ui/components/tooltip.tsx';
 export * from './ui/components/checkbox.tsx';
@@ -42,14 +50,19 @@ export * from './ui/components/separator.tsx';
 export * from './ui/components/alert.tsx';
 export * from './ui/components/badge.tsx';
 export * from './ui/components/feedback/loading-factory.tsx';
+export * from './ui/components/feedback/loading-registry.tsx';
 export * from './ui/components/feedback/announcement.tsx';
 export * from './ui/components/feedback/rating.tsx';
 export * from './ui/components/display/terminal.tsx';
 export * from './ui/components/display/highlight-text.tsx';
 export * from './ui/components/animation/number-ticker.tsx';
+export * from './ui/components/animation/sliding-number.tsx';
 export * from './ui/components/animation/particles-background.tsx';
+export * from './ui/components/animation/blur-text.tsx';
+export * from './ui/components/animation/morphing-blob-background.tsx';
 export * from './ui/components/animation/gradient-text.tsx';
 export * from './ui/components/animation/rolling-text.tsx';
+export * from './ui/components/animation/typing-placeholder.tsx';
 export * from './ui/components/forms/form-field.tsx';
 export * from './ui/components/forms/form-section-card.tsx';
 export * from './ui/components/forms/toggle-field.tsx';
@@ -57,3 +70,10 @@ export * from './ui/components/feedback/star-display.tsx';
 export * from './ui/components/display/horizontal-bar-chart.tsx';
 export * from './ui/components/navigation/breadcrumbs.tsx';
 export * from './ui/components/theme/theme-toggle.tsx';
+export * from './ui/components/scroll/scroll-direction-detector.tsx';
+// Re-export SUBMISSION_FORM_TOKENS from new design-tokens system
+export { SUBMISSION_FORM_TOKENS } from './design-tokens/submission-form.ts';
+// Motion components and providers
+export * from './ui/components/motion';
+export * from './ui/providers/lazy-motion-provider';
+export * from './ui/providers/motion-config-provider';

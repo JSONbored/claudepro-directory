@@ -1,11 +1,10 @@
 /**
  * OpenGraph Image URL Generator
  *
- * Generates URLs for the unified OG image API endpoint.
+ * Generates URLs for the static OG image.
  * Used in metadata configuration across the application.
  */
 
-import { env } from '@heyclaude/shared-runtime/schemas/env';
 import { APP_CONFIG } from '@heyclaude/shared-runtime';
 
 /**
@@ -20,21 +19,21 @@ export const OG_IMAGE_DIMENSIONS = {
 /**
  * Generate OpenGraph image URL for any page path
  *
- * Returns the dynamic OG image from the edge function, which generates
- * images based on route metadata (title, description, category, tags).
+ * Returns the static OG image URL. Currently using a single static image
+ * for all pages. The path parameter is accepted for API consistency but
+ * is not used (reserved for future dynamic OG image generation if needed).
  *
  * @param path - The page path (e.g., '/agents/code-reviewer' or '/')
- * @returns Full URL to the dynamic OG image edge function
+ * @returns Full URL to the static OG image
  */
 export function generateOGImageUrl(path: string): string {
-  const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
-  if (!supabaseUrl) {
-    // Fallback to static image if Supabase URL is not available (e.g., during build)
-    return `${APP_CONFIG.url}/og-images/og-image.webp`;
-  }
-
-  const route = encodeURIComponent(path || '/');
-  return `${supabaseUrl}/functions/v1/og-image?route=${route}`;
+  const baseUrl = APP_CONFIG.url;
+  
+  // Path parameter is accepted for API consistency but currently unused
+  // (reserved for future dynamic OG image generation if needed)
+  void path;
+  
+  return `${baseUrl}/og-images/og-image.webp`;
 }
 
 /**
@@ -52,7 +51,7 @@ export function generateOGMetadata(path: string, alt: string) {
         width: OG_IMAGE_DIMENSIONS.width,
         height: OG_IMAGE_DIMENSIONS.height,
         alt,
-        type: 'image/png', // Edge function returns PNG, not WebP
+        type: 'image/webp',
       },
     ],
   };

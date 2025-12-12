@@ -1,6 +1,7 @@
 'use client';
 
 import { ANIMATION_CONSTANTS, STATE_PATTERNS } from '../constants.ts';
+import { DURATION } from '../../design-system/index.ts';
 import { cn } from '../utils.ts';
 import { motion } from 'motion/react';
 import type * as React from 'react';
@@ -24,7 +25,7 @@ const Input = ({ className, type, ref, error, errorId, onFocus, onBlur, ...props
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
+          transition={{ duration: DURATION.quick }}
         />
       )}
       <input

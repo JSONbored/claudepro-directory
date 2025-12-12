@@ -9,64 +9,246 @@ import  { type Database } from '@heyclaude/database-types';
 import  { type SupabaseClient } from '@supabase/supabase-js';
 
 import { logRpcError } from '../utils/rpc-error-logging.ts';
+import { withSmartCache } from '../utils/request-cache.ts';
 
 export class SearchService {
   constructor(private supabase: SupabaseClient<Database>) {}
 
   /**
    * Calls the database RPC: search_unified
+   * Uses request-scoped caching to avoid duplicate calls within the same request
+   * 
+   * The database function now returns a composite type with results array and total_count
    */
   async searchUnified(args: Database['public']['Functions']['search_unified']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('search_unified', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'search_unified',
-          operation: 'SearchService.searchUnified',
-          args: args,
-        });
-        throw error;
-      }
-      const rows = data;
-      return { data: rows, total_count: rows?.length ?? 0 };
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'search_unified',
+      'searchUnified',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('search_unified', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'search_unified',
+              operation: 'SearchService.searchUnified',
+              args: args,
+            });
+            throw error;
+          }
+          // Database now returns composite type: { results: search_unified_row[], total_count: bigint }
+          const result = data as Database['public']['CompositeTypes']['search_unified_result'] | null;
+          const rows = result?.results ?? [];
+          const totalCount = result?.total_count ?? rows.length;
+          return { data: rows, total_count: totalCount };
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: search_content_optimized
+   * Uses request-scoped caching to avoid duplicate calls within the same request
+   * 
+   * The database function now returns a composite type with results array and total_count
    */
   async searchContent(args: Database['public']['Functions']['search_content_optimized']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('search_content_optimized', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'search_content_optimized',
-          operation: 'SearchService.searchContent',
-          args: args,
-        });
-        throw error;
-      }
-      const rows = data;
-      return { data: rows, total_count: rows?.length ?? 0 };
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'search_content_optimized',
+      'searchContent',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('search_content_optimized', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'search_content_optimized',
+              operation: 'SearchService.searchContent',
+              args: args,
+            });
+            throw error;
+          }
+          // Database now returns composite type: { results: search_content_optimized_row[], total_count: bigint }
+          const result = data as Database['public']['CompositeTypes']['search_content_optimized_result'] | null;
+          const rows = result?.results ?? [];
+          const totalCount = result?.total_count ?? rows.length;
+          return { data: rows, total_count: totalCount };
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: filter_jobs
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async filterJobs(args: Database['public']['Functions']['filter_jobs']['Args']) {
+    return withSmartCache(
+      'filter_jobs',
+      'filterJobs',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('filter_jobs', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'filter_jobs',
+              operation: 'SearchService.filterJobs',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
+  }
+
+  /**
+   * Calls the database RPC: get_search_facets
+   * Returns search facets including categories, tags, authors, and content counts
+   * Uses request-scoped caching to avoid duplicate calls within the same request
+   */
+  async getSearchFacets() {
+    return withSmartCache(
+      'get_search_facets',
+      'getSearchFacets',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_search_facets');
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_search_facets',
+              operation: 'SearchService.getSearchFacets',
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      undefined
+    );
+  }
+
+  /**
+   * Calls the database RPC: get_search_facets_formatted
+   * Returns search facets in frontend-ready format (filtered arrays, proper types)
+   * Uses request-scoped caching to avoid duplicate calls within the same request
+   */
+  async getSearchFacetsFormatted() {
+    return withSmartCache(
+      'get_search_facets_formatted',
+      'getSearchFacetsFormatted',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_search_facets_formatted');
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_search_facets_formatted',
+              operation: 'SearchService.getSearchFacetsFormatted',
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      undefined
+    );
+  }
+
+  /**
+   * Calls the database RPC: get_search_suggestions_from_history
+   * Returns search suggestions based on historical search queries
+   * Uses request-scoped caching to avoid duplicate calls within the same request
+   */
+  async getSearchSuggestions(
+    args: Database['public']['Functions']['get_search_suggestions_from_history']['Args']
+  ) {
+    return withSmartCache(
+      'get_search_suggestions_from_history',
+      'getSearchSuggestions',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_search_suggestions_from_history', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_search_suggestions_from_history',
+              operation: 'SearchService.getSearchSuggestions',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
+  }
+
+  /**
+   * Calls the database RPC: get_search_suggestions_formatted
+   * Returns search suggestions in frontend-ready format (with text, search_count, is_popular)
+   * Uses request-scoped caching to avoid duplicate calls within the same request
+   */
+  async getSearchSuggestionsFormatted(
+    args: Database['public']['Functions']['get_search_suggestions_formatted']['Args']
+  ) {
+    return withSmartCache(
+      'get_search_suggestions_formatted',
+      'getSearchSuggestionsFormatted',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_search_suggestions_formatted', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_search_suggestions_formatted',
+              operation: 'SearchService.getSearchSuggestionsFormatted',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
+  }
+
+  /**
+   * Calls the database RPC: batch_insert_search_queries
+   * Batch inserts search queries with error handling
+   * Returns result with inserted/failed counts and error details
+   */
+  async batchInsertSearchQueries(
+    args: Database['public']['Functions']['batch_insert_search_queries']['Args']
+  ): Promise<Database['public']['Functions']['batch_insert_search_queries']['Returns']> {
     try {
-      const { data, error } = await this.supabase.rpc('filter_jobs', args);
+      const { data, error } = await this.supabase.rpc('batch_insert_search_queries', args);
       if (error) {
         logRpcError(error, {
-          rpcName: 'filter_jobs',
-          operation: 'SearchService.filterJobs',
+          rpcName: 'batch_insert_search_queries',
+          operation: 'SearchService.batchInsertSearchQueries',
           args: args,
         });
         throw error;
@@ -76,5 +258,37 @@ export class SearchService {
       // Error already logged above
       throw error;
     }
+  }
+
+  /**
+   * Calls the database RPC: get_trending_searches
+   * Returns trending search queries with counts
+   * Uses request-scoped caching to avoid duplicate calls within the same request
+   */
+  async getTrendingSearches(
+    args?: Database['public']['Functions']['get_trending_searches']['Args']
+  ) {
+    return withSmartCache(
+      'get_trending_searches',
+      'getTrendingSearches',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_trending_searches', args ?? {});
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_trending_searches',
+              operation: 'SearchService.getTrendingSearches',
+              args: args ?? {},
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args ?? {}
+    );
   }
 }

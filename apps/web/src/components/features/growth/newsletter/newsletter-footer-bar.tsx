@@ -1,6 +1,6 @@
 'use client';
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { getAppSettings, getNewsletterConfig } from '@heyclaude/web-runtime/config/static-configs';
 import {
   ensureNumber,
@@ -10,19 +10,18 @@ import {
 } from '@heyclaude/web-runtime/core';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { Mail, X } from '@heyclaude/web-runtime/icons';
-import { DIMENSIONS, POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { DIMENSIONS, POSITION_PATTERNS, UI_CLASSES, Button } from '@heyclaude/web-runtime/ui';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Button } from '@heyclaude/web-runtime/ui';
 
 import { NewsletterForm } from './newsletter-form';
 
 export interface NewsletterFooterBarProps {
-  source: Database['public']['Enums']['newsletter_source'];
-  dismissible?: boolean;
-  showAfterDelay?: number;
-  respectInlineCTA?: boolean;
   ctaVariant?: 'aggressive' | 'social_proof' | 'value_focused';
+  dismissible?: boolean;
+  respectInlineCTA?: boolean;
+  showAfterDelay?: number;
+  source: Database['public']['Enums']['newsletter_source'];
 }
 
 export function NewsletterFooterBar({
@@ -36,7 +35,7 @@ export function NewsletterFooterBar({
   const [isVisible, setIsVisible] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const [pagesWithInlineCTA, setPagesWithInlineCTA] = useState<string[]>([]);
-  const [delayMs, setDelayMs] = useState(showAfterDelay ?? 30000);
+  const [delayMs, setDelayMs] = useState(showAfterDelay ?? 30_000);
   const loadConfigs = useLoggedAsync({
     scope: 'NewsletterFooterBar',
     defaultMessage: 'Failed to load newsletter footer configs',
@@ -59,7 +58,7 @@ export function NewsletterFooterBar({
         if (showAfterDelay === undefined) {
           const configDelay = ensureNumber(
             newsletterConfig['newsletter.footer_bar.show_after_delay_ms'],
-            30000
+            30_000
           );
           setDelayMs(configDelay);
         }
@@ -98,7 +97,7 @@ export function NewsletterFooterBar({
       };
     }
 
-    return undefined;
+    return;
   }, [delayMs]);
 
   const handleDismiss = () => {
@@ -112,21 +111,21 @@ export function NewsletterFooterBar({
 
   return (
     <aside
-      className={`slide-in-from-bottom ${POSITION_PATTERNS.FIXED_BOTTOM_FULL_RESPONSIVE} z-50 animate-in border-border-medium border-t-2 bg-bg-overlaydrop-blur-xl duration-300`}
+      className={`slide-in-from-bottom ${POSITION_PATTERNS.FIXED_BOTTOM_FULL_RESPONSIVE} animate-in border-border-medium bg-bg-overlaydrop-blur-xl z-50 border-t-2 duration-300`}
       aria-label="Newsletter signup"
     >
       <div
-        className={`${POSITION_PATTERNS.ABSOLUTE_TOP_FULL} h-px bg-linear-to-r from-transparent via-(--color-accent)/30 to-transparent`}
+        className={`${POSITION_PATTERNS.ABSOLUTE_TOP_FULL} h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent`}
       />
       <div className="container mx-auto px-4 py-6 md:py-4">
         {/* Desktop layout */}
         <div className="mx-auto hidden max-w-5xl items-center justify-between gap-6 md:flex">
           <div className="flex shrink-0 items-center gap-3">
-            <div className="rounded-lg border border-accent/20 bg-accent/10 p-2.5">
+            <div className="border-accent/20 bg-accent/10 rounded-lg border p-2.5">
               <Mail className={`${UI_CLASSES.ICON_MD} text-accent`} aria-hidden="true" />
             </div>
             <div>
-              <p className="font-semibold text-base text-foreground">
+              <p className="text-foreground text-base font-semibold">
                 {ctaVariant === 'aggressive'
                   ? "⚡ Don't miss out!"
                   : ctaVariant === 'social_proof'
@@ -144,7 +143,7 @@ export function NewsletterFooterBar({
           </div>
           <div className="flex shrink-0 items-center gap-3">
             <NewsletterForm source={source} className={DIMENSIONS.MIN_W_NEWSLETTER_FORM_LG} />
-            {dismissible && (
+            {dismissible ? (
               <Button
                 variant="ghost"
                 size="sm"
@@ -154,7 +153,7 @@ export function NewsletterFooterBar({
               >
                 <X className={UI_CLASSES.ICON_SM} aria-hidden="true" />
               </Button>
-            )}
+            ) : null}
           </div>
         </div>
 
@@ -163,7 +162,7 @@ export function NewsletterFooterBar({
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
             <div className="flex items-center gap-2">
               <Mail className={`${UI_CLASSES.ICON_SM} shrink-0nt`} aria-hidden="true" />
-              <p className="font-medium text-foreground text-sm">
+              <p className="text-foreground text-sm font-medium">
                 {ctaVariant === 'aggressive'
                   ? "⚡ Don't miss out!"
                   : ctaVariant === 'social_proof'
@@ -171,7 +170,7 @@ export function NewsletterFooterBar({
                     : NEWSLETTER_CTA_CONFIG.headline}
               </p>
             </div>
-            {dismissible && (
+            {dismissible ? (
               <Button
                 variant="ghost"
                 size="sm"
@@ -180,7 +179,7 @@ export function NewsletterFooterBar({
               >
                 <X className={UI_CLASSES.ICON_SM} aria-hidden="true" />
               </Button>
-            )}
+            ) : null}
           </div>
           <NewsletterForm source={source} />
         </div>

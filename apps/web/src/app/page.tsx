@@ -2,7 +2,6 @@
 
 import { type Database } from '@heyclaude/database-types';
 import { trackRPCFailure } from '@heyclaude/web-runtime/core';
-import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
 import {
   generatePageMetadata,
   getHomepageCategoryIds,
@@ -11,34 +10,26 @@ import {
 import { type SearchFilterOptions } from '@heyclaude/web-runtime/types/component.types';
 import { HomePageLoading } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
-import dynamicImport from 'next/dynamic';
 import { Suspense } from 'react';
 
 import { LazySection } from '@/src/components/core/infra/scroll-animated-section';
 import { TopContributors } from '@/src/components/features/community/top-contributors';
+import { HeroSearchConnectionProvider } from '@/src/components/features/home/hero-search-connection';
 import { HomepageContentServer } from '@/src/components/features/home/homepage-content-server';
 import { HomepageHeroServer } from '@/src/components/features/home/homepage-hero-server';
 import { HomepageSearchFacetsServer } from '@/src/components/features/home/homepage-search-facets-server';
 import { RecentlyViewedRail } from '@/src/components/features/home/recently-viewed-rail';
 
-const NewsletterCTAVariant = dynamicImport(
-  () =>
-    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then(
-      (module_) => ({
-        default: module_.NewsletterCTAVariant,
-      })
-    ),
-  {
-    loading: () => <div className="bg-muted/20 h-32 animate-pulse rounded-lg" />,
-  }
-);
-
 /**
- * Dynamic Rendering Required
- * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
+ * Generate metadata for the root page, deferring execution until request time.
+ *
+ * Awaits the request-scoped connection to satisfy Cache Component requirements for non-deterministic operations, then produces page metadata for '/'.
+ *
+ * @returns Page metadata for the root path (`'/'`) as a `Metadata` object.
+ *
+ * @see generatePageMetadata
+ * @see connection
  */
-export const revalidate = 1800;
-
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/');
 }
@@ -50,16 +41,16 @@ interface HomePageProperties {
 }
 
 /**
- * Server component that renders the homepage top contributors.
+ * Render the homepage TopContributors component with normalized contributor data.
  *
- * Fetches homepage data for the homepage categories, filters out entries missing
- * required identity fields, and normalizes each contributor by ensuring `id`,
- * `slug`, and `name` are present, defaulting `tier` to `"free"` when absent,
- * and adding a `created_at` ISO timestamp. If fetching homepage data fails,
- * the failure is tracked with scope `top-contributors` and the component
- * renders with an empty contributor list.
+ * Fetches homepage data for the homepage categories; if the fetch fails the failure
+ * is tracked (scope `get_homepage_optimized`, section `top-contributors`) and an
+ * empty contributor list is used. Filters out entries missing `id`, `slug`, or
+ * `name`, ensures each contributor has `id`, `slug`, `name`, `image`, `bio`, and
+ * `work`, defaults `tier` to `"free"` when absent, and sets `created_at` to the
+ * database-provided value or the current ISO timestamp as a fallback.
  *
- * This component runs during server rendering and does not declare its own ISR.
+ * This component runs during server rendering and does not declare ISR/revalidation.
  *
  * @returns A React element rendering TopContributors populated with the processed contributors.
  *
@@ -72,14 +63,15 @@ async function TopContributorsServer() {
   const categoryIds = getHomepageCategoryIds;
   const homepageResult = await getHomepageData(categoryIds).catch((error: unknown) => {
     trackRPCFailure('get_homepage_optimized', error, {
-      section: 'top-contributors',
       categoryIds: categoryIds.length,
+      section: 'top-contributors',
     });
     return null;
   });
 
   interface TopContributor {
     bio: null | string;
+    created_at?: Date | null | string;
     id: string;
     image: null | string;
     name: string;
@@ -89,107 +81,132 @@ async function TopContributorsServer() {
   }
 
   const topContributors = (homepageResult?.top_contributors ?? [])
-    .filter((c): c is TopContributor => {
-      return 'id' in c && 'slug' in c && 'name' in c && Boolean(c.id && c.slug && c.name);
-    })
-    .map((contributor) => ({
-      id: contributor.id,
-      slug: contributor.slug,
-      name: contributor.name,
-      image: contributor.image,
-      bio: contributor.bio,
-      work: contributor.work,
-      tier: contributor.tier ?? 'free',
-      created_at: new Date().toISOString(),
-    }));
+    .filter(
+      (c): c is TopContributor =>
+        'id' in c && 'slug' in c && 'name' in c && Boolean(c.id && c.slug && c.name)
+    )
+    .map((contributor) => {
+      // Convert created_at to string - UserProfile requires created_at: string
+      let created_at: string;
+      if (contributor.created_at) {
+        if (typeof contributor.created_at === 'object' && 'toISOString' in contributor.created_at) {
+          // Date object
+          created_at = contributor.created_at.toISOString();
+        } else if (typeof contributor.created_at === 'string') {
+          created_at = contributor.created_at;
+        } else {
+          // Fallback to empty string if unexpected type
+          created_at = '';
+        }
+      } else {
+        // Fallback to empty string if missing
+        created_at = '';
+      }
+
+      return {
+        bio: contributor.bio,
+        created_at, // Always present as string
+        id: contributor.id,
+        image: contributor.image,
+        name: contributor.name,
+        slug: contributor.slug,
+        tier: contributor.tier ?? 'free',
+        work: contributor.work,
+      };
+    });
 
   return <TopContributors contributors={topContributors} />;
 }
 
 /**
- * Server component that renders the homepage using streaming Suspense boundaries to reduce time-to-first-byte.
+ * Render the homepage using streaming Suspense boundaries to enable progressive rendering.
  *
- * Renders the page as a set of streaming sections so the hero can appear immediately while other data loads:
- * - Hero: renders immediately and receives a best-effort member count fetched from `getHomepageData` (falls back to 0 on failure).
- * - Search facets: fetched in parallel and streamed independently.
- * - Homepage content: rendered within a Suspense boundary and streamed when its data is ready.
- * - Top contributors and newsletter CTA: lazy-loaded below the fold.
+ * Awaits connection() to establish request-time dynamic context before resolving non-deterministic data and the provided `searchParams`. Streams the hero, search facets, and main content independently and lazy-loads below-the-fold sections (e.g., top contributors).
  *
- * @param searchParams - A promise resolving to the page's query parameters (awaited so search params are available before render).
- * @returns The homepage React element composed of streaming Suspense boundaries and lazy sections.
+ * @param searchParams - A promise that resolves to the page's query parameters (object with optional `q` string)
+ * @param searchParams.searchParams
+ * @returns The homepage React element composed of streaming Suspense boundaries and lazy-loaded sections
  *
  * @see HomepageHeroServer
  * @see HomepageContentServerWrapper
  * @see TopContributorsServer
  * @see getHomepageData
  * @see trackRPCFailure
- * @see revalidate
  */
-export default async function HomePage({ searchParams }: HomePageProperties) {
-  // Generate single requestId for this page request
-  const requestId = generateRequestId();
+export default function HomePage({ searchParams: _searchParams }: HomePageProperties) {
+  const searchFiltersPromise = HomepageSearchFacetsServer();
 
-  // Create request-scoped child logger
-  const reqLogger = logger.child({
-    requestId,
-    operation: 'HomePage',
-    route: '/',
-    module: 'apps/web/src/app',
-  });
+  return (
+    <HeroSearchConnectionProvider>
+      <div className="bg-background min-h-screen">
+        <div className="relative overflow-hidden">
+          {/* Hero section - streams immediately with Suspense boundary for member count */}
+          <Suspense fallback={<HomepageHeroServer memberCount={0} />}>
+            <HomepageHeroWithMemberCount />
+          </Suspense>
 
-  await searchParams;
+          <LazySection>
+            <RecentlyViewedRail />
+          </LazySection>
 
-  reqLogger.info('HomePage: rendering homepage');
+          {/* Homepage content - streams when ready (non-blocking) */}
+          <div className="relative">
+            <Suspense fallback={<HomePageLoading />}>
+              <HomepageContentServerWrapper searchFiltersPromise={searchFiltersPromise} />
+            </Suspense>
+          </div>
 
-  // Fetch member count for hero (lightweight, can be done in parallel with other data)
-  // We'll use a default value for the hero and update it when content loads
+          {/* Top contributors - lazy loaded below fold */}
+          <LazySection rootMargin="0px 0px -500px 0px">
+            <Suspense fallback={null}>
+              <TopContributorsServer />
+            </Suspense>
+          </LazySection>
+        </div>
+      </div>
+    </HeroSearchConnectionProvider>
+  );
+}
+
+/**
+ * Fetches the homepage member count and renders the hero with that value.
+ *
+ * If fetching fails, records an RPC failure for the hero member-count purpose and falls back to 0.
+ *
+ * @returns A HomepageHeroServer element rendered with the resolved `memberCount`
+ *
+ * @see HomepageHeroServer
+ * @see getHomepageData
+ * @see trackRPCFailure
+ */
+async function HomepageHeroWithMemberCount() {
   const categoryIds = getHomepageCategoryIds;
-  const homepageResultPromise = getHomepageData(categoryIds).catch((error: unknown) => {
+  const homepageResult = await getHomepageData(categoryIds).catch((error: unknown) => {
     trackRPCFailure('get_homepage_optimized', error, {
-      section: 'hero',
       categoryIds: categoryIds.length,
       purpose: 'member-count',
+      section: 'hero',
     });
     return null;
   });
 
-  // Get member count for hero (non-blocking, can use default if slow)
-  const homepageResult = await homepageResultPromise;
   const memberCount = homepageResult?.member_count ?? 0;
 
-  // Fetch search facets in parallel (non-blocking, streams separately)
-  const searchFiltersPromise = HomepageSearchFacetsServer();
+  // Extract stats from homepage result
+  let stats: Record<string, number | { featured: number; total: number }> = {};
+  if (
+    homepageResult?.content &&
+    typeof homepageResult.content === 'object' &&
+    !Array.isArray(homepageResult.content)
+  ) {
+    const content = homepageResult.content as Record<string, unknown>;
+    if ('stats' in content && typeof content['stats'] === 'object' && content['stats'] !== null) {
+      stats = content['stats'] as Record<string, number | { featured: number; total: number }>;
+    }
+  }
 
-  return (
-    <div className="bg-background min-h-screen">
-      <div className="relative overflow-hidden">
-        {/* Hero section - streams immediately (no data fetching) */}
-        <HomepageHeroServer memberCount={memberCount} />
-
-        <LazySection>
-          <RecentlyViewedRail />
-        </LazySection>
-
-        {/* Homepage content - streams when ready (non-blocking) */}
-        <div className="relative">
-          <Suspense fallback={<HomePageLoading />}>
-            <HomepageContentServerWrapper searchFiltersPromise={searchFiltersPromise} />
-          </Suspense>
-        </div>
-
-        {/* Top contributors - lazy loaded below fold */}
-        <LazySection rootMargin="0px 0px -500px 0px">
-          <Suspense fallback={null}>
-            <TopContributorsServer />
-          </Suspense>
-        </LazySection>
-
-        <LazySection rootMargin="0px 0px -500px 0px">
-          <NewsletterCTAVariant variant="hero" source="homepage" />
-        </LazySection>
-      </div>
-    </div>
-  );
+  // Hero will get search ref from context via client wrapper
+  return <HomepageHeroServer memberCount={memberCount} stats={stats} />;
 }
 
 /**
@@ -200,9 +217,12 @@ export default async function HomePage({ searchParams }: HomePageProperties) {
  *
  * @param props.searchFiltersPromise - A promise that resolves to the search filter options to pass to HomepageContentServer.
  *
+ * @param root0
+ * @param root0.searchFiltersPromise
  * @see HomepageContentServer
  * @see SearchFilterOptions
- */
+ 
+ * @returns {Promise<unknown>} Description of return value*/
 async function HomepageContentServerWrapper({
   searchFiltersPromise,
 }: {

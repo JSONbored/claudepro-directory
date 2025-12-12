@@ -5,41 +5,33 @@
  * Edge caching: Static config-controlled TTL for global cache
  */
 
-import type { Database } from '@heyclaude/database-types';
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
-import {
-  getActiveAnnouncement as fetchActiveAnnouncement,
-  getCacheTtl,
-} from '@heyclaude/web-runtime/server';
-import { unstable_cache } from 'next/cache';
-import { cache } from 'react';
+import { type Database } from '@heyclaude/database-types';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { getActiveAnnouncement as fetchActiveAnnouncement } from '@heyclaude/web-runtime/server';
+import { cacheLife, cacheTag } from 'next/cache';
 
 /**
- * Get active announcement from database using anonymous client (ISR-safe)
- * Edge-layer cached with static config-controlled TTL + React cache for deduplication
+ * Get active announcement from database
+ *
+ * Uses 'use cache' to cache active announcement with cacheLife profile.
+ * This data is public and same for all users, so it can be cached at build time.
  */
-export const getActiveAnnouncement = cache(
-  async (): Promise<Database['public']['Tables']['announcements']['Row'] | null> => {
-    const ttl = getCacheTtl('cache.announcements.ttl_seconds');
+export async function getActiveAnnouncement(): Promise<Database['public']['Tables']['announcements']['Row'] | null> {
+  'use cache';
+  // Use 'hours' profile: 1hr stale, 15min revalidate, 1 day expire
+  cacheLife('hours');
+  cacheTag('announcements');
 
-    return unstable_cache(
-      async () => {
-        try {
-          return await fetchActiveAnnouncement();
-        } catch (error) {
-          logger.error(
-            'Failed to load announcement',
-            normalizeError(error, 'Failed to load announcement'),
-            { source: 'AnnouncementBanner' }
-          );
-          return null;
-        }
-      },
-      ['active-announcement'],
+  try {
+    return await fetchActiveAnnouncement();
+  } catch (error) {
+    logger.error(
       {
-        revalidate: ttl,
-        tags: ['announcements'],
-      }
-    )();
+        err: normalizeError(error, 'Failed to load announcement'),
+        source: 'AnnouncementBanner',
+      },
+      'Failed to load announcement'
+    );
+    return null;
   }
-);
+}

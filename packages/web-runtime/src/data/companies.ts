@@ -1,23 +1,15 @@
 'use server';
 
-import { CompaniesService } from '@heyclaude/data-layer';
+import { CompaniesService, SearchService } from '@heyclaude/data-layer';
 import { Constants, type Database } from '@heyclaude/database-types';
-import { unstable_cache } from 'next/cache';
-import { cache } from 'react';
+import { cacheLife, cacheTag } from 'next/cache';
 
-import { fetchCached } from '../cache/fetch-cached.ts';
-import { getCacheTtl } from '../cache-config.ts';
-import { searchCompaniesUnified } from '../edge/search-client.ts';
-import { normalizeError } from '../errors.ts';
 import { logger } from '../logger.ts';
 import { createSupabaseServerClient } from '../supabase/server.ts';
-import { generateRequestId } from '../utils/request-id.ts';
 
 import { normalizeRpcResult } from './content-helpers.ts';
 
 const JOBS_CATEGORY = Constants.public.Enums.content_category[9] as string; // 'jobs'
-
-const COMPANY_DETAIL_TTL_KEY = 'cache.company_detail.ttl_seconds';
 
 type GetCompanyAdminProfileReturn =
   Database['public']['Functions']['get_company_admin_profile']['Returns'];
@@ -25,118 +17,182 @@ type GetCompanyAdminProfileReturn =
 /**
  * Get company admin profile
  *
- * CRITICAL: This function uses React.cache() for request-level deduplication only.
- * It does NOT use Next.js unstable_cache() because:
- * 1. Company admin profiles are user-specific and require cookies() for auth
- * 2. cookies() cannot be called inside unstable_cache() (Next.js restriction)
+ * Uses 'use cache: private' to enable cross-request caching for user-specific data.
+ * This allows cookies() to be used inside the cache scope while still providing
+ * per-user caching with TTL and cache invalidation support.
  *
- * React.cache() provides request-level deduplication within the same React Server Component tree,
- * which is safe and appropriate for user-specific data.
+ * Cache behavior:
+ * - Minimum 30 seconds stale time (required for runtime prefetch)
+ * - Per-company cache keys (companyId in cache tag)
+ * - Not prerendered (runs at request time)
+ * @param companyId
  */
-export const getCompanyAdminProfile = cache(
-  async (companyId: string): Promise<GetCompanyAdminProfileReturn[number] | null> => {
-    const requestId = generateRequestId();
-    const requestLogger = logger.child({
-      requestId,
-      operation: 'getCompanyAdminProfile',
-      module: 'data/companies',
-    });
+export async function getCompanyAdminProfile(
+  companyId: string
+): Promise<GetCompanyAdminProfileReturn[number] | null> {
+  'use cache: private';
 
-    if (!companyId) {
-      return null;
-    }
-
-    try {
-      // Create authenticated client OUTSIDE of any cache scope
-      const client = await createSupabaseServerClient();
-      const service = new CompaniesService(client);
-
-      const data = await service.getCompanyAdminProfile({ p_company_id: companyId });
-
-      const normalized = normalizeRpcResult(data);
-      if (!normalized) {
-        requestLogger.warn('getCompanyAdminProfile: company not found', {
-          companyId,
-        });
-        return null;
-      }
-
-      requestLogger.info('getCompanyAdminProfile: fetched successfully', {
-        companyId,
-        hasResult: Boolean(normalized),
-      });
-
-      return normalized as GetCompanyAdminProfileReturn[number] | null;
-    } catch (error) {
-      const normalized = normalizeError(error, 'Failed to get company admin profile');
-      requestLogger.error('getCompanyAdminProfile failed', normalized, {
-        companyId,
-      });
-      throw normalized;
-    }
+  if (!companyId) {
+    return null;
   }
-);
 
-export async function getCompanyProfile(
-  slug: string
-): Promise<Database['public']['Functions']['get_company_profile']['Returns'] | null> {
-  const requestId = generateRequestId();
+  // Configure cache
+  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
+  cacheTag(`company-admin-${companyId}`);
+
   const requestLogger = logger.child({
-    requestId,
-    operation: 'getCompanyProfile',
     module: 'data/companies',
+    operation: 'getCompanyAdminProfile',
   });
 
   try {
-    return await fetchCached(
-      (client) => new CompaniesService(client).getCompanyProfile({ p_slug: slug }),
+    // Can use cookies() inside 'use cache: private'
+    const client = await createSupabaseServerClient();
+    const service = new CompaniesService(client);
+
+    const data = await service.getCompanyAdminProfile({ p_company_id: companyId });
+
+    const normalized = normalizeRpcResult(data);
+    if (!normalized) {
+      requestLogger.warn({ companyId }, 'getCompanyAdminProfile: company not found');
+      return null;
+    }
+
+    requestLogger.info(
       {
-        keyParts: ['company', slug],
-        tags: ['companies', JOBS_CATEGORY, `company-${slug}`],
-        ttlKey: COMPANY_DETAIL_TTL_KEY,
-        fallback: null,
-        logMeta: { slug },
-      }
+        companyId,
+        hasResult: Boolean(normalized),
+      },
+      'getCompanyAdminProfile: fetched successfully'
     );
+
+    return normalized as GetCompanyAdminProfileReturn[number] | null;
   } catch (error) {
-    const normalized = normalizeError(error, 'Failed to get company profile');
-    requestLogger.error('getCompanyProfile failed', normalized, {
-      slug,
-    });
-    throw normalized;
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
+    requestLogger.error({ companyId, err: errorForLogging }, 'getCompanyAdminProfile failed');
+    throw error;
   }
 }
 
+/**
+ * Get company profile by slug
+ * Uses 'use cache' to cache company profiles. This data is public and same for all users.
+ * Company profiles change periodically, so we use the 'half' cacheLife profile.
+ * @param slug
+ */
+export async function getCompanyProfile(
+  slug: string
+): Promise<Database['public']['Functions']['get_company_profile']['Returns'] | null> {
+  'use cache';
+
+  const { isBuildTime } = await import('../build-time.ts');
+  const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
+
+  // Configure cache - use 'half' profile for company profiles (changes every 30 minutes)
+  cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
+  cacheTag('companies');
+  cacheTag(JOBS_CATEGORY);
+  cacheTag(`company-${slug}`);
+
+  const requestLogger = logger.child({
+    module: 'data/companies',
+    operation: 'getCompanyProfile',
+  });
+
+  try {
+    // Use admin client during build for better performance, anon client at runtime
+    let client;
+    if (isBuildTime()) {
+      const { createSupabaseAdminClient } = await import('../supabase/admin.ts');
+      client = createSupabaseAdminClient();
+    } else {
+      client = createSupabaseAnonClient();
+    }
+
+    const result = await new CompaniesService(client).getCompanyProfile({ p_slug: slug });
+
+    requestLogger.info(
+      {
+        hasResult: Boolean(result),
+        slug,
+      },
+      'getCompanyProfile: fetched successfully'
+    );
+
+    return result;
+  } catch (error) {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
+    requestLogger.error({ err: errorForLogging, slug }, 'getCompanyProfile failed');
+    throw error;
+  }
+}
+
+/**
+ * Get companies list
+ * Uses 'use cache' to cache companies lists. This data is public and same for all users.
+ * Company lists change periodically, so we use the 'half' cacheLife profile.
+ * @param limit
+ * @param offset
+ */
 export async function getCompaniesList(
   limit = 50,
   offset = 0
 ): Promise<Database['public']['Functions']['get_companies_list']['Returns']> {
-  const requestId = generateRequestId();
+  'use cache';
+
+  const { isBuildTime } = await import('../build-time.ts');
+  const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
+
+  // Configure cache - use 'half' profile for company lists (changes every 30 minutes)
+  cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
+  cacheTag('companies');
+  cacheTag(JOBS_CATEGORY);
+
   const requestLogger = logger.child({
-    requestId,
-    operation: 'getCompaniesList',
     module: 'data/companies',
+    operation: 'getCompaniesList',
   });
 
   try {
-    return await fetchCached(
-      (client) =>
-        new CompaniesService(client).getCompaniesList({ p_limit: limit, p_offset: offset }),
-      {
-        keyParts: ['companies-list', limit, offset],
-        tags: ['companies', JOBS_CATEGORY],
-        ttlKey: 'cache.company_list.ttl_seconds',
-        fallback: { companies: [], total: 0 },
-        logMeta: { limit, offset },
-      }
-    );
-  } catch (error) {
-    const normalized = normalizeError(error, 'Failed to get companies list');
-    requestLogger.error('getCompaniesList failed', normalized, {
-      limit,
-      offset,
+    // Use admin client during build for better performance, anon client at runtime
+    let client;
+    if (isBuildTime()) {
+      const { createSupabaseAdminClient } = await import('../supabase/admin.ts');
+      client = createSupabaseAdminClient();
+    } else {
+      client = createSupabaseAnonClient();
+    }
+
+    const result = await new CompaniesService(client).getCompaniesList({
+      p_limit: limit,
+      p_offset: offset,
     });
-    throw normalized;
+
+    requestLogger.info(
+      {
+        companyCount: result.companies?.length ?? 0,
+        limit,
+        offset,
+        total: result.total ?? 0,
+      },
+      'getCompaniesList: fetched successfully'
+    );
+
+    return result;
+  } catch (error) {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
+    requestLogger.error(
+      {
+        err: errorForLogging,
+        limit,
+        offset,
+      },
+      'getCompaniesList failed'
+    );
+    throw error;
   }
 }
 
@@ -151,64 +207,78 @@ async function fetchCompanySearchResults(
   query: string,
   limit: number
 ): Promise<CompanySearchResult[]> {
-  const requestId = generateRequestId();
+  'use cache';
+  const { cacheLife, cacheTag } = await import('next/cache');
+  const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
+
+  // Configure cache - use 'quarter' profile for company search (same as API route)
+  cacheLife('quarter'); // 15min stale, 5min revalidate, 2hr expire
+  cacheTag('company-search');
+  cacheTag('companies');
+
   const requestLogger = logger.child({
-    requestId,
-    operation: 'fetchCompanySearchResults',
     module: 'data/companies',
+    operation: 'fetchCompanySearchResults',
   });
 
-  const { trackPerformance } = await import('../utils/performance-metrics');
-
   try {
-    const { result } = await trackPerformance(
-      async () => {
-        const results = await searchCompaniesUnified(query, limit);
-        return results.map((entity) => ({
-          id: entity.id,
-          name: entity.title || entity.slug || '',
-          slug: entity.slug,
-          description: entity.description,
-        }));
-      },
-      {
-        operation: 'fetchCompanySearchResults',
-        logger: requestLogger, // Use child logger to avoid passing requestId/operation repeatedly
-        requestId, // Pass requestId for return value
-        logMeta: { query, limit },
-        logLevel: 'info', // Log all operations for observability
-      }
-    );
+    // Use SearchService directly (same as API route)
+    // Follows architectural strategy: data layer -> database RPC -> DB
+    const supabase = createSupabaseAnonClient();
+    const searchService = new SearchService(supabase);
 
-    return result;
+    const unifiedArgs: Database['public']['Functions']['search_unified']['Args'] = {
+      p_entities: ['company'],
+      p_highlight_query: query,
+      p_limit: limit,
+      p_offset: 0,
+      p_query: query,
+    };
+
+    const searchResponse = await searchService.searchUnified(unifiedArgs);
+    const results = searchResponse.data || [];
+
+    return results.map((entity) => ({
+      description: entity.description as string,
+      id: entity.id as string,
+      name: entity.title || entity.slug || '',
+      slug: entity.slug as string,
+    }));
   } catch (error) {
-    // trackPerformance already logs the error, but we log again with context about fallback behavior
-    const normalized = normalizeError(error, 'Company search failed, returning empty results');
-    requestLogger.warn('Company search failed, returning empty results', {
-      err: normalized,
-      query,
-      limit,
-      fallbackStrategy: 'empty-array',
-    });
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string =
+      error instanceof Error ? error : (typeof error === 'string' ? error : String(error));
+    requestLogger.warn(
+      {
+        err: errorForLogging,
+        fallbackStrategy: 'empty-array',
+        limit,
+        query,
+      },
+      'Company search failed, returning empty results'
+    );
     return [];
   }
 }
 
+/**
+ * Search companies by query
+ *
+ * Uses 'use cache' to cache search results. Query and limit become part of the cache key.
+ * This data is public and same for all users with the same query, so it can be cached.
+ * Company search results change frequently, so we use the 'quarter' cacheLife profile.
+ *
+ * Follows architectural strategy: data layer -> database RPC -> DB
+ * @param query
+ * @param limit
+ */
 export async function searchCompanies(query: string, limit = 10): Promise<CompanySearchResult[]> {
   const trimmed = query.trim();
   if (trimmed.length < 2) {
     return [];
   }
 
-  const normalized = trimmed.toLowerCase();
-  const ttl = getCacheTtl('cache.company_search.ttl_seconds');
-
-  return unstable_cache(
-    () => fetchCompanySearchResults(trimmed, limit),
-    [`company-search-${normalized}-${limit}`],
-    {
-      revalidate: ttl,
-      tags: ['company-search'],
-    }
-  )();
+  // fetchCompanySearchResults already has 'use cache', so we just call it
+  // query and limit are automatically part of cache key
+  return fetchCompanySearchResults(trimmed, limit);
 }

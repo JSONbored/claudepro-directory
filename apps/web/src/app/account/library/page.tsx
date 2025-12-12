@@ -3,7 +3,7 @@
  * Uses getUserLibrary data function for fetching bookmarks and collections
  */
 
-import { Constants, type Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
@@ -17,40 +17,56 @@ import {
   Layers,
   Plus,
 } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  UI_CLASSES,
-  NavLink,
-  UnifiedBadge,
   Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  NavLink,
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
+  UI_CLASSES,
+  UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import Link from 'next/link';
+import { connection } from 'next/server';
+import { Suspense } from 'react';
+
+import Loading from './loading';
+
+// Extract collections category value to avoid fragile enum index access
+const COLLECTIONS_TAB_VALUE = 'collections' as const;
+
+// MIGRATED: Added Suspense boundary for dynamic getAuthenticatedUser access (Cache Components requirement)
 
 /**
  * Dynamic Rendering Required
  * Authenticated user library
  */
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
 
 /**
- * Produce page metadata for the account Library route.
+ * Generate metadata for the account Library page and establish a request-time boundary for non-deterministic operations.
  *
- * @returns The Next.js `Metadata` object configured for the "/account/library" page.
+ * This function awaits a request-scoped connection to ensure non-deterministic operations (for example, `Date.now()` used
+ * by downstream metadata generation) occur at request time as required by Next.js Cache Components, then returns the
+ * metadata produced for the "/account/library" route.
+ *
+ * @returns The Next.js `Metadata` object for the "/account/library" route.
  *
  * @see generatePageMetadata
+ * @see connection
  */
 export async function generateMetadata(): Promise<Metadata> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
   return generatePageMetadata('/account/library');
 }
 
@@ -63,28 +79,55 @@ export async function generateMetadata(): Promise<Metadata> {
  *
  * @see getAuthenticatedUser - obtains the current user for this request
  * @see getUserLibrary - fetches bookmarks, collections, and stats for the user
- * @see generateRequestId - creates the request-scoped identifier used for logging
  * @see normalizeError - used to normalize fetch errors for logging
  */
 export default async function LibraryPage() {
-  // Generate single requestId for this page request
-  const requestId = generateRequestId();
+  'use cache: private';
+  cacheLife('userProfile'); // 1min stale, 5min revalidate, 30min expire - User-specific data
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    requestId,
+    module: 'apps/web/src/app/account/library',
     operation: 'LibraryPage',
     route: '/account/library',
-    module: 'apps/web/src/app/account/library',
   });
 
+  return (
+    <Suspense fallback={<Loading />}>
+      <LibraryPageContent reqLogger={reqLogger} />
+    </Suspense>
+  );
+}
+
+/**
+ * Renders the user-scoped Library page content: verifies authentication, loads the user's
+ * library (bookmarks, collections, and stats), and returns the UI for bookmarks and collections
+ * with counts, creation actions, and appropriate empty/error states.
+ *
+ * Attempts to retrieve the authenticated user; if no user is present, renders a sign-in prompt.
+ * Loads library data for the authenticated user, logs fetch results, and renders:
+ * - Header with "My Library" and numeric counts
+ * - Tabs for Bookmarks and Collections with list and empty-state cards
+ * - Actions to create a new collection and links to items/collections
+ *
+ * @param reqLogger - Request-scoped logger (a child of the incoming request logger). A child
+ *   logger with user context is created for user-scoped log entries; userId fields are redacted.
+ * @param reqLogger.reqLogger
+ * @returns The React element tree for the library page content (cards, tabs, lists, and actions).
+ *
+ * @see getAuthenticatedUser
+ * @see getUserLibrary
+ * @see ROUTES
+ */
+async function LibraryPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
   // Section: Authentication
   const { user } = await getAuthenticatedUser({ context: 'LibraryPage' });
 
   if (!user) {
-    reqLogger.warn('LibraryPage: unauthenticated access attempt detected', {
-      section: 'authentication',
-    });
+    reqLogger.warn(
+      { section: 'data-fetch' },
+      'LibraryPage: unauthenticated access attempt detected'
+    );
     return (
       <div className="space-y-6">
         <Card>
@@ -108,29 +151,29 @@ export default async function LibraryPage() {
     userId: user.id, // Redaction will automatically hash this
   });
 
-  userLogger.info('LibraryPage: authentication successful', {
-    section: 'authentication',
-  });
+  userLogger.info({ section: 'data-fetch' }, 'LibraryPage: authentication successful');
 
   // Section: Library Data Fetch
   let data: Database['public']['Functions']['get_user_library']['Returns'] | null = null;
   try {
     data = await getUserLibrary(user.id);
     if (data === null) {
-      userLogger.warn('LibraryPage: getUserLibrary returned null', {
-        section: 'library-data-fetch',
-      });
+      userLogger.warn({ section: 'data-fetch' }, 'LibraryPage: getUserLibrary returned null');
     } else {
-      userLogger.info('LibraryPage: library data loaded', {
-        section: 'library-data-fetch',
-        hasData: Boolean(data),
-      });
+      userLogger.info(
+        { hasData: Boolean(data), section: 'data-fetch' },
+        'LibraryPage: library data loaded'
+      );
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user library');
-    userLogger.error('LibraryPage: getUserLibrary threw', normalized, {
-      section: 'library-data-fetch',
-    });
+    userLogger.error(
+      {
+        err: normalized,
+        section: 'data-fetch',
+      },
+      'LibraryPage: getUserLibrary threw'
+    );
   }
 
   if (!data) {
@@ -164,18 +207,22 @@ export default async function LibraryPage() {
   // Map snake_case to camelCase for compatibility
   const bookmarkCount = stats.bookmark_count ?? 0;
   const collectionCount = stats.collection_count ?? 0;
-  if (!(bookmarks.length > 0 || collections.length > 0)) {
-    userLogger.info('LibraryPage: library returned no bookmarks or collections', {
-      section: 'library-data-fetch',
-    });
+  if (bookmarks.length <= 0 && collections.length <= 0) {
+    userLogger.info(
+      { section: 'data-fetch' },
+      'LibraryPage: library returned no bookmarks or collections'
+    );
   }
 
   // Final summary log
-  userLogger.info('LibraryPage: page render completed', {
-    section: 'page-render',
-    bookmarksCount: bookmarks.length,
-    collectionsCount: collections.length,
-  });
+  userLogger.info(
+    {
+      bookmarksCount: bookmarks.length,
+      collectionsCount: collections.length,
+      section: 'data-fetch',
+    },
+    'LibraryPage: page render completed'
+  );
 
   return (
     <div className="space-y-6">
@@ -194,22 +241,19 @@ export default async function LibraryPage() {
         </Link>
       </div>
 
-      <Tabs defaultValue="bookmarks" className="w-full">
+      <Tabs className="w-full" defaultValue="bookmarks">
         <TabsList className="grid w-full max-w-md grid-cols-2">
-          <TabsTrigger value="bookmarks" className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+          <TabsTrigger className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} value="bookmarks">
             <BookmarkIcon className="h-4 w-4" />
             Bookmarks ({bookmarkCount})
           </TabsTrigger>
-          <TabsTrigger
-            value={Constants.public.Enums.content_category[8]} // 'collections'
-            className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
-          >
+          <TabsTrigger className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} value={COLLECTIONS_TAB_VALUE}>
             <FolderOpen className="h-4 w-4" />
             Collections ({collectionCount})
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="bookmarks" className="space-y-4">
+        <TabsContent className="space-y-4" value="bookmarks">
           {bookmarks.length === 0 ? (
             <Card>
               <CardContent className="flex flex-col items-center py-12">
@@ -219,7 +263,7 @@ export default async function LibraryPage() {
                   Start exploring the directory and bookmark your favorite agents, MCP servers,
                   rules, and more!
                 </p>
-                <NavLink href="/" className="mt-4">
+                <NavLink className="mt-4" href="/">
                   Browse Directory →
                 </NavLink>
               </CardContent>
@@ -232,7 +276,7 @@ export default async function LibraryPage() {
                     <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
                       <div className="flex-1">
                         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                          <UnifiedBadge variant="base" style="outline" className="capitalize">
+                          <UnifiedBadge className="capitalize" style="outline" variant="base">
                             {bookmark.content_type}
                           </UnifiedBadge>
                           <CardTitle className="text-lg">{bookmark.content_slug}</CardTitle>
@@ -242,8 +286,8 @@ export default async function LibraryPage() {
                         ) : null}
                       </div>
                       <NavLink
-                        href={`/${bookmark.content_type}/${bookmark.content_slug}`}
                         className="hover:text-primary/80"
+                        href={`/${bookmark.content_type}/${bookmark.content_slug}`}
                       >
                         <ExternalLink className="h-4 w-4" />
                       </NavLink>
@@ -263,10 +307,7 @@ export default async function LibraryPage() {
           )}
         </TabsContent>
 
-        <TabsContent
-          value={Constants.public.Enums.content_category[8]} // 'collections'
-          className="space-y-4"
-        >
+        <TabsContent className="space-y-4" value={COLLECTIONS_TAB_VALUE}>
           {collections.length === 0 ? (
             <Card>
               <CardContent className="flex flex-col items-center py-12">
@@ -287,7 +328,7 @@ export default async function LibraryPage() {
           ) : (
             <div className="grid gap-4 sm:grid-cols-2">
               {collections.map((collection) => (
-                <Card key={collection.id} className={UI_CLASSES.CARD_INTERACTIVE}>
+                <Card className={UI_CLASSES.CARD_INTERACTIVE} key={collection.id}>
                   <Link href={`/account/library/${collection.slug}`}>
                     <CardHeader>
                       <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
@@ -295,7 +336,7 @@ export default async function LibraryPage() {
                           <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} mb-2`}>
                             <Layers className="text-primary h-4 w-4" />
                             {collection.is_public ? (
-                              <UnifiedBadge variant="base" style="outline" className="text-xs">
+                              <UnifiedBadge className="text-xs" style="outline" variant="base">
                                 Public
                               </UnifiedBadge>
                             ) : null}

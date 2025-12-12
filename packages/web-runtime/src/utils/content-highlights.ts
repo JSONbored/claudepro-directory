@@ -1,17 +1,18 @@
 /**
  * Content Highlight Utilities
  *
- * Pure utility functions for content analysis and trending calculations.
- * These functions work with DisplayableContent types and are used for:
+ * Pure utility functions for content analysis. These functions work with DisplayableContent
+ * types and are used for:
  * - Extracting published dates from content items
  * - Determining if content is "new" based on cutoff dates
- * - Calculating trending scores and identifying top trending items
+ * - Identifying top trending items (uses database ordering, no client-side calculations)
  *
  * Architecture:
  * - Pure functions with no side effects
  * - Type-safe with DisplayableContent union type
  * - Defensive null/undefined handling
  * - No dependencies on app-specific code
+ * - Database-first: All trending calculations done in database, UI just uses ordering
  *
  * Usage:
  * ```typescript
@@ -19,7 +20,7 @@
  *
  * const publishedDate = getItemPublishedDate(item);
  * const isNew = isNewSince(item, weekStartDate);
- * const trendingSlugs = getTrendingSlugs(items, 3);
+ * const trendingSlugs = getTrendingSlugs(items, 3); // Items must be pre-sorted by database
  * ```
  */
 
@@ -90,32 +91,16 @@ export function isNewSince(item: DisplayableContent, cutoff: Date | null): boole
 }
 
 /**
- * Calculate trending score for a content item
- *
- * Uses weighted formula:
- * - Views: 50% weight
- * - Copies: 35% weight
- * - Ratings: 15% weight
- *
- * @param item - Content item to score
- * @returns Numeric score (higher = more trending)
- */
-function getTrendingScore(item: DisplayableContent): number {
-  const views = 'view_count' in item && typeof item.view_count === 'number' ? item.view_count : 0;
-  const copies = 'copy_count' in item && typeof item.copy_count === 'number' ? item.copy_count : 0;
-  const rating =
-    'rating_count' in item && typeof item.rating_count === 'number' ? item.rating_count : 0;
-
-  return views * 0.5 + copies * 0.35 + rating * 0.15;
-}
-
-/**
  * Get top N trending content slugs
  *
- * Calculates trending scores for all items, sorts by score,
- * and returns the slugs of the top N items.
+ * Uses database-calculated trending scores. Items from get_homepage_optimized
+ * are already ordered by trending_score from the materialized view, so we use
+ * position (first N items) as the trending indicator.
  *
- * @param items - Array of content items to analyze
+ * All trending data comes from the database materialized view with proper
+ * time-windowed metrics (views_7d, copies_7d, velocity_7d, etc.).
+ *
+ * @param items - Array of content items to analyze (pre-sorted by trending_score from database)
  * @param topN - Number of top items to return (default: 3)
  * @returns Set of slugs for top trending items
  */
@@ -125,14 +110,15 @@ export function getTrendingSlugs(items: readonly DisplayableContent[], topN = 3)
     return new Set();
   }
 
-  const scored = items
-    .map((item) => ({
-      slug: typeof item.slug === 'string' ? item.slug : null,
-      score: getTrendingScore(item),
-    }))
-    .filter((entry) => entry.slug && entry.score > 0)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, topN);
-
-  return new Set(scored.map((entry) => entry.slug as string));
+  // Items are already sorted by database trending_score - use position
+  // All data comes from database via data layer, so we can trust the ordering
+  return new Set(
+    items
+      .slice(0, topN)
+      .map((item) => {
+        const slug = typeof item.slug === 'string' ? item.slug : null;
+        return slug;
+      })
+      .filter((slug): slug is string => slug !== null)
+  );
 }

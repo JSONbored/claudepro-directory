@@ -51,3 +51,15 @@ public/service-worker.js
 *.config.js
 *.config.mjs
 *.config.ts
+*.config.cjs
+
+# Lock files (auto-generated, don't format)
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Build artifacts
+.next/**
+dist/**
+build/**
+.turbo/**

@@ -154,7 +154,7 @@
   gap: 4px;
   /* Hide until hover */
   opacity: 0;
-  transition: opacity 0.15s ease;
+  transition: opacity var(--duration-fast) ease;
 }
 
 .code-block-wrapper:hover .code-block-header-actions {
@@ -174,7 +174,7 @@
   background: transparent;
   color: #6b7280;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--duration-fast) ease;
 }
 
 .code-action-btn:hover {

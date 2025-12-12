@@ -3,10 +3,8 @@ import {
   getAuthenticatedUser,
   getUserIdentitiesData,
 } from '@heyclaude/web-runtime/data';
-import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  Button,
   Card,
   CardContent,
   CardDescription,
@@ -14,16 +12,19 @@ import {
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
-import Link from 'next/link';
+import { cacheLife } from 'next/cache';
+import { connection } from 'next/server';
+import { Suspense } from 'react';
 
+import { SignInButton } from '@/src/components/core/auth/sign-in-button';
 import { ConnectedAccountsClient } from '@/src/components/features/account/connected-accounts-client';
+
+import Loading from './loading';
 
 /**
  * Dynamic Rendering Required
  * Authenticated user connections
  */
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
 
 const ROUTE = '/account/connected-accounts';
 
@@ -37,13 +38,18 @@ const ROUTE = '/account/connected-accounts';
  * @see generatePageMetadata
  */
 export async function generateMetadata(): Promise<Metadata> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
   return generatePageMetadata(ROUTE);
 }
 
 /**
- * Renders the Connected Accounts page for the current user, showing linked OAuth identities or a sign-in prompt when unauthenticated.
+ * Render the Connected Accounts page that displays the user's linked OAuth identities or a sign-in prompt when unauthenticated.
  *
- * @returns The page's React element containing the header and an OAuth providers card populated with the user's identities, or a sign-in prompt if no user is authenticated.
+ * This server component defers non-deterministic operations to request time (calls `connection()`), creates a request-scoped logger, and mounts the client/content renderer inside a Suspense boundary.
+ *
+ * @returns The page React element containing the header and an "OAuth Providers" card populated with the authenticated user's identities, or a sign-in prompt if no user is authenticated.
  *
  * @see getAuthenticatedUser
  * @see getUserIdentitiesData
@@ -51,31 +57,54 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see ROUTES.LOGIN
  */
 export default async function ConnectedAccountsPage() {
-  // Generate single requestId for this page request
-  const requestId = generateRequestId();
+  return (
+    <Suspense fallback={<Loading />}>
+      <ConnectedAccountsPageContent />
+    </Suspense>
+  );
+}
+
+/**
+ * Renders the Connected Accounts page content, enforcing authentication, fetching the user's
+ * OAuth identities, and presenting either a sign-in prompt or the connected accounts UI.
+ *
+ * Performs server-side authentication via getAuthenticatedUser and retrieves identity data with
+ * getUserIdentitiesData; on fetch failure it falls back to an empty identities list so the page
+ * can still render.
+ *
+ * @returns A React element containing either a sign-in prompt when no user is authenticated or
+ *   the Connected Accounts UI populated with the user's OAuth identities.
+ *
+ * @see getAuthenticatedUser
+ * @see getUserIdentitiesData
+ * @see ConnectedAccountsClient
+ */
+async function ConnectedAccountsPageContent() {
+  'use cache: private';
+  cacheLife('userProfile'); // 1min stale, 5min revalidate, 30min expire - User-specific data
+
   const operation = 'ConnectedAccountsPage';
   const route = ROUTE;
-  const module = 'apps/web/src/app/account/connected-accounts/page';
+  const modulePath = 'apps/web/src/app/account/connected-accounts/page';
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    requestId,
+    module: modulePath,
     operation,
     route,
-    module,
   });
 
   // Section: Authentication
   const { user } = await getAuthenticatedUser({ context: 'ConnectedAccountsPage' });
 
   if (!user) {
-    reqLogger.warn('ConnectedAccountsPage: unauthenticated access attempt detected', {
-      section: 'authentication',
-    });
-    reqLogger.info('ConnectedAccountsPage: page render completed (unauthenticated)', {
-      section: 'page-render',
-      outcome: 'unauthenticated',
-    });
+    reqLogger.info(
+      {
+        outcome: 'unauthenticated',
+        section: 'data-fetch',
+      },
+      'ConnectedAccountsPage: page render completed (unauthenticated)'
+    );
     return (
       <div className="space-y-6">
         <Card>
@@ -84,9 +113,12 @@ export default async function ConnectedAccountsPage() {
             <CardDescription>Please sign in to manage your connected accounts.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild>
-              <Link href={ROUTES.LOGIN}>Go to login</Link>
-            </Button>
+            <SignInButton
+              redirectTo="/account/connected-accounts"
+              valueProposition="Sign in to manage your connected accounts"
+            >
+              Go to login
+            </SignInButton>
           </CardContent>
         </Card>
       </div>
@@ -100,24 +132,26 @@ export default async function ConnectedAccountsPage() {
     userId: user.id, // Redaction automatically hashes this via hashUserIdCensor
   });
 
-  userLogger.info('ConnectedAccountsPage: authentication successful', {
-    section: 'authentication',
-  });
+  userLogger.info({ section: 'data-fetch' }, 'ConnectedAccountsPage: authentication successful');
 
   // Section: Identities Data Fetch
-  // CRITICAL: Call data function directly instead of action to avoid cookies() in unstable_cache() error
+  // Call the data function directly to leverage its built-in caching ('use cache: private')
   let identitiesData: Awaited<ReturnType<typeof getUserIdentitiesData>>;
   try {
     identitiesData = await getUserIdentitiesData(user.id);
-    userLogger.info('ConnectedAccountsPage: identities data loaded', {
-      section: 'identities-data-fetch',
-      hasData: Boolean(identitiesData),
-    });
+    userLogger.info(
+      { hasData: Boolean(identitiesData), section: 'data-fetch' },
+      'ConnectedAccountsPage: identities data loaded'
+    );
   } catch (error) {
     const normalized = normalizeError(error, 'getUserIdentitiesData invocation failed');
-    userLogger.error('ConnectedAccountsPage: getUserIdentitiesData threw', normalized, {
-      section: 'identities-data-fetch',
-    });
+    userLogger.error(
+      {
+        err: normalized,
+        section: 'data-fetch',
+      },
+      'ConnectedAccountsPage: getUserIdentitiesData threw'
+    );
     // Fallback to empty identities array on error
     identitiesData = { identities: [] };
   }
@@ -131,16 +165,14 @@ export default async function ConnectedAccountsPage() {
 
   const identities = identitiesData?.identities ?? [];
   if (identities.length === 0) {
-    userLogger.info('ConnectedAccountsPage: no OAuth identities found', {
-      section: 'identities-data-fetch',
-    });
+    userLogger.info({ section: 'data-fetch' }, 'ConnectedAccountsPage: no OAuth identities found');
   }
 
   // Final summary log
-  userLogger.info('ConnectedAccountsPage: page render completed', {
-    section: 'page-render',
-    identitiesCount: identities.length,
-  });
+  userLogger.info(
+    { identitiesCount: identities.length, section: 'data-fetch' },
+    'ConnectedAccountsPage: page render completed'
+  );
 
   return (
     <div className="space-y-6">

@@ -3,9 +3,9 @@
 import { z } from 'zod';
 
 import { getEnvObject } from '../env.ts';
-import { logError, logWarn } from '../logging.ts';
+import { logger, normalizeError } from '../logger/index.ts';
 
-import { nonEmptyString, urlString } from './primitives.ts';
+import { nonEmptyString, optionalUrlString } from './primitives.ts';
 
 /**
  * Server-side environment variables schema
@@ -45,64 +45,27 @@ const serverEnvSchema = z
       .optional()
       .describe('Git commit author name of the deployment'),
 
-    UMAMI_WEBSITE_ID: z
-      .string()
-      .uuid()
-      .optional()
-      .describe('Umami analytics website ID for server-side tracking'),
-    UMAMI_API_URL: urlString
-      .optional()
-      .describe('Umami API endpoint URL for server-side analytics'),
-
-    RATE_LIMIT_SECRET: z
-      .string()
-      .min(32)
-      .optional()
-      .describe('Secret key for rate limiting token generation (minimum 32 characters)'),
-
-    CACHE_WARM_AUTH_TOKEN: z
-      .string()
-      .min(32)
-      .optional()
-      .describe('Authorization token for cache warming endpoints (minimum 32 characters)'),
-
-    BYPASS_RELATED_CACHE: z
-      .enum(['true', 'false'])
-      .optional()
-      .describe('Development flag to bypass related content caching'),
-
-    VIEW_COUNT_SALT: z
-      .string()
-      .min(16)
-      .optional()
-      .describe('Salt for secure view count hashing (minimum 16 characters)'),
-
-    WEBHOOK_SECRET: z
-      .string()
-      .min(32)
-      .optional()
-      .describe('Secret key for webhook signature validation (minimum 32 characters)'),
-
-    CRON_SECRET: z
-      .string()
-      .min(32)
-      .optional()
-      .describe('Secret key for cron job authorization (minimum 32 characters)'),
-
     REVALIDATE_SECRET: z
-      .string()
-      .min(32)
-      .optional()
+      .preprocess(
+        (val) => (val === '' || val === null ? undefined : val),
+        z.string().min(32).optional()
+      )
       .describe(
         'Secret key for on-demand ISR revalidation from Supabase webhooks (minimum 32 characters)'
       ),
 
-    BETTERSTACK_HEARTBEAT_DAILY_MAINTENANCE: urlString
-      .optional()
-      .describe('BetterStack heartbeat URL for daily maintenance cron monitoring'),
-    BETTERSTACK_HEARTBEAT_WEEKLY_TASKS: urlString
-      .optional()
+    BETTERSTACK_HEARTBEAT_WEEKLY_TASKS: optionalUrlString
       .describe('BetterStack heartbeat URL for weekly tasks cron monitoring'),
+
+    BETTERSTACK_HEARTBEAT_CRITICAL_FAILURE: optionalUrlString
+      .describe('BetterStack heartbeat URL for critical Inngest function failures'),
+
+    BETTERSTACK_HEARTBEAT_INNGEST_CRON: optionalUrlString
+      .describe('BetterStack heartbeat URL for Inngest cron function success monitoring'),
+
+    BETTERSTACK_API_TOKEN: nonEmptyString
+      .optional()
+      .describe('BetterStack API token for programmatic monitor creation (optional)'),
 
     RESEND_API_KEY: nonEmptyString
       .optional()
@@ -117,12 +80,6 @@ const serverEnvSchema = z
     SUPABASE_SERVICE_ROLE_KEY: nonEmptyString
       .optional()
       .describe('Supabase service role key for admin operations (bypasses RLS)'),
-
-    GITHUB_BOT_TOKEN: nonEmptyString
-      .optional()
-      .describe(
-        'GitHub Personal Access Token for automated PR creation (requires Contents + Pull Requests permissions)'
-      ),
 
     POLAR_ACCESS_TOKEN: nonEmptyString
       .optional()
@@ -160,29 +117,9 @@ const buildEnvSchema = z
  */
 const clientEnvSchema = z
   .object({
-    NEXT_PUBLIC_UMAMI_WEBSITE_ID: z
-      .string()
-      .uuid()
-      .optional()
-      .describe('Public Umami analytics website ID exposed to the browser'),
-    NEXT_PUBLIC_UMAMI_SCRIPT_URL: urlString
-      .optional()
-      .describe('Public Umami analytics script URL for client-side tracking'),
+    NEXT_PUBLIC_SITE_URL: optionalUrlString.describe('Public site URL for canonical links'),
 
-    NEXT_PUBLIC_DEBUG_ANALYTICS: z
-      .enum(['true', 'false'])
-      .optional()
-      .describe('Enable debug logging for analytics in the browser'),
-    NEXT_PUBLIC_ENABLE_PWA: z
-      .enum(['true', 'false'])
-      .optional()
-      .describe('Enable Progressive Web App features'),
-
-    NEXT_PUBLIC_API_URL: urlString.optional().describe('Public API endpoint URL'),
-    NEXT_PUBLIC_SITE_URL: urlString.optional().describe('Public site URL for canonical links'),
-
-    NEXT_PUBLIC_SUPABASE_URL: urlString
-      .optional()
+    NEXT_PUBLIC_SUPABASE_URL: optionalUrlString
       .describe('Supabase project URL (safe for client-side)'),
     NEXT_PUBLIC_SUPABASE_ANON_KEY: nonEmptyString
       .optional()
@@ -211,13 +148,14 @@ export type Env = z.infer<typeof envSchema>;
 /**
  * Production-specific required environment variables
  * These must be set in production for security and functionality
+ * 
+ * Note: Previously required variables (RATE_LIMIT_SECRET, CACHE_WARM_AUTH_TOKEN,
+ * VIEW_COUNT_SALT, WEBHOOK_SECRET, CRON_SECRET) have been removed as they are
+ * not actually used in the codebase. They were likely planned for future features
+ * that were never implemented or replaced by other implementations.
  */
 const productionRequiredEnvs = [
-  'RATE_LIMIT_SECRET',
-  'CACHE_WARM_AUTH_TOKEN',
-  'VIEW_COUNT_SALT',
-  'WEBHOOK_SECRET',
-  'CRON_SECRET',
+  // No variables currently required - all security features use optional env vars
 ] as const;
 
 /**
@@ -241,29 +179,94 @@ function validateEnv(): Env {
   validationAttempted = true;
 
   const rawEnv = getEnvObject();
+  
+  // Check if we're in build phase - be more lenient during builds
+  // Netlify may not pass all env vars during build, but they're available at runtime
+  const isBuildPhase =
+    rawEnv['NEXT_PHASE'] === 'phase-production-build' ||
+    rawEnv['NEXT_PHASE'] === 'phase-production-server';
+  
   const parsed = envSchema.safeParse(rawEnv);
 
   if (!parsed.success) {
     const errorDetails = JSON.stringify(parsed.error.flatten().fieldErrors, null, 2);
+    
+    // Debug: Log actual values for problematic env vars to understand what Netlify is passing
+    // Check BOTH rawEnv (normalized) AND process.env (raw) to see if normalization is the issue
+    const debugValues: Record<string, unknown> = {};
+    const problematicKeys = ['REVALIDATE_SECRET', 'BETTERSTACK_HEARTBEAT_WEEKLY_TASKS', 'NEXT_PUBLIC_SUPABASE_URL'];
+    for (const key of problematicKeys) {
+      const rawValue = rawEnv[key];
+      // Also check process.env directly to see if normalization is truncating
+      const processEnvValue = typeof process !== 'undefined' && process.env ? process.env[key] : undefined;
+      debugValues[key] = {
+        exists: key in rawEnv,
+        type: typeof rawValue,
+        length: typeof rawValue === 'string' ? rawValue.length : 'N/A',
+        processEnvLength: typeof processEnvValue === 'string' ? processEnvValue.length : 'N/A',
+        processEnvExists: processEnvValue !== undefined,
+        valuePreview: typeof rawValue === 'string' 
+          ? (rawValue.length > 0 ? `${rawValue.substring(0, 50)}${rawValue.length > 50 ? '...' : ''}` : '(empty string)')
+          : String(rawValue),
+        processEnvPreview: typeof processEnvValue === 'string'
+          ? (processEnvValue.length > 0 ? `${processEnvValue.substring(0, 50)}${processEnvValue.length > 50 ? '...' : ''}` : '(empty string)')
+          : String(processEnvValue),
+        isUndefined: rawValue === undefined,
+        isNull: rawValue === null,
+        isEmptyString: rawValue === '',
+        processEnvIsEmpty: processEnvValue === '',
+      };
+    }
+    
     const validationError = new Error(`Invalid environment variables: ${errorDetails}`);
     // Fire-and-forget: validation must remain synchronous
-    void logError('Invalid environment variables detected', {
+    const normalized = normalizeError(validationError, 'Invalid environment variables detected');
+    void logger.error({
+      err: normalized,
       module: 'shared-runtime',
       operation: 'validateEnv',
       errorDetails,
       phase: 'validation',
-    }, validationError);
+      isBuildPhase,
+      debugValues, // Include debug info to see what Netlify is actually passing
+    }, 'Invalid environment variables detected');
 
-    // In production, we should fail fast on invalid env vars
+    // During build phase, be lenient - env vars may not be available yet
+    // Netlify may not pass all env vars during build, but they're available at runtime
+    // They'll be validated again at runtime when they're actually needed
+    if (isBuildPhase) {
+      logger.warn({
+        module: 'shared-runtime',
+        operation: 'validateEnv',
+        phase: 'build',
+        errorDetails,
+      }, 'Skipping strict env validation during build phase - will validate at runtime');
+      // Use a permissive parse that filters out invalid optional fields
+      const buildTimeEnv: Record<string, unknown> = { ...rawEnv };
+      // Remove invalid optional fields - they'll be validated at runtime
+      for (const [key] of Object.entries(parsed.error.flatten().fieldErrors)) {
+        // For optional fields, remove invalid values (set to undefined)
+        // This allows the build to proceed - validation happens at runtime
+        delete buildTimeEnv[key];
+      }
+      // Parse with cleaned env - optional fields will be undefined if invalid
+      cachedEnv = envSchema.parse({
+        ...buildTimeEnv,
+        NODE_ENV: rawEnv['NODE_ENV'] ?? 'development',
+      });
+      return cachedEnv;
+    }
+
+    // In production runtime (not build), we should fail fast on invalid env vars
     if ((rawEnv['NODE_ENV'] ?? 'development') === 'production') {
       throw new Error('Invalid environment variables. Check the logs for details.');
     }
 
     // In development, warn but continue with defaults
-    logWarn('Using default values for missing environment variables', {
+    logger.warn({
       module: 'shared-runtime',
       operation: 'validateEnv',
-    });
+    }, 'Using default values for missing environment variables');
     cachedEnv = envSchema.parse({
       ...rawEnv,
       NODE_ENV: rawEnv['NODE_ENV'] ?? 'development',
@@ -274,9 +277,7 @@ function validateEnv(): Env {
   // Production validation - server-side only for security  
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Runtime check for SSR detection
   const isServer = globalThis.window === undefined;
-  const isBuildPhase =
-    rawEnv['NEXT_PHASE'] === 'phase-production-build' ||
-    rawEnv['NEXT_PHASE'] === 'phase-production-server';
+  // Reuse isBuildPhase from above (line 247)
   const isProductionRuntime =
     rawEnv['NODE_ENV'] === 'production' || rawEnv['VERCEL_ENV'] === 'production';
 
@@ -288,46 +289,21 @@ function validateEnv(): Env {
       const missingEnvError = new Error(`Missing required production environment variables: ${missingVars}`);
       
       // Fire-and-forget: log the error before throwing
-      void logError('Missing required production environment variables for security features', {
+      const normalized = normalizeError(missingEnvError, 'Missing required production environment variables for security features');
+      void logger.error({
+        err: normalized,
         module: 'shared-runtime',
         operation: 'validateEnv',
         missingVars,
-      }, missingEnvError);
+      }, 'Missing required production environment variables for security features');
       throw new Error(
         `Missing required production environment variables: ${missingVars}. These are required for security and functionality in production.`
       );
     }
 
-    const securityValidations = [
-      {
-        name: 'RATE_LIMIT_SECRET',
-        value: rawEnv['RATE_LIMIT_SECRET'],
-        minLength: 32,
-      },
-      {
-        name: 'CACHE_WARM_AUTH_TOKEN',
-        value: rawEnv['CACHE_WARM_AUTH_TOKEN'],
-        minLength: 32,
-      },
-      {
-        name: 'VIEW_COUNT_SALT',
-        value: rawEnv['VIEW_COUNT_SALT'],
-        minLength: 16,
-      },
-      {
-        name: 'WEBHOOK_SECRET',
-        value: rawEnv['WEBHOOK_SECRET'],
-        minLength: 32,
-      },
-    ];
-
-    for (const validation of securityValidations) {
-      if (validation.value && validation.value.length < validation.minLength) {
-        throw new Error(
-          `${validation.name} must be at least ${validation.minLength} characters for production security`
-        );
-      }
-    }
+    // Security validations removed - these env vars are no longer used
+    // Previously validated: RATE_LIMIT_SECRET, CACHE_WARM_AUTH_TOKEN, VIEW_COUNT_SALT, WEBHOOK_SECRET
+    // These were removed as they are not actually used in the codebase
   }
 
   cachedEnv = parsed.data;
@@ -347,16 +323,6 @@ export const env = validateEnv();
 
 export const isDevelopment = env.NODE_ENV === 'development';
 export const isProduction = env.NODE_ENV === 'production';
-
-/**
- * Security configuration
- * Production Security: Frozen to prevent runtime mutations
- */
-export const securityConfig = Object.freeze({
-  rateLimitSecret: env.RATE_LIMIT_SECRET,
-  cacheWarmToken: env.CACHE_WARM_AUTH_TOKEN,
-  isSecured: !!env.RATE_LIMIT_SECRET,
-} as const);
 
 /**
  * Build configuration

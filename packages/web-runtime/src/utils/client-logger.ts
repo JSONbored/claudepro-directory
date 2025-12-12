@@ -62,7 +62,7 @@ import { getOrCreateSessionId } from './client-session.ts';
  * 
  * @remarks
  * This interface matches the context structure used server-side, ensuring consistency.
- * The `sessionId` field is unique to client-side logs (server-side uses `requestId`).
+ * The `sessionId` field is unique to client-side logs.
  * 
  * @see {@link createClientLogContext} - Creates context with automatic session ID injection
  * @see {@link ../utils/log-context.WebAppLogContext | WebAppLogContext} - Server-side equivalent
@@ -218,7 +218,7 @@ export function logClientError(
   const context: LogContext = Object.fromEntries(
     Object.entries(clientContext).map(([key, value]) => [key, toLogContextValue(value)])
   ) as LogContext;
-  logger.error(message, normalized, context);
+  logger.error({ err: normalized, ...context }, message);
 }
 
 /**
@@ -281,9 +281,9 @@ export function logClientWarn(
   if (error !== undefined) {
     const normalized = normalizeError(error, message);
     // Merge error into context - logger.warn expects (message, context, metadata)
-    logger.warn(message, { ...context, err: normalized });
+    logger.warn({ ...context, err: normalized }, message);
   } else {
-    logger.warn(message, context);
+    logger.warn(context, message);
   }
 }
 
@@ -330,7 +330,7 @@ export function logClientInfo(
   const context: LogContext = Object.fromEntries(
     Object.entries(clientContext).map(([key, value]) => [key, toLogContextValue(value)])
   ) as LogContext;
-  logger.info(message, context);
+  logger.info(context, message);
 }
 
 /**
@@ -376,7 +376,7 @@ export function logClientDebug(
   const context: LogContext = Object.fromEntries(
     Object.entries(clientContext).map(([key, value]) => [key, toLogContextValue(value)])
   ) as LogContext;
-  logger.debug(message, context);
+  logger.debug(context, message);
 }
 
 /**
@@ -420,7 +420,7 @@ export function logClientDebug(
  * @see {@link logClientError} - For non-boundary errors
  */
 /**
- * Create client-safe log context with requestId (compatible with server-side createWebAppContextWithId)
+ * Create client-safe log context (compatible with server-side createWebAppContextWithId)
  * 
  * **Client-Safe Alternative to Server-Side createWebAppContextWithId**
  * - ✅ **SAFE** to use in client components
@@ -431,16 +431,14 @@ export function logClientDebug(
  * ```typescript
  * 'use client';
  * 
- * import { generateRequestId, createWebAppContextWithIdClient } from '@heyclaude/web-runtime/logging/client';
+ * import { createWebAppContextWithIdClient } from '@heyclaude/web-runtime/logging/client';
  * 
- * const requestId = generateRequestId();
- * const logContext = createWebAppContextWithIdClient(requestId, '/account/jobs', 'JobsPage', {
+ * const logContext = createWebAppContextWithIdClient('/account/jobs', 'JobsPage', {
  *   userId: user.id,
  * });
  * logger.error('Error occurred', error, logContext);
  * ```
  * 
- * @param requestId - Pre-generated request ID (use generateRequestId())
  * @param route - The HTTP/website route path (e.g., '/account/jobs')
  * @param operation - The operation name (e.g., 'JobsPage', 'ErrorBoundary')
  * @param options - Additional context fields
@@ -450,7 +448,6 @@ export function logClientDebug(
  * @see {@link ../logging/server.createWebAppContextWithId | createWebAppContextWithId} - Server-side version
  */
 export function createWebAppContextWithIdClient(
-  requestId: string,
   route: string,
   operation: string,
   options?: Record<string, unknown>
@@ -462,7 +459,6 @@ export function createWebAppContextWithIdClient(
   
   // Convert to LogContext format (compatible with logger.error signature)
   const logContext: LogContext = {
-    requestId,
     route,
     operation: clientContext.operation,
     sessionId: clientContext.sessionId,
@@ -532,5 +528,5 @@ export function logClientErrorBoundary(
   const context: LogContext = Object.fromEntries(
     Object.entries(clientContext).map(([key, value]) => [key, toLogContextValue(value)])
   ) as LogContext;
-  logger.error(message, normalized, context);
+  logger.error({ err: normalized, ...context }, message);
 }

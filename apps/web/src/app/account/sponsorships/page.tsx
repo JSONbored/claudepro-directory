@@ -5,26 +5,31 @@ import {
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { BarChart, Eye, MousePointer, TrendingUp } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  UI_CLASSES,
-  UnifiedBadge,
   Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  UI_CLASSES,
+  UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import Link from 'next/link';
+import { connection } from 'next/server';
+import { Suspense } from 'react';
+
+import { SignInButton } from '@/src/components/core/auth/sign-in-button';
+
+import Loading from './loading';
 
 /**
  * Dynamic Rendering Required
  * Authenticated user sponsorships
  */
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
 
 /**
  * Provide the page metadata for the /account/sponsorships route.
@@ -34,24 +39,33 @@ export const runtime = 'nodejs';
  * @see generatePageMetadata
  */
 export async function generateMetadata(): Promise<Metadata> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  await connection();
   return generatePageMetadata('/account/sponsorships');
 }
 
-/**
+/*******
  * Determine whether a sponsorship is active at a given time.
  *
  * A sponsorship is considered active when its `active` flag is `true` and the
  * provided time falls between `start_date` and `end_date` (inclusive).
  *
- * @param sponsorship - Object containing sponsorship state and date range:
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship - Object containing sponsorship state and date range:
  *   - `active`: boolean or null indicating whether the sponsorship is enabled
  *   - `start_date`: ISO date string for the start of the sponsorship period
  *   - `end_date`: ISO date string for the end of the sponsorship period
- * @param now - Reference Date used to evaluate whether the sponsorship is within its active range
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship.start_date
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship.end_date
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship.active
+ * @param {Date} now - Reference Date used to evaluate whether the sponsorship is within its active range
  * @returns `true` if the sponsorship's `active` flag is `true` and `now` is between `start_date` and `end_date` (inclusive), `false` otherwise.
  *
  * @see SponsorshipsPage
- */
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
+  * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
+*/
 function isSponsorshipActive(
   sponsorship: { active: boolean | null; end_date: string; start_date: string },
   now: Date
@@ -81,25 +95,55 @@ function isSponsorshipActive(
  * @see isSponsorshipActive
  */
 export default async function SponsorshipsPage() {
-  // Generate single requestId for this page request
-  const requestId = generateRequestId();
+  'use cache: private';
+  cacheLife('userProfile'); // 1min stale, 5min revalidate, 30min expire - User-specific data
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
-    requestId,
+    module: 'apps/web/src/app/account/sponsorships',
     operation: 'SponsorshipsPage',
     route: '/account/sponsorships',
-    module: 'apps/web/src/app/account/sponsorships',
   });
 
+  return (
+    <Suspense fallback={<Loading />}>
+      <SponsorshipsPageContent reqLogger={reqLogger} />
+    </Suspense>
+  );
+}
+
+/**
+ * Renders the account sponsorships UI for the current authenticated user.
+ *
+ * Fetches the authenticated user and that user's sponsorships, then renders one of:
+ * - a sign-in prompt when there is no authenticated user,
+ * - an error message when loading sponsorships fails,
+ * - an empty-state UI when the user has no sponsorships,
+ * - or a list of sponsorship cards (with status, metrics, progress, and analytics links) when sponsorships exist.
+ *
+ * @param reqLogger - A request-scoped logger (used to create a user-scoped child logger for per-request telemetry).
+ * @param reqLogger.reqLogger
+ * @returns The server-rendered React element for the sponsorships page content.
+ *
+ * @see getAuthenticatedUser
+ * @see getUserSponsorships
+ * @see isSponsorshipActive
+ */
+async function SponsorshipsPageContent({
+  reqLogger,
+}: {
+  reqLogger: ReturnType<typeof logger.child>;
+}) {
   // Section: Authentication
   const { user } = await getAuthenticatedUser({ context: 'SponsorshipsPage' });
 
   if (!user) {
-    reqLogger.warn('SponsorshipsPage: unauthenticated access attempt', {
-      section: 'authentication',
-      timestamp: new Date().toISOString(),
-    });
+    reqLogger.warn(
+      {
+        section: 'data-fetch',
+      },
+      'SponsorshipsPage: unauthenticated access attempt'
+    );
     return (
       <div className="space-y-6">
         <Card>
@@ -108,9 +152,12 @@ export default async function SponsorshipsPage() {
             <CardDescription>Please sign in to manage your sponsorship campaigns.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild>
-              <Link href={ROUTES.LOGIN}>Go to login</Link>
-            </Button>
+            <SignInButton
+              redirectTo="/account/sponsorships"
+              valueProposition="Sign in to manage your sponsorship campaigns"
+            >
+              Go to login
+            </SignInButton>
           </CardContent>
         </Card>
       </div>
@@ -129,9 +176,13 @@ export default async function SponsorshipsPage() {
     sponsorships = await getUserSponsorships(user.id);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user sponsorships');
-    userLogger.error('SponsorshipsPage: getUserSponsorships threw', normalized, {
-      section: 'sponsorships-data-fetch',
-    });
+    userLogger.error(
+      {
+        err: normalized,
+        section: 'data-fetch',
+      },
+      'SponsorshipsPage: getUserSponsorships threw'
+    );
     return (
       <div className="space-y-6">
         <div className="text-destructive">Failed to load sponsorships. Please try again later.</div>
@@ -140,7 +191,7 @@ export default async function SponsorshipsPage() {
   }
 
   if (sponsorships.length === 0) {
-    userLogger.info('SponsorshipsPage: user has no sponsorships');
+    userLogger.info({ section: 'data-fetch' }, 'SponsorshipsPage: user has no sponsorships');
     return (
       <div className="space-y-6">
         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
@@ -148,7 +199,7 @@ export default async function SponsorshipsPage() {
             <h1 className="mb-2 text-3xl font-bold">Sponsorships</h1>
             <p className="text-muted-foreground">No active campaigns yet</p>
           </div>
-          <Button variant="outline" asChild>
+          <Button asChild variant="outline">
             <Link href={ROUTES.PARTNER}>
               <TrendingUp className="mr-2 h-4 w-4" />
               Become a Sponsor
@@ -157,14 +208,14 @@ export default async function SponsorshipsPage() {
         </div>
         <Card>
           <CardContent className="text-muted-foreground py-12 text-center">
-            You haven't launched any sponsorship campaigns yet.
+            You haven&apos;t launched any sponsorship campaigns yet.
           </CardContent>
         </Card>
       </div>
     );
   }
 
-  const orderedSponsorships = [...sponsorships].toSorted(
+  const orderedSponsorships = [...sponsorships].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   );
 
@@ -181,7 +232,7 @@ export default async function SponsorshipsPage() {
             {activeCount} active {activeCount === 1 ? 'campaign' : 'campaigns'}
           </p>
         </div>
-        <Button variant="outline" asChild>
+        <Button asChild variant="outline">
           <Link href={ROUTES.PARTNER}>
             <TrendingUp className="mr-2 h-4 w-4" />
             Become a Sponsor
@@ -212,18 +263,18 @@ export default async function SponsorshipsPage() {
                 <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
                   <div className="flex-1">
                     <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                      <UnifiedBadge variant="sponsored" tier={safeTier} showIcon />
+                      <UnifiedBadge showIcon tier={safeTier} variant="sponsored" />
                       {isActive ? (
-                        <UnifiedBadge variant="base" className={UI_CLASSES.STATUS_APPROVED}>
+                        <UnifiedBadge className={UI_CLASSES.STATUS_APPROVED} variant="base">
                           Active
                         </UnifiedBadge>
                       ) : (
-                        <UnifiedBadge variant="base" style="outline">
+                        <UnifiedBadge style="outline" variant="base">
                           Inactive
                         </UnifiedBadge>
                       )}
                       {hasHitLimit ? (
-                        <UnifiedBadge variant="base" className={UI_CLASSES.STATUS_WARNING}>
+                        <UnifiedBadge className={UI_CLASSES.STATUS_WARNING} variant="base">
                           Limit Reached
                         </UnifiedBadge>
                       ) : null}
@@ -236,7 +287,7 @@ export default async function SponsorshipsPage() {
                       {new Date(sponsorship.end_date).toLocaleDateString()}
                     </CardDescription>
                   </div>
-                  <Button variant="outline" size="sm" asChild>
+                  <Button asChild size="sm" variant="outline">
                     <Link href={`/account/sponsorships/${sponsorship.id}/analytics`}>
                       <BarChart className="mr-1 h-3 w-3" />
                       Analytics
@@ -287,19 +338,19 @@ export default async function SponsorshipsPage() {
                 {/* Progress bar if has limit */}
                 {sponsorship.impression_limit == null ? null : (
                   <div
+                    aria-label={`Impressions: ${impressionCount} of ${sponsorship.impression_limit}`}
+                    aria-valuemax={sponsorship.impression_limit}
+                    aria-valuemin={0}
+                    aria-valuenow={Math.min(impressionCount, sponsorship.impression_limit)}
                     className="bg-muted h-2 w-full rounded-full"
                     role="progressbar"
-                    aria-valuenow={impressionCount}
-                    aria-valuemin={0}
-                    aria-valuemax={sponsorship.impression_limit}
-                    aria-label={`Impressions: ${impressionCount} of ${sponsorship.impression_limit}`}
                   >
                     <div
+                      aria-hidden="true"
                       className="bg-primary h-2 rounded-full transition-all"
                       style={{
                         width: `${Math.min(100, (impressionCount / sponsorship.impression_limit) * 100)}%`,
                       }}
-                      aria-hidden="true"
                     />
                   </div>
                 )}

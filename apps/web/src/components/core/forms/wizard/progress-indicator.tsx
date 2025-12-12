@@ -16,28 +16,44 @@
 
 import { CheckCircle } from '@heyclaude/web-runtime/icons';
 import { cn } from '@heyclaude/web-runtime/ui';
-import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
+import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/design-tokens';
+import { SPRING, DURATION } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 
 export interface WizardStep {
-  id: string;
-  number: number;
-  label: string;
-  shortLabel?: string; // For mobile
   description?: string;
+  id: string;
+  isAccessible: boolean; // Can navigate to this step
   isCompleted: boolean;
   isCurrent: boolean;
-  isAccessible: boolean; // Can navigate to this step
+  label: string;
+  number: number;
+  shortLabel?: string; // For mobile
 }
 
 interface ProgressIndicatorProps {
-  steps: WizardStep[];
+  className?: string;
   currentStep: number;
   onStepClick?: (stepNumber: number) => void;
   qualityScore?: number;
-  className?: string;
+  steps: WizardStep[];
 }
 
+/**
+ * Renders a responsive wizard progress indicator with optional quality score and interactive step controls.
+ *
+ * Renders a horizontal progress bar, desktop step indicators with labels and connectors, compact mobile step buttons, and an optional "Form Completion" quality badge. Step buttons are interactive only when the step's `isAccessible` is true; completed steps show a checkmark and the current step is visually emphasized.
+ *
+ * @param steps - Array of wizard steps to display; each step controls its label, number, completion, current state, accessibility, and optional description tooltip.
+ * @param currentStep - The 1-based index or number of the current step for display in the mobile summary.
+ * @param onStepClick - Optional callback invoked with a step's `number` when an accessible step is clicked.
+ * @param qualityScore - Optional numeric score (0–100) shown in the quality badge and its progress bar.
+ * @param className - Optional additional CSS classes applied to the root container.
+ * @returns The rendered progress indicator React element.
+ *
+ * @see WizardStep
+ * @see ProgressIndicatorProps
+ */
 export function ProgressIndicator({
   steps,
   currentStep,
@@ -55,7 +71,7 @@ export function ProgressIndicator({
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-4 flex items-center justify-between rounded-lg border border-border/50 bg-background-secondary p-3"
+          className="border-border/50 bg-background-secondary mb-4 flex items-center justify-between rounded-lg border p-3"
           style={{
             borderColor: TOKENS.colors.border.light,
             backgroundColor: TOKENS.colors.background.secondary,
@@ -63,12 +79,12 @@ export function ProgressIndicator({
         >
           <span className="text-muted-foreground text-sm">Form Completion</span>
           <div className="flex items-center gap-2">
-            <div className="h-2 w-32 overflow-hidden rounded-full bg-background">
+            <div className="bg-background h-2 w-32 overflow-hidden rounded-full">
               <motion.div
                 className="h-full rounded-full"
                 initial={{ width: 0 }}
                 animate={{ width: `${qualityScore}%` }}
-                transition={{ duration: 0.5, ease: 'easeOut' }}
+                transition={{ duration: DURATION.moderate, ease: 'easeOut' }}
                 style={{
                   backgroundColor:
                     qualityScore >= 90
@@ -81,18 +97,18 @@ export function ProgressIndicator({
                 }}
               />
             </div>
-            <span className="min-w-[3ch] text-right font-semibold text-sm">{qualityScore}%</span>
+            <span className="min-w-[3ch] text-right text-sm font-semibold">{qualityScore}%</span>
           </div>
         </motion.div>
       )}
 
       {/* Progress Bar */}
-      <div className="relative mb-8 h-1 w-full overflow-hidden rounded-full bg-background">
+      <div className="bg-background relative mb-8 h-1 w-full overflow-hidden rounded-full">
         <motion.div
           className="absolute top-0 left-0 h-full rounded-full"
           initial={{ width: 0 }}
           animate={{ width: `${progressPercentage}%` }}
-          transition={TOKENS.animations.spring.smooth}
+          transition={SPRING.smooth}
           style={{
             backgroundColor: TOKENS.colors.accent.primary,
             boxShadow: TOKENS.shadows.glow.orange,
@@ -132,14 +148,14 @@ export function ProgressIndicator({
                 <motion.div
                   initial={{ scale: 0, rotate: -180 }}
                   animate={{ scale: 1, rotate: 0 }}
-                  transition={TOKENS.animations.spring.bouncy}
+                  transition={SPRING.bouncy}
                 >
                   <CheckCircle className="h-5 w-5 text-white" />
                 </motion.div>
               ) : (
                 <span
                   className={cn(
-                    'font-semibold text-sm',
+                    'text-sm font-semibold',
                     step.isCurrent ? 'text-accent-primary' : 'text-muted-foreground'
                   )}
                 >
@@ -148,9 +164,9 @@ export function ProgressIndicator({
               )}
 
               {/* Tooltip on hover */}
-              {step.description && step.isAccessible && (
+              {step.description && step.isAccessible ? (
                 <div
-                  className="-top-12 -translate-x-1/2 pointer-events-none absolute left-1/2 z-50 whitespace-nowrap rounded-md px-3 py-1.5 text-xs opacity-0 transition-opacity group-hover:opacity-100"
+                  className="pointer-events-none absolute -top-12 left-1/2 z-50 -translate-x-1/2 rounded-md px-3 py-1.5 text-xs whitespace-nowrap opacity-0 transition-opacity group-hover:opacity-100"
                   style={{
                     backgroundColor: TOKENS.colors.background.elevated,
                     border: `1px solid ${TOKENS.colors.border.medium}`,
@@ -159,14 +175,14 @@ export function ProgressIndicator({
                 >
                   {step.description}
                 </div>
-              )}
+              ) : null}
             </button>
 
             {/* Label */}
             <div className="ml-3 flex-1">
               <div
                 className={cn(
-                  'font-medium text-sm',
+                  'text-sm font-medium',
                   step.isCurrent ? 'text-foreground' : 'text-muted-foreground'
                 )}
               >
@@ -187,7 +203,7 @@ export function ProgressIndicator({
                   animate={{
                     scaleX: step.isCompleted ? 1 : 0,
                   }}
-                  transition={TOKENS.animations.spring.smooth}
+                  transition={SPRING.smooth}
                   style={{
                     backgroundColor: TOKENS.colors.accent.primary,
                     transformOrigin: 'left',
@@ -233,7 +249,7 @@ export function ProgressIndicator({
             ) : (
               <span
                 className={cn(
-                  'font-semibold text-xs',
+                  'text-xs font-semibold',
                   step.isCurrent ? 'text-accent-primary' : 'text-muted-foreground'
                 )}
               >
@@ -246,10 +262,10 @@ export function ProgressIndicator({
 
       {/* Current Step Label - Mobile Only */}
       <div className="mt-4 text-center md:hidden">
-        <div className="font-medium text-foreground text-sm">
+        <div className="text-foreground text-sm font-medium">
           {steps.find((s) => s.isCurrent)?.label || 'Step'}
         </div>
-        <div className="mt-1 text-muted-foreground text-xs">
+        <div className="text-muted-foreground mt-1 text-xs">
           Step {currentStep} of {steps.length}
         </div>
       </div>

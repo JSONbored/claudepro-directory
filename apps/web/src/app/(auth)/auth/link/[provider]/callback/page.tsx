@@ -9,30 +9,28 @@ import { normalizeError } from '@heyclaude/shared-runtime';
 import { isValidProvider, validateNextParameter } from '@heyclaude/web-runtime';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks';
 import { AlertCircle, Loader2 } from '@heyclaude/web-runtime/icons';
+import { logClientError, logClientWarn } from '@heyclaude/web-runtime/logging/client';
 import {
-  generateRequestId,
-  logClientError,
-  logClientWarn,
-} from '@heyclaude/web-runtime/logging/client';
-import {
-  UI_CLASSES,
   Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  UI_CLASSES,
 } from '@heyclaude/web-runtime/ui';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { use, useEffect, useRef, useState } from 'react';
 
-// Force dynamic rendering - auth callback pages should never be cached
-export const dynamic = 'force-dynamic';
-
 /**
+ * Note: This is a client component ('use client'), so segment config exports are not allowed.
+ * Dynamic rendering is inherited from the parent layout or route group if configured.
+ * Auth callback pages should never be cached - this is handled by the parent route configuration.
+ *
  * Initiates an OAuth account linking flow for a given provider and renders either a loading UI while redirecting or an error UI on failure.
  *
  * @param params - A promise resolving to an object with the OAuth provider slug (for example, `{ provider: 'github' }`)
+ * @param params.params
  * @returns The page's React element showing a loading state while redirecting to the provider or an error state if linking fails
  *
  * @see isValidProvider
@@ -53,10 +51,10 @@ export default function OAuthLinkCallbackPage({
   const [provider, setProvider] = useState<null | string>(null);
   const hasAttempted = useRef<boolean>(false);
   const {
-    user,
     isAuthenticated,
     isLoading: isAuthLoading,
     supabaseClient,
+    user,
   } = useAuthenticatedUser({ context: 'OAuthLinkCallback' });
 
   useEffect(() => {
@@ -79,7 +77,8 @@ export default function OAuthLinkCallbackPage({
      * @see validateNextParameter
      * @see isValidProvider
      * @see supabaseClient.auth.linkIdentity
-     */
+     
+ * @returns {Promise<unknown>} Description of return value*/
 
     async function handleLink() {
       // Prevent duplicate OAuth linking attempts (e.g., from Strict Mode re-mounts)
@@ -95,11 +94,9 @@ export default function OAuthLinkCallbackPage({
       // Mark as attempted before proceeding
       hasAttempted.current = true;
 
-      // Generate single requestId for this client-side operation
-      const requestId = generateRequestId();
       const operation = 'OAuthLinkCallback';
       const route = `/auth/link/${resolvedParameters.provider}/callback`;
-      const module = 'apps/web/src/app/(auth)/auth/link/[provider]/callback/page';
+      const modulePath = 'apps/web/src/app/(auth)/auth/link/[provider]/callback/page';
 
       try {
         // Get provider from params
@@ -116,15 +113,17 @@ export default function OAuthLinkCallbackPage({
         setProvider(rawProvider);
 
         // Check if user is authenticated
-        if (!(isAuthenticated && user)) {
+        if (!isAuthenticated || !user) {
           if (!mounted) return;
           setStatus('error');
           setErrorMessage('You must be signed in to link an account. Redirecting to login...');
-          logClientWarn('OAuth link callback: user not authenticated', undefined, operation, {
-            requestId,
-            route,
-            module,
+          logClientWarn('[OAuth] User not authenticated', undefined, operation, {
+            action: 'check-auth',
+            category: 'auth',
+            component: 'OAuthLinkCallback',
+            module: modulePath,
             provider: rawProvider,
+            route,
           });
           // Guard redirect with mounted check and store timeout ID for cleanup
           redirectTimeoutId = setTimeout(() => {
@@ -152,19 +151,22 @@ export default function OAuthLinkCallbackPage({
 
         // Call linkIdentity() to initiate OAuth flow
         const { data, error } = await supabaseClient.auth.linkIdentity({
-          provider: rawProvider,
           options: {
             redirectTo: callbackUrl.toString(),
           },
+          provider: rawProvider,
         });
 
         if (error) {
           if (!mounted) return;
-          logClientError('OAuth link callback: linkIdentity failed', error, operation, {
-            requestId,
-            route,
-            module,
+          const normalized = normalizeError(error, 'Failed to link identity');
+          logClientError('[OAuth] Link identity failed', normalized, operation, {
+            action: 'link-identity',
+            category: 'auth',
+            component: 'OAuthLinkCallback',
+            module: modulePath,
             provider: rawProvider,
+            route,
           });
           setStatus('error');
           setErrorMessage(
@@ -185,11 +187,14 @@ export default function OAuthLinkCallbackPage({
         setErrorMessage('Unexpected response from OAuth provider. Please try again.');
       } catch (caughtError) {
         if (!mounted) return;
-        logClientError('OAuth link callback: unexpected error', caughtError, operation, {
-          requestId,
-          route,
-          module,
+        const normalized = normalizeError(caughtError, 'Unexpected OAuth link callback error');
+        logClientError('[OAuth] Unexpected error', normalized, operation, {
+          action: 'oauth-callback',
+          category: 'auth',
+          component: 'OAuthLinkCallback',
+          module: modulePath,
           provider: resolvedParameters.provider,
+          route,
         });
         setStatus('error');
         setErrorMessage('An unexpected error occurred. Please try again.');

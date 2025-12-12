@@ -56,20 +56,31 @@ import {
 // Analytics functions (Phase 3)
 import { processPulseQueue } from './functions/analytics/pulse';
 
+// Trending functions (Phase 3)
+import { calculateTrendingMetrics } from './functions/trending/calculate-metrics';
+
 // Changelog functions (Phase 3)
-import { processChangelogQueue } from './functions/changelog/process';
+// Note: processChangelogQueue removed - replaced by /api/changelog/sync endpoint
+// (Vercel free tier doesn't support webhooks, so we use GitHub Actions → API endpoint instead)
 import { processChangelogNotifyQueue } from './functions/changelog/notify';
 
 // Discord functions (Phase 3)
 import { processDiscordJobsQueue } from './functions/discord/jobs';
 import { processDiscordSubmissionsQueue } from './functions/discord/submissions';
 import { processDiscordErrorsQueue } from './functions/discord/errors';
+import { sendDiscordDirect } from './functions/discord/direct';
 
 // Notification functions (Phase 3)
 import { createNotification, broadcastNotification } from './functions/notifications/create';
 
 // Polar webhook functions (Phase 5 - Payment processing)
 import { handlePolarWebhook } from './functions/polar/webhook';
+
+// Supabase database webhook functions
+import { handleSupabaseContentChanged } from './functions/supabase/content-changed';
+
+  // IndexNow functions
+  import { submitIndexNow } from './functions/indexnow/submit';
 
 /**
  * All Inngest functions that should be served.
@@ -96,14 +107,18 @@ export const functions = [
   // Analytics functions (Phase 3) - COMPLETE
   processPulseQueue, // Cron: Every 30 minutes
 
+  // Trending functions (Phase 3) - COMPLETE
+  calculateTrendingMetrics, // Cron: Every 30 minutes (calculates time-windowed metrics and refreshes materialized view)
+
   // Changelog functions (Phase 3) - COMPLETE
-  processChangelogQueue, // Cron: Every 30 minutes
-  processChangelogNotifyQueue, // Cron: Every 30 minutes
+  // processChangelogQueue removed - replaced by /api/changelog/sync endpoint
+  processChangelogNotifyQueue, // Cron: Every 30 minutes (processes notifications from API endpoint)
 
   // Discord functions (Phase 3) - COMPLETE
   processDiscordJobsQueue, // Cron: Every 30 minutes
   processDiscordSubmissionsQueue, // Cron: Every 30 minutes
   processDiscordErrorsQueue, // Cron: Every 15 minutes (webhook error alerts)
+  sendDiscordDirect, // Event: discord/direct (sends direct Discord notifications)
 
   // Notification functions (Phase 3) - COMPLETE
   createNotification, // Event: notification/create
@@ -111,6 +126,12 @@ export const functions = [
 
   // Polar webhook functions (Phase 5) - Payment processing
   handlePolarWebhook, // Event: polar/webhook (unified handler with idempotency)
+
+  // Supabase database webhook functions
+  handleSupabaseContentChanged, // Event: supabase/content-changed (triggers GitHub Actions)
+
+  // IndexNow functions
+  submitIndexNow, // Event: indexnow/submit (submits URLs to IndexNow API)
 ];
 
 // Re-export individual functions for direct imports
@@ -133,14 +154,18 @@ export { jobPostingDripCampaign };
 // Analytics functions
 export { processPulseQueue };
 
+// Trending functions
+export { calculateTrendingMetrics };
+
 // Changelog functions
-export { processChangelogQueue };
+// processChangelogQueue removed - replaced by /api/changelog/sync endpoint
 export { processChangelogNotifyQueue };
 
 // Discord functions
 export { processDiscordJobsQueue };
 export { processDiscordSubmissionsQueue };
 export { processDiscordErrorsQueue };
+export { sendDiscordDirect };
 
 // Notification functions
 export { createNotification };
@@ -148,6 +173,12 @@ export { broadcastNotification };
 
 // Polar webhook functions
 export { handlePolarWebhook };
+
+// Supabase database webhook functions
+export { handleSupabaseContentChanged };
+
+// IndexNow functions
+export { submitIndexNow };
 
 // Import the client for serve handler
 import { inngest } from './client';

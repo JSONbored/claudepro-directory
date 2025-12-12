@@ -1,28 +1,32 @@
 'use client';
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { logUnhandledPromise, NEWSLETTER_CTA_CONFIG } from '@heyclaude/web-runtime/core';
-import { usePulse } from '@heyclaude/web-runtime/hooks';
-import { cn, toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { useEffect, useState } from 'react';
-import { Button } from '@heyclaude/web-runtime/ui';
-import { Input } from '@heyclaude/web-runtime/ui';
+import { usePulse, useNewsletter } from '@heyclaude/web-runtime/hooks';
+import { logClientInfo, logClientWarn } from '@heyclaude/web-runtime/logging/client';
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
+  cn,
+  toasts,
+  UI_CLASSES,
+  Button,
+  Input,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
 } from '@heyclaude/web-runtime/ui';
-import { useNewsletter } from '@heyclaude/web-runtime/hooks';
+import { SPRING } from '@heyclaude/web-runtime/design-system';
+import { motion } from 'motion/react';
+import { useEffect, useRef, useState } from 'react';
 
 export interface NewsletterModalProps {
-  source: Database['public']['Enums']['newsletter_source'];
   category?: Database['public']['Enums']['content_category'];
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
   copyType: Database['public']['Enums']['copy_type'];
+  onOpenChange: (open: boolean) => void;
+  open: boolean;
   slug?: string;
+  source: Database['public']['Enums']['newsletter_source'];
 }
 
 export function NewsletterModal({
@@ -33,7 +37,33 @@ export function NewsletterModal({
   copyType,
   slug,
 }: NewsletterModalProps) {
-  const [showTime, setShowTime] = useState<number | null>(null);
+  // CRITICAL: Early return if not open (prevents Dialog from rendering backdrop)
+  // This must be FIRST to prevent Radix UI Dialog from rendering overlay when closed
+  if (!open) {
+    return null;
+  }
+
+  // Defensive check: Ensure config is available
+  // This check happens AFTER open check to prevent backdrop from appearing
+  if (!NEWSLETTER_CTA_CONFIG) {
+    logClientWarn(
+      '[NewsletterModal] NEWSLETTER_CTA_CONFIG is undefined',
+      undefined,
+      'NewsletterModal.configMissing',
+      {
+        component: 'NewsletterModal',
+        action: 'config-check',
+        category: 'newsletter',
+      }
+    );
+    // Close modal if config is missing to prevent stuck backdrop
+    onOpenChange(false);
+    return null;
+  }
+
+  const [showTime, setShowTime] = useState<null | number>(null);
+  const [isInputFocused, setIsInputFocused] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
   const pulse = usePulse();
 
   const { email, setEmail, isSubmitting, subscribe } = useNewsletter({
@@ -56,10 +86,57 @@ export function NewsletterModal({
     },
   });
 
+  // DEBUG: Log modal open/close state
+  useEffect(() => {
+    logClientInfo(
+      '[NewsletterModal] State changed',
+      'NewsletterModal.stateChange',
+      {
+        component: 'NewsletterModal',
+        action: 'state-change',
+        category: 'newsletter',
+        open,
+        source,
+        contentCategory: category ?? null,
+        copyType,
+        slug: slug ?? null,
+        hasInputRef: Boolean(inputRef.current),
+      }
+    );
+  }, [open, source, category, copyType, slug]);
+
   useEffect(() => {
     if (open) {
       const now = Date.now();
       setShowTime(now);
+
+      logClientInfo(
+        '[NewsletterModal] Opening modal, setting focus timer',
+        'NewsletterModal.open',
+        {
+          component: 'NewsletterModal',
+          action: 'modal-open',
+          category: 'newsletter',
+          source,
+          copyType,
+        }
+      );
+
+      // Focus input field after modal animation completes
+      const focusTimer = setTimeout(() => {
+        logClientInfo(
+          '[NewsletterModal] Focus timer fired, attempting to focus input',
+          'NewsletterModal.focus',
+          {
+            component: 'NewsletterModal',
+            action: 'input-focus',
+            category: 'newsletter',
+            hasInputRef: Boolean(inputRef.current),
+          }
+        );
+        inputRef.current?.focus();
+        setIsInputFocused(true);
+      }, 300); // Wait for dialog animation
 
       pulse
         .click({
@@ -77,7 +154,13 @@ export function NewsletterModal({
             copyType,
           });
         });
+
+      return () => {
+        clearTimeout(focusTimer);
+      };
     }
+    setIsInputFocused(false);
+    return undefined;
   }, [open, copyType, pulse]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -148,27 +231,66 @@ export function NewsletterModal({
     }
   };
 
+  // DEBUG: Log render (use useEffect to avoid conditional hook call)
+  useEffect(() => {
+    logClientInfo(
+      '[NewsletterModal] Rendering',
+      'NewsletterModal.render',
+      {
+        component: 'NewsletterModal',
+        action: 'render',
+        category: 'newsletter',
+        open,
+        hasContext: Boolean(category || copyType || slug),
+        source,
+        copyType,
+      }
+    );
+  }, [open, category, copyType, slug, source]);
+
   return (
-    <Sheet open={open} onOpenChange={handleDismiss}>
-      <SheetContent side="bottom" className="sm:mx-auto sm:max-w-md">
-        <SheetHeader>
-          <SheetTitle>{NEWSLETTER_CTA_CONFIG.headline}</SheetTitle>
-          <SheetDescription>{NEWSLETTER_CTA_CONFIG.description}</SheetDescription>
-        </SheetHeader>
+    <Dialog open={open} onOpenChange={handleDismiss}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>{NEWSLETTER_CTA_CONFIG.headline}</DialogTitle>
+          <DialogDescription>{NEWSLETTER_CTA_CONFIG.description}</DialogDescription>
+        </DialogHeader>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <div className="space-y-2">
-            <Input
-              type="email"
-              placeholder="your@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={isSubmitting}
-              className="h-12 text-base"
-              autoComplete="email"
-              aria-label="Email address"
-              required={true}
-            />
+            <motion.div
+              initial={false}
+              animate={
+                isInputFocused
+                  ? {
+                      scale: 1.02,
+                      transition: SPRING.loading,
+                    }
+                  : { scale: 1 }
+              }
+            >
+              <Input
+                ref={inputRef}
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onFocus={() => setIsInputFocused(true)}
+                onBlur={() => setIsInputFocused(false)}
+                disabled={isSubmitting}
+                className={cn(
+                  'h-12 text-base',
+                  'border-border bg-background',
+                  'focus:border-accent focus:ring-accent/20 focus:ring-2',
+                  'transition-all duration-200',
+                  isInputFocused && 'shadow-lg shadow-accent/10',
+                  isSubmitting && 'cursor-not-allowed opacity-60'
+                )}
+                autoComplete="email"
+                aria-label="Email address"
+                required
+              />
+            </motion.div>
           </div>
 
           <div className={UI_CLASSES.FLEX_COL_SM_ROW_GAP_3}>
@@ -176,8 +298,10 @@ export function NewsletterModal({
               type="submit"
               disabled={isSubmitting || !email.trim()}
               className={cn(
-                'flex-1 bg-linear-to-r from-accent to-primary hover:from-accent/90 hover:to-primary/90',
-                isSubmitting && 'opacity-50'
+                'bg-accent text-white font-semibold flex-1',
+                'hover:bg-accent/90 transition-all duration-200',
+                'disabled:opacity-60 disabled:cursor-not-allowed',
+                isSubmitting && 'opacity-60'
               )}
             >
               {isSubmitting ? 'Joining...' : NEWSLETTER_CTA_CONFIG.buttonText}
@@ -194,10 +318,10 @@ export function NewsletterModal({
           </div>
         </form>
 
-        <p className="mt-4 text-center text-muted-foreground text-xs">
+        <p className="text-muted-foreground mt-4 text-center text-xs">
           By subscribing, you agree to receive updates about Claude tools and resources.
         </p>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 }

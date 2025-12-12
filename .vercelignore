@@ -36,11 +36,10 @@ jest.config.js
 .turbo/
 out/
 dist/
-# TypeScript incremental build info (must be excluded to ensure fresh builds)
-# If cached without dist/, TypeScript thinks builds are complete but outputs don't exist
-*.tsbuildinfo
-tsconfig.tsbuildinfo
-.tsbuildinfo
+# TypeScript incremental build info - ALLOWED for caching
+# These files enable faster incremental TypeScript builds
+# Turbo cache handles .tsbuildinfo files correctly
+# Note: Vercel will cache these via Turbo, improving build performance
 
 # Package manager files (Vercel auto-detects via lock files)
 # DO NOT exclude pnpm-lock.yaml - required for pnpm detection

@@ -1,8 +1,8 @@
 'use client';
 
-import * as React from 'react';
-import type { Database } from '@heyclaude/database-types';
-import { isValidCategory, logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { type Database } from '@heyclaude/database-types';
+import { isValidCategory } from '@heyclaude/web-runtime/core';
+import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import {
   Bookmark,
@@ -20,19 +20,24 @@ import {
   Terminal,
   Zap,
 } from '@heyclaude/web-runtime/icons';
-import type { UnifiedSectionProps } from '@heyclaude/web-runtime/types/component.types';
-import { cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { motion } from 'motion/react';
-import { ProductionCodeBlock } from '@/src/components/content/interactive-code-block';
-import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
-import { Button } from '@heyclaude/web-runtime/ui';
+import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
+import { type UnifiedSectionProps } from '@heyclaude/web-runtime/types/component.types';
 import {
+  cn,
+  UI_CLASSES,
+  UnifiedBadge,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
+import { motion } from 'motion/react';
+import * as React from 'react';
+import { useEffect, useState } from 'react';
+
+import { ProductionCodeBlock } from '@/src/components/content/interactive-code-block';
 
 const ICONS: Record<Database['public']['Enums']['content_category'], LucideIcon> = {
   agents: Sparkles,
@@ -48,6 +53,20 @@ const ICONS: Record<Database['public']['Enums']['content_category'], LucideIcon>
   changelog: Bot,
 };
 
+/**
+ * Renders a motion-animated card with a header (icon and title), optional description, and content.
+ *
+ * @param title - Heading text displayed in the card header.
+ * @param description - Optional secondary text shown under the title.
+ * @param icon - Fallback icon component used when `category` is not provided.
+ * @param category - Optional content category key used to select a category-specific icon from `ICONS`.
+ * @param className - Additional CSS classes applied to the outer Card container.
+ * @param children - Content rendered inside the card body.
+ * @returns A JSX element representing the animated card with header and content.
+ *
+ * @see ICONS - mapping of content categories to icon components
+ * @see Card, CardHeader, CardTitle, CardDescription, CardContent - Card primitives used to build the layout
+ */
 function Wrapper({
   title,
   description,
@@ -56,12 +75,12 @@ function Wrapper({
   className,
   children,
 }: {
-  title: string;
+  category?: Database['public']['Enums']['content_category'];
+  children: React.ReactNode;
+  className?: string;
   description?: string;
   icon?: LucideIcon;
-  category?: Database['public']['Enums']['content_category'];
-  className?: string;
-  children: React.ReactNode;
+  title: string;
 }) {
   const Icon = category ? ICONS[category] : icon;
 
@@ -70,7 +89,7 @@ function Wrapper({
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-50px' }}
-      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      transition={SPRING.smooth}
     >
       <Card className={cn('', className)}>
         <CardHeader>
@@ -78,7 +97,7 @@ function Wrapper({
             <Icon className={UI_CLASSES.ICON_MD} />
             {title}
           </CardTitle>
-          {description && <CardDescription>{description}</CardDescription>}
+          {description ? <CardDescription>{description}</CardDescription> : null}
         </CardHeader>
         <CardContent>{children}</CardContent>
       </Card>
@@ -86,31 +105,134 @@ function Wrapper({
   );
 }
 
+/**
+ * Initiates a browser download of a plain text file using the given filename and content.
+ *
+ * @param filename - The desired name of the downloaded file (including extension).
+ * @param content - The text content to write into the file.
+ *
+ * @see URL.createObjectURL
+ */
 function downloadTextFile(filename: string, content: string) {
   const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement('a');
   anchor.href = url;
   anchor.download = filename;
-  document.body.appendChild(anchor);
+  document.body.append(anchor);
   anchor.click();
-  document.body.removeChild(anchor);
+  anchor.remove();
   URL.revokeObjectURL(url);
 }
 
 /**
- * Tabbed code group component for displaying multiple code blocks in tabs
+ * Render HTML content safely by sanitizing it on the client while preserving server-rendered markup.
+ *
+ * Sanitizes `html` using DOMPurify after hydration to mitigate XSS risks. During server-side rendering
+ * the original `html` is rendered so markup is present for initial render; on the client the component
+ * dynamically imports DOMPurify, replaces the content with a sanitized version, and falls back to the
+ * original `html` if sanitization fails (a client warning is logged).
+ *
+ * @param html - The HTML string to render inside the wrapper element.
+ * @param className - Optional CSS class(es) applied to the wrapper element.
+ * @returns A div element containing the provided HTML (sanitized on the client when possible).
+ *
+ * @see https://github.com/cure53/DOMPurify
+ * @see logClientWarn
+ * @see normalizeError
+ */
+function TrustedHTML({ html, className }: { className?: string; html: string }) {
+  // Hooks must be called unconditionally (Rules of Hooks)
+  const [safeHtml, setSafeHtml] = useState<string>(
+    globalThis.window === undefined ? html : '' // Start empty on client, will be set in useEffect
+  );
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+    if (globalThis.window !== undefined && html && typeof html === 'string') {
+      import('dompurify')
+        .then((DOMPurify) => {
+          const sanitized = DOMPurify.default.sanitize(html, {
+            ALLOWED_TAGS: [
+              'p',
+              'br',
+              'strong',
+              'em',
+              'b',
+              'i',
+              'u',
+              'a',
+              'ul',
+              'ol',
+              'li',
+              'h1',
+              'h2',
+              'h3',
+              'h4',
+              'h5',
+              'h6',
+              'code',
+              'pre',
+              'blockquote',
+              'span',
+              'div',
+            ],
+            ALLOWED_ATTR: ['href', 'target', 'rel', 'class', 'id'],
+          });
+          setSafeHtml(sanitized);
+        })
+        .catch((error) => {
+          const normalized = normalizeError(error, 'Failed to sanitize HTML');
+          logClientWarn(
+            '[TrustedHTML] Failed to sanitize HTML',
+            normalized,
+            'TrustedHTML.sanitize',
+            {
+              component: 'TrustedHTML',
+              action: 'sanitize-html',
+            }
+          );
+          // Fallback to original HTML if sanitization fails
+          setSafeHtml(html);
+        });
+    }
+  }, [html]);
+
+  // Early return check after hooks (Rules of Hooks compliance)
+  if (!html || typeof html !== 'string') {
+    return <div className={className} />;
+  }
+
+  // SSR uses pre-sanitized HTML; client re-sanitizes as defense-in-depth
+  const htmlToRender = isClient ? safeHtml : html;
+
+  // eslint-disable-next-line react/no-danger -- HTML is pre-sanitized server-side via markdownToHtml and re-sanitized client-side via DOMPurify as defense-in-depth
+  return <div className={className} dangerouslySetInnerHTML={{ __html: htmlToRender }} />;
+}
+
+/**
+ * Renders a tabbed interface for selecting and viewing multiple code blocks.
+ *
+ * Each tab displays a labeled code block and, when the active block includes a filename,
+ * exposes a Download button that saves the block's code and invokes an optional download callback.
+ *
+ * @param props.blocks - Array of code block objects. Each block must include `code`, `html`, `label`, and `language`. `filename` is optional; when present a Download button is shown for that block.
+ * @param props.onDownload - Optional callback invoked after a block is downloaded.
+ *
+ * @see ProductionCodeBlock
+ * @see downloadTextFile
  */
 function CodeGroupTabs({
   blocks,
   onDownload,
 }: {
   blocks: Array<{
-    html: string;
     code: string;
-    language: string;
     filename?: string;
+    html: string;
     label: string;
+    language: string;
   }>;
   onDownload?: () => void;
 }) {
@@ -122,14 +244,14 @@ function CodeGroupTabs({
   return (
     <div className="space-y-3">
       {/* Tab buttons */}
-      <div className="flex flex-wrap gap-1 border-border border-b pb-2">
+      <div className="border-border flex flex-wrap gap-1 border-b pb-2">
         {blocks.map((block, index) => (
           <button
             key={`${block.label}-${index}`}
             type="button"
             onClick={() => setActiveIndex(index)}
             className={cn(
-              'rounded-t-md px-3 py-1.5 font-medium text-xs transition-colors',
+              'rounded-t-md px-3 py-1.5 text-xs font-medium transition-colors',
               activeIndex === index
                 ? 'bg-accent/20 text-accent-foreground'
                 : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
@@ -150,7 +272,7 @@ function CodeGroupTabs({
       />
 
       {/* Download button */}
-      {activeBlock.filename && (
+      {activeBlock.filename ? (
         <div className="mt-3">
           <Button
             variant="outline"
@@ -164,20 +286,21 @@ function CodeGroupTabs({
             Download {activeBlock.filename}
           </Button>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
 
 /**
- * Render a vertical list of strings with a leading colored dot for each item.
+ * Renders a vertical list of strings with a leading colored dot for each item.
  *
- * @param items - Strings to render as list rows; each string becomes one list item.
+ * @param items - Strings to display as list rows; each string becomes one list item.
  * @param color - CSS class(es) applied to the dot indicator (typically Tailwind color classes).
+ * @returns The rendered list element.
  *
  * @see UI_CLASSES
  */
-function List({ items, color }: { items: string[]; color: string }) {
+function List({ items, color }: { color: string; items: string[] }) {
   return (
     <ul className="space-y-2">
       {items.map((item) => (
@@ -192,8 +315,8 @@ function List({ items, color }: { items: string[]; color: string }) {
 
 type EnhancedListItem =
   | string
-  | { issue: string; solution: string }
-  | { question: string; answer: string };
+  | { answer: string; question: string }
+  | { issue: string; solution: string };
 
 const getEnhancedListKey = (item: EnhancedListItem, index: number) => {
   if (typeof item === 'string') {
@@ -216,7 +339,7 @@ const getEnhancedListKey = (item: EnhancedListItem, index: number) => {
  *
  * @see getEnhancedListKey
  */
-function EnhancedList({ items, color }: { items: EnhancedListItem[]; color: string }) {
+function EnhancedList({ items, color }: { color: string; items: EnhancedListItem[] }) {
   return (
     <ul className="space-y-4">
       {items.map((item, index) => {
@@ -238,7 +361,7 @@ function EnhancedList({ items, color }: { items: EnhancedListItem[]; color: stri
             <div className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
               <div className={cn('mt-2 h-1.5 w-1.5 shrink-0 rounded-full', color)} />
               <div className="space-y-1">
-                <p className="font-medium text-foreground text-sm">{title}</p>
+                <p className="text-foreground text-sm font-medium">{title}</p>
                 <p className="text-muted-foreground text-sm leading-relaxed">{content}</p>
               </div>
             </div>
@@ -250,17 +373,31 @@ function EnhancedList({ items, color }: { items: EnhancedListItem[]; color: stri
 }
 
 type PlatformStep =
-  | { type: 'command'; html: string; code: string }
-  | { type: 'text'; text: string };
+  | { code: string; html: string; type: 'command' }
+  | { text: string; type: 'text' };
 
+/**
+ * Renders a titled platform block showing a sequence of setup steps and optional configuration paths.
+ *
+ * Each step of type `"command"` is shown as a bash code block with a generated filename based on `name` and step index.
+ * Each step of type `"text"` is shown as a compact text row with a leading colored dot.
+ *
+ * @param props.name - Display name for the platform section (used as the heading and in generated filenames)
+ * @param props.steps - Ordered list of platform steps; command steps render a ProductionCodeBlock, text steps render inline text
+ * @param props.paths - Optional mapping of configuration keys to filesystem or config paths displayed under "Configuration Paths"
+ * @returns A JSX element containing the platform heading, rendered steps, and an optional configuration paths list
+ *
+ * @see ProductionCodeBlock
+ * @see UnifiedBadge
+ */
 function Platform({
   name,
   steps,
   paths,
 }: {
   name: string;
-  steps: PlatformStep[];
   paths?: Record<string, string>;
+  steps: PlatformStep[];
 }) {
   const getStepKey = (step: PlatformStep, index: number) =>
     step.type === 'command'
@@ -285,31 +422,53 @@ function Platform({
             </div>
           ) : (
             <div key={getStepKey(step, index)} className="flex items-start gap-3">
-              <div className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+              <div className="bg-primary mt-2 h-1.5 w-1.5 shrink-0 rounded-full" />
               <span className="text-sm leading-relaxed">{step.text}</span>
             </div>
           )
         )}
       </div>
-      {paths && (
+      {paths ? (
         <div>
-          <h5 className="mb-2 font-medium text-sm">Configuration Paths</h5>
+          <h5 className="mb-2 text-sm font-medium">Configuration Paths</h5>
           <div className="space-y-1 text-sm">
             {Object.entries(paths).map(([k, p]) => (
               <div key={k} className={UI_CLASSES.FLEX_GAP_2}>
                 <UnifiedBadge variant="base" style="outline" className="capitalize">
                   {k}
                 </UnifiedBadge>
-                <code className="rounded bg-muted px-1 py-0.5 text-xs">{String(p)}</code>
+                <code className="bg-muted rounded px-1 py-0.5 text-xs">{String(p)}</code>
               </div>
             ))}
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
 
+/**
+ * Renders a unified, variant-driven documentation section (lists, code blocks, examples, installation, text, etc.) based on the provided props.
+ *
+ * This component switches on `props.variant` to render one of several section types:
+ * - 'list' and 'enhanced-list': compact item lists
+ * - 'code' and 'code-group': single or tabbed code blocks with optional download buttons
+ * - 'examples': multiple titled examples each with code and optional download
+ * - 'configuration': single, multi, or hook configuration code blocks with optional downloads
+ * - 'installation': platform-specific installation steps and optional requirement list
+ * - 'text': rich HTML content sanitized client-side via TrustedHTML
+ *
+ * When download buttons are used, a telemetry download event is attempted via the pulse hook; telemetry failures are logged but do not interrupt rendering or downloads.
+ *
+ * @param props - Props controlling the variant, content, presentation, and optional telemetry context for the section
+ * @returns The rendered React element for the requested section, or `null` when there is no content to display for the selected variant
+ *
+ * @see Wrapper
+ * @see ProductionCodeBlock
+ * @see TrustedHTML
+ * @see downloadTextFile
+ * @see usePulse
+ */
 export default function UnifiedSection(props: UnifiedSectionProps) {
   const pulse = usePulse();
   const baseItem = 'item' in props ? props.item : undefined;
@@ -318,7 +477,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
     'category' in baseItem &&
     typeof baseItem.category === 'string' &&
     isValidCategory(baseItem.category)
-      ? (baseItem.category as Database['public']['Enums']['content_category'])
+      ? baseItem.category
       : null;
   const itemSlug =
     baseItem && 'slug' in baseItem && typeof baseItem.slug === 'string' ? baseItem.slug : null;
@@ -333,15 +492,20 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
       .catch((error) => {
         // Log but don't throw - tracking failures shouldn't break user experience
         const normalized = normalizeError(error, 'Failed to track download');
-        logger.warn('[Share] Failed to track download', {
-          err: normalized,
-          category: 'share',
-          component: 'UnifiedSection',
-          nonCritical: true,
-          context: 'unified_section_download',
-          itemCategory,
-          itemSlug,
-        });
+        logClientWarn(
+          '[Share] Failed to track download',
+          normalized,
+          'UnifiedSection.trackDownload',
+          {
+            component: 'UnifiedSection',
+            action: 'track-download',
+            category: 'share',
+            nonCritical: true,
+            context: 'unified_section_download',
+            itemCategory,
+            itemSlug,
+          }
+        );
       });
   };
 
@@ -377,7 +541,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
       );
     }
 
-    case 'code':
+    case 'code': {
       return (
         <Wrapper
           title={props.title}
@@ -393,7 +557,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
             maxLines={20}
           />
           {/* Download button below code block for better UX */}
-          {props.filename && (
+          {props.filename ? (
             <div className="mt-3">
               <Button
                 variant="outline"
@@ -407,9 +571,10 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                 Download {props.filename}
               </Button>
             </div>
-          )}
+          ) : null}
         </Wrapper>
       );
+    }
 
     case 'code-group': {
       if (props.codeBlocks.length === 0) return null;
@@ -432,7 +597,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
               filename={block.filename}
               maxLines={20}
             />
-            {block.filename && (
+            {block.filename ? (
               <div className="mt-3">
                 <Button
                   variant="outline"
@@ -446,7 +611,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                   Download {block.filename}
                 </Button>
               </div>
-            )}
+            ) : null}
           </Wrapper>
         );
       }
@@ -482,21 +647,21 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
               <article
                 key={`${ex.title}-${i}`}
                 className="space-y-3"
-                itemScope={true}
+                itemScope
                 itemType="https://schema.org/SoftwareSourceCode"
               >
                 <div className="space-y-1">
-                  <h4 className="font-semibold text-base text-foreground" itemProp="name">
+                  <h4 className="text-foreground text-base font-semibold" itemProp="name">
                     {ex.title}
                   </h4>
-                  {ex.description && (
+                  {ex.description ? (
                     <p
                       className="text-muted-foreground text-sm leading-relaxed"
                       itemProp="description"
                     >
                       {ex.description}
                     </p>
-                  )}
+                  ) : null}
                 </div>
                 <div className="not-prose" itemProp="text">
                   <meta itemProp="programmingLanguage" content={ex.language} />
@@ -510,7 +675,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                     className="shadow-sm"
                   />
                   {/* Download button for example code */}
-                  {ex.filename && (
+                  {ex.filename ? (
                     <div className="mt-3">
                       <Button
                         variant="outline"
@@ -524,7 +689,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                         Download {ex.filename}
                       </Button>
                     </div>
-                  )}
+                  ) : null}
                 </div>
               </article>
             ))}
@@ -552,7 +717,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                     maxLines={25}
                   />
                   {/* Download button for config */}
-                  {c.filename && (
+                  {c.filename ? (
                     <div className="mt-3">
                       <Button
                         variant="outline"
@@ -566,7 +731,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                         Download {c.filename}
                       </Button>
                     </div>
-                  )}
+                  ) : null}
                 </div>
               ))}
             </div>
@@ -582,7 +747,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
             {...(props.className && { className: props.className })}
           >
             <div className="space-y-4">
-              {props.hookConfig && (
+              {props.hookConfig ? (
                 <div className="space-y-2">
                   <ProductionCodeBlock
                     html={props.hookConfig.html}
@@ -605,8 +770,8 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                     Download hook config
                   </Button>
                 </div>
-              )}
-              {props.scriptContent && (
+              ) : null}
+              {props.scriptContent ? (
                 <div className="space-y-2">
                   <ProductionCodeBlock
                     html={props.scriptContent.html}
@@ -629,7 +794,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                     Download script
                   </Button>
                 </div>
-              )}
+              ) : null}
             </div>
           </Wrapper>
         );
@@ -649,7 +814,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
             maxLines={25}
           />
           {/* Download button for configuration */}
-          {props.filename && (
+          {props.filename ? (
             <div className="mt-3">
               <Button
                 variant="outline"
@@ -663,7 +828,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                 Download {props.filename}
               </Button>
             </div>
-          )}
+          ) : null}
         </Wrapper>
       );
     }
@@ -678,34 +843,53 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
           {...(props.className && { className: props.className })}
         >
           <div className="space-y-6">
-            {d.claudeCode && (
+            {d.claudeCode ? (
               <Platform
                 name="Claude Code Setup"
                 steps={d.claudeCode.steps}
                 {...(d.claudeCode.configPath && { paths: d.claudeCode.configPath })}
               />
-            )}
-            {d.claudeDesktop && (
+            ) : null}
+            {d.claudeDesktop ? (
               <Platform
                 name="Claude Desktop Setup"
                 steps={d.claudeDesktop.steps}
                 {...(d.claudeDesktop.configPath && { paths: d.claudeDesktop.configPath })}
               />
-            )}
-            {d.sdk && <Platform name="SDK Setup" steps={d.sdk.steps} />}
-            {d.mcpb && <Platform name="One-Click Install (.mcpb)" steps={d.mcpb.steps} />}
-            {d.requirements && d.requirements.length > 0 && (
+            ) : null}
+            {d.sdk ? <Platform name="SDK Setup" steps={d.sdk.steps} /> : null}
+            {d.mcpb ? <Platform name="One-Click Install (.mcpb)" steps={d.mcpb.steps} /> : null}
+            {d.requirements && d.requirements.length > 0 ? (
               <div>
                 <h4 className="mb-2 font-medium">Requirements</h4>
                 <List items={d.requirements} color="bg-orange-500" />
               </div>
-            )}
+            ) : null}
           </div>
         </Wrapper>
       );
     }
 
-    default:
+    case 'text': {
+      if (!props.html) return null;
+
+      return (
+        <Wrapper
+          title={props.title}
+          {...(props.description && { description: props.description })}
+          {...(props.icon && { icon: props.icon })}
+          {...(props.category && { category: props.category })}
+          {...(props.className && { className: props.className })}
+        >
+          <div className="prose prose-slate dark:prose-invert prose-headings:font-semibold prose-headings:text-foreground prose-p:text-foreground/90 prose-p:leading-relaxed prose-ul:my-4 prose-ol:my-4 prose-li:my-2 prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-strong:font-semibold prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-muted prose-pre:text-foreground prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-4 prose-blockquote:italic max-w-none">
+            <TrustedHTML html={props.html} />
+          </div>
+        </Wrapper>
+      );
+    }
+
+    default: {
       return null;
+    }
   }
 }

@@ -5,35 +5,33 @@
 
 'use client';
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { checkConfettiEnabled } from '@heyclaude/web-runtime/config/static-configs';
-import { logClientError, logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { getLayoutFlags } from '@heyclaude/web-runtime/data';
-import { DIMENSIONS, toasts } from '@heyclaude/web-runtime/ui';
+import { useConfetti } from '@heyclaude/web-runtime/hooks';
+import {
+  logClientError,
+  logClientWarn,
+  normalizeError,
+} from '@heyclaude/web-runtime/logging/client';
+import { DIMENSIONS, toasts, ErrorBoundary } from '@heyclaude/web-runtime/ui';
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
+import { logClientInfo } from '@heyclaude/web-runtime/logging/client';
+
 import { AnnouncementBannerClient } from '@/src/components/core/layout/announcement-banner-client';
 import { Navigation } from '@/src/components/core/layout/navigation';
+import { NavigationCommandMenu } from '@/src/components/core/layout/navigation-command-menu';
+import { CommandPaletteProvider, useCommandPalette } from '@/src/components/features/navigation/command-palette-provider';
 import { PinboardDrawerProvider } from '@/src/components/features/navigation/pinboard-drawer-provider';
 import { RecentlyViewedMobileTray } from '@/src/components/features/navigation/recently-viewed-mobile';
-import { useConfetti } from '@heyclaude/web-runtime/hooks';
 
 const Footer = dynamic(
   () => import('@/src/components/core/layout/footer').then((mod) => ({ default: mod.Footer })),
   {
     loading: () => null,
     ssr: true,
-  }
-);
-
-const NotificationSheet = dynamic(
-  () =>
-    import('@/src/components/features/notifications/notification-sheet').then((mod) => ({
-      default: mod.NotificationSheet,
-    })),
-  {
-    loading: () => null,
   }
 );
 
@@ -47,15 +45,55 @@ const NewsletterFooterBar = dynamic(
   }
 );
 
-const FloatingActionBar = dynamic(
-  () =>
-    import('@/src/components/features/fab/floating-action-bar').then((mod) => ({
-      default: mod.FloatingActionBar,
-    })),
-  {
-    loading: () => null,
-  }
-);
+/**
+ * Wrapper component to access CommandPalette context and render NavigationCommandMenu
+ */
+function CommandMenuWrapper({ children }: { children: React.ReactNode }) {
+  const { isOpen, openPalette, closePalette } = useCommandPalette();
+  
+  // CRITICAL FIX: onOpenChange needs to handle both open and close
+  const handleOpenChange = useCallback((open: boolean) => {
+    logClientInfo(
+      '[CommandMenuWrapper] onOpenChange called',
+      'CommandMenuWrapper.handleOpenChange',
+      {
+        component: 'CommandMenuWrapper',
+        action: 'on-open-change',
+        category: 'navigation',
+        open,
+        currentIsOpen: isOpen,
+      }
+    );
+    if (open) {
+      openPalette();
+    } else {
+      closePalette();
+    }
+  }, [openPalette, closePalette, isOpen]);
+  
+  // DEBUG: Log when isOpen changes
+  useEffect(() => {
+    logClientInfo(
+      '[CommandMenuWrapper] isOpen state changed',
+      'CommandMenuWrapper.stateChange',
+      {
+        component: 'CommandMenuWrapper',
+        action: 'state-change',
+        category: 'navigation',
+        isOpen,
+      }
+    );
+  }, [isOpen]);
+  
+  return (
+    <>
+      {children}
+      <ErrorBoundary>
+        <NavigationCommandMenu open={isOpen} onOpenChange={handleOpenChange} />
+      </ErrorBoundary>
+    </>
+  );
+}
 
 const NEWSLETTER_OPT_IN_COOKIE = 'newsletter_opt_in';
 const NEWSLETTER_OPT_IN_SEEN_FLAG = 'newsletter_opt_in_seen';
@@ -67,17 +105,17 @@ const buildStorageErrorContext = (error: unknown) => {
   };
 };
 
-type WindowWithCookieStore = Window &
-  typeof globalThis & {
+type WindowWithCookieStore = typeof globalThis &
+  Window & {
     cookieStore?: {
       delete?: (name: string) => Promise<void>;
     };
   };
 
 async function clearNewsletterOptInCookie() {
-  if (typeof window === 'undefined') return;
+  if (globalThis.window === undefined) return;
 
-  const cookieStoreApi = (window as WindowWithCookieStore).cookieStore;
+  const cookieStoreApi = (globalThis as WindowWithCookieStore).cookieStore;
   if (cookieStoreApi?.delete) {
     await cookieStoreApi.delete(NEWSLETTER_OPT_IN_COOKIE);
     return;
@@ -99,26 +137,16 @@ async function clearNewsletterOptInCookie() {
 }
 
 interface LayoutContentProps {
-  children: React.ReactNode;
   announcement: Database['public']['Tables']['announcements']['Row'] | null;
-  navigationData: Database['public']['Functions']['get_navigation_menu']['Returns'];
+  children: React.ReactNode;
 }
 
-export function LayoutContent({ children, announcement, navigationData }: LayoutContentProps) {
+export function LayoutContent({ children, announcement }: LayoutContentProps) {
   const pathname = usePathname();
   const { fireConfetti } = useConfetti();
-  
+
   // Get static layout flags (no async operations)
   const layoutFlags = getLayoutFlags();
-
-  const useFloatingActionBar = layoutFlags.useFloatingActionBar;
-  const fabFlags = {
-    showSubmit: layoutFlags.fabSubmitAction,
-    showSearch: layoutFlags.fabSearchAction,
-    showScrollToTop: layoutFlags.fabScrollToTop,
-    showNotifications: layoutFlags.fabNotifications,
-    showPinboard: true,
-  };
 
   // Get newsletter experiment variants from static flags
   const footerDelayVariant = layoutFlags.footerDelayVariant;
@@ -126,7 +154,7 @@ export function LayoutContent({ children, announcement, navigationData }: Layout
 
   // Convert variant to delay milliseconds
   const delayMs =
-    footerDelayVariant === '10s' ? 10000 : footerDelayVariant === '60s' ? 60000 : 30000;
+    footerDelayVariant === '10s' ? 10_000 : footerDelayVariant === '60s' ? 60_000 : 30_000;
 
   // Auth route prefixes - Next.js strips route groups like (auth) from URLs
   const AUTH_ROUTE_PREFIXES = ['/login', '/auth-code-error', '/auth/'];
@@ -141,11 +169,17 @@ export function LayoutContent({ children, announcement, navigationData }: Layout
     try {
       hasSeenToast = sessionStorage.getItem(NEWSLETTER_OPT_IN_SEEN_FLAG) === 'true';
     } catch (error) {
+      const normalized = normalizeError(error, 'Unable to read newsletter toast flag from sessionStorage');
       logClientWarn(
-        'LayoutContent: unable to read newsletter toast flag from sessionStorage',
-        error,
+        '[Storage] Unable to read newsletter toast flag',
+        normalized,
         'LayoutContent.readToastFlag',
-        buildStorageErrorContext(error)
+        {
+          component: 'LayoutContent',
+          action: 'read-toast-flag',
+          category: 'storage',
+          ...buildStorageErrorContext(error),
+        }
       );
     }
 
@@ -160,11 +194,17 @@ export function LayoutContent({ children, announcement, navigationData }: Layout
     try {
       sessionStorage.setItem(NEWSLETTER_OPT_IN_SEEN_FLAG, 'true');
     } catch (error) {
+      const normalized = normalizeError(error, 'Unable to set newsletter toast flag');
       logClientWarn(
-        'LayoutContent: unable to set newsletter toast flag',
-        error,
+        '[Storage] Unable to set newsletter toast flag',
+        normalized,
         'LayoutContent.setToastFlag',
-        buildStorageErrorContext(error)
+        {
+          component: 'LayoutContent',
+          action: 'set-toast-flag',
+          category: 'storage',
+          ...buildStorageErrorContext(error),
+        }
       );
     }
 
@@ -179,11 +219,19 @@ export function LayoutContent({ children, announcement, navigationData }: Layout
     }
 
     clearNewsletterOptInCookie().catch((error) => {
-      logClientError('LayoutContent: failed to clear newsletter opt-in cookie', error, 'LayoutContent.clearCookie', {
-        component: 'LayoutContent',
-        pathname,
-        cookieName: NEWSLETTER_OPT_IN_COOKIE,
-      });
+      const normalized = normalizeError(error, 'Failed to clear newsletter opt-in cookie');
+      logClientError(
+        '[Storage] Failed to clear newsletter opt-in cookie',
+        normalized,
+        'LayoutContent.clearCookie',
+        {
+          component: 'LayoutContent',
+          action: 'clear-cookie',
+          category: 'storage',
+          pathname,
+          cookieName: NEWSLETTER_OPT_IN_COOKIE,
+        }
+      );
     });
   }, [fireConfetti, isAuthRoute, pathname]);
 
@@ -201,27 +249,26 @@ export function LayoutContent({ children, announcement, navigationData }: Layout
     <>
       <a
         href="#main-content"
-        className={
-          'sr-only rounded-md focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground'
-        }
+        className="focus:bg-primary focus:text-primary-foreground sr-only rounded-md focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2"
       >
         Skip to main content
       </a>
-      <PinboardDrawerProvider>
-        <div className={'flex min-h-screen flex-col bg-background'}>
-          {announcement && <AnnouncementBannerClient announcement={announcement} />}
-          <Navigation hideCreateButton={useFloatingActionBar} navigationData={navigationData} />
-          <main id="main-content" className="flex-1">
-            {children}
-          </main>
-          <Footer />
-          {/* Floating Action Bar - controlled by static config */}
-          {useFloatingActionBar && <FloatingActionBar fabFlags={fabFlags} />}
-          <RecentlyViewedMobileTray />
-          <NotificationSheet />
-          <NewsletterFooterBar source="footer" showAfterDelay={delayMs} ctaVariant={ctaVariant} />
-        </div>
-      </PinboardDrawerProvider>
+      <CommandPaletteProvider>
+        <PinboardDrawerProvider>
+          <CommandMenuWrapper>
+            <div className="bg-background flex min-h-screen flex-col">
+              {announcement ? <AnnouncementBannerClient announcement={announcement} /> : null}
+              <Navigation />
+            <main id="main-content" className="flex-1">
+              {children}
+            </main>
+            <Footer />
+            <RecentlyViewedMobileTray />
+            <NewsletterFooterBar source="footer" showAfterDelay={delayMs} ctaVariant={ctaVariant} />
+            </div>
+          </CommandMenuWrapper>
+        </PinboardDrawerProvider>
+      </CommandPaletteProvider>
     </>
   );
 }

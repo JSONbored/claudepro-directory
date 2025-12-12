@@ -11,15 +11,17 @@ export default defineConfig({
   timeout: 30 * 1000,
   expect: {
     timeout: 10000, // Increased timeout for screenshot stability
-    toHaveScreenshot: { 
+    toHaveScreenshot: {
       threshold: 0.2,
-      maxDiffPixels: 500, // Allow more pixels to differ for initial baseline
+      // Use maxDiffPixelRatio instead of maxDiffPixels for better scaling across screen sizes
+      maxDiffPixelRatio: 0.01, // 1% pixel difference allowed
     },
   },
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  // Optimize workers: 2 for CI (better utilization), auto for local
+  workers: process.env.CI ? 2 : undefined,
   reporter: [
     ['html'],
     ['json', { outputFile: 'test-results/results.json' }],
@@ -29,7 +31,8 @@ export default defineConfig({
     baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:3000',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
-    trace: 'on-first-retry',
+    // Keep traces for all failures (better debugging than on-first-retry)
+    trace: 'retain-on-failure',
   },
   projects: [
     {

@@ -16,19 +16,20 @@
  */
 
 import { Bot, Brain, Code, FileCode, Sparkles, Terminal, Zap } from '@heyclaude/web-runtime/icons';
-import type { SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
+import { type SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
 import { cn } from '@heyclaude/web-runtime/ui';
-import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
+import { MICROINTERACTIONS, SPRING, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
+import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/design-tokens';
 import { motion } from 'motion/react';
 import { useCallback, useState } from 'react';
 
 interface TypeCard {
-  type: SubmissionContentType;
-  label: string;
-  description: string;
-  icon: typeof Bot;
   color: string;
+  description: string;
   examples: string[];
+  icon: typeof Bot;
+  label: string;
+  type: SubmissionContentType;
 }
 
 const TYPE_CARDS: TypeCard[] = [
@@ -91,13 +92,13 @@ const TYPE_CARDS: TypeCard[] = [
 ];
 
 interface TypeSelectionCardsProps {
-  selected?: SubmissionContentType;
-  onSelect: (type: SubmissionContentType) => void;
   className?: string;
+  onSelect: (type: SubmissionContentType) => void;
+  selected?: SubmissionContentType;
 }
 
 export function TypeSelectionCards({ selected, onSelect, className }: TypeSelectionCardsProps) {
-  const [hoveredCard, setHoveredCard] = useState<SubmissionContentType | null>(null);
+  const [hoveredCard, setHoveredCard] = useState<null | SubmissionContentType>(null);
 
   const handleSelect = useCallback(
     (type: SubmissionContentType) => {
@@ -118,7 +119,7 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
           visible: {
             opacity: 1,
             transition: {
-              staggerChildren: 0.08,
+              staggerChildren: STAGGER.tight,
             },
           },
         }}
@@ -139,10 +140,15 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
                 hidden: { opacity: 0, y: 20 },
                 visible: { opacity: 1, y: 0 },
               }}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.98 }}
+              whileHover={{
+                ...MICROINTERACTIONS.card.hover,
+                scale: 1.03, // Preserve exact original scale (design token is 1.02, but original was 1.03)
+                y: 0, // Preserve original (no y movement in original)
+              }}
+              whileTap={MICROINTERACTIONS.card.tap}
+              transition={MICROINTERACTIONS.card.transition}
               className={cn(
-                'group relative overflow-hidden rounded-xl border-2 p-6 text-left transition-all',
+                'group relative overflow-hidden rounded-xl border-2 p-6 text-left',
                 'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
                 isSelected
                   ? 'border-accent-primary bg-accent-primary/10'
@@ -173,7 +179,7 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
                 animate={{
                   opacity: isHovered || isSelected ? 1 : 0,
                 }}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: DURATION.default }}
               />
 
               {/* Content */}
@@ -189,7 +195,7 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
                       scale: isHovered ? 1.1 : 1,
                       rotate: isHovered ? 5 : 0,
                     }}
-                    transition={TOKENS.animations.spring.bouncy}
+                    transition={SPRING.bouncy}
                   >
                     <Icon
                       className="h-6 w-6"
@@ -200,11 +206,11 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
                   </motion.div>
 
                   {/* Selection Indicator */}
-                  {isSelected && (
+                  {isSelected ? (
                     <motion.div
                       initial={{ scale: 0, rotate: -180 }}
                       animate={{ scale: 1, rotate: 0 }}
-                      transition={TOKENS.animations.spring.bouncy}
+                      transition={SPRING.bouncy}
                       className="flex h-6 w-6 items-center justify-center rounded-full"
                       style={{
                         backgroundColor: TOKENS.colors.accent.primary,
@@ -225,13 +231,13 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
                         />
                       </svg>
                     </motion.div>
-                  )}
+                  ) : null}
                 </div>
 
                 {/* Label */}
                 <h3
                   className={cn(
-                    'mb-2 font-semibold text-lg transition-colors',
+                    'mb-2 text-lg font-semibold transition-colors',
                     isSelected
                       ? 'text-accent-primary'
                       : 'text-foreground group-hover:text-accent-primary'
@@ -244,7 +250,7 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
                 </h3>
 
                 {/* Description */}
-                <p className="mb-3 text-muted-foreground text-sm leading-relaxed">
+                <p className="text-muted-foreground mb-3 text-sm leading-relaxed">
                   {card.description}
                 </p>
 
@@ -260,8 +266,8 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
                         x: 0,
                       }}
                       transition={{
-                        delay: 0.1 + index * 0.05,
-                        duration: 0.2,
+                        delay: STAGGER.fast + index * STAGGER.micro,
+                        duration: DURATION.quick,
                       }}
                     >
                       <div
@@ -286,7 +292,7 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
                 animate={{
                   opacity: isHovered ? 0.3 : 0,
                 }}
-                transition={{ duration: 0.2 }}
+                transition={{ duration: DURATION.quick }}
               />
             </motion.button>
           );
@@ -295,10 +301,10 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
 
       {/* Helper Text */}
       <motion.p
-        className="mt-6 text-center text-muted-foreground text-sm"
+        className="text-muted-foreground mt-6 text-center text-sm"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
+        transition={{ delay: STAGGER.loose }}
       >
         Select the type that best matches your submission
       </motion.p>
@@ -354,11 +360,11 @@ export function CompactTypeSelection({ selected, onSelect, className }: TypeSele
               </div>
 
               <div className="min-w-0 flex-1">
-                <div className="font-medium text-sm">{card.label}</div>
-                <div className="truncate text-muted-foreground text-xs">{card.description}</div>
+                <div className="text-sm font-medium">{card.label}</div>
+                <div className="text-muted-foreground truncate text-xs">{card.description}</div>
               </div>
 
-              {isSelected && (
+              {isSelected ? (
                 <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="shrink-0">
                   <svg
                     className="h-5 w-5"
@@ -375,7 +381,7 @@ export function CompactTypeSelection({ selected, onSelect, className }: TypeSele
                     />
                   </svg>
                 </motion.div>
-              )}
+              ) : null}
             </motion.button>
           );
         })}

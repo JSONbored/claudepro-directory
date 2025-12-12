@@ -3,67 +3,78 @@
  * Allows users to manage their multi-factor authentication settings
  */
 
+import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { Shield } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger } from '@heyclaude/web-runtime/logging/server';
+import { logger } from '@heyclaude/web-runtime/logging/server';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/server';
 import {
-  UI_CLASSES,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  UI_CLASSES,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 import { MFAFactorsListClient } from './mfa-factors-list-client';
 
 export const metadata: Metadata = {
-  title: 'Two-Factor Authentication | Account Settings',
   description: 'Manage your two-factor authentication settings',
+  title: 'Two-Factor Authentication | Account Settings',
 };
-
-// Force dynamic rendering for auth-protected pages
-export const dynamic = 'force-dynamic';
 
 /**
  * Render the MFA Settings page that lets an authenticated user view and manage multi-factor authentication.
  *
- * If no authenticated user is found, the function redirects to `/login`. A request-scoped identifier and logger are created for the page request.
+ * If no authenticated user is found, the function redirects to `/login`. A request-scoped logger is created for the page request.
+ *
+ * Note: Suspense boundary removed - account layout already provides Suspense boundary.
+ * Nested Suspense boundaries cause React errors with Dialog portals.
  *
  * @returns The JSX for the MFA Settings page, including an enrolled factors list and explanatory "How it works" content.
  *
  * @see getAuthenticatedUser
  * @see MFAFactorsListClient
- * @see generateRequestId
  * @see redirect
  */
 export default async function MFASettingsPage() {
-  // Generate single requestId for this page request
-  const requestId = generateRequestId();
+  'use cache: private';
+  cacheLife('userProfile'); // 1min stale, 5min revalidate, 30min expire - User-specific data
 
   // Create request-scoped child logger
   const reqLogger = logger.child({
-    requestId,
+    module: 'apps/web/src/app/account/settings/mfa',
     operation: 'MFASettingsPage',
     route: '/account/settings/mfa',
-    module: 'apps/web/src/app/account/settings/mfa',
   });
-
+  // getAuthenticatedUser with requireUser: true throws when no user is present,
+  // so the null check below is unreachable
   const { user } = await getAuthenticatedUser({
-    requireUser: true,
     context: 'MFASettingsPage',
+    requireUser: true,
   });
 
   if (!user) {
-    reqLogger.info('MFASettingsPage: user not authenticated, redirecting to login');
-    redirect('/login');
+    reqLogger.error(
+      {
+        err: new Error('User is null'),
+        section: 'data-fetch',
+      },
+      'MFASettingsPage: user is null despite requireUser: true'
+    );
+    redirect(ROUTES.LOGIN);
   }
 
-  reqLogger.info('MFASettingsPage: rendered for authenticated user', {
-    userIdHash: user.id, // userId is automatically hashed by redaction
-  });
+  reqLogger.info(
+    {
+      section: 'data-fetch',
+      userIdHash: user.id, // userId is automatically hashed by redaction
+    },
+    'MFASettingsPage: rendered for authenticated user'
+  );
 
   return (
     <div className="space-y-6">

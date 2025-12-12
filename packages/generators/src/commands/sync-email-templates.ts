@@ -10,8 +10,7 @@ import type {
   EmailTemplateSlug,
 } from '@heyclaude/edge-runtime/utils/email/templates/manifest';
 
-// Runtime import via relative path (tsx handles this fine, tsc cannot resolve Deno imports)
-// @ts-expect-error -- edge-runtime manifest uses Deno-style imports that tsc can't resolve
+// Runtime import from edge-runtime manifest
 import { EMAIL_TEMPLATE_MANIFEST as EMAIL_TEMPLATE_MANIFEST_RAW } from '@heyclaude/edge-runtime/utils/email/templates/manifest';
 import { Resend } from 'resend';
 

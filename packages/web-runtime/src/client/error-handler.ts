@@ -3,7 +3,6 @@
 import { isDevelopment } from '@heyclaude/shared-runtime/schemas/env';
 
 import {
-  generateRequestId,
   logger,
   normalizeError,
 } from '@heyclaude/web-runtime/core';
@@ -15,7 +14,6 @@ type ErrorResponse = {
   message: string;
   code: string;
   timestamp: string;
-  requestId?: string;
   stack?: string;
 };
 
@@ -41,7 +39,7 @@ function determineErrorType(error: unknown): string {
  *
  * @param error - The Error instance caught by the React error boundary
  * @param errorInfo - The React error boundary info object; expects a `componentStack` string
- * @returns An ErrorResponse containing `success: false`, `error`, `message`, `code`, `timestamp`, `requestId`, and, when available in development, `stack`
+ * @returns An ErrorResponse containing `success: false`, `error`, `message`, `code`, `timestamp`, and, when available in development, `stack`
  */
 export function createErrorBoundaryFallback(
   error: Error,
@@ -49,12 +47,11 @@ export function createErrorBoundaryFallback(
 ): ErrorResponse {
   try {
     const errorType = determineErrorType(error);
-    const requestId = generateRequestId();
     const route = typeof window !== 'undefined' ? window.location.pathname : 'unknown';
     const normalized = normalizeError(error, 'React error boundary triggered');
     
     // Create standardized log context (client-safe version)
-    const logContext = createWebAppContextWithIdClient(requestId, route, 'ReactErrorBoundary', {
+    const logContext = createWebAppContextWithIdClient(route, 'ReactErrorBoundary', {
       errorType,
       componentStack: errorInfo.componentStack || '',
       errorBoundary: true,
@@ -63,7 +60,7 @@ export function createErrorBoundaryFallback(
     });
     
     // Use structured logging instead of console.error
-    logger.error('React error boundary caught error', normalized, logContext);
+    logger.error({ err: normalized, ...logContext }, 'React error boundary caught error');
     
     return {
       success: false,
@@ -71,16 +68,13 @@ export function createErrorBoundaryFallback(
       message: error.message || 'An error occurred during rendering',
       code: generateErrorCode(errorType),
       timestamp: new Date().toISOString(),
-      requestId,
       ...(isDevelopment && error.stack && { stack: error.stack }),
     };
   } catch (fallbackError) {
     // Fallback error handling - still try to log
-    const fallbackRequestId = generateRequestId();
     const normalized = normalizeError(fallbackError, 'Error boundary fallback failed');
     try {
       const logContext = createWebAppContextWithIdClient(
-        fallbackRequestId,
         typeof window !== 'undefined' ? window.location.pathname : 'unknown',
         'ReactErrorBoundary',
         {
@@ -88,7 +82,7 @@ export function createErrorBoundaryFallback(
           fallbackError: true,
         }
       );
-      logger.error('Error boundary fallback handler failed', normalized, logContext, undefined);
+      logger.error({ err: normalized, ...logContext }, 'Error boundary fallback handler failed');
     } catch {
       // Last resort - if even logging fails, just return error response
     }
@@ -98,7 +92,6 @@ export function createErrorBoundaryFallback(
       message: 'An unexpected error occurred',
       code: 'INT_FALLBACK',
       timestamp: new Date().toISOString(),
-      requestId: fallbackRequestId,
     };
   }
 }

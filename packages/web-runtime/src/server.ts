@@ -15,17 +15,58 @@ export * from './supabase/server-anon.ts';
 export * from './supabase/admin.ts';
 export * from './supabase/middleware.ts';
 export * from './pulse.ts';
+export * from './supabase/pgmq-client.ts';
 export * from './auth/get-authenticated-user.ts';
-export * from './server/api-helpers.ts';
+export {
+  buildCacheHeaders,
+  jsonResponse,
+  badRequestResponse,
+  unauthorizedResponse,
+  methodNotAllowedResponse,
+  handleOptionsRequest,
+  getOnlyCorsHeaders,
+  getWithAuthCorsHeaders,
+  getWithAcceptCorsHeaders,
+  postCorsHeaders,
+  publicCorsHeaders,
+  type CachePresetKey,
+} from './server/api-helpers.ts';
+export * from './server/not-found-response.ts';
 export * from './server/storage-proxy.ts';
 export * from './server/fetch-helpers.ts';
+// API Route Factory (re-exports with different names to avoid conflicts)
+export {
+  createApiRoute,
+  createOptionsHandler as createApiOptionsHandler,
+  type ApiRouteConfig,
+  type RouteHandler,
+  type RouteHandlerContext,
+  type CorsConfig,
+} from './api/route-factory';
+export * from './api/schemas';
+// Explicitly export commonly used schemas for convenience
+export {
+  searchAutocompleteQuerySchema,
+  searchQuerySchema,
+  changelogFormatSchema,
+  changelogEntryFormatSchema,
+  categoryContentFormatSchema,
+  contentFormatSchema,
+  contentDetailQuerySchema,
+  sitewideFormatSchema,
+  feedQuerySchema,
+  trendingQuerySchema,
+  ogImageQuerySchema,
+  sitemapFormatSchema,
+} from './api/schemas';
 export * from './rpc/run-rpc.ts';
 export * from './seo/generator.ts';
 export * from './data/seo/client.ts';
 export * from './data/content/detail.ts'; // 'use server' but often used in server contexts directly
-export * from './cache-config.ts';
 export * from './cache-tags.ts';
 export * from './proxy/next.ts';
+// Export edge-safe error normalization for proxy/middleware files
+export { normalizeErrorEdge } from './errors-edge.ts';
 
 // Data Loaders (Server-Side)
 export * from './data/content-helpers.ts';
@@ -38,7 +79,6 @@ export * from './data/jobs.ts';
 export * from './data/payments.ts';
 export * from './data/community.ts';
 export * from './data/account.ts';
-export { getActiveNotifications } from './data/notifications.ts';
 export * from './data/announcements.ts';
 export * from './data/contact.ts';
 export * from './data/marketing.ts';
@@ -54,6 +94,7 @@ export * from './data/changelog.ts';
 export * from './data/forms/submission-form-fields.ts';
 export * from './data/layout.ts';
 export { getLayoutData } from './data/layout.ts'; // Explicit export for build resolution
+export { DEFAULT_LAYOUT_DATA, type LayoutData } from './data/layout/constants.ts'; // Constants exported separately to avoid 'use server' restrictions
 export * from './data/config/categories.ts';
 export * from './data/config/category/index.ts';
 export * from './data/search/facets.ts';

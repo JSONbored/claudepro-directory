@@ -26,7 +26,9 @@ import { isDevelopment } from '@heyclaude/shared-runtime/schemas/env';
 
 import { logClientErrorBoundary, logClientWarn } from '../../utils/client-logger.ts';
 import { usePulse } from '../../hooks/use-pulse.ts';
+import { useCopyToClipboard } from '../../hooks/index.ts';
 import { UI_CLASSES } from '../constants.ts';
+import { Copy, Check } from '../../icons.tsx';
 import { Button } from './button.tsx';
 import {
   Card,
@@ -74,6 +76,33 @@ export interface NextErrorBoundaryProps {
 /**
  * Internal component that renders the error UI
  */
+function ErrorCodeBlock({ content }: { content: string }) {
+  const { copied, copy } = useCopyToClipboard({
+    context: { component: 'SegmentErrorBoundary', action: 'copy-error' },
+  });
+
+  return (
+    <div className="relative">
+      <pre className="max-w-full break-all whitespace-pre-wrap text-destructive text-xs bg-background/50 rounded border border-border p-3 pr-10">
+        {content}
+      </pre>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="absolute top-2 right-2 h-6 w-6 p-0"
+        onClick={() => copy(content)}
+        aria-label={copied ? 'Copied!' : 'Copy error message'}
+      >
+        {copied ? (
+          <Check className="h-3 w-3 text-green-500" aria-hidden="true" />
+        ) : (
+          <Copy className="h-3 w-3" aria-hidden="true" />
+        )}
+      </Button>
+    </div>
+  );
+}
+
 function SegmentErrorFallbackUI({
   config,
   error,
@@ -147,9 +176,15 @@ function SegmentErrorFallbackUI({
               <p className="mb-2 font-semibold text-muted-foreground text-sm">
                 Error details
               </p>
-              <pre className="wrap-break-word whitespace-pre-wrap text-destructive text-xs">
-                {error.message}
-              </pre>
+              <ErrorCodeBlock content={error.message} />
+              {error.stack ? (
+                <details className="mt-2 text-xs">
+                  <summary className="cursor-pointer font-semibold">► Stack Trace</summary>
+                  <div className="mt-2">
+                    <ErrorCodeBlock content={error.stack} />
+                  </div>
+                </details>
+              ) : null}
               {error.digest && (
                 <p className="mt-2 font-mono text-muted-foreground text-xs">
                   Digest: {error.digest}

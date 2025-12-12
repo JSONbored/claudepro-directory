@@ -72,17 +72,13 @@ function loadPinsFromStorage(): PinboardItem[] {
     if (!stored) return [];
     const parsed = JSON.parse(stored) as PinboardItem[];
     if (!Array.isArray(parsed)) {
-      logger.warn('usePinboard: invalid data structure, resetting pinboard', undefined, {
-        hook: 'usePinboard',
-      });
+      logger.warn({ hook: 'usePinboard' }, 'usePinboard: invalid data structure, resetting pinboard');
       return [];
     }
     return parsed.slice(0, MAX_PINS);
   } catch (error) {
     const normalized = normalizeError(error, 'usePinboard: failed to load pins');
-    logger.error('usePinboard: failed to load pins', normalized, {
-      hook: 'usePinboard',
-    });
+    logger.error({ err: normalized, hook: 'usePinboard', }, 'usePinboard: failed to load pins');
     return [];
   }
 }
@@ -93,9 +89,7 @@ function savePinsToStorage(pins: PinboardItem[]): void {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(pins.slice(0, MAX_PINS)));
   } catch (error) {
     const normalized = normalizeError(error, 'usePinboard: failed to persist pins');
-    logger.error('usePinboard: failed to persist pins', normalized, {
-      hook: 'usePinboard',
-    });
+    logger.error({ err: normalized, hook: 'usePinboard', }, 'usePinboard: failed to persist pins');
   }
 }
 
@@ -119,10 +113,8 @@ export function usePinboard(): UsePinboardReturn {
       if (!payload.slug) return;
       pulse.bookmark({ category: payload.category, slug: payload.slug, action }).catch((error) => {
         const normalized = normalizeError(error, 'usePinboard: bookmark pulse failed');
-        logger.warn('usePinboard: bookmark pulse failed', {
-          err: normalized,
-          hook: 'usePinboard',
-        });
+        logger.warn({ err: normalized,
+          hook: 'usePinboard', }, 'usePinboard: bookmark pulse failed');
       });
     },
     [pulse]

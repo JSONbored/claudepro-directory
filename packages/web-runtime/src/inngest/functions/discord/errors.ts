@@ -9,7 +9,8 @@ import { normalizeError, getEnvVar } from '@heyclaude/shared-runtime';
 
 import { inngest } from '../../client';
 import { pgmqRead, pgmqDelete } from '../../../supabase/pgmq-client';
-import { logger, generateRequestId, createWebAppContextWithId } from '../../../logging/server';
+import { logger, createWebAppContextWithId } from '../../../logging/server';
+import { sendCronSuccessHeartbeat } from '../../utils/monitoring';
 
 const DISCORD_ERRORS_QUEUE = 'discord_errors';
 const BATCH_SIZE = 10;
@@ -63,16 +64,14 @@ export const processDiscordErrorsQueue = inngest.createFunction(
   },
   { cron: '*/15 * * * *' }, // Every 15 minutes (errors need faster alerts)
   async ({ step }) => {
-    const requestId = generateRequestId();
     const logContext = createWebAppContextWithId(
-      requestId,
       '/inngest/discord-errors',
       'processDiscordErrorsQueue'
     );
 
     // Step 1: Read messages from queue
     const messages = await step.run('read-queue', async () => {
-      logger.info('Reading discord_errors queue', logContext);
+      logger.info(logContext, 'Reading discord_errors queue');
       
       const result = await pgmqRead<ErrorWebhookPayload>(DISCORD_ERRORS_QUEUE, {
         vt: 120, // 2 minutes to process batch of 10 messages safely
@@ -83,14 +82,12 @@ export const processDiscordErrorsQueue = inngest.createFunction(
     });
 
     if (messages.length === 0) {
-      logger.info('No error messages to process', logContext);
+      logger.info(logContext, 'No error messages to process');
       return { processed: 0 };
     }
 
-    logger.info('Processing discord error messages', {
-      ...logContext,
-      messageCount: messages.length,
-    });
+    logger.info({ ...logContext,
+      messageCount: messages.length, }, 'Processing discord error messages');
 
     // Step 2: Get Discord webhook URL
     const webhookUrl = await step.run('get-webhook-url', async () => {
@@ -112,11 +109,9 @@ export const processDiscordErrorsQueue = inngest.createFunction(
           // Check if message has exceeded max retries
           const readCount = msg.read_ct ?? 0;
           if (readCount > MAX_RETRY_COUNT) {
-            logger.warn('Message exceeded max retries, deleting', {
-              ...logContext,
+            logger.warn({ ...logContext,
               msgId,
-              readCount,
-            });
+              readCount, }, 'Message exceeded max retries, deleting');
             await pgmqDelete(DISCORD_ERRORS_QUEUE, msg.msg_id);
             return { msgId, success: false, error: 'Max retries exceeded' };
           }
@@ -155,19 +150,15 @@ export const processDiscordErrorsQueue = inngest.createFunction(
           // Delete message from queue on success
           await pgmqDelete(DISCORD_ERRORS_QUEUE, msg.msg_id);
 
-          logger.info('Discord error notification sent', {
-            ...logContext,
+          logger.info({ ...logContext,
             msgId,
-            webhookEventId: payload.webhook_event_id,
-          });
+            webhookEventId: payload.webhook_event_id, }, 'Discord error notification sent');
 
           return { msgId, success: true };
         } catch (error) {
           const normalized = normalizeError(error, 'Failed to send Discord error notification');
-          logger.error('Discord error notification failed', normalized, {
-            ...logContext,
-            msgId,
-          });
+          logger.error({ err: normalized, ...logContext,
+            msgId, }, 'Discord error notification failed');
           return { msgId, success: false, error: normalized.message };
         }
       });
@@ -178,18 +169,26 @@ export const processDiscordErrorsQueue = inngest.createFunction(
     const successCount = results.filter((r) => r.success).length;
     const failedCount = results.filter((r) => !r.success).length;
 
-    logger.info('Discord errors queue processing complete', {
-      ...logContext,
+    logger.info({ ...logContext,
       successCount,
       failedCount,
-      totalProcessed: messages.length,
-    });
+      totalProcessed: messages.length, }, 'Discord errors queue processing complete');
 
-    return {
+    const result = {
       processed: messages.length,
       success: successCount,
       failed: failedCount,
       results,
     };
+
+    // BetterStack monitoring: Send success heartbeat (feature-flagged)
+    if (result.success > 0) {
+      sendCronSuccessHeartbeat('BETTERSTACK_HEARTBEAT_INNGEST_CRON', {
+        functionName: 'processDiscordErrorsQueue',
+        result: { success: result.success },
+      });
+    }
+
+    return result;
   }
 );

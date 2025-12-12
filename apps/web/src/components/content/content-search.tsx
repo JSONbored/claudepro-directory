@@ -1,12 +1,33 @@
 'use client';
 
+import { type Database } from '@heyclaude/database-types';
+import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
+import { HelpCircle } from '@heyclaude/web-runtime/icons';
+import {
+  type ContentSearchClientProps,
+  type DisplayableContent,
+  type FilterState,
+} from '@heyclaude/web-runtime/types/component.types';
+import {
+  Button,
+  Skeleton,
+  ConfigCard,
+  ErrorBoundary,
+  UnifiedCardGrid,
+  ICON_NAME_MAP,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@heyclaude/web-runtime/ui';
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { UnifiedCardGrid } from '@heyclaude/web-runtime/ui';
-import { ConfigCard, ErrorBoundary } from '@heyclaude/web-runtime/ui';
-import { Skeleton } from '@heyclaude/web-runtime/ui';
-import { Button } from '@heyclaude/web-runtime/ui';
+
+import { useAuthModal } from '@/src/hooks/use-auth-modal';
+import { useSavedSearchPresets } from '@/src/hooks/use-saved-search-presets';
+import { useSearchDebounce } from '@/src/hooks/use-search-debounce';
+import { searchCache } from '@/src/utils/search-cache';
 
 const UnifiedSearch = dynamic(
   () =>
@@ -19,26 +40,19 @@ const UnifiedSearch = dynamic(
   }
 );
 
-import type { Database } from '@heyclaude/database-types';
-import type { UnifiedSearchFilters } from '@heyclaude/web-runtime';
-import { searchUnifiedClient } from '@heyclaude/web-runtime/data';
-import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
-import { HelpCircle } from '@heyclaude/web-runtime/icons';
-import type {
-  ContentSearchClientProps,
-  DisplayableContent,
-  FilterState,
-} from '@heyclaude/web-runtime/types/component.types';
-import { ICON_NAME_MAP } from '@heyclaude/web-runtime/ui';
-import { useSavedSearchPresets } from '@/src/hooks/use-saved-search-presets';
-
 /**
  * Content Search Client - Edge Function Integration
  * Uses edge-cached search client for optimized search
  */
 
-type ExtractableValue = string | string[] | null | undefined;
+type ExtractableValue = null | string | string[] | undefined;
 
+/**
+ * Normalize a list of strings by trimming whitespace, removing non-string or empty entries, deduplicating, and sorting.
+ *
+ * @param values - Optional array of values to sanitize; non-string entries are ignored.
+ * @returns A sorted array of unique, trimmed, non-empty strings. Returns an empty array if `values` is not an array or contains no valid strings.
+ */
 function sanitizeStringList(values?: string[]): string[] {
   if (!Array.isArray(values)) return [];
   const set = new Set<string>();
@@ -49,9 +63,20 @@ function sanitizeStringList(values?: string[]): string[] {
       set.add(trimmed);
     }
   }
-  return Array.from(set).sort((a, b) => a.localeCompare(b));
+  return [...set].sort((a, b) => a.localeCompare(b));
 }
 
+/**
+ * Extracts distinct, trimmed strings from a list of items using the provided extractor.
+ *
+ * The extractor may return a string, an array of strings, undefined, or null; only non-empty trimmed string values are included.
+ *
+ * @param items - The source array of items to scan for string values.
+ * @param extractor - A function that extracts a string, string array, null, or undefined from an item.
+ * @returns A sorted array of unique, trimmed strings collected from all items.
+ *
+ * @see sanitizeStringList
+ */
 function collectStringsFromItems<T>(
   items: T[],
   extractor: (item: T) => ExtractableValue
@@ -74,7 +99,7 @@ function collectStringsFromItems<T>(
       }
     }
   }
-  return Array.from(set).sort((a, b) => a.localeCompare(b));
+  return [...set].sort((a, b) => a.localeCompare(b));
 }
 
 const QUICK_TAG_LIMIT = 8;
@@ -83,8 +108,19 @@ const QUICK_CATEGORY_LIMIT = 6;
 const FALLBACK_SUGGESTION_LIMIT = 18;
 const FALLBACK_SUGGESTION_CHUNK_SIZE = 6;
 
-type QuickFilterType = 'tag' | 'author' | 'category';
+type QuickFilterType = 'author' | 'category' | 'tag';
 
+/**
+ * Remove duplicate content items by their `slug`, preserving the original order and enforcing an optional maximum.
+ *
+ * Items with a missing or empty `slug` are treated as distinct and are not considered duplicates.
+ *
+ * @param items - Array of displayable content items to deduplicate
+ * @param limit - Maximum number of unique items to return; if greater than zero the result will contain at most `limit` items. Defaults to `FALLBACK_SUGGESTION_LIMIT`.
+ * @returns An array of the first unique items (by `slug`) from `items`, subject to the `limit` constraint
+ *
+ * @see FALLBACK_SUGGESTION_LIMIT
+ */
 function dedupeContentItems<T extends DisplayableContent>(
   items: T[],
   limit = FALLBACK_SUGGESTION_LIMIT
@@ -94,7 +130,7 @@ function dedupeContentItems<T extends DisplayableContent>(
 
   for (const item of items) {
     if (limit > 0 && unique.length >= limit) break;
-    const slug = (item as { slug?: string | null }).slug;
+    const slug = (item as { slug?: null | string }).slug;
     if (typeof slug === 'string' && slug.length > 0) {
       if (seenSlugs.has(slug)) continue;
       seenSlugs.add(slug);
@@ -117,18 +153,53 @@ function chunkItems<T>(items: T[], size: number): T[][] {
   return chunks;
 }
 
+/**
+ * Determine whether the provided filter state contains any active filtering criteria.
+ *
+ * @param filters - The filter state to inspect; may be null or undefined.
+ * @returns `true` if any of `category`, `author`, a non-empty `tags` array, `sort`, `dateRange`, or `popularity` is present; `false` otherwise.
+ * @see FilterState
+ */
 function hasFilterCriteria(filters?: FilterState | null): boolean {
   if (!filters) return false;
   return Boolean(
     filters.category ||
-      filters.author ||
-      (filters.tags && filters.tags.length > 0) ||
-      filters.sort ||
-      filters.dateRange ||
-      filters.popularity
+    filters.author ||
+    (filters.tags && filters.tags.length > 0) ||
+    filters.sort ||
+    filters.dateRange ||
+    filters.popularity
   );
 }
 
+/**
+ * Renders a searchable, filterable content list with quick filters, saved-search presets, and fallback suggestions.
+ *
+ * Renders a unified search bar with filter controls, displays search results in a card grid, and when no results
+ * are found shows quick filter buttons and paginated fallback suggestions.
+ *
+ * @template T - Type of content items, must extend DisplayableContent
+ * @param props.items - Initial list of content items to display and search over
+ * @param props.searchPlaceholder - Placeholder text for the search input
+ * @param props.title - Human-readable title used in empty/fallback messages
+ * @param props.icon - Icon name used in the empty-state illustration
+ * @param props.category - Optional fixed category to constrain searches
+ * @param props.availableTags - Optional list of tags to show in filter controls (overrides derived tags)
+ * @param props.availableAuthors - Optional list of authors to show in filter controls (overrides derived authors)
+ * @param props.availableCategories - Optional list of categories to show in filter controls (overrides derived categories)
+ * @param props.zeroStateSuggestions - Optional suggestions shown when there is no query or filters
+ * @param props.quickTags - Optional list of tag strings to render as quick-filter buttons
+ * @param props.quickAuthors - Optional list of author strings to render as quick-filter buttons
+ * @param props.quickCategories - Optional list of category strings to render as quick-filter buttons
+ * @param props.fallbackSuggestions - Optional prioritized pool of fallback suggestion items
+ * @returns The component's JSX element tree
+ *
+ * @see UnifiedSearch
+ * @see UnifiedCardGrid
+ * @see ConfigCard
+ * @see useSavedSearchPresets
+ * @see /api/search route
+ */
 function ContentSearchClientComponent<T extends DisplayableContent>({
   items,
   searchPlaceholder,
@@ -166,8 +237,8 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
     const merged: T[] = [];
     const seen = new Set<string>();
 
-    [...items, ...searchResults].forEach((item, index) => {
-      const slug = (item as { slug?: string | null }).slug;
+    for (const [index, item] of [...items, ...searchResults].entries()) {
+      const slug = (item as { slug?: null | string }).slug;
       const key =
         typeof slug === 'string' && slug.length > 0 ? slug : `content-search-item-${index}`;
 
@@ -175,20 +246,21 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
         seen.add(key);
         merged.push(item);
       }
-    });
+    }
 
     return merged;
   }, [items, searchResults]);
 
-  const handleSearch = useCallback(
+  // Create search function that handles caching and API calls
+  const performSearch = useCallback(
     async (
       query: string,
       overrideFilters?: FilterState,
-      telemetry?: { quickFilterType?: QuickFilterType; quickFilterValue?: string }
+      telemetry?: { quickFilterType?: QuickFilterType; quickFilterValue?: string },
+      signal?: AbortSignal
     ) => {
       const nextFilters = overrideFilters ?? filters;
       const sanitizedQuery = query.trim();
-      setSearchQuery(query);
 
       const shouldExecuteSearch = sanitizedQuery.length > 0 || hasFilterCriteria(nextFilters);
       if (!shouldExecuteSearch) {
@@ -196,26 +268,42 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
         return;
       }
 
+      // Build cache key from query and filters
+      const cacheKey: Record<string, unknown> = {
+        categories: nextFilters.category
+          ? [nextFilters.category]
+          : category
+            ? [category]
+            : [],
+        tags: nextFilters.tags || [],
+        authors: nextFilters.author ? [nextFilters.author] : [],
+        sort: nextFilters.sort || 'relevance',
+      };
+
+      // Check cache first
+      const cached = searchCache.get(sanitizedQuery, cacheKey);
+      if (cached && !signal?.aborted) {
+        setSearchResults(cached as T[]);
+        // Still fetch fresh in background (don't await, fire and forget)
+      }
+
       const result = await runLoggedAsync(
         async () => {
-          const searchFilters: UnifiedSearchFilters = {
-            limit: 100,
-          };
-
-          if (nextFilters.category) {
-            searchFilters.categories = [nextFilters.category];
-          } else if (category) {
-            searchFilters.categories = [category];
+          // Check if request was aborted
+          if (signal?.aborted) {
+            return null;
           }
 
-          if (nextFilters.tags && nextFilters.tags.length > 0) {
-            searchFilters.tags = nextFilters.tags;
-          }
+          // Build query parameters for API route
+          // Follows architectural strategy: API route -> data layer -> database RPC -> DB
+          // Note: API determines searchType internally based on entities and job filters
+          const searchParams = new URLSearchParams({
+            q: sanitizedQuery,
+            entities: 'content', // Use unified search when entities are specified
+            limit: '100',
+          });
 
-          if (nextFilters.author) {
-            searchFilters.authors = [nextFilters.author];
-          }
-
+          // Map FilterState sort to API route sort
           if (nextFilters.sort) {
             const sortMap: Record<string, 'relevance' | 'popularity' | 'newest' | 'alphabetical'> =
               {
@@ -226,17 +314,50 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
               };
             const mappedSort = sortMap[nextFilters.sort];
             if (mappedSort) {
-              searchFilters.sort = mappedSort;
+              searchParams.set('sort', mappedSort);
             }
           }
 
-          const result = await searchUnifiedClient({
-            query: sanitizedQuery,
-            entities: ['content'],
-            filters: searchFilters,
+          // Add category filter if provided
+          const effectiveCategory = nextFilters.category || category;
+          if (effectiveCategory) {
+            searchParams.set('categories', effectiveCategory);
+          }
+
+          // Add tag filters if provided
+          if (nextFilters.tags && nextFilters.tags.length > 0) {
+            searchParams.set('tags', nextFilters.tags.join(','));
+          }
+
+          // Add author filter if provided
+          if (nextFilters.author) {
+            searchParams.set('authors', nextFilters.author);
+          }
+
+          // Check if request was aborted before making API call
+          if (signal?.aborted) {
+            return null;
+          }
+
+          // Call API route (follows architectural strategy: API route -> data layer -> database RPC -> DB)
+          const response = await fetch(`/api/search?${searchParams.toString()}`, {
+            method: 'GET',
+            ...(signal ? { signal } : {}), // Support request cancellation
           });
 
-          return result.results as T[];
+          if (!response.ok) {
+            throw new Error(`Search API returned ${response.status}: ${response.statusText}`);
+          }
+
+          const result = await response.json();
+
+          // Check again after API call
+          if (signal?.aborted) {
+            return null;
+          }
+
+          // Extract results from API response
+          return (Array.isArray(result.results) ? result.results : []) as T[];
         },
         {
           context: {
@@ -249,14 +370,51 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
         }
       );
 
-      if (result) {
+      // Only update if request wasn't aborted
+      if (!signal?.aborted && result) {
         setSearchResults(result);
-      } else {
+        // Store in cache
+        searchCache.set(sanitizedQuery, cacheKey, result);
+      } else if (!signal?.aborted && !result) {
         // On error, fallback to original items
         setSearchResults(items);
       }
     },
     [category, filters, items, runLoggedAsync]
+  );
+
+  // Use debounced search hook for query changes only
+  const { debouncedSearch: debouncedPerformSearch } = useSearchDebounce({
+    delay: 400,
+    onSearch: async (query, signal) => {
+      await performSearch(query, filters, undefined, signal);
+    },
+  });
+
+  const handleSearch = useCallback(
+    async (
+      query: string,
+      overrideFilters?: FilterState,
+      telemetry?: { quickFilterType?: QuickFilterType; quickFilterValue?: string }
+    ) => {
+      const nextFilters = overrideFilters ?? filters;
+      const sanitizedQuery = query.trim();
+      setSearchQuery(query);
+
+      // If filters changed, execute immediately (no debounce for filter changes)
+      // If only query changed, use debounced search
+      if (overrideFilters && JSON.stringify(overrideFilters) !== JSON.stringify(filters)) {
+        // Filter change - execute immediately
+        await performSearch(query, nextFilters, telemetry);
+      } else if (sanitizedQuery.length > 0) {
+        // Query change - use debounced search
+        debouncedPerformSearch(sanitizedQuery);
+      } else {
+        // Empty query - reset to items
+        setSearchResults(items);
+      }
+    },
+    [category, filters, items, debouncedPerformSearch, performSearch]
   );
 
   const handleFiltersChange = useCallback(
@@ -321,24 +479,35 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
 
       let didChange = false;
 
-      if (type === 'tag') {
-        const nextTags = new Set(nextFilters.tags ?? []);
-        if (!nextTags.has(value)) {
-          nextTags.add(value);
-          nextFilters.tags = Array.from(nextTags);
-          didChange = true;
+      switch (type) {
+        case 'tag': {
+          const nextTags = new Set(nextFilters.tags);
+          if (!nextTags.has(value)) {
+            nextTags.add(value);
+            nextFilters.tags = [...nextTags];
+            didChange = true;
+          }
+
+          break;
         }
-      } else if (type === 'author') {
-        if (nextFilters.author !== value) {
-          nextFilters.author = value;
-          didChange = true;
+        case 'author': {
+          if (nextFilters.author !== value) {
+            nextFilters.author = value;
+            didChange = true;
+          }
+
+          break;
         }
-      } else if (type === 'category') {
-        const typedValue = value as Database['public']['Enums']['content_category'];
-        if (nextFilters.category !== typedValue) {
-          nextFilters.category = typedValue;
-          didChange = true;
+        case 'category': {
+          const typedValue = value as Database['public']['Enums']['content_category'];
+          if (nextFilters.category !== typedValue) {
+            nextFilters.category = typedValue;
+            didChange = true;
+          }
+
+          break;
         }
+        // No default
       }
 
       if (!didChange) {
@@ -409,7 +578,7 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
         ? normalizedProvidedTags
         : collectStringsFromItems(
             combinedItems,
-            (item) => (item as { tags?: string[] | null }).tags ?? []
+            (item) => (item as { tags?: null | string[] }).tags ?? []
           );
 
     const derivedAuthors =
@@ -418,8 +587,8 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
         : collectStringsFromItems(
             combinedItems,
             (item) =>
-              (item as { author?: string | null }).author ??
-              (item as { created_by?: string | null }).created_by ??
+              (item as { author?: null | string }).author ??
+              (item as { created_by?: null | string }).created_by ??
               null
           );
 
@@ -428,7 +597,7 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
         ? normalizedProvidedCategories
         : collectStringsFromItems(
             combinedItems,
-            (item) => (item as { category?: string | null }).category ?? null
+            (item) => (item as { category?: null | string }).category ?? null
           );
 
     return {
@@ -467,17 +636,27 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
     resolvedQuickAuthorOptions.length > 0 ||
     resolvedQuickCategoryOptions.length > 0;
 
+  const { openAuthModal } = useAuthModal();
+
+  const handleAuthRequired = useCallback(() => {
+    openAuthModal({
+      valueProposition: 'Sign in to save bookmarks',
+      redirectTo: pathname ?? undefined,
+    });
+  }, [openAuthModal, pathname]);
+
   const renderSuggestionCard = useCallback(
     (item: DisplayableContent) => (
       <ConfigCard
         item={item}
         variant="default"
-        showCategory={true}
-        showActions={true}
+        showCategory
+        showActions
         searchQuery={searchQuery}
+        onAuthRequired={handleAuthRequired}
       />
     ),
-    [searchQuery]
+    [searchQuery, handleAuthRequired]
   );
 
   return (
@@ -506,7 +685,7 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
           <UnifiedCardGrid
             items={filteredItems}
             variant="normal"
-            infiniteScroll={true}
+            infiniteScroll
             batchSize={30}
             emptyMessage={`No ${title.toLowerCase()} found`}
             ariaLabel="Search results"
@@ -515,73 +694,101 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
               <ConfigCard
                 item={item}
                 variant="default"
-                showCategory={true}
-                showActions={true}
+                showCategory
+                showActions
+                onAuthRequired={handleAuthRequired}
                 searchQuery={searchQuery}
               />
             )}
           />
         </ErrorBoundary>
       ) : (
-        <div className="rounded-3xl border border-border/60 bg-card/40 p-8 text-center shadow-inner">
+        <div className="border-border/60 bg-card/40 rounded-3xl border p-8 text-center shadow-inner">
           {(() => {
-            const IconComponent = ICON_NAME_MAP[icon as keyof typeof ICON_NAME_MAP] || HelpCircle;
+            const IconComponent = ICON_NAME_MAP[icon] || HelpCircle;
             return (
               <IconComponent
-                className="mx-auto mb-4 h-16 w-16 text-muted-foreground/50"
+                className="text-muted-foreground/50 mx-auto mb-4 h-16 w-16"
                 aria-hidden="true"
               />
             );
           })()}
-          <h2 className="mb-2 font-semibold text-lg">No {title.toLowerCase()} found</h2>
-          <p className="mb-6 text-muted-foreground">
+          <h2 className="mb-2 text-lg font-semibold">No {title.toLowerCase()} found</h2>
+          <p className="text-muted-foreground mb-6">
             Try a suggested filter or explore popular configurations from this week.
           </p>
 
-          {quickFiltersAvailable && (
+          {quickFiltersAvailable ? (
             <div className="mb-6 space-y-2">
-              <p className="text-muted-foreground text-xs uppercase tracking-wide">Quick filters</p>
+              <p className="text-muted-foreground text-xs tracking-wide uppercase">Quick filters</p>
               <div className="flex flex-wrap justify-center gap-2">
                 {resolvedQuickTagOptions.map((tag) => (
-                  <Button
-                    key={`tag-${tag}`}
-                    variant="outline"
-                    size="sm"
-                    aria-label={`Filter by tag ${tag}`}
-                    onClick={() => handleQuickFilter('tag', tag)}
-                  >
-                    #{tag}
-                  </Button>
+                  <TooltipProvider key={`tag-${tag}`}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          aria-label={`Filter by tag ${tag}`}
+                          onClick={() => handleQuickFilter('tag', tag)}
+                        >
+                          #{tag}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Filter by tag: {tag}</p>
+                        <p className="text-xs text-muted-foreground">Show only items with this tag</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 ))}
                 {resolvedQuickAuthorOptions.map((author) => (
-                  <Button
-                    key={`author-${author}`}
-                    variant="outline"
-                    size="sm"
-                    aria-label={`Filter by author ${author}`}
-                    onClick={() => handleQuickFilter('author', author)}
-                  >
-                    {author}
-                  </Button>
+                  <TooltipProvider key={`author-${author}`}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          aria-label={`Filter by author ${author}`}
+                          onClick={() => handleQuickFilter('author', author)}
+                        >
+                          {author}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Filter by author: {author}</p>
+                        <p className="text-xs text-muted-foreground">Show only items by this author</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 ))}
                 {resolvedQuickCategoryOptions.map((cat) => (
-                  <Button
-                    key={`category-${cat}`}
-                    variant="outline"
-                    size="sm"
-                    aria-label={`Filter by category ${cat}`}
-                    onClick={() => handleQuickFilter('category', cat)}
-                  >
-                    {cat}
-                  </Button>
+                  <TooltipProvider key={`category-${cat}`}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          aria-label={`Filter by category ${cat}`}
+                          onClick={() => handleQuickFilter('category', cat)}
+                        >
+                          {cat}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Filter by category: {cat}</p>
+                        <p className="text-xs text-muted-foreground">Show only items in this category</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 ))}
               </div>
             </div>
-          )}
+          ) : null}
 
           {visibleFallbackSuggestions.length > 0 && (
             <div className="space-y-3 text-left">
-              <p className="text-muted-foreground text-xs uppercase tracking-wide">
+              <p className="text-muted-foreground text-xs tracking-wide uppercase">
                 Trending &nbsp;•&nbsp; Suggested picks
               </p>
               <ErrorBoundary>
@@ -596,7 +803,7 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
                   renderCard={renderSuggestionCard}
                 />
               </ErrorBoundary>
-              {hasMoreFallbackSuggestions && (
+              {hasMoreFallbackSuggestions ? (
                 <div className="text-center">
                   <Button
                     variant="ghost"
@@ -607,7 +814,7 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
                     Show more suggestions
                   </Button>
                 </div>
-              )}
+              ) : null}
             </div>
           )}
         </div>

@@ -5,9 +5,10 @@
  * Shows inline CTA when user reaches 60% scroll depth (indicates engagement)
  */
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { getNewsletterConfigValue } from '@heyclaude/web-runtime/config/static-configs';
 import { ensureNumber, logUnhandledPromise } from '@heyclaude/web-runtime/core';
+import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { motion, useScroll } from 'motion/react';
 import { useEffect, useState } from 'react';
@@ -15,18 +16,18 @@ import { useEffect, useState } from 'react';
 import { NewsletterCTAVariant } from './newsletter-cta-variants';
 
 export interface NewsletterScrollTriggerProps {
-  source: Database['public']['Enums']['newsletter_source'];
   category?: string;
-  /**
-   * Scroll threshold (0-1) to trigger CTA
-   * @default 0.6 (60% of page)
-   */
-  threshold?: number;
   /**
    * Only show on long-form content (minimum scroll height)
    * @default 500px (from Dynamic Config)
    */
   minScrollHeight?: number;
+  source: Database['public']['Enums']['newsletter_source'];
+  /**
+   * Scroll threshold (0-1) to trigger CTA
+   * @default 0.6 (60% of page)
+   */
+  threshold?: number;
 }
 
 export function NewsletterScrollTrigger({
@@ -55,7 +56,9 @@ export function NewsletterScrollTrigger({
     loadScrollConfig(
       async () => {
         // Get newsletter config value from static defaults
-        const configValue = getNewsletterConfigValue('newsletter.scroll_trigger.min_scroll_height_px');
+        const configValue = getNewsletterConfigValue(
+          'newsletter.scroll_trigger.min_scroll_height_px'
+        );
         // Use ensureNumber to safely validate and fallback to 500 if invalid
         const configHeight = ensureNumber(configValue, 500);
         setScrollHeightThreshold(configHeight);
@@ -108,10 +111,7 @@ export function NewsletterScrollTrigger({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{
-        duration: 0.4,
-        ease: [0.16, 1, 0.3, 1], // Smooth spring
-      }}
+      transition={SPRING.smooth}
       className="my-12"
     >
       <NewsletterCTAVariant variant="inline" source={source} {...(category ? { category } : {})} />

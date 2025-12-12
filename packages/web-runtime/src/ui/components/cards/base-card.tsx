@@ -41,25 +41,22 @@
  * ```
  */
 
-import { getSocialLinks } from '../../../data/marketing/contact.ts';
 import { APP_CONFIG } from '../../../data/config/constants.ts';
 import { getViewTransitionName } from '../../utils.ts';
 import { POSITION_PATTERNS, UI_CLASSES } from '../../constants.ts';
 import { UnifiedBadge } from '../badges/unified-badge.tsx';
 import { SwipeableCardWrapper } from './swipeable-card.tsx';
-import { HoverCard } from '../animation/hover-card.tsx';
+import { motion } from 'motion/react';
+import { MICROINTERACTIONS } from '../../../design-system/index.ts';
 import { SponsoredPulse } from '../features/sponsored-pulse.tsx';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../card.tsx';
 import { type UseCardNavigationOptions, useCardNavigation } from '../../../hooks/use-card-navigation.ts';
+import { useTheme } from '../../../hooks/use-theme.ts';
+import { COLORS } from '../../../design-tokens/index.ts';
 import { logger } from '../../../logger.ts';
 import { normalizeError } from '../../../errors.ts';
 import type { ReactNode, HTMLAttributes } from 'react';
 import { memo } from 'react';
-
-/**
- * Props for BaseCard component
- */
-const SOCIAL_LINK_SNAPSHOT = getSocialLinks();
 
 /**
  * Generic card component props - accepts any component that matches Card structure
@@ -309,6 +306,9 @@ export const BaseCard = memo(
     const CardTitleComponent = CardTitle;
     const CardDescriptionComponent = CardDescription;
 
+    // Detect current theme for semantic color tokens
+    const theme = useTheme();
+
     try {
       const navigationParam: string | UseCardNavigationOptions | undefined =
         disableNavigation || !targetPath
@@ -335,20 +335,9 @@ export const BaseCard = memo(
           ? { viewTransitionName: getViewTransitionName('card', viewTransitionSlug) }
           : undefined;
 
-      // Card content wrapper - conditionally render with or without motion animations
-      const cardElement = (
-        <CardComponent
-          className={`${disableNavigation ? '' : UI_CLASSES.CARD_INTERACTIVE} ${variant === 'detailed' ? UI_CLASSES.CARD_PADDING_DEFAULT : ''} ${variant === 'review' ? `rounded-lg border ${UI_CLASSES.CARD_PADDING_COMPACT}` : ''} ${compactMode ? UI_CLASSES.CARD_PADDING_COMPACT : ''} ${className || ''} relative`}
-          style={{
-            ...viewTransitionStyle,
-            contain: 'paint',
-          }}
-          onClick={disableNavigation ? undefined : handleCardClick}
-          role="article"
-          aria-label={ariaLabel}
-          tabIndex={disableNavigation ? undefined : 0}
-          onKeyDown={disableNavigation ? undefined : handleKeyDown}
-        >
+      // Card content - shared between both CardComponent and motion.div
+      const cardContent = (
+        <>
           {/* Top accent border for related content */}
           {topAccent && (
             <div
@@ -364,18 +353,18 @@ export const BaseCard = memo(
 
             {/* Standard header (config/collection cards) */}
             {!renderHeader && (
-              <div className={'flex items-start justify-between'}>
-                <div className="flex-1">
+              <div className={'flex items-start justify-between overflow-visible'}>
+                <div className="flex-1 overflow-visible">
                   {/* Top badges slot (type, difficulty, sponsored, etc.) */}
                   {renderTopBadges && (
-                    <div className={`mb-1 flex items-center ${UI_CLASSES.SPACE_COMPACT}`}>
+                    <div className={`mb-1 flex items-center flex-wrap gap-1 ${UI_CLASSES.SPACE_COMPACT} overflow-visible`}>
                       {renderTopBadges()}
                     </div>
                   )}
 
                   {/* Title */}
                   <CardTitleComponent
-                    className={`${UI_CLASSES.TEXT_CARD_TITLE} text-foreground ${disableNavigation ? '' : 'transition-colors-smooth group-hover:text-accent'}`}
+                    className={`${UI_CLASSES.TEXT_CARD_TITLE} text-foreground ${disableNavigation ? '' : 'transition-colors-smooth'}`}
                   >
                     {displayTitle}
                   </CardTitleComponent>
@@ -455,20 +444,46 @@ export const BaseCard = memo(
               {/* Left side: Author and custom metadata */}
               {(showAuthor && author) || customMetadataText ? (
                 <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} ${UI_CLASSES.TEXT_METADATA}`}>
-                  {showAuthor && author && (
-                    <span>
-                      by{' '}
-                      <a
-                        href={authorProfileUrl || SOCIAL_LINK_SNAPSHOT.authorProfile}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="transition-colors hover:text-foreground hover:underline"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        {typeof author === 'string' ? author : author}
-                      </a>
-                    </span>
-                  )}
+                  {showAuthor && author && (() => {
+                    // Only show profile link if authorProfileUrl is explicitly provided
+                    // Don't fallback to default - if no profile URL exists, don't show a link
+                    if (authorProfileUrl) {
+                      // Check if this is an internal user profile link
+                      const isInternalProfile = authorProfileUrl.startsWith('/u/');
+                      
+                      return (
+                        <span>
+                          by{' '}
+                          {isInternalProfile ? (
+                            <a
+                              href={authorProfileUrl}
+                              className="transition-colors hover:text-foreground hover:underline"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              {typeof author === 'string' ? author : author}
+                            </a>
+                          ) : (
+                            <a
+                              href={authorProfileUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="transition-colors hover:text-foreground hover:underline"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              {typeof author === 'string' ? author : author}
+                            </a>
+                          )}
+                        </span>
+                      );
+                    }
+                    
+                    // No profile URL - just show author name without link
+                    return (
+                      <span>
+                        by {typeof author === 'string' ? author : author}
+                      </span>
+                    );
+                  })()}
                   {customMetadataText}
                 </div>
               ) : (
@@ -485,29 +500,73 @@ export const BaseCard = memo(
               </div>
             </div>
           </CardContentComponent>
-        </CardComponent>
+        </>
       );
 
-      // Wrap card with hover animation if navigation is enabled
-      const motionCard = disableNavigation ? (
-        cardElement
+      // Card wrapper - apply motion animations directly using design system tokens
+      // For non-navigation cards, use CardComponent. For interactive cards, use motion.div with Card styling
+      // Motion.dev handles hover border color via whileHover - no CSS hover classes needed
+      // Base classes: layout, border width, background, text - border color comes from CARD_INTERACTIVE for interactive cards
+      const cardBaseClasses = `${UI_CLASSES.FLEX_COL_GAP_6} rounded-xl border bg-card py-6 text-card-foreground shadow-sm`;
+      // For non-interactive cards, add border color explicitly
+      // For interactive cards, CARD_INTERACTIVE provides border-border/50
+      const cardBorderColor = disableNavigation ? 'border-border/50' : '';
+      const cardInteractiveClasses = disableNavigation ? '' : UI_CLASSES.CARD_INTERACTIVE;
+      const cardClassName = `${cardBaseClasses} ${cardBorderColor} ${cardInteractiveClasses} ${variant === 'detailed' ? UI_CLASSES.CARD_PADDING_DEFAULT : ''} ${variant === 'review' ? `rounded-lg border border-border/50 ${UI_CLASSES.CARD_PADDING_COMPACT}` : ''} ${compactMode ? UI_CLASSES.CARD_PADDING_COMPACT : ''} ${className || ''} relative`;
+      
+      const cardElement = disableNavigation ? (
+        <CardComponent
+          className={cardClassName}
+          style={{
+            ...viewTransitionStyle,
+            contain: 'layout style',
+          }}
+          role="article"
+          aria-label={ariaLabel}
+        >
+          {cardContent}
+        </CardComponent>
       ) : (
-        <HoverCard variant="gentle" disabled={disableNavigation}>
-          {cardElement}
-        </HoverCard>
+        <motion.div
+          className={cardClassName}
+          style={{
+            ...viewTransitionStyle,
+            // Use semantic design token for border color - theme-aware via useTheme hook
+            borderColor: COLORS.semantic.border[theme].default,
+            // 3D transform support for forward tilt animation
+            perspective: '1000px',
+            transformStyle: 'preserve-3d',
+          }}
+          initial={false}
+          whileHover={{
+            ...MICROINTERACTIONS.card.hover,
+            // Override borderColor with theme-aware semantic token
+            borderColor: COLORS.semantic.primary[theme].base,
+          }}
+          whileTap={MICROINTERACTIONS.card.tap}
+          transition={MICROINTERACTIONS.card.transition}
+          onClick={handleCardClick}
+          role="article"
+          aria-label={ariaLabel}
+          tabIndex={0}
+          onKeyDown={handleKeyDown}
+          data-slot="card"
+        >
+          {cardContent}
+        </motion.div>
       );
 
       // Optionally wrap with swipeable gestures for mobile quick actions
-      const cardContent = enableSwipeGestures ? (
+      const finalCardContent = enableSwipeGestures ? (
         <SwipeableCardWrapper
           onSwipeRight={onSwipeRight}
           onSwipeLeft={onSwipeLeft}
           enableGestures={enableSwipeGestures}
         >
-          {motionCard}
+          {cardElement}
         </SwipeableCardWrapper>
       ) : (
-        motionCard
+        cardElement
       );
 
       // Wrap in sponsored tracker if this is sponsored content
@@ -519,22 +578,20 @@ export const BaseCard = memo(
             position={position}
             pageUrl={typeof window !== 'undefined' ? window.location.href : undefined}
           >
-            {cardContent}
+            {finalCardContent}
           </SponsoredPulse>
         );
       }
 
-      return cardContent;
+      return finalCardContent;
     } catch (error) {
       const normalized = normalizeError(error, 'BaseCard: Rendering failed');
-      logger.warn('[Render] BaseCard rendering failed', {
-        err: normalized,
+      logger.warn({ err: normalized,
         category: 'render',
         component: 'BaseCard',
         recoverable: true,
         targetPath,
-        hasTitle: Boolean(displayTitle),
-      });
+        hasTitle: Boolean(displayTitle), }, '[Render] BaseCard rendering failed');
       // Return a minimal fallback
       return (
         <div className="rounded-lg border p-4" role="article" aria-label={ariaLabel}>

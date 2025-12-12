@@ -9,335 +9,519 @@ import  { type Database } from '@heyclaude/database-types';
 import  { type SupabaseClient } from '@supabase/supabase-js';
 
 import { logRpcError } from '../utils/rpc-error-logging.ts';
+import { withSmartCache } from '../utils/request-cache.ts';
 
 export class AccountService {
   constructor(private supabase: SupabaseClient<Database>) {}
 
   /**
    * Calls the database RPC: get_account_dashboard
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getAccountDashboard(args: Database['public']['Functions']['get_account_dashboard']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('get_account_dashboard', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_account_dashboard',
-          operation: 'AccountService.getAccountDashboard',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_account_dashboard',
+      'getAccountDashboard',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_account_dashboard', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_account_dashboard',
+              operation: 'AccountService.getAccountDashboard',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: get_user_library
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getUserLibrary(args: Database['public']['Functions']['get_user_library']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('get_user_library', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_user_library',
-          operation: 'AccountService.getUserLibrary',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_user_library',
+      'getUserLibrary',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_user_library', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_user_library',
+              operation: 'AccountService.getUserLibrary',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: get_user_dashboard
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getUserDashboard(args: Database['public']['Functions']['get_user_dashboard']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('get_user_dashboard', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_user_dashboard',
-          operation: 'AccountService.getUserDashboard',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_user_dashboard',
+      'getUserDashboard',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_user_dashboard', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_user_dashboard',
+              operation: 'AccountService.getUserDashboard',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: get_collection_detail_with_items
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getCollectionDetailWithItems(args: Database['public']['Functions']['get_collection_detail_with_items']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('get_collection_detail_with_items', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_collection_detail_with_items',
-          operation: 'AccountService.getCollectionDetailWithItems',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_collection_detail_with_items',
+      'getCollectionDetailWithItems',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_collection_detail_with_items', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_collection_detail_with_items',
+              operation: 'AccountService.getCollectionDetailWithItems',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: get_user_settings
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getUserSettings(args: Database['public']['Functions']['get_user_settings']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('get_user_settings', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_user_settings',
-          operation: 'AccountService.getUserSettings',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_user_settings',
+      'getUserSettings',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_user_settings', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_user_settings',
+              operation: 'AccountService.getUserSettings',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: get_sponsorship_analytics
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getSponsorshipAnalytics(args: Database['public']['Functions']['get_sponsorship_analytics']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('get_sponsorship_analytics', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_sponsorship_analytics',
-          operation: 'AccountService.getSponsorshipAnalytics',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_sponsorship_analytics',
+      'getSponsorshipAnalytics',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_sponsorship_analytics', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_sponsorship_analytics',
+              operation: 'AccountService.getSponsorshipAnalytics',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: get_user_companies
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getUserCompanies(args: Database['public']['Functions']['get_user_companies']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('get_user_companies', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_user_companies',
-          operation: 'AccountService.getUserCompanies',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_user_companies',
+      'getUserCompanies',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_user_companies', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_user_companies',
+              operation: 'AccountService.getUserCompanies',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: get_user_sponsorships
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getUserSponsorships(args: Database['public']['Functions']['get_user_sponsorships']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('get_user_sponsorships', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_user_sponsorships',
-          operation: 'AccountService.getUserSponsorships',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_user_sponsorships',
+      'getUserSponsorships',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_user_sponsorships', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_user_sponsorships',
+              operation: 'AccountService.getUserSponsorships',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: get_submission_dashboard
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getSubmissionDashboard(args: Database['public']['Functions']['get_submission_dashboard']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('get_submission_dashboard', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_submission_dashboard',
-          operation: 'AccountService.getSubmissionDashboard',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_submission_dashboard',
+      'getSubmissionDashboard',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_submission_dashboard', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_submission_dashboard',
+              operation: 'AccountService.getSubmissionDashboard',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: is_bookmarked
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async isBookmarked(args: Database['public']['Functions']['is_bookmarked']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('is_bookmarked', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'is_bookmarked',
-          operation: 'AccountService.isBookmarked',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'is_bookmarked',
+      'isBookmarked',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('is_bookmarked', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'is_bookmarked',
+              operation: 'AccountService.isBookmarked',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: is_bookmarked_batch
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async isBookmarkedBatch(args: Database['public']['Functions']['is_bookmarked_batch']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('is_bookmarked_batch', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'is_bookmarked_batch',
-          operation: 'AccountService.isBookmarkedBatch',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'is_bookmarked_batch',
+      'isBookmarkedBatch',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('is_bookmarked_batch', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'is_bookmarked_batch',
+              operation: 'AccountService.isBookmarkedBatch',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: is_following
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async isFollowing(args: Database['public']['Functions']['is_following']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('is_following', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'is_following',
-          operation: 'AccountService.isFollowing',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'is_following',
+      'isFollowing',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('is_following', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'is_following',
+              operation: 'AccountService.isFollowing',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: is_following_batch
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async isFollowingBatch(args: Database['public']['Functions']['is_following_batch']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('is_following_batch', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'is_following_batch',
-          operation: 'AccountService.isFollowingBatch',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'is_following_batch',
+      'isFollowingBatch',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('is_following_batch', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'is_following_batch',
+              operation: 'AccountService.isFollowingBatch',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: get_user_activity_summary
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getUserActivitySummary(args: Database['public']['Functions']['get_user_activity_summary']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('get_user_activity_summary', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_user_activity_summary',
-          operation: 'AccountService.getUserActivitySummary',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_user_activity_summary',
+      'getUserActivitySummary',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_user_activity_summary', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_user_activity_summary',
+              operation: 'AccountService.getUserActivitySummary',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: get_user_activity_timeline
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getUserActivityTimeline(args: Database['public']['Functions']['get_user_activity_timeline']['Args']) {
-    try {
-      const { data, error } = await this.supabase.rpc('get_user_activity_timeline', args);
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'get_user_activity_timeline',
-          operation: 'AccountService.getUserActivityTimeline',
-          args: args,
-        });
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
+    return withSmartCache(
+      'get_user_activity_timeline',
+      'getUserActivityTimeline',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_user_activity_timeline', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_user_activity_timeline',
+              operation: 'AccountService.getUserActivityTimeline',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
   }
 
   /**
    * Calls the database RPC: get_user_identities
+   * Uses request-scoped caching to avoid duplicate calls within the same request
    */
   async getUserIdentities(args: Database['public']['Functions']['get_user_identities']['Args']) {
+    return withSmartCache(
+      'get_user_identities',
+      'getUserIdentities',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_user_identities', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_user_identities',
+              operation: 'AccountService.getUserIdentities',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
+  }
+
+  /**
+   * Calls the database RPC: get_user_complete_data
+   * Uses request-scoped caching to avoid duplicate calls within the same request
+   */
+  async getUserCompleteData(args: Database['public']['Functions']['get_user_complete_data']['Args']) {
+    return withSmartCache(
+      'get_user_complete_data',
+      'getUserCompleteData',
+      async () => {
+        try {
+          const { data, error } = await this.supabase.rpc('get_user_complete_data', args);
+          if (error) {
+            logRpcError(error, {
+              rpcName: 'get_user_complete_data',
+              operation: 'AccountService.getUserCompleteData',
+              args: args,
+            });
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          // Error already logged above
+          throw error;
+        }
+      },
+      args
+    );
+  }
+
+  /**
+   * Calls the database RPC: batch_insert_user_interactions
+   * Batch inserts user interactions with error handling
+   * Returns result with inserted/failed counts and error details
+   * Note: This is a mutation, so it does NOT use request-scoped caching
+   */
+  async batchInsertUserInteractions(
+    args: Database['public']['Functions']['batch_insert_user_interactions']['Args']
+  ): Promise<Database['public']['Functions']['batch_insert_user_interactions']['Returns']> {
     try {
-      const { data, error } = await this.supabase.rpc('get_user_identities', args);
+      const { data, error } = await this.supabase.rpc('batch_insert_user_interactions', args);
       if (error) {
         logRpcError(error, {
-          rpcName: 'get_user_identities',
-          operation: 'AccountService.getUserIdentities',
+          rpcName: 'batch_insert_user_interactions',
+          operation: 'AccountService.batchInsertUserInteractions',
           args: args,
         });
         throw error;

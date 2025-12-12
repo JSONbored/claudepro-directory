@@ -1,68 +1,32 @@
 'use client';
 
 import { ListTree } from '@heyclaude/web-runtime/icons';
-import type { ContentHeadingMetadata } from '@heyclaude/web-runtime/types/component.types';
+import { type ContentHeadingMetadata } from '@heyclaude/web-runtime/types/component.types';
 import { cn, STATE_PATTERNS } from '@heyclaude/web-runtime/ui';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
+import { normalizeHeadings, type NormalizedHeading } from './utils/normalize-headings';
 
 interface DetailTocProps {
-  headings?: ContentHeadingMetadata[] | null;
   className?: string;
+  headings?: ContentHeadingMetadata[] | null;
 }
 
-interface NormalizedHeading {
-  id: string;
-  title: string;
-  anchor: string;
-  level: number;
-}
-
-function normalizeHeadings(
-  headings: ContentHeadingMetadata[] | null | undefined
-): NormalizedHeading[] {
-  if (!Array.isArray(headings)) return [];
-
-  const deduped = new Map<string, NormalizedHeading>();
-
-  for (const heading of headings) {
-    if (!heading || typeof heading !== 'object') continue;
-    const rawId = typeof heading.id === 'string' ? heading.id.trim() : '';
-    const rawTitle = typeof heading.title === 'string' ? heading.title.trim() : '';
-
-    if (!(rawId && rawTitle)) continue;
-
-    if (deduped.has(rawId)) {
-      continue;
-    }
-
-    const level =
-      typeof heading.level === 'number' && Number.isFinite(heading.level)
-        ? Math.min(Math.max(Math.round(heading.level), 2), 6)
-        : 2;
-
-    const anchor =
-      typeof heading.anchor === 'string' && heading.anchor.startsWith('#')
-        ? heading.anchor
-        : `#${rawId}`;
-
-    deduped.set(rawId, {
-      id: rawId,
-      anchor,
-      level,
-      title: rawTitle,
-    });
-
-    if (deduped.size >= 50) {
-      break;
-    }
-  }
-
-  return Array.from(deduped.values());
-}
-
+/**
+ * Renders a table-of-contents navigation that highlights the currently visible section and lets users jump to headings.
+ *
+ * The component normalizes the provided headings, observes document headings to keep the active entry in sync with scroll position,
+ * updates the URL hash without adding history entries, and scrolls smoothly to targets when items are clicked (honoring reduced-motion).
+ *
+ * @param props.headings - Array of heading metadata to build the TOC from (may be null or undefined). If fewer than 3 normalized headings are available, nothing is rendered.
+ * @param props.className - Optional additional CSS classes applied to the root nav element.
+ * @returns A nav element containing the table of contents, or `null` when there are fewer than three headings.
+ *
+ * @see normalizeHeadings
+ */
 export function DetailToc({ headings, className }: DetailTocProps) {
   const normalizedHeadings = useMemo(() => normalizeHeadings(headings), [headings]);
-  const [activeId, setActiveId] = useState<string | null>(null);
+  const [activeId, setActiveId] = useState<null | string>(null);
 
   const baseLevel = useMemo(() => {
     if (normalizedHeadings.length === 0) return 2;
@@ -70,21 +34,21 @@ export function DetailToc({ headings, className }: DetailTocProps) {
   }, [normalizedHeadings]);
 
   const updateHash = useCallback((id: string) => {
-    if (typeof window === 'undefined' || !id) return;
-    const { pathname, search } = window.location;
-    const currentHash = window.location.hash.replace('#', '');
+    if (globalThis.window === undefined || !id) return;
+    const { pathname, search } = globalThis.location;
+    const currentHash = globalThis.location.hash.replace('#', '');
     if (currentHash === id) return;
     const nextUrl = `${pathname}${search ? search : ''}#${id}`;
-    window.history.replaceState(null, '', nextUrl);
+    globalThis.history.replaceState(null, '', nextUrl);
   }, []);
 
   useEffect(() => {
-    if (typeof window === 'undefined' || normalizedHeadings.length === 0) {
+    if (globalThis.window === undefined || normalizedHeadings.length === 0) {
       setActiveId(null);
       return;
     }
 
-    const hash = window.location.hash.replace('#', '');
+    const hash = globalThis.location.hash.replace('#', '');
     if (hash && normalizedHeadings.some((heading) => heading.id === hash)) {
       setActiveId(hash);
       return;
@@ -98,8 +62,14 @@ export function DetailToc({ headings, className }: DetailTocProps) {
     updateHash(activeId);
   }, [activeId, updateHash]);
 
+  const activeIdRef = useRef<null | string>(activeId);
+
   useEffect(() => {
-    if (typeof window === 'undefined' || normalizedHeadings.length === 0) {
+    activeIdRef.current = activeId;
+  }, [activeId]);
+
+  useEffect(() => {
+    if (globalThis.window === undefined || normalizedHeadings.length === 0) {
       return;
     }
 
@@ -117,7 +87,7 @@ export function DetailToc({ headings, className }: DetailTocProps) {
           const firstEntry = visibleEntries[0];
           if (firstEntry) {
             const nextActiveId = firstEntry.target.id;
-            if (nextActiveId && nextActiveId !== activeId) {
+            if (nextActiveId && nextActiveId !== activeIdRef.current) {
               setActiveId(nextActiveId);
             }
           }
@@ -129,6 +99,8 @@ export function DetailToc({ headings, className }: DetailTocProps) {
       }
     );
 
+    if (typeof document === 'undefined') return;
+    
     const elements = normalizedHeadings
       .map((heading) => document.getElementById(heading.id))
       .filter((el): el is HTMLElement => el !== null);
@@ -138,18 +110,20 @@ export function DetailToc({ headings, className }: DetailTocProps) {
     }
 
     return () => observer.disconnect();
-  }, [normalizedHeadings, activeId]);
+  }, [normalizedHeadings]);
 
   const handleHeadingClick = useCallback(
     (heading: NormalizedHeading) => {
-      if (typeof window === 'undefined') return;
+      if (typeof window === 'undefined' || typeof document === 'undefined') return;
       const element = document.getElementById(heading.id);
       if (!element) {
         updateHash(heading.id);
         return;
       }
 
-      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const prefersReducedMotion = window.matchMedia(
+        '(prefers-reduced-motion: reduce)'
+      ).matches;
       const offset = 96;
       const top = window.scrollY + element.getBoundingClientRect().top - offset;
 
@@ -171,7 +145,7 @@ export function DetailToc({ headings, className }: DetailTocProps) {
   return (
     <nav
       className={cn(
-        'rounded-2xl border border-border/60 bg-card/70 p-4 shadow-sm backdrop-blur',
+        'border-border/60 bg-card/70 rounded-2xl border p-4 shadow-sm backdrop-blur',
         'lg:sticky lg:top-28',
         className
       )}
@@ -179,8 +153,8 @@ export function DetailToc({ headings, className }: DetailTocProps) {
     >
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <ListTree className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-          <p className="font-semibold text-muted-foreground text-xs uppercase tracking-wide">
+          <ListTree className="text-muted-foreground h-4 w-4" aria-hidden="true" />
+          <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
             On this page
           </p>
         </div>

@@ -12,7 +12,7 @@ import { normalizeError, escapeHtml } from '@heyclaude/shared-runtime';
 import { inngest } from '../../client';
 import { sendEmail } from '../../../integrations/resend';
 import { HELLO_FROM, CONTACT_FROM } from '../../../email/config/email-config';
-import { logger, generateRequestId, createWebAppContextWithId } from '../../../logging/server';
+import { logger, createWebAppContextWithId } from '../../../logging/server';
 
 type ContactCategory = DatabaseGenerated['public']['Enums']['contact_category'];
 
@@ -35,8 +35,7 @@ export const sendContactEmails = inngest.createFunction(
   { event: 'email/contact' },
   async ({ event, step }) => {
     const startTime = Date.now();
-    const requestId = generateRequestId();
-    const logContext = createWebAppContextWithId(requestId, '/inngest/email/contact', 'sendContactEmails');
+    const logContext = createWebAppContextWithId('/inngest/email/contact', 'sendContactEmails');
 
     const { submissionId, name, email, category, message } = event.data;
 
@@ -45,21 +44,17 @@ export const sendContactEmails = inngest.createFunction(
     const isValidCategory = contactCategoryValues.includes(category as ContactCategory);
     
     if (!isValidCategory) {
-      logger.warn('Invalid contact category', {
-        ...logContext,
+      logger.warn({ ...logContext,
         category,
-        validCategories: contactCategoryValues.join(', '),
-      });
+        validCategories: contactCategoryValues.join(', '), }, 'Invalid contact category');
       throw new Error(`Invalid category: ${category}. Must be one of: ${contactCategoryValues.join(', ')}`);
     }
 
     const validatedCategory = category as ContactCategory;
 
-    logger.info('Contact form submission received', {
-      ...logContext,
+    logger.info({ ...logContext,
       submissionId,
-      category: validatedCategory,
-    });
+      category: validatedCategory, }, 'Contact form submission received');
 
     // Step 1: Send admin notification email
     const adminEmailResult = await step.run('send-admin-email', async (): Promise<{
@@ -99,21 +94,17 @@ export const sendContactEmails = inngest.createFunction(
         );
 
         if (emailError) {
-          logger.warn('Admin notification email failed', {
-            ...logContext,
+          logger.warn({ ...logContext,
             errorMessage: emailError.message,
-            submissionId,
-          });
+            submissionId, }, 'Admin notification email failed');
           return { sent: false, emailId: null };
         }
 
         return { sent: true, emailId: emailData?.id ?? null };
       } catch (error) {
         const normalized = normalizeError(error, 'Admin notification email failed');
-        logger.warn('Admin notification email failed', {
-          ...logContext,
-          errorMessage: normalized.message,
-        });
+        logger.warn({ ...logContext,
+          errorMessage: normalized.message, }, 'Admin notification email failed');
         return { sent: false, emailId: null };
       }
     });
@@ -142,33 +133,27 @@ export const sendContactEmails = inngest.createFunction(
         );
 
         if (emailError) {
-          logger.warn('User confirmation email failed', {
-            ...logContext,
+          logger.warn({ ...logContext,
             errorMessage: emailError.message,
-            submissionId,
-          });
+            submissionId, }, 'User confirmation email failed');
           return { sent: false, emailId: null };
         }
 
         return { sent: true, emailId: emailData?.id ?? null };
       } catch (error) {
         const normalized = normalizeError(error, 'User confirmation email failed');
-        logger.warn('User confirmation email failed', {
-          ...logContext,
-          errorMessage: normalized.message,
-        });
+        logger.warn({ ...logContext,
+          errorMessage: normalized.message, }, 'User confirmation email failed');
         return { sent: false, emailId: null };
       }
     });
 
     const durationMs = Date.now() - startTime;
-    logger.info('Contact form emails completed', {
-      ...logContext,
+    logger.info({ ...logContext,
       durationMs,
       submissionId,
       adminEmailSent: adminEmailResult.sent,
-      userEmailSent: userEmailResult.sent,
-    });
+      userEmailSent: userEmailResult.sent, }, 'Contact form emails completed');
 
     return {
       success: true,

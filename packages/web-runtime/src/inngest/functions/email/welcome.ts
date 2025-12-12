@@ -16,7 +16,7 @@ import {
   sendEmail,
   enrollInOnboardingSequence,
 } from '../../../integrations/resend';
-import { logger, generateRequestId, createWebAppContextWithId } from '../../../logging/server';
+import { logger, createWebAppContextWithId } from '../../../logging/server';
 
 /**
  * Welcome email function
@@ -37,17 +37,14 @@ export const sendWelcomeEmail = inngest.createFunction(
   { event: 'email/welcome' },
   async ({ event, step }) => {
     const startTime = Date.now();
-    const requestId = generateRequestId();
-    const logContext = createWebAppContextWithId(requestId, '/inngest/email/welcome', 'sendWelcomeEmail');
+    const logContext = createWebAppContextWithId('/inngest/email/welcome', 'sendWelcomeEmail');
 
     const { email, subscriptionId, triggerSource } = event.data;
 
-    logger.info('Welcome email request received', {
-      ...logContext,
+    logger.info({ ...logContext,
       email,
       triggerSource,
-      subscriptionId: subscriptionId ?? null,
-    });
+      subscriptionId: subscriptionId ?? null, }, 'Welcome email request received');
 
     // Step 1: Render and send the appropriate welcome email
     const emailResult = await step.run('send-welcome-email', async (): Promise<{
@@ -75,25 +72,19 @@ export const sendWelcomeEmail = inngest.createFunction(
         );
 
         if (emailError) {
-          logger.warn('Welcome email failed', {
-            ...logContext,
-            errorMessage: emailError.message,
-          });
+          logger.warn({ ...logContext,
+            errorMessage: emailError.message, }, 'Welcome email failed');
           return { sent: false, emailId: null };
         }
 
-        logger.info('Welcome email sent successfully', {
-          ...logContext,
-          emailId: emailData?.id ?? null,
-        });
+        logger.info({ ...logContext,
+          emailId: emailData?.id ?? null, }, 'Welcome email sent successfully');
 
         return { sent: true, emailId: emailData?.id ?? null };
       } catch (error) {
         const normalized = normalizeError(error, 'Welcome email failed');
-        logger.warn('Welcome email failed', {
-          ...logContext,
-          errorMessage: normalized.message,
-        });
+        logger.warn({ ...logContext,
+          errorMessage: normalized.message, }, 'Welcome email failed');
         return { sent: false, emailId: null };
       }
     });
@@ -103,28 +94,22 @@ export const sendWelcomeEmail = inngest.createFunction(
       await step.run('enroll-onboarding', async () => {
         try {
           await enrollInOnboardingSequence(email);
-          logger.info('Enrolled in onboarding sequence', {
-            ...logContext,
-            email,
-          });
+          logger.info({ ...logContext,
+            email, }, 'Enrolled in onboarding sequence');
         } catch (error) {
           const normalized = normalizeError(error, 'Onboarding enrollment failed');
-          logger.warn('Onboarding enrollment failed', {
-            ...logContext,
-            errorMessage: normalized.message,
-          });
+          logger.warn({ ...logContext,
+            errorMessage: normalized.message, }, 'Onboarding enrollment failed');
         }
       });
     }
 
     const durationMs = Date.now() - startTime;
-    logger.info('Welcome email completed', {
-      ...logContext,
+    logger.info({ ...logContext,
       durationMs,
       sent: emailResult.sent,
       emailId: emailResult.emailId,
-      triggerSource,
-    });
+      triggerSource, }, 'Welcome email completed');
 
     return {
       success: emailResult.sent,

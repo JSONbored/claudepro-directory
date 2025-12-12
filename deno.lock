@@ -1,0 +1,251 @@
+{
+  "version": "5",
+  "remote": {
+    "https://edge.netlify.com/": "fd941d61d88673d5f28aab283fb86fcc50f08a3bc80ee5470498fcfa88c65cfb",
+    "https://edge.netlify.com/bootstrap/config.ts": "6a2ce0e544e15e8f8883a5c18da5948e37fd0f2619f68cb31f3af53c51817025",
+    "https://edge.netlify.com/bootstrap/context.ts": "e97240232121e2f369f6546ce961490f34d961ea1ea54be3ff09633e3f08373f",
+    "https://edge.netlify.com/bootstrap/cookie.ts": "8b0baae708989ca183c6f3b4ab3d029e6abcbc2e43f93edeb0ff447b3bbc3a05",
+    "https://edge.netlify.com/bootstrap/edge_function.ts": "b8253e86aa83c67341f5cfedeba5049d77fbf84dcab7eceff7566b7728ae9b39",
+    "https://edge.netlify.com/bootstrap/globals/types.ts": "eaa6148ded3121d8dee62dd91c86e7fe76601df0f3ca8d7962243a30f4c8935f"
+  },
+  "workspace": {
+    "packageJson": {
+      "dependencies": [
+        "npm:@anthropic-ai/mcpb@^2.1.2",
+        "npm:@aws-sdk/client-s3@^3.948.0",
+        "npm:@eslint/js@^9.39.1",
+        "npm:@eslint/json@0.14",
+        "npm:@modelcontextprotocol/inspector@~0.17.5",
+        "npm:@next/eslint-plugin-next@^16.0.8",
+        "npm:@playwright/test@^1.57.0",
+        "npm:@react-email/components@^1.0.1",
+        "npm:@react-email/render@2",
+        "npm:@supabase/supabase-js@^2.87.1",
+        "npm:@testing-library/jest-dom@^6.9.1",
+        "npm:@testing-library/react@^16.3.0",
+        "npm:@testing-library/user-event@^14.6.1",
+        "npm:@total-typescript/ts-reset@~0.6.1",
+        "npm:@types/archiver@7",
+        "npm:@types/node@^24.10.2",
+        "npm:archiver@^7.0.1",
+        "npm:concurrently@^9.2.1",
+        "npm:eslint-config-next@^16.0.8",
+        "npm:eslint-config-prettier@^10.1.8",
+        "npm:eslint-import-resolver-typescript@^4.4.4",
+        "npm:eslint-plugin-array-func@^5.1.0",
+        "npm:eslint-plugin-better-tailwindcss@^3.8.0",
+        "npm:eslint-plugin-boundaries@^5.3.1",
+        "npm:eslint-plugin-de-morgan@2",
+        "npm:eslint-plugin-import-x@^4.16.1",
+        "npm:eslint-plugin-jsdoc@^61.5.0",
+        "npm:eslint-plugin-jsx-a11y@^6.10.2",
+        "npm:eslint-plugin-n@^17.23.1",
+        "npm:eslint-plugin-perfectionist@^4.15.1",
+        "npm:eslint-plugin-prettier@^5.5.4",
+        "npm:eslint-plugin-promise@^7.2.1",
+        "npm:eslint-plugin-react-hooks@^7.0.1",
+        "npm:eslint-plugin-react@^7.37.5",
+        "npm:eslint-plugin-security@^3.0.1",
+        "npm:eslint-plugin-sonarjs@^3.0.5",
+        "npm:eslint-plugin-turbo@^2.6.3",
+        "npm:eslint-plugin-unicorn@62",
+        "npm:eslint-plugin-vitest@~0.5.4",
+        "npm:eslint@^9.39.1",
+        "npm:inngest-cli@^1.14.3",
+        "npm:jsdom@^27.3.0",
+        "npm:knip@^5.73.1",
+        "npm:lefthook@^2.0.9",
+        "npm:ora@9",
+        "npm:prettier-plugin-tailwindcss@~0.7.2",
+        "npm:prettier@^3.7.4",
+        "npm:react-dom@19.2.1",
+        "npm:react@19.2.1",
+        "npm:server-only@^0.0.1",
+        "npm:tailwindcss@^4.1.17",
+        "npm:ts-prune@~0.10.3",
+        "npm:tsx@^4.21.0",
+        "npm:turbo@^2.6.3",
+        "npm:typescript-eslint@^8.49.0",
+        "npm:typescript@5.9.3",
+        "npm:vercel@^49.1.2",
+        "npm:vitest@^4.0.15"
+      ]
+    },
+    "members": {
+      "apps/web": {
+        "packageJson": {
+          "dependencies": [
+            "npm:@calcom/embed-react@^1.5.3",
+            "npm:@hookform/resolvers@^5.2.2",
+            "npm:@next/bundle-analyzer@16.0.8",
+            "npm:@radix-ui/react-avatar@^1.1.11",
+            "npm:@radix-ui/react-checkbox@^1.3.3",
+            "npm:@radix-ui/react-collapsible@^1.1.12",
+            "npm:@radix-ui/react-dialog@^1.1.15",
+            "npm:@radix-ui/react-dropdown-menu@^2.1.16",
+            "npm:@radix-ui/react-label@^2.1.8",
+            "npm:@radix-ui/react-popover@^1.1.15",
+            "npm:@radix-ui/react-scroll-area@^1.2.10",
+            "npm:@radix-ui/react-select@^2.2.6",
+            "npm:@radix-ui/react-separator@^1.1.8",
+            "npm:@radix-ui/react-slider@^1.3.6",
+            "npm:@radix-ui/react-slot@^1.2.4",
+            "npm:@radix-ui/react-switch@^1.2.6",
+            "npm:@radix-ui/react-tabs@^1.1.13",
+            "npm:@radix-ui/react-tooltip@^1.2.8",
+            "npm:@radix-ui/react-use-controllable-state@^1.2.2",
+            "npm:@radix-ui/react-visually-hidden@^1.2.4",
+            "npm:@supabase/ssr@0.8",
+            "npm:@supabase/supabase-js@^2.86.2",
+            "npm:@tailwindcss/postcss@^4.1.17",
+            "npm:@types/canvas-confetti@^1.9.0",
+            "npm:@types/he@^1.2.3",
+            "npm:@types/node@^24.10.1",
+            "npm:@types/react-dom@19.2.3",
+            "npm:@types/react@19.2.7",
+            "npm:@types/sanitize-html@^2.16.0",
+            "npm:@vercel/analytics@^1.6.1",
+            "npm:@vercel/speed-insights@^1.3.1",
+            "npm:babel-plugin-react-compiler@1",
+            "npm:canvas-confetti@^1.9.4",
+            "npm:class-variance-authority@~0.7.1",
+            "npm:clsx@^2.1.1",
+            "npm:cmdk@^1.1.1",
+            "npm:devalue@^5.5.0",
+            "npm:dompurify@^3.3.0",
+            "npm:embla-carousel-react@^8.6.0",
+            "npm:geist@^1.5.1",
+            "npm:he@^1.2.0",
+            "npm:html2canvas-pro@^1.5.13",
+            "npm:isomorphic-dompurify@^2.33.0",
+            "npm:lucide-react@0.556",
+            "npm:marked@^17.0.1",
+            "npm:motion@^12.23.25",
+            "npm:next-safe-action@^8.0.11",
+            "npm:next-themes@~0.4.6",
+            "npm:next@16.0.8",
+            "npm:pino-pretty@^13.1.3",
+            "npm:pino@^10.1.0",
+            "npm:postcss@^8.5.6",
+            "npm:react-dom@19.2.1",
+            "npm:react-error-boundary@6",
+            "npm:react-hook-form@^7.68.0",
+            "npm:react-share@^5.2.2",
+            "npm:react@19.2.1",
+            "npm:sanitize-html@^2.17.0",
+            "npm:server-only@^0.0.1",
+            "npm:sonner@^2.0.7",
+            "npm:sugar-high@~0.9.5",
+            "npm:tailwind-merge@^3.4.0",
+            "npm:tailwindcss@^4.1.17",
+            "npm:zod@^4.1.13",
+            "npm:zustand@^5.0.9"
+          ]
+        }
+      },
+      "packages/data-layer": {
+        "packageJson": {
+          "dependencies": [
+            "npm:@supabase/supabase-js@^2.86.2",
+            "npm:pino@^10.1.0",
+            "npm:typescript@5.9.3"
+          ]
+        }
+      },
+      "packages/edge-runtime": {
+        "packageJson": {
+          "dependencies": [
+            "npm:pino@^10.1.0"
+          ]
+        }
+      },
+      "packages/generators": {
+        "packageJson": {
+          "dependencies": [
+            "npm:@aws-sdk/client-s3@^3.937.0",
+            "npm:@iarna/toml@^2.2.5",
+            "npm:@supabase/supabase-js@^2.86.2",
+            "npm:@types/escape-html@^1.0.4",
+            "npm:archiver@^7.0.1",
+            "npm:escape-html@^1.0.3",
+            "npm:jiti@^2.6.1",
+            "npm:open@11",
+            "npm:ora@9",
+            "npm:pino@^10.1.0",
+            "npm:resend@^6.5.2",
+            "npm:ts-morph@24",
+            "npm:ts-morph@^27.0.2",
+            "npm:zod@^4.1.12"
+          ]
+        }
+      },
+      "packages/shared-runtime": {
+        "packageJson": {
+          "dependencies": [
+            "npm:@supabase/supabase-js@^2.86.2",
+            "npm:@types/sanitize-html@^2.16.0",
+            "npm:esbuild@0.27",
+            "npm:pino-pretty@^13.1.2",
+            "npm:pino@^10.1.0",
+            "npm:sanitize-html@^2.17.0",
+            "npm:sugar-high@~0.9.5",
+            "npm:zod@^4.1.12"
+          ]
+        }
+      },
+      "packages/web-runtime": {
+        "packageJson": {
+          "dependencies": [
+            "npm:@radix-ui/react-avatar@^1.1.11",
+            "npm:@radix-ui/react-checkbox@^1.1.2",
+            "npm:@radix-ui/react-collapsible@^1.1.12",
+            "npm:@radix-ui/react-dialog@^1.1.15",
+            "npm:@radix-ui/react-dropdown-menu@^2.1.16",
+            "npm:@radix-ui/react-hover-card@^1.1.15",
+            "npm:@radix-ui/react-label@^2.1.8",
+            "npm:@radix-ui/react-popover@^1.1.15",
+            "npm:@radix-ui/react-scroll-area@^1.2.0",
+            "npm:@radix-ui/react-select@^2.2.6",
+            "npm:@radix-ui/react-separator@^1.1.0",
+            "npm:@radix-ui/react-slider@^1.2.1",
+            "npm:@radix-ui/react-slot@^1.2.4",
+            "npm:@radix-ui/react-switch@^1.1.1",
+            "npm:@radix-ui/react-tabs@^1.1.13",
+            "npm:@radix-ui/react-tooltip@^1.2.8",
+            "npm:@radix-ui/react-use-controllable-state@^1.1.1",
+            "npm:@radix-ui/react-visually-hidden@^1.2.4",
+            "npm:@react-email/components@^1.0.1",
+            "npm:@supabase/ssr@0.8",
+            "npm:@supabase/supabase-js@^2.86.2",
+            "npm:@types/canvas-confetti@^1.6.4",
+            "npm:@types/react@19.2.7",
+            "npm:canvas-confetti@^1.9.4",
+            "npm:class-variance-authority@~0.7.1",
+            "npm:clsx@^2.1.1",
+            "npm:cmdk@^1.1.1",
+            "npm:devalue@^5.5.0",
+            "npm:dompurify@^3.3.0",
+            "npm:html2canvas-pro@^1.5.13",
+            "npm:inngest@^3.46.0",
+            "npm:lucide-react@0.555",
+            "npm:motion@^12.23.25",
+            "npm:next-safe-action@^8.0.11",
+            "npm:next@16.0.8",
+            "npm:pino-pretty@^13.1.2",
+            "npm:pino@^10.1.0",
+            "npm:react-dom@19.2.1",
+            "npm:react-error-boundary@6",
+            "npm:react-use-measure@^2.1.7",
+            "npm:react@19.2.1",
+            "npm:resend@^6.5.2",
+            "npm:server-only@^0.0.1",
+            "npm:sonner@^2.0.7",
+            "npm:tailwind-merge@^3.4.0",
+            "npm:zod@^4.1.12",
+            "npm:zustand@^5.0.2"
+          ]
+        }
+      }
+    }
+  }
+}

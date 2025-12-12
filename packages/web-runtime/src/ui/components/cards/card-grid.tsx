@@ -37,6 +37,7 @@
  */
 
 import { logUnhandledPromise } from '../../../entries/core.ts';
+import { SPRING, STAGGER } from '../../../design-system/index.ts';
 import { useInfiniteScroll } from '../../../hooks/use-infinite-scroll.ts';
 import type { DisplayableContent } from '../../../types/component.types.ts';
 import { UI_CLASSES } from '../../constants.ts';
@@ -216,9 +217,8 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{
-                  duration: 0.4,
-                  delay: (index % batchSize) * 0.03,
-                  ease: [0.25, 0.1, 0.25, 1],
+                  ...SPRING.smooth,
+                  delay: (index % batchSize) * STAGGER.micro, // Using micro for 30ms
                 }}
               >
                 {cardContent}

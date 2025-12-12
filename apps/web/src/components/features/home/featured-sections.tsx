@@ -2,27 +2,28 @@
 
 /** Featured sections consuming homepageConfigs for runtime-tunable categories */
 
-import type { Database } from '@heyclaude/database-types';
-import { trackMissingData } from '@heyclaude/web-runtime/core';
+import { type Database } from '@heyclaude/database-types';
+import { trackMissingData, getTrendingSlugs, isNewSince } from '@heyclaude/web-runtime/core';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ExternalLink } from '@heyclaude/web-runtime/icons';
-import type {
-  DisplayableContent,
-  UnifiedCategoryConfig,
+import {
+  type DisplayableContent,
+  type UnifiedCategoryConfig,
 } from '@heyclaude/web-runtime/types/component.types';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { UI_CLASSES, UnifiedBadge, UnifiedCardGrid, ConfigCard, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, BlurText } from '@heyclaude/web-runtime/ui';
+import { SPRING, TEXT_ANIMATIONS, STAGGER, VIEWPORT } from '@heyclaude/web-runtime/design-system';
+import { motion } from 'motion/react';
 import Link from 'next/link';
-import { type FC, memo, useEffect, useMemo } from 'react';
-import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
-import { UnifiedCardGrid } from '@heyclaude/web-runtime/ui';
-import { ConfigCard } from '@heyclaude/web-runtime/ui';
+import { usePathname } from 'next/navigation';
+import { type FC, memo, useCallback, useEffect, useMemo } from 'react';
+
+import { useAuthModal } from '@/src/hooks/use-auth-modal';
 import { JobCard } from '@/src/components/core/domain/cards/job-card';
-import { getTrendingSlugs, isNewSince } from '@heyclaude/web-runtime/core';
 
 interface FeaturedSectionProps {
-  title: string;
   href: string;
   items: readonly DisplayableContent[];
+  title: string;
   weekStart?: string;
 }
 
@@ -37,6 +38,16 @@ interface FeaturedSectionProps {
  */
 const FeaturedSection: FC<FeaturedSectionProps> = memo(
   ({ title, href, items, weekStart }: FeaturedSectionProps) => {
+    const { openAuthModal } = useAuthModal();
+    const pathname = usePathname();
+
+    const handleAuthRequired = useCallback(() => {
+      openAuthModal({
+        valueProposition: 'Sign in to save bookmarks',
+        redirectTo: pathname ?? undefined,
+      });
+    }, [openAuthModal, pathname]);
+
     // PERFORMANCE: Memoize the sliced array to prevent re-creating on every render
     // Previous: rules.slice(0, 6) created new array on EVERY parent render
     // Current: Stable reference unless items array changes
@@ -55,8 +66,19 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
     return (
       <div>
         <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mb-8`}>
-          <h2 className={'font-bold text-2xl'}>{title}</h2>
-          <Link href={href} className="flex items-center gap-2 text-accent hover:underline">
+          <BlurText
+            text={title}
+            delay={50}
+            animateBy="words"
+            direction="top"
+            threshold={VIEWPORT.default.amount}
+            rootMargin={VIEWPORT.default.margin}
+            className="text-2xl font-bold"
+            animationFrom={TEXT_ANIMATIONS.blur.from}
+            animationTo={[...TEXT_ANIMATIONS.blur.to]}
+            stepDuration={0.35}
+          />
+          <Link href={href} className="text-accent flex items-center gap-2 hover:underline">
             View all <ExternalLink className={UI_CLASSES.ICON_SM} />
           </Link>
         </div>
@@ -68,31 +90,64 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
             const showTrending = Boolean(slug && trendingSlugs.has(slug));
 
             return (
-              <div className="relative h-full">
-                {(showNew || showTrending) && (
-                  <div className="pointer-events-none absolute top-3 left-3 z-10 flex flex-col gap-2">
-                    {showNew && (
-                      <UnifiedBadge
-                        variant="base"
-                        style="secondary"
-                        className="text-[10px] uppercase tracking-wide"
-                      >
-                        New this week
-                      </UnifiedBadge>
-                    )}
-                    {showTrending && (
-                      <UnifiedBadge
-                        variant="base"
-                        style="outline"
-                        className="text-[10px] uppercase tracking-wide"
-                      >
-                        Trending
-                      </UnifiedBadge>
-                    )}
-                  </div>
-                )}
-                <ConfigCard item={item} showBorderBeam={index < 3} />
-              </div>
+              <motion.div
+                key={`card-${item.slug || index}`}
+                className="relative h-full"
+                initial={{ opacity: 0, y: 20, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{
+                  delay: index * STAGGER.default,
+                  ...SPRING.smooth,
+                }}
+              >
+                {showNew || showTrending ? (
+                  <TooltipProvider delayDuration={300}>
+                    <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
+                      {showNew ? (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="cursor-help">
+                              <UnifiedBadge
+                                variant="base"
+                                style="secondary"
+                                className="text-[10px] tracking-wide uppercase pointer-events-auto"
+                              >
+                                New this week
+                              </UnifiedBadge>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent side="right" className="max-w-xs">
+                            Added or updated within the last 7 days
+                          </TooltipContent>
+                        </Tooltip>
+                      ) : null}
+                      {showTrending ? (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="cursor-help">
+                              <UnifiedBadge
+                                variant="base"
+                                style="outline"
+                                className="text-[10px] tracking-wide uppercase pointer-events-auto"
+                              >
+                                Trending
+                              </UnifiedBadge>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent side="right" className="max-w-xs">
+                            Most viewed and copied configurations this week
+                          </TooltipContent>
+                        </Tooltip>
+                      ) : null}
+                    </div>
+                  </TooltipProvider>
+                ) : null}
+                <ConfigCard
+                  item={item}
+                  showBorderBeam={index < 3}
+                  onAuthRequired={handleAuthRequired}
+                />
+              </motion.div>
             );
           }}
           variant="normal"
@@ -109,8 +164,8 @@ FeaturedSection.displayName = 'FeaturedSection';
 export interface FeaturedSectionsProps {
   categories: Record<string, readonly DisplayableContent[]>;
   categoryConfigs: Record<string, UnifiedCategoryConfig>;
-  featuredJobs?: ReadonlyArray<Database['public']['Tables']['jobs']['Row']>;
   featuredCategories: readonly Database['public']['Enums']['content_category'][];
+  featuredJobs?: ReadonlyArray<Database['public']['Tables']['jobs']['Row']>;
   weekStart?: string;
 }
 
@@ -133,9 +188,9 @@ const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({
   }, [featuredCategories.length, categories, categoryConfigs, featuredJobs.length]);
 
   return (
-    <div className={'mb-16 space-y-16'}>
+    <div className="mb-16 space-y-16">
       {featuredCategories.length === 0 && (
-        <div className="py-8 text-center text-muted-foreground">
+        <div className="text-muted-foreground py-8 text-center">
           No featured categories available.
         </div>
       )}
@@ -143,15 +198,38 @@ const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({
         const items = categories[categorySlug];
         const config = categoryConfigs[categorySlug];
 
-        // Skip if no config or no items for this category
-        // Also validate that items is actually an array (defensive programming)
-        if (!(config && items && Array.isArray(items))) {
+        // Skip if no config - this is a real issue (category should have config)
+        if (!config) {
+          trackMissingData('featured', 'category-config', {
+            categorySlug,
+            hasConfig: false,
+          });
+          return null;
+        }
+
+        // Skip if items is missing or not an array - this is a data structure issue
+        if (!items || !Array.isArray(items)) {
           trackMissingData('featured', 'category-data', {
             categorySlug,
             hasConfig: !!config,
             hasItems: !!items,
             itemsIsArray: Array.isArray(items),
             itemsType: typeof items,
+          });
+          return null;
+        }
+
+        // Empty items array is NOT expected - featured sections should always have 6 items per category
+        // This indicates either:
+        // 1. RPC returned empty data (database issue)
+        // 2. Cache returned stale empty data (cache invalidation issue)
+        // 3. No content exists in database for this category (data issue)
+        if (items.length === 0) {
+          trackMissingData('featured', 'category-data-empty', {
+            categorySlug,
+            hasConfig: !!config,
+            expectedItems: 6,
+            actualItems: 0,
           });
           return null;
         }
@@ -171,17 +249,41 @@ const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({
       {featuredJobs.length > 0 && (
         <div>
           <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mb-8`}>
-            <h2 className={'font-bold text-2xl'}>Featured Jobs</h2>
+            <BlurText
+              text="Featured Jobs"
+              delay={50}
+              animateBy="words"
+              direction="top"
+              threshold={0.1}
+              rootMargin="0px"
+              className="text-2xl font-bold"
+              animationFrom={{ filter: 'blur(10px)', opacity: 0, y: -20 }}
+              animationTo={[
+                { filter: 'blur(5px)', opacity: 0.7, y: 0 },
+                { filter: 'blur(0px)', opacity: 1, y: 0 }
+              ]}
+              stepDuration={0.35}
+            />
             <Link
               href={ROUTES.JOBS}
-              className="flex items-center gap-2 text-accent hover:underline"
+              className="text-accent flex items-center gap-2 hover:underline"
             >
               View all <ExternalLink className={UI_CLASSES.ICON_SM} />
             </Link>
           </div>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {featuredJobs.slice(0, 6).map((job) => (
-              <JobCard key={job.slug} job={job} />
+            {featuredJobs.slice(0, 6).map((job, index) => (
+              <motion.div
+                key={job.slug}
+                initial={{ opacity: 0, y: 20, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{
+                  delay: index * STAGGER.default,
+                  ...SPRING.smooth,
+                }}
+              >
+                <JobCard job={job} />
+              </motion.div>
             ))}
           </div>
         </div>

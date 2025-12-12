@@ -12,6 +12,7 @@
  * - Escape hatch for integration testing
  */
 
+import { getDeploymentEnv } from '@heyclaude/shared-runtime/platform';
 import { logger as pinoLogger } from '../../logging/server';
 
 /**
@@ -53,12 +54,12 @@ export interface EmailSafetyConfig {
  */
 export function getEmailSafetyConfig(): EmailSafetyConfig {
   const nodeEnv = process.env['NODE_ENV'];
-  const vercelEnv = process.env['VERCEL_ENV'];
+  const deploymentEnv = getDeploymentEnv();
 
-  // Determine if production
+  // Determine if production (platform-agnostic)
   const isProduction =
     nodeEnv === 'production' ||
-    vercelEnv === 'production';
+    deploymentEnv === 'production';
 
   // Check for dev email override
   const allowDevEmails =
@@ -165,17 +166,20 @@ export interface BlockedEmailLog {
 export function logBlockedEmail(emailData: BlockedEmailLog, reason: string): void {
   const recipients = Array.isArray(emailData.to) ? emailData.to : [emailData.to];
 
-  pinoLogger.info('📧 Email BLOCKED (dev mode)', {
-    operation: 'email-safety-block',
-    reason,
-    to: recipients.join(', '),
-    from: emailData.from,
+  pinoLogger.info(
+    {
+      operation: 'email-safety-block',
+        reason,
+      to: recipients.join(', '),
+      from: emailData.from,
     subject: emailData.subject,
     tags: emailData.tags?.map((t) => `${t.name}=${t.value}`).join(', '),
     htmlPreview: emailData.html ? emailData.html.slice(0, 200) + '...' : undefined,
     environment: process.env['NODE_ENV'] || 'development',
-    tip: 'To send real emails in dev, set ALLOW_DEV_EMAILS=true or add email to DEV_EMAIL_WHITELIST',
-  });
+      tip: 'To send real emails in dev, set ALLOW_DEV_EMAILS=true or add email to DEV_EMAIL_WHITELIST',
+    },
+    '📧 Email BLOCKED (dev mode)'
+  );
 }
 
 /**

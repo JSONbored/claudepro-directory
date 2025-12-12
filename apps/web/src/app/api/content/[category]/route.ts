@@ -1,138 +1,182 @@
 /**
- * Category-Only Content API Route
- * Migrated from public-api edge function
+ * Category Content API Route
+ * 
+ * Returns category content in multiple formats (LLMs.txt or JSON).
+ * Supports filtering by content category with optimized caching.
+ * 
+ * @example
+ * ```ts
+ * // Request
+ * GET /api/content/agents?format=json
+ * 
+ * // Response (200) - application/json
+ * [
+ *   { "id": "...", "title": "...", ... },
+ *   ...
+ * ]
+ * ```
  */
 
 import 'server-only';
-
 import { ContentService } from '@heyclaude/data-layer';
 import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
+import { createApiRoute, createApiOptionsHandler, categoryContentFormatSchema } from '@heyclaude/web-runtime/server';
 import {
-  generateRequestId,
-  logger,
-  normalizeError,
-  createErrorResponse,
-} from '@heyclaude/web-runtime/logging/server';
-import {
-  createSupabaseAnonClient,
-  badRequestResponse,
-  getOnlyCorsHeaders,
   buildCacheHeaders,
+  createSupabaseAnonClient,
+  getOnlyCorsHeaders,
+  jsonResponse,
+  notFoundResponse,
 } from '@heyclaude/web-runtime/server';
-import { NextRequest, NextResponse } from 'next/server';
-
-const CORS = getOnlyCorsHeaders;
-const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
-
-/**
- * Checks whether a string is a valid content category value.
- *
- * @param value - The string to validate as a content category
- * @returns `true` if `value` is one of the allowed `content_category` enum values, `false` otherwise
- * @see CONTENT_CATEGORY_VALUES
- * @see DatabaseGenerated['public']['Enums']['content_category']
- */
-function isValidContentCategory(
-  value: string
-): value is DatabaseGenerated['public']['Enums']['content_category'] {
-  return CONTENT_CATEGORY_VALUES.includes(
-    value as DatabaseGenerated['public']['Enums']['content_category']
-  );
-}
+import { cacheLife } from 'next/cache';
+import { NextResponse } from 'next/server';
+import { z } from 'zod';
 
 /**
- * Handle GET requests for category-only content at /api/content/[category].
+ * Cached helper function to fetch category content list.
+ * Uses Cache Components to reduce function invocations.
+ * The category parameter becomes part of the cache key, so different categories have different cache entries.
  *
- * Validates the `format` query parameter (must be "llms-category") and the path
- * `category`, fetches the corresponding Category LLMs.txt content, normalizes
- * literal `\n` sequences into real newlines, and returns the content as
- * `text/plain; charset=utf-8` with security, CORS, and cache headers.
- *
- * On invalid `format` or `category`, or when the category content is missing,
- * responds with a 400 Bad Request including CORS headers. On internal errors,
- * returns a structured error response containing route and operation context.
- *
- * @param request - The incoming NextRequest
- * @param params - An object with a Promise resolving to `{ category: string }`
- * @returns A NextResponse:
- *   - 200 with the formatted Category LLMs.txt as `text/plain; charset=utf-8` when successful
- *   - 400 with CORS headers for invalid input or missing content
- *   - An error response for unexpected failures
- *
- * @see ContentService
- * @see isValidContentCategory
- * @see createErrorResponse
+ * @param {DatabaseGenerated['public']['Enums']['content_category']} category - Content category enum value
+ * @returns {Promise<unknown[]>} Category content list from the database (typically an array of content item objects)
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ category: string }> }
+async function getCachedCategoryContent(
+  category: DatabaseGenerated['public']['Enums']['content_category']
 ) {
-  const requestId = generateRequestId();
-  const reqLogger = logger.child({
-    requestId,
-    operation: 'ContentCategoryAPI',
-    route: '/api/content/[category]',
-    method: 'GET',
-  });
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire (defined in next.config.mjs)
 
-  try {
-    const { category } = await params;
-    const url = new URL(request.url);
-    const format = (url.searchParams.get('format') ?? 'llms-category').toLowerCase();
+  const supabase = createSupabaseAnonClient();
+  const service = new ContentService(supabase);
+  return await service.getCategoryContentList({ p_category: category });
+}
 
-    if (format !== 'llms-category') {
-      return badRequestResponse(`Invalid format '${format}' for category-only route`, CORS);
-    }
+/**
+ * Cached helper function to fetch category LLMs.txt
+ * Uses Cache Components to reduce function invocations
+ *
+ * @param {DatabaseGenerated['public']['Enums']['content_category']} category - Content category enum value
+ * @returns {Promise<string | null>} Category LLMs.txt content from the database
+ */
+async function getCachedCategoryLlmsTxt(
+  category: DatabaseGenerated['public']['Enums']['content_category']
+) {
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
 
-    if (!isValidContentCategory(category)) {
-      return badRequestResponse(`Invalid category '${category}'`, CORS);
-    }
+  const supabase = createSupabaseAnonClient();
+  const service = new ContentService(supabase);
+  return await service.getCategoryLlmsTxt({ p_category: category });
+}
 
-    reqLogger.info('Category LLMs.txt request received', { category, format });
-
-    const supabase = createSupabaseAnonClient();
-    const service = new ContentService(supabase);
-    const data = await service.getCategoryLlmsTxt({ p_category: category });
-
-    if (!data) {
-      reqLogger.warn('Category LLMs.txt not found', { category });
-      return badRequestResponse('Category LLMs.txt not found or invalid', CORS);
-    }
-
-    const formatted = data.replaceAll(String.raw`\n`, '\n');
-
-    reqLogger.info('Category LLMs.txt generated', {
-      category,
-      bytes: formatted.length,
-    });
-
-    return new NextResponse(formatted, {
-      status: 200,
-      headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-        'X-Generated-By': 'supabase.rpc.generate_category_llms_txt',
-        ...buildSecurityHeaders(),
-        ...CORS,
-        ...buildCacheHeaders('content_export'),
+/**
+ * GET /api/content/[category] - Get category content
+ * 
+ * Returns category content in multiple formats (LLMs.txt or JSON).
+ * Supports filtering by content category with optimized caching.
+ */
+export const GET = createApiRoute({
+  route: '/api/content/[category]',
+  operation: 'ContentCategoryAPI',
+  method: 'GET',
+  cors: 'anon',
+  querySchema: z.object({
+    format: categoryContentFormatSchema,
+  }),
+  openapi: {
+    summary: 'Get category content',
+    description: 'Returns category content in multiple formats (LLMs.txt or JSON). Supports filtering by content category with optimized caching.',
+    tags: ['content', 'categories', 'export'],
+    operationId: 'getCategoryContent',
+    responses: {
+      200: {
+        description: 'Category content retrieved successfully',
       },
-    });
-  } catch (error) {
-    reqLogger.error('Category API error', normalizeError(error));
-    return createErrorResponse(error, {
-      route: '/api/content/[category]',
-      operation: 'ContentCategoryAPI',
-      method: 'GET',
-    });
-  }
-}
-
-export function OPTIONS() {
-  return new NextResponse(null, {
-    status: 204,
-    headers: {
-      ...getOnlyCorsHeaders,
+      400: {
+        description: 'Invalid category or format parameter',
+      },
+      404: {
+        description: 'Category content not found',
+      },
     },
-  });
-}
+  },
+  handler: async ({ logger, query, nextContext }) => {
+    // Extract path parameter from Next.js route context
+    interface RouteContext {
+      params: Promise<{ category: string }>;
+    }
+    const context = nextContext as RouteContext;
+    if (!context || !context.params) {
+      logger.error({}, 'Missing route context for category content handler');
+      throw new Error('Missing route context');
+    }
+
+    const { category } = await context.params;
+
+    // Validate category from path parameter
+    const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
+    if (!CONTENT_CATEGORY_VALUES.includes(category as DatabaseGenerated['public']['Enums']['content_category'])) {
+      throw new Error(`Invalid category '${category}'. Valid categories: ${CONTENT_CATEGORY_VALUES.join(', ')}`);
+    }
+
+    // Zod schema ensures proper types
+    const { format } = query;
+
+    logger.info({ category, format }, 'Category content request received');
+
+      switch (format) {
+        case 'llms-category': {
+          const data = await getCachedCategoryLlmsTxt(category as DatabaseGenerated['public']['Enums']['content_category']);
+
+          if (!data) {
+            logger.warn({ category }, 'Category LLMs.txt not found');
+            return notFoundResponse('Category LLMs.txt not found', 'CategoryContent');
+          }
+
+          const formatted = data.replaceAll(String.raw`\n`, '\n');
+
+          logger.info({ bytes: formatted.length, category }, 'Category LLMs.txt generated');
+
+          return new NextResponse(formatted, {
+            headers: {
+              'Content-Type': 'text/plain; charset=utf-8',
+              'X-Generated-By': 'supabase.rpc.generate_category_llms_txt',
+              ...buildSecurityHeaders(),
+              ...getOnlyCorsHeaders,
+              ...buildCacheHeaders('content_export'),
+            },
+            status: 200,
+          });
+        }
+        case 'json': {
+          const data = await getCachedCategoryContent(category as DatabaseGenerated['public']['Enums']['content_category']);
+
+          if (!data || (Array.isArray(data) && data.length === 0)) {
+            logger.warn({ category }, 'Category content not found');
+            return notFoundResponse('Category content not found', 'CategoryContent');
+          }
+
+          logger.info({ category, itemCount: Array.isArray(data) ? data.length : 1 }, 'Category content retrieved');
+
+          return jsonResponse(data, 200, getOnlyCorsHeaders, {
+            'X-Generated-By': 'supabase.rpc.get_category_content_list',
+            ...buildSecurityHeaders(),
+            ...buildCacheHeaders('content_export', {
+              stale: 60 * 60 * 24 * 30, // 30 days stale-while-revalidate
+              ttl: 60 * 60 * 24 * 7, // 7 days
+            }),
+          });
+        }
+        default: {
+          throw new Error(`Invalid format '${format}'. Valid formats: llms-category, json`);
+        }
+      }
+  },
+});
+
+/**
+ * OPTIONS handler for CORS preflight requests
+ */
+export const OPTIONS = createApiOptionsHandler('anon');

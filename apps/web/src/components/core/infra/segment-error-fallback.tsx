@@ -9,6 +9,8 @@ import {
   CardTitle,
   UI_CLASSES,
 } from '@heyclaude/web-runtime/ui';
+import { useCopyToClipboard } from '@heyclaude/web-runtime/hooks';
+import { Copy, Check } from '@heyclaude/web-runtime/icons';
 import Link from 'next/link';
 
 /**
@@ -19,19 +21,48 @@ import Link from 'next/link';
 // eslint-disable-next-line architectural-rules/require-env-validation-schema -- NODE_ENV is inlined by Next.js at build time, not a runtime lookup
 const isDevelopment = process.env.NODE_ENV === 'development';
 
-type FallbackLink = {
+interface FallbackLink {
   href: string;
   label: string;
-  variant?: 'default' | 'outline' | 'ghost';
-};
+  variant?: 'default' | 'ghost' | 'outline';
+}
 
 interface SegmentErrorFallbackProps {
-  title: string;
   description: string;
-  resetText?: string;
-  onReset?: () => void;
-  links?: FallbackLink[];
   error?: Error & { digest?: string };
+  links?: FallbackLink[];
+  onReset?: () => void;
+  resetText?: string;
+  title: string;
+}
+
+function ErrorCodeBlock({ content }: { content: string }) {
+  const { copied, copy } = useCopyToClipboard({
+    context: { component: 'SegmentErrorFallback', action: 'copy-error' },
+  });
+
+  if (!content) return null;
+
+  return (
+    <div className="relative">
+      <pre className="text-destructive text-xs max-w-full break-all whitespace-pre-wrap bg-background/50 rounded border border-border p-3 pr-10">
+        {content}
+      </pre>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="absolute top-2 right-2 h-6 w-6 p-0"
+        onClick={() => copy(content)}
+        aria-label={copied ? 'Copied!' : 'Copy error message'}
+      >
+        {copied ? (
+          <Check className="h-3 w-3 text-green-500" aria-hidden="true" />
+        ) : (
+          <Copy className="h-3 w-3" aria-hidden="true" />
+        )}
+      </Button>
+    </div>
+  );
 }
 
 export function SegmentErrorFallback({
@@ -50,17 +81,17 @@ export function SegmentErrorFallback({
           <CardDescription>{description}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {onReset && (
+          {onReset ? (
             <Button onClick={onReset} className="w-full sm:w-auto">
               {resetText}
             </Button>
-          )}
+          ) : null}
           {links.length > 0 && (
             <div className={`${UI_CLASSES.FLEX_COL_SM_ROW_GAP_3}`}>
               {links.map((link) => (
                 <Button
                   key={`${link.href}-${link.label}`}
-                  asChild={true}
+                  asChild
                   variant={link.variant ?? 'outline'}
                   className="w-full sm:w-auto"
                 >
@@ -69,19 +100,25 @@ export function SegmentErrorFallback({
               ))}
             </div>
           )}
-          {isDevelopment && error && (
-            <div className="rounded-lg border border-muted-foreground/30 border-dashed bg-muted/30 p-4">
-              <p className="mb-2 font-semibold text-muted-foreground text-sm">Error details</p>
-              <pre className="wrap-break-word whitespace-pre-wrap text-destructive text-xs">
-                {error.message}
-              </pre>
-              {error.digest && (
-                <p className="mt-2 font-mono text-muted-foreground text-xs">
+          {isDevelopment && error ? (
+            <div className="border-muted-foreground/30 bg-muted/30 rounded-lg border border-dashed p-4">
+              <p className="text-muted-foreground mb-2 text-sm font-semibold">Error details</p>
+              <ErrorCodeBlock content={error.message} />
+              {error.stack ? (
+                <details className="mt-2 text-xs">
+                  <summary className="cursor-pointer font-semibold">► Stack Trace</summary>
+                  <div className="mt-2">
+                    <ErrorCodeBlock content={error.stack} />
+                  </div>
+                </details>
+              ) : null}
+              {error.digest ? (
+                <p className="text-muted-foreground mt-2 font-mono text-xs break-words">
                   Digest: {error.digest}
                 </p>
-              )}
+              ) : null}
             </div>
-          )}
+          ) : null}
         </CardContent>
       </Card>
     </div>

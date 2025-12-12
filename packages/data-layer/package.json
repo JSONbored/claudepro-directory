@@ -1,6 +1,6 @@
 {
   "name": "@heyclaude/data-layer",
-  "version": "0.0.0",
+  "version": "1.1.0",
   "private": true,
   "sideEffects": false,
   "exports": {
@@ -15,7 +15,7 @@
   "dependencies": {
     "@heyclaude/database-types": "workspace:*",
     "@heyclaude/shared-runtime": "workspace:*",
-    "@supabase/supabase-js": "^2.84.0",
+    "@supabase/supabase-js": "^2.86.2",
     "pino": "^10.1.0"
   },
   "devDependencies": {

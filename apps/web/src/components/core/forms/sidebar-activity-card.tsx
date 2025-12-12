@@ -6,23 +6,32 @@
 
 'use client';
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { CheckCircle, Clock, Lightbulb } from '@heyclaude/web-runtime/icons';
-import { cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import {
+  cn,
+  UI_CLASSES,
+  UnifiedBadge,
+  NavLink,
+  Card,
+  CardContent,
+  CardHeader,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@heyclaude/web-runtime/ui';
+import { DURATION } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
-import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
-import { NavLink } from '@heyclaude/web-runtime/ui';
-import { Card, CardContent, CardHeader } from '@heyclaude/web-runtime/ui';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@heyclaude/web-runtime/ui';
 
 interface SidebarActivityCardProps {
   recentMerged: Array<{
-    id: string | number;
     content_name: string;
     content_type: Database['public']['Enums']['content_category'];
+    id: number | string;
     merged_at: string;
     merged_at_formatted?: string;
-    user?: { name: string; slug: string } | null;
+    user?: null | { name: string; slug: string };
   }>;
   tips: string[];
   typeLabels: Partial<Record<Database['public']['Enums']['content_category'], string>>;
@@ -36,10 +45,32 @@ const tabContentVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.3, ease: 'easeOut' as const },
+    transition: { duration: DURATION.default, ease: 'easeOut' as const },
   },
 } as const;
 
+/**
+ * Sidebar card displaying recent merged submissions and tips in two tabs.
+ *
+ * Renders a "Recent" tab that lists submissions with name, type label, optional author link, and timestamp,
+ * and a "Tips" tab that shows a vertical list of tip strings.
+ *
+ * @param recentMerged - Array of recent submission objects. Each item should include:
+ *   - id: number | string
+ *   - content_name: string
+ *   - content_type: string
+ *   - merged_at: string
+ *   - merged_at_formatted?: string
+ *   - user?: null | { name: string; slug: string }
+ * @param tips - Array of tip strings to display under the "Tips" tab.
+ * @param typeLabels - Mapping from content type keys to human-readable label strings used for the submission badges.
+ *
+ * @returns A React element rendering the activity card with tabbed "Recent" and "Tips" content.
+ *
+ * @see UnifiedBadge
+ * @see NavLink
+ * @see UI_CLASSES
+ */
 export function SidebarActivityCard({ recentMerged, tips, typeLabels }: SidebarActivityCardProps) {
   return (
     <Card>
@@ -90,14 +121,14 @@ export function SidebarActivityCard({ recentMerged, tips, typeLabels }: SidebarA
                         <UnifiedBadge variant="base" style="outline" className={UI_CLASSES.TEXT_XS}>
                           {typeLabels[submission.content_type]}
                         </UnifiedBadge>
-                        {submission.user && (
+                        {submission.user ? (
                           <span className={UI_CLASSES.TEXT_XS_MUTED}>
                             by{' '}
                             <NavLink href={`/u/${submission.user.slug}`}>
                               @{submission.user.name}
                             </NavLink>
                           </span>
-                        )}
+                        ) : null}
                       </div>
                       <p className={cn('mt-1', UI_CLASSES.TEXT_XS_MUTED)}>
                         {submission.merged_at_formatted || submission.merged_at}
@@ -115,7 +146,7 @@ export function SidebarActivityCard({ recentMerged, tips, typeLabels }: SidebarA
               <ul className="list-none space-y-2">
                 {tips.map((tip) => (
                   <li key={tip} className={UI_CLASSES.FLEX_ITEMS_START_GAP_2}>
-                    <span className="mt-0.5 text-blue-400 text-xs">•</span>
+                    <span className="mt-0.5 text-xs text-blue-400">•</span>
                     <span className={UI_CLASSES.TEXT_XS_MUTED}>{tip}</span>
                   </li>
                 ))}

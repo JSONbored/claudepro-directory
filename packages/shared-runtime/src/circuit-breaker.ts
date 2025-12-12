@@ -3,7 +3,7 @@
  * Prevents cascading failures by opening circuit after threshold failures
  */
 
-import { createUtilityContext, logInfo, logWarn } from './logging.ts';
+import { logger } from './logger/index.ts';
 
 // =============================================================================
 // Exported CircuitBreaker Class (for direct instantiation)
@@ -203,12 +203,13 @@ class InternalCircuitBreaker {
     if (this.state.state === 'OPEN' && now - this.state.lastFailureTime >= this.config.resetTimeoutMs) {
       this.state.state = 'HALF_OPEN';
       this.state.halfOpenAttempts = 0;
-      const logContext = createUtilityContext('circuit-breaker', 'state-transition', {
+      logger.info({
+        function: 'circuit-breaker',
+        operation: 'state-transition',
         key: this.key,
         resetTimeoutMs: this.config.resetTimeoutMs,
         state: 'HALF_OPEN',
-      });
-      logInfo('Circuit half-open (testing recovery)', logContext);
+      }, 'Circuit half-open (testing recovery)');
     }
   }
 
@@ -217,11 +218,12 @@ class InternalCircuitBreaker {
       this.state.state = 'CLOSED';
       this.state.failures = 0;
       this.state.halfOpenAttempts = 0;
-      const logContext = createUtilityContext('circuit-breaker', 'state-transition', {
+      logger.info({
+        function: 'circuit-breaker',
+        operation: 'state-transition',
         key: this.key,
         state: 'CLOSED',
-      });
-      logInfo('Circuit closed (recovery successful)', logContext);
+      }, 'Circuit closed (recovery successful)');
     } else {
       this.state.failures = 0;
     }
@@ -236,22 +238,24 @@ class InternalCircuitBreaker {
       if (this.state.halfOpenAttempts >= this.config.halfOpenMaxAttempts) {
         this.state.state = 'OPEN';
         this.state.halfOpenAttempts = 0;
-        const logContext = createUtilityContext('circuit-breaker', 'state-transition', {
+        logger.warn({
+          function: 'circuit-breaker',
+          operation: 'state-transition',
           key: this.key,
           state: 'OPEN',
           halfOpenAttempts: this.state.halfOpenAttempts,
-        });
-        logWarn('Circuit opened (half-open failures)', logContext);
+        }, 'Circuit opened (half-open failures)');
       }
     } else if (this.state.failures >= this.config.failureThreshold) {
       this.state.state = 'OPEN';
-      const logContext = createUtilityContext('circuit-breaker', 'state-transition', {
+      logger.warn({
+        function: 'circuit-breaker',
+        operation: 'state-transition',
         key: this.key,
         state: 'OPEN',
         failures: this.state.failures,
         threshold: this.config.failureThreshold,
-      });
-      logWarn('Circuit opened (threshold exceeded)', logContext);
+      }, 'Circuit opened (threshold exceeded)');
     }
   }
 

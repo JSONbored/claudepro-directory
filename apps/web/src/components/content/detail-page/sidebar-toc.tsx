@@ -13,71 +13,37 @@
  * Design inspired by Supabase docs "ON THIS PAGE" sidebar
  */
 
-import type { ContentHeadingMetadata } from '@heyclaude/web-runtime/types/component.types';
+import { type ContentHeadingMetadata } from '@heyclaude/web-runtime/types/component.types';
 import { cn, STATE_PATTERNS } from '@heyclaude/web-runtime/ui';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import { normalizeHeadings, type NormalizedHeading } from './utils/normalize-headings';
+
 interface SidebarTocProps {
-  headings?: ContentHeadingMetadata[] | null;
   className?: string;
+  headings?: ContentHeadingMetadata[] | null;
   /** Minimum headings required to render (default: 2) */
   minHeadings?: number;
 }
 
-interface NormalizedHeading {
-  id: string;
-  title: string;
-  anchor: string;
-  level: number;
-}
-
-function normalizeHeadings(
-  headings: ContentHeadingMetadata[] | null | undefined
-): NormalizedHeading[] {
-  if (!Array.isArray(headings)) return [];
-
-  const deduped = new Map<string, NormalizedHeading>();
-
-  for (const heading of headings) {
-    if (!heading || typeof heading !== 'object') continue;
-    const rawId = typeof heading.id === 'string' ? heading.id.trim() : '';
-    const rawTitle = typeof heading.title === 'string' ? heading.title.trim() : '';
-
-    if (!(rawId && rawTitle)) continue;
-
-    if (deduped.has(rawId)) {
-      continue;
-    }
-
-    const level =
-      typeof heading.level === 'number' && Number.isFinite(heading.level)
-        ? Math.min(Math.max(Math.round(heading.level), 2), 6)
-        : 2;
-
-    const anchor =
-      typeof heading.anchor === 'string' && heading.anchor.startsWith('#')
-        ? heading.anchor
-        : `#${rawId}`;
-
-    deduped.set(rawId, {
-      id: rawId,
-      anchor,
-      level,
-      title: rawTitle,
-    });
-
-    if (deduped.size >= 50) {
-      break;
-    }
-  }
-
-  return Array.from(deduped.values());
-}
-
+/**
+ * Renders a right-side, scroll-synced table of contents for a page with heading links.
+ *
+ * Renders nothing when the provided headings are fewer than `minHeadings`. Displays a hierarchical list of headings, highlights the active item based on scroll position or URL hash, and updates the URL hash when an item becomes active or is clicked. Clicking a heading scrolls to its section with smooth behavior unless the user prefers reduced motion.
+ *
+ * @param headings - Array of heading metadata to show in the TOC; may be null or undefined. Headings are normalized, deduplicated, and capped before rendering.
+ * @param className - Optional additional CSS class names applied to the root nav element.
+ * @param minHeadings - Minimum number of headings required to render the TOC; defaults to 2.
+ * @returns The rendered navigation element containing the table of contents, or `null` when not rendered.
+ *
+ * @see normalizeHeadings
+ * @see STATE_PATTERNS
+ * @see cn
+ */
 export function SidebarToc({ headings, className, minHeadings = 2 }: SidebarTocProps) {
   const normalizedHeadings = useMemo(() => normalizeHeadings(headings), [headings]);
-  const [activeId, setActiveId] = useState<string | null>(null);
-  const activeIdRef = useRef<string | null>(activeId);
+  const [activeId, setActiveId] = useState<null | string>(null);
+  const activeIdRef = useRef<null | string>(activeId);
 
   // Keep ref in sync with activeId state
   useEffect(() => {
@@ -86,7 +52,7 @@ export function SidebarToc({ headings, className, minHeadings = 2 }: SidebarTocP
 
   const baseLevel = useMemo(() => {
     if (normalizedHeadings.length === 0) return 2;
-    return normalizedHeadings.reduce((min, heading) => Math.min(min, heading.level), 6);
+    return normalizedHeadings.reduce((min: number, heading: NormalizedHeading) => Math.min(min, heading.level), 6);
   }, [normalizedHeadings]);
 
   const updateHash = useCallback((id: string) => {
@@ -106,7 +72,7 @@ export function SidebarToc({ headings, className, minHeadings = 2 }: SidebarTocP
     }
 
     const hash = window.location.hash.replace('#', '');
-    if (hash && normalizedHeadings.some((heading) => heading.id === hash)) {
+    if (hash && normalizedHeadings.some((heading: NormalizedHeading) => heading.id === hash)) {
       setActiveId(hash);
       return;
     }
@@ -153,9 +119,11 @@ export function SidebarToc({ headings, className, minHeadings = 2 }: SidebarTocP
       }
     );
 
+    if (typeof document === 'undefined') return;
+    
     const elements = normalizedHeadings
-      .map((heading) => document.getElementById(heading.id))
-      .filter((el): el is HTMLElement => el !== null);
+      .map((heading: NormalizedHeading) => document.getElementById(heading.id))
+      .filter((el: HTMLElement | null): el is HTMLElement => el !== null);
 
     for (const el of elements) {
       observer.observe(el);
@@ -173,7 +141,9 @@ export function SidebarToc({ headings, className, minHeadings = 2 }: SidebarTocP
         return;
       }
 
-      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const prefersReducedMotion = window.matchMedia(
+        '(prefers-reduced-motion: reduce)'
+      ).matches;
       const offset = 96; // Account for sticky header
       const top = window.scrollY + element.getBoundingClientRect().top - offset;
 
@@ -196,13 +166,13 @@ export function SidebarToc({ headings, className, minHeadings = 2 }: SidebarTocP
   return (
     <nav className={cn('py-2', className)} aria-label="On this page">
       {/* Header - Supabase style uppercase */}
-      <p className="mb-3 font-medium text-muted-foreground text-xs uppercase tracking-wider">
+      <p className="text-muted-foreground mb-3 text-xs font-medium tracking-wider uppercase">
         On this page
       </p>
 
       {/* Heading list with left border indicator */}
       <ul className="space-y-0.5">
-        {normalizedHeadings.map((heading) => {
+        {normalizedHeadings.map((heading: NormalizedHeading) => {
           const depthOffset = Math.max(heading.level - baseLevel, 0);
           const isActive = activeId === heading.id;
 

@@ -2,20 +2,52 @@
 
 import { MiscService } from '@heyclaude/data-layer';
 import { type Database } from '@heyclaude/database-types';
+import { cacheLife, cacheTag } from 'next/cache';
 
-import { fetchCached } from '../cache/fetch-cached.ts';
+import { logger } from '../logger.ts';
 
 type ContactCommandsRow =
   Database['public']['Functions']['get_contact_commands']['Returns'][number];
 
+/**
+ * Fetch contact commands
+ * Uses 'use cache' to cache contact commands. This data is public and same for all users.
+ * Contact commands change periodically, so we use the 'hours' cacheLife profile.
+ */
 export async function fetchContactCommands(): Promise<ContactCommandsRow | null> {
-  const result = await fetchCached((client) => new MiscService(client).getContactCommands(), {
-    keyParts: ['contact-commands'],
-    tags: ['contact'],
-    ttlKey: 'cache.contact.ttl_seconds',
-    fallback: [],
-    logMeta: { source: 'contact.actions' },
+  'use cache';
+
+  const { isBuildTime } = await import('../build-time.ts');
+  const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
+
+  // Configure cache - use 'hours' profile for contact commands (changes hourly)
+  cacheLife('hours'); // 1hr stale, 15min revalidate, 1 day expire
+  cacheTag('contact');
+
+  const reqLogger = logger.child({
+    module: 'data/contact',
+    operation: 'fetchContactCommands',
   });
 
-  return result[0] ?? null;
+  try {
+    // Use admin client during build for better performance, anon client at runtime
+    let client;
+    if (isBuildTime()) {
+      const { createSupabaseAdminClient } = await import('../supabase/admin.ts');
+      client = createSupabaseAdminClient();
+    } else {
+      client = createSupabaseAnonClient();
+    }
+
+    const result = await new MiscService(client).getContactCommands();
+
+    reqLogger.info({ count: result?.length ?? 0 }, 'fetchContactCommands: fetched successfully');
+
+    return result?.[0] ?? null;
+  } catch (error) {
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
+    reqLogger.error({ err: errorForLogging }, 'fetchContactCommands: failed');
+    return null;
+  }
 }

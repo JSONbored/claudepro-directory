@@ -6,11 +6,12 @@
  */
 
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
-import { normalizeError, getEnvVar } from '@heyclaude/shared-runtime';
+import { normalizeError, getEnvVar, sanitizeForDiscord } from '@heyclaude/shared-runtime';
 
 import { inngest } from '../../client';
 import { pgmqRead, pgmqDelete, type PgmqMessage } from '../../../supabase/pgmq-client';
-import { logger, generateRequestId, createWebAppContextWithId } from '../../../logging/server';
+import { logger, createWebAppContextWithId } from '../../../logging/server';
+import { sendCronSuccessHeartbeat } from '../../utils/monitoring';
 
 type JobRow = DatabaseGenerated['public']['Tables']['jobs']['Row'];
 
@@ -42,15 +43,6 @@ interface JobWebhookPayload {
 }
 
 /**
- * Sanitize string for Discord markdown (removes link injection, truncates)
- */
-function sanitizeForDiscord(str: string | null | undefined, maxLength = 200): string {
-  if (!str) return '';
-  // Remove markdown link syntax to prevent phishing
-  return str.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1').slice(0, maxLength);
-}
-
-/**
  * Validate slug is safe for URL construction
  */
 function isValidSlug(slug: string | null | undefined): slug is string {
@@ -62,7 +54,7 @@ function buildJobEmbed(job: JobRow, isNew: boolean): Record<string, unknown> | n
 
   // Validate slug before constructing URL
   if (!isValidSlug(job.slug)) {
-    logger.warn('Invalid job slug, skipping embed', { slug: job.slug });
+    logger.warn({ slug: job.slug }, 'Invalid job slug, skipping embed');
     return null;
   }
 
@@ -117,15 +109,14 @@ export const processDiscordJobsQueue = inngest.createFunction(
   { cron: '*/30 * * * *' }, // Every 30 minutes
   async ({ step }) => {
     const startTime = Date.now();
-    const requestId = generateRequestId();
-    const logContext = createWebAppContextWithId(requestId, '/inngest/discord/jobs', 'processDiscordJobsQueue');
+    const logContext = createWebAppContextWithId('/inngest/discord/jobs', 'processDiscordJobsQueue');
 
-    logger.info('Discord jobs queue processing started', logContext);
+    logger.info(logContext, 'Discord jobs queue processing started');
 
     const discordWebhookUrl = getEnvVar('DISCORD_JOBS_WEBHOOK_URL');
 
     if (!discordWebhookUrl) {
-      logger.warn('Discord jobs webhook URL not configured', logContext);
+      logger.warn(logContext, 'Discord jobs webhook URL not configured');
       return { processed: 0, sent: 0, skipped: 'no_webhook_url' };
     }
 
@@ -146,16 +137,14 @@ export const processDiscordJobsQueue = inngest.createFunction(
           msg.message && ['INSERT', 'UPDATE', 'DELETE'].includes(msg.message.type)
         );
       } catch (error) {
-        logger.warn('Failed to read Discord jobs queue', {
-          ...logContext,
-          errorMessage: normalizeError(error, 'Queue read failed').message,
-        });
+        logger.warn({ ...logContext,
+          errorMessage: normalizeError(error, 'Queue read failed').message, }, 'Failed to read Discord jobs queue');
         return [];
       }
     });
 
     if (messages.length === 0) {
-      logger.info('No messages in Discord jobs queue', logContext);
+      logger.info(logContext, 'No messages in Discord jobs queue');
       return { processed: 0, sent: 0 };
     }
 
@@ -223,27 +212,21 @@ export const processDiscordJobsQueue = inngest.createFunction(
           });
 
           if (!discordResponse.ok) {
-            logger.warn('Discord webhook failed', {
-              ...logContext,
+            logger.warn({ ...logContext,
               jobId: job.id,
-              status: discordResponse.status,
-            });
+              status: discordResponse.status, }, 'Discord webhook failed');
             return { success: false, sent: false };
           }
 
-          logger.info('Discord job notification sent', {
-            ...logContext,
+          logger.info({ ...logContext,
             jobId: job.id,
-            type: payload.type,
-          });
+            type: payload.type, }, 'Discord job notification sent');
 
           return { success: true, sent: true };
         } catch (error) {
           const normalized = normalizeError(error, 'Discord job notification failed');
-          logger.warn('Discord job notification failed', {
-            ...logContext,
-            errorMessage: normalized.message,
-          });
+          logger.warn({ ...logContext,
+            errorMessage: normalized.message, }, 'Discord job notification failed');
           return { success: false, sent: false };
         }
       });
@@ -266,16 +249,24 @@ export const processDiscordJobsQueue = inngest.createFunction(
     }
 
     const durationMs = Date.now() - startTime;
-    logger.info('Discord jobs queue processing completed', {
-      ...logContext,
+    logger.info({ ...logContext,
       durationMs,
       processed: messages.length,
-      sent: sentCount,
-    });
+      sent: sentCount, }, 'Discord jobs queue processing completed');
 
-    return {
+    const result = {
       processed: messages.length,
       sent: sentCount,
     };
+
+    // BetterStack monitoring: Send success heartbeat (feature-flagged)
+    if (result.sent > 0) {
+      sendCronSuccessHeartbeat('BETTERSTACK_HEARTBEAT_INNGEST_CRON', {
+        functionName: 'processDiscordJobsQueue',
+        result: { sent: result.sent },
+      });
+    }
+
+    return result;
   }
 );

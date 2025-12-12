@@ -22,36 +22,17 @@
  * - Responsive design
  */
 
-import { Constants } from '@heyclaude/database-types';
 import { type Database } from '@heyclaude/database-types';
 import { generatePageMetadata, getChangelogOverview } from '@heyclaude/web-runtime/data';
-import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
-import { ArrowLeft } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { UI_CLASSES, NavLink, Breadcrumbs } from '@heyclaude/web-runtime/ui';
+import { APP_CONFIG, QUERY_LIMITS } from '@heyclaude/web-runtime/data/config/constants';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { type Metadata } from 'next';
-import dynamicImport from 'next/dynamic';
+import { cacheLife } from 'next/cache';
+import { Suspense } from 'react';
 
 import { StructuredData } from '@/src/components/core/infra/structured-data';
-import { ChangelogListClient } from '@/src/components/features/changelog/changelog-list-client';
-
-const NewsletterCTAVariant = dynamicImport(
-  () =>
-    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then(
-      (module_) => ({
-        default: module_.NewsletterCTAVariant,
-      })
-    ),
-  {
-    loading: () => <div className="bg-muted/20 h-32 animate-pulse rounded-lg" />,
-  }
-);
-
-/**
- * ISR: 1 hour (3600s) - Changelog list updates periodically
- * Uses ISR for better performance while keeping content fresh
- */
-export const revalidate = 3600;
+import { ChangelogContentSkeleton } from '@/src/components/features/changelog/changelog-content-skeleton';
+import { ChangelogTimelineView } from '@/src/components/features/changelog/changelog-timeline-view';
 
 /**
  * Generate page metadata for the /changelog route, including RSS and Atom feed alternates.
@@ -66,15 +47,11 @@ export const revalidate = 3600;
  * @see APP_CONFIG
  */
 export async function generateMetadata(): Promise<Metadata> {
-  // Generate requestId for metadata generation (separate from page render)
-  const metadataRequestId = generateRequestId();
-
-  // Create request-scoped child logger to avoid race conditions
+  // Create request-scoped child logger
   const metadataLogger = logger.child({
-    requestId: metadataRequestId,
+    module: 'apps/web/src/app/changelog',
     operation: 'ChangelogPageMetadata',
     route: '/changelog',
-    module: 'apps/web/src/app/changelog',
   });
 
   try {
@@ -85,64 +62,110 @@ export async function generateMetadata(): Promise<Metadata> {
       ...baseMetadata,
       alternates: {
         types: {
-          'application/rss+xml': `${APP_CONFIG.url}/changelog/rss.xml`,
           'application/atom+xml': `${APP_CONFIG.url}/changelog/atom.xml`,
+          'application/rss+xml': `${APP_CONFIG.url}/changelog/rss.xml`,
         },
       },
     };
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to generate changelog metadata');
-    metadataLogger.error('Failed to generate changelog metadata', normalized, {
-      section: 'metadata-generation',
-    });
+    metadataLogger.error(
+      {
+        err: normalized,
+        section: 'metadata-generation',
+      },
+      'Failed to generate changelog metadata'
+    );
     return {
-      title: 'Changelog - Claude Pro Directory',
-      description: 'Track all updates, features, and improvements to Claude Pro Directory.',
       alternates: {
         types: {
-          'application/rss+xml': `${APP_CONFIG.url}/changelog/rss.xml`,
           'application/atom+xml': `${APP_CONFIG.url}/changelog/atom.xml`,
+          'application/rss+xml': `${APP_CONFIG.url}/changelog/rss.xml`,
         },
       },
+      description: 'Track all updates, features, and improvements to Claude Pro Directory.',
+      title: 'Changelog - Claude Pro Directory',
     };
   }
 }
 
 /**
- * Render the Changelog page using server-side loaded entries, client-side filtering, structured data, and a newsletter CTA.
+ * Render the Changelog page with a static header and a Suspense-wrapped timeline that streams changelog content.
  *
- * Loads published changelog entries (with normalized keywords and contributors), computes category counts from the overview metadata, and renders a stats header plus the client-side ChangelogListClient for interactive filtering. If data loading fails, returns a minimal fallback UI instead of throwing.
+ * This server component awaits a server connection to establish a request-scoped logger, then renders page
+ * structured data, a header matching the site template, and a Suspense boundary that loads changelog entries
+ * via the server-side ChangelogContentWithData component so the timeline can stream progressively.
  *
- * Server-side behavior:
- * - Fetches changelog overview via getChangelogOverview with publishedOnly=true.
- * - Uses server-side data to populate the client list and category counts.
- * - Page is intended to be served with ISR (revalidation configured at the file level).
- *
- * @returns A React element representing the changelog page; returns a minimal fallback UI when data loading fails.
+ * @returns A React element containing the page layout, header, and a Suspense-wrapped changelog timeline.
  *
  * @see getChangelogOverview
- * @see ChangelogListClient
+ * @see ChangelogContentWithData
+ * @see ChangelogContentSkeleton
  * @see StructuredData
  */
 export default async function ChangelogPage() {
-  // Generate single requestId for this page request
-  const requestId = generateRequestId();
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
-  // Create request-scoped child logger to avoid race conditions
+  // Create request-scoped child logger
   const reqLogger = logger.child({
-    requestId,
+    module: 'apps/web/src/app/changelog',
     operation: 'ChangelogPage',
     route: '/changelog',
-    module: 'apps/web/src/app/changelog',
   });
+
+  return (
+    <>
+      <StructuredData route="/changelog" />
+
+      <div className="bg-background relative min-h-screen">
+        {/* Header - EXACTLY matches Magic UI template */}
+        <div className="border-border/50 border-b">
+          <div className="relative mx-auto max-w-5xl">
+            <div className="flex items-center justify-between p-3">
+              <h1 className="text-3xl font-semibold tracking-tight">Changelog</h1>
+              {/* ThemeToggle would go here if we had it */}
+            </div>
+          </div>
+        </div>
+
+        {/* Timeline - EXACTLY matches Magic UI template */}
+        <Suspense fallback={<ChangelogContentSkeleton />}>
+          <ChangelogContentWithData reqLogger={reqLogger} />
+        </Suspense>
+      </div>
+    </>
+  );
+}
+
+/**
+ * Fetches published changelog entries server-side, normalizes fields, sorts them by release date (newest first), and renders the changelog timeline or an error card.
+ *
+ * Performs server-side data loading intended to be used inside a Suspense boundary; normalizes `keywords` and `contributors` to never be null and transforms overview entries to match the frontend changelog row schema before rendering.
+ *
+ * @param reqLogger - Request-scoped logger used to record errors during data fetching
+ * @param reqLogger.reqLogger
+ * @returns JSX element containing the changelog timeline populated with sorted entries, or an error card if loading fails
+ *
+ * @see getChangelogOverview
+ * @see ChangelogTimelineView
+ */
+async function ChangelogContentWithData({
+  reqLogger,
+}: {
+  reqLogger: ReturnType<typeof logger.child>;
+}) {
+  // Fetch data outside JSX construction - handle errors before rendering
+  let sortedEntries: Array<Database['public']['Tables']['changelog']['Row']> = [];
+  let hasError = false;
 
   try {
     // Load changelog overview with entries, metadata, and featured (database-cached)
     // This replaces getAllChangelogEntries() + client-side category counting
     const overview = await getChangelogOverview({
-      publishedOnly: true, // Only get published entries
-      limit: 10_000,
+      limit: QUERY_LIMITS.changelog.max,
       offset: 0,
+      publishedOnly: true, // Only get published entries
     });
 
     // Normalize entries: ensure contributors and keywords are arrays (never null)
@@ -156,8 +179,11 @@ export default async function ChangelogPage() {
       return {
         ...entry,
         canonical_url: null,
+        changes: entry.changes ?? {},
         commit_count: null,
+        content: entry.content ?? '',
         contributors,
+        created_at: entry.created_at ?? '',
         git_commit_sha: null,
         json_ld: null,
         keywords,
@@ -167,103 +193,34 @@ export default async function ChangelogPage() {
         robots_index: null,
         source: null,
         twitter_card: null,
-        content: entry.content ?? '',
-        changes: entry.changes ?? {},
-        created_at: entry.created_at ?? '',
         updated_at: entry.updated_at ?? '',
       } as Database['public']['Tables']['changelog']['Row'];
     });
 
-    // Get category counts from metadata (database-calculated, not client-side)
-    // Cast category_counts from Json to Record<string, number>
-    const categoryCountsJson = overview.metadata?.category_counts as null | Record<string, number>;
-    const categoryCounts: Record<string, number> = {
-      All: overview.metadata?.total_entries ?? 0,
-      Added: categoryCountsJson?.['Added'] ?? 0,
-      Changed: categoryCountsJson?.['Changed'] ?? 0,
-      Fixed: categoryCountsJson?.['Fixed'] ?? 0,
-      Removed: categoryCountsJson?.['Removed'] ?? 0,
-      Deprecated: categoryCountsJson?.['Deprecated'] ?? 0,
-      Security: categoryCountsJson?.['Security'] ?? 0,
-    };
-
-    return (
-      <>
-        <StructuredData route="/changelog" />
-
-        <div className="mx-auto max-w-[1400px] space-y-8 px-4 py-8 md:px-8 lg:px-12">
-          {/* Breadcrumbs */}
-          <Breadcrumbs categoryLabel="Changelog" />
-
-          {/* Header */}
-          <div className="space-y-4">
-            <NavLink
-              href="/"
-              className="text-muted-foreground inline-flex items-center gap-2 text-sm"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              <span>Back to Home</span>
-            </NavLink>
-
-            <div className="space-y-2">
-              <h1 className="text-4xl font-bold tracking-tight">Changelog</h1>
-              <p className="text-muted-foreground text-lg">
-                Track all updates, new features, bug fixes, and improvements to Claude Pro
-                Directory.
-              </p>
-            </div>
-
-            {/* Stats */}
-            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_6} text-muted-foreground text-sm`}>
-              <div>
-                <span className="text-foreground font-semibold">
-                  {overview.metadata?.total_entries ?? publishedEntries.length}
-                </span>{' '}
-                total updates
-              </div>
-              {publishedEntries.length > 0 && publishedEntries[0]?.release_date ? (
-                <div>
-                  Latest:{' '}
-                  <time
-                    dateTime={publishedEntries[0].release_date}
-                    className="text-foreground font-medium"
-                  >
-                    {new Date(publishedEntries[0].release_date).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    })}
-                  </time>
-                </div>
-              ) : null}
-            </div>
-          </div>
-
-          {/* Client-side filtered list */}
-          <ChangelogListClient entries={publishedEntries} categoryCounts={categoryCounts} />
-        </div>
-
-        {/* Email CTA - Footer section (matching homepage pattern) */}
-        <section className="mx-auto px-4 py-12">
-          <NewsletterCTAVariant
-            source="content_page"
-            variant="hero"
-            category={Constants.public.Enums.content_category[10]} // 'changelog' - Context needed for analytics and correct copy
-          />
-        </section>
-      </>
-    );
-  } catch (error) {
-    const normalized = normalizeError(error, 'Failed to load changelog page');
-    reqLogger.error('Failed to load changelog page', normalized, {
-      section: 'data-fetch',
+    // Sort entries by date (newest first) - EXACTLY matches Magic UI template
+    sortedEntries = [...publishedEntries].toSorted((a, b) => {
+      const dateA = new Date(a.release_date).getTime();
+      const dateB = new Date(b.release_date).getTime();
+      return dateB - dateA;
     });
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load changelog content');
+    reqLogger.error(
+      {
+        err: normalized,
+        section: 'data-fetch',
+      },
+      'Failed to load changelog content'
+    );
+    hasError = true;
+  }
 
-    // Fallback UI on error
+  // Return JSX outside try/catch - errors are handled above
+  if (hasError) {
     return (
-      <div className="container max-w-7xl py-8">
+      <div className="border-border bg-card/50 overflow-hidden rounded-lg border p-4 shadow-sm backdrop-blur-sm sm:p-6">
         <div className="space-y-4">
-          <h1 className="text-4xl font-bold tracking-tight">Changelog</h1>
+          <h2 className="text-2xl font-bold tracking-tight">Changelog</h2>
           <p className="text-muted-foreground">
             Unable to load changelog entries. Please try again later.
           </p>
@@ -271,4 +228,12 @@ export default async function ChangelogPage() {
       </div>
     );
   }
+
+  return (
+    <div className="mx-auto max-w-5xl px-6 pt-10 lg:px-10">
+      <div className="relative">
+        <ChangelogTimelineView entries={sortedEntries} />
+      </div>
+    </div>
+  );
 }

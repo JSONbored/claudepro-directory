@@ -1,0 +1,82 @@
+# Generate README
+# Optimizations: database webhook-triggered, auto-commit changes, shallow clones
+# Uses actions/checkout@v6 for improved performance and sparse checkout support
+name: Generate README
+
+on:
+  # Primary: Database webhook trigger (via Inngest → GitHub Actions)
+  # Triggers when content metadata changes (title, description, slug, category)
+  repository_dispatch:
+    types: [readme-update-needed]
+  # Manual trigger (for testing/debugging)
+  workflow_dispatch:
+  # Fallback: trigger on README generation script changes
+  push:
+    branches: [main]
+    paths:
+      - 'packages/generators/src/commands/generate-readme.ts'
+      - 'apps/web/src/app/api/content/sitewide/route.ts'
+      - 'packages/web-runtime/src/utils/readme-builder.ts'
+
+# Concurrency: only one README generation at a time
+concurrency:
+  group: generate-readme
+  cancel-in-progress: false
+
+jobs:
+  generate-readme:
+    name: Generate README
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write # Required to commit README changes
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1 # Shallow clone - only need current commit
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: ./.github/actions/setup
+        with:
+          skip-checkout: true # Already checked out above
+      - name: Generate README
+        run: pnpm generate:readme
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL || 'https://claudepro.directory' }}
+          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+          TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+      - name: Check for changes
+        id: check-changes
+        run: |
+          if [ -n "$(git status --porcelain README.md)" ]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          fi
+      - name: Commit README changes
+        if: steps.check-changes.outputs.has_changes == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add README.md
+          git commit -m "chore: auto-update README.md from database content"
+          git push
+      - name: Summary
+        if: always()
+        run: |
+          echo "## ✅ README Generation Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Trigger:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.check-changes.outputs.has_changes }}" = "true" ]; then
+            echo "**Status:** ✅ README.md updated and committed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "**Status:** ℹ️  No changes detected (README already up to date)" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ github.event_name }}" = "repository_dispatch" ] && [ -n "${{ github.event.client_payload.content_id }}" ]; then
+            echo "**Content ID:** ${{ github.event.client_payload.content_id }}" >> $GITHUB_STEP_SUMMARY
+            if [ -n "${{ github.event.client_payload.slug }}" ]; then
+              echo "**Slug:** ${{ github.event.client_payload.slug }}" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi

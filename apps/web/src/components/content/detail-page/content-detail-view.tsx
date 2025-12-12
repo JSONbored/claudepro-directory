@@ -5,17 +5,6 @@
 
 import { Constants, type Database } from '@heyclaude/database-types';
 import {
-  ensureStringArray,
-  getMetadata,
-  isValidCategory,
-  logger,
-  normalizeError,
-  transformMcpConfigForDisplay,
-} from '@heyclaude/web-runtime/core';
-import {
-  getCategoryConfig,
-} from '@heyclaude/web-runtime/data';
-import { 
   highlightCode,
   detectLanguage,
   generateFilename,
@@ -23,76 +12,111 @@ import {
   extractMarkdownHeadings,
 } from '@heyclaude/shared-runtime';
 import { extractCodeBlocksFromMarkdown, type ExtractedCodeBlock } from '@heyclaude/web-runtime';
-import type {
-  ContentItem,
-  ContentHeadingMetadata,
-  InstallationSteps,
-  ProcessedSectionData,
+import {
+  ensureStringArray,
+  getMetadata,
+  isValidCategory,
+  transformMcpConfigForDisplay,
+} from '@heyclaude/web-runtime/core';
+import { getCategoryConfig } from '@heyclaude/web-runtime/data';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import {
+  type ContentItem,
+  type ContentHeadingMetadata,
+  type InstallationSteps,
+  type ProcessedSectionData,
 } from '@heyclaude/web-runtime/types/component.types';
 import { getDisplayTitle, getViewTransitionName } from '@heyclaude/web-runtime/ui';
 import { Suspense } from 'react';
+
 import { TabbedDetailLayout } from '@/src/components/content/detail-tabs/tabbed-detail-layout';
 import { JSONSectionRenderer } from '@/src/components/content/json-to-sections';
 import UnifiedSection from '@/src/components/content/sections/unified-section';
 import { ReviewListSection } from '@/src/components/core/domain/reviews/review-list-section';
 import { NewsletterScrollTrigger } from '@/src/components/features/growth/newsletter/newsletter-scroll-trigger';
 import { RecentlyViewedSidebar } from '@/src/components/features/navigation/recently-viewed-sidebar';
+
 import { DetailHeader } from './detail-header';
 import { DetailMetadata } from './detail-metadata';
 import { DetailQuickActionsBar } from './detail-quick-actions-bar';
-import { SidebarToc } from './sidebar-toc';
 import { DetailSidebar } from './sidebar/navigation-sidebar';
+import { SidebarToc } from './sidebar-toc';
+import { ScrollAwareToc } from './scroll-aware-toc';
 
 /**
  * UnifiedDetailPage is only used for content detail pages, never for jobs.
  * So we narrow the type to exclude jobs to ensure proper type safety.
  */
 export interface UnifiedDetailPageProps {
+  collectionSections?: React.ReactNode;
+  copyCount?: number;
+  copyCountPromise?: Promise<number>;
   item:
-    | Database['public']['Tables']['content']['Row']
     | (Database['public']['Functions']['get_content_detail_complete']['Returns']['content'] &
-        Database['public']['Tables']['content']['Row']);
+        Database['public']['Tables']['content']['Row'])
+    | Database['public']['Tables']['content']['Row'];
   relatedItems?:
     | ContentItem[]
     | Database['public']['Functions']['get_content_detail_complete']['Returns']['related'];
-  viewCount?: number;
-  copyCount?: number;
   relatedItemsPromise?: Promise<
     | ContentItem[]
     | Database['public']['Functions']['get_content_detail_complete']['Returns']['related']
   >;
-  viewCountPromise?: Promise<number>;
-  copyCountPromise?: Promise<number>;
-  collectionSections?: React.ReactNode;
   tabsEnabled?: boolean;
+  viewCount?: number;
+  viewCountPromise?: Promise<number>;
 }
 
+/**
+ * Log a standardized warning when processing of a detail page section fails.
+ *
+ * Normalizes the provided error and emits a warning with the section name, the item's category and slug, and the normalized error message.
+ *
+ * @param section - Human-readable name of the section that failed (e.g., "configuration", "examples")
+ * @param error - The original error thrown or received during processing
+ * @param item - Content item being processed; used to include `category` and `slug` in the log context
+ *
+ * @see normalizeError
+ * @see logger
+ * @see UnifiedDetailPage
+ */
 function logDetailProcessingWarning(
   section: string,
   error: unknown,
   item:
-    | Database['public']['Tables']['content']['Row']
     | (Database['public']['Functions']['get_content_detail_complete']['Returns']['content'] &
         Database['public']['Tables']['content']['Row'])
+    | Database['public']['Tables']['content']['Row']
 ): void {
   const normalized = normalizeError(error, `${section} processing failed`);
-  logger.warn(`UnifiedDetailPage: ${section} processing failed`, {
-    category: item.category ?? 'null',
-    slug: item.slug ?? 'unknown',
-    error: normalized.message,
-  });
+  logger.warn(
+    {
+      category: item.category ?? 'null',
+      slug: item.slug ?? 'unknown',
+      err: normalized,
+    },
+    `UnifiedDetailPage: ${section} processing failed`
+  );
 }
 
 /**
- * Safely extracts configuration from item or metadata as a string
+ * Retrieve the configuration value from a content item or its metadata as a string.
+ *
+ * Checks the top-level `configuration` field on the provided `item` first; if present and not a string,
+ * it JSON-stringifies the value with 2-space indentation. If not found on the item, it attempts the same
+ * extraction from `metadata.configuration`. Returns `null` when no configuration is present.
+ *
+ * @param item - Content row (either a fully-joined content result or a plain content table row) to read `configuration` from
+ * @param metadata - Associated metadata object which may contain a `configuration` entry
+ * @returns The configuration serialized as a string, or `null` if no configuration is available
  */
 function getConfigurationAsString(
   item:
-    | Database['public']['Tables']['content']['Row']
     | (Database['public']['Functions']['get_content_detail_complete']['Returns']['content'] &
-        Database['public']['Tables']['content']['Row']),
+        Database['public']['Tables']['content']['Row'])
+    | Database['public']['Tables']['content']['Row'],
   metadata: Record<string, unknown>
-): string | null {
+): null | string {
   // Use generated type directly (tags/features/use_cases are already text[] in database)
   const contentItem = item as Database['public']['Tables']['content']['Row'];
 
@@ -113,19 +137,32 @@ function getConfigurationAsString(
   return null;
 }
 
+/**
+ * Renders DetailMetadata after resolving the view count and optional copy count.
+ *
+ * Awaits `viewCountPromise` and either `copyCountPromise` or the provided `copyCount`, then returns a DetailMetadata element with those resolved counts.
+ *
+ * @param item - Content row data used to render metadata (can be the expanded content return type or a raw content table row).
+ * @param viewCountPromise - Promise resolving to the number of views for the content item.
+ * @param copyCount - Optional pre-resolved number of times the content was copied; used if `copyCountPromise` is not provided.
+ * @param copyCountPromise - Optional promise resolving to the copy count; takes precedence over `copyCount` when provided.
+ * @returns The DetailMetadata React element populated with `viewCount` and `copyCount`.
+ *
+ * @see DetailMetadata
+ */
 async function ViewCountMetadata({
   item,
   viewCountPromise,
   copyCount,
   copyCountPromise,
 }: {
-  item:
-    | Database['public']['Tables']['content']['Row']
-    | (Database['public']['Functions']['get_content_detail_complete']['Returns']['content'] &
-        Database['public']['Tables']['content']['Row']);
-  viewCountPromise: Promise<number>;
   copyCount?: number;
   copyCountPromise?: Promise<number>;
+  item:
+    | (Database['public']['Functions']['get_content_detail_complete']['Returns']['content'] &
+        Database['public']['Tables']['content']['Row'])
+    | Database['public']['Tables']['content']['Row'];
+  viewCountPromise: Promise<number>;
 }) {
   const [viewCount, resolvedCopyCount] = await Promise.all([
     viewCountPromise,
@@ -150,43 +187,41 @@ async function SidebarWithRelated({
   relatedItemsPromise,
   config,
 }: {
+  config: {
+    metadata?:
+      | undefined
+      | {
+          categoryLabel?: string;
+          githubPathPrefix?: string;
+          showGitHubLink?: boolean;
+        };
+    typeName: string;
+  };
   item:
-    | Database['public']['Tables']['content']['Row']
     | (Database['public']['Functions']['get_content_detail_complete']['Returns']['content'] &
-        Database['public']['Tables']['content']['Row']);
+        Database['public']['Tables']['content']['Row'])
+    | Database['public']['Tables']['content']['Row'];
   relatedItemsPromise: Promise<
     | ContentItem[]
     | Database['public']['Functions']['get_content_detail_complete']['Returns']['related']
   >;
-  config: {
-    typeName: string;
-    metadata?:
-      | {
-          categoryLabel?: string;
-          showGitHubLink?: boolean;
-          githubPathPrefix?: string;
-        }
-      | undefined;
-  };
 }) {
   const relatedItems = await relatedItemsPromise;
   return <DetailSidebar item={item} relatedItems={relatedItems} config={config} />;
 }
 
 /**
- * Render the detail page for a content item, composing the header, metadata, main content sections, and sidebars.
+ * Render the detail page for a content item, composing header, metadata, main content sections, and sidebars.
  *
- * Renders configuration, installation, examples, content/code sections, and optional tabbed layouts; supports streaming of view and copy counts via promise props and accepts pre-fetched or eagerly provided related items for the sidebar.
- *
- * @param props.item - Content row or expanded content detail used to build the page.
- * @param props.relatedItems - Eagerly provided related items for the sidebar.
- * @param props.viewCount - Pre-fetched view count to render immediately.
- * @param props.copyCount - Pre-fetched copy count to render immediately.
- * @param props.relatedItemsPromise - Promise that resolves to related items for streaming into the sidebar.
- * @param props.viewCountPromise - Promise that resolves to the view count for streaming into metadata.
- * @param props.copyCountPromise - Promise that resolves to the copy count for streaming into metadata.
- * @param props.collectionSections - React node with collection-specific sections to include in the main content.
- * @param props.tabsEnabled - When true and the category configuration defines tabs, render the tabbed layout.
+ * @param props.item - Content row or expanded content detail used to build the page; used to derive title, metadata, content, and configuration.
+ * @param props.relatedItems - Eagerly provided related items to display in the sidebar.
+ * @param props.viewCount - Optional pre-fetched view count to render immediately in metadata.
+ * @param props.copyCount - Optional pre-fetched copy count to render immediately in metadata.
+ * @param props.relatedItemsPromise - Optional promise resolving to related items for streaming into the sidebar.
+ * @param props.viewCountPromise - Optional promise resolving to the view count for streaming into metadata.
+ * @param props.copyCountPromise - Optional promise resolving to the copy count for streaming into metadata.
+ * @param props.collectionSections - Optional React node containing collection-specific sections to include in the main content.
+ * @param props.tabsEnabled - When true and the category configuration defines tabs, render the tabbed layout instead of the default linear layout.
  * @returns The JSX element for the rendered detail page for the provided content item.
  *
  * @see getCategoryConfig
@@ -246,13 +281,12 @@ export async function UnifiedDetailPage({
   })();
 
   const securityItems = (() => {
-    const sec =
-      ('security' in contentItem && contentItem['security']) || metadata['security'];
+    const sec = ('security' in contentItem && contentItem['security']) || metadata['security'];
     return ensureStringArray(sec);
   })();
 
   const quickActionsPackageName =
-    typeof metadata['package'] === 'string' ? (metadata['package'] as string) : null;
+    typeof metadata['package'] === 'string' ? metadata['package'] : null;
   const quickActionsMcpServers =
     metadata['mcpServers'] && typeof metadata['mcpServers'] === 'object'
       ? (metadata['mcpServers'] as Record<string, unknown>)
@@ -269,28 +303,29 @@ export async function UnifiedDetailPage({
   // Parallelize independent preprocessing blocks to reduce TTFB
   // Start all promises first, then await them together
   const contentDataPromise = (async (): Promise<
-    | {
-        html: string;
-        code: string;
-        language: string;
-        filename: string;
-        headings?: ContentHeadingMetadata[];
-        markdownBefore?: string;
-        markdownAfter?: string;
-      }
     | Array<{
-        html: string;
         code: string;
-        language: string;
         filename: string;
         headings?: ContentHeadingMetadata[];
-        markdownBefore?: string;
+        html: string;
+        language: string;
         markdownAfter?: string;
+        markdownBefore?: string;
       }>
     | null
+    | {
+        code: string;
+        filename: string;
+        headings?: ContentHeadingMetadata[];
+        html: string;
+        language: string;
+        markdownAfter?: string;
+        markdownBefore?: string;
+      }
   > => {
     // GUIDES: Skip content processing - structured sections rendered separately
-    if (item.category === Constants.public.Enums.content_category[7]) { // 'guides'
+    if (item.category === Constants.public.Enums.content_category[7]) {
+      // 'guides'
       return null;
     }
 
@@ -308,7 +343,7 @@ export async function UnifiedDetailPage({
     try {
       // Parse markdown to extract individual code blocks
       const codeBlocks = extractCodeBlocksFromMarkdown(content);
-      
+
       // If we found code blocks, process each separately using shared-runtime utilities
       if (codeBlocks.length > 0) {
         const processedBlocks = codeBlocks.map((block: ExtractedCodeBlock, index: number) => {
@@ -316,7 +351,7 @@ export async function UnifiedDetailPage({
             // Use shared-runtime utilities directly (no edge function call)
             const detectedLanguage = detectLanguage(
               block.code,
-              block.language !== 'text' ? block.language : undefined
+              block.language === 'text' ? undefined : block.language
             );
             const generatedFilename = generateFilename({
               item: {
@@ -333,12 +368,15 @@ export async function UnifiedDetailPage({
             });
             const headings = extractMarkdownHeadings(block.code);
             // Map HeadingMetadata to ContentHeadingMetadata (same structure)
-            const contentHeadings: ContentHeadingMetadata[] | undefined = headings.length > 0 ? headings.map(h => ({
-              id: h.id,
-              anchor: h.anchor,
-              title: h.title,
-              level: h.level,
-            })) : undefined;
+            const contentHeadings: ContentHeadingMetadata[] | undefined =
+              headings.length > 0
+                ? headings.map((h) => ({
+                    id: h.id,
+                    anchor: h.anchor,
+                    title: h.title,
+                    level: h.level,
+                  }))
+                : undefined;
 
             return {
               html: highlightedHtml,
@@ -357,18 +395,22 @@ export async function UnifiedDetailPage({
 
         // Filter out null results and return array
         const validBlocks = processedBlocks.filter(
-          (block: typeof processedBlocks[0] | null): block is NonNullable<typeof processedBlocks[0]> => block !== null
+          (
+            block: (typeof processedBlocks)[0] | null
+          ): block is NonNullable<(typeof processedBlocks)[0]> => block !== null
         );
 
-        return validBlocks.length > 0 ? (validBlocks as Array<{
-          html: string;
-          code: string;
-          language: string;
-          filename: string;
-          headings?: ContentHeadingMetadata[];
-          markdownBefore?: string;
-          markdownAfter?: string;
-        }>) : null;
+        return validBlocks.length > 0
+          ? (validBlocks as Array<{
+              code: string;
+              filename: string;
+              headings?: ContentHeadingMetadata[];
+              html: string;
+              language: string;
+              markdownAfter?: string;
+              markdownBefore?: string;
+            }>)
+          : null;
       }
 
       // Fallback: If no code blocks found, process entire content as single block
@@ -392,12 +434,15 @@ export async function UnifiedDetailPage({
       });
       const headings = extractMarkdownHeadings(content);
       // Map HeadingMetadata to ContentHeadingMetadata (same structure)
-      const contentHeadings: ContentHeadingMetadata[] | undefined = headings.length > 0 ? headings.map(h => ({
-        id: h.id,
-        anchor: h.anchor,
-        title: h.title,
-        level: h.level,
-      })) : undefined;
+      const contentHeadings: ContentHeadingMetadata[] | undefined =
+        headings.length > 0
+          ? headings.map((h) => ({
+              id: h.id,
+              anchor: h.anchor,
+              title: h.title,
+              level: h.level,
+            }))
+          : undefined;
 
       return {
         html: highlightedHtml,
@@ -429,8 +474,8 @@ export async function UnifiedDetailPage({
     // Multi-format configuration (MCP servers)
     if (format === 'multi') {
       const config = configuration as {
-        claudeDesktop?: Record<string, unknown>;
         claudeCode?: Record<string, unknown>;
+        claudeDesktop?: Record<string, unknown>;
         http?: Record<string, unknown>;
         sse?: Record<string, unknown>;
       };
@@ -441,7 +486,7 @@ export async function UnifiedDetailPage({
 
           const displayValue =
             key === 'claudeDesktop' || key === 'claudeCode'
-              ? transformMcpConfigForDisplay(value as Record<string, unknown>)
+              ? transformMcpConfigForDisplay(value)
               : value;
 
           const code = JSON.stringify(displayValue, null, 2);
@@ -454,9 +499,7 @@ export async function UnifiedDetailPage({
               slug: item.slug ?? null,
               name: 'name' in item ? ((item as { name?: string }).name ?? null) : null,
               hook_type:
-                'hook_type' in item
-                  ? ((item as { hook_type?: string }).hook_type ?? null)
-                  : null,
+                'hook_type' in item ? ((item as { hook_type?: string }).hook_type ?? null) : null,
             },
             language: 'json',
             format: 'multi',
@@ -469,7 +512,7 @@ export async function UnifiedDetailPage({
         return {
           format: 'multi' as const,
           configs: highlightedConfigs.filter(
-            (c): c is { key: string; html: string; code: string; filename: string } => c !== null
+            (c): c is { code: string; filename: string; html: string; key: string } => c !== null
           ),
         };
       } catch (error) {
@@ -496,7 +539,9 @@ export async function UnifiedDetailPage({
 
         // Use shared-runtime utilities directly
         const highlightedHookConfig = config.hookConfig
-          ? highlightCode(JSON.stringify(config.hookConfig, null, 2), 'json', { showLineNumbers: true })
+          ? highlightCode(JSON.stringify(config.hookConfig, null, 2), 'json', {
+              showLineNumbers: true,
+            })
           : null;
         const highlightedScript = config.scriptContent
           ? highlightCode(config.scriptContent, 'bash', { showLineNumbers: true })
@@ -572,10 +617,10 @@ export async function UnifiedDetailPage({
 
     try {
       const examples = item.examples as Array<{
-        title: string;
         code: string;
-        language: string;
         description?: string;
+        language: string;
+        title: string;
       }>;
 
       const highlightedExamplesResults = examples.map((example) => {
@@ -602,8 +647,8 @@ export async function UnifiedDetailPage({
           // Generate filename from title
           const filename = `${example.title
             .toLowerCase()
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/^-+|-+$/g, '')}.${
+            .replaceAll(/[^a-z0-9]+/g, '-')
+            .replaceAll(/^-+|-+$/g, '')}.${
             {
               typescript: 'ts',
               javascript: 'js',
@@ -663,36 +708,37 @@ export async function UnifiedDetailPage({
       const mcpbStepsFromMetadata = installation.mcpb?.steps || [];
       const shouldAutoGenerateMcpbSteps = hasMcpbPackage && mcpbStepsFromMetadata.length === 0;
 
-        // Use shared-runtime utilities directly (synchronous, no Promise.all needed)
-        const claudeCodeSteps = installation.claudeCode?.steps
-          ? installation.claudeCode.steps.map((step) => {
-              if (isCommandStep(step)) {
-                const html = highlightCode(step, 'bash', { showLineNumbers: true });
-                return { type: 'command' as const, html, code: step };
-              }
-              return { type: 'text' as const, text: step };
-            })
-          : null;
-        const claudeDesktopSteps = installation.claudeDesktop?.steps
-          ? installation.claudeDesktop.steps.map((step) => {
-              if (isCommandStep(step)) {
-                const html = highlightCode(step, 'bash', { showLineNumbers: true });
-                return { type: 'command' as const, html, code: step };
-              }
-              return { type: 'text' as const, text: step };
-            })
-          : null;
-        const sdkSteps = installation.sdk?.steps
-          ? installation.sdk.steps.map((step) => {
-              if (isCommandStep(step)) {
-                const html = highlightCode(step, 'bash', { showLineNumbers: true });
-                return { type: 'command' as const, html, code: step };
-              }
-              return { type: 'text' as const, text: step };
-            })
-          : null;
-        // Process .mcpb steps from metadata OR auto-generate if package exists
-        const mcpbSteps = mcpbStepsFromMetadata.length > 0
+      // Use shared-runtime utilities directly (synchronous, no Promise.all needed)
+      const claudeCodeSteps = installation.claudeCode?.steps
+        ? installation.claudeCode.steps.map((step) => {
+            if (isCommandStep(step)) {
+              const html = highlightCode(step, 'bash', { showLineNumbers: true });
+              return { type: 'command' as const, html, code: step };
+            }
+            return { type: 'text' as const, text: step };
+          })
+        : null;
+      const claudeDesktopSteps = installation.claudeDesktop?.steps
+        ? installation.claudeDesktop.steps.map((step) => {
+            if (isCommandStep(step)) {
+              const html = highlightCode(step, 'bash', { showLineNumbers: true });
+              return { type: 'command' as const, html, code: step };
+            }
+            return { type: 'text' as const, text: step };
+          })
+        : null;
+      const sdkSteps = installation.sdk?.steps
+        ? installation.sdk.steps.map((step) => {
+            if (isCommandStep(step)) {
+              const html = highlightCode(step, 'bash', { showLineNumbers: true });
+              return { type: 'command' as const, html, code: step };
+            }
+            return { type: 'text' as const, text: step };
+          })
+        : null;
+      // Process .mcpb steps from metadata OR auto-generate if package exists
+      const mcpbSteps =
+        mcpbStepsFromMetadata.length > 0
           ? mcpbStepsFromMetadata.map((step) => {
               if (isCommandStep(step)) {
                 const html = highlightCode(step, 'bash', { showLineNumbers: true });
@@ -752,22 +798,24 @@ export async function UnifiedDetailPage({
     const itemMetadata = getMetadata(item);
     if (!(itemMetadata?.['sections'] && Array.isArray(itemMetadata['sections']))) {
       // Log warning if sections are missing for guides
-      logger.warn('Guides content missing sections in metadata', {
+      logger.warn({ 
         category: item.category,
         slug: item.slug,
         hasMetadata: !!itemMetadata,
         sectionsType: itemMetadata?.['sections'] ? typeof itemMetadata['sections'] : 'undefined',
-      });
+        },
+        'Guides content missing sections in metadata'
+      );
       return null;
     }
 
     const sections = itemMetadata['sections'] as Array<{
-      type: string;
+      [key: string]: unknown;
       code?: string;
       language?: string;
-      tabs?: Array<{ code: string; language: string; [key: string]: unknown }>;
-      steps?: Array<{ code?: string; language?: string; [key: string]: unknown }>;
-      [key: string]: unknown;
+      steps?: Array<{ [key: string]: unknown; code?: string; language?: string }>;
+      tabs?: Array<{ [key: string]: unknown; code: string; language: string }>;
+      type: string;
     }>;
 
     return await Promise.all(
@@ -868,17 +916,17 @@ export async function UnifiedDetailPage({
   // Extract headings from contentData (handle both single and array)
   const headingMetadata = Array.isArray(contentData)
     ? contentData.flatMap((block) => block.headings || [])
-    : contentData?.headings ?? null;
+    : (contentData?.headings ?? null);
   const shouldRenderDetailToc = Array.isArray(headingMetadata) && headingMetadata.length >= 3;
 
   // Handle case where config is not found - AFTER ALL HOOKS
   if (!config) {
     return (
-      <div className={'min-h-screen bg-background'}>
+      <div className="bg-background min-h-screen">
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">
-            <h1 className="mb-4 font-bold text-2xl">Configuration Not Found</h1>
-            <p className="mb-6 text-muted-foreground">
+            <h1 className="mb-4 text-2xl font-bold">Configuration Not Found</h1>
+            <p className="text-muted-foreground mb-6">
               No configuration found for content type: {item.category}
             </p>
           </div>
@@ -917,8 +965,12 @@ export async function UnifiedDetailPage({
     };
 
     return (
-      <div className={'min-h-screen bg-background'}>
-        <DetailHeader displayTitle={displayTitle} item={item} config={serializableConfig as typeof config} />
+      <div className="bg-background min-h-screen">
+        <DetailHeader
+          displayTitle={displayTitle}
+          item={item}
+          config={serializableConfig as typeof config}
+        />
         {viewCountPromise ? (
           <Suspense
             fallback={<DetailMetadata item={item} viewCount={undefined} copyCount={copyCount} />}
@@ -951,12 +1003,14 @@ export async function UnifiedDetailPage({
               />
             </div>
 
-            {/* Sidebars - TOC + Related content + Recently Viewed */}
-            <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
-              {/* On This Page - Supabase-style minimal TOC */}
-              {headingMetadata && headingMetadata.length >= 2 && (
+          {/* Sidebars - TOC + Related content + Recently Viewed */}
+          <aside className="space-y-6 lg:self-start">
+            {/* On This Page - Scroll-aware TOC (hides on scroll down, shows on scroll up) */}
+            {headingMetadata && headingMetadata.length >= 2 ? (
+              <ScrollAwareToc>
                 <SidebarToc headings={headingMetadata} />
-              )}
+              </ScrollAwareToc>
+            ) : null}
 
               {/* Detail Sidebar - Related content */}
               {relatedItemsPromise && config ? (
@@ -1018,9 +1072,13 @@ export async function UnifiedDetailPage({
   };
 
   return (
-    <div className={'min-h-screen bg-background'}>
+    <div className="bg-background min-h-screen">
       {/* Header - Client component for interactivity */}
-      <DetailHeader displayTitle={displayTitle} item={item} config={serializableConfig as typeof config} />
+      <DetailHeader
+        displayTitle={displayTitle}
+        item={item}
+        config={serializableConfig as typeof config}
+      />
 
       {/* Metadata - Stream view count if promise provided */}
       {viewCountPromise ? (
@@ -1038,7 +1096,7 @@ export async function UnifiedDetailPage({
         <DetailMetadata item={item} viewCount={viewCount} copyCount={copyCount} />
       )}
 
-      {shouldRenderQuickActionsBar && (
+      {shouldRenderQuickActionsBar ? (
         <div className="container mx-auto px-4 pt-4">
           <DetailQuickActionsBar
             item={contentItem}
@@ -1048,7 +1106,7 @@ export async function UnifiedDetailPage({
             mcpServers={quickActionsMcpServers}
           />
         </div>
-      )}
+      ) : null}
 
       {/* Main content */}
       <div
@@ -1062,35 +1120,35 @@ export async function UnifiedDetailPage({
             {collectionSections}
 
             {/* GUIDES: Render structured sections from metadata using JSONSectionRenderer */}
-            {guideSections && guideSections.length > 0 && (
+            {guideSections && guideSections.length > 0 ? (
               <JSONSectionRenderer sections={guideSections} />
-            )}
+            ) : null}
 
             {/* Content/Code section (non-guides) */}
-            {contentData && config && (
+            {contentData && config ? (
               <>
                 {Array.isArray(contentData) ? (
                   // Smart grouping: Merge adjacent code blocks into code_group sections
                   (() => {
                     // Type for grouped sections with explicit optional handling
-                    type GroupedSection = {
-                      type: 'single' | 'group';
+                    interface GroupedSection {
                       blocks: typeof contentData;
-                      markdownBefore: string | null;
-                    };
-                    
+                      markdownBefore: null | string;
+                      type: 'group' | 'single';
+                    }
+
                     const groupedSections: GroupedSection[] = [];
                     let currentGroup: typeof contentData = [];
-                    let groupMarkdownBefore: string | null = null;
-                    
-                    for (let i = 0; i < contentData.length; i++) {
-                      const block = contentData[i];
+                    let groupMarkdownBefore: null | string = null;
+
+                    for (const block of contentData) {
                       if (!block) continue;
-                      
+
                       // Check if this block has substantial markdown before it (>50 chars of actual content)
-                      const hasSubstantialMarkdownBefore = block.markdownBefore && 
-                        block.markdownBefore.replace(/\s+/g, ' ').trim().length > 50;
-                      
+                      const hasSubstantialMarkdownBefore =
+                        block.markdownBefore &&
+                        block.markdownBefore.replaceAll(/\s+/g, ' ').trim().length > 50;
+
                       if (hasSubstantialMarkdownBefore && currentGroup.length > 0) {
                         // End current group and start new one
                         groupedSections.push({
@@ -1108,7 +1166,7 @@ export async function UnifiedDetailPage({
                         currentGroup.push(block);
                       }
                     }
-                    
+
                     // Don't forget the last group
                     if (currentGroup.length > 0) {
                       groupedSections.push({
@@ -1117,17 +1175,17 @@ export async function UnifiedDetailPage({
                         markdownBefore: groupMarkdownBefore,
                       });
                     }
-                    
+
                     // Render grouped sections
                     return groupedSections.map((section, sectionIndex) => (
                       <div key={`content-section-${sectionIndex}`} className="space-y-4">
                         {/* Render markdown context before the section */}
-                        {section.markdownBefore && (
-                          <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
+                        {section.markdownBefore ? (
+                          <div className="prose prose-sm dark:prose-invert text-muted-foreground max-w-none">
                             <p>{section.markdownBefore}</p>
                           </div>
-                        )}
-                        
+                        ) : null}
+
                         {section.type === 'group' ? (
                           // Render as tabbed code group
                           <UnifiedSection
@@ -1163,7 +1221,9 @@ export async function UnifiedDetailPage({
                             html={section.blocks[0]?.html ?? ''}
                             code={section.blocks[0]?.code ?? ''}
                             language={section.blocks[0]?.language ?? 'text'}
-                            {...(section.blocks[0]?.filename ? { filename: section.blocks[0].filename } : {})}
+                            {...(section.blocks[0]?.filename
+                              ? { filename: section.blocks[0].filename }
+                              : {})}
                           />
                         )}
                       </div>
@@ -1182,10 +1242,10 @@ export async function UnifiedDetailPage({
                   />
                 )}
               </>
-            )}
+            ) : null}
 
             {/* Features Section */}
-            {config?.sections.features && features.length > 0 && (
+            {config?.sections.features && features.length > 0 ? (
               <UnifiedSection
                 variant="list"
                 title="Features"
@@ -1194,10 +1254,10 @@ export async function UnifiedDetailPage({
                 category={category}
                 dotColor="bg-primary"
               />
-            )}
+            ) : null}
 
             {/* Requirements Section */}
-            {config?.sections.requirements && requirements.length > 0 && (
+            {config?.sections.requirements && requirements.length > 0 ? (
               <UnifiedSection
                 variant="list"
                 title="Requirements"
@@ -1206,19 +1266,19 @@ export async function UnifiedDetailPage({
                 category={category}
                 dotColor="bg-orange-500"
               />
-            )}
+            ) : null}
 
             {/* Installation Section */}
-            {config?.sections.installation && installationData && (
+            {config?.sections.installation && installationData ? (
               <UnifiedSection
                 variant="installation"
                 installationData={installationData}
                 item={item}
               />
-            )}
+            ) : null}
 
             {/* Configuration Section */}
-            {config?.sections.configuration && configData && (
+            {config?.sections.configuration && configData ? (
               <UnifiedSection
                 variant="configuration"
                 {...(configData.format === 'multi'
@@ -1236,10 +1296,10 @@ export async function UnifiedDetailPage({
                         filename: configData.filename,
                       })}
               />
-            )}
+            ) : null}
 
             {/* Use Cases Section */}
-            {config?.sections.use_cases && useCases.length > 0 && (
+            {config?.sections.use_cases && useCases.length > 0 ? (
               <UnifiedSection
                 variant="list"
                 title="Use Cases"
@@ -1248,10 +1308,10 @@ export async function UnifiedDetailPage({
                 category={category}
                 dotColor="bg-accent"
               />
-            )}
+            ) : null}
 
             {/* Security Section (MCP-specific) */}
-            {config?.sections.security && securityItems.length > 0 && (
+            {config?.sections.security && securityItems.length > 0 ? (
               <UnifiedSection
                 variant="list"
                 title="Security Best Practices"
@@ -1260,10 +1320,10 @@ export async function UnifiedDetailPage({
                 category={category}
                 dotColor="bg-orange-500"
               />
-            )}
+            ) : null}
 
             {/* Troubleshooting Section */}
-            {config?.sections.troubleshooting && troubleshooting.length > 0 && (
+            {config?.sections.troubleshooting && troubleshooting.length > 0 ? (
               <UnifiedSection
                 variant="enhanced-list"
                 title="Troubleshooting"
@@ -1271,25 +1331,25 @@ export async function UnifiedDetailPage({
                 items={
                   troubleshooting as Array<
                     | string
+                    | { answer: string; question: string }
                     | { issue: string; solution: string }
-                    | { question: string; answer: string }
                   >
                 }
                 dotColor="bg-red-500"
               />
-            )}
+            ) : null}
 
             {/* Usage Examples Section - GitHub-style code snippets with syntax highlighting */}
-            {config?.sections.examples && examplesData && examplesData.length > 0 && (
+            {config?.sections.examples && examplesData && examplesData.length > 0 ? (
               <UnifiedSection variant="examples" examples={examplesData} />
-            )}
+            ) : null}
 
             {/* Reviews & Ratings Section */}
-            {isValidCategory(item.category) && item.category && item.slug && (
+            {isValidCategory(item.category) && item.category && item.slug ? (
               <div className="mt-12 border-t pt-12">
                 <ReviewListSection contentType={item.category} contentSlug={item.slug} />
               </div>
-            )}
+            ) : null}
 
             {/* Email CTA - Scroll-triggered variant for better engagement */}
             <NewsletterScrollTrigger
@@ -1301,9 +1361,9 @@ export async function UnifiedDetailPage({
           {/* Sidebars - TOC + Related content + Recently Viewed */}
           <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
             {/* On This Page - Supabase-style minimal TOC */}
-            {shouldRenderDetailToc && headingMetadata && headingMetadata.length >= 2 && (
+            {shouldRenderDetailToc && headingMetadata && headingMetadata.length >= 2 ? (
               <SidebarToc headings={headingMetadata} />
-            )}
+            ) : null}
 
             {/* Detail Sidebar - Related content */}
             {relatedItemsPromise && config ? (

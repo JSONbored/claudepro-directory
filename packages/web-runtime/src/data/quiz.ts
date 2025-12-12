@@ -2,11 +2,10 @@
 
 import { QuizService } from '@heyclaude/data-layer';
 import { type Database } from '@heyclaude/database-types';
-import { cache } from 'react';
+import { cacheLife, cacheTag } from 'next/cache';
 
-import { logger, normalizeError } from '../index.ts';
+import { logger } from '../index.ts';
 import { createSupabaseServerClient } from '../supabase/server.ts';
-import { generateRequestId } from '../utils/request-id.ts';
 
 export type QuizConfigurationResult =
   Database['public']['Functions']['get_quiz_configuration']['Returns'];
@@ -14,37 +13,41 @@ export type QuizConfigurationResult =
 /**
  * Get quiz configuration
  *
- * CRITICAL: This function uses React.cache() for request-level deduplication only.
- * It does NOT use Next.js unstable_cache() because:
- * 1. Quiz configuration requires cookies() for auth
- * 2. cookies() cannot be called inside unstable_cache() (Next.js restriction)
+ * Uses 'use cache: private' to enable cross-request caching for user-specific data.
+ * This allows cookies() to be used inside the cache scope while still providing
+ * per-user caching with TTL and cache invalidation support.
  *
- * React.cache() provides request-level deduplication within the same React Server Component tree,
- * which is safe and appropriate for user-specific data.
+ * Cache behavior:
+ * - Minimum 30 seconds stale time (required for runtime prefetch)
+ * - Not prerendered (runs at request time)
+ * @returns Quiz configuration result or null if error occurs
  */
-export const getQuizConfiguration = cache(async (): Promise<null | QuizConfigurationResult> => {
-  const requestId = generateRequestId();
+export async function getQuizConfiguration(): Promise<null | QuizConfigurationResult> {
+  'use cache: private';
+
+  // Configure cache
+  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
+  cacheTag('quiz-configuration');
+
   const reqLogger = logger.child({
-    requestId,
-    operation: 'getQuizConfiguration',
     module: 'data/quiz',
+    operation: 'getQuizConfiguration',
   });
 
   try {
-    // Create authenticated client OUTSIDE of any cache scope
+    // Can use cookies() inside 'use cache: private'
     const client = await createSupabaseServerClient();
     const service = new QuizService(client);
 
     const result = await service.getQuizConfiguration();
 
-    reqLogger.info('getQuizConfiguration: fetched successfully', {
-      hasResult: Boolean(result),
-    });
+    reqLogger.info({ hasResult: Boolean(result) }, 'getQuizConfiguration: fetched successfully');
 
     return result;
   } catch (error) {
-    const normalized = normalizeError(error, 'getQuizConfiguration failed');
-    reqLogger.error('getQuizConfiguration: unexpected error', normalized);
+    // logger.error() normalizes errors internally, so pass raw error
+    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
+    reqLogger.error({ err: errorForLogging }, 'getQuizConfiguration: unexpected error');
     return null;
   }
-});
+}

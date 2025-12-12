@@ -6,7 +6,7 @@
  */
 
 /**
- * Remove "Technical Details" and "Deployment" accordion sections and their content from markdown.
+ * Remove "Technical Details", "Deployment", and "Statistics" accordion sections and their content from markdown.
  *
  * Collapses runs of three or more consecutive newlines into two and trims leading/trailing whitespace.
  * If `content` is falsy or not a string, returns the input unchanged.
@@ -17,11 +17,14 @@
 export function removeAccordionSectionsFromContent(content: string): string {
   if (!content || typeof content !== 'string') return content;
 
-  // Match ### Technical Details and ### Deployment sections
-  const sectionRegex = /### (Technical Details|Deployment)([\s\S]*?)(?=### |## |$)/g;
-  
+  // Match ### Technical Details, ### Deployment, and ### Statistics sections
+  const sectionRegex = /### (Technical Details|Deployment|Statistics)([\s\S]*?)(?=### |## |$)/g;
+
   // Remove all matches
-  return content.replace(sectionRegex, '').replace(/\n{3,}/g, '\n\n').trim();
+  return content
+    .replaceAll(sectionRegex, '')
+    .replaceAll(/\n{3,}/g, '\n\n')
+    .trim();
 }
 
 /**
@@ -38,13 +41,14 @@ export function removeCategorySectionsFromContent(content: string): string {
 
   // Match ## Category headers and their content until next ## or ### or end
   // Categories: Added, Changed, Fixed, Removed, Deprecated, Security
-  const categoryRegex = /^## (Added|Changed|Fixed|Removed|Deprecated|Security)([\s\S]*?)(?=^## |^### |$)/gm;
-  
+  const categoryRegex =
+    /^## (Added|Changed|Fixed|Removed|Deprecated|Security)([\s\S]*?)(?=^## |^### |$)/gm;
+
   // Remove all category sections
-  let cleaned = content.replace(categoryRegex, '');
-  
+  let cleaned = content.replaceAll(categoryRegex, '');
+
   // Clean up extra newlines
-  cleaned = cleaned.replace(/\n{3,}/g, '\n\n').trim();
-  
+  cleaned = cleaned.replaceAll(/\n{3,}/g, '\n\n').trim();
+
   return cleaned;
 }

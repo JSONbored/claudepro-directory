@@ -17,7 +17,6 @@ const submitContactFormSchema = z.object({
   message: z.string(),
   metadata: z.any().optional()
 });
-export type SubmitContactFormInput = z.infer<typeof submitContactFormSchema>;
 
 export const submitContactForm = authedAction
   .metadata({ actionName: 'submitContactForm', category: 'form' })
@@ -44,11 +43,7 @@ export const submitContactForm = authedAction
       
       
       // Lazy import server-only dependencies
-      // const { logActionFailure } = await import('../errors');
       const { revalidatePath, revalidateTag } = await import('next/cache');
-      
-      const { nextInvalidateByKeys } = await import('../cache-tags');
-      const { getCacheConfigSnapshot } = await import('../cache-config');
 
       // Simple success check?
       // Some RPCs return void, some return { success: boolean }?
@@ -56,11 +51,8 @@ export const submitContactForm = authedAction
       
       revalidatePath(`/admin/contact-submissions`);
       revalidateTag(`contact-submission-${result?.submission_id}`, 'default');
-      
-      await nextInvalidateByKeys({
-        cacheConfig: getCacheConfigSnapshot(),
-        invalidateKeys: ['cache.invalidate.contact_submission']
-      });
+      revalidateTag(`contact`, 'default');
+      revalidateTag(`submissions`, 'default');
 
       
       // Lazy load hook to avoid server-only side effects at top level

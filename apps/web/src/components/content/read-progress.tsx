@@ -10,76 +10,94 @@
  * - Motion.dev powered (useScroll + useSpring for smooth physics)
  * - GPU-accelerated animations (60fps guaranteed)
  * - Respects prefers-reduced-motion
- * - Configurable position, color, height
+ * - Configurable position, color, height, zIndex
  * - Zero performance overhead
  *
  * Usage:
  * ```tsx
- * <ReadProgress /> // Default: top, accent color, 2px height
+ * <ReadProgress /> // Default: below navigation, accent color, 5px height
  * <ReadProgress position="bottom" color="primary" height={4} />
  * ```
  *
  * @module components/content/read-progress
  */
 
+import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { motion, useScroll, useSpring } from 'motion/react';
 import { useEffect, useState } from 'react';
 
 export interface ReadProgressProps {
   /**
-   * Position of the progress bar
-   * @default 'below-nav' (positions below sticky navigation)
-   */
-  position?: 'top' | 'bottom' | 'below-nav';
-
-  /**
    * Color variant (maps to CSS variables)
    * @default 'accent'
    */
-  color?: 'accent' | 'primary' | 'foreground';
+  color?: 'accent' | 'foreground' | 'primary';
 
   /**
    * Height of the progress bar in pixels
-   * @default 3
+   * @default 5
    */
   height?: number;
+
+  /**
+   * Position of the progress bar
+   * @default 'below-nav' (positions below sticky navigation)
+   */
+  position?: 'below-nav' | 'bottom' | 'top';
+
+  /**
+   * Spring physics configuration
+   * @default { ...SPRING.scroll, restDelta: 0.0001 }
+   */
+  springConfig?: {
+    damping?: number;
+    restDelta?: number;
+    stiffness?: number;
+  };
 
   /**
    * Z-index for stacking context
    * @default 51 (above navigation at z-50)
    */
   zIndex?: number;
-
-  /**
-   * Spring physics configuration
-   * @default { stiffness: 100, damping: 30, restDelta: 0.001 }
-   */
-  springConfig?: {
-    stiffness?: number;
-    damping?: number;
-    restDelta?: number;
-  };
 }
 
+/**
+ * Render a smooth, configurable reading progress bar fixed to the top, bottom, or immediately below the site navigation.
+ *
+ * The bar animates its horizontal scale using a spring tied to the page scroll position and respects reduced-motion preferences via the provided spring configuration.
+ *
+ * @param position - Where to place the bar. 'below-nav' positions it directly under the site's <header> > <nav>, 'top' pins to the page top, 'bottom' pins to the page bottom. @default 'below-nav'
+ * @param height - Height of the progress bar in pixels. @default 5
+ * @param color - Visual color token to apply: 'accent', 'foreground', or 'primary'. Maps to corresponding background utility classes. @default 'accent'
+ * @param zIndex - CSS z-index value applied to the bar. @default 51
+ * @param springConfig - Spring physics controlling the smoothness of the scale animation. Provide `stiffness`, `damping`, and `restDelta` to tune responsiveness. Defaults to `{ ...SPRING.scroll, restDelta: 0.0001 }`
+ * @returns The progress bar React element that visually represents reading progress as a percentage (0–100) via its horizontal scale.
+ *
+ * @see ReadProgressPresets
+ */
 export function ReadProgress({
   position = 'below-nav',
   height = 5,
+  color = 'accent',
   zIndex = 51,
   springConfig = {
-    stiffness: 400,
-    damping: 40,
+    ...SPRING.scroll,
     restDelta: 0.0001,
   },
 }: ReadProgressProps) {
+  // ALL hooks must be called unconditionally before any early returns (Rules of Hooks)
   const [isMounted, setIsMounted] = useState(false);
   const [navHeight, setNavHeight] = useState(0);
   const [navWidth, setNavWidth] = useState(0);
   const [navLeft, setNavLeft] = useState(0);
+  const [currentProgress, setCurrentProgress] = useState(0);
 
   // Motion hooks must be called unconditionally (React rules)
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, springConfig);
 
+  // ALL useEffect hooks must be called unconditionally before any early returns (Rules of Hooks)
   // Dynamically measure navigation height
   useEffect(() => {
     setIsMounted(true);
@@ -122,7 +140,22 @@ export function ReadProgress({
     };
   }, [position]);
 
+  // Update progress value in effect to avoid hydration mismatch
+  // This effect must be called unconditionally (before any early returns)
+  useEffect(() => {
+    if (!isMounted) return;
+    
+    const updateProgress = () => {
+      setCurrentProgress(Math.round(scrollYProgress.get() * 100));
+    };
+    updateProgress();
+    // Subscribe to scroll progress changes
+    const unsubscribe = scrollYProgress.on('change', updateProgress);
+    return () => unsubscribe();
+  }, [scrollYProgress, isMounted]);
+
   // Don't render on server or before mount
+  // This prevents hydration mismatches by ensuring server and client both render null initially
   if (!isMounted) {
     return null;
   }
@@ -147,9 +180,13 @@ export function ReadProgress({
     return { bottom: 0 };
   };
 
+  // Compute color class from color prop
+  const colorClass =
+    color === 'primary' ? 'bg-primary' : color === 'foreground' ? 'bg-foreground' : 'bg-accent';
+
   return (
     <motion.div
-      className="pointer-events-none fixed origin-left bg-accent"
+      className={`${colorClass} pointer-events-none fixed origin-left`}
       style={{
         ...getPositionStyle(),
         height: `${height}px`,
@@ -161,8 +198,8 @@ export function ReadProgress({
       aria-label="Reading progress"
       aria-valuemin={0}
       aria-valuemax={100}
-      aria-valuenow={Math.round(scrollYProgress.get() * 100)}
-      suppressHydrationWarning={true}
+      aria-valuenow={currentProgress}
+      suppressHydrationWarning
     />
   );
 }
@@ -172,7 +209,7 @@ export function ReadProgress({
  */
 export const ReadProgressPresets = {
   /**
-   * Default: Top, accent color, thin line
+   * Default: Below navigation, accent color, 5px height
    */
   default: () => <ReadProgress />,
 
@@ -197,10 +234,13 @@ export const ReadProgressPresets = {
   fast: () => (
     <ReadProgress
       springConfig={{
-        stiffness: 200,
-        damping: 40,
+        ...SPRING.scroll,
         restDelta: 0.001,
       }}
     />
   ),
 } as const;
+
+// Explicit default export for better module resolution
+// This helps Turbopack properly resolve the client component reference
+export default ReadProgress;

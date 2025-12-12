@@ -12,7 +12,7 @@ import { Constants, type Database as DatabaseGenerated } from '@heyclaude/databa
 import { getEnvVar, normalizeError } from '@heyclaude/shared-runtime';
 
 import { pgmqRead, pgmqDelete } from '../../supabase/pgmq-client';
-import { logger, generateRequestId, createWebAppContextWithId } from '../../logging/server';
+import { logger, createWebAppContextWithId } from '../../logging/server';
 import { createErrorResponse } from '../../utils/error-handler';
 
 // CORS headers
@@ -91,12 +91,16 @@ function timingSafeEqual(a: string, b: string): boolean {
 /**
  * POST /api/flux/revalidation
  * Process revalidation queue and invalidate Next.js cache tags
+ * 
+ * NOTE: revalidateTag() must be called from Next.js server context, so this
+ * cannot be moved to Inngest. The handler processes the queue synchronously
+ * which is necessary for revalidateTag() to work correctly.
+ * 
+ * This endpoint is called infrequently (only when content changes via database triggers),
+ * so it's not a major source of function invocations. The current approach is optimal.
  */
 export async function handleRevalidation(_request: NextRequest): Promise<NextResponse> {
-  const startTime = Date.now();
-  const requestId = generateRequestId();
   const logContext = createWebAppContextWithId(
-    requestId,
     '/api/flux/revalidation',
     'handleRevalidation'
   );
@@ -128,10 +132,8 @@ export async function handleRevalidation(_request: NextRequest): Promise<NextRes
       try {
         // Validate payload structure
         if (!isValidRevalidationPayload(msg.message)) {
-          logger.warn('Invalid revalidation payload structure', {
-            ...logContext,
-            msgId: String(msg.msg_id),
-          });
+          logger.warn({ ...logContext,
+            msgId: String(msg.msg_id), }, 'Invalid revalidation payload structure');
 
           // Delete invalid message
           await pgmqDelete(CONTENT_REVALIDATION_QUEUE, msg.msg_id);
@@ -149,10 +151,8 @@ export async function handleRevalidation(_request: NextRequest): Promise<NextRes
         // Verify secret
         const secret = payload.secret;
         if (!(secret && expectedSecret && timingSafeEqual(secret, expectedSecret))) {
-          logger.warn('Revalidation unauthorized', {
-            ...logContext,
-            msgId: String(msg.msg_id),
-          });
+          logger.warn({ ...logContext,
+            msgId: String(msg.msg_id), }, 'Revalidation unauthorized');
           await pgmqDelete(CONTENT_REVALIDATION_QUEUE, msg.msg_id);
           results.push({
             msg_id: String(msg.msg_id),
@@ -193,18 +193,14 @@ export async function handleRevalidation(_request: NextRequest): Promise<NextRes
         await pgmqDelete(CONTENT_REVALIDATION_QUEUE, msg.msg_id);
         results.push({ msg_id: String(msg.msg_id), status: 'success' });
 
-        logger.info('Cache tags invalidated', {
-          ...logContext,
+        logger.info({ ...logContext,
           msgId: String(msg.msg_id),
-          tags: tagsToInvalidate,
-        });
+          tags: tagsToInvalidate, }, 'Cache tags invalidated');
       } catch (error) {
         const errorObj = normalizeError(error, 'Revalidation failed');
-        logger.warn('Revalidation message failed', {
-          ...logContext,
+        logger.warn({ ...logContext,
           msgId: String(msg.msg_id),
-          errorMessage: errorObj.message,
-        });
+          errorMessage: errorObj.message, }, 'Revalidation message failed');
         // Leave in queue for retry
         results.push({
           msg_id: String(msg.msg_id),
@@ -215,13 +211,9 @@ export async function handleRevalidation(_request: NextRequest): Promise<NextRes
       }
     }
 
-    const durationMs = Date.now() - startTime;
-    logger.info('Revalidation processing completed', {
-      ...logContext,
-      durationMs,
+    logger.info({ ...logContext,
       processed: messages.length,
-      results,
-    });
+      results, }, 'Revalidation processing completed');
 
     return NextResponse.json(
       {
@@ -233,13 +225,13 @@ export async function handleRevalidation(_request: NextRequest): Promise<NextRes
     );
   } catch (error) {
     const normalized = normalizeError(error, 'Revalidation queue error');
-    logger.error('Revalidation queue error', normalized, logContext);
+    logger.error({ err: normalized, ...logContext }, 'Revalidation queue error');
 
     return createErrorResponse(error, {
       route: '/api/flux/revalidation',
       operation: 'POST',
       method: 'POST',
-      logContext: { requestId },
+      logContext: {},
     });
   }
 }

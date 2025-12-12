@@ -103,14 +103,11 @@ function generateChangelog(options: GenerateOptions): string {
 
     return output.trim();
   } catch (error) {
-    logger.error(
-      '❌ Failed to generate changelog',
-      normalizeError(error, 'Changelog generation failed'),
-      {
-        script: 'changelog-generate-entry',
-      }
-    );
-    throw error;
+    const normalized = normalizeError(error, 'Changelog generation failed');
+    logger.error('❌ Failed to generate changelog', normalized, {
+      script: 'changelog-generate-entry',
+    });
+    throw normalized;
   }
 }
 
@@ -152,14 +149,11 @@ function prependToChangelog(newEntry: string): void {
     // Write using file descriptor
     writeFileSync(fd, newContent, 'utf8');
   } catch (error) {
-    logger.error(
-      'Error writing to CHANGELOG.md',
-      normalizeError(error, 'Changelog file write failed'),
-      {
-        script: 'changelog-generate-entry',
-      }
-    );
-    throw error;
+    const normalized = normalizeError(error, 'Changelog file write failed');
+    logger.error('Error writing to CHANGELOG.md', normalized, {
+      script: 'changelog-generate-entry',
+    });
+    throw normalized;
   } finally {
     // Always close file descriptor
     closeSync(fd);

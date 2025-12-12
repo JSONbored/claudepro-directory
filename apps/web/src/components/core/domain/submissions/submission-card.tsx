@@ -1,15 +1,16 @@
 import { Constants, type Database } from '@heyclaude/database-types';
-import { logger } from '@heyclaude/web-runtime/core';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import type { ReactElement } from 'react';
-import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
+import { logger } from '@heyclaude/web-runtime/logging/server';
 import {
+  UI_CLASSES,
+  UnifiedBadge,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
+import { type ReactElement } from 'react';
+
 import { ContentLinkButton, PrLinkButton } from './submission-link-buttons';
 
 type UserSubmission = NonNullable<
@@ -17,25 +18,46 @@ type UserSubmission = NonNullable<
 >[number];
 
 interface SubmissionCardProps {
-  submission: UserSubmission;
-  index: number;
-  getStatusBadge: (status: Database['public']['Enums']['submission_status']) => ReactElement;
-  getTypeLabel: (type: Database['public']['Enums']['submission_type']) => string;
   formatSubmissionDate: (dateString: string) => string;
-  getPrLinkProps: (submission: UserSubmission) => { href: string } | null;
   getContentLinkProps: (
     type: Database['public']['Enums']['submission_type'],
     slug: string,
     status: Database['public']['Enums']['submission_status']
-  ) => { href: string } | null;
+  ) => null | { href: string };
+  getPrLinkProps: (submission: UserSubmission) => null | { href: string };
+  getStatusBadge: (status: Database['public']['Enums']['submission_status']) => ReactElement;
+  getTypeLabel: (type: Database['public']['Enums']['submission_type']) => string;
+  index: number;
   isValidSubmissionStatus: (
     status: unknown
   ) => status is Database['public']['Enums']['submission_status'];
   isValidSubmissionType: (type: unknown) => type is Database['public']['Enums']['submission_type'];
+  submission: UserSubmission;
   VALID_SUBMISSION_STATUSES: Database['public']['Enums']['submission_status'][];
   VALID_SUBMISSION_TYPES: Database['public']['Enums']['submission_type'][];
 }
 
+/**
+ * Renders a card summarizing a user's submission with status, type, timestamps, alerts, and action links.
+ *
+ * Validates submission fields and logs warnings for missing or invalid status, content type, or slug.
+ *
+ * @param props.submission - The submission record to display.
+ * @param props.index - Fallback numeric index used for keys and IDs when `submission.id` is absent.
+ * @param props.getStatusBadge - Returns a badge element for a valid submission status.
+ * @param props.getTypeLabel - Returns the display label for a valid submission content type.
+ * @param props.formatSubmissionDate - Formats an ISO date string for display.
+ * @param props.getPrLinkProps - Computes optional PR link props for the submission; return `null` when no PR link should be shown.
+ * @param props.getContentLinkProps - Computes optional content link props for a (type, slug, status) triplet; return `null` when no content link should be shown.
+ * @param props.isValidSubmissionStatus - Type guard validating a submission status value.
+ * @param props.isValidSubmissionType - Type guard validating a submission content type value.
+ * @param props.VALID_SUBMISSION_STATUSES - Array of allowed submission status enum values (used only for logging context).
+ * @param props.VALID_SUBMISSION_TYPES - Array of allowed submission content type enum values (used only for logging context).
+ * @returns The rendered submission card element.
+ *
+ * @see PrLinkButton
+ * @see ContentLinkButton
+ */
 export function SubmissionCard({
   submission,
   index,
@@ -57,17 +79,17 @@ export function SubmissionCard({
     if (isValidSubmissionStatus(submission.status)) {
       status = submission.status;
     } else {
-      logger.warn('SubmissionsPage: Invalid submission status', {
+      logger.warn({ 
         submissionId,
         invalidStatus: submission.status,
         validStatuses: VALID_SUBMISSION_STATUSES,
         error: `Invalid status: ${submission.status}`,
-      });
+        },
+        'SubmissionsPage: Invalid submission status'
+      );
     }
   } else {
-    logger.warn('SubmissionsPage: Missing submission status', undefined, {
-      submissionId,
-    });
+    logger.warn({ submissionId }, 'SubmissionsPage: Missing submission status');
   }
 
   // Validate content_type - log warning if missing or invalid
@@ -76,25 +98,23 @@ export function SubmissionCard({
     if (isValidSubmissionType(submission.content_type)) {
       type = submission.content_type;
     } else {
-      logger.warn('SubmissionsPage: Invalid submission content_type', {
+      logger.warn({ 
         submissionId,
         invalidContentType: submission.content_type,
         validContentTypes: VALID_SUBMISSION_TYPES,
         error: `Invalid content_type: ${submission.content_type}`,
-      });
+        },
+        'SubmissionsPage: Invalid submission content_type'
+      );
     }
   } else {
-    logger.warn('SubmissionsPage: Missing submission content_type', undefined, {
-      submissionId,
-    });
+    logger.warn({ submissionId }, 'SubmissionsPage: Missing submission content_type');
   }
 
   // Validate content_slug - log warning if missing
   const contentSlug = submission.content_slug;
   if (!contentSlug) {
-    logger.warn('SubmissionsPage: Missing submission content_slug', undefined, {
-      submissionId,
-    });
+    logger.warn({ submissionId }, 'SubmissionsPage: Missing submission content_slug');
   }
 
   const prLinkProps = getPrLinkProps(submission);
@@ -142,42 +162,42 @@ export function SubmissionCard({
       </CardHeader>
 
       <CardContent>
-        <div className={'mb-4 flex flex-wrap gap-4 text-muted-foreground text-sm'}>
+        <div className="text-muted-foreground mb-4 flex flex-wrap gap-4 text-sm">
           <div>
             Submitted {submission.created_at ? formatSubmissionDate(submission.created_at) : 'N/A'}
           </div>
-          {submission.merged_at && (
+          {submission.merged_at ? (
             <>
               <span>•</span>
               <div>Merged {formatSubmissionDate(submission.merged_at)}</div>
             </>
-          )}
-          {submission.pr_number && (
+          ) : null}
+          {submission.pr_number ? (
             <>
               <span>•</span>
               <div>PR #{submission.pr_number}</div>
             </>
-          )}
+          ) : null}
         </div>
 
-        {status === Constants.public.Enums.submission_status[2] && submission.rejection_reason && ( // 'rejected'
+        {status === Constants.public.Enums.submission_status[2] && submission.rejection_reason ? (
           <div className="mb-4 rounded border border-red-500/20 bg-red-500/10 p-3">
-            <p className={'mb-1 font-medium text-red-400 text-sm'}>Rejection Reason:</p>
-            <p className={'text-muted-foreground text-sm'}>{submission.rejection_reason}</p>
+            <p className="mb-1 text-sm font-medium text-red-400">Rejection Reason:</p>
+            <p className="text-muted-foreground text-sm">{submission.rejection_reason}</p>
           </div>
-        )}
+        ) : null}
 
         {status === Constants.public.Enums.submission_status[4] && ( // 'merged'
           <div className="mb-4 rounded border border-green-500/20 bg-green-500/10 p-3">
-            <p className={'font-medium text-green-400 text-sm'}>
+            <p className="text-sm font-medium text-green-400">
               🎉 Your contribution is now live on ClaudePro Directory!
             </p>
           </div>
         )}
 
         <div className={UI_CLASSES.FLEX_GAP_2}>
-          {prLinkProps && <PrLinkButton href={prLinkProps.href} />}
-          {contentLinkProps && <ContentLinkButton href={contentLinkProps.href} />}
+          {prLinkProps ? <PrLinkButton href={prLinkProps.href} /> : null}
+          {contentLinkProps ? <ContentLinkButton href={contentLinkProps.href} /> : null}
         </div>
       </CardContent>
     </Card>

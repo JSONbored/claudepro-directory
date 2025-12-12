@@ -8,28 +8,43 @@
  */
 
 import { Eye, Sparkles, X } from '@heyclaude/web-runtime/icons';
-import type { SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
-import { cn } from '@heyclaude/web-runtime/ui';
-import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
+import { type SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
+import {
+  cn,
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
+import { SPRING, DURATION } from '@heyclaude/web-runtime/design-system';
 import { AnimatePresence, motion } from 'motion/react';
 import { useState } from 'react';
-import { Badge } from '@heyclaude/web-runtime/ui';
-import { Button } from '@heyclaude/web-runtime/ui';
-import { Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
 
 interface InlinePreviewProps {
+  className?: string;
   formData: {
-    submission_type: SubmissionContentType;
-    name: string;
     description: string;
-    tags: string[];
     examples: string[];
+    name: string;
+    submission_type: SubmissionContentType;
+    tags: string[];
     type_specific: Record<string, unknown>;
   };
   qualityScore: number;
-  className?: string;
 }
 
+/**
+ * Renders a live preview card for a submission with desktop sidebar and mobile modal behaviors.
+ *
+ * @param formData - Submission data (name, description, examples, submission_type, tags, and type_specific) used to populate the preview.
+ * @param qualityScore - Quality score between 0 and 100 displayed as a horizontal progress indicator when greater than 0.
+ * @param className - Optional CSS class names applied to the desktop preview wrapper.
+ * @returns A responsive preview UI: a sidebar card on large screens with a show/hide toggle and a floating button that opens a modal on small screens.
+ *
+ * @see PreviewToggle
+ */
 export function InlinePreview({ formData, qualityScore, className }: InlinePreviewProps) {
   const [isVisible, setIsVisible] = useState(true);
   const [isMobileModalOpen, setIsMobileModalOpen] = useState(false);
@@ -38,7 +53,7 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={TOKENS.animations.spring.smooth}
+      transition={SPRING.smooth}
     >
       <Card className="overflow-hidden">
         <CardHeader className="space-y-1 pb-3">
@@ -52,11 +67,11 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
           </div>
           {qualityScore > 0 && (
             <div className="flex items-center gap-2">
-              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+              <div className="bg-muted h-1.5 flex-1 overflow-hidden rounded-full">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${qualityScore}%` }}
-                  transition={{ duration: 0.5, ease: 'easeOut' }}
+                  transition={{ duration: DURATION.moderate, ease: 'easeOut' }}
                   className={cn(
                     'h-full rounded-full',
                     qualityScore >= 80
@@ -73,7 +88,7 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
         </CardHeader>
         <CardContent className="space-y-3">
           {formData.description ? (
-            <p className="line-clamp-3 text-muted-foreground text-sm">{formData.description}</p>
+            <p className="text-muted-foreground line-clamp-3 text-sm">{formData.description}</p>
           ) : (
             <p className="text-muted-foreground/60 text-sm italic">No description yet...</p>
           )}
@@ -94,10 +109,10 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
           )}
 
           {formData.examples.length > 0 && (
-            <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
+            <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
               <Sparkles className="h-3 w-3" />
               <span>
-                {formData.examples.length} example{formData.examples.length !== 1 ? 's' : ''}
+                {formData.examples.length} example{formData.examples.length === 1 ? '' : 's'}
               </span>
             </div>
           )}
@@ -112,7 +127,7 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
       <div className={cn('hidden lg:block', className)}>
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-sm">Live Preview</h3>
+            <h3 className="text-sm font-semibold">Live Preview</h3>
             <Button
               variant="ghost"
               size="sm"
@@ -124,23 +139,23 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
           </div>
 
           <AnimatePresence mode="wait">
-            {isVisible && (
+            {isVisible ? (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                transition={TOKENS.animations.spring.smooth}
+                transition={SPRING.smooth}
               >
                 {previewCard}
               </motion.div>
-            )}
+            ) : null}
           </AnimatePresence>
 
           {!isVisible && (
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-center text-muted-foreground text-xs"
+              className="text-muted-foreground text-center text-xs"
             >
               Preview hidden
             </motion.p>
@@ -161,7 +176,7 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
         </Button>
 
         <AnimatePresence>
-          {isMobileModalOpen && (
+          {isMobileModalOpen ? (
             <>
               <motion.div
                 initial={{ opacity: 0 }}
@@ -174,12 +189,12 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                transition={TOKENS.animations.spring.smooth}
-                className="-translate-y-1/2 sm:-translate-x-1/2 fixed inset-x-4 top-1/2 z-50 sm:inset-x-auto sm:left-1/2 sm:w-full sm:max-w-md"
+                transition={SPRING.smooth}
+                className="fixed inset-x-4 top-1/2 z-50 -translate-y-1/2 sm:inset-x-auto sm:left-1/2 sm:w-full sm:max-w-md sm:-translate-x-1/2"
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-sm text-white">Live Preview</h3>
+                    <h3 className="text-sm font-semibold text-white">Live Preview</h3>
                     <Button
                       variant="ghost"
                       size="sm"
@@ -193,7 +208,7 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
                 </div>
               </motion.div>
             </>
-          )}
+          ) : null}
         </AnimatePresence>
       </div>
     </>
@@ -204,11 +219,23 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
  * Preview Toggle Button (for wizard header)
  */
 interface PreviewToggleProps {
-  onClick: () => void;
-  isVisible: boolean;
   className?: string;
+  isVisible: boolean;
+  onClick: () => void;
 }
 
+/**
+ * Render a small outline button that toggles the visibility of the live preview.
+ *
+ * The button shows an Eye icon and the text "Show Preview" or "Hide Preview" depending on `isVisible`.
+ *
+ * @param onClick - Callback invoked when the button is clicked.
+ * @param isVisible - Current visibility state of the preview; controls the button label.
+ * @param className - Optional additional CSS classes applied to the button.
+ * @returns A button element that toggles preview visibility.
+ *
+ * @see InlinePreview
+ */
 export function PreviewToggle({ onClick, isVisible, className }: PreviewToggleProps) {
   return (
     <Button variant="outline" size="sm" onClick={onClick} className={cn('gap-2', className)}>

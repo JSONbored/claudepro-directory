@@ -1,55 +1,74 @@
-import { getContactChannels, getLastUpdatedDate } from '@heyclaude/web-runtime/core';
+import { getContactChannels } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { NavLink } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
+import { connection } from 'next/server';
 
 /**
- * Provide metadata for the /accessibility page.
+ * Cache Components: Page uses request-time rendering with caching.
+ * Content is static, but rendering happens at request time because generatePageMetadata
+ * uses Date.now() internally. The 'use cache' directive caches the rendered output.
+ */
+
+/**
+ * Produce page metadata for the /accessibility route.
  *
- * Used by Next.js to populate the document head (title, description, Open Graph, etc.)
- * for the accessibility page.
+ * Note: generatePageMetadata internally uses Date.now() via getSEOMetadata, so connection() is required
+ * to defer to request time. This opts into dynamic rendering for metadata generation.
  *
  * @returns The Metadata object for the /accessibility route.
  * @see generatePageMetadata
- * @see revalidate
+ * @see connection
  */
 export async function generateMetadata(): Promise<Metadata> {
+  // generatePageMetadata internally uses Date.now() via getSEOMetadata
+  // connection() defers to request time for non-deterministic operations
+  await connection();
   return await generatePageMetadata('/accessibility');
 }
 
 /**
- * Accessibility statement should reflect the latest compliance status.
- * revalidate: 3600 = Revalidate every hour
+ * Render the site's Accessibility Statement page with request-time caching.
  *
- * Note: With hourly revalidation, getLastUpdatedDate() will effectively show
- * the last regeneration time (up to an hour old). This aligns the displayed
- * "last updated" timestamp with the actual page regeneration cycle, ensuring
- * users see a timestamp that reflects when the page was last rebuilt rather
- * than a fixed "statement last updated" date from config or content.
- */
-export const revalidate = 3600;
-
-/**
- * Renders the site's Accessibility Statement page.
+ * Content is static but rendered at request time with caching via 'use cache' directive.
+ * The cacheLife profile controls how long the cached output is reused.
  *
- * This server component reads the site's last-updated timestamp and public contact channels at render time and is intended to be statically generated and revalidated according to the module's ISR configuration.
+ * @returns A React element that renders the Accessibility Statement page.
  *
- * @returns A React element containing the complete Accessibility Statement page.
- * @see getLastUpdatedDate
  * @see getContactChannels
  * @see APP_CONFIG
- * @see revalidate
  */
-export default function AccessibilityPage() {
-  const lastUpdated = getLastUpdatedDate();
+export default async function AccessibilityPage() {
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
+
+  return <AccessibilityPageContent />;
+}
+
+/**
+ * Render the Accessibility Statement content for the accessibility page.
+ *
+ * Uses static contact channels to populate page content. The "last reviewed" date is static.
+ *
+ * @returns A React element containing the full Accessibility Statement content.
+ *
+ * @see getContactChannels
+ * @see NavLink
+ * @see APP_CONFIG
+ */
+function AccessibilityPageContent() {
   const channels = getContactChannels();
+
+  // Static date - update this manually when the accessibility statement is reviewed/updated
+  const lastReviewed = 'December 15, 2024';
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8 sm:py-12">
       <div className="prose prose-invert max-w-none">
         <h1 className="mb-6 text-3xl font-bold sm:text-4xl">Accessibility Statement</h1>
-        <p className="text-muted-foreground mb-8">Page generated: {lastUpdated}</p>
+        <p className="text-muted-foreground mb-8">Last reviewed: {lastReviewed}</p>
 
         <section className="mb-8">
           <h2 className="mb-4 text-2xl font-semibold">Our Commitment</h2>
@@ -65,10 +84,10 @@ export default function AccessibilityPage() {
           <p className="mb-4">
             We aim to conform to the{' '}
             <NavLink
-              href="https://www.w3.org/WAI/WCAG21/quickref/"
               external
-              target="_blank"
+              href="https://www.w3.org/WAI/WCAG21/quickref/"
               rel="noopener noreferrer"
+              target="_blank"
             >
               Web Content Accessibility Guidelines (WCAG) 2.1
             </NavLink>{' '}
@@ -169,7 +188,7 @@ export default function AccessibilityPage() {
           <ul className="list-disc space-y-2 pl-6">
             <li>
               Email:{' '}
-              <NavLink href={`mailto:${channels.email}`} external>
+              <NavLink external href={`mailto:${channels.email}`}>
                 {channels.email}
               </NavLink>
             </li>
@@ -178,7 +197,7 @@ export default function AccessibilityPage() {
             </li>
             <li>
               GitHub Issues:{' '}
-              <NavLink href={`${channels.github}/issues`} external>
+              <NavLink external href={`${channels.github}/issues`}>
                 Report an Issue
               </NavLink>
             </li>

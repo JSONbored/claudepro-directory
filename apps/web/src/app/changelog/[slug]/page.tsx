@@ -2,27 +2,24 @@
  * Changelog Detail Page
  *
  * Individual changelog entry page with full content and metadata.
- * Follows existing [category]/[slug]/page.tsx pattern with ISR.
+ * Follows existing [category]/[slug]/page.tsx pattern with use cache + Suspense.
  *
  * Architecture:
- * - Server component with ISR (2-hour revalidation)
- * - Static generation for recent entries, older ones via on-demand ISR
+ * - Server component with 'use cache' directive and Suspense boundaries
+ * - Static generation for recent entries, dynamic rendering via Suspense fallback
  * - SEO-optimized with metadata and structured data
  * - View tracking integration
  *
  * Performance:
- * - ISR: 7200s (2 hours) for stable changelog content
+ * - cacheLife('static'): 5min stale, 1day revalidate, 1week expire
  * - Database-cached entry loading
  * - Static params generation for recent entries only
  *
  * Production Standards:
- * - Type-safe with Next.js 15.5.4
+ * - Type-safe with Next.js 16.0.7
  * - Proper error handling with notFound()
  * - Accessibility support
  * - Responsive design
- */
-/**
- * ISR: 2 hours (7200s) - Changelog entries are stable after publication
  */
 import { Constants } from '@heyclaude/database-types';
 import {
@@ -32,35 +29,34 @@ import {
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft, Calendar } from '@heyclaude/web-runtime/icons';
-import { generateRequestId, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  UI_CLASSES,
-  NavLink,
-  Separator,
   ANIMATION_CONSTANTS,
   Breadcrumbs,
+  NavLink,
+  Separator,
+  UI_CLASSES,
 } from '@heyclaude/web-runtime/ui';
 import { formatChangelogDate, getChangelogUrl } from '@heyclaude/web-runtime/utils/changelog';
 import { type Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import { notFound } from 'next/navigation';
+import { Suspense } from 'react';
 
 import { ReadProgress } from '@/src/components/content/read-progress';
 import { Pulse } from '@/src/components/core/infra/pulse';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { ChangelogContent } from '@/src/components/features/changelog/changelog-content';
 
-export const revalidate = 7200;
-export const dynamicParams = true; // Allow older changelog entries to be rendered on-demand
+import ChangelogEntryLoading from './loading';
 
 /**
- * Build the list of static route params for the most recent changelog entries.
+ * Build static route params for the most recent changelog entries to seed Next.js static generation.
  *
- * Pre-renders up to STATIC_GENERATION_LIMITS.changelog of the latest entries to reduce build time;
- * older entries are rendered on-demand via ISR (revalidate = 7200 seconds).
+ * Returns up to the configured STATIC_GENERATION_LIMITS.changelog newest entries. If no entries are available
+ * or an error occurs while loading entries, returns an empty array. Suspense boundaries will handle dynamic rendering.
  *
- * @returns An array of param objects of the form `{ slug: string }` for Next.js static generation
- *
- * @throws {Error} When loading changelog entries fails — the error is normalized and re-thrown.
+ * @returns An array of param objects `{ slug: string }` used by Next.js to statically generate routes, or an empty array when no entries are available or an error occurs.
  *
  * @see getAllChangelogEntries
  * @see STATIC_GENERATION_LIMITS
@@ -69,15 +65,11 @@ export async function generateStaticParams() {
   // Import shared constant for consistency across changelog pages
   const { STATIC_GENERATION_LIMITS } = await import('@heyclaude/web-runtime/data/config/constants');
 
-  // Generate requestId for static params generation (build-time)
-  const requestId = generateRequestId();
-
-  // Create request-scoped child logger to avoid race conditions
+  // Create request-scoped child logger
   const reqLogger = logger.child({
-    requestId,
+    module: 'apps/web/src/app/changelog/[slug]',
     operation: 'ChangelogEntryPageStaticParams',
     route: '/changelog',
-    module: 'apps/web/src/app/changelog/[slug]',
   });
 
   try {
@@ -85,14 +77,22 @@ export async function generateStaticParams() {
 
     // Only pre-render the most recent entries to optimize build time
     const limit = Math.max(0, STATIC_GENERATION_LIMITS.changelog);
+    // Return empty array if no entries found - Suspense boundaries will handle dynamic rendering
+    // This follows Next.js best practices by avoiding placeholder patterns
     return entries.slice(0, limit).map((entry) => ({
       slug: entry.slug,
     }));
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to generate changelog static params');
-    reqLogger.error('ChangelogEntryPage: generateStaticParams threw', normalized);
-    // Re-throw so callers/CI see a hard failure rather than masking it
-    throw normalized;
+    reqLogger.error(
+      {
+        err: normalized,
+        section: 'data-fetch',
+      },
+      'ChangelogEntryPage: generateStaticParams threw'
+    );
+    // Return empty array on error - Suspense boundaries will handle dynamic rendering
+    return [];
   }
 }
 
@@ -100,6 +100,7 @@ export async function generateStaticParams() {
  * Produce route metadata for a changelog entry identified by `slug`.
  *
  * @param params - Promise that resolves to an object containing the route `slug` to load metadata for
+ * @param params.params
  * @returns Metadata for the `/changelog/:slug` route; if the entry cannot be loaded, the metadata will be generated with `item: null`
  *
  * @see getChangelogEntryBySlug
@@ -112,15 +113,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
 
-  // Generate requestId for metadata generation (separate from page render)
-  const metadataRequestId = generateRequestId();
-
-  // Create request-scoped child logger to avoid race conditions
+  // Create request-scoped child logger
   const metadataLogger = logger.child({
-    requestId: metadataRequestId,
+    module: 'apps/web/src/app/changelog/[slug]',
     operation: 'ChangelogEntryPageMetadata',
     route: `/changelog/${slug}`,
-    module: 'apps/web/src/app/changelog/[slug]',
   });
 
   let entry: Awaited<ReturnType<typeof getChangelogEntryBySlug>>;
@@ -128,28 +125,33 @@ export async function generateMetadata({
     entry = await getChangelogEntryBySlug(slug);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load changelog entry for metadata');
-    metadataLogger.error('ChangelogEntryPage: metadata loader threw', normalized, {
-      operation: 'generateMetadata',
-    });
+    metadataLogger.error(
+      {
+        err: normalized,
+        operation: 'generateMetadata',
+      },
+      'ChangelogEntryPage: metadata loader threw'
+    );
     entry = null;
   }
 
   return generatePageMetadata('/changelog/:slug', {
-    params: { slug },
     item: entry,
+    params: { slug },
     slug,
   });
 }
 
 /**
- * Render the changelog detail page for the entry identified by `slug`.
+ * Renders the changelog detail page for the entry identified by `slug`.
  *
- * Fetches the changelog entry, triggers a 404 when the entry is not found, and renders
- * page chrome (read progress, view tracking, structured data) and the entry content.
+ * Loads the changelog entry, triggers a 404 when the entry is not found, and renders
+ * page chrome (read progress, view tracking, structured data) alongside the entry content.
  *
- * @param params - Promise that resolves to an object containing the `slug` of the changelog entry to render.
- * @returns The server-rendered React element for the changelog entry page.
- * @throws A normalized error when loading the changelog entry fails.
+ * @param params - Promise resolving to an object containing the `slug` of the changelog entry to render
+ * @param params.params
+ * @returns The server-rendered React element for the changelog entry page
+ * @throws A normalized error when loading the changelog entry fails
  *
  * @see getChangelogEntryBySlug
  * @see getChangelogUrl
@@ -161,30 +163,74 @@ export default async function ChangelogEntryPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const { slug } = await params;
+  'use cache';
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
-  // Generate single requestId for this page request
-  const requestId = generateRequestId();
-
-  // Create request-scoped child logger to avoid race conditions
+  // Create request-scoped child logger
   const reqLogger = logger.child({
-    requestId,
-    operation: 'ChangelogEntryPage',
-    route: `/changelog/${slug}`,
     module: 'apps/web/src/app/changelog/[slug]',
+    operation: 'ChangelogEntryPage',
+    route: '/changelog/[slug]',
   });
+
+  return (
+    <Suspense fallback={<ChangelogEntryLoading />}>
+      <ChangelogEntryPageContent params={params} reqLogger={reqLogger} />
+    </Suspense>
+  );
+}
+
+/**
+ * Renders the changelog entry page for a given slug by loading the entry and composing the page UI.
+ *
+ * Loads the changelog entry for `params.slug`; if the entry cannot be loaded a normalized error is thrown,
+ * and if the entry is not found the Next.js `notFound()` helper is invoked to render a 404.
+ *
+ * @param params - A promise resolving to an object with the `slug` of the changelog entry to render.
+ * @param params.params
+ * @param reqLogger - Route-scoped logger used for request-scoped logging.
+ * @param params.reqLogger
+ * @returns The rendered changelog entry page JSX including read progress, view tracking, structured data, header, and content.
+ *
+ * @throws A normalized error when fetching the changelog entry fails.
+ *
+ * @see getChangelogEntryBySlug
+ * @see getChangelogUrl
+ * @see ChangelogContent
+ * @see ReadProgress
+ * @see Pulse
+ * @see StructuredData
+ */
+async function ChangelogEntryPageContent({
+  params,
+  reqLogger,
+}: {
+  params: Promise<{ slug: string }>;
+  reqLogger: ReturnType<typeof logger.child>;
+}) {
+  const { slug } = await params;
+  const route = `/changelog/${slug}`;
+
+  // Create route-specific logger
+  const routeLogger = reqLogger.child({ route });
 
   let entry: Awaited<ReturnType<typeof getChangelogEntryBySlug>>;
   try {
     entry = await getChangelogEntryBySlug(slug);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load changelog entry');
-    reqLogger.error('ChangelogEntryPage: getChangelogEntryBySlug threw', normalized);
+    routeLogger.error(
+      {
+        err: normalized,
+        section: 'data-fetch',
+      },
+      'ChangelogEntryPage: getChangelogEntryBySlug threw'
+    );
     throw normalized;
   }
 
   if (!entry) {
-    reqLogger.warn('ChangelogEntryPage: entry not found');
+    routeLogger.warn({ section: 'data-fetch' }, 'ChangelogEntryPage: entry not found');
     notFound();
   }
 
@@ -197,9 +243,9 @@ export default async function ChangelogEntryPage({
 
       {/* View Tracker - Track page views */}
       <Pulse
-        variant="view"
-        category={Constants.public.Enums.content_category[10]} // 'changelog'
+        category={'changelog' as (typeof Constants.public.Enums.content_category)[number]}
         slug={entry.slug}
+        variant="view"
       />
 
       {/* Structured Data - Pre-generated schemas from database */}
@@ -213,8 +259,8 @@ export default async function ChangelogEntryPage({
 
         {/* Navigation */}
         <NavLink
-          href={ROUTES.CHANGELOG}
           className={`${UI_CLASSES.TEXT_HELPER} ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} ${UI_CLASSES.TEXT_BODY_SM}`}
+          href={ROUTES.CHANGELOG}
         >
           <ArrowLeft className={UI_CLASSES.ICON_SM} />
           <span>Back to Changelog</span>
@@ -235,8 +281,8 @@ export default async function ChangelogEntryPage({
           <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} ${UI_CLASSES.TEXT_BODY_SM}`}>
             <span className={UI_CLASSES.TEXT_HELPER}>Permanent link:</span>
             <a
-              href={canonicalUrl}
               className={`text-primary hover:text-primary/80 truncate ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT}`}
+              href={canonicalUrl}
             >
               {canonicalUrl}
             </a>
@@ -246,7 +292,7 @@ export default async function ChangelogEntryPage({
         <Separator className={UI_CLASSES.MARGIN_Y_RELAXED} />
 
         {/* Content */}
-        <ChangelogContent entry={entry} />
+        <ChangelogContent entry={entry} hideHeader />
       </article>
     </>
   );

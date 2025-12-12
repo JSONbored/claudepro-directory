@@ -1,7 +1,7 @@
 'use client';
 
 import { Shield } from '@heyclaude/web-runtime/icons';
-import { UI_CLASSES, Button } from '@heyclaude/web-runtime/ui';
+import { Button, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useState } from 'react';
 
 import { EnrollMFADialog } from '@/src/components/features/account/mfa/enroll-mfa-dialog';
@@ -27,9 +27,9 @@ export function MFAFactorsListClient() {
       <MFAFactorsList key={refreshKey} onFactorUnenrolled={handleEnrolled} />
 
       <EnrollMFADialog
-        open={enrollDialogOpen}
-        onOpenChange={setEnrollDialogOpen}
         onEnrolled={handleEnrolled}
+        onOpenChange={setEnrollDialogOpen}
+        open={enrollDialogOpen}
       />
     </div>
   );

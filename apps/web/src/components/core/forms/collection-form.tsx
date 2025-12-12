@@ -15,16 +15,22 @@
  * ```
  */
 
-import type { Database } from '@heyclaude/database-types';
+import { type Database } from '@heyclaude/database-types';
 import { createCollection, updateCollection } from '@heyclaude/web-runtime/actions';
-import { useFormSubmit } from '@heyclaude/web-runtime/hooks';
-import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { useAuthenticatedUser, useFormSubmit } from '@heyclaude/web-runtime/hooks';
+import {
+  toasts,
+  UI_CLASSES,
+  UnifiedBadge,
+  FormField,
+  Button,
+  Checkbox,
+  Label,
+} from '@heyclaude/web-runtime/ui';
+import { usePathname } from 'next/navigation';
 import { useId, useState } from 'react';
-import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
-import { FormField } from '@heyclaude/web-runtime/ui';
-import { Button } from '@heyclaude/web-runtime/ui';
-import { Checkbox } from '@heyclaude/web-runtime/ui';
-import { Label } from '@heyclaude/web-runtime/ui';
+
+import { useAuthModal } from '@/src/hooks/use-auth-modal';
 
 type Bookmark = Database['public']['Tables']['bookmarks']['Row'];
 type CollectionData = Database['public']['Tables']['user_collections']['Row'];
@@ -32,18 +38,33 @@ type CollectionData = Database['public']['Tables']['user_collections']['Row'];
 interface CollectionFormProps {
   /** User's existing bookmarks to optionally add to collection */
   bookmarks: Bookmark[];
-  /** Form mode - 'create' for new collections, 'edit' for existing */
-  mode: 'create' | 'edit';
   /** Existing collection data (required for edit mode) */
   collection?: CollectionData;
+  /** Form mode - 'create' for new collections, 'edit' for existing */
+  mode: 'create' | 'edit';
 }
 
 /**
- * Form component for creating and editing user collections.
- * Handles validation, submission, and navigation automatically.
+ * Render a form for creating or editing a user collection.
+ *
+ * The form manages fields for name, slug, description, and public visibility, performs
+ * client-side validation, and submits create or update requests. In create mode the form
+ * can optionally include a selectable list of bookmarks to add to the new collection.
+ *
+ * @param bookmarks - Optional list of bookmarks available to add when creating a collection.
+ * @param mode - Operation mode: `'create'` to create a new collection, `'edit'` to update an existing one.
+ * @param collection - Existing collection data used to initialize fields in edit mode.
+ * @returns The form element for creating or editing a collection.
+ *
+ * @see createCollection
+ * @see updateCollection
+ * @see useFormSubmit
  */
 export function CollectionForm({ bookmarks, mode, collection }: CollectionFormProps) {
   const [selectedBookmarks, setSelectedBookmarks] = useState<string[]>([]);
+  const pathname = usePathname();
+  const { user, status } = useAuthenticatedUser({ context: 'CollectionForm' });
+  const { openAuthModal } = useAuthModal();
 
   // Use standardized form submission hook
   const { isPending, handleSubmit, router } = useFormSubmit<CollectionData>({
@@ -80,14 +101,29 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
     if (mode === 'create' || !slug) {
       const generatedSlug = value
         .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-+|-+$/g, '');
+        .replaceAll(/[^a-z0-9]+/g, '-')
+        .replaceAll(/^-+|-+$/g, '');
       setSlug(generatedSlug);
     }
   };
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    // Proactive auth check - show modal before attempting action
+    if (status === 'loading') {
+      // Wait for auth check to complete
+      return;
+    }
+
+    if (!user) {
+      // User is not authenticated - show auth modal
+      openAuthModal({
+        valueProposition: 'Sign in to create collections',
+        redirectTo: pathname ?? undefined,
+      });
+      return;
+    }
 
     // Client-side validation
     if (!name.trim()) {
@@ -145,8 +181,8 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
         value={name}
         onChange={(e) => handleNameChange(e.target.value)}
         maxLength={100}
-        showCharCount={true}
-        required={true}
+        showCharCount
+        required
         disabled={isPending}
       />
 
@@ -171,7 +207,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         maxLength={500}
-        showCharCount={true}
+        showCharCount
         rows={3}
         disabled={isPending}
       />
@@ -185,10 +221,10 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
           disabled={isPending}
         />
         <div className="flex-1">
-          <Label htmlFor={isPublicId} className="cursor-pointer font-medium text-base">
+          <Label htmlFor={isPublicId} className="cursor-pointer text-base font-medium">
             Public Collection
           </Label>
-          <p className={'text-muted-foreground text-sm'}>
+          <p className="text-muted-foreground text-sm">
             Make this collection visible on your public profile
           </p>
         </div>
@@ -199,7 +235,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
         <div className={UI_CLASSES.FORM_GROUP_SPACING}>
           <div>
             <Label className="text-base">Add Bookmarks (Optional)</Label>
-            <p className={'mt-1 text-muted-foreground text-sm'}>
+            <p className="text-muted-foreground mt-1 text-sm">
               Select bookmarks to add to this collection. You can add more later.
             </p>
           </div>
@@ -207,7 +243,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
             {bookmarks.map((bookmark) => (
               <div
                 key={bookmark.id}
-                className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_3} rounded-md p-2 hover:bg-accent`}
+                className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_3} hover:bg-accent rounded-md p-2`}
               >
                 <Checkbox
                   id={bookmark.id}
@@ -227,7 +263,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
                 <div className="flex-1">
                   <Label
                     htmlFor={bookmark.id}
-                    className={`cursor-pointer font-normal text-sm ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}`}
+                    className={`cursor-pointer text-sm font-normal ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}`}
                   >
                     <UnifiedBadge variant="base" style="outline" className="text-xs capitalize">
                       {bookmark.content_type}
@@ -239,7 +275,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
             ))}
           </div>
           {selectedBookmarks.length > 0 && (
-            <p className={'text-muted-foreground text-sm'}>
+            <p className="text-muted-foreground text-sm">
               {selectedBookmarks.length} bookmark{selectedBookmarks.length === 1 ? '' : 's'}{' '}
               selected
             </p>
@@ -250,14 +286,14 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
       {/* Empty bookmarks message */}
       {mode === 'create' && bookmarks.length === 0 && (
         <div className="rounded-lg border border-dashed p-6 text-center">
-          <p className={'text-muted-foreground text-sm'}>
+          <p className="text-muted-foreground text-sm">
             You don't have any bookmarks yet. Create the collection first and add bookmarks later.
           </p>
         </div>
       )}
 
       {/* Actions */}
-      <div className={'flex items-center gap-4 pt-4'}>
+      <div className="flex items-center gap-4 pt-4">
         <Button type="submit" disabled={isPending} className="flex-1 sm:flex-initial">
           {isPending
             ? mode === 'create'

@@ -97,12 +97,9 @@ export function useLoggedAsync({
         // Pino's stdSerializers.err automatically handles error serialization
         // Pass error as 'err' key for proper formatting
         if (severity === 'warn') {
-          logger.warn(logLabel, {
-            ...sanitizedContext,
-            err: normalized,
-          });
+          logger.warn({ ...sanitizedContext, err: normalized }, logLabel);
         } else {
-          logger.error(logLabel, normalized, sanitizedContext);
+          logger.error({ err: normalized, ...sanitizedContext }, logLabel);
         }
 
         onError?.(normalized);
