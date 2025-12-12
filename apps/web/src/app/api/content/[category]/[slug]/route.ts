@@ -1,7 +1,22 @@
 /**
- * Content Record Export API Route
- * Migrated from public-api edge function
- * Handles JSON, Markdown, LLMs.txt, and storage format exports
+ * Content Detail Export API Route
+ * 
+ * Returns individual content records in multiple formats (JSON, Markdown, LLMs.txt, Storage).
+ * Supports various export options including metadata and footer inclusion.
+ * 
+ * @example
+ * ```ts
+ * // Request
+ * GET /api/content/agents/code-reviewer?format=json
+ * 
+ * // Response (200) - application/json
+ * {
+ *   "id": "...",
+ *   "title": "Code Reviewer",
+ *   "slug": "code-reviewer",
+ *   ...
+ * }
+ * ```
  */
 
 import 'server-only';
@@ -9,16 +24,17 @@ import { ContentService } from '@heyclaude/data-layer';
 import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { APP_CONFIG, buildSecurityHeaders } from '@heyclaude/shared-runtime';
-import { createErrorResponse, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { createApiRoute, createApiOptionsHandler, contentDetailQuerySchema } from '@heyclaude/web-runtime/server';
+import { normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  badRequestResponse,
   buildCacheHeaders,
   createSupabaseAnonClient,
   getOnlyCorsHeaders,
   getWithAcceptCorsHeaders,
+  notFoundResponse,
 } from '@heyclaude/web-runtime/server';
 import { cacheLife } from 'next/cache';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
 /**
  * Cached helper function to fetch full content record
@@ -46,22 +62,8 @@ async function getCachedContentFull(
   return await service.getApiContentFull(rpcArgs);
 }
 
-const CORS_JSON = getOnlyCorsHeaders;
-const CORS_MARKDOWN = getWithAcceptCorsHeaders;
 const SITE_URL = APP_CONFIG.url;
 
-const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
-
-function isValidContentCategory(
-  value: string
-): value is DatabaseGenerated['public']['Enums']['content_category'] {
-  for (const validValue of CONTENT_CATEGORY_VALUES) {
-    if (value === validValue) {
-      return true;
-    }
-  }
-  return false;
-}
 
 function getProperty(obj: unknown, key: string): unknown {
   if (typeof obj !== 'object' || obj === null) {
@@ -124,36 +126,27 @@ function sanitizeFilename(name: string): string {
 async function handleJsonFormat(
   category: DatabaseGenerated['public']['Enums']['content_category'],
   slug: string,
-  reqLogger: ReturnType<typeof logger.child>
+  logger: { error: (context: Record<string, unknown>, message: string) => void; warn: (context: Record<string, unknown>, message: string) => void; info: (context: Record<string, unknown>, message: string) => void; debug: (context: Record<string, unknown>, message: string) => void }
 ) {
   let data: Awaited<ReturnType<typeof getCachedContentFull>> | null = null;
   try {
     data = await getCachedContentFull(category, slug);
   } catch (error) {
     const normalized = normalizeError(error, 'Operation failed');
-    reqLogger.error(
+    logger.error(
       {
         category,
         err: normalized,
         rpcName: 'get_api_content_full',
         slug,
-      },
+      } as Record<string, unknown>,
       'Content JSON RPC error'
     );
-    return createErrorResponse(normalized, {
-      logContext: {
-        category,
-        rpcName: 'get_api_content_full',
-        slug,
-      },
-      method: 'GET',
-      operation: 'ContentRecordAPI',
-      route: '/api/content/[category]/[slug]',
-    });
+    throw normalized; // Factory will handle error response
   }
 
   if (!data) {
-    reqLogger.warn({ category, slug }, 'Content not found');
+    logger.warn({ category, slug } as Record<string, unknown>, 'Content not found');
     return NextResponse.json(
       {
         error: {
@@ -167,7 +160,7 @@ async function handleJsonFormat(
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
           ...buildSecurityHeaders(),
-          ...CORS_JSON,
+          ...getOnlyCorsHeaders,
         },
         status: 404,
       }
@@ -183,12 +176,12 @@ async function handleJsonFormat(
       parsedData = JSON.parse(data);
     } catch {
       // If parsing fails, treat it as raw text and wrap it
-      reqLogger.warn(
+      logger.warn(
         {
           category,
           dataPreview: data.slice(0, 100),
           slug,
-        },
+        } as Record<string, unknown>,
         'Content JSON: RPC returned non-JSON string'
       );
       return NextResponse.json(
@@ -197,7 +190,7 @@ async function handleJsonFormat(
           headers: {
             'Content-Type': 'application/json; charset=utf-8',
             ...buildSecurityHeaders(),
-            ...CORS_JSON,
+            ...getOnlyCorsHeaders,
           },
           status: 500,
         }
@@ -214,12 +207,12 @@ async function handleJsonFormat(
 
   // Ensure we have actual content
   if (!parsedData || (typeof parsedData === 'object' && Object.keys(parsedData).length === 0)) {
-    reqLogger.warn(
+    logger.warn(
       {
         category,
         dataType: typeof data,
         slug,
-      },
+      } as Record<string, unknown>,
       'Content JSON: empty or null data returned from RPC'
     );
     return NextResponse.json(
@@ -228,7 +221,7 @@ async function handleJsonFormat(
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
           ...buildSecurityHeaders(),
-          ...CORS_JSON,
+          ...getOnlyCorsHeaders,
         },
         status: 500,
       }
@@ -243,7 +236,7 @@ async function handleJsonFormat(
       'Content-Type': 'application/json; charset=utf-8',
       'X-Generated-By': 'supabase.rpc.get_api_content_full',
       ...buildSecurityHeaders(),
-      ...CORS_JSON,
+      ...getOnlyCorsHeaders,
       ...buildCacheHeaders('content_export'),
     },
     status: 200,
@@ -270,11 +263,10 @@ async function handleJsonFormat(
 async function handleMarkdownFormat(
   category: DatabaseGenerated['public']['Enums']['content_category'],
   slug: string,
-  url: URL,
-  reqLogger: ReturnType<typeof logger.child>
+  includeMetadata: boolean,
+  includeFooter: boolean,
+  logger: { error: (context: Record<string, unknown>, message: string) => void; warn: (context: Record<string, unknown>, message: string) => void; info: (context: Record<string, unknown>, message: string) => void }
 ) {
-  const includeMetadata = url.searchParams.get('includeMetadata') !== 'false';
-  const includeFooter = url.searchParams.get('includeFooter') === 'true';
 
   const supabase = createSupabaseAnonClient();
   const service = new ContentService(supabase);
@@ -290,25 +282,16 @@ async function handleMarkdownFormat(
     data = await service.generateMarkdownExport(rpcArgs);
   } catch (error) {
     const normalized = normalizeError(error, 'Content Markdown RPC error');
-    reqLogger.error(
+    logger.error(
       {
         category,
         err: normalized,
         rpcName: 'generate_markdown_export',
         slug,
-      },
+      } as Record<string, unknown>,
       'Content Markdown RPC error'
     );
-    return createErrorResponse(normalized, {
-      logContext: {
-        category,
-        rpcName: 'generate_markdown_export',
-        slug,
-      },
-      method: 'GET',
-      operation: 'ContentRecordAPI',
-      route: '/api/content/[category]/[slug]',
-    });
+    throw normalized; // Factory will handle error response
   }
 
   const success = getProperty(data, 'success');
@@ -320,7 +303,7 @@ async function handleMarkdownFormat(
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
           ...buildSecurityHeaders(),
-          ...CORS_MARKDOWN,
+          ...getWithAcceptCorsHeaders,
         },
         status: 400,
       }
@@ -336,13 +319,13 @@ async function handleMarkdownFormat(
     typeof filename !== 'string' ||
     typeof contentId !== 'string'
   ) {
-    reqLogger.warn(
+    logger.warn(
       {
         dataKeys: data ? Object.keys(data) : [],
         hasContentId: typeof contentId === 'string',
         hasFilename: typeof filename === 'string',
         hasMarkdown: typeof markdown === 'string',
-      },
+      } as Record<string, unknown>,
       'Content Markdown: invalid response structure'
     );
     return NextResponse.json(
@@ -351,7 +334,7 @@ async function handleMarkdownFormat(
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
           ...buildSecurityHeaders(),
-          ...CORS_MARKDOWN,
+          ...getWithAcceptCorsHeaders,
         },
         status: 400,
       }
@@ -360,13 +343,13 @@ async function handleMarkdownFormat(
 
   // Ensure markdown content is not empty
   if (!markdown || markdown.trim().length === 0) {
-    reqLogger.warn(
+    logger.warn(
       {
         category,
         contentId,
         filename,
         slug,
-      },
+      } as Record<string, unknown>,
       'Content Markdown: empty markdown content returned'
     );
     return NextResponse.json(
@@ -375,7 +358,7 @@ async function handleMarkdownFormat(
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
           ...buildSecurityHeaders(),
-          ...CORS_MARKDOWN,
+          ...getWithAcceptCorsHeaders,
         },
         status: 400,
       }
@@ -385,14 +368,14 @@ async function handleMarkdownFormat(
   const safeFilename = sanitizeFilename(filename);
   const safeContentId = sanitizeHeaderValue(contentId);
 
-  reqLogger.info(
+  logger.info(
     {
       category,
       contentId: safeContentId,
       filename: safeFilename,
       markdownLength: markdown.length,
       slug,
-    },
+    } as Record<string, unknown>,
     'Content Markdown: markdown generated successfully'
   );
 
@@ -403,7 +386,7 @@ async function handleMarkdownFormat(
       'X-Content-ID': safeContentId,
       'X-Generated-By': 'supabase.rpc.generate_markdown_export',
       ...buildSecurityHeaders(),
-      ...CORS_MARKDOWN,
+      ...getWithAcceptCorsHeaders,
       ...buildCacheHeaders('content_export'),
     },
     status: 200,
@@ -428,7 +411,7 @@ async function handleMarkdownFormat(
 async function handleItemLlmsTxt(
   category: DatabaseGenerated['public']['Enums']['content_category'],
   slug: string,
-  reqLogger: ReturnType<typeof logger.child>
+  logger: { error: (context: Record<string, unknown>, message: string) => void; warn: (context: Record<string, unknown>, message: string) => void; info: (context: Record<string, unknown>, message: string) => void; debug: (context: Record<string, unknown>, message: string) => void }
 ) {
   const supabase = createSupabaseAnonClient();
   const service = new ContentService(supabase);
@@ -442,39 +425,20 @@ async function handleItemLlmsTxt(
     data = await service.getItemLlmsTxt(rpcArgs);
   } catch (error) {
     const normalized = normalizeError(error, 'Content LLMs.txt RPC error');
-    reqLogger.error(
+    logger.error(
       {
         category,
         err: normalized,
         rpcName: 'generate_item_llms_txt',
         slug,
-      },
+      } as Record<string, unknown>,
       'Content LLMs.txt RPC error'
     );
-    return createErrorResponse(normalized, {
-      logContext: {
-        category,
-        rpcName: 'generate_item_llms_txt',
-        slug,
-      },
-      method: 'GET',
-      operation: 'ContentRecordAPI',
-      route: '/api/content/[category]/[slug]',
-    });
+    throw normalized; // Factory will handle error response
   }
 
   if (!data) {
-    return NextResponse.json(
-      { error: 'LLMs.txt content not found' },
-      {
-        headers: {
-          'Content-Type': 'application/json; charset=utf-8',
-          ...buildSecurityHeaders(),
-          ...CORS_JSON,
-        },
-        status: 404,
-      }
-    );
+    return notFoundResponse('LLMs.txt content not found', 'Content');
   }
 
   // Handle different return types - RPC might return JSON or plain text
@@ -485,12 +449,12 @@ async function handleItemLlmsTxt(
       try {
         // It's JSON - this shouldn't happen, but handle it gracefully
         const parsed = JSON.parse(data);
-        reqLogger.warn(
+        logger.warn(
           {
             category,
             dataType: 'json',
             slug,
-          },
+          } as Record<string, unknown>,
           'Content LLMs.txt: RPC returned JSON instead of plain text'
         );
         // Convert JSON to a readable format (fallback)
@@ -498,13 +462,13 @@ async function handleItemLlmsTxt(
       } catch (error) {
         // Not valid JSON, treat as plain text (graceful fallback)
         const normalized = normalizeError(error, 'JSON parse failed, treating as plain text');
-        reqLogger.debug(
+        logger.debug(
           {
             category,
             dataType: 'string',
             err: normalized,
             slug,
-          },
+          } as Record<string, unknown>,
           'Content LLMs.txt: Data looked like JSON but parse failed, treating as plain text'
         );
         formatted = data;
@@ -515,12 +479,12 @@ async function handleItemLlmsTxt(
     }
   } else {
     // If it's an object, convert to string (shouldn't happen, but handle it)
-    reqLogger.warn(
+    logger.warn(
       {
         category,
         dataType: typeof data,
         slug,
-      },
+      } as Record<string, unknown>,
       'Content LLMs.txt: RPC returned object instead of string'
     );
     formatted = JSON.stringify(data, null, 2);
@@ -528,13 +492,13 @@ async function handleItemLlmsTxt(
 
   // Database RPC returns properly formatted text (no client-side processing needed)
   // This eliminates CPU-intensive string replacement (5-10% CPU savings)
-  reqLogger.info(
+  logger.info(
     {
       category,
       firstLine: formatted.split('\n')[0]?.slice(0, 50),
       length: formatted.length,
       slug,
-    },
+    } as Record<string, unknown>,
     'Content LLMs.txt: formatted successfully'
   );
 
@@ -543,7 +507,7 @@ async function handleItemLlmsTxt(
       'Content-Type': 'text/plain; charset=utf-8',
       'X-Generated-By': 'supabase.rpc.generate_item_llms_txt',
       ...buildSecurityHeaders(),
-      ...CORS_JSON,
+      ...getOnlyCorsHeaders,
       ...buildCacheHeaders('content_export'),
     },
     status: 200,
@@ -553,10 +517,10 @@ async function handleItemLlmsTxt(
 async function handleStorageFormat(
   category: DatabaseGenerated['public']['Enums']['content_category'],
   slug: string,
-  reqLogger: ReturnType<typeof logger.child>,
-  metadataMode = false
+  metadataMode: boolean,
+  logger: { error: (context: Record<string, unknown>, message: string) => void; warn: (context: Record<string, unknown>, message: string) => void; info: (context: Record<string, unknown>, message: string) => void }
 ) {
-  reqLogger.info({ category, metadataMode, slug }, 'Handling storage format');
+  logger.info({ category, metadataMode, slug } as Record<string, unknown>, 'Handling storage format');
 
   const supabase = createSupabaseAnonClient();
   const service = new ContentService(supabase);
@@ -572,23 +536,15 @@ async function handleStorageFormat(
       data = await service.getSkillStoragePath(rpcArgs);
     } catch (error) {
       const normalized = normalizeError(error, 'Skill storage path RPC error');
-      reqLogger.error(
+      logger.error(
         {
           err: normalized,
           rpcName: 'get_skill_storage_path',
           slug,
-        },
+        } as Record<string, unknown>,
         'Skill storage path RPC error'
       );
-      return createErrorResponse(normalized, {
-        logContext: {
-          rpcName: 'get_skill_storage_path',
-          slug,
-        },
-        method: 'GET',
-        operation: 'ContentRecordAPI',
-        route: '/api/content/[category]/[slug]',
-      });
+      throw normalized; // Factory will handle error response
     }
 
     const result = data;
@@ -598,7 +554,7 @@ async function handleStorageFormat(
     const objectPath = getStringProperty(location, 'object_path');
 
     if (!bucket || !objectPath) {
-      return badRequestResponse('Storage file not found', CORS_JSON);
+      throw new Error('Storage file not found');
     }
 
     // If metadata mode requested, return JSON metadata instead of binary file
@@ -612,14 +568,14 @@ async function handleStorageFormat(
         slug,
       };
 
-      reqLogger.info({ bucket, objectPath }, 'Returning storage metadata');
+      logger.info({ bucket, objectPath } as Record<string, unknown>, 'Returning storage metadata');
 
       return NextResponse.json(metadata, {
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
           'X-Generated-By': 'supabase.rpc.get_skill_storage_path',
           ...buildSecurityHeaders(),
-          ...CORS_JSON,
+          ...getOnlyCorsHeaders,
           ...buildCacheHeaders('content_export'),
         },
         status: 200,
@@ -632,13 +588,13 @@ async function handleStorageFormat(
       data: { publicUrl },
     } = supabase.storage.from(bucket).getPublicUrl(objectPath);
 
-    reqLogger.info(
+    logger.info(
       {
         bucket,
         objectPath,
         publicUrl,
         redirect: true,
-      },
+      } as Record<string, unknown>,
       'Redirecting to Supabase Storage public URL (eliminates proxying)'
     );
 
@@ -651,7 +607,7 @@ async function handleStorageFormat(
         'X-Storage-Bucket': bucket,
         'X-Storage-Path': objectPath,
         ...buildSecurityHeaders(),
-        ...CORS_JSON,
+        ...getOnlyCorsHeaders,
       },
       status: 308, // Permanent redirect (preserves method)
     });
@@ -667,23 +623,15 @@ async function handleStorageFormat(
       data = await service.getMcpbStoragePath(rpcArgs);
     } catch (error) {
       const normalized = normalizeError(error, 'MCPB storage path RPC error');
-      reqLogger.error(
+      logger.error(
         {
           err: normalized,
           rpcName: 'get_mcpb_storage_path',
           slug,
-        },
+        } as Record<string, unknown>,
         'MCPB storage path RPC error'
       );
-      return createErrorResponse(normalized, {
-        logContext: {
-          rpcName: 'get_mcpb_storage_path',
-          slug,
-        },
-        method: 'GET',
-        operation: 'ContentRecordAPI',
-        route: '/api/content/[category]/[slug]',
-      });
+      throw normalized; // Factory will handle error response
     }
 
     const result = data;
@@ -693,7 +641,7 @@ async function handleStorageFormat(
     const objectPath = getStringProperty(location, 'object_path');
 
     if (!bucket || !objectPath) {
-      return badRequestResponse('MCPB package not found', CORS_JSON);
+      throw new Error('MCPB package not found');
     }
 
     // If metadata mode requested, return JSON metadata instead of binary file
@@ -707,14 +655,14 @@ async function handleStorageFormat(
         slug,
       };
 
-      reqLogger.info({ bucket, objectPath }, 'Returning storage metadata');
+      logger.info({ bucket, objectPath } as Record<string, unknown>, 'Returning storage metadata');
 
       return NextResponse.json(metadata, {
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
           'X-Generated-By': 'supabase.rpc.get_mcpb_storage_path',
           ...buildSecurityHeaders(),
-          ...CORS_JSON,
+          ...getOnlyCorsHeaders,
           ...buildCacheHeaders('content_export'),
         },
         status: 200,
@@ -727,13 +675,13 @@ async function handleStorageFormat(
       data: { publicUrl },
     } = supabase.storage.from(bucket).getPublicUrl(objectPath);
 
-    reqLogger.info(
+    logger.info(
       {
         bucket,
         objectPath,
         publicUrl,
         redirect: true,
-      },
+      } as Record<string, unknown>,
       'Redirecting to Supabase Storage public URL (eliminates proxying)'
     );
 
@@ -746,96 +694,137 @@ async function handleStorageFormat(
         'X-Storage-Bucket': bucket,
         'X-Storage-Path': objectPath,
         ...buildSecurityHeaders(),
-        ...CORS_JSON,
+        ...getOnlyCorsHeaders,
       },
       status: 308, // Permanent redirect (preserves method)
     });
   }
 
-  return badRequestResponse(
-    `Storage format not supported for category '${category}'. Supported categories: skills, mcp`,
-    CORS_JSON
+  throw new Error(
+    `Storage format not supported for category '${category}'. Supported categories: skills, mcp`
   );
 }
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ category: string; slug: string }> }
-) {
-  const reqLogger = logger.child({
-    method: 'GET',
-    operation: 'ContentRecordAPI',
-    route: '/api/content/[category]/[slug]',
-  });
-
-  try {
-    const { category, slug } = await params;
-    const url = new URL(request.url);
-
-    if (!isValidContentCategory(category)) {
-      return badRequestResponse(
-        `Invalid category '${category}'. Valid categories: ${CONTENT_CATEGORY_VALUES.join(', ')}`,
-        CORS_JSON
-      );
-    }
-
-    const format = (url.searchParams.get('format') ?? 'json').toLowerCase();
-
-    reqLogger.info(
-      {
-        category,
-        format,
-        slug,
+/**
+ * GET /api/content/[category]/[slug] - Get content detail in multiple formats
+ * 
+ * Returns individual content records in multiple formats (JSON, Markdown, LLMs.txt, Storage).
+ * Supports various export options including metadata and footer inclusion.
+ */
+export const GET = createApiRoute({
+  route: '/api/content/[category]/[slug]',
+  operation: 'ContentRecordAPI',
+  method: 'GET',
+  cors: 'anon',
+  querySchema: contentDetailQuerySchema,
+  openapi: {
+    summary: 'Get content detail in multiple formats',
+    description: 'Returns individual content records in multiple formats (JSON, Markdown, LLMs.txt, Storage). Supports various export options including metadata and footer inclusion.',
+    tags: ['content', 'export'],
+    operationId: 'getContentDetail',
+    responses: {
+      200: {
+        description: 'Content detail retrieved successfully',
       },
-      'Content record export request received'
-    );
-
-    switch (format) {
-      case 'json': {
-        return handleJsonFormat(category, slug, reqLogger);
-      }
-      case 'llms':
-      case 'llms-txt': {
-        return handleItemLlmsTxt(category, slug, reqLogger);
-      }
-      case 'markdown':
-      case 'md': {
-        return handleMarkdownFormat(category, slug, url, reqLogger);
-      }
-      case 'storage': {
-        // Check if metadata mode is requested (for MCP resources)
-        const metadataMode = url.searchParams.get('metadata') === 'true';
-        return handleStorageFormat(category, slug, reqLogger, metadataMode);
-      }
-      default: {
-        return badRequestResponse(
-          'Invalid format. Valid formats: json, markdown, llms-txt, storage',
-          CORS_JSON
-        );
-      }
+      400: {
+        description: 'Invalid category, format, or query parameters',
+      },
+      404: {
+        description: 'Content not found',
+      },
+    },
+  },
+  handler: async ({ logger, query, nextContext }) => {
+    // Extract path parameters from Next.js route context
+    interface RouteContext {
+      params: Promise<{ category: string; slug: string }>;
     }
-  } catch (error) {
-    const normalized = normalizeError(error, 'Content record API error');
-    reqLogger.error({ err: normalized }, 'Content record API error');
-    return createErrorResponse(normalized, {
-      method: 'GET',
-      operation: 'ContentRecordAPI',
-      route: '/api/content/[category]/[slug]',
-    });
-  }
-}
+    const context = nextContext as RouteContext;
+    if (!context || !context.params) {
+      logger.error({}, 'Missing route context for content detail handler');
+      throw new Error('Missing route context');
+    }
+
+    const { category, slug } = await context.params;
+
+    // Validate category from path parameter
+    const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
+    if (!CONTENT_CATEGORY_VALUES.includes(category as DatabaseGenerated['public']['Enums']['content_category'])) {
+      throw new Error(`Invalid category '${category}'. Valid categories: ${CONTENT_CATEGORY_VALUES.join(', ')}`);
+    }
+
+    // Zod schema ensures proper types
+    const { format, includeMetadata = true, includeFooter = false, metadata: metadataMode = false } = query;
+
+      logger.info(
+        {
+          category,
+          format,
+          slug,
+        },
+        'Content record export request received'
+      );
+
+      switch (format) {
+        case 'json': {
+          return handleJsonFormat(
+            category as DatabaseGenerated['public']['Enums']['content_category'],
+            slug,
+            {
+              error: (context: Record<string, unknown>, message: string) => logger.error(context as Parameters<typeof logger.error>[0], message),
+              warn: (context: Record<string, unknown>, message: string) => logger.warn(context as Parameters<typeof logger.warn>[0], message),
+              info: (context: Record<string, unknown>, message: string) => logger.info(context as Parameters<typeof logger.info>[0], message),
+              debug: (context: Record<string, unknown>, message: string) => logger.debug(context as Parameters<typeof logger.debug>[0], message),
+            }
+          );
+        }
+        case 'llms':
+        case 'llms-txt': {
+          return handleItemLlmsTxt(
+            category as DatabaseGenerated['public']['Enums']['content_category'],
+            slug,
+            {
+              error: (context: Record<string, unknown>, message: string) => logger.error(context as Parameters<typeof logger.error>[0], message),
+              warn: (context: Record<string, unknown>, message: string) => logger.warn(context as Parameters<typeof logger.warn>[0], message),
+              info: (context: Record<string, unknown>, message: string) => logger.info(context as Parameters<typeof logger.info>[0], message),
+              debug: (context: Record<string, unknown>, message: string) => logger.debug(context as Parameters<typeof logger.debug>[0], message),
+            }
+          );
+        }
+        case 'markdown':
+        case 'md': {
+          return handleMarkdownFormat(
+            category as DatabaseGenerated['public']['Enums']['content_category'],
+            slug,
+            includeMetadata ?? true,
+            includeFooter ?? false,
+            {
+              error: (context: Record<string, unknown>, message: string) => logger.error(context as Parameters<typeof logger.error>[0], message),
+              warn: (context: Record<string, unknown>, message: string) => logger.warn(context as Parameters<typeof logger.warn>[0], message),
+              info: (context: Record<string, unknown>, message: string) => logger.info(context as Parameters<typeof logger.info>[0], message),
+            }
+          );
+        }
+        case 'storage': {
+          return handleStorageFormat(
+            category as DatabaseGenerated['public']['Enums']['content_category'],
+            slug,
+            metadataMode ?? false,
+            {
+              error: (context: Record<string, unknown>, message: string) => logger.error(context as Parameters<typeof logger.error>[0], message),
+              warn: (context: Record<string, unknown>, message: string) => logger.warn(context as Parameters<typeof logger.warn>[0], message),
+              info: (context: Record<string, unknown>, message: string) => logger.info(context as Parameters<typeof logger.info>[0], message),
+            }
+          );
+        }
+        default: {
+          throw new Error('Invalid format. Valid formats: json, markdown, llms-txt, storage');
+        }
+      }
+  },
+});
 
 /**
- * Handle CORS preflight requests by returning a 204 No Content response with CORS headers.
- *
- * @returns {NextResponse} A 204 No Content response configured with the `getOnlyCorsHeaders` CORS headers.
- * @see getOnlyCorsHeaders
+ * OPTIONS handler for CORS preflight requests
  */
-export function OPTIONS() {
-  return new NextResponse(null, {
-    headers: {
-      ...getOnlyCorsHeaders,
-    },
-    status: 204,
-  });
-}
+export const OPTIONS = createApiOptionsHandler('anon');

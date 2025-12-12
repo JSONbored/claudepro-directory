@@ -3,16 +3,32 @@
  *
  * Fetches content templates by category for client-side consumption.
  * Used by the wizard to load templates dynamically.
- *
- * Runtime: Node.js (required for Supabase client with service role)
+ * 
+ * @example
+ * ```ts
+ * // Request
+ * GET /api/templates?category=skills
+ * 
+ * // Response (200)
+ * {
+ *   "success": true,
+ *   "category": "skills",
+ *   "count": 25,
+ *   "templates": [
+ *     { "id": "...", "title": "...", ... }
+ *   ]
+ * }
+ * ```
  */
+import 'server-only';
 import { type Database } from '@heyclaude/database-types';
 import { VALID_CATEGORIES } from '@heyclaude/web-runtime/core';
 import { getContentTemplates } from '@heyclaude/web-runtime/data';
-import { createErrorResponse, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { createApiRoute, createApiOptionsHandler, categorySchema, badRequestResponse, getOnlyCorsHeaders } from '@heyclaude/web-runtime/server';
 import { buildCacheHeaders } from '@heyclaude/web-runtime/server';
 import { cacheLife, cacheTag } from 'next/cache';
-import { type NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
+import { z } from 'zod';
 
 /***
  * Cached helper function to fetch content templates
@@ -31,52 +47,48 @@ async function getCachedTemplatesForAPI(category: Database['public']['Enums']['c
 }
 
 /**
- * Handle GET requests to fetch content templates for a specified category.
- *
- * Validates the `category` query parameter and returns either a success payload
- * with templates and metadata, a 400 JSON error when the category is missing or
- * invalid, or a standardized error response for internal failures. Successful
- * responses include Cache-Control headers suitable for CDN/edge caching.
- *
- * @param request - The incoming NextRequest whose URL search parameters may include `category`
- * @returns A NextResponse containing:
- *  - On success (status 200): an object `{ success: true, templates: Array, category: string, count: number }`
- *  - On invalid category (status 400): an object `{ error: 'Invalid category', message: string }`
- *  - On internal error: a standardized error response produced by `createErrorResponse`
- *
- * @see VALID_CATEGORIES
- * @see getContentTemplates
- * @see createErrorResponse
+ * GET /api/templates - Get content templates by category
+ * 
+ * Fetches content templates for a specified category.
+ * Validates category parameter and returns templates with metadata.
  */
-export async function GET(request: NextRequest) {
-  // Create request-scoped child logger to avoid race conditions
-  const reqLogger = logger.child({
-    module: 'apps/web/src/app/api/templates',
-    operation: 'TemplatesAPI',
-    route: '/api/templates',
-  });
+export const GET = createApiRoute({
+  route: '/api/templates',
+  operation: 'TemplatesAPI',
+  method: 'GET',
+  cors: 'anon',
+  querySchema: z.object({
+    category: categorySchema,
+  }),
+  openapi: {
+    summary: 'Get content templates by category',
+    description: 'Fetches content templates by category for client-side consumption. Used by the wizard to load templates dynamically.',
+    tags: ['content', 'templates'],
+    operationId: 'getTemplates',
+    responses: {
+      200: {
+        description: 'Templates retrieved successfully',
+      },
+      400: {
+        description: 'Invalid or missing category parameter',
+      },
+    },
+  },
+  handler: async ({ logger, query }) => {
+    const { category } = query as { category: Database['public']['Enums']['content_category'] | null };
 
-  const searchParameters = request.nextUrl.searchParams;
-  const category = searchParameters.get('category');
-
-  try {
-    // Validate category
-    if (
-      !category ||
-      !VALID_CATEGORIES.includes(category as Database['public']['Enums']['content_category'])
-    ) {
-      reqLogger.warn(
+    // Handle category: schema transforms "all" to null, but this endpoint requires a specific category
+    // If category is null (from "all" transformation), return 400 Bad Request (validation error)
+    if (!category || !VALID_CATEGORIES.includes(category)) {
+      logger.warn(
         {
           category,
         },
-        'Templates API: invalid category'
+        'Templates API: invalid or missing category'
       );
-      return NextResponse.json(
-        {
-          error: 'Invalid category',
-          message: `Category must be one of: ${VALID_CATEGORIES.join(', ')}`,
-        },
-        { status: 400 }
+      return badRequestResponse(
+        `Category parameter is required and cannot be "all". Valid categories: ${VALID_CATEGORIES.join(', ')}`,
+        getOnlyCorsHeaders
       );
     }
 
@@ -87,7 +99,7 @@ export async function GET(request: NextRequest) {
     const templates = await getCachedTemplatesForAPI(validCategory);
 
     // Structured logging with cache tags
-    reqLogger.info(
+    logger.info(
       {
         cacheTags: ['templates', `templates-${validCategory}`],
         category: validCategory,
@@ -112,21 +124,10 @@ export async function GET(request: NextRequest) {
         status: 200,
       }
     );
-  } catch (error) {
-    const normalized = normalizeError(error, 'Templates API error');
-    reqLogger.error(
-      {
-        err: normalized,
-        section: 'error-handling',
-        ...(category && { category }),
-      },
-      'Templates API error'
-    );
-    return createErrorResponse(normalized, {
-      logContext: category ? { category } : {},
-      method: 'GET',
-      operation: 'TemplatesAPI',
-      route: '/api/templates',
-    });
-  }
-}
+  },
+});
+
+/**
+ * OPTIONS handler for CORS preflight requests
+ */
+export const OPTIONS = createApiOptionsHandler('anon');

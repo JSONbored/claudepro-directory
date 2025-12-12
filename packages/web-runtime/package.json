@@ -50,10 +50,6 @@
       "react-server": "./src/entries/data-server.ts",
       "default": "./src/entries/data-client.ts"
     },
-    "./config/security": {
-      "types": "./src/config/security.ts",
-      "default": "./src/config/security.ts"
-    },
     "./config/static-configs": {
       "types": "./src/config/static-configs.ts",
       "default": "./src/config/static-configs.ts"
@@ -61,10 +57,6 @@
     "./types/app.schema": {
       "types": "./src/types/app.schema.ts",
       "default": "./src/types/app.schema.ts"
-    },
-    "./ui/design-tokens/submission-form": {
-      "types": "./src/ui/design-tokens/submission-form.ts",
-      "default": "./src/ui/design-tokens/submission-form.ts"
     },
     "./utils/changelog": {
       "types": "./src/utils/changelog.ts",
@@ -94,14 +86,6 @@
       "types": "./src/utils/error-handler.ts",
       "default": "./src/utils/error-handler.ts"
     },
-    "./utils/heading-normalization": {
-      "types": "./src/utils/heading-normalization.ts",
-      "default": "./src/utils/heading-normalization.ts"
-    },
-    "./utils/content-stats": {
-      "types": "./src/utils/content-stats.ts",
-      "default": "./src/utils/content-stats.ts"
-    },
     "./utils/request-context": {
       "types": "./src/utils/request-context.ts",
       "default": "./src/utils/request-context.ts"
@@ -125,10 +109,6 @@
     "./data/layout/flags-client": {
       "types": "./src/data/layout/flags-client.ts",
       "default": "./src/data/layout/flags-client.ts"
-    },
-    "./edge/search-client": {
-      "types": "./src/edge/search-client.ts",
-      "default": "./src/edge/search-client.ts"
     },
     "./data/config/category": {
       "types": "./src/data/config/category/index.ts",
@@ -197,14 +177,6 @@
     "./design-system": {
       "types": "./src/design-system/index.ts",
       "default": "./src/design-system/index.ts"
-    },
-    "./design-system/tokens": {
-      "types": "./src/design-system/tokens.ts",
-      "default": "./src/design-system/tokens.ts"
-    },
-    "./design-system/styles": {
-      "types": "./src/design-system/styles/index.ts",
-      "default": "./src/design-system/styles/index.ts"
     },
     "./design-tokens": {
       "types": "./src/design-tokens/index.ts",

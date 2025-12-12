@@ -1,95 +1,124 @@
 /**
  * On-Demand ISR Revalidation - Realtime-Based Architecture
- * Called by edge function via Supabase Realtime (logical replication)
- *
+ * 
+ * Called by edge function via Supabase Realtime (logical replication).
  * Flow: Database Trigger → Table Change → Realtime (postgres_changes) → Edge Function → This API Route
  *
- * Payload format from edge function:
+ * @example
+ * ```ts
+ * // Request
+ * POST /api/revalidate
+ * Content-Type: application/json
+ * 
  * {
  *   "secret": "REVALIDATE_SECRET",
  *   "category": "agents",
  *   "slug": "code-reviewer",
  *   "tags": ["content", "homepage", "trending"]
  * }
+ * 
+ * // Response (200)
+ * {
+ *   "revalidated": true,
+ *   "paths": ["/", "/agents", "/agents/code-reviewer"],
+ *   "tags": ["content", "homepage", "trending"],
+ *   "timestamp": "2025-01-11T12:00:00Z"
+ * }
+ * ```
  *
  * Runtime: Node.js (required for revalidatePath/revalidateTag)
  */
+import 'server-only';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
-import { handleApiError, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { createApiRoute, createApiOptionsHandler, unauthorizedResponse, getOnlyCorsHeaders } from '@heyclaude/web-runtime/server';
 import { revalidatePath, revalidateTag } from 'next/cache';
-import { type NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
-// Zod schema for revalidate request
-const RevalidateRequestSchema = z.object({
-  category: z.string().optional(),
-  secret: z.string(),
-  slug: z.string().optional(),
-  tags: z.array(z.string()).optional(),
+/**
+ * Zod schema for revalidate request body validation
+ * 
+ * Note: `secret` is optional in schema to allow handler to return 401 instead of 400
+ * when secret is missing. Handler will validate secret and return 401 if missing/invalid.
+ */
+const revalidateRequestSchema = z.object({
+  category: z.string().optional().describe('Content category to revalidate'),
+  secret: z.string().optional().describe('Revalidation secret token'),
+  slug: z.string().optional().describe('Content slug to revalidate'),
+  tags: z.array(z.string()).optional().describe('Cache tags to invalidate'),
 });
 
 /**
- * Trigger on-demand ISR revalidation and cache tag invalidation for specified targets.
- *
+ * POST /api/revalidate - Trigger on-demand ISR revalidation
+ * 
  * Validates the JSON payload, verifies the secret, revalidates Next.js paths derived from
  * `category`/`slug`, invalidates the provided cache `tags`, logs the outcome, and returns a
  * JSON summary of the revalidation actions.
- *
- * Expected request body: { secret: string, category?: string, slug?: string, tags?: string[] }.
- *
- * @param request - Incoming Next.js request containing the JSON payload for revalidation
- * @returns A NextResponse JSON object with `revalidated: true`, optional `paths` and `tags` arrays, and a `timestamp`, or an error payload with an appropriate HTTP status
- * @see RevalidateRequestSchema
- * @see revalidatePath
- * @see revalidateTag
- * @see env.REVALIDATE_SECRET
  */
-export async function POST(request: NextRequest) {
-  // Create request-scoped child logger to avoid race conditions
-  const reqLogger = logger.child({
-    module: 'apps/web/src/app/api/revalidate',
-    operation: 'RevalidateAPI',
-    route: '/api/revalidate',
-  });
+export const POST = createApiRoute({
+  route: '/api/revalidate',
+  operation: 'RevalidateAPI',
+  method: 'POST',
+  cors: 'anon',
+  bodySchema: revalidateRequestSchema,
+  openapi: {
+    summary: 'Trigger on-demand ISR revalidation',
+    description: 'Trigger on-demand ISR revalidation and cache tag invalidation for specified targets. Called by edge function via Supabase Realtime (logical replication).',
+    tags: ['cache', 'revalidation', 'webhook'],
+    operationId: 'revalidate',
+    responses: {
+      200: {
+        description: 'Revalidation completed successfully',
+      },
+      401: {
+        description: 'Unauthorized - invalid secret',
+      },
+      400: {
+        description: 'Invalid request payload or missing category/tags',
+      },
+    },
+  },
+  handler: async ({ logger, request, body }) => {
+    // Zod schema ensures proper types
+    const { category, secret, slug, tags } = body;
 
-  try {
-    // Validate request body immediately with Zod (no intermediate unsafe variable)
-    const parseResult = RevalidateRequestSchema.safeParse(await request.json());
-
-    if (!parseResult.success) {
-      // Serialize Zod errors for logging (convert to JSON-serializable format)
-      const zodErrors = parseResult.error.issues.map((issue) => ({
-        code: issue.code,
-        message: issue.message,
-        path: issue.path.join('.'),
-      }));
-
-      reqLogger.warn(
+    // Verify secret from body (PostgreSQL trigger sends in payload)
+    // Note: If secret is missing, Zod validation will catch it and return 400
+    // But if secret is provided but invalid, we return 401
+    if (!secret) {
+      // Secret is required by schema, so this should be caught by validation
+      // But handle it here as a safety check
+      logger.warn(
         {
-          zodErrors,
+          hasSecret: false,
+          // eslint-disable-next-line architectural-rules/warn-pii-field-logging -- IP address necessary for security audit trail
+          ip: request.headers.get('x-forwarded-for') ?? 'unknown',
+          securityEvent: true,
         },
-        'Revalidate webhook invalid payload'
+        'Revalidate webhook missing secret'
       );
-      return NextResponse.json(
-        { details: parseResult.error.issues, error: 'Invalid request payload' },
-        { status: 400 }
+      return unauthorizedResponse(
+        'Missing secret parameter',
+        undefined, // No login/signup for automation endpoints
+        getOnlyCorsHeaders
       );
     }
 
-    const { category, secret, slug, tags } = parseResult.data;
-
-    // Verify secret from body (PostgreSQL trigger sends in payload)
-    if (!secret || secret !== env.REVALIDATE_SECRET) {
-      reqLogger.warn(
+    if (secret !== env.REVALIDATE_SECRET) {
+      logger.warn(
         {
-          hasSecret: Boolean(secret),
+          hasSecret: true,
           // eslint-disable-next-line architectural-rules/warn-pii-field-logging -- IP address necessary for security audit trail
           ip: request.headers.get('x-forwarded-for') ?? 'unknown',
           securityEvent: true,
         },
         'Revalidate webhook unauthorized'
       );
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return unauthorizedResponse(
+        'Invalid secret',
+        undefined, // No login/signup for automation endpoints
+        getOnlyCorsHeaders
+      );
     }
 
     const paths: string[] = [];
@@ -123,7 +152,7 @@ export async function POST(request: NextRequest) {
 
     // If neither category nor tags provided, return error
     if (!category && (!tags || tags.length === 0)) {
-      reqLogger.warn(
+      logger.warn(
         {
           hasCategory: Boolean(category),
           hasTags: Boolean(tags),
@@ -131,14 +160,11 @@ export async function POST(request: NextRequest) {
         },
         'Revalidate webhook invalid payload'
       );
-      return NextResponse.json(
-        { error: 'Missing category or tags in webhook payload' },
-        { status: 400 }
-      );
+      throw new Error('Missing category or tags in webhook payload');
     }
 
     // Structured logging with revalidation targets and cache tags
-    reqLogger.info(
+    logger.info(
       {
         operation: 'cache_revalidation',
         securityEvent: true,
@@ -162,19 +188,10 @@ export async function POST(request: NextRequest) {
       ...(invalidatedTags.length > 0 && { tags: invalidatedTags }),
       timestamp: new Date().toISOString(),
     });
-  } catch (error: unknown) {
-    const normalized = normalizeError(error, 'Revalidate API error');
-    reqLogger.error(
-      {
-        err: normalized,
-        section: 'error-handling',
-      },
-      'Revalidate API error'
-    );
-    return handleApiError(error, {
-      method: 'POST',
-      operation: 'RevalidateAPI',
-      route: '/api/revalidate',
-    });
-  }
-}
+  },
+});
+
+/**
+ * OPTIONS handler for CORS preflight requests
+ */
+export const OPTIONS = createApiOptionsHandler('anon');

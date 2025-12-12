@@ -37,7 +37,14 @@ export function NewsletterModal({
   copyType,
   slug,
 }: NewsletterModalProps) {
+  // CRITICAL: Early return if not open (prevents Dialog from rendering backdrop)
+  // This must be FIRST to prevent Radix UI Dialog from rendering overlay when closed
+  if (!open) {
+    return null;
+  }
+
   // Defensive check: Ensure config is available
+  // This check happens AFTER open check to prevent backdrop from appearing
   if (!NEWSLETTER_CTA_CONFIG) {
     logClientWarn(
       '[NewsletterModal] NEWSLETTER_CTA_CONFIG is undefined',
@@ -49,11 +56,8 @@ export function NewsletterModal({
         category: 'newsletter',
       }
     );
-    return null;
-  }
-
-  // Early return if not open (prevents unnecessary renders)
-  if (!open) {
+    // Close modal if config is missing to prevent stuck backdrop
+    onOpenChange(false);
     return null;
   }
 

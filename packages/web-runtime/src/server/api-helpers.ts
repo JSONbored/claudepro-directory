@@ -162,6 +162,66 @@ export function handleOptionsRequest(
   });
 }
 
+/**
+ * Creates a standardized 401 Unauthorized response
+ * 
+ * Returns a consistent error response for authentication failures.
+ * Optionally includes login/signup URLs for user-facing endpoints.
+ * 
+ * @param message - Error message to return
+ * @param authInfo - Optional authentication info (login/signup URLs for user-facing endpoints)
+ * @param corsHeaders - CORS headers to include
+ * @returns NextResponse with 401 status
+ * 
+ * @example
+ * ```ts
+ * // For automation endpoints (no user-facing message)
+ * return unauthorizedResponse('Invalid or missing Bearer token', undefined, postCorsHeaders);
+ * 
+ * // For user-facing endpoints (with login/signup URLs)
+ * return unauthorizedResponse('Authentication required', {
+ *   loginUrl: '/login',
+ *   signupUrl: '/signup',
+ *   message: 'Please sign in to access this endpoint',
+ * }, getWithAuthCorsHeaders);
+ * ```
+ */
+export function unauthorizedResponse(
+  message: string,
+  authInfo?: {
+    loginUrl?: string;
+    signupUrl?: string;
+    message?: string;
+  },
+  corsHeaders: Record<string, string> = getOnlyCorsHeaders
+): NextResponse {
+  return NextResponse.json(
+    {
+      error: 'Unauthorized',
+      message,
+      code: 'UNAUTHORIZED',
+      ...(authInfo && {
+        auth: {
+          required: true,
+          loginUrl: authInfo.loginUrl ?? '/login',
+          signupUrl: authInfo.signupUrl ?? '/signup',
+          message: authInfo.message ?? 'Please sign in to access this endpoint',
+        },
+      }),
+      timestamp: new Date().toISOString(),
+    },
+    {
+      status: 401,
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8',
+        'WWW-Authenticate': 'Bearer',
+        ...buildSecurityHeaders(),
+        ...corsHeaders,
+      },
+    }
+  );
+}
+
 // =============================================================================
 // API Route Handler Factory
 // =============================================================================

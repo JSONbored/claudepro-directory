@@ -12,6 +12,9 @@ import { useEffect } from 'react';
  * CRITICAL: Direct reference to process.env.NODE_ENV
  * Next.js inlines this at build time. Do NOT use dynamic env lookups here!
  * The shared-runtime isDevelopment uses dynamic lookup which doesn't work client-side.
+ * 
+ * HMR Issue: The process polyfill can cause HMR errors. Next.js should inline this,
+ * but if HMR errors occur, it may be a Turbopack/webpack configuration issue.
  */
 // eslint-disable-next-line architectural-rules/require-env-validation-schema -- NODE_ENV is inlined by Next.js at build time, not a runtime lookup
 const isDevelopment = process.env.NODE_ENV === 'development';

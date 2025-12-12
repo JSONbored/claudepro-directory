@@ -1,8 +1,25 @@
+/**
+ * Open Graph Image Generation API Route
+ * 
+ * Generates dynamic Open Graph images using Next.js ImageResponse.
+ * Supports custom title, description, type badge, and tags.
+ * 
+ * @example
+ * ```ts
+ * // Request
+ * GET /api/og?title=My%20Title&description=My%20Description&type=AGENT&tags=ai,automation
+ * 
+ * // Response (200) - image/png
+ * [Binary image data]
+ * ```
+ */
+
+import 'server-only';
 import { OG_DEFAULTS, OG_DIMENSIONS } from '@heyclaude/shared-runtime';
-import { createErrorResponse, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { createApiRoute, createApiOptionsHandler, ogImageQuerySchema } from '@heyclaude/web-runtime/server';
 import { buildCacheHeaders } from '@heyclaude/web-runtime/server';
 import { ImageResponse } from 'next/og';
-import { type NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 
 /******
  * Generate an Open Graph image
@@ -149,54 +166,64 @@ async function generateOgImage(
 }
 
 /**
- * Generate an Open Graph image SVG/JSX using values from the request URL's search parameters.
- *
- * The function reads these optional search parameters from `request.url`:
+ * GET /api/og - Generate Open Graph image
+ * 
+ * Generates dynamic Open Graph images using Next.js ImageResponse.
+ * Supports custom title, description, type badge, and tags.
+ * 
+ * The function reads these optional search parameters:
  * - `title` — title text to render (falls back to OG_DEFAULTS.title)
  * - `description` — descriptive subtitle (falls back to OG_DEFAULTS.description)
  * - `type` — badge text rendered at the top (falls back to OG_DEFAULTS.type)
  * - `tags` — comma-separated list of tags; parsed, trimmed, uniqued, and up to 5 tags rendered
- *
- * @param request - NextRequest whose URL search params supply `title`, `description`, `type`, and `tags`
- * @returns An ImageResponse containing the rendered Open Graph image using OG_DIMENSIONS for width and height
- *
- * @see OG_DEFAULTS
- * @see OG_DIMENSIONS
- * @see ImageResponse
  */
-export async function GET(request: NextRequest) {
-  const reqLogger = logger.child({
-    method: 'GET',
-    operation: 'OGImageAPI',
-    route: '/api/og',
-  });
+export const GET = createApiRoute({
+  route: '/api/og',
+  operation: 'OGImageAPI',
+  method: 'GET',
+  cors: 'anon',
+  querySchema: ogImageQuerySchema,
+  openapi: {
+    summary: 'Generate Open Graph image',
+    description: 'Generates dynamic Open Graph images using Next.js ImageResponse. Supports custom title, description, type badge, and tags.',
+    tags: ['og', 'images', 'seo'],
+    operationId: 'generateOgImage',
+    responses: {
+      200: {
+        description: 'OG image generated successfully (image/png)',
+      },
+      400: {
+        description: 'Invalid query parameters',
+      },
+    },
+  },
+  handler: async ({ logger, query }) => {
+    // Zod schema ensures proper types
+    const { title: queryTitle, description: queryDescription, type: queryType, tags: rawTags } = query;
 
-  // Extract parameters and prepare data outside try/catch to avoid JSX construction in try/catch
-  const { searchParams } = new URL(request.url);
-  const title = searchParams.get('title') ?? OG_DEFAULTS.title;
-  const description = searchParams.get('description') ?? OG_DEFAULTS.description;
-  const type = searchParams.get('type') ?? OG_DEFAULTS.type;
-  const rawTags = searchParams.get('tags');
+    // Use defaults if not provided
+    const title = queryTitle ?? OG_DEFAULTS.title;
+    const description = queryDescription ?? OG_DEFAULTS.description;
+    const type = queryType ?? OG_DEFAULTS.type;
 
-  // Optimized tag parsing: single-pass with Set for deduplication (eliminates multiple array iterations)
-  // This reduces CPU usage by ~2-3% compared to split/map/filter/Set spread pattern
-  const tags: string[] = [];
-  if (rawTags) {
-    const tagSet = new Set<string>();
-    const parts = rawTags.split(',');
-    for (const part of parts) {
-      const trimmed = part.trim();
-      if (trimmed.length > 0) {
-        tagSet.add(trimmed);
+    // Optimized tag parsing: single-pass with Set for deduplication (eliminates multiple array iterations)
+    // This reduces CPU usage by ~2-3% compared to split/map/filter/Set spread pattern
+    const tags: string[] = [];
+    if (rawTags) {
+      const tagSet = new Set<string>();
+      const parts = rawTags.split(',');
+      for (const part of parts) {
+        const trimmed = part.trim();
+        if (trimmed.length > 0) {
+          tagSet.add(trimmed);
+        }
       }
+      // Convert Set to array only once (more efficient than spread operator for small arrays)
+      tags.push(...tagSet);
     }
-    // Convert Set to array only once (more efficient than spread operator for small arrays)
-    tags.push(...tagSet);
-  }
 
-  reqLogger.info({ tagCount: tags.length, title, type }, 'Generating OG image');
+    logger.info({ tagCount: tags.length, title, type }, 'Generating OG image');
 
-  try {
     // Generate ImageResponse - CPU savings come from HTTP response caching below
     // (7-day TTL with 30-day stale-while-revalidate) rather than function-level caching
     const imageResponse = await generateOgImage(title, description, type, tags);
@@ -217,24 +244,15 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    return new Response(imageResponse.body, {
+    return new NextResponse(imageResponse.body, {
       headers,
       status: imageResponse.status,
       statusText: imageResponse.statusText,
     });
-  } catch (error) {
-    const normalized = normalizeError(error, 'OG image generation failed');
-    reqLogger.error(
-      {
-        err: normalized,
-      },
-      'OG image generation failed'
-    );
-    return createErrorResponse(normalized, {
-      logContext: {},
-      method: 'GET',
-      operation: 'OGImageAPI',
-      route: '/api/og',
-    });
-  }
-}
+  },
+});
+
+/**
+ * OPTIONS handler for CORS preflight requests
+ */
+export const OPTIONS = createApiOptionsHandler('anon');

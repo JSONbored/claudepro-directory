@@ -1,17 +1,39 @@
+/**
+ * Search Facets API Route
+ * 
+ * Returns available search facets (categories, tags, authors) for filtering search results.
+ * Used by the search interface to populate filter dropdowns and facet counts.
+ * 
+ * @example
+ * ```ts
+ * // Request
+ * GET /api/search/facets
+ * 
+ * // Response (200)
+ * {
+ *   "facets": [
+ *     {
+ *       "category": "skills",
+ *       "content_count": 150,
+ *       "tags": ["javascript", "typescript", "react"],
+ *       "authors": ["user1", "user2"]
+ *     }
+ *   ]
+ * }
+ * ```
+ */
+
 import 'server-only';
 import { SearchService } from '@heyclaude/data-layer';
-import { createErrorResponse, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { createApiRoute, createApiOptionsHandler } from '@heyclaude/web-runtime/server';
+import { createErrorResponse, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   buildCacheHeaders,
   createSupabaseAnonClient,
   getWithAuthCorsHeaders,
-  handleOptionsRequest,
   jsonResponse,
 } from '@heyclaude/web-runtime/server';
 import { cacheLife } from 'next/cache';
-import { type NextRequest } from 'next/server';
-
-const CORS = getWithAuthCorsHeaders;
 
 /**
  * Cached helper function to fetch search facets.
@@ -32,16 +54,31 @@ async function getCachedSearchFacetsFormatted() {
   return await service.getSearchFacetsFormatted();
 }
 
-export async function GET(_request: NextRequest) {
-  const reqLogger = logger.child({
-    method: 'GET',
-    operation: 'SearchFacetsAPI',
-    route: '/api/search/facets',
-  });
+/**
+ * GET /api/search/facets - Get search facets
+ * 
+ * Returns available search facets (categories, tags, authors) for filtering.
+ * Database RPC returns frontend-ready data (no client-side mapping needed).
+ */
+export const GET = createApiRoute({
+  route: '/api/search/facets',
+  operation: 'SearchFacetsAPI',
+  method: 'GET',
+  cors: 'auth',
+  openapi: {
+    summary: 'Get search facets',
+    description: 'Returns available search facets (categories, tags, authors) for filtering search results. Used by the search interface to populate filter dropdowns and facet counts.',
+    tags: ['search', 'facets'],
+    operationId: 'getSearchFacets',
+    responses: {
+      200: {
+        description: 'Search facets retrieved successfully',
+      },
+    },
+  },
+  handler: async ({ logger }) => {
+    logger.info({}, 'Facets request received');
 
-  reqLogger.info({}, 'Facets request received');
-
-  try {
     // Database RPC returns frontend-ready data (no client-side mapping needed)
     // This eliminates CPU-intensive array mapping and filtering (5-10% CPU savings)
     let data: Awaited<ReturnType<typeof getCachedSearchFacetsFormatted>> | null = null;
@@ -49,12 +86,12 @@ export async function GET(_request: NextRequest) {
       data = await getCachedSearchFacetsFormatted();
     } catch (error) {
       const normalized = normalizeError(error, 'Facets RPC failed');
-      reqLogger.error({ err: normalized }, 'Facets RPC failed');
+      logger.error({ err: normalized }, 'Facets RPC failed');
       return createErrorResponse(normalized, {
-        logContext: { facetType: 'all' },
-        method: 'GET',
-        operation: 'get_search_facets_formatted',
         route: '/api/search/facets',
+        operation: 'SearchFacetsAPI',
+        method: 'GET',
+        logContext: { facetType: 'all' },
       });
     }
 
@@ -67,22 +104,14 @@ export async function GET(_request: NextRequest) {
       },
       200,
       {
-        ...CORS,
+        ...getWithAuthCorsHeaders,
         ...buildCacheHeaders('search_facets'),
       }
     );
-  } catch (error) {
-    const normalized = normalizeError(error, 'Facets handler failed');
-    reqLogger.error({ err: normalized }, 'Facets handler failed');
-    return createErrorResponse(normalized, {
-      logContext: {},
-      method: 'GET',
-      operation: 'GET',
-      route: '/api/search/facets',
-    });
-  }
-}
+  },
+});
 
-export function OPTIONS() {
-  return handleOptionsRequest(CORS);
-}
+/**
+ * OPTIONS handler for CORS preflight requests
+ */
+export const OPTIONS = createApiOptionsHandler('auth');

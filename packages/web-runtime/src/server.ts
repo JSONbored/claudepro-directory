@@ -17,10 +17,48 @@ export * from './supabase/middleware.ts';
 export * from './pulse.ts';
 export * from './supabase/pgmq-client.ts';
 export * from './auth/get-authenticated-user.ts';
-export * from './server/api-helpers.ts';
+export {
+  buildCacheHeaders,
+  jsonResponse,
+  badRequestResponse,
+  unauthorizedResponse,
+  methodNotAllowedResponse,
+  handleOptionsRequest,
+  getOnlyCorsHeaders,
+  getWithAuthCorsHeaders,
+  getWithAcceptCorsHeaders,
+  postCorsHeaders,
+  publicCorsHeaders,
+  type CachePresetKey,
+} from './server/api-helpers.ts';
 export * from './server/not-found-response.ts';
 export * from './server/storage-proxy.ts';
 export * from './server/fetch-helpers.ts';
+// API Route Factory (re-exports with different names to avoid conflicts)
+export {
+  createApiRoute,
+  createOptionsHandler as createApiOptionsHandler,
+  type ApiRouteConfig,
+  type RouteHandler,
+  type RouteHandlerContext,
+  type CorsConfig,
+} from './api/route-factory';
+export * from './api/schemas';
+// Explicitly export commonly used schemas for convenience
+export {
+  searchAutocompleteQuerySchema,
+  searchQuerySchema,
+  changelogFormatSchema,
+  changelogEntryFormatSchema,
+  categoryContentFormatSchema,
+  contentFormatSchema,
+  contentDetailQuerySchema,
+  sitewideFormatSchema,
+  feedQuerySchema,
+  trendingQuerySchema,
+  ogImageQuerySchema,
+  sitemapFormatSchema,
+} from './api/schemas';
 export * from './rpc/run-rpc.ts';
 export * from './seo/generator.ts';
 export * from './data/seo/client.ts';

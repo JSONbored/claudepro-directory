@@ -1,11 +1,29 @@
 /**
  * Category Configs API Route
- * Migrated from public-api edge function
+ * 
+ * Returns category configuration data including features, metadata, and display settings.
+ * Used by the frontend to render category-specific UI and determine available features.
+ * 
+ * @example
+ * ```ts
+ * // Request
+ * GET /api/content/category-configs
+ * 
+ * // Response (200)
+ * [
+ *   {
+ *     "category": "skills",
+ *     "display_name": "Skills",
+ *     "features": ["search", "filter", "bookmark"],
+ *     "metadata": { ... }
+ *   }
+ * ]
+ * ```
  */
 
 import 'server-only';
 import { ContentService } from '@heyclaude/data-layer';
-import { createErrorResponse, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { createApiRoute, createApiOptionsHandler } from '@heyclaude/web-runtime/server';
 import {
   buildCacheHeaders,
   createSupabaseAnonClient,
@@ -13,9 +31,6 @@ import {
   jsonResponse,
 } from '@heyclaude/web-runtime/server';
 import { cacheLife } from 'next/cache';
-import { NextRequest, NextResponse } from 'next/server';
-
-const CORS = getOnlyCorsHeaders;
 
 /**
  * Cached helper function to fetch category configs.
@@ -32,45 +47,48 @@ async function getCachedCategoryConfigs() {
   return service.getCategoryConfigs();
 }
 
-export async function GET(_request: NextRequest) {
-  const reqLogger = logger.child({
-    method: 'GET',
-    operation: 'CategoryConfigsAPI',
-    route: '/api/content/category-configs',
-  });
-
-  try {
-    reqLogger.info({}, 'Category configs request received');
+/**
+ * GET /api/content/category-configs - Get category configurations
+ * 
+ * Returns category configuration data including features, metadata, and display settings.
+ * Used by the frontend to render category-specific UI and determine available features.
+ */
+export const GET = createApiRoute({
+  route: '/api/content/category-configs',
+  operation: 'CategoryConfigsAPI',
+  method: 'GET',
+  cors: 'anon',
+  openapi: {
+    summary: 'Get category configurations',
+    description: 'Returns category configuration data including features, metadata, and display settings. Used by the frontend to render category-specific UI and determine available features.',
+    tags: ['content', 'categories', 'config'],
+    operationId: 'getCategoryConfigs',
+    responses: {
+      200: {
+        description: 'Category configurations retrieved successfully',
+      },
+    },
+  },
+  handler: async ({ logger }) => {
+    logger.info({}, 'Category configs request received');
 
     const data = await getCachedCategoryConfigs();
 
-    reqLogger.info(
+    logger.info(
       {
         count: Array.isArray(data) ? data.length : 'unknown',
       },
       'Category configs retrieved'
     );
 
-    return jsonResponse(data, 200, CORS, {
+    return jsonResponse(data, 200, getOnlyCorsHeaders, {
       'X-Generated-By': 'supabase.rpc.get_category_configs_with_features',
       ...buildCacheHeaders('config'),
     });
-  } catch (error) {
-    const normalized = normalizeError(error, 'Operation failed');
-    reqLogger.error({ err: normalized }, 'Category configs API error');
-    return createErrorResponse(normalized, {
-      method: 'GET',
-      operation: 'CategoryConfigsAPI',
-      route: '/api/content/category-configs',
-    });
-  }
-}
+  },
+});
 
-export function OPTIONS() {
-  return new NextResponse(null, {
-    headers: {
-      ...CORS,
-    },
-    status: 204,
-  });
-}
+/**
+ * OPTIONS handler for CORS preflight requests
+ */
+export const OPTIONS = createApiOptionsHandler('anon');

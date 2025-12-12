@@ -168,18 +168,18 @@ export function getDeploymentUrl(): string | undefined {
   // Priority 2: Platform-specific URLs
   const platform = detectPlatform();
   switch (platform) {
-    case 'aws':
-      return process.env['AMPLIFY_HOST'];
-    case 'cloudflare':
-      return process.env['CF_PAGES_URL'];
+    case 'vercel':
+      return process.env['VERCEL_URL'];
     case 'netlify':
       return process.env['DEPLOY_PRIME_URL'] || process.env['URL'];
+    case 'cloudflare':
+      return process.env['CF_PAGES_URL'];
+    case 'aws':
+      return process.env['AMPLIFY_HOST'];
     case 'railway':
       return process.env['RAILWAY_PUBLIC_DOMAIN'];
     case 'render':
       return process.env['RENDER_EXTERNAL_URL'];
-    case 'vercel':
-      return process.env['VERCEL_URL'];
     default:
       return undefined;
   }
@@ -203,18 +203,18 @@ export function getDeploymentBranch(): string | undefined {
   // Priority 2: Platform-specific branch variables
   const platform = detectPlatform();
   switch (platform) {
-    case 'aws':
-      return process.env['AWS_BRANCH'];
-    case 'cloudflare':
-      return process.env['CF_PAGES_BRANCH'];
+    case 'vercel':
+      return process.env['VERCEL_GIT_COMMIT_REF'];
     case 'netlify':
       return process.env['HEAD'] || process.env['BRANCH'];
+    case 'cloudflare':
+      return process.env['CF_PAGES_BRANCH'];
+    case 'aws':
+      return process.env['AWS_BRANCH'];
     case 'railway':
       return process.env['RAILWAY_GIT_BRANCH'];
     case 'render':
       return process.env['RENDER_GIT_BRANCH'];
-    case 'vercel':
-      return process.env['VERCEL_GIT_COMMIT_REF'];
     default:
       return undefined;
   }
@@ -238,18 +238,18 @@ export function getDeploymentCommit(): string | undefined {
   // Priority 2: Platform-specific commit variables
   const platform = detectPlatform();
   switch (platform) {
-    case 'aws':
-      return process.env['AWS_COMMIT_ID'];
-    case 'cloudflare':
-      return process.env['CF_PAGES_COMMIT_SHA'];
+    case 'vercel':
+      return process.env['VERCEL_GIT_COMMIT_SHA'];
     case 'netlify':
       return process.env['COMMIT_REF'];
+    case 'cloudflare':
+      return process.env['CF_PAGES_COMMIT_SHA'];
+    case 'aws':
+      return process.env['AWS_COMMIT_ID'];
     case 'railway':
       return process.env['RAILWAY_GIT_COMMIT_SHA'];
     case 'render':
       return process.env['RENDER_GIT_COMMIT'];
-    case 'vercel':
-      return process.env['VERCEL_GIT_COMMIT_SHA'];
     default:
       return undefined;
   }
@@ -275,24 +275,24 @@ export function getDeploymentPullRequestId(): string | undefined {
   // Priority 2: Platform-specific PR ID variables
   const platform = detectPlatform();
   switch (platform) {
-    case 'aws':
-      // AWS Amplify doesn't expose PR ID directly
-      return undefined;
-    case 'cloudflare':
-      // Cloudflare Pages doesn't expose PR ID directly
-      return undefined;
+    case 'vercel':
+      return process.env['VERCEL_GIT_PULL_REQUEST_ID'];
     case 'netlify':
       // Netlify doesn't have a direct PR ID, but we can use DEPLOY_PRIME_URL or REVIEW_ID
       // REVIEW_ID is available in deploy previews
       return process.env['REVIEW_ID'];
+    case 'cloudflare':
+      // Cloudflare Pages doesn't expose PR ID directly
+      return undefined;
+    case 'aws':
+      // AWS Amplify doesn't expose PR ID directly
+      return undefined;
     case 'railway':
       // Railway doesn't expose PR ID directly
       return undefined;
     case 'render':
       // Render doesn't expose PR ID directly
       return undefined;
-    case 'vercel':
-      return process.env['VERCEL_GIT_PULL_REQUEST_ID'];
     default:
       return undefined;
   }

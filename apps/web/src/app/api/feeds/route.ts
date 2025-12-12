@@ -1,6 +1,24 @@
 /**
  * Feeds API Route (RSS/Atom)
- * Migrated from public-api edge function
+ * 
+ * Generates RSS or Atom feeds for content or changelog entries.
+ * Supports category filtering and changelog-specific feeds.
+ * 
+ * @example
+ * ```ts
+ * // Request - RSS feed for all content
+ * GET /api/feeds?type=rss
+ * 
+ * // Request - Atom feed for skills category
+ * GET /api/feeds?type=atom&category=skills
+ * 
+ * // Request - RSS feed for changelog
+ * GET /api/feeds?type=rss&category=changelog
+ * 
+ * // Response (200) - application/rss+xml or application/atom+xml
+ * <?xml version="1.0" encoding="UTF-8"?>
+ * <rss version="2.0">...</rss>
+ * ```
  */
 
 import 'server-only';
@@ -8,23 +26,21 @@ import { ContentService } from '@heyclaude/data-layer';
 import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
-import { createErrorResponse, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { createApiRoute, createApiOptionsHandler, feedQuerySchema } from '@heyclaude/web-runtime/server';
+import { normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  badRequestResponse,
   buildCacheHeaders,
   createSupabaseAnonClient,
   getOnlyCorsHeaders,
 } from '@heyclaude/web-runtime/server';
 import { cacheLife } from 'next/cache';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
-const CORS = getOnlyCorsHeaders;
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
 const FEED_LIMIT = 50;
 
 type ContentCategory = DatabaseGenerated['public']['Enums']['content_category'];
 type FeedType = 'atom' | 'rss';
-const SUPPORTED_TYPES = new Set<FeedType>(['rss', 'atom']);
 
 /***
  * Convert a raw string to a validated ContentCategory or return null.
@@ -60,7 +76,16 @@ async function getCachedFeedPayload(
 
   const supabase = createSupabaseAnonClient();
   // Use module-level logger since this runs in cached context
-  return generateFeedPayload(type, category, supabase, logger);
+  // Import logger for cached context (dynamic import to avoid circular deps)
+  const { logger: cachedLogger } = await import('@heyclaude/web-runtime/logging/server');
+  const loggerInstance = cachedLogger.child({ operation: 'getCachedFeedPayload' });
+  // Wrap logger to match expected type signature
+  const wrappedLogger: Logger = {
+    error: (context: Record<string, unknown>, message: string) => loggerInstance.error(context as Parameters<typeof loggerInstance.error>[0], message),
+    warn: (context: Record<string, unknown>, message: string) => loggerInstance.warn(context as Parameters<typeof loggerInstance.warn>[0], message),
+    info: (context: Record<string, unknown>, message: string) => loggerInstance.info(context as Parameters<typeof loggerInstance.info>[0], message),
+  };
+  return generateFeedPayload(type, category, supabase, wrappedLogger);
 }
 
 /******
@@ -78,11 +103,17 @@ async function getCachedFeedPayload(
  * @see ContentService
  * @see toContentCategory
  */
+type Logger = {
+  error: (context: Record<string, unknown>, message: string) => void;
+  warn?: (context: Record<string, unknown>, message: string) => void;
+  info?: (context: Record<string, unknown>, message: string) => void;
+};
+
 async function generateFeedPayload(
   type: FeedType,
   category: null | string,
   supabase: ReturnType<typeof createSupabaseAnonClient>,
-  reqLogger?: ReturnType<typeof logger.child>
+  reqLogger?: Logger
 ): Promise<{ contentType: string; source: string; xml: string }> {
   const service = new ContentService(supabase);
 
@@ -171,33 +202,44 @@ async function generateFeedPayload(
   }
 }
 
-export async function GET(request: NextRequest) {
-  const reqLogger = logger.child({
-    method: 'GET',
-    operation: 'FeedsAPI',
-    route: '/api/feeds',
-  });
+/**
+ * GET /api/feeds - Generate RSS or Atom feeds
+ * 
+ * Generates RSS or Atom feeds for content or changelog entries.
+ * Supports category filtering and changelog-specific feeds.
+ */
+export const GET = createApiRoute({
+  route: '/api/feeds',
+  operation: 'FeedsAPI',
+  method: 'GET',
+  cors: 'anon',
+  querySchema: feedQuerySchema,
+  openapi: {
+    summary: 'Generate RSS or Atom feeds',
+    description: 'Generates RSS or Atom feeds for content or changelog entries. Supports category filtering and changelog-specific feeds.',
+    tags: ['feeds', 'rss', 'atom'],
+    operationId: 'getFeeds',
+    responses: {
+      200: {
+        description: 'Feed generated successfully (RSS or Atom XML)',
+      },
+      400: {
+        description: 'Invalid type or category parameter',
+      },
+    },
+  },
+  handler: async ({ logger, query }) => {
+    // Zod schema ensures type is 'rss' | 'atom' and category is string | null
+    const { type, category } = query;
 
-  try {
-    const url = new URL(request.url);
-    const typeParam = (url.searchParams.get('type') ?? 'rss').toLowerCase();
-    const categoryParam = url.searchParams.get('category');
-    const category =
-      categoryParam && categoryParam !== 'all' ? categoryParam.trim().toLowerCase() : null;
-
-    if (!SUPPORTED_TYPES.has(typeParam as FeedType)) {
-      return badRequestResponse('Invalid type. Valid types: rss, atom', CORS);
-    }
-    const type = typeParam as FeedType;
-
+    // Additional validation: category must be valid content category or 'changelog'
     if (category && category !== 'changelog' && !toContentCategory(category)) {
-      return badRequestResponse(
-        `Invalid category parameter. Valid categories: changelog, ${CONTENT_CATEGORY_VALUES.join(', ')}, or omit/use 'all' for site-wide feed`,
-        CORS
+      throw new Error(
+        `Invalid category parameter. Valid categories: changelog, ${CONTENT_CATEGORY_VALUES.join(', ')}, or omit/use 'all' for site-wide feed`
       );
     }
 
-    reqLogger.info(
+    logger.info(
       {
         category: category ?? 'all',
         type,
@@ -205,9 +247,9 @@ export async function GET(request: NextRequest) {
       'Feeds request received'
     );
 
-    const payload = await getCachedFeedPayload(type, category);
+    const payload = await getCachedFeedPayload(type as FeedType, category);
 
-    reqLogger.info(
+    logger.info(
       {
         category: category ?? 'all',
         contentType: payload.contentType,
@@ -224,33 +266,15 @@ export async function GET(request: NextRequest) {
         'X-Generated-By': 'supabase.functions.feeds',
         'X-Robots-Tag': 'index, follow',
         ...buildSecurityHeaders(),
-        ...CORS,
+        ...getOnlyCorsHeaders,
         ...buildCacheHeaders('feeds'),
       },
       status: 200,
     });
-  } catch (error) {
-    const normalized = normalizeError(error, 'Feeds API error');
-    reqLogger.error({ err: normalized }, 'Feeds API error');
-    return createErrorResponse(normalized, {
-      method: 'GET',
-      operation: 'FeedsAPI',
-      route: '/api/feeds',
-    });
-  }
-}
+  },
+});
 
 /**
- * Responds to CORS preflight (OPTIONS) requests with a 204 No Content and CORS headers.
- *
- * @returns A NextResponse with HTTP status 204 and only CORS headers set.
- * @see getOnlyCorsHeaders
+ * OPTIONS handler for CORS preflight requests
  */
-export function OPTIONS() {
-  return new NextResponse(null, {
-    headers: {
-      ...getOnlyCorsHeaders,
-    },
-    status: 204,
-  });
-}
+export const OPTIONS = createApiOptionsHandler('anon');

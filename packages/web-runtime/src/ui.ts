@@ -73,3 +73,7 @@ export * from './ui/components/theme/theme-toggle.tsx';
 export * from './ui/components/scroll/scroll-direction-detector.tsx';
 // Re-export SUBMISSION_FORM_TOKENS from new design-tokens system
 export { SUBMISSION_FORM_TOKENS } from './design-tokens/submission-form.ts';
+// Motion components and providers
+export * from './ui/components/motion';
+export * from './ui/providers/lazy-motion-provider';
+export * from './ui/providers/motion-config-provider';

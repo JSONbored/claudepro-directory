@@ -11,13 +11,33 @@
  * Caching: Two-layer caching strategy:
  * - Next.js Cache Components: 15min stale, 5min revalidate, 2hr expire (cacheLife('quarter'))
  * - HTTP Cache-Control: 5 minutes via Cache-Control headers (s-maxage=300)
+ * 
+ * @example
+ * ```ts
+ * // Request
+ * GET /api/stats/social-proof
+ * 
+ * // Response (200)
+ * {
+ *   "success": true,
+ *   "stats": {
+ *     "contributors": { "count": 42, "names": ["user1", "user2"] },
+ *     "submissions": 150,
+ *     "successRate": 85.5,
+ *     "totalUsers": 1000
+ *   },
+ *   "timestamp": "2025-01-11T12:00:00Z"
+ * }
+ * ```
  */
+import 'server-only';
 import { MiscService } from '@heyclaude/data-layer';
 import { type Database } from '@heyclaude/database-types';
-import { createErrorResponse, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { createApiRoute, createApiOptionsHandler } from '@heyclaude/web-runtime/server';
 import { createSupabaseAdminClient } from '@heyclaude/web-runtime/server';
 import { cacheLife } from 'next/cache';
-import { connection, NextResponse } from 'next/server';
+import { connection } from 'next/server';
+import { NextResponse } from 'next/server';
 
 /**
  * Cached helper function to fetch social proof stats.
@@ -76,46 +96,33 @@ async function getCachedSocialProofData(): Promise<{
 }
 
 /**
- * Provide live social proof metrics for the submission wizard.
- *
- * Returns aggregated, derived values: top contributors this week (up to 5 usernames),
- * `submissions` — count of submissions in the past 7 days, `successRate` — percentage of
- * submissions with status 'merged' over the past 30 days (or `null` if there are no submissions),
- * and `totalUsers` — total content/user count (or `null` if unavailable). The response also
- * includes an ISO 8601 `timestamp` and is served with cache headers (`Cache-Control`, `ETag`,
- * `Last-Modified`) to support conditional requests and short-term caching.
- *
- * @returns A NextResponse with status 200 and JSON body:
- *  {
- *    success: true,
- *    stats: {
- *      contributors: { count: number, names: string[] },
- *      submissions: number,
- *      successRate: number | null,
- *      totalUsers: number | null
- *    },
- *    timestamp: string
- *  }
- *  On failure, returns a standardized error response produced by `createErrorResponse`.
- *
- * @see createSupabaseAdminClient
- * @see normalizeError
- * @see createErrorResponse
- * @see Constants.public.Enums.submission_status
+ * GET /api/stats/social-proof - Get social proof statistics
+ * 
+ * Returns aggregated social proof metrics: top contributors this week (up to 5 usernames),
+ * submissions count in the past 7 days, success rate percentage over the past 30 days,
+ * and total user count. Includes ETag and Last-Modified headers for conditional requests.
  */
-export async function GET() {
-  // Explicitly defer to request time before using non-deterministic operations (Date.now())
-  // This is required by Cache Components for non-deterministic operations
-  await connection();
+export const GET = createApiRoute({
+  route: '/api/stats/social-proof',
+  operation: 'SocialProofStatsAPI',
+  method: 'GET',
+  cors: 'anon',
+  openapi: {
+    summary: 'Get social proof statistics',
+    description: 'Returns aggregated social proof metrics for the submission wizard: top contributors this week, recent submission count, success rate, and total user count. Includes ETag and Last-Modified headers for conditional requests.',
+    tags: ['stats', 'social-proof'],
+    operationId: 'getSocialProofStats',
+    responses: {
+      200: {
+        description: 'Social proof statistics retrieved successfully',
+      },
+    },
+  },
+  handler: async ({ logger }) => {
+    // Explicitly defer to request time before using non-deterministic operations (Date.now())
+    // This is required by Cache Components for non-deterministic operations
+    await connection();
 
-  // Create request-scoped child logger to avoid race conditions
-  const reqLogger = logger.child({
-    module: 'apps/web/src/app/api/stats/social-proof',
-    operation: 'SocialProofStatsAPI',
-    route: '/api/stats/social-proof',
-  });
-
-  try {
     // Fetch cached stats data
     const stats = await getCachedSocialProofData();
 
@@ -123,7 +130,7 @@ export async function GET() {
     const timestamp = new Date().toISOString();
 
     // Structured logging with cache tags and stats
-    reqLogger.info(
+    logger.info(
       {
         cacheTags: ['stats', 'social-proof'],
         stats: {
@@ -157,19 +164,10 @@ export async function GET() {
         status: 200,
       }
     );
-  } catch (error) {
-    const normalized = normalizeError(error, 'Social proof stats API error');
-    reqLogger.error(
-      {
-        err: normalized,
-        section: 'error-handling',
-      },
-      'Social proof stats API error'
-    );
-    return createErrorResponse(normalized, {
-      method: 'GET',
-      operation: 'SocialProofStatsAPI',
-      route: '/api/stats/social-proof',
-    });
-  }
-}
+  },
+});
+
+/**
+ * OPTIONS handler for CORS preflight requests
+ */
+export const OPTIONS = createApiOptionsHandler('anon');

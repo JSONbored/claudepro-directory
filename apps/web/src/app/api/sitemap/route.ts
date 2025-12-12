@@ -1,3 +1,23 @@
+/**
+ * Sitemap API Route
+ * 
+ * Generates XML or JSON sitemaps for search engines.
+ * Supports IndexNow submission for search engine indexing.
+ * 
+ * @example
+ * ```ts
+ * // Request - XML sitemap
+ * GET /api/sitemap?format=xml
+ * 
+ * // Request - JSON sitemap
+ * GET /api/sitemap?format=json
+ * 
+ * // Response (200) - application/xml or application/json
+ * <?xml version="1.0"?>
+ * <urlset>...</urlset>
+ * ```
+ */
+
 import 'server-only';
 import { MiscService } from '@heyclaude/data-layer';
 import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
@@ -9,16 +29,17 @@ import {
   getStringProperty,
 } from '@heyclaude/shared-runtime';
 import { inngest } from '@heyclaude/web-runtime/inngest';
-import { createErrorResponse, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { createApiRoute, createApiOptionsHandler, sitemapFormatSchema } from '@heyclaude/web-runtime/server';
+import { normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   buildCacheHeaders,
   createSupabaseAnonClient,
   getOnlyCorsHeaders,
-  handleOptionsRequest,
   jsonResponse,
 } from '@heyclaude/web-runtime/server';
 import { cacheLife } from 'next/cache';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
+import { z } from 'zod';
 
 /**
  * Cached helper function to fetch sitemap URLs.
@@ -40,7 +61,6 @@ async function getCachedSiteUrls() {
   return service.getSiteUrls();
 }
 
-const CORS = getOnlyCorsHeaders;
 const INDEXNOW_API_KEY = getEnvVar('INDEXNOW_API_KEY');
 const INDEXNOW_TRIGGER_KEY = getEnvVar('INDEXNOW_TRIGGER_KEY');
 const SITE_URL = APP_CONFIG.url;
@@ -64,24 +84,47 @@ function timingSafeEqual(a?: null | string, b?: null | string): boolean {
   return diff === 0;
 }
 
-export async function GET(request: NextRequest) {
-  const reqLogger = logger.child({
-    method: 'GET',
-    operation: 'SitemapAPI',
-    route: '/api/sitemap',
-  });
-  const format = (request.nextUrl.searchParams.get('format') ?? 'xml').toLowerCase();
+/**
+ * GET /api/sitemap - Get sitemap in XML or JSON format
+ * 
+ * Generates XML or JSON sitemaps for search engines.
+ * Supports both XML (default) and JSON formats.
+ */
+export const GET = createApiRoute({
+  route: '/api/sitemap',
+  operation: 'SitemapAPI',
+  method: 'GET',
+  cors: 'anon',
+  querySchema: z.object({
+    format: sitemapFormatSchema,
+  }),
+  openapi: {
+    summary: 'Get sitemap in XML or JSON format',
+    description: 'Generates XML or JSON sitemaps for search engines. Supports both XML (default) and JSON formats.',
+    tags: ['sitemap', 'seo'],
+    operationId: 'getSitemap',
+    responses: {
+      200: {
+        description: 'Sitemap generated successfully',
+      },
+      500: {
+        description: 'Sitemap generation failed',
+      },
+    },
+  },
+  handler: async ({ logger, query }) => {
+    // Zod schema ensures proper types
+    const { format } = query;
 
-  reqLogger.info({ format }, 'Sitemap request received');
+    logger.info({ format }, 'Sitemap request received');
 
-  try {
     if (format === 'json') {
       let data: Awaited<ReturnType<typeof getCachedSiteUrls>> | null = null;
       try {
         data = await getCachedSiteUrls();
       } catch (error) {
         const normalized = normalizeError(error, 'Operation failed');
-        reqLogger.error(
+        logger.error(
           {
             err: normalized,
             operation: 'get_site_urls',
@@ -89,25 +132,18 @@ export async function GET(request: NextRequest) {
           },
           'get_site_urls RPC failed'
         );
-        return createErrorResponse(normalized, {
-          logContext: {
-            rpcName: 'get_site_urls',
-          },
-          method: 'GET',
-          operation: 'get_site_urls',
-          route: '/api/sitemap',
-        });
+        throw normalized; // Factory will handle error response
       }
 
       if (!Array.isArray(data) || data.length === 0) {
-        reqLogger.warn({}, 'get_site_urls returned no rows');
+        logger.warn({}, 'get_site_urls returned no rows');
         return jsonResponse(
           {
             error: 'No URLs available',
           },
           500,
+          getOnlyCorsHeaders,
           {
-            ...CORS,
             ...buildCacheHeaders('sitemap'),
           }
         );
@@ -152,7 +188,7 @@ export async function GET(request: NextRequest) {
         mappedUrls.push(urlEntry);
       }
 
-      reqLogger.info(
+      logger.info(
         {
           count: mappedUrls.length,
         },
@@ -168,16 +204,15 @@ export async function GET(request: NextRequest) {
           urls: mappedUrls,
         },
         200,
+        getOnlyCorsHeaders,
         {
-          ...CORS,
           ...buildCacheHeaders('sitemap'),
-        },
-        {
           'X-Content-Source': 'supabase.mv_site_urls',
         }
       );
     }
 
+    // XML format (default)
     const supabase = createSupabaseAnonClient();
     const service = new MiscService(supabase);
 
@@ -190,7 +225,7 @@ export async function GET(request: NextRequest) {
       data = await service.generateSitemapXml(rpcArgs);
     } catch (error) {
       const normalized = normalizeError(error, 'generate_sitemap_xml RPC failed');
-      reqLogger.error(
+      logger.error(
         {
           err: normalized,
           rpcArgs,
@@ -198,22 +233,15 @@ export async function GET(request: NextRequest) {
         },
         'generate_sitemap_xml RPC failed'
       );
-      return createErrorResponse(normalized, {
-        logContext: {
-          rpcName: 'generate_sitemap_xml',
-        },
-        method: 'GET',
-        operation: 'generate_sitemap_xml',
-        route: '/api/sitemap',
-      });
+      throw normalized; // Factory will handle error response
     }
 
     if (!data) {
-      reqLogger.warn({}, 'generate_sitemap_xml returned null');
-      return jsonResponse({ error: 'Sitemap XML generation returned null' }, 500, CORS);
+      logger.warn({}, 'generate_sitemap_xml returned null');
+      return jsonResponse({ error: 'Sitemap XML generation returned null' }, 500, getOnlyCorsHeaders);
     }
 
-    reqLogger.info({}, 'Sitemap XML generated');
+    logger.info({}, 'Sitemap XML generated');
 
     return new NextResponse(data, {
       headers: {
@@ -222,77 +250,103 @@ export async function GET(request: NextRequest) {
         'X-Generated-By': 'supabase.rpc.generate_sitemap_xml',
         'X-Robots-Tag': 'index, follow',
         ...buildSecurityHeaders(),
-        ...CORS,
+        ...getOnlyCorsHeaders,
         ...buildCacheHeaders('sitemap'),
       },
       status: 200,
     });
-  } catch (error) {
-    const normalized = normalizeError(error, 'Unhandled sitemap GET error');
-    reqLogger.error({ err: normalized }, 'Unhandled sitemap GET error');
-    return createErrorResponse(normalized, {
-      logContext: {},
-      method: 'GET',
-      operation: 'SitemapAPI',
-      route: '/api/sitemap',
-    });
-  }
-}
+  },
+});
 
-export async function POST(request: NextRequest) {
-  const reqLogger = logger.child({
-    method: 'POST',
-    operation: 'SitemapAPI',
-    route: '/api/sitemap',
-  });
-
-  reqLogger.info(
-    {
-      operation: 'indexnow_submission',
-      securityEvent: true,
+/**
+ * POST /api/sitemap - Submit URLs to IndexNow
+ * 
+ * Submits site URLs to IndexNow for search engine indexing.
+ * Requires authentication via x-indexnow-trigger-key header.
+ * 
+ * @example
+ * ```ts
+ * // Request
+ * POST /api/sitemap
+ * Headers: x-indexnow-trigger-key: <trigger-key>
+ * 
+ * // Response (200)
+ * {
+ *   "message": "IndexNow submission enqueued",
+ *   "ok": true,
+ *   "submitted": 1234
+ * }
+ * ```
+ */
+export const POST = createApiRoute({
+  route: '/api/sitemap',
+  operation: 'SitemapAPI',
+  method: 'POST',
+  cors: 'anon',
+  openapi: {
+    summary: 'Submit URLs to IndexNow',
+    description: 'Submits site URLs to IndexNow for search engine indexing. Requires authentication via x-indexnow-trigger-key header.',
+    tags: ['sitemap', 'seo', 'indexnow'],
+    operationId: 'submitIndexNow',
+    responses: {
+      200: {
+        description: 'IndexNow submission enqueued successfully',
+      },
+      401: {
+        description: 'Unauthorized - invalid trigger key',
+      },
+      503: {
+        description: 'Service unavailable - IndexNow keys not configured',
+      },
     },
-    'IndexNow submission received'
-  );
-
-  if (!INDEXNOW_TRIGGER_KEY) {
-    return jsonResponse(
+  },
+  handler: async ({ logger, request }) => {
+    logger.info(
       {
-        error: 'Service unavailable',
-        message: 'IndexNow trigger key not configured',
+        operation: 'indexnow_submission',
+        securityEvent: true,
       },
-      503,
-      CORS
+      'IndexNow submission received'
     );
-  }
 
-  const triggerKey = request.headers.get('x-indexnow-trigger-key');
-  if (!timingSafeEqual(triggerKey, INDEXNOW_TRIGGER_KEY)) {
-    reqLogger.warn({ securityEvent: true }, 'Invalid IndexNow trigger key');
-    return jsonResponse(
-      {
-        error: 'Unauthorized',
-        message: 'Invalid trigger key',
-      },
-      401,
-      CORS
-    );
-  }
+    if (!INDEXNOW_TRIGGER_KEY) {
+      return jsonResponse(
+        {
+          error: 'Service unavailable',
+          message: 'IndexNow trigger key not configured',
+        },
+        503,
+        getOnlyCorsHeaders
+      );
+    }
 
-  if (!INDEXNOW_API_KEY) {
-    return jsonResponse(
-      {
-        error: 'Service unavailable',
-        message: 'IndexNow API key not configured',
-      },
-      503,
-      CORS
-    );
-  }
+    const triggerKey = request.headers.get('x-indexnow-trigger-key');
+    if (!timingSafeEqual(triggerKey, INDEXNOW_TRIGGER_KEY)) {
+      logger.warn({ securityEvent: true }, 'Invalid IndexNow trigger key');
+      return jsonResponse(
+        {
+          error: 'Unauthorized',
+          message: 'Invalid trigger key',
+        },
+        401,
+        getOnlyCorsHeaders
+      );
+    }
 
-  const supabase = createSupabaseAnonClient();
-  const service = new MiscService(supabase);
+    if (!INDEXNOW_API_KEY) {
+      return jsonResponse(
+        {
+          error: 'Service unavailable',
+          message: 'IndexNow API key not configured',
+        },
+        503,
+        getOnlyCorsHeaders
+      );
+    }
 
-  try {
+    const supabase = createSupabaseAnonClient();
+    const service = new MiscService(supabase);
+
     // Database RPC returns string[] directly (SETOF text) - no client-side extraction needed
     // This eliminates CPU-intensive map/filter operations (5-10% CPU savings)
     let urlList: string[];
@@ -303,7 +357,7 @@ export async function POST(request: NextRequest) {
       });
     } catch (error) {
       const normalized = normalizeError(error, 'get_site_urls_formatted RPC failed');
-      reqLogger.error(
+      logger.error(
         {
           err: normalized,
           operation: 'get_site_urls_formatted',
@@ -311,19 +365,12 @@ export async function POST(request: NextRequest) {
         },
         'get_site_urls_formatted RPC failed'
       );
-      return createErrorResponse(normalized, {
-        logContext: {
-          rpcName: 'get_site_urls_formatted',
-        },
-        method: 'POST',
-        operation: 'get_site_urls_formatted',
-        route: '/api/sitemap',
-      });
+      throw normalized; // Factory will handle error response
     }
 
     if (!Array.isArray(urlList) || urlList.length === 0) {
-      reqLogger.warn({}, 'No URLs returned, skipping IndexNow');
-      return jsonResponse({ error: 'No URLs to submit' }, 500, CORS);
+      logger.warn({}, 'No URLs returned, skipping IndexNow');
+      return jsonResponse({ error: 'No URLs to submit' }, 500, getOnlyCorsHeaders);
     }
 
     // Trigger Inngest function to handle IndexNow submission asynchronously
@@ -339,7 +386,7 @@ export async function POST(request: NextRequest) {
         name: 'indexnow/submit',
       });
 
-      reqLogger.info(
+      logger.info(
         {
           operation: 'indexnow_submission',
           securityEvent: true,
@@ -355,11 +402,11 @@ export async function POST(request: NextRequest) {
           submitted: urlList.length,
         },
         200,
-        CORS
+        getOnlyCorsHeaders
       );
     } catch (error) {
       const normalized = normalizeError(error, 'Failed to enqueue IndexNow submission');
-      reqLogger.error(
+      logger.error(
         {
           err: normalized,
           securityEvent: true,
@@ -374,23 +421,13 @@ export async function POST(request: NextRequest) {
           submitted: 0,
         },
         500,
-        CORS
+        getOnlyCorsHeaders
       );
     }
-  } catch (error) {
-    reqLogger.error({ err: normalizeError(error) }, 'IndexNow submission error');
-    return jsonResponse(
-      {
-        error: 'IndexNow submission failed',
-        ok: false,
-        submitted: 0,
-      },
-      500,
-      CORS
-    );
-  }
-}
+  },
+});
 
-export function OPTIONS() {
-  return handleOptionsRequest(CORS);
-}
+/**
+ * OPTIONS handler for CORS preflight requests
+ */
+export const OPTIONS = createApiOptionsHandler('anon');

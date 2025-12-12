@@ -1,22 +1,35 @@
 /**
  * Changelog Index API Route
- * Migrated from public-api edge function
+ * 
+ * Returns the changelog in LLMs.txt format for AI/LLM consumption.
+ * Used for exporting changelog data in a standardized text format.
+ * 
+ * @example
+ * ```ts
+ * // Request
+ * GET /api/content/changelog?format=llms-changelog
+ * 
+ * // Response (200) - text/plain
+ * # Changelog
+ * 
+ * ## [1.0.0] - 2025-01-11
+ * - Added new feature
+ * - Fixed bug
+ * ```
  */
 
 import 'server-only';
 import { ContentService } from '@heyclaude/data-layer';
 import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
-import { createErrorResponse, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { createApiRoute, createApiOptionsHandler, changelogFormatSchema } from '@heyclaude/web-runtime/server';
 import {
-  badRequestResponse,
   buildCacheHeaders,
   createSupabaseAnonClient,
   getOnlyCorsHeaders,
 } from '@heyclaude/web-runtime/server';
 import { cacheLife } from 'next/cache';
-import { NextRequest, NextResponse } from 'next/server';
-
-const CORS = getOnlyCorsHeaders;
+import { NextResponse } from 'next/server';
+import { z } from 'zod';
 
 /**
  * Cached helper function to fetch changelog LLMs.txt content.
@@ -31,33 +44,49 @@ async function getCachedChangelogLlmsTxt(): Promise<null | string> {
   return service.getChangelogLlmsTxt();
 }
 
-export async function GET(request: NextRequest) {
-  const reqLogger = logger.child({
-    method: 'GET',
-    operation: 'ChangelogIndexAPI',
-    route: '/api/content/changelog',
-  });
+/**
+ * GET /api/content/changelog - Get changelog in LLMs.txt format
+ * 
+ * Returns the changelog in LLMs.txt format for AI/LLM consumption.
+ * Validates format parameter (must be 'llms-changelog').
+ */
+export const GET = createApiRoute({
+  route: '/api/content/changelog',
+  operation: 'ChangelogIndexAPI',
+  method: 'GET',
+  cors: 'anon',
+  querySchema: z.object({
+    format: changelogFormatSchema,
+  }),
+  openapi: {
+    summary: 'Get changelog in LLMs.txt format',
+    description: 'Returns the changelog in LLMs.txt format for AI/LLM consumption. Used for exporting changelog data in a standardized text format.',
+    tags: ['content', 'changelog', 'export'],
+    operationId: 'getChangelogIndex',
+    responses: {
+      200: {
+        description: 'Changelog LLMs.txt content retrieved successfully',
+      },
+      400: {
+        description: 'Invalid format parameter',
+      },
+    },
+  },
+  handler: async ({ logger, query }) => {
+    const { format } = query as { format: 'llms-changelog' };
 
-  try {
-    const url = new URL(request.url);
-    const format = (url.searchParams.get('format') ?? 'llms-changelog').toLowerCase();
-
-    if (format !== 'llms-changelog') {
-      return badRequestResponse(`Invalid format '${format}' for changelog index`, CORS);
-    }
-
-    reqLogger.info({ format }, 'Changelog index request received');
+    logger.info({ format }, 'Changelog index request received');
 
     const data = await getCachedChangelogLlmsTxt();
 
     if (!data) {
-      reqLogger.warn({}, 'Changelog LLMs.txt not found');
-      return badRequestResponse('Changelog LLMs.txt not found or invalid', CORS);
+      logger.warn({}, 'Changelog LLMs.txt not found');
+      throw new Error('Changelog LLMs.txt not found or invalid');
     }
 
     const formatted = data.replaceAll(String.raw`\n`, '\n');
 
-    reqLogger.info(
+    logger.info(
       {
         bytes: formatted.length,
       },
@@ -69,27 +98,15 @@ export async function GET(request: NextRequest) {
         'Content-Type': 'text/plain; charset=utf-8',
         'X-Generated-By': 'supabase.rpc.generate_changelog_llms_txt',
         ...buildSecurityHeaders(),
-        ...CORS,
+        ...getOnlyCorsHeaders,
         ...buildCacheHeaders('content_export'),
       },
       status: 200,
     });
-  } catch (error) {
-    const normalized = normalizeError(error, 'Operation failed');
-    reqLogger.error({ err: normalizeError(error) }, 'Changelog index API error');
-    return createErrorResponse(normalized, {
-      method: 'GET',
-      operation: 'ChangelogIndexAPI',
-      route: '/api/content/changelog',
-    });
-  }
-}
+  },
+});
 
-export function OPTIONS() {
-  return new NextResponse(null, {
-    headers: {
-      ...CORS,
-    },
-    status: 204,
-  });
-}
+/**
+ * OPTIONS handler for CORS preflight requests
+ */
+export const OPTIONS = createApiOptionsHandler('anon');

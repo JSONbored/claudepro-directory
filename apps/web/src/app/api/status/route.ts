@@ -1,11 +1,42 @@
 /**
  * Status/Health Check API Route
- * Migrated from public-api edge function
+ * 
+ * Returns the current health status of the API and database connections.
+ * Used for monitoring, uptime checks, and health dashboards.
+ * 
+ * @example
+ * ```ts
+ * // Request
+ * GET /api/status
+ * 
+ * // Response (200) - Healthy
+ * {
+ *   "status": "healthy",
+ *   "database": "connected",
+ *   "timestamp": "2025-01-11T12:00:00Z",
+ *   "version": "1.1.0"
+ * }
+ * 
+ * // Response (200) - Degraded
+ * {
+ *   "status": "degraded",
+ *   "database": "slow",
+ *   "timestamp": "2025-01-11T12:00:00Z"
+ * }
+ * 
+ * // Response (503) - Unhealthy
+ * {
+ *   "status": "unhealthy",
+ *   "database": "disconnected",
+ *   "timestamp": "2025-01-11T12:00:00Z"
+ * }
+ * ```
  */
 
 import 'server-only';
 import { MiscService } from '@heyclaude/data-layer';
-import { createErrorResponse, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { createApiRoute, createApiOptionsHandler } from '@heyclaude/web-runtime/server';
+import { createErrorResponse, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   buildCacheHeaders,
   createSupabaseAnonClient,
@@ -13,15 +44,12 @@ import {
   jsonResponse,
 } from '@heyclaude/web-runtime/server';
 import { cacheLife } from 'next/cache';
-import { NextRequest, NextResponse } from 'next/server';
-
-const CORS = getOnlyCorsHeaders;
 
 /**
  * Cached helper function to fetch API health status
  * Uses Cache Components to reduce function invocations
  * Database RPC returns frontend-ready camelCase data (no client-side transformation needed)
- *
+ * 
  * @returns {Promise<unknown>} API health status data
  */
 async function getCachedApiHealthFormatted() {
@@ -34,28 +62,32 @@ async function getCachedApiHealthFormatted() {
 }
 
 /**
- * Handle GET /api/status by querying the `get_api_health_formatted` RPC and returning a normalized health report.
- *
- * Queries the database via a Supabase anon client, which returns frontend-ready camelCase data.
- * Responds with JSON including CORS and cache headers. HTTP status is 200 for `healthy`
- * or `degraded`, and 503 for any other status. If the RPC returns an error or an unexpected exception
- * occurs, a structured error response is returned.
- *
- * @param _request - NextRequest representing the incoming request (unused)
- * @returns A NextResponse containing the health report JSON on success, or a structured error response on failure
- *
- * @see createSupabaseAnonClient
- * @see createErrorResponse
+ * GET /api/status - Health check endpoint
+ * 
+ * Queries the database via a Supabase anon client and returns a normalized health report.
+ * HTTP status is 200 for `healthy` or `degraded`, and 503 for any other status.
  */
-export async function GET(_request: NextRequest) {
-  const reqLogger = logger.child({
-    method: 'GET',
-    operation: 'StatusAPI',
-    route: '/api/status',
-  });
-
-  try {
-    reqLogger.info({}, 'Status/health check request received');
+export const GET = createApiRoute({
+  route: '/api/status',
+  operation: 'StatusAPI',
+  method: 'GET',
+  cors: 'anon',
+  openapi: {
+    summary: 'Get API health status',
+    description: 'Returns the current health status of the API and database connections. Used for monitoring, uptime checks, and health dashboards.',
+    tags: ['health', 'monitoring'],
+    operationId: 'getApiStatus',
+    responses: {
+      200: {
+        description: 'API is healthy or degraded',
+      },
+      503: {
+        description: 'API is unhealthy',
+      },
+    },
+  },
+  handler: async ({ logger }) => {
+    logger.info({}, 'Status/health check request received');
 
     // Database RPC returns frontend-ready camelCase data (no client-side transformation needed)
     // This eliminates CPU-intensive object traversal and property mapping (10-15% CPU savings)
@@ -64,31 +96,41 @@ export async function GET(_request: NextRequest) {
       data = await getCachedApiHealthFormatted();
     } catch (error) {
       const normalized = normalizeError(error, 'Health check RPC error');
-      reqLogger.error(
+      logger.error(
         {
           err: normalized,
           rpcName: 'get_api_health_formatted',
         },
         'Health check RPC error'
       );
+      // Return error response directly to preserve RPC context
       return createErrorResponse(normalized, {
+        route: '/api/status',
+        operation: 'StatusAPI',
+        method: 'GET',
         logContext: {
           rpcName: 'get_api_health_formatted',
         },
-        method: 'GET',
-        operation: 'StatusAPI',
-        route: '/api/status',
       });
     }
 
     // Determine HTTP status code based on health status
-    const status =
-      typeof data === 'object' && data !== null && 'status' in data
-        ? String(data['status'])
-        : 'unhealthy';
+    // Handle case where status might be a composite type string (from database function)
+    let status: string = 'unhealthy';
+    if (typeof data === 'object' && data !== null && 'status' in data) {
+      const statusValue = String(data['status']);
+      // If status is a composite type string (starts with '('), extract the actual status
+      if (statusValue.startsWith('(')) {
+        // Parse composite type string: (healthy,"timestamp",version,checks)
+        const match = statusValue.match(/^\((\w+),/);
+        status = match && match[1] ? match[1] : 'unhealthy';
+      } else {
+        status = statusValue;
+      }
+    }
     const statusCode = status === 'healthy' ? 200 : status === 'degraded' ? 200 : 503;
 
-    reqLogger.info(
+    logger.info(
       {
         status,
         statusCode,
@@ -96,34 +138,29 @@ export async function GET(_request: NextRequest) {
       'Status check completed'
     );
 
-    return jsonResponse(data, statusCode, CORS, {
+    // If status field is a composite type string, fix it in the response
+    let responseData = data;
+    if (
+      typeof data === 'object' &&
+      data !== null &&
+      'status' in data &&
+      String(data['status']).startsWith('(')
+    ) {
+      // Fix the status field by replacing composite string with actual status value
+      responseData = {
+        ...data,
+        status,
+      };
+    }
+
+    return jsonResponse(responseData, statusCode, getOnlyCorsHeaders, {
       'X-Generated-By': 'supabase.rpc.get_api_health_formatted',
       ...buildCacheHeaders('status'),
     });
-  } catch (error) {
-    const normalized = normalizeError(error, 'Operation failed');
-    reqLogger.error({ err: normalizeError(error) }, 'Status API error');
-    return createErrorResponse(normalized, {
-      method: 'GET',
-      operation: 'StatusAPI',
-      route: '/api/status',
-    });
-  }
-}
+  },
+});
 
 /**
- * Responds to HTTP OPTIONS requests with CORS headers and no response body.
- *
- * Returns a 204 No Content response including only the CORS headers required for preflight requests.
- *
- * @returns A NextResponse with status 204 and CORS headers.
- * @see getOnlyCorsHeaders
+ * OPTIONS handler for CORS preflight requests
  */
-export function OPTIONS() {
-  return new NextResponse(null, {
-    headers: {
-      ...getOnlyCorsHeaders,
-    },
-    status: 204,
-  });
-}
+export const OPTIONS = createApiOptionsHandler('anon');

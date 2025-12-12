@@ -175,6 +175,7 @@ export function PostCopyEmailProvider({ children }: PostCopyEmailProviderProps) 
         if (dismissed === 'true') return;
 
         // Show modal with exit-intent context
+        // CRITICAL: Set context first, then open - ensures both are set together
         setModalContext({
           copyType: 'link',
           referrer: 'exit-intent',
@@ -223,12 +224,9 @@ export function PostCopyEmailProvider({ children }: PostCopyEmailProviderProps) 
       // Show modal and track in session
       // CRITICAL: Set context first, then open - ensures both are set together
       // Use functional updates to ensure state consistency
+      // Set both state updates in the same render cycle to prevent race conditions
       setModalContext(context);
-      // Use setTimeout to ensure context is set before opening (prevents race condition)
-      // This ensures modalContext exists when Dialog renders
-      setTimeout(() => {
-        setIsOpen(true);
-      }, 0);
+      setIsOpen(true);
       setHasShownThisSession(true);
       sessionStorage.setItem(SESSION_KEY, 'true');
       

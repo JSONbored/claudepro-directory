@@ -7,7 +7,6 @@
 		"@heyclaude/data-layer/": "../../../packages/data-layer/src/",
 		"@supabase/supabase-js": "npm:@supabase/supabase-js@2.86.0",
 		"@supabase/supabase-js/": "npm:@supabase/supabase-js@2.86.0/",
-		"resend": "npm:resend@6.5.2",
 		"zod": "npm:zod@3.24.1",
 		"zod-to-json-schema": "npm:zod-to-json-schema@3.24.1",
 		"mcp-lite": "npm:mcp-lite@0.8.2",
@@ -16,7 +15,6 @@
 		// sanitize-html@2.17.0 is the latest version (verified 2025-01-27)
 		// Security audit shows no known vulnerabilities (pnpm audit verified)
 		"sanitize-html": "npm:sanitize-html@2.17.0",
-		"sugar-high": "npm:sugar-high@0.9.5",
 		"react": "npm:react@18.3.1",
 		"yoga-layout": "npm:yoga-layout@3.2.1",
 		"https://esm.sh/yoga-layout@3.2.1": "npm:yoga-layout@3.2.1",

@@ -1,23 +1,41 @@
 /**
  * Sitewide Content API Route
- * Migrated from public-api edge function
+ * 
+ * Serves sitewide content in multiple export formats:
+ * - `llms` / `llms-txt` (default): LLMs export as plain text
+ * - `readme`: Raw JSON data for CLI formatting
+ * - `json`: Complete directory content as JSON array
+ * 
+ * @example
+ * ```ts
+ * // Request - LLMs format (default)
+ * GET /api/content/sitewide?format=llms
+ * 
+ * // Response (200) - text/plain
+ * # Sitewide Content
+ * ...
+ * 
+ * // Request - JSON format
+ * GET /api/content/sitewide?format=json
+ * 
+ * // Response (200) - application/json
+ * [{ "id": "...", "title": "...", ... }]
+ * ```
  */
 
 import 'server-only';
 import { ContentService } from '@heyclaude/data-layer';
 import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
-import { createErrorResponse, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { createApiRoute, createApiOptionsHandler, sitewideFormatSchema } from '@heyclaude/web-runtime/server';
+import { normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  badRequestResponse,
   buildCacheHeaders,
   createSupabaseAnonClient,
   getOnlyCorsHeaders,
 } from '@heyclaude/web-runtime/server';
 import { cacheLife } from 'next/cache';
-import { type NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-
-const CORS = getOnlyCorsHeaders;
+import { z } from 'zod';
 
 /**
  * Cached helper function to fetch sitewide content list
@@ -35,33 +53,42 @@ async function getCachedSitewideContent() {
 }
 
 /**
- * Serve sitewide content in multiple export formats based on the request's `format` query parameter.
- *
- * Supported formats:
- * - `llms` / `llms-txt` (default): returns the sitewide LLMs export as plain text (`text/plain; charset=utf-8`).
- * - `readme`: returns raw JSON data from the readme RPC (`application/json; charset=utf-8`) intended for CLI formatting.
- * - `json`: returns complete directory content as JSON array (`application/json; charset=utf-8`) with hyper-optimized caching (7-day TTL, 14-day stale).
- *
- * Successful responses include security, CORS, and content cache headers. An invalid `format` yields a 400 JSON error; failures generating the LLMs export yield a 500 JSON error.
- *
- * @param request - The incoming NextRequest; may include a `format` query parameter (`llms`, `llms-txt`, `readme`, or `json`).
- * @returns A NextResponse containing the exported content (plain text or JSON) or a JSON error payload.
- *
- * @see ContentService
- * @see createSupabaseAnonClient
+ * GET /api/content/sitewide - Get sitewide content in various formats
+ * 
+ * Serves sitewide content in multiple export formats:
+ * - `llms` / `llms-txt` (default): LLMs export as plain text
+ * - `readme`: Raw JSON data for CLI formatting
+ * - `json`: Complete directory content as JSON array
  */
-export async function GET(request: NextRequest) {
-  const reqLogger = logger.child({
-    method: 'GET',
-    operation: 'ContentSitewideAPI',
-    route: '/api/content/sitewide',
-  });
+export const GET = createApiRoute({
+  route: '/api/content/sitewide',
+  operation: 'ContentSitewideAPI',
+  method: 'GET',
+  cors: 'anon',
+  querySchema: z.object({
+    format: sitewideFormatSchema,
+  }),
+  openapi: {
+    summary: 'Get sitewide content in various formats',
+    description: 'Serves sitewide content in multiple export formats: LLMs text format (default), README JSON data, or complete JSON array. Used for exporting the entire directory content.',
+    tags: ['content', 'export', 'sitewide'],
+    operationId: 'getSitewideContent',
+    responses: {
+      200: {
+        description: 'Sitewide content retrieved successfully in requested format',
+      },
+      400: {
+        description: 'Invalid format parameter',
+      },
+      500: {
+        description: 'Failed to generate sitewide export',
+      },
+    },
+  },
+  handler: async ({ logger, query }) => {
+    const { format } = query as { format: 'llms' | 'llms-txt' | 'readme' | 'json' };
 
-  try {
-    const url = new URL(request.url);
-    const format = (url.searchParams.get('format') ?? 'llms').toLowerCase();
-
-    reqLogger.info({ format }, 'Sitewide content request received');
+    logger.info({ format }, 'Sitewide content request received');
 
     const supabase = createSupabaseAnonClient();
     const service = new ContentService(supabase);
@@ -71,7 +98,7 @@ export async function GET(request: NextRequest) {
       let data: Awaited<ReturnType<typeof getCachedSitewideContent>> = [];
       try {
         data = await getCachedSitewideContent();
-        reqLogger.info(
+        logger.info(
           {
             itemCount: data.length,
           },
@@ -79,21 +106,14 @@ export async function GET(request: NextRequest) {
         );
       } catch (error) {
         const normalized = normalizeError(error, 'Operation failed');
-        reqLogger.error(
+        logger.error(
           {
             err: normalized,
             format,
           },
           'Sitewide JSON query error'
         );
-        return createErrorResponse(normalized, {
-          logContext: {
-            format,
-          },
-          method: 'GET',
-          operation: 'ContentSitewideAPI',
-          route: '/api/content/sitewide',
-        });
+        throw normalized; // Factory will handle error response
       }
 
       // Next.js automatically compresses JSON responses (gzip/brotli)
@@ -106,7 +126,7 @@ export async function GET(request: NextRequest) {
           Vary: 'Accept-Encoding',
           'X-Generated-By': 'supabase.rpc.get_sitewide_content_list',
           ...buildSecurityHeaders(),
-          ...CORS,
+          ...getOnlyCorsHeaders,
           // Hyper-optimized caching: 7 days TTL, 14 days stale (matches content_export preset)
           // Sitewide content lists rarely change, so aggressive caching reduces DB pressure by 95%+
           // This reduces bandwidth usage by serving cached responses from CDN
@@ -120,7 +140,7 @@ export async function GET(request: NextRequest) {
     if (format === 'readme') {
       const data = await service.getSitewideReadme();
 
-      reqLogger.info(
+      logger.info(
         {
           categoriesCount: data.categories?.length ?? 0,
           totalCount: data.total_count ?? 0,
@@ -133,7 +153,7 @@ export async function GET(request: NextRequest) {
           'Content-Type': 'application/json; charset=utf-8',
           'X-Generated-By': 'supabase.rpc.generate_readme_data',
           ...buildSecurityHeaders(),
-          ...CORS,
+          ...getOnlyCorsHeaders,
           ...buildCacheHeaders('content_export'),
         },
         status: 200,
@@ -141,36 +161,16 @@ export async function GET(request: NextRequest) {
     }
 
     // Handle LLMs format (default)
-    if (format !== 'llms' && format !== 'llms-txt') {
-      return badRequestResponse(
-        `Invalid sitewide format '${format}'. Valid formats: llms, llms-txt, readme, json`,
-        CORS
-      );
-    }
-
     const data = await service.getSitewideLlmsTxt();
 
     if (!data) {
-      reqLogger.error({}, 'Sitewide LLMs export returned null');
-      return NextResponse.json(
-        {
-          error: 'Sitewide LLMs export failed',
-          message: 'RPC returned null or invalid',
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json; charset=utf-8',
-            ...buildSecurityHeaders(),
-            ...CORS,
-          },
-          status: 500,
-        }
-      );
+      logger.error({}, 'Sitewide LLMs export returned null');
+      throw new Error('Sitewide LLMs export failed: RPC returned null or invalid');
     }
 
     // Database RPC returns properly formatted text (no client-side processing needed)
     // This eliminates CPU-intensive string replacement (5-10% CPU savings)
-    reqLogger.info(
+    logger.info(
       {
         bytes: typeof data === 'string' ? data.length : 0,
       },
@@ -182,34 +182,15 @@ export async function GET(request: NextRequest) {
         'Content-Type': 'text/plain; charset=utf-8',
         'X-Generated-By': 'supabase.rpc.generate_sitewide_llms_txt',
         ...buildSecurityHeaders(),
-        ...CORS,
+        ...getOnlyCorsHeaders,
         ...buildCacheHeaders('content_export'),
       },
       status: 200,
     });
-  } catch (error) {
-    const normalized = normalizeError(error, 'Sitewide content API error');
-    reqLogger.error({ err: normalized }, 'Sitewide content API error');
-    return createErrorResponse(normalized, {
-      method: 'GET',
-      operation: 'ContentSitewideAPI',
-      route: '/api/content/sitewide',
-    });
-  }
-}
+  },
+});
 
 /**
- * Responds to HTTP OPTIONS (CORS preflight) requests with no content and CORS headers.
- *
- * @returns The NextResponse for the OPTIONS request: HTTP 204 No Content with only the configured CORS headers.
- * @see getOnlyCorsHeaders
- * @see NextResponse
+ * OPTIONS handler for CORS preflight requests
  */
-export function OPTIONS() {
-  return new NextResponse(null, {
-    headers: {
-      ...CORS,
-    },
-    status: 204,
-  });
-}
+export const OPTIONS = createApiOptionsHandler('anon');

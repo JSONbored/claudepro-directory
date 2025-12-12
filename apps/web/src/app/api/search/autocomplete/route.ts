@@ -1,20 +1,37 @@
+/**
+ * Search Autocomplete API Route
+ * 
+ * Returns search autocomplete suggestions based on a query string.
+ * Used by the search interface to provide real-time search suggestions as users type.
+ * 
+ * @example
+ * ```ts
+ * // Request
+ * GET /api/search/autocomplete?q=react&limit=10
+ * 
+ * // Response (200)
+ * {
+ *   "query": "react",
+ *   "suggestions": [
+ *     { "text": "react hooks", "search_count": 150, "is_popular": true },
+ *     { "text": "react native", "search_count": 120, "is_popular": false }
+ *   ]
+ * }
+ * ```
+ */
+
 import 'server-only';
 import { SearchService } from '@heyclaude/data-layer';
 import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
-import { validateLimit, validateQueryString } from '@heyclaude/shared-runtime';
-import { createErrorResponse, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { createApiRoute, createApiOptionsHandler, searchAutocompleteQuerySchema } from '@heyclaude/web-runtime/server';
+import { createErrorResponse, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  badRequestResponse,
   buildCacheHeaders,
   createSupabaseAnonClient,
   getWithAuthCorsHeaders,
-  handleOptionsRequest,
   jsonResponse,
 } from '@heyclaude/web-runtime/server';
 import { cacheLife } from 'next/cache';
-import { type NextRequest } from 'next/server';
-
-const CORS = getWithAuthCorsHeaders;
 
 /**
  * Cached helper function to fetch search autocomplete suggestions.
@@ -45,62 +62,59 @@ async function getCachedSearchSuggestionsFormatted(query: string, limit: number)
 }
 
 /**
- * Handle GET requests for search autocomplete and return matching suggestions based on the user's query.
- *
- * Validates query string and `limit` parameters, queries the database via a Supabase RPC for historical
- * search suggestions, and responds with a JSON payload containing `suggestions` and the original `query`.
- * Validation failures produce a 400 response; RPC or unexpected failures produce a structured error response.
- *
- * @param request - The incoming NextRequest for the autocomplete endpoint
- * @returns A Response containing JSON `{ suggestions, query }` with HTTP 200 on success, or an error response on failure
- *
- * @see validateQueryString
- * @see validateLimit
- * @see createSupabaseAnonClient
- * @see createErrorResponse
+ * GET /api/search/autocomplete - Get search autocomplete suggestions
+ * 
+ * Returns search autocomplete suggestions based on a query string.
+ * Validates query (minimum 2 characters) and limit (1-20, default 10) parameters.
  */
-export async function GET(request: NextRequest) {
-  const reqLogger = logger.child({
-    method: 'GET',
-    operation: 'SearchAutocompleteAPI',
-    route: '/api/search/autocomplete',
-  });
-  const url = request.nextUrl;
+export const GET = createApiRoute({
+  route: '/api/search/autocomplete',
+  operation: 'SearchAutocompleteAPI',
+  method: 'GET',
+  cors: 'auth',
+  querySchema: searchAutocompleteQuerySchema,
+  openapi: {
+    summary: 'Get search autocomplete suggestions',
+    description: 'Returns search autocomplete suggestions based on a query string. Used by the search interface to provide real-time search suggestions as users type.',
+    tags: ['search', 'autocomplete'],
+    operationId: 'getSearchAutocomplete',
+    responses: {
+      200: {
+        description: 'Autocomplete suggestions retrieved successfully',
+      },
+      400: {
+        description: 'Invalid query parameters (query must be at least 2 characters)',
+      },
+    },
+  },
+  handler: async ({ logger, query }) => {
+    // TypeScript knows query is searchAutocompleteQuerySchema type
+    const { q, limit } = query as { q: string; limit: number };
 
-  const queryStringValidation = validateQueryString(url);
-  if (!queryStringValidation.valid) {
-    return badRequestResponse(queryStringValidation.error ?? 'Invalid query string', CORS);
-  }
+    // Additional validation: query must be at least 2 characters after trimming
+    const trimmedQuery = q.trim();
+    if (trimmedQuery.length < 2) {
+      // This should be caught by schema validation, but adding as safety check
+      throw new Error('Query must be at least 2 characters');
+    }
 
-  const query = url.searchParams.get('q')?.trim() ?? '';
-  if (query.length < 2) {
-    return badRequestResponse('Query must be at least 2 characters', CORS);
-  }
+    logger.info({ query: trimmedQuery, limit }, 'Autocomplete request received');
 
-  const limitValidation = validateLimit(url.searchParams.get('limit'), 1, 20, 10);
-  if (!limitValidation.valid || limitValidation.limit === undefined) {
-    return badRequestResponse(limitValidation.error ?? 'Invalid limit parameter', CORS);
-  }
-  const limit = limitValidation.limit;
-
-  reqLogger.info({ query }, 'Autocomplete request received');
-
-  try {
     // Database RPC returns frontend-ready data (no client-side mapping needed)
     // This eliminates CPU-intensive array mapping and filtering (5-10% CPU savings)
     let data: Awaited<ReturnType<typeof getCachedSearchSuggestionsFormatted>> | null = null;
     try {
-      data = await getCachedSearchSuggestionsFormatted(query, limit);
+      data = await getCachedSearchSuggestionsFormatted(trimmedQuery, limit);
     } catch (error) {
       const normalized = normalizeError(error, 'Autocomplete RPC failed');
-      reqLogger.error({ err: normalized }, 'Autocomplete RPC failed');
+      logger.error({ err: normalized }, 'Autocomplete RPC failed');
       return createErrorResponse(normalized, {
-        logContext: {
-          query,
-        },
-        method: 'GET',
-        operation: 'get_search_suggestions_formatted',
         route: '/api/search/autocomplete',
+        operation: 'SearchAutocompleteAPI',
+        method: 'GET',
+        logContext: {
+          query: trimmedQuery,
+        },
       });
     }
 
@@ -109,29 +123,19 @@ export async function GET(request: NextRequest) {
 
     return jsonResponse(
       {
-        query,
+        query: trimmedQuery,
         suggestions,
       },
       200,
       {
-        ...CORS,
+        ...getWithAuthCorsHeaders,
         ...buildCacheHeaders('search_autocomplete'),
       }
     );
-  } catch (error) {
-    const normalized = normalizeError(error, 'Autocomplete handler failed');
-    reqLogger.error({ err: normalized }, 'Autocomplete handler failed');
-    return createErrorResponse(normalized, {
-      logContext: {
-        query,
-      },
-      method: 'GET',
-      operation: 'GET',
-      route: '/api/search/autocomplete',
-    });
-  }
-}
+  },
+});
 
-export function OPTIONS() {
-  return handleOptionsRequest(CORS);
-}
+/**
+ * OPTIONS handler for CORS preflight requests
+ */
+export const OPTIONS = createApiOptionsHandler('auth');

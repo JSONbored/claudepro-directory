@@ -12,7 +12,7 @@ import {
   generatePageMetadata,
   getLayoutData,
 } from '@heyclaude/web-runtime/server';
-import { ErrorBoundary } from '@heyclaude/web-runtime/ui';
+import { ErrorBoundary, LazyMotionProvider } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { cacheLife, cacheTag } from 'next/cache';
 import localFont from 'next/font/local';
@@ -313,17 +313,19 @@ export default function RootLayout({
             enableColorScheme={false}
             storageKey="claudepro-theme"
           >
-            <PostCopyEmailProvider>
-              <AuthModalProvider>
-                <ErrorBoundary>
-                  <Suspense fallback={<LayoutFallback>{children}</LayoutFallback>}>
-                    <LayoutDataWrapper>{children}</LayoutDataWrapper>
-                  </Suspense>
-                </ErrorBoundary>
-                <Toaster />
-                {/* Newsletter capture is conditionally rendered in LayoutContent for non-auth pages */}
-              </AuthModalProvider>
-            </PostCopyEmailProvider>
+            <LazyMotionProvider>
+              <PostCopyEmailProvider>
+                <AuthModalProvider>
+                  <ErrorBoundary>
+                    <Suspense fallback={<LayoutFallback>{children}</LayoutFallback>}>
+                      <LayoutDataWrapper>{children}</LayoutDataWrapper>
+                    </Suspense>
+                  </ErrorBoundary>
+                  <Toaster />
+                  {/* Newsletter capture is conditionally rendered in LayoutContent for non-auth pages */}
+                </AuthModalProvider>
+              </PostCopyEmailProvider>
+            </LazyMotionProvider>
           </ThemeProvider>
         </ComponentConfigContextProvider>
         {/* Pulse Cannon - Unified pulse loading system (loads after page idle) */}

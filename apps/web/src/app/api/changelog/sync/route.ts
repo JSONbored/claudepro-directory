@@ -33,6 +33,28 @@
  * 5. Enqueues to changelog_notify queue (for Discord notification)
  * 6. Returns success response
  *
+ * @example
+ * ```ts
+ * // Request
+ * POST /api/changelog/sync
+ * Authorization: Bearer <token>
+ * Content-Type: application/json
+ * 
+ * {
+ *   "version": "1.2.0",
+ *   "date": "2025-12-07",
+ *   "content": "..."
+ * }
+ * 
+ * // Response (200)
+ * {
+ *   "success": true,
+ *   "id": "...",
+ *   "slug": "1-2-0-2025-12-07",
+ *   "message": "Changelog entry synced successfully"
+ * }
+ * ```
+ *
  * @see {@link packages/web-runtime/src/inngest/functions/changelog/notify.ts | Notification Handler}
  * @see {@link .github/workflows/release.yml | GitHub Actions Workflow}
  */
@@ -42,45 +64,44 @@ import { timingSafeEqual } from 'node:crypto';
 
 import { ChangelogService } from '@heyclaude/data-layer';
 import { type Database } from '@heyclaude/database-types';
-import { buildSecurityHeaders, requireEnvVar } from '@heyclaude/shared-runtime';
-import { createErrorResponse, logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { requireEnvVar } from '@heyclaude/shared-runtime';
+import { createApiRoute, createApiOptionsHandler, unauthorizedResponse, postCorsHeaders } from '@heyclaude/web-runtime/server';
+import { normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  badRequestResponse,
   createSupabaseAdminClient,
   pgmqSend,
-  postCorsHeaders,
 } from '@heyclaude/web-runtime/server';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
-const CORS = postCorsHeaders;
-
-// Zod schema for request body validation
+/**
+ * Zod schema for changelog sync request body validation
+ */
 const changelogSyncRequestSchema = z.object({
-  content: z.string().min(1),
-  date: z.string().min(1),
+  content: z.string().min(1, 'Content is required'),
+  date: z.string().min(1, 'Date is required'),
   rawContent: z.string().optional(),
   sections: z.record(z.string(), z.array(z.string())).optional(),
   tldr: z.string().optional(),
-  version: z.string().min(1),
+  version: z.string().min(1, 'Version is required'),
   whatChanged: z.string().optional(),
 });
 
-/*****
+/**
  * Validates the authentication token using timing-safe comparison to prevent timing attacks.
  *
- * @param {null | string} authHeader - The Authorization header value from the request
- * @param {string} expectedToken - The expected token value from environment
- * @param {ReturnType<typeof logger.child>} reqLogger - Request-scoped logger for error logging
+ * @param authHeader - The Authorization header value from the request
+ * @param expectedToken - The expected token value from environment
+ * @param logger - Request-scoped logger for error logging
  * @returns True if token is valid, false otherwise
  */
 function validateToken(
   authHeader: null | string,
   expectedToken: string,
-  reqLogger: ReturnType<typeof logger.child>
+  logger: ReturnType<typeof import('@heyclaude/web-runtime/logging/server').logger.child>
 ): boolean {
   if (!expectedToken) {
-    reqLogger.warn({ route: '/api/changelog/sync' }, 'CHANGELOG_SYNC_TOKEN not configured');
+    logger.warn({ route: '/api/changelog/sync' }, 'CHANGELOG_SYNC_TOKEN not configured');
     return false;
   }
 
@@ -107,17 +128,35 @@ function validateToken(
 // Database RPC sync_changelog_entry handles all transformations internally
 
 /**
- * POST handler for changelog sync.
- * @param request
+ * POST /api/changelog/sync - Sync changelog entry
+ * 
+ * Syncs changelog entry from CHANGELOG.md to database and enqueues notification.
+ * Requires Bearer token authentication (CHANGELOG_SYNC_TOKEN).
  */
-export async function POST(request: NextRequest) {
-  const reqLogger = logger.child({
-    method: 'POST',
-    operation: 'ChangelogSyncAPI',
-    route: '/api/changelog/sync',
-  });
-
-  try {
+export const POST = createApiRoute({
+  route: '/api/changelog/sync',
+  operation: 'ChangelogSyncAPI',
+  method: 'POST',
+  cors: 'auth',
+  bodySchema: changelogSyncRequestSchema,
+  openapi: {
+    summary: 'Sync changelog entry',
+    description: 'Syncs changelog entry from CHANGELOG.md to database and enqueues notification. Called by GitHub Actions after generating changelog and creating tag. Requires Bearer token authentication.',
+    tags: ['changelog', 'sync', 'webhook'],
+    operationId: 'syncChangelog',
+    responses: {
+      200: {
+        description: 'Changelog entry synced successfully',
+      },
+      401: {
+        description: 'Unauthorized - invalid or missing Bearer token',
+      },
+      400: {
+        description: 'Invalid request body',
+      },
+    },
+  },
+  handler: async ({ logger, request, body }) => {
     // Get environment variable with validation
     let changelogSyncToken: string;
     try {
@@ -126,71 +165,38 @@ export async function POST(request: NextRequest) {
         'CHANGELOG_SYNC_TOKEN is required'
       );
     } catch (error) {
-      reqLogger.error({ err: normalizeError(error) }, 'CHANGELOG_SYNC_TOKEN not configured');
-      return NextResponse.json(
-        { error: 'Server configuration error' },
+      // Log as warning, not error - missing token is an expected auth failure (401), not a server error
+      // Don't include error object to avoid hasError/isErrorLevel flags
+      logger.warn(
         {
-          headers: {
-            'Content-Type': 'application/json',
-            ...buildSecurityHeaders(),
-            ...CORS,
-          },
-          status: 500,
-        }
+          securityEvent: true,
+          reason: 'CHANGELOG_SYNC_TOKEN environment variable not set',
+        },
+        'CHANGELOG_SYNC_TOKEN not configured - returning 401'
+      );
+      // Return 401 instead of 500 - missing token is an authentication issue
+      return unauthorizedResponse(
+        'Server authentication not configured',
+        undefined, // No login/signup for automation endpoints
+        postCorsHeaders
       );
     }
 
     // Validate authentication
     const authHeader = request.headers.get('authorization');
-    if (!validateToken(authHeader, changelogSyncToken, reqLogger)) {
-      reqLogger.warn({}, 'Unauthorized changelog sync attempt');
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            ...buildSecurityHeaders(),
-            ...CORS,
-          },
-          status: 401,
-        }
+    if (!validateToken(authHeader, changelogSyncToken, logger)) {
+      logger.warn({}, 'Unauthorized changelog sync attempt');
+      return unauthorizedResponse(
+        'Invalid or missing Bearer token',
+        undefined, // No login/signup for automation endpoints
+        postCorsHeaders
       );
     }
 
-    // Parse and validate request body with Zod schema
-    let body: unknown;
-    try {
-      body = await request.json();
-    } catch (error) {
-      const normalized = normalizeError(error, 'Failed to parse request body as JSON');
-      reqLogger.error(
-        {
-          err: normalized,
-          method: 'POST',
-          operation: 'POST',
-          route: '/api/changelog/sync',
-        },
-        'Invalid JSON in request body'
-      );
-      return badRequestResponse('Invalid JSON in request body', CORS);
-    }
+    // Zod schema ensures proper types
+    const { content, date, rawContent, sections, tldr, version, whatChanged } = body;
 
-    const parseResult = changelogSyncRequestSchema.safeParse(body);
-    if (!parseResult.success) {
-      const errorMessages = parseResult.error.issues.map((e) => e.message).join(', ');
-      reqLogger.warn(
-        {
-          errorCount: parseResult.error.issues.length,
-          errorMessages: parseResult.error.issues.map((e) => e.message),
-        },
-        'Invalid request body'
-      );
-      return badRequestResponse(`Invalid request body: ${errorMessages}`, CORS);
-    }
-
-    const { content, date, rawContent, sections, tldr, version, whatChanged } = parseResult.data;
-
-    reqLogger.info(
+    logger.info(
       {
         action: 'changelog_sync_request',
         audit: true,
@@ -261,7 +267,7 @@ export async function POST(request: NextRequest) {
     const slug = changelogData.slug;
 
     if (isNewEntry) {
-      reqLogger.info(
+      logger.info(
         {
           action: 'changelog_insert',
           audit: true,
@@ -271,7 +277,7 @@ export async function POST(request: NextRequest) {
         'Changelog entry inserted'
       );
     } else {
-      reqLogger.info(
+      logger.info(
         {
           action: 'changelog_sync_check',
           audit: true,
@@ -285,8 +291,7 @@ export async function POST(request: NextRequest) {
         {
           headers: {
             'Content-Type': 'application/json',
-            ...buildSecurityHeaders(),
-            ...CORS,
+            ...postCorsHeaders,
           },
           status: 200,
         }
@@ -306,7 +311,7 @@ export async function POST(request: NextRequest) {
 
     try {
       await pgmqSend('changelog_notify', notificationJob);
-      reqLogger.info(
+      logger.info(
         {
           action: 'notification_enqueued',
           audit: true,
@@ -316,7 +321,7 @@ export async function POST(request: NextRequest) {
       );
     } catch (error) {
       // Notification is best-effort - log error but don't fail the request
-      reqLogger.error(
+      logger.error(
         {
           action: 'notification_enqueue_failed',
           audit: true,
@@ -338,32 +343,15 @@ export async function POST(request: NextRequest) {
       {
         headers: {
           'Content-Type': 'application/json',
-          ...buildSecurityHeaders(),
-          ...CORS,
+          ...postCorsHeaders,
         },
         status: 200,
       }
     );
-  } catch (error) {
-    const normalized = normalizeError(error, 'Changelog sync API error');
-    reqLogger.error({ err: normalized }, 'Changelog sync API error');
-    return createErrorResponse(normalized, {
-      method: 'POST',
-      operation: 'ChangelogSyncAPI',
-      route: '/api/changelog/sync',
-    });
-  }
-}
+  },
+});
 
 /**
- * Handle CORS preflight requests.
+ * OPTIONS handler for CORS preflight requests
  */
-export function OPTIONS() {
-  return new NextResponse(null, {
-    headers: {
-      ...buildSecurityHeaders(),
-      ...CORS,
-    },
-    status: 204,
-  });
-}
+export const OPTIONS = createApiOptionsHandler('auth');
