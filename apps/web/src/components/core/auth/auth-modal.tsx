@@ -20,7 +20,7 @@
  */
 
 import { VALID_PROVIDERS } from '@heyclaude/web-runtime';
-import { ensureString } from '@heyclaude/web-runtime/core';
+import { ensureString } from '@heyclaude/web-runtime/data/utils';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import {
   Dialog,
@@ -30,7 +30,9 @@ import {
   DialogTitle,
 } from '@heyclaude/web-runtime/ui';
 import { SPRING } from '@heyclaude/web-runtime/design-system';
-import { AnimatePresence, motion } from 'motion/react';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
+import { motion } from 'motion/react';
+import { AnimatePresence } from '@heyclaude/web-runtime/ui';
 import { useEffect, useMemo, useState } from 'react';
 
 import { NewsletterOptInTile } from '@/src/components/core/auth/newsletter-opt-in-tile';
@@ -145,14 +147,16 @@ export function AuthModal({
     return { tileHeadline, tileDescription, tileBenefits, tileSafety, badgePrefix };
   }, [newsletterConfig]);
 
-  // Check for reduced motion preference
-  const prefersReducedMotion =
-    typeof window !== 'undefined' &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const shouldReduceMotion = useReducedMotion();
 
   // Animation config - disable animations if user prefers reduced motion
-  const animationConfig = prefersReducedMotion
-    ? { duration: 0 }
+  const animationConfig = shouldReduceMotion
+    ? {
+        initial: { opacity: 0 },
+        animate: { opacity: 1 },
+        exit: { opacity: 0 },
+        transition: modalSpring,
+      }
     : {
         initial: {
           opacity: 0,
@@ -192,7 +196,7 @@ export function AuthModal({
             <motion.div
               {...animationConfig}
               style={{
-                perspective: prefersReducedMotion ? 'none' : 800,
+                perspective: shouldReduceMotion ? 'none' : 800,
                 transformStyle: 'preserve-3d',
               }}
               className="relative"

@@ -51,7 +51,7 @@ export async function generatePageMetadata(
     return {
       title: APP_CONFIG.name,
       description: APP_CONFIG.description,
-      metadataBase: new URL(APP_CONFIG.url),
+      metadataBase: APP_CONFIG.url, // Convert URL to string to avoid serialization issues
       alternates: { canonical: canonicalUrl },
       openGraph: {
         type: 'website',

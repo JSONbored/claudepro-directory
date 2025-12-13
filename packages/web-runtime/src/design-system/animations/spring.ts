@@ -161,6 +161,17 @@ export const SPRING = {
     stiffness: 500,
     type: 'spring' as const,
   },
+
+  /**
+   * Hover spring - Fast, responsive for hover interactions
+   * Best for: Button hovers, search bar focus, interactive elements
+   * Characteristics: High stiffness, low damping = quick, responsive feel
+   */
+  hover: {
+    damping: 15,
+    stiffness: 450,
+    type: 'spring' as const,
+  },
 } as const;
 
 /**

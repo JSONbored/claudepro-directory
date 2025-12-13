@@ -8,7 +8,9 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { logger, normalizeError } from '../entries/core.ts';
+// Import directly from source files to avoid indirect imports through entries/core.ts
+import { logger } from '../logger.ts';
+import { normalizeError } from '../errors.ts';
 import { CONFETTI_CONFIG } from '../config/unified-config.ts';
 import confetti from 'canvas-confetti';
 import { useCallback } from 'react';

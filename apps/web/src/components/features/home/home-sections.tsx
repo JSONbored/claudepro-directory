@@ -4,57 +4,68 @@
 
 import { type Database } from '@heyclaude/database-types';
 import { getHomepageConfigBundle } from '@heyclaude/web-runtime/config/static-configs';
-import {
-  logUnhandledPromise,
-  trackHomepageSectionError,
-  trackMissingData,
-} from '@heyclaude/web-runtime/core';
-import { getCategoryConfigs } from '@heyclaude/web-runtime/data';
-import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
+import { logUnhandledPromise, trackHomepageSectionError, trackMissingData } from '@heyclaude/web-runtime/core';
+import { usePulse } from '@heyclaude/web-runtime/hooks';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import {
+  SearchProvider,
+  SearchResults,
+  useSearchAPI,
+  useSearchContext,
+} from '@heyclaude/web-runtime/search';
+import { logClientInfo, logClientError } from '@heyclaude/web-runtime/logging/client';
+import type { FilterState } from '@heyclaude/web-runtime/types/component.types';
+import {
   type DisplayableContent,
-  type FilterState,
   type HomePageClientProps,
 } from '@heyclaude/web-runtime/types/component.types';
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useAuthModal } from '@/src/hooks/use-auth-modal';
+import { usePathname } from 'next/navigation';
+import { Suspense, memo, useCallback, useEffect, useMemo, useRef, useState, useDeferredValue } from 'react';
 
 import {
   LazyFeaturedSections,
-  LazySearchSection,
   LazyTabsSection,
 } from '@/src/components/features/home/lazy-home-sections';
 import { useHeroSearchConnection } from '@/src/components/features/home/hero-search-connection';
-import { searchCache } from '@/src/utils/search-cache';
+import { HomepageSearchBar } from '@/src/components/features/home/homepage-search-wrapper';
+import { 
+  NumberTicker, 
+  Tooltip, 
+  TooltipContent, 
+  TooltipProvider, 
+  TooltipTrigger,
+  UnifiedBadge,
+} from '@heyclaude/web-runtime/ui';
+import { MICROINTERACTIONS, SPRING, VIEWPORT, STAGGER } from '@heyclaude/web-runtime/design-system';
+import { getCategoryConfigs, getCategoryStatsConfig } from '@heyclaude/web-runtime/data';
+import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { motion } from 'motion/react';
+import Link from 'next/link';
 
-// UnifiedSearch is now wrapped in MagneticSearchWrapper for enhanced interactions
-
-function HomePageClientComponent({
+/**
+ * Inner component that uses search context
+ */
+function HomePageClientContent({
   initialData,
   featuredByCategory,
   stats,
   featuredJobs = [],
-  searchFilters,
   weekStart,
   serverCategoryIds,
 }: HomePageClientProps) {
-  const { setSearchFocused, setSearchProps } = useHeroSearchConnection();
+  const { setSearchFocused } = useHeroSearchConnection();
+  const { query } = useSearchContext();
+  const { openAuthModal } = useAuthModal();
+  const pathname = usePathname();
   const [allConfigs, setAllConfigs] = useState<DisplayableContent[]>([]);
   const [isLoadingAllConfigs, setIsLoadingAllConfigs] = useState(false);
   const [hasMoreAllConfigs, setHasMoreAllConfigs] = useState(true);
   const [activeTab, setActiveTab] = useState('all');
-  const [searchResults, setSearchResults] = useState<DisplayableContent[]>([]);
-  const [isSearching, setIsSearching] = useState(false); // Loading state only
-  const [filters, setFilters] = useState<FilterState>({});
-  const [currentSearchQuery, setCurrentSearchQuery] = useState('');
-  const abortControllerRef = useRef<AbortController | null>(null);
   const hasInitialFetchRef = useRef(false);
 
-  const runLoggedAsync = useLoggedAsync({
-    scope: 'HomePageClient',
-    defaultMessage: 'Homepage operation failed',
-    defaultRethrow: false,
-  });
+  // Category stats config for counters
+  const categoryStatsConfig = useMemo(() => getCategoryStatsConfig(), []);
 
   // Initialize featuredCategories from server data immediately
   // This ensures content renders even if static config is unavailable
@@ -137,183 +148,64 @@ function HomePageClientComponent({
 
   const fetchAllConfigs = useCallback(
     async (offset: number, limit = 30) => {
-      logClientWarn(
-        '[HomePageClient] fetchAllConfigs called',
-        null,
-        'HomePageClient.fetchAllConfigs.start',
-        {
-          component: 'HomePageClient',
-          action: 'fetch-all-configs-start',
-          category: 'home',
-          offset,
-          limit,
-          isLoadingAllConfigs,
-          hasMoreAllConfigs,
-          willSkip: isLoadingAllConfigs || !hasMoreAllConfigs,
-        }
-      );
-
       if (isLoadingAllConfigs || !hasMoreAllConfigs) {
-        logClientWarn(
-          '[HomePageClient] fetchAllConfigs skipped (already loading or no more)',
-          null,
-          'HomePageClient.fetchAllConfigs.skipped',
-          {
-            component: 'HomePageClient',
-            action: 'fetch-all-configs-skipped',
-            category: 'home',
-            isLoadingAllConfigs,
-            hasMoreAllConfigs,
-          }
-        );
         return;
       }
 
       setIsLoadingAllConfigs(true);
 
       try {
-        await runLoggedAsync(
-          async () => {
-            logClientWarn(
-              '[HomePageClient] Importing fetchPaginatedContent',
-              null,
-              'HomePageClient.fetchAllConfigs.import',
-              {
-                component: 'HomePageClient',
-                action: 'fetch-all-configs-import',
-                category: 'home',
-              }
-            );
+        const { fetchPaginatedContent } = await import('@heyclaude/web-runtime/actions');
 
-            const { fetchPaginatedContent } = await import('@heyclaude/web-runtime/actions');
+        const result = await fetchPaginatedContent({
+          offset,
+          limit,
+          category: null,
+        });
 
-            logClientWarn(
-              '[HomePageClient] Calling fetchPaginatedContent action',
-              null,
-              'HomePageClient.fetchAllConfigs.call',
-              {
-                component: 'HomePageClient',
-                action: 'fetch-all-configs-call',
-                category: 'home',
-                offset,
-                limit,
-              }
-            );
-
-            const result = await fetchPaginatedContent({
+        if (result?.serverError) {
+          // Error already logged by safe-action middleware
+          trackHomepageSectionError(
+            'all-content',
+            'fetch-paginated-content',
+            result.serverError,
+            {
               offset,
               limit,
-              category: null,
-            });
-
-            logClientWarn(
-              '[HomePageClient] fetchPaginatedContent result received',
-              null,
-              'HomePageClient.fetchAllConfigs.result',
-              {
-                component: 'HomePageClient',
-                action: 'fetch-all-configs-result',
-                category: 'home',
-                hasResult: Boolean(result),
-                hasData: Boolean(result?.data),
-                hasServerError: Boolean(result?.serverError),
-                dataIsArray: Array.isArray(result?.data),
-                dataLength: Array.isArray(result?.data) ? result.data.length : 0,
-                serverError: result?.serverError,
-              }
-            );
-
-            if (result?.serverError) {
-              // Error already logged by safe-action middleware
-              trackHomepageSectionError(
-                'all-content',
-                'fetch-paginated-content',
-                result.serverError,
-                {
-                  offset,
-                  limit,
-                  source: 'fetchAllConfigs',
-                }
-              );
-              throw new Error(result.serverError);
+              source: 'fetchAllConfigs',
             }
+          );
+          throw new Error(result.serverError);
+        }
 
-            // Safe-action returns { data: T, serverError?: ... } structure
-            // fetchPaginatedContent returns DisplayableContent[] wrapped in { data: DisplayableContent[] }
-            // Defensive: Ensure data is an array before using it
-            const newItems: DisplayableContent[] = Array.isArray(result?.data) ? result.data : [];
+        // Safe-action returns { data: T, serverError?: ... } structure
+        // fetchPaginatedContent returns DisplayableContent[] wrapped in { data: DisplayableContent[] }
+        // Defensive: Ensure data is an array before using it
+        const newItems: DisplayableContent[] = Array.isArray(result?.data) ? result.data : [];
 
-            logClientWarn(
-              '[HomePageClient] Processing fetchPaginatedContent result',
-              null,
-              'HomePageClient.fetchAllConfigs.process',
-              {
-                component: 'HomePageClient',
-                action: 'fetch-all-configs-process',
-                category: 'home',
-                newItemsLength: newItems.length,
-                limit,
-                willSetHasMoreFalse: newItems.length < limit,
-              }
-            );
+        if (newItems.length < limit) {
+          setHasMoreAllConfigs(false);
+        }
 
-            if (newItems.length < limit) {
-              setHasMoreAllConfigs(false);
+        setAllConfigs((prev) => {
+          // Deduplicate items by slug to prevent duplicate keys
+          // Create a Set of existing slugs for O(1) lookup
+          const existingSlugs = new Set(prev.map((item) => item.slug).filter(Boolean));
+          
+          // Filter out items that already exist
+          const uniqueNewItems = newItems.filter((item) => {
+            if (!item.slug) return true; // Keep items without slugs (shouldn't happen, but defensive)
+            if (existingSlugs.has(item.slug)) {
+              return false;
             }
-
-            setAllConfigs((prev) => {
-              // Deduplicate items by slug to prevent duplicate keys
-              // Create a Set of existing slugs for O(1) lookup
-              const existingSlugs = new Set(prev.map((item) => item.slug).filter(Boolean));
-              
-              // Filter out items that already exist
-              const uniqueNewItems = newItems.filter((item) => {
-                if (!item.slug) return true; // Keep items without slugs (shouldn't happen, but defensive)
-                if (existingSlugs.has(item.slug)) {
-                  logClientWarn(
-                    '[HomePageClient] Duplicate item filtered out',
-                    null,
-                    'HomePageClient.fetchAllConfigs.deduplicate',
-                    {
-                      component: 'HomePageClient',
-                      action: 'fetch-all-configs-deduplicate',
-                      category: 'home',
-                      slug: item.slug,
-                    }
-                  );
-                  return false;
-                }
-                existingSlugs.add(item.slug);
-                return true;
-              });
-              
-              const updated = [...prev, ...uniqueNewItems];
-              logClientWarn(
-                '[HomePageClient] Updated allConfigs state',
-                null,
-                'HomePageClient.fetchAllConfigs.stateUpdate',
-                {
-                  component: 'HomePageClient',
-                  action: 'fetch-all-configs-state-update',
-                  category: 'home',
-                  previousLength: prev.length,
-                  newItemsLength: newItems.length,
-                  uniqueNewItemsLength: uniqueNewItems.length,
-                  filteredOutCount: newItems.length - uniqueNewItems.length,
-                  updatedLength: updated.length,
-                }
-              );
-              return updated;
-            });
-          },
-          {
-            message: 'Failed to fetch paginated content',
-            context: { offset, limit, section: 'all-content' },
-            level: 'warn',
-          }
-        );
+            existingSlugs.add(item.slug);
+            return true;
+          });
+          
+          const updated = [...prev, ...uniqueNewItems];
+          return updated;
+        });
       } catch (error) {
-        // Error already logged by useLoggedAsync, trackHomepageSectionError also called
         const normalized = normalizeError(error, 'fetchAllConfigs failed');
         logClientWarn(
           '[HomePageClient] fetchAllConfigs error caught',
@@ -327,11 +219,15 @@ function HomePageClientComponent({
             limit,
           }
         );
+        trackHomepageSectionError('all-content', 'fetch-all-configs', error, {
+          offset,
+          limit,
+        });
       } finally {
         setIsLoadingAllConfigs(false);
       }
     },
-    [hasMoreAllConfigs, runLoggedAsync]
+    [hasMoreAllConfigs]
   );
 
   const handleFetchMore = useCallback(async () => {
@@ -339,35 +235,8 @@ function HomePageClientComponent({
   }, [fetchAllConfigs, allConfigs.length]);
 
   useEffect(() => {
-    logClientWarn(
-      '[HomePageClient] useEffect triggered for All tab',
-      null,
-      'HomePageClient.useEffect.allTab',
-      {
-        component: 'HomePageClient',
-        action: 'useEffect-all-tab',
-        category: 'home',
-        activeTab,
-        allConfigsLength: allConfigs.length,
-        isLoadingAllConfigs,
-        shouldFetch: activeTab === 'all' && allConfigs.length === 0 && !isLoadingAllConfigs,
-        hasInitialFetch: hasInitialFetchRef.current,
-      }
-    );
-
     if (activeTab === 'all' && allConfigs.length === 0 && !isLoadingAllConfigs && !hasInitialFetchRef.current) {
       hasInitialFetchRef.current = true;
-      logClientWarn(
-        '[HomePageClient] Triggering fetchAllConfigs for All tab',
-        null,
-        'HomePageClient.fetchAllConfigs.trigger',
-        {
-          component: 'HomePageClient',
-          action: 'fetch-all-configs-trigger',
-          category: 'home',
-          offset: 0,
-        }
-      );
       fetchAllConfigs(0).catch((error) => {
         trackHomepageSectionError('all-content', 'initial-fetch', error, {
           activeTab,
@@ -377,246 +246,7 @@ function HomePageClientComponent({
     }
   }, [activeTab, allConfigs.length, isLoadingAllConfigs, fetchAllConfigs]);
 
-  const handleSearch = useCallback(
-    async (query: string, categoryOverride?: string, signal?: AbortSignal) => {
-      const trimmedQuery = query.trim();
-
-      // Cancel previous request if still pending
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-        abortControllerRef.current = null;
-      }
-
-      // Clear search if query is empty
-      if (!trimmedQuery) {
-        setSearchResults([]);
-        setIsSearching(false);
-        setCurrentSearchQuery('');
-        return;
-      }
-
-      // Set query immediately (for UI feedback)
-      setCurrentSearchQuery(trimmedQuery);
-      
-      // Check cache first - if cached, use immediately without loading state
-      const effectiveTab = categoryOverride ?? activeTab;
-      const categories =
-        effectiveTab !== 'all' && effectiveTab !== 'community' ? [effectiveTab] : undefined;
-      // Normalize sort for cache key - map 'trending' to 'relevance' to match API behavior
-      const normalizedSort = filters.sort === 'trending' ? 'relevance' : (filters.sort || 'relevance');
-      const cacheKey = {
-        categories: categories || [],
-        tags: filters.tags || [],
-        authors: filters.author ? [filters.author] : [],
-        sort: normalizedSort,
-      };
-
-      const cachedResults = searchCache.get(trimmedQuery, cacheKey);
-      if (cachedResults) {
-        // Use cached results immediately without showing loading state
-        setSearchResults(cachedResults as DisplayableContent[]);
-        setIsSearching(false);
-        return;
-      }
-      
-      // No cache - show loading state and fetch
-      setIsSearching(true);
-
-      try {
-        await runLoggedAsync(
-          async () => {
-            // Check if request was aborted
-            if (signal?.aborted) {
-              return;
-            }
-
-            // Build query parameters for API route
-            // Follows architectural strategy: API route -> data layer -> database RPC -> DB
-            // Note: API determines searchType internally based on entities and job filters
-            const searchParams = new URLSearchParams({
-              q: trimmedQuery,
-              entities: 'content', // Use unified search when entities are specified
-              limit: '50',
-            });
-
-            // Map FilterState sort to API route sort
-            if (filters.sort) {
-              const sortMap: Record<string, 'relevance' | 'popularity' | 'newest' | 'alphabetical'> =
-                {
-                  trending: 'relevance', // Map 'trending' to 'relevance' for API compatibility
-                  relevance: 'relevance',
-                  popularity: 'popularity',
-                  newest: 'newest',
-                  alphabetical: 'alphabetical',
-                };
-              const mappedSort = sortMap[filters.sort];
-              if (mappedSort) {
-                searchParams.set('sort', mappedSort);
-              }
-            }
-
-            // Add category filter if provided
-            if (categories && categories.length > 0) {
-              searchParams.set('categories', categories.join(','));
-            }
-
-            // Add tag filters if provided
-            if (filters.tags && filters.tags.length > 0) {
-              searchParams.set('tags', filters.tags.join(','));
-            }
-
-            // Add author filter if provided
-            if (filters.author) {
-              searchParams.set('authors', filters.author);
-            }
-
-            logClientWarn(
-              '[HomePageClient] Calling /api/search',
-              undefined,
-              'HomePageClient.handleSearch.call',
-              {
-                component: 'HomePageClient',
-                action: 'handle-search-call',
-                category: 'search',
-                query: trimmedQuery,
-                entities: ['content'],
-                searchParams: searchParams.toString(),
-              }
-            );
-
-            // Call API route (follows architectural strategy: API route -> data layer -> database RPC -> DB)
-            const response = await fetch(`/api/search?${searchParams.toString()}`, {
-              method: 'GET',
-              ...(signal ? { signal } : {}), // Support request cancellation
-            });
-
-            if (!response.ok) {
-              throw new Error(`Search API returned ${response.status}: ${response.statusText}`);
-            }
-
-            const result = await response.json();
-
-            // Check if request was aborted before setting results
-            if (signal?.aborted) {
-              return;
-            }
-
-            // Extract results - ensure we have an array
-            // Defensive: Handle various response formats
-            let results: DisplayableContent[] = [];
-            if (result && typeof result === 'object') {
-              if (Array.isArray(result.results)) {
-                results = result.results as DisplayableContent[];
-              } else if (result.results && typeof result.results === 'object' && 'data' in result.results) {
-                // Handle nested results structure if database returns it differently
-                const nestedResults = (result.results as { data?: unknown[] }).data;
-                results = Array.isArray(nestedResults) ? (nestedResults as DisplayableContent[]) : [];
-              }
-            }
-            
-            logClientWarn(
-              '[HomePageClient] /api/search result received',
-              undefined,
-              'HomePageClient.handleSearch.result',
-              {
-                component: 'HomePageClient',
-                action: 'handle-search-result',
-                category: 'search',
-                query: trimmedQuery,
-                hasResult: Boolean(result),
-                resultType: typeof result,
-                resultsType: result?.results ? typeof result.results : 'undefined',
-                resultsIsArray: Array.isArray(result?.results),
-                resultsLength: Array.isArray(result?.results) ? result.results.length : 0,
-                extractedLength: results.length,
-                firstResultSlug: results[0]?.slug,
-                searchType: result?.searchType,
-              }
-            );
-            
-            // Log if we got unexpected results structure
-            if (result && !Array.isArray(result.results) && result.results !== null && result.results !== undefined) {
-              logClientWarn(
-                '[HomePageClient] Search returned non-array results',
-                undefined,
-                'HomePageClient.handleSearch.unexpectedResults',
-                {
-                  component: 'HomePageClient',
-                  action: 'handle-search-unexpected',
-                  category: 'search',
-                  query: trimmedQuery,
-                  resultsType: typeof result.results,
-                  hasResults: result.results !== null && result.results !== undefined,
-                  resultKeys: result ? Object.keys(result) : [],
-                }
-              );
-            }
-
-            // Cache the results
-            searchCache.set(trimmedQuery, cacheKey, results);
-
-            // Update state
-            logClientWarn(
-              '[HomePageClient] Setting search results',
-              undefined,
-              'HomePageClient.handleSearch.setResults',
-              {
-                component: 'HomePageClient',
-                action: 'set-search-results',
-                category: 'search',
-                query: trimmedQuery,
-                resultsLength: results.length,
-                willUpdateState: true,
-              }
-            );
-            // Ensure we always set an array, never null or undefined
-            setSearchResults(Array.isArray(results) ? results : []);
-          },
-          {
-            message: 'Search operation failed',
-            context: {
-              query: trimmedQuery,
-              category: effectiveTab,
-              section: 'search',
-            },
-            level: 'warn',
-          }
-        );
-      } catch (error) {
-        // Ignore abort errors (expected when canceling)
-        if (error instanceof Error && error.name === 'AbortError') {
-          return;
-        }
-
-        // Error already logged by useLoggedAsync
-        const effectiveTab = categoryOverride ?? activeTab;
-        trackHomepageSectionError('search', 'search-unified', error, {
-          query: trimmedQuery,
-          category: effectiveTab,
-        });
-        setSearchResults([]);
-      } finally {
-        // Only set isSearching to false if request wasn't aborted
-        if (!signal?.aborted) {
-          setIsSearching(false);
-        }
-      }
-    },
-    [allConfigs, activeTab, runLoggedAsync, filters]
-  );
-
-  const handleFiltersChange = useCallback((newFilters: FilterState) => {
-    setFilters(newFilters);
-  }, []);
-
-  const filterOptions = useMemo(
-    () => ({
-      tags: searchFilters?.tags ?? [],
-      authors: searchFilters?.authors ?? [],
-      categories: searchFilters?.categories ?? [],
-    }),
-    [searchFilters]
-  );
+  // Search is now handled by SearchProvider + useSearch (unified search system)
 
   // Create lookup maps dynamically for all featured categories
   // O(1) slug checking instead of O(n) array.some() calls
@@ -638,33 +268,108 @@ function HomePageClientComponent({
     return maps;
   }, [initialData, featuredCategories]);
 
-  // Filter results by active tab
-  // Performance: When searching, DB filters by category (no client-side filtering needed)
-  // When not searching, use Set lookups for O(1) filtering
+  // Get search results from SearchProvider
+  const { results: searchResults } = useSearchContext();
+  
+  // Defer query for performance (keeps input responsive while filtering)
+  const deferredQuery = useDeferredValue(query);
+  
+  // Client-side filtering function for matching query in content
+  const matchesQuery = useCallback((item: DisplayableContent, searchQuery: string): boolean => {
+    if (!searchQuery.trim()) return true;
+    
+    const queryLower = searchQuery.toLowerCase().trim();
+    const title = item.title?.toLowerCase() || '';
+    const description = item.description?.toLowerCase() || '';
+    const slug = item.slug?.toLowerCase() || '';
+    const category = item.category?.toLowerCase() || '';
+    
+    return (
+      title.includes(queryLower) ||
+      description.includes(queryLower) ||
+      slug.includes(queryLower) ||
+      category.includes(queryLower)
+    );
+  }, []);
+  
+  // Filter allConfigs by search query (client-side filtering)
+  const filteredAllConfigs = useMemo((): DisplayableContent[] => {
+    if (!deferredQuery.trim()) return allConfigs;
+    
+    try {
+      return allConfigs.filter((item) => matchesQuery(item, deferredQuery));
+    } catch (error) {
+      const normalized = normalizeError(error, 'filteredAllConfigs computation failed');
+      logClientWarn(
+        '[HomePageClient] filteredAllConfigs computation error',
+        normalized,
+        'HomePageClient.filteredAllConfigs.error',
+        {
+          component: 'HomePageClient',
+          action: 'compute-filtered-all-configs-error',
+          category: 'search',
+          query: deferredQuery,
+        }
+      );
+      return [];
+    }
+  }, [allConfigs, deferredQuery, matchesQuery]);
+  
+  // Merge search API results with filtered local content (deduplicate by slug)
+  const mergedResults = useMemo((): DisplayableContent[] => {
+    if (!deferredQuery.trim()) return [];
+    
+    try {
+      const apiResults = Array.isArray(searchResults) ? searchResults : [];
+      const localResults = filteredAllConfigs;
+      
+      // Deduplicate by slug - prioritize API results (more comprehensive)
+      const seen = new Set<string>();
+      const merged: DisplayableContent[] = [];
+      
+      // Add API results first (prioritized)
+      for (const item of apiResults) {
+        if (item.slug && !seen.has(item.slug)) {
+          seen.add(item.slug);
+          merged.push(item);
+        }
+      }
+      
+      // Add unique local results
+      for (const item of localResults) {
+        if (item.slug && !seen.has(item.slug)) {
+          seen.add(item.slug);
+          merged.push(item);
+        }
+      }
+      
+      return merged;
+    } catch (error) {
+      const normalized = normalizeError(error, 'mergedResults computation failed');
+      logClientWarn(
+        '[HomePageClient] mergedResults computation error',
+        normalized,
+        'HomePageClient.mergedResults.error',
+        {
+          component: 'HomePageClient',
+          action: 'compute-merged-results-error',
+          category: 'search',
+          query: deferredQuery,
+        }
+      );
+      return Array.isArray(searchResults) ? searchResults : [];
+    }
+  }, [searchResults, filteredAllConfigs, deferredQuery]);
+  
+  // Filter results by active tab (for tabs section, not search)
+  // When searching, use mergedResults; otherwise filter allConfigs by tab
   const filteredResults = useMemo((): DisplayableContent[] => {
     try {
-      // Show search results if there's an active search query
-      if (currentSearchQuery.length > 0) {
-        // Ensure searchResults is an array and handle null/undefined
-        const results = Array.isArray(searchResults) ? searchResults : [];
-        logClientWarn(
-          '[HomePageClient] Computing filteredResults for search',
-          undefined,
-          'HomePageClient.filteredResults.search',
-          {
-            component: 'HomePageClient',
-            action: 'compute-filtered-results',
-            category: 'search',
-            currentSearchQuery,
-            searchResultsLength: Array.isArray(searchResults) ? searchResults.length : 0,
-            filteredResultsLength: results.length,
-            searchResultsIsArray: Array.isArray(searchResults),
-            searchResultsType: typeof searchResults,
-          }
-        );
-        return results;
+      // If searching, use merged results
+      if (deferredQuery.trim()) {
+        return mergedResults;
       }
-
+      
       // Not searching - filter allConfigs by tab
       const dataSource = Array.isArray(allConfigs) ? allConfigs : [];
 
@@ -692,159 +397,377 @@ function HomePageClientComponent({
         {
           component: 'HomePageClient',
           action: 'compute-filtered-results-error',
-          category: 'search',
-          currentSearchQuery,
+          category: 'tabs',
           activeTab,
         }
       );
       // Return empty array on error to prevent crashes
       return [];
     }
-  }, [searchResults, allConfigs, activeTab, slugLookupMaps, currentSearchQuery]);
+  }, [allConfigs, activeTab, slugLookupMaps, deferredQuery, mergedResults]);
 
-  // Handle tab change - re-trigger search if currently searching
+  // Handle tab change (search is now handled by SearchProvider)
   const handleTabChange = useCallback(
     (value: string) => {
       setActiveTab(value);
-      // If there's an active search query, re-run search with new category filter (DB-side)
-      if (currentSearchQuery.length > 0) {
-        // Create new AbortController for this search
-        const controller = new AbortController();
-        abortControllerRef.current = controller;
-
-        handleSearch(currentSearchQuery, value, controller.signal).catch((error) => {
-          // Ignore abort errors
-          if (error instanceof Error && error.name === 'AbortError') {
-            return;
-          }
-          trackHomepageSectionError('search', 'search-retry', error, {
-            query: currentSearchQuery,
-            tab: value,
-          });
-          logUnhandledPromise('HomePageClient: search retry failed', error, {
-            tab: value,
-          });
-        });
-      }
+      // Search is now handled by SearchProvider, which syncs with URL
     },
-    [currentSearchQuery, handleSearch]
+    []
   );
-
-  // Handle clear search
-  const handleClearSearch = useCallback(() => {
-    // Cancel any pending search
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-      abortControllerRef.current = null;
-    }
-
-    setCurrentSearchQuery('');
-    setSearchResults([]);
-    setIsSearching(false);
-  }, []);
-
-  // Cleanup: Cancel pending requests on unmount
-  useEffect(() => {
-    return () => {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-    };
-  }, []);
-
-  // Memoize search props to prevent unnecessary re-renders
-  const searchPropsMemo = useMemo(
-    () => ({
-      onSearch: (query: string) => {
-        // UnifiedSearch already debounces (400ms), so this will be called after debounce
-        // Create new AbortController for this search
-        const controller = new AbortController();
-        abortControllerRef.current = controller;
-        // handleSearch will cancel previous request if still pending
-        handleSearch(query, undefined, controller.signal).catch((error) => {
-          // Ignore abort errors (expected when canceling)
-          if (error instanceof Error && error.name !== 'AbortError') {
-            const normalized = normalizeError(error, 'Search handler failed');
-            logClientWarn(
-              '[HomePageClient] handleSearch error',
-              normalized,
-              'HomePageClient.onSearch.error',
-              {
-                component: 'HomePageClient',
-                action: 'on-search-error',
-                category: 'search',
-                query: query.trim(),
-              }
-            );
-            trackHomepageSectionError('search', 'search-handler', error, {
-              query: query.trim(),
-            });
-          }
-        });
-      },
-      onFiltersChange: handleFiltersChange,
-      filters,
-      availableTags: filterOptions.tags,
-      availableAuthors: filterOptions.authors,
-      availableCategories: filterOptions.categories,
-      resultCount: filteredResults.length,
-      onFocusChange: setSearchFocused,
-    }),
-    [handleSearch, handleFiltersChange, filters, filterOptions.tags, filterOptions.authors, filterOptions.categories, filteredResults.length, setSearchFocused]
-  );
-
-  // Set search props in context so hero can render the search bar
-  useEffect(() => {
-    setSearchProps(searchPropsMemo);
-  }, [searchPropsMemo, setSearchProps]);
 
   return (
     <>
-      {/* Search Section and Stats removed - now rendered in hero */}
+      {/* Search Bar and Category Stats Section - Below Hero */}
+      <section className="container mx-auto px-4 pt-8 pb-4">
+        <div className="mx-auto max-w-4xl">
+          {/* Search Bar - New Unified Search System */}
+          <div className="mb-6">
+            <HomepageSearchBar onFocusChange={setSearchFocused} />
+          </div>
+
+          {/* Category Stats Grid - Mobile and Desktop */}
+          {stats && typeof stats === 'object' && Object.keys(stats).length > 0 ? (
+            <>
+              {/* Mobile Stats - Horizontal scroll */}
+              <TooltipProvider delayDuration={300}>
+                <motion.div
+                  className="flex gap-2 overflow-x-auto pb-2 md:hidden"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={VIEWPORT.default}
+                  transition={SPRING.smooth}
+                >
+                  {categoryStatsConfig.map(({ categoryId, delay }, index: number) => {
+                    const categoryRoute = ROUTES[categoryId.toUpperCase() as keyof typeof ROUTES];
+                    const count =
+                      typeof stats[categoryId] === 'number'
+                        ? stats[categoryId]
+                        : stats[categoryId]?.total || 0;
+                    const categoryConfig = categoryConfigs[categoryId as Database['public']['Enums']['content_category']];
+                    const tooltipText = categoryConfig?.description || `View all ${categoryId} configurations`;
+
+                    return (
+                      <Tooltip key={categoryId}>
+                        <TooltipTrigger asChild>
+                          <Link
+                            href={categoryRoute}
+                            className="group no-underline"
+                            aria-label={`View all ${categoryId} configurations`}
+                          >
+                            <motion.div
+                              className="flex min-w-fit items-center gap-1.5 rounded-md border border-border/30 px-2 py-1 whitespace-nowrap transition-colors cursor-help bg-transparent"
+                              initial={{ opacity: 0, x: -8 }}
+                              whileInView={{ 
+                                opacity: 1, 
+                                x: 0,
+                              }}
+                              viewport={VIEWPORT.default}
+                              transition={{
+                                delay: index * STAGGER.fast,
+                                ...SPRING.smooth,
+                              }}
+                              whileHover={{
+                                scale: MICROINTERACTIONS.button.hover.scale,
+                                borderColor: 'rgba(249, 115, 22, 0.5)',
+                                transition: MICROINTERACTIONS.button.transition,
+                              }}
+                              whileTap={{
+                                scale: MICROINTERACTIONS.button.tap.scale,
+                                transition: MICROINTERACTIONS.button.transition,
+                              }}
+                            >
+                              <UnifiedBadge
+                                variant="category"
+                                category={categoryId}
+                                href={null}
+                                className="shrink-0 text-xs"
+                              />
+                              <NumberTicker
+                                value={count}
+                                delay={delay}
+                                className="text-xs font-semibold tabular-nums"
+                              />
+                            </motion.div>
+                          </Link>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="max-w-xs text-center">
+                          {tooltipText}
+                        </TooltipContent>
+                      </Tooltip>
+                    );
+                  })}
+                </motion.div>
+              </TooltipProvider>
+
+              {/* Desktop Stats */}
+              <TooltipProvider delayDuration={300}>
+                <div className="hidden flex-wrap justify-center gap-2 md:flex lg:gap-2">
+                  {categoryStatsConfig.map(({ categoryId, delay }, index: number) => {
+                    const categoryRoute = ROUTES[categoryId.toUpperCase() as keyof typeof ROUTES];
+                    const count =
+                      typeof stats[categoryId] === 'number'
+                        ? stats[categoryId]
+                        : stats[categoryId]?.total || 0;
+                    const categoryConfig = categoryConfigs[categoryId as Database['public']['Enums']['content_category']];
+                    const tooltipText = categoryConfig?.description || `View all ${categoryId} configurations`;
+
+                    return (
+                      <Tooltip key={categoryId}>
+                        <TooltipTrigger asChild>
+                          <Link
+                            href={categoryRoute}
+                            className="group no-underline"
+                            aria-label={`View all ${categoryId} configurations`}
+                          >
+                            <motion.div
+                              className="group flex items-center gap-1.5 rounded-md border border-border/30 px-2 py-1 transition-colors cursor-help bg-transparent"
+                              initial={{ opacity: 0, y: 20 }}
+                              whileInView={{ 
+                                opacity: 1, 
+                                y: 0,
+                              }}
+                              viewport={VIEWPORT.default}
+                              transition={{
+                                delay: index * STAGGER.fast,
+                                ...SPRING.smooth,
+                              }}
+                              whileHover={{
+                                scale: MICROINTERACTIONS.button.hover.scale,
+                                borderColor: 'rgba(249, 115, 22, 0.5)',
+                                transition: MICROINTERACTIONS.button.transition,
+                              }}
+                              whileTap={{
+                                scale: MICROINTERACTIONS.button.tap.scale,
+                                transition: MICROINTERACTIONS.button.transition,
+                              }}
+                            >
+                              <UnifiedBadge
+                                variant="category"
+                                category={categoryId}
+                                href={null}
+                                className="shrink-0 text-xs"
+                              />
+                              <NumberTicker
+                                value={count}
+                                delay={delay}
+                                className="text-xs font-semibold tabular-nums"
+                              />
+                            </motion.div>
+                          </Link>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="max-w-xs text-center">
+                          {tooltipText}
+                        </TooltipContent>
+                      </Tooltip>
+                    );
+                  })}
+                </div>
+              </TooltipProvider>
+            </>
+          ) : null}
+        </div>
+      </section>
+
+      {/* Main Content Section */}
       <section className="container mx-auto px-4 pb-16">
-        {/* Search Results Section - Show when there's an active search query */}
-        {currentSearchQuery.length > 0 && (
-          <LazySearchSection
-            isSearching={isSearching}
-            filteredResults={filteredResults}
-            onClearSearch={handleClearSearch}
-            searchQuery={currentSearchQuery}
-          />
+        {/* Search Results Section - Show at top when there's an active search query */}
+        {query.trim().length > 0 && (
+          <div className="mb-8">
+            <Suspense fallback={<div className="text-muted-foreground p-8 text-center">Loading search results...</div>}>
+              <SearchResults
+                showCategory
+                showActions
+                onAuthRequired={() => {
+                  openAuthModal({
+                    valueProposition: 'Sign in to save bookmarks',
+                    redirectTo: pathname ?? undefined,
+                  });
+                }}
+              />
+            </Suspense>
+          </div>
         )}
 
-        {/* Featured Content Sections - Hide when searching */}
-        {currentSearchQuery.length === 0 && (
-          <LazyFeaturedSections
-            categories={
-              (featuredByCategory || initialData) as Record<string, readonly DisplayableContent[]>
-            }
-            categoryConfigs={categoryConfigs}
-            featuredJobs={
-              featuredJobs as ReadonlyArray<Database['public']['Tables']['jobs']['Row']>
-            }
-            featuredCategories={featuredCategories}
-            {...(weekStart ? { weekStart } : {})}
-          />
-        )}
+        {/* Featured Content Sections - Always visible (maintains context) */}
+        <LazyFeaturedSections
+          categories={
+            (featuredByCategory || initialData) as Record<string, readonly DisplayableContent[]>
+          }
+          categoryConfigs={categoryConfigs}
+          featuredJobs={
+            featuredJobs as ReadonlyArray<Database['public']['Tables']['jobs']['Row']>
+          }
+          featuredCategories={featuredCategories}
+          {...(weekStart ? { weekStart } : {})}
+        />
 
-        {/* Tabs Section - Hide when searching */}
-        {currentSearchQuery.length === 0 && (
-          <LazyTabsSection
-            activeTab={activeTab}
-            filteredResults={filteredResults}
-            onTabChange={handleTabChange}
-            categoryConfigs={categoryConfigs}
-            onFetchMore={handleFetchMore}
-            serverHasMore={hasMoreAllConfigs}
-            {...(weekStart ? { weekStart } : {})}
-          />
-        )}
+        {/* Tabs Section - Always visible (shows filtered content when searching) */}
+        <LazyTabsSection
+          activeTab={activeTab}
+          filteredResults={filteredResults}
+          onTabChange={handleTabChange}
+          categoryConfigs={categoryConfigs}
+          onFetchMore={handleFetchMore}
+          serverHasMore={hasMoreAllConfigs}
+          {...(weekStart ? { weekStart } : {})}
+        />
       </section>
     </>
   );
 }
 
 // Memoize the component to prevent unnecessary re-renders when initialData prop hasn't changed
+const HomePageClientContentMemo = memo(HomePageClientContent);
+
+/**
+ * HomePageClient - Wrapper with SearchProvider
+ */
+function HomePageClientComponent(props: HomePageClientProps) {
+  const pulse = usePulse();
+  const searchFunction = useSearchAPI({
+    apiPath: '/api/search',
+    limit: 50,
+    offset: 0,
+  });
+
+  // Handle search with analytics
+  const handleSearch = useCallback(
+    async (query: string, filters: FilterState) => {
+      const searchStart = Date.now();
+      
+      logClientInfo(
+        '[HomePageClient] handleSearch called',
+        'HomePageClient.handleSearch.start',
+        {
+          component: 'HomePageClient',
+          action: 'handle-search-start',
+          query: query.trim(),
+          queryLength: query.trim().length,
+          filters: JSON.stringify(filters),
+          timestamp: searchStart,
+        }
+      );
+      
+      try {
+        logClientInfo(
+          '[HomePageClient] Calling searchFunction',
+          'HomePageClient.handleSearch.callFunction',
+          {
+            component: 'HomePageClient',
+            action: 'handle-search-call-function',
+            query: query.trim(),
+            timestamp: Date.now(),
+          }
+        );
+        
+        const functionCallStart = Date.now();
+        const results = await searchFunction(query, filters);
+        const functionCallDuration = Date.now() - functionCallStart;
+        
+        logClientInfo(
+          '[HomePageClient] searchFunction completed',
+          'HomePageClient.handleSearch.functionCompleted',
+          {
+            component: 'HomePageClient',
+            action: 'handle-search-function-completed',
+            query: query.trim(),
+            resultsCount: Array.isArray(results) ? results.length : 0,
+            isArray: Array.isArray(results),
+            functionDuration: functionCallDuration,
+            timestamp: Date.now(),
+          }
+        );
+
+        // Track search analytics (fire and forget)
+        if (query.trim()) {
+          logClientInfo(
+            '[HomePageClient] Tracking search analytics',
+            'HomePageClient.handleSearch.analytics',
+            {
+              component: 'HomePageClient',
+              action: 'handle-search-analytics',
+              query: query.trim(),
+              resultsCount: results.length,
+              timestamp: Date.now(),
+            }
+          );
+          
+          // Use 'agents' as default category for homepage search (no specific category)
+          pulse
+            .search({
+              category: 'agents',
+              slug: '',
+              query: query.trim(),
+              metadata: {
+                filters,
+                resultCount: results.length,
+              },
+            })
+            .catch((error) => {
+              const normalized = normalizeError(error, 'Analytics tracking failed');
+              logClientError(
+                '[HomePageClient] Analytics tracking error',
+                normalized,
+                'HomePageClient.handleSearch.analyticsError',
+                {
+                  component: 'HomePageClient',
+                  action: 'handle-search-analytics-error',
+                  query: query.trim(),
+                  timestamp: Date.now(),
+                }
+              );
+            });
+        }
+
+        logClientInfo(
+          '[HomePageClient] handleSearch completed successfully',
+          'HomePageClient.handleSearch.success',
+          {
+            component: 'HomePageClient',
+            action: 'handle-search-success',
+            query: query.trim(),
+            resultsCount: Array.isArray(results) ? results.length : 0,
+            totalDuration: Date.now() - searchStart,
+            timestamp: Date.now(),
+          }
+        );
+
+        return results;
+      } catch (error) {
+        const normalized = normalizeError(error, 'handleSearch failed');
+        
+        logClientError(
+          '[HomePageClient] handleSearch error',
+          normalized,
+          'HomePageClient.handleSearch.error',
+          {
+            component: 'HomePageClient',
+            action: 'handle-search-error',
+            query: query.trim(),
+            errorName: error instanceof Error ? error.name : 'Unknown',
+            errorMessage: error instanceof Error ? error.message : String(error),
+            duration: Date.now() - searchStart,
+            timestamp: Date.now(),
+          }
+        );
+        
+        throw normalized;
+      }
+    },
+    [searchFunction, pulse]
+  );
+
+  return (
+    <SearchProvider
+      onSearch={handleSearch}
+      defaultQuery=""
+      defaultFilters={{}}
+    >
+      <HomePageClientContentMemo {...props} />
+    </SearchProvider>
+  );
+}
+
 const HomePageClient = memo(HomePageClientComponent);
 
 export { HomePageClient };

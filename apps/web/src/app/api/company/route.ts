@@ -1,14 +1,14 @@
 /**
  * Company Profile API Route
- * 
+ *
  * Returns company profile data by slug identifier.
  * Used to display company information on company profile pages.
- * 
+ *
  * @example
  * ```ts
  * // Request
  * GET /api/company?slug=acme-corp
- * 
+ *
  * // Response (200)
  * {
  *   "id": "...",
@@ -22,14 +22,16 @@
 import 'server-only';
 import { CompaniesService } from '@heyclaude/data-layer';
 import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
-import { createApiRoute, createApiOptionsHandler, slugSchema } from '@heyclaude/web-runtime/server';
 import { normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   buildCacheHeaders,
+  createApiOptionsHandler,
+  createApiRoute,
   createSupabaseAnonClient,
   getOnlyCorsHeaders,
   jsonResponse,
   notFoundResponse,
+  slugSchema,
 } from '@heyclaude/web-runtime/server';
 import { cacheLife } from 'next/cache';
 import { z } from 'zod';
@@ -59,35 +61,12 @@ async function getCachedCompanyProfile(slug: string): Promise<{
 
 /**
  * GET /api/company - Get company profile by slug
- * 
+ *
  * Returns company profile data by slug identifier.
  * Validates slug parameter and returns company profile with cache headers.
  */
 export const GET = createApiRoute({
-  route: '/api/company',
-  operation: 'CompanyAPI',
-  method: 'GET',
   cors: 'anon',
-  querySchema: z.object({
-    slug: slugSchema.describe('Company slug identifier'),
-  }),
-  openapi: {
-    summary: 'Get company profile by slug',
-    description: 'Returns company profile data by slug identifier. Used to display company information on company profile pages.',
-    tags: ['company', 'profiles'],
-    operationId: 'getCompanyProfile',
-    responses: {
-      200: {
-        description: 'Company profile retrieved successfully',
-      },
-      400: {
-        description: 'Missing or invalid slug parameter',
-      },
-      404: {
-        description: 'Company not found',
-      },
-    },
-  },
   handler: async ({ logger, query }) => {
     // Zod schema ensures proper types
     const { slug } = query;
@@ -124,6 +103,30 @@ export const GET = createApiRoute({
       ...buildCacheHeaders('company_profile'),
     });
   },
+  method: 'GET',
+  openapi: {
+    description:
+      'Returns company profile data by slug identifier. Used to display company information on company profile pages.',
+    operationId: 'getCompanyProfile',
+    responses: {
+      200: {
+        description: 'Company profile retrieved successfully',
+      },
+      400: {
+        description: 'Missing or invalid slug parameter',
+      },
+      404: {
+        description: 'Company not found',
+      },
+    },
+    summary: 'Get company profile by slug',
+    tags: ['company', 'profiles'],
+  },
+  operation: 'CompanyAPI',
+  querySchema: z.object({
+    slug: slugSchema.describe('Company slug identifier'),
+  }),
+  route: '/api/company',
 });
 
 /**

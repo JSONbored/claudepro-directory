@@ -12,6 +12,7 @@
  */
 
 import { SPRING, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import { Navigation3DCard, type Navigation3DCardProps } from './navigation-3d-card';
@@ -25,6 +26,7 @@ export function NavigationCardGrid({
   cards,
   className,
 }: NavigationCardGridProps) {
+  const shouldReduceMotion = useReducedMotion();
   return (
     <div
       className={cn(
@@ -37,8 +39,8 @@ export function NavigationCardGrid({
       {cards.map((card, index) => (
         <motion.div
           key={card.href}
-          initial={{ opacity: 0, y: 20, scale: 0.9 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
+          initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20, scale: 0.9 }}
+          animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
           transition={{
             duration: DURATION.slow,
             delay: index * STAGGER.micro, // Stagger by 50ms per card

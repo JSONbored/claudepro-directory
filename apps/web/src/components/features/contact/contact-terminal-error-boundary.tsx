@@ -5,9 +5,11 @@
 
 'use client';
 
-import { AlertTriangle } from '@heyclaude/web-runtime/icons';
+import { AlertCircle, RefreshCw } from '@heyclaude/web-runtime/icons';
 import { logClientErrorBoundary } from '@heyclaude/web-runtime/logging/client';
 import { Terminal, Button } from '@heyclaude/web-runtime/ui';
+import { SPRING } from '@heyclaude/web-runtime/design-system';
+import { motion } from 'motion/react';
 import { Component, type ReactNode } from 'react';
 
 interface Props {
@@ -17,16 +19,17 @@ interface Props {
 interface State {
   error: Error | null;
   hasError: boolean;
+  isResetting: boolean;
 }
 
 export class ContactTerminalErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = { hasError: false, error: null };
+    this.state = { hasError: false, error: null, isResetting: false };
   }
 
   static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error };
+    return { hasError: true, error, isResetting: false };
   }
 
   override componentDidCatch(error: Error, errorInfo: { componentStack?: string }) {
@@ -48,9 +51,26 @@ export class ContactTerminalErrorBoundary extends Component<Props, State> {
     if (this.state.hasError) {
       return (
         <Terminal className="relative flex min-h-[500px] flex-col">
-          <div className="flex flex-1 items-center justify-center p-8">
-            <div className="max-w-md space-y-4 text-center">
-              <AlertTriangle className="text-destructive mx-auto h-12 w-12" />
+          <motion.div
+            className="flex flex-1 items-center justify-center p-8"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={SPRING.smooth}
+          >
+            <motion.div
+              className="max-w-md space-y-4 text-center"
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={SPRING.smooth}
+            >
+              <motion.div
+                className="bg-destructive/10 rounded-full p-3 mx-auto w-fit"
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ ...SPRING.bouncy, delay: 0.1 }}
+              >
+                <AlertCircle className="text-destructive h-12 w-12" />
+              </motion.div>
               <div className="space-y-2">
                 <h3 className="text-lg font-semibold">Terminal Error</h3>
                 <p className="text-muted-foreground text-sm">
@@ -62,25 +82,37 @@ export class ContactTerminalErrorBoundary extends Component<Props, State> {
                   ) : null}
                 </p>
               </div>
-              <div className="flex justify-center gap-2">
+              <motion.div
+                className="flex justify-center gap-2"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ ...SPRING.smooth, delay: 0.2 }}
+              >
                 <Button
                   variant="outline"
-                  size="sm"
+                  size="lg"
+                  disabled={this.state.isResetting}
                   onClick={() => {
-                    this.setState({ hasError: false, error: null });
+                    this.setState({ isResetting: true, hasError: false, error: null });
                   }}
                 >
-                  Try Again
+                  <RefreshCw className={`mr-2 h-4 w-4 ${this.state.isResetting ? 'animate-spin' : ''}`} />
+                  {this.state.isResetting ? 'Retrying...' : 'Try Again'}
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => globalThis.location.reload()}>
+                <Button variant="outline" size="lg" onClick={() => globalThis.location.reload()}>
                   Refresh Page
                 </Button>
-              </div>
-              <p className="text-muted-foreground text-xs">
+              </motion.div>
+              <motion.p
+                className="text-muted-foreground text-xs"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ ...SPRING.smooth, delay: 0.3 }}
+              >
                 You can still use the contact options below.
-              </p>
-            </div>
-          </div>
+              </motion.p>
+            </motion.div>
+          </motion.div>
         </Terminal>
       );
     }

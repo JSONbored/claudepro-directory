@@ -22,6 +22,7 @@
  */
 
 import { DURATION } from '../../../design-system/index.ts';
+import { useReducedMotion, usePageInView } from '../../../hooks/motion/index.ts';
 import { cn } from '../../utils.ts';
 import { motion } from 'motion/react';
 import type { ReactNode } from 'react';
@@ -45,6 +46,8 @@ export function AnimatedGradientText({
   colors = ['#F97316', '#FBBF24', '#F97316'], // orange → amber → orange
   noAnimation = false,
 }: AnimatedGradientTextProps) {
+  const shouldReduceMotion = useReducedMotion();
+  const isPageInView = usePageInView();
   const gradientStyle = {
     background: `linear-gradient(90deg, ${colors.join(', ')})`,
     backgroundSize: '200% 100%',
@@ -66,14 +69,22 @@ export function AnimatedGradientText({
     <motion.span
       className={cn('inline-block', className)}
       style={gradientStyle}
-      animate={{
-        backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
-      }}
-      transition={{
-        duration,
-        repeat: Number.POSITIVE_INFINITY,
-        ease: 'linear',
-      }}
+      animate={
+        shouldReduceMotion || noAnimation || !isPageInView
+          ? {}
+          : {
+              backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+            }
+      }
+      transition={
+        shouldReduceMotion || noAnimation || !isPageInView
+          ? {}
+          : {
+              duration,
+              repeat: Number.POSITIVE_INFINITY,
+              ease: 'linear',
+            }
+      }
     >
       {children}
     </motion.span>
@@ -90,6 +101,8 @@ export function ShimmeringGradientText({
   children: ReactNode;
   className?: string;
 }) {
+  const shouldReduceMotion = useReducedMotion();
+  const isPageInView = usePageInView();
   return (
     <motion.span
       className={cn('inline-block', className)}
@@ -101,28 +114,44 @@ export function ShimmeringGradientText({
         WebkitTextFillColor: 'transparent',
         color: 'transparent',
       }}
-      animate={{
-        backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
-      }}
-      transition={{
-        duration: DURATION.extreme,
-        repeat: Number.POSITIVE_INFINITY,
-        ease: 'linear',
-      }}
+      animate={
+        shouldReduceMotion || !isPageInView
+          ? {}
+          : {
+              backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+            }
+      }
+      transition={
+        shouldReduceMotion || !isPageInView
+          ? {}
+          : {
+              duration: DURATION.extreme,
+              repeat: Number.POSITIVE_INFINITY,
+              ease: 'linear',
+            }
+      }
     >
       <motion.span
-        animate={{
-          textShadow: [
-            '0 0 20px rgba(251, 191, 36, 0.5)',
-            '0 0 40px rgba(251, 191, 36, 0.8)',
-            '0 0 20px rgba(251, 191, 36, 0.5)',
-          ],
-        }}
-        transition={{
-          duration: DURATION.maximum,
-          repeat: Number.POSITIVE_INFINITY,
-          ease: 'easeInOut',
-        }}
+        animate={
+          shouldReduceMotion || !isPageInView
+            ? {}
+            : {
+                textShadow: [
+                  '0 0 20px rgba(251, 191, 36, 0.5)',
+                  '0 0 40px rgba(251, 191, 36, 0.8)',
+                  '0 0 20px rgba(251, 191, 36, 0.5)',
+                ],
+              }
+        }
+        transition={
+          shouldReduceMotion || !isPageInView
+            ? {}
+            : {
+                duration: DURATION.maximum,
+                repeat: Number.POSITIVE_INFINITY,
+                ease: 'easeInOut',
+              }
+        }
       >
         {children}
       </motion.span>

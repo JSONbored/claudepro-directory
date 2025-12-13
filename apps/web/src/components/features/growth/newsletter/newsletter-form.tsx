@@ -11,6 +11,7 @@ import {
   Input,
 } from '@heyclaude/web-runtime/ui';
 import { SPRING, DURATION } from '@heyclaude/web-runtime/design-system';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { AnimatePresence, motion } from 'motion/react';
 import { useId, useMemo } from 'react';
 
@@ -39,6 +40,7 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
     },
   });
   const errorId = useId();
+  const shouldReduceMotion = useReducedMotion();
 
   // Determine if email is valid and button should be visible
   const isValid = useMemo(() => isValidEmail(email), [email]);
@@ -90,9 +92,9 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
                   'bg-[#F6F8F4] text-background',
                   'cursor-not-allowed'
                 )}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
+                initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.8 }}
+                animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }}
+                exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.8 }}
                 transition={{ duration: DURATION.quick }}
                 aria-label="Subscribing..."
               >
@@ -111,17 +113,17 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F6F8F4] focus-visible:ring-offset-2',
                   'active:scale-95'
                 )}
-                initial={{ opacity: 0, x: -8, scale: 0.8 }}
-                animate={{ opacity: 1, x: 0, scale: 1 }}
-                exit={{ opacity: 0, x: -8, scale: 0.8 }}
+                initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -8, scale: 0.8 }}
+                animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0, scale: 1 }}
+                exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -8, scale: 0.8 }}
                 transition={SPRING.loading}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={shouldReduceMotion ? {} : { scale: 1.05 }}
+                whileTap={shouldReduceMotion ? {} : { scale: 0.95 }}
                 aria-label={NEWSLETTER_CTA_CONFIG.buttonText}
               >
                 <motion.div
                   initial={{ rotate: 0 }}
-                  whileHover={{ rotate: 15 }}
+                  whileHover={shouldReduceMotion ? {} : { rotate: 15 }}
                   transition={SPRING.bouncy}
                 >
                   <ArrowRight className="h-5 w-5" aria-hidden="true" />
@@ -137,9 +139,9 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
             id={errorId}
             className="text-destructive text-sm"
             role="alert"
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
+            initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -4 }}
+            animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+            exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -4 }}
             transition={{ duration: DURATION.quick }}
           >
             {error}

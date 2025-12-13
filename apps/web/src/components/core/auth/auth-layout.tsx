@@ -9,6 +9,7 @@
 'use client';
 
 import { SPRING, STAGGER } from '@heyclaude/web-runtime/design-system';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import { type ReactNode } from 'react';
 
@@ -41,6 +42,7 @@ const cardBorderStyle = {
  * @see cardBorderStyle
  */
 export function SplitAuthLayout({ brandPanel, authPanel, mobileHeader }: SplitAuthLayoutProps) {
+  const shouldReduceMotion = useReducedMotion();
   return (
     <div className="bg-background relative min-h-dvh min-h-screen overflow-hidden">
       {/* Desktop: Side-by-side layout - both sides vertically centered */}
@@ -48,8 +50,8 @@ export function SplitAuthLayout({ brandPanel, authPanel, mobileHeader }: SplitAu
         {/* Left: Brand content - centered */}
         <motion.div
           className="flex min-h-dvh min-h-screen items-center justify-center px-12 xl:px-16"
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }}
+          initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -30 }}
+          animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
           transition={SPRING.smooth}
         >
           {brandPanel}
@@ -60,8 +62,8 @@ export function SplitAuthLayout({ brandPanel, authPanel, mobileHeader }: SplitAu
           <motion.div
             className="bg-card w-full max-w-md rounded-2xl p-10 shadow-2xl xl:p-12"
             style={cardBorderStyle}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
+            animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
             transition={{ ...SPRING.smooth, delay: STAGGER.fast }}
           >
             {authPanel}

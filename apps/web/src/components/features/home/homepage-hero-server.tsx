@@ -33,14 +33,13 @@ const HomepageHeroClient = dynamicImport(
  * The member count and stats are passed as props from the parent page component
  * which can fetch them separately or use default values
  *
- * NOTE: Morphing blob background is handled in client component for interactivity
+ * NOTE: Hero animations are handled in client component for interactivity
  */
 export async function HomepageHeroServer({ 
   memberCount,
-  stats = {},
 }: { 
   memberCount: number;
   stats?: Record<string, { featured: number; total: number } | number>;
 }) {
-  return <HomepageHeroClient memberCount={memberCount} stats={stats} />;
+  return <HomepageHeroClient memberCount={memberCount} />;
 }

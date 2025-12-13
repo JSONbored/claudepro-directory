@@ -14,7 +14,9 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { logger, normalizeError } from '../entries/core.ts';
+// Import directly from source files to avoid indirect imports through entries/core.ts
+import { logger } from '../logger.ts';
+import { normalizeError } from '../errors.ts';
 import { usePulse } from './use-pulse.ts';
 import { useCallback, useEffect, useRef } from 'react';
 import { create } from 'zustand';

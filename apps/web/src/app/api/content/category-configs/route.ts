@@ -1,14 +1,14 @@
 /**
  * Category Configs API Route
- * 
+ *
  * Returns category configuration data including features, metadata, and display settings.
  * Used by the frontend to render category-specific UI and determine available features.
- * 
+ *
  * @example
  * ```ts
  * // Request
  * GET /api/content/category-configs
- * 
+ *
  * // Response (200)
  * [
  *   {
@@ -23,9 +23,10 @@
 
 import 'server-only';
 import { ContentService } from '@heyclaude/data-layer';
-import { createApiRoute, createApiOptionsHandler } from '@heyclaude/web-runtime/server';
 import {
   buildCacheHeaders,
+  createApiOptionsHandler,
+  createApiRoute,
   createSupabaseAnonClient,
   getOnlyCorsHeaders,
   jsonResponse,
@@ -49,26 +50,12 @@ async function getCachedCategoryConfigs() {
 
 /**
  * GET /api/content/category-configs - Get category configurations
- * 
+ *
  * Returns category configuration data including features, metadata, and display settings.
  * Used by the frontend to render category-specific UI and determine available features.
  */
 export const GET = createApiRoute({
-  route: '/api/content/category-configs',
-  operation: 'CategoryConfigsAPI',
-  method: 'GET',
   cors: 'anon',
-  openapi: {
-    summary: 'Get category configurations',
-    description: 'Returns category configuration data including features, metadata, and display settings. Used by the frontend to render category-specific UI and determine available features.',
-    tags: ['content', 'categories', 'config'],
-    operationId: 'getCategoryConfigs',
-    responses: {
-      200: {
-        description: 'Category configurations retrieved successfully',
-      },
-    },
-  },
   handler: async ({ logger }) => {
     logger.info({}, 'Category configs request received');
 
@@ -86,6 +73,21 @@ export const GET = createApiRoute({
       ...buildCacheHeaders('config'),
     });
   },
+  method: 'GET',
+  openapi: {
+    description:
+      'Returns category configuration data including features, metadata, and display settings. Used by the frontend to render category-specific UI and determine available features.',
+    operationId: 'getCategoryConfigs',
+    responses: {
+      200: {
+        description: 'Category configurations retrieved successfully',
+      },
+    },
+    summary: 'Get category configurations',
+    tags: ['content', 'categories', 'config'],
+  },
+  operation: 'CategoryConfigsAPI',
+  route: '/api/content/category-configs',
 });
 
 /**

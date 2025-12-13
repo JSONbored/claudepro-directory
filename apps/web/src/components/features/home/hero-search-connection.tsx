@@ -7,12 +7,10 @@
  * Creates a cohesive, connected experience where hero responds to search interaction.
  */
 
-import { createContext, useContext, useRef, useState, type ReactNode } from 'react';
+import { createContext, useContext, useState, type ReactNode } from 'react';
 import type { UnifiedSearchProps } from '@heyclaude/web-runtime/types/component.types';
 
 interface HeroSearchConnectionContextValue {
-  /** Search input ref for blob targeting */
-  searchRef: React.MutableRefObject<HTMLInputElement | null>;
   /** Whether search is currently focused */
   isSearchFocused: boolean;
   /** Set search focus state */
@@ -29,14 +27,12 @@ interface HeroSearchConnectionContextValue {
 const HeroSearchConnectionContext = createContext<HeroSearchConnectionContextValue | null>(null);
 
 export function HeroSearchConnectionProvider({ children }: { children: ReactNode }) {
-  const searchRef = useRef<HTMLInputElement | null>(null);
   const [isSearchFocused, setSearchFocused] = useState(false);
   const [searchProps, setSearchProps] = useState<HeroSearchConnectionContextValue['searchProps']>();
 
   return (
     <HeroSearchConnectionContext.Provider
       value={{
-        searchRef: searchRef as React.MutableRefObject<HTMLInputElement | null>,
         isSearchFocused,
         setSearchFocused,
         searchProps,

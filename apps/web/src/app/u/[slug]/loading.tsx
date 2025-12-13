@@ -1,5 +1,3 @@
 'use client';
 
-import { getLoadingComponent } from '@heyclaude/web-runtime/ui';
-
-export default getLoadingComponent('/u/[slug]');
+export { UserProfileSkeleton as default } from '@/src/components/features/account/user-profile-skeleton';

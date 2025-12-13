@@ -47,11 +47,11 @@ import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { useRef } from 'react';
 
-import { usePostCopyEmail } from '@/src/components/core/infra/providers/email-capture-modal-provider';
 import { usePinboardDrawer } from '@/src/components/features/navigation/pinboard-drawer-provider';
 import { ExploreDropdown } from '@/src/components/content/explore-dropdown';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@heyclaude/web-runtime/ui';
 import { MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 
 /**
  * Validate and return a safe path segment for use in URLs.
@@ -220,11 +220,11 @@ export function DetailHeaderActions({
   const router = useRouter();
   const referrer = globalThis.window === undefined ? undefined : globalThis.location.pathname;
   const { copy: copyToClipboard } = useCopyToClipboard();
-  const { showModal } = usePostCopyEmail();
   // Cast item to ContentItem for property access (content is Json type)
   const contentItem = item as ContentItem;
 
   const pulse = usePulse();
+  const shouldReduceMotion = useReducedMotion();
   const handleCopyContentRef = useRef<(() => Promise<void>) | null>(null);
   
   const { copy } = useCopyWithEmailCapture({
@@ -435,8 +435,8 @@ export function DetailHeaderActions({
         <Tooltip>
           <TooltipTrigger asChild>
             <motion.div 
-              whileHover={MICROINTERACTIONS.button.hover} 
-              whileTap={MICROINTERACTIONS.button.tap}
+              whileHover={shouldReduceMotion ? {} : MICROINTERACTIONS.button.hover} 
+              whileTap={shouldReduceMotion ? {} : MICROINTERACTIONS.button.tap}
               transition={MICROINTERACTIONS.button.transition}
               className="mb-4 inline-block"
             >
@@ -496,8 +496,8 @@ export function DetailHeaderActions({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <motion.div 
-                    whileTap={MICROINTERACTIONS.button.tap} 
-                    whileHover={MICROINTERACTIONS.button.hover}
+                    whileTap={shouldReduceMotion ? {} : MICROINTERACTIONS.button.tap} 
+                    whileHover={shouldReduceMotion ? {} : MICROINTERACTIONS.button.hover}
                     transition={MICROINTERACTIONS.button.transition}
                   >
                     <Button onClick={() => handleActionClick(primaryAction)} className="w-full">
@@ -525,8 +525,8 @@ export function DetailHeaderActions({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <motion.div 
-                    whileTap={MICROINTERACTIONS.button.tap} 
-                    whileHover={MICROINTERACTIONS.button.hover}
+                    whileTap={shouldReduceMotion ? {} : MICROINTERACTIONS.button.tap} 
+                    whileHover={shouldReduceMotion ? {} : MICROINTERACTIONS.button.hover}
                     transition={MICROINTERACTIONS.button.transition}
                   >
                     <Button
@@ -565,7 +565,7 @@ export function DetailHeaderActions({
                 <TooltipTrigger asChild>
                   <DropdownMenuTrigger asChild>
                     <motion.div 
-                      whileTap={MICROINTERACTIONS.button.tap}
+                      whileTap={shouldReduceMotion ? {} : MICROINTERACTIONS.button.tap}
                       transition={MICROINTERACTIONS.button.transition}
                     >
                       <Button variant="outline" size="sm" className="w-full">
@@ -732,12 +732,6 @@ export function DetailHeaderActions({
                         }
                         const content = await response.text();
                         await copyToClipboard(content);
-                        showModal({
-                          copyType: 'markdown',
-                          category,
-                          slug: contentItem.slug,
-                          ...(referrer && { referrer }),
-                        });
                         toasts.raw.success('Copied markdown to clipboard!');
                         await pulse.copy({
                           category,

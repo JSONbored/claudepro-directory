@@ -20,6 +20,7 @@
 import { MotionConfig as MotionMotionConfig } from 'motion/react';
 import type { ReactNode } from 'react';
 import type { Transition } from 'motion/react';
+import { SPRING } from '../../design-system/index.ts';
 
 export interface MotionConfigProviderProps {
   /**
@@ -29,7 +30,7 @@ export interface MotionConfigProviderProps {
 
   /**
    * Global transition defaults for all motion components
-   * @default { duration: 0.3, ease: [0.22, 1, 0.36, 1] }
+   * @default SPRING.smooth (damping: 25, stiffness: 300, type: 'spring')
    */
   transition?: Transition;
 
@@ -63,10 +64,7 @@ export interface MotionConfigProviderProps {
  */
 export function MotionConfigProvider({
   children,
-  transition = {
-    duration: 0.3,
-    ease: [0.22, 1, 0.36, 1], // Custom easing curve (easeOutExpo)
-  },
+  transition = SPRING.smooth, // Use design system default spring config
   reducedMotion = 'user',
   nonce,
 }: MotionConfigProviderProps) {

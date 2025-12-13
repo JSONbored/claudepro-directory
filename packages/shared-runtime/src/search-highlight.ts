@@ -72,7 +72,7 @@ export function highlightSearchTerms(
   options: HighlightOptions = {}
 ): string {
   const {
-    className = 'bg-yellow-200/30 dark:bg-yellow-600/40 font-medium px-0.5 py-0 rounded',
+    className = 'font-medium px-0.5 py-0 rounded', // Color handled by CSS (globals.css mark styles)
     wholeWordsOnly = true,
     maxLength = 10_000,
   } = options;

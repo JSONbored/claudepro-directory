@@ -9,6 +9,7 @@ import { DiscordBrandIcon, GithubBrandIcon, GoogleBrandIcon } from '@heyclaude/w
 import { logClientError, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { cn, toasts } from '@heyclaude/web-runtime/ui';
 import { MICROINTERACTIONS, DURATION } from '@heyclaude/web-runtime/design-system';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import { useCallback, useState } from 'react';
 
@@ -56,6 +57,7 @@ export function OAuthProviderButton({
   newsletterOptIn = false,
 }: OAuthProviderButtonProps) {
   const [loading, setLoading] = useState(false);
+  const shouldReduceMotion = useReducedMotion();
   const supabase = createSupabaseBrowserClient();
 
   const config = PROVIDER_CONFIG[provider];
@@ -125,7 +127,7 @@ export function OAuthProviderButton({
           loading && 'cursor-wait'
         )}
         style={{ borderColor: 'oklch(74% 0.2 35 / 0.3)' }}
-        {...(loading
+        {...(loading || shouldReduceMotion
           ? {}
           : {
               whileHover: {
@@ -139,8 +141,12 @@ export function OAuthProviderButton({
         {loading ? (
           <motion.div
             className="h-7 w-7 rounded-full border-2 border-white/20 border-t-white/80"
-            animate={{ rotate: 360 }}
-            transition={{ duration: DURATION.long, repeat: Number.POSITIVE_INFINITY, ease: 'linear' }}
+            animate={shouldReduceMotion ? {} : { rotate: 360 }}
+            transition={
+              shouldReduceMotion
+                ? {}
+                : { duration: DURATION.long, repeat: Number.POSITIVE_INFINITY, ease: 'linear' }
+            }
           />
         ) : (
           <div style={{ width: '28px', height: '28px' }} className="text-foreground">

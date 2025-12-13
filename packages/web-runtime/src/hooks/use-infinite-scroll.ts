@@ -9,7 +9,8 @@
  */
 
 import { getHomepageConfigBundle, getTimeoutConfig } from '../config/static-configs.ts';
-import { logger } from '../entries/core.ts';
+// Import directly from source files to avoid indirect imports through entries/core.ts
+import { logger } from '../logger.ts';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface UseInfiniteScrollOptions {

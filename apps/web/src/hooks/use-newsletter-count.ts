@@ -3,10 +3,9 @@
 /**
  * Newsletter Subscriber Count Hook
  * Provides live subscriber count with localStorage caching and visibility-based polling
- * Uses secure server action for data fetching
+ * Uses API route for data fetching (avoids HMR issues with server actions)
  */
 
-import { getNewsletterCountAction } from '@heyclaude/web-runtime/actions';
 import { POLLING_CONFIG } from '@heyclaude/web-runtime/config/unified-config';
 import { logClientError, logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { useEffect, useRef, useState } from 'react';
@@ -64,18 +63,24 @@ export function useNewsletterCount(): UseNewsletterCountReturn {
         }
       }
 
-      // Fetch from server action
+      // Fetch from API route (avoids HMR issues with server actions)
       try {
-        const result = await getNewsletterCountAction({});
+        const response = await fetch('/api/flux/email/count', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
 
-        if (result?.serverError) {
-          throw new Error(result.serverError);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch newsletter count: ${response.status} ${response.statusText}`);
         }
 
-        const newCount = result?.data ?? null;
+        const data = await response.json();
+        const newCount = data?.count ?? null;
 
-        if (newCount === null) {
-          throw new Error('Failed to fetch newsletter count');
+        if (newCount === null || typeof newCount !== 'number') {
+          throw new Error('Invalid newsletter count response');
         } else {
           setCount(newCount);
           setIsLoading(false);

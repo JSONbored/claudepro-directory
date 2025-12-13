@@ -6,7 +6,8 @@ import {
   getReviewsWithStats,
   markReviewHelpful,
 } from '@heyclaude/web-runtime/actions';
-import { formatDistanceToNow, logUnhandledPromise } from '@heyclaude/web-runtime/core';
+import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
+import { formatDistanceToNow } from '@heyclaude/web-runtime/data/utils';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { Edit, Star, ThumbsUp, Trash } from '@heyclaude/web-runtime/icons';

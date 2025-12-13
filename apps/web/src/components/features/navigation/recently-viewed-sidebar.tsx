@@ -40,6 +40,7 @@ import {
   Button,
 } from '@heyclaude/web-runtime/ui';
 import { MICROINTERACTIONS, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
 import { memo, useState, type MouseEvent } from 'react';
@@ -60,6 +61,7 @@ const RecentlyViewedItemComponent = memo(function RecentlyViewedItemComponent({
   onRemove,
 }: RecentlyViewedItemProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const shouldReduceMotion = useReducedMotion();
 
   const href = `/${getCategoryRoute(item.category)}/${item.slug}`;
 
@@ -81,9 +83,9 @@ const RecentlyViewedItemComponent = memo(function RecentlyViewedItemComponent({
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: -10 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -10 }}
+      initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -10 }}
+      animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
+      exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -10 }}
       transition={{
         duration: DURATION.quick,
         delay: index * STAGGER.micro, // Stagger by 30ms (using micro for closest match)
@@ -94,13 +96,17 @@ const RecentlyViewedItemComponent = memo(function RecentlyViewedItemComponent({
       onMouseLeave={() => setIsHovered(false)}
     >
       <motion.div
-        whileHover={{
-          ...MICROINTERACTIONS.card.hover,
-          borderColor: 'rgba(249, 115, 22, 0.5)', // Preserve exact original border color (accent/50)
-          backgroundColor: 'rgba(249, 115, 22, 0.05)', // Preserve exact original background (accent/5)
-          y: 0, // Preserve original (no y movement in original)
-        }}
-        whileTap={MICROINTERACTIONS.card.tap}
+        whileHover={
+          shouldReduceMotion
+            ? {}
+            : {
+                ...MICROINTERACTIONS.card.hover,
+                borderColor: 'rgba(249, 115, 22, 0.5)', // Preserve exact original border color (accent/50)
+                backgroundColor: 'rgba(249, 115, 22, 0.05)', // Preserve exact original background (accent/5)
+                y: 0, // Preserve original (no y movement in original)
+              }
+        }
+        whileTap={shouldReduceMotion ? {} : MICROINTERACTIONS.card.tap}
         transition={MICROINTERACTIONS.card.transition}
       >
         <Link

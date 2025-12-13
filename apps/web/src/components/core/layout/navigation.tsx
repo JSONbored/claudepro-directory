@@ -14,10 +14,12 @@ import {
   POSITION_PATTERNS,
   UI_CLASSES,
 } from '@heyclaude/web-runtime/ui';
-import { motion, useScroll, useTransform } from 'motion/react';
+import { motion, useScroll, useMotionValueEvent } from 'motion/react';
+import { useTransform } from '@heyclaude/web-runtime/hooks/motion';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { memo, useEffect, useState } from 'react';
+import { memo, useRef, useState } from 'react';
 
 import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';
 // NavigationCommandMenu is now rendered in CommandMenuWrapper (root-layout-wrapper.tsx)
@@ -36,40 +38,26 @@ const NavigationComponent = () => {
   const pathname = usePathname();
 
   // Motion.dev scroll-based animations (Phase 1.5 - October 2025)
+  const shouldReduceMotion = useReducedMotion();
   const { scrollY } = useScroll();
-  const backdropBlur = useTransform(scrollY, [0, 100], ['blur(0px)', 'blur(12px)']);
+  const lastScrollYRef = useRef(0);
+  
+  // Disable blur effect for reduced motion (opacity-only is fine)
+  const backdropBlur = shouldReduceMotion
+    ? useTransform(scrollY, [0, 100], ['blur(0px)', 'blur(0px)'])
+    : useTransform(scrollY, [0, 100], ['blur(0px)', 'blur(12px)']);
   const navOpacity = useTransform(scrollY, [0, 50], [0.95, 1]);
-
-  // SHA-2088: Optimized scroll handler with threshold check and rAF debouncing
+  
+  // SHA-2088: Optimized scroll handler using Motion.dev useScroll
   // Only updates state when crossing 20px threshold (prevents 98% of unnecessary re-renders)
-  useEffect(() => {
-    let rafId: null | number = null;
-
-    const handleScroll = () => {
-      // Cancel pending frame to debounce
-      if (rafId !== null) {
-        cancelAnimationFrame(rafId);
-      }
-
-      // Schedule update for next animation frame
-      rafId = requestAnimationFrame(() => {
-        const scrolled = window.scrollY > 20;
-        // Only update state when crossing threshold (prevents re-render on every pixel)
-        setIsScrolled((prev) => (prev === scrolled ? prev : scrolled));
-      });
-    };
-
-    // Check initial scroll position
-    handleScroll();
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      if (rafId !== null) {
-        cancelAnimationFrame(rafId);
-      }
-    };
-  }, []);
+  useMotionValueEvent(scrollY, 'change', (current: number) => {
+    const scrolled = current > 20;
+    // Only update state when crossing threshold (prevents re-render on every pixel)
+    if ((lastScrollYRef.current <= 20) !== scrolled) {
+      setIsScrolled(scrolled);
+    }
+    lastScrollYRef.current = current;
+  });
 
   const isActive = (path: string) => {
     return pathname === path || pathname.startsWith(path);

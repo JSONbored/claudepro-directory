@@ -38,9 +38,10 @@ import {
   useFormTracking,
   useLoggedAsync,
 } from '@heyclaude/web-runtime/hooks';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
 import {
-  Camera as ImageIcon, Code, FileText, Plus, Sparkles, Tag, X,
+  Code, FileText, Camera as ImageIcon, Plus, Sparkles, Tag, X,
 } from '@heyclaude/web-runtime/icons';
 import { useClientLogger } from '@heyclaude/web-runtime/logging/client';
 import { type SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
@@ -889,8 +890,8 @@ export default function WizardSubmissionPage() {
       case 1: {
         return (
           <StepTypeSelection
-            onSelect={(type) => updateFormData({ submission_type: type })}
             selected={formData.submission_type}
+            onSelect={(type) => updateFormData({ submission_type: type })}
           />
         );
       }
@@ -899,7 +900,6 @@ export default function WizardSubmissionPage() {
           <StepBasicInfo
             data={formData}
             isUploadingThumbnail={isUploadingThumbnail}
-            thumbnailPreview={thumbnailPreview ?? formData.thumbnail_url ?? null}
             onChange={updateFormData}
             onImageUpload={handleImageUpload}
             onRemoveThumbnail={() => {
@@ -932,6 +932,7 @@ export default function WizardSubmissionPage() {
               });
               setThumbnailPreview(null);
             }}
+            thumbnailPreview={thumbnailPreview ?? formData.thumbnail_url ?? null}
           />
         );
       }
@@ -940,11 +941,11 @@ export default function WizardSubmissionPage() {
           <StepConfiguration
             data={formData.type_specific}
             getHighlightClasses={getHighlightClasses}
-            onApplyTemplate={applyTemplate}
-            onChange={(data) => updateFormData({ type_specific: data })}
             submissionType={formData.submission_type}
             templates={templates}
             templatesLoading={templatesLoading}
+            onApplyTemplate={applyTemplate}
+            onChange={(data) => updateFormData({ type_specific: data })}
           />
         );
       }
@@ -956,11 +957,11 @@ export default function WizardSubmissionPage() {
           <StepReviewSubmit
             data={formData}
             isSubmitting={isSubmitting}
-            qualityScore={qualityScore}
-            showCelebration={showCelebration}
             onSubmit={() => {
               void handleSubmit();
             }}
+            qualityScore={qualityScore}
+            showCelebration={showCelebration}
           />
         );
       }
@@ -981,13 +982,13 @@ export default function WizardSubmissionPage() {
         canGoPrevious={currentStep > 1}
         currentStep={currentStep}
         isLastStep={currentStep === 5}
+        qualityScore={qualityScore}
+        steps={steps}
+        submissionType={formData.submission_type}
         onNext={handleNext}
         onPrevious={handlePrevious}
         onSave={handleSave}
         onStepChange={handleStepChange}
-        qualityScore={qualityScore}
-        steps={steps}
-        submissionType={formData.submission_type}
       >
         {renderStepContent()}
 
@@ -1023,18 +1024,19 @@ function StepTypeSelection({
   onSelect: (type: SubmissionContentType) => void;
   selected: SubmissionContentType;
 }) {
+  const shouldReduceMotion = useReducedMotion();
   return (
     <div className="space-y-8">
       <motion.div
-        animate={{ opacity: 1, y: 0 }}
+        animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
         className="text-center"
-        initial={{ opacity: 0, y: 20 }}
+        initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
         transition={SPRING.smooth}
       >
         <motion.div
-          animate={{ scale: 1 }}
+          animate={shouldReduceMotion ? { opacity: 1 } : { scale: 1 }}
           className="mb-4 inline-flex"
-          initial={{ scale: 0 }}
+          initial={shouldReduceMotion ? { opacity: 0 } : { scale: 0 }}
           transition={{ ...SPRING.bouncy, delay: STAGGER.default }}
         >
           <Sparkles className="h-12 w-12" style={{ color: TOKENS.colors.accent.primary }} />
@@ -1048,7 +1050,7 @@ function StepTypeSelection({
         </div>
       </motion.div>
 
-      <TypeSelectionCards onSelect={onSelect} selected={selected} />
+      <TypeSelectionCards selected={selected} onSelect={onSelect} />
     </div>
   );
 }
@@ -1117,18 +1119,19 @@ function StepBasicInfo({
     }
   }, [data.description]);
 
+  const shouldReduceMotion = useReducedMotion();
   return (
     <div className="space-y-8">
       <motion.div
-        animate={{ opacity: 1, y: 0 }}
+        animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
         className="text-center"
-        initial={{ opacity: 0, y: 20 }}
+        initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
         transition={SPRING.smooth}
       >
         <motion.div
-          animate={{ scale: 1 }}
+          animate={shouldReduceMotion ? { opacity: 1 } : { scale: 1 }}
           className="mb-4 inline-flex"
-          initial={{ scale: 0 }}
+          initial={shouldReduceMotion ? { opacity: 0 } : { scale: 0 }}
           transition={{ ...SPRING.bouncy, delay: STAGGER.default }}
         >
           <FileText className="h-12 w-12" style={{ color: TOKENS.colors.accent.primary }} />
@@ -1140,8 +1143,8 @@ function StepBasicInfo({
       </motion.div>
 
       <motion.div
-        animate={{ opacity: 1, y: 0 }}
-        initial={{ opacity: 0, y: 20 }}
+        animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+        initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
         transition={{ ...SPRING.smooth, delay: STAGGER.fast }}
       >
         <Card
@@ -1152,34 +1155,34 @@ function StepBasicInfo({
         >
           <CardContent className="space-y-6 pt-6">
             <AnimatedFormField
+              required
               helpText="A clear, descriptive name"
               id="wizard-name"
               label="Name"
-              required
               validationState={nameValidation}
               {...(nameValidation === 'invalid'
                 ? { errorMessage: 'Name must be at least 3 characters' }
                 : {})}
               {...(nameValidation === 'valid' ? { successMessage: 'Great name!' } : {})}
+              showCharCount
               currentLength={data.name.length}
               maxLength={100}
-              showCharCount
             >
               <Input
                 className="pr-12"
                 id="wizard-name"
                 maxLength={100}
-                onChange={(event) => onChange({ name: event.target.value })}
                 placeholder="e.g., React Query Expert"
                 value={data.name}
+                onChange={(event) => onChange({ name: event.target.value })}
               />
             </AnimatedFormField>
 
             <AnimatedFormField
+              required
               helpText="Explain what your configuration does and how to use it"
               id="wizard-description"
               label="Description"
-              required
               validationState={descValidation}
               {...(descValidation === 'warning'
                 ? {
@@ -1189,31 +1192,31 @@ function StepBasicInfo({
               {...(descValidation === 'valid' && data.description.length >= 50
                 ? { successMessage: 'Excellent description!' }
                 : {})}
+              showCharCount
               currentLength={data.description.length}
               maxLength={500}
-              showCharCount
             >
               <Textarea
                 id="wizard-description"
                 maxLength={500}
+                onChange={(event) => onChange({ description: event.target.value })}
                 placeholder="Describe what your configuration does..."
                 rows={6}
                 value={data.description}
-                onChange={(event) => onChange({ description: event.target.value })}
               />
             </AnimatedFormField>
 
             <AnimatedFormField
+              required
               helpText="Your name or username"
               id="wizard-author"
               label="Author Name"
-              required
             >
               <Input
                 id="wizard-author"
+                onChange={(event) => onChange({ author: event.target.value })}
                 placeholder="Your name"
                 value={data.author}
-                onChange={(event) => onChange({ author: event.target.value })}
               />
             </AnimatedFormField>
 
@@ -1224,10 +1227,10 @@ function StepBasicInfo({
             >
               <Input
                 id="wizard-github"
+                onChange={(event) => onChange({ github_url: event.target.value })}
                 placeholder="https://github.com/..."
                 type="url"
                 value={data.github_url ?? ''}
-                onChange={(event) => onChange({ github_url: event.target.value })}
               />
             </AnimatedFormField>
 
@@ -1257,6 +1260,7 @@ function StepBasicInfo({
                       className="hidden"
                       disabled={isUploadingThumbnail}
                       id="thumbnail-upload"
+                      type="file"
                       onChange={(event) => {
                         const file = event.target.files?.[0];
                         if (file) {
@@ -1265,7 +1269,6 @@ function StepBasicInfo({
                         // Reset input to allow re-selecting the same file
                         event.target.value = '';
                       }}
-                      type="file"
                     />
                   </label>
                 </div>
@@ -1274,10 +1277,10 @@ function StepBasicInfo({
                 <AnimatePresence mode="wait">
                   {thumbnailPreview ? (
                     <motion.div
-                      animate={{ opacity: 1, scale: 1 }}
+                      animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }}
                       className="relative inline-block"
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      initial={{ opacity: 0, scale: 0.95 }}
+                      exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
+                      initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
                       transition={SPRING.smooth}
                     >
                       <div
@@ -1285,9 +1288,9 @@ function StepBasicInfo({
                         style={{ borderColor: TOKENS.colors.border.light }}
                       >
                         <Image
+                          fill
                           alt="Thumbnail preview"
                           className="object-cover"
-                          fill
                           src={thumbnailPreview}
                           unoptimized={thumbnailPreview.startsWith('blob:')}
                         />
@@ -1295,10 +1298,10 @@ function StepBasicInfo({
                       <motion.button
                         className="bg-destructive text-destructive-foreground absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full shadow-sm"
                         disabled={isUploadingThumbnail}
-                        onClick={onRemoveThumbnail}
                         type="button"
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
+                        whileHover={shouldReduceMotion ? {} : { scale: 1.1 }}
+                        whileTap={shouldReduceMotion ? {} : { scale: 0.9 }}
+                        onClick={onRemoveThumbnail}
                       >
                         <X className="h-4 w-4" />
                       </motion.button>
@@ -1355,18 +1358,19 @@ function StepConfiguration({
   templatesLoading?: boolean;
 }) {
   const hasTemplates = templates && templates.length > 0;
+  const shouldReduceMotion = useReducedMotion();
   return (
     <div className="space-y-8">
       <motion.div
-        animate={{ opacity: 1, y: 0 }}
+        animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
         className="text-center"
-        initial={{ opacity: 0, y: 20 }}
+        initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
         transition={SPRING.smooth}
       >
         <motion.div
-          animate={{ scale: 1 }}
+          animate={shouldReduceMotion ? { opacity: 1 } : { scale: 1 }}
           className="mb-4 inline-flex"
-          initial={{ scale: 0 }}
+          initial={shouldReduceMotion ? { opacity: 0 } : { scale: 0 }}
           transition={{ ...SPRING.bouncy, delay: STAGGER.default }}
         >
           <Code className="h-12 w-12" style={{ color: TOKENS.colors.accent.primary }} />
@@ -1383,8 +1387,8 @@ function StepConfiguration({
       {/* Template Quick Select - Show at top of configuration step */}
       {templatesLoading ? (
         <motion.div
-          animate={{ opacity: 1, y: 0 }}
-          initial={{ opacity: 0, y: 10 }}
+          animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+          initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 10 }}
           transition={{ ...SPRING.smooth, delay: STAGGER.medium }}
         >
           <TemplateQuickSelectSkeleton />
@@ -1393,22 +1397,22 @@ function StepConfiguration({
 
       {hasTemplates && onApplyTemplate && !templatesLoading ? (
         <motion.div
-          animate={{ opacity: 1, y: 0 }}
-          initial={{ opacity: 0, y: 10 }}
+          animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+          initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 10 }}
           transition={{ ...SPRING.smooth, delay: STAGGER.medium }}
         >
           <TemplateQuickSelect
             contentType={submissionType as Database['public']['Enums']['content_category']}
             maxVisible={3}
-            onApplyTemplate={onApplyTemplate}
             templates={templates}
+            onApplyTemplate={onApplyTemplate}
           />
         </motion.div>
       ) : null}
 
       <motion.div
-        animate={{ opacity: 1, y: 0 }}
-        initial={{ opacity: 0, y: 20 }}
+        animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+        initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
         transition={{ ...SPRING.smooth, delay: STAGGER.fast }}
       >
         <Card
@@ -1421,22 +1425,22 @@ function StepConfiguration({
             {submissionType === SUBMISSION_TYPE_AGENTS && (
               <>
                 <AnimatedFormField
+                  required
+                  showCharCount
                   currentLength={((data['systemPrompt'] as string) || '').length}
                   helpText="The main prompt that defines the agent's behavior"
                   id="wizard-system-prompt"
                   label="System Prompt"
                   maxLength={2000}
-                  required
-                  showCharCount
                 >
                   <Textarea
                     className={getHighlightClasses?.('type_specific.systemPrompt')}
                     id="wizard-system-prompt"
                     maxLength={2000}
-                    onChange={(event) => onChange({ ...data, systemPrompt: event.target.value })}
                     placeholder="You are an expert in..."
                     rows={8}
                     value={(data['systemPrompt'] as string) || ''}
+                    onChange={(event) => onChange({ ...data, systemPrompt: event.target.value })}
                   />
                 </AnimatedFormField>
 
@@ -1450,9 +1454,6 @@ function StepConfiguration({
                       id="wizard-temperature"
                       max={1}
                       min={0}
-                      step={0.1}
-                      type="number"
-                      value={(data['temperature'] as number | undefined) ?? 0.7}
                       onChange={(event) => {
                         const raw = event.target.value;
                         const parsed = raw === '' ? undefined : Number.parseFloat(raw);
@@ -1461,6 +1462,9 @@ function StepConfiguration({
                           temperature: Number.isNaN(parsed as number) ? undefined : parsed,
                         });
                       }}
+                      step={0.1}
+                      type="number"
+                      value={(data['temperature'] as number | undefined) ?? 0.7}
                     />
                   </AnimatedFormField>
 
@@ -1473,9 +1477,6 @@ function StepConfiguration({
                       id="wizard-max-tokens"
                       max={4096}
                       min={100}
-                      step={100}
-                      type="number"
-                      value={(data['maxTokens'] as number | undefined) ?? 2048}
                       onChange={(event) => {
                         const raw = event.target.value;
                         const parsed = raw === '' ? undefined : Number.parseInt(raw, 10);
@@ -1484,6 +1485,9 @@ function StepConfiguration({
                           maxTokens: Number.isNaN(parsed as number) ? undefined : parsed,
                         });
                       }}
+                      step={100}
+                      type="number"
+                      value={(data['maxTokens'] as number | undefined) ?? 2048}
                     />
                   </AnimatedFormField>
                 </div>
@@ -1493,16 +1497,16 @@ function StepConfiguration({
             {submissionType === SUBMISSION_TYPE_MCP && (
               <>
                 <AnimatedFormField
+                  required
                   helpText="The npm package name"
                   id="wizard-npm-package"
                   label="NPM Package"
-                  required
                 >
                   <Input
                     id="wizard-npm-package"
+                    onChange={(event) => onChange({ ...data, npmPackage: event.target.value })}
                     placeholder="@modelcontextprotocol/server-..."
                     value={(data['npmPackage'] as string) || ''}
-                    onChange={(event) => onChange({ ...data, npmPackage: event.target.value })}
                   />
                 </AnimatedFormField>
 
@@ -1513,9 +1517,9 @@ function StepConfiguration({
                 >
                   <Input
                     id="wizard-install-command"
+                    onChange={(event) => onChange({ ...data, installCommand: event.target.value })}
                     placeholder="npm install -g @modelcontextprotocol/..."
                     value={(data['installCommand'] as string) || ''}
-                    onChange={(event) => onChange({ ...data, installCommand: event.target.value })}
                   />
                 </AnimatedFormField>
 
@@ -1526,15 +1530,15 @@ function StepConfiguration({
                 >
                   <Textarea
                     id="wizard-tools-description"
-                    placeholder="This server provides tools for..."
-                    rows={4}
-                    value={(data['toolsDescription'] as string) || ''}
                     onChange={(event) =>
                       onChange({
                         ...data,
                         toolsDescription: event.target.value,
                       })
                     }
+                    placeholder="This server provides tools for..."
+                    rows={4}
+                    value={(data['toolsDescription'] as string) || ''}
                   />
                 </AnimatedFormField>
               </>
@@ -1542,43 +1546,43 @@ function StepConfiguration({
 
             {submissionType === SUBMISSION_TYPE_RULES && (
               <AnimatedFormField
+                required
+                showCharCount
                 currentLength={((data['rulesContent'] as string) || '').length}
                 helpText="The expertise rules or guidelines"
                 id="wizard-rules-content"
                 label="Rules Content"
                 maxLength={3000}
-                required
-                showCharCount
               >
                 <Textarea
                   id="wizard-rules-content"
                   maxLength={3000}
+                  onChange={(event) => onChange({ ...data, rulesContent: event.target.value })}
                   placeholder="When working with TypeScript..."
                   rows={10}
                   value={(data['rulesContent'] as string) || ''}
-                  onChange={(event) => onChange({ ...data, rulesContent: event.target.value })}
                 />
               </AnimatedFormField>
             )}
 
             {submissionType === SUBMISSION_TYPE_COMMANDS && (
               <AnimatedFormField
+                required
+                showCharCount
                 currentLength={((data['commandContent'] as string) || '').length}
                 helpText="The shell command or script"
                 id="wizard-command-content"
                 label="Command Content"
                 maxLength={1000}
-                required
-                showCharCount
               >
                 <Textarea
                   className="font-mono"
                   id="wizard-command-content"
                   maxLength={1000}
-                  onChange={(event) => onChange({ ...data, commandContent: event.target.value })}
                   placeholder="#!/bin/bash..."
                   rows={6}
                   value={(data['commandContent'] as string) || ''}
+                  onChange={(event) => onChange({ ...data, commandContent: event.target.value })}
                 />
               </AnimatedFormField>
             )}
@@ -1636,18 +1640,19 @@ function StepExamplesTags({
     });
   };
 
+  const shouldReduceMotion = useReducedMotion();
   return (
     <div className="space-y-8">
       <motion.div
-        animate={{ opacity: 1, y: 0 }}
+        animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
         className="text-center"
-        initial={{ opacity: 0, y: 20 }}
+        initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
         transition={SPRING.smooth}
       >
         <motion.div
-          animate={{ scale: 1 }}
+          animate={shouldReduceMotion ? { opacity: 1 } : { scale: 1 }}
           className="mb-4 inline-flex"
-          initial={{ scale: 0 }}
+          initial={shouldReduceMotion ? { opacity: 0 } : { scale: 0 }}
           transition={{ ...SPRING.bouncy, delay: STAGGER.default }}
         >
           <Sparkles className="h-12 w-12" style={{ color: TOKENS.colors.accent.primary }} />
@@ -1662,9 +1667,9 @@ function StepExamplesTags({
       </motion.div>
 
       <motion.div
-        animate={{ opacity: 1, y: 0 }}
+        animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
         className="space-y-6"
-        initial={{ opacity: 0, y: 20 }}
+        initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
         transition={{ ...SPRING.smooth, delay: STAGGER.fast }}
       >
         {/* Examples Section */}
@@ -1689,6 +1694,8 @@ function StepExamplesTags({
             <div className="flex gap-2">
               <Input
                 className="flex-1"
+                placeholder="e.g., 'Create a React component'"
+                value={newExample}
                 onChange={(event) => setNewExample(event.target.value)}
                 onKeyDown={(event) => {
                   if (event.key === 'Enter') {
@@ -1696,16 +1703,14 @@ function StepExamplesTags({
                     addExample();
                   }
                 }}
-                placeholder="e.g., 'Create a React component'"
-                value={newExample}
               />
               <Button
                 disabled={!newExample.trim()}
-                onClick={addExample}
                 style={{
                   backgroundColor: TOKENS.colors.accent.primary,
                 }}
                 type="button"
+                onClick={addExample}
               >
                 <Plus className="h-4 w-4" />
               </Button>
@@ -1720,10 +1725,16 @@ function StepExamplesTags({
                     const exampleKey = `example-${example}`;
                     return (
                       <motion.div
-                        animate={{ opacity: 1, scale: 1, x: 0 }}
+                        animate={
+                          shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1, x: 0 }
+                        }
                         className="group hover:border-accent/50 flex items-start gap-3 rounded-lg border p-3 transition-all"
-                        exit={{ opacity: 0, scale: 0.9, x: 20 }}
-                        initial={{ opacity: 0, scale: 0.9, x: -20 }}
+                        exit={
+                          shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.9, x: 20 }
+                        }
+                        initial={
+                          shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.9, x: -20 }
+                        }
                         key={exampleKey}
                         style={{
                           backgroundColor: TOKENS.colors.background.primary,
@@ -1743,13 +1754,13 @@ function StepExamplesTags({
                         <span className="flex-1 text-sm leading-relaxed">{example}</span>
                         <motion.button
                           className="shrink-0 rounded-full p-1 opacity-0 transition-all group-hover:opacity-100"
-                          onClick={() => removeExample(index)}
                           style={{
                             color: TOKENS.colors.error.text,
                           }}
                           type="button"
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
+                          whileHover={shouldReduceMotion ? {} : { scale: 1.1 }}
+                          whileTap={shouldReduceMotion ? {} : { scale: 0.9 }}
+                          onClick={() => removeExample(index)}
                         >
                           <X className="h-4 w-4" />
                         </motion.button>
@@ -1779,8 +1790,8 @@ function StepExamplesTags({
 
       {/* Tags Section */}
       <motion.div
-        animate={{ opacity: 1, y: 0 }}
-        initial={{ opacity: 0, y: 20 }}
+        animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+        initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
         transition={{ ...SPRING.smooth, delay: STAGGER.default }}
       >
         <Card
@@ -1808,6 +1819,8 @@ function StepExamplesTags({
               <Input
                 className="flex-1"
                 maxLength={30}
+                placeholder="e.g., 'react', 'typescript', 'api'"
+                value={newTag}
                 onChange={(event) => setNewTag(event.target.value)}
                 onKeyDown={(event) => {
                   if (event.key === 'Enter') {
@@ -1815,18 +1828,19 @@ function StepExamplesTags({
                     addTag();
                   }
                 }}
-                placeholder="e.g., 'react', 'typescript', 'api'"
-                value={newTag}
               />
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <motion.div
+                whileHover={shouldReduceMotion ? {} : { scale: 1.05 }}
+                whileTap={shouldReduceMotion ? {} : { scale: 0.95 }}
+              >
                 <Button
                   className="gap-2"
                   disabled={!newTag.trim()}
-                  onClick={addTag}
                   style={{
                     backgroundColor: TOKENS.colors.accent.primary,
                   }}
                   type="button"
+                  onClick={addTag}
                 >
                   <Plus className="h-4 w-4" />
                   Add
@@ -1843,12 +1857,12 @@ function StepExamplesTags({
                     const tagKey = `tag-${tag}`;
                     return (
                       <motion.div
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0 }}
-                        initial={{ opacity: 0, scale: 0 }}
+                        animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }}
+                        exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0 }}
+                        initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0 }}
                         key={tagKey}
                         transition={SPRING.bouncy}
-                        whileHover={{ scale: 1.05 }}
+                        whileHover={shouldReduceMotion ? {} : { scale: 1.05 }}
                       >
                         <Badge
                           className="group gap-1.5 pr-1 text-sm"
@@ -1862,13 +1876,13 @@ function StepExamplesTags({
                           {tag}
                           <button
                             className="hover:bg-accent/20 ml-1 rounded-full p-0.5 transition-colors"
+                            type="button"
                             onClick={() => {
                               const tagIndex = data.tags.indexOf(tag);
                               if (tagIndex !== -1) {
                                 removeTag(tagIndex);
                               }
                             }}
-                            type="button"
                           >
                             <X className="h-3 w-3" />
                           </button>

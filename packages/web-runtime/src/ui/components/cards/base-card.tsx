@@ -8,7 +8,7 @@
  *
  * Architecture:
  * - Client-side only (uses hooks, motion)
- * - Accepts app-specific primitives as optional props (Card, HoverCard, SponsoredPulse)
+ * - Accepts app-specific primitives as optional props (Card, HoverCard)
  * - Uses web-runtime utilities (navigation, badges, view transitions)
  * - Structured logging for errors
  * - Performance optimized with React.memo
@@ -17,7 +17,6 @@
  * - Shared card structure and navigation logic
  * - Customizable badge, action, and metadata slots
  * - Integrated useCardNavigation hook
- * - Sponsored content tracking support (via optional SponsoredPulse wrapper)
  * - Full accessibility (ARIA labels, keyboard navigation)
  * - Motion.dev hover/tap animations (via optional HoverCard wrapper)
  * - View Transitions API support
@@ -41,14 +40,13 @@
  * ```
  */
 
-import { APP_CONFIG } from '../../../data/config/constants.ts';
 import { getViewTransitionName } from '../../utils.ts';
 import { POSITION_PATTERNS, UI_CLASSES } from '../../constants.ts';
 import { UnifiedBadge } from '../badges/unified-badge.tsx';
 import { SwipeableCardWrapper } from './swipeable-card.tsx';
 import { motion } from 'motion/react';
 import { MICROINTERACTIONS } from '../../../design-system/index.ts';
-import { SponsoredPulse } from '../features/sponsored-pulse.tsx';
+import { useReducedMotion } from '../../../hooks/motion/index.ts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../card.tsx';
 import { type UseCardNavigationOptions, useCardNavigation } from '../../../hooks/use-card-navigation.ts';
 import { useTheme } from '../../../hooks/use-theme.ts';
@@ -173,20 +171,6 @@ export interface BaseCardProps {
    */
   customMetadataText?: ReactNode;
 
-  /**
-   * Whether this is sponsored content
-   */
-  isSponsored?: boolean;
-
-  /**
-   * Sponsored content ID for tracking
-   */
-  sponsoredId?: string;
-
-  /**
-   * Position in list (for sponsored tracking)
-   */
-  position?: number;
 
   /**
    * Custom click handler (called before navigation)
@@ -284,9 +268,6 @@ export const BaseCard = memo(
     renderMetadataBadges,
     renderActions,
     customMetadataText,
-    isSponsored,
-    sponsoredId,
-    position,
     onBeforeNavigate,
     disableNavigation = false,
     showAuthor = true,
@@ -308,6 +289,7 @@ export const BaseCard = memo(
 
     // Detect current theme for semantic color tokens
     const theme = useTheme();
+    const shouldReduceMotion = useReducedMotion();
 
     try {
       const navigationParam: string | UseCardNavigationOptions | undefined =
@@ -538,12 +520,14 @@ export const BaseCard = memo(
             transformStyle: 'preserve-3d',
           }}
           initial={false}
-          whileHover={{
-            ...MICROINTERACTIONS.card.hover,
-            // Override borderColor with theme-aware semantic token
-            borderColor: COLORS.semantic.primary[theme].base,
-          }}
-          whileTap={MICROINTERACTIONS.card.tap}
+          whileHover={shouldReduceMotion
+            ? {}
+            : {
+                ...MICROINTERACTIONS.card.hover,
+                // Override borderColor with theme-aware semantic token
+                borderColor: COLORS.semantic.primary[theme].base,
+              }}
+          whileTap={shouldReduceMotion ? {} : MICROINTERACTIONS.card.tap}
           transition={MICROINTERACTIONS.card.transition}
           onClick={handleCardClick}
           role="article"
@@ -568,20 +552,6 @@ export const BaseCard = memo(
       ) : (
         cardElement
       );
-
-      // Wrap in sponsored tracker if this is sponsored content
-      if (isSponsored && sponsoredId && targetPath) {
-        return (
-          <SponsoredPulse
-            sponsoredId={sponsoredId}
-            targetUrl={`${APP_CONFIG.url}${targetPath}`}
-            position={position}
-            pageUrl={typeof window !== 'undefined' ? window.location.href : undefined}
-          >
-            {finalCardContent}
-          </SponsoredPulse>
-        );
-      }
 
       return finalCardContent;
     } catch (error) {

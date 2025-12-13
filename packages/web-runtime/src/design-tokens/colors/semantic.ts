@@ -265,4 +265,47 @@ export const SEMANTIC_COLORS = {
       },
     },
   },
+
+  /**
+   * Search Bar Colors
+   * For search input focus states and animations
+   * Includes both OKLCH (for CSS) and RGB (for Motion.dev animations)
+   */
+  search: {
+    focus: {
+      /**
+       * Focus border color - Claude orange with 70% opacity
+       * OKLCH for CSS, RGB for Motion.dev
+       */
+      borderColor: {
+        oklch: 'oklch(74% 0.2 35 / 0.7)', // For CSS
+        rgb: 'rgba(249, 115, 22, 0.7)', // For Motion.dev animations
+      },
+      /**
+       * Focus shadow color - Claude orange with 20% opacity
+       * OKLCH for CSS, RGB for Motion.dev
+       */
+      shadowColor: {
+        oklch: 'oklch(74% 0.2 35 / 0.2)', // For CSS
+        rgb: 'rgba(249, 115, 22, 0.2)', // For Motion.dev animations
+      },
+      /**
+       * Focus glow color - Claude orange with varying opacity
+       * RGB for Motion.dev animations
+       */
+      glow: {
+        from: 'rgba(249, 115, 22, 0.5)', // Gradient start
+        via: 'rgba(249, 115, 22, 0.35)', // Gradient middle
+        to: 'rgba(249, 115, 22, 0.15)', // Gradient end
+      },
+    },
+    /**
+     * Particle effect colors
+     * RGB for Motion.dev animations
+     */
+    particle: {
+      base: 'rgba(249, 115, 22, 0.4)', // Particle base color
+      shadow: 'rgba(249, 115, 22, 0.5)', // Particle shadow
+    },
+  },
 } as const;

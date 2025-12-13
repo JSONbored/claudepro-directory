@@ -11,10 +11,10 @@ import { type Database } from '@heyclaude/database-types';
 import {
   ensureStringArray,
   formatCopyCount,
-  formatDate,
   formatViewCount,
   getSocialLinks,
 } from '@heyclaude/web-runtime/core';
+import { formatDate } from '@heyclaude/web-runtime/data/utils';
 import { Calendar, Copy, Eye, Tag, User } from '@heyclaude/web-runtime/icons';
 import { type ContentItem } from '@heyclaude/web-runtime/types/component.types';
 import { UI_CLASSES, UnifiedBadge } from '@heyclaude/web-runtime/ui';

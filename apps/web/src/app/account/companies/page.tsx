@@ -4,13 +4,13 @@
  */
 
 import { type Database } from '@heyclaude/database-types';
-import { formatRelativeDate } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
   getUserCompanies,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { formatRelativeDate } from '@heyclaude/web-runtime/data/utils';
 import {
   Briefcase,
   Building2,

@@ -7,6 +7,7 @@
  */
 
 export { Reorder } from './reorder';
+export { AnimatePresence } from './animate-presence';
 export type { ReorderGroupProps, ReorderItemProps } from './reorder';
 
 export { LayoutGroup } from './layout-group';

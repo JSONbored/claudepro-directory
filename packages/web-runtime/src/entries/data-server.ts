@@ -1,7 +1,7 @@
 // Update entry point
-export * from '../actions/safe-action.ts';
-// Export ParseStrategy and safeParse from data.ts (exports both value and type)
-export { ParseStrategy, safeParse } from '../data.ts';
+// REMOVED: export * from '../actions/safe-action.ts'; - Actions should ONLY be exported from @heyclaude/web-runtime/actions to prevent Turbopack from creating 'actions/data' module IDs
+// REMOVED: export { ParseStrategy, safeParse } from '../data.ts'; - This creates phantom module 'actions/data:217325' when both data.ts and actions.ts are in module graph
+// If you need ParseStrategy/safeParse, import from @heyclaude/web-runtime/data/utils instead
 // REMOVED: export * from '../actions/feature-flags.ts'; - Causes module-level evaluation during SSR, use lazy imports
 export * from '../storage/image-storage.ts';
 export * from '../storage/image-utils.ts';
@@ -72,17 +72,16 @@ export * from '../data/layout.ts';
 export { getLayoutFlags, type LayoutFlags } from '../data/layout/flags.ts';
 // REMOVED: export * from '../data/config/categories.ts'; - Has module-level feature-flags import, but re-export specific functions
 export { getHomepageFeaturedCategories, getHomepageTabCategories } from '../data/config/categories.ts';
-export * from '../data/config/category/index.ts';
+// REMOVED: export * from '../data/config/category/index.ts'; - This creates phantom module 'actions/data:217325' when both data.ts and actions.ts are in module graph
+// Client components should import from @heyclaude/web-runtime/data/config/category instead
+// But server components need these exports, so export them here
+export { 
+  getCategoryConfigs,
+  getCategoryConfig,
+  getCategoryStatsConfig,
+  getHomepageCategoryIds,
+} from '../data/config/category/index.ts';
 export { STATIC_GENERATION_LIMITS } from '../data/config/constants.ts';
 
-// Actions
-export * from '../actions/pulse.ts';
-export * from '../actions/newsletter.ts';
-export { getQuizConfigurationAction } from '../actions/quiz.ts';
-export * from '../actions/run-rpc-instance.ts';
-export * from '../actions/companies.ts';
-export * from '../actions/contact.ts';
-export * from '../actions/submit-contact-form.generated.ts';
-export * from '../actions/content.ts';
-export * from '../actions/jobs.ts';
-export * from '../actions/user.ts';
+// REMOVED: All action exports - Actions should ONLY be exported from @heyclaude/web-runtime/actions to prevent Turbopack from creating 'actions/data' module IDs
+// If you need actions, import from @heyclaude/web-runtime/actions instead

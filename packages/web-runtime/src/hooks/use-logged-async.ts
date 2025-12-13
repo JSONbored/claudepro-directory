@@ -1,6 +1,8 @@
 'use client';
 
-import { logger, normalizeError } from '../entries/core.ts';
+// Import directly from source files to avoid indirect imports through entries/core.ts
+import { logger } from '../logger.ts';
+import { normalizeError } from '../errors.ts';
 import { useCallback } from 'react';
 
 type ContextValue = string | number | boolean;

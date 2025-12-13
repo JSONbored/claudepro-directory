@@ -53,7 +53,7 @@ import { useAnimate } from 'motion/react';
  * automatically cleaned up.
  * 
  * @returns Tuple of `[scope, animate]` where:
- *   - `scope`: Ref to attach to the root element
+ *   - `scope`: Ref to attach to the root element (Motion.dev's AnimationScope, compatible with React refs)
  *   - `animate`: Function to animate elements within the scope
  * 
  * @see https://motion.dev/docs/react/utilities/use-animate

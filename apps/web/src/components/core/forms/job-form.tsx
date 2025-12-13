@@ -8,7 +8,7 @@
 import { type Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { normalizeError } from '@heyclaude/shared-runtime';
-import { type CreateJobInput } from '@heyclaude/web-runtime';
+import { type CreateJobInput } from '@heyclaude/web-runtime/actions';
 import { type PaymentPlanCatalogEntry } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { useAuthenticatedUser, useLoggedAsync } from '@heyclaude/web-runtime/hooks';

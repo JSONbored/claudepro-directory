@@ -109,6 +109,83 @@ export function shallowEqual(objA: unknown, objB: unknown): boolean {
   return true;
 }
 
+/**
+ * Deep equality comparison for arrays and objects.
+ * 
+ * Performs a deep comparison of two values, handling:
+ * - Primitives (uses Object.is for strict equality)
+ * - Arrays (compares length and elements recursively)
+ * - Objects (compares keys and values recursively)
+ * - Null/undefined values
+ * 
+ * **Performance:** Faster than JSON.stringify for memo comparisons.
+ * **Use cases:** React.memo custom comparison, useMemo dependencies, array/object equality checks.
+ * 
+ * @param a - First value to compare
+ * @param b - Second value to compare
+ * @returns true if values are deeply equal
+ * 
+ * @example
+ * ```typescript
+ * import { deepEqual } from '@heyclaude/web-runtime/ui';
+ * 
+ * // In memo comparison
+ * export const MyComponent = memo(Component, (prev, next) => {
+ *   return deepEqual(prev.items, next.items);
+ * });
+ * 
+ * // In useMemo dependency
+ * const stableKey = useMemo(() => {
+ *   return items; // Return original array, use deepEqual in dependency array
+ * }, [deepEqual(items, prevItems) ? items : items]);
+ * ```
+ */
+export function deepEqual(a: unknown, b: unknown): boolean {
+  // Fast path: same reference or strict equality
+  if (Object.is(a, b)) return true;
+
+  // Handle null/undefined
+  if (a === null || b === null) return a === b;
+  if (a === undefined || b === undefined) return a === b;
+
+  // Type mismatch
+  if (typeof a !== typeof b) return false;
+
+  // Primitives (already handled by Object.is above, but defensive check)
+  if (typeof a !== 'object') return false;
+
+  // Arrays
+  if (Array.isArray(a) && Array.isArray(b)) {
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) {
+      if (!deepEqual(a[i], b[i])) return false;
+    }
+    return true;
+  }
+
+  // One is array, other is not
+  if (Array.isArray(a) || Array.isArray(b)) return false;
+
+  // Objects
+  if (typeof a === 'object' && typeof b === 'object' && a !== null && b !== null) {
+    const keysA = Object.keys(a);
+    const keysB = Object.keys(b);
+
+    if (keysA.length !== keysB.length) return false;
+
+    for (const key of keysA) {
+      if (!Object.hasOwn(b, key)) return false;
+      if (!deepEqual((a as Record<string, unknown>)[key], (b as Record<string, unknown>)[key])) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  return false;
+}
+
 function capitalizeAcronyms(title: string): string {
   if (!title) return title;
 

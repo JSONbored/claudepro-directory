@@ -30,7 +30,9 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/design-tokens';
 import { SPRING, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
-import { AnimatePresence, motion } from 'motion/react';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
+import { motion } from 'motion/react';
+import { AnimatePresence } from '@heyclaude/web-runtime/ui';
 import { useCallback, useState } from 'react';
 
 interface FormData {
@@ -58,6 +60,7 @@ export function StepExamplesTags({
 }) {
   const [newExample, setNewExample] = useState('');
   const [newTag, setNewTag] = useState('');
+  const shouldReduceMotion = useReducedMotion();
 
   const addExample = useCallback(() => {
     if (newExample.trim() && data.examples.length < 10) {
@@ -95,14 +98,14 @@ export function StepExamplesTags({
     <div className="space-y-8">
       {/* Header */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
+        animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
         transition={SPRING.smooth}
         className="text-center"
       >
         <motion.div
-          initial={{ scale: 0, rotate: -180 }}
-          animate={{ scale: 1, rotate: 0 }}
+          initial={shouldReduceMotion ? { opacity: 0 } : { scale: 0, rotate: -180 }}
+          animate={shouldReduceMotion ? { opacity: 1 } : { scale: 1, rotate: 0 }}
           transition={{ ...SPRING.bouncy, delay: STAGGER.default }}
           className="mb-4 inline-flex"
         >
@@ -116,8 +119,8 @@ export function StepExamplesTags({
 
       {/* Examples Section */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
+        animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
           transition={{ ...SPRING.smooth, delay: STAGGER.fast }}
       >
         <Card
@@ -155,7 +158,10 @@ export function StepExamplesTags({
                 className="flex-1"
                 maxLength={200}
               />
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <motion.div
+                whileHover={shouldReduceMotion ? {} : { scale: 1.05 }}
+                whileTap={shouldReduceMotion ? {} : { scale: 0.95 }}
+              >
                 <Button
                   type="button"
                   onClick={addExample}
@@ -181,9 +187,17 @@ export function StepExamplesTags({
                     return (
                       <motion.div
                         key={exampleKey}
-                        initial={{ opacity: 0, x: -20, scale: 0.9 }}
-                        animate={{ opacity: 1, x: 0, scale: 1 }}
-                        exit={{ opacity: 0, x: 20, scale: 0.9 }}
+                        initial={
+                          shouldReduceMotion
+                            ? { opacity: 0 }
+                            : { opacity: 0, x: -20, scale: 0.9 }
+                        }
+                        animate={
+                          shouldReduceMotion
+                            ? { opacity: 1 }
+                            : { opacity: 1, x: 0, scale: 1 }
+                        }
+                        exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: 20, scale: 0.9 }}
                         transition={SPRING.snappy}
                         className="group hover:border-accent-primary/50 flex items-start gap-3 rounded-lg border p-3 transition-all"
                         style={{
@@ -204,8 +218,8 @@ export function StepExamplesTags({
                         <motion.button
                           type="button"
                           onClick={() => removeExample(index)}
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
+                          whileHover={shouldReduceMotion ? {} : { scale: 1.1 }}
+                          whileTap={shouldReduceMotion ? {} : { scale: 0.9 }}
                           className="shrink-0 rounded-full p-1 opacity-0 transition-all group-hover:opacity-100"
                           style={{
                             color: TOKENS.colors.error.text,
@@ -239,8 +253,8 @@ export function StepExamplesTags({
 
       {/* Tags Section */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
+        animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
           transition={{ ...SPRING.smooth, delay: STAGGER.default }}
       >
         <Card
@@ -278,7 +292,10 @@ export function StepExamplesTags({
                 className="flex-1"
                 maxLength={30}
               />
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <motion.div
+                whileHover={shouldReduceMotion ? {} : { scale: 1.05 }}
+                whileTap={shouldReduceMotion ? {} : { scale: 0.95 }}
+              >
                 <Button
                   type="button"
                   onClick={addTag}
@@ -304,11 +321,11 @@ export function StepExamplesTags({
                     return (
                       <motion.div
                         key={tagKey}
-                        initial={{ opacity: 0, scale: 0 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0 }}
+                        initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0 }}
+                        animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }}
+                        exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0 }}
                         transition={SPRING.bouncy}
-                        whileHover={{ scale: 1.05 }}
+                        whileHover={shouldReduceMotion ? {} : { scale: 1.05 }}
                       >
                         <Badge
                           variant="secondary"
@@ -376,6 +393,7 @@ export function StepReviewSubmit({
   qualityScore: number;
   showCelebration: boolean;
 }) {
+  const shouldReduceMotion = useReducedMotion();
   // Quality level
   const qualityLevel =
     qualityScore >= 90
@@ -401,21 +419,29 @@ export function StepReviewSubmit({
             }}
           >
             <motion.div
-              initial={{ scale: 0, rotate: -180 }}
-              animate={{ scale: 1, rotate: 0 }}
+              initial={shouldReduceMotion ? { opacity: 0 } : { scale: 0, rotate: -180 }}
+              animate={shouldReduceMotion ? { opacity: 1 } : { scale: 1, rotate: 0 }}
               transition={SPRING.bouncy}
               className="text-center"
             >
               <motion.div
-                animate={{
-                  scale: [1, 1.2, 1],
-                  rotate: [0, 10, -10, 0],
-                }}
-                transition={{
-                  duration: DURATION.extended,
-                  repeat: Number.POSITIVE_INFINITY,
-                  repeatDelay: 0.5,
-                }}
+                animate={
+                  shouldReduceMotion
+                    ? {}
+                    : {
+                        scale: [1, 1.2, 1],
+                        rotate: [0, 10, -10, 0],
+                      }
+                }
+                transition={
+                  shouldReduceMotion
+                    ? {}
+                    : {
+                        duration: DURATION.extended,
+                        repeat: Number.POSITIVE_INFINITY,
+                        repeatDelay: 0.5,
+                      }
+                }
               >
                 <Rocket
                   className="mx-auto mb-6 h-24 w-24"
@@ -432,13 +458,17 @@ export function StepReviewSubmit({
                 return (
                   <motion.div
                     key={confettiKey}
-                    initial={{ opacity: 1, x: 0, y: 0, scale: 1 }}
-                    animate={{
-                      opacity: [1, 1, 0],
-                      x: Math.cos((i / 12) * Math.PI * 2) * 200,
-                      y: Math.sin((i / 12) * Math.PI * 2) * 200,
-                      scale: [1, 1.5, 0],
-                    }}
+                    initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 1, x: 0, y: 0, scale: 1 }}
+                    animate={
+                      shouldReduceMotion
+                        ? { opacity: 0 }
+                        : {
+                            opacity: [1, 1, 0],
+                            x: Math.cos((i / 12) * Math.PI * 2) * 200,
+                            y: Math.sin((i / 12) * Math.PI * 2) * 200,
+                            scale: [1, 1.5, 0],
+                          }
+                    }
                     transition={{
                       duration: DURATION.veryExtended,
                       delay: i * STAGGER.micro,
@@ -463,14 +493,14 @@ export function StepReviewSubmit({
 
       {/* Header */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
+        animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
         transition={SPRING.smooth}
         className="text-center"
       >
         <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
+          initial={shouldReduceMotion ? { opacity: 0 } : { scale: 0 }}
+          animate={shouldReduceMotion ? { opacity: 1 } : { scale: 1 }}
           transition={{ ...SPRING.bouncy, delay: STAGGER.default }}
           className="mb-4 inline-flex"
         >
@@ -484,8 +514,8 @@ export function StepReviewSubmit({
 
       {/* Quality Score Card */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
+        animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
           transition={{ ...SPRING.smooth, delay: STAGGER.fast }}
       >
         <Card
@@ -498,8 +528,8 @@ export function StepReviewSubmit({
             <div className="text-center">
               <p className="text-muted-foreground mb-3 text-sm">Submission Quality</p>
               <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
+                initial={shouldReduceMotion ? { opacity: 0 } : { scale: 0 }}
+                animate={shouldReduceMotion ? { opacity: 1 } : { scale: 1 }}
                 transition={SPRING.bouncy}
                 className="mb-4 inline-flex"
               >
@@ -539,8 +569,8 @@ export function StepReviewSubmit({
                     <motion.span
                       className="text-3xl font-bold"
                       style={{ color: qualityLevel.color }}
-                      initial={{ opacity: 0, scale: 0 }}
-                      animate={{ opacity: 1, scale: 1 }}
+                      initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0 }}
+                      animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }}
                       transition={{
                         delay: STAGGER.loose,
                         ...SPRING.bouncy,
@@ -566,8 +596,8 @@ export function StepReviewSubmit({
 
       {/* Summary Cards */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
+        animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
           transition={{ ...SPRING.smooth, delay: STAGGER.default }}
         className="grid gap-4 sm:grid-cols-2"
       >
@@ -632,8 +662,8 @@ export function StepReviewSubmit({
 
       {/* Description Preview */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
+        animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
           transition={{ ...SPRING.smooth, delay: STAGGER.slow }}
       >
         <Card
@@ -653,11 +683,14 @@ export function StepReviewSubmit({
 
       {/* Submit Button */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
+        animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
           transition={{ ...SPRING.smooth, delay: STAGGER.relaxed }}
       >
-        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+        <motion.div
+          whileHover={shouldReduceMotion ? {} : { scale: 1.02 }}
+          whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
+        >
           <Button
             type="button"
             onClick={onSubmit}

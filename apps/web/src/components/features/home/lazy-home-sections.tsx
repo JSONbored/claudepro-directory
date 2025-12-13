@@ -3,7 +3,6 @@ import dynamic from 'next/dynamic';
 
 // Re-export section prop types so consumers can name the inferred component types without TS4023 issues.
 export type { FeaturedSectionsProps } from '@/src/components/features/home/featured-sections';
-export type { SearchSectionProps } from '@/src/components/features/home/homepage-search';
 export type { TabsSectionProps } from '@/src/components/features/home/homepage-tabs';
 
 /**
@@ -59,15 +58,8 @@ export const LazyTabsSection = dynamic(
 );
 
 /**
- * Lazy-loaded SearchSection with skeleton loading state
+ * SearchSection - REMOVED
+ * 
+ * Search results are now handled by the unified SearchResults component
+ * from @heyclaude/web-runtime/search, which is integrated via SearchProvider.
  */
-export const LazySearchSection = dynamic(
-  () =>
-    import('@/src/components/features/home/homepage-search').then((mod) => ({
-      default: mod.SearchSection,
-    })),
-  {
-    loading: () => null, // SearchSection is conditionally rendered, no skeleton needed
-    ssr: true,
-  }
-);

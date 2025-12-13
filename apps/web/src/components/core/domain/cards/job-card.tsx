@@ -1,6 +1,7 @@
 'use client';
 
-import { formatRelativeDate, type JobType, logUnhandledPromise } from '@heyclaude/web-runtime/core';
+import { type JobType, logUnhandledPromise } from '@heyclaude/web-runtime/core';
+import { formatRelativeDate } from '@heyclaude/web-runtime/data/utils';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import {
   Building,

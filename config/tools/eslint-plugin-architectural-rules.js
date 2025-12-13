@@ -4393,19 +4393,10 @@ export default {
                            prop.value.property.name === 'id');
 
                         if (isRawUserId) {
-                          // Auto-fix: Replace userId: user.id with userIdHash: hashUserId(user.id)
+                          // Note: Autofix disabled - too risky (complex userId transformation could break TypeScript)
                           context.report({
                             node: prop,
                             messageId: 'rawUserIdLogged',
-                            fix(fixer) {
-                              // Replace the property key and value
-                              const newKey = fixer.replaceText(prop.key, 'userIdHash');
-                              const newValue = fixer.replaceText(
-                                prop.value,
-                                `hashUserId(${sourceCode.getText(prop.value)})`
-                              );
-                              return [newKey, newValue];
-                            },
                           });
                         }
                       }

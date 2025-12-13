@@ -7,8 +7,10 @@
 
 import { type Database } from '@heyclaude/database-types';
 import { getNewsletterConfigValue } from '@heyclaude/web-runtime/config/static-configs';
-import { ensureNumber, logUnhandledPromise } from '@heyclaude/web-runtime/core';
+import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
+import { ensureNumber } from '@heyclaude/web-runtime/data/utils';
 import { SPRING } from '@heyclaude/web-runtime/design-system';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { motion, useScroll } from 'motion/react';
 import { useEffect, useState } from 'react';
@@ -40,6 +42,7 @@ export function NewsletterScrollTrigger({
   const [hasTriggered, setHasTriggered] = useState(false);
   const [scrollHeightThreshold, setScrollHeightThreshold] = useState(minScrollHeight ?? 500);
   const { scrollYProgress } = useScroll();
+  const shouldReduceMotion = useReducedMotion();
   const loadScrollConfig = useLoggedAsync({
     scope: 'NewsletterScrollTrigger',
     defaultMessage: 'Failed to load newsletter scroll config',
@@ -109,8 +112,8 @@ export function NewsletterScrollTrigger({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
+      animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
       transition={SPRING.smooth}
       className="my-12"
     >

@@ -20,8 +20,10 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
+  LayoutGroup,
 } from '@heyclaude/web-runtime/ui';
 import { MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -51,6 +53,7 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
   const [tabCategories, setTabCategories] = useState<readonly string[]>([]);
   const { openAuthModal } = useAuthModal();
   const pathname = usePathname();
+  const shouldReduceMotion = useReducedMotion();
 
   const handleAuthRequired = useCallback(() => {
     openAuthModal({
@@ -83,9 +86,10 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
   const trendingSlugs = useMemo(() => getTrendingSlugs(filteredResults, 6), [filteredResults]);
 
   return (
-    <Tabs value={activeTab} onValueChange={onTabChange} className="space-y-8">
-      {/* Tabs with horizontal scroll on mobile/tablet */}
-      <TabsList className="scrollbar-hide w-full gap-1 overflow-x-auto lg:grid lg:w-auto lg:auto-cols-fr lg:grid-flow-col">
+    <LayoutGroup>
+      <Tabs value={activeTab} onValueChange={onTabChange} className="space-y-8">
+        {/* Tabs with horizontal scroll on mobile/tablet */}
+        <TabsList className="scrollbar-hide w-full gap-1 overflow-x-auto lg:grid lg:w-auto lg:auto-cols-fr lg:grid-flow-col">
         <div className="flex min-w-max lg:contents lg:min-w-0">
           {tabCategories.map((tab) => {
             let displayName = tab.charAt(0).toUpperCase() + tab.slice(1);
@@ -98,7 +102,11 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
             }
 
             return (
-              <motion.div key={tab} whileTap={MICROINTERACTIONS.button.tap} transition={MICROINTERACTIONS.button.transition}>
+              <motion.div
+                key={tab}
+                whileTap={shouldReduceMotion ? {} : MICROINTERACTIONS.button.tap}
+                transition={MICROINTERACTIONS.button.transition}
+              >
                 <TabsTrigger
                   value={tab}
                   className="px-3 text-xs whitespace-nowrap sm:px-4 sm:text-sm"
@@ -220,7 +228,8 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
           </Button>
         </div>
       </TabsContent>
-    </Tabs>
+      </Tabs>
+    </LayoutGroup>
   );
 };
 

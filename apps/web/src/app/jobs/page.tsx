@@ -4,7 +4,8 @@
  */
 
 import { Constants } from '@heyclaude/database-types';
-import { isValidCategory, type JobsFilterResult } from '@heyclaude/web-runtime/core';
+import { isValidCategory } from '@heyclaude/web-runtime/core';
+import { type JobsFilterResult } from '@heyclaude/web-runtime/data';
 import {
   generatePageMetadata,
   getCategoryConfig,

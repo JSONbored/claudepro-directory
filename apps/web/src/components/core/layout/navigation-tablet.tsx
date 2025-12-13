@@ -26,6 +26,7 @@ import {
   cn,
 } from '@heyclaude/web-runtime/ui';
 import { SPRING, MICROINTERACTIONS, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
 import { Fragment, useEffect, useState } from 'react';
@@ -146,6 +147,7 @@ function CommunityIconsRow({
   const pulse = usePulse();
   const SOCIAL_LINK_SNAPSHOT = getSocialLinks();
   const [githubStars, setGithubStars] = useState<number | null>(null);
+  const shouldReduceMotion = useReducedMotion();
   
   // Fetch GitHub star count
   useEffect(() => {
@@ -229,8 +231,8 @@ function CommunityIconsRow({
       <div className="flex items-center justify-center gap-3 px-2">
         {/* Search / Command Menu */}
         <motion.div
-          whileHover={MICROINTERACTIONS.button.hover}
-          whileTap={MICROINTERACTIONS.button.tap}
+          whileHover={shouldReduceMotion ? {} : MICROINTERACTIONS.button.hover}
+          whileTap={shouldReduceMotion ? {} : MICROINTERACTIONS.button.tap}
           transition={MICROINTERACTIONS.button.transition}
         >
           <Button
@@ -250,8 +252,8 @@ function CommunityIconsRow({
 
         {/* Discord */}
         <motion.div
-          whileHover={MICROINTERACTIONS.button.hover}
-          whileTap={MICROINTERACTIONS.button.tap}
+          whileHover={shouldReduceMotion ? {} : MICROINTERACTIONS.button.hover}
+          whileTap={shouldReduceMotion ? {} : MICROINTERACTIONS.button.tap}
           transition={MICROINTERACTIONS.button.transition}
         >
           <Button
@@ -267,8 +269,8 @@ function CommunityIconsRow({
         
         {/* Pinboard */}
         <motion.div
-          whileHover={MICROINTERACTIONS.button.hover}
-          whileTap={MICROINTERACTIONS.button.tap}
+          whileHover={shouldReduceMotion ? {} : MICROINTERACTIONS.button.hover}
+          whileTap={shouldReduceMotion ? {} : MICROINTERACTIONS.button.tap}
           transition={MICROINTERACTIONS.button.transition}
         >
           <Button
@@ -287,8 +289,8 @@ function CommunityIconsRow({
         
         {/* GitHub Stars */}
         <motion.div
-          whileHover={MICROINTERACTIONS.button.hover}
-          whileTap={MICROINTERACTIONS.button.tap}
+          whileHover={shouldReduceMotion ? {} : MICROINTERACTIONS.button.hover}
+          whileTap={shouldReduceMotion ? {} : MICROINTERACTIONS.button.tap}
           transition={MICROINTERACTIONS.button.transition}
         >
           <Button
@@ -319,12 +321,13 @@ interface NavigationTabletProps {
 export function NavigationTablet({ isActive }: NavigationTabletProps) {
   const { openDrawer: openPinboardDrawer, isOpen: isPinboardOpen } = usePinboardDrawer();
   const { openPalette, isOpen: isCommandMenuOpen } = useCommandPalette();
+  const shouldReduceMotion = useReducedMotion();
 
   return (
     <motion.nav
       className="scrollbar-hide hidden snap-x snap-mandatory overflow-x-auto md:flex xl:hidden"
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -10 }}
+      animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
       transition={{ duration: DURATION.default, ease: 'easeOut' }}
       aria-label="Tablet navigation"
     >

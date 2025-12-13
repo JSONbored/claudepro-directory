@@ -19,8 +19,9 @@ import { AlertCircle, AlertTriangle, CheckCircle, Info } from '@heyclaude/web-ru
 import { cn, Label } from '@heyclaude/web-runtime/ui';
 import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/design-tokens';
 import { SPRING, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
+import { useReducedMotion, useAnimateScoped } from '@heyclaude/web-runtime/hooks/motion';
 import { AnimatePresence, motion } from 'motion/react';
-import { type FocusEvent, type ReactNode, useCallback, useState } from 'react';
+import { type FocusEvent, type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 
 export type ValidationState = 'idle' | 'invalid' | 'valid' | 'warning';
 
@@ -88,6 +89,31 @@ export function AnimatedFormField({
 }: AnimatedFormFieldProps) {
   const [isFocused, setIsFocused] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
+  const shouldReduceMotion = useReducedMotion();
+  const [, animate] = useAnimateScoped();
+  const previousValidationStateRef = useRef(validationState);
+  const fieldContainerRef = useRef<HTMLDivElement>(null);
+  
+  // Animate validation state changes programmatically
+  useEffect(() => {
+    if (previousValidationStateRef.current !== validationState && fieldContainerRef.current && !shouldReduceMotion) {
+      if (validationState === 'invalid') {
+        // Shake animation on error
+        animate(fieldContainerRef.current, 
+          { x: [0, -10, 10, -10, 10, 0] },
+          { duration: 0.4, ease: 'easeInOut' }
+        );
+      } else if (validationState === 'valid') {
+        // Subtle pulse on success
+        animate(fieldContainerRef.current,
+          { scale: [1, 1.02, 1] },
+          { duration: 0.3, ease: 'easeOut' }
+        );
+      }
+      
+      previousValidationStateRef.current = validationState;
+    }
+  }, [validationState, animate, shouldReduceMotion]);
 
   const handleFocus = useCallback(
     (e: FocusEvent<HTMLElement>) => {
@@ -124,9 +150,21 @@ export function AnimatedFormField({
       case 'valid': {
         return (
           <motion.div
-            initial={{ scale: 0, rotate: -180 }}
-            animate={{ scale: 1, rotate: 0 }}
-            exit={{ scale: 0, rotate: 180 }}
+            initial={
+              shouldReduceMotion
+                ? { opacity: 0 }
+                : { scale: 0, rotate: -180 }
+            }
+            animate={
+              shouldReduceMotion
+                ? { opacity: 1 }
+                : { scale: 1, rotate: 0 }
+            }
+            exit={
+              shouldReduceMotion
+                ? { opacity: 0 }
+                : { scale: 0, rotate: 180 }
+            }
             transition={SPRING.bouncy}
           >
             <CheckCircle className="h-5 w-5" style={{ color: TOKENS.colors.success.text }} />
@@ -136,9 +174,9 @@ export function AnimatedFormField({
       case 'invalid': {
         return (
           <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            exit={{ scale: 0 }}
+            initial={shouldReduceMotion ? { opacity: 0 } : { scale: 0 }}
+            animate={shouldReduceMotion ? { opacity: 1 } : { scale: 1 }}
+            exit={shouldReduceMotion ? { opacity: 0 } : { scale: 0 }}
             transition={SPRING.snappy}
           >
             <AlertCircle className="h-5 w-5" style={{ color: TOKENS.colors.error.text }} />
@@ -148,9 +186,9 @@ export function AnimatedFormField({
       case 'warning': {
         return (
           <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            exit={{ scale: 0 }}
+            initial={shouldReduceMotion ? { opacity: 0 } : { scale: 0 }}
+            animate={shouldReduceMotion ? { opacity: 1 } : { scale: 1 }}
+            exit={shouldReduceMotion ? { opacity: 0 } : { scale: 0 }}
             transition={SPRING.snappy}
           >
             <AlertTriangle className="h-5 w-5" style={{ color: TOKENS.colors.warning.text }} />
@@ -206,8 +244,8 @@ export function AnimatedFormField({
   return (
     <motion.div
       className={cn('space-y-2', className)}
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 10 }}
+      animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
       transition={SPRING.smooth}
     >
       {/* Label Row */}
@@ -255,7 +293,9 @@ export function AnimatedFormField({
           onFocus={handleFocus}
           onBlur={handleBlur}
         >
-          {children}
+          <div ref={fieldContainerRef}>
+            {children}
+          </div>
         </motion.div>
 
         {/* Validation Icon (positioned absolute right) */}

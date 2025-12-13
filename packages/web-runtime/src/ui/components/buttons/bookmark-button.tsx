@@ -19,21 +19,23 @@
  *
  * @remarks
  * - Requires authentication (shows sign-in prompt if not authenticated)
- * - Persists bookmarks to database via server actions
+ * - Persists bookmarks to database via API routes (/api/bookmarks/add, /api/bookmarks/remove)
  * - Shows confetti celebration on bookmark add (if enabled in config)
  * - Tracks bookmark events with analytics
  * - Displays loading spinner during async operations
  * - Automatically refreshes router after state change
  *
- * @see {@link addBookmark} Server action for adding bookmarks
- * @see {@link removeBookmark} Server action for removing bookmarks
+ * @see /api/bookmarks/add API route for adding bookmarks
+ * @see /api/bookmarks/remove API route for removing bookmarks
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { addBookmark } from '../../../actions/add-bookmark.generated.ts';
 import { checkConfettiEnabled } from '../../../config/static-configs.ts';
-import { removeBookmark } from '../../../actions/remove-bookmark.generated.ts';
-import { isValidCategory, logClientWarning, normalizeError } from '../../../entries/core.ts';
+// Import directly from source files to avoid indirect imports through entries/core.ts
+// which exports from data.ts, potentially causing Turbopack module resolution issues
+import { isValidCategory } from '../../../utils/category-validation.ts';
+import { logClientWarn } from '../../../utils/client-logger.ts';
+import { normalizeError } from '../../../errors.ts';
 import { useAuthenticatedUser, useLoggedAsync, usePulse, useConfetti } from '../../../hooks/index.ts';
 import { Bookmark, BookmarkCheck, Loader2 } from '../../../icons.tsx';
 import type { ButtonStyleProps } from '../../../types/component.types.ts';
@@ -131,10 +133,24 @@ export function BookmarkButton({
         if (isBookmarked) {
           await runLoggedAsync(
             async () => {
-              const result = await removeBookmark({
-                content_type: validatedCategory,
-                content_slug: contentSlug,
+              // Use API route instead of server action to avoid HMR issues
+              const response = await fetch('/api/bookmarks/remove', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  content_type: validatedCategory,
+                  content_slug: contentSlug,
+                }),
               });
+
+              if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+                throw new Error(errorData.error || `API returned ${response.status}`);
+              }
+
+              const result = await response.json();
 
               if (result?.data?.success) {
                 setIsBookmarked(false);
@@ -152,7 +168,7 @@ export function BookmarkButton({
                       error,
                       'BookmarkButton: bookmark removal tracking failed'
                     );
-                    logClientWarning('BookmarkButton: bookmark removal tracking failed', normalized, {
+                    logClientWarn('BookmarkButton: bookmark removal tracking failed', normalized, 'BookmarkButton.handleToggle', {
                       component: 'BookmarkButton',
                       contentType,
                       contentSlug,
@@ -168,11 +184,25 @@ export function BookmarkButton({
         } else {
           await runLoggedAsync(
             async () => {
-              const result = await addBookmark({
-                content_type: validatedCategory,
-                content_slug: contentSlug,
-                notes: '',
+              // Use API route instead of server action to avoid HMR issues
+              const response = await fetch('/api/bookmarks/add', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  content_type: validatedCategory,
+                  content_slug: contentSlug,
+                  notes: '',
+                }),
               });
+
+              if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+                throw new Error(errorData.error || `API returned ${response.status}`);
+              }
+
+              const result = await response.json();
 
               if (result?.data?.success) {
                 setIsBookmarked(true);
@@ -190,7 +220,7 @@ export function BookmarkButton({
                       error,
                       'BookmarkButton: bookmark addition tracking failed'
                     );
-                    logClientWarning('BookmarkButton: bookmark addition tracking failed', normalized, {
+                    logClientWarn('BookmarkButton: bookmark addition tracking failed', normalized, 'BookmarkButton.handleToggle', {
                       component: 'BookmarkButton',
                       contentType,
                       contentSlug,

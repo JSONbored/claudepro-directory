@@ -40,7 +40,9 @@
  * @see {@link useCopyToClipboard} Alternative hook-based approach
  */
 
-import { logger, normalizeError } from '../../../entries/core.ts';
+// Import directly from source files to avoid indirect imports through entries/core.ts
+import { logger } from '../../../logger.ts';
+import { normalizeError } from '../../../errors.ts';
 import { UI_TIMEOUTS } from '../../../config/unified-config.ts';
 import type { ButtonStyleProps } from '../../../types/component.types.ts';
 import { toasts } from '../../../client/toast.ts';

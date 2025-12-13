@@ -6,7 +6,7 @@
  */
 
 import { type Database } from '@heyclaude/database-types';
-import { unlinkOAuthProvider } from '@heyclaude/web-runtime';
+import { unlinkOAuthProvider } from '@heyclaude/web-runtime/actions';
 import {
   AlertTriangle,
   CheckCircle,

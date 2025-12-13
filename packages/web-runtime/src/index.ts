@@ -62,13 +62,11 @@ export { TIME_CONSTANTS } from '@heyclaude/shared-runtime';
 export * from './logger.ts';
 export * from './errors.ts';
 export * from './build-time.ts';
-export * from './data.ts';
 export * from './pulse.ts';
 export * from './skeleton-keys.ts';
 export * from './error-utils.ts';
 export * from './content.ts';
 export * from './notifications.ts';
-export * from './ui.ts';
 export * from './trace.ts';
 export * from './auth/mfa.ts';
 export * from './auth/aal.ts';
@@ -196,7 +194,6 @@ export {
 export type { LucideIcon } from './icons.tsx';
 export * from './types/component.types.ts';
 export * from './transformers/skill-to-md.ts';
-export * from './hooks/index.ts';
 export * from './integrations/polar.ts';
 export * from './utils/auth-redirect.ts';
 export * from './utils/category-validation.ts';
@@ -204,5 +201,7 @@ export * from './utils/content-highlights.ts';
 export * from './utils/deserialize-postgres-tuple.ts';
 export * from './utils/placeholder-images.ts';
 
-// Actions (Isomorphic exports)
-export * from './entries/actions.ts';
+// Unified Search System
+export * from './search/index.ts';
+
+

@@ -4,7 +4,7 @@
  */
 
 import { Constants, type Database } from '@heyclaude/database-types';
-import { type CreateJobInput } from '@heyclaude/web-runtime';
+import { type CreateJobInput } from '@heyclaude/web-runtime/actions';
 import { updateJob } from '@heyclaude/web-runtime/actions';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {

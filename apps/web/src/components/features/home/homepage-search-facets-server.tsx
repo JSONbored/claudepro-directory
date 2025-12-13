@@ -11,6 +11,11 @@ import { type SearchFilterOptions } from '@heyclaude/web-runtime/types/component
  * Returns search filters that can be passed to HomePageClient
  */
 export async function HomepageSearchFacetsServer(): Promise<SearchFilterOptions> {
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  // This is required by Cache Components for non-deterministic operations
+  const { connection } = await import('next/server');
+  await connection();
+
   const facetData = await getSearchFacets().catch((error: unknown) => {
     trackRPCFailure('get_search_facets', error, {
       section: 'search-facets',

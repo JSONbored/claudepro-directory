@@ -42,7 +42,8 @@ export const CARD = {
     // Use semantic primary color token - theme-aware (component must use useTheme hook)
     // Note: This is a static value - components using this should override with theme-aware value
     borderColor: COLORS.semantic.primary.dark.base, // Orange border from semantic tokens
-    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)', // Enhanced shadow for depth
+    // Use filter: drop-shadow() for performance (GPU-accelerated, not boxShadow)
+    filter: 'drop-shadow(0 8px 16px rgba(0, 0, 0, 0.15))',
     scale: 1.01, // Subtle scale (reduced from 1.02)
     rotateX: -8, // Forward tilt (negative = forward, creates "entering" effect)
     z: 8, // Move forward in 3D space

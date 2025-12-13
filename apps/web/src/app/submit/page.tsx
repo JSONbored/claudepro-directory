@@ -19,7 +19,6 @@ import {
   CardHeader,
   CardTitle,
   cn,
-  Skeleton,
   UI_CLASSES,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
@@ -29,6 +28,8 @@ import { Suspense } from 'react';
 import { SubmitFormClient } from '@/src/components/core/forms/content-submission-form';
 import { SidebarActivityCard } from '@/src/components/core/forms/sidebar-activity-card';
 import { SubmitPageHero } from '@/src/components/core/forms/submit-page-hero';
+import { SubmitPageHeroSkeleton as SubmitPageHeroSkeletonComponent } from '@/src/components/core/forms/submit-page-hero-skeleton';
+import { SubmitPageSidebarSkeleton as SubmitPageSidebarSkeletonComponent } from '@/src/components/core/forms/submit-page-sidebar-skeleton';
 import { ContentSidebar } from '@/src/components/core/layout/content-sidebar';
 
 import SubmitFormLoading from './loading-form';
@@ -527,31 +528,7 @@ async function SubmitPageSidebar({ reqLogger }: { reqLogger: ReturnType<typeof l
  * @returns A skeleton UI matching the hero section layout
  */
 function SubmitPageHeroSkeleton() {
-  return (
-    <div
-      className={cn(
-        'border-border/50 bg-card relative overflow-hidden rounded-2xl border',
-        UI_CLASSES.PADDING_RELAXED,
-        UI_CLASSES.MARGIN_RELAXED
-      )}
-    >
-      <div className="relative z-10 grid gap-6 lg:grid-cols-[1fr_auto]">
-        <div className={UI_CLASSES.SPACE_Y_4}>
-          <Skeleton className="h-6 w-48 rounded-full" />
-          <Skeleton className="h-12 w-96" />
-          <Skeleton className="h-6 w-3/4" />
-          <div className={cn(UI_CLASSES.FLEX_WRAP_ITEMS_CENTER_GAP_3)}>
-            <Skeleton className="h-5 w-32" />
-            <Skeleton className="h-5 w-24" />
-            <Skeleton className="h-5 w-28" />
-          </div>
-        </div>
-        <div className="hidden lg:flex lg:items-center lg:justify-center">
-          <Skeleton className="h-32 w-32 rounded-2xl" />
-        </div>
-      </div>
-    </div>
-  );
+  return <SubmitPageHeroSkeletonComponent />;
 }
 
 /**
@@ -562,22 +539,5 @@ function SubmitPageHeroSkeleton() {
  * @returns A skeleton UI matching the sidebar layout
  */
 function SubmitPageSidebarSkeleton() {
-  return (
-    <Card>
-      <CardHeader className={UI_CLASSES.CARD_HEADER_TIGHT}>
-        <div className="grid w-full grid-cols-2 gap-2">
-          <Skeleton className="h-9 w-full rounded-md" />
-          <Skeleton className="h-9 w-full rounded-md" />
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {Array.from({ length: 3 }, (_, i) => (
-          <div className="space-y-2" key={`skeleton-${i}`}>
-            <Skeleton className="h-4 w-3/4" />
-            <Skeleton className="h-3 w-1/2" />
-          </div>
-        ))}
-      </CardContent>
-    </Card>
-  );
+  return <SubmitPageSidebarSkeletonComponent />;
 }

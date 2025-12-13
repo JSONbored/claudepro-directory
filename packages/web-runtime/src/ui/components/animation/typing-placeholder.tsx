@@ -25,6 +25,7 @@
  */
 
 import { DURATION } from '../../../design-system/index.ts';
+import { useReducedMotion } from '../../../hooks/motion/index.ts';
 import { cn } from '../../utils.ts';
 import { motion } from 'motion/react';
 import { useEffect, useState, useRef } from 'react';
@@ -71,9 +72,7 @@ export function TypingPlaceholder({
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Check for reduced motion
-  const prefersReducedMotion =
-    typeof window !== 'undefined' &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => {
     // Start after initial delay

@@ -38,7 +38,8 @@ export { APP_CONFIG, type AppConfig, SECURITY_CONFIG, type SecurityConfig, ROUTE
 export * from '../logger.ts';
 export * from '../errors.ts';
 export * from '../build-time.ts';
-export * from '../data.ts';
+export { ensureStringArray, getMetadata } from '../utils/content-helpers.ts';
+export { logUnhandledPromise } from '../errors.ts';
 export * from '../trace.ts';
 export * from '../error-utils.ts';
 export * from '../content.ts';
@@ -52,26 +53,15 @@ export * from '../utils/homepage-error-tracking.ts';
 export * from '../utils/client-session.ts';
 export * from '../utils/client-logger.ts';
 export * from '../hooks/use-client-logger.ts';
-export * from '../data/marketing/contact.ts';
-export type { JobsFilterResult } from '../data/jobs.ts';
-// SearchFilters type - uses generated database types
-// Categories are enum arrays, not string arrays
-import type { Database } from '@heyclaude/database-types';
-
-export type SearchFilters = {
-  sort?: 'relevance' | 'popularity' | 'newest' | 'alphabetical';
-  p_categories?: Database['public']['Enums']['content_category'][]; // Use generated enum type
-  p_tags?: string[];
-  p_authors?: string[];
-  p_limit?: number;
-  p_offset?: number;
-};
-export type { CollectionDetailData } from '../data/community.ts';
+export { NEWSLETTER_CTA_CONFIG, getSocialLinks, getContactChannels, getPartnerContactChannels, getPartnerCtas } from '../config/marketing-client.ts';
 export type { CategoryType } from '../ui/constants.ts';
 export type { SharePlatform } from '../client/share.ts';
 export type { JobType } from '../ui/constants.ts';
 export type { NotificationRecord } from '../notifications.ts';
 export { generateConfigRecommendations } from '../pulse-client.ts';
-export { getQuizConfiguration } from '../data/quiz.ts';
 export type { UseCopyToClipboardOptions } from '../hooks/use-copy-to-clipboard.ts';
+import type { Database } from '@heyclaude/database-types';
+export type SearchFilters = Partial<Database['public']['Functions']['search_content_optimized']['Args']> & {
+  sort?: 'relevance' | 'popularity' | 'newest' | 'alphabetical';
+};
 export * from '../types/app.schema.ts';

@@ -4,6 +4,7 @@ import { type Database } from '@heyclaude/database-types';
 import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
 import { AlertTriangle } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES, Alert, AlertDescription, AlertTitle } from '@heyclaude/web-runtime/ui';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 
@@ -50,6 +51,7 @@ export function DuplicateWarning({ contentType: _contentType, name }: DuplicateW
   const [checking, setChecking] = useState(false);
   const [warning, setWarning] = useState<null | string>(null);
   const [debounceMs, setDebounceMs] = useState(300);
+  const shouldReduceMotion = useReducedMotion();
 
   // Load debounce value from config
   useEffect(() => {
@@ -100,8 +102,8 @@ export function DuplicateWarning({ contentType: _contentType, name }: DuplicateW
     return (
       <motion.div
         className="text-muted-foreground text-sm"
-        animate={{ opacity: [1, 0.5, 1] }}
-        transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
+        animate={shouldReduceMotion ? { opacity: 1 } : { opacity: [1, 0.5, 1] }}
+        transition={shouldReduceMotion ? {} : { duration: 1, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
       >
         Checking for duplicates...
       </motion.div>

@@ -1,14 +1,14 @@
 /**
  * Search Facets API Route
- * 
+ *
  * Returns available search facets (categories, tags, authors) for filtering search results.
  * Used by the search interface to populate filter dropdowns and facet counts.
- * 
+ *
  * @example
  * ```ts
  * // Request
  * GET /api/search/facets
- * 
+ *
  * // Response (200)
  * {
  *   "facets": [
@@ -25,10 +25,11 @@
 
 import 'server-only';
 import { SearchService } from '@heyclaude/data-layer';
-import { createApiRoute, createApiOptionsHandler } from '@heyclaude/web-runtime/server';
 import { createErrorResponse, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   buildCacheHeaders,
+  createApiOptionsHandler,
+  createApiRoute,
   createSupabaseAnonClient,
   getWithAuthCorsHeaders,
   jsonResponse,
@@ -56,26 +57,12 @@ async function getCachedSearchFacetsFormatted() {
 
 /**
  * GET /api/search/facets - Get search facets
- * 
+ *
  * Returns available search facets (categories, tags, authors) for filtering.
  * Database RPC returns frontend-ready data (no client-side mapping needed).
  */
 export const GET = createApiRoute({
-  route: '/api/search/facets',
-  operation: 'SearchFacetsAPI',
-  method: 'GET',
   cors: 'auth',
-  openapi: {
-    summary: 'Get search facets',
-    description: 'Returns available search facets (categories, tags, authors) for filtering search results. Used by the search interface to populate filter dropdowns and facet counts.',
-    tags: ['search', 'facets'],
-    operationId: 'getSearchFacets',
-    responses: {
-      200: {
-        description: 'Search facets retrieved successfully',
-      },
-    },
-  },
   handler: async ({ logger }) => {
     logger.info({}, 'Facets request received');
 
@@ -88,10 +75,10 @@ export const GET = createApiRoute({
       const normalized = normalizeError(error, 'Facets RPC failed');
       logger.error({ err: normalized }, 'Facets RPC failed');
       return createErrorResponse(normalized, {
-        route: '/api/search/facets',
-        operation: 'SearchFacetsAPI',
-        method: 'GET',
         logContext: { facetType: 'all' },
+        method: 'GET',
+        operation: 'SearchFacetsAPI',
+        route: '/api/search/facets',
       });
     }
 
@@ -109,6 +96,21 @@ export const GET = createApiRoute({
       }
     );
   },
+  method: 'GET',
+  openapi: {
+    description:
+      'Returns available search facets (categories, tags, authors) for filtering search results. Used by the search interface to populate filter dropdowns and facet counts.',
+    operationId: 'getSearchFacets',
+    responses: {
+      200: {
+        description: 'Search facets retrieved successfully',
+      },
+    },
+    summary: 'Get search facets',
+    tags: ['search', 'facets'],
+  },
+  operation: 'SearchFacetsAPI',
+  route: '/api/search/facets',
 });
 
 /**

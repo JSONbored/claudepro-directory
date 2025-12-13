@@ -7,7 +7,7 @@
 
 import { type Database } from '@heyclaude/database-types';
 import { normalizeError } from '@heyclaude/shared-runtime';
-import { refreshProfileFromOAuth, updateProfile } from '@heyclaude/web-runtime';
+import { refreshProfileFromOAuth, updateProfile } from '@heyclaude/web-runtime/actions/user';
 import { useAuthenticatedUser, useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import {
   extractFirstFieldFromTuple,

@@ -1,23 +1,23 @@
 /**
  * Trending API Route
- * 
+ *
  * Returns trending, popular, or recent content based on tab selection.
  * Supports both page and sidebar modes with category filtering.
- * 
+ *
  * @example
  * ```ts
  * // Request - Trending tab
  * GET /api/trending?tab=trending&category=skills&limit=12
- * 
+ *
  * // Response (200)
  * {
  *   "trending": [...],
  *   "totalCount": 50
  * }
- * 
+ *
  * // Request - Sidebar mode
  * GET /api/trending?mode=sidebar&category=guides&limit=8
- * 
+ *
  * // Response (200)
  * {
  *   "trending": [...],
@@ -29,12 +29,14 @@
 import 'server-only';
 import { TrendingService } from '@heyclaude/data-layer';
 import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
-import { createApiRoute, createApiOptionsHandler, trendingQuerySchema } from '@heyclaude/web-runtime/server';
 import {
   buildCacheHeaders,
+  createApiOptionsHandler,
+  createApiRoute,
   createSupabaseAnonClient,
   getOnlyCorsHeaders,
   jsonResponse,
+  trendingQuerySchema,
 } from '@heyclaude/web-runtime/server';
 import { cacheLife } from 'next/cache';
 
@@ -134,33 +136,15 @@ async function getCachedSidebarRecentFormatted(
 
 /**
  * GET /api/trending - Get trending, popular, or recent content
- * 
+ *
  * Returns trending, popular, or recent content based on tab selection.
  * Supports both page and sidebar modes with category filtering.
  */
 export const GET = createApiRoute({
-  route: '/api/trending',
-  operation: 'TrendingAPI',
-  method: 'GET',
   cors: 'anon',
-  querySchema: trendingQuerySchema,
-  openapi: {
-    summary: 'Get trending, popular, or recent content',
-    description: 'Returns trending, popular, or recent content based on tab selection. Supports both page and sidebar modes with category filtering.',
-    tags: ['content', 'trending'],
-    operationId: 'getTrending',
-    responses: {
-      200: {
-        description: 'Trending content retrieved successfully',
-      },
-      400: {
-        description: 'Invalid tab or category parameter',
-      },
-    },
-  },
   handler: async ({ logger, query, url }) => {
     // Zod schema ensures proper types
-    const { tab, category, limit, mode } = query;
+    const { category, limit, mode, tab } = query;
 
     // Handle path-based sidebar route (/api/trending/sidebar)
     const segments = url.pathname.replace('/api/trending', '').split('/').filter(Boolean);
@@ -176,14 +160,37 @@ export const GET = createApiRoute({
     // Handle page tabs
     return handlePageTabs(logger, tab, category, limit);
   },
+  method: 'GET',
+  openapi: {
+    description:
+      'Returns trending, popular, or recent content based on tab selection. Supports both page and sidebar modes with category filtering.',
+    operationId: 'getTrending',
+    responses: {
+      200: {
+        description: 'Trending content retrieved successfully',
+      },
+      400: {
+        description: 'Invalid tab or category parameter',
+      },
+    },
+    summary: 'Get trending, popular, or recent content',
+    tags: ['content', 'trending'],
+  },
+  operation: 'TrendingAPI',
+  querySchema: trendingQuerySchema,
+  route: '/api/trending',
 });
 
-/**
+/******
  * Handle page tabs (trending, popular, recent)
+ * @param {ReturnType<typeof import('@heyclaude/web-runtime/logging/server').logger.child>} logger
+ * @param {'popular' | 'recent' | 'trending'} tab
+ * @param {ContentCategory | null} category
+ * @param {number} limit
  */
 async function handlePageTabs(
   logger: ReturnType<typeof import('@heyclaude/web-runtime/logging/server').logger.child>,
-  tab: 'trending' | 'popular' | 'recent',
+  tab: 'popular' | 'recent' | 'trending',
   category: ContentCategory | null,
   limit: number
 ) {
@@ -234,8 +241,11 @@ async function handlePageTabs(
   throw new Error('Invalid tab. Valid tabs: trending, popular, recent');
 }
 
-/**
+/*****
  * Handle sidebar mode
+ * @param {ReturnType<typeof import('@heyclaude/web-runtime/logging/server').logger.child>} logger
+ * @param {ContentCategory | null} category
+ * @param {number} limit
  */
 async function handleSidebar(
   logger: ReturnType<typeof import('@heyclaude/web-runtime/logging/server').logger.child>,

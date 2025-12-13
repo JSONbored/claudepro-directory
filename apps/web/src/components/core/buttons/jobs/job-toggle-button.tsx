@@ -6,7 +6,7 @@
  */
 
 import { normalizeError } from '@heyclaude/shared-runtime';
-import { type JobStatus } from '@heyclaude/web-runtime';
+import { type JobStatus } from '@heyclaude/web-runtime/ui/constants';
 import { toggleJobStatus } from '@heyclaude/web-runtime/actions';
 import { useAuthenticatedUser, useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { Pause, Play } from '@heyclaude/web-runtime/icons';

@@ -19,7 +19,8 @@ interface HoverCardProps {
 
 /**
  * Card hover variants using design tokens
- * Uses OKLCH color space for consistent hover border colors
+ * Uses rgba format for Motion.dev compatibility (oklch colors cannot be animated)
+ * oklch(74% 0.2 35) = #F97316 (orange-500)
  */
 const VARIANTS = {
   gentle: {
@@ -27,7 +28,7 @@ const VARIANTS = {
       scale: MICROINTERACTIONS.card.hover.scale,
       rotateX: MICROINTERACTIONS.card.hover.rotateX,
       z: MICROINTERACTIONS.card.hover.z,
-      borderColor: 'oklch(74% 0.2 35 / 0.3)', // Subtle orange border (30% opacity)
+      borderColor: 'rgba(249, 115, 22, 0.3)', // oklch(74% 0.2 35 / 0.3) converted to rgba for Motion.dev compatibility
       transition: MICROINTERACTIONS.card.hover.transition,
     },
     tap: MICROINTERACTIONS.card.tap,
@@ -37,7 +38,7 @@ const VARIANTS = {
       scale: 1.02,
       rotateX: -12, // Stronger forward tilt
       z: 12, // More forward movement
-      borderColor: 'oklch(74% 0.2 35 / 0.5)', // More visible orange border (50% opacity) - matches CARD.hover
+      borderColor: 'rgba(249, 115, 22, 0.5)', // oklch(74% 0.2 35 / 0.5) converted to rgba for Motion.dev compatibility
       boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
       transition: MICROINTERACTIONS.card.hover.transition,
     },

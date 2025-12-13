@@ -25,6 +25,7 @@
 'use client';
 
 import { Reorder as MotionReorder } from 'motion/react';
+import type { DragControls } from 'motion/react';
 import type { ReactNode } from 'react';
 
 export interface ReorderGroupProps {
@@ -94,6 +95,11 @@ export interface ReorderItemProps {
    * @default false
    */
   dragListener?: boolean;
+
+  /**
+   * Drag controls for custom drag triggers (e.g., drag handle only)
+   */
+  dragControls?: DragControls;
 }
 
 /**
@@ -141,6 +147,7 @@ export function ReorderItem({
   as = 'li',
   className,
   dragListener = true,
+  dragControls,
   ...props
 }: ReorderItemProps) {
   return (
@@ -149,6 +156,7 @@ export function ReorderItem({
       as={as}
       className={className}
       dragListener={dragListener}
+      dragControls={dragControls}
       {...props}
     >
       {children}

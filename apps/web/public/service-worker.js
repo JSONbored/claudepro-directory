@@ -132,6 +132,13 @@ self.addEventListener("fetch", (event) => {
       longTermCacheStrategy(request, STATIC_CACHE, 7 * 24 * 60 * 60 * 1000),
     ); // 7 days
   } else if (url.pathname.startsWith("/api/")) {
+    // API requests: Skip service worker in development mode to avoid 503 errors
+    // In production, use network-first strategy with cache fallback
+    if (isDev) {
+      // In development, let requests pass through to the network without interception
+      // This prevents service worker from returning 503 when network is available
+      return;
+    }
     // API requests: Network first, cache as fallback
     event.respondWith(networkFirstStrategy(request, API_CACHE));
   } else if (

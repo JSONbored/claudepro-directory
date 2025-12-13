@@ -46,6 +46,7 @@ import {
   Textarea,
 } from '@heyclaude/web-runtime/ui';
 import { STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { AnimatePresence, motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -88,6 +89,7 @@ export function ContactTerminal() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const outputEndRef = useRef<HTMLDivElement>(null);
+  const shouldReduceMotion = useReducedMotion();
   const runLoggedAsync = useLoggedAsync({
     scope: 'ContactTerminal',
     defaultMessage: 'Contact terminal operation failed',
@@ -471,8 +473,8 @@ export function ContactTerminal() {
       <Terminal className="relative flex min-h-[500px] flex-col">
         <div className="flex flex-1 items-center justify-center">
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 10 }}
+            animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
             className="space-y-4 text-center"
           >
             <X className="text-destructive mx-auto h-8 w-8" />
@@ -508,8 +510,8 @@ export function ContactTerminal() {
             {output.map((line, index) => (
               <motion.div
                 key={line.id}
-                initial={{ opacity: 0, y: -5 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -5 }}
+                animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
                 transition={{ duration: DURATION.quick, delay: index * STAGGER.micro }} // Using micro for 30ms
                 className={cn(
                   'flex items-start gap-2',

@@ -1,6 +1,7 @@
 'use client';
 
 import { Check, ChevronDown, ChevronUp } from '../../icons.tsx';
+import { SPRING } from '../../design-system/index.ts';
 import {
   DIMENSIONS,
   POSITION_PATTERNS,
@@ -9,6 +10,7 @@ import {
 } from '../constants.ts';
 import { cn } from '../utils.ts';
 import * as SelectPrimitive from '@radix-ui/react-select';
+import { motion } from 'motion/react';
 import type * as React from 'react';
 
 const Select = SelectPrimitive.Root;
@@ -101,26 +103,32 @@ const SelectContent = ({
   <SelectPrimitive.Portal>
     <SelectPrimitive.Content
       ref={ref}
-      className={cn(
-        `data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 relative z-50 max-h-96 ${DIMENSIONS.MIN_W_BUTTON} overflow-hidden rounded-lg border border-border/50 backdrop-blur-xl bg-[rgba(0,0,0,0.8)] text-popover-foreground shadow-xl data-[state=closed]:animate-out data-[state=open]:animate-in`,
-        position === 'popper' &&
-          'data-[side=left]:-translate-x-1 data-[side=top]:-translate-y-1 data-[side=right]:translate-x-1 data-[side=bottom]:translate-y-1',
-        className
-      )}
+      asChild
       position={position}
       {...props}
     >
-      <SelectScrollUpButton />
-      <SelectPrimitive.Viewport
+      <motion.div
+        layout
+        transition={SPRING.smooth}
         className={cn(
-          'p-1',
+          `data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 relative z-50 max-h-96 ${DIMENSIONS.MIN_W_BUTTON} overflow-hidden rounded-lg border border-border/50 backdrop-blur-xl bg-[rgba(0,0,0,0.8)] text-popover-foreground shadow-xl data-[state=closed]:animate-out data-[state=open]:animate-in`,
           position === 'popper' &&
-            'h-(--radix-select-trigger-height) w-full min-w-(--radix-select-trigger-width)'
+            'data-[side=left]:-translate-x-1 data-[side=top]:-translate-y-1 data-[side=right]:translate-x-1 data-[side=bottom]:translate-y-1',
+          className
         )}
       >
-        {children}
-      </SelectPrimitive.Viewport>
-      <SelectScrollDownButton />
+        <SelectScrollUpButton />
+        <SelectPrimitive.Viewport
+          className={cn(
+            'p-1',
+            position === 'popper' &&
+              'h-(--radix-select-trigger-height) w-full min-w-(--radix-select-trigger-width)'
+          )}
+        >
+          {children}
+        </SelectPrimitive.Viewport>
+        <SelectScrollDownButton />
+      </motion.div>
     </SelectPrimitive.Content>
   </SelectPrimitive.Portal>
 );

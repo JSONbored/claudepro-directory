@@ -9,7 +9,7 @@
 import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import { type TabbedDetailLayoutProps } from '@heyclaude/web-runtime/types/component.types';
-import { cn, Tabs, TabsContent, TabsList, TabsTrigger } from '@heyclaude/web-runtime/ui';
+import { cn, Tabs, TabsContent, TabsList, TabsTrigger, LayoutGroup } from '@heyclaude/web-runtime/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { TabSectionRenderer } from './tab-section-renderer';
@@ -137,9 +137,10 @@ export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDe
   }, [goToNextTab, goToPreviousTab]);
 
   return (
-    <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-      {/* Sticky tab bar */}
-      <div className="bg-background/95 supports-backdrop-filter:bg-background/60 sticky top-16 z-10 -mx-4 border-b px-4 backdrop-blur">
+    <LayoutGroup>
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+        {/* Sticky tab bar */}
+        <div className="bg-background/95 supports-backdrop-filter:bg-background/60 sticky top-16 z-10 -mx-4 border-b px-4 backdrop-blur">
         <div className="container mx-auto">
           <TabsList className="h-auto w-full justify-start rounded-none border-0 bg-transparent p-0">
             {tabs.map((tab) => {
@@ -202,6 +203,7 @@ export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDe
           </TabsContent>
         ))}
       </div>
-    </Tabs>
+      </Tabs>
+    </LayoutGroup>
   );
 }

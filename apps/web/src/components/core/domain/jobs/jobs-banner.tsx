@@ -20,6 +20,7 @@ import {
   Input,
 } from '@heyclaude/web-runtime/ui';
 import { SPRING, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
 import { useId, useMemo, useState } from 'react';
@@ -47,6 +48,7 @@ const isValidEmail = (email: string): boolean => {
 export function JobsPromo() {
   const { fireConfetti } = useConfetti();
   const [showNewsletterForm, setShowNewsletterForm] = useState(false);
+  const shouldReduceMotion = useReducedMotion();
 
   const { email, setEmail, isSubmitting, subscribe, error, reset } = useNewsletter({
     source: 'inline' as Database['public']['Enums']['newsletter_source'],
@@ -78,8 +80,8 @@ export function JobsPromo() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
+      animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
       transition={{ duration: DURATION.moderate, delay: STAGGER.default, ...SPRING.smooth }}
     >
       <Card
@@ -120,8 +122,8 @@ export function JobsPromo() {
               'bg-card/50 rounded-lg border border-border/50',
               UI_CLASSES.PADDING_COMPACT
             )}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
+            initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
+            animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }}
             transition={{ delay: STAGGER.relaxed, ...SPRING.smooth }}
           >
             <div className={cn(UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN, UI_CLASSES.TEXT_SM)}>
@@ -143,8 +145,8 @@ export function JobsPromo() {
                   'font-semibold',
                   UI_CLASSES.ICON_SUCCESS
                 )}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
+                initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -10 }}
+                animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
                 transition={{ delay: STAGGER.extended }}
               >
                 <TrendingUp className={UI_CLASSES.ICON_XS} />
@@ -163,8 +165,8 @@ export function JobsPromo() {
               <motion.div
                 key={text}
                 className={UI_CLASSES.FLEX_ITEMS_START_GAP_2}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
+                initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -10 }}
+                animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
                 transition={{ delay: STAGGER.loose + i * STAGGER.fast }}
               >
                 <Check
@@ -180,9 +182,9 @@ export function JobsPromo() {
             {showNewsletterForm ? (
               <motion.div
                 key="form"
-                initial={{ opacity: 0, height: 0, y: -10 }}
-                animate={{ opacity: 1, height: 'auto', y: 0 }}
-                exit={{ opacity: 0, height: 0, y: -10 }}
+                initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, height: 0, y: -10 }}
+                animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, height: 'auto', y: 0 }}
+                exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, height: 0, y: -10 }}
                 transition={{
                   ...SPRING.gentle,
                   mass: 0.8,
@@ -234,9 +236,9 @@ export function JobsPromo() {
                             'bg-[#F6F8F4] text-background',
                             'cursor-not-allowed'
                           )}
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.8 }}
+                          initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.8 }}
+                          animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }}
+                          exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.8 }}
                           transition={{ duration: DURATION.quick }}
                           aria-label="Subscribing..."
                         >
@@ -255,17 +257,17 @@ export function JobsPromo() {
                             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F6F8F4] focus-visible:ring-offset-2',
                             'active:scale-95'
                           )}
-                          initial={{ opacity: 0, x: -8, scale: 0.8 }}
-                          animate={{ opacity: 1, x: 0, scale: 1 }}
-                          exit={{ opacity: 0, x: -8, scale: 0.8 }}
+                          initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -8, scale: 0.8 }}
+                          animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0, scale: 1 }}
+                          exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -8, scale: 0.8 }}
                           transition={SPRING.loading}
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
+                          whileHover={shouldReduceMotion ? {} : { scale: 1.05 }}
+                          whileTap={shouldReduceMotion ? {} : { scale: 0.95 }}
                           aria-label="Subscribe to job alerts"
                         >
                           <motion.div
                             initial={{ rotate: 0 }}
-                            whileHover={{ rotate: 15 }}
+                            whileHover={shouldReduceMotion ? {} : { rotate: 15 }}
                             transition={SPRING.bouncy}
                           >
                             <Send className="h-4 w-4" aria-hidden="true" />
@@ -281,9 +283,9 @@ export function JobsPromo() {
                       id={errorId}
                       className="text-destructive text-sm"
                       role="alert"
-                      initial={{ opacity: 0, y: -4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -4 }}
+                      initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -4 }}
+                      animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                      exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -4 }}
                       transition={{ duration: DURATION.quick }}
                     >
                       {error}
@@ -302,11 +304,11 @@ export function JobsPromo() {
           <div className={cn(UI_CLASSES.SPACE_Y_2)}>
             {/* Post Job CTA */}
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 10 }}
+              animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
               transition={{ delay: STAGGER.maximum }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              whileHover={shouldReduceMotion ? {} : { scale: 1.02 }}
+              whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
             >
               <Button
                 asChild
@@ -328,13 +330,13 @@ export function JobsPromo() {
                 'transition-colors duration-200',
                 'hover:bg-accent/5 rounded-md py-1.5'
               )}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              whileHover={shouldReduceMotion ? {} : { scale: 1.02 }}
+              whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
             >
               <Mail className="h-4 w-4" aria-hidden="true" />
               <span>{showNewsletterForm ? 'Hide job alerts' : 'Get job alerts by email'}</span>
               <motion.div
-                animate={{ rotate: showNewsletterForm ? 180 : 0 }}
+                animate={shouldReduceMotion ? {} : { rotate: showNewsletterForm ? 180 : 0 }}
                 transition={SPRING.smooth}
               >
                 <ChevronUp className="h-4 w-4" aria-hidden="true" />

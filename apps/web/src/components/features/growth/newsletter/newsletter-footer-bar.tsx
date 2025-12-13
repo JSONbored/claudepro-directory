@@ -3,11 +3,11 @@
 import { type Database } from '@heyclaude/database-types';
 import { getAppSettings, getNewsletterConfig } from '@heyclaude/web-runtime/config/static-configs';
 import {
-  ensureNumber,
   ensureStringArray,
   logUnhandledPromise,
   NEWSLETTER_CTA_CONFIG,
 } from '@heyclaude/web-runtime/core';
+import { ensureNumber } from '@heyclaude/web-runtime/data/utils';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { Mail, X } from '@heyclaude/web-runtime/icons';
 import { DIMENSIONS, POSITION_PATTERNS, UI_CLASSES, Button } from '@heyclaude/web-runtime/ui';

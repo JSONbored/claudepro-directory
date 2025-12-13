@@ -25,6 +25,19 @@ export const BRAND_COLORS = {
   orangeActive: 'oklch(70% 0.21 35)',
   orangeLight: 'oklch(82% 0.17 37)',
   orangeMuted: 'oklch(65% 0.18 33)',
+
+  /**
+   * RGB equivalents for Motion.dev animations
+   * Motion.dev cannot animate OKLCH colors, so we provide RGB equivalents
+   */
+  orangeRgb: 'rgb(249, 115, 22)', // #F97316
+  orangeRgba70: 'rgba(249, 115, 22, 0.7)', // oklch(74% 0.2 35 / 0.7)
+  orangeRgba20: 'rgba(249, 115, 22, 0.2)', // oklch(74% 0.2 35 / 0.2)
+  orangeRgba50: 'rgba(249, 115, 22, 0.5)', // oklch(74% 0.2 35 / 0.5)
+  orangeRgba40: 'rgba(249, 115, 22, 0.4)', // oklch(74% 0.2 35 / 0.4)
+  orangeRgba30: 'rgba(249, 115, 22, 0.3)', // oklch(74% 0.2 35 / 0.3)
+  orangeRgba15: 'rgba(249, 115, 22, 0.15)', // oklch(74% 0.2 35 / 0.15)
+  orangeRgba10: 'rgba(249, 115, 22, 0.1)', // oklch(74% 0.2 35 / 0.1)
 } as const;
 
 /**

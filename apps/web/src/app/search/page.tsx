@@ -15,13 +15,10 @@ import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { type Metadata } from 'next';
 import { Suspense } from 'react';
 
-import { getCachedSearchResults } from '@/src/app/api/search/route';
-import { ContentSearchClient } from '@/src/components/content/content-search';
+// Search is now handled by SearchPageClient (new unified search system)
+import { SearchPageClient } from '@/src/app/search/search-page-client';
 import { ContentSidebar } from '@/src/components/core/layout/content-sidebar';
 
-type SearchType = 'content' | 'jobs' | 'unified';
-
-// Use generated database types - no custom types
 type ContentCategory = Database['public']['Enums']['content_category'];
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums
   .content_category as readonly ContentCategory[];
@@ -152,15 +149,8 @@ export async function generateMetadata({ searchParams }: SearchPageProperties): 
  * @see getCachedSearchResults
  * @see normalizeError
  */
-async function SearchResultsSection({
+function SearchResultsSection({
   facetOptions,
-  fallbackSuggestions,
-  filters,
-  hasUserFilters,
-  query,
-  quickAuthors,
-  quickCategories,
-  quickTags,
 }: {
   facetOptions: {
     authors: string[];
@@ -175,78 +165,11 @@ async function SearchResultsSection({
   quickCategories: ContentCategory[];
   quickTags: string[];
 }) {
-  // Create request-scoped child logger
-  const sectionLogger = logger.child({
-    module: 'apps/web/src/app/search',
-    operation: 'SearchResultsSection',
-    route: '/search',
-  });
-
-  // Section: Search Results
-  // Use getCachedSearchResults for consistent caching (same as API route)
-  // Follows architectural strategy: API route -> data layer -> database RPC -> DB
-  let results: DisplayableContent[] = [];
-  try {
-    // Convert to proper types - p_categories should already be enum array, but ensure it
-    const categoryEnums = filters.p_categories
-      ? filters.p_categories.filter((cat): cat is ContentCategory =>
-          CONTENT_CATEGORY_VALUES.includes(cat)
-        )
-      : undefined;
-
-    // Determine searchType based on entities (same logic as API route)
-    // When entities are specified, use 'unified' search
-    const searchType: SearchType = ['content'].length > 0 ? 'unified' : 'content';
-
-    const searchResult = await getCachedSearchResults({
-      authors: filters.p_authors,
-      categories: categoryEnums, // Use generated enum type
-      entities: ['content'], // Use unified search when entities are specified
-      limit: filters.p_limit || 50,
-      offset: filters.p_offset || 0,
-      query,
-      searchType, // Required parameter - determined by entities
-      sort: filters.sort || 'relevance',
-      tags: filters.p_tags,
-    });
-
-    // search_unified returns content items compatible with DisplayableContent
-    results = searchResult.results as DisplayableContent[];
-
-    sectionLogger.info(
-      {
-        hasFilters: hasUserFilters,
-        queryLength: query.length,
-        resultsCount: results.length,
-        section: 'data-fetch',
-        totalCount: searchResult.totalCount,
-      },
-      'SearchPage: search results loaded'
-    );
-  } catch (error) {
-    const normalized = normalizeError(error, 'Search content fetch failed');
-    sectionLogger.error(
-      { err: normalized, hasFilters: hasUserFilters, query, section: 'data-fetch' },
-      'SearchPage: getCachedSearchResults invocation failed'
-    );
-    throw normalized;
-  }
-
   return (
-    <ContentSearchClient
+    <SearchPageClient
       availableAuthors={facetOptions.authors}
       availableCategories={facetOptions.categories}
       availableTags={facetOptions.tags}
-      fallbackSuggestions={fallbackSuggestions}
-      icon="Search"
-      items={results}
-      quickAuthors={quickAuthors}
-      quickCategories={quickCategories}
-      quickTags={quickTags}
-      searchPlaceholder="Search agents, MCP servers, rules, commands..."
-      title="Results"
-      type={Constants.public.Enums.content_category[0]}
-      zeroStateSuggestions={fallbackSuggestions}
     />
   );
 }
@@ -305,21 +228,11 @@ export default function SearchPage({ searchParams }: SearchPageProperties) {
  * @returns {unknown} Description of return value*/
 function SearchResultsSkeleton() {
   return (
-    <ContentSearchClient
-      availableAuthors={[]}
-      availableCategories={[]}
-      availableTags={[]}
-      fallbackSuggestions={[]}
-      icon="Search"
-      items={[]}
-      quickAuthors={[]}
-      quickCategories={[]}
-      quickTags={[]}
-      searchPlaceholder="Search agents, MCP servers, rules, commands..."
-      title="Results"
-      type={Constants.public.Enums.content_category[0]}
-      zeroStateSuggestions={[]}
-    />
+    <div className="space-y-6">
+      <div className="bg-muted h-14 w-full animate-pulse rounded-lg" />
+      <div className="bg-muted h-32 w-full animate-pulse rounded-lg" />
+      <div className="bg-muted h-64 w-full animate-pulse rounded-lg" />
+    </div>
   );
 }
 
@@ -480,8 +393,6 @@ async function SearchFacetsAndResults({
     }
   }
 
-  const fallbackSuggestions = dedupeSuggestions(zeroStateSuggestions, FALLBACK_SUGGESTION_LIMIT);
-
   const quickTags = rankFacetValues(
     facetAggregate?.facets,
     (facet) => facet.tags,
@@ -519,7 +430,7 @@ async function SearchFacetsAndResults({
     <Suspense fallback={<SearchResultsSkeleton />}>
       <SearchResultsSection
         facetOptions={facetOptions}
-        fallbackSuggestions={fallbackSuggestions}
+        fallbackSuggestions={dedupeSuggestions(zeroStateSuggestions, FALLBACK_SUGGESTION_LIMIT)}
         filters={filters}
         hasUserFilters={hasUserFilters}
         query={query}

@@ -20,7 +20,8 @@
 
 import { cn } from '../../utils.ts';
 import { SPRING } from '../../../design-system/index.ts';
-import { useSpring } from 'motion/react';
+import { useReducedMotion, usePageInView } from '../../../hooks/motion/index.ts';
+import { useSpring } from '../../../hooks/motion/index.ts';
 import * as React from 'react';
 import { memo, useEffect, useRef, useState } from 'react';
 
@@ -63,20 +64,28 @@ function NumberTickerComponent({
   style,
   ...props
 }: NumberTickerProps) {
-  // Create spring-animated value - called at top level
-  const spring = useSpring(0, SPRING.smooth);
-
-  // Subscribe to spring value changes and format to string
-  // Start with actual value to prevent "0" flash (production fix)
+  const shouldReduceMotion = useReducedMotion();
+  const isPageInView = usePageInView();
+  
+  // For reduced motion, display value instantly without animation
   const [displayValue, setDisplayValue] = useState(
     `${prefix}${value.toFixed(decimalPlaces)}${suffix}`
   );
+
+  // Create spring-animated value only if not reducing motion and page is in view
+  const spring = useSpring(shouldReduceMotion || !isPageInView ? value : 0, SPRING.smooth);
 
   // Store spring in ref to access stable reference in effects
   const springRef = useRef(spring);
   springRef.current = spring;
 
   useEffect(() => {
+    // For reduced motion or when page not in view, update display value directly
+    if (shouldReduceMotion || !isPageInView) {
+      setDisplayValue(`${prefix}${value.toFixed(decimalPlaces)}${suffix}`);
+      return;
+    }
+
     // Subscribe to spring value changes
     // Use springRef.current to get stable reference
     const currentSpring = springRef.current;
@@ -88,10 +97,16 @@ function NumberTickerComponent({
     return () => {
       unsubscribe();
     };
-  }, [decimalPlaces, prefix, suffix]);
+  }, [decimalPlaces, prefix, suffix, shouldReduceMotion, isPageInView, value]);
 
   // Animate to target value on mount or when value changes
   useEffect(() => {
+    if (shouldReduceMotion || !isPageInView) {
+      // For reduced motion or when page not in view, set value instantly
+      setDisplayValue(`${prefix}${value.toFixed(decimalPlaces)}${suffix}`);
+      return;
+    }
+
     const timer = setTimeout(() => {
       springRef.current.set(value);
     }, delay);
@@ -99,7 +114,7 @@ function NumberTickerComponent({
     return () => {
       clearTimeout(timer);
     };
-  }, [value, delay]);
+  }, [value, delay, shouldReduceMotion, isPageInView, prefix, suffix, decimalPlaces]);
 
   return (
     <span

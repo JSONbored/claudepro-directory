@@ -1,15 +1,24 @@
 'use client';
 
+import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { useCopyToClipboard } from '@heyclaude/web-runtime/hooks';
-import { Check, Copy } from '@heyclaude/web-runtime/icons';
+import { AlertCircle, Check, Copy, RefreshCw } from '@heyclaude/web-runtime/icons';
 import { logClientErrorBoundary } from '@heyclaude/web-runtime/logging/client';
-import { Button, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { useEffect } from 'react';
+import {
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@heyclaude/web-runtime/ui';
+import { motion } from 'motion/react';
+import { useEffect, useState } from 'react';
 
 /**
  * CRITICAL: Direct reference to process.env.NODE_ENV
  * Next.js inlines this at build time. Do NOT use dynamic env lookups here!
- * 
+ *
  * HMR Issue: The process polyfill can cause HMR errors. Next.js should inline this,
  * but if HMR errors occur, it may be a Turbopack/webpack configuration issue.
  */
@@ -35,11 +44,11 @@ function ErrorCodeBlock({ content }: { content: string }) {
       <Button
         aria-label={copied ? 'Copied!' : 'Copy error message'}
         className="absolute top-2 right-2 h-6 w-6 p-0"
+        size="sm"
+        variant="ghost"
         onClick={() => {
           void copy(content);
         }}
-        size="sm"
-        variant="ghost"
       >
         {copied ? (
           <Check aria-hidden="true" className="h-3 w-3 text-green-500" />
@@ -69,6 +78,8 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const [isResetting, setIsResetting] = useState(false);
+
   useEffect(() => {
     // Log critical global errors with digest for Vercel observability
     logClientErrorBoundary(
@@ -84,42 +95,70 @@ export default function GlobalError({
       }
     );
   }, [error]);
+
+  const handleReset = () => {
+    setIsResetting(true);
+    reset();
+  };
+
   return (
     <html lang="en">
       <body>
-        <div className="flex min-h-screen flex-col items-center justify-center p-4 font-sans">
-          <div className="border-border bg-card max-w-md rounded-lg border p-8 text-center">
-            <h2 className="text-destructive mb-4 text-2xl font-bold">Application Error</h2>
-            <p className="text-muted-foreground mb-6">
-              A critical error occurred. Please refresh the page or try again later.
-            </p>
-            {isDevelopment && error.message ? (
-              <div className="bg-muted mb-6 rounded-md p-4 text-left">
-                <ErrorCodeBlock content={error.message} />
-                {error.stack ? (
-                  <details className="mt-2 text-xs">
-                    <summary className="cursor-pointer font-semibold">► Stack Trace</summary>
-                    <div className="mt-2">
-                      <ErrorCodeBlock content={error.stack} />
-                    </div>
-                  </details>
+        <motion.div
+          animate={{ opacity: 1 }}
+          className="flex min-h-screen flex-col items-center justify-center p-4 font-sans"
+          initial={{ opacity: 0 }}
+          transition={SPRING.smooth}
+        >
+          <motion.div
+            animate={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            transition={SPRING.smooth}
+          >
+            <Card className="w-full max-w-lg text-center">
+              <CardHeader>
+                <div className="mb-4 flex justify-center">
+                  <motion.div
+                    animate={{ rotate: 0, scale: 1 }}
+                    className="bg-destructive/10 rounded-full p-3"
+                    initial={{ rotate: -180, scale: 0 }}
+                    transition={{ ...SPRING.bouncy, delay: 0.1 }}
+                  >
+                    <AlertCircle aria-hidden="true" className="text-destructive h-12 w-12" />
+                  </motion.div>
+                </div>
+                <CardTitle className="text-2xl">Application Error</CardTitle>
+                <CardDescription>
+                  A critical error occurred. Please refresh the page or try again later.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {isDevelopment && error.message ? (
+                  <div className="bg-muted rounded-md p-4 text-left">
+                    <ErrorCodeBlock content={error.message} />
+                    {error.stack ? (
+                      <details className="mt-2 text-xs">
+                        <summary className="cursor-pointer font-semibold">► Stack Trace</summary>
+                        <div className="mt-2">
+                          <ErrorCodeBlock content={error.stack} />
+                        </div>
+                      </details>
+                    ) : null}
+                    {error.digest ? (
+                      <p className="text-muted-foreground mt-2 font-mono text-xs break-words">
+                        Digest: {error.digest}
+                      </p>
+                    ) : null}
+                  </div>
                 ) : null}
-                {error.digest ? (
-                  <p className="text-muted-foreground mt-2 font-mono text-xs break-words">
-                    Digest: {error.digest}
-                  </p>
-                ) : null}
-              </div>
-            ) : null}
-            <button
-              className={`bg-primary cursor-pointer rounded-md border-none ${UI_CLASSES.CONTAINER_PADDING_SM} text-primary-foreground hover:bg-primary/90 text-base transition-colors`}
-              onClick={reset}
-              type="button"
-            >
-              Reset Application
-            </button>
-          </div>
-        </div>
+                <Button className="w-full" disabled={isResetting} size="lg" onClick={handleReset}>
+                  <RefreshCw className={`mr-2 h-4 w-4 ${isResetting ? 'animate-spin' : ''}`} />
+                  {isResetting ? 'Resetting...' : 'Reset Application'}
+                </Button>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </motion.div>
       </body>
     </html>
   );

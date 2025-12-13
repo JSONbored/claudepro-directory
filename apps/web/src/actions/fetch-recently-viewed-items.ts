@@ -153,7 +153,7 @@ export async function fetchRecentlyViewedItems(
 
     // Filter out null items (deleted content)
     const validItems = enrichedItems.filter(
-      (item): item is Database['public']['CompositeTypes']['enriched_content_item'] => item !== null
+      (item: Database['public']['CompositeTypes']['enriched_content_item'] | null): item is Database['public']['CompositeTypes']['enriched_content_item'] => item !== null
     );
 
     reqLogger.info(

@@ -3,7 +3,7 @@
 import { cn } from '../utils.ts';
 import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 import { motion } from 'motion/react';
-import type * as React from 'react';
+import * as React from 'react';
 import { MICROINTERACTIONS } from '../../design-system/index.ts';
 
 const TooltipProvider = ({ 
@@ -24,8 +24,8 @@ const TooltipProvider = ({
   );
 };
 
-const Tooltip = ({ children, defaultOpen = false, ...props }: React.ComponentProps<typeof TooltipPrimitive.Root>) => (
-  <TooltipPrimitive.Root defaultOpen={defaultOpen} {...props}>
+const Tooltip = ({ children, ...props }: React.ComponentProps<typeof TooltipPrimitive.Root>) => (
+  <TooltipPrimitive.Root {...props}>
     {children}
   </TooltipPrimitive.Root>
 );

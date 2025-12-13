@@ -4,8 +4,7 @@ import {
   trackValidationFailure,
 } from '@heyclaude/web-runtime/core';
 import { getHomepageCategoryIds, getHomepageData } from '@heyclaude/web-runtime/server';
-import { type SearchFilterOptions } from '@heyclaude/web-runtime/types/component.types';
-import { normalizeError } from '@heyclaude/shared-runtime/logger/index.ts';
+import { normalizeError, serializeForClient } from '@heyclaude/shared-runtime';
 
 import { HomePageClient } from '@/src/components/features/home/home-sections';
 
@@ -190,12 +189,11 @@ async function HomepageContentData() {
  * Homepage Content Server Component
  *
  * Renders the main homepage content section with all featured content
+ * 
+ * OPTIMIZATION: Fetches homepage data immediately without waiting for search filters
+ * Search filters are optional and can be loaded separately to avoid blocking content streaming
  */
-export async function HomepageContentServer({
-  searchFilters,
-}: {
-  searchFilters: SearchFilterOptions;
-}) {
+export async function HomepageContentServer() {
   // Use cache-safe logger for Server Components that run during prerendering
   // Dynamically import to avoid serialization issues
   const { createLogger } = await import('@heyclaude/shared-runtime/logger/index.ts');
@@ -206,27 +204,24 @@ export async function HomepageContentServer({
     module: 'apps/web/src/components/features/home/homepage-content-server',
   });
 
+  // CRITICAL: Fetch homepage data immediately, don't wait for searchFilters
+  // This allows content to stream even if search facets are still loading
   const { homepageContentData, featuredJobs, categoryIds } = await HomepageContentData();
 
   // CRITICAL: Ensure data is properly serialized for Next.js Client Component
   // Next.js requires all props to be serializable (JSON-compatible)
-  // Convert the data to ensure it's properly serialized
-  const serializedCategoryData: Record<string, unknown[]> = {};
-  for (const [key, value] of Object.entries(homepageContentData.categoryData)) {
-    // Ensure each value is an array and is serializable
-    if (Array.isArray(value)) {
-      serializedCategoryData[key] = value;
-    } else {
-      reqLogger.warn(
-        {
-          key,
-          valueType: typeof value,
-          value,
-        },
-        'HomepageContentServer: Non-array categoryData value'
-      );
-      serializedCategoryData[key] = [];
-    }
+  // Use standardized serializeForClient utility for consistent serialization
+  const serializedCategoryData = serializeForClient(homepageContentData.categoryData);
+
+  // Validate that serialized data maintains expected structure
+  if (!(serializedCategoryData && typeof serializedCategoryData === 'object' && !Array.isArray(serializedCategoryData))) {
+    reqLogger.warn(
+      {
+        serializedType: typeof serializedCategoryData,
+        isArray: Array.isArray(serializedCategoryData),
+      },
+      'HomepageContentServer: Serialized categoryData has unexpected structure'
+    );
   }
 
   reqLogger.info(
@@ -265,7 +260,6 @@ export async function HomepageContentServer({
       featuredByCategory={serializedCategoryData}
       stats={homepageContentData.stats}
       featuredJobs={featuredJobs}
-      searchFilters={searchFilters}
       weekStart={homepageContentData.weekStart}
       serverCategoryIds={categoryIds}
     />

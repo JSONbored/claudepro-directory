@@ -1,3 +1,5 @@
+'use client';
+
 import type { Database } from '@heyclaude/database-types';
 import { baseBadgeVariants } from '../badges/unified-badge.tsx';
 import { ANIMATION_CONSTANTS } from '../../constants.ts';

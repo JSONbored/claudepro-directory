@@ -5,6 +5,7 @@
 'use client';
 
 import { STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 
 import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';
@@ -16,11 +17,12 @@ import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';
  * @see ./brand-logo#HeyClaudeLogo
  */
 export function AuthBrandPanel() {
+  const shouldReduceMotion = useReducedMotion();
   return (
     <div className="flex max-w-2xl flex-col items-start justify-center space-y-8">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
+        animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
         transition={{ duration: DURATION.extended, delay: STAGGER.default }}
       >
         <div className="mb-6">

@@ -15,6 +15,7 @@ import {
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
 import { SPRING, STAGGER } from '@heyclaude/web-runtime/design-system';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 
@@ -91,6 +92,7 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
   } = props;
   const { count, isLoading } = useNewsletterCount();
   const [newsletterConfig, setNewsletterConfig] = useState<Record<string, unknown>>({});
+  const shouldReduceMotion = useReducedMotion();
   const loadConfig = useLoggedAsync({
     scope: 'NewsletterCTAVariant',
     defaultMessage: 'Failed to load newsletter config',
@@ -152,8 +154,8 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
         {/* Icon */}
         <motion.div
           className="mb-5 inline-flex"
-          initial={{ scale: 0.9, opacity: 0 }}
-          whileInView={{ scale: 1, opacity: 1 }}
+          initial={shouldReduceMotion ? { opacity: 0 } : { scale: 0.9, opacity: 0 }}
+          whileInView={shouldReduceMotion ? { opacity: 1 } : { scale: 1, opacity: 1 }}
           viewport={{ once: true }}
           transition={SPRING.smooth}
         >
@@ -165,8 +167,8 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
         {/* Headline */}
         <motion.h2
           className="text-foreground mx-auto mb-3 max-w-md text-xl leading-tight font-semibold tracking-tight md:text-2xl"
-          initial={{ y: 10, opacity: 0 }}
-          whileInView={{ y: 0, opacity: 1 }}
+          initial={shouldReduceMotion ? { opacity: 0 } : { y: 10, opacity: 0 }}
+          whileInView={shouldReduceMotion ? { opacity: 1 } : { y: 0, opacity: 1 }}
           viewport={{ once: true }}
           transition={{ delay: STAGGER.fast }}
         >
@@ -176,8 +178,8 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
         {/* Description */}
         <motion.p
           className="text-muted-foreground mx-auto mb-6 max-w-lg text-sm leading-relaxed md:text-base"
-          initial={{ y: 10, opacity: 0 }}
-          whileInView={{ y: 0, opacity: 1 }}
+          initial={shouldReduceMotion ? { opacity: 0 } : { y: 10, opacity: 0 }}
+          whileInView={shouldReduceMotion ? { opacity: 1 } : { y: 0, opacity: 1 }}
           viewport={{ once: true }}
           transition={{ delay: STAGGER.medium }}
         >
@@ -187,8 +189,8 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
         {/* Form */}
         <motion.div
           className="mx-auto max-w-sm"
-          initial={{ y: 10, opacity: 0 }}
-          whileInView={{ y: 0, opacity: 1 }}
+          initial={shouldReduceMotion ? { opacity: 0 } : { y: 10, opacity: 0 }}
+          whileInView={shouldReduceMotion ? { opacity: 1 } : { y: 0, opacity: 1 }}
           viewport={{ once: true }}
           transition={{ delay: STAGGER.default }}
         >

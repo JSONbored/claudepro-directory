@@ -1,17 +1,17 @@
 /**
  * Sitemap API Route
- * 
+ *
  * Generates XML or JSON sitemaps for search engines.
  * Supports IndexNow submission for search engine indexing.
- * 
+ *
  * @example
  * ```ts
  * // Request - XML sitemap
  * GET /api/sitemap?format=xml
- * 
+ *
  * // Request - JSON sitemap
  * GET /api/sitemap?format=json
- * 
+ *
  * // Response (200) - application/xml or application/json
  * <?xml version="1.0"?>
  * <urlset>...</urlset>
@@ -29,13 +29,15 @@ import {
   getStringProperty,
 } from '@heyclaude/shared-runtime';
 import { inngest } from '@heyclaude/web-runtime/inngest';
-import { createApiRoute, createApiOptionsHandler, sitemapFormatSchema } from '@heyclaude/web-runtime/server';
 import { normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   buildCacheHeaders,
+  createApiOptionsHandler,
+  createApiRoute,
   createSupabaseAnonClient,
   getOnlyCorsHeaders,
   jsonResponse,
+  sitemapFormatSchema,
 } from '@heyclaude/web-runtime/server';
 import { cacheLife } from 'next/cache';
 import { NextResponse } from 'next/server';
@@ -86,32 +88,12 @@ function timingSafeEqual(a?: null | string, b?: null | string): boolean {
 
 /**
  * GET /api/sitemap - Get sitemap in XML or JSON format
- * 
+ *
  * Generates XML or JSON sitemaps for search engines.
  * Supports both XML (default) and JSON formats.
  */
 export const GET = createApiRoute({
-  route: '/api/sitemap',
-  operation: 'SitemapAPI',
-  method: 'GET',
   cors: 'anon',
-  querySchema: z.object({
-    format: sitemapFormatSchema,
-  }),
-  openapi: {
-    summary: 'Get sitemap in XML or JSON format',
-    description: 'Generates XML or JSON sitemaps for search engines. Supports both XML (default) and JSON formats.',
-    tags: ['sitemap', 'seo'],
-    operationId: 'getSitemap',
-    responses: {
-      200: {
-        description: 'Sitemap generated successfully',
-      },
-      500: {
-        description: 'Sitemap generation failed',
-      },
-    },
-  },
   handler: async ({ logger, query }) => {
     // Zod schema ensures proper types
     const { format } = query;
@@ -238,7 +220,11 @@ export const GET = createApiRoute({
 
     if (!data) {
       logger.warn({}, 'generate_sitemap_xml returned null');
-      return jsonResponse({ error: 'Sitemap XML generation returned null' }, 500, getOnlyCorsHeaders);
+      return jsonResponse(
+        { error: 'Sitemap XML generation returned null' },
+        500,
+        getOnlyCorsHeaders
+      );
     }
 
     logger.info({}, 'Sitemap XML generated');
@@ -256,20 +242,41 @@ export const GET = createApiRoute({
       status: 200,
     });
   },
+  method: 'GET',
+  openapi: {
+    description:
+      'Generates XML or JSON sitemaps for search engines. Supports both XML (default) and JSON formats.',
+    operationId: 'getSitemap',
+    responses: {
+      200: {
+        description: 'Sitemap generated successfully',
+      },
+      500: {
+        description: 'Sitemap generation failed',
+      },
+    },
+    summary: 'Get sitemap in XML or JSON format',
+    tags: ['sitemap', 'seo'],
+  },
+  operation: 'SitemapAPI',
+  querySchema: z.object({
+    format: sitemapFormatSchema,
+  }),
+  route: '/api/sitemap',
 });
 
 /**
  * POST /api/sitemap - Submit URLs to IndexNow
- * 
+ *
  * Submits site URLs to IndexNow for search engine indexing.
  * Requires authentication via x-indexnow-trigger-key header.
- * 
+ *
  * @example
  * ```ts
  * // Request
  * POST /api/sitemap
  * Headers: x-indexnow-trigger-key: <trigger-key>
- * 
+ *
  * // Response (200)
  * {
  *   "message": "IndexNow submission enqueued",
@@ -279,27 +286,7 @@ export const GET = createApiRoute({
  * ```
  */
 export const POST = createApiRoute({
-  route: '/api/sitemap',
-  operation: 'SitemapAPI',
-  method: 'POST',
   cors: 'anon',
-  openapi: {
-    summary: 'Submit URLs to IndexNow',
-    description: 'Submits site URLs to IndexNow for search engine indexing. Requires authentication via x-indexnow-trigger-key header.',
-    tags: ['sitemap', 'seo', 'indexnow'],
-    operationId: 'submitIndexNow',
-    responses: {
-      200: {
-        description: 'IndexNow submission enqueued successfully',
-      },
-      401: {
-        description: 'Unauthorized - invalid trigger key',
-      },
-      503: {
-        description: 'Service unavailable - IndexNow keys not configured',
-      },
-    },
-  },
   handler: async ({ logger, request }) => {
     logger.info(
       {
@@ -425,6 +412,27 @@ export const POST = createApiRoute({
       );
     }
   },
+  method: 'POST',
+  openapi: {
+    description:
+      'Submits site URLs to IndexNow for search engine indexing. Requires authentication via x-indexnow-trigger-key header.',
+    operationId: 'submitIndexNow',
+    responses: {
+      200: {
+        description: 'IndexNow submission enqueued successfully',
+      },
+      401: {
+        description: 'Unauthorized - invalid trigger key',
+      },
+      503: {
+        description: 'Service unavailable - IndexNow keys not configured',
+      },
+    },
+    summary: 'Submit URLs to IndexNow',
+    tags: ['sitemap', 'seo', 'indexnow'],
+  },
+  operation: 'SitemapAPI',
+  route: '/api/sitemap',
 });
 
 /**

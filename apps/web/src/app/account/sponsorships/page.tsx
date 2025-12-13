@@ -64,6 +64,21 @@ export async function generateMetadata(): Promise<Metadata> {
  * @see SponsorshipsPage
  * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
  * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
   * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
 */
 function isSponsorshipActive(

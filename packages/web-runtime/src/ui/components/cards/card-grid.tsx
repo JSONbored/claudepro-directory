@@ -36,14 +36,16 @@
  * ```
  */
 
-import { logUnhandledPromise } from '../../../entries/core.ts';
+// Import directly from source files to avoid indirect imports through entries/core.ts
+import { logUnhandledPromise } from '../../../errors.ts';
 import { SPRING, STAGGER } from '../../../design-system/index.ts';
+import { useReducedMotion } from '../../../hooks/motion/index.ts';
 import { useInfiniteScroll } from '../../../hooks/use-infinite-scroll.ts';
 import type { DisplayableContent } from '../../../types/component.types.ts';
 import { UI_CLASSES } from '../../constants.ts';
 import { ErrorBoundary } from '../error-boundary.tsx';
 import { ConfigCard } from './config-card.tsx';
-import { motion } from 'motion/react';
+import { motion, stagger } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import type { ComponentType, ReactNode } from 'react';
 import { memo, useEffect } from 'react';
@@ -161,6 +163,33 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
   });
 
   const displayedItems = infiniteScroll ? safeItems.slice(0, displayCount) : safeItems;
+  const shouldReduceMotion = useReducedMotion();
+
+  // Variants for staggered animations
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        when: 'beforeChildren',
+        delayChildren: shouldReduceMotion ? 0 : stagger(STAGGER.micro),
+        staggerChildren: shouldReduceMotion ? 0 : STAGGER.micro,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: shouldReduceMotion
+      ? { opacity: 0 }
+      : { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        ...SPRING.smooth,
+      },
+    },
+  };
 
   useEffect(() => {
     if (infiniteScroll && onFetchMore && displayCount >= safeItems.length && serverHasMore) {
@@ -192,7 +221,12 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
 
   return (
     <section className={className} aria-label={ariaLabel}>
-      <div className={gridClassName}>
+      <motion.div
+        className={gridClassName}
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
         {displayedItems.map((item, index) => {
           const key = getKey(item, index);
           let cardContent: ReactNode;
@@ -213,20 +247,13 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
 
           return (
             <ErrorBoundary key={key}>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  ...SPRING.smooth,
-                  delay: (index % batchSize) * STAGGER.micro, // Using micro for 30ms
-                }}
-              >
+              <motion.div variants={itemVariants}>
                 {cardContent}
               </motion.div>
             </ErrorBoundary>
           );
         })}
-      </div>
+      </motion.div>
 
       {infiniteScroll && (hasMore || serverHasMore) && (
         <div

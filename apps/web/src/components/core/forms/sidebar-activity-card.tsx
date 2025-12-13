@@ -22,6 +22,7 @@ import {
   TabsTrigger,
 } from '@heyclaude/web-runtime/ui';
 import { DURATION } from '@heyclaude/web-runtime/design-system';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 
 interface SidebarActivityCardProps {
@@ -40,14 +41,19 @@ interface SidebarActivityCardProps {
 /**
  * Fade-in animation for tab content
  */
-const tabContentVariants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: DURATION.default, ease: 'easeOut' as const },
-  },
-} as const;
+const createTabContentVariants = (shouldReduceMotion: boolean) => ({
+  hidden: shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 10 },
+  visible: shouldReduceMotion
+    ? {
+        opacity: 1,
+        transition: { duration: DURATION.default, ease: 'easeOut' as const },
+      }
+    : {
+        opacity: 1,
+        y: 0,
+        transition: { duration: DURATION.default, ease: 'easeOut' as const },
+      },
+} as const);
 
 /**
  * Sidebar card displaying recent merged submissions and tips in two tabs.
@@ -72,6 +78,7 @@ const tabContentVariants = {
  * @see UI_CLASSES
  */
 export function SidebarActivityCard({ recentMerged, tips, typeLabels }: SidebarActivityCardProps) {
+  const shouldReduceMotion = useReducedMotion();
   return (
     <Card>
       <Tabs defaultValue="recent" className="w-full">
@@ -94,7 +101,7 @@ export function SidebarActivityCard({ recentMerged, tips, typeLabels }: SidebarA
             <motion.div
               initial="hidden"
               animate="visible"
-              variants={tabContentVariants}
+              variants={createTabContentVariants(shouldReduceMotion)}
               className={UI_CLASSES.SPACE_Y_3}
             >
               {recentMerged.length === 0 ? (
@@ -142,7 +149,7 @@ export function SidebarActivityCard({ recentMerged, tips, typeLabels }: SidebarA
 
           {/* Tips Tab */}
           <TabsContent value="tips" className="mt-0">
-            <motion.div initial="hidden" animate="visible" variants={tabContentVariants}>
+            <motion.div initial="hidden" animate="visible" variants={createTabContentVariants(shouldReduceMotion)}>
               <ul className="list-none space-y-2">
                 {tips.map((tip) => (
                   <li key={tip} className={UI_CLASSES.FLEX_ITEMS_START_GAP_2}>

@@ -11,6 +11,7 @@ import { Constants } from '@heyclaude/database-types';
 // Use generated type from database - search_content_optimized now returns composite type
 // Extract the row type from the results array in the composite type
 type SearchResult = Database['public']['CompositeTypes']['search_content_optimized_row'];
+type UnifiedSearchResult = Database['public']['CompositeTypes']['search_unified_row'];
 import type { LucideIcon } from '../icons.tsx';
 import type { ReactNode } from 'react';
 import type {
@@ -64,6 +65,7 @@ export type HomepageContentItem = {
 export type DisplayableContent =
   | ContentItem
   | SearchResult
+  | UnifiedSearchResult
   | Database['public']['CompositeTypes']['enriched_content_item']
   | Database['public']['CompositeTypes']['related_content_item']
   | HomepageContentItem;

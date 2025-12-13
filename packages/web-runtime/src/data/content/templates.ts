@@ -1,7 +1,7 @@
 'use server';
 
 import { type Database } from '@heyclaude/database-types';
-import { getEnvVar } from '@heyclaude/shared-runtime';
+import { getEnvVar, serializeForClient } from '@heyclaude/shared-runtime';
 // Temporarily removed cache imports - will be re-added when caching is re-implemented
 // import { cacheLife, cacheTag } from 'next/cache';
 
@@ -92,49 +92,9 @@ export async function getContentTemplates(
     });
 
     // Serialize for Client Component compatibility - ensure all data is plain objects
+    // Uses standardized serializeForClient utility for consistent serialization
     // This handles Date objects, class instances, and any other non-serializable data
-    // Use structuredClone where possible, fallback to JSON serialization for complex cases
-    let serialized: MergedTemplateItem[];
-    try {
-      // Try structuredClone first (faster and safer for most cases)
-      serialized = structuredClone(merged);
-    } catch {
-      // Fallback to JSON serialization for complex objects that structuredClone can't handle
-      serialized = JSON.parse(
-        JSON.stringify(merged, (_key, value) => {
-          // Filter out any non-serializable values
-          if (value === null || value === undefined) {
-            return value;
-          }
-          // Handle Date objects - check if it's a Date by checking for toISOString method
-          if (
-            typeof value === 'object' &&
-            value !== null &&
-            'toISOString' in value &&
-            typeof (value as { toISOString?: unknown }).toISOString === 'function'
-          ) {
-            return (value as Date).toISOString();
-          }
-          // Handle objects with null prototype (which can't be serialized)
-          if (typeof value === 'object' && Object.getPrototypeOf(value) === null) {
-            return Object.assign({}, value);
-          }
-          // Handle class instances (objects with constructor that's not Object)
-          if (typeof value === 'object' && value !== null) {
-            const proto = Object.getPrototypeOf(value);
-            if (proto !== null && proto !== Object.prototype && proto !== Array.prototype) {
-              // Try to extract plain properties using structuredClone
-              try {
-                return structuredClone(value);
-              } catch {
-                return null;
-              }
-            }
-          }
-          return value;
-        })
-      ) as MergedTemplateItem[];
-    }
+    const serialized = serializeForClient(merged);
 
     reqLogger.info(
       { category, templateCount: serialized.length },

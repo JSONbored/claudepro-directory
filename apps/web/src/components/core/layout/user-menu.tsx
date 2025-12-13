@@ -45,6 +45,7 @@ import {
   NavigationHoverCardTrigger,
 } from '@heyclaude/web-runtime/ui';
 import { MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -57,6 +58,7 @@ interface UserMenuProps {
 export function UserMenu({ className }: UserMenuProps) {
   const [signingOut, setSigningOut] = useState(false);
   const router = useRouter();
+  const shouldReduceMotion = useReducedMotion();
   const { user, status, supabaseClient } = useAuthenticatedUser({
     context: 'UserMenu',
   });
@@ -149,8 +151,8 @@ export function UserMenu({ className }: UserMenuProps) {
       <NavigationHoverCard openDelay={150} closeDelay={300}>
         <NavigationHoverCardTrigger asChild>
           <motion.div
-            whileHover={MICROINTERACTIONS.iconButton.hover}
-            whileTap={MICROINTERACTIONS.iconButton.tap}
+            whileHover={shouldReduceMotion ? {} : MICROINTERACTIONS.iconButton.hover}
+            whileTap={shouldReduceMotion ? {} : MICROINTERACTIONS.iconButton.tap}
             transition={MICROINTERACTIONS.iconButton.transition}
           >
             <Button
@@ -189,7 +191,7 @@ export function UserMenu({ className }: UserMenuProps) {
 
           {/* Dashboard Link */}
           <motion.div
-            whileHover={{ backgroundColor: 'rgba(249, 115, 22, 0.05)' }}
+            whileHover={shouldReduceMotion ? {} : { backgroundColor: 'rgba(249, 115, 22, 0.05)' }}
             transition={MICROINTERACTIONS.colorTransition.default}
             className="mb-2"
           >

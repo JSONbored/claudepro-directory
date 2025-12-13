@@ -1,0 +1,216 @@
+'use client';
+
+/**
+ * Code Tabs Component
+ * 
+ * A tabbed interface for displaying multiple code snippets with syntax highlighting.
+ * Perfect for showing installation commands, configuration examples, or multi-file code samples.
+ * 
+ * @example
+ * ```tsx
+ * <CodeTabs
+ *   codes={{
+ *     npm: 'npm install package',
+ *     pnpm: 'pnpm add package',
+ *     yarn: 'yarn add package'
+ *   }}
+ *   lang="bash"
+ *   copyButton={true}
+ * />
+ * ```
+ * 
+ * **When to use:**
+ * - Installation instructions: Show commands for different package managers
+ * - Configuration examples: Multiple config file formats
+ * - Multi-file code samples: Related code files in tabs
+ * - Documentation: Alternative approaches or examples
+ * 
+ * **Key features:**
+ * - Tab-based navigation between code snippets
+ * - Syntax highlighting via Shiki
+ * - Copy button for active tab
+ * - Dark mode support
+ * - Smooth tab transitions
+ */
+
+import * as React from 'react';
+import { useTheme } from 'next-themes';
+import { Tabs, TabsContent, TabsList, TabsTrigger, cn } from '@heyclaude/web-runtime/ui';
+import { CopyButton } from './code-editor';
+
+type CodeTabsProps = {
+  codes: Record<string, string>;
+  lang?: string;
+  themes?: {
+    light: string;
+    dark: string;
+  };
+  copyButton?: boolean;
+  /** Called when copy is attempted. Return false to prevent copy action. */
+  onCopy?: (content: string) => void | boolean;
+  defaultValue?: string;
+  value?: string;
+  onValueChange?: (value: string) => void;
+  className?: string;
+};
+
+function CodeTabsContent({
+  codes,
+  lang = 'bash',
+  themes = {
+    light: 'github-light',
+    dark: 'github-dark',
+  },
+  copyButton = true,
+  onCopy,
+  activeValue,
+}: {
+  codes: Record<string, string>;
+  lang?: string;
+  themes?: { light: string; dark: string };
+  copyButton?: boolean;
+  onCopy?: (content: string) => void | boolean;
+  activeValue?: string;
+}) {
+  const { resolvedTheme } = useTheme();
+
+  const [highlightedCodes, setHighlightedCodes] = React.useState<Record<
+    string,
+    string
+  >>(codes); // Start with raw codes for instant rendering
+
+  React.useEffect(() => {
+    async function loadHighlightedCode() {
+      try {
+        const { codeToHtml } = await import('shiki');
+        const newHighlightedCodes: Record<string, string> = {};
+
+        for (const [command, val] of Object.entries(codes)) {
+          const highlighted = await codeToHtml(val, {
+            lang,
+            themes: {
+              light: themes.light,
+              dark: themes.dark,
+            },
+            defaultColor: resolvedTheme === 'dark' ? 'dark' : 'light',
+          });
+
+          newHighlightedCodes[command] = highlighted;
+        }
+
+        setHighlightedCodes(newHighlightedCodes);
+      } catch (error) {
+        // Error highlighting codes - fallback to raw code already set in state
+        // Logging handled by caller if needed
+      }
+    }
+    loadHighlightedCode();
+  }, [resolvedTheme, lang, themes.light, themes.dark, codes]);
+
+  return (
+    <>
+      <TabsList
+        data-slot="install-tabs-list"
+        className="w-full relative justify-between rounded-none h-10 bg-muted border-b border-border/75 dark:border-border/50 text-current py-0 px-4"
+      >
+        <div className="flex gap-x-3 h-full">
+          {Object.keys(codes).map((code) => (
+            <TabsTrigger
+              key={code}
+              value={code}
+              className="text-muted-foreground data-[state=active]:text-current px-0"
+            >
+              {code}
+            </TabsTrigger>
+          ))}
+        </div>
+
+        {copyButton && activeValue && (
+          <CopyButton
+            content={codes[activeValue] ?? ''}
+            size="sm"
+            variant="ghost"
+            className="-me-2 bg-transparent hover:bg-black/5 dark:hover:bg-white/10"
+            {...(onCopy ? { onCopy: (content: string) => onCopy(content) } : {})}
+          />
+        )}
+      </TabsList>
+      {Object.entries(codes).map(([code, rawCode]) => (
+        <TabsContent
+          data-slot="install-tabs-content"
+          key={code}
+          className="w-full text-sm flex items-center p-4 overflow-auto"
+          value={code}
+        >
+          <div className="w-full [&>pre]:m-0 [&>pre]:p-0 [&>pre]:bg-transparent! [&>pre]:border-none [&>pre]:text-[13px] [&>pre]:leading-relaxed [&_code]:text-[13px] [&_code]:leading-relaxed [&_code]:bg-transparent! [&_.shiki]:bg-transparent!">
+            {highlightedCodes[code] !== undefined && highlightedCodes[code] !== rawCode ? (
+              <div dangerouslySetInnerHTML={{ __html: highlightedCodes[code]! }} />
+            ) : (
+              <pre>
+                <code>{rawCode}</code>
+              </pre>
+            )}
+          </div>
+        </TabsContent>
+      ))}
+    </>
+  );
+}
+
+function CodeTabs({
+  codes,
+  lang = 'bash',
+  themes = {
+    light: 'github-light',
+    dark: 'github-dark',
+  },
+  className,
+  defaultValue,
+  value,
+  onValueChange,
+  copyButton = true,
+  onCopy,
+}: CodeTabsProps) {
+  const firstKey = React.useMemo(() => Object.keys(codes)[0] ?? '', [codes]);
+  const [activeValue, setActiveValue] = React.useState(value ?? defaultValue ?? firstKey);
+
+  // Update activeValue when value changes (controlled mode)
+  React.useEffect(() => {
+    if (value !== undefined) {
+      setActiveValue(value);
+    }
+  }, [value]);
+
+  // Handle value changes
+  const handleValueChange = React.useCallback((newValue: string) => {
+    setActiveValue(newValue);
+    onValueChange?.(newValue);
+  }, [onValueChange]);
+
+  // Handle controlled vs uncontrolled properly
+  const finalTabsProps = value !== undefined
+    ? { value, onValueChange: handleValueChange }
+    : { defaultValue: defaultValue ?? firstKey, onValueChange: handleValueChange };
+
+  return (
+    <Tabs
+      data-slot="install-tabs"
+      className={cn(
+        'w-full gap-0 bg-muted/50 rounded-xl border overflow-hidden',
+        className,
+      )}
+      {...finalTabsProps}
+    >
+      <CodeTabsContent
+        codes={codes}
+        lang={lang}
+        themes={themes}
+        copyButton={copyButton}
+        {...(onCopy ? { onCopy } : {})}
+        activeValue={value ?? activeValue}
+      />
+    </Tabs>
+  );
+}
+
+export { CodeTabs, type CodeTabsProps };

@@ -6,6 +6,7 @@
 
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 
 import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';
@@ -21,12 +22,13 @@ import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';
  * @see UI_CLASSES.CARD_BODY_SPACING
  */
 export function AuthMobileHeader() {
+  const shouldReduceMotion = useReducedMotion();
   return (
     <motion.div
       className={UI_CLASSES.CARD_BODY_SPACING}
       style={{ backgroundColor: 'oklch(74% 0.2 35)' }}
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -20 }}
+      animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
       transition={{ duration: DURATION.moderate }}
     >
       <div className="flex items-center gap-3">

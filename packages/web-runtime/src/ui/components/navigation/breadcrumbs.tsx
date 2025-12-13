@@ -41,7 +41,7 @@
 
 import { type Database } from '@heyclaude/database-types';
 import { isValidCategory } from '@heyclaude/web-runtime/core';
-import { getCategoryConfig } from '@heyclaude/web-runtime/data';
+import { getCategoryConfig } from '@heyclaude/web-runtime/data/config/category';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useMemo } from 'react';

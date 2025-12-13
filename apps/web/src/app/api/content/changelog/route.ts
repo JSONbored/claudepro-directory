@@ -1,17 +1,17 @@
 /**
  * Changelog Index API Route
- * 
+ *
  * Returns the changelog in LLMs.txt format for AI/LLM consumption.
  * Used for exporting changelog data in a standardized text format.
- * 
+ *
  * @example
  * ```ts
  * // Request
  * GET /api/content/changelog?format=llms-changelog
- * 
+ *
  * // Response (200) - text/plain
  * # Changelog
- * 
+ *
  * ## [1.0.0] - 2025-01-11
  * - Added new feature
  * - Fixed bug
@@ -21,9 +21,11 @@
 import 'server-only';
 import { ContentService } from '@heyclaude/data-layer';
 import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
-import { createApiRoute, createApiOptionsHandler, changelogFormatSchema } from '@heyclaude/web-runtime/server';
 import {
   buildCacheHeaders,
+  changelogFormatSchema,
+  createApiOptionsHandler,
+  createApiRoute,
   createSupabaseAnonClient,
   getOnlyCorsHeaders,
 } from '@heyclaude/web-runtime/server';
@@ -46,32 +48,12 @@ async function getCachedChangelogLlmsTxt(): Promise<null | string> {
 
 /**
  * GET /api/content/changelog - Get changelog in LLMs.txt format
- * 
+ *
  * Returns the changelog in LLMs.txt format for AI/LLM consumption.
  * Validates format parameter (must be 'llms-changelog').
  */
 export const GET = createApiRoute({
-  route: '/api/content/changelog',
-  operation: 'ChangelogIndexAPI',
-  method: 'GET',
   cors: 'anon',
-  querySchema: z.object({
-    format: changelogFormatSchema,
-  }),
-  openapi: {
-    summary: 'Get changelog in LLMs.txt format',
-    description: 'Returns the changelog in LLMs.txt format for AI/LLM consumption. Used for exporting changelog data in a standardized text format.',
-    tags: ['content', 'changelog', 'export'],
-    operationId: 'getChangelogIndex',
-    responses: {
-      200: {
-        description: 'Changelog LLMs.txt content retrieved successfully',
-      },
-      400: {
-        description: 'Invalid format parameter',
-      },
-    },
-  },
   handler: async ({ logger, query }) => {
     const { format } = query as { format: 'llms-changelog' };
 
@@ -104,6 +86,27 @@ export const GET = createApiRoute({
       status: 200,
     });
   },
+  method: 'GET',
+  openapi: {
+    description:
+      'Returns the changelog in LLMs.txt format for AI/LLM consumption. Used for exporting changelog data in a standardized text format.',
+    operationId: 'getChangelogIndex',
+    responses: {
+      200: {
+        description: 'Changelog LLMs.txt content retrieved successfully',
+      },
+      400: {
+        description: 'Invalid format parameter',
+      },
+    },
+    summary: 'Get changelog in LLMs.txt format',
+    tags: ['content', 'changelog', 'export'],
+  },
+  operation: 'ChangelogIndexAPI',
+  querySchema: z.object({
+    format: changelogFormatSchema,
+  }),
+  route: '/api/content/changelog',
 });
 
 /**

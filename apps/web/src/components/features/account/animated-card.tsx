@@ -9,6 +9,7 @@
 
 import { motion } from 'motion/react';
 import { MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import type { ReactNode } from 'react';
 
 export interface AnimatedCardProps {
@@ -20,10 +21,12 @@ export interface AnimatedCardProps {
  * The Card component itself remains unchanged - this just adds motion to its container.
  */
 export function AnimatedCard({ children }: AnimatedCardProps) {
+  const shouldReduceMotion = useReducedMotion();
+
   return (
     <motion.div
-      whileHover={MICROINTERACTIONS.card.hover}
-      whileTap={MICROINTERACTIONS.card.tap}
+      whileHover={shouldReduceMotion ? {} : MICROINTERACTIONS.card.hover}
+      whileTap={shouldReduceMotion ? {} : MICROINTERACTIONS.card.tap}
       transition={MICROINTERACTIONS.card.transition}
       className="block"
     >

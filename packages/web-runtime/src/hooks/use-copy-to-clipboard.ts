@@ -1,7 +1,9 @@
 'use client';
 
 import { getTimeoutConfig } from '../config/static-configs.ts';
-import { logger, normalizeError } from '../entries/core.ts';
+// Import directly from source files to avoid indirect imports through entries/core.ts
+import { logger } from '../logger.ts';
+import { normalizeError } from '../errors.ts';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 // Clipboard reset delay (loaded from static config)

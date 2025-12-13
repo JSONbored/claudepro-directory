@@ -2,6 +2,7 @@
 
 import { cn, Checkbox } from '@heyclaude/web-runtime/ui';
 import { type CheckedState } from '@radix-ui/react-checkbox';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import { useId } from 'react';
 
@@ -53,6 +54,8 @@ export function NewsletterOptInTile({
     ? '✨ Loading Claude builders…'
     : `${resolvedBadgePrefix} ${subscriberCountLabel} Claude builders`;
 
+  const shouldReduceMotion = useReducedMotion();
+
   const handleCheckboxChange = (value: CheckedState) => {
     if (value === 'indeterminate') return;
     onChange(Boolean(value));
@@ -61,8 +64,8 @@ export function NewsletterOptInTile({
   return (
     <motion.div
       onClick={() => onChange(!checked)}
-      whileHover={{ scale: 1.01 }}
-      whileTap={{ scale: 0.99 }}
+      whileHover={shouldReduceMotion ? {} : { scale: 1.01 }}
+      whileTap={shouldReduceMotion ? {} : { scale: 0.99 }}
       className={cn(
         'group relative w-full overflow-hidden rounded-2xl border p-6 text-left transition-all duration-300 cursor-pointer',
         'from-card/80 via-card/60 to-card/30 bg-linear-to-br backdrop-blur-xl',

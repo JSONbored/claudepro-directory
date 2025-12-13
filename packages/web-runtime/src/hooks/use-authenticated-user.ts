@@ -1,8 +1,10 @@
 'use client';
 
 import { createSupabaseBrowserClient } from '../supabase/browser.ts';
-import { logClientWarning, normalizeError } from '../errors.ts';
+// Import directly from source files to avoid indirect imports through entries/core.ts
+import { normalizeError } from '../errors.ts';
 import { logger } from '../logger.ts';
+import { logClientWarn } from '../utils/client-logger.ts';
 import type { User } from '@supabase/supabase-js';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -111,7 +113,8 @@ export function useAuthenticatedUser(
 
     init().catch((error) => {
       if (active) {
-        logClientWarning('useAuthenticatedUser: initial fetch failed', error, {
+        logClientWarn('useAuthenticatedUser: initial fetch failed', error, 'useAuthenticatedUser.init', {
+          component: 'useAuthenticatedUser',
           context: contextLabel,
         });
         setStatus('unauthenticated');

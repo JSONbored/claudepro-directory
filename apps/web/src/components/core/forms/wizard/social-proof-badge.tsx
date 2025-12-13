@@ -13,6 +13,7 @@
 import { Award, CheckCircle, Sparkles, TrendingUp, Users } from '@heyclaude/web-runtime/icons';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { SPRING } from '@heyclaude/web-runtime/design-system';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 
 interface SocialProofBadgeProps {
@@ -44,11 +45,12 @@ export function SocialProofBadge({
   percentage,
   className,
 }: SocialProofBadgeProps) {
+  const shouldReduceMotion = useReducedMotion();
   const badges = {
     contributors: (
       <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
+        initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.9 }}
+        animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }}
         transition={SPRING.smooth}
         className={cn(
           'flex items-center gap-2 rounded-lg border border-purple-500/30',
@@ -71,8 +73,8 @@ export function SocialProofBadge({
 
     submissions: (
       <motion.div
-        initial={{ opacity: 0, x: -10 }}
-        animate={{ opacity: 1, x: 0 }}
+        initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -10 }}
+        animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
         transition={SPRING.smooth}
         className={cn(
           'flex items-center gap-2 rounded-lg border border-blue-500/30',
@@ -90,8 +92,8 @@ export function SocialProofBadge({
 
     success: (
       <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
+        initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.9 }}
+        animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }}
         transition={SPRING.bouncy}
         className={cn(
           'flex items-center gap-2 rounded-lg border border-green-500/30',
@@ -109,8 +111,8 @@ export function SocialProofBadge({
 
     join: (
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 10 }}
+        animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
         transition={SPRING.smooth}
         className={cn(
           'flex items-center gap-2 rounded-lg border border-amber-500/30',
@@ -160,10 +162,11 @@ interface SocialProofBarProps {
  * @see InlineSocialProof
  */
 export function SocialProofBar({ stats, className }: SocialProofBarProps) {
+  const shouldReduceMotion = useReducedMotion();
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
+      animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
       transition={SPRING.smooth}
       className={cn('flex flex-wrap items-center gap-2', className)}
     >
@@ -219,6 +222,7 @@ export function InlineSocialProof({
   subtext,
   className,
 }: InlineSocialProofProps) {
+  const shouldReduceMotion = useReducedMotion();
   const icons = {
     users: <Users className="h-3.5 w-3.5" />,
     sparkles: <Sparkles className="h-3.5 w-3.5" />,
@@ -227,8 +231,8 @@ export function InlineSocialProof({
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
+      initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
+      animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }}
       transition={SPRING.smooth}
       className={cn('text-muted-foreground inline-flex items-center gap-1.5 text-xs', className)}
     >

@@ -139,8 +139,9 @@
       "cache": true
     },
     "dev:exec": {
-      "dependsOn": ["generate:service-worker:exec"],
-      "cache": false
+      "dependsOn": ["^build", "generate:service-worker:exec"],
+      "cache": false,
+      "persistent": true
     },
     "build:mcpb:exec": {
       "dependsOn": ["generators:build"],

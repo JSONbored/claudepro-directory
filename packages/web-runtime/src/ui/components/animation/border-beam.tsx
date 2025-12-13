@@ -10,7 +10,9 @@
 
 import { useEffect, useRef } from 'react';
 import { cn } from '../../../ui/utils.ts';
-import { animate, motion, useMotionValue, useTransform } from 'motion/react';
+import { usePageInView } from '../../../hooks/motion/index.ts';
+import { animate, motion } from 'motion/react';
+import { useMotionValue, useTransform } from '../../../hooks/motion/index.ts';
 
 interface BorderBeamProps {
   className?: string;
@@ -33,8 +35,14 @@ export function BorderBeam({
 }: BorderBeamProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const progress = useMotionValue(0);
+  const isPageInView = usePageInView();
 
   useEffect(() => {
+    if (!isPageInView) {
+      // Pause animation when page not visible
+      return;
+    }
+
     const controls = animate(progress, 1, {
       duration: duration * 1000, // Convert seconds to milliseconds
       delay: delay * 1000,
@@ -43,7 +51,7 @@ export function BorderBeam({
     });
 
     return () => controls.stop();
-  }, [duration, delay, progress]);
+  }, [duration, delay, progress, isPageInView]);
 
   // Calculate x position along border perimeter
   // Path: top (left→right) → right (top→bottom) → bottom (right→left) → left (bottom→top)

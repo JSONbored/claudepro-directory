@@ -6,6 +6,7 @@ import { useLoggedAsync, useButtonSuccess } from '@heyclaude/web-runtime/hooks';
 import { type ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
 import { toasts, Button } from '@heyclaude/web-runtime/ui';
 import { DURATION } from '@heyclaude/web-runtime/design-system';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { Check, type LucideIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useState } from 'react';
@@ -83,6 +84,7 @@ export function ContentActionButton({
 }: ContentActionButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { isSuccess, triggerSuccess } = useButtonSuccess();
+  const shouldReduceMotion = useReducedMotion();
   const runLoggedAsync = useLoggedAsync({
     scope: 'ContentActionButton',
     defaultMessage: 'Content action failed',
@@ -173,7 +175,7 @@ export function ContentActionButton({
     >
       {showIcon ? (
         <motion.div
-          animate={isSuccess ? { scale: [1, 1.2, 1] } : {}}
+          animate={isSuccess && !shouldReduceMotion ? { scale: [1, 1.2, 1] } : {}}
           transition={{ duration: DURATION.default }}
         >
           <DisplayIcon className="h-4 w-4" />

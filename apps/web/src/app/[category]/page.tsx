@@ -48,8 +48,8 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import React, { Suspense } from 'react';
 
+import { CategoryPageSearchClient } from '@/src/app/[category]/category-page-search-client';
 import { ContentSearchSkeleton } from '@/src/components/content/content-grid-list';
-import { ContentSearchClient } from '@/src/components/content/content-search';
 import { ExploreDropdown } from '@/src/components/content/explore-dropdown';
 import { ContentSidebar } from '@/src/components/core/layout/content-sidebar';
 
@@ -437,18 +437,11 @@ function CategoryBadges({
 function CategoryPageContent({
   category,
   config,
-  items,
 }: {
   category: Database['public']['Enums']['content_category'];
   config: UnifiedCategoryConfig<Database['public']['Enums']['content_category']>;
   items: Awaited<ReturnType<typeof getContentByCategory>>;
 }) {
-  // OPTIMIZATION: Items are now passed as prop from parent (fetched once at page level)
-  // This eliminates duplicate getContentByCategory() calls
-
-  // Get icon name from component by finding it in ICON_NAME_MAP
-  const iconName = getIconNameFromComponent(config.icon);
-
   return (
     <>
       {/* Content section - Full width like homepage, sidebar on the side */}
@@ -459,14 +452,9 @@ function CategoryPageContent({
         <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_18rem]">
           {/* Main content area - Full width within grid column */}
           <div className="min-w-0">
-            <ContentSearchClient
+            <CategoryPageSearchClient
               category={category}
-              icon={iconName}
-              items={items}
               searchPlaceholder={config.listPage.searchPlaceholder}
-              title={config.pluralTitle}
-              type={category}
-              zeroStateSuggestions={items.slice(0, 6)}
             />
           </div>
 

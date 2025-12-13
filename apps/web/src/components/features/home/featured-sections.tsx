@@ -12,6 +12,7 @@ import {
 } from '@heyclaude/web-runtime/types/component.types';
 import { UI_CLASSES, UnifiedBadge, UnifiedCardGrid, ConfigCard, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, BlurText } from '@heyclaude/web-runtime/ui';
 import { SPRING, TEXT_ANIMATIONS, STAGGER, VIEWPORT } from '@heyclaude/web-runtime/design-system';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -40,6 +41,7 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
   ({ title, href, items, weekStart }: FeaturedSectionProps) => {
     const { openAuthModal } = useAuthModal();
     const pathname = usePathname();
+    const shouldReduceMotion = useReducedMotion();
 
     const handleAuthRequired = useCallback(() => {
       openAuthModal({
@@ -93,8 +95,16 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
               <motion.div
                 key={`card-${item.slug || index}`}
                 className="relative h-full"
-                initial={{ opacity: 0, y: 20, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
+                initial={
+                  shouldReduceMotion
+                    ? { opacity: 0 }
+                    : { opacity: 0, y: 20, scale: 0.98 }
+                }
+                animate={
+                  shouldReduceMotion
+                    ? { opacity: 1 }
+                    : { opacity: 1, y: 0, scale: 1 }
+                }
                 transition={{
                   delay: index * STAGGER.default,
                   ...SPRING.smooth,
@@ -176,6 +186,8 @@ const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({
   featuredCategories,
   weekStart,
 }) => {
+  const shouldReduceMotion = useReducedMotion();
+
   // Track missing featured categories
   useEffect(() => {
     if (featuredCategories.length === 0) {
@@ -275,8 +287,16 @@ const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({
             {featuredJobs.slice(0, 6).map((job, index) => (
               <motion.div
                 key={job.slug}
-                initial={{ opacity: 0, y: 20, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
+                initial={
+                  shouldReduceMotion
+                    ? { opacity: 0 }
+                    : { opacity: 0, y: 20, scale: 0.98 }
+                }
+                animate={
+                  shouldReduceMotion
+                    ? { opacity: 1 }
+                    : { opacity: 1, y: 0, scale: 1 }
+                }
                 transition={{
                   delay: index * STAGGER.default,
                   ...SPRING.smooth,

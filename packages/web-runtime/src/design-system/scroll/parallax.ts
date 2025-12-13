@@ -4,12 +4,28 @@
  * Parallax animation configurations for scroll-linked movement.
  * Creates depth and visual interest through layered scrolling speeds.
  *
+ * ⚠️ ACCESSIBILITY WARNING: Parallax effects can cause motion sickness.
+ * Always check `useReducedMotion()` before applying parallax transforms.
+ * When reduced motion is enabled, disable parallax or use opacity-only transitions.
+ *
  * @module web-runtime/design-system/scroll/parallax
+ * @see useReducedMotion
  */
 
 /**
  * Parallax Effects
  * Speed multipliers: 1 = normal scroll, < 1 = slower, > 1 = faster
+ * 
+ * @example
+ * ```tsx
+ * const shouldReduceMotion = useReducedMotion();
+ * const { scrollY } = useScroll();
+ * const y = useTransform(scrollY, [0, 1000], [0, -200]);
+ * 
+ * return (
+ *   <motion.div style={{ y: shouldReduceMotion ? 0 : y }} />
+ * );
+ * ```
  */
 export const PARALLAX = {
   /**

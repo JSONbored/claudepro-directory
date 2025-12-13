@@ -17,6 +17,7 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import { MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import type { Database } from '@heyclaude/database-types';
 
 export interface ProfileContributionsSectionProps {
@@ -31,6 +32,8 @@ export function ProfileContributionsSection({
   contributions,
   getSafeContentUrl,
 }: ProfileContributionsSectionProps) {
+  const shouldReduceMotion = useReducedMotion();
+
   if (!contributions || contributions.length === 0) {
     return null;
   }
@@ -60,8 +63,8 @@ export function ProfileContributionsSection({
           return (
             <motion.div
               key={item.id}
-              whileHover={MICROINTERACTIONS.card.hover}
-              whileTap={MICROINTERACTIONS.card.tap}
+              whileHover={shouldReduceMotion ? {} : MICROINTERACTIONS.card.hover}
+              whileTap={shouldReduceMotion ? {} : MICROINTERACTIONS.card.tap}
               transition={MICROINTERACTIONS.card.transition}
             >
               <Card className="border-border/50 cursor-pointer">

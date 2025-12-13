@@ -18,7 +18,6 @@ import { DIMENSIONS, toasts, ErrorBoundary } from '@heyclaude/web-runtime/ui';
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
 import { useEffect, useCallback } from 'react';
-import { logClientInfo } from '@heyclaude/web-runtime/logging/client';
 
 import { AnnouncementBannerClient } from '@/src/components/core/layout/announcement-banner-client';
 import { Navigation } from '@/src/components/core/layout/navigation';
@@ -53,37 +52,12 @@ function CommandMenuWrapper({ children }: { children: React.ReactNode }) {
   
   // CRITICAL FIX: onOpenChange needs to handle both open and close
   const handleOpenChange = useCallback((open: boolean) => {
-    logClientInfo(
-      '[CommandMenuWrapper] onOpenChange called',
-      'CommandMenuWrapper.handleOpenChange',
-      {
-        component: 'CommandMenuWrapper',
-        action: 'on-open-change',
-        category: 'navigation',
-        open,
-        currentIsOpen: isOpen,
-      }
-    );
     if (open) {
       openPalette();
     } else {
       closePalette();
     }
-  }, [openPalette, closePalette, isOpen]);
-  
-  // DEBUG: Log when isOpen changes
-  useEffect(() => {
-    logClientInfo(
-      '[CommandMenuWrapper] isOpen state changed',
-      'CommandMenuWrapper.stateChange',
-      {
-        component: 'CommandMenuWrapper',
-        action: 'state-change',
-        category: 'navigation',
-        isOpen,
-      }
-    );
-  }, [isOpen]);
+  }, [openPalette, closePalette]);
   
   return (
     <>

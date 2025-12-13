@@ -13,8 +13,7 @@
  * @module generators/toolkit/logger
  */
 
-import { createPinoConfig } from '../../../shared-runtime/src/logger/config.ts';
-import { normalizeError } from '../../../shared-runtime/src/error-handling.ts';
+import { createPinoConfig, normalizeError } from '@heyclaude/shared-runtime';
 import pino from 'pino';
 
 // Create Pino logger instance with centralized configuration

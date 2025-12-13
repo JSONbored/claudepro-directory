@@ -1,3 +1,4 @@
+import { type Database } from '@heyclaude/database-types';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ExternalLink, HelpCircle } from '@heyclaude/web-runtime/icons';
 import {
@@ -14,7 +15,7 @@ import {
 import Link from 'next/link';
 import { Suspense, useId } from 'react';
 
-import { ContentSearchClient } from '@/src/components/content/content-search';
+import { ContentListSearchClient } from '@/src/components/content/content-list-search-client';
 import { RecentlyViewedSidebar } from '@/src/components/features/navigation/recently-viewed-sidebar';
 
 /**
@@ -179,14 +180,13 @@ export function ContentListServer<T extends DisplayableContent>({
         <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_18rem]">
           <div>
             <Suspense fallback={<ContentSearchSkeleton />}>
-              <ContentSearchClient
+              <ContentListSearchClient
                 items={items}
-                type={type}
+                type={type as Database['public']['Enums']['content_category']}
                 {...(category && { category })}
                 searchPlaceholder={searchPlaceholder}
                 title={title}
                 icon={icon}
-                zeroStateSuggestions={items.slice(0, 6)}
               />
             </Suspense>
           </div>

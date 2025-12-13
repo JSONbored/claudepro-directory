@@ -1,6 +1,6 @@
 /**
  * On-Demand ISR Revalidation - Realtime-Based Architecture
- * 
+ *
  * Called by edge function via Supabase Realtime (logical replication).
  * Flow: Database Trigger → Table Change → Realtime (postgres_changes) → Edge Function → This API Route
  *
@@ -9,14 +9,14 @@
  * // Request
  * POST /api/revalidate
  * Content-Type: application/json
- * 
+ *
  * {
  *   "secret": "REVALIDATE_SECRET",
  *   "category": "agents",
  *   "slug": "code-reviewer",
  *   "tags": ["content", "homepage", "trending"]
  * }
- * 
+ *
  * // Response (200)
  * {
  *   "revalidated": true,
@@ -30,14 +30,19 @@
  */
 import 'server-only';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
-import { createApiRoute, createApiOptionsHandler, unauthorizedResponse, getOnlyCorsHeaders } from '@heyclaude/web-runtime/server';
+import {
+  createApiOptionsHandler,
+  createApiRoute,
+  getOnlyCorsHeaders,
+  unauthorizedResponse,
+} from '@heyclaude/web-runtime/server';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
 /**
  * Zod schema for revalidate request body validation
- * 
+ *
  * Note: `secret` is optional in schema to allow handler to return 401 instead of 400
  * when secret is missing. Handler will validate secret and return 401 if missing/invalid.
  */
@@ -50,35 +55,15 @@ const revalidateRequestSchema = z.object({
 
 /**
  * POST /api/revalidate - Trigger on-demand ISR revalidation
- * 
+ *
  * Validates the JSON payload, verifies the secret, revalidates Next.js paths derived from
  * `category`/`slug`, invalidates the provided cache `tags`, logs the outcome, and returns a
  * JSON summary of the revalidation actions.
  */
 export const POST = createApiRoute({
-  route: '/api/revalidate',
-  operation: 'RevalidateAPI',
-  method: 'POST',
-  cors: 'anon',
   bodySchema: revalidateRequestSchema,
-  openapi: {
-    summary: 'Trigger on-demand ISR revalidation',
-    description: 'Trigger on-demand ISR revalidation and cache tag invalidation for specified targets. Called by edge function via Supabase Realtime (logical replication).',
-    tags: ['cache', 'revalidation', 'webhook'],
-    operationId: 'revalidate',
-    responses: {
-      200: {
-        description: 'Revalidation completed successfully',
-      },
-      401: {
-        description: 'Unauthorized - invalid secret',
-      },
-      400: {
-        description: 'Invalid request payload or missing category/tags',
-      },
-    },
-  },
-  handler: async ({ logger, request, body }) => {
+  cors: 'anon',
+  handler: async ({ body, logger, request }) => {
     // Zod schema ensures proper types
     const { category, secret, slug, tags } = body;
 
@@ -189,6 +174,27 @@ export const POST = createApiRoute({
       timestamp: new Date().toISOString(),
     });
   },
+  method: 'POST',
+  openapi: {
+    description:
+      'Trigger on-demand ISR revalidation and cache tag invalidation for specified targets. Called by edge function via Supabase Realtime (logical replication).',
+    operationId: 'revalidate',
+    responses: {
+      200: {
+        description: 'Revalidation completed successfully',
+      },
+      400: {
+        description: 'Invalid request payload or missing category/tags',
+      },
+      401: {
+        description: 'Unauthorized - invalid secret',
+      },
+    },
+    summary: 'Trigger on-demand ISR revalidation',
+    tags: ['cache', 'revalidation', 'webhook'],
+  },
+  operation: 'RevalidateAPI',
+  route: '/api/revalidate',
 });
 
 /**

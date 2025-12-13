@@ -62,13 +62,39 @@ export function GitHubStarsButton({
     })();
 
     fetch(apiUrl)
-      .then((res) => res.json())
+      .then(async (res) => {
+        // Handle 403 (rate limit or access issue) gracefully - don't log as error
+        if (res.status === 403) {
+          // Silently handle 403 - it's expected (rate limiting, private repo, etc.)
+          return null;
+        }
+        
+        // Check if response is ok before parsing JSON
+        if (!res.ok) {
+          throw new Error(`GitHub API returned ${res.status}: ${res.statusText}`);
+        }
+        
+        return res.json();
+      })
       .then((data) => {
+        // Skip if API failed (403 or other error)
+        if (!data) {
+          return;
+        }
+        
         const count =
           data && typeof data.stargazers_count === 'number' ? data.stargazers_count : null;
         setStars(count);
       })
       .catch((error) => {
+        // Only log unexpected errors (not 403)
+        if (error.message.includes('403')) {
+          // Silently handle 403 - already handled above
+          setStars(null);
+          return;
+        }
+        
+        // Log other errors
         const normalized = normalizeError(error, 'Failed to fetch GitHub star count');
         logClientWarn(
           '[GitHub] Failed to fetch star count',
@@ -102,18 +128,36 @@ export function GitHubStarsButton({
     window.open(repoUrl, '_blank', 'noopener,noreferrer');
   };
 
+  // Format star count: show "1.2k" for numbers > 999, otherwise full number with commas
+  const formattedStars = typeof stars === 'number' 
+    ? (stars > 999 ? `${(stars / 1000).toFixed(1)}k` : stars.toLocaleString())
+    : null;
+
   return (
     <Button
       variant={variant}
-      size={size}
+      size={size === 'icon' ? 'icon' : size}
       onClick={handleClick}
       disabled={disabled}
-      className={cn('gap-2', className)}
+      className={cn(
+        // Match "More" dropdown design: icon-only with absolute badge overlay
+        size === 'icon' ? 'h-8 w-8 relative' : 'gap-2',
+        className
+      )}
       aria-label={`Star us on GitHub${stars !== null ? ` - ${stars} stars` : ''}`}
     >
-      <Github className={UI_CLASSES.ICON_SM} aria-hidden="true" />
-      {typeof stars === 'number' && (
-        <span className="font-medium tabular-nums">{stars.toLocaleString()}</span>
+      <Github className={size === 'icon' ? 'h-4 w-4' : UI_CLASSES.ICON_SM} aria-hidden="true" />
+      {formattedStars !== null && (
+        <span 
+          className={cn(
+            // Match "More" dropdown: absolute badge overlay in top-right corner
+            size === 'icon' 
+              ? 'absolute -top-1 -right-1 text-[10px] font-medium text-accent'
+              : 'font-medium tabular-nums'
+          )}
+        >
+          {formattedStars}
+        </span>
       )}
     </Button>
   );

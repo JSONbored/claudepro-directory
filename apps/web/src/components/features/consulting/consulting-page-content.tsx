@@ -36,6 +36,7 @@ import {
   MagneticButton,
   UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { LazySection } from '@/src/components/core/infra/scroll-animated-section';
 import { logClientError, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { motion } from 'motion/react';
@@ -57,6 +58,7 @@ import {
 
 export function ConsultingClient() {
   const [calReady, setCalReady] = useState(false);
+  const shouldReduceMotion = useReducedMotion();
 
   useEffect(() => {
     (async () => {
@@ -103,15 +105,15 @@ export function ConsultingClient() {
 
         <div className="container relative z-10 mx-auto px-4 py-16 sm:px-6 sm:py-24">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 30 }}
+            animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
             transition={SPRING.smooth}
             className="text-center space-y-8 max-w-4xl mx-auto"
           >
             {/* Badge */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
+              initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.9 }}
+              animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }}
               transition={{ ...SPRING.smooth, delay: 0.1 }}
               className="inline-flex"
             >
@@ -123,8 +125,8 @@ export function ConsultingClient() {
 
             {/* Main Headline */}
             <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
+              animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
               transition={{ ...SPRING.smooth, delay: 0.2 }}
               className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight"
             >
@@ -136,8 +138,8 @@ export function ConsultingClient() {
 
             {/* Subheadline */}
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
+              animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
               transition={{ ...SPRING.smooth, delay: 0.3 }}
               className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed"
             >
@@ -148,8 +150,8 @@ export function ConsultingClient() {
 
             {/* CTAs */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
+              animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
               transition={{ ...SPRING.smooth, delay: 0.4 }}
               className="flex flex-col sm:flex-row gap-4 justify-center items-center"
             >
@@ -178,16 +180,23 @@ export function ConsultingClient() {
 
             {/* Stats */}
             <motion.div
-              variants={{
-                hidden: { opacity: 0 },
-                show: {
-                  opacity: 1,
-                  transition: {
-                    staggerChildren: 0.1,
-                    delayChildren: 0.5,
-                  },
-                },
-              }}
+              variants={
+                shouldReduceMotion
+                  ? {
+                      hidden: { opacity: 0 },
+                      show: { opacity: 1 },
+                    }
+                  : {
+                      hidden: { opacity: 0 },
+                      show: {
+                        opacity: 1,
+                        transition: {
+                          staggerChildren: 0.1,
+                          delayChildren: 0.5,
+                        },
+                      },
+                    }
+              }
               initial="hidden"
               animate="show"
               className="grid grid-cols-1 sm:grid-cols-3 gap-8 mt-16 pt-16 border-t border-border/50"
@@ -199,10 +208,17 @@ export function ConsultingClient() {
               ].map((stat, index) => (
                 <motion.div
                   key={stat.label}
-                  variants={{
-                    hidden: { opacity: 0, y: 20 },
-                    show: { opacity: 1, y: 0 },
-                  }}
+                  variants={
+                    shouldReduceMotion
+                      ? {
+                          hidden: { opacity: 0 },
+                          show: { opacity: 1 },
+                        }
+                      : {
+                          hidden: { opacity: 0, y: 20 },
+                          show: { opacity: 1, y: 0 },
+                        }
+                  }
                   className="text-center"
                 >
                   <div className="text-3xl sm:text-4xl font-bold mb-2">
@@ -221,8 +237,8 @@ export function ConsultingClient() {
         <div className="container mx-auto px-4 sm:px-6">
           <div className="max-w-4xl mx-auto">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
+              whileInView={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-100px' }}
               transition={SPRING.smooth}
               className="text-center mb-12"
@@ -236,8 +252,8 @@ export function ConsultingClient() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
               {/* Profile Image Placeholder */}
               <motion.div
-                initial={{ opacity: 0, x: -30 }}
-                whileInView={{ opacity: 1, x: 0 }}
+                initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -30 }}
+                whileInView={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={SPRING.smooth}
                 className="relative"
@@ -249,8 +265,8 @@ export function ConsultingClient() {
 
               {/* Story Content */}
               <motion.div
-                initial={{ opacity: 0, x: 30 }}
-                whileInView={{ opacity: 1, x: 0 }}
+                initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: 30 }}
+                whileInView={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={SPRING.smooth}
                 className="space-y-6"
@@ -404,15 +420,26 @@ export function ConsultingClient() {
               return (
                 <motion.div
                   key={service.title}
-                  variants={{
-                    hidden: { opacity: 0, y: 50 },
-                    show: { opacity: 1, y: 0 },
-                  }}
-                  whileHover={{
-                    ...MICROINTERACTIONS.card.hover,
-                    y: -8,
-                  }}
-                  whileTap={MICROINTERACTIONS.card.tap}
+                  variants={
+                    shouldReduceMotion
+                      ? {
+                          hidden: { opacity: 0 },
+                          show: { opacity: 1 },
+                        }
+                      : {
+                          hidden: { opacity: 0, y: 50 },
+                          show: { opacity: 1, y: 0 },
+                        }
+                  }
+                  whileHover={
+                    shouldReduceMotion
+                      ? {}
+                      : {
+                          ...MICROINTERACTIONS.card.hover,
+                          y: -8,
+                        }
+                  }
+                  whileTap={shouldReduceMotion ? {} : MICROINTERACTIONS.card.tap}
                   transition={MICROINTERACTIONS.card.transition}
                 >
                   <Card className={`h-full border-2 ${service.borderColor} bg-gradient-to-br ${service.color} backdrop-blur-sm hover:shadow-xl transition-shadow`}>
@@ -457,8 +484,8 @@ export function ConsultingClient() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {/* Claude Pro Directory */}
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 30 }}
+              whileInView={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={SPRING.smooth}
             >
@@ -556,16 +583,23 @@ export function ConsultingClient() {
           </motion.div>
 
           <motion.div
-            variants={{
-              hidden: { opacity: 0 },
-              show: {
-                opacity: 1,
-                transition: {
-                  staggerChildren: 0.15,
-                  delayChildren: 0.2,
-                },
-              },
-            }}
+            variants={
+              shouldReduceMotion
+                ? {
+                    hidden: { opacity: 0 },
+                    show: { opacity: 1 },
+                  }
+                : {
+                    hidden: { opacity: 0 },
+                    show: {
+                      opacity: 1,
+                      transition: {
+                        staggerChildren: 0.15,
+                        delayChildren: 0.2,
+                      },
+                    },
+                  }
+            }
             initial="hidden"
             whileInView="show"
             viewport={{ once: true, margin: '-100px' }}
@@ -581,11 +615,18 @@ export function ConsultingClient() {
               return (
                 <motion.div
                   key={stat.label}
-                  variants={{
-                    hidden: { opacity: 0, scale: 0.9 },
-                    show: { opacity: 1, scale: 1 },
-                  }}
-                  whileHover={{ scale: 1.05, y: -4 }}
+                  variants={
+                    shouldReduceMotion
+                      ? {
+                          hidden: { opacity: 0 },
+                          show: { opacity: 1 },
+                        }
+                      : {
+                          hidden: { opacity: 0, scale: 0.9 },
+                          show: { opacity: 1, scale: 1 },
+                        }
+                  }
+                  whileHover={shouldReduceMotion ? {} : { scale: 1.05, y: -4 }}
                   transition={SPRING.smooth}
                   className="text-center p-6 rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm"
                 >
@@ -691,8 +732,8 @@ export function ConsultingClient() {
 
             {/* Compact Calendar Container */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
+              initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
+              whileInView={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={SPRING.smooth}
               className="relative"

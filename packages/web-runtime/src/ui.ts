@@ -16,7 +16,7 @@ export * from './ui/components/animation/border-beam.tsx';
 export * from './ui/components/animation/animated-border.tsx';
 export * from './ui/components/animation/hover-card.tsx';
 export * from './ui/components/feedback/review-rating-compact.tsx';
-export * from './ui/components/features/sponsored-pulse.tsx';
+
 export * from './ui/components/cards/base-card.tsx';
 export * from './ui/components/cards/config-card.tsx';
 export * from './ui/components/cards/card-grid.tsx';
@@ -59,7 +59,6 @@ export * from './ui/components/animation/number-ticker.tsx';
 export * from './ui/components/animation/sliding-number.tsx';
 export * from './ui/components/animation/particles-background.tsx';
 export * from './ui/components/animation/blur-text.tsx';
-export * from './ui/components/animation/morphing-blob-background.tsx';
 export * from './ui/components/animation/gradient-text.tsx';
 export * from './ui/components/animation/rolling-text.tsx';
 export * from './ui/components/animation/typing-placeholder.tsx';

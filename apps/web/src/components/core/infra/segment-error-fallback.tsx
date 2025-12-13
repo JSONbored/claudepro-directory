@@ -10,8 +10,11 @@ import {
   UI_CLASSES,
 } from '@heyclaude/web-runtime/ui';
 import { useCopyToClipboard } from '@heyclaude/web-runtime/hooks';
-import { Copy, Check } from '@heyclaude/web-runtime/icons';
+import { Copy, Check, AlertCircle, RefreshCw } from '@heyclaude/web-runtime/icons';
+import { SPRING } from '@heyclaude/web-runtime/design-system';
+import { motion } from 'motion/react';
 import Link from 'next/link';
+import { useState } from 'react';
 
 /**
  * CRITICAL: Direct reference to process.env.NODE_ENV
@@ -73,54 +76,112 @@ export function SegmentErrorFallback({
   links = [],
   error,
 }: SegmentErrorFallbackProps) {
+  const [isResetting, setIsResetting] = useState(false);
+
+  const handleReset = () => {
+    setIsResetting(true);
+    onReset?.();
+  };
+
   return (
-    <div className="flex min-h-[60vh] items-center justify-center px-4 py-12">
-      <Card className="w-full max-w-2xl">
-        <CardHeader>
-          <CardTitle className="text-2xl">{title}</CardTitle>
-          <CardDescription>{description}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {onReset ? (
-            <Button onClick={onReset} className="w-full sm:w-auto">
-              {resetText}
-            </Button>
-          ) : null}
-          {links.length > 0 && (
-            <div className={`${UI_CLASSES.FLEX_COL_SM_ROW_GAP_3}`}>
-              {links.map((link) => (
+    <motion.div
+      className="flex min-h-[60vh] items-center justify-center px-4 py-12"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={SPRING.smooth}
+    >
+      <motion.div
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={SPRING.smooth}
+      >
+        <Card className="w-full max-w-lg text-center">
+          <CardHeader>
+            <div className="mb-4 flex justify-center">
+              <motion.div
+                className="bg-destructive/10 rounded-full p-3"
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ ...SPRING.bouncy, delay: 0.1 }}
+              >
+                <AlertCircle className="text-destructive h-12 w-12" aria-hidden="true" />
+              </motion.div>
+            </div>
+            <CardTitle className="text-2xl">{title}</CardTitle>
+            <CardDescription>{description}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {onReset ? (
+              <motion.div
+                className={UI_CLASSES.FLEX_COL_SM_ROW_GAP_3}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ ...SPRING.smooth, delay: 0.3 }}
+              >
                 <Button
-                  key={`${link.href}-${link.label}`}
-                  asChild
-                  variant={link.variant ?? 'outline'}
+                  onClick={handleReset}
+                  size="lg"
                   className="w-full sm:w-auto"
+                  disabled={isResetting}
                 >
-                  <Link href={link.href}>{link.label}</Link>
+                  <RefreshCw className={`mr-2 h-4 w-4 ${isResetting ? 'animate-spin' : ''}`} />
+                  {isResetting ? 'Retrying...' : resetText}
                 </Button>
-              ))}
-            </div>
-          )}
-          {isDevelopment && error ? (
-            <div className="border-muted-foreground/30 bg-muted/30 rounded-lg border border-dashed p-4">
-              <p className="text-muted-foreground mb-2 text-sm font-semibold">Error details</p>
-              <ErrorCodeBlock content={error.message} />
-              {error.stack ? (
-                <details className="mt-2 text-xs">
-                  <summary className="cursor-pointer font-semibold">► Stack Trace</summary>
-                  <div className="mt-2">
-                    <ErrorCodeBlock content={error.stack} />
-                  </div>
-                </details>
-              ) : null}
-              {error.digest ? (
-                <p className="text-muted-foreground mt-2 font-mono text-xs break-words">
-                  Digest: {error.digest}
-                </p>
-              ) : null}
-            </div>
-          ) : null}
-        </CardContent>
-      </Card>
-    </div>
+              </motion.div>
+            ) : null}
+            {links.length > 0 && (
+              <motion.div
+                className={UI_CLASSES.FLEX_COL_SM_ROW_GAP_3}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ ...SPRING.smooth, delay: 0.3 }}
+              >
+                {links.map((link, index) => (
+                  <motion.div
+                    key={`${link.href}-${link.label}`}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ ...SPRING.smooth, delay: 0.35 + index * 0.05 }}
+                  >
+                    <Button
+                      asChild
+                      size="lg"
+                      variant={link.variant ?? 'outline'}
+                      className="w-full sm:w-auto"
+                    >
+                      <Link href={link.href}>{link.label}</Link>
+                    </Button>
+                  </motion.div>
+                ))}
+              </motion.div>
+            )}
+            {isDevelopment && error ? (
+              <motion.div
+                className="border-muted-foreground/30 bg-muted/30 rounded-lg border border-dashed p-4"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ ...SPRING.smooth, delay: 0.4 }}
+              >
+                <p className="text-muted-foreground mb-2 text-sm font-semibold">Error details</p>
+                <ErrorCodeBlock content={error.message} />
+                {error.stack ? (
+                  <details className="mt-2 text-xs">
+                    <summary className="cursor-pointer font-semibold">► Stack Trace</summary>
+                    <div className="mt-2">
+                      <ErrorCodeBlock content={error.stack} />
+                    </div>
+                  </details>
+                ) : null}
+                {error.digest ? (
+                  <p className="text-muted-foreground mt-2 font-mono text-xs break-words">
+                    Digest: {error.digest}
+                  </p>
+                ) : null}
+              </motion.div>
+            ) : null}
+          </CardContent>
+        </Card>
+      </motion.div>
+    </motion.div>
   );
 }

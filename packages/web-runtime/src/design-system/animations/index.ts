@@ -34,8 +34,10 @@ import { TRANSITIONS } from './transitions.ts';
 export * from './spring.ts';
 export * from './duration.ts';
 export * from './easing.ts';
-export * from './transitions.ts';
+export * from './scroll.ts';
+export * from './spring.ts';
 export * from './stagger.ts';
+export * from './transitions.ts';
 
 /**
  * Complete Animation Design Tokens

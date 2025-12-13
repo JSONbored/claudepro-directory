@@ -115,26 +115,6 @@ const trackTerminalFormSubmissionSchema = z.object({
   error: z.string().optional(),
 });
 
-const trackSponsoredImpressionSchema = z.object({
-  sponsoredId: z.string(),
-  pageUrl: z.string().optional(),
-  position: z.number().int().min(0).optional(),
-});
-
-const trackSponsoredClickSchema = z.object({
-  sponsoredId: z.string(),
-  targetUrl: z.string().refine(
-    (url) => {
-      try {
-        new URL(url);
-        return true;
-      } catch {
-        return false;
-      }
-    },
-    { message: 'Invalid URL format' }
-  ),
-});
 
 const trackUsageSchema = z.object({
   content_type: z.enum([...CONTENT_CATEGORY_VALUES] as [
@@ -300,77 +280,7 @@ export const trackUsageAction = optionalAuthAction
 // ============================================
 // SPONSORED CONTENT TRACKING
 // ============================================
-
-export const trackSponsoredImpression = optionalAuthAction
-  .inputSchema(trackSponsoredImpressionSchema)
-  .metadata({ actionName: 'pulse.trackSponsoredImpression', category: 'analytics' })
-  .action(async ({ parsedInput, ctx }) => {
-    const userId = ctx.userId ?? null;
-
-    const { createSupabaseServerClient } = await import('../supabase/server.ts');
-    const supabase = await createSupabaseServerClient();
-    const { MiscService } = await import('@heyclaude/data-layer');
-    const service = new MiscService(supabase);
-
-    const sponsoredContent = await service.getSponsoredContentById(parsedInput.sponsoredId);
-
-    if (!sponsoredContent) {
-      logger.warn({ sponsored_id: parsedInput.sponsoredId }, 'Failed to fetch sponsored content for tracking');
-      return;
-    }
-
-    const contentType = sponsoredContent.content_type;
-
-    const { enqueuePulseEventServer } = await import('../pulse.ts');
-
-    await enqueuePulseEventServer({
-      user_id: userId,
-      content_type: contentType,
-      content_slug: parsedInput.sponsoredId,
-      interaction_type: 'sponsored_impression',
-      metadata: {
-        event_type: 'impression',
-        sponsored_id: parsedInput.sponsoredId,
-        page_url: parsedInput.pageUrl,
-        position: parsedInput.position,
-      } as Json,
-    });
-  });
-
-export const trackSponsoredClick = optionalAuthAction
-  .inputSchema(trackSponsoredClickSchema)
-  .metadata({ actionName: 'pulse.trackSponsoredClick', category: 'analytics' })
-  .action(async ({ parsedInput, ctx }) => {
-    const userId = ctx.userId ?? null;
-
-    const { createSupabaseServerClient } = await import('../supabase/server.ts');
-    const supabase = await createSupabaseServerClient();
-    const { MiscService } = await import('@heyclaude/data-layer');
-    const service = new MiscService(supabase);
-
-    const sponsoredContent = await service.getSponsoredContentById(parsedInput.sponsoredId);
-
-    if (!sponsoredContent) {
-      logger.warn({ sponsored_id: parsedInput.sponsoredId }, 'Failed to fetch sponsored content for tracking');
-      return;
-    }
-
-    const contentType = sponsoredContent.content_type;
-
-    const { enqueuePulseEventServer } = await import('../pulse.ts');
-
-    await enqueuePulseEventServer({
-      user_id: userId,
-      content_type: contentType,
-      content_slug: parsedInput.sponsoredId,
-      interaction_type: 'sponsored_click',
-      metadata: {
-        event_type: 'click',
-        sponsored_id: parsedInput.sponsoredId,
-        target_url: parsedInput.targetUrl,
-      } as Json,
-    });
-  });
+// Moved to pulse-sponsored.ts to avoid phantom module errors
 
 // ============================================
 // CONTENT RECOMMENDATIONS

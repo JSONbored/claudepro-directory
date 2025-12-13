@@ -2,14 +2,13 @@
  * Job Analytics Page - Display view/click metrics for job postings.
  */
 
-import { type JobStatus } from '@heyclaude/web-runtime';
-import { formatRelativeDate } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
   getUserJobById,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { formatRelativeDate } from '@heyclaude/web-runtime/data/utils';
 import { ArrowLeft, ExternalLink } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
@@ -23,6 +22,7 @@ import {
   UI_CLASSES,
   UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
+import { type JobStatus } from '@heyclaude/web-runtime/ui/constants';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import Link from 'next/link';

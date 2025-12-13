@@ -1,6 +1,4 @@
 import { type Database } from '@heyclaude/database-types';
-import { type JobStatus } from '@heyclaude/web-runtime';
-import { formatRelativeDate } from '@heyclaude/web-runtime/core';
 import { type JobBillingSummaryEntry } from '@heyclaude/web-runtime/data';
 import {
   generatePageMetadata,
@@ -9,6 +7,7 @@ import {
   getUserDashboard,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { formatRelativeDate } from '@heyclaude/web-runtime/data/utils';
 import {
   BarChart,
   Briefcase,
@@ -33,6 +32,7 @@ import {
   UI_CLASSES,
   UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
+import { type JobStatus } from '@heyclaude/web-runtime/ui/constants';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import Link from 'next/link';

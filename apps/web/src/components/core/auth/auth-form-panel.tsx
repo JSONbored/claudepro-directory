@@ -5,6 +5,7 @@
 'use client';
 
 import { STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import { type ReactNode } from 'react';
 
@@ -32,12 +33,13 @@ export function AuthFormPanel({
   children,
   afterContent,
 }: AuthFormPanelProps) {
+  const shouldReduceMotion = useReducedMotion();
   return (
     <div className="w-full">
       <motion.div
         className="mb-12"
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -10 }}
+        animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
         transition={{ duration: DURATION.moderate, delay: STAGGER.slow }}
       >
         <h2 className="mb-4 text-center text-3xl font-bold">{title}</h2>
@@ -57,8 +59,8 @@ export function AuthFormPanel({
       {afterContent ? (
         <motion.div
           className="mt-8"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 10 }}
+          animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
           transition={{ duration: DURATION.slow, delay: STAGGER.extended }}
         >
           {afterContent}

@@ -25,6 +25,8 @@
 // Default orange color - can be overridden via props
 const DEFAULT_PARTICLE_COLOR = '#F97316';
 import { useEffect, useRef } from 'react';
+import { useAnimationFrame } from '../../../hooks/motion/use-animation-frame.ts';
+import { usePageInView } from '../../../hooks/motion/use-page-in-view.ts';
 
 interface Particle {
   x: number;
@@ -57,12 +59,12 @@ export function ParticlesBackground({
 }: ParticlesBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<Particle[]>([]);
-  const animationFrameRef = useRef<number | undefined>(undefined);
+  const isPageInView = usePageInView();
 
   useEffect(() => {
     // Check for reduced motion preference
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (disabled || prefersReducedMotion) return;
+    if (disabled || prefersReducedMotion || !isPageInView) return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -119,51 +121,7 @@ export function ParticlesBackground({
 
     initParticles();
 
-    // Parse color to RGB
-    const hexToRgb = (hex: string): { r: number; g: number; b: number } => {
-      // Remove # if present
-      const cleanHex = hex.replace(/^#/, '');
-
-      // Parse hex values
-      const r = Number.parseInt(cleanHex.slice(0, 2), 16);
-      const g = Number.parseInt(cleanHex.slice(2, 4), 16);
-      const b = Number.parseInt(cleanHex.slice(4, 6), 16);
-
-      return { r, g, b };
-    };
-
-    const rgb = hexToRgb(color);
-
-    // Animation loop
-    const animate = () => {
-      if (!(ctx && canvas)) return;
-
-      // Clear canvas
-      ctx.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
-
-      // Update and draw particles
-      for (const particle of particlesRef.current) {
-        // Update position
-        particle.x += particle.speedX;
-        particle.y += particle.speedY;
-
-        // Wrap around edges
-        if (particle.x < 0) particle.x = canvas.offsetWidth;
-        if (particle.x > canvas.offsetWidth) particle.x = 0;
-        if (particle.y < 0) particle.y = canvas.offsetHeight;
-        if (particle.y > canvas.offsetHeight) particle.y = 0;
-
-        // Draw particle
-        ctx.beginPath();
-        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${particle.opacity})`;
-        ctx.fill();
-      }
-
-      animationFrameRef.current = requestAnimationFrame(animate);
-    };
-
-    animate();
+    // Animation loop will be handled by useAnimationFrame hook
 
     // Handle resize
     const handleResize = () => {
@@ -175,12 +133,55 @@ export function ParticlesBackground({
 
     // Cleanup
     return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
       window.removeEventListener('resize', handleResize);
     };
-  }, [count, color, maxSize, speed, disabled]);
+  }, [count, color, maxSize, speed, disabled, isPageInView]);
+
+  // Parse color to RGB helper
+  const hexToRgb = (hex: string): { r: number; g: number; b: number } => {
+    const cleanHex = hex.replace(/^#/, '');
+    const r = Number.parseInt(cleanHex.slice(0, 2), 16);
+    const g = Number.parseInt(cleanHex.slice(2, 4), 16);
+    const b = Number.parseInt(cleanHex.slice(4, 6), 16);
+    return { r, g, b };
+  };
+
+  // Animation loop using useAnimationFrame
+  useAnimationFrame(
+    !disabled && isPageInView && canvasRef.current
+      ? () => {
+          const canvas = canvasRef.current;
+          if (!canvas) return;
+          
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return;
+
+          const rgb = hexToRgb(color);
+
+          // Clear canvas
+          ctx.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
+
+          // Update and draw particles
+          for (const particle of particlesRef.current) {
+            // Update position
+            particle.x += particle.speedX;
+            particle.y += particle.speedY;
+
+            // Wrap around edges
+            if (particle.x < 0) particle.x = canvas.offsetWidth;
+            if (particle.x > canvas.offsetWidth) particle.x = 0;
+            if (particle.y < 0) particle.y = canvas.offsetHeight;
+            if (particle.y > canvas.offsetHeight) particle.y = 0;
+
+            // Draw particle
+            ctx.beginPath();
+            ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${particle.opacity})`;
+            ctx.fill();
+          }
+        }
+      : undefined
+  );
 
   return (
     <canvas

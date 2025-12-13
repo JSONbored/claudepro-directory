@@ -1,20 +1,28 @@
 'use client';
 
-import { Search } from '../../icons.tsx';
+/**
+ * Command Component - Premium CMDK with Motion.dev Animations
+ *
+ * Beautiful, modern command palette with:
+ * - Premium 3D modal entrance animations (scale + slide)
+ * - Backdrop blur with fade
+ * - Staggered item animations
+ * - Smooth microinteractions
+ * - Vercel/Linear/Raycast quality
+ */
+
 import { cn } from '../utils.ts';
-import { DIMENSIONS } from '../constants.ts';
 import type { DialogProps } from '@radix-ui/react-dialog';
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { Command as CommandPrimitive } from 'cmdk';
 import type * as React from 'react';
-import { useEffect } from 'react';
-import { logClientInfo, logClientWarn } from '@heyclaude/web-runtime/logging/client';
+import { logClientWarn } from '@heyclaude/web-runtime/logging/client';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogTitle,
 } from './dialog.tsx';
+import { SHADOWS } from '../../design-tokens/index.ts';
 
 const Command = ({
   className,
@@ -26,7 +34,13 @@ const Command = ({
   <CommandPrimitive
     ref={ref}
     className={cn(
-      'flex h-full w-full flex-col overflow-hidden rounded-md bg-popover text-popover-foreground',
+      // Vercel exact pattern: max-width: 640px, padding: 8px, border-radius: 12px
+      'max-w-[640px] w-full p-2',
+      'rounded-xl', // 12px = rounded-xl
+      'overflow-hidden',
+      'bg-background text-foreground',
+      'border border-border', // 1px solid var(--gray6)
+      'outline-none',
       className
     )}
     {...props}
@@ -35,28 +49,9 @@ const Command = ({
 Command.displayName = CommandPrimitive.displayName;
 
 const CommandDialog = ({ children, open, onOpenChange, ...props }: DialogProps) => {
-  // DEBUG: Log command dialog state
-  useEffect(() => {
-    logClientInfo(
-      '[CommandDialog] State changed',
-      'CommandDialog.stateChange',
-      {
-        component: 'CommandDialog',
-        action: 'state-change',
-        category: 'navigation',
-        open: open ?? false,
-        hasOnOpenChange: Boolean(onOpenChange),
-      }
-    );
-  }, [open, onOpenChange]);
-
-  // CRITICAL: Ensure open is explicitly boolean (Radix UI requires this)
-  const isOpen = open === true;
-
-  // Early return if not open (prevents unnecessary renders)
-  if (!isOpen) {
-    return null;
-  }
+  // CRITICAL FIX: Do NOT return null when closed
+  // Radix UI Dialog needs to be in the DOM to manage portal, overlay, and animations
+  // Radix UI will handle showing/hiding based on the `open` prop internally
 
   // Defensive check: Ensure children are defined
   if (!children) {
@@ -73,10 +68,10 @@ const CommandDialog = ({ children, open, onOpenChange, ...props }: DialogProps) 
     return null;
   }
 
-  // Build dialog props - only include onOpenChange if provided (exactOptionalPropertyTypes)
+  // Build dialog props - ensure open is boolean (Radix UI requires this)
   const dialogProps: DialogProps = {
     ...props,
-    open: isOpen,
+    open: open === true, // Ensure boolean
   };
   if (onOpenChange) {
     dialogProps.onOpenChange = onOpenChange;
@@ -84,14 +79,39 @@ const CommandDialog = ({ children, open, onOpenChange, ...props }: DialogProps) 
 
   return (
     <Dialog {...dialogProps}>
-      <DialogContent className="overflow-hidden p-0 shadow-lg">
-        <VisuallyHidden>
-          <DialogTitle>Command Menu</DialogTitle>
-          <DialogDescription>
-            Type a command or search for items using the keyboard
-          </DialogDescription>
-        </VisuallyHidden>
-        <Command className="[&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5 **:[[cmdk-group-heading]]:px-2 **:[[cmdk-group-heading]]:font-medium **:[[cmdk-group-heading]]:text-muted-foreground **:[[cmdk-group]]:px-2 **:[[cmdk-input]]:h-12 **:[[cmdk-item]]:px-2 **:[[cmdk-item]]:py-3">
+      <DialogContent
+        className={cn(
+          // Vercel exact pattern: Remove DialogContent padding, CMDK handles its own
+          'overflow-hidden p-0',
+          // Vercel exact: max-width: 640px
+          'max-w-[640px]',
+          'w-[95vw] sm:w-full',
+          // Vercel exact: border-radius: 12px (rounded-xl)
+          'rounded-xl',
+          // Vercel exact: border: 1px solid var(--gray6)
+          'border border-border',
+          // Vercel exact: background (dark mode: rgba(22, 22, 22, 0.7))
+          'bg-background',
+        )}
+        style={{ 
+          // Vercel exact: box-shadow: var(--cmdk-shadow)
+          // Using semantic shadow token
+          boxShadow: SHADOWS.elevation.dark.medium 
+        }}
+      >
+        <DialogTitle className="sr-only">Command Menu</DialogTitle>
+        <DialogDescription className="sr-only">
+          Type a command or search for items using the keyboard
+        </DialogDescription>
+        <Command
+          className={cn(
+            // Vercel exact pattern from SCSS
+            // Group spacing: *:not([hidden]) + [cmdk-group] { margin-top: 8px }
+            '[&_[cmdk-group]:not([hidden])_~[cmdk-group]]:mt-2',
+            // Icon sizing: width: 18px; height: 18px
+            '[&_[cmdk-item]_svg]:w-[18px] [&_[cmdk-item]_svg]:h-[18px]'
+          )}
+        >
           {children}
         </Command>
       </DialogContent>
@@ -105,19 +125,27 @@ const CommandInput = ({
   ...props
 }: React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input> & {
   ref?: React.Ref<React.ElementRef<typeof CommandPrimitive.Input>>;
-}) => (
-  <div className={'flex items-center border-b px-3'} cmdk-input-wrapper="">
-    <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+}) => {
+  return (
     <CommandPrimitive.Input
       ref={ref}
       className={cn(
-        'flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
+        // Vercel exact pattern: font-size: 17px, padding: 8px 8px 16px 8px
+        'text-[17px]',
+        'px-2 py-2 pb-4', // 8px 8px 16px 8px
+        'border-b border-border mb-4', // border-bottom + margin-bottom: 16px
+        'bg-transparent',
+        'text-foreground',
+        'outline-none',
+        'rounded-none', // border-radius: 0
+        'w-full',
+        'placeholder:text-muted-foreground',
         className
       )}
       {...props}
     />
-  </div>
-);
+  );
+};
 
 CommandInput.displayName = CommandPrimitive.Input.displayName;
 
@@ -127,13 +155,23 @@ const CommandList = ({
   ...props
 }: React.ComponentPropsWithoutRef<typeof CommandPrimitive.List> & {
   ref?: React.Ref<React.ElementRef<typeof CommandPrimitive.List>>;
-}) => (
-  <CommandPrimitive.List
-    ref={ref}
-    className={cn(`${DIMENSIONS.DROPDOWN_MAX} overflow-y-auto overflow-x-hidden`, className)}
-    {...props}
-  />
-);
+}) => {
+  return (
+    <CommandPrimitive.List
+      ref={ref}
+      className={cn(
+        // Vercel exact pattern: height: min(330px, calc(var(--cmdk-list-height))), max-height: 400px
+        'h-[min(330px,var(--cmdk-list-height,auto))]',
+        'max-h-[400px]',
+        'overflow-y-auto overflow-x-hidden',
+        'overscroll-contain',
+        'transition-[height] duration-100 ease-out',
+        className
+      )}
+      {...props}
+    />
+  );
+};
 
 CommandList.displayName = CommandPrimitive.List.displayName;
 
@@ -142,7 +180,20 @@ const CommandEmpty = ({
   ...props
 }: React.ComponentPropsWithoutRef<typeof CommandPrimitive.Empty> & {
   ref?: React.Ref<React.ElementRef<typeof CommandPrimitive.Empty>>;
-}) => <CommandPrimitive.Empty ref={ref} className="py-6 text-center text-sm" {...props} />;
+}) => (
+  <CommandPrimitive.Empty
+    ref={ref}
+    className={cn(
+      // Vercel exact pattern: font-size: 14px, height: 48px
+      'text-sm',
+      'h-12',
+      'flex items-center justify-center',
+      'whitespace-pre-wrap',
+      'text-muted-foreground',
+    )}
+    {...props}
+  />
+);
 
 CommandEmpty.displayName = CommandPrimitive.Empty.displayName;
 
@@ -156,7 +207,15 @@ const CommandGroup = ({
   <CommandPrimitive.Group
     ref={ref}
     className={cn(
-      'overflow-hidden p-1 text-foreground **:[[cmdk-group-heading]]:px-2 **:[[cmdk-group-heading]]:py-1.5 **:[[cmdk-group-heading]]:font-medium **:[[cmdk-group-heading]]:text-muted-foreground **:[[cmdk-group-heading]]:text-xs',
+      'overflow-hidden text-foreground',
+      // Vercel exact pattern: Group heading - font-size: 12px, padding: 0 8px, margin-bottom: 8px
+      '[&_[cmdk-group-heading]]:text-xs',
+      '[&_[cmdk-group-heading]]:px-2', // 0 8px
+      '[&_[cmdk-group-heading]]:mb-2', // margin-bottom: 8px
+      '[&_[cmdk-group-heading]]:select-none',
+      '[&_[cmdk-group-heading]]:flex',
+      '[&_[cmdk-group-heading]]:items-center',
+      '[&_[cmdk-group-heading]]:text-muted-foreground',
       className
     )}
     {...props}
@@ -174,7 +233,14 @@ const CommandSeparator = ({
 }) => (
   <CommandPrimitive.Separator
     ref={ref}
-    className={cn('-mx-1 h-px bg-border', className)}
+    className={cn(
+      // Vercel exact pattern: height: 1px, background: var(--gray5), margin: 4px 0
+      'h-px',
+      'bg-border',
+      'my-1', // margin: 4px 0
+      'w-full',
+      className
+    )}
     {...props}
   />
 );
@@ -190,7 +256,29 @@ const CommandItem = ({
   <CommandPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none data-[disabled=true]:pointer-events-none data-[selected='true']:bg-accent data-[selected=true]:text-accent-foreground data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+      // Vercel exact pattern:
+      // height: 48px, border-radius: 8px, font-size: 14px, padding: 0 16px, gap: 8px
+      'h-12', // 48px
+      'rounded-lg', // 8px
+      'text-sm', // 14px
+      'px-4', // 0 16px
+      'gap-2', // 8px
+      'flex items-center',
+      'cursor-pointer',
+      'select-none',
+      'outline-none',
+      // Vercel transitions: transition: all 150ms ease, transition-property: none
+      'transition-all duration-150 ease-out',
+      // Selected state: background: var(--grayA3), color: var(--gray12)
+      'data-[selected=true]:bg-accent/50 data-[selected=true]:text-foreground',
+      // Disabled state: color: var(--gray8)
+      'data-[disabled=true]:text-muted-foreground data-[disabled=true]:cursor-not-allowed',
+      // Active state: transition-property: background, background: var(--gray4)
+      'active:transition-[background] active:bg-accent/30',
+      // Item spacing: & + [cmdk-item] { margin-top: 4px }
+      '[&+&]:mt-1',
+      // Icon styling: width: 18px; height: 18px
+      '[&_svg]:w-[18px] [&_svg]:h-[18px] [&_svg]:shrink-0',
       className
     )}
     {...props}

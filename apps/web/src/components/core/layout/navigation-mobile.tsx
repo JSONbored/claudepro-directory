@@ -13,6 +13,7 @@ import {
 } from '@heyclaude/web-runtime/config/navigation';
 import { getContactChannels } from '@heyclaude/web-runtime/core';
 import { SPRING, MICROINTERACTIONS, STAGGER } from '@heyclaude/web-runtime/design-system';
+import { useReducedMotion, useDragControls } from '@heyclaude/web-runtime/hooks/motion';
 import { DiscordIcon, Github, Menu } from '@heyclaude/web-runtime/icons';
 import {
   ANIMATION_CONSTANTS,
@@ -82,6 +83,8 @@ const CONTACT_CHANNELS = getContactChannels();
 
 export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationMobileProps) {
   const [isMounted, setIsMounted] = useState(false);
+  const shouldReduceMotion = useReducedMotion();
+  const dragControls = useDragControls();
 
   useEffect(() => {
     setIsMounted(true);
@@ -109,8 +112,10 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
       >
         {/* Swipe-to-close indicator */}
         <motion.div
-          className="${POSITION_PATTERNS.ABSOLUTE_TOP_HALF} bg-border/50 left-1/2 h-1 w-12 -translate-x-1/2 cursor-grab rounded-full active:cursor-grabbing"
-          drag="y"
+          className={`${POSITION_PATTERNS.ABSOLUTE_TOP_HALF} bg-border/50 left-1/2 h-1 w-12 -translate-x-1/2 cursor-grab rounded-full active:cursor-grabbing`}
+          drag={shouldReduceMotion ? false : 'y'}
+          dragControls={shouldReduceMotion ? undefined : dragControls}
+          dragListener={!shouldReduceMotion}
           dragConstraints={{ top: 0, bottom: 50 }}
           onDragEnd={(
             _: MouseEvent | PointerEvent | TouchEvent,
@@ -118,7 +123,7 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
           ) => {
             if (info.offset.y > 100) onOpenChange(false);
           }}
-          whileDrag={{ scale: 1.2, backgroundColor: 'rgb(249, 115, 22)' }} // Claude orange (was hsl(var(--accent)))
+          whileDrag={shouldReduceMotion ? {} : { scale: 1.2, backgroundColor: 'rgb(249, 115, 22)' }} // Claude orange (was hsl(var(--accent)))
           transition={SPRING.smooth}
         />
 
@@ -127,8 +132,8 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
           {/* Header with Motion.dev fade-in */}
           <motion.div
             className="flex items-center px-1 pb-8"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
+            initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -20 }}
+            animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
             transition={{ delay: STAGGER.fast }}
           >
             <HeyClaudeLogo size="lg" duration={1.2} />
@@ -143,12 +148,12 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
                 return (
                   <motion.div
                     key={`action-${link.label}-${index}`}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
+                    initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -20 }}
+                    animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
                     transition={{ delay: STAGGER.medium + index * STAGGER.micro }}
                   >
                     <motion.div
-                      whileTap={MICROINTERACTIONS.button.tap}
+                      whileTap={shouldReduceMotion ? {} : MICROINTERACTIONS.button.tap}
                       transition={MICROINTERACTIONS.button.transition}
                     >
                       <Link
@@ -171,12 +176,12 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
                 return (
                   <motion.div
                     key={`primary-${link.label}-${index}`}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
+                    initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -20 }}
+                    animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
                     transition={{ delay: STAGGER.medium + adjustedIndex * STAGGER.micro }}
                   >
                     <motion.div
-                      whileTap={MICROINTERACTIONS.button.tap}
+                      whileTap={shouldReduceMotion ? {} : MICROINTERACTIONS.button.tap}
                       transition={MICROINTERACTIONS.button.transition}
                     >
                       <NavLink
@@ -213,14 +218,14 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
                       return (
                         <motion.div
                           key={`secondary-${link.label}-${index}`}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
+                          initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -20 }}
+                          animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
                           transition={{
                             delay: STAGGER.medium + (PRIMARY_NAVIGATION.length + index) * STAGGER.micro,
                           }}
                         >
                           <motion.div
-                            whileTap={MICROINTERACTIONS.button.tap}
+                            whileTap={shouldReduceMotion ? {} : MICROINTERACTIONS.button.tap}
                             transition={MICROINTERACTIONS.button.transition}
                           >
                             <NavLink
@@ -246,8 +251,8 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
           {/* Footer with spring animation on tap */}
           <motion.div
             className="border-border/30 border-t pt-6 pb-6"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
+            animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
             transition={{ delay: STAGGER.slow }}
           >
             <div className={`${UI_CLASSES.GRID_COLS_3_GAP_4} px-4`}>
@@ -267,7 +272,7 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
               ].map((item) => (
                 <motion.div
                   key={item.label}
-                  whileTap={MICROINTERACTIONS.button.tap}
+                  whileTap={shouldReduceMotion ? {} : MICROINTERACTIONS.button.tap}
                   transition={MICROINTERACTIONS.button.transition}
                 >
                   <Button

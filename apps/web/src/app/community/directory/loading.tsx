@@ -1,5 +1,3 @@
 'use client';
 
-import { getLoadingComponent } from '@heyclaude/web-runtime/ui';
-
-export default getLoadingComponent('/community/directory');
+export { CommunityDirectorySkeleton as default } from '@/src/components/features/community/community-directory-skeleton';

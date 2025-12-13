@@ -14,6 +14,7 @@ import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/cl
 import { ArrowRight, Loader2, Mail } from '@heyclaude/web-runtime/icons';
 import { cn, SimpleCopyButton, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { SPRING, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useId, useMemo, useState } from 'react';
 
@@ -46,6 +47,7 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
   const errorId = useId();
   const isValid = useMemo(() => isValidEmail(email), [email]);
   const showSubmitButton = isValid && !isSubmitting && email.trim().length > 0;
+  const shouldReduceMotion = useReducedMotion();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -105,8 +107,8 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
             {/* Left Column - MCP Command */}
             <motion.div
               className="space-y-4"
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -20 }}
+              whileInView={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: DURATION.moderate }}
             >
@@ -156,16 +158,16 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
             {/* Right Column - Newsletter */}
             <motion.div
               className="space-y-4"
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: 20 }}
+              whileInView={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: DURATION.moderate, delay: STAGGER.fast }}
             >
               {/* Envelope Icon */}
               <motion.div
                 className="inline-flex"
-                initial={{ scale: 0.9, opacity: 0 }}
-                whileInView={{ scale: 1, opacity: 1 }}
+                initial={shouldReduceMotion ? { opacity: 0 } : { scale: 0.9, opacity: 0 }}
+                whileInView={shouldReduceMotion ? { opacity: 1 } : { scale: 1, opacity: 1 }}
                 viewport={{ once: true }}
                 transition={SPRING.smooth}
               >
@@ -224,9 +226,9 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
                           'bg-[#F6F8F4] text-background',
                           'cursor-not-allowed'
                         )}
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.8 }}
+                        initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.8 }}
+                        animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }}
+                        exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.8 }}
                         transition={{ duration: DURATION.quick }}
                         aria-label="Subscribing..."
                       >
@@ -244,17 +246,17 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
                           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F6F8F4] focus-visible:ring-offset-2',
                           'active:scale-95'
                         )}
-                        initial={{ opacity: 0, x: -8, scale: 0.8 }}
-                        animate={{ opacity: 1, x: 0, scale: 1 }}
-                        exit={{ opacity: 0, x: -8, scale: 0.8 }}
+                        initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -8, scale: 0.8 }}
+                        animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0, scale: 1 }}
+                        exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -8, scale: 0.8 }}
                         transition={SPRING.loading}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
+                        whileHover={shouldReduceMotion ? {} : { scale: 1.05 }}
+                        whileTap={shouldReduceMotion ? {} : { scale: 0.95 }}
                         aria-label="Subscribe to newsletter"
                       >
                         <motion.div
                           initial={{ rotate: 0 }}
-                          whileHover={{ rotate: 15 }}
+                          whileHover={shouldReduceMotion ? {} : { rotate: 15 }}
                           transition={SPRING.bouncy}
                         >
                           <ArrowRight className="h-5 w-5" aria-hidden="true" />
@@ -271,9 +273,9 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
                       id={errorId}
                       className="text-destructive text-sm"
                       role="alert"
-                      initial={{ opacity: 0, y: -4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -4 }}
+                      initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -4 }}
+                      animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                      exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -4 }}
                       transition={{ duration: DURATION.quick }}
                     >
                       {error}

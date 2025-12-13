@@ -1,5 +1,3 @@
 'use client';
 
-import { getLoadingComponent } from '@heyclaude/web-runtime/ui';
-
-export default getLoadingComponent('/submit');
+export { SubmitPageSkeleton as default } from '@/src/components/core/forms/submit-page-skeleton';

@@ -72,8 +72,20 @@ export async function generateStaticParams() {
         // Return all items with slugs - no validation needed
         // dynamicParams=true will handle invalid slugs on-demand
         const categoryParameters = topItems
-          .filter((item): item is typeof item & { slug: string } => Boolean(item.slug))
-          .map((item) => ({ category, slug: item.slug }));
+          .filter(
+            (
+              item: Database['public']['Functions']['get_enriched_content_list']['Returns'][number]
+            ): item is Database['public']['Functions']['get_enriched_content_list']['Returns'][number] & {
+              slug: string;
+            } => Boolean(item.slug)
+          )
+          .map(
+            (
+              item: Database['public']['Functions']['get_enriched_content_list']['Returns'][number] & {
+                slug: string;
+              }
+            ) => ({ category, slug: item.slug })
+          );
 
         return { category, params: categoryParameters };
       } catch (error) {

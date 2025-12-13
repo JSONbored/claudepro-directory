@@ -23,6 +23,7 @@ import {
   DropdownMenuTrigger,
   toasts,
 } from '@heyclaude/web-runtime/ui';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 
 interface ShareMenuProps {
@@ -90,6 +91,7 @@ export function ShareMenu({
   label = 'Share',
 }: ShareMenuProps) {
   const { copy: copyToClipboard } = useCopyToClipboard();
+  const shouldReduceMotion = useReducedMotion();
 
   // Platform share handlers
   const shareToTwitter = () => {
@@ -157,7 +159,7 @@ export function ShareMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <motion.div whileTap={{ scale: 0.97 }}>
+        <motion.div whileTap={shouldReduceMotion ? {} : { scale: 0.97 }}>
           <Button variant={variant} className="min-w-0 gap-2">
             <Share2 className="h-4 w-4" />
             <span>{label}</span>

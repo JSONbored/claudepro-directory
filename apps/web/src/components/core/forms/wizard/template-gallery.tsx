@@ -38,6 +38,7 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/design-tokens';
 import { SPRING, STAGGER } from '@heyclaude/web-runtime/design-system';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -73,6 +74,7 @@ export function TemplateGallery({
   className,
 }: TemplateGalleryProps) {
   const [selectedCategory, setSelectedCategory] = useState<null | string>(null);
+  const shouldReduceMotion = useReducedMotion();
 
   // Filter templates by selected content type and category
   const filteredTemplates = useMemo(() => {
@@ -104,8 +106,8 @@ export function TemplateGallery({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
+      animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
       transition={SPRING.smooth}
       className={cn('space-y-6', className)}
     >
@@ -113,8 +115,8 @@ export function TemplateGallery({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <motion.div
-            initial={{ scale: 0, rotate: -180 }}
-            animate={{ scale: 1, rotate: 0 }}
+            initial={shouldReduceMotion ? { opacity: 0 } : { scale: 0, rotate: -180 }}
+            animate={shouldReduceMotion ? { opacity: 1 } : { scale: 1, rotate: 0 }}
             transition={SPRING.bouncy}
             className={cn(
               'flex h-10 w-10 items-center justify-center rounded-xl',
@@ -166,12 +168,26 @@ export function TemplateGallery({
 
       {/* Templates grid */}
       <AnimatePresence mode="popLayout">
-        <motion.div layout className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredTemplates.map((template, index) => (
+        <motion.div
+          layout
+          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+          variants={{
+            hidden: { opacity: 0 },
+            visible: {
+              opacity: 1,
+              transition: {
+                when: 'beforeChildren',
+                staggerChildren: shouldReduceMotion ? 0 : STAGGER.micro,
+              },
+            },
+          }}
+          initial="hidden"
+          animate="visible"
+        >
+          {filteredTemplates.map((template) => (
             <TemplateCard
               key={template.id}
               template={template as TemplateWithStats}
-              index={index}
               onApply={() => onApplyTemplate(template)}
             />
           ))}
@@ -181,8 +197,8 @@ export function TemplateGallery({
       {/* Empty state */}
       {filteredTemplates.length === 0 && (
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
+          initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
+          animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }}
           className="rounded-xl border border-dashed p-12 text-center"
         >
           <Sparkles className="text-muted-foreground/50 mx-auto mb-3 h-12 w-12" />
@@ -197,13 +213,13 @@ export function TemplateGallery({
  * Individual Template Card
  */
 interface TemplateCardProps {
-  index: number;
   onApply: () => void;
   template: TemplateWithStats;
 }
 
-function TemplateCard({ template, index, onApply }: TemplateCardProps) {
+function TemplateCard({ template, onApply }: TemplateCardProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const shouldReduceMotion = useReducedMotion();
 
   // Extract stats from templateData (if available)
   const stats = useMemo(() => {
@@ -244,13 +260,27 @@ function TemplateCard({ template, index, onApply }: TemplateCardProps) {
     }
   }, [template]);
 
+  // Variants for stagger animation (parent handles staggerChildren)
+  const cardVariants = {
+    hidden: shouldReduceMotion
+      ? { opacity: 0 }
+      : { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        ...SPRING.smooth,
+      },
+    },
+    exit: shouldReduceMotion
+      ? { opacity: 0 }
+      : { opacity: 0, scale: 0.9 },
+  };
+
   return (
     <motion.div
-      layout
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.9 }}
-      transition={{ ...SPRING.smooth, delay: index * STAGGER.micro }}
+      layout={!shouldReduceMotion}
+      variants={cardVariants}
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
     >
@@ -308,10 +338,14 @@ function TemplateCard({ template, index, onApply }: TemplateCardProps) {
           <CardTitle className="flex items-start justify-between gap-2 text-base">
             <span className="line-clamp-2">{template.name}</span>
             <motion.div
-              animate={{
-                x: isHovered ? 4 : 0,
-                opacity: isHovered ? 1 : 0.6,
-              }}
+              animate={
+                shouldReduceMotion
+                  ? { opacity: isHovered ? 1 : 0.6 }
+                  : {
+                      x: isHovered ? 4 : 0,
+                      opacity: isHovered ? 1 : 0.6,
+                    }
+              }
               transition={SPRING.snappy}
             >
               <ArrowRight className="h-4 w-4 shrink-0 text-amber-500" />
@@ -419,6 +453,7 @@ export function TemplateQuickSelect({
 }: TemplateQuickSelectProps) {
   const [expanded, setExpanded] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const shouldReduceMotion = useReducedMotion();
 
   // Filter and sort templates
   const allTemplates = useMemo(() => {
@@ -456,17 +491,29 @@ export function TemplateQuickSelect({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 10 }}
+      animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
       transition={SPRING.smooth}
       className={cn('space-y-3', className)}
     >
       {/* Onboarding Tooltip */}
       {showOnboarding ? (
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: -10 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: -10 }}
+          initial={
+            shouldReduceMotion
+              ? { opacity: 0 }
+              : { opacity: 0, scale: 0.95, y: -10 }
+          }
+          animate={
+            shouldReduceMotion
+              ? { opacity: 1 }
+              : { opacity: 1, scale: 1, y: 0 }
+          }
+          exit={
+            shouldReduceMotion
+              ? { opacity: 0 }
+              : { opacity: 0, scale: 0.95, y: -10 }
+          }
           transition={SPRING.bouncy}
         >
           <Alert className="border-amber-500/50 bg-amber-500/10">

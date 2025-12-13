@@ -1,5 +1,3 @@
 'use client';
 
-import { getLoadingComponent } from '@heyclaude/web-runtime/ui';
-
-export default getLoadingComponent('/search');
+export { SearchPageSkeleton as default } from '@/src/components/features/search/search-page-skeleton';

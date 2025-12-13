@@ -37,6 +37,10 @@
       "types": "./src/entries/hooks.ts",
       "default": "./src/entries/hooks.ts"
     },
+    "./hooks/motion": {
+      "types": "./src/hooks/motion/index.ts",
+      "default": "./src/hooks/motion/index.ts"
+    },
     "./client": {
       "types": "./src/entries/client.ts",
       "default": "./src/entries/client.ts"
@@ -49,6 +53,10 @@
       "types": "./src/entries/data-server.ts",
       "react-server": "./src/entries/data-server.ts",
       "default": "./src/entries/data-client.ts"
+    },
+    "./data/utils": {
+      "types": "./src/data.ts",
+      "default": "./src/data.ts"
     },
     "./config/static-configs": {
       "types": "./src/config/static-configs.ts",
@@ -122,6 +130,14 @@
       "types": "./src/seo/generator.ts",
       "default": "./src/seo/generator.ts"
     },
+    "./ui/constants": {
+      "types": "./src/ui/constants.ts",
+      "default": "./src/ui/constants.ts"
+    },
+    "./actions/user": {
+      "types": "./src/actions/user.ts",
+      "default": "./src/actions/user.ts"
+    },
     "./icons": {
       "types": "./src/icons.tsx",
       "default": "./src/icons.tsx"
@@ -185,6 +201,10 @@
     "./flux": {
       "types": "./src/flux/index.ts",
       "default": "./src/flux/index.ts"
+    },
+    "./search": {
+      "types": "./src/search/index.ts",
+      "default": "./src/search/index.ts"
     }
   },
   "dependencies": {
@@ -236,7 +256,8 @@
   "scripts": {
     "build": "tsc --build",
     "type-check": "tsc --noEmit",
-    "lint": "eslint --config ../../config/tools/eslint.config.mjs src --ignore-pattern '**/*.generated.ts' --ignore-pattern '**/*.generated.tsx'"
+    "lint": "eslint --config ../../config/tools/eslint.config.mjs src --ignore-pattern '**/*.generated.ts' --ignore-pattern '**/*.generated.tsx'",
+    "clear-caches": "bash scripts/clear-caches.sh"
   },
   "peerDependencies": {
     "next": "^16.0.9",

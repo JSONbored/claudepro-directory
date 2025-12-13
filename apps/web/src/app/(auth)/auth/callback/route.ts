@@ -3,8 +3,9 @@
  */
 
 import { env } from '@heyclaude/shared-runtime/schemas/env';
-import { refreshProfileFromOAuthServer, validateNextParameter } from '@heyclaude/web-runtime';
+import { validateNextParameter } from '@heyclaude/web-runtime';
 import { subscribeViaOAuthAction } from '@heyclaude/web-runtime/actions';
+import { refreshProfileFromOAuthServer } from '@heyclaude/web-runtime/actions/user';
 import { SECURITY_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { createSupabaseServerClient } from '@heyclaude/web-runtime/server';
@@ -126,7 +127,7 @@ export async function GET(request: NextRequest) {
 
       // Validate forwarded host against allowed origins to prevent open redirect attacks
       const allowedHosts = SECURITY_CONFIG.allowedOrigins
-        .map((url) => {
+        .map((url: string) => {
           try {
             return new URL(url).hostname;
           } catch (urlError) {
@@ -146,9 +147,9 @@ export async function GET(request: NextRequest) {
 
       const redirectUrl = isLocalEnvironment
         ? `${origin}${next}`
-        : forwardedHost && isValidHost
+        : (forwardedHost && isValidHost
           ? `https://${forwardedHost}${next}`
-          : `${origin}${next}`;
+          : `${origin}${next}`);
 
       const response = NextResponse.redirect(redirectUrl);
       if (shouldSetNewsletterCookie) {

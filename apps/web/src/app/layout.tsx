@@ -12,7 +12,7 @@ import {
   generatePageMetadata,
   getLayoutData,
 } from '@heyclaude/web-runtime/server';
-import { ErrorBoundary, LazyMotionProvider } from '@heyclaude/web-runtime/ui';
+import { ErrorBoundary, LazyMotionProvider, MotionConfigProvider } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { cacheLife, cacheTag } from 'next/cache';
 import localFont from 'next/font/local';
@@ -21,7 +21,6 @@ import { ThemeProvider } from 'next-themes';
 import { Suspense } from 'react';
 
 import { AuthModalProvider } from '@/src/components/core/auth/auth-modal-provider';
-import { PostCopyEmailProvider } from '@/src/components/core/infra/providers/email-capture-modal-provider';
 import { Pulse } from '@/src/components/core/infra/pulse';
 import { PulseCannon } from '@/src/components/core/infra/pulse-cannon';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
@@ -283,7 +282,7 @@ export default function RootLayout({
         {/* Manifest link is automatically injected by Next.js metadata API (line 109) */}
 
         {/* iOS Safari PWA Support */}
-        <meta content="yes" name="apple-mobile-web-app-capable" />
+        <meta content="yes" name="mobile-web-app-capable" />
         <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style" />
         <meta content="ClaudePro" name="apple-mobile-web-app-title" />
         <link href="/assets/icons/apple-touch-icon.png" rel="apple-touch-icon" />
@@ -314,7 +313,7 @@ export default function RootLayout({
             storageKey="claudepro-theme"
           >
             <LazyMotionProvider>
-              <PostCopyEmailProvider>
+              <MotionConfigProvider reducedMotion="user">
                 <AuthModalProvider>
                   <ErrorBoundary>
                     <Suspense fallback={<LayoutFallback>{children}</LayoutFallback>}>
@@ -324,7 +323,7 @@ export default function RootLayout({
                   <Toaster />
                   {/* Newsletter capture is conditionally rendered in LayoutContent for non-auth pages */}
                 </AuthModalProvider>
-              </PostCopyEmailProvider>
+              </MotionConfigProvider>
             </LazyMotionProvider>
           </ThemeProvider>
         </ComponentConfigContextProvider>

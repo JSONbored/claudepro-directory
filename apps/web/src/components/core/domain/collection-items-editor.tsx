@@ -4,7 +4,7 @@
  * Collection Item Manager Component
  * Manages items within a collection (add, remove, reorder)
  *
- * Uses simple up/down buttons for reordering (no drag-drop initially)
+ * Uses drag-to-reorder with Motion.dev Reorder component for intuitive UX
  * Following existing UI patterns from the codebase
  */
 
@@ -16,8 +16,9 @@ import {
 } from '@heyclaude/web-runtime/actions';
 import { isValidCategory, sanitizeSlug } from '@heyclaude/web-runtime/core';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
-import { ArrowDown, ArrowUp, ExternalLink, Plus, Trash } from '@heyclaude/web-runtime/icons';
+import { ExternalLink, Plus, Trash } from '@heyclaude/web-runtime/icons';
 import {
   toasts,
   UI_CLASSES,
@@ -29,6 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
   Separator,
+  Reorder,
 } from '@heyclaude/web-runtime/ui';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useState, useTransition } from 'react';
@@ -73,7 +75,7 @@ interface CollectionItemManagerProps {
  * UI for managing items within a collection (add, remove, and reorder).
  *
  * Renders controls to add bookmarks to the collection, remove existing items, and reorder items
- * using up/down buttons. Performs optimistic updates for reordering, synchronizes changes with
+ * using drag-to-reorder. Performs optimistic updates for reordering, synchronizes changes with
  * server actions, shows user-facing toasts for validation/success/errors, and refreshes route data
  * after successful operations.
  *
@@ -97,6 +99,7 @@ export function CollectionItemManager({
   const pathname = usePathname();
   const { user, status } = useAuthenticatedUser({ context: 'CollectionItemManager' });
   const { openAuthModal } = useAuthModal();
+  const shouldReduceMotion = useReducedMotion();
   const [isPending, startTransition] = useTransition();
   const [items, setItems] = useState(initialItems);
   const [selectedBookmarkId, setSelectedBookmarkId] = useState<string>('');
@@ -224,113 +227,57 @@ export function CollectionItemManager({
     });
   };
 
-  const handleMoveUp = async (index: number) => {
-    if (index === 0) return;
+  const handleReorder = useCallback(
+    (newOrder: unknown[]) => {
+      // Type assertion - Reorder.Group passes the same type as values
+      const typedOrder = newOrder as CollectionItem[];
 
-    const newItems = [...items];
-    const temp = newItems[index];
-    const prev = newItems[index - 1];
-    if (temp && prev) {
-      newItems[index] = prev;
-      newItems[index - 1] = temp;
-    }
+      // Update order values based on new order
+      const reorderedItems = typedOrder.map((item, idx) => ({
+        id: item.id,
+        order: idx,
+      }));
 
-    // Update order values
-    const reorderedItems = newItems.map((item, idx) => ({
-      id: item.id,
-      order: idx,
-    }));
+      // Optimistic update
+      setItems(typedOrder);
 
-    setItems(newItems); // Optimistic update
-
-    startTransition(async () => {
-      try {
-        await reorderCollectionItems({
-          collection_id: collectionId,
-          items: reorderedItems,
-        });
-        toasts.success.actionCompleted('Items reordered');
-        router.refresh();
-      } catch (error) {
-        setItems(items); // Revert on error
-        const normalized = normalizeError(error, 'Failed to reorder items up');
-        logClientWarn(
-          '[Collection] Reorder up failed',
-          normalized,
-          'CollectionItemManager.handleMoveUp',
-          {
-            component: 'CollectionItemManager',
-            action: 'reorder-up',
-            category: 'collection',
-            collectionId,
-          }
-        );
-        // Show error toast with "Retry" button
-        toasts.raw.error('Failed to reorder items', {
-          action: {
-            label: 'Retry',
-            onClick: () => {
-              handleMoveUp(index);
+      startTransition(async () => {
+        try {
+          await reorderCollectionItems({
+            collection_id: collectionId,
+            items: reorderedItems,
+          });
+          toasts.success.actionCompleted('Items reordered');
+          router.refresh();
+        } catch (error) {
+          // Revert on error
+          setItems(items);
+          const normalized = normalizeError(error, 'Failed to reorder items');
+          logClientWarn(
+            '[Collection] Reorder failed',
+            normalized,
+            'CollectionItemManager.handleReorder',
+            {
+              component: 'CollectionItemManager',
+              action: 'reorder',
+              category: 'collection',
+              collectionId,
+            }
+          );
+          // Show error toast with "Retry" button
+          toasts.raw.error('Failed to reorder items', {
+            action: {
+              label: 'Retry',
+              onClick: () => {
+                handleReorder(newOrder);
+              },
             },
-          },
-        });
-      }
-    });
-  };
-
-  const handleMoveDown = async (index: number) => {
-    if (index === items.length - 1) return;
-
-    const newItems = [...items];
-    const temp = newItems[index];
-    const next = newItems[index + 1];
-    if (temp && next) {
-      newItems[index] = next;
-      newItems[index + 1] = temp;
-    }
-
-    // Update order values
-    const reorderedItems = newItems.map((item, idx) => ({
-      id: item.id,
-      order: idx,
-    }));
-
-    setItems(newItems); // Optimistic update
-
-    startTransition(async () => {
-      try {
-        await reorderCollectionItems({
-          collection_id: collectionId,
-          items: reorderedItems,
-        });
-        toasts.success.actionCompleted('Items reordered');
-        router.refresh();
-      } catch (error) {
-        setItems(items); // Revert on error
-        const normalized = normalizeError(error, 'Failed to reorder items down');
-        logClientWarn(
-          '[Collection] Reorder down failed',
-          normalized,
-          'CollectionItemManager.handleMoveDown',
-          {
-            component: 'CollectionItemManager',
-            action: 'reorder-down',
-            category: 'collection',
-            collectionId,
-          }
-        );
-        // Show error toast with "Retry" button
-        toasts.raw.error('Failed to reorder items', {
-          action: {
-            label: 'Retry',
-            onClick: () => {
-              handleMoveDown(index);
-            },
-          },
-        });
-      }
-    });
-  };
+          });
+        }
+      });
+    },
+    [collectionId, items, router]
+  );
 
   return (
     <div className="space-y-4">
@@ -382,35 +329,45 @@ export function CollectionItemManager({
           </p>
         </div>
       ) : (
-        <div className="space-y-2">
+        // TODO: Enhance reordering functionality with features that leverage custom order:
+        // - Display collections in custom order on profile/public pages
+        // - Featured/pinned items at the top (with visual indicator)
+        // - Custom sorting options (by date added, type, alphabetical, custom order)
+        // - Export collections preserving custom order
+        // - Share collections with custom order preserved
+        // - Collection templates with predefined item order
+        // - Analytics on most-reordered items (popularity/priority insights)
+        // Currently, reordering only affects the database order field but doesn't impact
+        // how collections are displayed elsewhere in the application.
+        <Reorder.Group
+          axis="y"
+          values={items}
+          onReorder={shouldReduceMotion || isPending ? () => {} : handleReorder}
+          as="div"
+          className="space-y-2"
+        >
           {items.map((item: CollectionItem, index: number) => (
-            <div
+            <Reorder.Item
               key={item.id}
-              className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} bg-card hover:bg-accent/50 rounded-lg border p-3 transition-colors`}
+              value={item}
+              as="div"
+              className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} bg-card hover:bg-accent/50 rounded-lg border p-3 transition-colors ${
+                shouldReduceMotion || isPending ? '' : 'cursor-grab active:cursor-grabbing'
+              }`}
+              dragListener={!shouldReduceMotion && !isPending}
             >
-              {/* Order Controls */}
-              <div className="flex flex-col gap-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={`${UI_CLASSES.ICON_LG} p-0`}
-                  onClick={() => handleMoveUp(index)}
-                  disabled={index === 0 || isPending}
-                  aria-label="Move up"
+              {/* Drag Handle - Only visible when drag is enabled */}
+              {!shouldReduceMotion && !isPending && (
+                <div
+                  className="text-muted-foreground flex flex-col gap-0.5 cursor-grab active:cursor-grabbing"
+                  style={{ touchAction: 'none' }}
+                  aria-label="Drag handle"
                 >
-                  <ArrowUp className={UI_CLASSES.ICON_XS} />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={`${UI_CLASSES.ICON_LG} p-0`}
-                  onClick={() => handleMoveDown(index)}
-                  disabled={index === items.length - 1 || isPending}
-                  aria-label="Move down"
-                >
-                  <ArrowDown className={UI_CLASSES.ICON_XS} />
-                </Button>
-              </div>
+                  <div className="h-0.5 w-3 rounded-full bg-current" />
+                  <div className="h-0.5 w-3 rounded-full bg-current" />
+                  <div className="h-0.5 w-3 rounded-full bg-current" />
+                </div>
+              )}
 
               {/* Order Number */}
               <div className="text-muted-foreground w-8 text-center text-sm font-medium">
@@ -458,9 +415,9 @@ export function CollectionItemManager({
                   <Trash className={UI_CLASSES.ICON_SM} />
                 </Button>
               </div>
-            </div>
+            </Reorder.Item>
           ))}
-        </div>
+        </Reorder.Group>
       )}
     </div>
   );

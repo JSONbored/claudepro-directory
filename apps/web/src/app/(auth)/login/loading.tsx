@@ -1,5 +1,3 @@
 'use client';
 
-import { getLoadingComponent } from '@heyclaude/web-runtime/ui';
-
-export default getLoadingComponent('/login');
+export { LoginSkeleton as default } from '@/src/components/core/auth/login-skeleton';

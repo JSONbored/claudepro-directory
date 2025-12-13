@@ -1,5 +1,6 @@
 import { getNewsletterConfig } from '@heyclaude/web-runtime/config/static-configs';
-import { ensureString, NEWSLETTER_CTA_CONFIG } from '@heyclaude/web-runtime/core';
+import { NEWSLETTER_CTA_CONFIG } from '@heyclaude/web-runtime/core';
+import { ensureString } from '@heyclaude/web-runtime/data/utils';
 
 /**
  * Newsletter config type

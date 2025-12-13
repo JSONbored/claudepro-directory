@@ -11,6 +11,7 @@ import { VALID_CATEGORIES } from '@heyclaude/web-runtime';
 import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import {
   Camera,
   Check,
@@ -157,10 +158,11 @@ interface ShareDropdownProps {
  * @see generateShareText
  */
 function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: ShareDropdownProps) {
+  const shouldReduceMotion = useReducedMotion();
   return (
     <motion.div
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -10 }}
+      animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
       className={`${POSITION_PATTERNS.ABSOLUTE_TOP_RIGHT} border-border bg-card/95 top-full z-50 mt-2 w-56 rounded-lg border p-2 shadow-xl backdrop-blur-md`}
       onMouseLeave={onMouseLeave}
     >
@@ -275,6 +277,7 @@ export function ProductionCodeBlock({
   const pulse = usePulse();
   const codeBlockRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
+  const shouldReduceMotion = useReducedMotion();
 
   // Sanitize HTML on client side
   useEffect(() => {
@@ -698,7 +701,7 @@ export function ProductionCodeBlock({
             <motion.button
               type="button"
               onClick={handleCopy}
-              animate={isCopied ? { scale: [1, 1.1, 1] } : {}}
+              animate={isCopied && !shouldReduceMotion ? { scale: [1, 1.1, 1] } : {}}
               transition={{ duration: DURATION.default }}
               className={UI_CLASSES.CODE_BLOCK_BUTTON_BASE}
               title={isCopied ? 'Copied!' : 'Copy code'}
@@ -780,7 +783,7 @@ export function ProductionCodeBlock({
             <motion.button
               type="button"
               onClick={handleCopy}
-              animate={isCopied ? { scale: [1, 1.1, 1] } : {}}
+              animate={isCopied && !shouldReduceMotion ? { scale: [1, 1.1, 1] } : {}}
               transition={{ duration: DURATION.default }}
               className={UI_CLASSES.CODE_BLOCK_BUTTON_BASE}
               title={isCopied ? 'Copied!' : 'Copy code'}

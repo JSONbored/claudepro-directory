@@ -1,85 +1,101 @@
+'use client';
+
 /**
  * Changelog Content Skeleton
  *
- * Skeleton UI for changelog timeline view that matches the two-column layout
- * with timeline markers on the left and content cards on the right.
- *
- * Used as Suspense fallback for streaming changelog content.
+ * Perfectly matches ChangelogTimelineView structure:
+ * - Two-column layout: Left (sticky timeline markers) + Right (content)
+ * - Each entry: date, version badge, title, tags, content
+ * - Beautiful animations with staggered mount
  */
 
 import { UI_CLASSES, Skeleton } from '@heyclaude/web-runtime/ui';
+import { SPRING, STAGGER } from '@heyclaude/web-runtime/design-system';
+import { motion } from 'motion/react';
+
+const KEYS_6 = Array.from({ length: 6 }, (_, i) => `skeleton-${i + 1}`);
 
 /**
- * Renders a skeleton UI that mirrors the changelog timeline layout.
+ * Renders a skeleton UI that perfectly mirrors the changelog timeline layout.
  *
  * Two-column layout:
- * - Left: Timeline markers skeleton (hidden on mobile)
- * - Right: Changelog entry cards skeleton
+ * - Left: Sticky timeline markers (date + version badge)
+ * - Right: Changelog entry content (title, tags, prose)
  *
  * @returns The React element containing skeleton placeholders for the timeline view.
  *
  * @see ChangelogTimelineView
- * @see Skeleton
- * @see UI_CLASSES
  */
 export function ChangelogContentSkeleton() {
   return (
-    <div className="border-border bg-card/50 overflow-hidden rounded-lg border p-4 shadow-sm backdrop-blur-sm sm:p-6">
-      <div className="grid grid-cols-1 gap-8 md:grid-cols-[240px_1fr] md:gap-8 lg:gap-12">
-        {/* Timeline Column (Left) - Hidden on mobile */}
-        <div className="relative hidden md:block">
-          {/* Vertical timeline line skeleton */}
-          <div className="bg-border/40 absolute top-0 bottom-0 left-3 w-px" aria-hidden="true" />
+    <motion.div
+      className="space-y-0"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={SPRING.smooth}
+    >
+      {KEYS_6.map((key, index) => {
+        const prefersReducedMotion =
+          typeof window !== 'undefined' &&
+          window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-          {/* Timeline markers skeleton */}
-          <div className="relative pl-8 space-y-8">
-            {Array.from({ length: 6 }).map((_, index) => (
-              <div key={`timeline-marker-${index}`} className="space-y-2">
-                <Skeleton size="sm" width="xs" />
-                <Skeleton size="sm" width="sm" />
+        return (
+          <motion.div
+            key={key}
+            className="relative pb-10 last:pb-0"
+            initial={!prefersReducedMotion ? { opacity: 0, y: 20 } : false}
+            animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+            transition={{
+              ...SPRING.loading,
+              mass: 0.5,
+              delay: index * STAGGER.micro,
+            }}
+          >
+            <div className="flex flex-col gap-y-6 md:flex-row">
+              {/* Left: Timeline markers (sticky) */}
+              <div className="flex-shrink-0 md:w-48">
+                <div className="pb-10 md:sticky md:top-8">
+                  {/* Date */}
+                  <Skeleton size="sm" width="xs" className="mb-3" />
+                  {/* Version badge */}
+                  <Skeleton size="md" width="md" rounded="lg" className="h-10 w-10" />
+                </div>
               </div>
-            ))}
-          </div>
-        </div>
 
-        {/* Content Column (Right) - Changelog entries skeleton */}
-        <div className="space-y-0">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <div
-              key={`changelog-entry-${index}`}
-              className="border-border/20 border-b pt-6 pb-12 last:border-b-0 last:pb-0 md:pt-8 md:pb-20"
-            >
-              <div className="space-y-4">
-                {/* Entry header */}
-                <div className="mb-3 flex items-center gap-2">
-                  <Skeleton size="sm" width="xs" />
-                  <Skeleton size="sm" width="sm" />
+              {/* Right: Content */}
+              <div className="relative flex-1 pb-10 pl-0 md:pl-8">
+                {/* Vertical timeline line */}
+                <div className="hidden md:block absolute top-2 left-0 w-px h-full bg-border">
+                  {/* Timeline dot */}
+                  <div className="hidden md:block absolute -translate-x-1/2 size-3 bg-primary rounded-full z-10" />
                 </div>
 
-                {/* Entry title */}
-                <Skeleton size="lg" width="2/3" className="mb-2" />
+                <div className="relative z-10 space-y-6">
+                  {/* Title */}
+                  <div className="flex flex-col gap-2">
+                    <Skeleton size="lg" width="3/4" className="h-8" />
+                    
+                    {/* Tags */}
+                    <div className={`${UI_CLASSES.FLEX_WRAP_GAP_2}`}>
+                      <Skeleton size="xs" width="xs" rounded="full" className="h-6" />
+                      <Skeleton size="xs" width="xs" rounded="full" className="h-6" />
+                      <Skeleton size="xs" width="xs" rounded="full" className="h-6" />
+                    </div>
+                  </div>
 
-                {/* Entry description */}
-                <Skeleton size="sm" width="3xl" className="mb-4" />
-
-                {/* Category badges */}
-                <div className={`${UI_CLASSES.FLEX_WRAP_GAP_2} mb-4`}>
-                  <Skeleton size="sm" width="xs" rounded="full" />
-                  <Skeleton size="sm" width="xs" rounded="full" />
-                  <Skeleton size="sm" width="xs" rounded="full" />
-                </div>
-
-                {/* Content sections */}
-                <div className="space-y-3">
-                  <Skeleton size="md" width="3xl" />
-                  <Skeleton size="sm" width="3xl" />
-                  <Skeleton size="sm" width="2/3" />
+                  {/* Content prose */}
+                  <div className="space-y-3">
+                    <Skeleton size="md" width="3xl" />
+                    <Skeleton size="sm" width="3xl" />
+                    <Skeleton size="sm" width="3xl" />
+                    <Skeleton size="sm" width="2/3" />
+                  </div>
                 </div>
               </div>
             </div>
-          ))}
-        </div>
-      </div>
-    </div>
+          </motion.div>
+        );
+      })}
+    </motion.div>
   );
 }

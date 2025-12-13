@@ -1109,8 +1109,9 @@
      ======================================== */
 
   /* Base mark styling - semantic HTML5 element for search highlighting */
+  /* BEAUTIFUL: Using Claude orange with 50% opacity for vibrant, visible highlights */
   mark {
-    background-color: rgb(250 204 21 / 0.3); /* yellow-300 with 30% opacity */
+    background-color: oklch(74% 0.2 35 / 0.5); /* Claude orange with 50% opacity */
     color: inherit; /* Inherit text color for proper contrast */
     padding: 0.125rem 0.25rem; /* Subtle padding */
     border-radius: 0.25rem; /* Rounded corners */
@@ -1120,18 +1121,18 @@
     -webkit-box-decoration-break: clone; /* Safari support */
   }
 
-  /* Dark mode */
+  /* Dark mode - slightly more opacity for better visibility */
   @media (prefers-color-scheme: dark) {
     mark {
-      background-color: rgb(234 179 8 / 0.4); /* yellow-600 with 40% opacity */
+      background-color: oklch(74% 0.2 35 / 0.6); /* Claude orange with 60% opacity in dark mode */
     }
   }
 
   /* High contrast mode support */
   @media (prefers-contrast: high) {
     mark {
-      background-color: rgb(250 204 21 / 0.5); /* More opaque for better visibility */
-      border: 1px solid rgb(234 179 8); /* Add border for clarity */
+      background-color: oklch(74% 0.2 35 / 0.7); /* More opaque for better visibility */
+      border: 1px solid oklch(74% 0.2 35); /* Add border for clarity */
     }
   }
 
@@ -2127,4 +2128,235 @@ body {
   .layout-child {
     grid-column: span 4;
   }
+}
+
+/* ========================================
+   CMDK (Command Menu) STYLES
+   Based on official cmdk documentation and examples
+   ======================================== */
+
+/* Command Root - Main container */
+[cmdk-root] {
+  max-width: 640px;
+  width: 100%;
+  background: var(--color-popover);
+  color: var(--color-popover-foreground);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  font-family: var(--font-sans);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 10px 38px -10px rgba(22, 23, 24, 0.35), 0 10px 20px -15px rgba(22, 23, 24, 0.2);
+  outline: none;
+}
+
+/* Command Dialog - Dialog wrapper */
+[cmdk-dialog] {
+  z-index: 50;
+}
+
+/* Command Overlay - Backdrop */
+[cmdk-overlay] {
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(4px);
+}
+
+/* Command Input Wrapper */
+[cmdk-input-wrapper] {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--color-border);
+  padding: 0.75rem;
+}
+
+/* Command Input */
+[cmdk-input] {
+  font-family: var(--font-sans);
+  border: none;
+  width: 100%;
+  font-size: 0.9375rem;
+  padding: 0.5rem;
+  outline: none;
+  background: transparent;
+  color: var(--color-popover-foreground);
+}
+
+[cmdk-input]::placeholder {
+  color: var(--color-muted-foreground);
+}
+
+/* Command List - Scrollable container with height animation (CMDK pattern) */
+[cmdk-list] {
+  min-height: 300px;
+  height: var(--cmdk-list-height, auto);
+  max-height: 500px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0.5rem;
+  overscroll-behavior: contain;
+  scroll-padding-block-start: 0.5rem;
+  scroll-padding-block-end: 0.5rem;
+  /* Smooth height transitions */
+  transition: height 100ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Command Group - Groups items with heading */
+[cmdk-group] {
+  overflow: hidden;
+  padding: 0.25rem;
+}
+
+/* Command Group Heading */
+[cmdk-group-heading] {
+  user-select: none;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-muted-foreground);
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+/* Spacing between groups */
+[cmdk-group]:not([hidden]) ~ [cmdk-group] {
+  margin-top: 0.5rem;
+  padding-top: 0;
+}
+
+/* Command Item - Individual selectable items with premium animations */
+[cmdk-item] {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 0.75rem; /* Increased padding for premium feel */
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  border-radius: 0.5rem; /* More rounded for premium feel */
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+  /* Premium microinteractions - smooth, responsive transitions */
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  color: var(--color-popover-foreground);
+  /* Staggered entrance animation - more dramatic */
+  animation: cmdk-item-enter 0.2s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+}
+
+/* Staggered entrance - each item animates with slight delay for beautiful cascade */
+[cmdk-item]:nth-child(1) { animation-delay: 0.03s; }
+[cmdk-item]:nth-child(2) { animation-delay: 0.06s; }
+[cmdk-item]:nth-child(3) { animation-delay: 0.09s; }
+[cmdk-item]:nth-child(4) { animation-delay: 0.12s; }
+[cmdk-item]:nth-child(5) { animation-delay: 0.15s; }
+[cmdk-item]:nth-child(6) { animation-delay: 0.18s; }
+[cmdk-item]:nth-child(7) { animation-delay: 0.21s; }
+[cmdk-item]:nth-child(8) { animation-delay: 0.24s; }
+[cmdk-item]:nth-child(9) { animation-delay: 0.27s; }
+[cmdk-item]:nth-child(10) { animation-delay: 0.30s; }
+[cmdk-item]:nth-child(n+11) { animation-delay: 0.33s; }
+
+@keyframes cmdk-item-enter {
+  from {
+    opacity: 0;
+    transform: translateX(-16px) scale(0.94);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    filter: blur(0px);
+  }
+}
+
+[cmdk-item][data-selected='true'] {
+  background-color: color-mix(in oklch, var(--color-accent) 15%, transparent);
+  color: var(--color-accent);
+  /* Premium selected state - scale + glow */
+  transform: scale(1.02) translateX(2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+[cmdk-item][data-selected='true']:not([data-disabled='true']) {
+  border-left: 3px solid var(--color-accent);
+  padding-left: calc(0.75rem - 3px); /* Compensate for border */
+}
+
+[cmdk-item][data-disabled='true'] {
+  color: var(--color-muted-foreground);
+  cursor: not-allowed;
+  opacity: 0.5;
+  pointer-events: none;
+  animation: none; /* Disable animation for disabled items */
+}
+
+[cmdk-item]:hover:not([data-disabled='true']):not([data-selected='true']) {
+  background-color: color-mix(in oklch, var(--color-accent) 8%, transparent);
+  /* Premium hover - scale + slide + shadow */
+  transform: scale(1.015) translateX(4px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+[cmdk-item] svg {
+  transition: transform 200ms ease-out;
+}
+
+[cmdk-item]:hover:not([data-disabled='true']) svg {
+  transform: scale(1.1) rotate(3deg);
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  [cmdk-item] {
+    animation: none;
+    transition: background-color 150ms ease, color 150ms ease;
+  }
+  
+  [cmdk-item]:hover:not([data-disabled='true']):not([data-selected='true']),
+  [cmdk-item][data-selected='true'] {
+    transform: none;
+  }
+}
+
+[cmdk-item] svg {
+  width: 1rem;
+  height: 1rem;
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+/* Command Separator */
+[cmdk-separator] {
+  height: 1px;
+  width: 100%;
+  background: var(--color-border);
+  margin: 0.25rem 0;
+}
+
+/* Command Empty - No results state */
+[cmdk-empty] {
+  padding: 1.5rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--color-muted-foreground);
+  white-space: pre-wrap;
+}
+
+/* Command Loading - Loading state */
+[cmdk-loading] {
+  padding: 1.5rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--color-muted-foreground);
+}
+
+/* CRITICAL FIX: Ensure DialogContent is centered and above overlay - override Radix UI positioning */
+[role="dialog"][data-radix-dialog-content],
+[role="dialog"] {
+  /* Force centering with !important to override Radix inline styles */
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  /* CRITICAL: z-index must be higher than overlay to appear above blur */
+  z-index: 100 !important;
 }

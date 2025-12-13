@@ -9,6 +9,7 @@
 import { CheckCircle, Clock, Send, Sparkles, Users } from '@heyclaude/web-runtime/icons';
 import { cn, UI_CLASSES, BorderBeam } from '@heyclaude/web-runtime/ui';
 import { SPRING, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 
 interface SubmitPageHeroProps {
@@ -23,40 +24,57 @@ interface SubmitPageHeroProps {
 /**
  * Container animation: Fade in + slide up
  */
-const containerVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: DURATION.moderate,
-      staggerChildren: STAGGER.fast,
-    },
-  },
-};
+const createContainerVariants = (shouldReduceMotion: boolean) => ({
+  hidden: shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 },
+  visible: shouldReduceMotion
+    ? {
+        opacity: 1,
+        transition: {
+          duration: DURATION.moderate,
+        },
+      }
+    : {
+        opacity: 1,
+        y: 0,
+        transition: {
+          duration: DURATION.moderate,
+          staggerChildren: STAGGER.fast,
+        },
+      },
+});
 
 /**
  * Child animation: Fade in
  */
-const itemVariants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: DURATION.slow },
-  },
-};
+const createItemVariants = (shouldReduceMotion: boolean) => ({
+  hidden: shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 10 },
+  visible: shouldReduceMotion
+    ? {
+        opacity: 1,
+        transition: { duration: DURATION.slow },
+      }
+    : {
+        opacity: 1,
+        y: 0,
+        transition: { duration: DURATION.slow },
+      },
+});
 
 /**
  * Icon animation: Scale in with spring
  */
-const iconVariants = {
-  hidden: { scale: 0 },
-  visible: {
-    scale: 1,
-    transition: SPRING.icon,
-  },
-};
+const createIconVariants = (shouldReduceMotion: boolean) => ({
+  hidden: shouldReduceMotion ? { opacity: 0 } : { scale: 0 },
+  visible: shouldReduceMotion
+    ? {
+        opacity: 1,
+        transition: SPRING.icon,
+      }
+    : {
+        scale: 1,
+        transition: SPRING.icon,
+      },
+});
 
 /**
  * Renders the animated hero section for the /submit page showing contribution messaging, feature badges, and a decorative illustration.
@@ -74,6 +92,7 @@ const iconVariants = {
  * @see cn
  */
 export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
+  const shouldReduceMotion = useReducedMotion();
   return (
     <motion.div
       className={cn(
@@ -84,7 +103,7 @@ export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
       )}
       initial="hidden"
       animate="visible"
-      variants={containerVariants}
+      variants={createContainerVariants(shouldReduceMotion)}
     >
       {/* BorderBeam animation for visual interest */}
       <BorderBeam size={250} duration={20} colorFrom="#9333ea" colorTo="#a855f7" borderWidth={1} />
@@ -93,7 +112,7 @@ export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
         {/* Left: Content */}
         <div className={UI_CLASSES.SPACE_Y_4}>
           {/* Badge */}
-          <motion.div variants={itemVariants}>
+          <motion.div variants={createItemVariants(shouldReduceMotion)}>
             <div
               className={cn(
                 'border-primary/20 bg-primary/10 inline-flex rounded-full border',
@@ -103,7 +122,7 @@ export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
                 UI_CLASSES.TEXT_SM
               )}
             >
-              <motion.div variants={iconVariants}>
+              <motion.div variants={createIconVariants(shouldReduceMotion)}>
                 <Sparkles className={cn(UI_CLASSES.ICON_SM, 'text-primary')} />
               </motion.div>
               <span className="text-primary font-medium">Community Contributions</span>
@@ -111,14 +130,14 @@ export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
           </motion.div>
 
           {/* Title */}
-          <motion.h1 className="text-4xl font-bold lg:text-5xl" variants={itemVariants}>
+          <motion.h1 className="text-4xl font-bold lg:text-5xl" variants={createItemVariants(shouldReduceMotion)}>
             Share Your Configuration
           </motion.h1>
 
           {/* Description */}
           <motion.p
             className={cn('max-w-2xl', UI_CLASSES.TEXT_BODY_LG, UI_CLASSES.TEXT_MUTED)}
-            variants={itemVariants}
+            variants={createItemVariants(shouldReduceMotion)}
           >
             Contribute to the largest Claude configuration library. No JSON formatting required - we
             handle the technical details!
@@ -127,7 +146,7 @@ export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
           {/* Feature badges */}
           <motion.div
             className={cn(UI_CLASSES.FLEX_WRAP_ITEMS_CENTER_GAP_3, UI_CLASSES.TEXT_SM_MUTED)}
-            variants={itemVariants}
+            variants={createItemVariants(shouldReduceMotion)}
           >
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5}>
               <CheckCircle className={cn(UI_CLASSES.ICON_SM, UI_CLASSES.ICON_SUCCESS)} />
@@ -147,11 +166,11 @@ export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
         {/* Right: Illustration (hidden on mobile) */}
         <motion.div
           className={cn('hidden lg:flex', UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_CENTER)}
-          variants={itemVariants}
+          variants={createItemVariants(shouldReduceMotion)}
         >
           <motion.div
             className="relative"
-            whileHover={{ scale: 1.05 }}
+            whileHover={shouldReduceMotion ? {} : { scale: 1.05 }}
             transition={SPRING.smooth}
           >
             <div
@@ -164,19 +183,21 @@ export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
             </div>
 
             {/* Animated pulse ring */}
-            <motion.div
-              className="border-primary/30 absolute inset-0 rounded-2xl border-2"
-              initial={{ scale: 1, opacity: 1 }}
-              animate={{
-                scale: [1, 1.2, 1],
-                opacity: [0.5, 0, 0.5],
-              }}
-              transition={{
-                duration: DURATION.maximum,
-                repeat: Number.POSITIVE_INFINITY,
-                ease: 'easeInOut',
-              }}
-            />
+            {!shouldReduceMotion && (
+              <motion.div
+                className="border-primary/30 absolute inset-0 rounded-2xl border-2"
+                initial={{ scale: 1, opacity: 1 }}
+                animate={{
+                  scale: [1, 1.2, 1],
+                  opacity: [0.5, 0, 0.5],
+                }}
+                transition={{
+                  duration: DURATION.maximum,
+                  repeat: Number.POSITIVE_INFINITY,
+                  ease: 'easeInOut',
+                }}
+              />
+            )}
           </motion.div>
         </motion.div>
       </div>

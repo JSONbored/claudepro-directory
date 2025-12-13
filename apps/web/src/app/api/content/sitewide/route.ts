@@ -1,23 +1,23 @@
 /**
  * Sitewide Content API Route
- * 
+ *
  * Serves sitewide content in multiple export formats:
  * - `llms` / `llms-txt` (default): LLMs export as plain text
  * - `readme`: Raw JSON data for CLI formatting
  * - `json`: Complete directory content as JSON array
- * 
+ *
  * @example
  * ```ts
  * // Request - LLMs format (default)
  * GET /api/content/sitewide?format=llms
- * 
+ *
  * // Response (200) - text/plain
  * # Sitewide Content
  * ...
- * 
+ *
  * // Request - JSON format
  * GET /api/content/sitewide?format=json
- * 
+ *
  * // Response (200) - application/json
  * [{ "id": "...", "title": "...", ... }]
  * ```
@@ -26,12 +26,14 @@
 import 'server-only';
 import { ContentService } from '@heyclaude/data-layer';
 import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
-import { createApiRoute, createApiOptionsHandler, sitewideFormatSchema } from '@heyclaude/web-runtime/server';
 import { normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   buildCacheHeaders,
+  createApiOptionsHandler,
+  createApiRoute,
   createSupabaseAnonClient,
   getOnlyCorsHeaders,
+  sitewideFormatSchema,
 } from '@heyclaude/web-runtime/server';
 import { cacheLife } from 'next/cache';
 import { NextResponse } from 'next/server';
@@ -54,39 +56,16 @@ async function getCachedSitewideContent() {
 
 /**
  * GET /api/content/sitewide - Get sitewide content in various formats
- * 
+ *
  * Serves sitewide content in multiple export formats:
  * - `llms` / `llms-txt` (default): LLMs export as plain text
  * - `readme`: Raw JSON data for CLI formatting
  * - `json`: Complete directory content as JSON array
  */
 export const GET = createApiRoute({
-  route: '/api/content/sitewide',
-  operation: 'ContentSitewideAPI',
-  method: 'GET',
   cors: 'anon',
-  querySchema: z.object({
-    format: sitewideFormatSchema,
-  }),
-  openapi: {
-    summary: 'Get sitewide content in various formats',
-    description: 'Serves sitewide content in multiple export formats: LLMs text format (default), README JSON data, or complete JSON array. Used for exporting the entire directory content.',
-    tags: ['content', 'export', 'sitewide'],
-    operationId: 'getSitewideContent',
-    responses: {
-      200: {
-        description: 'Sitewide content retrieved successfully in requested format',
-      },
-      400: {
-        description: 'Invalid format parameter',
-      },
-      500: {
-        description: 'Failed to generate sitewide export',
-      },
-    },
-  },
   handler: async ({ logger, query }) => {
-    const { format } = query as { format: 'llms' | 'llms-txt' | 'readme' | 'json' };
+    const { format } = query as { format: 'json' | 'llms' | 'llms-txt' | 'readme' };
 
     logger.info({ format }, 'Sitewide content request received');
 
@@ -188,6 +167,30 @@ export const GET = createApiRoute({
       status: 200,
     });
   },
+  method: 'GET',
+  openapi: {
+    description:
+      'Serves sitewide content in multiple export formats: LLMs text format (default), README JSON data, or complete JSON array. Used for exporting the entire directory content.',
+    operationId: 'getSitewideContent',
+    responses: {
+      200: {
+        description: 'Sitewide content retrieved successfully in requested format',
+      },
+      400: {
+        description: 'Invalid format parameter',
+      },
+      500: {
+        description: 'Failed to generate sitewide export',
+      },
+    },
+    summary: 'Get sitewide content in various formats',
+    tags: ['content', 'export', 'sitewide'],
+  },
+  operation: 'ContentSitewideAPI',
+  querySchema: z.object({
+    format: sitewideFormatSchema,
+  }),
+  route: '/api/content/sitewide',
 });
 
 /**

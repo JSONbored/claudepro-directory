@@ -24,6 +24,7 @@ import {
   cn,
 } from '@heyclaude/web-runtime/ui';
 import { AnimatedBorder } from '@heyclaude/web-runtime/ui';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
 import { Fragment, useEffect, useState } from 'react';
@@ -104,6 +105,7 @@ interface ConfigsDropdownProps {
 function ConfigsDropdown({ link, getCategoryFromHref }: ConfigsDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [animationKey, setAnimationKey] = useState(0);
+  const shouldReduceMotion = useReducedMotion();
 
   useEffect(() => {
     if (isOpen) {
@@ -164,8 +166,8 @@ function ConfigsDropdown({ link, getCategoryFromHref }: ConfigsDropdownProps) {
               {/* Left Column: Hero Card */}
               <div>
                 <motion.div
-                  whileHover={MICROINTERACTIONS.card.hover}
-                  whileTap={MICROINTERACTIONS.card.tap}
+                  whileHover={shouldReduceMotion ? {} : MICROINTERACTIONS.card.hover}
+                  whileTap={shouldReduceMotion ? {} : MICROINTERACTIONS.card.tap}
                   transition={MICROINTERACTIONS.card.transition}
                 >
                   <Link
@@ -213,16 +215,16 @@ function ConfigsDropdown({ link, getCategoryFromHref }: ConfigsDropdownProps) {
                             return (
                               <div key={`${animationKey}-${link.label}-${child.label}-${colIndex}-${childIndex}`}>
                                 <motion.div
-                                  initial={{ opacity: 0, y: 4 }}
-                                  animate={{ opacity: 1, y: 0 }}
+                                  initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 4 }}
+                                  animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
                                   transition={{
                                     ...SPRING.smooth,
                                     delay: (colIndex * itemsPerColumn + childIndex) * STAGGER.micro, // Using micro for 20ms
                                   }}
                                 >
                                   <motion.div
-                                    whileHover={MICROINTERACTIONS.card.hover}
-                                    whileTap={MICROINTERACTIONS.card.tap}
+                                    whileHover={shouldReduceMotion ? {} : MICROINTERACTIONS.card.hover}
+                                    whileTap={shouldReduceMotion ? {} : MICROINTERACTIONS.card.tap}
                                     transition={MICROINTERACTIONS.card.transition}
                                   >
                                     <Link

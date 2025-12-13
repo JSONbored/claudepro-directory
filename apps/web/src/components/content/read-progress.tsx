@@ -23,7 +23,9 @@
  */
 
 import { SPRING } from '@heyclaude/web-runtime/design-system';
-import { motion, useScroll, useSpring } from 'motion/react';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
+import { motion, useScroll } from 'motion/react';
+import { useSpring } from '@heyclaude/web-runtime/hooks/motion';
 import { useEffect, useState } from 'react';
 
 export interface ReadProgressProps {
@@ -92,6 +94,7 @@ export function ReadProgress({
   const [navWidth, setNavWidth] = useState(0);
   const [navLeft, setNavLeft] = useState(0);
   const [currentProgress, setCurrentProgress] = useState(0);
+  const shouldReduceMotion = useReducedMotion();
 
   // Motion hooks must be called unconditionally (React rules)
   const { scrollYProgress } = useScroll();
@@ -190,7 +193,7 @@ export function ReadProgress({
       style={{
         ...getPositionStyle(),
         height: `${height}px`,
-        scaleX,
+        scaleX: shouldReduceMotion ? 1 : scaleX,
         zIndex,
         borderRadius: '2.5px', // Pill shape (half of 5px height)
       }}

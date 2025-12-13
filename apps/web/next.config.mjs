@@ -211,7 +211,11 @@ const nextConfig = {
       dynamic: 30,
       static: 300,
     },
-    serverComponentsHmrCache: true,
+    // HMR Cache: Caches fetch() responses across Hot Module Replacement refreshes
+    // Set to false to see fresh data on every code change (better for debugging cache issues)
+    // Default: true (enabled) - provides faster HMR but may show stale data
+    // When debugging cache issues, set to false temporarily
+    serverComponentsHmrCache: process.env.DISABLE_HMR_CACHE === 'true' ? false : true,
     inlineCss: true,
     serverActions: {
       // Platform-agnostic deployment URL detection for server actions
@@ -309,6 +313,24 @@ const nextConfig = {
     reactRemoveProperties:
       process.env.NODE_ENV === 'production' ? { properties: ['^data-test'] } : false,
   },
+
+  // Fetch Logging Configuration
+  // Enables detailed logging of fetch requests for debugging cache behavior
+  // Safe for production: Logging only outputs to console (no performance impact on users)
+  // However, it's recommended to disable in production to reduce server logs
+  // Development: Shows full URLs and HMR cache hits/misses
+  // Production: Can be disabled by setting NODE_ENV=production (logging is dev-only by default)
+  logging:
+    process.env.NODE_ENV === 'development'
+      ? {
+          fetches: {
+            // Show full URLs of fetch requests (helps identify which requests are cached)
+            fullUrl: true,
+            // Log HMR cache hits/misses (shows when data is served from HMR cache vs fresh)
+            hmrRefreshes: true,
+          },
+        }
+      : undefined, // Disable in production (undefined = no logging)
 
   // Webpack config: Fallback for non-Turbopack builds or edge cases
   // Note: With --turbopack flag, this config is typically not executed.

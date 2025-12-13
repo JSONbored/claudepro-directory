@@ -24,6 +24,7 @@ import {
 } from '@heyclaude/web-runtime/icons';
 import { UnifiedBadge, ThemeToggle } from '@heyclaude/web-runtime/ui';
 import { STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -89,6 +90,7 @@ function FooterComponent() {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
+  const shouldReduceMotion = useReducedMotion();
 
   // Context-aware RSS feed - shows most relevant feed for current page
   const rssFeed = useMemo(() => {
@@ -163,8 +165,8 @@ function FooterComponent() {
           {mounted ? (
             <motion.div
               className="space-y-6"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
+              whileInView={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: DURATION.slow }}
             >
@@ -256,8 +258,8 @@ function FooterComponent() {
           {mounted ? (
             <motion.div
               className="grid grid-cols-2 gap-8 sm:grid-cols-4"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
+              whileInView={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: DURATION.slow, delay: STAGGER.fast }}
             >

@@ -1,14 +1,14 @@
 /**
  * Paginated Content API Route
- * 
+ *
  * Returns paginated content with optional category filtering.
  * Supports offset/limit pagination and category filtering.
- * 
+ *
  * @example
  * ```ts
  * // Request
  * GET /api/content/paginated?offset=0&limit=30&category=skills
- * 
+ *
  * // Response (200)
  * [
  *   { "id": "...", "title": "...", ... },
@@ -20,13 +20,16 @@
 import 'server-only';
 import { ContentService } from '@heyclaude/data-layer';
 import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
-import { createApiRoute, createApiOptionsHandler, paginationSchema, categorySchema } from '@heyclaude/web-runtime/server';
 import { normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   buildCacheHeaders,
+  categorySchema,
+  createApiOptionsHandler,
+  createApiRoute,
   createSupabaseAnonClient,
   getOnlyCorsHeaders,
   jsonResponse,
+  paginationSchema,
 } from '@heyclaude/web-runtime/server';
 import { cacheLife } from 'next/cache';
 
@@ -55,6 +58,156 @@ import { cacheLife } from 'next/cache';
 }} params.offset
  
  * @returns {unknown} Description of return value * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
   category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
   limit: number;
   offset: number;
@@ -126,38 +279,17 @@ async function getCachedPaginatedContent(params: {
   }
 }
 
-
 /**
  * GET /api/content/paginated - Get paginated content
- * 
+ *
  * Returns paginated content with optional category filtering.
  * Supports offset/limit pagination and category filtering.
  */
 export const GET = createApiRoute({
-  route: '/api/content/paginated',
-  operation: 'ContentPaginatedAPI',
-  method: 'GET',
   cors: 'anon',
-  querySchema: paginationSchema.extend({
-    category: categorySchema,
-  }),
-  openapi: {
-    summary: 'Get paginated content',
-    description: 'Returns paginated content with optional category filtering. Supports offset/limit pagination and category filtering.',
-    tags: ['content', 'pagination'],
-    operationId: 'getPaginatedContent',
-    responses: {
-      200: {
-        description: 'Paginated content retrieved successfully',
-      },
-      400: {
-        description: 'Invalid pagination or category parameters',
-      },
-    },
-  },
   handler: async ({ logger, query }) => {
     // Zod schema ensures proper types - category is already transformed to null if 'all'
-    const { limit, offset, category } = query;
+    const { category, limit, offset } = query;
 
     logger.info(
       {
@@ -214,6 +346,27 @@ export const GET = createApiRoute({
       ...buildCacheHeaders('content_paginated'),
     });
   },
+  method: 'GET',
+  openapi: {
+    description:
+      'Returns paginated content with optional category filtering. Supports offset/limit pagination and category filtering.',
+    operationId: 'getPaginatedContent',
+    responses: {
+      200: {
+        description: 'Paginated content retrieved successfully',
+      },
+      400: {
+        description: 'Invalid pagination or category parameters',
+      },
+    },
+    summary: 'Get paginated content',
+    tags: ['content', 'pagination'],
+  },
+  operation: 'ContentPaginatedAPI',
+  querySchema: paginationSchema.extend({
+    category: categorySchema,
+  }),
+  route: '/api/content/paginated',
 });
 
 /**

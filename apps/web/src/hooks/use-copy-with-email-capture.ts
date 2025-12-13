@@ -20,7 +20,6 @@ import { type UseCopyToClipboardOptions } from '@heyclaude/web-runtime/core';
 import { useCopyToClipboard } from '@heyclaude/web-runtime/hooks';
 import { useCallback } from 'react';
 
-import { usePostCopyEmail } from '@/src/components/core/infra/providers/email-capture-modal-provider';
 
 /**
  * Email capture context for copy actions
@@ -101,24 +100,11 @@ export interface UseCopyWithEmailCaptureOptions extends Omit<
 export function useCopyWithEmailCapture(options: UseCopyWithEmailCaptureOptions) {
   const { emailContext, onSuccess, enableEmailModal = true, ...clipboardOptions } = options;
 
-  // Get modal context
-  const { showModal } = usePostCopyEmail();
-
-  // Wrap success callback to trigger modal
+  // Wrap success callback (email modal removed)
   const handleSuccess = useCallback(() => {
-    // Call user's onSuccess first
+    // Call user's onSuccess
     onSuccess?.();
-
-    // Trigger email modal if enabled
-    if (enableEmailModal) {
-      showModal({
-        copyType: emailContext.copyType,
-        ...(emailContext.category && { category: emailContext.category }),
-        ...(emailContext.slug && { slug: emailContext.slug }),
-        ...(emailContext.referrer && { referrer: emailContext.referrer }),
-      });
-    }
-  }, [onSuccess, enableEmailModal, showModal, emailContext]);
+  }, [onSuccess]);
 
   // Use standard clipboard hook with wrapped success handler
   return useCopyToClipboard({

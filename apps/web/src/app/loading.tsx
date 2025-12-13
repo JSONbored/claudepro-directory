@@ -1,5 +1,3 @@
 'use client';
 
-import { getLoadingComponent } from '@heyclaude/web-runtime/ui';
-
-export default getLoadingComponent('/');
+export { HomepageSkeleton as default } from '@/src/components/features/home/homepage-skeleton';

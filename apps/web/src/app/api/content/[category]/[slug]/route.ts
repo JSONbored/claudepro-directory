@@ -1,14 +1,14 @@
 /**
  * Content Detail Export API Route
- * 
+ *
  * Returns individual content records in multiple formats (JSON, Markdown, LLMs.txt, Storage).
  * Supports various export options including metadata and footer inclusion.
- * 
+ *
  * @example
  * ```ts
  * // Request
  * GET /api/content/agents/code-reviewer?format=json
- * 
+ *
  * // Response (200) - application/json
  * {
  *   "id": "...",
@@ -24,10 +24,12 @@ import { ContentService } from '@heyclaude/data-layer';
 import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { APP_CONFIG, buildSecurityHeaders } from '@heyclaude/shared-runtime';
-import { createApiRoute, createApiOptionsHandler, contentDetailQuerySchema } from '@heyclaude/web-runtime/server';
 import { normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   buildCacheHeaders,
+  contentDetailQuerySchema,
+  createApiOptionsHandler,
+  createApiRoute,
   createSupabaseAnonClient,
   getOnlyCorsHeaders,
   getWithAcceptCorsHeaders,
@@ -63,7 +65,6 @@ async function getCachedContentFull(
 }
 
 const SITE_URL = APP_CONFIG.url;
-
 
 function getProperty(obj: unknown, key: string): unknown {
   if (typeof obj !== 'object' || obj === null) {
@@ -122,11 +123,185 @@ function sanitizeFilename(name: string): string {
  * @returns A NextResponse containing the exported JSON content on success, a 404 JSON response if not found, or an error response created from RPC errors
  * @see {@link createErrorResponse}
  * @see {@link get_api_content_full}
- */
+ * @param {{ error: (context: Record<string, unknown>, message: string) => void; warn: (context: Record<string, unknown>, message: string) => void; info: (context: Record<string, unknown>, message: string) => void; debug: (context: Record<string, unknown>, message: string) => void }} logger Parameter description
+  * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+*/
 async function handleJsonFormat(
   category: DatabaseGenerated['public']['Enums']['content_category'],
   slug: string,
-  logger: { error: (context: Record<string, unknown>, message: string) => void; warn: (context: Record<string, unknown>, message: string) => void; info: (context: Record<string, unknown>, message: string) => void; debug: (context: Record<string, unknown>, message: string) => void }
+  logger: {
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }
 ) {
   let data: Awaited<ReturnType<typeof getCachedContentFull>> | null = null;
   try {
@@ -259,15 +434,150 @@ async function handleJsonFormat(
  * @see generate_markdown_export RPC
  * @see sanitizeFilename
  * @see sanitizeHeaderValue
- */
+ * @param {boolean} includeMetadata Parameter description
+ * @param {boolean} includeFooter Parameter description
+  * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+*/
 async function handleMarkdownFormat(
   category: DatabaseGenerated['public']['Enums']['content_category'],
   slug: string,
   includeMetadata: boolean,
   includeFooter: boolean,
-  logger: { error: (context: Record<string, unknown>, message: string) => void; warn: (context: Record<string, unknown>, message: string) => void; info: (context: Record<string, unknown>, message: string) => void }
+  logger: {
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }
 ) {
-
   const supabase = createSupabaseAnonClient();
   const service = new ContentService(supabase);
   const rpcArgs = {
@@ -407,11 +717,185 @@ async function handleMarkdownFormat(
  * @see generate_item_llms_txt (Supabase RPC)
  * @see createErrorResponse
  * @see buildSecurityHeaders
- */
+ * @param {{ error: (context: Record<string, unknown>, message: string) => void; warn: (context: Record<string, unknown>, message: string) => void; info: (context: Record<string, unknown>, message: string) => void; debug: (context: Record<string, unknown>, message: string) => void }} logger Parameter description
+  * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+*/
 async function handleItemLlmsTxt(
   category: DatabaseGenerated['public']['Enums']['content_category'],
   slug: string,
-  logger: { error: (context: Record<string, unknown>, message: string) => void; warn: (context: Record<string, unknown>, message: string) => void; info: (context: Record<string, unknown>, message: string) => void; debug: (context: Record<string, unknown>, message: string) => void }
+  logger: {
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }
 ) {
   const supabase = createSupabaseAnonClient();
   const service = new ContentService(supabase);
@@ -518,9 +1002,16 @@ async function handleStorageFormat(
   category: DatabaseGenerated['public']['Enums']['content_category'],
   slug: string,
   metadataMode: boolean,
-  logger: { error: (context: Record<string, unknown>, message: string) => void; warn: (context: Record<string, unknown>, message: string) => void; info: (context: Record<string, unknown>, message: string) => void }
+  logger: {
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }
 ) {
-  logger.info({ category, metadataMode, slug } as Record<string, unknown>, 'Handling storage format');
+  logger.info(
+    { category, metadataMode, slug } as Record<string, unknown>,
+    'Handling storage format'
+  );
 
   const supabase = createSupabaseAnonClient();
   const service = new ContentService(supabase);
@@ -707,20 +1198,129 @@ async function handleStorageFormat(
 
 /**
  * GET /api/content/[category]/[slug] - Get content detail in multiple formats
- * 
+ *
  * Returns individual content records in multiple formats (JSON, Markdown, LLMs.txt, Storage).
  * Supports various export options including metadata and footer inclusion.
  */
 export const GET = createApiRoute({
-  route: '/api/content/[category]/[slug]',
-  operation: 'ContentRecordAPI',
-  method: 'GET',
   cors: 'anon',
-  querySchema: contentDetailQuerySchema,
+  handler: async ({ logger, nextContext, query }) => {
+    // Extract path parameters from Next.js route context
+    interface RouteContext {
+      params: Promise<{ category: string; slug: string }>;
+    }
+    const context = nextContext as RouteContext;
+    if (!context?.params) {
+      logger.error({}, 'Missing route context for content detail handler');
+      throw new Error('Missing route context');
+    }
+
+    const { category, slug } = await context.params;
+
+    // Validate category from path parameter
+    const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
+    if (
+      !CONTENT_CATEGORY_VALUES.includes(
+        category as DatabaseGenerated['public']['Enums']['content_category']
+      )
+    ) {
+      throw new Error(
+        `Invalid category '${category}'. Valid categories: ${CONTENT_CATEGORY_VALUES.join(', ')}`
+      );
+    }
+
+    // Zod schema ensures proper types
+    const {
+      format,
+      includeFooter = false,
+      includeMetadata = true,
+      metadata: metadataMode = false,
+    } = query;
+
+    logger.info(
+      {
+        category,
+        format,
+        slug,
+      },
+      'Content record export request received'
+    );
+
+    switch (format) {
+      case 'json': {
+        return handleJsonFormat(
+          category as DatabaseGenerated['public']['Enums']['content_category'],
+          slug,
+          {
+            debug: (context: Record<string, unknown>, message: string) =>
+              logger.debug(context as Parameters<typeof logger.debug>[0], message),
+            error: (context: Record<string, unknown>, message: string) =>
+              logger.error(context as Parameters<typeof logger.error>[0], message),
+            info: (context: Record<string, unknown>, message: string) =>
+              logger.info(context as Parameters<typeof logger.info>[0], message),
+            warn: (context: Record<string, unknown>, message: string) =>
+              logger.warn(context as Parameters<typeof logger.warn>[0], message),
+          }
+        );
+      }
+      case 'llms':
+      case 'llms-txt': {
+        return handleItemLlmsTxt(
+          category as DatabaseGenerated['public']['Enums']['content_category'],
+          slug,
+          {
+            debug: (context: Record<string, unknown>, message: string) =>
+              logger.debug(context as Parameters<typeof logger.debug>[0], message),
+            error: (context: Record<string, unknown>, message: string) =>
+              logger.error(context as Parameters<typeof logger.error>[0], message),
+            info: (context: Record<string, unknown>, message: string) =>
+              logger.info(context as Parameters<typeof logger.info>[0], message),
+            warn: (context: Record<string, unknown>, message: string) =>
+              logger.warn(context as Parameters<typeof logger.warn>[0], message),
+          }
+        );
+      }
+      case 'markdown':
+      case 'md': {
+        return handleMarkdownFormat(
+          category as DatabaseGenerated['public']['Enums']['content_category'],
+          slug,
+          includeMetadata ?? true,
+          includeFooter ?? false,
+          {
+            error: (context: Record<string, unknown>, message: string) =>
+              logger.error(context as Parameters<typeof logger.error>[0], message),
+            info: (context: Record<string, unknown>, message: string) =>
+              logger.info(context as Parameters<typeof logger.info>[0], message),
+            warn: (context: Record<string, unknown>, message: string) =>
+              logger.warn(context as Parameters<typeof logger.warn>[0], message),
+          }
+        );
+      }
+      case 'storage': {
+        return handleStorageFormat(
+          category as DatabaseGenerated['public']['Enums']['content_category'],
+          slug,
+          metadataMode ?? false,
+          {
+            error: (context: Record<string, unknown>, message: string) =>
+              logger.error(context as Parameters<typeof logger.error>[0], message),
+            info: (context: Record<string, unknown>, message: string) =>
+              logger.info(context as Parameters<typeof logger.info>[0], message),
+            warn: (context: Record<string, unknown>, message: string) =>
+              logger.warn(context as Parameters<typeof logger.warn>[0], message),
+          }
+        );
+      }
+      default: {
+        throw new Error('Invalid format. Valid formats: json, markdown, llms-txt, storage');
+      }
+    }
+  },
+  method: 'GET',
   openapi: {
-    summary: 'Get content detail in multiple formats',
-    description: 'Returns individual content records in multiple formats (JSON, Markdown, LLMs.txt, Storage). Supports various export options including metadata and footer inclusion.',
-    tags: ['content', 'export'],
+    description:
+      'Returns individual content records in multiple formats (JSON, Markdown, LLMs.txt, Storage). Supports various export options including metadata and footer inclusion.',
     operationId: 'getContentDetail',
     responses: {
       200: {
@@ -733,95 +1333,12 @@ export const GET = createApiRoute({
         description: 'Content not found',
       },
     },
+    summary: 'Get content detail in multiple formats',
+    tags: ['content', 'export'],
   },
-  handler: async ({ logger, query, nextContext }) => {
-    // Extract path parameters from Next.js route context
-    interface RouteContext {
-      params: Promise<{ category: string; slug: string }>;
-    }
-    const context = nextContext as RouteContext;
-    if (!context || !context.params) {
-      logger.error({}, 'Missing route context for content detail handler');
-      throw new Error('Missing route context');
-    }
-
-    const { category, slug } = await context.params;
-
-    // Validate category from path parameter
-    const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
-    if (!CONTENT_CATEGORY_VALUES.includes(category as DatabaseGenerated['public']['Enums']['content_category'])) {
-      throw new Error(`Invalid category '${category}'. Valid categories: ${CONTENT_CATEGORY_VALUES.join(', ')}`);
-    }
-
-    // Zod schema ensures proper types
-    const { format, includeMetadata = true, includeFooter = false, metadata: metadataMode = false } = query;
-
-      logger.info(
-        {
-          category,
-          format,
-          slug,
-        },
-        'Content record export request received'
-      );
-
-      switch (format) {
-        case 'json': {
-          return handleJsonFormat(
-            category as DatabaseGenerated['public']['Enums']['content_category'],
-            slug,
-            {
-              error: (context: Record<string, unknown>, message: string) => logger.error(context as Parameters<typeof logger.error>[0], message),
-              warn: (context: Record<string, unknown>, message: string) => logger.warn(context as Parameters<typeof logger.warn>[0], message),
-              info: (context: Record<string, unknown>, message: string) => logger.info(context as Parameters<typeof logger.info>[0], message),
-              debug: (context: Record<string, unknown>, message: string) => logger.debug(context as Parameters<typeof logger.debug>[0], message),
-            }
-          );
-        }
-        case 'llms':
-        case 'llms-txt': {
-          return handleItemLlmsTxt(
-            category as DatabaseGenerated['public']['Enums']['content_category'],
-            slug,
-            {
-              error: (context: Record<string, unknown>, message: string) => logger.error(context as Parameters<typeof logger.error>[0], message),
-              warn: (context: Record<string, unknown>, message: string) => logger.warn(context as Parameters<typeof logger.warn>[0], message),
-              info: (context: Record<string, unknown>, message: string) => logger.info(context as Parameters<typeof logger.info>[0], message),
-              debug: (context: Record<string, unknown>, message: string) => logger.debug(context as Parameters<typeof logger.debug>[0], message),
-            }
-          );
-        }
-        case 'markdown':
-        case 'md': {
-          return handleMarkdownFormat(
-            category as DatabaseGenerated['public']['Enums']['content_category'],
-            slug,
-            includeMetadata ?? true,
-            includeFooter ?? false,
-            {
-              error: (context: Record<string, unknown>, message: string) => logger.error(context as Parameters<typeof logger.error>[0], message),
-              warn: (context: Record<string, unknown>, message: string) => logger.warn(context as Parameters<typeof logger.warn>[0], message),
-              info: (context: Record<string, unknown>, message: string) => logger.info(context as Parameters<typeof logger.info>[0], message),
-            }
-          );
-        }
-        case 'storage': {
-          return handleStorageFormat(
-            category as DatabaseGenerated['public']['Enums']['content_category'],
-            slug,
-            metadataMode ?? false,
-            {
-              error: (context: Record<string, unknown>, message: string) => logger.error(context as Parameters<typeof logger.error>[0], message),
-              warn: (context: Record<string, unknown>, message: string) => logger.warn(context as Parameters<typeof logger.warn>[0], message),
-              info: (context: Record<string, unknown>, message: string) => logger.info(context as Parameters<typeof logger.info>[0], message),
-            }
-          );
-        }
-        default: {
-          throw new Error('Invalid format. Valid formats: json, markdown, llms-txt, storage');
-        }
-      }
-  },
+  operation: 'ContentRecordAPI',
+  querySchema: contentDetailQuerySchema,
+  route: '/api/content/[category]/[slug]',
 });
 
 /**

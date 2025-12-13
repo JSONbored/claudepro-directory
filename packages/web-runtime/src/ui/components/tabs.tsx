@@ -72,18 +72,27 @@ TabsTrigger.displayName = TabsPrimitive.Trigger.displayName;
 const TabsContent = ({
   className,
   ref,
+  children,
   ...props
 }: React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content> & {
   ref?: React.RefObject<React.ElementRef<typeof TabsPrimitive.Content> | null>;
 }) => (
   <TabsPrimitive.Content
     ref={ref}
-    className={cn(
-      `data-[state=active]:fade-in-0 data-[state=active]:slide-in-from-bottom-2 mt-2 ring-offset-background ${STATE_PATTERNS.FOCUS_RING} data-[state=active]:animate-in`,
-      className
-    )}
+    asChild
     {...props}
-  />
+  >
+    <motion.div
+      layout
+      transition={SPRING.smooth}
+      className={cn(
+        `data-[state=active]:fade-in-0 data-[state=active]:slide-in-from-bottom-2 mt-2 ring-offset-background ${STATE_PATTERNS.FOCUS_RING} data-[state=active]:animate-in`,
+        className
+      )}
+    >
+      {children}
+    </motion.div>
+  </TabsPrimitive.Content>
 );
 TabsContent.displayName = TabsPrimitive.Content.displayName;
 

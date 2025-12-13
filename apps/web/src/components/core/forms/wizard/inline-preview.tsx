@@ -19,6 +19,7 @@ import {
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
 import { SPRING, DURATION } from '@heyclaude/web-runtime/design-system';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { AnimatePresence, motion } from 'motion/react';
 import { useState } from 'react';
 
@@ -48,11 +49,12 @@ interface InlinePreviewProps {
 export function InlinePreview({ formData, qualityScore, className }: InlinePreviewProps) {
   const [isVisible, setIsVisible] = useState(true);
   const [isMobileModalOpen, setIsMobileModalOpen] = useState(false);
+  const shouldReduceMotion = useReducedMotion();
 
   const previewCard = (
     <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
+      initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
+      animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }}
       transition={SPRING.smooth}
     >
       <Card className="overflow-hidden">
@@ -141,9 +143,13 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
           <AnimatePresence mode="wait">
             {isVisible ? (
               <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
+                initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, height: 0 }}
+                animate={
+                  shouldReduceMotion
+                    ? { opacity: 1 }
+                    : { opacity: 1, height: 'auto' }
+                }
+                exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, height: 0 }}
                 transition={SPRING.smooth}
               >
                 {previewCard}
@@ -186,9 +192,21 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
                 className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
               />
               <motion.div
-                initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                initial={
+                  shouldReduceMotion
+                    ? { opacity: 0 }
+                    : { opacity: 0, scale: 0.9, y: 20 }
+                }
+                animate={
+                  shouldReduceMotion
+                    ? { opacity: 1 }
+                    : { opacity: 1, scale: 1, y: 0 }
+                }
+                exit={
+                  shouldReduceMotion
+                    ? { opacity: 0 }
+                    : { opacity: 0, scale: 0.9, y: 20 }
+                }
                 transition={SPRING.smooth}
                 className="fixed inset-x-4 top-1/2 z-50 -translate-y-1/2 sm:inset-x-auto sm:left-1/2 sm:w-full sm:max-w-md sm:-translate-x-1/2"
               >

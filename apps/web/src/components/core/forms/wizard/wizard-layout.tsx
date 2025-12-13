@@ -21,10 +21,9 @@ import { logClientError, logClientWarn, normalizeError } from '@heyclaude/web-ru
 import { type SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
 import { cn, Button } from '@heyclaude/web-runtime/ui';
 import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/design-tokens';
-import { SPRING } from '@heyclaude/web-runtime/design-system';
-import { AnimatePresence, motion } from 'motion/react';
+import { useAnimateScoped } from '@heyclaude/web-runtime/hooks/motion';
 import { useRouter } from 'next/navigation';
-import { type ReactNode, useCallback, useEffect, useState } from 'react';
+import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 
 import { ProgressIndicator, type WizardStep } from './progress-indicator';
 
@@ -71,6 +70,9 @@ export function WizardLayout({
   const formTracking = useFormTracking();
   const [isSaving, setIsSaving] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [, animate] = useAnimateScoped();
+  const previousStepRef = useRef(currentStep);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   // Handle exit confirmation
   const handleExit = useCallback(() => {
@@ -119,6 +121,23 @@ export function WizardLayout({
   }, [onSave, formTracking, submissionType, currentStep, qualityScore]);
 
   // Handle next step
+  // Animate step transition programmatically
+  useEffect(() => {
+    if (previousStepRef.current !== currentStep && contentRef.current) {
+      const stepDirection = currentStep > previousStepRef.current ? 1 : -1;
+      
+      // Coordinate animations: fade out, then fade in with slide
+      animate(contentRef.current, { opacity: 0, x: stepDirection * 20 }, { duration: 0.15 })
+        .then(() => {
+          if (contentRef.current) {
+            animate(contentRef.current, { opacity: 1, x: 0 }, { duration: 0.3, ease: [0.22, 1, 0.36, 1] });
+          }
+        });
+      
+      previousStepRef.current = currentStep;
+    }
+  }, [currentStep, animate]);
+
   const handleNext = useCallback(async () => {
     if (!(canGoNext && onNext)) return;
 
@@ -247,18 +266,9 @@ export function WizardLayout({
 
       {/* Main Content with Step Transition */}
       <main className="container mx-auto max-w-4xl px-4 py-8">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentStep}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={SPRING.smooth}
-            className="min-h-[60vh]"
-          >
-            {children}
-          </motion.div>
-        </AnimatePresence>
+        <div ref={contentRef} className="min-h-[60vh]">
+          {children}
+        </div>
       </main>
 
       {/* Footer Navigation */}

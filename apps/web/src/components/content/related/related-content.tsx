@@ -9,8 +9,8 @@ import { getContentItemUrl, isValidCategory } from '@heyclaude/web-runtime/core'
 import { getRelatedContent } from '@heyclaude/web-runtime/data';
 import { Sparkles } from '@heyclaude/web-runtime/icons';
 import { logClientError, normalizeError } from '@heyclaude/web-runtime/logging/client';
-import { UI_CLASSES, UnifiedBadge, UnifiedCardGrid, BaseCard } from '@heyclaude/web-runtime/ui';
-import { useEffect, useMemo, useState } from 'react';
+import { UI_CLASSES, UnifiedBadge, UnifiedCardGrid, BaseCard, deepEqual } from '@heyclaude/web-runtime/ui';
+import { useEffect, useState, useRef } from 'react';
 
 // Use the generated composite type directly
 type RelatedContentItemWithUI = Database['public']['CompositeTypes']['related_content_item'] & {
@@ -125,12 +125,50 @@ export function RelatedContentClient({
   const pathname: string =
     providedPathname ?? (globalThis.window === undefined ? '/' : globalThis.location.pathname);
 
-  // Create stable string keys for array dependencies to prevent infinite re-renders
-  const excludeKey = useMemo(() => JSON.stringify(exclude), [exclude]);
-  const currentTagsKey = useMemo(() => JSON.stringify(currentTags), [currentTags]);
-  const currentKeywordsKey = useMemo(() => JSON.stringify(currentKeywords), [currentKeywords]);
+  // Use refs to track previous values and prevent unnecessary re-fetches
+  // Only trigger effect when values actually change (deep comparison)
+  const prevExcludeRef = useRef<typeof exclude>(exclude);
+  const prevCurrentTagsRef = useRef<typeof currentTags>(currentTags);
+  const prevCurrentKeywordsRef = useRef<typeof currentKeywords>(currentKeywords);
+  const prevPathnameRef = useRef(pathname);
+  const prevFeaturedRef = useRef(featured);
+  const prevLimitRef = useRef(limit);
 
   useEffect(() => {
+    // Check if any dependency has actually changed using deep equality
+    // This prevents unnecessary API calls when arrays/objects are recreated with same content
+    const excludeChanged = !deepEqual(prevExcludeRef.current, exclude);
+    const currentTagsChanged = !deepEqual(prevCurrentTagsRef.current, currentTags);
+    const currentKeywordsChanged = !deepEqual(prevCurrentKeywordsRef.current, currentKeywords);
+    const pathnameChanged = prevPathnameRef.current !== pathname;
+    const featuredChanged = prevFeaturedRef.current !== featured;
+    const limitChanged = prevLimitRef.current !== limit;
+
+    // Skip fetch if nothing has changed
+    if (!excludeChanged && !currentTagsChanged && !currentKeywordsChanged && !pathnameChanged && !featuredChanged && !limitChanged) {
+      return;
+    }
+
+    // Update refs when values change
+    if (excludeChanged) {
+      prevExcludeRef.current = exclude;
+    }
+    if (currentTagsChanged) {
+      prevCurrentTagsRef.current = currentTags;
+    }
+    if (currentKeywordsChanged) {
+      prevCurrentKeywordsRef.current = currentKeywords;
+    }
+    if (pathnameChanged) {
+      prevPathnameRef.current = pathname;
+    }
+    if (featuredChanged) {
+      prevFeaturedRef.current = featured;
+    }
+    if (limitChanged) {
+      prevLimitRef.current = limit;
+    }
+
     const fetchRelatedContent = async () => {
       try {
         const response = await getRelatedContent({
@@ -187,7 +225,7 @@ export function RelatedContentClient({
       }
     };
 
-    fetchRelatedContent().catch((error) => {
+    void fetchRelatedContent().catch((error) => {
       logClientError(
         '[Content] Related content fetch promise rejected',
         normalizeError(error, 'Related content fetch promise rejected'),
@@ -199,7 +237,9 @@ export function RelatedContentClient({
         }
       );
     });
-  }, [pathname, currentTagsKey, currentKeywordsKey, featured, excludeKey, limit]);
+    // Dependencies: Use actual values - deep equality check inside effect prevents unnecessary fetches
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname, exclude, currentTags, currentKeywords, featured, limit]);
 
   return (
     <section

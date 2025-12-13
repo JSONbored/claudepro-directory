@@ -42,20 +42,17 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
-import { addBookmark } from '../../../actions/add-bookmark.generated.ts';
-import {
-  ensureStringArray,
-  formatViewCount,
-  getContentItemUrl,
-  getMetadata,
-  isValidCategory,
-  logClientWarning,
-  logger,
-  logUnhandledPromise,
-  normalizeError,
-} from '../../../entries/core.ts';
-import { getCategoryConfig } from '../../../data/config/category/index.ts';
-import { useCopyToClipboard, usePulse, usePinboard, useComponentCardConfig, useAuthenticatedUser } from '../../../hooks/index.ts';
+import { ensureStringArray, getMetadata } from '../../../utils/content-helpers.ts';
+import { getCategoryDisplayName } from '../../../utils/category-display-names.ts';
+// Import client-safe utilities directly from content.ts
+import { formatViewCount, getContentItemUrl } from '../../../content.ts';
+import { isValidCategory } from '../../../utils/category-validation.ts';
+import { normalizeError, logClientError, logClientWarn } from '../../../logging/client';
+import { useCopyToClipboard } from '../../../hooks/use-copy-to-clipboard.ts';
+import { usePulse } from '../../../hooks/use-pulse.ts';
+import { usePinboard } from '../../../hooks/use-pinboard.ts';
+import { useComponentCardConfig } from '../../../hooks/use-component-card-config.tsx';
+import { useAuthenticatedUser } from '../../../hooks/use-authenticated-user.ts';
 import { Button } from '../button.tsx';
 import { BookmarkButton } from '../buttons/bookmark-button.tsx';
 import { SimpleCopyButton } from '../buttons/simple-copy-button.tsx';
@@ -251,7 +248,7 @@ export const ConfigCard = memo(
             },
           })
           .catch((error) => {
-            logUnhandledPromise('ConfigCard: card click pulse failed', error, {
+            logClientError('ConfigCard: card click pulse failed', normalizeError(error), 'ConfigCard.handleCardClick', {
               category: (item.category ?? Constants.public.Enums.content_category[0]) as Database['public']['Enums']['content_category'],
               slug: item.slug ?? '',
             });
@@ -290,7 +287,7 @@ export const ConfigCard = memo(
                 },
               })
               .catch((error) => {
-                logUnhandledPromise('ConfigCard: highlight analytics pulse failed', error, {
+                logClientError('ConfigCard: highlight analytics pulse failed', normalizeError(error), 'ConfigCard.handleHighlight', {
                   category: category as Database['public']['Enums']['content_category'],
                   slug: item.slug ?? '',
                 });
@@ -326,7 +323,7 @@ export const ConfigCard = memo(
             slug: item.slug,
           })
           .catch((error) => {
-            logUnhandledPromise('ConfigCard: swipe copy pulse failed', error, {
+            logClientError('ConfigCard: swipe copy pulse failed', normalizeError(error), 'ConfigCard.handleSwipeLeftCopy', {
               category: category as Database['public']['Enums']['content_category'],
               slug: item.slug ?? undefined,
             });
@@ -370,9 +367,11 @@ export const ConfigCard = memo(
             'Invalid content type',
             'Invalid content type for bookmark'
           );
-          logger.error({ err: normalized, component: 'ConfigCard',
+          logClientError('Invalid content type for bookmark', normalized, 'ConfigCard.handleSwipeLeftBookmark', {
+            component: 'ConfigCard',
             contentType: categoryValue,
-            contentSlug: item.slug, }, 'Invalid content type for bookmark');
+            contentSlug: item.slug,
+          });
           toasts.error.fromError(new Error(`Invalid content type: ${categoryValue}`));
           return;
         }
@@ -381,11 +380,25 @@ export const ConfigCard = memo(
 
         // User is authenticated - proceed with bookmark action
         try {
-          const result = await addBookmark({
-            content_type: validatedCategory,
-            content_slug: item.slug,
-            notes: '',
+          // Use API route instead of server action to avoid HMR issues
+          const response = await fetch('/api/bookmarks/add', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              content_type: validatedCategory,
+              content_slug: item.slug,
+              notes: '',
+            }),
           });
+
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+            throw new Error(errorData.error || `API returned ${response.status}`);
+          }
+
+          const result = await response.json();
 
           if (result?.data?.success) {
             toasts.success.bookmarkAdded();
@@ -397,7 +410,7 @@ export const ConfigCard = memo(
                 action: 'add',
               })
               .catch((error) => {
-                logClientWarning('ConfigCard: bookmark addition pulse failed', error, {
+                logClientWarn('ConfigCard: bookmark addition pulse failed', error, 'ConfigCard.handleSwipeLeftBookmark', {
                   category: validatedCategory,
                   slug: item.slug ?? undefined,
                 });
@@ -407,9 +420,11 @@ export const ConfigCard = memo(
           }
         } catch (error) {
           const normalized = normalizeError(error, 'ConfigCard: Failed to add bookmark via swipe');
-          logger.error({ err: normalized, component: 'ConfigCard',
+          logClientError('ConfigCard: Failed to add bookmark via swipe', normalized, 'ConfigCard.handleSwipeLeftBookmark', {
+            component: 'ConfigCard',
             contentType: validatedCategory,
-            contentSlug: item.slug, }, 'ConfigCard: Failed to add bookmark via swipe');
+            contentSlug: item.slug,
+          });
           if (error instanceof Error && error.message.includes('signed in')) {
             // Auth error - use callback if provided, otherwise show toast with action button
             if (onAuthRequired) {
@@ -459,22 +474,24 @@ export const ConfigCard = memo(
                 })
                 .catch((error) => {
                   const normalized = normalizeError(error, 'Failed to track copy action');
-                  logger.warn({ err: normalized,
+                  logClientWarn('[Clipboard] Failed to track copy action', normalized, 'ConfigCard.copyInlineValue', {
                     category: 'clipboard',
                     component: 'ConfigCard',
                     nonCritical: true,
                     context: 'config_card_quick_copy',
                     itemCategory: cardCategory,
-                    itemSlug: cardSlug, }, '[Clipboard] Failed to track copy action');
+                    itemSlug: cardSlug,
+                  });
                 });
             }
           } catch (error) {
             const normalized = normalizeError(error, 'ConfigCard: quick action copy failed');
-            logger.warn({ err: normalized,
+            logClientWarn('[Clipboard] Quick action copy failed', normalized, 'ConfigCard.copyInlineValue', {
               category: 'clipboard',
               component: 'ConfigCard',
               recoverable: true,
-              userRetryable: true, }, '[Clipboard] Quick action copy failed');
+              userRetryable: true,
+            });
             // Show error toast with "Retry" button
             // Note: Retry will attempt to copy the same value again
             toasts.raw.error('Copy failed', {
@@ -522,7 +539,9 @@ export const ConfigCard = memo(
             });
           } catch (error) {
             const normalized = normalizeError(error, 'ConfigCard: failed to toggle pinboard state');
-            logger.error({ err: normalized, component: 'ConfigCard', }, 'ConfigCard: failed to toggle pinboard state');
+            logClientError('ConfigCard: failed to toggle pinboard state', normalized, 'ConfigCard.handlePinToggle', {
+              component: 'ConfigCard',
+            });
             // Show error toast with "Retry" button
             toasts.raw.error('Unable to update pinboard', {
               description: 'Please try again.',
@@ -540,7 +559,9 @@ export const ConfigCard = memo(
                   } catch (retryError) {
                     // Error will be handled by the toast above if it fails again
                     const retryNormalized = normalizeError(retryError, 'ConfigCard: retry pinboard toggle failed');
-                    logger.error({ err: retryNormalized, component: 'ConfigCard', }, 'ConfigCard: retry pinboard toggle failed');
+                    logClientError('ConfigCard: retry pinboard toggle failed', retryNormalized, 'ConfigCard.handlePinToggle.retry', {
+                      component: 'ConfigCard',
+                    });
                   }
                 },
               },
@@ -559,21 +580,6 @@ export const ConfigCard = memo(
         ]
       );
 
-      // Extract sponsored metadata
-      const isSponsored: boolean | undefined =
-        'is_sponsored' in item && typeof item.is_sponsored === 'boolean'
-          ? item.is_sponsored
-          : undefined;
-      const sponsoredId: string | undefined =
-        'sponsored_content_id' in item && typeof item.sponsored_content_id === 'string'
-          ? item.sponsored_content_id
-          : undefined;
-      const sponsorTier: Database['public']['Enums']['sponsorship_tier'] | null | undefined =
-        'sponsorship_tier' in item &&
-        item.sponsorship_tier !== null &&
-        item.sponsorship_tier !== undefined
-          ? (item.sponsorship_tier as Database['public']['Enums']['sponsorship_tier'])
-          : undefined;
       const viewCount =
         'view_count' in item && typeof item.view_count === 'number' ? item.view_count : undefined;
       const copyCount =
@@ -633,9 +639,6 @@ export const ConfigCard = memo(
         variant,
         showActions,
         ariaLabel: `${displayTitle} - ${item.category ?? 'content'} by ${('author' in item && item.author) || 'Community'}`,
-        ...(isSponsored !== undefined ? { isSponsored } : {}),
-        ...(sponsoredId !== undefined ? { sponsoredId } : {}),
-        ...(position !== undefined ? { position } : {}),
         enableSwipeGestures,
         onSwipeRight: handleSwipeRightCopy,
         onSwipeLeft: handleSwipeLeftBookmark,
@@ -662,9 +665,9 @@ export const ConfigCard = memo(
                       </div>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>{getCategoryConfig(category)?.pluralTitle ?? category}</p>
+                      <p>{getCategoryDisplayName(category).pluralTitle}</p>
                       <p className="text-xs text-muted-foreground">
-                        {getCategoryConfig(category)?.description ?? 'Content category'}
+                        {getCategoryDisplayName(category).description}
                       </p>
                     </TooltipContent>
                   </Tooltip>
@@ -789,21 +792,6 @@ export const ConfigCard = memo(
                   </Tooltip>
                 </TooltipProvider>
               )}
-              {isSponsored && sponsorTier && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div>
-                        <UnifiedBadge variant="sponsored" tier={sponsorTier} showIcon={true} />
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Sponsored content</p>
-                      <p className="text-xs text-muted-foreground">Paid promotion</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
 
               {/* New indicator */}
               {'isNew' in item && item.isNew && (
@@ -890,7 +878,7 @@ export const ConfigCard = memo(
                             },
                           })
                           .catch((error) => {
-                            logUnhandledPromise('ConfigCard: GitHub link click pulse failed', error, {
+                            logClientError('ConfigCard: GitHub link click pulse failed', normalizeError(error), 'ConfigCard.handleGitHubClick', {
                               category: category as Database['public']['Enums']['content_category'],
                               slug: item.slug ?? undefined,
                             });
@@ -902,7 +890,7 @@ export const ConfigCard = memo(
                             description: 'Opening in new tab...',
                           });
                         } else {
-                          logClientWarning('ConfigCard: Unsafe repository URL blocked', {
+                          logClientWarn('ConfigCard: Unsafe repository URL blocked', undefined, 'ConfigCard.handleRepositoryClick', {
                             url: item.repository,
                             slug: item.slug,
                           });
@@ -947,7 +935,7 @@ export const ConfigCard = memo(
                               },
                             })
                             .catch((error) => {
-                              logUnhandledPromise('ConfigCard: documentation link click pulse failed', error, {
+                              logClientError('ConfigCard: documentation link click pulse failed', normalizeError(error), 'ConfigCard.handleDocClick', {
                                 category,
                                 slug: item.slug ?? undefined,
                               });
@@ -959,7 +947,7 @@ export const ConfigCard = memo(
                               description: 'Opening in new tab...',
                             });
                           } else {
-                            logClientWarning('ConfigCard: Blocked untrusted documentation URL', {
+                            logClientWarn('ConfigCard: Blocked untrusted documentation URL', undefined, 'ConfigCard.handleDocumentationClick', {
                               url: item.documentation_url,
                             });
                             toasts.raw.error?.('Invalid or unsafe documentation link.', {
@@ -1088,11 +1076,12 @@ export const ConfigCard = memo(
                           }
                         ).catch((error) => {
                           const normalized = normalizeError(error, 'Failed to copy configuration');
-                          logger.warn({ err: normalized,
+                          logClientWarn('[Clipboard] Copy configuration failed', normalized, 'ConfigCard.handleConfigCopy', {
                             category: 'clipboard',
                             component: 'ConfigCard',
                             recoverable: true,
-                            userRetryable: true, }, '[Clipboard] Copy configuration failed');
+                            userRetryable: true,
+                          });
                         });
                       }}
                       aria-label="Copy configuration JSON"
@@ -1131,7 +1120,7 @@ export const ConfigCard = memo(
                                 : Constants.public.Enums.content_category[0];
                             if (item.slug) {
                               pulse.copy({ category, slug: item.slug }).catch((error) => {
-                                logUnhandledPromise('ConfigCard: copy button pulse failed', error, {
+                                logClientError('ConfigCard: copy button pulse failed', normalizeError(error), 'ConfigCard.handleCopyButton', {
                                   category,
                                   slug: item.slug ?? undefined,
                                 });
@@ -1169,7 +1158,7 @@ export const ConfigCard = memo(
                         e.stopPropagation();
                         if (isSafeCategoryAndSlug(item.category, item.slug)) {
                           if (!isValidInternalPath(targetPath)) {
-                            logClientWarning('ConfigCard: Blocked invalid internal path', {
+                            logClientWarn('ConfigCard: Blocked invalid internal path', undefined, 'ConfigCard.handleInternalLinkClick', {
                               attemptedCategory: item.category,
                               attemptedSlug: item.slug,
                               targetPath,
@@ -1178,7 +1167,7 @@ export const ConfigCard = memo(
                           }
                           window.location.href = targetPath;
                         } else {
-                          logClientWarning('ConfigCard: Blocked potentially unsafe redirect', {
+                          logClientWarn('ConfigCard: Blocked potentially unsafe redirect', undefined, 'ConfigCard.handleInternalLinkClick', {
                       attemptedCategory: item.category,
                       attemptedSlug: item.slug,
                       targetPath,
@@ -1242,12 +1231,13 @@ export const ConfigCard = memo(
       );
     } catch (error) {
       const normalized = normalizeError(error, 'ConfigCard: Rendering failed');
-      logger.warn({ err: normalized,
+      logClientWarn('[Render] ConfigCard rendering failed', normalized, 'ConfigCard.render', {
         category: 'render',
         component: 'ConfigCard',
         recoverable: true,
         hasSlug: Boolean(item.slug),
-        hasCategory: Boolean(item.category), }, '[Render] ConfigCard rendering failed');
+        hasCategory: Boolean(item.category),
+      });
       // Return minimal fallback
       return (
         <div className="rounded-lg border p-4" role="article">

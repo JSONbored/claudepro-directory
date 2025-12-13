@@ -4,7 +4,7 @@
  */
 
 import { Constants } from '@heyclaude/database-types';
-import { type CollectionDetailData } from '@heyclaude/web-runtime/core';
+import { type CollectionDetailData } from '@heyclaude/web-runtime/data';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
@@ -74,6 +74,21 @@ function isValidSlug(slug: string): boolean {
  *
  * @see isValidContentType
  * @see isValidSlug
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
  * @param {{ content_slug: string; content_type: string }} item Parameter description
  * @param {{ content_slug: string; content_type: string }} item Parameter description
  * @param {{ content_slug: string; content_type: string }} item Parameter description

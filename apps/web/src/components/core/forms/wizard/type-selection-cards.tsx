@@ -20,6 +20,7 @@ import { type SubmissionContentType } from '@heyclaude/web-runtime/types/compone
 import { cn } from '@heyclaude/web-runtime/ui';
 import { MICROINTERACTIONS, SPRING, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
 import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/design-tokens';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import { useCallback, useState } from 'react';
 
@@ -99,6 +100,7 @@ interface TypeSelectionCardsProps {
 
 export function TypeSelectionCards({ selected, onSelect, className }: TypeSelectionCardsProps) {
   const [hoveredCard, setHoveredCard] = useState<null | SubmissionContentType>(null);
+  const shouldReduceMotion = useReducedMotion();
 
   const handleSelect = useCallback(
     (type: SubmissionContentType) => {
@@ -112,17 +114,24 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
       {/* Grid of Type Cards */}
       <motion.div
         className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
-        initial="hidden"
-        animate="visible"
-        variants={{
-          hidden: { opacity: 0 },
-          visible: {
-            opacity: 1,
-            transition: {
-              staggerChildren: STAGGER.tight,
-            },
-          },
-        }}
+        {...(shouldReduceMotion
+          ? {
+              initial: { opacity: 0 },
+              animate: { opacity: 1 },
+            }
+          : {
+              initial: 'hidden',
+              animate: 'visible',
+              variants: {
+                hidden: { opacity: 0 },
+                visible: {
+                  opacity: 1,
+                  transition: {
+                    staggerChildren: STAGGER.tight,
+                  },
+                },
+              },
+            })}
       >
         {TYPE_CARDS.map((card) => {
           const Icon = card.icon;
@@ -137,15 +146,21 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
               onMouseEnter={() => setHoveredCard(card.type)}
               onMouseLeave={() => setHoveredCard(null)}
               variants={{
-                hidden: { opacity: 0, y: 20 },
-                visible: { opacity: 1, y: 0 },
+                hidden: shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 },
+                visible: shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 },
               }}
-              whileHover={{
-                ...MICROINTERACTIONS.card.hover,
-                scale: 1.03, // Preserve exact original scale (design token is 1.02, but original was 1.03)
-                y: 0, // Preserve original (no y movement in original)
-              }}
-              whileTap={MICROINTERACTIONS.card.tap}
+              initial={shouldReduceMotion ? { opacity: 0 } : 'hidden'}
+              animate={shouldReduceMotion ? { opacity: 1 } : 'visible'}
+              whileHover={
+                shouldReduceMotion
+                  ? {}
+                  : {
+                      ...MICROINTERACTIONS.card.hover,
+                      scale: 1.03, // Preserve exact original scale (design token is 1.02, but original was 1.03)
+                      y: 0, // Preserve original (no y movement in original)
+                    }
+              }
+              whileTap={shouldReduceMotion ? {} : MICROINTERACTIONS.card.tap}
               transition={MICROINTERACTIONS.card.transition}
               className={cn(
                 'group relative overflow-hidden rounded-xl border-2 p-6 text-left',
@@ -191,10 +206,14 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
                     style={{
                       backgroundColor: `${card.color}20`,
                     }}
-                    animate={{
-                      scale: isHovered ? 1.1 : 1,
-                      rotate: isHovered ? 5 : 0,
-                    }}
+                    animate={
+                      shouldReduceMotion
+                        ? {}
+                        : {
+                            scale: isHovered ? 1.1 : 1,
+                            rotate: isHovered ? 5 : 0,
+                          }
+                    }
                     transition={SPRING.bouncy}
                   >
                     <Icon
@@ -208,8 +227,8 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
                   {/* Selection Indicator */}
                   {isSelected ? (
                     <motion.div
-                      initial={{ scale: 0, rotate: -180 }}
-                      animate={{ scale: 1, rotate: 0 }}
+                      initial={shouldReduceMotion ? { opacity: 0 } : { scale: 0, rotate: -180 }}
+                      animate={shouldReduceMotion ? { opacity: 1 } : { scale: 1, rotate: 0 }}
                       transition={SPRING.bouncy}
                       className="flex h-6 w-6 items-center justify-center rounded-full"
                       style={{
@@ -260,11 +279,15 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
                     <motion.div
                       key={example}
                       className="flex items-center gap-2 text-xs"
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{
-                        opacity: isHovered || isSelected ? 1 : 0.6,
-                        x: 0,
-                      }}
+                      initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -10 }}
+                      animate={
+                        shouldReduceMotion
+                          ? { opacity: isHovered || isSelected ? 1 : 0.6 }
+                          : {
+                              opacity: isHovered || isSelected ? 1 : 0.6,
+                              x: 0,
+                            }
+                      }
                       transition={{
                         delay: STAGGER.fast + index * STAGGER.micro,
                         duration: DURATION.quick,
@@ -317,6 +340,7 @@ export function TypeSelectionCards({ selected, onSelect, className }: TypeSelect
  * Useful for mobile or space-constrained layouts
  */
 export function CompactTypeSelection({ selected, onSelect, className }: TypeSelectionCardsProps) {
+  const shouldReduceMotion = useReducedMotion();
   return (
     <div className={cn('w-full', className)}>
       <div className="grid gap-2">
@@ -329,7 +353,7 @@ export function CompactTypeSelection({ selected, onSelect, className }: TypeSele
               key={card.type}
               type="button"
               onClick={() => onSelect(card.type)}
-              whileTap={{ scale: 0.98 }}
+              whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
               className={cn(
                 'flex items-center gap-3 rounded-lg border p-3 text-left transition-all',
                 isSelected
@@ -365,7 +389,11 @@ export function CompactTypeSelection({ selected, onSelect, className }: TypeSele
               </div>
 
               {isSelected ? (
-                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="shrink-0">
+                <motion.div
+                  initial={shouldReduceMotion ? { opacity: 0 } : { scale: 0 }}
+                  animate={shouldReduceMotion ? { opacity: 1 } : { scale: 1 }}
+                  className="shrink-0"
+                >
                   <svg
                     className="h-5 w-5"
                     fill="none"

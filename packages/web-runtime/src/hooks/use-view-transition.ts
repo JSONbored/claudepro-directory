@@ -33,7 +33,9 @@
 
 import { isDevelopment } from '@heyclaude/shared-runtime/schemas/env';
 
-import { logger, normalizeError } from '../entries/core.ts';
+// Import directly from source files to avoid indirect imports through entries/core.ts
+import { logger } from '../logger.ts';
+import { normalizeError } from '../errors.ts';
 import { logClientWarn } from '../utils/client-logger.ts';
 import { useCallback, useMemo } from 'react';
 

@@ -32,6 +32,7 @@
 
 import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { type ReactNode } from 'react';
 import { memo, useEffect, useState } from 'react';
 
@@ -172,7 +173,16 @@ function LazySectionComponent({
   eager = false,
 }: LazySectionProps) {
   const [isMounted, setIsMounted] = useState(false);
-  const variantConfig = ANIMATION_VARIANTS[variant];
+  const shouldReduceMotion = useReducedMotion();
+  const baseVariantConfig = ANIMATION_VARIANTS[variant];
+  
+  // Remove transforms when reduced motion is enabled
+  const variantConfig = shouldReduceMotion
+    ? {
+        initial: { opacity: baseVariantConfig.initial['opacity'] ?? 0 },
+        animate: { opacity: baseVariantConfig.animate['opacity'] ?? 1 },
+      }
+    : baseVariantConfig;
 
   // Wait for client-side mount to prevent hydration mismatch with Motion.dev attributes
   useEffect(() => {

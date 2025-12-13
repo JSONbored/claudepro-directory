@@ -18,6 +18,7 @@ import {
 import { FolderOpen } from '@heyclaude/web-runtime/icons';
 import { motion } from 'motion/react';
 import { MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import type { Database } from '@heyclaude/database-types';
 
 export interface ProfileCollectionsSectionProps {
@@ -34,6 +35,8 @@ export function ProfileCollectionsSection({
   slug,
   getSafeCollectionUrl,
 }: ProfileCollectionsSectionProps) {
+  const shouldReduceMotion = useReducedMotion();
+
   if (!collections || collections.length === 0) {
     return (
       <Card>
@@ -68,8 +71,8 @@ export function ProfileCollectionsSection({
           return (
             <motion.div
               key={collection.id}
-              whileHover={MICROINTERACTIONS.card.hover}
-              whileTap={MICROINTERACTIONS.card.tap}
+              whileHover={shouldReduceMotion ? {} : MICROINTERACTIONS.card.hover}
+              whileTap={shouldReduceMotion ? {} : MICROINTERACTIONS.card.tap}
               transition={MICROINTERACTIONS.card.transition}
             >
               <Card className={UI_CLASSES.CARD_INTERACTIVE}>

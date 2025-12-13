@@ -18,7 +18,9 @@ import { CheckCircle } from '@heyclaude/web-runtime/icons';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/design-tokens';
 import { SPRING, DURATION } from '@heyclaude/web-runtime/design-system';
+import { useReducedMotion, useAnimateScoped } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
+import { useEffect, useRef } from 'react';
 
 export interface WizardStep {
   description?: string;
@@ -63,14 +65,45 @@ export function ProgressIndicator({
 }: ProgressIndicatorProps) {
   const completedSteps = steps.filter((s) => s.isCompleted).length;
   const progressPercentage = (completedSteps / steps.length) * 100;
+  const shouldReduceMotion = useReducedMotion();
+  const [, animate] = useAnimateScoped();
+  const previousCompletedCountRef = useRef(completedSteps);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const stepIndicatorsRef = useRef<HTMLDivElement>(null);
+  
+  // Animate step completion programmatically using direct element references
+  useEffect(() => {
+    if (previousCompletedCountRef.current < completedSteps && !shouldReduceMotion && stepIndicatorsRef.current) {
+      // Animate newly completed steps with a bounce
+      const newlyCompletedStep = steps.find(
+        (s, idx) => idx + 1 === completedSteps && s.isCompleted
+      );
+      
+      if (newlyCompletedStep) {
+        // Find the checkmark element and animate it directly
+        const checkIcon = stepIndicatorsRef.current.querySelector(
+          `[data-step-id="${newlyCompletedStep.id}"] .check-icon`
+        ) as HTMLElement;
+        
+        if (checkIcon) {
+          animate(checkIcon, 
+            { scale: [0, 1.2, 1], rotate: [0, 180, 0] },
+            { duration: 0.5, ease: [0.22, 1, 0.36, 1] }
+          );
+        }
+      }
+      
+      previousCompletedCountRef.current = completedSteps;
+    }
+  }, [completedSteps, steps, animate, shouldReduceMotion]);
 
   return (
-    <div className={cn('w-full', className)}>
+    <div ref={containerRef} className={cn('w-full', className)}>
       {/* Quality Score Badge (if provided) */}
       {qualityScore !== undefined && (
         <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -10 }}
+          animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
           className="border-border/50 bg-background-secondary mb-4 flex items-center justify-between rounded-lg border p-3"
           style={{
             borderColor: TOKENS.colors.border.light,
@@ -117,7 +150,7 @@ export function ProgressIndicator({
       </div>
 
       {/* Step Indicators - Desktop */}
-      <div className="hidden items-center justify-between md:flex">
+      <div ref={stepIndicatorsRef} className="hidden items-center justify-between md:flex">
         {steps.map((step, index) => (
           <div key={step.id} className="flex flex-1 items-center">
             {/* Step Circle */}
@@ -146,11 +179,20 @@ export function ProgressIndicator({
             >
               {step.isCompleted ? (
                 <motion.div
-                  initial={{ scale: 0, rotate: -180 }}
-                  animate={{ scale: 1, rotate: 0 }}
+                  data-step-id={step.id}
+                  initial={
+                    shouldReduceMotion
+                      ? { opacity: 0 }
+                      : { scale: 0, rotate: -180 }
+                  }
+                  animate={
+                    shouldReduceMotion
+                      ? { opacity: 1 }
+                      : { scale: 1, rotate: 0 }
+                  }
                   transition={SPRING.bouncy}
                 >
-                  <CheckCircle className="h-5 w-5 text-white" />
+                  <CheckCircle className="check-icon h-5 w-5 text-white" />
                 </motion.div>
               ) : (
                 <span

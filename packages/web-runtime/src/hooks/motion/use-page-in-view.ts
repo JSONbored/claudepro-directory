@@ -23,21 +23,28 @@
  * @example
  * ```tsx
  * function VideoPlayer() {
- *   const videoRef = useRef(null);
+ *   const videoRef = useRef<HTMLVideoElement>(null);
  *   const isPageInView = usePageInView();
+ *   const shouldReduceMotion = useReducedMotion();
  *   
  *   useEffect(() => {
  *     const video = videoRef.current;
  *     if (!video) return;
+ *     
+ *     // Respect reduced motion preferences - disable autoplay
+ *     if (shouldReduceMotion) {
+ *       video.pause();
+ *       return;
+ *     }
  *     
  *     if (isPageInView) {
  *       video.play();
  *     } else {
  *       video.pause();
  *     }
- *   }, [isPageInView]);
+ *   }, [isPageInView, shouldReduceMotion]);
  *   
- *   return <video ref={videoRef} />;
+ *   return <video ref={videoRef} autoplay={!shouldReduceMotion} />;
  * }
  * ```
  */

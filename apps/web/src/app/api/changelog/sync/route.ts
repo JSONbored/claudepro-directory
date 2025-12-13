@@ -39,13 +39,13 @@
  * POST /api/changelog/sync
  * Authorization: Bearer <token>
  * Content-Type: application/json
- * 
+ *
  * {
  *   "version": "1.2.0",
  *   "date": "2025-12-07",
  *   "content": "..."
  * }
- * 
+ *
  * // Response (200)
  * {
  *   "success": true,
@@ -65,11 +65,14 @@ import { timingSafeEqual } from 'node:crypto';
 import { ChangelogService } from '@heyclaude/data-layer';
 import { type Database } from '@heyclaude/database-types';
 import { requireEnvVar } from '@heyclaude/shared-runtime';
-import { createApiRoute, createApiOptionsHandler, unauthorizedResponse, postCorsHeaders } from '@heyclaude/web-runtime/server';
 import { normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
+  createApiOptionsHandler,
+  createApiRoute,
   createSupabaseAdminClient,
   pgmqSend,
+  postCorsHeaders,
+  unauthorizedResponse,
 } from '@heyclaude/web-runtime/server';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
@@ -87,12 +90,12 @@ const changelogSyncRequestSchema = z.object({
   whatChanged: z.string().optional(),
 });
 
-/**
+/*****
  * Validates the authentication token using timing-safe comparison to prevent timing attacks.
  *
- * @param authHeader - The Authorization header value from the request
- * @param expectedToken - The expected token value from environment
- * @param logger - Request-scoped logger for error logging
+ * @param {null | string} authHeader - The Authorization header value from the request
+ * @param {string} expectedToken - The expected token value from environment
+ * @param {ReturnType<typeof import('@heyclaude/web-runtime/logging/server').logger.child>} logger - Request-scoped logger for error logging
  * @returns True if token is valid, false otherwise
  */
 function validateToken(
@@ -129,34 +132,14 @@ function validateToken(
 
 /**
  * POST /api/changelog/sync - Sync changelog entry
- * 
+ *
  * Syncs changelog entry from CHANGELOG.md to database and enqueues notification.
  * Requires Bearer token authentication (CHANGELOG_SYNC_TOKEN).
  */
 export const POST = createApiRoute({
-  route: '/api/changelog/sync',
-  operation: 'ChangelogSyncAPI',
-  method: 'POST',
-  cors: 'auth',
   bodySchema: changelogSyncRequestSchema,
-  openapi: {
-    summary: 'Sync changelog entry',
-    description: 'Syncs changelog entry from CHANGELOG.md to database and enqueues notification. Called by GitHub Actions after generating changelog and creating tag. Requires Bearer token authentication.',
-    tags: ['changelog', 'sync', 'webhook'],
-    operationId: 'syncChangelog',
-    responses: {
-      200: {
-        description: 'Changelog entry synced successfully',
-      },
-      401: {
-        description: 'Unauthorized - invalid or missing Bearer token',
-      },
-      400: {
-        description: 'Invalid request body',
-      },
-    },
-  },
-  handler: async ({ logger, request, body }) => {
+  cors: 'auth',
+  handler: async ({ body, logger, request }) => {
     // Get environment variable with validation
     let changelogSyncToken: string;
     try {
@@ -164,13 +147,13 @@ export const POST = createApiRoute({
         'CHANGELOG_SYNC_TOKEN',
         'CHANGELOG_SYNC_TOKEN is required'
       );
-    } catch (error) {
+    } catch {
       // Log as warning, not error - missing token is an expected auth failure (401), not a server error
       // Don't include error object to avoid hasError/isErrorLevel flags
       logger.warn(
         {
-          securityEvent: true,
           reason: 'CHANGELOG_SYNC_TOKEN environment variable not set',
+          securityEvent: true,
         },
         'CHANGELOG_SYNC_TOKEN not configured - returning 401'
       );
@@ -349,6 +332,27 @@ export const POST = createApiRoute({
       }
     );
   },
+  method: 'POST',
+  openapi: {
+    description:
+      'Syncs changelog entry from CHANGELOG.md to database and enqueues notification. Called by GitHub Actions after generating changelog and creating tag. Requires Bearer token authentication.',
+    operationId: 'syncChangelog',
+    responses: {
+      200: {
+        description: 'Changelog entry synced successfully',
+      },
+      400: {
+        description: 'Invalid request body',
+      },
+      401: {
+        description: 'Unauthorized - invalid or missing Bearer token',
+      },
+    },
+    summary: 'Sync changelog entry',
+    tags: ['changelog', 'sync', 'webhook'],
+  },
+  operation: 'ChangelogSyncAPI',
+  route: '/api/changelog/sync',
 });
 
 /**

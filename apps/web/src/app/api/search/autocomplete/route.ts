@@ -1,14 +1,14 @@
 /**
  * Search Autocomplete API Route
- * 
+ *
  * Returns search autocomplete suggestions based on a query string.
  * Used by the search interface to provide real-time search suggestions as users type.
- * 
+ *
  * @example
  * ```ts
  * // Request
  * GET /api/search/autocomplete?q=react&limit=10
- * 
+ *
  * // Response (200)
  * {
  *   "query": "react",
@@ -23,13 +23,15 @@
 import 'server-only';
 import { SearchService } from '@heyclaude/data-layer';
 import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
-import { createApiRoute, createApiOptionsHandler, searchAutocompleteQuerySchema } from '@heyclaude/web-runtime/server';
 import { createErrorResponse, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   buildCacheHeaders,
+  createApiOptionsHandler,
+  createApiRoute,
   createSupabaseAnonClient,
   getWithAuthCorsHeaders,
   jsonResponse,
+  searchAutocompleteQuerySchema,
 } from '@heyclaude/web-runtime/server';
 import { cacheLife } from 'next/cache';
 
@@ -63,33 +65,15 @@ async function getCachedSearchSuggestionsFormatted(query: string, limit: number)
 
 /**
  * GET /api/search/autocomplete - Get search autocomplete suggestions
- * 
+ *
  * Returns search autocomplete suggestions based on a query string.
  * Validates query (minimum 2 characters) and limit (1-20, default 10) parameters.
  */
 export const GET = createApiRoute({
-  route: '/api/search/autocomplete',
-  operation: 'SearchAutocompleteAPI',
-  method: 'GET',
   cors: 'auth',
-  querySchema: searchAutocompleteQuerySchema,
-  openapi: {
-    summary: 'Get search autocomplete suggestions',
-    description: 'Returns search autocomplete suggestions based on a query string. Used by the search interface to provide real-time search suggestions as users type.',
-    tags: ['search', 'autocomplete'],
-    operationId: 'getSearchAutocomplete',
-    responses: {
-      200: {
-        description: 'Autocomplete suggestions retrieved successfully',
-      },
-      400: {
-        description: 'Invalid query parameters (query must be at least 2 characters)',
-      },
-    },
-  },
   handler: async ({ logger, query }) => {
     // TypeScript knows query is searchAutocompleteQuerySchema type
-    const { q, limit } = query as { q: string; limit: number };
+    const { limit, q } = query as { limit: number; q: string };
 
     // Additional validation: query must be at least 2 characters after trimming
     const trimmedQuery = q.trim();
@@ -98,7 +82,7 @@ export const GET = createApiRoute({
       throw new Error('Query must be at least 2 characters');
     }
 
-    logger.info({ query: trimmedQuery, limit }, 'Autocomplete request received');
+    logger.info({ limit, query: trimmedQuery }, 'Autocomplete request received');
 
     // Database RPC returns frontend-ready data (no client-side mapping needed)
     // This eliminates CPU-intensive array mapping and filtering (5-10% CPU savings)
@@ -109,12 +93,12 @@ export const GET = createApiRoute({
       const normalized = normalizeError(error, 'Autocomplete RPC failed');
       logger.error({ err: normalized }, 'Autocomplete RPC failed');
       return createErrorResponse(normalized, {
-        route: '/api/search/autocomplete',
-        operation: 'SearchAutocompleteAPI',
-        method: 'GET',
         logContext: {
           query: trimmedQuery,
         },
+        method: 'GET',
+        operation: 'SearchAutocompleteAPI',
+        route: '/api/search/autocomplete',
       });
     }
 
@@ -133,6 +117,25 @@ export const GET = createApiRoute({
       }
     );
   },
+  method: 'GET',
+  openapi: {
+    description:
+      'Returns search autocomplete suggestions based on a query string. Used by the search interface to provide real-time search suggestions as users type.',
+    operationId: 'getSearchAutocomplete',
+    responses: {
+      200: {
+        description: 'Autocomplete suggestions retrieved successfully',
+      },
+      400: {
+        description: 'Invalid query parameters (query must be at least 2 characters)',
+      },
+    },
+    summary: 'Get search autocomplete suggestions',
+    tags: ['search', 'autocomplete'],
+  },
+  operation: 'SearchAutocompleteAPI',
+  querySchema: searchAutocompleteQuerySchema,
+  route: '/api/search/autocomplete',
 });
 
 /**

@@ -1,14 +1,14 @@
 /**
  * Unified Search API Route
- * 
+ *
  * Provides comprehensive search across content, jobs, companies, and users.
  * Supports filtering, sorting, pagination, and job-specific filters.
- * 
+ *
  * @example
  * ```ts
  * // Request
  * GET /api/search?q=ai%20agents&categories=agents&sort=popularity&limit=20
- * 
+ *
  * // Response (200)
  * {
  *   "query": "ai agents",
@@ -28,13 +28,15 @@ import {
   type Json,
 } from '@heyclaude/database-types';
 import { normalizeError } from '@heyclaude/shared-runtime';
-import { createApiRoute, createApiOptionsHandler, searchQuerySchema } from '@heyclaude/web-runtime/server';
 import {
   buildCacheHeaders,
+  createApiOptionsHandler,
+  createApiRoute,
   createSupabaseAnonClient,
   enqueuePulseEventServer,
   getWithAuthCorsHeaders,
   jsonResponse,
+  searchQuerySchema,
 } from '@heyclaude/web-runtime/server';
 import { cacheLife } from 'next/cache';
 
@@ -42,7 +44,7 @@ type JobCategory = DatabaseGenerated['public']['Enums']['job_category'];
 type JobEmployment = DatabaseGenerated['public']['Enums']['job_type'];
 type JobExperience = DatabaseGenerated['public']['Enums']['experience_level'];
 
-type SortType = 'relevance' | 'popularity' | 'newest' | 'alphabetical';
+type SortType = 'alphabetical' | 'newest' | 'popularity' | 'relevance';
 type SearchType = 'content' | 'jobs' | 'unified';
 
 const DEFAULT_ENTITIES = ['content', 'company', 'job', 'user'] as const;
@@ -88,45 +90,27 @@ function toContentCategoryArray(
 
 /**
  * GET /api/search - Unified search across content, jobs, companies, and users
- * 
+ *
  * Provides comprehensive search with filtering, sorting, pagination, and job-specific filters.
  * Validates all query parameters using Zod schema and processes search results.
  */
 export const GET = createApiRoute({
-  route: '/api/search',
-  operation: 'SearchAPI',
-  method: 'GET',
   cors: 'auth',
-  querySchema: searchQuerySchema,
-  openapi: {
-    summary: 'Unified search across content, jobs, companies, and users',
-    description: 'Provides comprehensive search with filtering, sorting, pagination, and job-specific filters. Supports content, jobs, companies, and users in a single unified search.',
-    tags: ['search', 'content', 'jobs'],
-    operationId: 'search',
-    responses: {
-      200: {
-        description: 'Search results retrieved successfully',
-      },
-      400: {
-        description: 'Invalid query parameters',
-      },
-    },
-  },
   handler: async ({ logger, query }) => {
     // Zod schema ensures proper types
     const {
-      q: queryString,
-      categories: categoriesArray,
-      tags: tagsArray,
       authors: authorsArray,
+      categories: categoriesArray,
       entities: entitiesArray,
-      sort,
-      limit,
-      offset,
       job_category: jobCategory,
       job_employment: jobEmployment,
       job_experience: jobExperience,
       job_remote: jobRemote,
+      limit,
+      offset,
+      q: queryString,
+      sort,
+      tags: tagsArray,
     } = query;
 
     // Trim query string
@@ -139,9 +123,7 @@ export const GET = createApiRoute({
     const validatedCategories = toContentCategoryArray(categoriesArray);
 
     if (categoriesArray && categoriesArray.length > 0 && !validatedCategories?.length) {
-      throw new Error(
-        `Invalid categories. Valid values: ${CONTENT_CATEGORY_VALUES.join(', ')}`
-      );
+      throw new Error(`Invalid categories. Valid values: ${CONTENT_CATEGORY_VALUES.join(', ')}`);
     }
 
     const hasJobFilters = Boolean(
@@ -201,8 +183,10 @@ export const GET = createApiRoute({
       },
       highlightedResults.length,
       {
-        error: (context: Record<string, unknown>, message: string) => logger.error(context as Parameters<typeof logger.error>[0], message),
-        warn: (context: Record<string, unknown>, message: string) => logger.warn(context as Parameters<typeof logger.warn>[0], message),
+        error: (context: Record<string, unknown>, message: string) =>
+          logger.error(context as Parameters<typeof logger.error>[0], message),
+        warn: (context: Record<string, unknown>, message: string) =>
+          logger.warn(context as Parameters<typeof logger.warn>[0], message),
       }
     ).catch((error) => {
       // Errors already logged inside trackSearchAnalytics
@@ -244,22 +228,35 @@ export const GET = createApiRoute({
       'Search completed'
     );
 
-    return jsonResponse(
-      responseBody,
-      200,
-      getWithAuthCorsHeaders,
-      {
-        ...buildCacheHeaders('search'),
-      }
-    );
+    return jsonResponse(responseBody, 200, getWithAuthCorsHeaders, {
+      ...buildCacheHeaders('search'),
+    });
   },
+  method: 'GET',
+  openapi: {
+    description:
+      'Provides comprehensive search with filtering, sorting, pagination, and job-specific filters. Supports content, jobs, companies, and users in a single unified search.',
+    operationId: 'search',
+    responses: {
+      200: {
+        description: 'Search results retrieved successfully',
+      },
+      400: {
+        description: 'Invalid query parameters',
+      },
+    },
+    summary: 'Unified search across content, jobs, companies, and users',
+    tags: ['search', 'content', 'jobs'],
+  },
+  operation: 'SearchAPI',
+  querySchema: searchQuerySchema,
+  route: '/api/search',
 });
 
 /**
  * OPTIONS handler for CORS preflight requests
  */
 export const OPTIONS = createApiOptionsHandler('auth');
-
 
 /**
  * Cached helper function to execute search queries.
@@ -310,7 +307,7 @@ export async function getCachedSearchResults(params: {
   });
 }
 
-/************
+/*****************
  * Dispatches the search to the appropriate backend ('jobs', 'unified', or 'content') and returns matching rows with a total count.
  *
  * @param {{
@@ -473,13 +470,488 @@ export async function getCachedSearchResults(params: {
   sort: SortType;
   tags?: string[] | undefined;
 }} params.offset - Number of results to skip (pagination offset).
- * @param params.query - The raw search query string; may be empty.
- * @param params.searchService - SearchService instance used to perform backend searches.
- * @param params.searchType - The type of search to perform: `'jobs'`, `'unified'`, or `'content'`.
- * @param params.sort - Sort order to apply for content searches.
- * @param params.tags - Optional list of tags to filter content results.
+ * @param {{
+  authors?: string[] | undefined;
+  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  entities?: string[] | undefined;
+  jobCategory?: JobCategory | undefined;
+  jobEmployment?: JobEmployment | undefined;
+  jobExperience?: JobExperience | undefined;
+  jobRemote?: boolean | undefined;
+  limit: number;
+  offset: number;
+  query: string;
+  searchService: SearchService;
+  searchType: SearchType;
+  sort: SortType;
+  tags?: string[] | undefined;
+}} params.query - The raw search query string; may be empty.
+ * @param {{
+  authors?: string[] | undefined;
+  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  entities?: string[] | undefined;
+  jobCategory?: JobCategory | undefined;
+  jobEmployment?: JobEmployment | undefined;
+  jobExperience?: JobExperience | undefined;
+  jobRemote?: boolean | undefined;
+  limit: number;
+  offset: number;
+  query: string;
+  searchService: SearchService;
+  searchType: SearchType;
+  sort: SortType;
+  tags?: string[] | undefined;
+}} params.searchService - SearchService instance used to perform backend searches.
+ * @param {{
+  authors?: string[] | undefined;
+  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  entities?: string[] | undefined;
+  jobCategory?: JobCategory | undefined;
+  jobEmployment?: JobEmployment | undefined;
+  jobExperience?: JobExperience | undefined;
+  jobRemote?: boolean | undefined;
+  limit: number;
+  offset: number;
+  query: string;
+  searchService: SearchService;
+  searchType: SearchType;
+  sort: SortType;
+  tags?: string[] | undefined;
+}} params.searchType - The type of search to perform: `'jobs'`, `'unified'`, or `'content'`.
+ * @param {{
+  authors?: string[] | undefined;
+  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  entities?: string[] | undefined;
+  jobCategory?: JobCategory | undefined;
+  jobEmployment?: JobEmployment | undefined;
+  jobExperience?: JobExperience | undefined;
+  jobRemote?: boolean | undefined;
+  limit: number;
+  offset: number;
+  query: string;
+  searchService: SearchService;
+  searchType: SearchType;
+  sort: SortType;
+  tags?: string[] | undefined;
+}} params.sort - Sort order to apply for content searches.
+ * @param {{
+  authors?: string[] | undefined;
+  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  entities?: string[] | undefined;
+  jobCategory?: JobCategory | undefined;
+  jobEmployment?: JobEmployment | undefined;
+  jobExperience?: JobExperience | undefined;
+  jobRemote?: boolean | undefined;
+  limit: number;
+  offset: number;
+  query: string;
+  searchService: SearchService;
+  searchType: SearchType;
+  sort: SortType;
+  tags?: string[] | undefined;
+}} params.tags - Optional list of tags to filter content results.
  * @returns An object containing `results` (array of matching rows) and `totalCount` (the total number of matching items; prefers a backend-provided total when available, otherwise falls back to `results.length`).
- */
+  * @param {{
+  authors?: string[] | undefined;
+  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  entities?: string[] | undefined;
+  jobCategory?: JobCategory | undefined;
+  jobEmployment?: JobEmployment | undefined;
+  jobExperience?: JobExperience | undefined;
+  jobRemote?: boolean | undefined;
+  limit: number;
+  offset: number;
+  query: string;
+  searchService: SearchService;
+  searchType: SearchType;
+  sort: SortType;
+  tags?: string[] | undefined;
+}} params Parameter description
+ * @param {{
+  authors?: string[] | undefined;
+  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  entities?: string[] | undefined;
+  jobCategory?: JobCategory | undefined;
+  jobEmployment?: JobEmployment | undefined;
+  jobExperience?: JobExperience | undefined;
+  jobRemote?: boolean | undefined;
+  limit: number;
+  offset: number;
+  query: string;
+  searchService: SearchService;
+  searchType: SearchType;
+  sort: SortType;
+  tags?: string[] | undefined;
+}} params Parameter description
+ * @param {{
+  authors?: string[] | undefined;
+  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  entities?: string[] | undefined;
+  jobCategory?: JobCategory | undefined;
+  jobEmployment?: JobEmployment | undefined;
+  jobExperience?: JobExperience | undefined;
+  jobRemote?: boolean | undefined;
+  limit: number;
+  offset: number;
+  query: string;
+  searchService: SearchService;
+  searchType: SearchType;
+  sort: SortType;
+  tags?: string[] | undefined;
+}} params Parameter description
+ * @param {{
+  authors?: string[] | undefined;
+  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  entities?: string[] | undefined;
+  jobCategory?: JobCategory | undefined;
+  jobEmployment?: JobEmployment | undefined;
+  jobExperience?: JobExperience | undefined;
+  jobRemote?: boolean | undefined;
+  limit: number;
+  offset: number;
+  query: string;
+  searchService: SearchService;
+  searchType: SearchType;
+  sort: SortType;
+  tags?: string[] | undefined;
+}} params Parameter description
+ * @param {{
+  authors?: string[] | undefined;
+  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  entities?: string[] | undefined;
+  jobCategory?: JobCategory | undefined;
+  jobEmployment?: JobEmployment | undefined;
+  jobExperience?: JobExperience | undefined;
+  jobRemote?: boolean | undefined;
+  limit: number;
+  offset: number;
+  query: string;
+  searchService: SearchService;
+  searchType: SearchType;
+  sort: SortType;
+  tags?: string[] | undefined;
+}} params Parameter description
+ * @param {{
+  authors?: string[] | undefined;
+  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  entities?: string[] | undefined;
+  jobCategory?: JobCategory | undefined;
+  jobEmployment?: JobEmployment | undefined;
+  jobExperience?: JobExperience | undefined;
+  jobRemote?: boolean | undefined;
+  limit: number;
+  offset: number;
+  query: string;
+  searchService: SearchService;
+  searchType: SearchType;
+  sort: SortType;
+  tags?: string[] | undefined;
+}} params Parameter description
+ * @param {{
+  authors?: string[] | undefined;
+  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  entities?: string[] | undefined;
+  jobCategory?: JobCategory | undefined;
+  jobEmployment?: JobEmployment | undefined;
+  jobExperience?: JobExperience | undefined;
+  jobRemote?: boolean | undefined;
+  limit: number;
+  offset: number;
+  query: string;
+  searchService: SearchService;
+  searchType: SearchType;
+  sort: SortType;
+  tags?: string[] | undefined;
+}} params Parameter description
+ * @param {{
+  authors?: string[] | undefined;
+  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  entities?: string[] | undefined;
+  jobCategory?: JobCategory | undefined;
+  jobEmployment?: JobEmployment | undefined;
+  jobExperience?: JobExperience | undefined;
+  jobRemote?: boolean | undefined;
+  limit: number;
+  offset: number;
+  query: string;
+  searchService: SearchService;
+  searchType: SearchType;
+  sort: SortType;
+  tags?: string[] | undefined;
+}} params Parameter description
+ * @param {{
+  authors?: string[] | undefined;
+  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  entities?: string[] | undefined;
+  jobCategory?: JobCategory | undefined;
+  jobEmployment?: JobEmployment | undefined;
+  jobExperience?: JobExperience | undefined;
+  jobRemote?: boolean | undefined;
+  limit: number;
+  offset: number;
+  query: string;
+  searchService: SearchService;
+  searchType: SearchType;
+  sort: SortType;
+  tags?: string[] | undefined;
+}} params Parameter description
+ * @param {{
+  authors?: string[] | undefined;
+  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  entities?: string[] | undefined;
+  jobCategory?: JobCategory | undefined;
+  jobEmployment?: JobEmployment | undefined;
+  jobExperience?: JobExperience | undefined;
+  jobRemote?: boolean | undefined;
+  limit: number;
+  offset: number;
+  query: string;
+  searchService: SearchService;
+  searchType: SearchType;
+  sort: SortType;
+  tags?: string[] | undefined;
+}} params Parameter description
+ * @param {{
+  authors?: string[] | undefined;
+  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  entities?: string[] | undefined;
+  jobCategory?: JobCategory | undefined;
+  jobEmployment?: JobEmployment | undefined;
+  jobExperience?: JobExperience | undefined;
+  jobRemote?: boolean | undefined;
+  limit: number;
+  offset: number;
+  query: string;
+  searchService: SearchService;
+  searchType: SearchType;
+  sort: SortType;
+  tags?: string[] | undefined;
+}} params Parameter description
+ * @param {{
+  authors?: string[] | undefined;
+  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  entities?: string[] | undefined;
+  jobCategory?: JobCategory | undefined;
+  jobEmployment?: JobEmployment | undefined;
+  jobExperience?: JobExperience | undefined;
+  jobRemote?: boolean | undefined;
+  limit: number;
+  offset: number;
+  query: string;
+  searchService: SearchService;
+  searchType: SearchType;
+  sort: SortType;
+  tags?: string[] | undefined;
+}} params Parameter description
+ * @param {{
+  authors?: string[] | undefined;
+  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  entities?: string[] | undefined;
+  jobCategory?: JobCategory | undefined;
+  jobEmployment?: JobEmployment | undefined;
+  jobExperience?: JobExperience | undefined;
+  jobRemote?: boolean | undefined;
+  limit: number;
+  offset: number;
+  query: string;
+  searchService: SearchService;
+  searchType: SearchType;
+  sort: SortType;
+  tags?: string[] | undefined;
+}} params Parameter description
+ * @param {{
+  authors?: string[] | undefined;
+  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  entities?: string[] | undefined;
+  jobCategory?: JobCategory | undefined;
+  jobEmployment?: JobEmployment | undefined;
+  jobExperience?: JobExperience | undefined;
+  jobRemote?: boolean | undefined;
+  limit: number;
+  offset: number;
+  query: string;
+  searchService: SearchService;
+  searchType: SearchType;
+  sort: SortType;
+  tags?: string[] | undefined;
+}} params Parameter description
+ * @param {{
+  authors?: string[] | undefined;
+  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  entities?: string[] | undefined;
+  jobCategory?: JobCategory | undefined;
+  jobEmployment?: JobEmployment | undefined;
+  jobExperience?: JobExperience | undefined;
+  jobRemote?: boolean | undefined;
+  limit: number;
+  offset: number;
+  query: string;
+  searchService: SearchService;
+  searchType: SearchType;
+  sort: SortType;
+  tags?: string[] | undefined;
+}} params Parameter description
+ * @param {{
+  authors?: string[] | undefined;
+  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  entities?: string[] | undefined;
+  jobCategory?: JobCategory | undefined;
+  jobEmployment?: JobEmployment | undefined;
+  jobExperience?: JobExperience | undefined;
+  jobRemote?: boolean | undefined;
+  limit: number;
+  offset: number;
+  query: string;
+  searchService: SearchService;
+  searchType: SearchType;
+  sort: SortType;
+  tags?: string[] | undefined;
+}} params Parameter description
+ * @param {{
+  authors?: string[] | undefined;
+  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  entities?: string[] | undefined;
+  jobCategory?: JobCategory | undefined;
+  jobEmployment?: JobEmployment | undefined;
+  jobExperience?: JobExperience | undefined;
+  jobRemote?: boolean | undefined;
+  limit: number;
+  offset: number;
+  query: string;
+  searchService: SearchService;
+  searchType: SearchType;
+  sort: SortType;
+  tags?: string[] | undefined;
+}} params Parameter description
+ * @param {{
+  authors?: string[] | undefined;
+  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  entities?: string[] | undefined;
+  jobCategory?: JobCategory | undefined;
+  jobEmployment?: JobEmployment | undefined;
+  jobExperience?: JobExperience | undefined;
+  jobRemote?: boolean | undefined;
+  limit: number;
+  offset: number;
+  query: string;
+  searchService: SearchService;
+  searchType: SearchType;
+  sort: SortType;
+  tags?: string[] | undefined;
+}} params Parameter description
+ * @param {{
+  authors?: string[] | undefined;
+  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  entities?: string[] | undefined;
+  jobCategory?: JobCategory | undefined;
+  jobEmployment?: JobEmployment | undefined;
+  jobExperience?: JobExperience | undefined;
+  jobRemote?: boolean | undefined;
+  limit: number;
+  offset: number;
+  query: string;
+  searchService: SearchService;
+  searchType: SearchType;
+  sort: SortType;
+  tags?: string[] | undefined;
+}} params Parameter description
+ * @param {{
+  authors?: string[] | undefined;
+  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  entities?: string[] | undefined;
+  jobCategory?: JobCategory | undefined;
+  jobEmployment?: JobEmployment | undefined;
+  jobExperience?: JobExperience | undefined;
+  jobRemote?: boolean | undefined;
+  limit: number;
+  offset: number;
+  query: string;
+  searchService: SearchService;
+  searchType: SearchType;
+  sort: SortType;
+  tags?: string[] | undefined;
+}} params Parameter description
+ * @param {{
+  authors?: string[] | undefined;
+  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  entities?: string[] | undefined;
+  jobCategory?: JobCategory | undefined;
+  jobEmployment?: JobEmployment | undefined;
+  jobExperience?: JobExperience | undefined;
+  jobRemote?: boolean | undefined;
+  limit: number;
+  offset: number;
+  query: string;
+  searchService: SearchService;
+  searchType: SearchType;
+  sort: SortType;
+  tags?: string[] | undefined;
+}} params Parameter description
+ * @param {{
+  authors?: string[] | undefined;
+  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  entities?: string[] | undefined;
+  jobCategory?: JobCategory | undefined;
+  jobEmployment?: JobEmployment | undefined;
+  jobExperience?: JobExperience | undefined;
+  jobRemote?: boolean | undefined;
+  limit: number;
+  offset: number;
+  query: string;
+  searchService: SearchService;
+  searchType: SearchType;
+  sort: SortType;
+  tags?: string[] | undefined;
+}} params Parameter description
+ * @param {{
+  authors?: string[] | undefined;
+  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  entities?: string[] | undefined;
+  jobCategory?: JobCategory | undefined;
+  jobEmployment?: JobEmployment | undefined;
+  jobExperience?: JobExperience | undefined;
+  jobRemote?: boolean | undefined;
+  limit: number;
+  offset: number;
+  query: string;
+  searchService: SearchService;
+  searchType: SearchType;
+  sort: SortType;
+  tags?: string[] | undefined;
+}} params Parameter description
+ * @param {{
+  authors?: string[] | undefined;
+  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  entities?: string[] | undefined;
+  jobCategory?: JobCategory | undefined;
+  jobEmployment?: JobEmployment | undefined;
+  jobExperience?: JobExperience | undefined;
+  jobRemote?: boolean | undefined;
+  limit: number;
+  offset: number;
+  query: string;
+  searchService: SearchService;
+  searchType: SearchType;
+  sort: SortType;
+  tags?: string[] | undefined;
+}} params Parameter description
+ * @param {{
+  authors?: string[] | undefined;
+  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  entities?: string[] | undefined;
+  jobCategory?: JobCategory | undefined;
+  jobEmployment?: JobEmployment | undefined;
+  jobExperience?: JobExperience | undefined;
+  jobRemote?: boolean | undefined;
+  limit: number;
+  offset: number;
+  query: string;
+  searchService: SearchService;
+  searchType: SearchType;
+  sort: SortType;
+  tags?: string[] | undefined;
+}} params Parameter description
+*/
 async function executeSearch(params: {
   authors?: string[] | undefined;
   categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
@@ -636,7 +1108,10 @@ async function trackSearchAnalytics(
     tags?: string[];
   },
   resultCount: number,
-  reqLogger: { error: (context: Record<string, unknown>, message: string) => void; warn: (context: Record<string, unknown>, message: string) => void }
+  reqLogger: {
+    error: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }
 ) {
   if (!query.trim()) {
     return;

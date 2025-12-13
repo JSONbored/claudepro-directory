@@ -1,14 +1,14 @@
 /**
  * Open Graph Image Generation API Route
- * 
+ *
  * Generates dynamic Open Graph images using Next.js ImageResponse.
  * Supports custom title, description, type badge, and tags.
- * 
+ *
  * @example
  * ```ts
  * // Request
  * GET /api/og?title=My%20Title&description=My%20Description&type=AGENT&tags=ai,automation
- * 
+ *
  * // Response (200) - image/png
  * [Binary image data]
  * ```
@@ -16,8 +16,12 @@
 
 import 'server-only';
 import { OG_DEFAULTS, OG_DIMENSIONS } from '@heyclaude/shared-runtime';
-import { createApiRoute, createApiOptionsHandler, ogImageQuerySchema } from '@heyclaude/web-runtime/server';
-import { buildCacheHeaders } from '@heyclaude/web-runtime/server';
+import {
+  buildCacheHeaders,
+  createApiOptionsHandler,
+  createApiRoute,
+  ogImageQuerySchema,
+} from '@heyclaude/web-runtime/server';
 import { ImageResponse } from 'next/og';
 import { NextResponse } from 'next/server';
 
@@ -167,10 +171,10 @@ async function generateOgImage(
 
 /**
  * GET /api/og - Generate Open Graph image
- * 
+ *
  * Generates dynamic Open Graph images using Next.js ImageResponse.
  * Supports custom title, description, type badge, and tags.
- * 
+ *
  * The function reads these optional search parameters:
  * - `title` — title text to render (falls back to OG_DEFAULTS.title)
  * - `description` — descriptive subtitle (falls back to OG_DEFAULTS.description)
@@ -178,28 +182,15 @@ async function generateOgImage(
  * - `tags` — comma-separated list of tags; parsed, trimmed, uniqued, and up to 5 tags rendered
  */
 export const GET = createApiRoute({
-  route: '/api/og',
-  operation: 'OGImageAPI',
-  method: 'GET',
   cors: 'anon',
-  querySchema: ogImageQuerySchema,
-  openapi: {
-    summary: 'Generate Open Graph image',
-    description: 'Generates dynamic Open Graph images using Next.js ImageResponse. Supports custom title, description, type badge, and tags.',
-    tags: ['og', 'images', 'seo'],
-    operationId: 'generateOgImage',
-    responses: {
-      200: {
-        description: 'OG image generated successfully (image/png)',
-      },
-      400: {
-        description: 'Invalid query parameters',
-      },
-    },
-  },
   handler: async ({ logger, query }) => {
     // Zod schema ensures proper types
-    const { title: queryTitle, description: queryDescription, type: queryType, tags: rawTags } = query;
+    const {
+      description: queryDescription,
+      tags: rawTags,
+      title: queryTitle,
+      type: queryType,
+    } = query;
 
     // Use defaults if not provided
     const title = queryTitle ?? OG_DEFAULTS.title;
@@ -250,6 +241,25 @@ export const GET = createApiRoute({
       statusText: imageResponse.statusText,
     });
   },
+  method: 'GET',
+  openapi: {
+    description:
+      'Generates dynamic Open Graph images using Next.js ImageResponse. Supports custom title, description, type badge, and tags.',
+    operationId: 'generateOgImage',
+    responses: {
+      200: {
+        description: 'OG image generated successfully (image/png)',
+      },
+      400: {
+        description: 'Invalid query parameters',
+      },
+    },
+    summary: 'Generate Open Graph image',
+    tags: ['og', 'images', 'seo'],
+  },
+  operation: 'OGImageAPI',
+  querySchema: ogImageQuerySchema,
+  route: '/api/og',
 });
 
 /**

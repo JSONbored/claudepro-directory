@@ -28,7 +28,7 @@ import { logClientErrorBoundary, logClientWarn } from '../../utils/client-logger
 import { usePulse } from '../../hooks/use-pulse.ts';
 import { useCopyToClipboard } from '../../hooks/index.ts';
 import { UI_CLASSES } from '../constants.ts';
-import { Copy, Check } from '../../icons.tsx';
+import { Copy, Check, AlertCircle, RefreshCw } from '../../icons.tsx';
 import { Button } from './button.tsx';
 import {
   Card,
@@ -37,8 +37,10 @@ import {
   CardHeader,
   CardTitle,
 } from './card.tsx';
+import { SPRING } from '../../design-system/index.ts';
+import { motion } from 'motion/react';
 import Link from 'next/link';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 /**
  * Link configuration for error fallback navigation
@@ -114,12 +116,15 @@ function SegmentErrorFallbackUI({
 }) {
   const { segment, title, description, resetText = 'Try again', links = [] } = config;
   const pulse = usePulse();
+  const [isResetting, setIsResetting] = useState(false);
 
   /**
    * Handle reset with recovery tracking.
    * Tracks the error boundary recovery event before calling reset.
    */
   const handleReset = useCallback(() => {
+    setIsResetting(true);
+    
     // Track recovery attempt via click interaction
     pulse
       .click({
@@ -145,34 +150,84 @@ function SegmentErrorFallbackUI({
   }, [pulse, segment, error.digest, reset]);
 
   return (
-    <div className="flex min-h-[60vh] items-center justify-center px-4 py-12">
-      <Card className="w-full max-w-2xl">
-        <CardHeader>
-          <CardTitle className="text-2xl">{title}</CardTitle>
-          <CardDescription>{description}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Button onClick={handleReset} className="w-full sm:w-auto">
-            {resetText}
-          </Button>
-
-          {links.length > 0 && (
-            <div className={`${UI_CLASSES.FLEX_COL_SM_ROW_GAP_3}`}>
-              {links.map((link) => (
-                <Button
-                  key={`${link.href}-${link.label}`}
-                  asChild={true}
-                  variant={link.variant ?? 'outline'}
-                  className="w-full sm:w-auto"
-                >
-                  <Link href={link.href}>{link.label}</Link>
-                </Button>
-              ))}
+    <motion.div
+      className="flex min-h-[60vh] items-center justify-center px-4 py-12"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={SPRING.smooth}
+    >
+      <motion.div
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={SPRING.smooth}
+      >
+        <Card className="w-full max-w-lg text-center">
+          <CardHeader>
+            <div className="mb-4 flex justify-center">
+              <motion.div
+                className="bg-destructive/10 rounded-full p-3"
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ ...SPRING.bouncy, delay: 0.1 }}
+              >
+                <AlertCircle className="text-destructive h-12 w-12" aria-hidden="true" />
+              </motion.div>
             </div>
-          )}
+            <CardTitle className="text-2xl">{title}</CardTitle>
+            <CardDescription className="text-center">{description}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <motion.div
+              className={UI_CLASSES.FLEX_COL_SM_ROW_GAP_3}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ ...SPRING.smooth, delay: 0.3 }}
+            >
+              <Button
+                onClick={handleReset}
+                size="lg"
+                className="w-full sm:w-auto"
+                disabled={isResetting}
+              >
+                <RefreshCw className={`mr-2 h-4 w-4 ${isResetting ? 'animate-spin' : ''}`} />
+                {isResetting ? 'Retrying...' : resetText}
+              </Button>
+            </motion.div>
+
+            {links.length > 0 && (
+              <motion.div
+                className={UI_CLASSES.FLEX_COL_SM_ROW_GAP_3}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ ...SPRING.smooth, delay: 0.35 }}
+              >
+                {links.map((link, index) => (
+                  <motion.div
+                    key={`${link.href}-${link.label}`}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ ...SPRING.smooth, delay: 0.4 + index * 0.05 }}
+                  >
+                    <Button
+                      asChild={true}
+                      size="lg"
+                      variant={link.variant ?? 'outline'}
+                      className="w-full sm:w-auto"
+                    >
+                      <Link href={link.href}>{link.label}</Link>
+                    </Button>
+                  </motion.div>
+                ))}
+              </motion.div>
+            )}
 
           {isDevelopment && error && (
-            <div className="rounded-lg border border-muted-foreground/30 border-dashed bg-muted/30 p-4">
+            <motion.div
+              className="rounded-lg border border-muted-foreground/30 border-dashed bg-muted/30 p-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ ...SPRING.smooth, delay: 0.4 }}
+            >
               <p className="mb-2 font-semibold text-muted-foreground text-sm">
                 Error details
               </p>
@@ -190,11 +245,12 @@ function SegmentErrorFallbackUI({
                   Digest: {error.digest}
                 </p>
               )}
-            </div>
+            </motion.div>
           )}
         </CardContent>
       </Card>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 

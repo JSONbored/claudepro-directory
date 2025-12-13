@@ -4,6 +4,7 @@ import { type Database } from '@heyclaude/database-types';
 import { isValidCategory } from '@heyclaude/web-runtime/core';
 import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import {
   Bookmark,
   BookOpen,
@@ -83,11 +84,12 @@ function Wrapper({
   title: string;
 }) {
   const Icon = category ? ICONS[category] : icon;
+  const shouldReduceMotion = useReducedMotion();
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
+      whileInView={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-50px' }}
       transition={SPRING.smooth}
     >

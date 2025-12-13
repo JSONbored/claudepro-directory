@@ -3,12 +3,12 @@
  *
  * Fetches content templates by category for client-side consumption.
  * Used by the wizard to load templates dynamically.
- * 
+ *
  * @example
  * ```ts
  * // Request
  * GET /api/templates?category=skills
- * 
+ *
  * // Response (200)
  * {
  *   "success": true,
@@ -24,8 +24,14 @@ import 'server-only';
 import { type Database } from '@heyclaude/database-types';
 import { VALID_CATEGORIES } from '@heyclaude/web-runtime/core';
 import { getContentTemplates } from '@heyclaude/web-runtime/data';
-import { createApiRoute, createApiOptionsHandler, categorySchema, badRequestResponse, getOnlyCorsHeaders } from '@heyclaude/web-runtime/server';
-import { buildCacheHeaders } from '@heyclaude/web-runtime/server';
+import {
+  badRequestResponse,
+  buildCacheHeaders,
+  categorySchema,
+  createApiOptionsHandler,
+  createApiRoute,
+  getOnlyCorsHeaders,
+} from '@heyclaude/web-runtime/server';
 import { cacheLife, cacheTag } from 'next/cache';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
@@ -48,34 +54,16 @@ async function getCachedTemplatesForAPI(category: Database['public']['Enums']['c
 
 /**
  * GET /api/templates - Get content templates by category
- * 
+ *
  * Fetches content templates for a specified category.
  * Validates category parameter and returns templates with metadata.
  */
 export const GET = createApiRoute({
-  route: '/api/templates',
-  operation: 'TemplatesAPI',
-  method: 'GET',
   cors: 'anon',
-  querySchema: z.object({
-    category: categorySchema,
-  }),
-  openapi: {
-    summary: 'Get content templates by category',
-    description: 'Fetches content templates by category for client-side consumption. Used by the wizard to load templates dynamically.',
-    tags: ['content', 'templates'],
-    operationId: 'getTemplates',
-    responses: {
-      200: {
-        description: 'Templates retrieved successfully',
-      },
-      400: {
-        description: 'Invalid or missing category parameter',
-      },
-    },
-  },
   handler: async ({ logger, query }) => {
-    const { category } = query as { category: Database['public']['Enums']['content_category'] | null };
+    const { category } = query as {
+      category: Database['public']['Enums']['content_category'] | null;
+    };
 
     // Handle category: schema transforms "all" to null, but this endpoint requires a specific category
     // If category is null (from "all" transformation), return 400 Bad Request (validation error)
@@ -93,7 +81,7 @@ export const GET = createApiRoute({
     }
 
     // Type narrowing: category is validated and guaranteed to be content_category
-    const validCategory = category as Database['public']['Enums']['content_category'];
+    const validCategory = category;
 
     // Fetch templates from cached helper (adds page-level caching on top of data layer caching)
     const templates = await getCachedTemplatesForAPI(validCategory);
@@ -125,6 +113,27 @@ export const GET = createApiRoute({
       }
     );
   },
+  method: 'GET',
+  openapi: {
+    description:
+      'Fetches content templates by category for client-side consumption. Used by the wizard to load templates dynamically.',
+    operationId: 'getTemplates',
+    responses: {
+      200: {
+        description: 'Templates retrieved successfully',
+      },
+      400: {
+        description: 'Invalid or missing category parameter',
+      },
+    },
+    summary: 'Get content templates by category',
+    tags: ['content', 'templates'],
+  },
+  operation: 'TemplatesAPI',
+  querySchema: z.object({
+    category: categorySchema,
+  }),
+  route: '/api/templates',
 });
 
 /**

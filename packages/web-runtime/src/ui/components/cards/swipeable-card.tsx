@@ -37,12 +37,14 @@
  */
 
 import { SPRING } from '../../../design-system/index.ts';
+import { useDragControls } from '../../../hooks/motion/index.ts';
 import { logger } from '../../../logger.ts';
 import { normalizeError } from '../../../errors.ts';
 import { Bookmark, Copy as CopyIcon } from '../../../icons.tsx';
 import { POSITION_PATTERNS, UI_CLASSES } from '../../constants.ts';
 import { COLORS } from '../../../design-tokens/index.ts';
-import { motion, useMotionValue, useTransform } from 'motion/react';
+import { motion } from 'motion/react';
+import { useMotionValue, useTransform } from '../../../hooks/motion/index.ts';
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 
@@ -74,6 +76,7 @@ export function SwipeableCardWrapper({
 }: SwipeableCardWrapperProps) {
   const [isMobile, setIsMobile] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const dragControls = useDragControls();
   // Spring animation config from design system
   const springSmooth = SPRING.smooth;
 
@@ -179,29 +182,40 @@ export function SwipeableCardWrapper({
       {/* Draggable Card Content */}
       <motion.div
         drag="x"
+        dragControls={dragControls}
         dragConstraints={{ left: -120, right: 120 }}
         dragElastic={0.2}
-        dragMomentum={false}
+        dragMomentum={true}
+        dragDirectionLock={true}
+        dragTransition={{ bounceStiffness: 300, bounceDamping: 20 }}
         style={{ x }}
         onDragEnd={(
           _event: MouseEvent | TouchEvent | PointerEvent,
           info: { offset: { x: number; y: number }; velocity: { x: number; y: number } }
         ) => {
           try {
-            // Swipe right threshold: 100px
-            if (info.offset.x > 100 && onSwipeRight) {
+            const threshold = 100;
+            const velocityThreshold = 500; // Minimum velocity for momentum-based swipe
+            
+            // Check if swipe meets threshold OR has sufficient velocity (momentum-based)
+            const hasRightMomentum = info.offset.x > 50 && info.velocity.x > velocityThreshold;
+            const hasLeftMomentum = info.offset.x < -50 && info.velocity.x < -velocityThreshold;
+            
+            // Swipe right threshold: 100px OR momentum-based
+            if ((info.offset.x > threshold || hasRightMomentum) && onSwipeRight) {
               onSwipeRight();
-              // Snap back with spring
+              // Animate back with momentum
               x.set(0);
             }
-            // Swipe left threshold: -100px
-            else if (info.offset.x < -100 && onSwipeLeft) {
+            // Swipe left threshold: -100px OR momentum-based
+            else if ((info.offset.x < -threshold || hasLeftMomentum) && onSwipeLeft) {
               onSwipeLeft();
-              // Snap back with spring
+              // Animate back with momentum
               x.set(0);
             }
-            // Not enough swipe - snap back
+            // Not enough swipe - animate back smoothly
             else {
+              // Animate back to original position
               x.set(0);
             }
           } catch (error) {

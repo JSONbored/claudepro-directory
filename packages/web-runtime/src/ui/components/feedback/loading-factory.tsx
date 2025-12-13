@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Loading Component Factory - Database-First Configuration
  * Configuration-driven skeleton system from category_configs table.
@@ -18,6 +20,7 @@ import {
   PageHeaderSkeleton,
   Skeleton,
 } from './loading-skeleton.tsx';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/card.tsx';
 import { motion } from 'motion/react';
 
 // Pre-generate skeleton keys for common counts
@@ -68,7 +71,9 @@ const SKELETON_CONFIGS: Record<string, SkeletonConfig> = {
 
 /**
  * Category list page loading
- * Matches structure of /[category] pages
+ * Perfectly matches structure of /[category] pages:
+ * - CategoryHeroShell (icon, title, description, badges, submit button)
+ * - CategoryPageContent (ContentSearchClient + ContentSidebar)
  */
 export function CategoryLoading({
   variant = 'grid3',
@@ -79,105 +84,358 @@ export function CategoryLoading({
 } = {}) {
   const selectedVariant = variant || 'grid3';
   const config = SKELETON_CONFIGS[selectedVariant] as SkeletonConfig;
+  const prefersReducedMotion =
+    typeof window !== 'undefined' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   return (
-    <div className={`container mx-auto ${UI_CLASSES.PADDING_X_DEFAULT} py-8`}>
-      {/* Header */}
-      <PageHeaderSkeleton />
+    <motion.div
+      className="bg-background min-h-screen"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={SPRING.smooth}
+    >
+      {/* CategoryHeroShell - Hero section with icon, title, description, badges, submit button */}
+      <motion.section
+        className="border-border border-b backdrop-blur-sm"
+        style={{ backgroundColor: 'color-mix(in srgb, var(--code-bg) 30%, transparent)' }}
+        initial={!prefersReducedMotion ? { opacity: 0, y: -20 } : false}
+        animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+        transition={{ ...SPRING.smooth, delay: 0.1 }}
+      >
+        <div className="container mx-auto px-4 py-20">
+          <div className="mx-auto max-w-3xl text-center">
+            {/* Icon */}
+            <motion.div
+              className="mb-6 flex justify-center"
+              initial={!prefersReducedMotion ? { scale: 0, rotate: -180 } : false}
+              animate={!prefersReducedMotion ? { scale: 1, rotate: 0 } : {}}
+              transition={{ ...SPRING.bouncy, delay: 0.15 }}
+            >
+              <div className="bg-accent/10 rounded-full p-3" aria-hidden="true">
+                <Skeleton size="xl" width="xl" rounded="full" className="h-12 w-12" />
+              </div>
+            </motion.div>
 
-      {/* Search bar (optional) */}
-      {showSearch && (
-        <div className={UI_CLASSES.MARGIN_RELAXED}>
-          <Skeleton size="lg" width="3xl" className="h-12" />
+            {/* Title with ExploreDropdown */}
+            <motion.div
+              className="flex items-center justify-center gap-4"
+              initial={!prefersReducedMotion ? { opacity: 0, y: 10 } : false}
+              animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+              transition={{ ...SPRING.smooth, delay: 0.2 }}
+            >
+              <Skeleton size="xl" width="2xl" className="h-14" />
+              <Skeleton size="sm" width="xs" rounded="md" className="hidden h-8 sm:block" />
+            </motion.div>
+
+            {/* Description */}
+            <motion.p
+              className="text-muted-foreground mt-4 text-lg sm:text-xl"
+              initial={!prefersReducedMotion ? { opacity: 0 } : false}
+              animate={!prefersReducedMotion ? { opacity: 1 } : {}}
+              transition={{ ...SPRING.smooth, delay: 0.25 }}
+            >
+              <Skeleton size="md" width="3xl" className="mx-auto h-6" />
+            </motion.p>
+
+            {/* Badges (streamed in Suspense) */}
+            <motion.div
+              className="mb-8 flex list-none flex-wrap justify-center gap-2"
+              initial={!prefersReducedMotion ? { opacity: 0 } : false}
+              animate={!prefersReducedMotion ? { opacity: 1 } : {}}
+              transition={{ ...SPRING.smooth, delay: 0.3 }}
+            >
+              <Skeleton size="sm" width="xs" rounded="full" className="h-8 w-24" />
+              <Skeleton size="sm" width="xs" rounded="full" className="h-8 w-32" />
+              <Skeleton size="sm" width="xs" rounded="full" className="h-8 w-28" />
+            </motion.div>
+
+            {/* Submit button + ExploreDropdown (mobile) */}
+            <motion.div
+              className="flex items-center justify-center gap-2"
+              initial={!prefersReducedMotion ? { opacity: 0, y: 10 } : false}
+              animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+              transition={{ ...SPRING.smooth, delay: 0.35 }}
+            >
+              <Skeleton size="sm" width="lg" rounded="md" className="h-9" />
+              <Skeleton size="sm" width="xs" rounded="md" className="h-8 sm:hidden" />
+            </motion.div>
+          </div>
         </div>
-      )}
+      </motion.section>
 
-      {/* Content grid */}
-      <div className={config.gridClass}>
-        {Array.from({ length: config.totalCards }).map((_, i) => (
-          <ConfigCardSkeleton key={KEYS_9[i]} />
-        ))}
-      </div>
-    </div>
+      {/* CategoryPageContent - ContentSearchClient + ContentSidebar */}
+      <motion.section
+        className="container mx-auto px-4 py-12"
+        initial={!prefersReducedMotion ? { opacity: 0, y: 20 } : false}
+        animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+        transition={{ ...SPRING.smooth, delay: 0.4 }}
+      >
+        <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_18rem]">
+          {/* Main Content - ContentSearchClient */}
+          <motion.div
+            className="min-w-0"
+            initial={!prefersReducedMotion ? { opacity: 0, x: -20 } : false}
+            animate={!prefersReducedMotion ? { opacity: 1, x: 0 } : {}}
+            transition={{ ...SPRING.smooth, delay: 0.45 }}
+          >
+            <div className="space-y-8">
+              {/* UnifiedSearch - Search bar */}
+              {showSearch && (
+                <Skeleton size="xl" width="3xl" className="h-14" />
+              )}
+
+              {/* Filters/Quick tags */}
+              <div className="flex flex-wrap gap-2">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <motion.div
+                    key={i}
+                    initial={!prefersReducedMotion ? { opacity: 0, scale: 0.8 } : false}
+                    animate={!prefersReducedMotion ? { opacity: 1, scale: 1 } : {}}
+                    transition={{ ...SPRING.loading, delay: 0.5 + i * STAGGER.micro }}
+                  >
+                    <Skeleton size="sm" width="xs" rounded="full" className="h-8" />
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Results grid */}
+              <div className={config.gridClass}>
+                {Array.from({ length: config.totalCards }).map((_, i) => (
+                  <motion.div
+                    key={KEYS_9[i]}
+                    initial={!prefersReducedMotion ? { opacity: 0, y: 20 } : false}
+                    animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+                    transition={{ ...SPRING.loading, delay: 0.6 + i * STAGGER.micro }}
+                  >
+                    <ConfigCardSkeleton />
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Sidebar - ContentSidebar (JobsPromo + RecentlyViewedSidebar) */}
+          <motion.aside
+            className="w-full space-y-6 lg:sticky lg:top-24 lg:h-fit"
+            initial={!prefersReducedMotion ? { opacity: 0, x: 20 } : false}
+            animate={!prefersReducedMotion ? { opacity: 1, x: 0 } : {}}
+            transition={{ ...SPRING.smooth, delay: 0.5 }}
+          >
+            {/* JobsPromo card */}
+            <motion.div
+              className="rounded-lg border p-6 space-y-4"
+              initial={!prefersReducedMotion ? { opacity: 0, y: 10 } : false}
+              animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+              transition={{ ...SPRING.loading, delay: 0.55 }}
+            >
+              <Skeleton size="md" width="sm" className="mb-2" />
+              <Skeleton size="sm" width="3xl" />
+              <Skeleton size="sm" width="2xl" />
+              <Skeleton size="md" width="3xl" rounded="md" className="h-10" />
+            </motion.div>
+
+            {/* RecentlyViewedSidebar */}
+            <motion.div
+              className="rounded-lg border p-4 space-y-3"
+              initial={!prefersReducedMotion ? { opacity: 0, y: 10 } : false}
+              animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+              transition={{ ...SPRING.loading, delay: 0.6 }}
+            >
+              <Skeleton size="sm" width="sm" />
+              <div className="space-y-2">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="flex items-center gap-3">
+                    <Skeleton size="sm" width="sm" rounded="md" className="h-10 w-10" />
+                    <div className="flex-1 space-y-1">
+                      <Skeleton size="sm" width="2/3" />
+                      <Skeleton size="xs" width="xs" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </motion.aside>
+        </div>
+      </motion.section>
+    </motion.div>
   );
 }
 
 /**
  * Detail page loading
- * Matches structure of /[category]/[slug] pages
+ * Perfectly matches structure of /[category]/[slug] pages with beautiful animations
+ * Structure: Header (back + title + badges + actions) → Metadata → Quick Actions → Main (2/3) + Sidebar (1/3)
  */
 export function DetailPageLoading() {
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="border-border/50 border-b bg-card/30">
-        <div className={`container mx-auto ${UI_CLASSES.PADDING_X_DEFAULT} py-8`}>
+    <motion.div
+      className="min-h-screen bg-background"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={SPRING.smooth}
+    >
+      {/* Header - DetailHeader with back button, icon, title, badges, actions sidebar */}
+      <motion.div
+        className="border-border bg-code/50 border-b backdrop-blur-sm"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ ...SPRING.smooth, delay: 0.1 }}
+      >
+        <div className="container mx-auto px-4 py-8">
           {/* Back button */}
-          <Skeleton size="sm" width="sm" className={UI_CLASSES.MARGIN_COMFORTABLE} />
+          <Skeleton size="sm" width="sm" className="mb-6" />
 
-          {/* Title section */}
-          <div
-            className={`${UI_CLASSES.MARGIN_COMFORTABLE} flex items-start ${UI_CLASSES.SPACE_COMFORTABLE}`}
-          >
-            <Skeleton size="xl" width="xs" className="shrink-0" />
-            <div className={`flex-1 ${UI_CLASSES.SPACE_Y_4}`}>
-              <Skeleton size="xl" width="3/4" />
-              <Skeleton size="md" width="3xl" />
+          {/* Title section with icon, title, description, badges, and actions sidebar */}
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_300px] lg:gap-10">
+            {/* Left: Content info */}
+            <div className="space-y-4">
+              {/* Badges */}
+              <div className="flex items-center gap-2">
+                <Skeleton size="sm" width="xs" rounded="full" />
+                <Skeleton size="sm" width="xs" rounded="full" />
+              </div>
+              {/* Title */}
+              <Skeleton size="xl" width="3/4" className="h-10" />
+              {/* Description */}
+              <Skeleton size="md" width="2xl" className="h-6" />
             </div>
-          </div>
 
-          {/* Metadata badges */}
-          <div className={`flex flex-wrap ${UI_CLASSES.SPACE_COMPACT}`}>
-            <Skeleton size="sm" width="xs" rounded="full" />
-            <Skeleton size="sm" width="xs" rounded="full" />
-            <Skeleton size="sm" width="xs" rounded="full" />
+            {/* Right: Actions sidebar (sticky) */}
+            <aside className="border-border/50 bg-card/50 space-y-3 rounded-lg border p-4 lg:sticky lg:top-24 lg:self-start">
+              <Skeleton size="md" width="3xl" className="h-10" />
+              <Skeleton size="sm" width="3xl" className="h-8" />
+            </aside>
           </div>
         </div>
-      </div>
+      </motion.div>
+
+      {/* Metadata section - DetailMetadata */}
+      <motion.div
+        className="container mx-auto px-4 py-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ ...SPRING.smooth, delay: 0.2 }}
+      >
+        <div className="flex flex-wrap items-center gap-4 text-sm">
+          <div className="flex items-center gap-1">
+            <Skeleton size="sm" width="xs" rounded="full" className="h-4 w-4" />
+            <Skeleton size="sm" width="xs" />
+          </div>
+          <div className="flex items-center gap-1">
+            <Skeleton size="sm" width="xs" rounded="full" className="h-4 w-4" />
+            <Skeleton size="sm" width="xs" />
+          </div>
+          <div className="flex items-center gap-1">
+            <Skeleton size="sm" width="xs" rounded="full" className="h-4 w-4" />
+            <Skeleton size="sm" width="xs" />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Skeleton size="xs" width="xs" rounded="full" />
+            <Skeleton size="xs" width="xs" rounded="full" />
+            <Skeleton size="xs" width="xs" rounded="full" />
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Quick Actions Bar - DetailQuickActionsBar (sticky) */}
+      <motion.section
+        className="sticky top-16 z-20 mb-8"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ ...SPRING.smooth, delay: 0.25 }}
+      >
+        <div className="container mx-auto px-4">
+          <div className="border-border/60 bg-card/80 rounded-2xl border p-3">
+            <div className="flex flex-wrap gap-2">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Skeleton key={i} size="sm" width="lg" rounded="md" className="h-8" />
+              ))}
+            </div>
+          </div>
+        </div>
+      </motion.section>
 
       {/* Content with sidebar */}
-      <div
-        className={`container mx-auto ${UI_CLASSES.PADDING_X_DEFAULT} ${UI_CLASSES.PADDING_Y_SECTION}`}
+      <motion.div
+        className="container mx-auto px-4 py-8"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ ...SPRING.smooth, delay: 0.3 }}
       >
-        <div className={`grid grid-cols-1 ${UI_CLASSES.SPACE_LOOSE} lg:grid-cols-3`}>
-          {/* Main content */}
-          <div className={`${UI_CLASSES.SPACE_Y_6} lg:col-span-2`}>
-            {/* Content card */}
-            <div
-              className={`${UI_CLASSES.SPACE_Y_4} rounded-lg border ${UI_CLASSES.PADDING_COMFORTABLE}`}
-            >
-              <Skeleton size="md" width="3xl" />
-              <Skeleton size="sm" width="3xl" />
-              <Skeleton size="sm" width="3xl" />
-              <Skeleton size="sm" width="2/3" />
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+          {/* Main content - TabbedDetailLayout */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Tabs */}
+            <div className="flex gap-2 border-b pb-2">
+              <Skeleton size="md" width="lg" rounded="md" className="h-10" />
+              <Skeleton size="md" width="lg" rounded="md" className="h-10" />
+              <Skeleton size="md" width="lg" rounded="md" className="h-10" />
             </div>
 
-            {/* Code block skeleton */}
-            <div
-              className={`${UI_CLASSES.SPACE_Y_4} rounded-lg border ${UI_CLASSES.PADDING_COMFORTABLE}`}
+            {/* Content sections */}
+            <motion.div
+              className="space-y-6"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ ...SPRING.loading, delay: 0.4 }}
             >
-              <Skeleton size="sm" width="sm" />
-              <div className={UI_CLASSES.SPACE_Y_2}>
-                {Array.from({ length: 8 }).map((_, i) => (
-                  <Skeleton key={KEYS_8[i]} size="sm" width={i % 3 === 0 ? '2/3' : '3xl'} />
+              {/* Prose content */}
+              <div className="prose space-y-4">
+                <Skeleton size="md" width="3xl" />
+                <Skeleton size="sm" width="3xl" />
+                <Skeleton size="sm" width="3xl" />
+                <Skeleton size="sm" width="2/3" />
+              </div>
+
+              {/* Code block */}
+              <div className="rounded-lg border p-4">
+                <Skeleton size="sm" width="sm" className="mb-2" />
+                <div className="space-y-2">
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <Skeleton key={KEYS_8[i]} size="sm" width={i % 3 === 0 ? '2/3' : '3xl'} />
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Sidebar - TOC + DetailSidebar + RecentlyViewedSidebar */}
+          <motion.aside
+            className="space-y-6 lg:self-start"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ ...SPRING.smooth, delay: 0.4 }}
+          >
+            {/* TOC */}
+            <div className="rounded-lg border p-4">
+              <Skeleton size="sm" width="sm" className="mb-4" />
+              <div className="space-y-2">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Skeleton key={i} size="xs" width="xs" />
                 ))}
               </div>
             </div>
-          </div>
 
-          {/* Sidebar */}
-          <div className={UI_CLASSES.SPACE_Y_6}>
-            <div
-              className={`${UI_CLASSES.SPACE_Y_4} rounded-lg border ${UI_CLASSES.PADDING_COMFORTABLE}`}
-            >
-              <Skeleton size="md" width="sm" />
-              <Skeleton size="sm" width="3xl" />
-              <Skeleton size="sm" width="3xl" />
+            {/* Related items */}
+            <div className="rounded-lg border p-4">
+              <Skeleton size="sm" width="sm" className="mb-4" />
+              <div className="space-y-3">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="flex items-center gap-3">
+                    <Skeleton size="sm" width="sm" rounded="md" className="h-10 w-10" />
+                    <div className="flex-1 space-y-1">
+                      <Skeleton size="sm" width="2/3" />
+                      <Skeleton size="xs" width="xs" />
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          </motion.aside>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 
@@ -186,9 +444,23 @@ export function DetailPageLoading() {
  * Matches structure of guide pages (more text-heavy)
  */
 export function GuideDetailLoading() {
+  const prefersReducedMotion =
+    typeof window !== 'undefined' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   return (
-    <div className="min-h-screen bg-background">
-      <div className="border-border/50 border-b bg-card/30">
+    <motion.div
+      className="min-h-screen bg-background"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={SPRING.smooth}
+    >
+      <motion.div
+        className="border-border/50 border-b bg-card/30"
+        initial={!prefersReducedMotion ? { opacity: 0, y: -20 } : false}
+        animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+        transition={{ ...SPRING.smooth, delay: 0.1 }}
+      >
         <div className={`container mx-auto ${UI_CLASSES.PADDING_X_DEFAULT} py-8`}>
           <Skeleton size="sm" width="sm" className={UI_CLASSES.MARGIN_COMFORTABLE} />
           <div className="max-w-4xl">
@@ -203,15 +475,25 @@ export function GuideDetailLoading() {
             </div>
             <div className={`flex flex-wrap ${UI_CLASSES.SPACE_COMPACT}`}>
               {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={KEYS_5[i]} size="sm" width="xs" rounded="full" />
+                <motion.div
+                  key={KEYS_5[i]}
+                  initial={!prefersReducedMotion ? { opacity: 0, scale: 0.8 } : false}
+                  animate={!prefersReducedMotion ? { opacity: 1, scale: 1 } : {}}
+                  transition={{ ...SPRING.loading, delay: 0.2 + i * STAGGER.micro }}
+                >
+                  <Skeleton size="sm" width="xs" rounded="full" />
+                </motion.div>
               ))}
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      <div
+      <motion.div
         className={`container mx-auto ${UI_CLASSES.PADDING_X_DEFAULT} ${UI_CLASSES.PADDING_Y_SECTION}`}
+        initial={!prefersReducedMotion ? { opacity: 0, y: 20 } : false}
+        animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+        transition={{ ...SPRING.smooth, delay: 0.2 }}
       >
         <div className={`grid grid-cols-1 ${UI_CLASSES.SPACE_LOOSE} lg:grid-cols-3`}>
           <div className={`${UI_CLASSES.SPACE_Y_6} lg:col-span-2`}>
@@ -219,54 +501,118 @@ export function GuideDetailLoading() {
               className={`${UI_CLASSES.SPACE_Y_4} rounded-lg border ${UI_CLASSES.PADDING_COMFORTABLE}`}
             >
               {Array.from({ length: 12 }).map((_, i) => (
-                <Skeleton key={KEYS_12[i]} size="sm" width={i % 4 === 0 ? '2/3' : '3xl'} />
+                <motion.div
+                  key={KEYS_12[i]}
+                  initial={!prefersReducedMotion ? { opacity: 0, x: -20 } : false}
+                  animate={!prefersReducedMotion ? { opacity: 1, x: 0 } : {}}
+                  transition={{ ...SPRING.loading, delay: 0.3 + i * STAGGER.micro }}
+                >
+                  <Skeleton size="sm" width={i % 4 === 0 ? '2/3' : '3xl'} />
+                </motion.div>
               ))}
             </div>
           </div>
           <div className={UI_CLASSES.SPACE_Y_6}>
-            <div
+            <motion.div
               className={`${UI_CLASSES.SPACE_Y_4} rounded-lg border ${UI_CLASSES.PADDING_COMFORTABLE}`}
+              initial={!prefersReducedMotion ? { opacity: 0, x: 20 } : false}
+              animate={!prefersReducedMotion ? { opacity: 1, x: 0 } : {}}
+              transition={{ ...SPRING.loading, delay: 0.4 }}
             >
               <Skeleton size="md" width="sm" />
               {Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton key={KEYS_3[i]} size="sm" width="3xl" />
+                <motion.div
+                  key={KEYS_3[i]}
+                  initial={!prefersReducedMotion ? { opacity: 0, y: 10 } : false}
+                  animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+                  transition={{ ...SPRING.loading, delay: 0.5 + i * STAGGER.micro }}
+                >
+                  <Skeleton size="sm" width="3xl" />
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           </div>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 
 /**
  * Search results loading
  * Matches structure of search page with filters
+ * 
+ * NOTE: The actual search page uses SearchPageSkeleton directly.
+ * This factory function is kept for backwards compatibility with getLoadingComponent('/search').
  */
 export function SearchResultsLoading() {
+  const prefersReducedMotion =
+    typeof window !== 'undefined' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   return (
-    <div className={UI_CLASSES.SPACE_Y_6}>
+    <motion.div
+      className={UI_CLASSES.SPACE_Y_6}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={SPRING.smooth}
+    >
       {/* Results count */}
-      <Skeleton size="sm" width="sm" />
+      <motion.div
+        initial={!prefersReducedMotion ? { opacity: 0, y: -20 } : false}
+        animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+        transition={{ ...SPRING.smooth, delay: 0.1 }}
+      >
+        <Skeleton size="sm" width="sm" />
+      </motion.div>
 
       {/* Results grid */}
-      <div className={UI_CLASSES.GRID_RESPONSIVE_3_TIGHT}>
+      <motion.div
+        className={UI_CLASSES.GRID_RESPONSIVE_3_TIGHT}
+        initial={!prefersReducedMotion ? { opacity: 0, y: 20 } : false}
+        animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+        transition={{ ...SPRING.smooth, delay: 0.2 }}
+      >
         {Array.from({ length: 9 }).map((_, i) => (
-          <ConfigCardSkeleton key={KEYS_9[i]} />
+          <motion.div
+            key={KEYS_9[i]}
+            initial={!prefersReducedMotion ? { opacity: 0, scale: 0.95 } : false}
+            animate={!prefersReducedMotion ? { opacity: 1, scale: 1 } : {}}
+            transition={{ ...SPRING.loading, delay: 0.3 + i * STAGGER.micro }}
+          >
+            <ConfigCardSkeleton />
+          </motion.div>
         ))}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 
 /**
  * Homepage loading (complex with multiple sections)
+ * 
+ * NOTE: The actual homepage uses HomepageSkeleton directly.
+ * This factory function is kept for backwards compatibility with getLoadingComponent('/').
  */
 export function HomePageLoading() {
+  const prefersReducedMotion =
+    typeof window !== 'undefined' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   return (
-    <div className="min-h-screen bg-background">
+    <motion.div
+      className="min-h-screen bg-background"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={SPRING.smooth}
+    >
       {/* Hero */}
-      <section className="border-border/50 border-b">
+      <motion.section
+        className="border-border/50 border-b"
+        initial={!prefersReducedMotion ? { opacity: 0, y: -20 } : false}
+        animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+        transition={{ ...SPRING.smooth, delay: 0.1 }}
+      >
         <div className={`container mx-auto ${UI_CLASSES.PADDING_X_DEFAULT} py-16 text-center`}>
           <Skeleton
             size="xl"
@@ -275,38 +621,71 @@ export function HomePageLoading() {
           />
           <Skeleton size="md" width="2/3" className="mx-auto" />
         </div>
-      </section>
+      </motion.section>
 
       {/* Search */}
-      <div className={`container mx-auto ${UI_CLASSES.PADDING_X_DEFAULT} py-8`}>
+      <motion.div
+        className={`container mx-auto ${UI_CLASSES.PADDING_X_DEFAULT} py-8`}
+        initial={!prefersReducedMotion ? { opacity: 0, y: 20 } : false}
+        animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+        transition={{ ...SPRING.smooth, delay: 0.2 }}
+      >
         <div className="mx-auto max-w-4xl">
           <Skeleton size="lg" width="3xl" className={`${UI_CLASSES.MARGIN_COMFORTABLE} h-14`} />
           {/* Stats */}
           <div className={`flex flex-wrap justify-center ${UI_CLASSES.SPACE_COMFORTABLE}`}>
             {Array.from({ length: 7 }).map((_, i) => (
-              <Skeleton key={KEYS_7[i]} size="sm" width="sm" />
+              <motion.div
+                key={KEYS_7[i]}
+                initial={!prefersReducedMotion ? { opacity: 0, scale: 0.8 } : false}
+                animate={!prefersReducedMotion ? { opacity: 1, scale: 1 } : {}}
+                transition={{ ...SPRING.loading, delay: 0.3 + i * STAGGER.micro }}
+              >
+                <Skeleton size="sm" width="sm" />
+              </motion.div>
             ))}
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Content sections */}
-      <div className={`container mx-auto ${UI_CLASSES.PADDING_X_DEFAULT} pb-16`}>
+      <motion.div
+        className={`container mx-auto ${UI_CLASSES.PADDING_X_DEFAULT} pb-16`}
+        initial={!prefersReducedMotion ? { opacity: 0, y: 20 } : false}
+        animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+        transition={{ ...SPRING.smooth, delay: 0.4 }}
+      >
         {Array.from({ length: 3 }).map((_, sectionIndex) => (
-          <div key={KEYS_3[sectionIndex]} className={UI_CLASSES.MARGIN_SECTION}>
+          <motion.div
+            key={KEYS_3[sectionIndex]}
+            className={UI_CLASSES.MARGIN_SECTION}
+            initial={!prefersReducedMotion ? { opacity: 0, y: 20 } : false}
+            animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+            transition={{ ...SPRING.loading, delay: 0.5 + sectionIndex * STAGGER.fast }}
+          >
             <div className={`${UI_CLASSES.MARGIN_COMFORTABLE} flex items-center justify-between`}>
               <Skeleton size="lg" width="lg" />
               <Skeleton size="sm" width="sm" />
             </div>
             <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
               {Array.from({ length: 6 }).map((_, i) => (
-                <ConfigCardSkeleton key={KEYS_6[i]} />
+                <motion.div
+                  key={KEYS_6[i]}
+                  initial={!prefersReducedMotion ? { opacity: 0, scale: 0.95 } : false}
+                  animate={!prefersReducedMotion ? { opacity: 1, scale: 1 } : {}}
+                  transition={{
+                    ...SPRING.loading,
+                    delay: 0.6 + sectionIndex * STAGGER.fast + i * STAGGER.micro,
+                  }}
+                >
+                  <ConfigCardSkeleton />
+                </motion.div>
               ))}
             </div>
-          </div>
+          </motion.div>
         ))}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 
@@ -314,73 +693,112 @@ export function HomePageLoading() {
  * Changelog list loading
  * Matches the changelog page structure with header and timeline view
  * Uses the same structure as ChangelogContentSkeleton component
+ * 
+ * NOTE: The actual changelog page uses ChangelogContentSkeleton directly in Suspense.
+ * This factory function is kept for backwards compatibility with getLoadingComponent('/changelog').
  */
 export function ChangelogListLoading() {
+  const prefersReducedMotion =
+    typeof window !== 'undefined' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   return (
-    <div className="bg-background relative min-h-screen">
+    <motion.div
+      className="bg-background relative min-h-screen"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={SPRING.smooth}
+    >
       {/* Header - EXACTLY matches changelog page */}
-      <div className="border-border/50 border-b">
+      <motion.div
+        className="border-border/50 border-b"
+        initial={!prefersReducedMotion ? { opacity: 0, y: -20 } : false}
+        animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+        transition={{ ...SPRING.smooth, delay: 0.1 }}
+      >
         <div className="relative mx-auto max-w-5xl">
           <div className="flex items-center justify-between p-3">
-            <Skeleton size="xl" width="lg" />
+            <Skeleton size="xl" width="lg" className="h-10" />
             {/* ThemeToggle placeholder */}
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Timeline skeleton - matches ChangelogContentSkeleton structure */}
-      <div className="border-border bg-card/50 overflow-hidden rounded-lg border p-4 shadow-sm backdrop-blur-sm sm:p-6 mx-auto max-w-5xl my-8">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-[240px_1fr] md:gap-8 lg:gap-12">
-          {/* Timeline Column (Left) - Hidden on mobile */}
-          <div className="relative hidden md:block">
-            <div className="bg-border/40 absolute top-0 bottom-0 left-3 w-px" aria-hidden="true" />
-            <div className="relative pl-8 space-y-8">
-              {Array.from({ length: 6 }).map((_, index) => (
-                <div key={`timeline-marker-${index}`} className="space-y-2">
-                  <Skeleton size="sm" width="xs" />
-                  <Skeleton size="sm" width="sm" />
+      <motion.div
+        className="mx-auto my-8 max-w-5xl"
+        initial={!prefersReducedMotion ? { opacity: 0, y: 20 } : false}
+        animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+        transition={{ ...SPRING.smooth, delay: 0.2 }}
+      >
+        <div className="space-y-0">
+          {KEYS_6.map((key, index) => (
+            <motion.div
+              key={key}
+              className="relative pb-10 last:pb-0"
+              initial={!prefersReducedMotion ? { opacity: 0, y: 20 } : false}
+              animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+              transition={{
+                ...SPRING.loading,
+                mass: 0.5,
+                delay: 0.3 + index * STAGGER.micro,
+              }}
+            >
+              <div className="flex flex-col gap-y-6 md:flex-row">
+                {/* Left: Timeline markers (sticky) */}
+                <div className="flex-shrink-0 md:w-48">
+                  <div className="pb-10 md:sticky md:top-8">
+                    {/* Date */}
+                    <Skeleton size="sm" width="xs" className="mb-3" />
+                    {/* Version badge */}
+                    <Skeleton size="md" width="md" rounded="lg" className="h-10 w-10" />
+                  </div>
                 </div>
-              ))}
-            </div>
-          </div>
 
-          {/* Content Column (Right) */}
-          <div className="space-y-0">
-            {Array.from({ length: 6 }).map((_, index) => (
-              <div
-                key={`changelog-entry-${index}`}
-                className="border-border/20 border-b pt-6 pb-12 last:border-b-0 last:pb-0 md:pt-8 md:pb-20"
-              >
-                <div className="space-y-4">
-                  <div className="mb-3 flex items-center gap-2">
-                    <Skeleton size="sm" width="xs" />
-                    <Skeleton size="sm" width="sm" />
+                {/* Right: Content */}
+                <div className="relative flex-1 pb-10 pl-0 md:pl-8">
+                  {/* Vertical timeline line */}
+                  <div className="hidden md:block absolute top-2 left-0 w-px h-full bg-border">
+                    {/* Timeline dot */}
+                    <div className="hidden md:block absolute -translate-x-1/2 size-3 bg-primary rounded-full z-10" />
                   </div>
-                  <Skeleton size="lg" width="2/3" className="mb-2" />
-                  <Skeleton size="sm" width="3xl" className="mb-4" />
-                  <div className={`${UI_CLASSES.FLEX_WRAP_GAP_2} mb-4`}>
-                    <Skeleton size="sm" width="xs" rounded="full" />
-                    <Skeleton size="sm" width="xs" rounded="full" />
-                    <Skeleton size="sm" width="xs" rounded="full" />
-                  </div>
-                  <div className="space-y-3">
-                    <Skeleton size="md" width="3xl" />
-                    <Skeleton size="sm" width="3xl" />
-                    <Skeleton size="sm" width="2/3" />
+
+                  <div className="relative z-10 space-y-6">
+                    {/* Title */}
+                    <div className="flex flex-col gap-2">
+                      <Skeleton size="lg" width="3/4" className="h-8" />
+                      {/* Tags */}
+                      <div className={`${UI_CLASSES.FLEX_WRAP_GAP_2}`}>
+                        <Skeleton size="xs" width="xs" rounded="full" className="h-6" />
+                        <Skeleton size="xs" width="xs" rounded="full" className="h-6" />
+                        <Skeleton size="xs" width="xs" rounded="full" className="h-6" />
+                      </div>
+                    </div>
+
+                    {/* Content prose */}
+                    <div className="space-y-3">
+                      <Skeleton size="md" width="3xl" />
+                      <Skeleton size="sm" width="3xl" />
+                      <Skeleton size="sm" width="3xl" />
+                      <Skeleton size="sm" width="2/3" />
+                    </div>
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
+            </motion.div>
+          ))}
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 
 /**
  * Submit page loading
- * Matches the submit page structure: hero, form (left), sidebar (right)
+ * Perfectly matches the submit page structure: hero, form (left), sidebar (right)
+ * 
+ * NOTE: The actual submit page uses SubmitPageSkeleton directly.
+ * This factory function is kept for backwards compatibility with getLoadingComponent('/submit').
  */
 export function SubmitPageLoading() {
   const prefersReducedMotion =
@@ -388,45 +806,63 @@ export function SubmitPageLoading() {
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   return (
-    <div className="container mx-auto max-w-7xl px-4 py-8 sm:py-12">
-      {/* Hero Header Skeleton */}
+    <motion.div
+      className="container mx-auto max-w-7xl px-4 py-8 sm:py-12"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={SPRING.smooth}
+    >
+      {/* Hero Header */}
       <motion.div
         initial={!prefersReducedMotion ? { opacity: 0, y: -20 } : false}
         animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
-        transition={
-          !prefersReducedMotion
-            ? {
-                ...SPRING.loading,
-                mass: 0.5,
-              }
-            : {}
-        }
+        transition={{ ...SPRING.smooth, delay: 0.1 }}
         className="border-border/50 bg-card relative overflow-hidden rounded-2xl border p-8 mb-8"
       >
-        <div className="grid gap-6 lg:grid-cols-[1fr_auto]">
+        <div className="relative z-10 grid gap-6 lg:grid-cols-[1fr_auto]">
           <div className="space-y-4">
-            <Skeleton size="sm" width="md" rounded="full" />
-            <Skeleton size="xl" width="3xl" />
-            <Skeleton size="sm" width="2xl" />
+            <Skeleton size="sm" width="md" rounded="full" className="h-7" />
+            <Skeleton size="xl" width="xl" className="h-12" />
+            <Skeleton size="md" width="3xl" className="h-6" />
             <div className="flex flex-wrap items-center gap-3">
-              <Skeleton size="sm" width="sm" />
-              <Skeleton size="sm" width="xs" />
-              <Skeleton size="sm" width="md" />
+              {Array.from({ length: 3 }).map((_, i) => (
+                <motion.div
+                  key={i}
+                  initial={!prefersReducedMotion ? { opacity: 0, scale: 0.8 } : false}
+                  animate={!prefersReducedMotion ? { opacity: 1, scale: 1 } : {}}
+                  transition={{ ...SPRING.loading, delay: 0.2 + i * STAGGER.micro }}
+                  className="flex items-center gap-1.5"
+                >
+                  <Skeleton size="sm" width="xs" rounded="full" className="h-4 w-4" />
+                  <Skeleton size="sm" width="xs" className="h-4" />
+                </motion.div>
+              ))}
             </div>
           </div>
           <div className="hidden lg:flex lg:items-center lg:justify-center">
-            <Skeleton size="xl" width="xl" rounded="lg" />
+            <Skeleton size="xl" width="xl" rounded="xl" className="h-32 w-32 rounded-2xl" />
           </div>
         </div>
       </motion.div>
 
-      <div className="grid items-start gap-6 lg:grid-cols-[2fr_1fr] lg:gap-8">
+      {/* Two-column layout: Form + Sidebar */}
+      <motion.div
+        className="grid items-start gap-6 lg:grid-cols-[2fr_1fr] lg:gap-8"
+        initial={!prefersReducedMotion ? { opacity: 0, y: 20 } : false}
+        animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+        transition={{ ...SPRING.smooth, delay: 0.2 }}
+      >
         {/* Form Section (Left) */}
-        <div className="w-full min-w-0">
+        <motion.div
+          className="w-full min-w-0"
+          initial={!prefersReducedMotion ? { opacity: 0, x: -20 } : false}
+          animate={!prefersReducedMotion ? { opacity: 1, x: 0 } : {}}
+          transition={{ ...SPRING.smooth, delay: 0.3 }}
+        >
           <div className="bg-muted/20 rounded-lg p-6 space-y-6">
             <div className="space-y-4">
-              <Skeleton size="lg" width="md" />
-              <Skeleton size="sm" width="3xl" />
+              <Skeleton size="lg" width="md" className="h-8" />
+              <Skeleton size="sm" width="3xl" className="h-5" />
             </div>
             <div className="space-y-4">
               {Array.from({ length: 6 }).map((_, i) => (
@@ -434,57 +870,84 @@ export function SubmitPageLoading() {
                   key={`field-${i}`}
                   initial={!prefersReducedMotion ? { opacity: 0, x: -20 } : false}
                   animate={!prefersReducedMotion ? { opacity: 1, x: 0 } : {}}
-                  transition={
-                    !prefersReducedMotion
-                      ? {
-                          ...SPRING.default,
-                          mass: 0.5,
-                          delay: i * STAGGER.micro,
-                        }
-                      : {}
-                  }
+                  transition={{ ...SPRING.loading, delay: 0.4 + i * STAGGER.micro }}
                   className="space-y-2"
                 >
-                  <Skeleton size="sm" width="xs" />
-                  <Skeleton size="lg" width="3xl" />
+                  <Skeleton size="sm" width="xs" className="h-4" />
+                  <Skeleton size="lg" width="3xl" className="h-10" />
                 </motion.div>
               ))}
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Sidebar (Right) */}
-        <div className="w-full space-y-4 sm:space-y-6 lg:sticky lg:top-24 lg:h-fit">
+        <motion.div
+          className="w-full space-y-4 sm:space-y-6 lg:sticky lg:top-24 lg:h-fit"
+          initial={!prefersReducedMotion ? { opacity: 0, x: 20 } : false}
+          animate={!prefersReducedMotion ? { opacity: 1, x: 0 } : {}}
+          transition={{ ...SPRING.smooth, delay: 0.4 }}
+        >
+          {/* JobsPromo card */}
           <motion.div
-            initial={!prefersReducedMotion ? { opacity: 0, x: 20 } : false}
-            animate={!prefersReducedMotion ? { opacity: 1, x: 0 } : {}}
-            transition={
-              !prefersReducedMotion
-                ? {
-                    ...SPRING.default,
-                    mass: 0.5,
-                    delay: STAGGER.default,
-                  }
-                : {}
-            }
             className="rounded-lg border p-6 space-y-4"
+            initial={!prefersReducedMotion ? { opacity: 0, y: 10 } : false}
+            animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+            transition={{ ...SPRING.loading, delay: 0.5 }}
           >
-            <div className="grid grid-cols-2 gap-2">
-              <Skeleton size="lg" width="3xl" rounded="md" />
-              <Skeleton size="lg" width="3xl" rounded="md" />
-            </div>
-            <div className="space-y-4">
+            <Skeleton size="md" width="sm" className="mb-2 h-6" />
+            <Skeleton size="sm" width="3xl" className="h-4" />
+            <Skeleton size="sm" width="2xl" className="h-4" />
+            <Skeleton size="md" width="3xl" rounded="md" className="h-10" />
+          </motion.div>
+
+          {/* RecentlyViewedSidebar */}
+          <motion.div
+            className="rounded-lg border p-4 space-y-3"
+            initial={!prefersReducedMotion ? { opacity: 0, y: 10 } : false}
+            animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+            transition={{ ...SPRING.loading, delay: 0.6 }}
+          >
+            <Skeleton size="sm" width="sm" className="h-5" />
+            <div className="space-y-2">
               {Array.from({ length: 3 }).map((_, i) => (
-                <div key={`sidebar-item-${i}`} className="space-y-2">
-                  <Skeleton size="sm" width="3xl" />
-                  <Skeleton size="xs" width="2xl" />
+                <div key={i} className="flex items-center gap-3">
+                  <Skeleton size="sm" width="sm" rounded="md" className="h-10 w-10" />
+                  <div className="flex-1 space-y-1">
+                    <Skeleton size="sm" width="2/3" className="h-4" />
+                    <Skeleton size="xs" width="xs" className="h-3" />
+                  </div>
                 </div>
               ))}
             </div>
           </motion.div>
-        </div>
-      </div>
-    </div>
+
+          {/* Submit page-specific sidebar */}
+          <motion.div
+            className="rounded-lg border p-4 space-y-3"
+            initial={!prefersReducedMotion ? { opacity: 0, y: 10 } : false}
+            animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+            transition={{ ...SPRING.loading, delay: 0.7 }}
+          >
+            <div className="grid w-full grid-cols-2 gap-2 rounded-lg border p-1">
+              <Skeleton size="sm" width="3xl" rounded="md" className="h-9" />
+              <Skeleton size="sm" width="3xl" rounded="md" className="h-9" />
+            </div>
+            <div className="space-y-3">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex items-start gap-3">
+                  <Skeleton size="sm" width="xs" rounded="full" className="h-6" />
+                  <div className="flex-1 space-y-1">
+                    <Skeleton size="sm" width="2/3" className="h-4" />
+                    <Skeleton size="xs" width="xs" className="h-3" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        </motion.div>
+      </motion.div>
+    </motion.div>
   );
 }
 
@@ -498,7 +961,12 @@ export function CompanyProfileLoading() {
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   return (
-    <div className="bg-background min-h-screen">
+    <motion.div
+      className="bg-background min-h-screen"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={SPRING.smooth}
+    >
       {/* Header Skeleton */}
       <section className="border-border relative border-b">
         <motion.div
@@ -608,7 +1076,7 @@ export function CompanyProfileLoading() {
           </aside>
         </div>
       </section>
-    </div>
+    </motion.div>
   );
 }
 
@@ -837,23 +1305,45 @@ export function createFormPageLoading(config: FormPageLoadingConfig = {}) {
   };
 
   function FormPageLoading() {
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
     return (
-      <div className={`container mx-auto ${maxWidthClasses[maxWidth]} px-4 py-8 space-y-6`}>
+      <motion.div
+        className={`container mx-auto ${maxWidthClasses[maxWidth]} px-4 py-8 space-y-6`}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={SPRING.smooth}
+      >
         {/* Header */}
-        <div className="space-y-4">
-          {showBackButton && <Skeleton size="sm" width="xs" rounded="md" />}
+        <motion.div
+          className="space-y-4"
+          initial={!prefersReducedMotion ? { opacity: 0, y: -20 } : false}
+          animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+          transition={{ ...SPRING.smooth, delay: 0.1 }}
+        >
+          {showBackButton && (
+            <motion.div
+              initial={!prefersReducedMotion ? { opacity: 0, x: -20 } : false}
+              animate={!prefersReducedMotion ? { opacity: 1, x: 0 } : {}}
+              transition={{ ...SPRING.loading, delay: 0.15 }}
+            >
+              <Skeleton size="sm" width="xs" rounded="md" className="h-9" />
+            </motion.div>
+          )}
           {title ? (
             <div>
-              <Skeleton size="xl" width="lg" />
-              <Skeleton size="sm" width="2xl" className="mt-2" />
+              <Skeleton size="xl" width="lg" className="h-9" />
+              <Skeleton size="sm" width="2xl" className="mt-2 h-5" />
             </div>
           ) : (
             <>
-              <Skeleton size="xl" width="lg" />
-              <Skeleton size="sm" width="2xl" />
+              <Skeleton size="xl" width="lg" className="h-9" />
+              <Skeleton size="sm" width="2xl" className="h-5" />
             </>
           )}
-        </div>
+        </motion.div>
 
         {/* Form Cards */}
         <form className="space-y-6">
@@ -862,41 +1352,64 @@ export function createFormPageLoading(config: FormPageLoadingConfig = {}) {
             const cardTitle = cardTitles?.[cardIndex];
 
             return (
-              <div key={`card-${cardIndex}`} className="rounded-lg border">
+              <motion.div
+                key={`card-${cardIndex}`}
+                className="rounded-lg border"
+                initial={!prefersReducedMotion ? { opacity: 0, y: 20 } : false}
+                animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+                transition={{ ...SPRING.loading, delay: 0.2 + cardIndex * STAGGER.micro }}
+              >
                 <div className="border-b p-6 space-y-2">
                   {cardTitle ? (
                     <>
-                      <Skeleton size="md" width="md" />
-                      <Skeleton size="sm" width="2xl" />
+                      <Skeleton size="md" width="md" className="h-6" />
+                      <Skeleton size="sm" width="2xl" className="h-4" />
                     </>
                   ) : (
                     <>
-                      <Skeleton size="md" width="md" />
-                      <Skeleton size="sm" width="2xl" />
+                      <Skeleton size="md" width="md" className="h-6" />
+                      <Skeleton size="sm" width="2xl" className="h-4" />
                     </>
                   )}
                 </div>
                 <div className="p-6 space-y-4">
                   {Array.from({ length: fieldCount }).map((_, fieldIndex) => (
-                    <div key={`field-${fieldIndex}`} className="space-y-2">
-                      <Skeleton size="sm" width="xs" />
-                      <Skeleton size="lg" width="3xl" />
-                    </div>
+                    <motion.div
+                      key={`field-${fieldIndex}`}
+                      className="space-y-2"
+                      initial={!prefersReducedMotion ? { opacity: 0, x: -20 } : false}
+                      animate={!prefersReducedMotion ? { opacity: 1, x: 0 } : {}}
+                      transition={{
+                        ...SPRING.loading,
+                        delay: 0.3 + cardIndex * STAGGER.micro + fieldIndex * STAGGER.micro,
+                      }}
+                    >
+                      <Skeleton size="sm" width="xs" className="h-4" />
+                      <Skeleton size="lg" width="3xl" className="h-10" />
+                    </motion.div>
                   ))}
                 </div>
-              </div>
+              </motion.div>
             );
           })}
 
           {/* Action Buttons */}
           {showActions && (
-            <div className="flex gap-4">
-              <Skeleton size="lg" width="lg" rounded="md" />
-              <Skeleton size="lg" width="lg" rounded="md" />
-            </div>
+            <motion.div
+              className="flex gap-4"
+              initial={!prefersReducedMotion ? { opacity: 0, y: 20 } : false}
+              animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+              transition={{
+                ...SPRING.smooth,
+                delay: 0.4 + cardCount * STAGGER.micro,
+              }}
+            >
+              <Skeleton size="lg" width="lg" rounded="md" className="h-10" />
+              <Skeleton size="lg" width="lg" rounded="md" className="h-10" />
+            </motion.div>
           )}
         </form>
-      </div>
+      </motion.div>
     );
   }
 
@@ -1222,68 +1735,133 @@ export function createDetailPageLoading(config: DetailPageLoadingConfig = {}) {
   };
 
   function DetailPageLoading() {
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
     return (
-      <div className={`container mx-auto ${maxWidthClasses[maxWidth]} px-4 py-8 space-y-6`}>
+      <motion.div
+        className={`container mx-auto ${maxWidthClasses[maxWidth]} px-4 py-8 space-y-6`}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={SPRING.smooth}
+      >
         {/* Header */}
-        <div className="space-y-2">
-          {showBackButton && <Skeleton size="sm" width="xs" rounded="md" />}
+        <motion.div
+          className="space-y-2"
+          initial={!prefersReducedMotion ? { opacity: 0, y: -20 } : false}
+          animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+          transition={{ ...SPRING.smooth, delay: 0.1 }}
+        >
+          {showBackButton && (
+            <motion.div
+              initial={!prefersReducedMotion ? { opacity: 0, x: -20 } : false}
+              animate={!prefersReducedMotion ? { opacity: 1, x: 0 } : {}}
+              transition={{ ...SPRING.loading, delay: 0.15 }}
+            >
+              <Skeleton size="sm" width="xs" rounded="md" className="h-9" />
+            </motion.div>
+          )}
           <div className="flex items-center gap-2">
-            {showBadges && <Skeleton size="sm" width="xs" rounded="full" />}
-            <Skeleton size="xl" width="lg" />
+            {showBadges && (
+              <motion.div
+                initial={!prefersReducedMotion ? { opacity: 0, scale: 0.8 } : false}
+                animate={!prefersReducedMotion ? { opacity: 1, scale: 1 } : {}}
+                transition={{ ...SPRING.loading, delay: 0.2 }}
+              >
+                <Skeleton size="sm" width="xs" rounded="full" className="h-6" />
+              </motion.div>
+            )}
+            <Skeleton size="xl" width="lg" className="h-9" />
           </div>
-          <Skeleton size="sm" width="2xl" />
-        </div>
+          <Skeleton size="sm" width="2xl" className="h-5" />
+        </motion.div>
 
         {/* Stats Section (optional) */}
         {showStats && (
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+          <motion.div
+            className="grid grid-cols-1 gap-4 md:grid-cols-4"
+            initial={!prefersReducedMotion ? { opacity: 0, y: 20 } : false}
+            animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+            transition={{ ...SPRING.smooth, delay: 0.2 }}
+          >
             {Array.from({ length: statsCount }).map((_, i) => (
-              <div key={`stat-${i}`} className="rounded-lg border p-6 space-y-2">
-                <Skeleton size="sm" width="xs" />
-                <Skeleton size="lg" width="sm" />
-              </div>
+              <motion.div
+                key={`stat-${i}`}
+                className="rounded-lg border p-6 space-y-2"
+                initial={!prefersReducedMotion ? { opacity: 0, scale: 0.95 } : false}
+                animate={!prefersReducedMotion ? { opacity: 1, scale: 1 } : {}}
+                transition={{ ...SPRING.loading, delay: 0.3 + i * STAGGER.micro }}
+              >
+                <Skeleton size="sm" width="xs" className="h-4" />
+                <Skeleton size="lg" width="sm" className="h-8" />
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         )}
 
         {/* Content Cards */}
         {Array.from({ length: cardCount }).map((_, cardIndex) => (
-          <div key={`card-${cardIndex}`} className="rounded-lg border">
+          <motion.div
+            key={`card-${cardIndex}`}
+            className="rounded-lg border"
+            initial={!prefersReducedMotion ? { opacity: 0, y: 20 } : false}
+            animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+            transition={{ ...SPRING.loading, delay: 0.4 + cardIndex * STAGGER.micro }}
+          >
             <div className="border-b p-6 space-y-2">
-              <Skeleton size="md" width="md" />
-              <Skeleton size="sm" width="2xl" />
+              <Skeleton size="md" width="md" className="h-6" />
+              <Skeleton size="sm" width="2xl" className="h-4" />
             </div>
             <div className="p-6">
               {cardIndex === 0 && showStats ? (
                 // First card might have stats grid
                 <div className="grid grid-cols-2 gap-4">
                   {Array.from({ length: 6 }).map((_, i) => (
-                    <div key={`detail-${i}`} className="space-y-1">
-                      <Skeleton size="sm" width="xs" />
-                      <Skeleton size="sm" width="sm" />
-                    </div>
+                    <motion.div
+                      key={`detail-${i}`}
+                      className="space-y-1"
+                      initial={!prefersReducedMotion ? { opacity: 0, y: 10 } : false}
+                      animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+                      transition={{ ...SPRING.loading, delay: 0.5 + i * STAGGER.micro }}
+                    >
+                      <Skeleton size="sm" width="xs" className="h-4" />
+                      <Skeleton size="sm" width="sm" className="h-4" />
+                    </motion.div>
                   ))}
                 </div>
               ) : (
                 // Regular card content
                 <div className="space-y-4">
-                  <Skeleton size="sm" width="3xl" />
-                  <Skeleton size="sm" width="3xl" />
-                  <Skeleton size="sm" width="2xl" />
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <motion.div
+                      key={`content-${i}`}
+                      initial={!prefersReducedMotion ? { opacity: 0, x: -20 } : false}
+                      animate={!prefersReducedMotion ? { opacity: 1, x: 0 } : {}}
+                      transition={{ ...SPRING.loading, delay: 0.5 + i * STAGGER.micro }}
+                    >
+                      <Skeleton size="sm" width={i === 2 ? '2xl' : '3xl'} className="h-4" />
+                    </motion.div>
+                  ))}
                 </div>
               )}
             </div>
-          </div>
+          </motion.div>
         ))}
 
         {/* Chart Area (optional) */}
         {showChart && (
-          <div className="rounded-lg border p-6 space-y-4">
-            <Skeleton size="md" width="md" />
+          <motion.div
+            className="rounded-lg border p-6 space-y-4"
+            initial={!prefersReducedMotion ? { opacity: 0, y: 20 } : false}
+            animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+            transition={{ ...SPRING.loading, delay: 0.6 + cardCount * STAGGER.micro }}
+          >
+            <Skeleton size="md" width="md" className="h-6" />
             <Skeleton size="xl" width="3xl" className="h-64" />
-          </div>
+          </motion.div>
         )}
-      </div>
+      </motion.div>
     );
   }
 
@@ -1361,48 +1939,90 @@ export function createStaticPageLoading(config: StaticPageLoadingConfig = {}) {
   };
 
   function StaticPageLoading() {
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
     return (
-      <div className={`container mx-auto ${maxWidthClasses[maxWidth]} px-4 py-8 sm:py-12`}>
+      <motion.div
+        className={`container mx-auto ${maxWidthClasses[maxWidth]} px-4 py-8 sm:py-12`}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={SPRING.smooth}
+      >
         {/* Header */}
-        <div className={centered ? 'text-center mb-8' : 'mb-8'}>
+        <motion.div
+          className={centered ? 'text-center mb-8' : 'mb-8'}
+          initial={!prefersReducedMotion ? { opacity: 0, y: -20 } : false}
+          animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+          transition={{ ...SPRING.smooth, delay: 0.1 }}
+        >
           {title ? (
             <>
-              <Skeleton size="xl" width="lg" className={centered ? 'mx-auto' : ''} />
-              <Skeleton size="sm" width="md" className={`mt-2 ${centered ? 'mx-auto' : ''}`} />
+              <Skeleton size="xl" width="lg" className={`h-10 ${centered ? 'mx-auto' : ''}`} />
+              <Skeleton size="sm" width="md" className={`mt-2 h-5 ${centered ? 'mx-auto' : ''}`} />
             </>
           ) : (
             <>
-              <Skeleton size="xl" width="lg" className={centered ? 'mx-auto' : ''} />
-              <Skeleton size="sm" width="md" className={`mt-2 ${centered ? 'mx-auto' : ''}`} />
+              <Skeleton size="xl" width="lg" className={`h-10 ${centered ? 'mx-auto' : ''}`} />
+              <Skeleton size="sm" width="md" className={`mt-2 h-5 ${centered ? 'mx-auto' : ''}`} />
             </>
           )}
-        </div>
+        </motion.div>
 
         {/* Cards Grid (optional) */}
         {showCards && (
-          <div className={`${gridClasses[cardsPerRow]} mb-8`}>
+          <motion.div
+            className={`${gridClasses[cardsPerRow]} mb-8`}
+            initial={!prefersReducedMotion ? { opacity: 0, y: 20 } : false}
+            animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+            transition={{ ...SPRING.smooth, delay: 0.2 }}
+          >
             {Array.from({ length: cardsPerRow * 2 }).map((_, i) => (
-              <div key={`card-${i}`} className="rounded-lg border p-6 space-y-3">
+              <motion.div
+                key={`card-${i}`}
+                className="rounded-lg border p-6 space-y-3"
+                initial={!prefersReducedMotion ? { opacity: 0, scale: 0.95 } : false}
+                animate={!prefersReducedMotion ? { opacity: 1, scale: 1 } : {}}
+                transition={{ ...SPRING.loading, delay: 0.3 + i * STAGGER.micro }}
+              >
                 <Skeleton size="md" width="md" />
                 <Skeleton size="sm" width="3xl" />
                 <Skeleton size="sm" width="2xl" />
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         )}
 
         {/* Content Sections */}
-        <div className="prose prose-invert max-w-none space-y-8">
+        <motion.div
+          className="prose prose-invert max-w-none space-y-8"
+          initial={!prefersReducedMotion ? { opacity: 0, y: 20 } : false}
+          animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+          transition={{ ...SPRING.smooth, delay: 0.2 }}
+        >
           {Array.from({ length: sections }).map((_, i) => (
-            <div key={`section-${i}`} className="space-y-4">
-              <Skeleton size="lg" width="md" />
-              <Skeleton size="sm" width="3xl" />
-              <Skeleton size="sm" width="3xl" />
-              <Skeleton size="sm" width="2xl" />
-            </div>
+            <motion.section
+              key={`section-${i}`}
+              className="space-y-4"
+              initial={!prefersReducedMotion ? { opacity: 0, y: 10 } : false}
+              animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+              transition={{ ...SPRING.loading, delay: 0.3 + i * STAGGER.micro }}
+            >
+              <Skeleton size="lg" width="md" className="h-8" />
+              <Skeleton size="sm" width="3xl" className="h-5" />
+              <Skeleton size="sm" width="3xl" className="h-5" />
+              <Skeleton size="sm" width="2xl" className="h-5" />
+              {i % 2 === 0 && (
+                <>
+                  <Skeleton size="sm" width="3xl" className="h-5" />
+                  <Skeleton size="sm" width="2/3" className="h-5" />
+                </>
+              )}
+            </motion.section>
           ))}
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     );
   }
 
@@ -1591,13 +2211,23 @@ export function createDashboardPageLoading(config: DashboardPageLoadingConfig = 
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     return (
-      <div className={`container mx-auto ${maxWidthClasses[maxWidth]} px-4 py-8 space-y-6`}>
+      <motion.div
+        className={`container mx-auto ${maxWidthClasses[maxWidth]} px-4 py-8 space-y-6`}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={SPRING.smooth}
+      >
         {/* Header */}
         {title && (
-          <div className="space-y-2">
-            <Skeleton size="xl" width="lg" />
-            <Skeleton size="sm" width="2xl" />
-          </div>
+          <motion.div
+            className="space-y-2"
+            initial={!prefersReducedMotion ? { opacity: 0, y: -20 } : false}
+            animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+            transition={{ ...SPRING.smooth, delay: 0.1 }}
+          >
+            <Skeleton size="xl" width="lg" className="h-9" />
+            <Skeleton size="sm" width="2xl" className="h-5" />
+          </motion.div>
         )}
 
         {/* Stats Grid */}
@@ -1723,7 +2353,7 @@ export function createDashboardPageLoading(config: DashboardPageLoadingConfig = 
             ))}
           </div>
         )}
-      </div>
+      </motion.div>
     );
   }
 
@@ -1806,13 +2436,23 @@ export function createProfilePageLoading(config: ProfilePageLoadingConfig = {}) 
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     return (
-      <div className={`container mx-auto ${maxWidthClasses[maxWidth]} px-4 py-8 space-y-6`}>
+      <motion.div
+        className={`container mx-auto ${maxWidthClasses[maxWidth]} px-4 py-8 space-y-6`}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={SPRING.smooth}
+      >
         {/* Header */}
-        <div className="space-y-4">
+        <motion.div
+          className="space-y-4"
+          initial={!prefersReducedMotion ? { opacity: 0, y: -20 } : false}
+          animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+          transition={{ ...SPRING.smooth, delay: 0.1 }}
+        >
           {title && (
             <>
-              <Skeleton size="xl" width="lg" />
-              <Skeleton size="sm" width="2xl" />
+              <Skeleton size="xl" width="lg" className="h-9" />
+              <Skeleton size="sm" width="2xl" className="h-5" />
             </>
           )}
 
@@ -1838,7 +2478,7 @@ export function createProfilePageLoading(config: ProfilePageLoadingConfig = {}) 
               </div>
             </motion.div>
           )}
-        </div>
+        </motion.div>
 
         {/* Form Fields (optional) */}
         {formFieldsCount > 0 && (
@@ -1920,7 +2560,7 @@ export function createProfilePageLoading(config: ProfilePageLoadingConfig = {}) 
             })}
           </div>
         )}
-      </div>
+      </motion.div>
     );
   }
 
@@ -2010,72 +2650,89 @@ export function createContactPageLoading(config: ContactPageLoadingConfig = {}) 
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     return (
-      <div className={`container mx-auto ${maxWidthClasses[maxWidth]} px-4 py-8 space-y-8`}>
+      <motion.div
+        className={`container mx-auto ${maxWidthClasses[maxWidth]} px-4 py-8 sm:py-12`}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={SPRING.smooth}
+      >
         {/* Header */}
-        <div className={centered ? 'text-center space-y-4' : 'space-y-4'}>
+        <motion.div
+          className={centered ? 'mb-8 text-center' : 'mb-8'}
+          initial={!prefersReducedMotion ? { opacity: 0, y: -20 } : false}
+          animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+          transition={{ ...SPRING.smooth, delay: 0.1 }}
+        >
           {title && (
             <>
-              <Skeleton size="xl" width="lg" className={centered ? 'mx-auto' : ''} />
-              <Skeleton size="sm" width="2xl" className={centered ? 'mx-auto' : ''} />
+              <Skeleton size="xl" width="lg" className={`mb-4 h-10 ${centered ? 'mx-auto' : ''}`} />
+              <Skeleton size="md" width="2xl" className={`h-6 ${centered ? 'mx-auto' : ''}`} />
             </>
           )}
-        </div>
+        </motion.div>
 
         {/* Cards Grid */}
         {cardsCount > 0 && (
-          <div className={gridClasses[cardsPerRow]}>
-            {Array.from({ length: cardsCount }).map((_, i) => (
-              <motion.div
-                key={`card-${i}`}
-                initial={!prefersReducedMotion ? { opacity: 0, y: 20 } : false}
-                animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
-                transition={
-                  !prefersReducedMotion
-                    ? {
-                        ...SPRING.loading,
-                        mass: 0.5,
-                        delay: i * STAGGER.micro,
-                      }
-                    : {}
-                }
-                className="rounded-lg border p-6 space-y-3"
-              >
-                <Skeleton size="md" width="md" />
-                <Skeleton size="sm" width="3xl" />
-                <Skeleton size="sm" width="2xl" />
-              </motion.div>
-            ))}
-          </div>
+          <motion.div
+            className="mb-12"
+            initial={!prefersReducedMotion ? { opacity: 0, y: 20 } : false}
+            animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+            transition={{ ...SPRING.smooth, delay: 0.2 }}
+          >
+            <h2 className="mb-6 text-center text-2xl font-semibold">
+              <Skeleton size="lg" width="md" className="mx-auto h-8" />
+            </h2>
+            <div className={`${gridClasses[cardsPerRow]} gap-6`}>
+              {Array.from({ length: cardsCount }).map((_, i) => (
+                <motion.div
+                  key={`card-${i}`}
+                  initial={!prefersReducedMotion ? { opacity: 0, scale: 0.95 } : false}
+                  animate={!prefersReducedMotion ? { opacity: 1, scale: 1 } : {}}
+                  transition={{ ...SPRING.loading, delay: 0.3 + i * STAGGER.micro }}
+                >
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Skeleton size="sm" width="xs" rounded="md" className="h-5 w-5" />
+                        <Skeleton size="md" width="md" className="h-6" />
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <Skeleton size="sm" width="3xl" className="mb-4 h-4" />
+                      <Skeleton size="sm" width="lg" rounded="md" className="h-6" />
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
         )}
 
         {/* Prose Sections */}
         {showProseSections && (
-          <div className="prose prose-invert max-w-none space-y-8">
+          <motion.div
+            className="prose prose-invert mx-auto mt-12 max-w-none space-y-8"
+            initial={!prefersReducedMotion ? { opacity: 0, y: 20 } : false}
+            animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+            transition={{ ...SPRING.smooth, delay: 0.4 }}
+          >
             {Array.from({ length: proseSectionsCount }).map((_, i) => (
-              <motion.div
+              <motion.section
                 key={`section-${i}`}
+                className="space-y-4"
                 initial={!prefersReducedMotion ? { opacity: 0, y: 10 } : false}
                 animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
-                transition={
-                  !prefersReducedMotion
-                    ? {
-                        ...SPRING.default,
-                        mass: 0.5,
-                        delay: STAGGER.slow + i * STAGGER.fast,
-                      }
-                    : {}
-                }
-                className="space-y-4"
+                transition={{ ...SPRING.loading, delay: 0.5 + i * STAGGER.micro }}
               >
-                <Skeleton size="lg" width="md" />
-                <Skeleton size="sm" width="3xl" />
-                <Skeleton size="sm" width="3xl" />
-                <Skeleton size="sm" width="2xl" />
-              </motion.div>
+                <Skeleton size="lg" width="md" className="h-8" />
+                <Skeleton size="sm" width="3xl" className="h-5" />
+                <Skeleton size="sm" width="3xl" className="h-5" />
+                <Skeleton size="sm" width="2xl" className="h-5" />
+              </motion.section>
             ))}
-          </div>
+          </motion.div>
         )}
-      </div>
+      </motion.div>
     );
   }
 

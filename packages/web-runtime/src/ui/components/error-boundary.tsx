@@ -5,11 +5,12 @@
  *
  * Generic error boundary with structured logging
  * Uses web-runtime UI primitives directly
+ * Matches design system with Motion.dev animations
  */
 
 import { isDevelopment } from '@heyclaude/shared-runtime/schemas/env';
 
-import { AlertTriangle, Home, RefreshCw, Copy, Check } from '../../icons.tsx';
+import { AlertCircle, Home, RefreshCw, Copy, Check } from '../../icons.tsx';
 import type {
   ErrorBoundaryProps,
   ErrorFallbackProps,
@@ -21,8 +22,12 @@ import { Button } from './button.tsx';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './card.tsx';
 import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary';
 import type { FallbackProps } from 'react-error-boundary';
-import { useCallback } from 'react';
+import { SPRING } from '../../design-system/index.ts';
+import { motion } from 'motion/react';
+import { useCallback, useState } from 'react';
 import type { ComponentType } from 'react';
+import Link from 'next/link';
+import { ROUTES } from '@heyclaude/shared-runtime';
 
 /**
  * ErrorCodeBlock component with copy-to-clipboard functionality
@@ -34,12 +39,16 @@ function ErrorCodeBlock({ content }: { content: string }) {
 
   return (
     <div className="relative">
-      <pre className={'max-w-full overflow-auto break-all whitespace-pre-wrap text-xs bg-background/50 rounded border border-border p-3 pr-10'}>{content}</pre>
+      <pre className="text-destructive bg-background/50 border-border max-w-full rounded border p-3 pr-10 font-mono text-xs break-all whitespace-pre-wrap">
+        {content}
+      </pre>
       <Button
         variant="ghost"
         size="sm"
         className="absolute top-2 right-2 h-6 w-6 p-0"
-        onClick={() => copy(content)}
+        onClick={() => {
+          void copy(content);
+        }}
         aria-label={copied ? 'Copied!' : 'Copy error message'}
       >
         {copied ? (
@@ -54,64 +63,88 @@ function ErrorCodeBlock({ content }: { content: string }) {
 
 /**
  * ErrorFallback component using web-runtime UI primitives
+ * Matches design system with Motion.dev animations and consistent styling
  */
 function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
-  const handleGoHome = useCallback(() => {
-    resetErrorBoundary();
-    window.location.href = '/';
-  }, [resetErrorBoundary]);
+  const [isResetting, setIsResetting] = useState(false);
 
   const handleReset = useCallback(() => {
+    setIsResetting(true);
     resetErrorBoundary();
     window.location.reload();
   }, [resetErrorBoundary]);
 
   return (
-    <div className={'flex min-h-screen items-center justify-center bg-background p-4'}>
-      <Card className={'w-full max-w-2xl'}>
-        <CardHeader>
-          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3}>
-            <AlertTriangle
-              className={`${UI_CLASSES.ICON_XL} text-destructive`}
-              aria-hidden="true"
-            />
-            <CardTitle as="h1" className="text-2xl">
-              Something went wrong
-            </CardTitle>
-          </div>
-          <CardDescription className="mt-2">
-            An unexpected error occurred. The error has been logged and we&apos;ll look into it.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {isDevelopment && error && (
-            <div className={'space-y-2 rounded-lg bg-muted p-4'}>
-              <p className={'font-semibold text-sm'}>Error Details:</p>
-              <ErrorCodeBlock content={error.toString()} />
-              {error.stack && (
-                <details className="text-xs">
-                  <summary className="cursor-pointer font-semibold">► Stack Trace</summary>
-                  <div className="mt-2">
-                    <ErrorCodeBlock content={error.stack} />
-                  </div>
-                </details>
-              )}
+    <motion.div
+      className="bg-background flex min-h-screen items-center justify-center px-4"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={SPRING.smooth}
+    >
+      <motion.div
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={SPRING.smooth}
+      >
+        <Card className="w-full max-w-lg text-center">
+          <CardHeader>
+            <div className="mb-4 flex justify-center">
+              <motion.div
+                className="bg-destructive/10 rounded-full p-3"
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ ...SPRING.bouncy, delay: 0.1 }}
+              >
+                <AlertCircle aria-hidden="true" className="text-destructive h-12 w-12" />
+              </motion.div>
             </div>
-          )}
+            <CardTitle className="text-2xl">Something went wrong</CardTitle>
+            <CardDescription>
+              An unexpected error occurred. We&apos;ve logged the issue and will investigate it
+              shortly.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {isDevelopment && error && (
+              <motion.div
+                className="bg-muted rounded-md p-4 text-left"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ ...SPRING.smooth, delay: 0.2 }}
+              >
+                <ErrorCodeBlock content={error.toString()} />
+                {error.stack && (
+                  <details className="mt-2 text-xs">
+                    <summary className="cursor-pointer font-semibold">► Stack Trace</summary>
+                    <div className="mt-2">
+                      <ErrorCodeBlock content={error.stack} />
+                    </div>
+                  </details>
+                )}
+              </motion.div>
+            )}
 
-          <div className="flex gap-3">
-            <Button onClick={handleReset} variant="default">
-              <RefreshCw className={UI_CLASSES.ICON_SM_LEADING} />
-              Try Again
-            </Button>
-            <Button onClick={handleGoHome} variant="outline">
-              <Home className={UI_CLASSES.ICON_SM_LEADING} />
-              Go Home
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+            <motion.div
+              className={UI_CLASSES.FLEX_COL_SM_ROW_GAP_3}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ ...SPRING.smooth, delay: 0.3 }}
+            >
+              <Button onClick={handleReset} size="lg" disabled={isResetting}>
+                <RefreshCw className={`mr-2 h-4 w-4 ${isResetting ? 'animate-spin' : ''}`} />
+                {isResetting ? 'Retrying...' : 'Try Again'}
+              </Button>
+              <Button asChild size="lg" variant="outline">
+                <Link href={ROUTES.HOME}>
+                  <Home className="mr-2 h-4 w-4" />
+                  Back to Home
+                </Link>
+              </Button>
+            </motion.div>
+          </CardContent>
+        </Card>
+      </motion.div>
+    </motion.div>
   );
 }
 

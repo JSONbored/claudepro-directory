@@ -49,6 +49,7 @@ import { cn } from '../../utils.ts';
 import { COLORS } from '../../../design-tokens/index.ts';
 import { cva } from 'class-variance-authority';
 import { motion } from 'motion/react';
+import { useReducedMotion } from '../../../hooks/motion/index.ts';
 import type * as React from 'react';
 import Link from 'next/link';
 
@@ -274,6 +275,7 @@ const BadgeWrapper = ({
   springDefault: { type: 'spring'; stiffness: number; damping: number };
   isInteractive?: boolean;
 }) => {
+  const shouldReduceMotion = useReducedMotion();
   // Only apply hover/tap animations for interactive badges
   if (!isInteractive) {
     return <>{children}</>;
@@ -282,12 +284,16 @@ const BadgeWrapper = ({
   return (
     <motion.div
       className="inline-block cursor-pointer"
-      whileHover={{
-        scale: 1.05,
-        y: -1,
-        transition: springDefault,
-      }}
-      whileTap={{ scale: 0.95 }}
+      whileHover={
+        shouldReduceMotion
+          ? {}
+          : {
+              scale: 1.05,
+              y: -1,
+              transition: springDefault,
+            }
+      }
+      whileTap={shouldReduceMotion ? {} : { scale: 0.95 }}
     >
       {children}
     </motion.div>
@@ -296,27 +302,32 @@ const BadgeWrapper = ({
 
 /**
  * PulseWrapper - Subtle pulse animation for attention badges (new, trending)
- * Respects prefers-reduced-motion via CSS class
+ * Respects prefers-reduced-motion via useReducedMotion hook
  */
 const PulseWrapper = ({
   children,
 }: {
   children: React.ReactNode;
-}) => (
-  <motion.div
-    className="inline-block motion-reduce:animate-none"
-    animate={{
-      scale: [1, 1.02, 1],
-    }}
-    transition={{
-      duration: DURATION.extraLong,
-      repeat: Infinity,
-      ease: "easeInOut",
-    }}
-  >
-    {children}
-  </motion.div>
-);
+}) => {
+  const shouldReduceMotion = useReducedMotion();
+  return (
+    <motion.div
+      className="inline-block motion-reduce:animate-none"
+      animate={shouldReduceMotion ? {} : { scale: [1, 1.02, 1] }}
+      transition={
+        shouldReduceMotion
+          ? {}
+          : {
+              duration: DURATION.extraLong,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }
+      }
+    >
+      {children}
+    </motion.div>
+  );
+};
 
 export function UnifiedBadge(props: UnifiedBadgeProps) {
   // Spring animation config from design system

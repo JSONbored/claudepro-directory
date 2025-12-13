@@ -16,9 +16,10 @@ export const LOADING_STATES = {
   /**
    * Skeleton loader
    * For placeholder content while loading
+   * Uses rgba format for Motion.dev compatibility (oklch colors cannot be animated)
    */
   skeleton: {
-    backgroundColor: 'oklch(28% 0.006 60 / 0.5)', // Muted background
+    backgroundColor: 'rgba(55, 47, 42, 0.5)', // oklch(28% 0.006 60 / 0.5) converted to rgba for Motion.dev compatibility
     borderRadius: '0.375rem', // Rounded corners
     animation: 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
   },
@@ -47,7 +48,7 @@ export const LOADING_STATES = {
       default: '0.25rem', // 4px
       large: '0.5rem', // 8px
     },
-    backgroundColor: 'oklch(28% 0.006 60 / 0.3)', // Track color
+    backgroundColor: 'rgba(55, 47, 42, 0.3)', // oklch(28% 0.006 60 / 0.3) converted to rgba for Motion.dev compatibility
     fillColor: COLORS.semantic.primary.dark.base, // Fill color
     borderRadius: '9999px', // Fully rounded
   },

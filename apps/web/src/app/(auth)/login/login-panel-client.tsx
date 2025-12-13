@@ -1,7 +1,7 @@
 'use client';
 
 import { VALID_PROVIDERS } from '@heyclaude/web-runtime';
-import { ensureString } from '@heyclaude/web-runtime/core';
+import { ensureString } from '@heyclaude/web-runtime/data/utils';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -106,7 +106,7 @@ export function LoginPanelClient({ redirectTo }: LoginPanelClientProperties) {
       description="Choose your preferred sign-in method"
       title="Sign in"
     >
-      {VALID_PROVIDERS.map((provider) => (
+      {VALID_PROVIDERS.map((provider: (typeof VALID_PROVIDERS)[number]) => (
         <OAuthProviderButton
           key={provider}
           newsletterOptIn={newsletterOptIn}

@@ -14,8 +14,9 @@
 import { Constants, type Database } from '@heyclaude/database-types';
 import { submitContentForReview } from '@heyclaude/web-runtime/actions';
 import { checkConfettiEnabled } from '@heyclaude/web-runtime/config/static-configs';
-import { ParseStrategy, safeParse } from '@heyclaude/web-runtime/core';
+import { ParseStrategy, safeParse } from '@heyclaude/web-runtime/data/utils';
 import { SPRING, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { useLoggedAsync, useConfetti } from '@heyclaude/web-runtime/hooks';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
 import { usePathname } from 'next/navigation';
@@ -157,6 +158,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
    * Minimal React State (only what requires reactivity)
    */
 
+  const shouldReduceMotion = useReducedMotion();
   /** Content type for dynamic field rendering */
   const [contentType, setContentType] = useState<SubmissionContentType>(DEFAULT_CONTENT_TYPE);
 
@@ -508,16 +510,16 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
       {/* Success Message with celebration animation */}
       {submissionResult ? (
         <motion.div
-          initial={{ opacity: 0, scale: 0.9, y: -20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
+          initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.9, y: -20 }}
+          animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
           transition={springSmooth}
         >
           <Card className="mb-6 border-green-500/20 bg-green-500/5">
             <CardContent className="pt-6">
               <div className={UI_CLASSES.FLEX_COL_SM_ROW_ITEMS_START}>
                 <motion.div
-                  initial={{ scale: 0, rotate: -180 }}
-                  animate={{ scale: 1, rotate: 0 }}
+                  initial={shouldReduceMotion ? { opacity: 0 } : { scale: 0, rotate: -180 }}
+                  animate={shouldReduceMotion ? { opacity: 1 } : { scale: 1, rotate: 0 }}
                   transition={{ ...springBouncy, delay: STAGGER.default }}
                 >
                   <CheckCircle
@@ -637,8 +639,8 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                 {name.length > 3 && (
                   <motion.div
                     className="absolute top-1/2 right-3 -translate-y-1/2"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
+                    initial={shouldReduceMotion ? { opacity: 0 } : { scale: 0 }}
+                    animate={shouldReduceMotion ? { opacity: 1 } : { scale: 1 }}
                     transition={springBouncy}
                   >
                     <CheckCircle className={cn(UI_CLASSES.ICON_SM, UI_CLASSES.ICON_SUCCESS)} />
@@ -744,20 +746,24 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
         {/* Enhanced Submit Button */}
         <motion.div
           className={`${UI_CLASSES.FLEX_COL_SM_ROW_GAP_3} pt-2 sm:pt-4`}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+          whileHover={shouldReduceMotion ? {} : { scale: 1.02 }}
+          whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
         >
           <Button type="submit" disabled={isPending} className="w-full flex-1 sm:flex-initial">
             {isPending ? (
               <>
                 <motion.div
                   className="mr-2"
-                  animate={{ opacity: [1, 0.5, 1], rotate: [0, 360] }}
-                  transition={{
-                    duration: DURATION.veryLong,
-                    repeat: Number.POSITIVE_INFINITY,
-                    ease: 'easeInOut',
-                  }}
+                  animate={shouldReduceMotion ? { opacity: 1 } : { opacity: [1, 0.5, 1], rotate: [0, 360] }}
+                  transition={
+                    shouldReduceMotion
+                      ? {}
+                      : {
+                          duration: DURATION.veryLong,
+                          repeat: Number.POSITIVE_INFINITY,
+                          ease: 'easeInOut',
+                        }
+                  }
                 >
                   <Github className={UI_CLASSES.ICON_SM} />
                 </motion.div>
