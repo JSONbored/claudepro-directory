@@ -14,7 +14,7 @@ export type GetNewContentForWeekArgs = {
   /** Parameter: p_week_start (date) */
   p_week_start: string;
   /** Parameter: p_limit (int4, optional) */
-  p_limit: number | undefined | null | undefined;
+  p_limit?: number;
 };
 
 /**
@@ -33,14 +33,44 @@ export const getNewContentForWeekArgsSchema = z.object({
 export type GetNewContentForWeekArgsFromZod = z.infer<typeof getNewContentForWeekArgsSchema>;
 
 /**
+ * Return row type for PostgreSQL function: get_new_content_for_week
+ */
+export type GetNewContentForWeekReturnRow = {
+  /** category (content_category, nullable) */
+  category: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog' | null;
+  /** slug (text, nullable) */
+  slug: string | null;
+  /** title (text, nullable) */
+  title: string | null;
+  /** description (text, nullable) */
+  description: string | null;
+  /** date_added (timestamptz, nullable) */
+  date_added: string | null;
+  /** url (text, nullable) */
+  url: string | null;
+};
+
+/**
+ * Zod schema for get_new_content_for_week return row
+ */
+export const getNewContentForWeekReturnRowSchema = z.object({
+  category: z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'skills', 'collections', 'guides', 'jobs', 'changelog']).nullable(),
+  slug: z.string().nullable(),
+  title: z.string().nullable(),
+  description: z.string().nullable(),
+  date_added: z.string().nullable(),
+  url: z.string().nullable(),
+});
+
+/**
  * Return type for PostgreSQL function: get_new_content_for_week
  */
-export type GetNewContentForWeekReturns = Record<string, unknown>[];
+export type GetNewContentForWeekReturns = GetNewContentForWeekReturnRow[];
 
 /**
  * Zod schema for get_new_content_for_week function return type
  */
-export const getNewContentForWeekReturnsSchema = z.array(z.any());
+export const getNewContentForWeekReturnsSchema = z.array(getNewContentForWeekReturnRowSchema);
 
 /**
  * Type inference from Zod schema (should match type above)

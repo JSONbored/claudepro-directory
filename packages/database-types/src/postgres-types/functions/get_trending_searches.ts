@@ -12,7 +12,7 @@ import { z } from 'zod';
  */
 export type GetTrendingSearchesArgs = {
   /** Parameter: limit_count (int4, optional) */
-  limit_count: number | undefined | null | undefined;
+  limit_count?: number;
 };
 
 /**
@@ -29,14 +29,35 @@ export const getTrendingSearchesArgsSchema = z.object({
 export type GetTrendingSearchesArgsFromZod = z.infer<typeof getTrendingSearchesArgsSchema>;
 
 /**
+ * Return row type for PostgreSQL function: get_trending_searches
+ */
+export type GetTrendingSearchesReturnRow = {
+  /** query (text, nullable) */
+  query: string | null;
+  /** count (int8, nullable) */
+  count: number | null;
+  /** label (text, nullable) */
+  label: string | null;
+};
+
+/**
+ * Zod schema for get_trending_searches return row
+ */
+export const getTrendingSearchesReturnRowSchema = z.object({
+  query: z.string().nullable(),
+  count: z.number().nullable(),
+  label: z.string().nullable(),
+});
+
+/**
  * Return type for PostgreSQL function: get_trending_searches
  */
-export type GetTrendingSearchesReturns = Record<string, unknown>[];
+export type GetTrendingSearchesReturns = GetTrendingSearchesReturnRow[];
 
 /**
  * Zod schema for get_trending_searches function return type
  */
-export const getTrendingSearchesReturnsSchema = z.array(z.any());
+export const getTrendingSearchesReturnsSchema = z.array(getTrendingSearchesReturnRowSchema);
 
 /**
  * Type inference from Zod schema (should match type above)

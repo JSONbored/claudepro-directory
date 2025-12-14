@@ -39,7 +39,7 @@ export type UserCompaniesCompany = {
   /** Attribute: updated_at (timestamptz, nullable) */
   updated_at: string | null;
   /** Attribute: stats (user_companies_stats, nullable) */
-  stats: UserCompaniesStats;
+  stats: UserCompaniesStats | null;
 };
 
 /**

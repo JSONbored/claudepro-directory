@@ -17,7 +17,7 @@ export type FormFieldConfigResult = {
   /** Attribute: form_type (text, nullable) */
   form_type: string | null;
   /** Attribute: fields (_form_field_config_item, nullable) */
-  fields: FormFieldConfigItem[];
+  fields: FormFieldConfigItem[] | null;
 };
 
 /**

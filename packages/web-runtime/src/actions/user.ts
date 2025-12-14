@@ -190,10 +190,14 @@ export const updateProfile = authedAction
     return result;
   });
 
+import type {
+  RefreshProfileFromOauthReturns,
+  BatchAddBookmarksReturns,
+  ToggleFollowReturns,
+} from '@heyclaude/database-types/postgres-types';
+
 async function refreshProfileFromOAuthInternal(userId: string) {
-  const result = await runRpc<
-    Database['public']['Functions']['refresh_profile_from_oauth']['Returns']
-  >(
+  const result = await runRpc<RefreshProfileFromOauthReturns>(
     'refresh_profile_from_oauth',
     { user_id: userId },
     { action: 'user.refreshProfileFromOAuth', userId }
@@ -282,7 +286,7 @@ export const addBookmarkBatch = authedAction
         content_slug: item.content_slug,
       }));
 
-    const result = await runRpc<Database['public']['Functions']['batch_add_bookmarks']['Returns']>(
+    const result = await runRpc<BatchAddBookmarksReturns>(
       'batch_add_bookmarks',
       {
         p_user_id: ctx.userId,
@@ -319,7 +323,7 @@ export const toggleFollow = authedAction
   })
   .inputSchema(followSchema)
   .action(async ({ parsedInput: { action, user_id, slug }, ctx }) => {
-    const result = await runRpc<Database['public']['Functions']['toggle_follow']['Returns']>(
+    const result = await runRpc<ToggleFollowReturns>(
       'toggle_follow',
       {
         p_follower_id: ctx.userId,
@@ -412,8 +416,9 @@ export const getFollowStatusBatch = authedAction
     });
 
     // Ensure data is an array
+    // IsFollowingBatchReturns is Record<string, unknown>[], so use bracket notation
     const results = Array.isArray(data) ? data : [];
-    return new Map(results.map((row) => [row.followed_user_id, row.is_following]));
+    return new Map(results.map((row) => [row['followed_user_id'] as string, row['is_following'] as boolean]));
   });
 
 export const getActivitySummary = authedAction

@@ -12,7 +12,7 @@ import { z } from 'zod';
  */
 export type GetSitewideContentListArgs = {
   /** Parameter: p_limit (int4, optional) */
-  p_limit: number | undefined | null | undefined;
+  p_limit?: number;
 };
 
 /**
@@ -29,14 +29,53 @@ export const getSitewideContentListArgsSchema = z.object({
 export type GetSitewideContentListArgsFromZod = z.infer<typeof getSitewideContentListArgsSchema>;
 
 /**
+ * Return row type for PostgreSQL function: get_sitewide_content_list
+ */
+export type GetSitewideContentListReturnRow = {
+  /** slug (text, nullable) */
+  slug: string | null;
+  /** title (text, nullable) */
+  title: string | null;
+  /** category (content_category, nullable) */
+  category: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog' | null;
+  /** description (text, nullable) */
+  description: string | null;
+  /** tags (_text, nullable) */
+  tags: string[] | null;
+  /** author (text, nullable) */
+  author: string | null;
+  /** date_added (date, nullable) */
+  date_added: string | null;
+  /** view_count (int4, nullable) */
+  view_count: number | null;
+  /** bookmark_count (int4, nullable) */
+  bookmark_count: number | null;
+};
+
+/**
+ * Zod schema for get_sitewide_content_list return row
+ */
+export const getSitewideContentListReturnRowSchema = z.object({
+  slug: z.string().nullable(),
+  title: z.string().nullable(),
+  category: z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'skills', 'collections', 'guides', 'jobs', 'changelog']).nullable(),
+  description: z.string().nullable(),
+  tags: z.array(z.string()).nullable(),
+  author: z.string().nullable(),
+  date_added: z.string().nullable(),
+  view_count: z.number().nullable(),
+  bookmark_count: z.number().nullable(),
+});
+
+/**
  * Return type for PostgreSQL function: get_sitewide_content_list
  */
-export type GetSitewideContentListReturns = Record<string, unknown>[];
+export type GetSitewideContentListReturns = GetSitewideContentListReturnRow[];
 
 /**
  * Zod schema for get_sitewide_content_list function return type
  */
-export const getSitewideContentListReturnsSchema = z.array(z.any());
+export const getSitewideContentListReturnsSchema = z.array(getSitewideContentListReturnRowSchema);
 
 /**
  * Type inference from Zod schema (should match type above)

@@ -17,7 +17,7 @@ export type GenerateMetadataCompleteArgs = {
   /** Parameter: p_route (text) */
   p_route: string;
   /** Parameter: p_include (text, optional) */
-  p_include: string | undefined | null | undefined;
+  p_include?: string;
 };
 
 /**

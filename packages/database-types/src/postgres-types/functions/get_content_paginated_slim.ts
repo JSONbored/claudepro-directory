@@ -15,15 +15,15 @@ import { contentPaginatedSlimResultSchema } from '../composites/content_paginate
  */
 export type GetContentPaginatedSlimArgs = {
   /** Parameter: p_category (content_category, optional) */
-  p_category: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog' | undefined | null | undefined;
+  p_category?: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog';
   /** Parameter: p_limit (int4, optional) */
-  p_limit: number | undefined | null | undefined;
+  p_limit?: number;
   /** Parameter: p_offset (int4, optional) */
-  p_offset: number | undefined | null | undefined;
+  p_offset?: number;
   /** Parameter: p_order_by (text, optional) */
-  p_order_by: string | undefined | null | undefined;
+  p_order_by?: string;
   /** Parameter: p_order_direction (text, optional) */
-  p_order_direction: string | undefined | null | undefined;
+  p_order_direction?: string;
 };
 
 /**

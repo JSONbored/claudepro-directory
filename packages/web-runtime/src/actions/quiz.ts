@@ -13,8 +13,9 @@ export const getQuizConfigurationAction = rateLimitedAction
     try {
       const { getQuizConfiguration: fetchQuizConfig } = await import('../data/quiz.ts');
       const data = await fetchQuizConfig();
-      return (data ?? []) as QuizConfigurationResult;
+      // GetQuizConfigurationReturns is QuizConfigurationQuestion (single object), not array
+      return data;
     } catch {
-      return [] as QuizConfigurationResult;
+      return null;
     }
   });

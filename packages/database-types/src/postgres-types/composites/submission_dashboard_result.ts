@@ -19,11 +19,11 @@ import { submissionDashboardStatsSchema } from './submission_dashboard_stats';
  */
 export type SubmissionDashboardResult = {
   /** Attribute: stats (submission_dashboard_stats, nullable) */
-  stats: SubmissionDashboardStats;
+  stats: SubmissionDashboardStats | null;
   /** Attribute: recent (_submission_dashboard_recent_item, nullable) */
-  recent: SubmissionDashboardRecentItem[];
+  recent: SubmissionDashboardRecentItem[] | null;
   /** Attribute: contributors (_submission_dashboard_contributor_item, nullable) */
-  contributors: SubmissionDashboardContributorItem[];
+  contributors: SubmissionDashboardContributorItem[] | null;
 };
 
 /**

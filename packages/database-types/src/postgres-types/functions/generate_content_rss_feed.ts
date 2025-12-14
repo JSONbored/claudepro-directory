@@ -12,9 +12,9 @@ import { z } from 'zod';
  */
 export type GenerateContentRssFeedArgs = {
   /** Parameter: p_category (content_category, optional) */
-  p_category: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog' | undefined | null | undefined;
+  p_category?: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog';
   /** Parameter: p_limit (int4, optional) */
-  p_limit: number | undefined | null | undefined;
+  p_limit?: number;
 };
 
 /**

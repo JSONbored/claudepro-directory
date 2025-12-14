@@ -19,11 +19,11 @@ export type GetRelatedContentArgs = {
   /** Parameter: p_slug (text) */
   p_slug: string;
   /** Parameter: p_tags (_text, optional) */
-  p_tags: string[] | undefined | null | undefined;
+  p_tags?: string[];
   /** Parameter: p_limit (int4, optional) */
-  p_limit: number | undefined | null | undefined;
+  p_limit?: number;
   /** Parameter: p_exclude_slugs (_text, optional) */
-  p_exclude_slugs: string[] | undefined | null | undefined;
+  p_exclude_slugs?: string[];
 };
 
 /**

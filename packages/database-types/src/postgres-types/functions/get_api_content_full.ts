@@ -16,7 +16,7 @@ export type GetApiContentFullArgs = {
   /** Parameter: p_slug (text) */
   p_slug: string;
   /** Parameter: p_base_url (text, optional) */
-  p_base_url: string | undefined | null | undefined;
+  p_base_url?: string;
 };
 
 /**

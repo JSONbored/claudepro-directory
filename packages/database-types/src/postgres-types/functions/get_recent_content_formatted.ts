@@ -12,11 +12,11 @@ import { z } from 'zod';
  */
 export type GetRecentContentFormattedArgs = {
   /** Parameter: p_category (content_category, optional) */
-  p_category: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog' | undefined | null | undefined;
+  p_category?: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog';
   /** Parameter: p_limit (int4, optional) */
-  p_limit: number | undefined | null | undefined;
+  p_limit?: number;
   /** Parameter: p_days (int4, optional) */
-  p_days: number | undefined | null | undefined;
+  p_days?: number;
 };
 
 /**
@@ -37,14 +37,47 @@ export const getRecentContentFormattedArgsSchema = z.object({
 export type GetRecentContentFormattedArgsFromZod = z.infer<typeof getRecentContentFormattedArgsSchema>;
 
 /**
+ * Return row type for PostgreSQL function: get_recent_content_formatted
+ */
+export type GetRecentContentFormattedReturnRow = {
+  /** category (content_category, nullable) */
+  category: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog' | null;
+  /** slug (text, nullable) */
+  slug: string | null;
+  /** title (text, nullable) */
+  title: string | null;
+  /** description (text, nullable) */
+  description: string | null;
+  /** author (text, nullable) */
+  author: string | null;
+  /** tags (_text, nullable) */
+  tags: string[] | null;
+  /** created_at (text, nullable) */
+  created_at: string | null;
+};
+
+/**
+ * Zod schema for get_recent_content_formatted return row
+ */
+export const getRecentContentFormattedReturnRowSchema = z.object({
+  category: z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'skills', 'collections', 'guides', 'jobs', 'changelog']).nullable(),
+  slug: z.string().nullable(),
+  title: z.string().nullable(),
+  description: z.string().nullable(),
+  author: z.string().nullable(),
+  tags: z.array(z.string()).nullable(),
+  created_at: z.string().nullable(),
+});
+
+/**
  * Return type for PostgreSQL function: get_recent_content_formatted
  */
-export type GetRecentContentFormattedReturns = Record<string, unknown>[];
+export type GetRecentContentFormattedReturns = GetRecentContentFormattedReturnRow[];
 
 /**
  * Zod schema for get_recent_content_formatted function return type
  */
-export const getRecentContentFormattedReturnsSchema = z.array(z.any());
+export const getRecentContentFormattedReturnsSchema = z.array(getRecentContentFormattedReturnRowSchema);
 
 /**
  * Type inference from Zod schema (should match type above)

@@ -17,9 +17,9 @@ import { contentPaginatedSlimItemSchema } from './content_paginated_slim_item';
  */
 export type ContentPaginatedSlimResult = {
   /** Attribute: items (_content_paginated_slim_item, nullable) */
-  items: ContentPaginatedSlimItem[];
+  items: ContentPaginatedSlimItem[] | null;
   /** Attribute: pagination (content_paginated_pagination, nullable) */
-  pagination: ContentPaginatedPagination;
+  pagination: ContentPaginatedPagination | null;
 };
 
 /**

@@ -29,14 +29,65 @@ export const getActiveNotificationsForUserArgsSchema = z.object({
 export type GetActiveNotificationsForUserArgsFromZod = z.infer<typeof getActiveNotificationsForUserArgsSchema>;
 
 /**
+ * Return row type for PostgreSQL function: get_active_notifications_for_user
+ */
+export type GetActiveNotificationsForUserReturnRow = {
+  /** id (text, nullable) */
+  id: string | null;
+  /** title (text, nullable) */
+  title: string | null;
+  /** message (text, nullable) */
+  message: string | null;
+  /** type (notification_type, nullable) */
+  type: 'announcement' | 'feedback' | null;
+  /** priority (notification_priority, nullable) */
+  priority: 'high' | 'medium' | 'low' | null;
+  /** active (bool, nullable) */
+  active: boolean | null;
+  /** action_label (text, nullable) */
+  action_label: string | null;
+  /** action_href (text, nullable) */
+  action_href: string | null;
+  /** action_onclick (text, nullable) */
+  action_onclick: string | null;
+  /** icon (text, nullable) */
+  icon: string | null;
+  /** expires_at (timestamptz, nullable) */
+  expires_at: string | null;
+  /** created_at (timestamptz, nullable) */
+  created_at: string | null;
+  /** updated_at (timestamptz, nullable) */
+  updated_at: string | null;
+};
+
+/**
+ * Zod schema for get_active_notifications_for_user return row
+ */
+export const getActiveNotificationsForUserReturnRowSchema = z.object({
+  id: z.string().nullable(),
+  title: z.string().nullable(),
+  message: z.string().nullable(),
+  type: z.enum(['announcement', 'feedback']).nullable(),
+  priority: z.enum(['high', 'medium', 'low']).nullable(),
+  active: z.boolean().nullable(),
+  action_label: z.string().nullable(),
+  action_href: z.string().nullable(),
+  action_onclick: z.string().nullable(),
+  icon: z.string().nullable(),
+  expires_at: z.string().nullable(),
+  created_at: z.string().nullable(),
+  updated_at: z.string().nullable(),
+});
+
+/**
  * Return type for PostgreSQL function: get_active_notifications_for_user
  */
-export type GetActiveNotificationsForUserReturns = Record<string, unknown>[];
+export type GetActiveNotificationsForUserReturns = GetActiveNotificationsForUserReturnRow[];
 
 /**
  * Zod schema for get_active_notifications_for_user function return type
  */
-export const getActiveNotificationsForUserReturnsSchema = z.array(z.any());
+export const getActiveNotificationsForUserReturnsSchema = z.array(getActiveNotificationsForUserReturnRowSchema);
 
 /**
  * Type inference from Zod schema (should match type above)

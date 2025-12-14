@@ -17,7 +17,7 @@ export type ManageReviewResult = {
   /** Attribute: success (bool, nullable) */
   success: boolean | null;
   /** Attribute: review (review_ratings, nullable) */
-  review: ReviewRatings;
+  review: ReviewRatings | null;
   /** Attribute: content_type (text, nullable) */
   content_type: string | null;
   /** Attribute: content_slug (text, nullable) */

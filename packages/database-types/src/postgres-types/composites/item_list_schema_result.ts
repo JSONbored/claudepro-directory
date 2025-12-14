@@ -29,7 +29,7 @@ export type ItemListSchemaResult = {
   /** Attribute: number_of_items (int4, nullable) */
   number_of_items: number | null;
   /** Attribute: item_list_element (_item_list_element, nullable) */
-  item_list_element: ItemListElement[];
+  item_list_element: ItemListElement[] | null;
 };
 
 /**

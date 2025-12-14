@@ -25,7 +25,7 @@ export type ReadmeCategory = {
   /** Attribute: url_slug (text, nullable) */
   url_slug: string | null;
   /** Attribute: items (_readme_category_item, nullable) */
-  items: ReadmeCategoryItem[];
+  items: ReadmeCategoryItem[] | null;
 };
 
 /**

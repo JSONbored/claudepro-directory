@@ -15,7 +15,7 @@ import { userIdentitiesIdentitySchema } from './user_identities_identity';
  */
 export type UserIdentitiesResult = {
   /** Attribute: identities (_user_identities_identity, nullable) */
-  identities: UserIdentitiesIdentity[];
+  identities: UserIdentitiesIdentity[] | null;
 };
 
 /**

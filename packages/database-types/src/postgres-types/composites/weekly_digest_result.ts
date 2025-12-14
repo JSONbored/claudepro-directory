@@ -23,9 +23,9 @@ export type WeeklyDigestResult = {
   /** Attribute: week_end (date, nullable) */
   week_end: string | null;
   /** Attribute: new_content (_weekly_digest_new_content, nullable) */
-  new_content: WeeklyDigestNewContent[];
+  new_content: WeeklyDigestNewContent[] | null;
   /** Attribute: trending_content (_weekly_digest_trending_content, nullable) */
-  trending_content: WeeklyDigestTrendingContent[];
+  trending_content: WeeklyDigestTrendingContent[] | null;
 };
 
 /**

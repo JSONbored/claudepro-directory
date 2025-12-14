@@ -29,14 +29,53 @@ export const getCategoryContentListArgsSchema = z.object({
 export type GetCategoryContentListArgsFromZod = z.infer<typeof getCategoryContentListArgsSchema>;
 
 /**
+ * Return row type for PostgreSQL function: get_category_content_list
+ */
+export type GetCategoryContentListReturnRow = {
+  /** slug (text, nullable) */
+  slug: string | null;
+  /** title (text, nullable) */
+  title: string | null;
+  /** category (content_category, nullable) */
+  category: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog' | null;
+  /** description (text, nullable) */
+  description: string | null;
+  /** tags (_text, nullable) */
+  tags: string[] | null;
+  /** author (text, nullable) */
+  author: string | null;
+  /** date_added (timestamptz, nullable) */
+  date_added: string | null;
+  /** view_count (int4, nullable) */
+  view_count: number | null;
+  /** bookmark_count (int4, nullable) */
+  bookmark_count: number | null;
+};
+
+/**
+ * Zod schema for get_category_content_list return row
+ */
+export const getCategoryContentListReturnRowSchema = z.object({
+  slug: z.string().nullable(),
+  title: z.string().nullable(),
+  category: z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'skills', 'collections', 'guides', 'jobs', 'changelog']).nullable(),
+  description: z.string().nullable(),
+  tags: z.array(z.string()).nullable(),
+  author: z.string().nullable(),
+  date_added: z.string().nullable(),
+  view_count: z.number().nullable(),
+  bookmark_count: z.number().nullable(),
+});
+
+/**
  * Return type for PostgreSQL function: get_category_content_list
  */
-export type GetCategoryContentListReturns = Record<string, unknown>[];
+export type GetCategoryContentListReturns = GetCategoryContentListReturnRow[];
 
 /**
  * Zod schema for get_category_content_list function return type
  */
-export const getCategoryContentListReturnsSchema = z.array(z.any());
+export const getCategoryContentListReturnsSchema = z.array(getCategoryContentListReturnRowSchema);
 
 /**
  * Type inference from Zod schema (should match type above)

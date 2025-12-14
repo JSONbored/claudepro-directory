@@ -19,14 +19,14 @@
  */
 
 import { MiscService, NewsletterService } from '@heyclaude/data-layer';
-import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
+import type { Prisma } from '@heyclaude/data-layer/prisma';
 import { normalizeError } from '@heyclaude/shared-runtime';
 
 import { inngest, type ResendEmailEventData } from '../../client';
 import { logger, createWebAppContextWithId } from '../../../logging/server';
 import { CONCURRENCY_LIMITS, RETRY_CONFIGS } from '../../config';
 
-type EmailEngagementInsert = DatabaseGenerated['public']['Tables']['email_engagement_summary']['Insert'];
+type EmailEngagementInsert = Prisma.email_engagement_summaryCreateInput;
 
 /**
  * Resend event types we handle

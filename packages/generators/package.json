@@ -27,7 +27,8 @@
     "heyclaude-consolidate-variables": "./src/bin/consolidate-variables.ts",
     "heyclaude-apply-variable-consolidation": "./src/bin/apply-variable-consolidation.ts",
     "heyclaude-comprehensive-css-analysis": "./src/bin/comprehensive-css-analysis.ts",
-    "heyclaude-exhaustive-css-token-comparison": "./src/bin/exhaustive-css-token-comparison.ts"
+    "heyclaude-exhaustive-css-token-comparison": "./src/bin/exhaustive-css-token-comparison.ts",
+    "heyclaude-migrate-inline-styles": "./src/bin/migrate-inline-styles.ts"
   },
   "exports": {
     ".": {

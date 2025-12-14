@@ -17,11 +17,11 @@ export type GetUserActivityTimelineArgs = {
   /** Parameter: p_user_id (uuid) */
   p_user_id: string;
   /** Parameter: p_type (text, optional) */
-  p_type: string | undefined | null | undefined;
+  p_type?: string;
   /** Parameter: p_limit (int4, optional) */
-  p_limit: number | undefined | null | undefined;
+  p_limit?: number;
   /** Parameter: p_offset (int4, optional) */
-  p_offset: number | undefined | null | undefined;
+  p_offset?: number;
 };
 
 /**

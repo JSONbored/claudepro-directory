@@ -17,9 +17,9 @@ import { userSettingsUserDataSchema } from './user_settings_user_data';
  */
 export type UserSettingsResultV2 = {
   /** Attribute: profile (user_settings_profile, nullable) */
-  profile: UserSettingsProfile;
+  profile: UserSettingsProfile | null;
   /** Attribute: user_data (user_settings_user_data, nullable) */
-  user_data: UserSettingsUserData;
+  user_data: UserSettingsUserData | null;
   /** Attribute: username (text, nullable) */
   username: string | null;
 };

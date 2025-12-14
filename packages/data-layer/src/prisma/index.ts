@@ -21,6 +21,7 @@ export type {
   sort_option,
   trending_period,
   submission_type,
+  submission_status,
   form_field_type,
   form_grid_column,
   form_icon_position,
@@ -38,6 +39,7 @@ export type {
   use_case_type,
   config_format,
   primary_action_type,
+  sponsorship_tier,
 } from '../../../generators/dist/prisma/index.js';
 
 // Re-export enum value objects for runtime use (e.g., Object.values(), direct access)

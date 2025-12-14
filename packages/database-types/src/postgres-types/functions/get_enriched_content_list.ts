@@ -15,13 +15,13 @@ import { enrichedContentItemSchema } from '../composites/enriched_content_item';
  */
 export type GetEnrichedContentListArgs = {
   /** Parameter: p_category (content_category, optional) */
-  p_category: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog' | undefined | null | undefined;
+  p_category?: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog';
   /** Parameter: p_slugs (_text, optional) */
-  p_slugs: string[] | undefined | null | undefined;
+  p_slugs?: string[];
   /** Parameter: p_limit (int4, optional) */
-  p_limit: number | undefined | null | undefined;
+  p_limit?: number;
   /** Parameter: p_offset (int4, optional) */
-  p_offset: number | undefined | null | undefined;
+  p_offset?: number;
 };
 
 /**

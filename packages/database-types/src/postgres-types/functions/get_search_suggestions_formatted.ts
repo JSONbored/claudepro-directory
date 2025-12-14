@@ -14,7 +14,7 @@ export type GetSearchSuggestionsFormattedArgs = {
   /** Parameter: p_query (text) */
   p_query: string;
   /** Parameter: p_limit (int4, optional) */
-  p_limit: number | undefined | null | undefined;
+  p_limit?: number;
 };
 
 /**
@@ -33,14 +33,35 @@ export const getSearchSuggestionsFormattedArgsSchema = z.object({
 export type GetSearchSuggestionsFormattedArgsFromZod = z.infer<typeof getSearchSuggestionsFormattedArgsSchema>;
 
 /**
+ * Return row type for PostgreSQL function: get_search_suggestions_formatted
+ */
+export type GetSearchSuggestionsFormattedReturnRow = {
+  /** text (text, nullable) */
+  text: string | null;
+  /** search_count (int4, nullable) */
+  search_count: number | null;
+  /** is_popular (bool, nullable) */
+  is_popular: boolean | null;
+};
+
+/**
+ * Zod schema for get_search_suggestions_formatted return row
+ */
+export const getSearchSuggestionsFormattedReturnRowSchema = z.object({
+  text: z.string().nullable(),
+  search_count: z.number().nullable(),
+  is_popular: z.boolean().nullable(),
+});
+
+/**
  * Return type for PostgreSQL function: get_search_suggestions_formatted
  */
-export type GetSearchSuggestionsFormattedReturns = Record<string, unknown>[];
+export type GetSearchSuggestionsFormattedReturns = GetSearchSuggestionsFormattedReturnRow[];
 
 /**
  * Zod schema for get_search_suggestions_formatted function return type
  */
-export const getSearchSuggestionsFormattedReturnsSchema = z.array(z.any());
+export const getSearchSuggestionsFormattedReturnsSchema = z.array(getSearchSuggestionsFormattedReturnRowSchema);
 
 /**
  * Type inference from Zod schema (should match type above)

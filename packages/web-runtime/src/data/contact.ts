@@ -1,14 +1,13 @@
 'use server';
 
 import { MiscService } from '@heyclaude/data-layer';
-import { type Database } from '@heyclaude/database-types';
+import type { ContactCommandResult } from '@heyclaude/database-types/postgres-types';
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { normalizeError } from '../errors.ts';
 import { logger } from '../logger.ts';
 
-type ContactCommandsRow =
-  Database['public']['Functions']['get_contact_commands']['Returns'][number];
+type ContactCommandsRow = ContactCommandResult;
 
 /**
  * Fetch contact commands
@@ -31,9 +30,11 @@ export async function fetchContactCommands(): Promise<ContactCommandsRow | null>
     const service = new MiscService();
     const result = await service.getContactCommands();
 
-    reqLogger.info({ count: result?.length ?? 0 }, 'fetchContactCommands: fetched successfully');
+    // GetContactCommandsReturns is ContactCommandResult[][] (array of arrays)
+    // Return the first array's first element, or null
+    reqLogger.info({ count: result?.[0]?.length ?? 0 }, 'fetchContactCommands: fetched successfully');
 
-    return result?.[0] ?? null;
+    return result?.[0]?.[0] ?? null;
   } catch (error) {
     const normalized = normalizeError(error, 'fetchContactCommands failed');
     reqLogger.error({ err: normalized }, 'fetchContactCommands: failed');

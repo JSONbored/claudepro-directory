@@ -15,7 +15,7 @@ import { readmeCategorySchema } from './readme_category';
  */
 export type GenerateReadmeDataResult = {
   /** Attribute: categories (_readme_category, nullable) */
-  categories: ReadmeCategory[];
+  categories: ReadmeCategory[] | null;
   /** Attribute: total_count (int4, nullable) */
   total_count: number | null;
   /** Attribute: category_breakdown (jsonb, nullable) */

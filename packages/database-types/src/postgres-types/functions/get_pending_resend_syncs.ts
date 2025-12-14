@@ -12,7 +12,7 @@ import { z } from 'zod';
  */
 export type GetPendingResendSyncsArgs = {
   /** Parameter: p_limit (int4, optional) */
-  p_limit: number | undefined | null | undefined;
+  p_limit?: number;
 };
 
 /**
@@ -29,14 +29,50 @@ export const getPendingResendSyncsArgsSchema = z.object({
 export type GetPendingResendSyncsArgsFromZod = z.infer<typeof getPendingResendSyncsArgsSchema>;
 
 /**
+ * Return row type for PostgreSQL function: get_pending_resend_syncs
+ */
+export type GetPendingResendSyncsReturnRow = {
+  /** id (uuid, nullable) */
+  id: string | null;
+  /** content_type (text, nullable) */
+  content_type: string | null;
+  /** content_slug (text, nullable) */
+  content_slug: string | null;
+  /** sync_type (text, nullable) */
+  sync_type: string | null;
+  /** scheduled_for (timestamptz, nullable) */
+  scheduled_for: string | null;
+  /** retry_count (int4, nullable) */
+  retry_count: number | null;
+  /** last_error (text, nullable) */
+  last_error: string | null;
+  /** created_at (timestamptz, nullable) */
+  created_at: string | null;
+};
+
+/**
+ * Zod schema for get_pending_resend_syncs return row
+ */
+export const getPendingResendSyncsReturnRowSchema = z.object({
+  id: z.string().uuid().nullable(),
+  content_type: z.string().nullable(),
+  content_slug: z.string().nullable(),
+  sync_type: z.string().nullable(),
+  scheduled_for: z.string().nullable(),
+  retry_count: z.number().nullable(),
+  last_error: z.string().nullable(),
+  created_at: z.string().nullable(),
+});
+
+/**
  * Return type for PostgreSQL function: get_pending_resend_syncs
  */
-export type GetPendingResendSyncsReturns = Record<string, unknown>[];
+export type GetPendingResendSyncsReturns = GetPendingResendSyncsReturnRow[];
 
 /**
  * Zod schema for get_pending_resend_syncs function return type
  */
-export const getPendingResendSyncsReturnsSchema = z.array(z.any());
+export const getPendingResendSyncsReturnsSchema = z.array(getPendingResendSyncsReturnRowSchema);
 
 /**
  * Type inference from Zod schema (should match type above)

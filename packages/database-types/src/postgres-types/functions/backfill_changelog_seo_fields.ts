@@ -25,14 +25,35 @@ export const backfillChangelogSeoFieldsArgsSchema = z.object({
 export type BackfillChangelogSeoFieldsArgsFromZod = z.infer<typeof backfillChangelogSeoFieldsArgsSchema>;
 
 /**
+ * Return row type for PostgreSQL function: backfill_changelog_seo_fields
+ */
+export type BackfillChangelogSeoFieldsReturnRow = {
+  /** updated_count (int4, nullable) */
+  updated_count: number | null;
+  /** skipped_count (int4, nullable) */
+  skipped_count: number | null;
+  /** errors (_text, nullable) */
+  errors: string[] | null;
+};
+
+/**
+ * Zod schema for backfill_changelog_seo_fields return row
+ */
+export const backfillChangelogSeoFieldsReturnRowSchema = z.object({
+  updated_count: z.number().nullable(),
+  skipped_count: z.number().nullable(),
+  errors: z.array(z.string()).nullable(),
+});
+
+/**
  * Return type for PostgreSQL function: backfill_changelog_seo_fields
  */
-export type BackfillChangelogSeoFieldsReturns = Record<string, unknown>[];
+export type BackfillChangelogSeoFieldsReturns = BackfillChangelogSeoFieldsReturnRow[];
 
 /**
  * Zod schema for backfill_changelog_seo_fields function return type
  */
-export const backfillChangelogSeoFieldsReturnsSchema = z.array(z.any());
+export const backfillChangelogSeoFieldsReturnsSchema = z.array(backfillChangelogSeoFieldsReturnRowSchema);
 
 /**
  * Type inference from Zod schema (should match type above)

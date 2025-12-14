@@ -5,7 +5,44 @@
  * Maintains the same public API for backward compatibility.
  */
 
-import { type Database } from '@heyclaude/database-types';
+import type {
+  BatchInsertUserInteractionsArgs,
+  BatchInsertUserInteractionsReturns,
+  GetAccountDashboardArgs,
+  GetAccountDashboardReturns,
+  GetUserLibraryArgs,
+  GetUserLibraryReturns,
+  GetUserDashboardArgs,
+  GetUserDashboardReturns,
+  GetCollectionDetailWithItemsArgs,
+  GetCollectionDetailWithItemsReturns,
+  GetUserSettingsArgs,
+  GetUserSettingsReturns,
+  GetSponsorshipAnalyticsArgs,
+  GetSponsorshipAnalyticsReturns,
+  GetUserCompaniesArgs,
+  GetUserCompaniesReturns,
+  GetUserSponsorshipsArgs,
+  GetUserSponsorshipsReturns,
+  GetSubmissionDashboardArgs,
+  GetSubmissionDashboardReturns,
+  IsBookmarkedArgs,
+  IsBookmarkedReturns,
+  IsBookmarkedBatchArgs,
+  IsBookmarkedBatchReturns,
+  IsFollowingArgs,
+  IsFollowingReturns,
+  IsFollowingBatchArgs,
+  IsFollowingBatchReturns,
+  GetUserActivitySummaryArgs,
+  GetUserActivitySummaryReturns,
+  GetUserActivityTimelineArgs,
+  GetUserActivityTimelineReturns,
+  GetUserIdentitiesArgs,
+  GetUserIdentitiesReturns,
+  GetUserCompleteDataArgs,
+  GetUserCompleteDataReturns,
+} from '@heyclaude/database-types/postgres-types';
 import { BasePrismaService } from './base-prisma-service.ts';
 
 /**
@@ -18,9 +55,9 @@ import { BasePrismaService } from './base-prisma-service.ts';
  */
 export class AccountService extends BasePrismaService {
   async getAccountDashboard(
-    args: Database['public']['Functions']['get_account_dashboard']['Args']
-  ): Promise<Database['public']['Functions']['get_account_dashboard']['Returns']> {
-    return this.callRpc<Database['public']['Functions']['get_account_dashboard']['Returns']>(
+    args: GetAccountDashboardArgs
+  ): Promise<GetAccountDashboardReturns> {
+    return this.callRpc<GetAccountDashboardReturns>(
       'get_account_dashboard',
       args,
       { methodName: 'getAccountDashboard' }
@@ -28,9 +65,9 @@ export class AccountService extends BasePrismaService {
   }
 
   async getUserLibrary(
-    args: Database['public']['Functions']['get_user_library']['Args']
-  ): Promise<Database['public']['Functions']['get_user_library']['Returns']> {
-    return this.callRpc<Database['public']['Functions']['get_user_library']['Returns']>(
+    args: GetUserLibraryArgs
+  ): Promise<GetUserLibraryReturns> {
+    return this.callRpc<GetUserLibraryReturns>(
       'get_user_library',
       args,
       { methodName: 'getUserLibrary' }
@@ -38,9 +75,9 @@ export class AccountService extends BasePrismaService {
   }
 
   async getUserDashboard(
-    args: Database['public']['Functions']['get_user_dashboard']['Args']
-  ): Promise<Database['public']['Functions']['get_user_dashboard']['Returns']> {
-    return this.callRpc<Database['public']['Functions']['get_user_dashboard']['Returns']>(
+    args: GetUserDashboardArgs
+  ): Promise<GetUserDashboardReturns> {
+    return this.callRpc<GetUserDashboardReturns>(
       'get_user_dashboard',
       args,
       { methodName: 'getUserDashboard' }
@@ -48,9 +85,9 @@ export class AccountService extends BasePrismaService {
   }
 
   async getCollectionDetailWithItems(
-    args: Database['public']['Functions']['get_collection_detail_with_items']['Args']
-  ): Promise<Database['public']['Functions']['get_collection_detail_with_items']['Returns']> {
-    return this.callRpc<Database['public']['Functions']['get_collection_detail_with_items']['Returns']>(
+    args: GetCollectionDetailWithItemsArgs
+  ): Promise<GetCollectionDetailWithItemsReturns> {
+    return this.callRpc<GetCollectionDetailWithItemsReturns>(
       'get_collection_detail_with_items',
       args,
       { methodName: 'getCollectionDetailWithItems' }
@@ -58,9 +95,9 @@ export class AccountService extends BasePrismaService {
   }
 
   async getUserSettings(
-    args: Database['public']['Functions']['get_user_settings']['Args']
-  ): Promise<Database['public']['Functions']['get_user_settings']['Returns']> {
-    return this.callRpc<Database['public']['Functions']['get_user_settings']['Returns']>(
+    args: GetUserSettingsArgs
+  ): Promise<GetUserSettingsReturns> {
+    return this.callRpc<GetUserSettingsReturns>(
       'get_user_settings',
       args,
       { methodName: 'getUserSettings' }
@@ -68,9 +105,9 @@ export class AccountService extends BasePrismaService {
   }
 
   async getSponsorshipAnalytics(
-    args: Database['public']['Functions']['get_sponsorship_analytics']['Args']
-  ): Promise<Database['public']['Functions']['get_sponsorship_analytics']['Returns']> {
-    return this.callRpc<Database['public']['Functions']['get_sponsorship_analytics']['Returns']>(
+    args: GetSponsorshipAnalyticsArgs
+  ): Promise<GetSponsorshipAnalyticsReturns> {
+    return this.callRpc<GetSponsorshipAnalyticsReturns>(
       'get_sponsorship_analytics',
       args,
       { methodName: 'getSponsorshipAnalytics' }
@@ -78,9 +115,9 @@ export class AccountService extends BasePrismaService {
   }
 
   async getUserCompanies(
-    args: Database['public']['Functions']['get_user_companies']['Args']
-  ): Promise<Database['public']['Functions']['get_user_companies']['Returns']> {
-    return this.callRpc<Database['public']['Functions']['get_user_companies']['Returns']>(
+    args: GetUserCompaniesArgs
+  ): Promise<GetUserCompaniesReturns> {
+    return this.callRpc<GetUserCompaniesReturns>(
       'get_user_companies',
       args,
       { methodName: 'getUserCompanies' }
@@ -88,9 +125,9 @@ export class AccountService extends BasePrismaService {
   }
 
   async getUserSponsorships(
-    args: Database['public']['Functions']['get_user_sponsorships']['Args']
-  ): Promise<Database['public']['Functions']['get_user_sponsorships']['Returns']> {
-    return this.callRpc<Database['public']['Functions']['get_user_sponsorships']['Returns']>(
+    args: GetUserSponsorshipsArgs
+  ): Promise<GetUserSponsorshipsReturns> {
+    return this.callRpc<GetUserSponsorshipsReturns>(
       'get_user_sponsorships',
       args,
       { methodName: 'getUserSponsorships' }
@@ -98,9 +135,9 @@ export class AccountService extends BasePrismaService {
   }
 
   async getSubmissionDashboard(
-    args: Database['public']['Functions']['get_submission_dashboard']['Args']
-  ): Promise<Database['public']['Functions']['get_submission_dashboard']['Returns']> {
-    return this.callRpc<Database['public']['Functions']['get_submission_dashboard']['Returns']>(
+    args: GetSubmissionDashboardArgs
+  ): Promise<GetSubmissionDashboardReturns> {
+    return this.callRpc<GetSubmissionDashboardReturns>(
       'get_submission_dashboard',
       args,
       { methodName: 'getSubmissionDashboard' }
@@ -108,9 +145,9 @@ export class AccountService extends BasePrismaService {
   }
 
   async isBookmarked(
-    args: Database['public']['Functions']['is_bookmarked']['Args']
-  ): Promise<Database['public']['Functions']['is_bookmarked']['Returns']> {
-    return this.callRpc<Database['public']['Functions']['is_bookmarked']['Returns']>(
+    args: IsBookmarkedArgs
+  ): Promise<IsBookmarkedReturns> {
+    return this.callRpc<IsBookmarkedReturns>(
       'is_bookmarked',
       args,
       { methodName: 'isBookmarked' }
@@ -118,9 +155,9 @@ export class AccountService extends BasePrismaService {
   }
 
   async isBookmarkedBatch(
-    args: Database['public']['Functions']['is_bookmarked_batch']['Args']
-  ): Promise<Database['public']['Functions']['is_bookmarked_batch']['Returns']> {
-    return this.callRpc<Database['public']['Functions']['is_bookmarked_batch']['Returns']>(
+    args: IsBookmarkedBatchArgs
+  ): Promise<IsBookmarkedBatchReturns> {
+    return this.callRpc<IsBookmarkedBatchReturns>(
       'is_bookmarked_batch',
       args,
       { methodName: 'isBookmarkedBatch' }
@@ -128,9 +165,9 @@ export class AccountService extends BasePrismaService {
   }
 
   async isFollowing(
-    args: Database['public']['Functions']['is_following']['Args']
-  ): Promise<Database['public']['Functions']['is_following']['Returns']> {
-    return this.callRpc<Database['public']['Functions']['is_following']['Returns']>(
+    args: IsFollowingArgs
+  ): Promise<IsFollowingReturns> {
+    return this.callRpc<IsFollowingReturns>(
       'is_following',
       args,
       { methodName: 'isFollowing' }
@@ -138,9 +175,9 @@ export class AccountService extends BasePrismaService {
   }
 
   async isFollowingBatch(
-    args: Database['public']['Functions']['is_following_batch']['Args']
-  ): Promise<Database['public']['Functions']['is_following_batch']['Returns']> {
-    return this.callRpc<Database['public']['Functions']['is_following_batch']['Returns']>(
+    args: IsFollowingBatchArgs
+  ): Promise<IsFollowingBatchReturns> {
+    return this.callRpc<IsFollowingBatchReturns>(
       'is_following_batch',
       args,
       { methodName: 'isFollowingBatch' }
@@ -148,9 +185,9 @@ export class AccountService extends BasePrismaService {
   }
 
   async getUserActivitySummary(
-    args: Database['public']['Functions']['get_user_activity_summary']['Args']
-  ): Promise<Database['public']['Functions']['get_user_activity_summary']['Returns']> {
-    return this.callRpc<Database['public']['Functions']['get_user_activity_summary']['Returns']>(
+    args: GetUserActivitySummaryArgs
+  ): Promise<GetUserActivitySummaryReturns> {
+    return this.callRpc<GetUserActivitySummaryReturns>(
       'get_user_activity_summary',
       args,
       { methodName: 'getUserActivitySummary' }
@@ -158,9 +195,9 @@ export class AccountService extends BasePrismaService {
   }
 
   async getUserActivityTimeline(
-    args: Database['public']['Functions']['get_user_activity_timeline']['Args']
-  ): Promise<Database['public']['Functions']['get_user_activity_timeline']['Returns']> {
-    return this.callRpc<Database['public']['Functions']['get_user_activity_timeline']['Returns']>(
+    args: GetUserActivityTimelineArgs
+  ): Promise<GetUserActivityTimelineReturns> {
+    return this.callRpc<GetUserActivityTimelineReturns>(
       'get_user_activity_timeline',
       args,
       { methodName: 'getUserActivityTimeline' }
@@ -168,9 +205,9 @@ export class AccountService extends BasePrismaService {
   }
 
   async getUserIdentities(
-    args: Database['public']['Functions']['get_user_identities']['Args']
-  ): Promise<Database['public']['Functions']['get_user_identities']['Returns']> {
-    return this.callRpc<Database['public']['Functions']['get_user_identities']['Returns']>(
+    args: GetUserIdentitiesArgs
+  ): Promise<GetUserIdentitiesReturns> {
+    return this.callRpc<GetUserIdentitiesReturns>(
       'get_user_identities',
       args,
       { methodName: 'getUserIdentities' }
@@ -178,9 +215,9 @@ export class AccountService extends BasePrismaService {
   }
 
   async getUserCompleteData(
-    args: Database['public']['Functions']['get_user_complete_data']['Args']
-  ): Promise<Database['public']['Functions']['get_user_complete_data']['Returns']> {
-    return this.callRpc<Database['public']['Functions']['get_user_complete_data']['Returns']>(
+    args: GetUserCompleteDataArgs
+  ): Promise<GetUserCompleteDataReturns> {
+    return this.callRpc<GetUserCompleteDataReturns>(
       'get_user_complete_data',
       args,
       { methodName: 'getUserCompleteData' }
@@ -188,10 +225,10 @@ export class AccountService extends BasePrismaService {
   }
 
   async batchInsertUserInteractions(
-    args: Database['public']['Functions']['batch_insert_user_interactions']['Args']
-  ): Promise<Database['public']['Functions']['batch_insert_user_interactions']['Returns']> {
+    args: BatchInsertUserInteractionsArgs
+  ): Promise<BatchInsertUserInteractionsReturns> {
     // Mutations don't use caching
-    return this.callRpc<Database['public']['Functions']['batch_insert_user_interactions']['Returns']>(
+    return this.callRpc<BatchInsertUserInteractionsReturns>(
       'batch_insert_user_interactions',
       args,
       { methodName: 'batchInsertUserInteractions', useCache: false }

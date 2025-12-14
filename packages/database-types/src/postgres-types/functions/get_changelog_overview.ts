@@ -15,15 +15,15 @@ import { changelogOverviewResultSchema } from '../composites/changelog_overview_
  */
 export type GetChangelogOverviewArgs = {
   /** Parameter: p_category (text, optional) */
-  p_category: string | undefined | null | undefined;
+  p_category?: string;
   /** Parameter: p_published_only (bool, optional) */
-  p_published_only: boolean | undefined | null | undefined;
+  p_published_only?: boolean;
   /** Parameter: p_featured_only (bool, optional) */
-  p_featured_only: boolean | undefined | null | undefined;
+  p_featured_only?: boolean;
   /** Parameter: p_limit (int4, optional) */
-  p_limit: number | undefined | null | undefined;
+  p_limit?: number;
   /** Parameter: p_offset (int4, optional) */
-  p_offset: number | undefined | null | undefined;
+  p_offset?: number;
 };
 
 /**

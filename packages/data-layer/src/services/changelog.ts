@@ -5,7 +5,18 @@
  * Maintains the same public API for backward compatibility.
  */
 
-import { type Database } from '@heyclaude/database-types';
+import type {
+  GetChangelogOverviewArgs,
+  GetChangelogOverviewReturns,
+  GetChangelogDetailArgs,
+  GetChangelogDetailReturns,
+  GetChangelogWithCategoryStatsArgs,
+  GetChangelogWithCategoryStatsReturns,
+  UpsertChangelogEntryArgs,
+  UpsertChangelogEntryReturns,
+  SyncChangelogEntryArgs,
+  SyncChangelogEntryReturns,
+} from '@heyclaude/database-types/postgres-types';
 import { BasePrismaService } from './base-prisma-service.ts';
 
 /**
@@ -18,9 +29,9 @@ import { BasePrismaService } from './base-prisma-service.ts';
  */
 export class ChangelogService extends BasePrismaService {
   async getChangelogOverview(
-    args: Database['public']['Functions']['get_changelog_overview']['Args']
-  ): Promise<Database['public']['Functions']['get_changelog_overview']['Returns']> {
-    return this.callRpc<Database['public']['Functions']['get_changelog_overview']['Returns']>(
+    args: GetChangelogOverviewArgs
+  ): Promise<GetChangelogOverviewReturns> {
+    return this.callRpc<GetChangelogOverviewReturns>(
       'get_changelog_overview',
       args,
       { methodName: 'getChangelogOverview' }
@@ -28,9 +39,9 @@ export class ChangelogService extends BasePrismaService {
   }
 
   async getChangelogDetail(
-    args: Database['public']['Functions']['get_changelog_detail']['Args']
-  ): Promise<Database['public']['Functions']['get_changelog_detail']['Returns']> {
-    return this.callRpc<Database['public']['Functions']['get_changelog_detail']['Returns']>(
+    args: GetChangelogDetailArgs
+  ): Promise<GetChangelogDetailReturns> {
+    return this.callRpc<GetChangelogDetailReturns>(
       'get_changelog_detail',
       args,
       { methodName: 'getChangelogDetail' }
@@ -38,9 +49,9 @@ export class ChangelogService extends BasePrismaService {
   }
 
   async getChangelogWithCategoryStats(
-    args: Database['public']['Functions']['get_changelog_with_category_stats']['Args']
-  ): Promise<Database['public']['Functions']['get_changelog_with_category_stats']['Returns']> {
-    return this.callRpc<Database['public']['Functions']['get_changelog_with_category_stats']['Returns']>(
+    args: GetChangelogWithCategoryStatsArgs
+  ): Promise<GetChangelogWithCategoryStatsReturns> {
+    return this.callRpc<GetChangelogWithCategoryStatsReturns>(
       'get_changelog_with_category_stats',
       args,
       { methodName: 'getChangelogWithCategoryStats' }
@@ -48,10 +59,10 @@ export class ChangelogService extends BasePrismaService {
   }
 
   async upsertChangelogEntry(
-    args: Database['public']['Functions']['upsert_changelog_entry']['Args']
-  ): Promise<Database['public']['Functions']['upsert_changelog_entry']['Returns'][0] | null> {
+    args: UpsertChangelogEntryArgs
+  ): Promise<UpsertChangelogEntryReturns[0] | null> {
     // Mutations don't use caching
-    const result = await this.callRpc<Database['public']['Functions']['upsert_changelog_entry']['Returns']>(
+    const result = await this.callRpc<UpsertChangelogEntryReturns>(
       'upsert_changelog_entry',
       args,
       { methodName: 'upsertChangelogEntry', useCache: false }
@@ -60,10 +71,10 @@ export class ChangelogService extends BasePrismaService {
   }
 
   async syncChangelogEntry(
-    args: Database['public']['Functions']['sync_changelog_entry']['Args']
-  ): Promise<Database['public']['Functions']['sync_changelog_entry']['Returns'][0] | null> {
+    args: SyncChangelogEntryArgs
+  ): Promise<SyncChangelogEntryReturns[0] | null> {
     // Mutations don't use caching
-    const result = await this.callRpc<Database['public']['Functions']['sync_changelog_entry']['Returns']>(
+    const result = await this.callRpc<SyncChangelogEntryReturns>(
       'sync_changelog_entry',
       args,
       { methodName: 'syncChangelogEntry', useCache: false }

@@ -33,14 +33,35 @@ export const isBookmarkedBatchArgsSchema = z.object({
 export type IsBookmarkedBatchArgsFromZod = z.infer<typeof isBookmarkedBatchArgsSchema>;
 
 /**
+ * Return row type for PostgreSQL function: is_bookmarked_batch
+ */
+export type IsBookmarkedBatchReturnRow = {
+  /** content_type (content_category, nullable) */
+  content_type: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog' | null;
+  /** content_slug (text, nullable) */
+  content_slug: string | null;
+  /** is_bookmarked (bool, nullable) */
+  is_bookmarked: boolean | null;
+};
+
+/**
+ * Zod schema for is_bookmarked_batch return row
+ */
+export const isBookmarkedBatchReturnRowSchema = z.object({
+  content_type: z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'skills', 'collections', 'guides', 'jobs', 'changelog']).nullable(),
+  content_slug: z.string().nullable(),
+  is_bookmarked: z.boolean().nullable(),
+});
+
+/**
  * Return type for PostgreSQL function: is_bookmarked_batch
  */
-export type IsBookmarkedBatchReturns = Record<string, unknown>[];
+export type IsBookmarkedBatchReturns = IsBookmarkedBatchReturnRow[];
 
 /**
  * Zod schema for is_bookmarked_batch function return type
  */
-export const isBookmarkedBatchReturnsSchema = z.array(z.any());
+export const isBookmarkedBatchReturnsSchema = z.array(isBookmarkedBatchReturnRowSchema);
 
 /**
  * Type inference from Zod schema (should match type above)

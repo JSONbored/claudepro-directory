@@ -8,7 +8,7 @@
  * Following existing UI patterns from the codebase
  */
 
-import { type Database } from '@heyclaude/database-types';
+import type { Bookmarks, CollectionItems } from '@heyclaude/database-types/postgres-types';
 import {
   addItemToCollection,
   removeItemFromCollection,
@@ -62,8 +62,9 @@ function getSafeContentUrl(type: string, slug: string): null | string {
   return `/${type}/${sanitizedSlug}`;
 }
 
-type CollectionItem = Database['public']['Tables']['collection_items']['Row'];
-type Bookmark = Database['public']['Tables']['bookmarks']['Row'];
+// Use composite types directly from generator - these match what RPCs return
+type CollectionItem = CollectionItems;
+type Bookmark = Bookmarks;
 
 interface CollectionItemManagerProps {
   availableBookmarks: Bookmark[];

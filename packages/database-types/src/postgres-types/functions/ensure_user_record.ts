@@ -17,15 +17,15 @@ export type EnsureUserRecordArgs = {
   /** Parameter: p_id (uuid) */
   p_id: string;
   /** Parameter: p_email (text, optional) */
-  p_email: string | undefined | null | undefined;
+  p_email?: string;
   /** Parameter: p_name (text, optional) */
-  p_name: string | undefined | null | undefined;
+  p_name?: string;
   /** Parameter: p_image (text, optional) */
-  p_image: string | undefined | null | undefined;
+  p_image?: string;
   /** Parameter: p_profile_public (bool, optional) */
-  p_profile_public: boolean | undefined | null | undefined;
+  p_profile_public?: boolean;
   /** Parameter: p_follow_email (bool, optional) */
-  p_follow_email: boolean | undefined | null | undefined;
+  p_follow_email?: boolean;
 };
 
 /**

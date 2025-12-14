@@ -15,19 +15,19 @@ import { filterJobsResultSchema } from '../composites/filter_jobs_result';
  */
 export type FilterJobsArgs = {
   /** Parameter: p_search_query (text, optional) */
-  p_search_query: string | undefined | null | undefined;
+  p_search_query?: string;
   /** Parameter: p_category (job_category, optional) */
-  p_category: 'engineering' | 'design' | 'product' | 'marketing' | 'sales' | 'support' | 'research' | 'data' | 'operations' | 'leadership' | 'consulting' | 'education' | 'other' | undefined | null | undefined;
+  p_category?: 'engineering' | 'design' | 'product' | 'marketing' | 'sales' | 'support' | 'research' | 'data' | 'operations' | 'leadership' | 'consulting' | 'education' | 'other';
   /** Parameter: p_employment_type (job_type, optional) */
-  p_employment_type: 'full-time' | 'part-time' | 'contract' | 'freelance' | 'internship' | undefined | null | undefined;
+  p_employment_type?: 'full-time' | 'part-time' | 'contract' | 'freelance' | 'internship';
   /** Parameter: p_remote_only (bool, optional) */
-  p_remote_only: boolean | undefined | null | undefined;
+  p_remote_only?: boolean;
   /** Parameter: p_experience_level (experience_level, optional) */
-  p_experience_level: 'beginner' | 'intermediate' | 'advanced' | undefined | null | undefined;
+  p_experience_level?: 'beginner' | 'intermediate' | 'advanced';
   /** Parameter: p_limit (int4, optional) */
-  p_limit: number | undefined | null | undefined;
+  p_limit?: number;
   /** Parameter: p_offset (int4, optional) */
-  p_offset: number | undefined | null | undefined;
+  p_offset?: number;
 };
 
 /**

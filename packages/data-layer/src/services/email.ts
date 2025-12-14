@@ -6,7 +6,10 @@
  * RPC function types remain using Database type (Prisma doesn't generate RPC types).
  */
 
-import type { Database } from '@heyclaude/database-types';
+import type {
+  GetDueSequenceEmailsReturns,
+  EnrollInEmailSequenceArgs,
+} from '@heyclaude/database-types/postgres-types';
 import type { Prisma } from '@heyclaude/data-layer/prisma';
 import { prisma } from '../prisma/client.ts';
 import { BasePrismaService } from './base-prisma-service.ts';
@@ -19,10 +22,8 @@ export class EmailService extends BasePrismaService {
    * Note: This method is primarily used in Inngest functions where request-scoped
    * caching provides no benefit. Direct RPC call for optimal performance.
    */
-  async getDueSequenceEmails(): Promise<
-    Database['public']['Functions']['get_due_sequence_emails']['Returns']
-  > {
-    return this.callRpc<Database['public']['Functions']['get_due_sequence_emails']['Returns']>(
+  async getDueSequenceEmails(): Promise<GetDueSequenceEmailsReturns> {
+    return this.callRpc<GetDueSequenceEmailsReturns>(
       'get_due_sequence_emails',
       {},
       { methodName: 'getDueSequenceEmails', useCache: false }
@@ -84,7 +85,7 @@ export class EmailService extends BasePrismaService {
    * This is a mutation, so it does NOT use request-scoped caching
    */
   async enrollInEmailSequence(
-    args: Database['public']['Functions']['enroll_in_email_sequence']['Args']
+    args: EnrollInEmailSequenceArgs
   ): Promise<void> {
     await this.callRpc<void>(
       'enroll_in_email_sequence',

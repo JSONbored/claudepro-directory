@@ -12,9 +12,9 @@ import { z } from 'zod';
  */
 export type GetTrendingMetricsFormattedArgs = {
   /** Parameter: p_category (content_category, optional) */
-  p_category: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog' | undefined | null | undefined;
+  p_category?: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog';
   /** Parameter: p_limit (int4, optional) */
-  p_limit: number | undefined | null | undefined;
+  p_limit?: number;
 };
 
 /**
@@ -33,14 +33,65 @@ export const getTrendingMetricsFormattedArgsSchema = z.object({
 export type GetTrendingMetricsFormattedArgsFromZod = z.infer<typeof getTrendingMetricsFormattedArgsSchema>;
 
 /**
+ * Return row type for PostgreSQL function: get_trending_metrics_formatted
+ */
+export type GetTrendingMetricsFormattedReturnRow = {
+  /** category (content_category, nullable) */
+  category: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog' | null;
+  /** slug (text, nullable) */
+  slug: string | null;
+  /** title (text, nullable) */
+  title: string | null;
+  /** description (text, nullable) */
+  description: string | null;
+  /** author (text, nullable) */
+  author: string | null;
+  /** tags (_text, nullable) */
+  tags: string[] | null;
+  /** source (text, nullable) */
+  source: string | null;
+  /** view_count (int4, nullable) */
+  view_count: number | null;
+  /** copy_count (int4, nullable) */
+  copy_count: number | null;
+  /** bookmark_count (int4, nullable) */
+  bookmark_count: number | null;
+  /** popularity (numeric, nullable) */
+  popularity: number | null;
+  /** engagement_score (numeric, nullable) */
+  engagement_score: number | null;
+  /** freshness_score (numeric, nullable) */
+  freshness_score: number | null;
+};
+
+/**
+ * Zod schema for get_trending_metrics_formatted return row
+ */
+export const getTrendingMetricsFormattedReturnRowSchema = z.object({
+  category: z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'skills', 'collections', 'guides', 'jobs', 'changelog']).nullable(),
+  slug: z.string().nullable(),
+  title: z.string().nullable(),
+  description: z.string().nullable(),
+  author: z.string().nullable(),
+  tags: z.array(z.string()).nullable(),
+  source: z.string().nullable(),
+  view_count: z.number().nullable(),
+  copy_count: z.number().nullable(),
+  bookmark_count: z.number().nullable(),
+  popularity: z.number().nullable(),
+  engagement_score: z.number().nullable(),
+  freshness_score: z.number().nullable(),
+});
+
+/**
  * Return type for PostgreSQL function: get_trending_metrics_formatted
  */
-export type GetTrendingMetricsFormattedReturns = Record<string, unknown>[];
+export type GetTrendingMetricsFormattedReturns = GetTrendingMetricsFormattedReturnRow[];
 
 /**
  * Zod schema for get_trending_metrics_formatted function return type
  */
-export const getTrendingMetricsFormattedReturnsSchema = z.array(z.any());
+export const getTrendingMetricsFormattedReturnsSchema = z.array(getTrendingMetricsFormattedReturnRowSchema);
 
 /**
  * Type inference from Zod schema (should match type above)

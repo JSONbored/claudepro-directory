@@ -12,7 +12,7 @@ import { z } from 'zod';
  */
 export type GenerateChangelogAtomFeedArgs = {
   /** Parameter: p_limit (int4, optional) */
-  p_limit: number | undefined | null | undefined;
+  p_limit?: number;
 };
 
 /**

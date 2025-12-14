@@ -20,7 +20,7 @@ export type InsertContactSubmissionArgs = {
   /** Parameter: p_message (text) */
   p_message: string;
   /** Parameter: p_metadata (jsonb, optional) */
-  p_metadata: Record<string, unknown> | undefined | null | undefined;
+  p_metadata?: Record<string, unknown>;
 };
 
 /**
@@ -45,14 +45,32 @@ export const insertContactSubmissionArgsSchema = z.object({
 export type InsertContactSubmissionArgsFromZod = z.infer<typeof insertContactSubmissionArgsSchema>;
 
 /**
+ * Return row type for PostgreSQL function: insert_contact_submission
+ */
+export type InsertContactSubmissionReturnRow = {
+  /** success (bool, nullable) */
+  success: boolean | null;
+  /** submission_id (uuid, nullable) */
+  submission_id: string | null;
+};
+
+/**
+ * Zod schema for insert_contact_submission return row
+ */
+export const insertContactSubmissionReturnRowSchema = z.object({
+  success: z.boolean().nullable(),
+  submission_id: z.string().uuid().nullable(),
+});
+
+/**
  * Return type for PostgreSQL function: insert_contact_submission
  */
-export type InsertContactSubmissionReturns = Record<string, unknown>[];
+export type InsertContactSubmissionReturns = InsertContactSubmissionReturnRow[];
 
 /**
  * Zod schema for insert_contact_submission function return type
  */
-export const insertContactSubmissionReturnsSchema = z.array(z.any());
+export const insertContactSubmissionReturnsSchema = z.array(insertContactSubmissionReturnRowSchema);
 
 /**
  * Type inference from Zod schema (should match type above)

@@ -4,7 +4,15 @@
  */
 
 import type { RecommendationItem } from '@heyclaude/data-layer/types/composite-types';
-import { Constants, type Database } from '@heyclaude/database-types';
+import type {
+  content_category,
+  experience_level,
+  focus_area_type,
+  integration_type,
+  use_case_type,
+} from '@heyclaude/data-layer/prisma';
+import { Constants } from '@heyclaude/database-types';
+import type { GetRecommendationsReturns } from '@heyclaude/database-types/postgres-types';
 import { generatePageMetadata, getConfigRecommendations } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
@@ -22,7 +30,7 @@ import ResultsLoading from './loading';
  * Results depend on search params (answers)
  */
 
-type RecommendationResponse = Database['public']['Functions']['get_recommendations']['Returns'] & {
+type RecommendationResponse = GetRecommendationsReturns & {
   answers: DecodedQuizAnswers;
   generatedAt: string;
   id: string;
@@ -30,13 +38,13 @@ type RecommendationResponse = Database['public']['Functions']['get_recommendatio
 
 // Type matching QuizAnswers from quiz-form.tsx
 interface DecodedQuizAnswers {
-  experienceLevel: Database['public']['Enums']['experience_level'];
-  p_focus_areas?: Array<Database['public']['Enums']['focus_area_type']>;
-  p_integrations?: Array<Database['public']['Enums']['integration_type']>;
+  experienceLevel: experience_level;
+  p_focus_areas?: Array<focus_area_type>;
+  p_integrations?: Array<integration_type>;
   teamSize?: string;
   timestamp?: string;
   toolPreferences: string[];
-  useCase: Database['public']['Enums']['use_case_type'];
+  useCase: use_case_type;
 }
 
 /*****
@@ -95,14 +103,14 @@ function decodeQuizAnswers(
     // Validate enum values
     if (
       !Constants.public.Enums.use_case_type.includes(
-        data['useCase'] as Database['public']['Enums']['use_case_type']
+        data['useCase'] as use_case_type
       )
     ) {
       throw new Error(`Invalid useCase value: ${data['useCase']}`);
     }
     if (
       !Constants.public.Enums.experience_level.includes(
-        data['experienceLevel'] as Database['public']['Enums']['experience_level']
+        data['experienceLevel'] as experience_level
       )
     ) {
       throw new Error(`Invalid experienceLevel value: ${data['experienceLevel']}`);
@@ -122,7 +130,7 @@ function decodeQuizAnswers(
         if (
           typeof integration !== 'string' ||
           !Constants.public.Enums.integration_type.includes(
-            integration as Database['public']['Enums']['integration_type']
+            integration as integration_type
           )
         ) {
           throw new Error(`Invalid p_integrations value: ${String(integration)}`);
@@ -134,7 +142,7 @@ function decodeQuizAnswers(
         if (
           typeof focusArea !== 'string' ||
           !Constants.public.Enums.focus_area_type.includes(
-            focusArea as Database['public']['Enums']['focus_area_type']
+            focusArea as focus_area_type
           )
         ) {
           throw new Error(`Invalid p_focus_areas value: ${String(focusArea)}`);
@@ -143,20 +151,16 @@ function decodeQuizAnswers(
     }
 
     return {
-      experienceLevel: data['experienceLevel'] as Database['public']['Enums']['experience_level'],
+      experienceLevel: data['experienceLevel'] as experience_level,
       toolPreferences: data['toolPreferences'] as string[],
-      useCase: data['useCase'] as Database['public']['Enums']['use_case_type'],
+      useCase: data['useCase'] as use_case_type,
       ...(Array.isArray(data['p_integrations']) &&
         data['p_integrations'].length > 0 && {
-          p_integrations: data['p_integrations'] as Array<
-            Database['public']['Enums']['integration_type']
-          >,
+          p_integrations: data['p_integrations'] as Array<integration_type>,
         }),
       ...(Array.isArray(data['p_focus_areas']) &&
         data['p_focus_areas'].length > 0 && {
-          p_focus_areas: data['p_focus_areas'] as Array<
-            Database['public']['Enums']['focus_area_type']
-          >,
+          p_focus_areas: data['p_focus_areas'] as Array<focus_area_type>,
         }),
       ...(typeof data['teamSize'] === 'string' && data['teamSize'] !== ''
         ? { teamSize: data['teamSize'] }
@@ -182,7 +186,7 @@ function decodeQuizAnswers(
 /*****
  * Filters and validates recommendation items, returning only those that include `category`, `slug`, and `title`.
  *
- * @param {Database['public']['Functions']['get_recommendations']['Returns']['results']} results - Raw recommendation items returned by the RPC; may be `null` or `undefined`.
+ * @param {GetRecommendationsReturns['results']} results - Raw recommendation items returned by the RPC; may be `null` or `undefined`.
  * @param {string} resultId - Identifier included in logs when items are filtered.
  * @param {ReturnType<typeof logger.child>} parentLogger - Optional parent logger used to create an operation-scoped logger for warnings.
  * @returns An array of recommendation items guaranteed to have `category`, `slug`, and `title`.
@@ -191,12 +195,12 @@ function decodeQuizAnswers(
  * @see ResultsDisplay
  */
 function normalizeRecommendationResults(
-  results: Database['public']['Functions']['get_recommendations']['Returns']['results'],
+  results: GetRecommendationsReturns['results'],
   resultId: string,
   parentLogger?: ReturnType<typeof logger.child>
 ): Array<
   RecommendationItem & {
-    category: Database['public']['Enums']['content_category'];
+    category: content_category;
     slug: string;
     title: string;
   }
@@ -216,7 +220,7 @@ function normalizeRecommendationResults(
   const normalized = results
     .filter(
       (item): item is RecommendationItem & {
-        category: Database['public']['Enums']['content_category'];
+        category: content_category;
         slug: string;
         title: string;
       } => Boolean(item.slug && item.title && item.category)

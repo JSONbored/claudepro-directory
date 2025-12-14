@@ -17,7 +17,7 @@ export type CommandInstallationClaudeCode = {
   /** Attribute: steps (_text, nullable) */
   steps: string[] | null;
   /** Attribute: config_path (command_installation_paths, nullable) */
-  config_path: CommandInstallationPaths;
+  config_path: CommandInstallationPaths | null;
   /** Attribute: config_format (text, nullable) */
   config_format: string | null;
 };

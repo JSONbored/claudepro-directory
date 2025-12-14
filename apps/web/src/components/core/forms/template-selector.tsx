@@ -4,7 +4,7 @@
  * Template Selector - Uses server-provided template data
  */
 
-import { type Database } from '@heyclaude/database-types';
+import type { GetContentTemplatesReturns } from '@heyclaude/database-types/postgres-types';
 import { ChevronDown, FileText } from '@heyclaude/web-runtime/icons';
 import {
   DIMENSIONS,
@@ -17,7 +17,7 @@ import {
 } from '@heyclaude/web-runtime/ui';
 
 // Use generated type directly from @heyclaude/database-types
-type ContentTemplatesResult = Database['public']['Functions']['get_content_templates']['Returns'];
+type ContentTemplatesResult = GetContentTemplatesReturns;
 type ContentTemplateItem = NonNullable<NonNullable<ContentTemplatesResult['templates']>[number]>;
 
 // Type representing the merged structure (matches what getContentTemplates returns)

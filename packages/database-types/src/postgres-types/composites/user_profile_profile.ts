@@ -31,7 +31,7 @@ export type UserProfileProfile = {
   /** Attribute: created_at (timestamptz, nullable) */
   created_at: string | null;
   /** Attribute: company (user_profile_company, nullable) */
-  company: UserProfileCompany;
+  company: UserProfileCompany | null;
 };
 
 /**

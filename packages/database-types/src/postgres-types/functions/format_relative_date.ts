@@ -14,9 +14,9 @@ export type FormatRelativeDateArgs = {
   /** Parameter: input_date (timestamptz) */
   input_date: string;
   /** Parameter: style (text, optional) */
-  style: string | undefined | null | undefined;
+  style?: string;
   /** Parameter: max_days (int4, optional) */
-  max_days: number | undefined | null | undefined;
+  max_days?: number;
 };
 
 /**

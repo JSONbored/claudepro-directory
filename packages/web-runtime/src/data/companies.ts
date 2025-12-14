@@ -2,7 +2,12 @@
 
 import { CompaniesService, SearchService } from '@heyclaude/data-layer';
 import { type content_category } from '@heyclaude/data-layer/prisma';
-import { type Database } from '@heyclaude/database-types';
+import type {
+  GetCompanyAdminProfileReturns,
+  GetCompanyProfileReturns,
+  GetCompaniesListReturns,
+  SearchUnifiedArgs,
+} from '@heyclaude/database-types/postgres-types/functions';
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { logger } from '../logger.ts';
@@ -12,8 +17,7 @@ import { normalizeRpcResult } from './content-helpers.ts';
 
 const JOBS_CATEGORY: content_category = 'jobs';
 
-type GetCompanyAdminProfileReturn =
-  Database['public']['Functions']['get_company_admin_profile']['Returns'];
+type GetCompanyAdminProfileReturn = GetCompanyAdminProfileReturns;
 
 /**
  * Get company admin profile
@@ -83,7 +87,7 @@ export async function getCompanyAdminProfile(
  */
 export async function getCompanyProfile(
   slug: string
-): Promise<Database['public']['Functions']['get_company_profile']['Returns'] | null> {
+): Promise<GetCompanyProfileReturns | null> {
   'use cache';
 
   // Configure cache - use 'half' profile for company profiles (changes every 30 minutes)
@@ -130,7 +134,7 @@ export async function getCompanyProfile(
 export async function getCompaniesList(
   limit = 50,
   offset = 0
-): Promise<Database['public']['Functions']['get_companies_list']['Returns']> {
+): Promise<GetCompaniesListReturns> {
   'use cache';
 
   // Configure cache - use 'half' profile for company lists (changes every 30 minutes)
@@ -207,7 +211,7 @@ async function fetchCompanySearchResults(
     // Follows architectural strategy: data layer -> database RPC -> DB
     const searchService = new SearchService();
 
-    const unifiedArgs: Database['public']['Functions']['search_unified']['Args'] = {
+    const unifiedArgs: SearchUnifiedArgs = {
       p_entities: ['company'],
       p_highlight_query: query,
       p_limit: limit,

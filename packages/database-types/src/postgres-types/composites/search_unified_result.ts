@@ -15,7 +15,7 @@ import { searchUnifiedRowSchema } from './search_unified_row';
  */
 export type SearchUnifiedResult = {
   /** Attribute: results (_search_unified_row, nullable) */
-  results: SearchUnifiedRow[];
+  results: SearchUnifiedRow[] | null;
   /** Attribute: total_count (int8, nullable) */
   total_count: number | null;
 };

@@ -16,9 +16,9 @@ export type GetUserContentVoteArgs = {
   /** Parameter: p_content_type (content_category) */
   p_content_type: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog';
   /** Parameter: p_user_id (uuid, optional) */
-  p_user_id: string | undefined | null | undefined;
+  p_user_id?: string;
   /** Parameter: p_session_id (text, optional) */
-  p_session_id: string | undefined | null | undefined;
+  p_session_id?: string;
 };
 
 /**

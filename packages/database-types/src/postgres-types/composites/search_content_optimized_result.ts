@@ -15,7 +15,7 @@ import { searchContentOptimizedRowSchema } from './search_content_optimized_row'
  */
 export type SearchContentOptimizedResult = {
   /** Attribute: results (_search_content_optimized_row, nullable) */
-  results: SearchContentOptimizedRow[];
+  results: SearchContentOptimizedRow[] | null;
   /** Attribute: total_count (int8, nullable) */
   total_count: number | null;
 };

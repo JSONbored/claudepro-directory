@@ -2,7 +2,7 @@
 
 import { ContentService } from '@heyclaude/data-layer';
 import { type content_category } from '@heyclaude/data-layer/prisma';
-import { type Database } from '@heyclaude/database-types';
+import type { GetSimilarContentReturns } from '@heyclaude/database-types/postgres-types/functions';
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { normalizeError } from '../../errors.ts';
@@ -21,7 +21,7 @@ export async function getSimilarContent(input: {
   contentSlug: string;
   contentType: content_category;
   limit?: number;
-}): Promise<Database['public']['Functions']['get_similar_content']['Returns'] | null> {
+}): Promise<GetSimilarContentReturns | null> {
   'use cache';
 
   const { contentSlug, contentType, limit = 6 } = input;

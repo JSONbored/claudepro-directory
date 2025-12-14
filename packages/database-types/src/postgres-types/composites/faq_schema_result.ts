@@ -19,7 +19,7 @@ export type FaqSchemaResult = {
   /** Attribute: @type (text, nullable) */
   _type: string | null;
   /** Attribute: main_entity (_faq_question, nullable) */
-  main_entity: FaqQuestion[];
+  main_entity: FaqQuestion[] | null;
   /** Attribute: url (text, nullable) */
   url: string | null;
 };

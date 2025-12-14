@@ -17,13 +17,13 @@ import { recommendationSummarySchema } from './recommendation_summary';
  */
 export type RecommendationResult = {
   /** Attribute: results (_recommendation_item, nullable) */
-  results: RecommendationItem[];
+  results: RecommendationItem[] | null;
   /** Attribute: total_matches (int4, nullable) */
   total_matches: number | null;
   /** Attribute: algorithm (text, nullable) */
   algorithm: string | null;
   /** Attribute: summary (recommendation_summary, nullable) */
-  summary: RecommendationSummary;
+  summary: RecommendationSummary | null;
 };
 
 /**

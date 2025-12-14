@@ -15,9 +15,9 @@ import { submissionDashboardResultSchema } from '../composites/submission_dashbo
  */
 export type GetSubmissionDashboardArgs = {
   /** Parameter: p_recent_limit (int4, optional) */
-  p_recent_limit: number | undefined | null | undefined;
+  p_recent_limit?: number;
   /** Parameter: p_contributors_limit (int4, optional) */
-  p_contributors_limit: number | undefined | null | undefined;
+  p_contributors_limit?: number;
 };
 
 /**

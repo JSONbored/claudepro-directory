@@ -29,7 +29,7 @@
 import 'server-only';
 
 import { MiscService } from '@heyclaude/data-layer';
-import { type Database } from '@heyclaude/database-types';
+import type { GetSocialProofStatsReturnRow } from '@heyclaude/database-types/postgres-types';
 import { createApiOptionsHandler, createApiRoute } from '@heyclaude/web-runtime/server';
 import { cacheLife } from 'next/cache';
 import { connection, NextResponse } from 'next/server';
@@ -52,10 +52,8 @@ async function getCachedSocialProofData(): Promise<{
   const service = new MiscService();
   const data = await service.getSocialProofStats();
 
-  // Extract the first overload's return type (no args version)
-  type SocialProofStatsFunction = Database['public']['Functions']['get_social_proof_stats'];
-  type NoArgsOverload = Extract<SocialProofStatsFunction, { Args: never }>;
-  type SocialProofStatsRow = NoArgsOverload['Returns'][number];
+  // Extract the return row type (function returns array of rows)
+  type SocialProofStatsRow = GetSocialProofStatsReturnRow;
 
   const result = data ?? [];
   const row =

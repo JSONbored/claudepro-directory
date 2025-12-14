@@ -7,7 +7,12 @@ import {
   type EnrichedContentItem,
 } from '@heyclaude/data-layer';
 import { type content_category } from '@heyclaude/data-layer/prisma';
-import { type Database } from '@heyclaude/database-types';
+import type {
+  GetTrendingContentReturns,
+  GetTrendingMetricsWithContentReturns,
+  GetPopularContentReturns,
+  GetRecentContentReturns,
+} from '@heyclaude/database-types/postgres-types/functions';
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { logger, toLogContextValue } from '../../logger.ts';
@@ -248,7 +253,7 @@ export async function getContentCount(category?: content_category): Promise<numb
 export async function getTrendingContent(
   category?: content_category,
   limit = 20
-): Promise<Database['public']['Functions']['get_trending_content']['Returns']> {
+): Promise<GetTrendingContentReturns> {
   'use cache';
 
   // Configure cache - use 'half' profile for trending content (changes every 30 minutes)
@@ -302,10 +307,9 @@ interface TrendingPageParameters {
   limit?: number;
 }
 
-type TrendingMetricsRows =
-  Database['public']['Functions']['get_trending_metrics_with_content']['Returns'];
-type PopularContentRows = Database['public']['Functions']['get_popular_content']['Returns'];
-type RecentContentRows = Database['public']['Functions']['get_recent_content']['Returns'];
+type TrendingMetricsRows = GetTrendingMetricsWithContentReturns;
+type PopularContentRows = GetPopularContentReturns;
+type RecentContentRows = GetRecentContentReturns;
 
 interface TrendingPageDataResult {
   popular: PopularContentRows;

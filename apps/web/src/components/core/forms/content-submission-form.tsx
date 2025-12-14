@@ -65,17 +65,7 @@ import { ContentTypeFieldRenderer } from './dynamic-form-field';
 import { ExamplesArrayInput } from './examples-array-input';
 import { TemplateSelector } from './template-selector';
 
-// Use generated type directly from @heyclaude/database-types
-type ContentTemplatesResult = Database['public']['Functions']['get_content_templates']['Returns'];
-type ContentTemplateItem = NonNullable<NonNullable<ContentTemplatesResult['templates']>[number]>;
-
-// Type representing the merged structure (matches what getContentTemplates returns)
-type MergedTemplateItem = ContentTemplateItem &
-  (ContentTemplateItem['template_data'] extends Record<string, unknown>
-    ? ContentTemplateItem['template_data']
-    : Record<string, unknown>) & {
-    templateData: ContentTemplateItem['template_data'];
-  };
+import type { MergedTemplateItem } from '@heyclaude/web-runtime/data';
 
 /**
  * Usage example schema (Zod)

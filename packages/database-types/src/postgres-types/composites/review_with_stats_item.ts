@@ -27,7 +27,7 @@ export type ReviewWithStatsItem = {
   /** Attribute: updated_at (timestamptz, nullable) */
   updated_at: string | null;
   /** Attribute: user (review_with_stats_user, nullable) */
-  user: ReviewWithStatsUser;
+  user: ReviewWithStatsUser | null;
   /** Attribute: is_helpful (bool, nullable) */
   is_helpful: boolean | null;
 };

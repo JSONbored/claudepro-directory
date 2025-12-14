@@ -17,13 +17,13 @@ export type SearchUnifiedArgs = {
   /** Parameter: p_query (text) */
   p_query: string;
   /** Parameter: p_entities (_text, optional) */
-  p_entities: string[] | undefined | null | undefined;
+  p_entities?: string[];
   /** Parameter: p_limit (int4, optional) */
-  p_limit: number | undefined | null | undefined;
+  p_limit?: number;
   /** Parameter: p_offset (int4, optional) */
-  p_offset: number | undefined | null | undefined;
+  p_offset?: number;
   /** Parameter: p_highlight_query (text, optional) */
-  p_highlight_query: string | undefined | null | undefined;
+  p_highlight_query?: string;
 };
 
 /**

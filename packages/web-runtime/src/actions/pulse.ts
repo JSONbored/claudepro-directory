@@ -6,6 +6,7 @@
  */
 
 import type { Database, Json } from '@heyclaude/database-types';
+import type { GetRecommendationsReturns } from '@heyclaude/database-types/postgres-types';
 import { Constants } from '@heyclaude/database-types';
 import { z } from 'zod';
 import { logger } from '../logger.ts';
@@ -37,11 +38,9 @@ export type TrackInteractionParams = Omit<
 >;
 
 type RecommendationItem = NonNullable<
-  NonNullable<Database['public']['Functions']['get_recommendations']['Returns']>['results']
+  NonNullable<GetRecommendationsReturns>['results']
 >[number];
-type RecommendationsPayload = NonNullable<
-  Database['public']['Functions']['get_recommendations']['Returns']
->;
+type RecommendationsPayload = NonNullable<GetRecommendationsReturns>;
 
 export interface ConfigRecommendationsResponse {
   success: boolean;
@@ -326,9 +325,7 @@ export const generateConfigRecommendationsAction = rateLimitedAction
       });
 
       const responseId = `rec_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
-      const fallback: NonNullable<
-        Database['public']['Functions']['get_recommendations']['Returns']
-      > = {
+      const fallback: NonNullable<GetRecommendationsReturns> = {
         results: [],
         total_matches: 0,
         algorithm: 'unknown',

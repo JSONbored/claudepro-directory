@@ -17,7 +17,7 @@ export type ContentDetailCoreResult = {
   /** Attribute: content (jsonb, nullable) */
   content: Record<string, unknown> | null;
   /** Attribute: collection_items (_content_detail_collection_item, nullable) */
-  collection_items: ContentDetailCollectionItem[];
+  collection_items: ContentDetailCollectionItem[] | null;
 };
 
 /**

@@ -21,7 +21,7 @@ export type AddBookmarkArgs = {
   /** Parameter: p_content_slug (text) */
   p_content_slug: string;
   /** Parameter: p_notes (text, optional) */
-  p_notes: string | undefined | null | undefined;
+  p_notes?: string;
 };
 
 /**

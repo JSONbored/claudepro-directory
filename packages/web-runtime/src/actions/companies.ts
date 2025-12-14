@@ -97,12 +97,12 @@ export const getCompanyByIdAction = rateLimitedAction
       }
 
       return {
-        id: profile.id,
-        name: profile.name,
-        slug: profile.slug,
-        logo: profile.logo,
-        website: profile.website,
-        description: profile.description,
+        id: profile.id ?? '',
+        name: profile.name ?? '',
+        slug: profile.slug ?? '',
+        logo: profile.logo ?? null,
+        website: profile.website ?? null,
+        description: profile.description ?? null,
       };
     } catch {
       // Fallback to null on error (safe-action middleware handles logging)

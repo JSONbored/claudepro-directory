@@ -15,7 +15,7 @@ import { similarContentItemSchema } from './similar_content_item';
  */
 export type SimilarContentResult = {
   /** Attribute: similar_items (_similar_content_item, nullable) */
-  similar_items: SimilarContentItem[];
+  similar_items: SimilarContentItem[] | null;
   /** Attribute: algorithm_version (text, nullable) */
   algorithm_version: string | null;
 };

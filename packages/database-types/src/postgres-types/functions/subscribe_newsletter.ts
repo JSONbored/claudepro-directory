@@ -17,35 +17,35 @@ export type SubscribeNewsletterArgs = {
   /** Parameter: p_email (text) */
   p_email: string;
   /** Parameter: p_source (newsletter_source, optional) */
-  p_source: 'footer' | 'homepage' | 'modal' | 'content_page' | 'inline' | 'post_copy' | 'resend_import' | 'oauth_signup' | undefined | null | undefined;
+  p_source?: 'footer' | 'homepage' | 'modal' | 'content_page' | 'inline' | 'post_copy' | 'resend_import' | 'oauth_signup';
   /** Parameter: p_referrer (text, optional) */
-  p_referrer: string | undefined | null | undefined;
+  p_referrer?: string;
   /** Parameter: p_copy_type (copy_type, optional) */
-  p_copy_type: 'llmstxt' | 'markdown' | 'code' | 'link' | undefined | null | undefined;
+  p_copy_type?: 'llmstxt' | 'markdown' | 'code' | 'link';
   /** Parameter: p_copy_category (content_category, optional) */
-  p_copy_category: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog' | undefined | null | undefined;
+  p_copy_category?: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog';
   /** Parameter: p_copy_slug (text, optional) */
-  p_copy_slug: string | undefined | null | undefined;
+  p_copy_slug?: string;
   /** Parameter: p_ip_address (inet, optional) */
-  p_ip_address: string | undefined | null | undefined;
+  p_ip_address?: string;
   /** Parameter: p_user_agent (text, optional) */
-  p_user_agent: string | undefined | null | undefined;
+  p_user_agent?: string;
   /** Parameter: p_resend_contact_id (text, optional) */
-  p_resend_contact_id: string | undefined | null | undefined;
+  p_resend_contact_id?: string;
   /** Parameter: p_sync_status (newsletter_sync_status, optional) */
-  p_sync_status: 'pending' | 'synced' | 'failed' | 'skipped' | undefined | null | undefined;
+  p_sync_status?: 'pending' | 'synced' | 'failed' | 'skipped';
   /** Parameter: p_sync_error (text, optional) */
-  p_sync_error: string | undefined | null | undefined;
+  p_sync_error?: string;
   /** Parameter: p_engagement_score (int4, optional) */
-  p_engagement_score: number | undefined | null | undefined;
+  p_engagement_score?: number;
   /** Parameter: p_primary_interest (newsletter_interest, optional) */
-  p_primary_interest: 'general' | 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog' | undefined | null | undefined;
+  p_primary_interest?: 'general' | 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog';
   /** Parameter: p_total_copies (int4, optional) */
-  p_total_copies: number | undefined | null | undefined;
+  p_total_copies?: number;
   /** Parameter: p_last_active_at (timestamptz, optional) */
-  p_last_active_at: string | undefined | null | undefined;
+  p_last_active_at?: string;
   /** Parameter: p_resend_topics (_text, optional) */
-  p_resend_topics: string[] | undefined | null | undefined;
+  p_resend_topics?: string[];
 };
 
 /**

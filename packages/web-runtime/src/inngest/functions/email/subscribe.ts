@@ -11,6 +11,7 @@
  */
 
 import { Constants, type Database as DatabaseGenerated } from '@heyclaude/database-types';
+import type { SubscribeNewsletterArgs } from '@heyclaude/database-types/postgres-types';
 import { NewsletterService } from '@heyclaude/data-layer';
 import { validateEmail, normalizeError } from '@heyclaude/shared-runtime';
 import { revalidateTag } from 'next/cache';
@@ -159,24 +160,25 @@ export const subscribeNewsletter = inngest.createFunction(
       const finalSource: DatabaseGenerated['public']['Enums']['newsletter_source'] =
         isValidNewsletterSource(source) ? source : 'footer';
 
-      const rpcArgs: DatabaseGenerated['public']['Functions']['subscribe_newsletter']['Args'] = {
+      // Build rpcArgs object, only including properties with values (for exactOptionalPropertyTypes)
+      const rpcArgs: SubscribeNewsletterArgs = {
         p_email: validatedEmail,
         p_source: finalSource,
-        ...(referrer ? { p_referrer: referrer } : {}),
-        ...(copyType && isValidCopyType(copyType) ? { p_copy_type: copyType } : {}),
-        ...(copyCategory && isValidContentCategory(copyCategory)
-          ? { p_copy_category: copyCategory }
-          : {}),
-        ...(copySlug ? { p_copy_slug: copySlug } : {}),
-        ...(syncResult.resendContactId ? { p_resend_contact_id: syncResult.resendContactId } : {}),
         p_sync_status: syncResult.syncStatus,
-        ...(syncResult.syncError ? { p_sync_error: syncResult.syncError } : {}),
         p_engagement_score: getNumberProperty(contactProperties, 'engagement_score'),
         p_primary_interest: primaryInterest,
         p_total_copies: getNumberProperty(contactProperties, 'total_copies'),
         p_last_active_at: new Date().toISOString(),
-        ...(syncResult.topicIds.length > 0 ? { p_resend_topics: syncResult.topicIds } : {}),
       };
+      
+      // Only add optional properties if they have values
+      if (referrer) { rpcArgs.p_referrer = referrer; }
+      if (copyType && isValidCopyType(copyType)) { rpcArgs.p_copy_type = copyType; }
+      if (copyCategory && isValidContentCategory(copyCategory)) { rpcArgs.p_copy_category = copyCategory; }
+      if (copySlug) { rpcArgs.p_copy_slug = copySlug; }
+      if (syncResult.resendContactId) { rpcArgs.p_resend_contact_id = syncResult.resendContactId; }
+      if (syncResult.syncError) { rpcArgs.p_sync_error = syncResult.syncError; }
+      if (syncResult.topicIds.length > 0) { rpcArgs.p_resend_topics = syncResult.topicIds; }
 
       const rpcResult = await newsletterService.subscribeNewsletter(rpcArgs);
 

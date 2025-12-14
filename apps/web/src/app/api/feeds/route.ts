@@ -23,7 +23,12 @@
 
 import 'server-only';
 import { ContentService } from '@heyclaude/data-layer';
-import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
+import type {
+  GenerateChangelogAtomFeedArgs,
+  GenerateChangelogRssFeedArgs,
+  GenerateContentAtomFeedArgs,
+  GenerateContentRssFeedArgs,
+} from '@heyclaude/database-types/postgres-types';
 import { Constants } from '@heyclaude/database-types';
 import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
 import { normalizeError } from '@heyclaude/web-runtime/logging/server';
@@ -40,7 +45,9 @@ import { NextResponse } from 'next/server';
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
 const FEED_LIMIT = 50;
 
-type ContentCategory = DatabaseGenerated['public']['Enums']['content_category'];
+import type { content_category } from '@heyclaude/data-layer/prisma';
+
+type ContentCategory = content_category;
 type FeedType = 'atom' | 'rss';
 
 /***
@@ -122,7 +129,7 @@ async function generateFeedPayload(
     if (type === 'rss') {
       const rpcArgs = {
         p_limit: FEED_LIMIT,
-      } satisfies DatabaseGenerated['public']['Functions']['generate_changelog_rss_feed']['Args'];
+      } satisfies GenerateChangelogRssFeedArgs;
       try {
         const feedData = await service.generateChangelogRssFeed(rpcArgs);
         return {
@@ -141,7 +148,7 @@ async function generateFeedPayload(
     }
     const rpcArgs2 = {
       p_limit: FEED_LIMIT,
-    } satisfies DatabaseGenerated['public']['Functions']['generate_changelog_atom_feed']['Args'];
+    } satisfies GenerateChangelogAtomFeedArgs;
     try {
       const feedData = await service.generateChangelogAtomFeed(rpcArgs2);
       return {
@@ -165,7 +172,7 @@ async function generateFeedPayload(
     const rpcArgs3 = {
       ...(typedCategory ? { p_category: typedCategory } : {}),
       p_limit: FEED_LIMIT,
-    } satisfies DatabaseGenerated['public']['Functions']['generate_content_rss_feed']['Args'];
+    } satisfies GenerateContentRssFeedArgs;
     try {
       const feedData = await service.generateContentRssFeed(rpcArgs3);
       return {
@@ -188,7 +195,7 @@ async function generateFeedPayload(
   const rpcArgs4 = {
     ...(typedCategory ? { p_category: typedCategory } : {}),
     p_limit: FEED_LIMIT,
-  } satisfies DatabaseGenerated['public']['Functions']['generate_content_atom_feed']['Args'];
+  } satisfies GenerateContentAtomFeedArgs;
   try {
     const feedData = await service.generateContentAtomFeed(rpcArgs4);
     return {

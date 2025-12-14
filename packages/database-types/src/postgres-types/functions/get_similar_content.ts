@@ -19,7 +19,7 @@ export type GetSimilarContentArgs = {
   /** Parameter: p_content_slug (text) */
   p_content_slug: string;
   /** Parameter: p_limit (int4, optional) */
-  p_limit: number | undefined | null | undefined;
+  p_limit?: number;
 };
 
 /**

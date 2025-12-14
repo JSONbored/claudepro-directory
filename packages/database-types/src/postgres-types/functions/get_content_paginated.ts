@@ -15,21 +15,21 @@ import { contentPaginatedResultSchema } from '../composites/content_paginated_re
  */
 export type GetContentPaginatedArgs = {
   /** Parameter: p_category (content_category, optional) */
-  p_category: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog' | undefined | null | undefined;
+  p_category?: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog';
   /** Parameter: p_author (text, optional) */
-  p_author: string | undefined | null | undefined;
+  p_author?: string;
   /** Parameter: p_tags (_text, optional) */
-  p_tags: string[] | undefined | null | undefined;
+  p_tags?: string[];
   /** Parameter: p_search (text, optional) */
-  p_search: string | undefined | null | undefined;
+  p_search?: string;
   /** Parameter: p_order_by (text, optional) */
-  p_order_by: string | undefined | null | undefined;
+  p_order_by?: string;
   /** Parameter: p_order_direction (text, optional) */
-  p_order_direction: string | undefined | null | undefined;
+  p_order_direction?: string;
   /** Parameter: p_limit (int4, optional) */
-  p_limit: number | undefined | null | undefined;
+  p_limit?: number;
   /** Parameter: p_offset (int4, optional) */
-  p_offset: number | undefined | null | undefined;
+  p_offset?: number;
 };
 
 /**

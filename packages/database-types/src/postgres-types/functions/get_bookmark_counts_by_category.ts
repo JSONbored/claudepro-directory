@@ -29,14 +29,32 @@ export const getBookmarkCountsByCategoryArgsSchema = z.object({
 export type GetBookmarkCountsByCategoryArgsFromZod = z.infer<typeof getBookmarkCountsByCategoryArgsSchema>;
 
 /**
+ * Return row type for PostgreSQL function: get_bookmark_counts_by_category
+ */
+export type GetBookmarkCountsByCategoryReturnRow = {
+  /** content_slug (text, nullable) */
+  content_slug: string | null;
+  /** bookmark_count (int8, nullable) */
+  bookmark_count: number | null;
+};
+
+/**
+ * Zod schema for get_bookmark_counts_by_category return row
+ */
+export const getBookmarkCountsByCategoryReturnRowSchema = z.object({
+  content_slug: z.string().nullable(),
+  bookmark_count: z.number().nullable(),
+});
+
+/**
  * Return type for PostgreSQL function: get_bookmark_counts_by_category
  */
-export type GetBookmarkCountsByCategoryReturns = Record<string, unknown>[];
+export type GetBookmarkCountsByCategoryReturns = GetBookmarkCountsByCategoryReturnRow[];
 
 /**
  * Zod schema for get_bookmark_counts_by_category function return type
  */
-export const getBookmarkCountsByCategoryReturnsSchema = z.array(z.any());
+export const getBookmarkCountsByCategoryReturnsSchema = z.array(getBookmarkCountsByCategoryReturnRowSchema);
 
 /**
  * Type inference from Zod schema (should match type above)

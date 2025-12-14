@@ -15,7 +15,7 @@ import { usersSchema } from './users';
  */
 export type RefreshProfileFromOauthResult = {
   /** Attribute: user_profile (users, nullable) */
-  user_profile: Users;
+  user_profile: Users | null;
 };
 
 /**

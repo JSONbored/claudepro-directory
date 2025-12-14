@@ -17,7 +17,7 @@ export type ChangelogMetadata = {
   /** Attribute: total_entries (int4, nullable) */
   total_entries: number | null;
   /** Attribute: date_range (changelog_metadata_date_range, nullable) */
-  date_range: ChangelogMetadataDateRange;
+  date_range: ChangelogMetadataDateRange | null;
   /** Attribute: category_counts (jsonb, nullable) */
   category_counts: Record<string, unknown> | null;
 };

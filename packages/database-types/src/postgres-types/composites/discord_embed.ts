@@ -23,9 +23,9 @@ export type DiscordEmbed = {
   /** Attribute: color (int4, nullable) */
   color: number | null;
   /** Attribute: fields (_discord_embed_field, nullable) */
-  fields: DiscordEmbedField[];
+  fields: DiscordEmbedField[] | null;
   /** Attribute: footer (discord_embed_footer, nullable) */
-  footer: DiscordEmbedFooter;
+  footer: DiscordEmbedFooter | null;
   /** Attribute: timestamp (timestamptz, nullable) */
   timestamp: string | null;
 };

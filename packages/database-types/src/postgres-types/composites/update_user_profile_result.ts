@@ -17,7 +17,7 @@ export type UpdateUserProfileResult = {
   /** Attribute: success (bool, nullable) */
   success: boolean | null;
   /** Attribute: profile (update_user_profile_result_profile, nullable) */
-  profile: UpdateUserProfileResultProfile;
+  profile: UpdateUserProfileResultProfile | null;
 };
 
 /**

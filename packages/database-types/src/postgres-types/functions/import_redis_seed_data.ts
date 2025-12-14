@@ -29,14 +29,38 @@ export const importRedisSeedDataArgsSchema = z.object({
 export type ImportRedisSeedDataArgsFromZod = z.infer<typeof importRedisSeedDataArgsSchema>;
 
 /**
+ * Return row type for PostgreSQL function: import_redis_seed_data
+ */
+export type ImportRedisSeedDataReturnRow = {
+  /** total_processed (int4, nullable) */
+  total_processed: number | null;
+  /** total_views_added (int4, nullable) */
+  total_views_added: number | null;
+  /** total_copies_added (int4, nullable) */
+  total_copies_added: number | null;
+  /** items_processed (int4, nullable) */
+  items_processed: number | null;
+};
+
+/**
+ * Zod schema for import_redis_seed_data return row
+ */
+export const importRedisSeedDataReturnRowSchema = z.object({
+  total_processed: z.number().nullable(),
+  total_views_added: z.number().nullable(),
+  total_copies_added: z.number().nullable(),
+  items_processed: z.number().nullable(),
+});
+
+/**
  * Return type for PostgreSQL function: import_redis_seed_data
  */
-export type ImportRedisSeedDataReturns = Record<string, unknown>[];
+export type ImportRedisSeedDataReturns = ImportRedisSeedDataReturnRow[];
 
 /**
  * Zod schema for import_redis_seed_data function return type
  */
-export const importRedisSeedDataReturnsSchema = z.array(z.any());
+export const importRedisSeedDataReturnsSchema = z.array(importRedisSeedDataReturnRowSchema);
 
 /**
  * Type inference from Zod schema (should match type above)

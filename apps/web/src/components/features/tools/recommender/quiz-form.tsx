@@ -38,7 +38,8 @@ const INTEGRATION_TYPE_VALUES = Constants.public.Enums.integration_type;
 const USE_CASE_TYPE_VALUES = Constants.public.Enums.use_case_type;
 
 // Use generated type directly from @heyclaude/database-types
-type QuizConfigurationResult = Database['public']['Functions']['get_quiz_configuration']['Returns'];
+import type { GetQuizConfigurationReturns } from '@heyclaude/database-types/postgres-types';
+type QuizConfigurationResult = GetQuizConfigurationReturns;
 
 interface QuizQuestion {
   description: null | string;
@@ -54,18 +55,29 @@ interface QuizQuestion {
   required: boolean;
 }
 
+// GetQuizConfigurationReturns is QuizConfigurationQuestion (single object with options array)
+// The function returns a single question object, but we need to convert it to array format
+// for the component. If the database actually returns an array, the generator needs to be fixed.
 function mapQuizConfigToQuestions(config: null | QuizConfigurationResult): null | QuizQuestion[] {
-  if (!(config && Array.isArray(config)) || config.length === 0) {
+  if (!config) {
     return null;
   }
 
-  return config.map((q) => ({
+  // Handle as single object (generated type says it's QuizConfigurationQuestion, not array)
+  // If database actually returns array, generator needs fixing
+  const questions = Array.isArray(config) ? config : [config];
+  
+  if (questions.length === 0) {
+    return null;
+  }
+
+  return questions.map((q) => ({
     id: q.id ?? '',
     question: q.question ?? '',
     description: q.description,
     required: q.required ?? false,
     displayOrder: q.display_order ?? 0,
-    options: (q.options ?? []).map((opt) => ({
+    options: (q.options ?? []).map((opt: NonNullable<typeof q.options>[number]) => ({
       value: opt.value ?? '',
       label: opt.label ?? '',
       description: opt.description,
@@ -132,6 +144,7 @@ export function QuizForm() {
     try {
       const result = await getQuizConfigurationAction({});
       if (result?.data) {
+        // result.data is QuizConfigurationQuestion (single object) or null
         const mapped = mapQuizConfigToQuestions(result.data);
         setQuizConfig(mapped);
       }

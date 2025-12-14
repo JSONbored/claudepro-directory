@@ -19,11 +19,11 @@ import { sponsorshipAnalyticsDailyStatSchema } from './sponsorship_analytics_dai
  */
 export type SponsorshipAnalyticsResult = {
   /** Attribute: sponsorship (sponsored_content, nullable) */
-  sponsorship: SponsoredContent;
+  sponsorship: SponsoredContent | null;
   /** Attribute: daily_stats (_sponsorship_analytics_daily_stat, nullable) */
-  daily_stats: SponsorshipAnalyticsDailyStat[];
+  daily_stats: SponsorshipAnalyticsDailyStat[] | null;
   /** Attribute: computed_metrics (sponsorship_analytics_computed_metrics, nullable) */
-  computed_metrics: SponsorshipAnalyticsComputedMetrics;
+  computed_metrics: SponsorshipAnalyticsComputedMetrics | null;
 };
 
 /**

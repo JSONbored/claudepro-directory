@@ -19,11 +19,11 @@ import { companyProfileStatsSchema } from './company_profile_stats';
  */
 export type CompanyProfileResult = {
   /** Attribute: company (companies, nullable) */
-  company: Companies;
+  company: Companies | null;
   /** Attribute: active_jobs (_company_profile_job_item, nullable) */
-  active_jobs: CompanyProfileJobItem[];
+  active_jobs: CompanyProfileJobItem[] | null;
   /** Attribute: stats (company_profile_stats, nullable) */
-  stats: CompanyProfileStats;
+  stats: CompanyProfileStats | null;
 };
 
 /**

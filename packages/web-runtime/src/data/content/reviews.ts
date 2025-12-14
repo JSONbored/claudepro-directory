@@ -2,7 +2,7 @@
 
 import { ContentService } from '@heyclaude/data-layer';
 import { type content_category } from '@heyclaude/data-layer/prisma';
-import { type Database } from '@heyclaude/database-types';
+import type { GetReviewsWithStatsReturns } from '@heyclaude/database-types/postgres-types/functions';
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { normalizeError } from '../../errors.ts';
@@ -32,7 +32,7 @@ interface ReviewsWithStatsParameters {
  */
 export async function getReviewsWithStatsData(
   parameters: ReviewsWithStatsParameters
-): Promise<Database['public']['Functions']['get_reviews_with_stats']['Returns'] | null> {
+): Promise<GetReviewsWithStatsReturns | null> {
   'use cache: private';
 
   const { contentSlug, contentType, limit, offset, sortBy, userId } = parameters;

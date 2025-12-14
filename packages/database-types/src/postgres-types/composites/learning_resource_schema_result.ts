@@ -27,7 +27,7 @@ export type LearningResourceSchemaResult = {
   /** Attribute: url (text, nullable) */
   url: string | null;
   /** Attribute: author (learning_resource_author, nullable) */
-  author: LearningResourceAuthor;
+  author: LearningResourceAuthor | null;
   /** Attribute: datepublished (text, nullable) */
   datepublished: string | null;
   /** Attribute: educationallevel (educational_level, nullable) */

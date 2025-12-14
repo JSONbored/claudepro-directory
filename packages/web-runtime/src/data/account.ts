@@ -8,10 +8,26 @@ import {
   type user_tier,
 } from '@heyclaude/data-layer/prisma';
 import type {
-  UserCompleteDataResult,
+  GetAccountDashboardReturns,
+  GetUserLibraryReturns,
+  GetUserDashboardReturns,
+  GetUserCompleteDataArgs,
+  GetUserCompleteDataReturns,
+  GetCollectionDetailWithItemsReturns,
+  GetUserSettingsReturns,
+  GetSponsorshipAnalyticsReturns,
+  GetUserCompaniesReturns,
+  GetUserSponsorshipsReturns,
+  GetSubmissionDashboardReturns,
+  GetUserActivitySummaryReturns,
+  GetUserActivityTimelineReturns,
+  GetUserIdentitiesReturns,
+  IsBookmarkedBatchReturns,
+  IsFollowingBatchReturns,
+} from '@heyclaude/database-types/postgres-types';
+import type {
   UserCompaniesCompany,
 } from '@heyclaude/data-layer/types/composite-types';
-import { type Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { cacheLife, cacheTag } from 'next/cache';
 import { z } from 'zod';
@@ -56,7 +72,7 @@ const accountDashboardSchema = z.object({
  */
 export async function getAccountDashboard(
   userId: string
-): Promise<Database['public']['Functions']['get_account_dashboard']['Returns'] | null> {
+): Promise<GetAccountDashboardReturns | null> {
   'use cache: private';
   cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`user-dashboard-${userId}`);
@@ -114,7 +130,7 @@ export async function getAccountDashboard(
  */
 export async function getUserLibrary(
   userId: string
-): Promise<Database['public']['Functions']['get_user_library']['Returns'] | null> {
+): Promise<GetUserLibraryReturns | null> {
   'use cache: private';
   cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`user-library-${userId}`);
@@ -145,7 +161,7 @@ export async function getUserLibrary(
 
     // Type assertion: RPC returns Database types, but we're migrating to custom composite types
     // TODO: Remove assertion when fully migrated to Prisma queries
-    return completeData.user_library as Database['public']['Functions']['get_user_library']['Returns'];
+    return completeData.user_library as GetUserLibraryReturns;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
@@ -217,7 +233,7 @@ export async function getUserBookmarksForCollections(userId: string): Promise<bo
  */
 export async function getUserDashboard(
   userId: string
-): Promise<Database['public']['Functions']['get_user_dashboard']['Returns'] | null> {
+): Promise<GetUserDashboardReturns | null> {
   'use cache: private';
   cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`user-dashboard-${userId}`);
@@ -248,7 +264,7 @@ export async function getUserDashboard(
 
     // Type assertion: RPC returns Database types, but we're migrating to custom composite types
     // TODO: Remove assertion when fully migrated to Prisma queries
-    return completeData.user_dashboard as Database['public']['Functions']['get_user_dashboard']['Returns'];
+    return completeData.user_dashboard as GetUserDashboardReturns;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
@@ -299,7 +315,7 @@ export async function getUserCompleteData(
     activityOffset?: number;
     activityType?: null | string;
   }
-): Promise<UserCompleteDataResult | null> {
+): Promise<GetUserCompleteDataReturns | null> {
   'use cache: private';
   cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`user-complete-data-${userId}`);
@@ -369,7 +385,7 @@ export async function getUserCompleteData(
     const service = new AccountService();
 
     // Build RPC parameters - only include p_activity_type if it's provided (not null/undefined)
-    const rpcParams: Database['public']['Functions']['get_user_complete_data']['Args'] = {
+    const rpcParams: GetUserCompleteDataArgs = {
       p_activity_limit: options?.activityLimit ?? 20,
       p_activity_offset: options?.activityOffset ?? 0,
       p_user_id: userId,
@@ -386,7 +402,7 @@ export async function getUserCompleteData(
     // Type assertion: RPC returns Database types, but we're migrating to custom composite types
     // The structure matches, but nullability differs slightly between Database types and our custom types
     // TODO: Remove assertion when fully migrated to Prisma queries
-    return result as UserCompleteDataResult;
+    return result as GetUserCompleteDataReturns;
   } catch (error) {
     // Normalize error properly - handle both Error instances and Supabase error objects
     const normalizedError = normalizeError(error, 'getUserCompleteData: unexpected error occurred');
@@ -429,7 +445,7 @@ export async function getUserCompleteData(
 export async function getCollectionDetail(
   userId: string,
   slug: string
-): Promise<Database['public']['Functions']['get_collection_detail_with_items']['Returns'] | null> {
+): Promise<GetCollectionDetailWithItemsReturns | null> {
   'use cache: private';
   cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`user-collection-${userId}-${slug}`);
@@ -497,7 +513,7 @@ export async function getCollectionDetail(
  */
 export async function getUserSettings(
   userId: string
-): Promise<Database['public']['Functions']['get_user_settings']['Returns'] | null> {
+): Promise<GetUserSettingsReturns | null> {
   'use cache: private';
   cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`user-settings-${userId}`);
@@ -552,7 +568,7 @@ export async function getUserSettings(
 export async function getSponsorshipAnalytics(
   userId: string,
   sponsorshipId: string
-): Promise<Database['public']['Functions']['get_sponsorship_analytics']['Returns'] | null> {
+): Promise<GetSponsorshipAnalyticsReturns | null> {
   'use cache: private';
   cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`user-sponsorship-analytics-${userId}-${sponsorshipId}`);
@@ -605,7 +621,7 @@ export async function getSponsorshipAnalytics(
  */
 export async function getUserCompanies(
   userId: string
-): Promise<Database['public']['Functions']['get_user_companies']['Returns'] | null> {
+): Promise<GetUserCompaniesReturns | null> {
   'use cache: private';
   cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`user-companies-${userId}`);
@@ -676,7 +692,7 @@ export async function getUserCompanies(
  */
 export async function getUserSponsorships(
   userId: string
-): Promise<Database['public']['Functions']['get_user_sponsorships']['Returns']> {
+): Promise<GetUserSponsorshipsReturns> {
   'use cache: private';
   cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`user-sponsorships-${userId}`);
@@ -711,7 +727,7 @@ export async function getUserSponsorships(
 
     // Type assertion: RPC returns Database types, but we're migrating to custom composite types
     // TODO: Remove assertion when fully migrated to Prisma queries
-    return (completeData.sponsorships ?? []) as Database['public']['Functions']['get_user_sponsorships']['Returns'];
+    return (completeData.sponsorships ?? []) as GetUserSponsorshipsReturns;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
@@ -748,7 +764,7 @@ export async function getUserCompanyById(
 export async function getSubmissionDashboard(
   recentLimit = 5,
   contributorsLimit = 5
-): Promise<Database['public']['Functions']['get_submission_dashboard']['Returns'] | null> {
+): Promise<GetSubmissionDashboardReturns | null> {
   'use cache: private';
   cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`submission-dashboard-${recentLimit}-${contributorsLimit}`);
@@ -818,7 +834,7 @@ export interface AccountDashboardBundle {
  */
 export async function getUserActivitySummary(
   userId: string
-): Promise<Database['public']['Functions']['get_user_activity_summary']['Returns'] | null> {
+): Promise<GetUserActivitySummaryReturns | null> {
   'use cache: private';
   cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`user-activity-summary-${userId}`);
@@ -897,7 +913,7 @@ export async function getUserActivityTimeline(input: {
   offset?: number | undefined;
   type?: string | undefined;
   userId: string;
-}): Promise<Database['public']['Functions']['get_user_activity_timeline']['Returns'] | null> {
+}): Promise<GetUserActivityTimelineReturns | null> {
   'use cache: private';
   const { limit = 20, offset = 0, type, userId } = input;
   cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
@@ -977,7 +993,7 @@ export async function getUserActivityTimeline(input: {
  */
 export async function getUserIdentitiesData(
   userId: string
-): Promise<Database['public']['Functions']['get_user_identities']['Returns'] | null> {
+): Promise<GetUserIdentitiesReturns | null> {
   'use cache: private';
   cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`user-identities-${userId}`);
@@ -1044,11 +1060,13 @@ export async function isBookmarked(input: {
 
   try {
     const service = new AccountService();
-    return await service.isBookmarked({
+    const result = await service.isBookmarked({
       p_content_slug: content_slug,
       p_content_type: content_type,
       p_user_id: userId,
     });
+    // Generated type is unknown, but function returns boolean
+    return Boolean(result);
   } catch (error) {
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error(
@@ -1086,10 +1104,12 @@ export async function isFollowing(input: {
 
   try {
     const service = new AccountService();
-    return await service.isFollowing({
+    const result = await service.isFollowing({
       follower_id: followerId,
       following_id: followingId,
     });
+    // Generated type is unknown, but function returns boolean
+    return Boolean(result);
   } catch (error) {
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error(
@@ -1114,7 +1134,7 @@ export async function isBookmarkedBatch(input: {
     content_type: content_category;
   }>;
   userId: string;
-}): Promise<Database['public']['Functions']['is_bookmarked_batch']['Returns']> {
+}): Promise<IsBookmarkedBatchReturns> {
   'use cache: private';
   const { items, userId } = input;
 
@@ -1135,8 +1155,10 @@ export async function isBookmarkedBatch(input: {
 
   try {
     const service = new AccountService();
+    // p_items expects Record<string, unknown> (JSONB), but we pass array
+    // Cast to match the generated type signature
     return await service.isBookmarkedBatch({
-      p_items: items,
+      p_items: items as unknown as Record<string, unknown>,
       p_user_id: userId,
     });
   } catch (error) {
@@ -1160,7 +1182,7 @@ export async function isBookmarkedBatch(input: {
 export async function isFollowingBatch(input: {
   followedUserIds: string[];
   followerId: string;
-}): Promise<Database['public']['Functions']['is_following_batch']['Returns']> {
+}): Promise<IsFollowingBatchReturns> {
   'use cache: private';
   const { followedUserIds, followerId } = input;
 

@@ -25,14 +25,38 @@ export const checkVacuumNeededArgsSchema = z.object({
 export type CheckVacuumNeededArgsFromZod = z.infer<typeof checkVacuumNeededArgsSchema>;
 
 /**
+ * Return row type for PostgreSQL function: check_vacuum_needed
+ */
+export type CheckVacuumNeededReturnRow = {
+  /** needs_vacuum (bool, nullable) */
+  needs_vacuum: boolean | null;
+  /** affected_tables (int4, nullable) */
+  affected_tables: number | null;
+  /** max_bloat_ratio (numeric, nullable) */
+  max_bloat_ratio: number | null;
+  /** alert_message (text, nullable) */
+  alert_message: string | null;
+};
+
+/**
+ * Zod schema for check_vacuum_needed return row
+ */
+export const checkVacuumNeededReturnRowSchema = z.object({
+  needs_vacuum: z.boolean().nullable(),
+  affected_tables: z.number().nullable(),
+  max_bloat_ratio: z.number().nullable(),
+  alert_message: z.string().nullable(),
+});
+
+/**
  * Return type for PostgreSQL function: check_vacuum_needed
  */
-export type CheckVacuumNeededReturns = Record<string, unknown>[];
+export type CheckVacuumNeededReturns = CheckVacuumNeededReturnRow[];
 
 /**
  * Zod schema for check_vacuum_needed function return type
  */
-export const checkVacuumNeededReturnsSchema = z.array(z.any());
+export const checkVacuumNeededReturnsSchema = z.array(checkVacuumNeededReturnRowSchema);
 
 /**
  * Type inference from Zod schema (should match type above)

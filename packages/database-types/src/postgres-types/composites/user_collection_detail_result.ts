@@ -19,11 +19,11 @@ import { userCollectionDetailUserSchema } from './user_collection_detail_user';
  */
 export type UserCollectionDetailResult = {
   /** Attribute: user (user_collection_detail_user, nullable) */
-  user: UserCollectionDetailUser;
+  user: UserCollectionDetailUser | null;
   /** Attribute: collection (user_collection_detail_collection, nullable) */
-  collection: UserCollectionDetailCollection;
+  collection: UserCollectionDetailCollection | null;
   /** Attribute: items (_user_collection_detail_item, nullable) */
-  items: UserCollectionDetailItem[];
+  items: UserCollectionDetailItem[] | null;
   /** Attribute: is_owner (bool, nullable) */
   is_owner: boolean | null;
 };

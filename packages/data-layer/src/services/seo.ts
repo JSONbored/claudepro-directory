@@ -5,7 +5,10 @@
  * Maintains the same public API for backward compatibility.
  */
 
-import { type Database } from '@heyclaude/database-types';
+import type {
+  GenerateMetadataCompleteArgs,
+  GenerateMetadataCompleteReturns,
+} from '@heyclaude/database-types/postgres-types';
 import { BasePrismaService } from './base-prisma-service.ts';
 
 /**
@@ -18,9 +21,9 @@ import { BasePrismaService } from './base-prisma-service.ts';
  */
 export class SeoService extends BasePrismaService {
   async generateMetadata(
-    args: Database['public']['Functions']['generate_metadata_complete']['Args']
-  ): Promise<Database['public']['Functions']['generate_metadata_complete']['Returns']> {
-    return this.callRpc<Database['public']['Functions']['generate_metadata_complete']['Returns']>(
+    args: GenerateMetadataCompleteArgs
+  ): Promise<GenerateMetadataCompleteReturns> {
+    return this.callRpc<GenerateMetadataCompleteReturns>(
       'generate_metadata_complete',
       args,
       { methodName: 'generateMetadata' }

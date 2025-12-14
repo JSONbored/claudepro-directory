@@ -25,14 +25,32 @@ export const calculateContentTimeMetricsArgsSchema = z.object({
 export type CalculateContentTimeMetricsArgsFromZod = z.infer<typeof calculateContentTimeMetricsArgsSchema>;
 
 /**
+ * Return row type for PostgreSQL function: calculate_content_time_metrics
+ */
+export type CalculateContentTimeMetricsReturnRow = {
+  /** updated_count (int4, nullable) */
+  updated_count: number | null;
+  /** created_count (int4, nullable) */
+  created_count: number | null;
+};
+
+/**
+ * Zod schema for calculate_content_time_metrics return row
+ */
+export const calculateContentTimeMetricsReturnRowSchema = z.object({
+  updated_count: z.number().nullable(),
+  created_count: z.number().nullable(),
+});
+
+/**
  * Return type for PostgreSQL function: calculate_content_time_metrics
  */
-export type CalculateContentTimeMetricsReturns = Record<string, unknown>[];
+export type CalculateContentTimeMetricsReturns = CalculateContentTimeMetricsReturnRow[];
 
 /**
  * Zod schema for calculate_content_time_metrics function return type
  */
-export const calculateContentTimeMetricsReturnsSchema = z.array(z.any());
+export const calculateContentTimeMetricsReturnsSchema = z.array(calculateContentTimeMetricsReturnRowSchema);
 
 /**
  * Type inference from Zod schema (should match type above)

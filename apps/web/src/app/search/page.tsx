@@ -2,7 +2,8 @@
  * Search Page - Database-First RPC via search_content_optimized()
  */
 
-import { Constants, type Database } from '@heyclaude/database-types';
+import type { content_category } from '@heyclaude/data-layer/prisma';
+import { Constants } from '@heyclaude/database-types';
 import { type DisplayableContent } from '@heyclaude/web-runtime';
 import { type SearchFilters } from '@heyclaude/web-runtime/core';
 import {
@@ -19,7 +20,7 @@ import { Suspense } from 'react';
 import { SearchPageClient } from '@/src/app/search/search-page-client';
 import { ContentSidebar } from '@/src/components/core/layout/content-sidebar';
 
-type ContentCategory = Database['public']['Enums']['content_category'];
+type ContentCategory = content_category;
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums
   .content_category as readonly ContentCategory[];
 

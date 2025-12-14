@@ -15,7 +15,7 @@ import { jobsSchema } from './jobs';
  */
 export type FilterJobsResult = {
   /** Attribute: jobs (_jobs, nullable) */
-  jobs: Jobs[];
+  jobs: Jobs[] | null;
   /** Attribute: total_count (int4, nullable) */
   total_count: number | null;
 };

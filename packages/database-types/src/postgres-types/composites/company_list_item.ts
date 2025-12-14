@@ -35,7 +35,7 @@ export type CompanyListItem = {
   /** Attribute: created_at (timestamptz, nullable) */
   created_at: string | null;
   /** Attribute: stats (company_job_stats_item, nullable) */
-  stats: CompanyJobStatsItem;
+  stats: CompanyJobStatsItem | null;
 };
 
 /**

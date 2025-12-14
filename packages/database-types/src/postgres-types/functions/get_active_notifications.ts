@@ -15,7 +15,7 @@ import { notificationsSchema } from '../composites/notifications';
  */
 export type GetActiveNotificationsArgs = {
   /** Parameter: p_dismissed_ids (_text, optional) */
-  p_dismissed_ids: string[] | undefined | null | undefined;
+  p_dismissed_ids?: string[];
 };
 
 /**

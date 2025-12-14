@@ -15,11 +15,11 @@ import { communityDirectoryUserSchema } from './community_directory_user';
  */
 export type CommunityDirectoryResult = {
   /** Attribute: all_users (_community_directory_user, nullable) */
-  all_users: CommunityDirectoryUser[];
+  all_users: CommunityDirectoryUser[] | null;
   /** Attribute: top_contributors (_community_directory_user, nullable) */
-  top_contributors: CommunityDirectoryUser[];
+  top_contributors: CommunityDirectoryUser[] | null;
   /** Attribute: new_members (_community_directory_user, nullable) */
-  new_members: CommunityDirectoryUser[];
+  new_members: CommunityDirectoryUser[] | null;
 };
 
 /**

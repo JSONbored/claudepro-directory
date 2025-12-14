@@ -29,21 +29,21 @@ import { userSettingsResultV2Schema } from './user_settings_result_v2';
  */
 export type UserCompleteDataResult = {
   /** Attribute: account_dashboard (account_dashboard_result, nullable) */
-  account_dashboard: AccountDashboardResult;
+  account_dashboard: AccountDashboardResult | null;
   /** Attribute: user_dashboard (user_dashboard_result, nullable) */
-  user_dashboard: UserDashboardResult;
+  user_dashboard: UserDashboardResult | null;
   /** Attribute: user_settings (user_settings_result_v2, nullable) */
-  user_settings: UserSettingsResultV2;
+  user_settings: UserSettingsResultV2 | null;
   /** Attribute: activity_summary (user_activity_summary, nullable) */
-  activity_summary: UserActivitySummary;
+  activity_summary: UserActivitySummary | null;
   /** Attribute: activity_timeline (user_activity_timeline_result, nullable) */
-  activity_timeline: UserActivityTimelineResult;
+  activity_timeline: UserActivityTimelineResult | null;
   /** Attribute: user_library (user_library_result, nullable) */
-  user_library: UserLibraryResult;
+  user_library: UserLibraryResult | null;
   /** Attribute: user_identities (user_identities_result, nullable) */
-  user_identities: UserIdentitiesResult;
+  user_identities: UserIdentitiesResult | null;
   /** Attribute: sponsorships (_sponsored_content, nullable) */
-  sponsorships: SponsoredContent[];
+  sponsorships: SponsoredContent[] | null;
 };
 
 /**

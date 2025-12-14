@@ -18,15 +18,15 @@ export type SyncChangelogEntryArgs = {
   /** Parameter: p_content (text) */
   p_content: string;
   /** Parameter: p_tldr (text, optional) */
-  p_tldr: string | undefined | null | undefined;
+  p_tldr?: string;
   /** Parameter: p_what_changed (text, optional) */
-  p_what_changed: string | undefined | null | undefined;
+  p_what_changed?: string;
   /** Parameter: p_raw_content (text, optional) */
-  p_raw_content: string | undefined | null | undefined;
+  p_raw_content?: string;
   /** Parameter: p_sections (jsonb, optional) */
-  p_sections: Record<string, unknown> | undefined | null | undefined;
+  p_sections?: Record<string, unknown>;
   /** Parameter: p_metadata (jsonb, optional) */
-  p_metadata: Record<string, unknown> | undefined | null | undefined;
+  p_metadata?: Record<string, unknown>;
 };
 
 /**
@@ -57,14 +57,59 @@ export const syncChangelogEntryArgsSchema = z.object({
 export type SyncChangelogEntryArgsFromZod = z.infer<typeof syncChangelogEntryArgsSchema>;
 
 /**
+ * Return row type for PostgreSQL function: sync_changelog_entry
+ */
+export type SyncChangelogEntryReturnRow = {
+  /** id (uuid, nullable) */
+  id: string | null;
+  /** version (text, nullable) */
+  version: string | null;
+  /** date (text, nullable) */
+  date: string | null;
+  /** slug (text, nullable) */
+  slug: string | null;
+  /** tldr (text, nullable) */
+  tldr: string | null;
+  /** what_changed (text, nullable) */
+  what_changed: string | null;
+  /** content (text, nullable) */
+  content: string | null;
+  /** raw_content (text, nullable) */
+  raw_content: string | null;
+  /** changes (jsonb, nullable) */
+  changes: Record<string, unknown> | null;
+  /** created_at (timestamptz, nullable) */
+  created_at: string | null;
+  /** updated_at (timestamptz, nullable) */
+  updated_at: string | null;
+};
+
+/**
+ * Zod schema for sync_changelog_entry return row
+ */
+export const syncChangelogEntryReturnRowSchema = z.object({
+  id: z.string().uuid().nullable(),
+  version: z.string().nullable(),
+  date: z.string().nullable(),
+  slug: z.string().nullable(),
+  tldr: z.string().nullable(),
+  what_changed: z.string().nullable(),
+  content: z.string().nullable(),
+  raw_content: z.string().nullable(),
+  changes: z.any().nullable(),
+  created_at: z.string().nullable(),
+  updated_at: z.string().nullable(),
+});
+
+/**
  * Return type for PostgreSQL function: sync_changelog_entry
  */
-export type SyncChangelogEntryReturns = Record<string, unknown>[];
+export type SyncChangelogEntryReturns = SyncChangelogEntryReturnRow[];
 
 /**
  * Zod schema for sync_changelog_entry function return type
  */
-export const syncChangelogEntryReturnsSchema = z.array(z.any());
+export const syncChangelogEntryReturnsSchema = z.array(syncChangelogEntryReturnRowSchema);
 
 /**
  * Type inference from Zod schema (should match type above)

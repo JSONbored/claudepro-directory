@@ -3,7 +3,8 @@
  * All stats/recent/contributors from data layer with edge caching.
  */
 
-import { Constants, type Database } from '@heyclaude/database-types';
+import type { content_category, submission_type } from '@heyclaude/data-layer/prisma';
+import { Constants } from '@heyclaude/database-types';
 import {
   generatePageMetadata,
   getContentTemplates,
@@ -54,7 +55,7 @@ const SUBMISSION_TIPS = [
   'Tag appropriately - tags help users discover your work',
 ];
 
-const TYPE_LABELS: Record<Database['public']['Enums']['submission_type'], string> = {
+const TYPE_LABELS: Record<submission_type, string> = {
   agents: 'Agent',
   commands: 'Command',
   hooks: 'Hook',
@@ -86,9 +87,9 @@ function formatTimeAgo(dateString: string): string {
  */
 function isValidContentCategory(
   value: string
-): value is Database['public']['Enums']['content_category'] {
+): value is content_category {
   return Constants.public.Enums.content_category.includes(
-    value as Database['public']['Enums']['content_category']
+    value as content_category
   );
 }
 
@@ -98,15 +99,15 @@ function isValidContentCategory(
  * If `submissionType` is `null` or not a recognized `content_category`, this function returns `DEFAULT_CONTENT_CATEGORY`
  * and logs a warning.
  *
- * @param {Database['public']['Enums']['submission_type'] | null} submissionType - A `submission_type` enum value or `null`
+ * @param {submission_type | null} submissionType - A `submission_type` enum value or `null`
  * @returns A `content_category` value corresponding to `submissionType`, or `DEFAULT_CONTENT_CATEGORY` as a fallback
  *
  * @see isValidContentCategory
  * @see DEFAULT_CONTENT_CATEGORY
  */
 function mapSubmissionTypeToContentCategory(
-  submissionType: Database['public']['Enums']['submission_type'] | null
-): Database['public']['Enums']['content_category'] {
+  submissionType: submission_type | null
+): content_category {
   if (submissionType === null) {
     return DEFAULT_CONTENT_CATEGORY; // Safe default
   }
@@ -144,7 +145,7 @@ function mapSubmissionTypeToContentCategory(
  */
 function isValidRecentSubmission(submission: unknown): submission is {
   content_name: string;
-  content_type: Database['public']['Enums']['submission_type'];
+  content_type: submission_type;
   id: string;
   merged_at: string;
   user?: null | { name: string; slug: string };
@@ -321,7 +322,7 @@ async function SubmitFormWithConfig({ reqLogger }: { reqLogger: ReturnType<typeo
   // Fetch templates for all supported submission types
   // submission_type enum values are a subset of content_category enum values
   // Map each element and validate using type guard to ensure type safety
-  const supportedCategories: Array<Database['public']['Enums']['content_category']> =
+  const supportedCategories: Array<content_category> =
     Constants.public.Enums.submission_type
       .map((type): string => {
         // Runtime validation: all submission_type values are valid content_category values
@@ -335,7 +336,7 @@ async function SubmitFormWithConfig({ reqLogger }: { reqLogger: ReturnType<typeo
         );
         return DEFAULT_CONTENT_CATEGORY;
       })
-      .filter((category): category is Database['public']['Enums']['content_category'] =>
+      .filter((category): category is content_category =>
         isValidContentCategory(category)
       );
 
@@ -510,7 +511,7 @@ async function SubmitPageSidebar({ reqLogger }: { reqLogger: ReturnType<typeof l
         typeLabels={Object.fromEntries(
           Object.entries(TYPE_LABELS).map(([key, value]) => [
             mapSubmissionTypeToContentCategory(
-              key as Database['public']['Enums']['submission_type']
+              key as submission_type
             ),
             value,
           ])

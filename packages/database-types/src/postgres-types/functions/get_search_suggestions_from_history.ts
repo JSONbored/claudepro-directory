@@ -14,7 +14,7 @@ export type GetSearchSuggestionsFromHistoryArgs = {
   /** Parameter: p_query (text) */
   p_query: string;
   /** Parameter: p_limit (int4, optional) */
-  p_limit: number | undefined | null | undefined;
+  p_limit?: number;
 };
 
 /**
@@ -33,14 +33,32 @@ export const getSearchSuggestionsFromHistoryArgsSchema = z.object({
 export type GetSearchSuggestionsFromHistoryArgsFromZod = z.infer<typeof getSearchSuggestionsFromHistoryArgsSchema>;
 
 /**
+ * Return row type for PostgreSQL function: get_search_suggestions_from_history
+ */
+export type GetSearchSuggestionsFromHistoryReturnRow = {
+  /** suggestion (text, nullable) */
+  suggestion: string | null;
+  /** search_count (int8, nullable) */
+  search_count: number | null;
+};
+
+/**
+ * Zod schema for get_search_suggestions_from_history return row
+ */
+export const getSearchSuggestionsFromHistoryReturnRowSchema = z.object({
+  suggestion: z.string().nullable(),
+  search_count: z.number().nullable(),
+});
+
+/**
  * Return type for PostgreSQL function: get_search_suggestions_from_history
  */
-export type GetSearchSuggestionsFromHistoryReturns = Record<string, unknown>[];
+export type GetSearchSuggestionsFromHistoryReturns = GetSearchSuggestionsFromHistoryReturnRow[];
 
 /**
  * Zod schema for get_search_suggestions_from_history function return type
  */
-export const getSearchSuggestionsFromHistoryReturnsSchema = z.array(z.any());
+export const getSearchSuggestionsFromHistoryReturnsSchema = z.array(getSearchSuggestionsFromHistoryReturnRowSchema);
 
 /**
  * Type inference from Zod schema (should match type above)

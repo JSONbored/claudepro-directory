@@ -79,6 +79,7 @@ apps/web/public/sitemap.xml
 # Backup files
 *.orig
 *.bak
+*.backup
 backups/
 
 # Build analysis

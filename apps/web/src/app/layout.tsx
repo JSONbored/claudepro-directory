@@ -309,7 +309,7 @@ export default function RootLayout({
         <ComponentConfigContextProvider value={componentCardConfig}>
           <ThemeProvider
             enableSystem
-            attribute="data-theme"
+            attribute="class"
             defaultTheme="dark"
             disableTransitionOnChange={false}
             enableColorScheme={false}

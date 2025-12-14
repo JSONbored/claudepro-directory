@@ -1,4 +1,6 @@
-import { Constants, type Database } from '@heyclaude/database-types';
+import type { sponsorship_tier } from '@heyclaude/data-layer/prisma';
+import { Constants } from '@heyclaude/database-types';
+import type { GetSponsorshipAnalyticsReturns } from '@heyclaude/database-types/postgres-types';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
@@ -31,7 +33,7 @@ import Loading from './loading';
  * Authenticated route
  */
 
-type SponsorshipAnalytics = Database['public']['Functions']['get_sponsorship_analytics']['Returns'];
+type SponsorshipAnalytics = GetSponsorshipAnalyticsReturns;
 
 interface AnalyticsPageProperties {
   params: Promise<{ id: string }>;
@@ -198,14 +200,14 @@ async function SponsorshipAnalyticsPageContent({
 
   // Type guard to check if tier is a valid enum value
   // Uses database enum constants directly - leverages readonly array includes
-  function isValidTier(tier: string): tier is Database['public']['Enums']['sponsorship_tier'] {
+  function isValidTier(tier: string): tier is sponsorship_tier {
     // TypeScript knows validTiers contains all enum values, so this is type-safe
     return (validTiers as readonly string[]).includes(tier);
   }
 
   const isTierValid = isValidTier(rawTier);
 
-  const safeTier: Database['public']['Enums']['sponsorship_tier'] = isTierValid
+  const safeTier: sponsorship_tier = isTierValid
     ? rawTier
     : 'sponsored'; // Safe default for invalid values
 

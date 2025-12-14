@@ -113,7 +113,13 @@ generatorHandler({
 
     // Generate types and schemas
     const functionOutput = config.generateTypes || config.generateZod
-      ? await generateFunctionTypes(functions, metadata.compositeTypes, metadata.enums, config)
+      ? await generateFunctionTypes(
+          functions, 
+          metadata.compositeTypes, 
+          metadata.enums, 
+          metadata.functionReturnStructures,
+          config
+        )
       : { files: {}, exports: [] };
 
     const compositeOutput = config.generateTypes || config.generateZod

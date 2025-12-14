@@ -3,7 +3,11 @@
 import { ContentService } from '@heyclaude/data-layer';
 import { type content_category } from '@heyclaude/data-layer/prisma';
 import { ContentCategory } from '@heyclaude/data-layer/prisma';
-import { type Database } from '@heyclaude/database-types';
+import type {
+  GetContentDetailCompleteReturns,
+  GetContentDetailCoreReturns,
+  GetContentAnalyticsReturns,
+} from '@heyclaude/database-types/postgres-types/functions';
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { normalizeError } from '../../errors.ts';
@@ -17,8 +21,7 @@ function isValidContentCategory(value: string): value is content_category {
   return typeof value === 'string' && CONTENT_CATEGORY_VALUES.includes(value as content_category);
 }
 
-export type ContentDetailData =
-  Database['public']['Functions']['get_content_detail_complete']['Returns'];
+export type ContentDetailData = GetContentDetailCompleteReturns;
 
 /**
  * Get content detail complete data
@@ -32,7 +35,7 @@ export type ContentDetailData =
 export async function getContentDetailComplete(input: {
   category: string;
   slug: string;
-}): Promise<Database['public']['Functions']['get_content_detail_complete']['Returns'] | null> {
+}): Promise<GetContentDetailCompleteReturns | null> {
   'use cache';
   const { category, slug } = input;
 
@@ -67,7 +70,10 @@ export async function getContentDetailComplete(input: {
 
   try {
     const service = new ContentService();
-    const result = await service.getContentDetailComplete({ p_category: category, p_slug: slug });
+    const result = await service.getContentDetailComplete({ 
+      p_category: category as content_category, 
+      p_slug: slug 
+    });
 
     reqLogger.info(
       { category, hasResult: Boolean(result), slug },
@@ -94,7 +100,7 @@ export async function getContentDetailComplete(input: {
 export async function getContentDetailCore(input: {
   category: string;
   slug: string;
-}): Promise<Database['public']['Functions']['get_content_detail_core']['Returns'] | null> {
+}): Promise<GetContentDetailCoreReturns | null> {
   'use cache';
   const { category, slug } = input;
 
@@ -129,7 +135,10 @@ export async function getContentDetailCore(input: {
 
   try {
     const service = new ContentService();
-    const result = await service.getContentDetailCore({ p_category: category, p_slug: slug });
+    const result = await service.getContentDetailCore({ 
+      p_category: category as content_category, 
+      p_slug: slug 
+    });
 
     reqLogger.info(
       { category, hasResult: Boolean(result), slug },
@@ -156,7 +165,7 @@ export async function getContentDetailCore(input: {
 export async function getContentAnalytics(input: {
   category: string;
   slug: string;
-}): Promise<Database['public']['Functions']['get_content_analytics']['Returns'] | null> {
+}): Promise<GetContentAnalyticsReturns | null> {
   'use cache';
   const { category, slug } = input;
 
@@ -188,7 +197,10 @@ export async function getContentAnalytics(input: {
 
   try {
     const service = new ContentService();
-    const result = await service.getContentAnalytics({ p_category: category, p_slug: slug });
+    const result = await service.getContentAnalytics({ 
+      p_category: category as content_category, 
+      p_slug: slug 
+    });
 
     reqLogger.info(
       { category, hasResult: Boolean(result), slug },

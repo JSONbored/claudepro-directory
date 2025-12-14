@@ -7,8 +7,13 @@
  * Runs every 5 minutes to process batched analytics events.
  */
 
-import type { Database as DatabaseGenerated, Json } from '@heyclaude/database-types';
+import type { Database, Json } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
+import type {
+  SearchQueryInput,
+  UserInteractionInput,
+} from '@heyclaude/database-types/postgres-types/composites';
+import { type content_category } from '@heyclaude/data-layer/prisma';
 import { normalizeError } from '@heyclaude/shared-runtime';
 
 import { AccountService, SearchService } from '@heyclaude/data-layer';
@@ -34,18 +39,18 @@ type PulseQueueMessage = PgmqMessage<PulseEvent>;
 // Type guards
 function isValidContentCategory(
   value: unknown
-): value is DatabaseGenerated['public']['Enums']['content_category'] {
+): value is content_category {
   if (typeof value !== 'string') return false;
   const validValues = Constants.public.Enums.content_category;
-  return validValues.includes(value as DatabaseGenerated['public']['Enums']['content_category']);
+  return validValues.includes(value as content_category);
 }
 
 function isValidInteractionType(
   value: unknown
-): value is DatabaseGenerated['public']['Enums']['interaction_type'] {
+): value is Database['public']['Enums']['interaction_type'] {
   if (typeof value !== 'string') return false;
   const validValues = Constants.public.Enums.interaction_type;
-  return validValues.includes(value as DatabaseGenerated['public']['Enums']['interaction_type']);
+  return validValues.includes(value as Database['public']['Enums']['interaction_type']);
 }
 
 function isValidPulseEvent(value: unknown): value is PulseEvent {
@@ -139,23 +144,24 @@ export const processPulseQueue = inngest.createFunction(
             const metadata = event.metadata as Record<string, unknown> | null;
 
             return {
-              query: typeof metadata?.['query'] === 'string' ? metadata['query'] : '',
-              filters: metadata?.['filters'] as Json || null,
-              result_count: typeof metadata?.['result_count'] === 'number' ? metadata['result_count'] : 0,
+              query: typeof metadata?.['query'] === 'string' ? metadata['query'] : null,
+              filters: (metadata?.['filters'] && typeof metadata['filters'] === 'object' && !Array.isArray(metadata['filters']))
+                ? (metadata['filters'] as Record<string, unknown>)
+                : null,
+              result_count: typeof metadata?.['result_count'] === 'number' ? metadata['result_count'] : null,
               user_id: event.user_id && isValidUUID(event.user_id) ? event.user_id : null,
               session_id: event.session_id && isValidUUID(event.session_id) ? event.session_id : null,
             };
           });
 
           // Prepare search query inputs for batch RPC
-          const searchQueryInputs: DatabaseGenerated['public']['CompositeTypes']['search_query_input'][] =
-            searchQueries.map((q) => ({
-              query: q.query,
-              filters: q.filters,
-              result_count: q.result_count,
-              user_id: q.user_id,
-              session_id: q.session_id,
-            }));
+          const searchQueryInputs: SearchQueryInput[] = searchQueries.map((q) => ({
+            query: q.query,
+            filters: q.filters,
+            result_count: q.result_count,
+            user_id: q.user_id,
+            session_id: q.session_id,
+          }));
 
           const service = new SearchService();
           const result = await service.batchInsertSearchQueries({
@@ -190,7 +196,7 @@ export const processPulseQueue = inngest.createFunction(
         failed: number;
       }> => {
         try {
-          const interactions: DatabaseGenerated['public']['CompositeTypes']['user_interaction_input'][] = [];
+          const interactions: UserInteractionInput[] = [];
           const validMsgIds: bigint[] = [];
           const invalidMsgIds: bigint[] = [];
 
@@ -206,13 +212,15 @@ export const processPulseQueue = inngest.createFunction(
               continue;
             }
 
-            const interaction: DatabaseGenerated['public']['CompositeTypes']['user_interaction_input'] = {
+            const interaction: UserInteractionInput = {
               user_id: event.user_id ?? null,
               content_type: isValidContentCategory(event.content_type) ? event.content_type : null,
               content_slug: event.content_slug ?? null,
               interaction_type: event.interaction_type,
               session_id: event.session_id ?? null,
-              metadata: event.metadata ?? null,
+              metadata: (event.metadata && typeof event.metadata === 'object' && !Array.isArray(event.metadata))
+                ? (event.metadata as Record<string, unknown>)
+                : null,
             };
 
             interactions.push(interaction);

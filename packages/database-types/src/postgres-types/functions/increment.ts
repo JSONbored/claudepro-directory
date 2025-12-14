@@ -18,7 +18,7 @@ export type IncrementArgs = {
   /** Parameter: column_name (text) */
   column_name: string;
   /** Parameter: increment_by (int4, optional) */
-  increment_by: number | undefined | null | undefined;
+  increment_by?: number;
 };
 
 /**

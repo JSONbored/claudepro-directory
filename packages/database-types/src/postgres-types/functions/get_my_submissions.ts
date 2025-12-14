@@ -15,9 +15,9 @@ import { mySubmissionsItemSchema } from '../composites/my_submissions_item';
  */
 export type GetMySubmissionsArgs = {
   /** Parameter: p_limit (int4, optional) */
-  p_limit: number | undefined | null | undefined;
+  p_limit?: number;
   /** Parameter: p_offset (int4, optional) */
-  p_offset: number | undefined | null | undefined;
+  p_offset?: number;
 };
 
 /**

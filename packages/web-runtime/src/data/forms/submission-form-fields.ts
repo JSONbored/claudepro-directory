@@ -1,7 +1,7 @@
 'use server';
 
 import { MiscService } from '@heyclaude/data-layer';
-import type { FormFieldConfigItem } from '@heyclaude/data-layer/types/composite-types';
+import type { FormFieldConfigItem } from '@heyclaude/database-types/postgres-types';
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { normalizeError } from '../../errors.ts';

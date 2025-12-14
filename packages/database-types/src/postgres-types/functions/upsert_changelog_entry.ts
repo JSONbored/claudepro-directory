@@ -28,17 +28,17 @@ export type UpsertChangelogEntryArgs = {
   /** Parameter: p_changes (jsonb) */
   p_changes: Record<string, unknown>;
   /** Parameter: p_seo_title (text, optional) */
-  p_seo_title: string | undefined | null | undefined;
+  p_seo_title?: string;
   /** Parameter: p_seo_description (text, optional) */
-  p_seo_description: string | undefined | null | undefined;
+  p_seo_description?: string;
   /** Parameter: p_keywords (_text, optional) */
-  p_keywords: string[] | undefined | null | undefined;
+  p_keywords?: string[];
   /** Parameter: p_canonical_url (text, optional) */
-  p_canonical_url: string | undefined | null | undefined;
+  p_canonical_url?: string;
   /** Parameter: p_og_image_url (text, optional) */
-  p_og_image_url: string | undefined | null | undefined;
+  p_og_image_url?: string;
   /** Parameter: p_metadata (jsonb, optional) */
-  p_metadata: Record<string, unknown> | undefined | null | undefined;
+  p_metadata?: Record<string, unknown>;
 };
 
 /**
@@ -81,14 +81,44 @@ export const upsertChangelogEntryArgsSchema = z.object({
 export type UpsertChangelogEntryArgsFromZod = z.infer<typeof upsertChangelogEntryArgsSchema>;
 
 /**
+ * Return row type for PostgreSQL function: upsert_changelog_entry
+ */
+export type UpsertChangelogEntryReturnRow = {
+  /** id (uuid, nullable) */
+  id: string | null;
+  /** slug (text, nullable) */
+  slug: string | null;
+  /** title (text, nullable) */
+  title: string | null;
+  /** release_date (date, nullable) */
+  release_date: string | null;
+  /** created_at (timestamptz, nullable) */
+  created_at: string | null;
+  /** updated_at (timestamptz, nullable) */
+  updated_at: string | null;
+};
+
+/**
+ * Zod schema for upsert_changelog_entry return row
+ */
+export const upsertChangelogEntryReturnRowSchema = z.object({
+  id: z.string().uuid().nullable(),
+  slug: z.string().nullable(),
+  title: z.string().nullable(),
+  release_date: z.string().nullable(),
+  created_at: z.string().nullable(),
+  updated_at: z.string().nullable(),
+});
+
+/**
  * Return type for PostgreSQL function: upsert_changelog_entry
  */
-export type UpsertChangelogEntryReturns = Record<string, unknown>[];
+export type UpsertChangelogEntryReturns = UpsertChangelogEntryReturnRow[];
 
 /**
  * Zod schema for upsert_changelog_entry function return type
  */
-export const upsertChangelogEntryReturnsSchema = z.array(z.any());
+export const upsertChangelogEntryReturnsSchema = z.array(upsertChangelogEntryReturnRowSchema);
 
 /**
  * Type inference from Zod schema (should match type above)

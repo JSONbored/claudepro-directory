@@ -3,6 +3,7 @@
 /** Featured sections consuming homepageConfigs for runtime-tunable categories */
 
 import { type Database } from '@heyclaude/database-types';
+import type { Jobs } from '@heyclaude/database-types/postgres-types';
 import { trackMissingData, getTrendingSlugs, isNewSince } from '@heyclaude/web-runtime/core';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ExternalLink } from '@heyclaude/web-runtime/icons';
@@ -175,7 +176,7 @@ export interface FeaturedSectionsProps {
   categories: Record<string, readonly DisplayableContent[]>;
   categoryConfigs: Record<string, UnifiedCategoryConfig>;
   featuredCategories: readonly Database['public']['Enums']['content_category'][];
-  featuredJobs?: ReadonlyArray<Database['public']['Tables']['jobs']['Row']>;
+  featuredJobs?: ReadonlyArray<Jobs>;
   weekStart?: string;
 }
 

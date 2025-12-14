@@ -16,7 +16,7 @@
  * @see https://supabase.com/docs/guides/database/webhooks
  */
 
-import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
+import type { Prisma } from '@heyclaude/data-layer/prisma';
 import { normalizeError } from '@heyclaude/shared-runtime';
 
 import { inngest } from '../../client';
@@ -24,7 +24,7 @@ import { logger, createWebAppContextWithId } from '../../../logging/server';
 import { RETRY_CONFIGS } from '../../config/index';
 
 // Type for content row from database
-type ContentRow = DatabaseGenerated['public']['Tables']['content']['Row'];
+type ContentRow = Prisma.contentGetPayload<{}>;
 
 /**
  * Result type for workflow triggers
@@ -171,7 +171,8 @@ export const handleSupabaseContentChanged = inngest.createFunction(
       }
 
       // Check if package generation is needed
-      const contentRecord = record as Partial<ContentRow>;
+      // Inngest serializes Date objects to strings, so we need to cast
+      const contentRecord = record as unknown as Partial<ContentRow>;
       
       let needsGeneration = false;
       if (category === 'skills') {
@@ -216,8 +217,9 @@ export const handleSupabaseContentChanged = inngest.createFunction(
     // This ensures README stays in sync with database content
     const readmeTriggerResult = await step.run('trigger-readme-update', async (): Promise<WorkflowTriggerResult> => {
       // Check if content metadata changed (title, description, slug, category)
-      const contentRecord = record as Partial<ContentRow>;
-      const oldContentRecord = event.data.oldRecord as Partial<ContentRow> | undefined;
+      // Inngest serializes Date objects to strings, so we need to cast
+      const contentRecord = record as unknown as Partial<ContentRow>;
+      const oldContentRecord = event.data.oldRecord ? (event.data.oldRecord as unknown as Partial<ContentRow>) : undefined;
 
       const metadataChanged =
         !oldContentRecord ||

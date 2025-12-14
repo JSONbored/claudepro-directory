@@ -15,7 +15,7 @@ import { weeklyDigestResultSchema } from '../composites/weekly_digest_result';
  */
 export type GetWeeklyDigestArgs = {
   /** Parameter: p_week_start (date, optional) */
-  p_week_start: string | undefined | null | undefined;
+  p_week_start?: string;
 };
 
 /**

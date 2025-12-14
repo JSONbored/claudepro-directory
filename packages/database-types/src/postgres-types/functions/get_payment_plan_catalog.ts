@@ -25,14 +25,53 @@ export const getPaymentPlanCatalogArgsSchema = z.object({
 export type GetPaymentPlanCatalogArgsFromZod = z.infer<typeof getPaymentPlanCatalogArgsSchema>;
 
 /**
+ * Return row type for PostgreSQL function: get_payment_plan_catalog
+ */
+export type GetPaymentPlanCatalogReturnRow = {
+  /** plan (job_plan, nullable) */
+  plan: 'one-time' | 'subscription' | null;
+  /** tier (job_tier, nullable) */
+  tier: 'standard' | 'featured' | null;
+  /** price_cents (int4, nullable) */
+  price_cents: number | null;
+  /** is_subscription (bool, nullable) */
+  is_subscription: boolean | null;
+  /** billing_cycle_days (int4, nullable) */
+  billing_cycle_days: number | null;
+  /** job_expiry_days (int4, nullable) */
+  job_expiry_days: number | null;
+  /** description (text, nullable) */
+  description: string | null;
+  /** benefits (jsonb, nullable) */
+  benefits: Record<string, unknown> | null;
+  /** product_type (payment_product_type, nullable) */
+  product_type: 'job_listing' | 'mcp_listing' | 'user_content' | 'subscription' | 'premium_membership' | null;
+};
+
+/**
+ * Zod schema for get_payment_plan_catalog return row
+ */
+export const getPaymentPlanCatalogReturnRowSchema = z.object({
+  plan: z.enum(['one-time', 'subscription']).nullable(),
+  tier: z.enum(['standard', 'featured']).nullable(),
+  price_cents: z.number().nullable(),
+  is_subscription: z.boolean().nullable(),
+  billing_cycle_days: z.number().nullable(),
+  job_expiry_days: z.number().nullable(),
+  description: z.string().nullable(),
+  benefits: z.any().nullable(),
+  product_type: z.enum(['job_listing', 'mcp_listing', 'user_content', 'subscription', 'premium_membership']).nullable(),
+});
+
+/**
  * Return type for PostgreSQL function: get_payment_plan_catalog
  */
-export type GetPaymentPlanCatalogReturns = Record<string, unknown>[];
+export type GetPaymentPlanCatalogReturns = GetPaymentPlanCatalogReturnRow[];
 
 /**
  * Zod schema for get_payment_plan_catalog function return type
  */
-export const getPaymentPlanCatalogReturnsSchema = z.array(z.any());
+export const getPaymentPlanCatalogReturnsSchema = z.array(getPaymentPlanCatalogReturnRowSchema);
 
 /**
  * Type inference from Zod schema (should match type above)

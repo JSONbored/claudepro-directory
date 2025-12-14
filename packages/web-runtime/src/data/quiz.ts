@@ -1,14 +1,13 @@
 'use server';
 
 import { QuizService } from '@heyclaude/data-layer';
-import { type Database } from '@heyclaude/database-types';
+import type { GetQuizConfigurationReturns } from '@heyclaude/database-types/postgres-types';
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { normalizeError } from '../errors.ts';
 import { logger } from '../index.ts';
 
-export type QuizConfigurationResult =
-  Database['public']['Functions']['get_quiz_configuration']['Returns'];
+export type QuizConfigurationResult = GetQuizConfigurationReturns;
 
 /**
  * Get quiz configuration

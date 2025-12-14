@@ -18,7 +18,7 @@ export type MarkSequenceEmailProcessedArgs = {
   /** Parameter: p_step (int4) */
   p_step: number;
   /** Parameter: p_success (bool, optional) */
-  p_success: boolean | undefined | null | undefined;
+  p_success?: boolean;
 };
 
 /**

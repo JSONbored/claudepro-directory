@@ -15,7 +15,7 @@ import { contentTemplatesItemSchema } from './content_templates_item';
  */
 export type ContentTemplatesResult = {
   /** Attribute: templates (_content_templates_item, nullable) */
-  templates: ContentTemplatesItem[];
+  templates: ContentTemplatesItem[] | null;
 };
 
 /**

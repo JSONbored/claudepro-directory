@@ -1,4 +1,6 @@
-import { Constants, type Database } from '@heyclaude/database-types';
+import type { submission_status, submission_type } from '@heyclaude/data-layer/prisma';
+import { Constants } from '@heyclaude/database-types';
+import type { UserDashboardSubmission } from '@heyclaude/database-types/postgres-types';
 import { logger } from '@heyclaude/web-runtime/logging/server';
 import {
   UI_CLASSES,
@@ -13,28 +15,26 @@ import { type ReactElement } from 'react';
 
 import { ContentLinkButton, PrLinkButton } from './submission-link-buttons';
 
-type UserSubmission = NonNullable<
-  Database['public']['Functions']['get_user_dashboard']['Returns']['submissions']
->[number];
+type UserSubmission = UserDashboardSubmission;
 
 interface SubmissionCardProps {
   formatSubmissionDate: (dateString: string) => string;
   getContentLinkProps: (
-    type: Database['public']['Enums']['submission_type'],
+    type: submission_type,
     slug: string,
-    status: Database['public']['Enums']['submission_status']
+    status: submission_status
   ) => null | { href: string };
   getPrLinkProps: (submission: UserSubmission) => null | { href: string };
-  getStatusBadge: (status: Database['public']['Enums']['submission_status']) => ReactElement;
-  getTypeLabel: (type: Database['public']['Enums']['submission_type']) => string;
+  getStatusBadge: (status: submission_status) => ReactElement;
+  getTypeLabel: (type: submission_type) => string;
   index: number;
   isValidSubmissionStatus: (
     status: unknown
-  ) => status is Database['public']['Enums']['submission_status'];
-  isValidSubmissionType: (type: unknown) => type is Database['public']['Enums']['submission_type'];
+  ) => status is submission_status;
+  isValidSubmissionType: (type: unknown) => type is submission_type;
   submission: UserSubmission;
-  VALID_SUBMISSION_STATUSES: Database['public']['Enums']['submission_status'][];
-  VALID_SUBMISSION_TYPES: Database['public']['Enums']['submission_type'][];
+  VALID_SUBMISSION_STATUSES: submission_status[];
+  VALID_SUBMISSION_TYPES: submission_type[];
 }
 
 /**
@@ -74,7 +74,7 @@ export function SubmissionCard({
   const submissionId = submission.id ?? `submission-${index}`;
 
   // Validate status - log warning if missing or invalid
-  let status: Database['public']['Enums']['submission_status'] | null = null;
+  let status: submission_status | null = null;
   if (submission.status) {
     if (isValidSubmissionStatus(submission.status)) {
       status = submission.status;
@@ -93,7 +93,7 @@ export function SubmissionCard({
   }
 
   // Validate content_type - log warning if missing or invalid
-  let type: Database['public']['Enums']['submission_type'] | null = null;
+  let type: submission_type | null = null;
   if (submission.content_type) {
     if (isValidSubmissionType(submission.content_type)) {
       type = submission.content_type;

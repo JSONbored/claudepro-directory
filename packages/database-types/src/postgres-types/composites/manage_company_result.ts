@@ -17,7 +17,7 @@ export type ManageCompanyResult = {
   /** Attribute: success (bool, nullable) */
   success: boolean | null;
   /** Attribute: company (companies, nullable) */
-  company: Companies;
+  company: Companies | null;
 };
 
 /**

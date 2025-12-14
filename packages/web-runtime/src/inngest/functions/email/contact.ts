@@ -6,7 +6,7 @@
  * - Sends user confirmation email
  */
 
-import { Constants, type Database as DatabaseGenerated } from '@heyclaude/database-types';
+import { Constants } from '@heyclaude/database-types';
 import { normalizeError, escapeHtml } from '@heyclaude/shared-runtime';
 
 import { inngest } from '../../client';
@@ -14,7 +14,7 @@ import { sendEmail } from '../../../integrations/resend';
 import { HELLO_FROM, CONTACT_FROM } from '../../../email/config/email-config';
 import { logger, createWebAppContextWithId } from '../../../logging/server';
 
-type ContactCategory = DatabaseGenerated['public']['Enums']['contact_category'];
+type ContactCategory = 'bug' | 'feature' | 'partnership' | 'general' | 'other';
 
 /**
  * Contact form submission function

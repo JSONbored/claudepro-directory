@@ -1,6 +1,6 @@
 'use server';
 
-import { type Database } from '@heyclaude/database-types';
+import type { GetHomepageOptimizedReturns } from '@heyclaude/database-types/postgres-types/functions';
 import { cacheLife, cacheTag } from 'next/cache';
 
 /**
@@ -10,7 +10,7 @@ import { cacheLife, cacheTag } from 'next/cache';
  */
 export async function getHomepageData(
   categoryIds: readonly string[]
-): Promise<Database['public']['Functions']['get_homepage_optimized']['Returns'] | null> {
+): Promise<GetHomepageOptimizedReturns | null> {
   'use cache';
 
   // CRITICAL: Defer to request time before any non-deterministic operations (Date.now(), etc.)

@@ -27,11 +27,11 @@ export type SubmitContentForReviewArgs = {
   /** Parameter: p_content_data (jsonb) */
   p_content_data: Record<string, unknown>;
   /** Parameter: p_author_profile_url (text, optional) */
-  p_author_profile_url: string | undefined | null | undefined;
+  p_author_profile_url?: string;
   /** Parameter: p_github_url (text, optional) */
-  p_github_url: string | undefined | null | undefined;
+  p_github_url?: string;
   /** Parameter: p_tags (_text, optional) */
-  p_tags: string[] | undefined | null | undefined;
+  p_tags?: string[];
 };
 
 /**

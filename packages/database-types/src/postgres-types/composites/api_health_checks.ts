@@ -19,11 +19,11 @@ import { apiHealthDatabaseCheckSchema } from './api_health_database_check';
  */
 export type ApiHealthChecks = {
   /** Attribute: database (api_health_database_check, nullable) */
-  database: ApiHealthDatabaseCheck;
+  database: ApiHealthDatabaseCheck | null;
   /** Attribute: content_table (api_health_content_table_check, nullable) */
-  content_table: ApiHealthContentTableCheck;
+  content_table: ApiHealthContentTableCheck | null;
   /** Attribute: category_configs (api_health_category_configs_check, nullable) */
-  category_configs: ApiHealthCategoryConfigsCheck;
+  category_configs: ApiHealthCategoryConfigsCheck | null;
 };
 
 /**

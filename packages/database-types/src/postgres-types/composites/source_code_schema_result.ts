@@ -15,7 +15,7 @@ import { sourceCodeSchemaItemSchema } from './source_code_schema_item';
  */
 export type SourceCodeSchemaResult = {
   /** Attribute: items (_source_code_schema_item, nullable) */
-  items: SourceCodeSchemaItem[];
+  items: SourceCodeSchemaItem[] | null;
 };
 
 /**

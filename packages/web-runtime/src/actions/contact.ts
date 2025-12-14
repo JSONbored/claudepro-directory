@@ -17,10 +17,12 @@ export const getContactCommands = rateLimitedAction
   .metadata({ actionName: 'contact.getContactCommands', category: 'content' })
   .action(async () => {
     try {
-      const { fetchContactCommands } = await import('../data/contact.ts');
-      const data = await fetchContactCommands();
-      // Return empty commands structure if data is null (graceful fallback)
-      return data ?? { commands: [] };
+      const { MiscService } = await import('@heyclaude/data-layer');
+      const service = new MiscService();
+      const result = await service.getContactCommands();
+      // GetContactCommandsReturns is ContactCommandResult[][] (array of arrays)
+      // Return first array as commands, or empty array if none
+      return { commands: result?.[0] ?? [] };
     } catch {
       // Fallback to empty commands on error (safe-action middleware handles logging)
       return { commands: [] };

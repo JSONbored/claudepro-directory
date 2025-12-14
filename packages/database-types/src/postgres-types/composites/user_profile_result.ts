@@ -21,13 +21,13 @@ import { userProfileStatsSchema } from './user_profile_stats';
  */
 export type UserProfileResult = {
   /** Attribute: profile (user_profile_profile, nullable) */
-  profile: UserProfileProfile;
+  profile: UserProfileProfile | null;
   /** Attribute: stats (user_profile_stats, nullable) */
-  stats: UserProfileStats;
+  stats: UserProfileStats | null;
   /** Attribute: collections (_user_profile_collection, nullable) */
-  collections: UserProfileCollection[];
+  collections: UserProfileCollection[] | null;
   /** Attribute: contributions (_user_profile_contribution, nullable) */
-  contributions: UserProfileContribution[];
+  contributions: UserProfileContribution[] | null;
   /** Attribute: is_following (bool, nullable) */
   is_following: boolean | null;
   /** Attribute: is_owner (bool, nullable) */

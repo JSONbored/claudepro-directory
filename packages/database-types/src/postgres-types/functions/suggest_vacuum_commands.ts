@@ -12,7 +12,7 @@ import { z } from 'zod';
  */
 export type SuggestVacuumCommandsArgs = {
   /** Parameter: p_min_bloat_ratio (numeric, optional) */
-  p_min_bloat_ratio: number | undefined | null | undefined;
+  p_min_bloat_ratio?: number;
 };
 
 /**
@@ -29,14 +29,38 @@ export const suggestVacuumCommandsArgsSchema = z.object({
 export type SuggestVacuumCommandsArgsFromZod = z.infer<typeof suggestVacuumCommandsArgsSchema>;
 
 /**
+ * Return row type for PostgreSQL function: suggest_vacuum_commands
+ */
+export type SuggestVacuumCommandsReturnRow = {
+  /** tablename (text, nullable) */
+  tablename: string | null;
+  /** bloat_ratio (numeric, nullable) */
+  bloat_ratio: number | null;
+  /** dead_tuples (int8, nullable) */
+  dead_tuples: number | null;
+  /** vacuum_command (text, nullable) */
+  vacuum_command: string | null;
+};
+
+/**
+ * Zod schema for suggest_vacuum_commands return row
+ */
+export const suggestVacuumCommandsReturnRowSchema = z.object({
+  tablename: z.string().nullable(),
+  bloat_ratio: z.number().nullable(),
+  dead_tuples: z.number().nullable(),
+  vacuum_command: z.string().nullable(),
+});
+
+/**
  * Return type for PostgreSQL function: suggest_vacuum_commands
  */
-export type SuggestVacuumCommandsReturns = Record<string, unknown>[];
+export type SuggestVacuumCommandsReturns = SuggestVacuumCommandsReturnRow[];
 
 /**
  * Zod schema for suggest_vacuum_commands function return type
  */
-export const suggestVacuumCommandsReturnsSchema = z.array(z.any());
+export const suggestVacuumCommandsReturnsSchema = z.array(suggestVacuumCommandsReturnRowSchema);
 
 /**
  * Type inference from Zod schema (should match type above)

@@ -15,7 +15,7 @@ import { userDashboardSubmissionSchema } from './user_dashboard_submission';
  */
 export type UserDashboardResult = {
   /** Attribute: submissions (_user_dashboard_submission, nullable) */
-  submissions: UserDashboardSubmission[];
+  submissions: UserDashboardSubmission[] | null;
   /** Attribute: companies (jsonb, nullable) */
   companies: Record<string, unknown> | null;
   /** Attribute: jobs (jsonb, nullable) */

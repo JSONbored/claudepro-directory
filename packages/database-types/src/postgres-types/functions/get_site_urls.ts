@@ -25,14 +25,38 @@ export const getSiteUrlsArgsSchema = z.object({
 export type GetSiteUrlsArgsFromZod = z.infer<typeof getSiteUrlsArgsSchema>;
 
 /**
+ * Return row type for PostgreSQL function: get_site_urls
+ */
+export type GetSiteUrlsReturnRow = {
+  /** path (text, nullable) */
+  path: string | null;
+  /** lastmod (timestamptz, nullable) */
+  lastmod: string | null;
+  /** changefreq (text, nullable) */
+  changefreq: string | null;
+  /** priority (numeric, nullable) */
+  priority: number | null;
+};
+
+/**
+ * Zod schema for get_site_urls return row
+ */
+export const getSiteUrlsReturnRowSchema = z.object({
+  path: z.string().nullable(),
+  lastmod: z.string().nullable(),
+  changefreq: z.string().nullable(),
+  priority: z.number().nullable(),
+});
+
+/**
  * Return type for PostgreSQL function: get_site_urls
  */
-export type GetSiteUrlsReturns = Record<string, unknown>[];
+export type GetSiteUrlsReturns = GetSiteUrlsReturnRow[];
 
 /**
  * Zod schema for get_site_urls function return type
  */
-export const getSiteUrlsReturnsSchema = z.array(z.any());
+export const getSiteUrlsReturnsSchema = z.array(getSiteUrlsReturnRowSchema);
 
 /**
  * Type inference from Zod schema (should match type above)

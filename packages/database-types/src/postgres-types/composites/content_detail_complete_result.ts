@@ -21,11 +21,11 @@ export type ContentDetailCompleteResult = {
   /** Attribute: content (jsonb, nullable) */
   content: Record<string, unknown> | null;
   /** Attribute: analytics (content_detail_analytics, nullable) */
-  analytics: ContentDetailAnalytics;
+  analytics: ContentDetailAnalytics | null;
   /** Attribute: related (_content_detail_related_item, nullable) */
-  related: ContentDetailRelatedItem[];
+  related: ContentDetailRelatedItem[] | null;
   /** Attribute: collection_items (_content_detail_collection_item, nullable) */
-  collection_items: ContentDetailCollectionItem[];
+  collection_items: ContentDetailCollectionItem[] | null;
 };
 
 /**

@@ -19,11 +19,11 @@ import { userLibraryStatsSchema } from './user_library_stats';
  */
 export type UserLibraryResult = {
   /** Attribute: bookmarks (_user_library_bookmark, nullable) */
-  bookmarks: UserLibraryBookmark[];
+  bookmarks: UserLibraryBookmark[] | null;
   /** Attribute: collections (_user_library_collection, nullable) */
-  collections: UserLibraryCollection[];
+  collections: UserLibraryCollection[] | null;
   /** Attribute: stats (user_library_stats, nullable) */
-  stats: UserLibraryStats;
+  stats: UserLibraryStats | null;
 };
 
 /**

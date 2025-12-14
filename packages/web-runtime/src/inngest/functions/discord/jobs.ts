@@ -5,7 +5,7 @@
  * Handles INSERT and UPDATE events for the jobs table.
  */
 
-import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
+import type { Prisma } from '@heyclaude/data-layer/prisma';
 import { normalizeError, getEnvVar, sanitizeForDiscord } from '@heyclaude/shared-runtime';
 
 import { inngest } from '../../client';
@@ -13,7 +13,7 @@ import { pgmqRead, pgmqDelete, type PgmqMessage } from '../../../supabase/pgmq-c
 import { logger, createWebAppContextWithId } from '../../../logging/server';
 import { sendCronSuccessHeartbeat } from '../../utils/monitoring';
 
-type JobRow = DatabaseGenerated['public']['Tables']['jobs']['Row'];
+type JobRow = Prisma.jobsGetPayload<{}>;
 
 const DISCORD_JOBS_QUEUE = 'discord_jobs';
 const BATCH_SIZE = 10;
@@ -195,7 +195,8 @@ export const processDiscordJobsQueue = inngest.createFunction(
           }
 
           // Build and send Discord embed
-          const embed = buildJobEmbed(job, payload.type === 'INSERT');
+          // Inngest serializes Date objects to strings, so we need to cast
+          const embed = buildJobEmbed(job as unknown as JobRow, payload.type === 'INSERT');
           if (!embed) {
             return { success: true, sent: false, reason: 'invalid_slug' };
           }

@@ -27,9 +27,9 @@ export type SeoMetadata = {
   /** Attribute: twitter_card (twitter_card_type, nullable) */
   twitter_card: 'summary_large_image' | 'summary' | 'app' | 'player' | null;
   /** Attribute: robots (seo_metadata_robots, nullable) */
-  robots: SeoMetadataRobots;
+  robots: SeoMetadataRobots | null;
   /** Attribute: debug (seo_metadata_debug, nullable) */
-  debug: SeoMetadataDebug;
+  debug: SeoMetadataDebug | null;
 };
 
 /**

@@ -25,15 +25,15 @@ export type ManageCollectionArgs = {
   /** Parameter: p_user_id (uuid) */
   p_user_id: string;
   /** Parameter: p_create_data (collection_create_input, optional) */
-  p_create_data: CollectionCreateInput | undefined | null | undefined;
+  p_create_data?: CollectionCreateInput;
   /** Parameter: p_update_data (collection_update_input, optional) */
-  p_update_data: CollectionUpdateInput | undefined | null | undefined;
+  p_update_data?: CollectionUpdateInput;
   /** Parameter: p_delete_id (uuid, optional) */
-  p_delete_id: string | undefined | null | undefined;
+  p_delete_id?: string;
   /** Parameter: p_add_item_data (collection_item_input, optional) */
-  p_add_item_data: CollectionItemInput | undefined | null | undefined;
+  p_add_item_data?: CollectionItemInput;
   /** Parameter: p_remove_item_id (uuid, optional) */
-  p_remove_item_id: string | undefined | null | undefined;
+  p_remove_item_id?: string;
 };
 
 /**

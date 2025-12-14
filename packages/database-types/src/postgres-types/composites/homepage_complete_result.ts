@@ -23,7 +23,7 @@ export type HomepageCompleteResult = {
   /** Attribute: featured_jobs (jsonb, nullable) */
   featured_jobs: Record<string, unknown> | null;
   /** Attribute: top_contributors (_homepage_top_contributor, nullable) */
-  top_contributors: HomepageTopContributor[];
+  top_contributors: HomepageTopContributor[] | null;
 };
 
 /**

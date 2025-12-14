@@ -12,7 +12,7 @@ import { z } from 'zod';
  */
 export type GetAnalyticsSummaryArgs = {
   /** Parameter: p_category (content_category, optional) */
-  p_category: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog' | undefined | null | undefined;
+  p_category?: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog';
 };
 
 /**
@@ -29,14 +29,44 @@ export const getAnalyticsSummaryArgsSchema = z.object({
 export type GetAnalyticsSummaryArgsFromZod = z.infer<typeof getAnalyticsSummaryArgsSchema>;
 
 /**
+ * Return row type for PostgreSQL function: get_analytics_summary
+ */
+export type GetAnalyticsSummaryReturnRow = {
+  /** category (content_category, nullable) */
+  category: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog' | null;
+  /** total_items (int8, nullable) */
+  total_items: number | null;
+  /** total_views (int8, nullable) */
+  total_views: number | null;
+  /** total_copies (int8, nullable) */
+  total_copies: number | null;
+  /** total_bookmarks (int8, nullable) */
+  total_bookmarks: number | null;
+  /** avg_popularity (numeric, nullable) */
+  avg_popularity: number | null;
+};
+
+/**
+ * Zod schema for get_analytics_summary return row
+ */
+export const getAnalyticsSummaryReturnRowSchema = z.object({
+  category: z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'skills', 'collections', 'guides', 'jobs', 'changelog']).nullable(),
+  total_items: z.number().nullable(),
+  total_views: z.number().nullable(),
+  total_copies: z.number().nullable(),
+  total_bookmarks: z.number().nullable(),
+  avg_popularity: z.number().nullable(),
+});
+
+/**
  * Return type for PostgreSQL function: get_analytics_summary
  */
-export type GetAnalyticsSummaryReturns = Record<string, unknown>[];
+export type GetAnalyticsSummaryReturns = GetAnalyticsSummaryReturnRow[];
 
 /**
  * Zod schema for get_analytics_summary function return type
  */
-export const getAnalyticsSummaryReturnsSchema = z.array(z.any());
+export const getAnalyticsSummaryReturnsSchema = z.array(getAnalyticsSummaryReturnRowSchema);
 
 /**
  * Type inference from Zod schema (should match type above)

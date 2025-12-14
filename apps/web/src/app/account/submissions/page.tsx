@@ -1,4 +1,5 @@
 import { Constants, type Database } from '@heyclaude/database-types';
+import type { GetUserDashboardReturns } from '@heyclaude/database-types/postgres-types';
 import { isValidCategory } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
@@ -337,9 +338,7 @@ async function SubmissionsPageContent({
   });
 
   // Section: Submissions Data Fetch
-  let submissions: NonNullable<
-    Database['public']['Functions']['get_user_dashboard']['Returns']['submissions']
-  > = [];
+  let submissions: NonNullable<GetUserDashboardReturns['submissions']> = [];
   let hasError = false;
   try {
     const data = await getUserDashboard(user.id);

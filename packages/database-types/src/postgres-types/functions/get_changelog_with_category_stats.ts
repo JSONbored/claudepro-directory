@@ -15,11 +15,11 @@ import { changelogWithCategoryStatsResultSchema } from '../composites/changelog_
  */
 export type GetChangelogWithCategoryStatsArgs = {
   /** Parameter: p_category (text, optional) */
-  p_category: string | undefined | null | undefined;
+  p_category?: string;
   /** Parameter: p_limit (int4, optional) */
-  p_limit: number | undefined | null | undefined;
+  p_limit?: number;
   /** Parameter: p_offset (int4, optional) */
-  p_offset: number | undefined | null | undefined;
+  p_offset?: number;
 };
 
 /**

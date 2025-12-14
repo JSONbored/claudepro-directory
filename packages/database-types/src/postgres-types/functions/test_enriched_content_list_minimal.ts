@@ -29,14 +29,38 @@ export const testEnrichedContentListMinimalArgsSchema = z.object({
 export type TestEnrichedContentListMinimalArgsFromZod = z.infer<typeof testEnrichedContentListMinimalArgsSchema>;
 
 /**
+ * Return row type for PostgreSQL function: test_enriched_content_list_minimal
+ */
+export type TestEnrichedContentListMinimalReturnRow = {
+  /** id (uuid, nullable) */
+  id: string | null;
+  /** slug (text, nullable) */
+  slug: string | null;
+  /** title (text, nullable) */
+  title: string | null;
+  /** category (content_category, nullable) */
+  category: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog' | null;
+};
+
+/**
+ * Zod schema for test_enriched_content_list_minimal return row
+ */
+export const testEnrichedContentListMinimalReturnRowSchema = z.object({
+  id: z.string().uuid().nullable(),
+  slug: z.string().nullable(),
+  title: z.string().nullable(),
+  category: z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'skills', 'collections', 'guides', 'jobs', 'changelog']).nullable(),
+});
+
+/**
  * Return type for PostgreSQL function: test_enriched_content_list_minimal
  */
-export type TestEnrichedContentListMinimalReturns = Record<string, unknown>[];
+export type TestEnrichedContentListMinimalReturns = TestEnrichedContentListMinimalReturnRow[];
 
 /**
  * Zod schema for test_enriched_content_list_minimal function return type
  */
-export const testEnrichedContentListMinimalReturnsSchema = z.array(z.any());
+export const testEnrichedContentListMinimalReturnsSchema = z.array(testEnrichedContentListMinimalReturnRowSchema);
 
 /**
  * Type inference from Zod schema (should match type above)

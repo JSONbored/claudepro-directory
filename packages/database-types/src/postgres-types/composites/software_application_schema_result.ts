@@ -33,7 +33,7 @@ export type SoftwareApplicationSchemaResult = {
   /** Attribute: url (text, nullable) */
   url: string | null;
   /** Attribute: author (software_application_author, nullable) */
-  author: SoftwareApplicationAuthor;
+  author: SoftwareApplicationAuthor | null;
   /** Attribute: date_published (text, nullable) */
   date_published: string | null;
   /** Attribute: date_modified (text, nullable) */
@@ -41,7 +41,7 @@ export type SoftwareApplicationSchemaResult = {
   /** Attribute: keywords (_text, nullable) */
   keywords: string[] | null;
   /** Attribute: offers (software_application_offer, nullable) */
-  offers: SoftwareApplicationOffer;
+  offers: SoftwareApplicationOffer | null;
   /** Attribute: software_requirements (_text, nullable) */
   software_requirements: string[] | null;
   /** Attribute: is_accessible_for_free (bool, nullable) */

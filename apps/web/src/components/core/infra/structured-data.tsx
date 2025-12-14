@@ -3,6 +3,7 @@
  * Schemas are serialized with XSS protection client-side
  */
 
+import type { Json } from '@heyclaude/database-types';
 import { serializeJsonLd } from '@heyclaude/shared-runtime';
 import { getSEOMetadataWithSchemas } from '@heyclaude/web-runtime/data';
 
@@ -54,7 +55,8 @@ export async function StructuredData({ route }: StructuredDataProps) {
         const sanitizedSchema = sanitizeUrlsInObject(schema) as typeof schema;
         
         // Serialize JSON-LD with XSS protection
-        const serialized = serializeJsonLd(sanitizedSchema);
+        // Cast to Json type for Prisma compatibility
+        const serialized = serializeJsonLd(sanitizedSchema as Json);
 
         // Extract @type for key
         let schemaType = 'schema';

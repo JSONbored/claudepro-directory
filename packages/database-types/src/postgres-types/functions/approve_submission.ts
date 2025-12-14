@@ -17,7 +17,7 @@ export type ApproveSubmissionArgs = {
   /** Parameter: p_submission_id (uuid) */
   p_submission_id: string;
   /** Parameter: p_moderator_notes (text, optional) */
-  p_moderator_notes: string | undefined | null | undefined;
+  p_moderator_notes?: string;
 };
 
 /**

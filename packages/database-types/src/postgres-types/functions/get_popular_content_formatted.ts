@@ -12,9 +12,9 @@ import { z } from 'zod';
  */
 export type GetPopularContentFormattedArgs = {
   /** Parameter: p_category (content_category, optional) */
-  p_category: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog' | undefined | null | undefined;
+  p_category?: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog';
   /** Parameter: p_limit (int4, optional) */
-  p_limit: number | undefined | null | undefined;
+  p_limit?: number;
 };
 
 /**
@@ -33,14 +33,53 @@ export const getPopularContentFormattedArgsSchema = z.object({
 export type GetPopularContentFormattedArgsFromZod = z.infer<typeof getPopularContentFormattedArgsSchema>;
 
 /**
+ * Return row type for PostgreSQL function: get_popular_content_formatted
+ */
+export type GetPopularContentFormattedReturnRow = {
+  /** category (content_category, nullable) */
+  category: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog' | null;
+  /** slug (text, nullable) */
+  slug: string | null;
+  /** title (text, nullable) */
+  title: string | null;
+  /** description (text, nullable) */
+  description: string | null;
+  /** author (text, nullable) */
+  author: string | null;
+  /** tags (_text, nullable) */
+  tags: string[] | null;
+  /** view_count (int4, nullable) */
+  view_count: number | null;
+  /** copy_count (int4, nullable) */
+  copy_count: number | null;
+  /** popularity (numeric, nullable) */
+  popularity: number | null;
+};
+
+/**
+ * Zod schema for get_popular_content_formatted return row
+ */
+export const getPopularContentFormattedReturnRowSchema = z.object({
+  category: z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'skills', 'collections', 'guides', 'jobs', 'changelog']).nullable(),
+  slug: z.string().nullable(),
+  title: z.string().nullable(),
+  description: z.string().nullable(),
+  author: z.string().nullable(),
+  tags: z.array(z.string()).nullable(),
+  view_count: z.number().nullable(),
+  copy_count: z.number().nullable(),
+  popularity: z.number().nullable(),
+});
+
+/**
  * Return type for PostgreSQL function: get_popular_content_formatted
  */
-export type GetPopularContentFormattedReturns = Record<string, unknown>[];
+export type GetPopularContentFormattedReturns = GetPopularContentFormattedReturnRow[];
 
 /**
  * Zod schema for get_popular_content_formatted function return type
  */
-export const getPopularContentFormattedReturnsSchema = z.array(z.any());
+export const getPopularContentFormattedReturnsSchema = z.array(getPopularContentFormattedReturnRowSchema);
 
 /**
  * Type inference from Zod schema (should match type above)

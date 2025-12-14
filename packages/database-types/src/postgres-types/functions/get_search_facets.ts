@@ -25,14 +25,53 @@ export const getSearchFacetsArgsSchema = z.object({
 export type GetSearchFacetsArgsFromZod = z.infer<typeof getSearchFacetsArgsSchema>;
 
 /**
+ * Return row type for PostgreSQL function: get_search_facets
+ */
+export type GetSearchFacetsReturnRow = {
+  /** category (content_category, nullable) */
+  category: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog' | null;
+  /** content_count (int8, nullable) */
+  content_count: number | null;
+  /** authors (_text, nullable) */
+  authors: string[] | null;
+  /** all_tags (_text, nullable) */
+  all_tags: string[] | null;
+  /** author_count (int8, nullable) */
+  author_count: number | null;
+  /** tag_count (int8, nullable) */
+  tag_count: number | null;
+  /** all_tags_aggregated (_text, nullable) */
+  all_tags_aggregated: string[] | null;
+  /** all_authors_aggregated (_text, nullable) */
+  all_authors_aggregated: string[] | null;
+  /** all_categories_aggregated (_content_category, nullable) */
+  all_categories_aggregated: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog'[] | null;
+};
+
+/**
+ * Zod schema for get_search_facets return row
+ */
+export const getSearchFacetsReturnRowSchema = z.object({
+  category: z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'skills', 'collections', 'guides', 'jobs', 'changelog']).nullable(),
+  content_count: z.number().nullable(),
+  authors: z.array(z.string()).nullable(),
+  all_tags: z.array(z.string()).nullable(),
+  author_count: z.number().nullable(),
+  tag_count: z.number().nullable(),
+  all_tags_aggregated: z.array(z.string()).nullable(),
+  all_authors_aggregated: z.array(z.string()).nullable(),
+  all_categories_aggregated: z.array(z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'skills', 'collections', 'guides', 'jobs', 'changelog'])).nullable(),
+});
+
+/**
  * Return type for PostgreSQL function: get_search_facets
  */
-export type GetSearchFacetsReturns = Record<string, unknown>[];
+export type GetSearchFacetsReturns = GetSearchFacetsReturnRow[];
 
 /**
  * Zod schema for get_search_facets function return type
  */
-export const getSearchFacetsReturnsSchema = z.array(z.any());
+export const getSearchFacetsReturnsSchema = z.array(getSearchFacetsReturnRowSchema);
 
 /**
  * Type inference from Zod schema (should match type above)

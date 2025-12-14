@@ -12,9 +12,9 @@ import { z } from 'zod';
  */
 export type GetTrendingMetricsWithContentArgs = {
   /** Parameter: p_category (content_category, optional) */
-  p_category: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog' | undefined | null | undefined;
+  p_category?: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog';
   /** Parameter: p_limit (int4, optional) */
-  p_limit: number | undefined | null | undefined;
+  p_limit?: number;
 };
 
 /**
@@ -33,14 +33,65 @@ export const getTrendingMetricsWithContentArgsSchema = z.object({
 export type GetTrendingMetricsWithContentArgsFromZod = z.infer<typeof getTrendingMetricsWithContentArgsSchema>;
 
 /**
+ * Return row type for PostgreSQL function: get_trending_metrics_with_content
+ */
+export type GetTrendingMetricsWithContentReturnRow = {
+  /** category (content_category, nullable) */
+  category: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog' | null;
+  /** slug (text, nullable) */
+  slug: string | null;
+  /** title (text, nullable) */
+  title: string | null;
+  /** description (text, nullable) */
+  description: string | null;
+  /** author (text, nullable) */
+  author: string | null;
+  /** tags (_text, nullable) */
+  tags: string[] | null;
+  /** source (text, nullable) */
+  source: string | null;
+  /** views_total (numeric, nullable) */
+  views_total: number | null;
+  /** copies_total (numeric, nullable) */
+  copies_total: number | null;
+  /** bookmarks_total (numeric, nullable) */
+  bookmarks_total: number | null;
+  /** trending_score (numeric, nullable) */
+  trending_score: number | null;
+  /** engagement_score (numeric, nullable) */
+  engagement_score: number | null;
+  /** freshness_score (numeric, nullable) */
+  freshness_score: number | null;
+};
+
+/**
+ * Zod schema for get_trending_metrics_with_content return row
+ */
+export const getTrendingMetricsWithContentReturnRowSchema = z.object({
+  category: z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'skills', 'collections', 'guides', 'jobs', 'changelog']).nullable(),
+  slug: z.string().nullable(),
+  title: z.string().nullable(),
+  description: z.string().nullable(),
+  author: z.string().nullable(),
+  tags: z.array(z.string()).nullable(),
+  source: z.string().nullable(),
+  views_total: z.number().nullable(),
+  copies_total: z.number().nullable(),
+  bookmarks_total: z.number().nullable(),
+  trending_score: z.number().nullable(),
+  engagement_score: z.number().nullable(),
+  freshness_score: z.number().nullable(),
+});
+
+/**
  * Return type for PostgreSQL function: get_trending_metrics_with_content
  */
-export type GetTrendingMetricsWithContentReturns = Record<string, unknown>[];
+export type GetTrendingMetricsWithContentReturns = GetTrendingMetricsWithContentReturnRow[];
 
 /**
  * Zod schema for get_trending_metrics_with_content function return type
  */
-export const getTrendingMetricsWithContentReturnsSchema = z.array(z.any());
+export const getTrendingMetricsWithContentReturnsSchema = z.array(getTrendingMetricsWithContentReturnRowSchema);
 
 /**
  * Type inference from Zod schema (should match type above)

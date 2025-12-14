@@ -13,6 +13,7 @@
     "types": ["next/types/global"],
     "paths": {
       "@heyclaude/database-types": ["../database-types/dist/index"],
+      "@heyclaude/database-types/*": ["../database-types/src/*"],
       "@heyclaude/shared-runtime": ["../shared-runtime/src/index.ts"],
       "@heyclaude/shared-runtime/schemas/env": ["../shared-runtime/src/schemas/env.ts"],
       "@heyclaude/data-layer": ["../data-layer/dist/index"]

@@ -5,7 +5,15 @@
  * Uses RPC function returns + minimal UI enrichment only.
  */
 
-import { Constants, type Database } from '@heyclaude/database-types';
+import type {
+  content_category,
+  experience_level,
+  focus_area_type,
+  integration_type,
+  use_case_type,
+} from '@heyclaude/data-layer/prisma';
+import { Constants } from '@heyclaude/database-types';
+import type { GetRecommendationsReturns } from '@heyclaude/database-types/postgres-types';
 import { addBookmarkBatch } from '@heyclaude/web-runtime/actions';
 import { getContentItemUrl, isValidCategory, sanitizeSlug } from '@heyclaude/web-runtime/core';
 import { getCategoryConfig } from '@heyclaude/web-runtime/data';
@@ -61,16 +69,16 @@ import { ShareResults } from './share-results';
 
 // Type matching DecodedQuizAnswers from results page
 interface DecodedQuizAnswers {
-  experienceLevel: Database['public']['Enums']['experience_level'];
-  p_focus_areas?: Database['public']['Enums']['focus_area_type'][];
-  p_integrations?: Database['public']['Enums']['integration_type'][];
+  experienceLevel: experience_level;
+  p_focus_areas?: focus_area_type[];
+  p_integrations?: integration_type[];
   teamSize?: string;
   timestamp?: string;
   toolPreferences: string[];
-  useCase: Database['public']['Enums']['use_case_type'];
+  useCase: use_case_type;
 }
 
-type RecommendationResponse = Database['public']['Functions']['get_recommendations']['Returns'] & {
+type RecommendationResponse = GetRecommendationsReturns & {
   answers: DecodedQuizAnswers;
   generatedAt: string;
   id: string;
@@ -118,7 +126,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
             (
               result
             ): result is typeof result & {
-              category: Database['public']['Enums']['content_category'];
+              category: content_category;
               slug: string;
             } => {
               if (!(result.category && result.slug)) return false;
@@ -394,7 +402,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                 (
                   result
                 ): result is typeof result & {
-                  category: Database['public']['Enums']['content_category'];
+                  category: content_category;
                   slug: string;
                 } => {
                   if (!(result.category && result.slug)) return false;

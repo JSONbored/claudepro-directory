@@ -19,11 +19,11 @@ import { userCollectionsSchema } from './user_collections';
  */
 export type CollectionDetailWithItemsResult = {
   /** Attribute: collection (user_collections, nullable) */
-  collection: UserCollections;
+  collection: UserCollections | null;
   /** Attribute: items (_collection_items, nullable) */
-  items: CollectionItems[];
+  items: CollectionItems[] | null;
   /** Attribute: bookmarks (_bookmarks, nullable) */
-  bookmarks: Bookmarks[];
+  bookmarks: Bookmarks[] | null;
 };
 
 /**

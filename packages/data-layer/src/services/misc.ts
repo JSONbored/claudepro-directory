@@ -6,7 +6,27 @@
  * RPC function types remain using Database type (Prisma doesn't generate RPC types).
  */
 
-import type { Database, Json } from '@heyclaude/database-types';
+import type {
+  GetActiveNotificationsArgs,
+  GetActiveNotificationsReturns,
+  GetActiveAnnouncementReturns,
+  GetContactCommandsReturns,
+  GetFormFieldConfigArgs,
+  GetFormFieldConfigReturns,
+  GetSocialProofStatsReturns,
+  GetApiHealthReturns,
+  GetApiHealthFormattedReturns,
+  GetSiteUrlsReturns,
+  GetSiteUrlsFormattedArgs,
+  GetSiteUrlsFormattedReturns,
+  GenerateSitemapXmlArgs,
+  GenerateSitemapXmlReturns,
+  GetWebhookEventBySvixIdArgs,
+  GetWebhookEventBySvixIdReturns,
+  InsertWebhookEventArgs,
+  InsertWebhookEventReturns,
+} from '@heyclaude/database-types/postgres-types';
+import type { Json } from '@heyclaude/database-types';
 import type { Prisma } from '@heyclaude/data-layer/prisma';
 import { prisma } from '../prisma/client.ts';
 import { BasePrismaService } from './base-prisma-service.ts';
@@ -23,29 +43,25 @@ import { logRpcError } from '../utils/rpc-error-logging.ts';
  */
 export class MiscService extends BasePrismaService {
   async getActiveNotifications(
-    args: Database['public']['Functions']['get_active_notifications']['Args']
-  ): Promise<Database['public']['Functions']['get_active_notifications']['Returns']> {
-    return this.callRpc<Database['public']['Functions']['get_active_notifications']['Returns']>(
+    args: GetActiveNotificationsArgs
+  ): Promise<GetActiveNotificationsReturns> {
+    return this.callRpc<GetActiveNotificationsReturns>(
       'get_active_notifications',
       args,
       { methodName: 'getActiveNotifications' }
     );
   }
 
-  async getActiveAnnouncement(): Promise<
-    Database['public']['Functions']['get_active_announcement']['Returns']
-  > {
-    return this.callRpc<Database['public']['Functions']['get_active_announcement']['Returns']>(
+  async getActiveAnnouncement(): Promise<GetActiveAnnouncementReturns> {
+    return this.callRpc<GetActiveAnnouncementReturns>(
       'get_active_announcement',
       {},
       { methodName: 'getActiveAnnouncement' }
     );
   }
 
-  async getContactCommands(): Promise<
-    Database['public']['Functions']['get_contact_commands']['Returns']
-  > {
-    return this.callRpc<Database['public']['Functions']['get_contact_commands']['Returns']>(
+  async getContactCommands(): Promise<GetContactCommandsReturns> {
+    return this.callRpc<GetContactCommandsReturns>(
       'get_contact_commands',
       {},
       { methodName: 'getContactCommands' }
@@ -53,45 +69,41 @@ export class MiscService extends BasePrismaService {
   }
 
   async getFormFieldConfig(
-    args: Database['public']['Functions']['get_form_field_config']['Args']
-  ): Promise<Database['public']['Functions']['get_form_field_config']['Returns']> {
-    return this.callRpc<Database['public']['Functions']['get_form_field_config']['Returns']>(
+    args: GetFormFieldConfigArgs
+  ): Promise<GetFormFieldConfigReturns> {
+    return this.callRpc<GetFormFieldConfigReturns>(
       'get_form_field_config',
       args,
       { methodName: 'getFormFieldConfig' }
     );
   }
 
-  async getSocialProofStats(): Promise<
-    Database['public']['Functions']['get_social_proof_stats']['Returns']
-  > {
-    return this.callRpc<Database['public']['Functions']['get_social_proof_stats']['Returns']>(
+  async getSocialProofStats(): Promise<GetSocialProofStatsReturns> {
+    return this.callRpc<GetSocialProofStatsReturns>(
       'get_social_proof_stats',
       {},
       { methodName: 'getSocialProofStats' }
     );
   }
 
-  async getApiHealth(): Promise<Database['public']['Functions']['get_api_health']['Returns']> {
-    return this.callRpc<Database['public']['Functions']['get_api_health']['Returns']>(
+  async getApiHealth(): Promise<GetApiHealthReturns> {
+    return this.callRpc<GetApiHealthReturns>(
       'get_api_health',
       {},
       { methodName: 'getApiHealth' }
     );
   }
 
-  async getApiHealthFormatted(): Promise<
-    Database['public']['Functions']['get_api_health_formatted']['Returns']
-  > {
-    return this.callRpc<Database['public']['Functions']['get_api_health_formatted']['Returns']>(
+  async getApiHealthFormatted(): Promise<GetApiHealthFormattedReturns> {
+    return this.callRpc<GetApiHealthFormattedReturns>(
       'get_api_health_formatted',
       {},
       { methodName: 'getApiHealthFormatted' }
     );
   }
 
-  async getSiteUrls(): Promise<Database['public']['Functions']['get_site_urls']['Returns']> {
-    return this.callRpc<Database['public']['Functions']['get_site_urls']['Returns']>(
+  async getSiteUrls(): Promise<GetSiteUrlsReturns> {
+    return this.callRpc<GetSiteUrlsReturns>(
       'get_site_urls',
       {},
       { methodName: 'getSiteUrls' }
@@ -99,9 +111,9 @@ export class MiscService extends BasePrismaService {
   }
 
   async getSiteUrlsFormatted(
-    args: Database['public']['Functions']['get_site_urls_formatted']['Args']
-  ): Promise<Database['public']['Functions']['get_site_urls_formatted']['Returns']> {
-    return this.callRpc<Database['public']['Functions']['get_site_urls_formatted']['Returns']>(
+    args: GetSiteUrlsFormattedArgs
+  ): Promise<GetSiteUrlsFormattedReturns> {
+    return this.callRpc<GetSiteUrlsFormattedReturns>(
       'get_site_urls_formatted',
       args,
       { methodName: 'getSiteUrlsFormatted' }
@@ -109,9 +121,9 @@ export class MiscService extends BasePrismaService {
   }
 
   async generateSitemapXml(
-    args?: Database['public']['Functions']['generate_sitemap_xml']['Args']
-  ): Promise<Database['public']['Functions']['generate_sitemap_xml']['Returns']> {
-    return this.callRpc<Database['public']['Functions']['generate_sitemap_xml']['Returns']>(
+    args?: GenerateSitemapXmlArgs
+  ): Promise<GenerateSitemapXmlReturns> {
+    return this.callRpc<GenerateSitemapXmlReturns>(
       'generate_sitemap_xml',
       args ?? {},
       { methodName: 'generateSitemapXml' }
@@ -265,9 +277,9 @@ export class MiscService extends BasePrismaService {
   }
 
   async getWebhookEventBySvixId(
-    args: Database['public']['Functions']['get_webhook_event_by_svix_id']['Args']
-  ): Promise<Database['public']['Functions']['get_webhook_event_by_svix_id']['Returns'][0] | null> {
-    const result = await this.callRpc<Database['public']['Functions']['get_webhook_event_by_svix_id']['Returns']>(
+    args: GetWebhookEventBySvixIdArgs
+  ): Promise<GetWebhookEventBySvixIdReturns[0] | null> {
+    const result = await this.callRpc<GetWebhookEventBySvixIdReturns>(
       'get_webhook_event_by_svix_id',
       args,
       { methodName: 'getWebhookEventBySvixId' }
@@ -276,10 +288,10 @@ export class MiscService extends BasePrismaService {
   }
 
   async insertWebhookEvent(
-    args: Database['public']['Functions']['insert_webhook_event']['Args']
-  ): Promise<Database['public']['Functions']['insert_webhook_event']['Returns']> {
+    args: InsertWebhookEventArgs
+  ): Promise<InsertWebhookEventReturns> {
     // Mutations don't use caching
-    return this.callRpc<Database['public']['Functions']['insert_webhook_event']['Returns']>(
+    return this.callRpc<InsertWebhookEventReturns>(
       'insert_webhook_event',
       args,
       { methodName: 'insertWebhookEvent', useCache: false }

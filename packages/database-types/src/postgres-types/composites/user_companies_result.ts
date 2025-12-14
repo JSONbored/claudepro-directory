@@ -15,7 +15,7 @@ import { userCompaniesCompanySchema } from './user_companies_company';
  */
 export type UserCompaniesResult = {
   /** Attribute: companies (_user_companies_company, nullable) */
-  companies: UserCompaniesCompany[];
+  companies: UserCompaniesCompany[] | null;
 };
 
 /**

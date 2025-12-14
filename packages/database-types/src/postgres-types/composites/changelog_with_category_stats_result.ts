@@ -17,9 +17,9 @@ import { changelogWithCategoryStatsEntrySchema } from './changelog_with_category
  */
 export type ChangelogWithCategoryStatsResult = {
   /** Attribute: entries (_changelog_with_category_stats_entry, nullable) */
-  entries: ChangelogWithCategoryStatsEntry[];
+  entries: ChangelogWithCategoryStatsEntry[] | null;
   /** Attribute: category_counts (changelog_category_counts, nullable) */
-  category_counts: ChangelogCategoryCounts;
+  category_counts: ChangelogCategoryCounts | null;
   /** Attribute: total (int4, nullable) */
   total: number | null;
   /** Attribute: filtered_count (int4, nullable) */

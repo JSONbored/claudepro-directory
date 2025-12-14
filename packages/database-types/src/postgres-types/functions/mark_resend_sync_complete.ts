@@ -16,9 +16,9 @@ export type MarkResendSyncCompleteArgs = {
   /** Parameter: p_resend_contact_id (text) */
   p_resend_contact_id: string;
   /** Parameter: p_success (bool, optional) */
-  p_success: boolean | undefined | null | undefined;
+  p_success?: boolean;
   /** Parameter: p_error_message (text, optional) */
-  p_error_message: string | undefined | null | undefined;
+  p_error_message?: string;
 };
 
 /**

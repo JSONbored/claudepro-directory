@@ -79,9 +79,22 @@ export abstract class BasePrismaService {
           // No arguments - simple function call
           const query = `SELECT * FROM ${functionName}()`;
           const result = await prisma.$queryRawUnsafe(query);
-          return Array.isArray(result) && result.length === 1
-            ? (result[0] as T)
-            : (result as T);
+          // Prisma $queryRawUnsafe always returns arrays for SELECT * FROM function()
+          // If result is array with one element, check if we should unwrap
+          // For functions returning SETOF (arrays), return array
+          // For functions returning single composite types, unwrap single element
+          if (Array.isArray(result) && result.length === 1) {
+            // Check if function name suggests it returns a single value (not SETOF)
+            // Functions returning single composite types typically don't have "list" or "get_*_list" in name
+            // And they return single composite types, not arrays
+            // For now, we'll check the result structure - if it's an object (not array of objects), unwrap
+            const firstElement = result[0];
+            if (firstElement && typeof firstElement === 'object' && !Array.isArray(firstElement)) {
+              // This looks like a single composite type result, unwrap it
+              return firstElement as T;
+            }
+          }
+          return result as T;
         }
 
         // Build parameterized query with named parameters
@@ -92,14 +105,31 @@ export abstract class BasePrismaService {
 
         const result = await prisma.$queryRawUnsafe(query, ...argValues);
 
-        // Handle different return types:
-        // - Single row: return the row
-        // - Multiple rows: return array
-        // - Composite type: return as-is
+        // Prisma $queryRawUnsafe always returns arrays for SELECT * FROM function()
+        // Handle unwrapping for single composite type returns
         if (Array.isArray(result)) {
+          // Check if this is a single-row result that should be unwrapped
+          // Functions returning SETOF (arrays) should return arrays
+          // Functions returning single composite types should return single objects
           if (result.length === 1) {
-            return result[0] as T;
+            const firstElement = result[0];
+            // If the first element is an object (composite type), check if we should unwrap
+            // We'll use a heuristic: if the function doesn't have "list" or plural in name,
+            // and returns a single object, unwrap it
+            if (firstElement && typeof firstElement === 'object' && !Array.isArray(firstElement)) {
+              // Check function name pattern - single result functions often don't have "list" or "get_*_list"
+              const isListFunction = functionName.includes('list') || 
+                                     functionName.includes('_list') ||
+                                     functionName.includes('search') ||
+                                     functionName.includes('get_') && functionName.includes('_content');
+              
+              // If it's not a list function and returns a single object, unwrap
+              if (!isListFunction) {
+                return firstElement as T;
+              }
+            }
           }
+          // For array results (SETOF functions), return as array
           return result as T;
         }
 

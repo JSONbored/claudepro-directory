@@ -29,14 +29,32 @@ export const getSkillStoragePathArgsSchema = z.object({
 export type GetSkillStoragePathArgsFromZod = z.infer<typeof getSkillStoragePathArgsSchema>;
 
 /**
+ * Return row type for PostgreSQL function: get_skill_storage_path
+ */
+export type GetSkillStoragePathReturnRow = {
+  /** bucket (text, nullable) */
+  bucket: string | null;
+  /** object_path (text, nullable) */
+  object_path: string | null;
+};
+
+/**
+ * Zod schema for get_skill_storage_path return row
+ */
+export const getSkillStoragePathReturnRowSchema = z.object({
+  bucket: z.string().nullable(),
+  object_path: z.string().nullable(),
+});
+
+/**
  * Return type for PostgreSQL function: get_skill_storage_path
  */
-export type GetSkillStoragePathReturns = Record<string, unknown>[];
+export type GetSkillStoragePathReturns = GetSkillStoragePathReturnRow[];
 
 /**
  * Zod schema for get_skill_storage_path function return type
  */
-export const getSkillStoragePathReturnsSchema = z.array(z.any());
+export const getSkillStoragePathReturnsSchema = z.array(getSkillStoragePathReturnRowSchema);
 
 /**
  * Type inference from Zod schema (should match type above)

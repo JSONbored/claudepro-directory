@@ -5,6 +5,7 @@ import {
 } from '@heyclaude/web-runtime/core';
 import { getHomepageCategoryIds, getHomepageData } from '@heyclaude/web-runtime/server';
 import { normalizeError, serializeForClient } from '@heyclaude/shared-runtime';
+import type { Jobs } from '@heyclaude/database-types/postgres-types';
 
 import { HomePageClient } from '@/src/components/features/home/home-sections';
 
@@ -72,7 +73,11 @@ async function HomepageContentData() {
   );
 
   const memberCount = homepageResult.member_count ?? 0;
-  const featuredJobs = (homepageResult.featured_jobs as Array<unknown> | null) ?? [];
+  // featured_jobs is JSONB from database, parse it as Jobs array
+  const featuredJobsRaw = homepageResult.featured_jobs;
+  const featuredJobs: readonly Jobs[] = Array.isArray(featuredJobsRaw) 
+    ? (featuredJobsRaw as Jobs[])
+    : [];
 
   // CRITICAL: content is Json type (JSONB from database) - Supabase should auto-parse it
   // But we need to ensure it's actually an object, not a string

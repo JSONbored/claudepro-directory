@@ -5,7 +5,11 @@
  * Maintains the same public API for backward compatibility.
  */
 
-import { type Database } from '@heyclaude/database-types';
+import type {
+  GetQuizConfigurationReturns,
+  GetRecommendationsArgs,
+  GetRecommendationsReturns,
+} from '@heyclaude/database-types/postgres-types';
 import { BasePrismaService } from './base-prisma-service.ts';
 
 /**
@@ -17,10 +21,8 @@ import { BasePrismaService } from './base-prisma-service.ts';
  * - Same public API as Supabase-based service
  */
 export class QuizService extends BasePrismaService {
-  async getQuizConfiguration(): Promise<
-    Database['public']['Functions']['get_quiz_configuration']['Returns']
-  > {
-    return this.callRpc<Database['public']['Functions']['get_quiz_configuration']['Returns']>(
+  async getQuizConfiguration(): Promise<GetQuizConfigurationReturns> {
+    return this.callRpc<GetQuizConfigurationReturns>(
       'get_quiz_configuration',
       {},
       { methodName: 'getQuizConfiguration' }
@@ -28,9 +30,9 @@ export class QuizService extends BasePrismaService {
   }
 
   async getRecommendations(
-    args: Database['public']['Functions']['get_recommendations']['Args']
-  ): Promise<Database['public']['Functions']['get_recommendations']['Returns']> {
-    return this.callRpc<Database['public']['Functions']['get_recommendations']['Returns']>(
+    args: GetRecommendationsArgs
+  ): Promise<GetRecommendationsReturns> {
+    return this.callRpc<GetRecommendationsReturns>(
       'get_recommendations',
       args,
       { methodName: 'getRecommendations' }

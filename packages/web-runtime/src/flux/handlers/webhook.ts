@@ -9,7 +9,7 @@ import { createHmac, timingSafeEqual } from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 
 import { MiscService } from '@heyclaude/data-layer';
-import type { Database as DatabaseGenerated, Json } from '@heyclaude/database-types';
+import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { normalizeError, verifySvixSignature } from '@heyclaude/shared-runtime';
 
 type ContentCategory = DatabaseGenerated['public']['Enums']['content_category'];
@@ -346,9 +346,10 @@ async function ingestWebhookEvent(
       p_source: source,
     });
 
-    if (existing) {
+    // GetWebhookEventBySvixIdReturns is string[] (array of UUIDs), not an object
+    if (existing && existing.length > 0) {
       duplicate = true;
-      webhookId = existing.id;
+      webhookId = existing[0] ?? null;
     } else {
       // Record the event with proper column names
       const webhookEventType = mapEventType(source, eventTypeRaw);
@@ -360,7 +361,7 @@ async function ingestWebhookEvent(
           p_svix_id: svixId,
           p_source: source,
           p_type: webhookEventType,
-          p_data: payload as Json,
+          p_data: payload as Record<string, unknown>,
           p_direction: 'inbound',
           p_received_at: now,
         });

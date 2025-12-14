@@ -17,7 +17,7 @@ export type GetHomepageOptimizedArgs = {
   /** Parameter: p_category_ids (_text) */
   p_category_ids: string[];
   /** Parameter: p_limit (int4, optional) */
-  p_limit: number | undefined | null | undefined;
+  p_limit?: number;
 };
 
 /**

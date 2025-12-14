@@ -17,7 +17,7 @@ export type AccountDashboardResult = {
   /** Attribute: bookmark_count (int4, nullable) */
   bookmark_count: number | null;
   /** Attribute: profile (account_dashboard_profile, nullable) */
-  profile: AccountDashboardProfile;
+  profile: AccountDashboardProfile | null;
 };
 
 /**

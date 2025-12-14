@@ -17,11 +17,11 @@ export type GetUserCompleteDataArgs = {
   /** Parameter: p_user_id (uuid) */
   p_user_id: string;
   /** Parameter: p_activity_limit (int4, optional) */
-  p_activity_limit: number | undefined | null | undefined;
+  p_activity_limit?: number;
   /** Parameter: p_activity_offset (int4, optional) */
-  p_activity_offset: number | undefined | null | undefined;
+  p_activity_offset?: number;
   /** Parameter: p_activity_type (text, optional) */
-  p_activity_type: string | undefined | null | undefined;
+  p_activity_type?: string;
 };
 
 /**

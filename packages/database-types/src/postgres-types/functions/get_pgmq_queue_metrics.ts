@@ -29,14 +29,35 @@ export const getPgmqQueueMetricsArgsSchema = z.object({
 export type GetPgmqQueueMetricsArgsFromZod = z.infer<typeof getPgmqQueueMetricsArgsSchema>;
 
 /**
+ * Return row type for PostgreSQL function: get_pgmq_queue_metrics
+ */
+export type GetPgmqQueueMetricsReturnRow = {
+  /** queue_length (int8, nullable) */
+  queue_length: number | null;
+  /** newest_msg_age_sec (numeric, nullable) */
+  newest_msg_age_sec: number | null;
+  /** oldest_msg_age_sec (numeric, nullable) */
+  oldest_msg_age_sec: number | null;
+};
+
+/**
+ * Zod schema for get_pgmq_queue_metrics return row
+ */
+export const getPgmqQueueMetricsReturnRowSchema = z.object({
+  queue_length: z.number().nullable(),
+  newest_msg_age_sec: z.number().nullable(),
+  oldest_msg_age_sec: z.number().nullable(),
+});
+
+/**
  * Return type for PostgreSQL function: get_pgmq_queue_metrics
  */
-export type GetPgmqQueueMetricsReturns = Record<string, unknown>[];
+export type GetPgmqQueueMetricsReturns = GetPgmqQueueMetricsReturnRow[];
 
 /**
  * Zod schema for get_pgmq_queue_metrics function return type
  */
-export const getPgmqQueueMetricsReturnsSchema = z.array(z.any());
+export const getPgmqQueueMetricsReturnsSchema = z.array(getPgmqQueueMetricsReturnRowSchema);
 
 /**
  * Type inference from Zod schema (should match type above)

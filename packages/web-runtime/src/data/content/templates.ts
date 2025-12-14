@@ -1,17 +1,17 @@
 'use server';
 
 import { type content_category } from '@heyclaude/data-layer/prisma';
-import { type Database } from '@heyclaude/database-types';
+import type { GetContentTemplatesReturns } from '@heyclaude/database-types/postgres-types';
 import { serializeForClient } from '@heyclaude/shared-runtime';
 // Temporarily removed cache imports - will be re-added when caching is re-implemented
 // import { cacheLife, cacheTag } from 'next/cache';
 
 import { logger, normalizeError } from '../../logging/server.ts';
 
-type ContentTemplatesResult = Database['public']['Functions']['get_content_templates']['Returns'];
+type ContentTemplatesResult = GetContentTemplatesReturns;
 type ContentTemplateItem = NonNullable<NonNullable<ContentTemplatesResult['templates']>[number]>;
 
-type MergedTemplateItem = ContentTemplateItem &
+export type MergedTemplateItem = ContentTemplateItem &
   (ContentTemplateItem['template_data'] extends Record<string, unknown>
     ? ContentTemplateItem['template_data']
     : Record<string, unknown>) & {

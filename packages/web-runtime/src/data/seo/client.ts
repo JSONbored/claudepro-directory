@@ -1,7 +1,7 @@
 import 'server-only';
 
 import { SeoService } from '@heyclaude/data-layer';
-import { type Database } from '@heyclaude/database-types';
+import type { GenerateMetadataCompleteReturns } from '@heyclaude/database-types/postgres-types';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
 import { cacheLife, cacheTag } from 'next/cache';
 
@@ -64,7 +64,7 @@ export async function getSEOMetadata(
   options: { includeSchemas: true }
 ): Promise<null | {
   metadata: SEOMetadataBase;
-  schemas: Database['public']['Functions']['generate_metadata_complete']['Returns']['schemas'];
+  schemas: GenerateMetadataCompleteReturns['schemas'];
 }>;
 /**
  * Get SEO metadata for a route
@@ -84,7 +84,7 @@ export async function getSEOMetadata(
   | SEOMetadataBase
   | {
       metadata: SEOMetadataBase;
-      schemas: Database['public']['Functions']['generate_metadata_complete']['Returns']['schemas'];
+      schemas: GenerateMetadataCompleteReturns['schemas'];
     }
 > {
   'use cache';
@@ -136,7 +136,8 @@ export async function getSEOMetadata(
     if (includeSchemas) {
       return {
         metadata: baseMetadata,
-        schemas: result.schemas ?? [],
+        // Cast schemas to Record<string, unknown>[] to match generated type
+        schemas: (result.schemas ?? []) as Record<string, unknown>[],
       };
     }
 
@@ -158,9 +159,7 @@ export async function getSEOMetadata(
  * @returns Base SEO metadata object
  */
 function buildBaseMetadata(
-  metadata: NonNullable<
-    Database['public']['Functions']['generate_metadata_complete']['Returns']['metadata']
-  >
+  metadata: NonNullable<GenerateMetadataCompleteReturns['metadata']>
 ): SEOMetadataBase {
   const debugObject: {
     category?: string;
@@ -206,7 +205,7 @@ function buildBaseMetadata(
  */
 export async function getSEOMetadataWithSchemas(route: string): Promise<null | {
   metadata: SEOMetadataBase;
-  schemas: Database['public']['Functions']['generate_metadata_complete']['Returns']['schemas'];
+  schemas: GenerateMetadataCompleteReturns['schemas'];
 }> {
   const result = await getSEOMetadata(route, { includeSchemas: true });
   if (!result || 'schemas' in result === false) {
@@ -214,6 +213,6 @@ export async function getSEOMetadataWithSchemas(route: string): Promise<null | {
   }
   return result as {
     metadata: SEOMetadataBase;
-    schemas: Database['public']['Functions']['generate_metadata_complete']['Returns']['schemas'];
+    schemas: GenerateMetadataCompleteReturns['schemas'];
   };
 }

@@ -2,7 +2,11 @@
 
 import { SearchService } from '@heyclaude/data-layer';
 import { type content_category } from '@heyclaude/data-layer/prisma';
-import { type Database } from '@heyclaude/database-types';
+import type {
+  GetSearchFacetsReturns,
+  GetTrendingSearchesReturns,
+} from '@heyclaude/database-types/postgres-types/functions';
+import { isValidContentCategory } from '../../utils/type-guards';
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { logger } from '../../index.ts';
@@ -22,7 +26,8 @@ function normalizeErrorForLogging(error: unknown): Error | string {
   return String(error);
 }
 
-type SearchFacetsRow = Database['public']['Functions']['get_search_facets']['Returns'][number];
+// Use generated type from Prisma generator
+type SearchFacetsRow = GetSearchFacetsReturns[number];
 
 export interface SearchFacetSummary {
   authors: string[];
@@ -39,12 +44,20 @@ export interface SearchFacetAggregate {
 }
 
 function normalizeFacetRow(row: SearchFacetsRow): SearchFacetSummary {
+  // Validate category and ensure it's a valid content_category
+  const category = row.category && isValidContentCategory(row.category) 
+    ? row.category 
+    : 'agents'; // Default fallback
+  
+  // Ensure content_count is a number (handle null)
+  const contentCount = row.content_count ?? 0;
+  
   return {
     authors: Array.isArray(row.authors)
       ? row.authors.filter((author): author is string => typeof author === 'string')
       : [],
-    category: row.category,
-    contentCount: row.content_count,
+    category,
+    contentCount,
     tags: Array.isArray(row.all_tags)
       ? row.all_tags.filter((tag): tag is string => typeof tag === 'string')
       : [],
@@ -76,6 +89,7 @@ function extractAggregatedArrays(data: SearchFacetsRow[]): {
   }
 
   // Extract pre-aggregated arrays from RPC (already sorted and deduplicated in database)
+  // The generated type now includes all_*_aggregated fields from introspection
   return {
     authors: Array.isArray(firstRow.all_authors_aggregated)
       ? firstRow.all_authors_aggregated.filter(
@@ -83,7 +97,9 @@ function extractAggregatedArrays(data: SearchFacetsRow[]): {
         )
       : [],
     categories: Array.isArray(firstRow.all_categories_aggregated)
-      ? firstRow.all_categories_aggregated.filter(Boolean)
+      ? (firstRow.all_categories_aggregated.filter((cat) => 
+          cat != null && isValidContentCategory(cat)
+        ) as content_category[])
       : [],
     tags: Array.isArray(firstRow.all_tags_aggregated)
       ? firstRow.all_tags_aggregated.filter((tag): tag is string => typeof tag === 'string')
@@ -153,7 +169,7 @@ export async function getSearchFacets(): Promise<SearchFacetAggregate> {
  */
 export async function getPopularSearches(
   limit = 100
-): Promise<Database['public']['Functions']['get_trending_searches']['Returns']> {
+): Promise<GetTrendingSearchesReturns> {
   'use cache';
 
   // Configure cache - use 'hours' profile for popular searches (changes hourly)

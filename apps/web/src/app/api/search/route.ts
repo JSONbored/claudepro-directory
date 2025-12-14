@@ -28,7 +28,15 @@ import {
   type job_category,
   type job_type,
 } from '@heyclaude/data-layer/prisma';
-import { type Database as DatabaseGenerated, type Json } from '@heyclaude/database-types';
+import type {
+  FilterJobsArgs,
+  Jobs,
+  SearchContentOptimizedArgs,
+  SearchContentOptimizedRow,
+  SearchUnifiedArgs,
+  SearchUnifiedRow,
+} from '@heyclaude/database-types/postgres-types';
+import { type Json } from '@heyclaude/database-types';
 import { normalizeError } from '@heyclaude/shared-runtime';
 import {
   buildCacheHeaders,
@@ -52,11 +60,11 @@ const DEFAULT_ENTITIES = ['content', 'company', 'job', 'user'] as const;
 
 // Use generated database types directly - no custom types
 // Functions now return composite types, so we extract the row types from the results array
-// Also include jobs table row type for filter_jobs results
+// Also include jobs composite type for filter_jobs results
 type SearchResultRow =
-  | DatabaseGenerated['public']['CompositeTypes']['search_content_optimized_row']
-  | DatabaseGenerated['public']['CompositeTypes']['search_unified_row']
-  | DatabaseGenerated['public']['Tables']['jobs']['Row'];
+  | SearchContentOptimizedRow
+  | SearchUnifiedRow
+  | Jobs;
 
 // HighlightedSearchResult is now just SearchResultRow since database provides highlighted fields
 type HighlightedSearchResult = SearchResultRow;
@@ -84,19 +92,20 @@ const CONTENT_CATEGORY_VALUES: readonly content_category[] = [
   'changelog',
 ] as const;
 
-function toContentCategoryArray(categories: string[] | undefined): content_category[] | undefined {
+function toContentCategoryArray(categories: string[] | undefined): SearchContentOptimizedArgs['p_categories'] {
   if (!categories || categories.length === 0) return undefined;
   const valid = categories
     .map((cat) => {
       const lowered = cat.trim().toLowerCase();
       return CONTENT_CATEGORY_VALUES.includes(
-        lowered as DatabaseGenerated['public']['Enums']['content_category']
+        lowered as content_category
       )
-        ? (lowered as DatabaseGenerated['public']['Enums']['content_category'])
+        ? (lowered as content_category)
         : null;
     })
-    .filter((cat): cat is DatabaseGenerated['public']['Enums']['content_category'] => cat !== null);
-  return valid.length > 0 ? valid : undefined;
+    .filter((cat): cat is content_category => cat !== null);
+  // Cast to match the exact generated type (literal union array)
+  return valid.length > 0 ? (valid as NonNullable<SearchContentOptimizedArgs['p_categories']>) : undefined;
 }
 
 /**
@@ -176,19 +185,47 @@ export const GET = createApiRoute({
 
     // Track analytics non-blocking (fire and forget)
     // Don't await - this prevents blocking the response
+    // Build analytics params object, only including properties with values (for exactOptionalPropertyTypes)
+    const analyticsParams: {
+      sort: SortType;
+      categories?: SearchContentOptimizedArgs['p_categories'];
+      tags?: string[];
+      authors?: string[];
+      entities?: string[];
+      job_category?: job_category;
+      job_employment?: job_type;
+      job_experience?: experience_level;
+      job_remote?: boolean;
+    } = {
+      sort,
+    };
+    if (validatedCategories && validatedCategories.length > 0) {
+      analyticsParams.categories = validatedCategories;
+    }
+    if (tagsArray && tagsArray.length > 0) {
+      analyticsParams.tags = tagsArray;
+    }
+    if (authorsArray && authorsArray.length > 0) {
+      analyticsParams.authors = authorsArray;
+    }
+    if (entitiesArray && entitiesArray.length > 0) {
+      analyticsParams.entities = entitiesArray;
+    }
+    if (jobCategory) {
+      analyticsParams.job_category = jobCategory;
+    }
+    if (jobEmployment) {
+      analyticsParams.job_employment = jobEmployment;
+    }
+    if (jobExperience) {
+      analyticsParams.job_experience = jobExperience;
+    }
+    if (jobRemote !== undefined) {
+      analyticsParams.job_remote = jobRemote;
+    }
     trackSearchAnalytics(
       trimmedQuery,
-      {
-        sort,
-        ...(validatedCategories ? { categories: validatedCategories } : {}),
-        ...(tagsArray ? { tags: tagsArray } : {}),
-        ...(authorsArray ? { authors: authorsArray } : {}),
-        ...(entitiesArray ? { entities: entitiesArray } : {}),
-        ...(jobCategory ? { job_category: jobCategory } : {}),
-        ...(jobEmployment ? { job_employment: jobEmployment } : {}),
-        ...(jobExperience ? { job_experience: jobExperience } : {}),
-        ...(jobRemote === undefined ? {} : { job_remote: jobRemote }),
-      },
+      analyticsParams,
       highlightedResults.length,
       {
         error: (context: Record<string, unknown>, message: string) =>
@@ -290,7 +327,7 @@ export const OPTIONS = createApiOptionsHandler('auth');
  */
 export async function getCachedSearchResults(params: {
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: SearchContentOptimizedArgs['p_categories']; // Use generated function arg type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -1601,7 +1638,7 @@ export async function getCachedSearchResults(params: {
 */
 async function executeSearch(params: {
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: SearchContentOptimizedArgs['p_categories']; // Use generated function arg type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -1633,7 +1670,7 @@ async function executeSearch(params: {
   } = params;
 
   if (searchType === 'jobs') {
-    const jobArgs: DatabaseGenerated['public']['Functions']['filter_jobs']['Args'] = {
+    const jobArgs: FilterJobsArgs = {
       p_limit: limit,
       p_offset: offset,
     };
@@ -1666,7 +1703,7 @@ async function executeSearch(params: {
 
   if (searchType === 'unified') {
     // Create args object - search_unified now has single function with optional p_highlight_query
-    const unifiedArgs: DatabaseGenerated['public']['Functions']['search_unified']['Args'] = {
+    const unifiedArgs: SearchUnifiedArgs = {
       p_entities: entities && entities.length > 0 ? entities : [...DEFAULT_ENTITIES],
       p_limit: limit,
       p_offset: offset,
@@ -1686,15 +1723,23 @@ async function executeSearch(params: {
   }
 
   // searchType === 'content'
-  const args: DatabaseGenerated['public']['Functions']['search_content_optimized']['Args'] = {
+  // Build args object, only including properties that have values (for exactOptionalPropertyTypes)
+  const args: SearchContentOptimizedArgs = {
     p_limit: limit,
     p_offset: offset,
-    p_query: query,
-    p_sort: sort,
   };
 
-  if (categories?.length) {
+  // Only add optional properties if they have values (for exactOptionalPropertyTypes)
+  if (query) {
+    args.p_query = query;
+  }
+  if (sort) {
+    args.p_sort = sort;
+  }
+  if (categories && categories.length > 0) {
     // categories is already enum array from getCachedSearchResults params
+    // Only set if array has items (for exactOptionalPropertyTypes)
+    // The generated type expects the literal union array, which content_category[] satisfies
     args.p_categories = categories;
   }
   if (tags?.length) {
@@ -1745,7 +1790,7 @@ async function trackSearchAnalytics(
   query: string,
   filters: {
     authors?: string[];
-    categories?: Array<DatabaseGenerated['public']['Enums']['content_category']>;
+    categories?: SearchContentOptimizedArgs['p_categories'];
     entities?: string[];
     job_category?: JobCategory;
     job_employment?: JobEmployment;

@@ -15,7 +15,7 @@ import { seoMetadataSchema } from './seo_metadata';
  */
 export type GenerateMetadataCompleteResult = {
   /** Attribute: metadata (seo_metadata, nullable) */
-  metadata: SeoMetadata;
+  metadata: SeoMetadata | null;
   /** Attribute: schemas (_jsonb, nullable) */
   schemas: Record<string, unknown>[] | null;
 };

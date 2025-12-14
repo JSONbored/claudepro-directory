@@ -18,13 +18,13 @@ export type UpsertContentBySlugArgs = {
   /** Parameter: p_title (text) */
   p_title: string;
   /** Parameter: p_description (text, optional) */
-  p_description: string | undefined | null | undefined;
+  p_description?: string;
   /** Parameter: p_metadata (jsonb, optional) */
-  p_metadata: Record<string, unknown> | undefined | null | undefined;
+  p_metadata?: Record<string, unknown>;
   /** Parameter: p_tags (_text, optional) */
-  p_tags: string[] | undefined | null | undefined;
+  p_tags?: string[];
   /** Parameter: p_source (text, optional) */
-  p_source: string | undefined | null | undefined;
+  p_source?: string;
 };
 
 /**
@@ -53,14 +53,44 @@ export const upsertContentBySlugArgsSchema = z.object({
 export type UpsertContentBySlugArgsFromZod = z.infer<typeof upsertContentBySlugArgsSchema>;
 
 /**
+ * Return row type for PostgreSQL function: upsert_content_by_slug
+ */
+export type UpsertContentBySlugReturnRow = {
+  /** id (uuid, nullable) */
+  id: string | null;
+  /** slug (text, nullable) */
+  slug: string | null;
+  /** category (content_category, nullable) */
+  category: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog' | null;
+  /** title (text, nullable) */
+  title: string | null;
+  /** created_at (timestamptz, nullable) */
+  created_at: string | null;
+  /** updated_at (timestamptz, nullable) */
+  updated_at: string | null;
+};
+
+/**
+ * Zod schema for upsert_content_by_slug return row
+ */
+export const upsertContentBySlugReturnRowSchema = z.object({
+  id: z.string().uuid().nullable(),
+  slug: z.string().nullable(),
+  category: z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'skills', 'collections', 'guides', 'jobs', 'changelog']).nullable(),
+  title: z.string().nullable(),
+  created_at: z.string().nullable(),
+  updated_at: z.string().nullable(),
+});
+
+/**
  * Return type for PostgreSQL function: upsert_content_by_slug
  */
-export type UpsertContentBySlugReturns = Record<string, unknown>[];
+export type UpsertContentBySlugReturns = UpsertContentBySlugReturnRow[];
 
 /**
  * Zod schema for upsert_content_by_slug function return type
  */
-export const upsertContentBySlugReturnsSchema = z.array(z.any());
+export const upsertContentBySlugReturnsSchema = z.array(upsertContentBySlugReturnRowSchema);
 
 /**
  * Type inference from Zod schema (should match type above)

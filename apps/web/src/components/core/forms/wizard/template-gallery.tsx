@@ -13,7 +13,8 @@
  * - First-time user onboarding tooltips
  */
 
-import { type Database } from '@heyclaude/database-types';
+import type { content_category } from '@heyclaude/data-layer/prisma';
+import type { GetContentTemplatesReturns } from '@heyclaude/database-types/postgres-types';
 import { DURATION } from '@heyclaude/web-runtime/design-system';
 import {
   ArrowRight,
@@ -44,7 +45,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useBoolean, useLocalStorage } from '@heyclaude/web-runtime/hooks';
 
 // Use generated type directly from @heyclaude/database-types
-type ContentTemplatesResult = Database['public']['Functions']['get_content_templates']['Returns'];
+type ContentTemplatesResult = GetContentTemplatesReturns;
 type ContentTemplateItem = NonNullable<NonNullable<ContentTemplatesResult['templates']>[number]>;
 
 // Type representing the merged structure (matches what getContentTemplates returns)
@@ -57,7 +58,7 @@ type MergedTemplateItem = ContentTemplateItem &
 
 interface TemplateGalleryProps {
   className?: string;
-  contentType: Database['public']['Enums']['content_category'] | null;
+  contentType: content_category | null;
   onApplyTemplate: (template: MergedTemplateItem) => void;
   templates: MergedTemplateItem[];
 }
@@ -439,7 +440,7 @@ function TemplateCard({ template, onApply }: TemplateCardProps) {
  */
 interface TemplateQuickSelectProps {
   className?: string;
-  contentType: Database['public']['Enums']['content_category'] | null;
+  contentType: content_category | null;
   maxVisible?: number;
   onApplyTemplate: (template: MergedTemplateItem) => void;
   templates: MergedTemplateItem[];

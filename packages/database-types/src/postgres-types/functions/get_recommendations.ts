@@ -21,11 +21,11 @@ export type GetRecommendationsArgs = {
   /** Parameter: p_tool_preferences (_text) */
   p_tool_preferences: string[];
   /** Parameter: p_integrations (_text, optional) */
-  p_integrations: string[] | undefined | null | undefined;
+  p_integrations?: string[];
   /** Parameter: p_focus_areas (_text, optional) */
-  p_focus_areas: string[] | undefined | null | undefined;
+  p_focus_areas?: string[];
   /** Parameter: p_limit (int4, optional) */
-  p_limit: number | undefined | null | undefined;
+  p_limit?: number;
 };
 
 /**

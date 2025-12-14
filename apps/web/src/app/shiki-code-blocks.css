@@ -158,12 +158,12 @@
   }
 }
 
-[data-theme="dark"] .shiki {
+.dark .shiki {
   color: var(--shiki-dark);
   background-color: var(--shiki-dark-bg);
 }
 
-[data-theme="light"] .shiki {
+.light .shiki {
   color: var(--shiki-light);
   background-color: var(--shiki-light-bg);
 }
@@ -174,15 +174,15 @@
 
 /* Highlighted lines (for future use with transformerNotationHighlight) */
 .shiki .line.highlighted {
-  background: hsl(var(--accent) / 0.1); /* Using design system accent color with opacity */
-  border-left: 2px solid hsl(var(--accent)); /* Using design system accent color */
+  background: hsl(var(--primary) / 0.1); /* Using design system accent color with opacity */
+  border-left: 2px solid hsl(var(--primary)); /* Using design system accent color */
   margin-left: -2px;
   padding-left: calc(1rem - 2px);
 }
 
 /* Word highlighting (for transformerNotationWordHighlight) */
 .shiki .highlighted-word {
-  background: hsl(var(--accent) / 0.15);
+  background: hsl(var(--primary) / 0.15);
   border-radius: 0.125rem; /* 2px */
   padding: 0.0625rem 0.125rem; /* 1px 2px */
 }
@@ -316,7 +316,7 @@
 
 .shiki ::selection,
 .code-block-pre ::selection {
-  background-color: hsl(var(--accent) / 0.25);
+  background-color: hsl(var(--primary) / 0.25);
 }
 
 /* ========================================

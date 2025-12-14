@@ -15,9 +15,9 @@ import { companyListResultSchema } from '../composites/company_list_result';
  */
 export type GetCompaniesListArgs = {
   /** Parameter: p_limit (int4, optional) */
-  p_limit: number | undefined | null | undefined;
+  p_limit?: number;
   /** Parameter: p_offset (int4, optional) */
-  p_offset: number | undefined | null | undefined;
+  p_offset?: number;
 };
 
 /**

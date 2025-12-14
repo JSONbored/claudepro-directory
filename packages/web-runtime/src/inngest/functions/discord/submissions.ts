@@ -5,7 +5,7 @@
  * Handles INSERT (new submission) and UPDATE (status changes, especially merged) events.
  */
 
-import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
+import type { Prisma } from '@heyclaude/data-layer/prisma';
 import { normalizeError, getEnvVar } from '@heyclaude/shared-runtime';
 
 import { inngest } from '../../client';
@@ -13,7 +13,7 @@ import { pgmqRead, pgmqDelete, type PgmqMessage } from '../../../supabase/pgmq-c
 import { logger, createWebAppContextWithId } from '../../../logging/server';
 import { sendCronSuccessHeartbeat } from '../../utils/monitoring';
 
-type ContentSubmission = DatabaseGenerated['public']['Tables']['content_submissions']['Row'];
+type ContentSubmission = Prisma.content_submissionsGetPayload<{}>;
 
 const DISCORD_SUBMISSIONS_QUEUE = 'discord_submissions';
 const BATCH_SIZE = 10;
@@ -183,7 +183,8 @@ export const processDiscordSubmissionsQueue = inngest.createFunction(
 
           // Handle INSERT - new submission notification (admin channel)
           if (payload.type === 'INSERT' && adminWebhookUrl) {
-            const embed = buildSubmissionEmbed(submission, true);
+            // Inngest serializes Date objects to strings, so we need to cast
+            const embed = buildSubmissionEmbed(submission as unknown as ContentSubmission, true);
             
             // Send with timeout to avoid hanging
             const controller = new AbortController();
@@ -231,7 +232,8 @@ export const processDiscordSubmissionsQueue = inngest.createFunction(
             const wasMerged = oldRecord?.status !== 'merged' && submission.status === 'merged';
 
             if (wasMerged && announcementWebhookUrl) {
-              const embed = buildMergedEmbed(submission);
+              // Inngest serializes Date objects to strings, so we need to cast
+              const embed = buildMergedEmbed(submission as unknown as ContentSubmission);
               
               // Send with timeout to avoid hanging
               const controller = new AbortController();

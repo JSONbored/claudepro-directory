@@ -19,9 +19,9 @@ export type GenerateMarkdownExportArgs = {
   /** Parameter: p_slug (text) */
   p_slug: string;
   /** Parameter: p_include_metadata (bool, optional) */
-  p_include_metadata: boolean | undefined | null | undefined;
+  p_include_metadata?: boolean;
   /** Parameter: p_include_footer (bool, optional) */
-  p_include_footer: boolean | undefined | null | undefined;
+  p_include_footer?: boolean;
 };
 
 /**

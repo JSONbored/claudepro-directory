@@ -17,23 +17,23 @@ export type UpdateUserProfileArgs = {
   /** Parameter: p_user_id (uuid) */
   p_user_id: string;
   /** Parameter: p_display_name (text, optional) */
-  p_display_name: string | undefined | null | undefined;
+  p_display_name?: string;
   /** Parameter: p_bio (text, optional) */
-  p_bio: string | undefined | null | undefined;
+  p_bio?: string;
   /** Parameter: p_work (text, optional) */
-  p_work: string | undefined | null | undefined;
+  p_work?: string;
   /** Parameter: p_website (text, optional) */
-  p_website: string | undefined | null | undefined;
+  p_website?: string;
   /** Parameter: p_social_x_link (text, optional) */
-  p_social_x_link: string | undefined | null | undefined;
+  p_social_x_link?: string;
   /** Parameter: p_interests (_text, optional) */
-  p_interests: string[] | undefined | null | undefined;
+  p_interests?: string[];
   /** Parameter: p_profile_public (bool, optional) */
-  p_profile_public: boolean | undefined | null | undefined;
+  p_profile_public?: boolean;
   /** Parameter: p_follow_email (bool, optional) */
-  p_follow_email: boolean | undefined | null | undefined;
+  p_follow_email?: boolean;
   /** Parameter: p_username (text, optional) */
-  p_username: string | undefined | null | undefined;
+  p_username?: string;
 };
 
 /**

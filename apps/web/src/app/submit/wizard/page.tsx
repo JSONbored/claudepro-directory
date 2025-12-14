@@ -24,7 +24,9 @@
  * Dynamic rendering behavior is determined by the parent layout and page configuration.
  */
 
-import { Constants, type Database } from '@heyclaude/database-types';
+import type { content_category } from '@heyclaude/data-layer/prisma';
+import { Constants } from '@heyclaude/database-types';
+import type { GetContentTemplatesReturns } from '@heyclaude/database-types/postgres-types';
 import { getEnvVar, normalizeError } from '@heyclaude/shared-runtime';
 import { submitContentForReview } from '@heyclaude/web-runtime/actions';
 import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
@@ -87,7 +89,7 @@ import { useOnboardingToasts } from '@/src/hooks/use-onboarding-toasts';
 import { useTemplateApplication } from '@/src/hooks/use-template-application';
 
 // Use generated type directly from @heyclaude/database-types
-type ContentTemplatesResult = Database['public']['Functions']['get_content_templates']['Returns'];
+type ContentTemplatesResult = GetContentTemplatesReturns;
 type ContentTemplateItem = NonNullable<NonNullable<ContentTemplatesResult['templates']>[number]>;
 
 // Type representing the merged structure (matches what getContentTemplates returns)
@@ -101,7 +103,7 @@ type MergedTemplateItem = ContentTemplateItem &
 interface FormData {
   author: string;
   author_profile_url?: string;
-  category: Database['public']['Enums']['content_category'];
+  category: content_category;
   description: string;
   examples: string[];
   github_url?: string;
@@ -235,7 +237,7 @@ export default function WizardSubmissionPage() {
 
       // Keep category and submission_type in sync
       if (updates.submission_type && updates.submission_type !== previous.submission_type) {
-        next.category = updates.submission_type as Database['public']['Enums']['content_category'];
+        next.category = updates.submission_type as content_category;
       }
 
       return next;
@@ -1441,7 +1443,7 @@ function StepConfiguration({
           transition={{ ...SPRING.smooth, delay: STAGGER.medium }}
         >
           <TemplateQuickSelect
-            contentType={submissionType as Database['public']['Enums']['content_category']}
+            contentType={submissionType as content_category}
             maxVisible={3}
             onApplyTemplate={onApplyTemplate}
             templates={templates}

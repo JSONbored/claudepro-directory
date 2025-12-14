@@ -17,7 +17,7 @@ export type SearchUsersArgs = {
   /** Parameter: search_query (text) */
   search_query: string;
   /** Parameter: result_limit (int4, optional) */
-  result_limit: number | undefined | null | undefined;
+  result_limit?: number;
 };
 
 /**

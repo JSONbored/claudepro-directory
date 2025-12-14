@@ -15,7 +15,7 @@ import { commandInstallationClaudeCodeSchema } from './command_installation_clau
  */
 export type CommandInstallationResult = {
   /** Attribute: claude_code (command_installation_claude_code, nullable) */
-  claude_code: CommandInstallationClaudeCode;
+  claude_code: CommandInstallationClaudeCode | null;
   /** Attribute: requirements (_text, nullable) */
   requirements: string[] | null;
 };

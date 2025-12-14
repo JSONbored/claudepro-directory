@@ -25,14 +25,41 @@ export const getSocialProofStatsArgsSchema = z.object({
 export type GetSocialProofStatsArgsFromZod = z.infer<typeof getSocialProofStatsArgsSchema>;
 
 /**
+ * Return row type for PostgreSQL function: get_social_proof_stats
+ */
+export type GetSocialProofStatsReturnRow = {
+  /** contributor_count (int4, nullable) */
+  contributor_count: number | null;
+  /** contributor_names (_text, nullable) */
+  contributor_names: string[] | null;
+  /** submission_count (int4, nullable) */
+  submission_count: number | null;
+  /** success_rate (numeric, nullable) */
+  success_rate: number | null;
+  /** total_users (int8, nullable) */
+  total_users: number | null;
+};
+
+/**
+ * Zod schema for get_social_proof_stats return row
+ */
+export const getSocialProofStatsReturnRowSchema = z.object({
+  contributor_count: z.number().nullable(),
+  contributor_names: z.array(z.string()).nullable(),
+  submission_count: z.number().nullable(),
+  success_rate: z.number().nullable(),
+  total_users: z.number().nullable(),
+});
+
+/**
  * Return type for PostgreSQL function: get_social_proof_stats
  */
-export type GetSocialProofStatsReturns = Record<string, unknown>[];
+export type GetSocialProofStatsReturns = GetSocialProofStatsReturnRow[];
 
 /**
  * Zod schema for get_social_proof_stats function return type
  */
-export const getSocialProofStatsReturnsSchema = z.array(z.any());
+export const getSocialProofStatsReturnsSchema = z.array(getSocialProofStatsReturnRowSchema);
 
 /**
  * Type inference from Zod schema (should match type above)

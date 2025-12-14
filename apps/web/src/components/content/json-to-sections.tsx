@@ -4,7 +4,7 @@
 
 'use client';
 
-import { type Database } from '@heyclaude/database-types';
+import type { Prisma } from '@heyclaude/data-layer/prisma';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { isValidInternalPath, getSafeExternalUrl } from '@heyclaude/web-runtime/core';
 import React, { useEffect, useState } from 'react';
@@ -16,7 +16,7 @@ import { UnifiedContentBlock } from '@/src/components/content/markdown-content-b
 import { ComparisonTable } from '@/src/components/core/domain/comparison-table';
 import { UnifiedContentBox } from '@/src/components/core/domain/content/featured-content-box';
 
-type ContentRow = Database['public']['Tables']['content']['Row'];
+type ContentRow = Prisma.contentGetPayload<{}>;
 type GuideSections = ContentRow['metadata'];
 
 interface JSONSectionRendererProps {

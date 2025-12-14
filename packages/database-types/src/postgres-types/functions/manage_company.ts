@@ -23,9 +23,9 @@ export type ManageCompanyArgs = {
   /** Parameter: p_user_id (uuid) */
   p_user_id: string;
   /** Parameter: p_create_data (company_create_input, optional) */
-  p_create_data: CompanyCreateInput | undefined | null | undefined;
+  p_create_data?: CompanyCreateInput;
   /** Parameter: p_update_data (company_update_input, optional) */
-  p_update_data: CompanyUpdateInput | undefined | null | undefined;
+  p_update_data?: CompanyUpdateInput;
 };
 
 /**

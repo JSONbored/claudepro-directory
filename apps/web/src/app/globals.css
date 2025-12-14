@@ -8,10 +8,10 @@
    CLAUDE DESKTOP THEME SYSTEM - OKLCH Color Space
    ================================================
 
-   Theme switching via data-theme attribute on html element:
-   - data-theme="dark" forces dark mode
-   - data-theme="light" forces light mode
-   - No attribute = follows system preference
+   Theme switching via .dark class on html element:
+   - .dark class forces dark mode
+   - .light class forces light mode
+   - No class = follows system preference
 */
 
 @theme {
@@ -270,31 +270,24 @@
      ======================================== */
 
   /* Active theme colors - defaults to dark */
-  --color-bg-primary: var(--dark-bg-primary);
-  --color-bg-secondary: var(--dark-bg-secondary);
+  --background: var(--dark-bg-primary);
+  --card: var(--dark-bg-secondary);
   --color-bg-tertiary: var(--dark-bg-tertiary);
   --color-bg-quaternary: var(--dark-bg-quaternary);
   --color-bg-selected: var(--dark-bg-selected);
   --color-bg-code: var(--dark-bg-code);
   --color-bg-overlay: var(--dark-bg-overlay);
-
-  --color-text-primary: var(--dark-text-primary);
-  --color-text-secondary: var(--dark-text-secondary);
+  --muted-foreground: var(--dark-text-secondary);
   --color-text-tertiary: var(--dark-text-tertiary);
   --color-text-disabled: var(--dark-text-disabled);
-  --color-text-inverse: var(--dark-text-inverse);
-
-  --color-accent: var(--claude-orange);
-  --color-accent-foreground: oklch(
-    20% 0 0
-  ); /* Near-black for WCAG AA contrast (>7:1 ratio) on orange buttons */
+  --color-text-inverse: var(--dark-text-inverse); /* Near-black for WCAG AA contrast (>7:1 ratio) on orange buttons */
   --color-accent-hover: var(--claude-orange-hover);
   --color-accent-active: var(--claude-orange-active);
   --color-accent-light: var(--claude-orange-light);
   --color-accent-muted: var(--claude-orange-muted);
   --color-accent-subtle: oklch(45% 0.08 35);
 
-  --color-border-default: var(--dark-border-default);
+  --border: var(--dark-border-default);
   --color-border-light: var(--dark-border-light);
   --color-border-medium: var(--dark-border-medium);
   --color-border-strong: var(--dark-border-strong);
@@ -311,8 +304,6 @@
   --color-info: var(--dark-info);
   --color-info-bg: var(--dark-info-bg);
   --color-info-border: var(--dark-info-border);
-
-  --shadow-xs: var(--dark-shadow-xs);
   --shadow-sm: var(--dark-shadow-sm);
   --shadow-md: var(--dark-shadow-md);
   --shadow-lg: var(--dark-shadow-lg);
@@ -370,7 +361,6 @@
   /* Letter Spacing */
   --tracking-tighter: -0.05em;
   --tracking-tight: -0.025em;
-  --tracking-normal: 0;
   --tracking-wide: 0.025em;
   --tracking-wider: 0.05em;
   --tracking-widest: 0.1em;
@@ -458,29 +448,25 @@
    SYSTEM PREFERENCE: LIGHT MODE
    ======================================== */
 @media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) {
-    --color-bg-primary: var(--light-bg-primary);
-    --color-bg-secondary: var(--light-bg-secondary);
+  :root:not(.dark) {
+    --background: var(--light-bg-primary);
+    --card: var(--light-bg-secondary);
     --color-bg-tertiary: var(--light-bg-tertiary);
     --color-bg-quaternary: var(--light-bg-quaternary);
     --color-bg-selected: var(--light-bg-selected);
     --color-bg-code: var(--light-bg-code);
     --color-bg-overlay: var(--light-bg-overlay);
-
-    --color-text-primary: var(--light-text-primary);
-    --color-text-secondary: var(--light-text-secondary);
+    --muted-foreground: var(--light-text-secondary);
     --color-text-tertiary: var(--light-text-tertiary);
     --color-text-disabled: var(--light-text-disabled);
     --color-text-inverse: var(--light-text-inverse);
-
-    --color-accent: var(--light-accent);
     --color-accent-hover: var(--light-accent-hover);
     --color-accent-active: var(--light-accent-active);
     --color-accent-subtle: var(--light-accent-subtle);
     --color-accent-light: var(--claude-orange-light);
     --color-accent-muted: var(--claude-orange-muted);
 
-    --color-border-default: var(--light-border-default);
+    --border: var(--light-border-default);
     --color-border-light: var(--light-border-light);
     --color-border-medium: var(--light-border-medium);
     --color-border-strong: var(--light-border-strong);
@@ -497,8 +483,6 @@
     --color-info: var(--light-info);
     --color-info-bg: var(--light-info-bg);
     --color-info-border: var(--light-info-border);
-
-    --shadow-xs: var(--light-shadow-xs);
     --shadow-sm: var(--light-shadow-sm);
     --shadow-md: var(--light-shadow-md);
     --shadow-lg: var(--light-shadow-lg);
@@ -510,32 +494,25 @@
 /* ========================================
    FORCED LIGHT MODE
    ======================================== */
-[data-theme="light"] {
-  --color-bg-primary: var(--light-bg-primary);
-  --color-bg-secondary: var(--light-bg-secondary);
+.light {
+  --background: var(--light-bg-primary);
+  --card: var(--light-bg-secondary);
   --color-bg-tertiary: var(--light-bg-tertiary);
   --color-bg-quaternary: var(--light-bg-quaternary);
   --color-bg-selected: var(--light-bg-selected);
   --color-bg-code: var(--light-bg-code);
   --color-bg-overlay: var(--light-bg-overlay);
-
-  --color-text-primary: var(--light-text-primary);
-  --color-text-secondary: var(--light-text-secondary);
+  --muted-foreground: var(--light-text-secondary);
   --color-text-tertiary: var(--light-text-tertiary);
   --color-text-disabled: var(--light-text-disabled);
-  --color-text-inverse: var(--light-text-inverse);
-
-  --color-accent: var(--light-accent);
-  --color-accent-foreground: oklch(
-    20% 0 0
-  ); /* Near-black for WCAG AA contrast (>7:1 ratio) on orange buttons */
+  --color-text-inverse: var(--light-text-inverse); /* Near-black for WCAG AA contrast (>7:1 ratio) on orange buttons */
   --color-accent-hover: var(--light-accent-hover);
   --color-accent-active: var(--light-accent-active);
   --color-accent-subtle: var(--light-accent-subtle);
   --color-accent-light: var(--claude-orange-light);
   --color-accent-muted: var(--claude-orange-muted);
 
-  --color-border-default: var(--light-border-default);
+  --border: var(--light-border-default);
   --color-border-light: var(--light-border-light);
   --color-border-medium: var(--light-border-medium);
   --color-border-strong: var(--light-border-strong);
@@ -552,8 +529,6 @@
   --color-info: var(--light-info);
   --color-info-bg: var(--light-info-bg);
   --color-info-border: var(--light-info-border);
-
-  --shadow-xs: var(--light-shadow-xs);
   --shadow-sm: var(--light-shadow-sm);
   --shadow-md: var(--light-shadow-md);
   --shadow-lg: var(--light-shadow-lg);
@@ -564,32 +539,25 @@
 /* ========================================
    FORCED DARK MODE
    ======================================== */
-[data-theme="dark"] {
-  --color-bg-primary: var(--dark-bg-primary);
-  --color-bg-secondary: var(--dark-bg-secondary);
+.dark {
+  --background: var(--dark-bg-primary);
+  --card: var(--dark-bg-secondary);
   --color-bg-tertiary: var(--dark-bg-tertiary);
   --color-bg-quaternary: var(--dark-bg-quaternary);
   --color-bg-selected: var(--dark-bg-selected);
   --color-bg-code: var(--dark-bg-code);
   --color-bg-overlay: var(--dark-bg-overlay);
-
-  --color-text-primary: var(--dark-text-primary);
-  --color-text-secondary: var(--dark-text-secondary);
+  --muted-foreground: var(--dark-text-secondary);
   --color-text-tertiary: var(--dark-text-tertiary);
   --color-text-disabled: var(--dark-text-disabled);
-  --color-text-inverse: var(--dark-text-inverse);
-
-  --color-accent: var(--claude-orange);
-  --color-accent-foreground: oklch(
-    20% 0 0
-  ); /* Near-black for WCAG AA contrast (>7:1 ratio) on orange buttons */
+  --color-text-inverse: var(--dark-text-inverse); /* Near-black for WCAG AA contrast (>7:1 ratio) on orange buttons */
   --color-accent-hover: var(--claude-orange-hover);
   --color-accent-active: var(--claude-orange-active);
   --color-accent-subtle: oklch(45% 0.08 35);
   --color-accent-light: var(--claude-orange-light);
   --color-accent-muted: var(--claude-orange-muted);
 
-  --color-border-default: var(--dark-border-default);
+  --border: var(--dark-border-default);
   --color-border-light: var(--dark-border-light);
   --color-border-medium: var(--dark-border-medium);
   --color-border-strong: var(--dark-border-strong);
@@ -606,8 +574,6 @@
   --color-info: var(--dark-info);
   --color-info-bg: var(--dark-info-bg);
   --color-info-border: var(--dark-info-border);
-
-  --shadow-xs: var(--dark-shadow-xs);
   --shadow-sm: var(--dark-shadow-sm);
   --shadow-md: var(--dark-shadow-md);
   --shadow-lg: var(--dark-shadow-lg);
@@ -637,7 +603,7 @@
   }
 
   * {
-    border-color: var(--color-border-default);
+    border-color: var(--border);
   }
 
   body {
@@ -646,21 +612,21 @@
       "rlig" 1,
       "calt" 1;
     font-family: var(--font-inter, "Inter"), system-ui, sans-serif;
-    background-color: var(--color-bg-primary);
-    color: var(--color-text-primary);
+    background-color: var(--background);
+    color: var(--border);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     transition:
       background-color 200ms ease-in-out,
       color 200ms ease-in-out;
-    letter-spacing: var(--tracking-normal);
+    letter-spacing: var(--shadow-spread);
   }
 
   code {
     @apply text-sm;
     font-family: var(--font-family-mono);
     background: var(--color-bg-code);
-    color: var(--color-text-secondary);
+    color: var(--muted-foreground);
     padding: 0.125rem 0.25rem;
     border-radius: 0.25rem;
   }
@@ -670,10 +636,10 @@
 @layer utilities {
   /* Background Utilities */
   .bg-primary {
-    background-color: var(--color-bg-primary);
+    background-color: var(--background);
   }
   .bg-secondary {
-    background-color: var(--color-bg-secondary);
+    background-color: var(--card);
   }
   .bg-tertiary {
     background-color: var(--color-bg-tertiary);
@@ -690,10 +656,10 @@
 
   /* Text Color Utilities */
   .text-primary {
-    color: var(--color-text-primary);
+    color: var(--border);
   }
   .text-secondary {
-    color: var(--color-text-secondary);
+    color: var(--muted-foreground);
   }
   .text-tertiary {
     color: var(--color-text-tertiary);
@@ -707,7 +673,7 @@
 
   /* Accent Color Utilities */
   .text-accent {
-    color: var(--color-accent);
+    color: var(--primary);
   }
   .text-accent-hover {
     color: var(--color-accent-hover);
@@ -716,7 +682,7 @@
     color: var(--color-accent-light);
   }
   .bg-accent {
-    background-color: var(--color-accent);
+    background-color: var(--primary);
   }
   .bg-accent-hover {
     background-color: var(--color-accent-hover);
@@ -727,7 +693,7 @@
 
   /* Border Utilities */
   .border-default {
-    border-color: var(--color-border-default);
+    border-color: var(--border);
   }
   .border-light {
     border-color: var(--color-border-light);
@@ -822,7 +788,7 @@
     left: 0;
     width: 0;
     height: 2px;
-    background-color: var(--color-accent);
+    background-color: var(--primary);
     transition: width var(--duration-default) ease;
   }
 
@@ -837,7 +803,7 @@
   }
 
   .link-icon:hover {
-    color: var(--color-accent);
+    color: var(--primary);
   }
 }
 
@@ -845,20 +811,20 @@
 @layer components {
   /* Typography/Prose Styles - Basic prose utility classes for markdown content */
   .prose {
-    color: var(--color-text-primary);
+    color: var(--border);
     max-width: 65ch;
   }
 
   .prose-invert {
-    color: var(--color-text-primary);
+    color: var(--border);
   }
 
   .prose-slate {
-    color: var(--color-text-primary);
+    color: var(--border);
   }
 
   .prose-neutral {
-    color: var(--color-text-primary);
+    color: var(--border);
   }
 
   .prose-sm {
@@ -872,12 +838,12 @@
   /* Dark mode prose invert variant */
   @media (prefers-color-scheme: dark) {
     .dark\:prose-invert {
-      color: var(--color-text-primary);
+      color: var(--border);
     }
   }
 
-  [data-theme="dark"] .dark\:prose-invert {
-    color: var(--color-text-primary);
+  .dark .dark\:prose-invert {
+    color: var(--border);
   }
 
   /* Hero Section with Claude Orange Gradient */
@@ -912,8 +878,8 @@
 
   /* Claude Card */
   .claude-card {
-    background-color: var(--color-bg-secondary);
-    border: 1px solid var(--color-border-default);
+    background-color: var(--card);
+    border: 1px solid var(--border);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-sm);
     transition: all var(--duration-quick) var(--ease-in-out);
@@ -940,15 +906,15 @@
   }
 
   .claude-btn-primary {
-    background-color: var(--color-accent);
+    background-color: var(--primary);
     color: white;
-    border: 1px solid var(--color-accent);
+    border: 1px solid var(--primary);
   }
 
   .claude-btn-primary:hover {
     background-color: var(--color-accent-hover);
     border-color: var(--color-accent-hover);
-    box-shadow: 0 0 0 1px var(--color-accent) / 0.2;
+    box-shadow: 0 0 0 1px var(--primary) / 0.2;
   }
 
   .claude-btn-primary:active {
@@ -957,13 +923,13 @@
 
   .claude-btn-primary:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 2px var(--color-accent) / 0.5;
+    box-shadow: 0 0 0 2px var(--primary) / 0.5;
   }
 
   .claude-btn-secondary {
     background-color: var(--color-bg-tertiary);
-    color: var(--color-text-primary);
-    border: 1px solid var(--color-border-default);
+    color: var(--border);
+    border: 1px solid var(--border);
   }
 
   .claude-btn-secondary:hover {
@@ -973,22 +939,22 @@
 
   .claude-btn-ghost {
     background-color: transparent;
-    color: var(--color-text-secondary);
+    color: var(--muted-foreground);
     border: 1px solid transparent;
   }
 
   .claude-btn-ghost:hover {
     background-color: var(--color-bg-tertiary);
-    color: var(--color-text-primary);
+    color: var(--border);
   }
 
   /* Claude Input */
   .claude-input {
     width: 100%;
     padding: var(--spacing-2) var(--spacing-3);
-    background-color: var(--color-bg-secondary);
-    color: var(--color-text-primary);
-    border: 1px solid var(--color-border-default);
+    background-color: var(--card);
+    color: var(--border);
+    border: 1px solid var(--border);
     border-radius: var(--radius-md);
     font-size: var(--font-size-sm);
     transition: all var(--duration-fast) var(--ease-in-out);
@@ -1000,8 +966,8 @@
 
   .claude-input:focus {
     outline: none;
-    border-color: var(--color-accent);
-    box-shadow: 0 0 0 2px var(--color-accent) / 0.2;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px var(--primary) / 0.2;
   }
 
   .claude-input::placeholder {
@@ -1009,7 +975,7 @@
   }
 
   .claude-input:disabled {
-    background-color: var(--color-bg-primary);
+    background-color: var(--background);
     color: var(--color-text-disabled);
     cursor: not-allowed;
   }
@@ -1030,7 +996,7 @@
 
   /* Claude Link */
   .claude-link {
-    color: var(--color-accent);
+    color: var(--primary);
     text-decoration: none;
     transition: all var(--duration-fast) var(--ease-in-out);
     text-underline-offset: 2px;
@@ -1056,7 +1022,7 @@
     font-size: var(--font-size-sm);
     line-height: var(--leading-relaxed);
     overflow-x: auto;
-    color: var(--color-text-secondary);
+    color: var(--muted-foreground);
   }
 
   .claude-code-inline {
@@ -1079,7 +1045,7 @@
   .line--highlighted,
   .shiki .line.highlighted {
     background-color: var(--color-accent-subtle);
-    border-left: 2px solid var(--color-accent);
+    border-left: 2px solid var(--primary);
     padding-left: 0.75rem;
     margin-left: -0.75rem;
     display: block;
@@ -1217,8 +1183,8 @@
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    border-color: var(--color-accent);
-    background-color: var(--color-accent);
+    border-color: var(--primary);
+    background-color: var(--primary);
     background-clip: padding-box;
   }
 
@@ -1258,7 +1224,7 @@
   /* Claude Navigation */
   .claude-nav-item {
     padding: var(--spacing-2) var(--spacing-3);
-    color: var(--color-text-secondary);
+    color: var(--muted-foreground);
     border-radius: var(--radius-md);
     transition: all var(--duration-fast) var(--ease-in-out);
     cursor: pointer;
@@ -1266,19 +1232,19 @@
 
   .claude-nav-item:hover {
     background-color: var(--color-bg-tertiary);
-    color: var(--color-text-primary);
+    color: var(--border);
   }
 
   .claude-nav-item.active {
     background-color: var(--color-accent-subtle);
-    color: var(--color-accent);
+    color: var(--primary);
     font-weight: var(--font-weight-medium);
   }
 
   /* Claude Divider */
   .claude-divider {
     height: 1px;
-    background-color: var(--color-border-default);
+    background-color: var(--border);
     margin: var(--spacing-4) 0;
   }
 
@@ -1299,7 +1265,7 @@
 
   .claude-list-item.selected {
     background-color: var(--color-bg-selected);
-    border-left: 2px solid var(--color-accent);
+    border-left: 2px solid var(--primary);
     padding-left: calc(var(--spacing-4) - 2px);
   }
 
@@ -1428,11 +1394,11 @@
   }
 
   /* Light mode specific adjustments */
-  [data-theme="light"] .claude-card {
+  .light .claude-card {
     box-shadow: 0 1px 3px oklch(0% 0 0 / 0.08);
   }
 
-  [data-theme="light"] .claude-btn-primary {
+  .light .claude-btn-primary {
     font-weight: 600;
   }
 
@@ -1582,20 +1548,20 @@
 
 /* Prose typography utilities */
 @utility prose {
-  color: var(--color-text-primary);
+  color: var(--border);
   max-width: 65ch;
 }
 
 @utility prose-invert {
-  color: var(--color-text-primary);
+  color: var(--border);
 }
 
 @utility prose-slate {
-  color: var(--color-text-primary);
+  color: var(--border);
 }
 
 @utility prose-neutral {
-  color: var(--color-text-primary);
+  color: var(--border);
 }
 
 @utility prose-sm {
@@ -2292,15 +2258,15 @@ body {
 }
 
 [cmdk-item][data-selected='true'] {
-  background-color: color-mix(in oklch, var(--color-accent) 15%, transparent);
-  color: var(--color-accent);
+  background-color: color-mix(in oklch, var(--primary) 15%, transparent);
+  color: var(--primary);
   /* Premium selected state - scale + glow */
   transform: scale(1.02) translateX(2px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 [cmdk-item][data-selected='true']:not([data-disabled='true']) {
-  border-left: 3px solid var(--color-accent);
+  border-left: 3px solid var(--primary);
   padding-left: calc(0.75rem - 3px); /* Compensate for border */
 }
 
@@ -2313,7 +2279,7 @@ body {
 }
 
 [cmdk-item]:hover:not([data-disabled='true']):not([data-selected='true']) {
-  background-color: color-mix(in oklch, var(--color-accent) 8%, transparent);
+  background-color: color-mix(in oklch, var(--primary) 8%, transparent);
   /* Premium hover - scale + slide + shadow */
   transform: scale(1.015) translateX(4px);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
@@ -2407,21 +2373,13 @@ body {
   --tracking-wide: calc(var(--tracking-normal) + 0.025em);
   --tracking-wider: calc(var(--tracking-normal) + 0.05em);
   --tracking-widest: calc(var(--tracking-normal) + 0.1em);
-  --tracking-normal: var(--tracking-normal);
   --shadow-2xl: var(--shadow-2xl);
   --shadow-xl: var(--shadow-xl);
   --shadow-lg: var(--shadow-lg);
   --shadow-md: var(--shadow-md);
-  --shadow: var(--shadow);
   --shadow-sm: var(--shadow-sm);
-  --shadow-xs: var(--shadow-xs);
   --shadow-2xs: var(--shadow-2xs);
-  --spacing: var(--spacing);
-  --letter-spacing: var(--letter-spacing);
-  --shadow-offset-y: var(--shadow-offset-y);
-  --shadow-offset-x: var(--shadow-offset-x);
   --shadow-spread: var(--shadow-spread);
-  --shadow-blur: var(--shadow-blur);
   --shadow-opacity: var(--shadow-opacity);
   --color-shadow-color: var(--shadow-color);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -2442,8 +2400,6 @@ body {
   --color-border: var(--border);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
   --color-muted: var(--muted);
   --color-secondary-foreground: var(--secondary-foreground);
@@ -2468,110 +2424,53 @@ body {
 */
 :root {
   --background: oklch(1.0000 0 0);
-  --foreground: oklch(0.2478 0 0);
   --card: oklch(0.9702 0 0);
-  --card-foreground: oklch(0.2478 0 0);
-  --popover: oklch(1.0000 0 0);
-  --popover-foreground: oklch(0.2478 0 0);
   --primary: oklch(0.6916 0.1669 37.2264);
-  --primary-foreground: oklch(1.0000 0 0);
   --secondary: oklch(0.9491 0 0);
-  --secondary-foreground: oklch(0.2478 0 0);
-  --muted: oklch(0.9702 0 0);
   --muted-foreground: oklch(0.5624 0 0);
-  --accent: oklch(0.6916 0.1669 37.2264);
-  --accent-foreground: oklch(0.6916 0.1669 37.2264);
   --destructive: oklch(0.6368 0.2078 25.3313);
-  --destructive-foreground: oklch(0.9851 0 0);
   --border: oklch(0.9067 0 0);
-  --input: oklch(0.9067 0 0);
-  --ring: oklch(0.6916 0.1669 37.2264);
-  --chart-1: oklch(0.6916 0.1669 37.2264);
   --chart-2: oklch(0.6731 0.1624 144.2083);
   --chart-3: oklch(0.6582 0.1690 248.8135);
   --chart-4: oklch(0.8442 0.1722 84.9338);
   --chart-5: oklch(0.5168 0.2151 321.2386);
   --radius: 0.5rem;
-  --sidebar: oklch(0.9702 0 0);
-  --sidebar-foreground: oklch(0.2478 0 0);
-  --sidebar-primary: oklch(0.6916 0.1669 37.2264);
-  --sidebar-primary-foreground: oklch(1.0000 0 0);
-  --sidebar-accent: oklch(0.6916 0.1669 37.2264);
-  --sidebar-accent-foreground: oklch(0.6916 0.1669 37.2264);
-  --sidebar-border: oklch(0.9067 0 0);
-  --sidebar-ring: oklch(0.6916 0.1669 37.2264);
   --font-sans: sans-serif;
   --font-serif: serif;
   --font-mono: monospace;
   --shadow-color: #000000;
   --shadow-opacity: 0.05;
-  --shadow-blur: 0.5rem;
   --shadow-spread: 0rem;
-  --shadow-offset-x: 0rem;
-  --shadow-offset-y: 0.25rem;
-  --letter-spacing: 0rem;
-  --spacing: 0.25rem;
   --shadow-2xs: 0rem 0.25rem 0.5rem 0rem hsl(0 0% 0% / 0.03);
-  --shadow-xs: 0rem 0.25rem 0.5rem 0rem hsl(0 0% 0% / 0.03);
   --shadow-sm: 0rem 0.25rem 0.5rem 0rem hsl(0 0% 0% / 0.05), 0rem 1px 2px -1px hsl(0 0% 0% / 0.05);
-  --shadow: 0rem 0.25rem 0.5rem 0rem hsl(0 0% 0% / 0.05), 0rem 1px 2px -1px hsl(0 0% 0% / 0.05);
   --shadow-md: 0rem 0.25rem 0.5rem 0rem hsl(0 0% 0% / 0.05), 0rem 2px 4px -1px hsl(0 0% 0% / 0.05);
   --shadow-lg: 0rem 0.25rem 0.5rem 0rem hsl(0 0% 0% / 0.05), 0rem 4px 6px -1px hsl(0 0% 0% / 0.05);
   --shadow-xl: 0rem 0.25rem 0.5rem 0rem hsl(0 0% 0% / 0.05), 0rem 8px 10px -1px hsl(0 0% 0% / 0.05);
   --shadow-2xl: 0rem 0.25rem 0.5rem 0rem hsl(0 0% 0% / 0.13);
-  --tracking-normal: 0rem;
 }
 /* ---break---
 */
 .dark {
   --background: oklch(0.2221 0 0);
-  --foreground: oklch(0.9067 0 0);
   --card: oklch(0.2645 0 0);
-  --card-foreground: oklch(0.9067 0 0);
-  --popover: oklch(0.2645 0 0);
-  --popover-foreground: oklch(0.9067 0 0);
   --primary: oklch(0.6916 0.1669 37.2264);
-  --primary-foreground: oklch(1.0000 0 0);
   --secondary: oklch(0.3092 0 0);
-  --secondary-foreground: oklch(0.9067 0 0);
-  --muted: oklch(0.2891 0 0);
   --muted-foreground: oklch(0.7058 0 0);
-  --accent: oklch(0.2922 0.0401 41.3185);
-  --accent-foreground: oklch(0.6916 0.1669 37.2264);
   --destructive: oklch(0.6368 0.2078 25.3313);
-  --destructive-foreground: oklch(1.0000 0 0);
   --border: oklch(0.3600 0 0);
-  --input: oklch(0.3211 0 0);
-  --ring: oklch(0.6916 0.1669 37.2264);
-  --chart-1: oklch(0.6916 0.1669 37.2264);
   --chart-2: oklch(0.6731 0.1624 144.2083);
   --chart-3: oklch(0.6582 0.1690 248.8135);
   --chart-4: oklch(0.8442 0.1722 84.9338);
   --chart-5: oklch(0.5168 0.2151 321.2386);
   --radius: 0.5rem;
-  --sidebar: oklch(0.2393 0 0);
-  --sidebar-foreground: oklch(0.9067 0 0);
-  --sidebar-primary: oklch(0.6916 0.1669 37.2264);
-  --sidebar-primary-foreground: oklch(1.0000 0 0);
-  --sidebar-accent: oklch(0.2922 0.0401 41.3185);
-  --sidebar-accent-foreground: oklch(0.6916 0.1669 37.2264);
-  --sidebar-border: oklch(0.3600 0 0);
-  --sidebar-ring: oklch(0.6916 0.1669 37.2264);
   --font-sans: sans-serif;
   --font-serif: serif;
   --font-mono: monospace;
   --shadow-color: #000000;
   --shadow-opacity: 0.2;
-  --shadow-blur: 0.75rem;
   --shadow-spread: -0.25rem;
-  --shadow-offset-x: 0rem;
-  --shadow-offset-y: 0.5rem;
-  --letter-spacing: 0rem;
-  --spacing: 0.25rem;
   --shadow-2xs: 0rem 0.5rem 0.75rem -0.25rem hsl(0 0% 0% / 0.10);
-  --shadow-xs: 0rem 0.5rem 0.75rem -0.25rem hsl(0 0% 0% / 0.10);
   --shadow-sm: 0rem 0.5rem 0.75rem -0.25rem hsl(0 0% 0% / 0.20), 0rem 1px 2px -1.25px hsl(0 0% 0% / 0.20);
-  --shadow: 0rem 0.5rem 0.75rem -0.25rem hsl(0 0% 0% / 0.20), 0rem 1px 2px -1.25px hsl(0 0% 0% / 0.20);
   --shadow-md: 0rem 0.5rem 0.75rem -0.25rem hsl(0 0% 0% / 0.20), 0rem 2px 4px -1.25px hsl(0 0% 0% / 0.20);
   --shadow-lg: 0rem 0.5rem 0.75rem -0.25rem hsl(0 0% 0% / 0.20), 0rem 4px 6px -1.25px hsl(0 0% 0% / 0.20);
   --shadow-xl: 0rem 0.5rem 0.75rem -0.25rem hsl(0 0% 0% / 0.20), 0rem 8px 10px -1.25px hsl(0 0% 0% / 0.20);

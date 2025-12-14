@@ -23,11 +23,11 @@ export type ManageReviewArgs = {
   /** Parameter: p_user_id (uuid) */
   p_user_id: string;
   /** Parameter: p_create_data (review_create_input, optional) */
-  p_create_data: ReviewCreateInput | undefined | null | undefined;
+  p_create_data?: ReviewCreateInput;
   /** Parameter: p_update_data (review_update_input, optional) */
-  p_update_data: ReviewUpdateInput | undefined | null | undefined;
+  p_update_data?: ReviewUpdateInput;
   /** Parameter: p_delete_id (uuid, optional) */
-  p_delete_id: string | undefined | null | undefined;
+  p_delete_id?: string;
 };
 
 /**

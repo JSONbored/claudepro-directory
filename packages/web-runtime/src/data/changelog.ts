@@ -1,8 +1,7 @@
 import 'server-only';
 import { ChangelogService } from '@heyclaude/data-layer';
-import { type changelog, type changelog_category } from '@heyclaude/data-layer/prisma';
-import type { ChangelogOverviewEntry } from '@heyclaude/data-layer/types/composite-types';
-import { type Database } from '@heyclaude/database-types';
+import { type changelog, type changelog_category, type Prisma } from '@heyclaude/data-layer/prisma';
+import type { ChangelogOverviewEntry, GetChangelogOverviewReturns } from '@heyclaude/database-types/postgres-types';
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { normalizeError } from '../errors.ts';
@@ -19,7 +18,7 @@ const CHANGELOG_TAG = 'changelog';
 function createEmptyOverview(
   limit: number,
   offset = 0
-): Database['public']['Functions']['get_changelog_overview']['Returns'] {
+): GetChangelogOverviewReturns {
   return {
     entries: [],
     featured: [],
@@ -55,7 +54,7 @@ export async function getChangelogOverview(
     offset?: number;
     publishedOnly?: boolean;
   } = {}
-): Promise<Database['public']['Functions']['get_changelog_overview']['Returns']> {
+): Promise<GetChangelogOverviewReturns> {
   'use cache';
 
   const { category, featuredOnly = false, limit = 50, offset = 0, publishedOnly = true } = options;
@@ -151,7 +150,7 @@ export async function getChangelogEntryBySlug(slug: string): Promise<changelog |
     // Note: RPC return type (changelog_detail_entry) doesn't have contributors field
     const normalizedEntry: changelog = {
       canonical_url: null,
-      changes: entry.changes ?? {},
+      changes: (entry.changes ?? {}) as Prisma.JsonValue,
       commit_count: null,
       content: entry.content ?? '',
       contributors: [], // RPC doesn't return contributors, use empty array
@@ -162,7 +161,7 @@ export async function getChangelogEntryBySlug(slug: string): Promise<changelog |
       id: entry.id ?? '',
       json_ld: null,
       keywords: Array.isArray(entry.keywords) ? entry.keywords : [],
-      metadata: entry.metadata,
+      metadata: (entry.metadata ?? null) as Prisma.JsonValue | null,
       og_image: null,
       og_type: null,
       published: entry.published ?? false,
@@ -194,7 +193,7 @@ export async function getChangelogEntryBySlug(slug: string): Promise<changelog |
 }
 
 export async function getChangelog(): Promise<{
-  entries: Database['public']['Functions']['get_changelog_overview']['Returns']['entries'];
+  entries: GetChangelogOverviewReturns['entries'];
   hasMore: boolean;
   limit: number;
   offset: number;
@@ -249,7 +248,7 @@ function normalizeChangelogEntry(
   const fullEntry: changelog = {
     ...entry,
     canonical_url: null,
-    changes: entry.changes ?? {},
+    changes: (entry.changes ?? {}) as Prisma.JsonValue,
     commit_count: null,
     content: entry.content ?? '',
     contributors,

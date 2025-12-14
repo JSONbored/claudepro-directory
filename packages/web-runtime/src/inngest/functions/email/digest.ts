@@ -9,7 +9,7 @@
  */
 
 import { ContentService, MiscService, NewsletterService } from '@heyclaude/data-layer';
-import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
+import type { GetWeeklyDigestReturns } from '@heyclaude/database-types/postgres-types';
 import { normalizeError } from '@heyclaude/shared-runtime';
 
 import { inngest } from '../../client';
@@ -19,7 +19,7 @@ import { logger, createWebAppContextWithId } from '../../../logging/server';
 import { sendCronSuccessHeartbeat } from '../../utils/monitoring';
 
 // Types for digest data
-type WeeklyDigestData = DatabaseGenerated['public']['Functions']['get_weekly_digest']['Returns'];
+type WeeklyDigestData = GetWeeklyDigestReturns;
 
 /**
  * Weekly digest email function

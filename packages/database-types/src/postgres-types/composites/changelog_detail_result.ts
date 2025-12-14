@@ -15,7 +15,7 @@ import { changelogDetailEntrySchema } from './changelog_detail_entry';
  */
 export type ChangelogDetailResult = {
   /** Attribute: entry (changelog_detail_entry, nullable) */
-  entry: ChangelogDetailEntry;
+  entry: ChangelogDetailEntry | null;
 };
 
 /**

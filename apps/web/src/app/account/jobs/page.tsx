@@ -1,3 +1,4 @@
+import type { GetUserDashboardReturns } from '@heyclaude/database-types/postgres-types';
 import { type Database } from '@heyclaude/database-types';
 import { type JobBillingSummaryEntry } from '@heyclaude/web-runtime/data';
 import {
@@ -299,7 +300,7 @@ async function PaymentSuccessAlert({
   userLogger: ReturnType<typeof logger.child>;
 }) {
   // Fetch dashboard to get the job
-  let data: Database['public']['Functions']['get_user_dashboard']['Returns'] | null = null;
+  let data: GetUserDashboardReturns | null = null;
   try {
     data = await getUserDashboard(userId);
   } catch (error) {
@@ -422,7 +423,7 @@ async function JobsListWithHeader({
   userLogger: ReturnType<typeof logger.child>;
 }) {
   // Section: Dashboard Data Fetch
-  let data: Database['public']['Functions']['get_user_dashboard']['Returns'] | null = null;
+  let data: GetUserDashboardReturns | null = null;
   let fetchError = false;
   try {
     data = await getUserDashboard(userId);

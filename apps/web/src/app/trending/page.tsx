@@ -4,6 +4,11 @@
  */
 
 import { Constants, type Database } from '@heyclaude/database-types';
+import type {
+  GetPopularContentReturns,
+  GetRecentContentReturns,
+  GetTrendingMetricsWithContentReturns,
+} from '@heyclaude/database-types/postgres-types';
 import { isValidCategory } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getTrendingPageData } from '@heyclaude/web-runtime/data';
 import { Clock, Star, TrendingUp, Users } from '@heyclaude/web-runtime/icons';
@@ -277,7 +282,7 @@ const DEFAULT_CATEGORY: Database['public']['Enums']['content_category'] =
   Constants.public.Enums.content_category[0]; // 'agents'
 
 function mapTrendingMetrics(
-  rows: Database['public']['Functions']['get_trending_metrics_with_content']['Returns'],
+  rows: GetTrendingMetricsWithContentReturns,
   category: Database['public']['Enums']['content_category'] | null
 ): DisplayableContent[] {
   if (rows.length === 0) return [];
@@ -285,23 +290,23 @@ function mapTrendingMetrics(
     const resolvedCategory = category ?? row.category;
     const validCategory = isValidCategory(resolvedCategory) ? resolvedCategory : DEFAULT_CATEGORY;
     return toHomepageContentItem({
-      author: row.author,
+      author: row.author ?? 'Community',
       category: validCategory,
-      copyCount: row.copies_total,
-      description: row.description,
+      copyCount: row.copies_total ?? 0,
+      description: row.description ?? '',
       featuredRank: index + 1,
-      featuredScore: row.trending_score,
-      slug: row.slug,
-      source: row.source,
-      tags: row.tags,
-      title: row.title,
-      viewCount: row.views_total,
+      featuredScore: row.trending_score ?? null,
+      slug: row.slug ?? '',
+      source: row.source ?? null,
+      tags: row.tags ?? [],
+      title: row.title ?? null,
+      viewCount: row.views_total ?? 0,
     });
   });
 }
 
 function mapPopularContent(
-  rows: Database['public']['Functions']['get_popular_content']['Returns'],
+  rows: GetPopularContentReturns,
   category: Database['public']['Enums']['content_category'] | null
 ): DisplayableContent[] {
   if (rows.length === 0) return [];
@@ -309,22 +314,22 @@ function mapPopularContent(
     const resolvedCategory = category ?? row.category;
     const validCategory = isValidCategory(resolvedCategory) ? resolvedCategory : DEFAULT_CATEGORY;
     return toHomepageContentItem({
-      author: row.author,
+      author: row.author ?? 'Community',
       category: validCategory,
-      copyCount: row.copy_count,
-      description: row.description,
+      copyCount: row.copy_count ?? 0,
+      description: row.description ?? '',
       featuredRank: index + 1,
-      featuredScore: row.popularity_score,
-      slug: row.slug,
-      tags: row.tags,
-      title: row.title,
-      viewCount: row.view_count,
+      featuredScore: row.popularity_score ?? null,
+      slug: row.slug ?? '',
+      tags: row.tags ?? [],
+      title: row.title ?? null,
+      viewCount: row.view_count ?? 0,
     });
   });
 }
 
 function mapRecentContent(
-  rows: Database['public']['Functions']['get_recent_content']['Returns'],
+  rows: GetRecentContentReturns,
   category: Database['public']['Enums']['content_category'] | null
 ): DisplayableContent[] {
   if (rows.length === 0) return [];
@@ -332,15 +337,15 @@ function mapRecentContent(
     const resolvedCategory = category ?? row.category;
     const validCategory = isValidCategory(resolvedCategory) ? resolvedCategory : DEFAULT_CATEGORY;
     return toHomepageContentItem({
-      author: row.author,
+      author: row.author ?? 'Community',
       category: validCategory,
-      created_at: row.created_at,
-      date_added: row.created_at,
-      description: row.description,
+      created_at: row.created_at ?? new Date().toISOString(),
+      date_added: row.created_at ?? new Date().toISOString(),
+      description: row.description ?? '',
       featuredRank: index + 1,
-      slug: row.slug,
-      tags: row.tags,
-      title: row.title,
+      slug: row.slug ?? '',
+      tags: row.tags ?? [],
+      title: row.title ?? null,
     });
   });
 }

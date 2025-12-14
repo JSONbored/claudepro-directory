@@ -63,7 +63,7 @@ import 'server-only';
 import { timingSafeEqual } from 'node:crypto';
 
 import { ChangelogService } from '@heyclaude/data-layer';
-import { type Database } from '@heyclaude/database-types';
+import type { SyncChangelogEntryArgs } from '@heyclaude/database-types/postgres-types';
 import { requireEnvVar } from '@heyclaude/shared-runtime';
 import { normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
@@ -203,38 +203,23 @@ export const POST = createApiRoute({
 
     // Database RPC handles all transformations (slug generation, section conversion) internally
     // This eliminates CPU-intensive client-side processing (10-15% CPU savings)
-    const baseArgs = {
+    // Build args object, only including optional properties if they have values (for exactOptionalPropertyTypes)
+    const syncArgs: SyncChangelogEntryArgs = {
       p_content: content,
       p_date: date,
       p_metadata: {
         version,
       },
       p_version: version,
-    } satisfies Pick<
-      Database['public']['Functions']['sync_changelog_entry']['Args'],
-      'p_content' | 'p_date' | 'p_metadata' | 'p_version'
-    >;
-
-    const optionalArgs: Partial<
-      Pick<
-        Database['public']['Functions']['sync_changelog_entry']['Args'],
-        'p_raw_content' | 'p_sections' | 'p_tldr' | 'p_what_changed'
-      >
-    > = {};
-    if (tldr) optionalArgs.p_tldr = tldr;
-    if (whatChanged) optionalArgs.p_what_changed = whatChanged;
-    if (rawContent) optionalArgs.p_raw_content = rawContent;
+    };
+    
+    // Only add optional properties if they have values
+    if (tldr) { syncArgs.p_tldr = tldr; }
+    if (whatChanged) { syncArgs.p_what_changed = whatChanged; }
+    if (rawContent) { syncArgs.p_raw_content = rawContent; }
     if (sections && Object.keys(sections).length > 0) {
-      // TypeScript needs explicit type assertion here because sections could be undefined
-      // but we've already checked it exists and has keys
-      optionalArgs.p_sections =
-        sections satisfies Database['public']['Functions']['sync_changelog_entry']['Args']['p_sections'];
+      syncArgs.p_sections = sections as Record<string, unknown>;
     }
-
-    const syncArgs = {
-      ...baseArgs,
-      ...optionalArgs,
-    } satisfies Database['public']['Functions']['sync_changelog_entry']['Args'];
     const changelogData = await service.syncChangelogEntry(syncArgs);
 
     if (!changelogData) {

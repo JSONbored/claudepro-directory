@@ -51,6 +51,9 @@ export { LAYOUT_ANIMATIONS } from './layout/index.ts';
 export * from './text/index.ts';
 export { TEXT_ANIMATIONS } from './text/index.ts';
 
+// Style Utilities (Semantic Tailwind utilities)
+export * from './styles/index.ts';
+
 // Design Tokens (V2 - Colors, Typography, Spacing, Shadows, States, Accessibility, Responsive)
 export * from '../design-tokens/index.ts';
 export { COLORS } from '../design-tokens/index.ts';

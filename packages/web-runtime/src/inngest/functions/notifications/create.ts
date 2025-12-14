@@ -6,14 +6,14 @@
  */
 
 import { MiscService } from '@heyclaude/data-layer';
-import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
+import type { Prisma } from '@heyclaude/data-layer/prisma';
 import { Constants } from '@heyclaude/database-types';
 
 import { inngest } from '../../client';
 import { logger, createWebAppContextWithId } from '../../../logging/server';
 
-type NotificationType = DatabaseGenerated['public']['Enums']['notification_type'];
-type NotificationPriority = DatabaseGenerated['public']['Enums']['notification_priority'];
+type NotificationType = 'announcement' | 'feedback';
+type NotificationPriority = 'high' | 'medium' | 'low';
 
 // Type guards
 function isValidNotificationType(value: string): value is NotificationType {
@@ -94,12 +94,12 @@ export const createNotification = inngest.createFunction(
       const notificationId = id ?? crypto.randomUUID();
 
       // Build notification data carefully to avoid exactOptionalPropertyTypes issues
-      const notificationData: DatabaseGenerated['public']['Tables']['notifications']['Insert'] = {
+      const notificationData: Prisma.notificationsCreateInput = {
         id: notificationId,
         title: title.trim(),
         message: message.trim(),
-        type: (type && isValidNotificationType(type) ? type : 'info') as NotificationType,
-        priority: (priority && isValidNotificationPriority(priority) ? priority : 'normal') as NotificationPriority,
+        type: (type && isValidNotificationType(type) ? type : 'announcement') as NotificationType,
+        priority: (priority && isValidNotificationPriority(priority) ? priority : 'medium') as NotificationPriority,
       };
 
       // Add optional fields only if they have values
@@ -194,7 +194,7 @@ export const broadcastNotification = inngest.createFunction(
       const notificationId = crypto.randomUUID();
 
       // Build notification data carefully to avoid exactOptionalPropertyTypes issues
-      const notificationData: DatabaseGenerated['public']['Tables']['notifications']['Insert'] = {
+      const notificationData: Prisma.notificationsCreateInput = {
         id: notificationId,
         title: title.trim(),
         message: message.trim(),

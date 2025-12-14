@@ -6,13 +6,26 @@
  * RPC function types remain using Database type (Prisma doesn't generate RPC types).
  */
 
-import type { Database } from '@heyclaude/database-types';
+import type {
+  GetJobsListReturns,
+  GetJobDetailArgs,
+  GetJobDetailReturns,
+  GetFeaturedJobsReturns,
+  GetJobsByCategoryArgs,
+  GetJobsByCategoryReturns,
+  GetJobsCountReturns,
+  GetPaymentPlanCatalogReturns,
+  GetJobBillingSummariesArgs,
+  GetJobBillingSummariesReturns,
+  GetJobTitleByIdArgs,
+  GetJobTitleByIdReturns,
+} from '@heyclaude/database-types/postgres-types';
 import type { Prisma } from '@heyclaude/data-layer/prisma';
 import { prisma } from '../prisma/client.ts';
 import { BasePrismaService } from './base-prisma-service.ts';
 export class JobsService extends BasePrismaService {
-  async getJobs(): Promise<Database['public']['Functions']['get_jobs_list']['Returns']> {
-    return this.callRpc<Database['public']['Functions']['get_jobs_list']['Returns']>(
+  async getJobs(): Promise<GetJobsListReturns> {
+    return this.callRpc<GetJobsListReturns>(
       'get_jobs_list',
       {},
       { methodName: 'getJobs' }
@@ -20,17 +33,17 @@ export class JobsService extends BasePrismaService {
   }
 
   async getJobBySlug(
-    args: Database['public']['Functions']['get_job_detail']['Args']
-  ): Promise<Database['public']['Functions']['get_job_detail']['Returns']> {
-    return this.callRpc<Database['public']['Functions']['get_job_detail']['Returns']>(
+    args: GetJobDetailArgs
+  ): Promise<GetJobDetailReturns> {
+    return this.callRpc<GetJobDetailReturns>(
       'get_job_detail',
       args,
       { methodName: 'getJobBySlug' }
     );
   }
 
-  async getFeaturedJobs(): Promise<Database['public']['Functions']['get_featured_jobs']['Returns']> {
-    return this.callRpc<Database['public']['Functions']['get_featured_jobs']['Returns']>(
+  async getFeaturedJobs(): Promise<GetFeaturedJobsReturns> {
+    return this.callRpc<GetFeaturedJobsReturns>(
       'get_featured_jobs',
       {},
       { methodName: 'getFeaturedJobs' }
@@ -38,17 +51,17 @@ export class JobsService extends BasePrismaService {
   }
 
   async getJobsByCategory(
-    args: Database['public']['Functions']['get_jobs_by_category']['Args']
-  ): Promise<Database['public']['Functions']['get_jobs_by_category']['Returns']> {
-    return this.callRpc<Database['public']['Functions']['get_jobs_by_category']['Returns']>(
+    args: GetJobsByCategoryArgs
+  ): Promise<GetJobsByCategoryReturns> {
+    return this.callRpc<GetJobsByCategoryReturns>(
       'get_jobs_by_category',
       args,
       { methodName: 'getJobsByCategory' }
     );
   }
 
-  async getJobsCount(): Promise<Database['public']['Functions']['get_jobs_count']['Returns']> {
-    return this.callRpc<Database['public']['Functions']['get_jobs_count']['Returns']>(
+  async getJobsCount(): Promise<GetJobsCountReturns> {
+    return this.callRpc<GetJobsCountReturns>(
       'get_jobs_count',
       {},
       { methodName: 'getJobsCount' }
@@ -85,10 +98,8 @@ export class JobsService extends BasePrismaService {
     return job;
   }
 
-  async getPaymentPlanCatalog(): Promise<
-    Database['public']['Functions']['get_payment_plan_catalog']['Returns']
-  > {
-    return this.callRpc<Database['public']['Functions']['get_payment_plan_catalog']['Returns']>(
+  async getPaymentPlanCatalog(): Promise<GetPaymentPlanCatalogReturns> {
+    return this.callRpc<GetPaymentPlanCatalogReturns>(
       'get_payment_plan_catalog',
       {},
       { methodName: 'getPaymentPlanCatalog' }
@@ -96,9 +107,9 @@ export class JobsService extends BasePrismaService {
   }
 
   async getJobBillingSummaries(
-    args: Database['public']['Functions']['get_job_billing_summaries']['Args']
-  ): Promise<Database['public']['Functions']['get_job_billing_summaries']['Returns']> {
-    return this.callRpc<Database['public']['Functions']['get_job_billing_summaries']['Returns']>(
+    args: GetJobBillingSummariesArgs
+  ): Promise<GetJobBillingSummariesReturns> {
+    return this.callRpc<GetJobBillingSummariesReturns>(
       'get_job_billing_summaries',
       args,
       { methodName: 'getJobBillingSummaries' }
@@ -106,9 +117,9 @@ export class JobsService extends BasePrismaService {
   }
 
   async getJobTitleById(
-    args: Database['public']['Functions']['get_job_title_by_id']['Args']
-  ): Promise<Database['public']['Functions']['get_job_title_by_id']['Returns']> {
-    return this.callRpc<Database['public']['Functions']['get_job_title_by_id']['Returns']>(
+    args: GetJobTitleByIdArgs
+  ): Promise<GetJobTitleByIdReturns> {
+    return this.callRpc<GetJobTitleByIdReturns>(
       'get_job_title_by_id',
       args,
       { methodName: 'getJobTitleById' }

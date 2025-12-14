@@ -19,13 +19,13 @@ import { changelogPaginationSchema } from './changelog_pagination';
  */
 export type ChangelogOverviewResult = {
   /** Attribute: entries (_changelog_overview_entry, nullable) */
-  entries: ChangelogOverviewEntry[];
+  entries: ChangelogOverviewEntry[] | null;
   /** Attribute: metadata (changelog_metadata, nullable) */
-  metadata: ChangelogMetadata;
+  metadata: ChangelogMetadata | null;
   /** Attribute: featured (_changelog_overview_entry, nullable) */
-  featured: ChangelogOverviewEntry[];
+  featured: ChangelogOverviewEntry[] | null;
   /** Attribute: pagination (changelog_pagination, nullable) */
-  pagination: ChangelogPagination;
+  pagination: ChangelogPagination | null;
 };
 
 /**

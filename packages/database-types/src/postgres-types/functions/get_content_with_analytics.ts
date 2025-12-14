@@ -33,14 +33,50 @@ export const getContentWithAnalyticsArgsSchema = z.object({
 export type GetContentWithAnalyticsArgsFromZod = z.infer<typeof getContentWithAnalyticsArgsSchema>;
 
 /**
+ * Return row type for PostgreSQL function: get_content_with_analytics
+ */
+export type GetContentWithAnalyticsReturnRow = {
+  /** id (uuid, nullable) */
+  id: string | null;
+  /** category (content_category, nullable) */
+  category: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog' | null;
+  /** slug (text, nullable) */
+  slug: string | null;
+  /** title (text, nullable) */
+  title: string | null;
+  /** description (text, nullable) */
+  description: string | null;
+  /** view_count (int4, nullable) */
+  view_count: number | null;
+  /** copy_count (int4, nullable) */
+  copy_count: number | null;
+  /** bookmark_count (int4, nullable) */
+  bookmark_count: number | null;
+};
+
+/**
+ * Zod schema for get_content_with_analytics return row
+ */
+export const getContentWithAnalyticsReturnRowSchema = z.object({
+  id: z.string().uuid().nullable(),
+  category: z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'skills', 'collections', 'guides', 'jobs', 'changelog']).nullable(),
+  slug: z.string().nullable(),
+  title: z.string().nullable(),
+  description: z.string().nullable(),
+  view_count: z.number().nullable(),
+  copy_count: z.number().nullable(),
+  bookmark_count: z.number().nullable(),
+});
+
+/**
  * Return type for PostgreSQL function: get_content_with_analytics
  */
-export type GetContentWithAnalyticsReturns = Record<string, unknown>[];
+export type GetContentWithAnalyticsReturns = GetContentWithAnalyticsReturnRow[];
 
 /**
  * Zod schema for get_content_with_analytics function return type
  */
-export const getContentWithAnalyticsReturnsSchema = z.array(z.any());
+export const getContentWithAnalyticsReturnsSchema = z.array(getContentWithAnalyticsReturnRowSchema);
 
 /**
  * Type inference from Zod schema (should match type above)

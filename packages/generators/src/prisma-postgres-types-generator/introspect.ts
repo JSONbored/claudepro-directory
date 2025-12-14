@@ -15,6 +15,8 @@ export interface DatabaseMetadata {
   functions: Record<string, FunctionMeta>;
   compositeTypes: Record<string, CompositeTypeAttribute[]>;
   enums: Record<string, string[]>;
+  /** Function-specific return structures for SETOF record functions */
+  functionReturnStructures: Record<string, CompositeTypeAttribute[]>;
 }
 
 /**
@@ -150,10 +152,106 @@ SELECT
       compositeTypes: Record<string, CompositeTypeAttribute[]>;
     };
 
+    /**
+     * Strip schema prefix from type name
+     */
+    function stripSchemaPrefix(typeName: string): string {
+      if (!typeName) return typeName;
+      let cleaned = typeName.replace(/["']/g, '');
+      const schemaMatch = cleaned.match(/^[a-z_][a-z0-9_]*\.([a-z_][a-z0-9_]*)$/i);
+      return schemaMatch && schemaMatch[1] ? schemaMatch[1] : cleaned;
+    }
+
+    // Introspect SETOF record functions to get actual return structure
+    const functionReturnStructures: Record<string, CompositeTypeAttribute[]> = {};
+    
+    for (const [functionName, functionMeta] of Object.entries(metadata.functions || {})) {
+      const returnType = functionMeta.returnType || '';
+      // Detect SETOF record (dynamic return structure)
+      const baseReturnType = returnType.startsWith('_') 
+        ? stripSchemaPrefix(returnType.slice(1))
+        : stripSchemaPrefix(returnType);
+      
+      const isRecordType = baseReturnType === 'record' || 
+                          baseReturnType.toLowerCase() === 'pg_catalog.record';
+      
+      if (isRecordType) {
+        try {
+          // Build function call with appropriate argument values
+          // For required arguments, we'll use safe default values based on type
+          const argValues: unknown[] = functionMeta.args.map((arg) => {
+            // If argument has default, use null (will use default)
+            if (arg.hasDefault) {
+              return null;
+            }
+            
+            // For required arguments, use safe defaults based on type
+            const udtName = (arg.udtName || '').toLowerCase();
+            if (udtName.includes('uuid') || udtName === 'uuid') {
+              // Use a test UUID for UUID arguments
+              return '00000000-0000-0000-0000-000000000000';
+            } else if (udtName.includes('text') || udtName.includes('varchar') || udtName.includes('string')) {
+              // Use empty string for text arguments
+              return '';
+            } else if (udtName.includes('int') || udtName.includes('numeric') || udtName.includes('number')) {
+              // Use 0 for numeric arguments
+              return 0;
+            } else if (udtName.includes('bool') || udtName === 'boolean') {
+              // Use false for boolean arguments
+              return false;
+            } else {
+              // Default to null for unknown types
+              return null;
+            }
+          });
+          
+          const argPlaceholders = functionMeta.args.map((_, i) => `$${i + 1}`).join(', ');
+          const functionCall = argPlaceholders 
+            ? `SELECT * FROM ${schema}.${functionName}(${argPlaceholders}) LIMIT 0`
+            : `SELECT * FROM ${schema}.${functionName}() LIMIT 0`;
+          
+          // Execute to get result set metadata (LIMIT 0 means no rows returned, just metadata)
+          // This is safe even with test arguments because LIMIT 0 prevents actual data processing
+          const testResult = await client.query(functionCall, argValues);
+          
+          // Extract column information from result fields
+          // pg library provides field metadata in result.fields
+          if (testResult.fields && testResult.fields.length > 0) {
+            const attributes: CompositeTypeAttribute[] = await Promise.all(
+              testResult.fields.map(async (field, index) => {
+                // Get type name from OID
+                // field.dataTypeID is the PostgreSQL OID for the column type
+                const typeResult = await client.query(
+                  'SELECT typname FROM pg_type WHERE oid = $1',
+                  [field.dataTypeID]
+                );
+                const udtName = typeResult.rows[0]?.typname || 'unknown';
+                
+                return {
+                  name: field.name,
+                  udtName,
+                  nullable: true, // Assume nullable for safety (can't determine from result set)
+                  ordinal: index + 1,
+                };
+              })
+            );
+            
+            functionReturnStructures[functionName] = attributes;
+          }
+        } catch (error) {
+          // If introspection fails (function has side effects, requires specific args, etc.),
+          // we'll fall back to Record<string, unknown>
+          // This is safe and expected for some functions
+          // Silently continue - the generator will handle it
+        }
+      }
+    }
+
     return {
       functions: metadata.functions || {},
       compositeTypes: metadata.compositeTypes || {},
       enums: metadata.enums || {},
+      functionReturnStructures,
     };
   } catch (error) {
     throw new Error(

@@ -18,8 +18,7 @@
  * - No MDX dependencies
  */
 
-import type { changelog, changelog_category } from '@heyclaude/data-layer/prisma';
-import { type Database } from '@heyclaude/database-types';
+import type { changelog, changelog_category, Prisma } from '@heyclaude/data-layer/prisma';
 import { parseChangelogChanges } from '@heyclaude/web-runtime/data';
 import {
   Plus,
@@ -50,7 +49,7 @@ import {
 import { SanitizedHTML } from './sanitized-html';
 
 type ChangelogEntry = changelog;
-type ContentRow = Database['public']['Tables']['content']['Row'];
+type ContentRow = Prisma.contentGetPayload<{}>;
 type GuideSection = ContentRow['metadata'];
 
 /**
@@ -109,7 +108,7 @@ function CategorySection({
   items,
   icon: Icon,
 }: {
-  category: Database['public']['Enums']['changelog_category'];
+  category: changelog_category;
   icon: React.ComponentType<{ className?: string }>;
   items: Array<{ content: string }>;
 }) {

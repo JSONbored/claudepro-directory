@@ -2,7 +2,12 @@
 
 import { CommunityService, SearchService } from '@heyclaude/data-layer';
 import type { CommunityDirectoryUser } from '@heyclaude/data-layer/types/composite-types';
-import { type Database } from '@heyclaude/database-types';
+import type {
+  SearchUnifiedArgs,
+  GetCommunityDirectoryReturns,
+  GetUserProfileReturns,
+  GetUserCollectionDetailReturns,
+} from '@heyclaude/database-types/postgres-types/functions';
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { normalizeError } from '../errors.ts';
@@ -32,7 +37,7 @@ async function searchUsersUnified(
 
   const searchService = new SearchService();
 
-  const unifiedArgs: Database['public']['Functions']['search_unified']['Args'] = {
+  const unifiedArgs: SearchUnifiedArgs = {
     p_entities: ['user'],
     p_highlight_query: query,
     p_limit: limit,
@@ -55,8 +60,7 @@ async function searchUsersUnified(
   }));
 }
 
-export type CollectionDetailData =
-  Database['public']['Functions']['get_user_collection_detail']['Returns'];
+export type CollectionDetailData = GetUserCollectionDetailReturns;
 
 /***
  *
@@ -68,7 +72,7 @@ export type CollectionDetailData =
  */
 async function getCommunityDirectoryRpc(
   limit: number
-): Promise<Database['public']['Functions']['get_community_directory']['Returns'] | null> {
+): Promise<GetCommunityDirectoryReturns | null> {
   'use cache';
 
   // Configure cache - use 'half' profile for community directory (changes every 30 minutes)
@@ -101,7 +105,7 @@ async function getCommunityDirectoryRpc(
 export async function getCommunityDirectory(options: {
   limit?: number;
   searchQuery?: string;
-}): Promise<Database['public']['Functions']['get_community_directory']['Returns'] | null> {
+}): Promise<GetCommunityDirectoryReturns | null> {
   const { limit = DEFAULT_DIRECTORY_LIMIT, searchQuery } = options;
   const reqLogger = logger.child({
     module: 'data/community',
@@ -170,7 +174,7 @@ export async function getCommunityDirectory(options: {
 export async function getPublicUserProfile(input: {
   slug: string;
   viewerId?: string;
-}): Promise<Database['public']['Functions']['get_user_profile']['Returns'] | null> {
+}): Promise<GetUserProfileReturns | null> {
   'use cache: private';
 
   const { slug, viewerId } = input;

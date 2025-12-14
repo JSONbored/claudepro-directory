@@ -21,7 +21,7 @@ export type ReviewAggregateRating = {
   /** Attribute: count (int4, nullable) */
   count: number | null;
   /** Attribute: distribution (review_rating_distribution, nullable) */
-  distribution: ReviewRatingDistribution;
+  distribution: ReviewRatingDistribution | null;
 };
 
 /**

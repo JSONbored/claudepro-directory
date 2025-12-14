@@ -59,9 +59,10 @@ function buildConsolidationPlan(report: ConsolidationReport): {
   const duplicatesToRemove = new Set<string>();
 
   // Build name mappings (old → new)
+  // Note: Even if there's a conflict, we still map (new tweakcn values take precedence)
   for (const mapping of report.mappings) {
     nameMappings.set(mapping.oldName, mapping.newName);
-    // Old variable can be removed after mapping
+    // Old variable can be removed after mapping (new tweakcn value takes precedence)
     variablesToRemove.add(mapping.oldName);
   }
 

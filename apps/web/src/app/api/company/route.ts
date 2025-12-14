@@ -21,7 +21,10 @@
 
 import 'server-only';
 import { CompaniesService } from '@heyclaude/data-layer';
-import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
+import type {
+  GetCompanyProfileArgs,
+  GetCompanyProfileReturns,
+} from '@heyclaude/database-types/postgres-types';
 import { normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   buildCacheHeaders,
@@ -43,16 +46,16 @@ import { z } from 'zod';
  * @returns Promise resolving to an object with the company profile data
  */
 async function getCachedCompanyProfile(slug: string): Promise<{
-  data: DatabaseGenerated['public']['Functions']['get_company_profile']['Returns'];
+  data: GetCompanyProfileReturns;
 }> {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
   // CompaniesService now uses Prisma (no constructor needed)
   const service = new CompaniesService();
-  const rpcArgs = {
+  const rpcArgs: GetCompanyProfileArgs = {
     p_slug: slug,
-  } satisfies DatabaseGenerated['public']['Functions']['get_company_profile']['Args'];
+  };
 
   const data = await service.getCompanyProfile(rpcArgs);
   return { data };

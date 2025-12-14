@@ -19,11 +19,11 @@ import { contentPaginatedPaginationSchema } from './content_paginated_pagination
  */
 export type ContentPaginatedResult = {
   /** Attribute: items (_content_paginated_item, nullable) */
-  items: ContentPaginatedItem[];
+  items: ContentPaginatedItem[] | null;
   /** Attribute: pagination (content_paginated_pagination, nullable) */
-  pagination: ContentPaginatedPagination;
+  pagination: ContentPaginatedPagination | null;
   /** Attribute: filters_applied (content_paginated_filters, nullable) */
-  filters_applied: ContentPaginatedFilters;
+  filters_applied: ContentPaginatedFilters | null;
 };
 
 /**

@@ -15,7 +15,7 @@ import { announcementsSchema } from '../composites/announcements';
  */
 export type GetActiveAnnouncementArgs = {
   /** Parameter: p_now (timestamptz, optional) */
-  p_now: string | undefined | null | undefined;
+  p_now?: string;
 };
 
 /**

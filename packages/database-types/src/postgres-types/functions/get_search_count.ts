@@ -14,7 +14,7 @@ export type GetSearchCountArgs = {
   /** Parameter: p_query (text) */
   p_query: string;
   /** Parameter: p_categories (_content_category, optional) */
-  p_categories: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog'[] | undefined | null | undefined;
+  p_categories?: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog'[];
 };
 
 /**

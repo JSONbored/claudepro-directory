@@ -14,7 +14,7 @@ export type GetSiteUrlsFormattedArgs = {
   /** Parameter: p_site_url (text) */
   p_site_url: string;
   /** Parameter: p_limit (int4, optional) */
-  p_limit: number | undefined | null | undefined;
+  p_limit?: number;
 };
 
 /**

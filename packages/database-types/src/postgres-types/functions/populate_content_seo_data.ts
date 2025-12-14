@@ -25,14 +25,35 @@ export const populateContentSeoDataArgsSchema = z.object({
 export type PopulateContentSeoDataArgsFromZod = z.infer<typeof populateContentSeoDataArgsSchema>;
 
 /**
+ * Return row type for PostgreSQL function: populate_content_seo_data
+ */
+export type PopulateContentSeoDataReturnRow = {
+  /** total_updated (int4, nullable) */
+  total_updated: number | null;
+  /** category_name (text, nullable) */
+  category_name: string | null;
+  /** items_updated (int4, nullable) */
+  items_updated: number | null;
+};
+
+/**
+ * Zod schema for populate_content_seo_data return row
+ */
+export const populateContentSeoDataReturnRowSchema = z.object({
+  total_updated: z.number().nullable(),
+  category_name: z.string().nullable(),
+  items_updated: z.number().nullable(),
+});
+
+/**
  * Return type for PostgreSQL function: populate_content_seo_data
  */
-export type PopulateContentSeoDataReturns = Record<string, unknown>[];
+export type PopulateContentSeoDataReturns = PopulateContentSeoDataReturnRow[];
 
 /**
  * Zod schema for populate_content_seo_data function return type
  */
-export const populateContentSeoDataReturnsSchema = z.array(z.any());
+export const populateContentSeoDataReturnsSchema = z.array(populateContentSeoDataReturnRowSchema);
 
 /**
  * Type inference from Zod schema (should match type above)

@@ -1,7 +1,7 @@
 import 'server-only';
 
 import { JobsService, SearchService } from '@heyclaude/data-layer';
-import { type Database } from '@heyclaude/database-types';
+import type { FilterJobsArgs, FilterJobsReturns } from '@heyclaude/database-types/postgres-types/functions';
 import { normalizeError } from '@heyclaude/shared-runtime';
 import { cacheLife, cacheTag } from 'next/cache';
 
@@ -13,7 +13,7 @@ import {
   isValidJobType,
 } from '../utils/type-guards.ts';
 
-export type JobsFilterResult = Database['public']['Functions']['filter_jobs']['Returns'];
+export type JobsFilterResult = FilterJobsReturns;
 
 export interface JobsFilterOptions {
   category?: string;
@@ -53,7 +53,7 @@ async function getFilteredJobsDirect(options: JobsFilterOptions): Promise<JobsFi
 
   try {
     // Build RPC args with proper type narrowing using type guards
-    const rpcArguments: Database['public']['Functions']['filter_jobs']['Args'] = {};
+    const rpcArguments: FilterJobsArgs = {};
 
     if (searchQuery) {
       rpcArguments.p_search_query = searchQuery;
@@ -111,7 +111,7 @@ async function getJobsListCached(limit: number, offset: number): Promise<JobsFil
   });
 
   try {
-    const rpcArgs: Database['public']['Functions']['filter_jobs']['Args'] = {};
+    const rpcArgs: FilterJobsArgs = {};
     if (limit !== undefined) {
       rpcArgs.p_limit = limit;
     }
@@ -152,7 +152,7 @@ async function getJobsListCached(limit: number, offset: number): Promise<JobsFil
  * @returns {Promise<unknown>} Return value description
  */
 async function getFilteredJobsCached(
-  rpcArguments: Database['public']['Functions']['filter_jobs']['Args'],
+  rpcArguments: FilterJobsArgs,
   searchQuery: string,
   category: string,
   employment: string,
@@ -292,7 +292,7 @@ export async function getFilteredJobs(
     }
 
     // Build RPC args with proper type narrowing using type guards
-    const rpcArguments: Database['public']['Functions']['filter_jobs']['Args'] = {};
+    const rpcArguments: FilterJobsArgs = {};
 
     if (searchQuery) {
       rpcArguments.p_search_query = searchQuery;
@@ -392,15 +392,18 @@ export async function getFeaturedJobs(limit = 5) {
     const service = new JobsService();
     const result = await service.getFeaturedJobs();
 
+    // GetFeaturedJobsReturns is Jobs (single object), not an array
+    // Convert to array for consistency with other job functions
     reqLogger.info(
-      { count: result !== null && result !== undefined ? result.length : 0, limit },
+      { hasResult: result !== null && result !== undefined, limit },
       'getFeaturedJobs: fetched successfully'
     );
 
     if (result === null || result === undefined) {
       return [];
     }
-    return result;
+    // Return as array for consistency
+    return [result];
   } catch (error) {
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error({ err: errorForLogging, limit }, 'getFeaturedJobs: unexpected error');

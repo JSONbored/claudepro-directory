@@ -189,6 +189,7 @@ function generateCompositeFile(
       // Handle nested composite types and arrays of composites
       // Note: mapPostgresTypeToTypeScript already handles composites and arrays,
       // but we need to override for proper type references
+      // IMPORTANT: We need to preserve nullable handling when overriding
       let finalType = tsType;
       
       // Check if attribute is an array of composite
@@ -196,13 +197,20 @@ function generateCompositeFile(
         const baseType = attr.udtName.slice(1);
         if (allCompositeTypes[baseType]) {
           // Array of composite - reference the generated type
-          finalType = `${toPascalCase(toSafeIdentifier(baseType))}[]`;
-          // Nullable is already handled by mapPostgresTypeToTypeScript
+          const baseTypeName = toPascalCase(toSafeIdentifier(baseType));
+          finalType = `${baseTypeName}[]`;
+          // Preserve nullable if it was in the original type
+          if (attr.nullable && !finalType.includes('| null')) {
+            finalType = `${finalType} | null`;
+          }
         }
       } else if (allCompositeTypes[attr.udtName]) {
         // Nested composite - reference the generated type
         finalType = toPascalCase(toSafeIdentifier(attr.udtName));
-        // Nullable is already handled by mapPostgresTypeToTypeScript
+        // Preserve nullable if it was in the original type
+        if (attr.nullable && !finalType.includes('| null')) {
+          finalType = `${finalType} | null`;
+        }
       }
 
       // Add JSDoc with type information

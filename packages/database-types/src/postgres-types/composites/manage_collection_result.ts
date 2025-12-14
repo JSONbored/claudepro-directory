@@ -19,9 +19,9 @@ export type ManageCollectionResult = {
   /** Attribute: success (bool, nullable) */
   success: boolean | null;
   /** Attribute: collection (user_collections, nullable) */
-  collection: UserCollections;
+  collection: UserCollections | null;
   /** Attribute: item (collection_items, nullable) */
-  item: CollectionItems;
+  item: CollectionItems | null;
 };
 
 /**

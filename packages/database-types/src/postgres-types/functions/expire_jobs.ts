@@ -25,14 +25,32 @@ export const expireJobsArgsSchema = z.object({
 export type ExpireJobsArgsFromZod = z.infer<typeof expireJobsArgsSchema>;
 
 /**
+ * Return row type for PostgreSQL function: expire_jobs
+ */
+export type ExpireJobsReturnRow = {
+  /** expired_count (int4, nullable) */
+  expired_count: number | null;
+  /** expiring_soon_count (int4, nullable) */
+  expiring_soon_count: number | null;
+};
+
+/**
+ * Zod schema for expire_jobs return row
+ */
+export const expireJobsReturnRowSchema = z.object({
+  expired_count: z.number().nullable(),
+  expiring_soon_count: z.number().nullable(),
+});
+
+/**
  * Return type for PostgreSQL function: expire_jobs
  */
-export type ExpireJobsReturns = Record<string, unknown>[];
+export type ExpireJobsReturns = ExpireJobsReturnRow[];
 
 /**
  * Zod schema for expire_jobs function return type
  */
-export const expireJobsReturnsSchema = z.array(z.any());
+export const expireJobsReturnsSchema = z.array(expireJobsReturnRowSchema);
 
 /**
  * Type inference from Zod schema (should match type above)

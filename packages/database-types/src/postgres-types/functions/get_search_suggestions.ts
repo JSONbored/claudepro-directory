@@ -14,7 +14,7 @@ export type GetSearchSuggestionsArgs = {
   /** Parameter: p_query (text) */
   p_query: string;
   /** Parameter: p_limit (int4, optional) */
-  p_limit: number | undefined | null | undefined;
+  p_limit?: number;
 };
 
 /**

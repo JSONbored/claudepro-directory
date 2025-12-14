@@ -17,7 +17,7 @@ export type AddBookmarkResult = {
   /** Attribute: success (bool, nullable) */
   success: boolean | null;
   /** Attribute: bookmark (add_bookmark_bookmark_item, nullable) */
-  bookmark: AddBookmarkBookmarkItem;
+  bookmark: AddBookmarkBookmarkItem | null;
 };
 
 /**

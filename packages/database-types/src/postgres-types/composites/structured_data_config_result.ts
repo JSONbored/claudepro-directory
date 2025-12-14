@@ -15,7 +15,7 @@ import { structuredDataSchemaTypesSchema } from './structured_data_schema_types'
  */
 export type StructuredDataConfigResult = {
   /** Attribute: schema_types (structured_data_schema_types, nullable) */
-  schema_types: StructuredDataSchemaTypes;
+  schema_types: StructuredDataSchemaTypes | null;
   /** Attribute: category_display_name (text, nullable) */
   category_display_name: string | null;
   /** Attribute: application_sub_category (text, nullable) */

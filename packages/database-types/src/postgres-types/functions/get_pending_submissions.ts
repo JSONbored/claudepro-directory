@@ -15,11 +15,11 @@ import { pendingSubmissionsItemSchema } from '../composites/pending_submissions_
  */
 export type GetPendingSubmissionsArgs = {
   /** Parameter: p_limit (int4, optional) */
-  p_limit: number | undefined | null | undefined;
+  p_limit?: number;
   /** Parameter: p_offset (int4, optional) */
-  p_offset: number | undefined | null | undefined;
+  p_offset?: number;
   /** Parameter: p_filter_type (text, optional) */
-  p_filter_type: string | undefined | null | undefined;
+  p_filter_type?: string;
 };
 
 /**

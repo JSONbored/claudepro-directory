@@ -29,14 +29,32 @@ export const getMcpbStoragePathArgsSchema = z.object({
 export type GetMcpbStoragePathArgsFromZod = z.infer<typeof getMcpbStoragePathArgsSchema>;
 
 /**
+ * Return row type for PostgreSQL function: get_mcpb_storage_path
+ */
+export type GetMcpbStoragePathReturnRow = {
+  /** bucket (text, nullable) */
+  bucket: string | null;
+  /** object_path (text, nullable) */
+  object_path: string | null;
+};
+
+/**
+ * Zod schema for get_mcpb_storage_path return row
+ */
+export const getMcpbStoragePathReturnRowSchema = z.object({
+  bucket: z.string().nullable(),
+  object_path: z.string().nullable(),
+});
+
+/**
  * Return type for PostgreSQL function: get_mcpb_storage_path
  */
-export type GetMcpbStoragePathReturns = Record<string, unknown>[];
+export type GetMcpbStoragePathReturns = GetMcpbStoragePathReturnRow[];
 
 /**
  * Zod schema for get_mcpb_storage_path function return type
  */
-export const getMcpbStoragePathReturnsSchema = z.array(z.any());
+export const getMcpbStoragePathReturnsSchema = z.array(getMcpbStoragePathReturnRowSchema);
 
 /**
  * Type inference from Zod schema (should match type above)

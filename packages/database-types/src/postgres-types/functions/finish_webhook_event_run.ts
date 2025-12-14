@@ -16,9 +16,9 @@ export type FinishWebhookEventRunArgs = {
   /** Parameter: p_status (webhook_delivery_status) */
   p_status: 'running' | 'succeeded' | 'failed';
   /** Parameter: p_error (text, optional) */
-  p_error: string | undefined | null | undefined;
+  p_error?: string;
   /** Parameter: p_metadata (jsonb, optional) */
-  p_metadata: Record<string, unknown> | undefined | null | undefined;
+  p_metadata?: Record<string, unknown>;
 };
 
 /**

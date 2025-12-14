@@ -15,21 +15,21 @@ import { searchContentOptimizedResultSchema } from '../composites/search_content
  */
 export type SearchContentOptimizedArgs = {
   /** Parameter: p_query (text, optional) */
-  p_query: string | undefined | null | undefined;
+  p_query?: string;
   /** Parameter: p_categories (_content_category, optional) */
-  p_categories: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog'[] | undefined | null | undefined;
+  p_categories?: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog'[];
   /** Parameter: p_tags (_text, optional) */
-  p_tags: string[] | undefined | null | undefined;
+  p_tags?: string[];
   /** Parameter: p_authors (_text, optional) */
-  p_authors: string[] | undefined | null | undefined;
+  p_authors?: string[];
   /** Parameter: p_sort (text, optional) */
-  p_sort: string | undefined | null | undefined;
+  p_sort?: string;
   /** Parameter: p_limit (int4, optional) */
-  p_limit: number | undefined | null | undefined;
+  p_limit?: number;
   /** Parameter: p_offset (int4, optional) */
-  p_offset: number | undefined | null | undefined;
+  p_offset?: number;
   /** Parameter: p_highlight_query (text, optional) */
-  p_highlight_query: string | undefined | null | undefined;
+  p_highlight_query?: string;
 };
 
 /**

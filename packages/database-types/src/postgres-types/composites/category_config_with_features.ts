@@ -59,7 +59,7 @@ export type CategoryConfigWithFeatures = {
   /** Attribute: badges (jsonb, nullable) */
   badges: Record<string, unknown> | null;
   /** Attribute: features (category_config_features, nullable) */
-  features: CategoryConfigFeatures;
+  features: CategoryConfigFeatures | null;
 };
 
 /**

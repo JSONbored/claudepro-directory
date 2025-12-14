@@ -15,11 +15,11 @@ import { contentSchema } from '../composites/content';
  */
 export type GetRecentContentArgs = {
   /** Parameter: p_category (text, optional) */
-  p_category: string | undefined | null | undefined;
+  p_category?: string;
   /** Parameter: p_limit (int4, optional) */
-  p_limit: number | undefined | null | undefined;
+  p_limit?: number;
   /** Parameter: p_days (int4, optional) */
-  p_days: number | undefined | null | undefined;
+  p_days?: number;
 };
 
 /**

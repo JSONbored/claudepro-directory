@@ -25,7 +25,7 @@ export type QuizConfigurationQuestion = {
   /** Attribute: display_order (int4, nullable) */
   display_order: number | null;
   /** Attribute: options (_quiz_configuration_option, nullable) */
-  options: QuizConfigurationOption[];
+  options: QuizConfigurationOption[] | null;
 };
 
 /**

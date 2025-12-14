@@ -19,7 +19,7 @@ export type FaqQuestion = {
   /** Attribute: name (text, nullable) */
   name: string | null;
   /** Attribute: accepted_answer (faq_answer, nullable) */
-  accepted_answer: FaqAnswer;
+  accepted_answer: FaqAnswer | null;
 };
 
 /**

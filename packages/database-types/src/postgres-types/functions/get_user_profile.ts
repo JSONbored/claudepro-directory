@@ -17,7 +17,7 @@ export type GetUserProfileArgs = {
   /** Parameter: p_user_slug (text) */
   p_user_slug: string;
   /** Parameter: p_viewer_id (uuid, optional) */
-  p_viewer_id: string | undefined | null | undefined;
+  p_viewer_id?: string;
 };
 
 /**

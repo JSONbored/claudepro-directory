@@ -15,7 +15,7 @@ import { companyListItemSchema } from './company_list_item';
  */
 export type CompanyListResult = {
   /** Attribute: companies (_company_list_item, nullable) */
-  companies: CompanyListItem[];
+  companies: CompanyListItem[] | null;
   /** Attribute: total (int4, nullable) */
   total: number | null;
 };

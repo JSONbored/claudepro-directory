@@ -15,7 +15,7 @@ import { userActivityTimelineItemSchema } from './user_activity_timeline_item';
  */
 export type UserActivityTimelineResult = {
   /** Attribute: activities (_user_activity_timeline_item, nullable) */
-  activities: UserActivityTimelineItem[];
+  activities: UserActivityTimelineItem[] | null;
   /** Attribute: has_more (bool, nullable) */
   has_more: boolean | null;
   /** Attribute: total (int4, nullable) */

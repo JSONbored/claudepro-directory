@@ -15,7 +15,7 @@ import { homepageCompleteResultSchema } from '../composites/homepage_complete_re
  */
 export type GetHomepageCompleteArgs = {
   /** Parameter: p_category_ids (_text, optional) */
-  p_category_ids: string[] | undefined | null | undefined;
+  p_category_ids?: string[];
 };
 
 /**

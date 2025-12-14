@@ -145,11 +145,11 @@ export async function applyVariableConsolidation(dryRun: boolean = false): Promi
   logger.info(`  - ${report.conflicts.length} conflicts (need manual review)`);
 
   if (report.conflicts.length > 0) {
-    logger.warn('⚠️  Conflicts found - these need manual review:');
+    logger.info('⚠️  Conflicts found - new tweakcn values will take precedence:');
     for (const conflict of report.conflicts) {
-      logger.warn(`  - ${conflict.oldName} → ${conflict.newName} (values differ)`);
+      logger.info(`  - ${conflict.oldName} → ${conflict.newName} (using new tweakcn value)`);
     }
-    logger.warn('Continuing with consolidation, but conflicts will be skipped.');
+    logger.info('Continuing with consolidation - new tweakcn values take precedence as requested.');
   }
 
   // Step 2: Find all CSS files

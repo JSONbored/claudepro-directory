@@ -12,11 +12,11 @@ import { z } from 'zod';
  */
 export type GetSidebarRecentFormattedArgs = {
   /** Parameter: p_category (content_category, optional) */
-  p_category: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog' | undefined | null | undefined;
+  p_category?: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog';
   /** Parameter: p_limit (int4, optional) */
-  p_limit: number | undefined | null | undefined;
+  p_limit?: number;
   /** Parameter: p_days (int4, optional) */
-  p_days: number | undefined | null | undefined;
+  p_days?: number;
 };
 
 /**
@@ -37,14 +37,35 @@ export const getSidebarRecentFormattedArgsSchema = z.object({
 export type GetSidebarRecentFormattedArgsFromZod = z.infer<typeof getSidebarRecentFormattedArgsSchema>;
 
 /**
+ * Return row type for PostgreSQL function: get_sidebar_recent_formatted
+ */
+export type GetSidebarRecentFormattedReturnRow = {
+  /** title (text, nullable) */
+  title: string | null;
+  /** slug (text, nullable) */
+  slug: string | null;
+  /** date (text, nullable) */
+  date: string | null;
+};
+
+/**
+ * Zod schema for get_sidebar_recent_formatted return row
+ */
+export const getSidebarRecentFormattedReturnRowSchema = z.object({
+  title: z.string().nullable(),
+  slug: z.string().nullable(),
+  date: z.string().nullable(),
+});
+
+/**
  * Return type for PostgreSQL function: get_sidebar_recent_formatted
  */
-export type GetSidebarRecentFormattedReturns = Record<string, unknown>[];
+export type GetSidebarRecentFormattedReturns = GetSidebarRecentFormattedReturnRow[];
 
 /**
  * Zod schema for get_sidebar_recent_formatted function return type
  */
-export const getSidebarRecentFormattedReturnsSchema = z.array(z.any());
+export const getSidebarRecentFormattedReturnsSchema = z.array(getSidebarRecentFormattedReturnRowSchema);
 
 /**
  * Type inference from Zod schema (should match type above)

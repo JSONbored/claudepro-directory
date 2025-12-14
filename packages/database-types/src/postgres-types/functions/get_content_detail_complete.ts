@@ -19,7 +19,7 @@ export type GetContentDetailCompleteArgs = {
   /** Parameter: p_slug (text) */
   p_slug: string;
   /** Parameter: p_user_id (uuid, optional) */
-  p_user_id: string | undefined | null | undefined;
+  p_user_id?: string;
 };
 
 /**

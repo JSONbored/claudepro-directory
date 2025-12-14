@@ -432,9 +432,7 @@ function HomePageClientContent({
             (featuredByCategory || initialData) as Record<string, readonly DisplayableContent[]>
           }
           categoryConfigs={categoryConfigs}
-          featuredJobs={
-            featuredJobs as ReadonlyArray<Database['public']['Tables']['jobs']['Row']>
-          }
+          featuredJobs={featuredJobs}
           featuredCategories={featuredCategories}
           {...(weekStart ? { weekStart } : {})}
         />

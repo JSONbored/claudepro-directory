@@ -16,7 +16,7 @@ export type InvokeEdgeFunctionArgs = {
   /** Parameter: action_header (text) */
   action_header: string;
   /** Parameter: payload (jsonb, optional) */
-  payload: Record<string, unknown> | undefined | null | undefined;
+  payload?: Record<string, unknown>;
 };
 
 /**

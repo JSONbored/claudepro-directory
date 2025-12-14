@@ -22,7 +22,7 @@ export type InsertWebhookEventArgs = {
   /** Parameter: p_direction (webhook_direction) */
   p_direction: 'inbound' | 'outbound';
   /** Parameter: p_received_at (timestamptz, optional) */
-  p_received_at: string | undefined | null | undefined;
+  p_received_at?: string;
 };
 
 /**

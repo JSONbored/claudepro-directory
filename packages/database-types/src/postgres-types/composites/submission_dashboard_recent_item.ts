@@ -23,7 +23,7 @@ export type SubmissionDashboardRecentItem = {
   /** Attribute: merged_at (timestamptz, nullable) */
   merged_at: string | null;
   /** Attribute: user (submission_dashboard_recent_user, nullable) */
-  user: SubmissionDashboardRecentUser;
+  user: SubmissionDashboardRecentUser | null;
 };
 
 /**

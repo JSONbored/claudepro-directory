@@ -35,7 +35,7 @@ export type RecommendationItem = {
   /** Attribute: rank (int4, nullable) */
   rank: number | null;
   /** Attribute: reasons (_recommendation_reason, nullable) */
-  reasons: RecommendationReason[];
+  reasons: RecommendationReason[] | null;
 };
 
 /**

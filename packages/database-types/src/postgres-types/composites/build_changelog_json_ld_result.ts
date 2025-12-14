@@ -17,9 +17,9 @@ import { techArticleSchemaSchema } from './tech_article_schema';
  */
 export type BuildChangelogJsonLdResult = {
   /** Attribute: blog_posting (blog_posting_schema, nullable) */
-  blog_posting: BlogPostingSchema;
+  blog_posting: BlogPostingSchema | null;
   /** Attribute: tech_article (tech_article_schema, nullable) */
-  tech_article: TechArticleSchema;
+  tech_article: TechArticleSchema | null;
 };
 
 /**

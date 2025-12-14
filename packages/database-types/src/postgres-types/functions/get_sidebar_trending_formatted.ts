@@ -12,9 +12,9 @@ import { z } from 'zod';
  */
 export type GetSidebarTrendingFormattedArgs = {
   /** Parameter: p_category (content_category, optional) */
-  p_category: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog' | undefined | null | undefined;
+  p_category?: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines' | 'skills' | 'collections' | 'guides' | 'jobs' | 'changelog';
   /** Parameter: p_limit (int4, optional) */
-  p_limit: number | undefined | null | undefined;
+  p_limit?: number;
 };
 
 /**
@@ -33,14 +33,35 @@ export const getSidebarTrendingFormattedArgsSchema = z.object({
 export type GetSidebarTrendingFormattedArgsFromZod = z.infer<typeof getSidebarTrendingFormattedArgsSchema>;
 
 /**
+ * Return row type for PostgreSQL function: get_sidebar_trending_formatted
+ */
+export type GetSidebarTrendingFormattedReturnRow = {
+  /** title (text, nullable) */
+  title: string | null;
+  /** slug (text, nullable) */
+  slug: string | null;
+  /** views (text, nullable) */
+  views: string | null;
+};
+
+/**
+ * Zod schema for get_sidebar_trending_formatted return row
+ */
+export const getSidebarTrendingFormattedReturnRowSchema = z.object({
+  title: z.string().nullable(),
+  slug: z.string().nullable(),
+  views: z.string().nullable(),
+});
+
+/**
  * Return type for PostgreSQL function: get_sidebar_trending_formatted
  */
-export type GetSidebarTrendingFormattedReturns = Record<string, unknown>[];
+export type GetSidebarTrendingFormattedReturns = GetSidebarTrendingFormattedReturnRow[];
 
 /**
  * Zod schema for get_sidebar_trending_formatted function return type
  */
-export const getSidebarTrendingFormattedReturnsSchema = z.array(z.any());
+export const getSidebarTrendingFormattedReturnsSchema = z.array(getSidebarTrendingFormattedReturnRowSchema);
 
 /**
  * Type inference from Zod schema (should match type above)

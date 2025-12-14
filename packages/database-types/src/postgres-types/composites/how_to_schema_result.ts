@@ -25,9 +25,9 @@ export type HowToSchemaResult = {
   /** Attribute: description (text, nullable) */
   description: string | null;
   /** Attribute: step (_how_to_step, nullable) */
-  step: HowToStep[];
+  step: HowToStep[] | null;
   /** Attribute: supply (_how_to_supply, nullable) */
-  supply: HowToSupply[];
+  supply: HowToSupply[] | null;
   /** Attribute: total_time (text, nullable) */
   total_time: string | null;
   /** Attribute: url (text, nullable) */

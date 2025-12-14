@@ -19,7 +19,7 @@ export type GetUserCollectionDetailArgs = {
   /** Parameter: p_collection_slug (text) */
   p_collection_slug: string;
   /** Parameter: p_viewer_id (uuid, optional) */
-  p_viewer_id: string | undefined | null | undefined;
+  p_viewer_id?: string;
 };
 
 /**

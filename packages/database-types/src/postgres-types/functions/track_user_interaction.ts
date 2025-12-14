@@ -21,9 +21,9 @@ export type TrackUserInteractionArgs = {
   /** Parameter: p_interaction_type (interaction_type) */
   p_interaction_type: 'view' | 'copy' | 'bookmark' | 'click' | 'time_spent' | 'search' | 'filter' | 'screenshot' | 'share' | 'download' | 'pwa_installed' | 'pwa_launched' | 'newsletter_subscribe' | 'contact_interact' | 'contact_submit' | 'form_started' | 'form_step_completed' | 'form_field_focused' | 'form_template_selected' | 'form_abandoned' | 'form_submitted' | 'sponsored_impression' | 'sponsored_click';
   /** Parameter: p_session_id (text, optional) */
-  p_session_id: string | undefined | null | undefined;
+  p_session_id?: string;
   /** Parameter: p_metadata (jsonb, optional) */
-  p_metadata: Record<string, unknown> | undefined | null | undefined;
+  p_metadata?: Record<string, unknown>;
 };
 
 /**

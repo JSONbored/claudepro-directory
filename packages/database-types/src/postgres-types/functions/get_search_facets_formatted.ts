@@ -25,14 +25,38 @@ export const getSearchFacetsFormattedArgsSchema = z.object({
 export type GetSearchFacetsFormattedArgsFromZod = z.infer<typeof getSearchFacetsFormattedArgsSchema>;
 
 /**
+ * Return row type for PostgreSQL function: get_search_facets_formatted
+ */
+export type GetSearchFacetsFormattedReturnRow = {
+  /** category (text, nullable) */
+  category: string | null;
+  /** content_count (int4, nullable) */
+  content_count: number | null;
+  /** tags (_text, nullable) */
+  tags: string[] | null;
+  /** authors (_text, nullable) */
+  authors: string[] | null;
+};
+
+/**
+ * Zod schema for get_search_facets_formatted return row
+ */
+export const getSearchFacetsFormattedReturnRowSchema = z.object({
+  category: z.string().nullable(),
+  content_count: z.number().nullable(),
+  tags: z.array(z.string()).nullable(),
+  authors: z.array(z.string()).nullable(),
+});
+
+/**
  * Return type for PostgreSQL function: get_search_facets_formatted
  */
-export type GetSearchFacetsFormattedReturns = Record<string, unknown>[];
+export type GetSearchFacetsFormattedReturns = GetSearchFacetsFormattedReturnRow[];
 
 /**
  * Zod schema for get_search_facets_formatted function return type
  */
-export const getSearchFacetsFormattedReturnsSchema = z.array(z.any());
+export const getSearchFacetsFormattedReturnsSchema = z.array(getSearchFacetsFormattedReturnRowSchema);
 
 /**
  * Type inference from Zod schema (should match type above)

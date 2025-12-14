@@ -13,6 +13,7 @@ import type {
   SearchUnifiedRow,
 } from '@heyclaude/data-layer/types/composite-types';
 import type { Database } from '@heyclaude/database-types';
+import type { Jobs } from '@heyclaude/database-types/postgres-types';
 
 // Use new composite types from @heyclaude/data-layer
 type SearchResult = SearchContentOptimizedRow;
@@ -118,8 +119,8 @@ export interface HomePageClientProps {
   featuredByCategory?: Record<string, unknown[]>;
   /** Content category statistics */
   stats?: Record<string, { total: number; featured: number }>;
-  /** Featured jobs from database (includes placeholders if no real jobs) */
-  featuredJobs?: Array<unknown>;
+  /** Featured jobs from database (includes placeholders if no real jobs) - uses generated Jobs type */
+  featuredJobs?: ReadonlyArray<Jobs>;
   /** Precomputed search filter options (tags/authors/categories) */
   searchFilters?: SearchFilterOptions;
   /** Start of the current content week (ISO string) */
@@ -186,7 +187,7 @@ export type JobCardJobType = {
 };
 
 export interface JobCardProps {
-  job: Database['public']['Tables']['jobs']['Row'] | JobCardJobType;
+  job: Jobs | JobCardJobType;
 }
 
 export interface FilterState {

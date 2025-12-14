@@ -15,9 +15,9 @@ import { tagWithCountsSchema } from '../composites/tag_with_counts';
  */
 export type GetAllTagsWithCountsArgs = {
   /** Parameter: p_min_count (int4, optional) */
-  p_min_count: number | undefined | null | undefined;
+  p_min_count?: number;
   /** Parameter: p_limit (int4, optional) */
-  p_limit: number | undefined | null | undefined;
+  p_limit?: number;
 };
 
 /**

@@ -17,13 +17,13 @@ import { reviewWithStatsItemSchema } from './review_with_stats_item';
  */
 export type ReviewWithStatsResult = {
   /** Attribute: reviews (_review_with_stats_item, nullable) */
-  reviews: ReviewWithStatsItem[];
+  reviews: ReviewWithStatsItem[] | null;
   /** Attribute: has_more (bool, nullable) */
   has_more: boolean | null;
   /** Attribute: total_count (int4, nullable) */
   total_count: number | null;
   /** Attribute: aggregate_rating (review_aggregate_rating, nullable) */
-  aggregate_rating: ReviewAggregateRating;
+  aggregate_rating: ReviewAggregateRating | null;
 };
 
 /**

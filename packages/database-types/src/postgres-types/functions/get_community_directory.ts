@@ -15,9 +15,9 @@ import { communityDirectoryResultSchema } from '../composites/community_director
  */
 export type GetCommunityDirectoryArgs = {
   /** Parameter: p_search_query (text, optional) */
-  p_search_query: string | undefined | null | undefined;
+  p_search_query?: string;
   /** Parameter: p_limit (int4, optional) */
-  p_limit: number | undefined | null | undefined;
+  p_limit?: number;
 };
 
 /**

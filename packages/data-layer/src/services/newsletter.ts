@@ -6,14 +6,20 @@
  * RPC function types remain using Database type (Prisma doesn't generate RPC types).
  */
 
-import type { Database } from '@heyclaude/database-types';
+import type {
+  SubscribeNewsletterArgs,
+  SubscribeNewsletterReturns,
+  GetActiveSubscribersReturns,
+  GetNewsletterSubscriptionByIdArgs,
+  GetNewsletterSubscriptionByIdReturns,
+} from '@heyclaude/database-types/postgres-types';
 import type { Prisma } from '@heyclaude/data-layer/prisma';
 import { prisma } from '../prisma/client.ts';
 import { BasePrismaService } from './base-prisma-service.ts';
 import { logRpcError } from '../utils/rpc-error-logging.ts';
 
-export type SubscriberResult = Database['public']['Functions']['subscribe_newsletter']['Returns'];
-export type SubscriberArgs = Database['public']['Functions']['subscribe_newsletter']['Args'];
+export type SubscriberResult = SubscribeNewsletterReturns;
+export type SubscriberArgs = SubscribeNewsletterArgs;
 
 /**
  * Newsletter Service using Prisma Client
@@ -35,7 +41,7 @@ export class NewsletterService extends BasePrismaService {
   }
 
   async getNewsletterSubscriberCount(): Promise<number> {
-    const result = await this.callRpc<Database['public']['Functions']['get_active_subscribers']['Returns']>(
+    const result = await this.callRpc<GetActiveSubscribersReturns>(
       'get_active_subscribers',
       {},
       { methodName: 'getNewsletterSubscriberCount' }
@@ -43,10 +49,8 @@ export class NewsletterService extends BasePrismaService {
     return Array.isArray(result) ? result.length : 0;
   }
 
-  async getActiveSubscribers(): Promise<
-    Database['public']['Functions']['get_active_subscribers']['Returns']
-  > {
-    const result = await this.callRpc<Database['public']['Functions']['get_active_subscribers']['Returns']>(
+  async getActiveSubscribers(): Promise<GetActiveSubscribersReturns> {
+    const result = await this.callRpc<GetActiveSubscribersReturns>(
       'get_active_subscribers',
       {},
       { methodName: 'getActiveSubscribers' }
@@ -56,10 +60,10 @@ export class NewsletterService extends BasePrismaService {
 
   async getSubscriptionById(
     id: string
-  ): Promise<Database['public']['Functions']['get_newsletter_subscription_by_id']['Returns'][0] | null> {
-    const result = await this.callRpc<Database['public']['Functions']['get_newsletter_subscription_by_id']['Returns']>(
+  ): Promise<GetNewsletterSubscriptionByIdReturns[0] | null> {
+    const result = await this.callRpc<GetNewsletterSubscriptionByIdReturns>(
       'get_newsletter_subscription_by_id',
-      { p_id: id },
+      { p_id: id } as GetNewsletterSubscriptionByIdArgs,
       { methodName: 'getSubscriptionById' }
     );
     return Array.isArray(result) && result.length > 0 ? (result[0] ?? null) : null;

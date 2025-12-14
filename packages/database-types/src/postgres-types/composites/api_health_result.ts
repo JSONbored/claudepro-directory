@@ -21,7 +21,7 @@ export type ApiHealthResult = {
   /** Attribute: api_version (text, nullable) */
   api_version: string | null;
   /** Attribute: checks (api_health_checks, nullable) */
-  checks: ApiHealthChecks;
+  checks: ApiHealthChecks | null;
 };
 
 /**
