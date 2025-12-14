@@ -148,7 +148,8 @@ export default function HomePage({ searchParams: _searchParams }: HomePageProper
         <div className="bg-background min-h-screen">
           <div className="relative overflow-hidden">
             {/* Hero section - streams immediately with Suspense boundary for member count */}
-            <Suspense fallback={<HomepageHeroServer memberCount={0} />}>
+            {/* CRITICAL: Use HomepageHeroServer with stats={} for fallback to match final layout */}
+            <Suspense fallback={<HomepageHeroServer memberCount={0} stats={{}} />}>
               <HomepageHeroWithMemberCount />
             </Suspense>
 
@@ -223,6 +224,7 @@ async function HomepageHeroWithMemberCount() {
   }
 
   // Hero will get search ref from context via client wrapper
+  // Pass stats to hero for skills counters display
   return <HomepageHeroServer memberCount={memberCount} stats={stats} />;
 }
 

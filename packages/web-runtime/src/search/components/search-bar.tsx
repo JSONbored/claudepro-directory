@@ -94,7 +94,10 @@ export function SearchBar({
   // Debounced sync from local state to context (for search execution)
   const [debouncedLocalQuery] = useDebounceValue(localQuery, 300);
   
+  // CRITICAL FIX: Sync debounced query to context to trigger search
   useEffect(() => {
+    // Only update if debounced value differs from context query
+    // This triggers search execution in SearchProvider
     if (debouncedLocalQuery !== query) {
       setQuery(debouncedLocalQuery);
     }

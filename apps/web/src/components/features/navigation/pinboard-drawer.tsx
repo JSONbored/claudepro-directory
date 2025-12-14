@@ -86,16 +86,17 @@ export function PinboardDrawer({ open, onOpenChange }: PinboardDrawerProps) {
       <SheetContent 
         side="right" 
         className={cn(
-          // Premium drawer design - beautiful, modern
-          'w-full sm:max-w-[420px]', // Slightly wider for better content display
+          // Premium drawer design - beautiful, modern, Vercel/Linear quality
+          'w-full sm:max-w-[440px]', // Slightly wider for better content display
           'overflow-y-auto',
           'rounded-l-2xl', // Larger radius for premium feel
           'border-l border-border/80',
-          'bg-background/98 backdrop-blur-xl', // Glass morphism
+          'bg-background/98 backdrop-blur-xl', // Enhanced glass morphism
           'shadow-2xl', // Premium shadow
+          'p-6', // Generous padding for premium feel
         )}
         style={{ 
-          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05)',
         }}
       >
         <SheetHeader className={cn('mb-6 pb-4 border-b border-border/50')}>
@@ -160,15 +161,17 @@ export function PinboardDrawer({ open, onOpenChange }: PinboardDrawerProps) {
                     whileTap={shouldReduceMotion ? {} : MICROINTERACTIONS.card.tap}
                     style={{ transformStyle: 'preserve-3d' }}
                     className={cn(
-                      // Premium card design - beautiful, modern
+                      // Premium card design - beautiful, modern, Vercel/Linear quality
                       'rounded-xl', // Larger radius for premium feel
                       'border border-border/60',
                       'p-4',
-                      'bg-background/50 backdrop-blur-sm', // Subtle glass effect
+                      'bg-background/60 backdrop-blur-md', // Enhanced glass effect
                       'group',
                       'cursor-pointer',
-                      'hover:bg-accent/40 hover:border-border/80',
-                      'hover:shadow-md',
+                      'hover:bg-accent/50 hover:border-accent/40',
+                      'hover:shadow-lg',
+                      'hover:scale-[1.02]', // Subtle scale on hover
+                      'active:scale-[0.98]', // Press feedback
                       'transition-all duration-200 ease-out', // Smooth transitions
                     )}
                   >

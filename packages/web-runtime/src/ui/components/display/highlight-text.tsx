@@ -48,12 +48,21 @@ function HighlightText({
       animate={isInView ? { backgroundSize: '100% 100%' } : {}}
       transition={transition}
       style={{
+        // CRITICAL: Use exact highlight color #F0704A at 100% opacity (like logo)
+        // Background gradient that expands from left to right
+        backgroundImage: 'linear-gradient(to right, #F0704A, #F0704A)',
         backgroundRepeat: 'no-repeat',
         backgroundPosition: 'left center',
         display: 'inline',
+        // Padding for the highlight effect
+        padding: '0.125rem 0.375rem',
+        borderRadius: '0.375rem',
+        // Text color should be white (like logo - white lettering on orange)
+        color: '#FFFFFF',
+        ...props.style,
       }}
       className={cn(
-        'relative inline-block rounded-lg bg-orange-400 px-2 py-1 dark:bg-orange-500/50',
+        'relative inline-block',
         className
       )}
       {...props}

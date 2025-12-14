@@ -26,37 +26,43 @@ import {
   TooltipContent, 
   TooltipProvider, 
   TooltipTrigger,
+  UnifiedBadge,
+  HighlightText,
+  ScrambledText,
 } from '@heyclaude/web-runtime/ui';
 import { 
   SPRING, 
   STAGGER, 
   MICROINTERACTIONS,
+  VIEWPORT,
 } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
-import dynamicImport from 'next/dynamic';
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
+import { type Database } from '@heyclaude/database-types';
+import { getCategoryConfigs, getCategoryStatsConfig } from '@heyclaude/web-runtime/data';
+import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import Link from 'next/link';
 
 import { useHeroSearchConnection } from './hero-search-connection';
 import { HomepageSearchBar } from './homepage-search-wrapper';
 import { HeroPartners } from './hero-partners';
 
-const RollingText = dynamicImport(
-  () => import('@heyclaude/web-runtime/ui').then((mod) => ({ default: mod.RollingText })),
-  {
-    loading: () => <span style={{ color: 'var(--claude-orange)' }}>enthusiasts</span>,
-  }
-);
-
 interface HomepageHeroClientProps {
   memberCount: number;
+  stats?: Record<string, { featured: number; total: number } | number>;
 }
 
 function HomepageHeroClientComponent({ 
   memberCount,
+  stats,
 }: HomepageHeroClientProps) {
   const { isSearchFocused, setSearchFocused } = useHeroSearchConnection();
   const shouldReduceMotion = useReducedMotion();
+  
+  // Category stats config for counters
+  const categoryStatsConfig = useMemo(() => getCategoryStatsConfig(), []);
+  const categoryConfigs = useMemo(() => getCategoryConfigs(), []);
 
   return (
     <section
@@ -115,54 +121,91 @@ function HomepageHeroClientComponent({
             {/* Hero Content - Centered with Perfect Hierarchy */}
             <div className="text-center">
               {/* Main Heading - Stunning Typography */}
-              <motion.h1
-                className="flex flex-wrap items-center justify-center gap-2 md:flex-nowrap md:gap-3"
-                initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 24 }}
-                animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-                transition={{
-                  ...SPRING.hero,
-                  delay: STAGGER.tight,
-                }}
+              <div
                 style={{
-                  fontSize: 'clamp(2rem, 5.5vw, 3.5rem)',
-                  fontWeight: 700,
-                  lineHeight: 1.1,
-                  letterSpacing: '-0.025em',
                   marginBottom: 'clamp(1.5rem, 4vw, 2rem)',
                 }}
               >
-                <motion.span 
-                  className="whitespace-nowrap"
-                  initial={shouldReduceMotion ? {} : { opacity: 0, y: 12 }}
-                  animate={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
+                <motion.h1
+                  className="flex items-center justify-center"
+                  initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 24 }}
+                  animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
                   transition={{
-                    ...SPRING.smooth,
+                    ...SPRING.hero,
+                    delay: STAGGER.tight,
+                  }}
+                  style={{
+                    fontSize: 'clamp(1.75rem, 4.5vw, 3rem)', // Smaller heading
+                    fontWeight: 700,
+                    lineHeight: 1.1,
+                    letterSpacing: '-0.025em',
+                    marginBottom: 'clamp(0.75rem, 2vw, 1rem)',
+                    color: 'var(--color-foreground)', // White text for heading
+                  }}
+                >
+                  <motion.span 
+                    initial={shouldReduceMotion ? {} : { opacity: 0, y: 12 }}
+                    animate={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
+                    transition={{
+                      ...SPRING.smooth,
+                      delay: STAGGER.tight + STAGGER.micro * 0.5,
+                    }}
+                  >
+                    The ultimate directory for
+                  </motion.span>
+                </motion.h1>
+                <motion.h1
+                  className="flex items-center justify-center"
+                  initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 24 }}
+                  animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                  transition={{
+                    ...SPRING.hero,
                     delay: STAGGER.tight + STAGGER.micro * 0.5,
                   }}
-                >
-                  The ultimate directory for Claude
-                </motion.span>
-                <motion.span
-                  initial={shouldReduceMotion ? {} : { opacity: 0, y: 12 }}
-                  animate={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
-                  transition={{
-                    ...SPRING.smooth,
-                    delay: STAGGER.tight + STAGGER.micro,
+                  style={{
+                    fontSize: 'clamp(1.75rem, 4.5vw, 3rem)', // Smaller heading
+                    fontWeight: 700,
+                    lineHeight: 1.1,
+                    letterSpacing: '-0.025em',
+                    gap: '0.5rem', // Proper spacing between Claude and HighlightText
+                    color: 'var(--color-foreground)', // White text for heading
                   }}
-                  style={{ color: 'oklch(74% 0.2 35)' }}
-                  className="whitespace-nowrap"
                 >
-                  <RollingText
-                    words={['enthusiasts', 'developers', 'power users', 'beginners', 'builders']}
-                    duration={3000}
-                    className="inline-block"
-                    style={{ color: 'oklch(74% 0.2 35)' }}
-                  />
-                </motion.span>
-              </motion.h1>
+                  <motion.span
+                    initial={shouldReduceMotion ? {} : { opacity: 0, y: 12 }}
+                    animate={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
+                    transition={{
+                      ...SPRING.smooth,
+                      delay: STAGGER.tight + STAGGER.micro,
+                    }}
+                    className="whitespace-nowrap"
+                  >
+                    Claude
+                  </motion.span>
+                  <motion.span
+                    initial={shouldReduceMotion ? {} : { opacity: 0, y: 12 }}
+                    animate={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
+                    transition={{
+                      ...SPRING.smooth,
+                      delay: STAGGER.tight + STAGGER.micro * 1.2,
+                    }}
+                    className="whitespace-nowrap"
+                  >
+                    <HighlightText
+                      text="creators"
+                      inView={!shouldReduceMotion}
+                      inViewOnce={true}
+                      transition={{
+                        duration: 2,
+                        ease: 'easeInOut',
+                      }}
+                    />
+                  </motion.span>
+                </motion.h1>
+              </div>
 
-              {/* Description - Enhanced Readability */}
-              <motion.p
+              {/* Description - Enhanced Readability with Scrambled Text */}
+              <motion.div
                 className="text-muted-foreground mx-auto max-w-2xl"
                 initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
                 animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
@@ -171,39 +214,49 @@ function HomepageHeroClientComponent({
                   delay: STAGGER.tight + STAGGER.micro * 1.5,
                 }}
                 style={{
-                  fontSize: 'clamp(1.125rem, 2.5vw, 1.375rem)',
+                  fontSize: 'clamp(1rem, 2vw, 1.25rem)', // Smaller subheading
                   lineHeight: 1.65,
                   marginBottom: 'clamp(2.5rem, 6vw, 3.5rem)',
                   fontWeight: 400,
                 }}
               >
-                Join{' '}
-                <TooltipProvider delayDuration={300}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <motion.span 
-                        className="cursor-help font-semibold"
-                        style={{ color: 'oklch(74% 0.2 35)' }}
-                        whileHover={shouldReduceMotion ? {} : { scale: 1.05 }}
-                        transition={SPRING.smooth}
-                      >
-                        <NumberTicker 
-                          value={memberCount} 
-                          className="font-semibold" 
-                          style={{ color: 'oklch(74% 0.2 35)' }} 
-                          suffix="+" 
-                        />
-                      </motion.span>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      Active community members who have contributed configurations, rules, or content to the directory
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>{' '}
-                members discovering and sharing the best Claude configurations. Explore expert rules,
-                powerful MCP servers, specialized agents, automation hooks, and connect with the
-                community building the future of AI.
-              </motion.p>
+                <ScrambledText
+                  radius={100}
+                  duration={1.2}
+                  speed={0.5}
+                  scrambleChars=".:"
+                  style={{
+                    fontSize: 'inherit',
+                    lineHeight: 'inherit',
+                    display: 'block',
+                  }}
+                >
+                  Join{' '}
+                  <TooltipProvider delayDuration={300}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="cursor-help font-semibold inline-block">
+                          <HighlightText
+                            text={`${memberCount}+`}
+                            inView={!shouldReduceMotion}
+                            inViewOnce={true}
+                            transition={{
+                              duration: 2,
+                              ease: 'easeInOut',
+                            }}
+                          />
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        Active community members who have contributed configurations, rules, or content to the directory
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>{' '}
+                  members discovering and sharing the best Claude configurations. Explore expert rules,
+                  powerful MCP servers, specialized agents, automation hooks, and connect with the
+                  community building the future of AI.
+                </ScrambledText>
+              </motion.div>
 
               {/* Search Bar - Integrated with Perfect Spacing */}
               <motion.div
@@ -214,10 +267,160 @@ function HomepageHeroClientComponent({
                   ...SPRING.smooth,
                   delay: STAGGER.tight + STAGGER.micro * 2.5,
                 }}
-                style={{ marginBottom: 'clamp(2.5rem, 6vw, 4rem)' }}
+                style={{ marginBottom: 'clamp(1.5rem, 4vw, 2rem)' }}
               >
                 <HomepageSearchBar onFocusChange={setSearchFocused} />
               </motion.div>
+
+              {/* Category Stats Section - Directly Below Search Bar */}
+              {stats && typeof stats === 'object' && Object.keys(stats).length > 0 && (
+                <motion.div
+                  className="mx-auto max-w-4xl"
+                  initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
+                  animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                  transition={{
+                    ...SPRING.smooth,
+                    delay: STAGGER.tight + STAGGER.micro * 3,
+                  }}
+                  style={{ marginBottom: 'clamp(2.5rem, 6vw, 4rem)' }}
+                >
+                  {/* Mobile Stats - Horizontal scroll */}
+                  <TooltipProvider delayDuration={300}>
+                    <motion.div
+                      className="flex gap-2 overflow-x-auto pb-2 md:hidden"
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={VIEWPORT.default}
+                      transition={SPRING.smooth}
+                    >
+                      {categoryStatsConfig.map(({ categoryId, delay }, index: number) => {
+                        const categoryRoute = ROUTES[categoryId.toUpperCase() as keyof typeof ROUTES];
+                        const count =
+                          typeof stats[categoryId] === 'number'
+                            ? stats[categoryId]
+                            : stats[categoryId]?.total || 0;
+                        const categoryConfig = categoryConfigs[categoryId as Database['public']['Enums']['content_category']];
+                        const tooltipText = categoryConfig?.description || `View all ${categoryId} configurations`;
+
+                        return (
+                          <Tooltip key={categoryId}>
+                            <TooltipTrigger asChild>
+                              <Link
+                                href={categoryRoute}
+                                className="group no-underline"
+                                aria-label={`View all ${categoryId} configurations`}
+                              >
+                                <motion.div
+                                  className="flex min-w-fit items-center gap-1.5 rounded-md border border-border/30 px-2 py-1 whitespace-nowrap transition-colors cursor-help bg-transparent"
+                                  initial={{ opacity: 0, x: -8 }}
+                                  whileInView={{ 
+                                    opacity: 1, 
+                                    x: 0,
+                                  }}
+                                  viewport={VIEWPORT.default}
+                                  transition={{
+                                    delay: index * STAGGER.fast,
+                                    ...SPRING.smooth,
+                                  }}
+                                  whileHover={{
+                                    scale: MICROINTERACTIONS.button.hover.scale,
+                                    borderColor: 'rgba(249, 115, 22, 0.5)',
+                                    transition: MICROINTERACTIONS.button.transition,
+                                  }}
+                                  whileTap={{
+                                    scale: MICROINTERACTIONS.button.tap.scale,
+                                    transition: MICROINTERACTIONS.button.transition,
+                                  }}
+                                >
+                                  <UnifiedBadge
+                                    variant="category"
+                                    category={categoryId}
+                                    href={null}
+                                    className="shrink-0 text-xs"
+                                  />
+                                  <NumberTicker
+                                    value={count}
+                                    delay={delay}
+                                    className="text-xs font-semibold tabular-nums"
+                                  />
+                                </motion.div>
+                              </Link>
+                            </TooltipTrigger>
+                            <TooltipContent side="bottom" className="max-w-xs text-center">
+                              {tooltipText}
+                            </TooltipContent>
+                          </Tooltip>
+                        );
+                      })}
+                    </motion.div>
+                  </TooltipProvider>
+
+                  {/* Desktop Stats */}
+                  <TooltipProvider delayDuration={300}>
+                    <div className="hidden flex-wrap justify-center gap-2 md:flex lg:gap-2">
+                      {categoryStatsConfig.map(({ categoryId, delay }, index: number) => {
+                        const categoryRoute = ROUTES[categoryId.toUpperCase() as keyof typeof ROUTES];
+                        const count =
+                          typeof stats[categoryId] === 'number'
+                            ? stats[categoryId]
+                            : stats[categoryId]?.total || 0;
+                        const categoryConfig = categoryConfigs[categoryId as Database['public']['Enums']['content_category']];
+                        const tooltipText = categoryConfig?.description || `View all ${categoryId} configurations`;
+
+                        return (
+                          <Tooltip key={categoryId}>
+                            <TooltipTrigger asChild>
+                              <Link
+                                href={categoryRoute}
+                                className="group no-underline"
+                                aria-label={`View all ${categoryId} configurations`}
+                              >
+                                <motion.div
+                                  className="flex items-center gap-1.5 rounded-md border border-border/30 px-3 py-1.5 transition-colors cursor-help bg-transparent"
+                                  initial={{ opacity: 0, y: 8 }}
+                                  whileInView={{ 
+                                    opacity: 1, 
+                                    y: 0,
+                                  }}
+                                  viewport={VIEWPORT.default}
+                                  transition={{
+                                    delay: index * STAGGER.fast,
+                                    ...SPRING.smooth,
+                                  }}
+                                  whileHover={{
+                                    scale: MICROINTERACTIONS.button.hover.scale,
+                                    borderColor: 'rgba(249, 115, 22, 0.5)',
+                                    transition: MICROINTERACTIONS.button.transition,
+                                  }}
+                                  whileTap={{
+                                    scale: MICROINTERACTIONS.button.tap.scale,
+                                    transition: MICROINTERACTIONS.button.transition,
+                                  }}
+                                >
+                                  <UnifiedBadge
+                                    variant="category"
+                                    category={categoryId}
+                                    href={null}
+                                    className="shrink-0 text-xs"
+                                  />
+                                  <NumberTicker
+                                    value={count}
+                                    delay={delay}
+                                    className="text-xs font-semibold tabular-nums"
+                                  />
+                                </motion.div>
+                              </Link>
+                            </TooltipTrigger>
+                            <TooltipContent side="bottom" className="max-w-xs text-center">
+                              {tooltipText}
+                            </TooltipContent>
+                          </Tooltip>
+                        );
+                      })}
+                    </div>
+                  </TooltipProvider>
+                </motion.div>
+              )}
             </div>
 
             {/* Partner Marquee - "Trusted by" (Feature-Flagged) */}

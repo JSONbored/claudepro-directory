@@ -34,7 +34,8 @@ const Command = ({
     ref={ref}
     className={cn(
       // Vercel exact pattern: max-width: 640px, padding: 8px, border-radius: 12px
-      'max-w-[640px] w-full p-2',
+      // CRITICAL: Width is constrained by parent DialogContent, so just use w-full
+      'w-full p-2',
       'rounded-xl', // 12px = rounded-xl
       'overflow-hidden',
       'bg-background text-foreground',
@@ -80,17 +81,31 @@ const CommandDialog = ({ children, open, onOpenChange, ...props }: DialogProps) 
     <Dialog {...dialogProps}>
       <DialogContent
         className={cn(
-          // Premium command palette design - modern, beautiful
+          // Premium command palette design - modern, beautiful, perfectly centered
           'overflow-hidden p-0',
-          'max-w-[640px]',
-          'w-[95vw] sm:w-full',
+          // CRITICAL FIX: Responsive width - never full width, always constrained
+          // Mobile: viewport minus safe padding (1rem each side), Desktop: fixed 640px
+          'w-[calc(100vw-2rem)] sm:w-[640px]',
+          'max-w-[640px]', // Never exceed 640px on any breakpoint
           'rounded-2xl', // Slightly larger radius for premium feel
           'border border-border/80',
           'bg-background/95 backdrop-blur-xl', // Glass morphism effect
           'shadow-2xl', // Premium shadow
+          // CRITICAL: Ensure proper centering - Dialog component handles this, but add explicit classes
+          '!fixed !top-[50%] !left-[50%] !right-auto !bottom-auto !-translate-x-1/2 !-translate-y-1/2 !z-[100] !m-0',
         )}
         style={{ 
-          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05)',
+          // CRITICAL: Inline styles as fallback for centering (Dialog component should handle this, but ensure it works)
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          right: 'auto',
+          bottom: 'auto',
+          transform: 'translate(-50%, -50%)',
+          margin: '0',
+          zIndex: 100,
+          // Width is handled by className with responsive utilities
         }}
       >
         <DialogTitle className="sr-only">Command Menu</DialogTitle>

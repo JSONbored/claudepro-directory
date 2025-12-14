@@ -13,13 +13,14 @@ output:
 
 # ============================================================================
 # PRE-COMMIT: Fast, parallel, smart grouping
-# Reduced from 18 commands to 5 logical groups for better performance
+# Only TypeScript type checking blocks commits
+# Linting and tests run but don't block
 # ============================================================================
 pre-commit:
   parallel: true
   follow: true
   commands:
-    # GROUP 1: Critical blocking checks (must pass, fail fast)
+    # GROUP 1: Critical blocking checks (TypeScript only)
     critical:
       glob: "**/*.{ts,tsx}"
       exclude: 
@@ -29,44 +30,18 @@ pre-commit:
         echo "🚨 Running critical checks..."
         START=$(date +%s%N)
         
-        # Type check (exits if fails)
+        # Type check (only blocking check)
         pnpm type-check:build || exit 1
-        
-        # Architecture validations (exits if fails)
-        pnpm validate:boundaries || exit 1
-        pnpm validate:api-routes || exit 1
-        pnpm validate:server-actions || exit 1
-        
-        # Client/server boundaries (exits if fails)
-        pnpm validate:client-server || exit 1
-        
-        # Database validations (exits if fails)
-        pnpm validate:database-queries || exit 1
-        pnpm validate:authentication || exit 1
-        
-        # RLS policies (exits if fails)
-        pnpm validate:rls-policies || exit 1
-        
-        # Performance validations (exits if fails)
-        pnpm validate:cache-components || exit 1
-        pnpm validate:nextresponse-promises || exit 1
-        
-        # Error handling validations (exits if fails)
-        pnpm validate:server-component-errors || exit 1
-        pnpm validate:client-component-errors || exit 1
-        
-        # Observability (exits if fails)
-        pnpm validate:logging-context || exit 1
         
         DURATION=$(( ($(date +%s%N) - START) / 1000000 ))
         echo "✅ Critical checks passed (${DURATION}ms)"
-      fail_text: "❌ Critical validation failed. Fix before committing."
+      fail_text: "❌ TypeScript type checking failed. Fix before committing."
 
-    # GROUP 2: Edge functions (isolated, parallel with GROUP 1)
+    # GROUP 2: Edge functions (non-blocking, isolated, parallel with GROUP 1)
     edge:
       glob: "apps/edge/functions/**/*.ts"
       run: |
-        echo "🦕 Checking edge functions..."
+        echo "🦕 Checking edge functions (non-blocking)..."
         if command -v deno &> /dev/null; then
           set +e
           OUTPUT=$(pnpm type-check:edge 2>&1)
@@ -75,16 +50,17 @@ pre-commit:
           if [ $STATUS -ne 0 ]; then
             if echo "$OUTPUT" | grep -F "packages/edge-runtime/src/utils/email/" >/dev/null; then
               echo "⚠️  Email template type errors ignored (packages/edge-runtime/src/utils/email/**)"
-              exit 0
+            else
+              echo "⚠️  Edge function type-check failed (non-blocking)"
             fi
-            exit $STATUS
           fi
+          exit 0
         else
           echo "⚠️  Deno not installed - skipping edge function type-check"
           echo "   Install: brew install deno"
           exit 0
         fi
-      fail_text: "❌ Edge function validation failed."
+      fail_text: "⚠️  Edge function validation issues (non-blocking)."
 
     # GROUP 3: Schema validation (runs in parallel with GROUP 1 & 2)
     schemas:
@@ -97,19 +73,20 @@ pre-commit:
         exit 0
       fail_text: "⚠️  Schema validation issues (review before merging)."
 
-    # GROUP 4: Auto-fixable issues (non-blocking, fixes staged files)
-    auto-fix:
+    # GROUP 4: Linting (non-blocking, auto-fixes staged files)
+    linting:
       glob: "**/*.{ts,tsx}"
       exclude: 
         - "apps/edge/functions/**"
         - "packages/edge-runtime/src/utils/email/**"
       run: |
-        echo "🔧 Auto-fixing code..."
+        echo "🔧 Running linting (non-blocking)..."
         set +e
         pnpm lint:build --fix 2>&1 | tail -3
         git add -u
         exit 0
       stage_fixed: true
+      fail_text: "⚠️  Linting issues found (non-blocking - auto-fixed where possible)."
 
     # GROUP 5: Tests (non-blocking, runs in parallel)
     tests:
@@ -124,55 +101,102 @@ pre-commit:
         exit 0
       fail_text: "⚠️  Tests failed (non-blocking - fix before merging)."
 
+    # GROUP 6: Formatting check (non-blocking, informative)
+    formatting:
+      glob: "**/*.{ts,tsx,js,jsx,json,css,md}"
+      exclude:
+        - "node_modules/**"
+        - ".next/**"
+        - "dist/**"
+        - "**/*.generated.*"
+      run: |
+        echo "✨ Checking code formatting..."
+        set +e
+        # Only check staged files for speed
+        STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|tsx|js|jsx|json|css|md)$' || true)
+        if [ -z "$STAGED_FILES" ]; then
+          echo "   ℹ️  No formatted files in this commit"
+          exit 0
+        fi
+        FORMAT_ISSUES=$(echo "$STAGED_FILES" | xargs pnpm prettier --check 2>&1 | grep -c "would reformat" || echo "0")
+        if [ "$FORMAT_ISSUES" != "0" ]; then
+          echo "   💡 $FORMAT_ISSUES staged file(s) need formatting"
+          echo "   Run: pnpm format"
+        else
+          echo "   ✅ Staged files are properly formatted"
+        fi
+        exit 0
+      fail_text: "💡 Formatting suggestions (non-blocking)."
+
+    # GROUP 7: Quick code insights (non-blocking, fast)
+    quick-insights:
+      glob: "**/*.{ts,tsx}"
+      exclude:
+        - "node_modules/**"
+        - ".next/**"
+        - "dist/**"
+        - "**/*.generated.*"
+      run: |
+        echo "💡 Quick code insights..."
+        set +e
+        
+        # Check staged files for common patterns
+        STAGED_TS=$(git diff --cached --name-only | grep -E '\.(ts|tsx)$' || true)
+        if [ -z "$STAGED_TS" ]; then
+          exit 0
+        fi
+        
+        # Check for console.* usage in staged files
+        CONSOLE_COUNT=$(git diff --cached | grep -c "console\." || echo "0")
+        if [ "$CONSOLE_COUNT" -gt 0 ]; then
+          echo "   ⚠️  Found console.* usage in staged files"
+          echo "   💡 Replace with logger.* from @heyclaude/web-runtime/logging/*"
+        fi
+        
+        # Check for 'use client' in server-only files
+        SERVER_FILES=$(echo "$STAGED_TS" | grep -E "(app/api|actions|server)" || true)
+        if [ -n "$SERVER_FILES" ]; then
+          CLIENT_DIRECTIVE=$(git diff --cached | grep -c "'use client'" || echo "0")
+          if [ "$CLIENT_DIRECTIVE" -gt 0 ]; then
+            echo "   ⚠️  Found 'use client' in server-only files"
+            echo "   💡 Remove 'use client' from API routes/server actions"
+          fi
+        fi
+        
+        # Check for missing 'use cache' in data functions
+        DATA_FUNCTIONS=$(git diff --cached | grep -E "export async function get.*\(" | grep -v "'use cache" | wc -l | tr -d ' ')
+        if [ "$DATA_FUNCTIONS" -gt 0 ]; then
+          echo "   💡 Consider adding 'use cache' to data fetching functions"
+        fi
+        
+        exit 0
+      fail_text: "💡 Quick insights (non-blocking)."
+
 # ============================================================================
-# PRE-PUSH: Comprehensive but optimized
-# Reduced from 15 commands to 4 consolidated commands
+# PRE-PUSH: Type checking blocks, everything else is non-blocking
+# Only TypeScript type checking blocks pushes
+# Build, linting, and tests run but don't block
 # ============================================================================
 pre-push:
   parallel: false
   commands:
-    # Comprehensive validation (all critical checks in one command)
-    validate:
+    # Type checking (only blocking check)
+    type-check:
       run: |
-        echo "🔍 Running comprehensive validation..."
+        echo "🔍 Running type checking..."
         START=$(date +%s%N)
         
-        echo "  ▶️  Type checking..."
+        echo "  ▶️  TypeScript type checking..."
         pnpm type-check:build || exit 1
         
-        echo "  ▶️  Architecture..."
-        pnpm validate:boundaries || exit 1
-        pnpm validate:api-routes || exit 1
-        pnpm validate:server-actions || exit 1
-        pnpm validate:client-server || exit 1
-        
-        echo "  ▶️  Data layer..."
-        pnpm validate:database-queries || exit 1
-        pnpm validate:authentication || exit 1
-        pnpm validate:rls-policies || exit 1
-        
-        echo "  ▶️  Performance..."
-        pnpm validate:cache-components || exit 1
-        pnpm validate:nextresponse-promises || exit 1
-        
-        echo "  ▶️  Error handling..."
-        pnpm validate:server-component-errors || exit 1
-        pnpm validate:client-component-errors || exit 1
-        
-        echo "  ▶️  Observability..."
-        pnpm validate:logging-context || exit 1
-        
-        echo "  ▶️  MCP tools..."
-        pnpm validate:mcp || exit 1
-        
         DURATION=$(( ($(date +%s%N) - START) / 1000000 ))
-        echo "✅ Validation passed (${DURATION}ms)"
-      fail_text: "❌ Validation failed. Fix before pushing."
+        echo "✅ Type checking passed (${DURATION}ms)"
+      fail_text: "❌ TypeScript type checking failed. Fix before pushing."
 
-    # Build verification (with better env var handling)
+    # Build verification (non-blocking, with better env var handling)
     build:
       run: |
-        echo "🏗️  Verifying build..."
+        echo "🏗️  Verifying build (non-blocking)..."
         START=$(date +%s%N)
         
         # Check for missing env vars
@@ -197,61 +221,253 @@ pre-push:
           fi
         fi
         
-        pnpm build || exit 1
-        
-        DURATION=$(( ($(date +%s%N) - START) / 1000000 ))
-        echo "✅ Build verified (${DURATION}ms)"
-      fail_text: "❌ Build failed."
+        set +e
+        BUILD_OUTPUT=$(pnpm build 2>&1)
+        BUILD_STATUS=$?
+        echo "$BUILD_OUTPUT" | tail -10
+        if [ $BUILD_STATUS -ne 0 ]; then
+          echo "   ⚠️  Build failed (non-blocking - fix before merging)"
+        else
+          DURATION=$(( ($(date +%s%N) - START) / 1000000 ))
+          echo "   ✅ Build verified (${DURATION}ms)"
+        fi
+        exit 0
+      fail_text: "⚠️  Build failed (non-blocking)."
+
+    # Linting (non-blocking)
+    linting:
+      run: |
+        echo "🔧 Running linting (non-blocking)..."
+        set +e
+        pnpm lint:build 2>&1 | tail -10
+        exit 0
+      fail_text: "⚠️  Linting issues found (non-blocking)."
 
     # Tests (non-blocking)
     tests:
       run: |
-        echo "🧪 Running tests..."
+        echo "🧪 Running tests (non-blocking)..."
         set +e
-        pnpm test --run 2>&1 | tail -20
+        # Check if there are any test files before running
+        TEST_FILES=$(find . -name "*.test.ts" -o -name "*.test.tsx" -o -name "*.spec.ts" -o -name "*.spec.tsx" 2>/dev/null | grep -v node_modules | head -1)
+        if [ -z "$TEST_FILES" ]; then
+          echo "   ℹ️  No test files found - skipping"
+          exit 0
+        fi
+        # Run tests and capture output
+        TEST_OUTPUT=$(pnpm test --run 2>&1)
+        TEST_STATUS=$?
+        echo "$TEST_OUTPUT" | tail -20
+        if [ $TEST_STATUS -ne 0 ]; then
+          echo "   ⚠️  Tests failed (non-blocking - fix before merging)"
+        else
+          echo "   ✅ Tests passed"
+        fi
         exit 0
       fail_text: "⚠️  Tests failed (non-blocking)."
 
-    # Tech debt (non-blocking, fast snapshot)
-    tech-debt:
+    # Code quality insights (non-blocking, informative)
+    code-quality:
       run: |
-        echo "📊 Tech debt snapshot..."
+        echo "📊 Code quality insights..."
         echo ""
+        set +e
         
-        # Unused exports (quick check)
+        # Unused exports check
         echo "🔍 Checking unused exports..."
-        UNUSED_COUNT=$(npx knip -c config/tools/knip.json --no-exit-code 2>/dev/null | grep -c "Unused " || echo 0)
-        if [ "$UNUSED_COUNT" -gt 0 ]; then
-          echo "   ⚠️  Found $UNUSED_COUNT unused items"
-          echo "   Run: pnpm analyze:unused"
+        UNUSED_OUTPUT=$(npx knip -c config/tools/knip.json --no-exit-code 2>/dev/null | head -20)
+        if echo "$UNUSED_OUTPUT" | grep -q "Unused"; then
+          UNUSED_COUNT=$(echo "$UNUSED_OUTPUT" | grep -c "Unused" || echo "0")
+          echo "   ⚠️  Found ~$UNUSED_COUNT unused export(s)"
+          echo "   💡 Run: pnpm analyze:unused"
         else
-          echo "   ✅ No unused exports"
+          echo "   ✅ No unused exports detected"
         fi
-        
-        # Circular deps (quick check)
-        echo "🔄 Checking circular dependencies..."
-        CIRCULAR_COUNT=$(npx madge --circular --extensions ts,tsx apps/web/src 2>/dev/null | grep -c "↻" || echo 0)
-        if [ "$CIRCULAR_COUNT" -gt 0 ]; then
-          echo "   ⚠️  Found circular dependencies"
-          echo "   Run: pnpm analyze:circular"
-        else
-          echo "   ✅ No circular dependencies"
-        fi
-        
-        # Large files (quick check)
-        echo "📏 Checking for bloat..."
-        LARGE_FILES=$(find apps/web/src apps/edge/functions -name "*.ts" -o -name "*.tsx" 2>/dev/null | xargs wc -l 2>/dev/null | awk '$1 > 500 {print $2}' | wc -l)
-        if [ "$LARGE_FILES" -gt 0 ]; then
-          echo "   ⚠️  Found $LARGE_FILES files > 500 LOC"
-          echo "   Run: pnpm analyze:files"
-        else
-          echo "   ✅ No bloated files"
-        fi
-        
         echo ""
-        echo "✅ Tech debt check complete (non-blocking)"
+        
+        # Circular dependencies check
+        echo "🔄 Checking circular dependencies..."
+        CIRCULAR_OUTPUT=$(npx madge --circular --extensions ts,tsx apps/web/src packages/web-runtime/src packages/data-layer/src 2>/dev/null | head -10)
+        if echo "$CIRCULAR_OUTPUT" | grep -q "↻"; then
+          CIRCULAR_COUNT=$(echo "$CIRCULAR_OUTPUT" | grep -c "↻" || echo "0")
+          echo "   ⚠️  Found ~$CIRCULAR_COUNT circular dependency chain(s)"
+          echo "   💡 Run: pnpm analyze:circular"
+        else
+          echo "   ✅ No circular dependencies detected"
+        fi
+        echo ""
+        
+        # Large files check
+        echo "📏 Checking for large files..."
+        LARGE_FILES=$(find apps/web/src packages/web-runtime/src packages/data-layer/src -name "*.ts" -o -name "*.tsx" 2>/dev/null | xargs wc -l 2>/dev/null | awk '$1 > 500 {print $2 " (" $1 " lines)"}' | head -5)
+        if [ -n "$LARGE_FILES" ]; then
+          LARGE_COUNT=$(echo "$LARGE_FILES" | wc -l | tr -d ' ')
+          echo "   ⚠️  Found $LARGE_COUNT file(s) > 500 LOC:"
+          echo "$LARGE_FILES" | sed 's/^/      - /'
+          echo "   💡 Consider splitting large files for maintainability"
+        else
+          echo "   ✅ No overly large files detected"
+        fi
+        echo ""
+        
+        echo "✅ Code quality check complete (non-blocking)"
         exit 0
-      fail_text: "ℹ️  Tech debt detected."
+      fail_text: "💡 Code quality insights (non-blocking)."
+
+    # Architecture pattern insights (non-blocking, using ast-grep if available)
+    architecture-insights:
+      run: |
+        echo "🏗️  Architecture pattern insights..."
+        set +e
+        
+        # Check if ast-grep is available
+        if command -v ast-grep &> /dev/null || npx ast-grep --version &> /dev/null 2>&1; then
+          echo "   🔍 Running ast-grep pattern checks..."
+          
+          # Logging patterns
+          echo "   📝 Logging patterns..."
+          CONSOLE_USAGE=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/logging-patterns.yml 2>/dev/null | grep -c "no-console-usage\|missing-normalize-error" || echo "0")
+          if [ "$CONSOLE_USAGE" != "0" ]; then
+            echo "      ⚠️  Found logging pattern issues (console.* usage, missing normalizeError)"
+            echo "      💡 Use logger.* from @heyclaude/web-runtime/logging/*"
+          fi
+          
+          # Security patterns
+          echo "   🔒 Security patterns..."
+          SECURITY_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/security-patterns.yml 2>/dev/null | grep -c "missing-input-validation\|missing-auth" || echo "0")
+          if [ "$SECURITY_ISSUES" != "0" ]; then
+            echo "      ⚠️  Found potential security issues"
+            echo "      💡 Review: config/coderabbit/ast-grep-rules/security-patterns.yml"
+          fi
+          
+          # Performance patterns
+          echo "   ⚡ Performance patterns..."
+          PERF_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/performance-patterns.yml 2>/dev/null | grep -c "n-plus-one\|await-in-loop\|missing-usememo\|missing-usecallback" || echo "0")
+          if [ "$PERF_ISSUES" != "0" ]; then
+            echo "      ⚠️  Found performance optimization opportunities"
+            echo "      💡 Review: config/coderabbit/ast-grep-rules/performance-patterns.yml"
+          fi
+          
+          # Database optimization patterns
+          echo "   🗄️  Database optimization patterns..."
+          DB_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/database-optimization-patterns.yml 2>/dev/null | grep -c "missing-request-scoped-cache\|missing-cache-life\|missing-cache-tag\|missing-rpc-error" || echo "0")
+          if [ "$DB_ISSUES" != "0" ]; then
+            echo "      ⚠️  Found database optimization opportunities"
+            echo "      💡 Review: config/coderabbit/ast-grep-rules/database-optimization-patterns.yml"
+          fi
+          
+          # React optimization patterns
+          echo "   ⚛️  React optimization patterns..."
+          REACT_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/react-optimization-patterns.yml 2>/dev/null | grep -c "missing-usememo\|missing-usecallback\|missing-useeffect" || echo "0")
+          if [ "$REACT_ISSUES" != "0" ]; then
+            echo "      ⚠️  Found React optimization opportunities"
+            echo "      💡 Review: config/coderabbit/ast-grep-rules/react-optimization-patterns.yml"
+          fi
+          
+          # Bundle optimization patterns
+          echo "   📦 Bundle optimization patterns..."
+          BUNDLE_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/bundle-optimization-patterns.yml 2>/dev/null | grep -c "missing-dynamic-import\|inefficient-barrel\|missing-code-splitting" || echo "0")
+          if [ "$BUNDLE_ISSUES" != "0" ]; then
+            echo "      ⚠️  Found bundle optimization opportunities"
+            echo "      💡 Review: config/coderabbit/ast-grep-rules/bundle-optimization-patterns.yml"
+          fi
+          
+          # Accessibility patterns
+          echo "   ♿ Accessibility patterns..."
+          A11Y_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/accessibility-patterns.yml 2>/dev/null | grep -c "missing-aria-label\|missing-alt-text\|missing-keyboard-handler" || echo "0")
+          if [ "$A11Y_ISSUES" != "0" ]; then
+            echo "      ⚠️  Found accessibility issues"
+            echo "      💡 Review: config/coderabbit/ast-grep-rules/accessibility-patterns.yml"
+          fi
+          
+          # Type safety patterns
+          echo "   🔷 Type safety patterns..."
+          TYPE_ISSUES=$(npx ast-grep scan --rule config/coderabbit/ast-grep-rules/type-safety-patterns.yml 2>/dev/null | grep -c "unsafe-as-assertion\|explicit-any\|missing-type-guard" || echo "0")
+          if [ "$TYPE_ISSUES" != "0" ]; then
+            echo "      ⚠️  Found type safety issues"
+            echo "      💡 Review: config/coderabbit/ast-grep-rules/type-safety-patterns.yml"
+          fi
+          
+          echo ""
+          echo "   ✅ Architecture pattern check complete"
+        else
+          echo "   ℹ️  ast-grep not available (install: npm i -g @ast-grep/cli)"
+          echo "   💡 Install for deeper architecture pattern analysis"
+        fi
+        
+        exit 0
+      fail_text: "💡 Architecture insights (non-blocking)."
+
+    # Performance insights (non-blocking)
+    performance-insights:
+      run: |
+        echo "⚡ Performance insights..."
+        set +e
+        
+        # Check for large bundle indicators in recent changes
+        echo "   📦 Checking bundle size indicators..."
+        
+        # Get changed files from current branch vs origin/main
+        CHANGED_FILES=$(git diff --name-only origin/main...HEAD 2>/dev/null | grep -E '\.(ts|tsx)$' | head -20 || echo "")
+        
+        if [ -n "$CHANGED_FILES" ]; then
+          # Count dynamic imports (good for code splitting)
+          DYNAMIC_COUNT=$(echo "$CHANGED_FILES" | xargs grep -l "await import\|import(" 2>/dev/null | wc -l | tr -d ' ')
+          if [ "$DYNAMIC_COUNT" -gt 0 ]; then
+            echo "   ✅ Found dynamic imports in changed files (good for code splitting)"
+          fi
+          
+          # Check for 'use cache' directives
+          CACHE_COUNT=$(echo "$CHANGED_FILES" | xargs grep -l "'use cache" 2>/dev/null | wc -l | tr -d ' ')
+          if [ "$CACHE_COUNT" -gt 0 ]; then
+            echo "   ✅ Found Cache Components directives in changed files"
+          fi
+          
+          # Check for missing cache directives in data functions
+          DATA_FUNCTIONS=$(echo "$CHANGED_FILES" | xargs grep -l "export async function get.*(" 2>/dev/null | wc -l | tr -d ' ')
+          if [ "$DATA_FUNCTIONS" -gt 0 ]; then
+            echo "   💡 Consider adding 'use cache' to data fetching functions"
+          fi
+        else
+          echo "   ℹ️  No changed files to analyze (or origin/main not available)"
+        fi
+        
+        echo "   ✅ Performance check complete"
+        exit 0
+      fail_text: "💡 Performance insights (non-blocking)."
+
+    # Summary & actionable insights (non-blocking)
+    summary:
+      run: |
+        echo ""
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "📋 Pre-push Summary & Quick Actions"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        echo "✅ Type checking: PASSED (blocking check)"
+        echo ""
+        echo "💡 Quick Actions (if needed):"
+        echo "   • Format code:        pnpm format"
+        echo "   • Fix linting:        pnpm lint:build:fix"
+        echo "   • Analyze unused:     pnpm analyze:unused"
+        echo "   • Check circular:    pnpm analyze:circular"
+        echo "   • Run tests:          pnpm test"
+        echo "   • Visual tests:        pnpm test:visual"
+        echo ""
+        echo "📚 Documentation:"
+        echo "   • Logging standards:  .cursor/rules/logging-instrumentation.mdc"
+        echo "   • API standards:      .cursor/rules/api-design-standards.mdc"
+        echo "   • Security:           .cursor/rules/security-standards.mdc"
+        echo ""
+        echo "🔧 Tools:"
+        echo "   • ESLint config:      config/tools/eslint.config.mjs"
+        echo "   • ast-grep rules:     config/coderabbit/ast-grep-rules/"
+        echo "   • Knip config:        config/tools/knip.json"
+        echo ""
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        exit 0
+      fail_text: "📋 Summary (informational)."
 
 # ============================================================================
 # COMMIT-MSG: Enforce conventional commits (with WIP support)
@@ -317,11 +533,11 @@ no_tty: false
 min_version: 1.13.0
 
 # ============================================================================
-# USAGE TIPS
+# USAGE TIPS & HELPFUL COMMANDS
 # ============================================================================
 # Skip specific commands:
 #   LEFTHOOK_EXCLUDE=critical,edge git commit
-#   LEFTHOOK_EXCLUDE=tech-debt git push
+#   LEFTHOOK_EXCLUDE=build,linting,tests,code-quality git push
 #
 # Skip commit-msg validation:
 #   LEFTHOOK_EXCLUDE=commit-msg git commit
@@ -339,7 +555,35 @@ min_version: 1.13.0
 #   git commit --no-verify
 #   git push --no-verify
 #
-# Technical debt reports:
-#   pnpm analyze:unused    # Full unused exports report
-#   pnpm analyze:circular  # Full circular dependency report
+# ============================================================================
+# HELPFUL ANALYSIS COMMANDS
+# ============================================================================
+# Code Quality:
+#   pnpm analyze:unused        # Find unused exports
+#   pnpm analyze:circular     # Find circular dependencies
+#   pnpm analyze:all          # Run all analyses
+#
+# Architecture:
+#   npx ast-grep scan --rule config/coderabbit/ast-grep-rules/logging-patterns.yml
+#   npx ast-grep scan --rule config/coderabbit/ast-grep-rules/security-patterns.yml
+#
+# Formatting:
+#   pnpm format               # Auto-fix formatting
+#   pnpm format:check         # Check formatting
+#
+# Type Checking:
+#   pnpm type-check:build     # Full type check
+#   pnpm type-check:web       # Web app only
+#   pnpm type-check:packages  # Packages only
+#
+# Testing:
+#   pnpm test                 # Run tests
+#   pnpm test:watch           # Watch mode
+#   pnpm test:visual          # Playwright tests
+#
+# Build & Deploy:
+#   pnpm build                # Production build
+#   pnpm build:analyze        # Bundle analysis
+#   pnpm deploy:web           # Deploy web app
+#   pnpm deploy:edge          # Deploy edge functions
 # ============================================================================

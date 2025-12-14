@@ -84,6 +84,16 @@ export async function generateMetadata(): Promise<Metadata> {
  * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
  * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
  * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
+ * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
   * @param {{ active: boolean | null; end_date: string; start_date: string }} sponsorship Parameter description
 */
 function isSponsorshipActive(

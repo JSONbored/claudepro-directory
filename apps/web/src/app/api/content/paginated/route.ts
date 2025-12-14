@@ -287,6 +287,106 @@ import { cacheLife } from 'next/cache';
   limit: number;
   offset: number;
 }} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
 */
 async function getCachedPaginatedContent(params: {
   category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;

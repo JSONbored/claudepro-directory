@@ -129,8 +129,12 @@ const DialogContent = ({
         element.style.setProperty('transform', 'translate(-50%, -50%)', 'important');
         element.style.setProperty('top', '50%', 'important');
         element.style.setProperty('left', '50%', 'important');
+        element.style.setProperty('right', 'auto', 'important');
+        element.style.setProperty('bottom', 'auto', 'important');
+        element.style.setProperty('margin', '0', 'important');
         // CRITICAL: Ensure z-index is higher than overlay (z-[60]) to appear above blur
         element.style.setProperty('z-index', '100', 'important');
+        element.style.setProperty('position', 'fixed', 'important');
       }
     };
     
@@ -138,10 +142,10 @@ const DialogContent = ({
     applyTransform();
     const immediateInterval = setInterval(applyTransform, 10);
     
-    // Clear immediate interval after 500ms (should be enough time for Radix to finish)
+    // Keep applying for longer (2 seconds) to ensure it sticks through all Radix animations
     setTimeout(() => {
       clearInterval(immediateInterval);
-    }, 500);
+    }, 2000);
     
     // Re-apply on any style changes (Radix may update styles during animations)
     const observer = new MutationObserver(() => {
@@ -150,7 +154,7 @@ const DialogContent = ({
     
     observer.observe(element, {
       attributes: true,
-      attributeFilter: ['style'],
+      attributeFilter: ['style', 'class'],
       attributeOldValue: false,
     });
     
@@ -158,13 +162,28 @@ const DialogContent = ({
     if (element.parentElement) {
       observer.observe(element.parentElement, {
         attributes: true,
-        attributeFilter: ['style'],
+        attributeFilter: ['style', 'class'],
       });
     }
+    
+    // Watch for any style mutations on the element itself
+    const styleObserver = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+          applyTransform();
+        }
+      }
+    });
+    
+    styleObserver.observe(element, {
+      attributes: true,
+      attributeFilter: ['style'],
+    });
     
     return () => {
       clearInterval(immediateInterval);
       observer.disconnect();
+      styleObserver.disconnect();
     };
   }, []);
   
@@ -177,9 +196,11 @@ const DialogContent = ({
           // CRITICAL: Use fixed positioning with proper centering
           // Use !important variants to ensure transform classes aren't overridden by Radix UI
           // CRITICAL: z-index must be higher than overlay (z-[60]) to appear above blur
-          'fixed top-[50%] left-[50%] !-translate-x-1/2 !-translate-y-1/2 !z-[100]',
-          // Responsive width - prevents edge clipping on mobile
-          'w-full max-w-[95vw] sm:max-w-lg',
+          '!fixed !top-[50%] !left-[50%] !right-auto !bottom-auto !-translate-x-1/2 !-translate-y-1/2 !z-[100] !m-0',
+          // CRITICAL FIX: Responsive width - never full width, always properly constrained
+          // Mobile: viewport minus safe padding (1rem each side)
+          // Desktop: auto width with max-width constraint (can be overridden by className prop for specific dialogs like command palette)
+          'w-[calc(100vw-2rem)] sm:w-auto sm:max-w-lg',
           // Base styling
           'border bg-background shadow-lg rounded-lg',
           // Padding (default, can be overridden by className prop)
@@ -192,11 +213,16 @@ const DialogContent = ({
           // CRITICAL FIX: Use inline styles as fallback to ensure centering works
           // Radix UI may override Tailwind classes, so inline styles ensure proper positioning
           // Note: useEffect above will ensure this is applied even if Radix overrides
-          transform: 'translate(-50%, -50%)',
+          position: 'fixed',
           top: '50%',
           left: '50%',
+          right: 'auto',
+          bottom: 'auto',
+          transform: 'translate(-50%, -50%)',
+          margin: '0',
           // CRITICAL: z-index must be higher than overlay to appear above blur
           zIndex: 100,
+          // Width is handled by className with responsive utilities and CSS
           ...props.style,
         }}
         {...props}

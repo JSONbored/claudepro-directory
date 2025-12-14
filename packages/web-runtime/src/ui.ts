@@ -61,6 +61,7 @@ export * from './ui/components/animation/particles-background.tsx';
 export * from './ui/components/animation/blur-text.tsx';
 export * from './ui/components/animation/gradient-text.tsx';
 export * from './ui/components/animation/rolling-text.tsx';
+export * from './ui/components/animation/scrambled-text.tsx';
 export * from './ui/components/animation/typing-placeholder.tsx';
 export * from './ui/components/forms/form-field.tsx';
 export * from './ui/components/forms/form-section-card.tsx';

@@ -2154,8 +2154,9 @@ body {
 
 /* Command Root - Main container */
 [cmdk-root] {
-  max-width: 640px;
-  width: 100%;
+  /* CRITICAL: Width is constrained by parent DialogContent, so use 100% to fill parent */
+  width: 100% !important;
+  max-width: 100% !important; /* Never exceed parent width */
   background: var(--color-popover);
   color: var(--color-popover-foreground);
   border-radius: 0.5rem;
@@ -2371,9 +2372,22 @@ body {
 [role="dialog"][data-radix-dialog-content],
 [role="dialog"] {
   /* Force centering with !important to override Radix inline styles */
+  position: fixed !important;
   top: 50% !important;
   left: 50% !important;
+  right: auto !important;
+  bottom: auto !important;
   transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
   /* CRITICAL: z-index must be higher than overlay to appear above blur */
   z-index: 100 !important;
+}
+
+/* CRITICAL: Command palette specific width constraints - responsive at all breakpoints */
+/* Only set width constraints for command palette (dialogs with cmdk-root) */
+/* Other dialogs will use their component-defined widths */
+[role="dialog"][data-radix-dialog-content] [cmdk-root] {
+  /* CRITICAL: Command root should never exceed parent width */
+  max-width: 100% !important;
+  width: 100% !important;
 }

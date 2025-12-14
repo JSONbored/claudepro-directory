@@ -297,6 +297,9 @@ export default function RootLayout({
 
         {/* Preconnect for critical third-party resources */}
         <link crossOrigin="anonymous" href="https://umami.claudepro.directory" rel="preconnect" />
+
+        {/* TweakCN Live Preview - Theme preview tool */}
+        <script src="https://tweakcn.com/live-preview.min.js" />
       </head>
       <body className="font-sans">
         {/* Suspense boundary for structured data - streams after initial HTML */}

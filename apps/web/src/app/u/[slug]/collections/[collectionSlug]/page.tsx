@@ -97,6 +97,16 @@ function isValidSlug(slug: string): boolean {
  * @param {{ content_slug: string; content_type: string }} item Parameter description
  * @param {{ content_slug: string; content_type: string }} item Parameter description
  * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
   * @param {{ content_slug: string; content_type: string }} item Parameter description
 */
 function getSafeContentLink(item: { content_slug: string; content_type: string }): null | string {

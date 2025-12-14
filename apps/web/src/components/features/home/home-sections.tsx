@@ -33,7 +33,7 @@ import {
   UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
 import { MICROINTERACTIONS, SPRING, VIEWPORT, STAGGER } from '@heyclaude/web-runtime/design-system';
-import { getCategoryConfigs, getCategoryStatsConfig } from '@heyclaude/web-runtime/data';
+import { getCategoryConfigs } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { motion } from 'motion/react';
 import Link from 'next/link';
@@ -58,8 +58,7 @@ function HomePageClientContent({
   const [activeTab, setActiveTab] = useState('all');
   const hasInitialFetchRef = useRef(false);
 
-  // Category stats config for counters
-  const categoryStatsConfig = useMemo(() => getCategoryStatsConfig(), []);
+  // Category stats config removed - now in hero section
 
   // Initialize featuredCategories from server data immediately
   // This ensures content renders even if static config is unavailable
@@ -417,152 +416,7 @@ function HomePageClientContent({
 
   return (
     <>
-      {/* Category Stats Section - Below Hero (Search bar now in hero) */}
-      <section className="container mx-auto px-4 pt-8 pb-4">
-        <div className="mx-auto max-w-4xl">
-
-          {/* Category Stats Grid - Mobile and Desktop */}
-          {stats && typeof stats === 'object' && Object.keys(stats).length > 0 ? (
-            <>
-              {/* Mobile Stats - Horizontal scroll */}
-              <TooltipProvider delayDuration={300}>
-                <motion.div
-                  className="flex gap-2 overflow-x-auto pb-2 md:hidden"
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={VIEWPORT.default}
-                  transition={SPRING.smooth}
-                >
-                  {categoryStatsConfig.map(({ categoryId, delay }, index: number) => {
-                    const categoryRoute = ROUTES[categoryId.toUpperCase() as keyof typeof ROUTES];
-                    const count =
-                      typeof stats[categoryId] === 'number'
-                        ? stats[categoryId]
-                        : stats[categoryId]?.total || 0;
-                    const categoryConfig = categoryConfigs[categoryId as Database['public']['Enums']['content_category']];
-                    const tooltipText = categoryConfig?.description || `View all ${categoryId} configurations`;
-
-                    return (
-                      <Tooltip key={categoryId}>
-                        <TooltipTrigger asChild>
-                          <Link
-                            href={categoryRoute}
-                            className="group no-underline"
-                            aria-label={`View all ${categoryId} configurations`}
-                          >
-                            <motion.div
-                              className="flex min-w-fit items-center gap-1.5 rounded-md border border-border/30 px-2 py-1 whitespace-nowrap transition-colors cursor-help bg-transparent"
-                              initial={{ opacity: 0, x: -8 }}
-                              whileInView={{ 
-                                opacity: 1, 
-                                x: 0,
-                              }}
-                              viewport={VIEWPORT.default}
-                              transition={{
-                                delay: index * STAGGER.fast,
-                                ...SPRING.smooth,
-                              }}
-                              whileHover={{
-                                scale: MICROINTERACTIONS.button.hover.scale,
-                                borderColor: 'rgba(249, 115, 22, 0.5)',
-                                transition: MICROINTERACTIONS.button.transition,
-                              }}
-                              whileTap={{
-                                scale: MICROINTERACTIONS.button.tap.scale,
-                                transition: MICROINTERACTIONS.button.transition,
-                              }}
-                            >
-                              <UnifiedBadge
-                                variant="category"
-                                category={categoryId}
-                                href={null}
-                                className="shrink-0 text-xs"
-                              />
-                              <NumberTicker
-                                value={count}
-                                delay={delay}
-                                className="text-xs font-semibold tabular-nums"
-                              />
-                            </motion.div>
-                          </Link>
-                        </TooltipTrigger>
-                        <TooltipContent side="bottom" className="max-w-xs text-center">
-                          {tooltipText}
-                        </TooltipContent>
-                      </Tooltip>
-                    );
-                  })}
-                </motion.div>
-              </TooltipProvider>
-
-              {/* Desktop Stats */}
-              <TooltipProvider delayDuration={300}>
-                <div className="hidden flex-wrap justify-center gap-2 md:flex lg:gap-2">
-                  {categoryStatsConfig.map(({ categoryId, delay }, index: number) => {
-                    const categoryRoute = ROUTES[categoryId.toUpperCase() as keyof typeof ROUTES];
-                    const count =
-                      typeof stats[categoryId] === 'number'
-                        ? stats[categoryId]
-                        : stats[categoryId]?.total || 0;
-                    const categoryConfig = categoryConfigs[categoryId as Database['public']['Enums']['content_category']];
-                    const tooltipText = categoryConfig?.description || `View all ${categoryId} configurations`;
-
-                    return (
-                      <Tooltip key={categoryId}>
-                        <TooltipTrigger asChild>
-                          <Link
-                            href={categoryRoute}
-                            className="group no-underline"
-                            aria-label={`View all ${categoryId} configurations`}
-                          >
-                            <motion.div
-                              className="group flex items-center gap-1.5 rounded-md border border-border/30 px-2 py-1 transition-colors cursor-help bg-transparent"
-                              initial={{ opacity: 0, y: 20 }}
-                              whileInView={{ 
-                                opacity: 1, 
-                                y: 0,
-                              }}
-                              viewport={VIEWPORT.default}
-                              transition={{
-                                delay: index * STAGGER.fast,
-                                ...SPRING.smooth,
-                              }}
-                              whileHover={{
-                                scale: MICROINTERACTIONS.button.hover.scale,
-                                borderColor: 'rgba(249, 115, 22, 0.5)',
-                                transition: MICROINTERACTIONS.button.transition,
-                              }}
-                              whileTap={{
-                                scale: MICROINTERACTIONS.button.tap.scale,
-                                transition: MICROINTERACTIONS.button.transition,
-                              }}
-                            >
-                              <UnifiedBadge
-                                variant="category"
-                                category={categoryId}
-                                href={null}
-                                className="shrink-0 text-xs"
-                              />
-                              <NumberTicker
-                                value={count}
-                                delay={delay}
-                                className="text-xs font-semibold tabular-nums"
-                              />
-                            </motion.div>
-                          </Link>
-                        </TooltipTrigger>
-                        <TooltipContent side="bottom" className="max-w-xs text-center">
-                          {tooltipText}
-                        </TooltipContent>
-                      </Tooltip>
-                    );
-                  })}
-                </div>
-              </TooltipProvider>
-            </>
-          ) : null}
-        </div>
-      </section>
+      {/* Category Stats Section removed - now in hero section directly below search bar */}
 
       {/* Main Content Section */}
       <section className="container mx-auto px-4 pb-16">

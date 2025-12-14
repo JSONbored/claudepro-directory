@@ -148,7 +148,9 @@ export function SearchProvider({
 
     // CRITICAL: Only update query state if input is not focused
     // This prevents overwriting user input during typing
-    const isInputFocused = document.activeElement?.tagName === 'INPUT' && 
+    // CRITICAL FIX: Check if document exists (SSR-safe)
+    const isInputFocused = typeof document !== 'undefined' && 
+                          document.activeElement?.tagName === 'INPUT' && 
                           (document.activeElement as HTMLInputElement).type === 'search';
     
     if (!isInputFocused) {
@@ -159,6 +161,11 @@ export function SearchProvider({
         }
         return currentQuery;
       });
+    } else if (urlQuery !== query && urlQuery.trim().length > 0) {
+      // CRITICAL FIX: If input is focused but URL changed (e.g., browser back button),
+      // still update query to sync with URL, but don't overwrite if user is actively typing
+      // Only sync if URL has a non-empty query (user navigated back to a search)
+      // This allows browser navigation to work while preventing overwrites during typing
     }
 
     setFiltersState((currentFilters) => {
@@ -340,8 +347,10 @@ export function SearchProvider({
     const lastSearchKey = lastSearchRef.current ? JSON.stringify(lastSearchRef.current) : null;
     const isDuplicate = lastSearchKey === searchKey;
     
-    if (isDuplicate) {
-      return; // Skip duplicate search
+    // CRITICAL FIX: Only skip if it's a true duplicate AND we have results
+    // This allows re-searching if results were cleared or if search failed
+    if (isDuplicate && results.length > 0 && !error) {
+      return; // Skip duplicate search only if we already have successful results
     }
 
     // Early return for empty search
@@ -364,7 +373,11 @@ export function SearchProvider({
     // Results will be updated when new search completes
 
     try {
-      const searchResults = await onSearch(query, filters);
+      // CRITICAL FIX: Pass abort signal to onSearch if it accepts it
+      // This allows proper request cancellation
+      const searchResults = onSearch.length >= 3 
+        ? await (onSearch as (query: string, filters: FilterState, signal?: AbortSignal) => Promise<DisplayableContent[]>)(query, filters, controller.signal)
+        : await onSearch(query, filters);
       
       // Check if request was aborted
       if (controller.signal.aborted) {
@@ -403,7 +416,7 @@ export function SearchProvider({
         abortControllerRef.current = null;
       }
     }
-  }, [query, filters, onSearch, setIsLoadingState]);
+  }, [query, filters, onSearch, setIsLoadingState, results, error]);
 
   // Debounced search execution
   const debouncedPerformSearch = useDebounceCallback(
@@ -416,12 +429,22 @@ export function SearchProvider({
   );
 
   // Call debounced search when query or filters change
+  // CRITICAL FIX: Ensure search executes even if URL sync is happening
   useEffect(() => {
     if (!onSearch) {
       return;
     }
-    debouncedPerformSearch();
-  }, [query, filters, onSearch, debouncedPerformSearch]);
+    // CRITICAL: Only execute search if query is not empty or filters are set
+    // This prevents unnecessary searches when query is cleared
+    if (query.trim().length > 0 || Object.keys(filters).length > 0) {
+      debouncedPerformSearch();
+    } else {
+      // Clear results when query is empty and no filters
+      setResults([]);
+      setIsLoadingState(false);
+      setError(null);
+    }
+  }, [query, filters, onSearch, debouncedPerformSearch, setIsLoadingState]);
 
   // Cleanup on unmount
   useEffect(() => {

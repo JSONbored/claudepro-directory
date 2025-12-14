@@ -109,10 +109,10 @@ export function AnimatedSearchBar({
     const hasValue = query.length > 0;
     setHasValue(hasValue);
     
-    // Mark as typing when query changes, clear after 500ms
+    // Mark as typing when query changes, clear after 300ms (reduced for better particle visibility)
     if (hasValue) {
       setIsTypingTrue();
-      const timer = setTimeout(() => setIsTypingFalse(), 500);
+      const timer = setTimeout(() => setIsTypingFalse(), 300);
       return () => clearTimeout(timer);
     } else {
       setIsTypingFalse();

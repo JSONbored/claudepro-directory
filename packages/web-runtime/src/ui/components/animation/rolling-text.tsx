@@ -102,6 +102,15 @@ export function RollingText({
     [currentWord, currentIndex]
   );
 
+  // Calculate max width needed for all words to prevent layout shift
+  const maxWordLength = React.useMemo(
+    () => Math.max(...words.map((word) => word.length)),
+    [words]
+  );
+
+  // Extract style prop to ensure color inheritance
+  const { style: propsStyle, ...restProps } = props;
+  
   return (
     <span
       ref={localRef}
@@ -109,12 +118,20 @@ export function RollingText({
       aria-live="polite"
       aria-atomic="true"
       style={{
-        minWidth: '12ch', // Prevent layout shift for word changes
+        // Fixed width based on longest word to prevent layout shift
+        // Add extra padding for smooth character animations
+        minWidth: `${maxWordLength + 2}ch`,
+        maxWidth: `${maxWordLength + 2}ch`,
+        display: 'inline-flex',
+        justifyContent: 'flex-start', // Left-align to match parent container alignment
+        alignItems: 'center',
+        // Inherit color from parent (for logo orange color)
+        ...propsStyle,
       }}
-      {...props}
+      {...restProps}
     >
       <span className="sr-only">{currentWord}</span>
-      <span aria-hidden="true" className="inline-flex">
+      <span aria-hidden="true" className="inline-flex" style={propsStyle ? { color: 'inherit' } : undefined}>
         {isMounted ? (
           characters.map((item, idx) => (
             <motion.span
@@ -138,13 +155,15 @@ export function RollingText({
                 backfaceVisibility: 'hidden',
                 transformOrigin: 'bottom center',
                 willChange: 'transform',
+                // Inherit color from parent
+                color: 'inherit',
               }}
             >
               {formatCharacter(item.char)}
             </motion.span>
           ))
         ) : (
-          <span className="inline-block">{words[0]}</span>
+          <span className="inline-block" style={propsStyle ? { color: 'inherit' } : undefined}>{words[0]}</span>
         )}
       </span>
     </span>

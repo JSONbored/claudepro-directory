@@ -1,28 +1,6 @@
-import dynamicImport from 'next/dynamic';
-
-const HomepageHeroClient = dynamicImport(
-  () =>
-    import('@/src/components/features/home/homepage-hero-client').then((mod) => ({
-      default: mod.HomepageHeroClient,
-    })),
-  {
-    loading: () => (
-      <section className="border-border/50 relative border-b" aria-label="Homepage hero">
-        <div className="relative z-10 container mx-auto px-4 py-10 sm:py-16 lg:py-24">
-          <div className="mx-auto max-w-3xl text-center">
-            <h1 className="mb-4 text-3xl leading-tight font-bold tracking-tight sm:mb-6 sm:text-4xl sm:leading-tight lg:text-5xl lg:leading-tight">
-              <span className="block">The ultimate directory for Claude</span>
-              <span className="text-accent block">enthusiasts</span>
-            </h1>
-            <p className="text-muted-foreground mx-auto max-w-2xl text-base leading-relaxed sm:text-lg lg:text-xl">
-              Join members discovering and sharing the best Claude configurations.
-            </p>
-          </div>
-        </div>
-      </section>
-    ),
-  }
-);
+// CRITICAL FIX: Remove dynamic import to prevent layout shift
+// Import directly to ensure hero loads immediately without CLS
+import { HomepageHeroClient } from '@/src/components/features/home/homepage-hero-client';
 
 /**
  * Homepage Hero Server Component
@@ -37,9 +15,10 @@ const HomepageHeroClient = dynamicImport(
  */
 export async function HomepageHeroServer({ 
   memberCount,
+  stats,
 }: { 
   memberCount: number;
   stats?: Record<string, { featured: number; total: number } | number>;
 }) {
-  return <HomepageHeroClient memberCount={memberCount} />;
+  return <HomepageHeroClient memberCount={memberCount} stats={stats} />;
 }
