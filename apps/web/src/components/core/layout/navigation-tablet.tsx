@@ -30,6 +30,7 @@ import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
 import { Fragment, useEffect, useState } from 'react';
+import { useBoolean } from '@heyclaude/web-runtime/hooks';
 
 import { getSocialLinks, logUnhandledPromise } from '@heyclaude/web-runtime/core';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
@@ -625,7 +626,7 @@ export function NavigationTablet({ isActive }: NavigationTabletProps) {
             (link.label === 'Discover' || link.label === 'Resources' || link.label === 'Contribute') &&
             link.sections
           ) {
-            const [isOpen, setIsOpen] = useState(false);
+            const { value: isOpen, setValue: setIsOpen } = useBoolean();
             const [animationKey, setAnimationKey] = useState(0);
 
             useEffect(() => {

@@ -40,6 +40,7 @@ import {
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useId, useState } from 'react';
+import { useBoolean } from '@heyclaude/web-runtime/hooks';
 
 import { useAuthModal } from '@/src/hooks/use-auth-modal';
 
@@ -100,7 +101,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
   const pathname = usePathname();
   const { user, status } = useAuthenticatedUser({ context: 'CompanyForm' });
   const { openAuthModal } = useAuthModal();
-  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const { value: isUploadingLogo, setTrue: setIsUploadingLogoTrue, setFalse: setIsUploadingLogoFalse } = useBoolean();
   const [logoUrl, setLogoUrl] = useState<null | string>(initialData?.logo || null);
   const [logoPreview, setLogoPreview] = useState<null | string>(initialData?.logo || null);
   const [useCursorDate, setUseCursorDate] = useState<boolean>(!!initialData?.using_cursor_since);
@@ -226,7 +227,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
     }
 
     // Upload to edge function
-    setIsUploadingLogo(true);
+    setIsUploadingLogoTrue();
 
     try {
       await runLoggedAsync(
@@ -287,7 +288,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
         });
       }
     } finally {
-      setIsUploadingLogo(false);
+      setIsUploadingLogoFalse();
     }
   }, [user, status, openAuthModal, pathname, maxFileSize, maxDimension, uploadLogo, runLoggedAsync, initialData?.id, logoUrl]);
 

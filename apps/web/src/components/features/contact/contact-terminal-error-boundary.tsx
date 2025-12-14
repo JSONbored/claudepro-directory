@@ -7,7 +7,8 @@
 
 import { AlertCircle, RefreshCw } from '@heyclaude/web-runtime/icons';
 import { logClientErrorBoundary } from '@heyclaude/web-runtime/logging/client';
-import { Terminal, Button } from '@heyclaude/web-runtime/ui';
+import { Button } from '@heyclaude/web-runtime/ui';
+import { Terminal } from '@/src/components/ui/terminal';
 import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 import { Component, type ReactNode } from 'react';

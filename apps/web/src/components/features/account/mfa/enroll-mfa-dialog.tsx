@@ -23,6 +23,7 @@ import {
   Input,
   Label,
 } from '@heyclaude/web-runtime/ui';
+import { useBoolean } from '@heyclaude/web-runtime/hooks';
 import Image from 'next/image';
 import { useState } from 'react';
 
@@ -34,7 +35,7 @@ interface EnrollMFADialogProps {
 
 export function EnrollMFADialog({ open, onOpenChange, onEnrolled }: EnrollMFADialogProps) {
   const [step, setStep] = useState<'enroll' | 'verify'>('enroll');
-  const [loading, setLoading] = useState(false);
+  const { value: loading, setTrue: setLoadingTrue, setFalse: setLoadingFalse } = useBoolean();
   const [error, setError] = useState<null | string>(null);
   const [qrCode, setQrCode] = useState<null | string>(null);
   const [secret, setSecret] = useState<null | string>(null);
@@ -49,7 +50,7 @@ export function EnrollMFADialog({ open, onOpenChange, onEnrolled }: EnrollMFADia
   });
 
   const handleEnroll = async () => {
-    setLoading(true);
+    setLoadingTrue();
     setError(null);
 
     try {
@@ -78,7 +79,7 @@ export function EnrollMFADialog({ open, onOpenChange, onEnrolled }: EnrollMFADia
       setError(message);
       errorToasts.actionFailed('enroll MFA', message);
     } finally {
-      setLoading(false);
+      setLoadingFalse();
     }
   };
 
@@ -88,7 +89,7 @@ export function EnrollMFADialog({ open, onOpenChange, onEnrolled }: EnrollMFADia
       return;
     }
 
-    setLoading(true);
+    setLoadingTrue();
     setError(null);
 
     try {
@@ -137,7 +138,7 @@ export function EnrollMFADialog({ open, onOpenChange, onEnrolled }: EnrollMFADia
       setError(message);
       errorToasts.actionFailed('verify MFA', message);
     } finally {
-      setLoading(false);
+      setLoadingFalse();
     }
   };
 

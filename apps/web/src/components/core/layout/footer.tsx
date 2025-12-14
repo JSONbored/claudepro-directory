@@ -29,7 +29,8 @@ import { motion } from 'motion/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
-import { memo, useEffect, useMemo, useState } from 'react';
+import { useBoolean } from '@heyclaude/web-runtime/hooks';
+import { memo, useEffect, useMemo } from 'react';
 
 import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';
 import { NewsletterCTAVariant } from '@/src/components/features/growth/newsletter/newsletter-cta-variants';
@@ -88,7 +89,7 @@ const CONTACT_CHANNELS = getContactChannels();
 function FooterComponent() {
   const currentYear = new Date().getFullYear();
   const { resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+  const { value: mounted, setTrue: setMountedTrue } = useBoolean();
   const pathname = usePathname();
   const shouldReduceMotion = useReducedMotion();
 
@@ -113,7 +114,7 @@ function FooterComponent() {
 
   // Wait for client-side mount to avoid hydration mismatch
   useEffect(() => {
-    setMounted(true);
+    setMountedTrue();
   }, []);
 
   // Navigation link groups

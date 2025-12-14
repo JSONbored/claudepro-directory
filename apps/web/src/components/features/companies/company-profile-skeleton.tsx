@@ -11,6 +11,7 @@
 
 import { Skeleton } from '@heyclaude/web-runtime/ui';
 import { SPRING, STAGGER } from '@heyclaude/web-runtime/design-system';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import { Card, CardContent, CardHeader, CardTitle, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 
@@ -135,6 +136,8 @@ function CompanyStatsSkeleton() {
  * Company Profile Skeleton
  */
 export function CompanyProfileSkeleton() {
+  const prefersReducedMotion = useReducedMotion();
+  
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -170,10 +173,6 @@ export function CompanyProfileSkeleton() {
             {/* Jobs Grid */}
             <div className="space-y-4">
               {KEYS_6.map((key, i) => {
-                const prefersReducedMotion =
-                  typeof window !== 'undefined' &&
-                  window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
                 return (
                   <motion.div
                     key={key}

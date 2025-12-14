@@ -7,12 +7,13 @@ id: server-import-in-client
 language: typescript
 rule:
   all:
-    - pattern: import $ITEMS from '@heyclaude/web-runtime/$MODULE'
-      kind: import_statement
+    - kind: import_statement
       has:
+        pattern: import $ITEMS from '@heyclaude/web-runtime/$MODULE'
         regex: (unstable_cache|headers|cookies|server)
     - inside:
-        pattern: 'use client'
+        has:
+          regex: 'use client'
 message: "Client components cannot import server-only utilities. Use client-compatible alternatives from @heyclaude/web-runtime/logging/client"
 severity: error
 
@@ -22,12 +23,13 @@ id: nodejs-api-in-client
 language: typescript
 rule:
   all:
-    - pattern: import $ITEMS from '$MODULE'
-      kind: import_statement
+    - kind: import_statement
       has:
+        pattern: import $ITEMS from '$MODULE'
         regex: (^fs$|^path$|^crypto$|^os$|^util$)
     - inside:
-        pattern: 'use client'
+        has:
+          regex: 'use client'
 message: "Client components cannot use Node.js APIs (fs, path, crypto, etc.). These are server-only"
 severity: error
 
@@ -37,12 +39,12 @@ id: browser-api-in-server
 language: typescript
 rule:
   all:
-    - pattern: ($WINDOW|$DOCUMENT|$LOCALSTORAGE|$SESSIONSTORAGE)
-      kind: identifier
+    - kind: identifier
       regex: (window|document|localStorage|sessionStorage)
     - not:
         inside:
-          pattern: 'use client'
+          has:
+            regex: 'use client'
 message: "Server components cannot use browser APIs (window, document, localStorage, etc.). Move to client component or use server-safe alternatives"
 severity: error
 
@@ -52,13 +54,13 @@ id: react-hooks-in-server
 language: typescript
 rule:
   all:
-    - pattern: ($HOOK)($$$)
-      kind: call_expression
+    - kind: call_expression
       has:
         regex: (useState|useEffect|useCallback|useMemo|useRef|useContext)
     - not:
         inside:
-          pattern: 'use client'
+          has:
+            regex: 'use client'
 message: "Server components cannot use React hooks. Add 'use client' directive or move hook usage to a client component"
 severity: error
 
@@ -68,12 +70,13 @@ id: wrong-logging-import-client
 language: typescript
 rule:
   all:
-    - pattern: import { logger } from '@heyclaude/web-runtime/$MODULE'
-      kind: import_statement
+    - kind: import_statement
       has:
+        pattern: import { logger } from '@heyclaude/web-runtime/$MODULE'
         regex: (core|logging/server)
     - inside:
-        pattern: 'use client'
+        has:
+          regex: 'use client'
 message: "Client components must use client logging utilities (logClientError, logClientWarn, etc.), not server logger. Import from @heyclaude/web-runtime/logging/client"
 severity: error
 
@@ -83,13 +86,14 @@ id: wrong-logging-import-server
 language: typescript
 rule:
   all:
-    - pattern: import { $CLIENT_LOGGER } from '@heyclaude/web-runtime/logging/client'
-      kind: import_statement
+    - kind: import_statement
       has:
+        pattern: import { $CLIENT_LOGGER } from '@heyclaude/web-runtime/logging/client'
         regex: (logClientError|logClientWarn|logClientInfo)
     - not:
         inside:
-          pattern: 'use client'
+          has:
+            regex: 'use client'
 message: "Server components must use server logging (logger), not client logging utilities. Import logger from @heyclaude/web-runtime/logging/server"
 severity: error
 
@@ -99,13 +103,13 @@ id: missing-use-client-directive
 language: typescript
 rule:
   all:
-    - pattern: export (function|const) $COMPONENT($$$) { $$$ }
-      kind: function_declaration
+    - kind: function_declaration
+      has:
+        pattern: export (function|const) $COMPONENT($$$) { $$$ }
     - has:
-        pattern: ($HOOK)($$$)
         regex: (useState|useEffect|useCallback|useMemo|useRef|useContext|useReducer)
     - not:
         precedes:
-          pattern: 'use client'
+          regex: 'use client'
 message: "Components using React hooks must have 'use client' directive at the top of the file"
 severity: error

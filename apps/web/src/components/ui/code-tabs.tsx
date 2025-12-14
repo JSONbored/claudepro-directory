@@ -36,6 +36,7 @@
 import * as React from 'react';
 import { useTheme } from 'next-themes';
 import { Tabs, TabsContent, TabsList, TabsTrigger, cn } from '@heyclaude/web-runtime/ui';
+import { getThemeConfig } from '@heyclaude/shared-runtime';
 import { CopyButton } from './code-editor';
 
 type CodeTabsProps = {
@@ -57,10 +58,7 @@ type CodeTabsProps = {
 function CodeTabsContent({
   codes,
   lang = 'bash',
-  themes = {
-    light: 'github-light',
-    dark: 'github-dark',
-  },
+  themes = getThemeConfig(), // Use centralized theme config
   copyButton = true,
   onCopy,
   activeValue,
@@ -160,10 +158,7 @@ function CodeTabsContent({
 function CodeTabs({
   codes,
   lang = 'bash',
-  themes = {
-    light: 'github-light',
-    dark: 'github-dark',
-  },
+  themes = getThemeConfig(), // Use centralized theme config
   className,
   defaultValue,
   value,

@@ -22,6 +22,7 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import { Building2, Plus, Search } from 'lucide-react';
 import { useCallback, useEffect, useId, useRef, useState, useTransition } from 'react';
+import { useBoolean, useDebounceValue } from '@heyclaude/web-runtime/hooks';
 
 type Company = Pick<
   Database['public']['Tables']['companies']['Row'],
@@ -56,13 +57,13 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
   const buttonId = useId();
   const nameInputId = useId();
   const websiteInputId = useId();
-  const [open, setOpen] = useState(false);
+  const { value: open, setValue: setOpen } = useBoolean();
   const [searchQuery, setSearchQuery] = useState('');
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
-  const [isSearching, setIsSearching] = useState(false);
+  const { value: isSearching, setTrue: setIsSearchingTrue, setFalse: setIsSearchingFalse } = useBoolean();
   const [debounceMs, setDebounceMs] = useState(DEFAULT_DEBOUNCE_MS);
-  const [showCreateForm, setShowCreateForm] = useState(false);
+  const { value: showCreateForm, setValue: setShowCreateForm } = useBoolean();
 
   const [, startTransition] = useTransition();
 
@@ -122,14 +123,14 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
     const trimmed = query.trim();
     if (trimmed.length < 2) {
       setCompanies([]);
-      setIsSearching(false);
+      setIsSearchingFalse();
       return;
     }
 
     // Update latest query before making request
     latestQueryRef.current = trimmed;
 
-    setIsSearching(true);
+    setIsSearchingTrue();
     try {
       const result = await searchCompaniesAction({ query: trimmed, limit: 10 });
       
@@ -170,41 +171,35 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
       );
       setCompanies([]);
     } finally {
-      setIsSearching(false);
+      setIsSearchingFalse();
     }
-  }, []);
+  }, [setIsSearchingTrue, setIsSearchingFalse]);
+
+  // Debounced search query
+  const [debouncedSearchQuery] = useDebounceValue(searchQuery, debounceMs);
 
   useEffect(() => {
-    const trimmed = searchQuery.trim();
+    const trimmed = debouncedSearchQuery.trim();
     if (trimmed.length < 2) {
       setCompanies([]);
-      setIsSearching(false);
+      setIsSearchingFalse();
       return;
     }
 
-    let cancelled = false;
-    const timer = setTimeout(() => {
-      if (cancelled) return;
-      searchCompanies(searchQuery).catch((error) => {
-        logClientError(
-          '[Form] Search execution failed',
-          normalizeError(error, 'Search execution failed'),
-          'CompanySelector.searchEffect',
-          {
-            component: 'CompanySelector',
-            action: 'search-effect',
-            category: 'form',
-            query: searchQuery,
-          }
-        );
-      });
-    }, debounceMs);
-
-    return () => {
-      cancelled = true;
-      clearTimeout(timer);
-    };
-  }, [debounceMs, searchCompanies, searchQuery]);
+    searchCompanies(debouncedSearchQuery).catch((error) => {
+      logClientError(
+        '[Form] Search execution failed',
+        normalizeError(error, 'Search execution failed'),
+        'CompanySelector.searchEffect',
+        {
+          component: 'CompanySelector',
+          action: 'search-effect',
+          category: 'form',
+          query: debouncedSearchQuery,
+        }
+      );
+    });
+  }, [debouncedSearchQuery, searchCompanies, setIsSearchingFalse]);
 
   const handleSelect = (company: Company) => {
     setSelectedCompany(company);

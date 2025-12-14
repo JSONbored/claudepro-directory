@@ -5,16 +5,12 @@
 import { type Database } from '@heyclaude/database-types';
 import { getHomepageConfigBundle } from '@heyclaude/web-runtime/config/static-configs';
 import { logUnhandledPromise, trackHomepageSectionError, trackMissingData } from '@heyclaude/web-runtime/core';
-import { usePulse } from '@heyclaude/web-runtime/hooks';
+import { useIsMounted } from '@heyclaude/web-runtime/hooks';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import {
-  SearchProvider,
   SearchResults,
-  useSearchAPI,
   useSearchContext,
 } from '@heyclaude/web-runtime/search';
-import { logClientInfo, logClientError } from '@heyclaude/web-runtime/logging/client';
-import type { FilterState } from '@heyclaude/web-runtime/types/component.types';
 import {
   type DisplayableContent,
   type HomePageClientProps,
@@ -22,13 +18,12 @@ import {
 import { useAuthModal } from '@/src/hooks/use-auth-modal';
 import { usePathname } from 'next/navigation';
 import { Suspense, memo, useCallback, useEffect, useMemo, useRef, useState, useDeferredValue } from 'react';
+import { useBoolean } from '@heyclaude/web-runtime/hooks';
 
 import {
   LazyFeaturedSections,
   LazyTabsSection,
 } from '@/src/components/features/home/lazy-home-sections';
-import { useHeroSearchConnection } from '@/src/components/features/home/hero-search-connection';
-import { HomepageSearchBar } from '@/src/components/features/home/homepage-search-wrapper';
 import { 
   NumberTicker, 
   Tooltip, 
@@ -54,13 +49,12 @@ function HomePageClientContent({
   weekStart,
   serverCategoryIds,
 }: HomePageClientProps) {
-  const { setSearchFocused } = useHeroSearchConnection();
   const { query } = useSearchContext();
   const { openAuthModal } = useAuthModal();
   const pathname = usePathname();
   const [allConfigs, setAllConfigs] = useState<DisplayableContent[]>([]);
-  const [isLoadingAllConfigs, setIsLoadingAllConfigs] = useState(false);
-  const [hasMoreAllConfigs, setHasMoreAllConfigs] = useState(true);
+  const { value: isLoadingAllConfigs, setTrue: setIsLoadingAllConfigsTrue, setFalse: setIsLoadingAllConfigsFalse } = useBoolean();
+  const { value: hasMoreAllConfigs, setValue: setHasMoreAllConfigs } = useBoolean(true);
   const [activeTab, setActiveTab] = useState('all');
   const hasInitialFetchRef = useRef(false);
 
@@ -146,13 +140,14 @@ function HomePageClientContent({
     );
   }, [serverCategoryIds, initialData]);
 
+  const isMounted = useIsMounted();
   const fetchAllConfigs = useCallback(
     async (offset: number, limit = 30) => {
-      if (isLoadingAllConfigs || !hasMoreAllConfigs) {
+      if (isLoadingAllConfigs || !hasMoreAllConfigs || !isMounted()) {
         return;
       }
 
-      setIsLoadingAllConfigs(true);
+      setIsLoadingAllConfigsTrue();
 
       try {
         const { fetchPaginatedContent } = await import('@heyclaude/web-runtime/actions');
@@ -177,6 +172,8 @@ function HomePageClientContent({
           );
           throw new Error(result.serverError);
         }
+
+        if (!isMounted()) return;
 
         // Safe-action returns { data: T, serverError?: ... } structure
         // fetchPaginatedContent returns DisplayableContent[] wrapped in { data: DisplayableContent[] }
@@ -206,6 +203,7 @@ function HomePageClientContent({
           return updated;
         });
       } catch (error) {
+        if (!isMounted()) return;
         const normalized = normalizeError(error, 'fetchAllConfigs failed');
         logClientWarn(
           '[HomePageClient] fetchAllConfigs error caught',
@@ -224,10 +222,12 @@ function HomePageClientContent({
           limit,
         });
       } finally {
-        setIsLoadingAllConfigs(false);
+        if (isMounted()) {
+          setIsLoadingAllConfigsFalse();
+        }
       }
     },
-    [hasMoreAllConfigs]
+    [hasMoreAllConfigs, setIsLoadingAllConfigsTrue, setIsLoadingAllConfigsFalse, isMounted, isLoadingAllConfigs]
   );
 
   const handleFetchMore = useCallback(async () => {
@@ -417,13 +417,9 @@ function HomePageClientContent({
 
   return (
     <>
-      {/* Search Bar and Category Stats Section - Below Hero */}
+      {/* Category Stats Section - Below Hero (Search bar now in hero) */}
       <section className="container mx-auto px-4 pt-8 pb-4">
         <div className="mx-auto max-w-4xl">
-          {/* Search Bar - New Unified Search System */}
-          <div className="mb-6">
-            <HomepageSearchBar onFocusChange={setSearchFocused} />
-          </div>
 
           {/* Category Stats Grid - Mobile and Desktop */}
           {stats && typeof stats === 'object' && Object.keys(stats).length > 0 ? (
@@ -620,152 +616,14 @@ function HomePageClientContent({
 const HomePageClientContentMemo = memo(HomePageClientContent);
 
 /**
- * HomePageClient - Wrapper with SearchProvider
+ * HomePageClient - Content component (SearchProvider now at page level)
+ * 
+ * NOTE: SearchProvider is now provided at page level via HomepageSearchProvider
+ * This allows hero section to also access SearchProvider context.
  */
 function HomePageClientComponent(props: HomePageClientProps) {
-  const pulse = usePulse();
-  const searchFunction = useSearchAPI({
-    apiPath: '/api/search',
-    limit: 50,
-    offset: 0,
-  });
-
-  // Handle search with analytics
-  const handleSearch = useCallback(
-    async (query: string, filters: FilterState) => {
-      const searchStart = Date.now();
-      
-      logClientInfo(
-        '[HomePageClient] handleSearch called',
-        'HomePageClient.handleSearch.start',
-        {
-          component: 'HomePageClient',
-          action: 'handle-search-start',
-          query: query.trim(),
-          queryLength: query.trim().length,
-          filters: JSON.stringify(filters),
-          timestamp: searchStart,
-        }
-      );
-      
-      try {
-        logClientInfo(
-          '[HomePageClient] Calling searchFunction',
-          'HomePageClient.handleSearch.callFunction',
-          {
-            component: 'HomePageClient',
-            action: 'handle-search-call-function',
-            query: query.trim(),
-            timestamp: Date.now(),
-          }
-        );
-        
-        const functionCallStart = Date.now();
-        const results = await searchFunction(query, filters);
-        const functionCallDuration = Date.now() - functionCallStart;
-        
-        logClientInfo(
-          '[HomePageClient] searchFunction completed',
-          'HomePageClient.handleSearch.functionCompleted',
-          {
-            component: 'HomePageClient',
-            action: 'handle-search-function-completed',
-            query: query.trim(),
-            resultsCount: Array.isArray(results) ? results.length : 0,
-            isArray: Array.isArray(results),
-            functionDuration: functionCallDuration,
-            timestamp: Date.now(),
-          }
-        );
-
-        // Track search analytics (fire and forget)
-        if (query.trim()) {
-          logClientInfo(
-            '[HomePageClient] Tracking search analytics',
-            'HomePageClient.handleSearch.analytics',
-            {
-              component: 'HomePageClient',
-              action: 'handle-search-analytics',
-              query: query.trim(),
-              resultsCount: results.length,
-              timestamp: Date.now(),
-            }
-          );
-          
-          // Use 'agents' as default category for homepage search (no specific category)
-          pulse
-            .search({
-              category: 'agents',
-              slug: '',
-              query: query.trim(),
-              metadata: {
-                filters,
-                resultCount: results.length,
-              },
-            })
-            .catch((error) => {
-              const normalized = normalizeError(error, 'Analytics tracking failed');
-              logClientError(
-                '[HomePageClient] Analytics tracking error',
-                normalized,
-                'HomePageClient.handleSearch.analyticsError',
-                {
-                  component: 'HomePageClient',
-                  action: 'handle-search-analytics-error',
-                  query: query.trim(),
-                  timestamp: Date.now(),
-                }
-              );
-            });
-        }
-
-        logClientInfo(
-          '[HomePageClient] handleSearch completed successfully',
-          'HomePageClient.handleSearch.success',
-          {
-            component: 'HomePageClient',
-            action: 'handle-search-success',
-            query: query.trim(),
-            resultsCount: Array.isArray(results) ? results.length : 0,
-            totalDuration: Date.now() - searchStart,
-            timestamp: Date.now(),
-          }
-        );
-
-        return results;
-      } catch (error) {
-        const normalized = normalizeError(error, 'handleSearch failed');
-        
-        logClientError(
-          '[HomePageClient] handleSearch error',
-          normalized,
-          'HomePageClient.handleSearch.error',
-          {
-            component: 'HomePageClient',
-            action: 'handle-search-error',
-            query: query.trim(),
-            errorName: error instanceof Error ? error.name : 'Unknown',
-            errorMessage: error instanceof Error ? error.message : String(error),
-            duration: Date.now() - searchStart,
-            timestamp: Date.now(),
-          }
-        );
-        
-        throw normalized;
-      }
-    },
-    [searchFunction, pulse]
-  );
-
-  return (
-    <SearchProvider
-      onSearch={handleSearch}
-      defaultQuery=""
-      defaultFilters={{}}
-    >
-      <HomePageClientContentMemo {...props} />
-    </SearchProvider>
-  );
+  // SearchProvider is now at page level, so we just render content
+  return <HomePageClientContentMemo {...props} />;
 }
 
 const HomePageClient = memo(HomePageClientComponent);

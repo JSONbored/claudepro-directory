@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { useLocalStorage } from './use-local-storage.ts';
 
 /**
  * Options for useDarkMode hook
@@ -88,35 +89,38 @@ export function useDarkMode(options: UseDarkModeOptions = {}) {
   const {
     defaultValue = false,
     localStorageKey = 'usehooks-ts-dark-mode',
-    initializeWithValue = true,
     applyDarkClass = true,
   } = options;
 
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
+  // Use useLocalStorage for persistent storage
+  const { value: storedPreference, setValue: setStoredPreference } = useLocalStorage<string | null>(
+    localStorageKey,
+    {
+      defaultValue: null,
+      syncAcrossTabs: true,
+    }
+  );
+
+  // Get initial OS preference
+  const [osPreference, setOsPreference] = useState<boolean>(() => {
     if (typeof window === 'undefined') {
       return defaultValue;
     }
-
-    if (!initializeWithValue) {
-      return defaultValue;
-    }
-
-    try {
-      const stored = localStorage.getItem(localStorageKey);
-      if (stored !== null) {
-        return stored === 'true';
-      }
-    } catch {
-      // localStorage not available
-    }
-
-    // Check OS preference
     try {
       return window.matchMedia('(prefers-color-scheme: dark)').matches;
     } catch {
       return defaultValue;
     }
   });
+
+  // Compute isDarkMode: use stored preference if exists, otherwise use OS preference
+  const isDarkMode = storedPreference !== null ? storedPreference === 'true' : osPreference;
+
+  // Update stored preference when isDarkMode changes (user action)
+  const setIsDarkMode = useCallback((value: boolean | ((prev: boolean) => boolean)) => {
+    const newValue = typeof value === 'function' ? value(isDarkMode) : value;
+    setStoredPreference(String(newValue));
+  }, [isDarkMode, setStoredPreference]);
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -131,14 +135,7 @@ export function useDarkMode(options: UseDarkModeOptions = {}) {
         document.documentElement.classList.remove('dark');
       }
     }
-
-    // Persist to localStorage
-    try {
-      localStorage.setItem(localStorageKey, String(isDarkMode));
-    } catch {
-      // localStorage not available or quota exceeded
-    }
-  }, [isDarkMode, localStorageKey, applyDarkClass]);
+  }, [isDarkMode, applyDarkClass]);
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -149,14 +146,10 @@ export function useDarkMode(options: UseDarkModeOptions = {}) {
     try {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
       const handler = (event: MediaQueryListEvent) => {
-        // Only update if user hasn't manually set a preference
-        try {
-          const stored = localStorage.getItem(localStorageKey);
-          if (stored === null) {
-            setIsDarkMode(event.matches);
-          }
-        } catch {
-          setIsDarkMode(event.matches);
+        // Only update OS preference if user hasn't manually set a preference
+        // (storedPreference will be null if user hasn't set a preference)
+        if (storedPreference === null) {
+          setOsPreference(event.matches);
         }
       };
 
@@ -172,23 +165,23 @@ export function useDarkMode(options: UseDarkModeOptions = {}) {
       // Media query not supported
       return;
     }
-  }, [localStorageKey]);
+  }, [storedPreference]);
 
   const toggle = useCallback(() => {
     setIsDarkMode((prev) => !prev);
-  }, []);
+  }, [setIsDarkMode]);
 
   const enable = useCallback(() => {
     setIsDarkMode(true);
-  }, []);
+  }, [setIsDarkMode]);
 
   const disable = useCallback(() => {
     setIsDarkMode(false);
-  }, []);
+  }, [setIsDarkMode]);
 
   const set = useCallback((value: boolean) => {
     setIsDarkMode(value);
-  }, []);
+  }, [setIsDarkMode]);
 
   return {
     isDarkMode,

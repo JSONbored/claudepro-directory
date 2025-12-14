@@ -16,6 +16,7 @@ import { TopContributors } from '@/src/components/features/community/top-contrib
 import { HeroSearchConnectionProvider } from '@/src/components/features/home/hero-search-connection';
 import { HomepageContentServer } from '@/src/components/features/home/homepage-content-server';
 import { HomepageHeroServer } from '@/src/components/features/home/homepage-hero-server';
+import { HomepageSearchProvider } from '@/src/components/features/home/homepage-search-provider';
 import { RecentlyViewedRail } from '@/src/components/features/home/recently-viewed-rail';
 
 /**
@@ -143,36 +144,38 @@ async function TopContributorsServer() {
 export default function HomePage({ searchParams: _searchParams }: HomePageProperties) {
   return (
     <HeroSearchConnectionProvider>
-      <div className="bg-background min-h-screen">
-        <div className="relative overflow-hidden">
-          {/* Hero section - streams immediately with Suspense boundary for member count */}
-          <Suspense fallback={<HomepageHeroServer memberCount={0} />}>
-            <HomepageHeroWithMemberCount />
-          </Suspense>
-
-          <LazySection>
-            <RecentlyViewedRail />
-          </LazySection>
-
-          {/* Homepage content - streams when ready (non-blocking) */}
-          {/* OPTIMIZATION: Fetch data independently, search filters are optional and loaded separately */}
-          <div className="relative">
-            <Suspense fallback={<HomePageLoading />}>
-              <HomepageContentServer />
+      <HomepageSearchProvider>
+        <div className="bg-background min-h-screen">
+          <div className="relative overflow-hidden">
+            {/* Hero section - streams immediately with Suspense boundary for member count */}
+            <Suspense fallback={<HomepageHeroServer memberCount={0} />}>
+              <HomepageHeroWithMemberCount />
             </Suspense>
+
+            <LazySection>
+              <RecentlyViewedRail />
+            </LazySection>
+
+            {/* Homepage content - streams when ready (non-blocking) */}
+            {/* OPTIMIZATION: Fetch data independently, search filters are optional and loaded separately */}
+            <div className="relative">
+              <Suspense fallback={<HomePageLoading />}>
+                <HomepageContentServer />
+              </Suspense>
+            </div>
+
+            {/* Search facets - loaded separately in parallel, optional for homepage content */}
+            {/* Note: Search facets are now optional and loaded separately to avoid blocking content */}
+
+            {/* Top contributors - lazy loaded below fold */}
+            <LazySection rootMargin="0px 0px -500px 0px">
+              <Suspense fallback={null}>
+                <TopContributorsServer />
+              </Suspense>
+            </LazySection>
           </div>
-
-          {/* Search facets - loaded separately in parallel, optional for homepage content */}
-          {/* Note: Search facets are now optional and loaded separately to avoid blocking content */}
-
-          {/* Top contributors - lazy loaded below fold */}
-          <LazySection rootMargin="0px 0px -500px 0px">
-            <Suspense fallback={null}>
-              <TopContributorsServer />
-            </Suspense>
-          </LazySection>
         </div>
-      </div>
+      </HomepageSearchProvider>
     </HeroSearchConnectionProvider>
   );
 }

@@ -27,8 +27,7 @@ id: missing-normalize-error
 language: typescript
 rule:
   all:
-    - pattern: catch ($ERROR) { $$$ }
-      kind: catch_clause
+    - kind: catch_clause
     - not:
         has:
           pattern: normalizeError($$$)
@@ -39,17 +38,18 @@ severity: error
 # Rule: Detect missing logger.child() for request-scoped context in server components
 id: missing-logger-child-context
 language: typescript
+files:
+  - 'app/**/*.tsx'
 rule:
   all:
-    - pattern: export default async function $NAME($$$) { $$$ }
-      kind: function_declaration
-    - inside:
-        pattern: app/**/*.tsx
+    - kind: function_declaration
+      has:
+        pattern: export default async function $NAME($$$) { $$$ }
     - has:
         pattern: logger.$METHOD($$$)
     - not:
         has:
-          pattern: const $LOGGER = logger.child({ operation: $OP, route: $ROUTE, module: $MODULE })
+          pattern: 'const $LOGGER = logger.child({ operation: $OP, route: $ROUTE, module: $MODULE })'
 message: "Server components/pages must use logger.child({ operation, route, module }) for request-scoped context. Create: const reqLogger = logger.child({ operation: 'PageName', route: '/path', module: 'apps/web/src/app/path' }) and use reqLogger for all logs. NOTE: requestId was removed from codebase - do NOT add it."
 severity: error
 
@@ -59,17 +59,18 @@ id: missing-operation-route-module-in-child
 language: typescript
 rule:
   all:
-    - pattern: logger.child({ $$$ })
-      kind: call_expression
+    - kind: call_expression
+      has:
+        pattern: logger.child({ $$$ })
     - not:
         has:
-          pattern: operation: $OP
+          regex: operation:\s*['"]
     - not:
         has:
-          pattern: route: $ROUTE
+          regex: route:\s*['"]
     - not:
         has:
-          pattern: module: $MODULE
+          regex: module:\s*['"]
 message: "logger.child() must include operation, route, and module fields. Use: logger.child({ operation: 'PageName', route: '/path', module: 'apps/web/src/app/path' })"
 severity: error
 
@@ -77,17 +78,18 @@ severity: error
 # Rule: Detect missing section-based logging in server pages
 id: missing-section-logging
 language: typescript
+files:
+  - 'app/**/*.tsx'
 rule:
   all:
-    - pattern: export default async function $NAME($$$) { $$$ }
-      kind: function_declaration
-    - inside:
-        pattern: app/**/*.tsx
+    - kind: function_declaration
+      has:
+        pattern: export default async function $NAME($$$) { $$$ }
     - has:
         pattern: $LOGGER.$METHOD($$$)
     - not:
         has:
-          pattern: section: $SECTION
+          regex: section:\s*['"]
 message: "Server pages should use section-based logging with section: 'section-name' in log context. Example: reqLogger.info({ section: 'data-fetch' }, 'message') or reqLogger.info('message', { section: 'data-fetch' })"
 severity: error
 
@@ -97,10 +99,12 @@ id: missing-use-logged-async
 language: typescript
 rule:
   all:
-    - pattern: const $HANDLER = async () => { $$$ }
-      kind: variable_declarator
+    - kind: variable_declarator
+      has:
+        pattern: const $HANDLER = async () => { $$$ }
     - inside:
-        pattern: 'use client'
+        has:
+          regex: 'use client'
     - not:
         has:
           pattern: useLoggedAsync($$$)

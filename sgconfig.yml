@@ -1,0 +1,11 @@
+# ast-grep project configuration
+# This file is required for ast-grep LSP to work in Zed IDE
+# See: https://ast-grep.github.io/guide/project/project-config.html
+
+# Directories where ast-grep will find rule files
+ruleDirs:
+  - config/coderabbit/ast-grep-rules
+
+# Optional: Utility directories (for reusable patterns)
+# utilDirs:
+#   - config/coderabbit/ast-grep-utils

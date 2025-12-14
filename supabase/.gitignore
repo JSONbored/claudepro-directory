@@ -1,0 +1,3 @@
+# Supabase local development files (not needed for GitHub Integration)
+.seed
+.temp

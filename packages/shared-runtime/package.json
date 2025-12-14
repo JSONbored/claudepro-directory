@@ -91,10 +91,11 @@
   },
   "dependencies": {
     "@heyclaude/database-types": "workspace:*",
+    "@shikijs/transformers": "^3.20.0",
     "@supabase/supabase-js": "^2.87.1",
     "pino": "^10.1.0",
     "sanitize-html": "^2.17.0",
-    "sugar-high": "^0.9.5",
+    "shiki": "^3.20.0",
     "zod": "^4.1.13"
   }
 }

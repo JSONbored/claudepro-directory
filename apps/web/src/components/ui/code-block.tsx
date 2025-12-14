@@ -155,6 +155,8 @@ import {
   useState,
 } from 'react';
 import { Button, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, cn } from '@heyclaude/web-runtime/ui';
+import { useBoolean, useTimeout } from '@heyclaude/web-runtime/hooks';
+import { getThemeConfig } from '@heyclaude/shared-runtime';
 
 export type BundledLanguage = string;
 
@@ -503,9 +505,16 @@ export const CodeBlockCopyButton = ({
   className,
   ...props
 }: CodeBlockCopyButtonProps) => {
-  const [isCopied, setIsCopied] = useState(false);
+  const { value: isCopied, setTrue: setIsCopiedTrue, setFalse: setIsCopiedFalse } = useBoolean();
   const { data, value } = useContext(CodeBlockContext);
   const code = data.find((item) => item.language === value)?.code;
+
+  // Reset copy state after timeout when isCopied is true
+  useTimeout(() => {
+    if (isCopied) {
+      setIsCopiedFalse();
+    }
+  }, isCopied ? timeout : null);
 
   const copyToClipboard = () => {
     if (
@@ -517,10 +526,8 @@ export const CodeBlockCopyButton = ({
     }
 
     navigator.clipboard.writeText(code).then(() => {
-      setIsCopied(true);
+      setIsCopiedTrue();
       onCopy?.();
-
-      setTimeout(() => setIsCopied(false), timeout);
     }, onError);
   };
 
@@ -627,20 +634,17 @@ export type CodeBlockContentProps = HTMLAttributes<HTMLDivElement> & {
 
 export const CodeBlockContent = ({
   children,
-  themes = {
-    light: 'vitesse-light',
-    dark: 'vitesse-dark',
-  },
+  themes = getThemeConfig(), // Use centralized theme config
   language = 'typescript',
   syntaxHighlighting = true,
   ...props
 }: CodeBlockContentProps) => {
   const [highlightedCode, setHighlightedCode] = useState<string>('');
-  const [isLoading, setIsLoading] = useState(syntaxHighlighting);
+  const { value: isLoading, setFalse: setIsLoadingFalse } = useBoolean(syntaxHighlighting);
 
   useEffect(() => {
     if (!syntaxHighlighting) {
-      setIsLoading(false);
+      setIsLoadingFalse();
       return;
     }
 
@@ -657,16 +661,16 @@ export const CodeBlockContent = ({
         });
 
         setHighlightedCode(html);
-        setIsLoading(false);
+        setIsLoadingFalse();
       } catch (error) {
         // Highlighting failed - fallback to plain text
         // Logging handled by caller if needed
-        setIsLoading(false);
+        setIsLoadingFalse();
       }
     };
 
     loadHighlightedCode();
-  }, [children, language, themes, syntaxHighlighting]);
+  }, [children, language, themes, syntaxHighlighting, setIsLoadingFalse]);
 
   if (!syntaxHighlighting || isLoading) {
     return <CodeBlockFallback {...(props as any)}>{children}</CodeBlockFallback>;

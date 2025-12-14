@@ -8,6 +8,7 @@
 import { requiresMFAChallenge } from '@heyclaude/web-runtime';
 import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
 import { logClientError, normalizeError } from '@heyclaude/web-runtime/logging/client';
+import { useBoolean } from '@heyclaude/web-runtime/hooks';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -32,9 +33,9 @@ interface AccountMFAGuardProps {
  * @see requiresMFAChallenge
  */
 export function AccountMFAGuard({ children }: AccountMFAGuardProps) {
-  const [checking, setChecking] = useState(true);
-  const [requiresMFA, setRequiresMFA] = useState(false);
-  const [mfaDialogOpen, setMfaDialogOpen] = useState(false);
+  const { value: checking, setTrue: setCheckingTrue, setFalse: setCheckingFalse } = useBoolean(true);
+  const { value: requiresMFA, setValue: setRequiresMFA } = useBoolean();
+  const { value: mfaDialogOpen, setTrue: setMfaDialogOpenTrue, setFalse: setMfaDialogOpenFalse } = useBoolean();
   const [checkError, setCheckError] = useState<Error | null>(null);
   const router = useRouter();
   const supabase = createSupabaseBrowserClient();
@@ -63,7 +64,7 @@ export function AccountMFAGuard({ children }: AccountMFAGuardProps) {
         setCheckError(null);
         setRequiresMFA(requires);
         if (requires) {
-          setMfaDialogOpen(true);
+          setMfaDialogOpenTrue();
         }
       }
     } catch (err) {
@@ -85,7 +86,7 @@ export function AccountMFAGuard({ children }: AccountMFAGuardProps) {
       setCheckError(normalized);
       setRequiresMFA(false);
     } finally {
-      setChecking(false);
+      setCheckingFalse();
     }
   }, [supabase]);
 
@@ -96,7 +97,7 @@ export function AccountMFAGuard({ children }: AccountMFAGuardProps) {
   }, [checkMFARequirement]);
 
   const handleMFAVerified = () => {
-    setMfaDialogOpen(false);
+    setMfaDialogOpenFalse();
     setRequiresMFA(false);
     // Refresh the page to get updated session with AAL2
     router.refresh();
@@ -127,7 +128,7 @@ export function AccountMFAGuard({ children }: AccountMFAGuardProps) {
             type="button"
             onClick={() => {
               setCheckError(null);
-              setChecking(true);
+              setCheckingTrue();
               checkMFARequirement().catch(() => {
                 // Error already handled in checkMFARequirement
               });

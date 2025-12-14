@@ -375,9 +375,6 @@ importers:
       sonner:
         specifier: ^2.0.7
         version: 2.0.7(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      sugar-high:
-        specifier: ^0.9.5
-        version: 0.9.5
       tailwind-merge:
         specifier: ^3.4.0
         version: 3.4.0
@@ -503,6 +500,9 @@ importers:
       '@heyclaude/database-types':
         specifier: workspace:*
         version: link:../database-types
+      '@shikijs/transformers':
+        specifier: ^3.20.0
+        version: 3.20.0
       '@supabase/supabase-js':
         specifier: ^2.87.1
         version: 2.87.1
@@ -512,9 +512,9 @@ importers:
       sanitize-html:
         specifier: ^2.17.0
         version: 2.17.0
-      sugar-high:
-        specifier: ^0.9.5
-        version: 0.9.5
+      shiki:
+        specifier: ^3.20.0
+        version: 3.20.0
       zod:
         specifier: ^4.1.13
         version: 4.1.13
@@ -3303,6 +3303,9 @@ packages:
 
   '@shikijs/themes@3.20.0':
     resolution: {integrity: sha512-U1NSU7Sl26Q7ErRvJUouArxfM2euWqq1xaSrbqMu2iqa+tSp0D1Yah8216sDYbdDHw4C8b75UpE65eWorm2erQ==}
+
+  '@shikijs/transformers@3.20.0':
+    resolution: {integrity: sha512-PrHHMRr3Q5W1qB/42kJW6laqFyWdhrPF2hNR9qjOm1xcSiAO3hAHo7HaVyHE6pMyevmy3i51O8kuGGXC78uK3g==}
 
   '@shikijs/types@3.20.0':
     resolution: {integrity: sha512-lhYAATn10nkZcBQ0BlzSbJA3wcmL5MXUUF8d2Zzon6saZDlToKaiRX60n2+ZaHJCmXEcZRWNzn+k9vplr8Jhsw==}
@@ -7417,9 +7420,6 @@ packages:
       babel-plugin-macros:
         optional: true
 
-  sugar-high@0.9.5:
-    resolution: {integrity: sha512-eirwp9p7QcMg6EFCD6zrGh4H30uFx2YtfiMJUavagceP6/YUUjLeiQmis7QuwqKB3nXrWXlLaRumCqOd9AKpSA==}
-
   supports-color@10.2.2:
     resolution: {integrity: sha512-SS+jx45GF1QjgEXQx4NJZV9ImqmO2NPz5FNsIHrsDjh2YsHnawpan7SNQ1o8NuhrbHZy9AZhIoCUiCeaW/C80g==}
     engines: {node: '>=18'}
@@ -11150,6 +11150,11 @@ snapshots:
 
   '@shikijs/themes@3.20.0':
     dependencies:
+      '@shikijs/types': 3.20.0
+
+  '@shikijs/transformers@3.20.0':
+    dependencies:
+      '@shikijs/core': 3.20.0
       '@shikijs/types': 3.20.0
 
   '@shikijs/types@3.20.0':
@@ -15756,8 +15761,6 @@ snapshots:
       react: 19.2.3
     optionalDependencies:
       '@babel/core': 7.28.5
-
-  sugar-high@0.9.5: {}
 
   supports-color@10.2.2: {}
 

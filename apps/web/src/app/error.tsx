@@ -2,7 +2,7 @@
 
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { SPRING } from '@heyclaude/web-runtime/design-system';
-import { useCopyToClipboard } from '@heyclaude/web-runtime/hooks';
+import { useBoolean, useCopyToClipboard } from '@heyclaude/web-runtime/hooks';
 import { AlertCircle, Check, Copy, Home, RefreshCw, Search } from '@heyclaude/web-runtime/icons';
 import { logClientErrorBoundary } from '@heyclaude/web-runtime/logging/client';
 import {
@@ -16,7 +16,7 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 /**
  * CRITICAL: Direct reference to process.env.NODE_ENV
@@ -86,7 +86,7 @@ export default function ErrorBoundary({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  const [isResetting, setIsResetting] = useState(false);
+  const { setTrue: setIsResettingTrue, value: isResetting } = useBoolean();
 
   useEffect(() => {
     logClientErrorBoundary(
@@ -104,7 +104,7 @@ export default function ErrorBoundary({
   }, [error]);
 
   const handleReset = () => {
-    setIsResetting(true);
+    setIsResettingTrue();
     reset();
   };
 

@@ -8,6 +8,7 @@
  */
 
 import { createContext, useContext, useState, type ReactNode } from 'react';
+import { useBoolean } from '@heyclaude/web-runtime/hooks';
 import type { UnifiedSearchProps } from '@heyclaude/web-runtime/types/component.types';
 
 interface HeroSearchConnectionContextValue {
@@ -27,7 +28,7 @@ interface HeroSearchConnectionContextValue {
 const HeroSearchConnectionContext = createContext<HeroSearchConnectionContextValue | null>(null);
 
 export function HeroSearchConnectionProvider({ children }: { children: ReactNode }) {
-  const [isSearchFocused, setSearchFocused] = useState(false);
+  const { value: isSearchFocused, setValue: setSearchFocused } = useBoolean();
   const [searchProps, setSearchProps] = useState<HeroSearchConnectionContextValue['searchProps']>();
 
   return (

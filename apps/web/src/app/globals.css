@@ -1070,8 +1070,10 @@
      Phase 1: Unified styling + max-height
      ======================================== */
 
-  /* Sugar High syntax highlighting - line and word highlights */
-  .line--highlighted {
+  /* Shiki code highlighting - line and word highlights */
+  /* These styles work with Shiki transformers for highlighting */
+  .line--highlighted,
+  .shiki .line.highlighted {
     background-color: var(--color-accent-subtle);
     border-left: 2px solid var(--color-accent);
     padding-left: 0.75rem;
@@ -1079,15 +1081,17 @@
     display: block;
   }
 
-  .word--highlighted {
+  .word--highlighted,
+  .shiki .highlighted-word {
     background-color: var(--color-accent-subtle);
     border-radius: 0.25rem;
     padding: 0.125rem 0.25rem;
     color: var(--color-accent-light);
   }
 
-  /* Line numbers for code blocks using data-line attribute */
-  .line-number::before {
+  /* Line numbers for code blocks using data-line attribute (Shiki compatible) */
+  .line-number::before,
+  .shiki .line[data-line]::before {
     content: attr(data-line);
     display: inline-block;
     width: 2rem;
@@ -1100,7 +1104,8 @@
     font-variant-numeric: tabular-nums;
   }
 
-  .line-number {
+  .line-number,
+  .shiki .line {
     display: block;
   }
 
@@ -1431,36 +1436,48 @@
   /* Now handled by micro-interactions.css with targeted selectors for better performance */
 
   /* ========================================
-     VIEW TRANSITIONS API - CIRCLE BLUR ANIMATION
+     VIEW TRANSITIONS API - SMOOTH THEME TRANSITION
      Modern theme toggle animation for Chrome/Edge 111+
+     Optimized for performance and smoothness
      ======================================== */
 
-  /** Circle blur animation for theme toggle (progressive enhancement). */
+  /** Smooth theme transition (progressive enhancement). */
   @supports (view-transition-name: root) {
-    /* Disable old view animation (fade out instantly) */
+    /* Cross-fade old view out smoothly */
     ::view-transition-old(root) {
-      animation: none;
-      opacity: 0;
+      animation: theme-fade-out var(--duration-quick) cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* Animate new view with enhanced circle blur expansion */
+    /* Animate new view with smooth circle expansion (no blur for performance) */
     ::view-transition-new(root) {
-      animation: circle-blur-expand var(--duration-relaxed) cubic-bezier(0.22, 1, 0.36, 1);
+      animation: theme-circle-expand var(--duration-quick) cubic-bezier(0.4, 0, 0.2, 1);
       mix-blend-mode: normal;
       /* Animation origin set dynamically via inline style */
     }
   }
 
-  @keyframes circle-blur-expand {
+  /* Smooth fade-out for old theme */
+  @keyframes theme-fade-out {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+
+  /* Smooth circle expansion without blur (much better performance)
+   * Uses only opacity and clip-path for optimal GPU acceleration
+   * No expensive filters (blur, brightness) that cause jank
+   */
+  @keyframes theme-circle-expand {
     from {
       clip-path: circle(0% at var(--x, 50%) var(--y, 50%));
-      filter: blur(8px) brightness(0.95);
-      transform: scale(1.02);
+      opacity: 0;
     }
     to {
       clip-path: circle(200% at var(--x, 50%) var(--y, 50%));
-      filter: blur(0) brightness(1);
-      transform: scale(1);
+      opacity: 1;
     }
   }
 

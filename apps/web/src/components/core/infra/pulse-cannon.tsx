@@ -7,8 +7,9 @@
 
 import { getFeatureFlag } from '@heyclaude/web-runtime/config/static-configs';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
+import { useIsClient, useBoolean, useTimeout } from '@heyclaude/web-runtime/hooks';
 import dynamic from 'next/dynamic';
-import { useEffect, useState } from 'react';
+import { useEffect, useCallback } from 'react';
 
 /**
  * CRITICAL: Direct reference to process.env.NODE_ENV
@@ -111,51 +112,58 @@ function loadUmamiPulse(): void {
 }
 
 export function PulseCannon() {
-  const [shouldLoadPulse, setShouldLoadPulse] = useState(false);
+  const { value: shouldLoadPulse, setTrue: setShouldLoadPulseTrue } = useBoolean();
+  const isClient = useIsClient();
+
+  const loadAllPulse = useCallback(() => {
+    try {
+      loadUmamiPulse();
+      setShouldLoadPulseTrue();
+    } catch (error) {
+      const normalized = normalizeError(error, 'Failed to load pulse services');
+      logClientWarn(
+        '[Analytics] Pulse loading failed',
+        normalized,
+        'PulseCannon.loadAllPulse',
+        {
+          component: 'PulseCannon',
+          action: 'load-all-pulse',
+          category: 'analytics',
+          error: normalized.message,
+        }
+      );
+    }
+  }, [setShouldLoadPulseTrue]);
 
   useEffect(() => {
-    if (!isProduction || shouldLoadPulse) {
+    if (!isProduction || shouldLoadPulse || !isClient) {
       return;
     }
-
-    if (typeof globalThis.window === 'undefined') {
-      return;
-    }
-
-    const loadAllPulse = () => {
-      try {
-        loadUmamiPulse();
-        setShouldLoadPulse(true);
-      } catch (error) {
-        const normalized = normalizeError(error, 'Failed to load pulse services');
-        logClientWarn(
-          '[Analytics] Pulse loading failed',
-          normalized,
-          'PulseCannon.loadAllPulse',
-          {
-            component: 'PulseCannon',
-            action: 'load-all-pulse',
-            category: 'analytics',
-            error: normalized.message,
-          }
-        );
-      }
-    };
 
     if ('requestIdleCallback' in globalThis) {
       requestIdleCallback(loadAllPulse, { timeout: 2000 });
     } else if (typeof document !== 'undefined' && document.readyState === 'complete') {
-      setTimeout(loadAllPulse, 100);
+      // Use useTimeout for delayed load when document is ready
+      // This will be handled below
     } else {
       (globalThis as unknown as Window).addEventListener(
         'load',
-        () => {
-          setTimeout(loadAllPulse, 100);
-        },
+        loadAllPulse,
         { once: true }
       );
     }
-  }, [shouldLoadPulse]);
+  }, [shouldLoadPulse, isClient, loadAllPulse]);
+
+  // Use useTimeout for delayed load when document is ready (fallback for browsers without requestIdleCallback)
+  const shouldDelayLoad = isProduction && !shouldLoadPulse && isClient && 
+    typeof document !== 'undefined' && document.readyState === 'complete' &&
+    !('requestIdleCallback' in globalThis);
+  
+  useTimeout(() => {
+    if (shouldDelayLoad) {
+      loadAllPulse();
+    }
+  }, shouldDelayLoad ? 100 : null);
 
   if (!shouldLoadPulse) {
     return null;

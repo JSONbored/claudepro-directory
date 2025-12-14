@@ -16,6 +16,7 @@
 import type { DisplayableContent, FilterState } from '@heyclaude/web-runtime/types/component.types';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useBoolean, useDebounceValue } from '@heyclaude/web-runtime/hooks';
 
 import { enhancedSearchCache } from '../utils/search-cache';
 import { syncSearchStateFromURL, syncSearchStateToURL } from '../utils/search-state';
@@ -76,17 +77,19 @@ export function useSearch({
     return searchParams.get('q') ?? '';
   });
 
+  // Debounced query for search execution
+  const [debouncedQuery, setDebouncedQuery] = useDebounceValue(query, debounceMs);
+
   const [filters, setFiltersState] = useState<FilterState>(() => {
     return syncSearchStateFromURL(searchParams);
   });
 
   const [results, setResults] = useState<DisplayableContent[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const { value: isLoading, setTrue: setIsLoadingTrue, setFalse: setIsLoadingFalse } = useBoolean();
   const [error, setError] = useState<Error | null>(null);
 
-  // Refs for cancellation and debouncing
+  // Refs for cancellation
   const abortControllerRef = useRef<AbortController | null>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastSearchRef = useRef<{ query: string; filters: FilterState } | null>(null);
 
   // Cancel current search
@@ -94,10 +97,6 @@ export function useSearch({
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
-    }
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
     }
   }, []);
 
@@ -109,7 +108,7 @@ export function useSearch({
         const cached = enhancedSearchCache.get(searchQuery, searchFilters);
         if (cached) {
           setResults(cached);
-          setIsLoading(false);
+          setIsLoadingFalse();
           setError(null);
           // Still fetch fresh in background (fire and forget)
         }
@@ -122,7 +121,7 @@ export function useSearch({
 
       if (!shouldSearch) {
         setResults([]);
-        setIsLoading(false);
+        setIsLoadingFalse();
         setError(null);
         return;
       }
@@ -131,7 +130,7 @@ export function useSearch({
         return;
       }
 
-      setIsLoading(true);
+      setIsLoadingTrue();
       setError(null);
 
       // Use cache deduplication
@@ -170,7 +169,7 @@ export function useSearch({
         // Only update if request wasn't aborted
         if (!abortControllerRef.current?.signal.aborted) {
           setResults(results);
-          setIsLoading(false);
+          setIsLoadingFalse();
           setError(null);
         }
       } catch (err) {
@@ -180,7 +179,7 @@ export function useSearch({
         }
 
         setError(err instanceof Error ? err : new Error('Search failed'));
-        setIsLoading(false);
+        setIsLoadingFalse();
       } finally {
         abortControllerRef.current = null;
       }
@@ -188,24 +187,18 @@ export function useSearch({
     [cache, minQueryLength, onSearch]
   );
 
-  // Debounced search function
+  // Search function - updates query immediately, search execution is debounced via useDebounceValue
   const search = useCallback(
     (newQuery: string) => {
       cancel();
-
       setQueryState(newQuery);
+      setDebouncedQuery(newQuery); // This will trigger debounced search via useEffect below
 
       // Update URL immediately
       const newSearchParams = syncSearchStateToURL(newQuery, filters, searchParams);
       router.replace(`?${newSearchParams.toString()}`, { scroll: false });
-
-      // Debounce the actual search
-      timeoutRef.current = setTimeout(() => {
-        lastSearchRef.current = { query: newQuery, filters };
-        performSearch(newQuery, filters);
-      }, debounceMs);
     },
-    [cancel, debounceMs, filters, performSearch, router, searchParams]
+    [cancel, filters, router, searchParams, setDebouncedQuery]
   );
 
   // Update filters
@@ -246,6 +239,20 @@ export function useSearch({
     router.replace(`?${newSearchParams.toString()}`, { scroll: false });
   }, [query, filters, router, searchParams]);
 
+  // Execute search when debounced query changes
+  useEffect(() => {
+    // Skip if this is the same search we just performed
+    if (
+      lastSearchRef.current?.query === debouncedQuery &&
+      JSON.stringify(lastSearchRef.current?.filters) === JSON.stringify(filters)
+    ) {
+      return;
+    }
+
+    lastSearchRef.current = { query: debouncedQuery, filters };
+    performSearch(debouncedQuery, filters);
+  }, [debouncedQuery, filters, performSearch]);
+
   // Sync from URL on mount and when URL changes
   useEffect(() => {
     const urlQuery = searchParams.get('q') ?? '';
@@ -254,6 +261,7 @@ export function useSearch({
     // Only sync if URL changed (avoid infinite loops)
     if (urlQuery !== query) {
       setQueryState(urlQuery);
+      setDebouncedQuery(urlQuery);
     }
 
     const filtersChanged =
@@ -262,7 +270,7 @@ export function useSearch({
       setFiltersState(urlFilters);
     }
 
-    // Perform search if URL changed
+    // Perform search if URL changed (immediate, no debounce for URL-initiated searches)
     if (
       (urlQuery !== lastSearchRef.current?.query ||
         JSON.stringify(urlFilters) !== JSON.stringify(lastSearchRef.current?.filters)) &&
@@ -271,7 +279,7 @@ export function useSearch({
       lastSearchRef.current = { query: urlQuery, filters: urlFilters };
       performSearch(urlQuery, urlFilters);
     }
-  }, [searchParams, query, filters, performSearch]);
+  }, [searchParams, query, filters, performSearch, setDebouncedQuery]);
 
   // Cleanup on unmount
   useEffect(() => {

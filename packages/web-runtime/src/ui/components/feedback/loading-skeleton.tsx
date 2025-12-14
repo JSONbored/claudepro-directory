@@ -30,6 +30,7 @@
 
 import { POSITION_PATTERNS, UI_CLASSES } from '../../constants.ts';
 import { SPRING, STAGGER, DURATION } from '../../../design-system/index.ts';
+import { useReducedMotion } from '../../../hooks/motion/index.ts';
 import { cn } from '../../utils.ts';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { motion } from 'motion/react';
@@ -96,9 +97,7 @@ export function Skeleton({
   ...props
 }: SkeletonProps) {
   // Check for prefers-reduced-motion
-  const prefersReducedMotion =
-    typeof window !== 'undefined' &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const prefersReducedMotion = useReducedMotion();
 
   return (
     <div
@@ -174,14 +173,13 @@ function ConfigGridSkeleton({
   count?: number;
   stagger?: boolean;
 } & React.HTMLAttributes<HTMLDivElement>) {
+  const prefersReducedMotion = useReducedMotion();
+  
   return (
     <div className={cn('container mx-auto px-4 py-8', className)} {...props}>
       <PageHeaderSkeleton />
       <div className={UI_CLASSES.GRID_RESPONSIVE_3_TIGHT}>
         {[...Array(count)].map((_, i) => {
-          const prefersReducedMotion =
-            typeof window !== 'undefined' &&
-            window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
           return (
             <motion.div
@@ -216,12 +214,11 @@ function ContentListSkeleton({
   count?: number;
   stagger?: boolean;
 } & React.HTMLAttributes<HTMLDivElement>) {
+  const prefersReducedMotion = useReducedMotion();
+  
   return (
     <div className={cn('space-y-4', className)} {...props}>
       {[...Array(count)].map((_, i) => {
-        const prefersReducedMotion =
-          typeof window !== 'undefined' &&
-          window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
         return (
           <motion.div
@@ -274,6 +271,8 @@ function FilterBarSkeleton({
 }: {
   stagger?: boolean;
 } & React.HTMLAttributes<HTMLDivElement>) {
+  const prefersReducedMotion = useReducedMotion();
+  
   return (
     <div
       className={cn('space-y-6 rounded-lg border border-border/50 bg-card/30 p-6', className)}
@@ -285,9 +284,6 @@ function FilterBarSkeleton({
       </div>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         {[...Array(4)].map((_, i) => {
-          const prefersReducedMotion =
-            typeof window !== 'undefined' &&
-            window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
           return (
             <motion.div
@@ -313,9 +309,6 @@ function FilterBarSkeleton({
       </div>
       <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
         {[...Array(8)].map((_, i) => {
-          const prefersReducedMotion =
-            typeof window !== 'undefined' &&
-            window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
           return (
             <motion.div
@@ -352,6 +345,8 @@ function TableSkeleton({
   columns?: number;
   stagger?: boolean;
 } & React.HTMLAttributes<HTMLDivElement>) {
+  const prefersReducedMotion = useReducedMotion();
+  
   return (
     <div className={cn('rounded-lg border', className)} {...props}>
       <div className="border-b p-4">
@@ -362,9 +357,6 @@ function TableSkeleton({
         </div>
       </div>
       {[...Array(rows)].map((_, rowIndex) => {
-        const prefersReducedMotion =
-          typeof window !== 'undefined' &&
-          window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
         return (
           <motion.div
@@ -424,6 +416,8 @@ function FeaturedSectionSkeleton({
   count?: number;
   stagger?: boolean;
 } & React.HTMLAttributes<HTMLDivElement>) {
+  const prefersReducedMotion = useReducedMotion();
+  
   return (
     <div className={cn('space-y-8', className)} {...props}>
       {/* Section Header */}
@@ -434,9 +428,6 @@ function FeaturedSectionSkeleton({
       {/* Card Grid with Stagger */}
       <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
         {[...Array(count)].map((_, i) => {
-          const prefersReducedMotion =
-            typeof window !== 'undefined' &&
-            window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
           return (
             <motion.div
@@ -469,15 +460,14 @@ function HomepageStatsSkeleton({
 }: {
   stagger?: boolean;
 } & React.HTMLAttributes<HTMLDivElement>) {
+  const prefersReducedMotion = useReducedMotion();
+  
   return (
     <div
       className={cn('flex-wrap justify-center gap-4 text-xs lg:gap-6 lg:text-sm', className)}
       {...props}
     >
       {[...Array(7)].map((_, i) => {
-        const prefersReducedMotion =
-          typeof window !== 'undefined' &&
-          window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
         return (
           <motion.div

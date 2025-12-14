@@ -14,7 +14,7 @@ import { Copy, Check, AlertCircle, RefreshCw } from '@heyclaude/web-runtime/icon
 import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useBoolean } from '@heyclaude/web-runtime/hooks';
 
 /**
  * CRITICAL: Direct reference to process.env.NODE_ENV
@@ -76,10 +76,10 @@ export function SegmentErrorFallback({
   links = [],
   error,
 }: SegmentErrorFallbackProps) {
-  const [isResetting, setIsResetting] = useState(false);
+  const { value: isResetting, setTrue: setIsResettingTrue } = useBoolean();
 
   const handleReset = () => {
-    setIsResetting(true);
+    setIsResettingTrue();
     onReset?.();
   };
 

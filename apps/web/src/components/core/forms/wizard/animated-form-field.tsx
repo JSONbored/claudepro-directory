@@ -21,7 +21,8 @@ import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/design-
 import { SPRING, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion, useAnimateScoped } from '@heyclaude/web-runtime/hooks/motion';
 import { AnimatePresence, motion } from 'motion/react';
-import { type FocusEvent, type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import { type FocusEvent, type ReactNode, useCallback, useEffect, useRef } from 'react';
+import { useBoolean } from '@heyclaude/web-runtime/hooks';
 
 export type ValidationState = 'idle' | 'invalid' | 'valid' | 'warning';
 
@@ -87,8 +88,8 @@ export function AnimatedFormField({
   onFocus,
   onBlur,
 }: AnimatedFormFieldProps) {
-  const [isFocused, setIsFocused] = useState(false);
-  const [hasInteracted, setHasInteracted] = useState(false);
+  const { value: isFocused, setTrue: setIsFocusedTrue, setFalse: setIsFocusedFalse } = useBoolean();
+  const { value: hasInteracted, setTrue: setHasInteractedTrue } = useBoolean();
   const shouldReduceMotion = useReducedMotion();
   const [, animate] = useAnimateScoped();
   const previousValidationStateRef = useRef(validationState);
@@ -117,8 +118,8 @@ export function AnimatedFormField({
 
   const handleFocus = useCallback(
     (e: FocusEvent<HTMLElement>) => {
-      setIsFocused(true);
-      setHasInteracted(true);
+      setIsFocusedTrue();
+      setHasInteractedTrue();
       onFocus?.(e);
     },
     [onFocus]
@@ -126,7 +127,7 @@ export function AnimatedFormField({
 
   const handleBlur = useCallback(
     (e: FocusEvent<HTMLElement>) => {
-      setIsFocused(false);
+      setIsFocusedFalse();
       onBlur?.(e);
     },
     [onBlur]

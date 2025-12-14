@@ -1,7 +1,8 @@
 'use client';
 
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
-import { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { useBoolean } from '@heyclaude/web-runtime/hooks';
+import { createContext, useContext, useMemo } from 'react';
 
 interface CommandPaletteContextValue {
   closePalette: () => void;
@@ -13,20 +14,7 @@ interface CommandPaletteContextValue {
 const CommandPaletteContext = createContext<null | CommandPaletteContextValue>(null);
 
 export function CommandPaletteProvider({ children }: { children: React.ReactNode }) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const openPalette = useCallback(() => {
-    // PERFORMANCE FIX: Removed excessive logging
-    setIsOpen(true);
-  }, []);
-
-  const closePalette = useCallback(() => {
-    setIsOpen(false);
-  }, []);
-
-  const togglePalette = useCallback(() => {
-    setIsOpen((prev) => !prev);
-  }, []);
+  const { value: isOpen, setTrue: openPalette, setFalse: closePalette, toggle: togglePalette } = useBoolean();
 
   const contextValue = useMemo(
     () => ({

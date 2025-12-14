@@ -8,7 +8,6 @@
  */
 
 import { type Database } from '@heyclaude/database-types';
-import { highlightCode } from '@heyclaude/shared-runtime/code-highlight';
 import { useNewsletter } from '@heyclaude/web-runtime/hooks';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { ArrowRight, Loader2, Mail } from '@heyclaude/web-runtime/icons';
@@ -57,47 +56,53 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
   };
 
   // Highlight the MCP command and sanitize with DOMPurify for defense-in-depth
-  const rawHighlightedCode = highlightCode(MCP_COMMAND, 'bash', { showLineNumbers: false });
   const [sanitizedCode, setSanitizedCode] = useState<string>('');
 
   useEffect(() => {
-    // Sanitize highlighted code with DOMPurify for XSS protection
-    // Even though input is hardcoded, sanitization provides defense-in-depth
-    if (typeof window !== 'undefined' && rawHighlightedCode) {
-      import('dompurify')
-        .then((DOMPurify) => {
-          // Sanitize with restrictive allowlist for code highlighting HTML
-          // sugar-high typically uses: <div>, <pre>, <code>, <span> with class attributes
+    // Highlight code asynchronously, then sanitize
+    const loadAndSanitize = async () => {
+      try {
+        const { highlightCode } = await import('@heyclaude/shared-runtime');
+        const rawHighlightedCode = await highlightCode(MCP_COMMAND, 'bash', { showLineNumbers: false });
+        
+        // Sanitize highlighted code with DOMPurify for XSS protection
+        // Even though input is hardcoded, sanitization provides defense-in-depth
+        if (typeof window !== 'undefined' && rawHighlightedCode) {
+          const DOMPurify = await import('dompurify');
+          // Sanitize with restrictive allowlist for Shiki HTML
+          // Shiki typically uses: <pre>, <code>, <span> with class and style attributes
           const sanitized = DOMPurify.default.sanitize(rawHighlightedCode, {
-            ALLOWED_TAGS: ['div', 'pre', 'code', 'span', 'button'],
-            ALLOWED_ATTR: ['class', 'data-line'],
-            // Allow data-* attributes (sugar-high may use data-line for line numbers)
+            ALLOWED_TAGS: ['pre', 'code', 'span', 'div'],
+            ALLOWED_ATTR: ['class', 'style', 'data-line'],
+            // Allow data-* attributes (Shiki may use data-line for line numbers)
             ALLOW_DATA_ATTR: true,
             // Remove any dangerous protocols or scripts
-            FORBID_TAGS: ['script', 'iframe', 'object', 'embed', 'form', 'input'],
+            FORBID_TAGS: ['script', 'iframe', 'object', 'embed', 'form', 'input', 'button'],
             FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'href', 'src'],
           });
           setSanitizedCode(sanitized);
-        })
-        .catch((error) => {
-          const normalized = normalizeError(error, 'Failed to load DOMPurify');
-          logClientWarn(
-            '[FooterNewsletterCTA] Failed to sanitize highlighted code',
-            normalized,
-            'FooterNewsletterCTA.sanitize',
-            {
-              component: 'FooterNewsletterCTA',
-              action: 'sanitize-code',
-            }
-          );
-          // Fallback to original HTML if DOMPurify fails (input is hardcoded, so safe)
-          setSanitizedCode(rawHighlightedCode);
-        });
-    } else {
-      // During SSR, use empty string (will be sanitized on client)
-      setSanitizedCode('');
-    }
-  }, [rawHighlightedCode]);
+        } else {
+          // During SSR, use empty string (will be sanitized on client)
+          setSanitizedCode('');
+        }
+      } catch (error) {
+        const normalized = normalizeError(error, 'Failed to highlight or sanitize code');
+        logClientWarn(
+          '[FooterNewsletterCTA] Failed to highlight or sanitize code',
+          normalized,
+          'FooterNewsletterCTA.loadAndSanitize',
+          {
+            component: 'FooterNewsletterCTA',
+            action: 'highlight-sanitize-code',
+          }
+        );
+        // Fallback to empty string
+        setSanitizedCode('');
+      }
+    };
+
+    loadAndSanitize();
+  }, []);
 
   return (
     <div className="border-border/50 bg-background border-b">

@@ -11,7 +11,9 @@
 import { getHomepageConfigBundle, getTimeoutConfig } from '../config/static-configs.ts';
 // Import directly from source files to avoid indirect imports through entries/core.ts
 import { logger } from '../logger.ts';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
+import { useBoolean } from './use-boolean.ts';
+import { useIntersectionObserver } from './use-intersection-observer.ts';
 
 interface UseInfiniteScrollOptions {
   /** Total number of items available */
@@ -92,8 +94,7 @@ export function useInfiniteScroll({
   }, [finalThreshold]);
 
   const [displayCount, setDisplayCount] = useState(finalBatchSize);
-  const [isLoading, setIsLoading] = useState(false);
-  const observerRef = useRef<IntersectionObserver | null>(null);
+  const { value: isLoading, setTrue: setIsLoadingTrue, setFalse: setIsLoadingFalse } = useBoolean();
 
   const hasMore = displayCount < totalItems;
 
@@ -104,56 +105,30 @@ export function useInfiniteScroll({
   const loadMore = useCallback(() => {
     if (isLoading || !hasMore) return;
 
-    setIsLoading(true);
+    setIsLoadingTrue();
 
     // Get timeout config from static defaults
     const config = getTimeoutConfig();
     const delay = config['timeout.ui.transition_ms'] ?? 200;
     setTimeout(() => {
       setDisplayCount((prev) => Math.min(prev + finalBatchSize, totalItems));
-      setIsLoading(false);
+      setIsLoadingFalse();
     }, delay);
-  }, [finalBatchSize, hasMore, isLoading, totalItems]);
+  }, [finalBatchSize, hasMore, isLoading, totalItems, setIsLoadingTrue, setIsLoadingFalse]);
 
-  /**
-   * Callback ref for sentinel element
-   * Handles observer setup/cleanup with proper dependency tracking
-   */
-  const sentinelRef = useCallback(
-    (node: HTMLDivElement | null) => {
-      // Disconnect previous observer
-      if (observerRef.current) {
-        observerRef.current.disconnect();
+  // Use useIntersectionObserver hook for uniform implementation
+  const { ref: sentinelRef } = useIntersectionObserver({
+    threshold: safeThreshold(),
+    root,
+    rootMargin,
+    initialIsIntersecting: false,
+    // Use onChange to conditionally load more (respects hasMore and isLoading)
+    onChange: (isIntersecting) => {
+      if (isIntersecting && hasMore && !isLoading) {
+        loadMore();
       }
-
-      // Don't observe if no more items (performance optimization)
-      if (!hasMore) return;
-
-      // Don't observe if currently loading (prevent duplicate requests)
-      if (isLoading) return;
-
-      // No node to observe
-      if (!node) return;
-
-      // Create new observer with validated threshold
-      observerRef.current = new IntersectionObserver(
-        (entries) => {
-          if (entries[0]?.isIntersecting && hasMore) {
-            loadMore();
-          }
-        },
-        {
-          root,
-          rootMargin,
-          threshold: safeThreshold(),
-        }
-      );
-
-      // Start observing
-      observerRef.current.observe(node);
     },
-    [hasMore, isLoading, loadMore, root, rootMargin, safeThreshold]
-  );
+  });
 
   /**
    * Reset to initial state
@@ -161,20 +136,8 @@ export function useInfiniteScroll({
    */
   const reset = useCallback(() => {
     setDisplayCount(finalBatchSize);
-    setIsLoading(false);
-  }, [finalBatchSize]);
-
-  /**
-   * Cleanup observer on unmount
-   * Prevents memory leaks
-   */
-  useEffect(() => {
-    return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
-    };
-  }, []);
+    setIsLoadingFalse();
+  }, [finalBatchSize, setIsLoadingFalse]);
 
   return {
     displayCount,

@@ -7,7 +7,7 @@
  */
 
 import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
-import { usePulse } from '@heyclaude/web-runtime/hooks';
+import { usePulse, useIsClient } from '@heyclaude/web-runtime/hooks';
 import { type TabbedDetailLayoutProps } from '@heyclaude/web-runtime/types/component.types';
 import { cn, Tabs, TabsContent, TabsList, TabsTrigger, LayoutGroup } from '@heyclaude/web-runtime/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -29,14 +29,16 @@ import { TabSectionRenderer } from './tab-section-renderer';
  */
 export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDetailLayoutProps) {
   const pulse = usePulse();
+  const isClient = useIsClient();
+  
   // Get initial tab from URL hash or default to first tab
   const getInitialTab = useCallback(() => {
     if (tabs.length === 0) return '';
-    if (typeof window === 'undefined') return tabs[0]?.id || '';
+    if (!isClient) return tabs[0]?.id || '';
     const hash = window.location.hash.slice(1);
     const matchingTab = tabs.find((tab) => tab.id === hash);
     return matchingTab ? matchingTab.id : tabs[0]?.id || '';
-  }, [tabs]);
+  }, [tabs, isClient]);
 
   const [activeTab, setActiveTab] = useState<string>(getInitialTab);
   const touchStartX = useRef<number>(0);
@@ -44,7 +46,7 @@ export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDe
 
   // Sync tab state with URL hash
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (!isClient) return;
     
     const handleHashChange = () => {
       const hash = window.location.hash.slice(1);
@@ -56,7 +58,7 @@ export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDe
 
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
-  }, [tabs]);
+  }, [tabs, isClient]);
 
   // Handle tab change with analytics tracking
   const handleTabChange = useCallback(
@@ -64,7 +66,7 @@ export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDe
       setActiveTab(value);
 
       // Update URL hash without scrolling
-      if (typeof window !== 'undefined' && window.location && window.history) {
+      if (isClient && window.location && window.history) {
         const newUrl = `${window.location.pathname}${window.location.search}#${value}`;
         window.history.replaceState(null, '', newUrl);
       }
@@ -86,7 +88,7 @@ export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDe
           });
         });
     },
-    [item.category, item.slug, pulse]
+    [item.category, item.slug, pulse, isClient]
   );
 
   // Mobile swipe gesture navigation

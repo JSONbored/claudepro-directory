@@ -24,7 +24,7 @@
       "language_servers": ["deno", "!typescript-language-server", "!vtsls"]
     },
     "TypeScript": {
-      "language_servers": ["vtsls", "typescript-language-server", "!deno"],
+      "language_servers": ["vtsls", "typescript-language-server", "ast-grep", "!deno"],
       "formatter": [
         {
           "code_action": "source.fixAll.eslint"
@@ -38,7 +38,7 @@
       ]
     },
     "JavaScript": {
-      "language_servers": ["vtsls", "typescript-language-server", "!deno"],
+      "language_servers": ["vtsls", "typescript-language-server", "ast-grep", "!deno"],
       "formatter": [
         {
           "code_action": "source.fixAll.eslint"
@@ -52,7 +52,7 @@
       ]
     },
     "TypeScript React": {
-      "language_servers": ["vtsls", "typescript-language-server", "!deno"],
+      "language_servers": ["vtsls", "typescript-language-server", "ast-grep", "!deno"],
       "formatter": [
         {
           "code_action": "source.fixAll.eslint"
@@ -66,7 +66,7 @@
       ]
     },
     "JavaScript React": {
-      "language_servers": ["vtsls", "typescript-language-server", "!deno"],
+      "language_servers": ["vtsls", "typescript-language-server", "ast-grep", "!deno"],
       "formatter": [
         {
           "code_action": "source.fixAll.eslint"
@@ -220,6 +220,77 @@
         "userLanguages": {
           "typescript": "javascript",
           "typescriptreact": "javascriptreact"
+        }
+      }
+    },
+    "ast-grep": {
+      "binary": {
+        "path": "ast-grep",
+        "arguments": ["lsp"]
+      }
+    },
+    "discord_presence": {
+      "initialization_options": {
+        "application_id": "1263505205522337886",
+        "base_icons_url": "https://raw.githubusercontent.com/xhyrom/zed-discord-presence/main/assets/icons/",
+        "state": "Building heyclau.de: {folder_and_file}",
+        "details": "Claude Pro Directory • {workspace}",
+        "large_image": "{base_icons_url}/{language:lo}.png",
+        "large_text": "{language:u}",
+        "small_image": "{base_icons_url}/zed.png",
+        "small_text": "Zed",
+        "idle": {
+          "timeout": 300,
+          "action": "change_activity",
+          "state": "Taking a break from heyclau.de",
+          "details": "Claude Pro Directory • Idling",
+          "large_image": "{base_icons_url}/zed.png",
+          "large_text": "Zed",
+          "small_image": "{base_icons_url}/idle.png",
+          "small_text": "Coffee break ☕"
+        },
+        "git_integration": true,
+        "languages": {
+          "typescript": {
+            "state": "TypeScript wizardry: {folder_and_file}",
+            "details": "Building Claude Pro Directory",
+            "large_text": "TypeScript"
+          },
+          "javascript": {
+            "state": "JS magic: {folder_and_file}",
+            "details": "Claude Pro Directory",
+            "large_text": "JavaScript"
+          },
+          "typescriptreact": {
+            "state": "React + TS: {folder_and_file}",
+            "details": "Claude Pro Directory UI",
+            "large_text": "React + TypeScript"
+          },
+          "javascriptreact": {
+            "state": "React component: {folder_and_file}",
+            "details": "Claude Pro Directory",
+            "large_text": "React"
+          },
+          "markdown": {
+            "state": "Documenting: {filename}",
+            "details": "Claude Pro Directory docs",
+            "large_text": "Documentation"
+          },
+          "yaml": {
+            "state": "Config: {filename}",
+            "details": "Claude Pro Directory setup",
+            "large_text": "Configuration"
+          },
+          "json": {
+            "state": "Config: {filename}",
+            "details": "Claude Pro Directory",
+            "large_text": "JSON"
+          },
+          "css": {
+            "state": "Styling: {filename}",
+            "details": "Claude Pro Directory",
+            "large_text": "CSS"
+          }
         }
       }
     }

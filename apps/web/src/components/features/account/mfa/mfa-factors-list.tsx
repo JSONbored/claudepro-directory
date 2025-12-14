@@ -7,7 +7,7 @@
 
 import { listMFAFactors, type MFAFactor, unenrollMFAFactor } from '@heyclaude/web-runtime';
 import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
-import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
+import { useLoggedAsync, useIsMounted, useBoolean } from '@heyclaude/web-runtime/hooks';
 import { AlertTriangle, CheckCircle, Loader2, Shield, Trash } from '@heyclaude/web-runtime/icons';
 import {
   errorToasts,
@@ -30,11 +30,11 @@ interface MFAFactorsListProps {
 
 export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
   const [factors, setFactors] = useState<MFAFactor[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { value: loading, setTrue: setLoadingTrue, setFalse: setLoadingFalse } = useBoolean(true);
   const [error, setError] = useState<null | string>(null);
-  const [unenrollDialogOpen, setUnenrollDialogOpen] = useState(false);
+  const { value: unenrollDialogOpen, setTrue: setUnenrollDialogOpenTrue, setFalse: setUnenrollDialogOpenFalse, setValue: setUnenrollDialogOpen } = useBoolean();
   const [factorToUnenroll, setFactorToUnenroll] = useState<MFAFactor | null>(null);
-  const [unenrolling, setUnenrolling] = useState(false);
+  const { value: unenrolling, setTrue: setUnenrollingTrue, setFalse: setUnenrollingFalse } = useBoolean();
 
   const supabase = createSupabaseBrowserClient();
   const runLoggedAsync = useLoggedAsync({
@@ -42,9 +42,11 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
     defaultMessage: 'MFA operation failed',
     defaultRethrow: false,
   });
+  const isMounted = useIsMounted();
 
   const loadFactors = useCallback(async () => {
-    setLoading(true);
+    if (!isMounted()) return;
+    setLoadingTrue();
     setError(null);
 
     try {
@@ -56,7 +58,9 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
             throw listError;
           }
 
-          setFactors(userFactors);
+          if (isMounted()) {
+            setFactors(userFactors);
+          }
         },
         {
           message: 'Failed to load MFA factors',
@@ -65,13 +69,17 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
       );
     } catch (error_) {
       // Error already logged by useLoggedAsync
-      const message = error_ instanceof Error ? error_.message : 'Failed to load MFA factors';
-      setError(message);
-      errorToasts.actionFailed('load MFA factors', message);
+      if (isMounted()) {
+        const message = error_ instanceof Error ? error_.message : 'Failed to load MFA factors';
+        setError(message);
+        errorToasts.actionFailed('load MFA factors', message);
+      }
     } finally {
-      setLoading(false);
+      if (isMounted()) {
+        setLoadingFalse();
+      }
     }
-  }, [supabase, runLoggedAsync]);
+  }, [supabase, runLoggedAsync, isMounted]);
 
   useEffect(() => {
     loadFactors().catch(() => {
@@ -80,20 +88,24 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
   }, [loadFactors]);
 
   const handleUnenroll = async () => {
-    if (!factorToUnenroll) return;
+    if (!factorToUnenroll || !isMounted()) return;
 
     // Check if this is the last verified factor
     const verifiedFactors = factors.filter((f) => f.status === 'verified');
     if (verifiedFactors.length <= 1 && factorToUnenroll.status === 'verified') {
-      errorToasts.actionFailed(
-        'unenroll MFA factor',
-        'Cannot unenroll your last verified MFA factor. Please add another factor first.'
-      );
-      setUnenrollDialogOpen(false);
+      if (isMounted()) {
+        errorToasts.actionFailed(
+          'unenroll MFA factor',
+          'Cannot unenroll your last verified MFA factor. Please add another factor first.'
+        );
+        setUnenrollDialogOpenFalse();
+      }
       return;
     }
 
-    setUnenrolling(true);
+    if (isMounted()) {
+      setUnenrollingTrue();
+    }
 
     try {
       await runLoggedAsync(
@@ -107,11 +119,13 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
             throw unenrollError || new Error('Unenrollment failed');
           }
 
-          successToasts.actionCompleted('MFA factor unenrolled');
-          setUnenrollDialogOpen(false);
-          setFactorToUnenroll(null);
-          await loadFactors();
-          onFactorUnenrolled?.();
+          if (isMounted()) {
+            successToasts.actionCompleted('MFA factor unenrolled');
+            setUnenrollDialogOpenFalse();
+            setFactorToUnenroll(null);
+            await loadFactors();
+            onFactorUnenrolled?.();
+          }
         },
         {
           message: 'Failed to unenroll MFA factor',
@@ -123,10 +137,14 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
       );
     } catch (error_) {
       // Error already logged by useLoggedAsync
-      const message = error_ instanceof Error ? error_.message : 'Failed to unenroll MFA factor';
-      errorToasts.actionFailed('unenroll MFA factor', message);
+      if (isMounted()) {
+        const message = error_ instanceof Error ? error_.message : 'Failed to unenroll MFA factor';
+        errorToasts.actionFailed('unenroll MFA factor', message);
+      }
     } finally {
-      setUnenrolling(false);
+      if (isMounted()) {
+        setUnenrollingFalse();
+      }
     }
   };
 
@@ -200,7 +218,7 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
                 size="sm"
                 onClick={() => {
                   setFactorToUnenroll(factor);
-                  setUnenrollDialogOpen(true);
+                  setUnenrollDialogOpenTrue();
                 }}
                 className="text-destructive hover:bg-destructive/10"
               >
@@ -235,7 +253,7 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => setUnenrollDialogOpen(false)}
+              onClick={setUnenrollDialogOpenFalse}
               disabled={unenrolling}
             >
               Cancel

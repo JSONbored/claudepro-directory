@@ -6,17 +6,18 @@
 # Rule: Detect missing logger.child() for request-scoped context in API routes
 id: missing-logger-child-api-route
 language: typescript
+files:
+  - 'app/api/**/*.ts'
 rule:
   all:
-    - pattern: export async function $METHOD($REQ: NextRequest) { $$$ }
-      kind: function_declaration
-    - inside:
-        pattern: app/api/**/*.ts
+    - kind: function_declaration
+      has:
+        pattern: 'export async function $METHOD($REQ: NextRequest) { $$$ }'
     - has:
         pattern: (logger|normalizeError|createErrorResponse)($$$)
     - not:
         has:
-          pattern: const $LOGGER = logger.child({ operation: $OP, route: $ROUTE, method: $METHOD })
+          pattern: 'const $LOGGER = logger.child({ operation: $OP, route: $ROUTE, method: $METHOD })'
 message: "API routes should use logger.child({ operation, route, method }) for request-scoped context. Create: const reqLogger = logger.child({ operation: 'APIName', route: '/api/path', method: 'GET' }) and use reqLogger for all logs"
 severity: error
 
@@ -24,12 +25,13 @@ severity: error
 # Rule: Detect missing auth checks in API routes
 id: missing-auth-api-route
 language: typescript
+files:
+  - 'app/api/**/*.ts'
 rule:
   all:
-    - pattern: export async function $METHOD($REQ: NextRequest) { $$$ }
-      kind: function_declaration
-    - inside:
-        pattern: app/api/**/*.ts
+    - kind: function_declaration
+      has:
+        pattern: 'export async function $METHOD($REQ: NextRequest) { $$$ }'
     - not:
         has:
           pattern: (getUser|checkAuth|verifyToken|authedAction|optionalAuthAction)($$$)
@@ -40,12 +42,13 @@ severity: error
 # Rule: Detect missing input validation (Zod schema) in API routes
 id: missing-api-input-validation
 language: typescript
+files:
+  - 'app/api/**/*.ts'
 rule:
   all:
-    - pattern: export async function $METHOD($REQ: NextRequest) { $$$ }
-      kind: function_declaration
-    - inside:
-        pattern: app/api/**/*.ts
+    - kind: function_declaration
+      has:
+        pattern: 'export async function $METHOD($REQ: NextRequest) { $$$ }'
     - has:
         pattern: ($REQ.body|$REQ.json()|$REQ.formData())($$$)
     - not:
@@ -58,14 +61,15 @@ severity: error
 # Rule: Detect missing error handling (createErrorResponse) in API routes
 id: missing-api-error-handling
 language: typescript
+files:
+  - 'app/api/**/*.ts'
 rule:
   all:
-    - pattern: export async function $METHOD($REQ: NextRequest) { $$$ }
-      kind: function_declaration
-    - inside:
-        pattern: app/api/**/*.ts
+    - kind: function_declaration
+      has:
+        pattern: 'export async function $METHOD($REQ: NextRequest) { $$$ }'
     - has:
-        pattern: catch ($ERROR) { $$$ }
+        kind: catch_clause
     - not:
         has:
           pattern: createErrorResponse($$$)
@@ -76,12 +80,11 @@ severity: error
 # Rule: Detect missing normalizeError in API route catch blocks
 id: missing-normalize-error-api-route
 language: typescript
+files:
+  - 'app/api/**/*.ts'
 rule:
   all:
-    - pattern: catch ($ERROR) { $$$ }
-      kind: catch_clause
-    - inside:
-        pattern: app/api/**/*.ts
+    - kind: catch_clause
     - not:
         has:
           pattern: normalizeError($$$)
@@ -92,14 +95,15 @@ severity: error
 # Rule: Detect missing CORS headers in API routes
 id: missing-cors-api-route
 language: typescript
+files:
+  - 'app/api/**/*.ts'
 rule:
   all:
-    - pattern: export async function $METHOD($REQ: NextRequest) { $$$ return NextResponse.$METHOD($$$) }
-      kind: function_declaration
-    - inside:
-        pattern: app/api/**/*.ts
+    - kind: function_declaration
+      has:
+        pattern: 'export async function $METHOD($REQ: NextRequest) { $$$ return NextResponse.$METHOD($$$) }'
     - not:
         has:
-          pattern: (Access-Control|CORS|cors|getOnlyCorsHeaders)($$$)
+          regex: (Access-Control|CORS|cors|getOnlyCorsHeaders)
 message: "API routes should include proper CORS headers. Use CORS middleware or set Access-Control-Allow-Origin headers"
 severity: warning

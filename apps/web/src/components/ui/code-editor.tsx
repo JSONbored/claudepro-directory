@@ -39,6 +39,8 @@ import * as React from 'react';
 import { useInView, type UseInViewOptions } from 'motion/react';
 import { useTheme } from 'next-themes';
 import { Button, cn } from '@heyclaude/web-runtime/ui';
+import { useBoolean, useTimeout, useInterval } from '@heyclaude/web-runtime/hooks';
+import { getThemeConfig } from '@heyclaude/shared-runtime';
 import { Copy, Check } from 'lucide-react';
 
 type CopyButtonProps = {
@@ -56,14 +58,20 @@ function CopyButton({
   className,
   onCopy,
 }: CopyButtonProps) {
-  const [copied, setCopied] = React.useState(false);
+  const { value: copied, setTrue: setCopiedTrue, setFalse: setCopiedFalse } = useBoolean();
+
+  // Reset copy state after 2000ms when copied is true
+  useTimeout(() => {
+    if (copied) {
+      setCopiedFalse();
+    }
+  }, copied ? 2000 : null);
 
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(content);
-      setCopied(true);
+      setCopiedTrue();
       onCopy?.(content);
-      setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       // Copy failed - silently handle (user can try again)
       // Logging handled by caller if needed
@@ -112,10 +120,7 @@ type CodeEditorProps = Omit<React.ComponentProps<'div'>, 'onCopy'> & {
 function CodeEditor({
   children: code,
   lang,
-  themes = {
-    light: 'github-light',
-    dark: 'github-dark',
-  },
+  themes = getThemeConfig(), // Use centralized theme config
   duration = 5,
   delay = 0,
   className,
@@ -138,7 +143,7 @@ function CodeEditor({
   const editorRef = React.useRef<HTMLDivElement>(null);
   const [visibleCode, setVisibleCode] = React.useState('');
   const [highlightedCode, setHighlightedCode] = React.useState('');
-  const [isDone, setIsDone] = React.useState(false);
+  const { value: isDone, setTrue: setIsDoneTrue } = useBoolean();
 
   const inViewResult = useInView(editorRef, {
     once: inViewOnce,
@@ -181,6 +186,7 @@ function CodeEditor({
     resolvedTheme,
   ]);
 
+  // Reset when code/writing changes
   React.useEffect(() => {
     if (!writing) {
       setVisibleCode(code);
@@ -188,39 +194,56 @@ function CodeEditor({
       return;
     }
 
-    if (!code.length || !isInView) return;
+    if (!code.length || !isInView) {
+      setVisibleCode('');
+      return;
+    }
 
-    const characters = Array.from(code);
-    let index = 0;
-    const totalDuration = duration * 1000;
-    const interval = totalDuration / characters.length;
-    let intervalId: NodeJS.Timeout;
+    // Reset visible code when starting new animation
+    setVisibleCode('');
+  }, [code, writing, isInView, onDone]);
 
-    const timeout = setTimeout(() => {
-      intervalId = setInterval(() => {
-        if (index < characters.length) {
-          setVisibleCode((prev) => {
-            const currentIndex = index;
-            index += 1;
-            return prev + characters[currentIndex];
-          });
-          editorRef.current?.scrollTo({
-            top: editorRef.current?.scrollHeight,
-            behavior: 'smooth',
-          });
-        } else {
-          clearInterval(intervalId);
-          setIsDone(true);
-          onDone?.();
-        }
-      }, interval);
-    }, delay * 1000);
+  // Track typing index
+  const [typingIndex, setTypingIndex] = React.useState(0);
 
-    return () => {
-      clearTimeout(timeout);
-      clearInterval(intervalId);
-    };
-  }, [code, duration, delay, isInView, writing, onDone]);
+  // Reset index when code/writing changes
+  React.useEffect(() => {
+    if (!writing || !code.length || !isInView) {
+      setTypingIndex(0);
+      return;
+    }
+    setTypingIndex(0);
+  }, [code, writing, isInView]);
+
+  const characters = React.useMemo(() => Array.from(code), [code]);
+  const totalDuration = duration * 1000;
+  const interval = totalDuration / characters.length;
+
+  // Use useTimeout for initial delay, then useInterval for typing
+  const shouldStartTyping = writing && code.length > 0 && isInView && typingIndex === 0;
+  
+  useTimeout(() => {
+    if (shouldStartTyping) {
+      setTypingIndex(1);
+    }
+  }, shouldStartTyping ? delay * 1000 : null);
+
+  // Use useInterval for typing animation
+  useInterval(() => {
+    if (!writing || !code.length || !isInView) return;
+    
+    if (typingIndex < characters.length) {
+      setVisibleCode((prev) => prev + characters[typingIndex]);
+      setTypingIndex((prev) => prev + 1);
+      editorRef.current?.scrollTo({
+        top: editorRef.current?.scrollHeight,
+        behavior: 'smooth',
+      });
+    } else {
+      setIsDoneTrue();
+      onDone?.();
+    }
+  }, writing && code.length > 0 && isInView && typingIndex > 0 && typingIndex < characters.length ? interval : null);
 
   return (
     <div

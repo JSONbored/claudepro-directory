@@ -26,6 +26,7 @@ import type { DisplayableContent, FilterState } from '@heyclaude/web-runtime/typ
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, useRef, startTransition } from 'react';
 import { normalizeError } from '@heyclaude/shared-runtime';
+import { useBoolean, useDebounceCallback } from '@heyclaude/web-runtime/hooks';
 
 import { syncSearchStateFromURL, syncSearchStateToURL } from '../utils/search-state';
 
@@ -95,11 +96,10 @@ export function SearchProvider({
   });
 
   const [results, setResults] = useState<DisplayableContent[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const { value: isLoading, setValue: setIsLoadingState } = useBoolean();
   const [error, setError] = useState<Error | null>(null);
 
   // Refs for debouncing and cancellation
-  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const urlTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastSearchRef = useRef<{ query: string; filters: FilterState } | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -114,10 +114,6 @@ export function SearchProvider({
   // Expose setters for useSearch hook to update results
   const setResultsState = useCallback((newResults: DisplayableContent[]) => {
     setResults(newResults);
-  }, []);
-
-  const setIsLoadingState = useCallback((loading: boolean) => {
-    setIsLoading(loading);
   }, []);
 
   const setErrorState = useCallback((err: Error | null) => {
@@ -286,9 +282,7 @@ export function SearchProvider({
   // Clear search (query and filters)
   const clearSearch = useCallback(() => {
     // Cancel pending operations
-    if (searchTimeoutRef.current) {
-      clearTimeout(searchTimeoutRef.current);
-    }
+    debouncedPerformSearch.cancel();
     if (urlTimeoutRef.current) {
       clearTimeout(urlTimeoutRef.current);
     }
@@ -330,17 +324,13 @@ export function SearchProvider({
     setFiltersState(urlFilters);
   }, [searchParams]);
 
-  // Call onSearch callback when query or filters change (debounced, non-blocking, OPTIMIZED)
-  // PERFORMANCE FIX: Removed excessive logging
-  useEffect(() => {
+  // Debounced search function
+  const performSearch = useCallback(async () => {
     if (!onSearch) {
       return;
     }
 
     // Cancel previous search
-    if (searchTimeoutRef.current) {
-      clearTimeout(searchTimeoutRef.current);
-    }
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
@@ -354,88 +344,89 @@ export function SearchProvider({
       return; // Skip duplicate search
     }
 
-    const performSearch = async () => {
-      // Early return for empty search
-      if (!query.trim() && Object.keys(filters).length === 0) {
-        setResults([]);
-        setIsLoading(false);
-        setError(null);
-        lastSearchRef.current = { query, filters };
+    // Early return for empty search
+    if (!query.trim() && Object.keys(filters).length === 0) {
+      setResults([]);
+      setIsLoadingState(false);
+      setError(null);
+      lastSearchRef.current = { query, filters };
+      return;
+    }
+
+    // Create new abort controller
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    setIsLoadingState(true);
+    setError(null);
+    // FIX: Don't clear results immediately - keep previous results visible while searching
+    // This prevents flashing "no results" when user double-clicks and types new query
+    // Results will be updated when new search completes
+
+    try {
+      const searchResults = await onSearch(query, filters);
+      
+      // Check if request was aborted
+      if (controller.signal.aborted) {
         return;
       }
 
-      // Create new abort controller
-      const controller = new AbortController();
-      abortControllerRef.current = controller;
-
-      setIsLoading(true);
-      setError(null);
-      // FIX: Don't clear results immediately - keep previous results visible while searching
-      // This prevents flashing "no results" when user double-clicks and types new query
-      // Results will be updated when new search completes
-
-      try {
-        const searchResults = await onSearch(query, filters);
-        
-        // Check if request was aborted
-        if (controller.signal.aborted) {
-          return;
+      // Only update if still the current search (prevent stale results)
+      const currentSearchKey = JSON.stringify({ query, filters });
+      if (currentSearchKey === searchKey) {
+        // Update results (this will replace previous results)
+        if (Array.isArray(searchResults)) {
+          setResults(searchResults);
+        } else {
+          setResults([]);
         }
-
-        // Only update if still the current search (prevent stale results)
-        const currentSearchKey = JSON.stringify({ query, filters });
-        if (currentSearchKey === searchKey) {
-          // Update results (this will replace previous results)
-          if (Array.isArray(searchResults)) {
-            setResults(searchResults);
-          } else {
-            setResults([]);
-          }
-          setIsLoading(false);
-          setError(null);
-          lastSearchRef.current = { query, filters };
-        }
-      } catch (err) {
-        const normalized = normalizeError(err, 'Search failed');
-        
-        // Ignore abort errors
-        if (err instanceof Error && err.name === 'AbortError') {
-          return;
-        }
-        
-        // Only set error if still the current search
-        const currentSearchKey = JSON.stringify({ query, filters });
-        if (currentSearchKey === searchKey) {
-          setError(normalized);
-          setIsLoading(false);
-        }
-      } finally {
-        if (!controller.signal.aborted) {
-          abortControllerRef.current = null;
-        }
+        setIsLoadingState(false);
+        setError(null);
+        lastSearchRef.current = { query, filters };
       }
-    };
+    } catch (err) {
+      const normalized = normalizeError(err, 'Search failed');
+      
+      // Ignore abort errors
+      if (err instanceof Error && err.name === 'AbortError') {
+        return;
+      }
+      
+      // Only set error if still the current search
+      const currentSearchKey = JSON.stringify({ query, filters });
+      if (currentSearchKey === searchKey) {
+        setError(normalized);
+        setIsLoadingState(false);
+      }
+    } finally {
+      if (!controller.signal.aborted) {
+        abortControllerRef.current = null;
+      }
+    }
+  }, [query, filters, onSearch, setIsLoadingState]);
 
-    // Debounce search (non-blocking)
-    searchTimeoutRef.current = setTimeout(() => {
+  // Debounced search execution
+  const debouncedPerformSearch = useDebounceCallback(
+    () => {
       startTransition(() => {
         performSearch();
       });
-    }, debounceMs);
+    },
+    debounceMs
+  );
 
-    return () => {
-      if (searchTimeoutRef.current) {
-        clearTimeout(searchTimeoutRef.current);
-      }
-    };
-  }, [query, filters, onSearch, debounceMs]);
+  // Call debounced search when query or filters change
+  useEffect(() => {
+    if (!onSearch) {
+      return;
+    }
+    debouncedPerformSearch();
+  }, [query, filters, onSearch, debouncedPerformSearch]);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (searchTimeoutRef.current) {
-        clearTimeout(searchTimeoutRef.current);
-      }
+      debouncedPerformSearch.cancel();
       if (urlTimeoutRef.current) {
         clearTimeout(urlTimeoutRef.current);
       }
@@ -443,7 +434,7 @@ export function SearchProvider({
         abortControllerRef.current.abort();
       }
     };
-  }, []);
+  }, [debouncedPerformSearch]);
 
   // Memoize action callbacks (stable references)
   const actions = useMemo(
@@ -452,7 +443,7 @@ export function SearchProvider({
       setFilters,
       clearSearch,
       setResults: setResultsState,
-      setIsLoading: setIsLoadingState,
+      setIsLoading: setIsLoadingState, // setValue from useBoolean works as (loading: boolean) => void
       setError: setErrorState,
       syncToURL,
       syncFromURL,

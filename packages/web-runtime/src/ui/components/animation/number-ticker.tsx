@@ -22,6 +22,7 @@ import { cn } from '../../utils.ts';
 import { SPRING } from '../../../design-system/index.ts';
 import { useReducedMotion, usePageInView } from '../../../hooks/motion/index.ts';
 import { useSpring } from '../../../hooks/motion/index.ts';
+import { useTimeout } from '../../../hooks/index.ts';
 import * as React from 'react';
 import { memo, useEffect, useRef, useState } from 'react';
 
@@ -100,21 +101,19 @@ function NumberTickerComponent({
   }, [decimalPlaces, prefix, suffix, shouldReduceMotion, isPageInView, value]);
 
   // Animate to target value on mount or when value changes
+  // For reduced motion or when page not in view, set value instantly
   useEffect(() => {
     if (shouldReduceMotion || !isPageInView) {
-      // For reduced motion or when page not in view, set value instantly
       setDisplayValue(`${prefix}${value.toFixed(decimalPlaces)}${suffix}`);
-      return;
     }
+  }, [value, shouldReduceMotion, isPageInView, prefix, suffix, decimalPlaces]);
 
-    const timer = setTimeout(() => {
+  // Use useTimeout for animation delay (handles delay === 0 as immediate execution)
+  useTimeout(() => {
+    if (!shouldReduceMotion && isPageInView) {
       springRef.current.set(value);
-    }, delay);
-
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [value, delay, shouldReduceMotion, isPageInView, prefix, suffix, decimalPlaces]);
+    }
+  }, !shouldReduceMotion && isPageInView && delay >= 0 ? delay : null);
 
   return (
     <span

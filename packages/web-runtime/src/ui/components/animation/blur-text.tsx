@@ -3,7 +3,8 @@
 import { motion } from 'motion/react';
 import type { Transition, Easing } from 'motion/react';
 import * as React from 'react';
-import { useEffect, useRef, useState, useMemo } from 'react';
+import { useMemo } from 'react';
+import { useIntersectionObserver } from '../../../hooks/use-intersection-observer.ts';
 
 type BlurTextProps = {
   text?: string;
@@ -51,24 +52,15 @@ export const BlurText: React.FC<BlurTextProps> = ({
   stepDuration = 0.35
 }) => {
   const elements = animateBy === 'words' ? text.split(' ') : text.split('');
-  const [inView, setInView] = useState(false);
-  const ref = useRef<HTMLParagraphElement>(null);
-
-  useEffect(() => {
-    if (!ref.current) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-        if (entry && entry.isIntersecting) {
-          setInView(true);
-          observer.unobserve(ref.current as Element);
-        }
-      },
-      { threshold, rootMargin }
-    );
-    observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [threshold, rootMargin]);
+  
+  // Use useIntersectionObserver hook for uniform implementation
+  const { ref, isIntersecting } = useIntersectionObserver({
+    threshold,
+    rootMargin,
+    freezeOnceVisible: true, // Once visible, keep it visible (matches original behavior)
+  });
+  
+  const inView = isIntersecting;
 
   const defaultFrom = useMemo(
     () =>

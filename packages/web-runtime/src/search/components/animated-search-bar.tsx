@@ -27,7 +27,8 @@ import {
 } from '@heyclaude/web-runtime/hooks/motion';
 import { motion, AnimatePresence, useMotionValue, useSpring } from 'motion/react';
 import { frame } from 'motion';
-import { useEffect, useRef, useState, useMemo } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
+import { useBoolean } from '@heyclaude/web-runtime/hooks';
 
 import { useSearchContext } from '../context/search-provider';
 import { SearchBar } from './search-bar';
@@ -73,16 +74,16 @@ export function AnimatedSearchBar({
   className,
 }: AnimatedSearchBarProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isFocused, setIsFocused] = useState(false);
-  const [hasValue, setHasValue] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
+  const { value: isFocused, setValue: setIsFocused } = useBoolean();
+  const { value: hasValue, setValue: setHasValue } = useBoolean();
+  const { value: isMounted, setTrue: setIsMountedTrue } = useBoolean();
   const shouldReduceMotion = useReducedMotion();
   const isPageInView = usePageInView();
 
   // Wait for client-side mount to prevent hydration mismatch
   useEffect(() => {
-    setIsMounted(true);
-  }, []);
+    setIsMountedTrue();
+  }, [setIsMountedTrue]);
 
   // Motion values for magnetic effect
   const mouseX = useMotionValue(0);
@@ -102,7 +103,7 @@ export function AnimatedSearchBar({
   // Track value changes from SearchBar context (for particle effects)
   // PERFORMANCE FIX: Disable particles during rapid typing
   const { query } = useSearchContext();
-  const [isTyping, setIsTyping] = useState(false);
+  const { value: isTyping, setTrue: setIsTypingTrue, setFalse: setIsTypingFalse } = useBoolean();
   
   useEffect(() => {
     const hasValue = query.length > 0;
@@ -110,14 +111,14 @@ export function AnimatedSearchBar({
     
     // Mark as typing when query changes, clear after 500ms
     if (hasValue) {
-      setIsTyping(true);
-      const timer = setTimeout(() => setIsTyping(false), 500);
+      setIsTypingTrue();
+      const timer = setTimeout(() => setIsTypingFalse(), 500);
       return () => clearTimeout(timer);
     } else {
-      setIsTyping(false);
+      setIsTypingFalse();
       return undefined;
     }
-  }, [query]);
+  }, [query, setHasValue, setIsTypingTrue, setIsTypingFalse]);
 
   // Optimized mouse tracking with frame utility (prevents layout thrashing)
   // PERFORMANCE FIX: Throttle mouse events, only listen when hovering, pause when page hidden

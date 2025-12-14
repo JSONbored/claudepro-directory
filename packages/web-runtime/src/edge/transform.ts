@@ -65,11 +65,11 @@ export async function highlightCodeEdge(
   const { language = 'javascript', showLineNumbers = true } = options;
 
   if (!code || code.trim() === '') {
-    return '<pre class="sugar-high-empty"><code>No code provided</code></pre>';
+    return '<pre class="code-block-pre code-block-fallback"><code>No code provided</code></pre>';
   }
 
   try {
-    return highlightCode(code, language, { showLineNumbers });
+    return await highlightCode(code, language, { showLineNumbers });
   } catch (error) {
     const normalized = normalizeError(error, 'Local highlighting failed, using fallback');
     logger.warn({ err: normalized,
@@ -149,7 +149,7 @@ export async function processContentEdge(
               ...(format ? { format } : {}),
             });
 
-      const html = highlightCode(codeString!, detectedLanguage, { showLineNumbers });
+      const html = await highlightCode(codeString!, detectedLanguage, { showLineNumbers });
       const headings = extractMarkdownHeadings(codeString!);
 
       return {
@@ -184,7 +184,7 @@ export async function processContentEdge(
 
     // operation === 'highlight'
     const highlightLanguage = language ?? languageHint ?? 'javascript';
-    const html = highlightCode(codeString!, highlightLanguage, { showLineNumbers });
+    const html = await highlightCode(codeString!, highlightLanguage, { showLineNumbers });
     return { html, language: highlightLanguage };
   } catch (error) {
     const normalized = normalizeError(error, 'processContentEdge failed');

@@ -1,7 +1,7 @@
 'use client';
 
 import { SPRING } from '@heyclaude/web-runtime/design-system';
-import { useCopyToClipboard } from '@heyclaude/web-runtime/hooks';
+import { useBoolean, useCopyToClipboard } from '@heyclaude/web-runtime/hooks';
 import { AlertCircle, Check, Copy, RefreshCw } from '@heyclaude/web-runtime/icons';
 import { logClientErrorBoundary } from '@heyclaude/web-runtime/logging/client';
 import {
@@ -13,7 +13,7 @@ import {
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 /**
  * CRITICAL: Direct reference to process.env.NODE_ENV
@@ -78,7 +78,7 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  const [isResetting, setIsResetting] = useState(false);
+  const { setTrue: setIsResettingTrue, value: isResetting } = useBoolean();
 
   useEffect(() => {
     // Log critical global errors with digest for Vercel observability
@@ -97,7 +97,7 @@ export default function GlobalError({
   }, [error]);
 
   const handleReset = () => {
-    setIsResetting(true);
+    setIsResettingTrue();
     reset();
   };
 

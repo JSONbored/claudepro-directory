@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { logger } from '../logger.ts';
 
 /**
  * Options for useReadLocalStorage hook
@@ -99,7 +100,13 @@ export function useReadLocalStorage<T>(
       }
       return deserializer(item);
     } catch (error) {
-      console.warn(`Error reading localStorage key "${key}":`, error);
+      const errorObj = error instanceof Error ? error : new Error(String(error));
+      logger.warn({ err: errorObj,
+        category: 'storage',
+        component: 'useReadLocalStorage',
+        recoverable: true,
+        action: 'initialize',
+        key, }, `Error reading localStorage key "${key}"`);
       return null;
     }
   });
@@ -118,7 +125,13 @@ export function useReadLocalStorage<T>(
           setStoredValue(deserializer(item));
         }
       } catch (error) {
-        console.warn(`Error reading localStorage key "${key}":`, error);
+        const errorObj = error instanceof Error ? error : new Error(String(error));
+        logger.warn({ err: errorObj,
+          category: 'storage',
+          component: 'useReadLocalStorage',
+          recoverable: true,
+          action: 'readValue',
+          key, }, `Error reading localStorage key "${key}"`);
         setStoredValue(null);
       }
     };

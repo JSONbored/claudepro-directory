@@ -6,12 +6,13 @@
 # Rule: Detect missing error boundaries in server components
 id: missing-error-boundary-server
 language: typescript
+files:
+  - 'app/**/*.tsx'
 rule:
   all:
-    - pattern: export default async function $COMPONENT($$$) { $$$ }
-      kind: function_declaration
-    - inside:
-        pattern: app/**/*.tsx
+    - kind: function_declaration
+      has:
+        pattern: export default async function $COMPONENT($$$) { $$$ }
     - not:
         inside:
           pattern: <ErrorBoundary>$$$</ErrorBoundary>
@@ -22,12 +23,13 @@ severity: warning
 # Rule: Detect missing error logging in error boundaries
 id: missing-error-boundary-logging
 language: typescript
+files:
+  - 'app/**/error.tsx'
 rule:
   all:
-    - pattern: export default function $ERROR_BOUNDARY({ error }: { error: Error }) { $$$ }
-      kind: function_declaration
-    - inside:
-        pattern: app/**/error.tsx
+    - kind: function_declaration
+      has:
+        pattern: 'export default function $ERROR_BOUNDARY({ error }: { error: Error }) { $$$ }'
     - not:
         has:
           pattern: (logClientErrorBoundary|logger.error|reqLogger.error)($$$)
@@ -40,10 +42,12 @@ id: missing-error-boundary-client-async
 language: typescript
 rule:
   all:
-    - pattern: export function $COMPONENT($$$) { $$$ }
-      kind: function_declaration
+    - kind: function_declaration
+      has:
+        pattern: export function $COMPONENT($$$) { $$$ }
     - inside:
-        pattern: 'use client'
+        has:
+          regex: 'use client'
     - has:
         pattern: await $ASYNC($$$)
     - not:

@@ -31,9 +31,11 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
+import { useIsClient } from '@heyclaude/web-runtime/hooks';
 import { motion } from 'motion/react';
 import { AnimatePresence } from '@heyclaude/web-runtime/ui';
 import { useEffect, useMemo, useState } from 'react';
+import { useBoolean } from '@heyclaude/web-runtime/hooks';
 
 import { NewsletterOptInTile } from '@/src/components/core/auth/newsletter-opt-in-tile';
 import { OAuthProviderButton } from '@/src/components/core/auth/oauth-provider-button';
@@ -73,23 +75,24 @@ export function AuthModal({
   valueProposition = 'Sign in to continue',
   redirectTo,
 }: AuthModalProps) {
-  const [newsletterOptIn, setNewsletterOptIn] = useState(false);
+  const { value: newsletterOptIn, setValue: setNewsletterOptIn } = useBoolean();
   const [newsletterConfig, setNewsletterConfig] = useState<Record<string, unknown>>({});
   const { count, isLoading } = useNewsletterCount();
   const subscriberCountLabel = useMemo(() => formatSubscriberCount(count), [count]);
 
   // Determine redirect path - use provided redirectTo, or current pathname with search params
   // Lazy-load pathname/searchParams to avoid blocking render
+  const isClient = useIsClient();
   const finalRedirectTo = useMemo(() => {
     if (redirectTo) return redirectTo;
     // Access route data lazily only when modal is open and redirectTo is not provided
-    if (typeof window !== 'undefined') {
+    if (isClient) {
       const pathname = window.location.pathname;
       const search = window.location.search;
       return search ? `${pathname}${search}` : pathname;
     }
     return undefined;
-  }, [redirectTo]);
+  }, [redirectTo, isClient]);
 
   // Load newsletter config
   useEffect(() => {

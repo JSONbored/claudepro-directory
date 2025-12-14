@@ -85,9 +85,17 @@ export function useScrollLock(
   lock: () => void;
   unlock: () => void;
 } {
+  // SSR-safe default: Use function to lazily evaluate document.body
+  const getDefaultLockTarget = (): HTMLElement | string => {
+    if (typeof document === 'undefined') {
+      return 'body'; // Fallback to string selector for SSR
+    }
+    return document.body;
+  };
+
   const {
     autoLock = true,
-    lockTarget = document.body,
+    lockTarget = getDefaultLockTarget(),
     widthReflow = true,
   } = options;
 

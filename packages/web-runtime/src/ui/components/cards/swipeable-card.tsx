@@ -45,8 +45,9 @@ import { POSITION_PATTERNS, UI_CLASSES } from '../../constants.ts';
 import { COLORS } from '../../../design-tokens/index.ts';
 import { motion } from 'motion/react';
 import { useMotionValue, useTransform } from '../../../hooks/motion/index.ts';
+import { useReducedMotion } from '../../../hooks/motion/index.ts';
 import type { ReactNode } from 'react';
-import { useEffect, useState } from 'react';
+import { useMediaQuery } from '../../../hooks/use-media-query.ts';
 
 export interface SwipeableCardWrapperProps {
   /** Child components to wrap with swipe gestures */
@@ -74,51 +75,21 @@ export function SwipeableCardWrapper({
   onSwipeLeft,
   enableGestures,
 }: SwipeableCardWrapperProps) {
-  const [isMobile, setIsMobile] = useState(false);
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  // Use useMediaQuery for responsive detection (replaces window.innerWidth checks)
+  const isNarrowScreen = useMediaQuery('(max-width: 1023px)'); // lg breakpoint (1024px)
+  
+  // Detect touch capability
+  const hasTouchScreen = useMediaQuery('(pointer:coarse)');
+  
+  // Mobile detection: touch-capable devices with narrow screens
+  const isMobile = hasTouchScreen && isNarrowScreen;
+  
+  // Use Motion.dev's useReducedMotion hook (replaces window.matchMedia for prefers-reduced-motion)
+  const prefersReducedMotion = useReducedMotion();
+  
   const dragControls = useDragControls();
   // Spring animation config from design system
   const springSmooth = SPRING.smooth;
-
-  // Detect mobile and reduced motion preference
-  useEffect(() => {
-    // Mobile detection (touch-capable devices with narrow screens)
-    const checkMobile = () => {
-      try {
-        const hasTouchScreen = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-        const isNarrowScreen = window.innerWidth < 1024; // lg breakpoint
-        setIsMobile(hasTouchScreen && isNarrowScreen);
-      } catch (error) {
-        const normalized = normalizeError(error, 'SwipeableCardWrapper: Mobile detection failed');
-        logger.warn({ err: normalized,
-          component: 'SwipeableCardWrapper', }, 'SwipeableCardWrapper: Mobile detection failed');
-        setIsMobile(false);
-      }
-    };
-
-    // Reduced motion preference
-    try {
-      const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-      setPrefersReducedMotion(mediaQuery.matches);
-
-      checkMobile();
-      window.addEventListener('resize', checkMobile);
-
-      // Listen for reduced motion changes
-      const handleChange = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
-      mediaQuery.addEventListener('change', handleChange);
-
-      return () => {
-        window.removeEventListener('resize', checkMobile);
-        mediaQuery.removeEventListener('change', handleChange);
-      };
-    } catch (error) {
-      const normalized = normalizeError(error, 'SwipeableCardWrapper: Media query setup failed');
-      logger.warn({ err: normalized,
-        component: 'SwipeableCardWrapper', }, 'SwipeableCardWrapper: Media query setup failed');
-      return () => {};
-    }
-  }, []);
 
 
   // Motion values for drag tracking

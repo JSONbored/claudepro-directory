@@ -45,12 +45,6 @@ declare module 'npm:@react-email/components@*' {
   export * from '@react-email/components';
 }
 
-declare module 'npm:sugar-high@*' {
-  const content: any;
-  export default content;
-  export * from 'sugar-high';
-}
-
 // HTTPS imports - declare as any to allow imports
 // Supports both default and named exports
 // Note: TypeScript doesn't support index signatures in module declarations,

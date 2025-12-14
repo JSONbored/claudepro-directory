@@ -1,18 +1,27 @@
 'use client';
 
 /**
- * Theme Toggle Component with Circle Blur Animation
+ * Theme Toggle Component with Beautiful Motion.dev Animations
  *
  * Features:
- * - View Transitions API for smooth circular reveal animation
+ * - Motion.dev-based smooth circle expansion animation
  * - Click position tracking for animation origin
- * - Progressive enhancement (fallback to instant transition)
+ * - Spring physics for natural, beautiful motion
  * - localStorage persistence
  * - Accessibility support (keyboard, screen readers)
+ * - Optimized performance (GPU-accelerated, no expensive filters)
  *
  * Animation:
- * - Chrome/Edge 111+: Circular blur expansion from click position
- * - Firefox/Safari: Instant theme change (no animation)
+ * - Beautiful circle expansion from click position using Motion.dev
+ * - Spring physics for natural, smooth motion
+ * - Opacity + clip-path for optimal GPU acceleration
+ * - Respects reduced motion preferences
+ *
+ * Performance Optimizations:
+ * - Uses only opacity and clip-path (GPU-accelerated)
+ * - No blur or brightness filters (prevents jank)
+ * - Spring physics for natural feel
+ * - Smooth, beautiful transitions
  *
  * @module web-runtime/ui/components/theme/theme-toggle
  *
@@ -20,75 +29,53 @@
  * ```tsx
  * <ThemeToggle />
  * ```
- *
- * CSS Requirements:
- * The consuming app should include view-transitions.css for animations:
- * ```css
- * ::view-transition-old(root),
- * ::view-transition-new(root) {
- *   animation: none;
- *   mix-blend-mode: normal;
- * }
- * ```
  */
 
-import { useEffect, useRef, useState } from 'react';
-import { isDevelopment } from '@heyclaude/shared-runtime/schemas/env';
-import { logClientWarning } from '../../../errors.ts';
-import { logger } from '../../../logger.ts';
-import { getTimeoutConfig } from '../../../config/static-configs.ts';
-import { useViewTransition } from '../../../hooks/use-view-transition.ts';
+import { useEffect, useRef } from 'react';
+import { useAnimate, useReducedMotion } from 'motion/react';
+import { SPRING } from '../../../design-system/index.ts';
+import { useTernaryDarkMode } from '../../../hooks/use-ternary-dark-mode.ts';
 import { Moon, Sun } from '../../../icons.tsx';
 import { UI_CLASSES } from '../../constants.ts';
 import { ThemeToggleLayout } from './theme-toggle-layout.tsx';
 
 /**
- * Type guard for theme validation
- * Replaces Zod schema for bundle size optimization
- */
-function isValidTheme(value: unknown): value is 'light' | 'dark' {
-  return value === 'light' || value === 'dark';
-}
-
-/**
  * ThemeToggle Component
  *
- * Sun/Moon toggle with View Transitions API support for
- * smooth circular reveal animations when switching themes.
+ * Sun/Moon toggle with beautiful Motion.dev animations for
+ * smooth, natural theme transitions with circle expansion effect.
+ * 
+ * Enhanced with useTernaryDarkMode (Phase 2):
+ * - Supports light/dark/system modes
+ * - Automatically syncs with OS preference when in 'system' mode
+ * - Persists user choice to localStorage
+ * - Beautiful Motion.dev spring animations
  */
 export function ThemeToggle() {
-  const [theme, setTheme] = useState<'light' | 'dark' | null>(null);
-  const [transitionMs, setTransitionMs] = useState(200);
   const containerRef = useRef<HTMLDivElement>(null);
-  const { startTransition, isSupported } = useViewTransition();
+  const overlayRef = useRef<HTMLDivElement | null>(null);
+  const [, animate] = useAnimate();
+  const shouldReduceMotion = useReducedMotion();
+  
+  // Use ternary dark mode hook for light/dark/system support
+  const { isDarkMode, ternaryDarkMode, toggleTernaryDarkMode } = useTernaryDarkMode({
+    defaultValue: 'system',
+    localStorageKey: 'theme-mode', // Different key to avoid conflicts with old 'theme' key
+  });
 
-  // Load transition duration from config
+  // Sync data-theme attribute with computed isDarkMode
   useEffect(() => {
-    try {
-      const config = getTimeoutConfig();
-      setTransitionMs(config['timeout.ui.transition_ms']);
-    } catch (error) {
-      logClientWarning('ThemeToggle: failed to load transition config', error);
-    }
-  }, []);
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
-    const saved = savedTheme && isValidTheme(savedTheme) ? savedTheme : null;
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const initial = saved || (prefersDark ? 'dark' : 'light');
-
-    setTheme(initial);
-    document.documentElement.setAttribute('data-theme', initial);
-  }, []);
+    const theme = isDarkMode ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [isDarkMode]);
 
   /**
    * Calculate click position as percentage of viewport
    * Used to set animation origin for circular reveal
    */
-  const getClickPosition = (event: React.MouseEvent | React.KeyboardEvent) => {
-    // For keyboard events, use center of switch element
-    if (!('clientX' in event)) {
+  const getClickPosition = (event?: React.MouseEvent | React.KeyboardEvent) => {
+    // For keyboard events or no event, use center of switch element
+    if (!event || !('clientX' in event)) {
       const rect = containerRef.current?.getBoundingClientRect();
       if (!rect) return { x: 50, y: 50 };
       return {
@@ -105,114 +92,106 @@ export function ThemeToggle() {
   };
 
   /**
-   * Set CSS variables for animation origin
-   * Must be done before view transition starts
+   * Handle theme toggle with beautiful Motion.dev animation
+   * Creates smooth circle expansion from click position
+   * 
+   * Cycles through: light -> system -> dark -> light
+   *
+   * Animation approach:
+   * - Creates a full-screen overlay with new theme background
+   * - Animates circle expansion from click position
+   * - Uses spring physics for natural, beautiful motion
+   * - Updates theme during animation for seamless transition
    */
-  const setAnimationOrigin = (x: number, y: number) => {
-    document.documentElement.style.setProperty('--x', `${x}%`);
-    document.documentElement.style.setProperty('--y', `${y}%`);
-  };
-
-  /**
-   * Async localStorage write - deferred to prevent blocking animations
-   * Uses requestIdleCallback for true non-blocking persistence
-   */
-  const saveThemeToStorage = (newTheme: 'light' | 'dark') => {
-    if ('requestIdleCallback' in window) {
-      requestIdleCallback(() => {
-        localStorage.setItem('theme', newTheme);
-      });
-    } else {
-      // Fallback for Safari (no requestIdleCallback)
-      setTimeout(() => {
-        localStorage.setItem('theme', newTheme);
-      }, 0);
+  const handleThemeChange = async (event?: React.MouseEvent) => {
+    // Skip animation if reduced motion is preferred
+    if (shouldReduceMotion) {
+      toggleTernaryDarkMode();
+      return;
     }
-  };
 
-  /**
-   * Handle theme toggle with View Transition animation
-   * Captures click position for circular reveal effect
-   *
-   * Performance optimizations:
-   * - DOM updates before React state (prevents blocking)
-   * - Deferred React state update (after animation starts)
-   * - localStorage write deferred to requestIdleCallback (non-blocking)
-   *
-   * Performance monitoring (development only):
-   * - Tracks animation start/end timing
-   * - Measures total interaction latency
-   */
-  const handleThemeChange = (checked: boolean, event?: React.MouseEvent) => {
-    const startTime = performance.now();
-    const newTheme = checked ? 'dark' : 'light';
+    // Get click position for animation origin
+    const position = getClickPosition(event);
 
-    // If View Transitions API is supported, use it
-    if (isSupported) {
-      // Use click position if available, otherwise use center
-      if (event) {
-        const { x, y } = getClickPosition(event);
-        setAnimationOrigin(x, y);
-      } else {
-        const rect = containerRef.current?.getBoundingClientRect();
-        if (rect) {
-          const x = ((rect.left + rect.width / 2) / window.innerWidth) * 100;
-          const y = ((rect.top + rect.height / 2) / window.innerHeight) * 100;
-          setAnimationOrigin(x, y);
-        }
-      }
+    // Calculate new theme
+    const newIsDarkMode = ternaryDarkMode === 'light' 
+      ? false // light -> system (will compute based on OS)
+      : ternaryDarkMode === 'system'
+      ? true // system -> dark
+      : false; // dark -> light
+    const newTheme = newIsDarkMode ? 'dark' : 'light';
 
-      // Start view transition with DOM-only updates (no React state yet)
-      const transition = startTransition(() => {
-        // Update DOM immediately (this is what the animation sees)
-        document.documentElement.setAttribute('data-theme', newTheme);
-      });
+    // Get theme background colors (matching your design system)
+    const darkBg = 'oklch(24% 0.008 60)'; // --dark-bg-primary
+    const lightBg = 'oklch(99% 0.003 90)'; // --light-bg-primary
+    const newBg = newTheme === 'dark' ? darkBg : lightBg;
 
-      // Defer localStorage write to prevent blocking animation
-      saveThemeToStorage(newTheme);
-
-      // Update React state after animation starts (non-blocking)
-      // This prevents React re-render from blocking the animation
-      requestAnimationFrame(() => {
-        setTheme(newTheme);
-      });
-
-      // Performance monitoring (development only)
-      if (isDevelopment && transition) {
-        transition.finished
-          .then(() => {
-            const endTime = performance.now();
-            logger.info({ durationMs: Number((endTime - startTime).toFixed(2)), }, '[Theme Toggle] Animation completed');
-          })
-          .catch((error) => {
-            logClientWarning('ThemeToggle: view transition animation failed', error);
-          });
-      }
+    // Create overlay element if it doesn't exist
+    let overlay = overlayRef.current;
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.style.cssText = `
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 9999;
+        background-color: ${newBg};
+        clip-path: circle(0% at ${position.x}% ${position.y}%);
+        opacity: 0;
+      `;
+      document.body.appendChild(overlay);
+      overlayRef.current = overlay;
     } else {
-      // Fallback: Use CSS transition for smooth color change
-      document.documentElement.classList.add('theme-transition');
+      // Update background color for new theme
+      overlay.style.backgroundColor = newBg;
+    }
 
-      setTheme(newTheme);
-      saveThemeToStorage(newTheme);
+    // Animate circle expansion with spring physics for beautiful, natural motion
+    await animate(
+      overlay,
+      {
+        clipPath: `circle(200% at ${position.x}% ${position.y}%)`,
+        opacity: [0, 1, 1, 0],
+      },
+      {
+        ...SPRING.smooth, // Beautiful spring physics for natural motion
+        duration: 0.5, // Slightly longer for smooth, premium feel
+      }
+    );
+
+    // Update theme during animation (halfway through for seamless crossfade)
+    // This creates a beautiful, smooth transition
+    setTimeout(() => {
       document.documentElement.setAttribute('data-theme', newTheme);
+    }, 250); // Halfway through animation
 
-      setTimeout(() => {
-        document.documentElement.classList.remove('theme-transition');
-      }, transitionMs);
+    // Toggle ternary mode (this will update isDarkMode and persist to localStorage)
+    toggleTernaryDarkMode();
+
+    // Clean up overlay after animation completes
+    if (overlayRef.current) {
+      overlayRef.current.remove();
+      overlayRef.current = null;
     }
   };
 
-  if (!theme) return null;
+  // Determine toggle checked state and label
+  // When in 'system' mode, show the computed isDarkMode state
+  const toggleChecked = isDarkMode;
+  const ariaLabel = ternaryDarkMode === 'system' 
+    ? 'System theme (follows OS preference)' 
+    : `Switch to ${ternaryDarkMode === 'light' ? 'dark' : 'light'} mode`;
 
   return (
     <div ref={containerRef} className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
       <Sun className={`${UI_CLASSES.ICON_SM} text-muted-foreground`} aria-hidden="true" />
       <ThemeToggleLayout
-        checked={theme === 'dark'}
-        onCheckedChange={(checked) => {
-          handleThemeChange(checked);
+        checked={toggleChecked}
+        onCheckedChange={(_checked, event) => {
+          // Pass the click event for animation origin
+          handleThemeChange(event);
         }}
-        aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+        aria-label={ariaLabel}
       />
       <Moon className={`${UI_CLASSES.ICON_SM} text-muted-foreground`} aria-hidden="true" />
     </div>

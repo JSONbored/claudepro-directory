@@ -6,17 +6,18 @@
 # Rule: Detect missing 'use cache' directive in server components with async data fetching
 id: missing-use-cache-directive
 language: typescript
+files:
+  - 'app/**/*.tsx'
 rule:
   all:
-    - pattern: export default async function $COMPONENT($$$) { $$$ }
-      kind: function_declaration
-    - inside:
-        pattern: app/**/*.tsx
+    - kind: function_declaration
+      has:
+        pattern: export default async function $COMPONENT($$$) { $$$ }
     - has:
         pattern: await $ASYNC($$$)
     - not:
-        precedes:
-          pattern: 'use cache'
+        has:
+          regex: 'use cache'
 message: "Server components with async data fetching must use 'use cache' or 'use cache: private' directive. Add directive as first statement in function body."
 severity: error
 
@@ -24,12 +25,13 @@ severity: error
 # Rule: Detect non-deterministic operations before connection()
 id: non-deterministic-before-connection
 language: typescript
+files:
+  - 'app/**/*.tsx'
 rule:
   all:
-    - pattern: export default async function $COMPONENT($$$) { $$$ }
-      kind: function_declaration
-    - inside:
-        pattern: app/**/*.tsx
+    - kind: function_declaration
+      has:
+        pattern: export default async function $COMPONENT($$$) { $$$ }
     - has:
         pattern: (Date.now()|Math.random()|new Date()|performance.now()|crypto.randomUUID())($$$)
     - not:
@@ -42,12 +44,13 @@ severity: error
 # Rule: Detect missing connection() in components with non-deterministic operations
 id: missing-connection-with-non-deterministic
 language: typescript
+files:
+  - 'app/**/*.tsx'
 rule:
   all:
-    - pattern: export default async function $COMPONENT($$$) { $$$ }
-      kind: function_declaration
-    - inside:
-        pattern: app/**/*.tsx
+    - kind: function_declaration
+      has:
+        pattern: export default async function $COMPONENT($$$) { $$$ }
     - has:
         pattern: (Date.now()|Math.random()|new Date()|performance.now()|crypto.randomUUID())($$$)
     - not:

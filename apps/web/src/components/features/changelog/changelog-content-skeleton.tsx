@@ -11,6 +11,7 @@
 
 import { UI_CLASSES, Skeleton } from '@heyclaude/web-runtime/ui';
 import { SPRING, STAGGER } from '@heyclaude/web-runtime/design-system';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 
 const KEYS_6 = Array.from({ length: 6 }, (_, i) => `skeleton-${i + 1}`);
@@ -27,6 +28,8 @@ const KEYS_6 = Array.from({ length: 6 }, (_, i) => `skeleton-${i + 1}`);
  * @see ChangelogTimelineView
  */
 export function ChangelogContentSkeleton() {
+  const prefersReducedMotion = useReducedMotion();
+  
   return (
     <motion.div
       className="space-y-0"
@@ -35,9 +38,6 @@ export function ChangelogContentSkeleton() {
       transition={SPRING.smooth}
     >
       {KEYS_6.map((key, index) => {
-        const prefersReducedMotion =
-          typeof window !== 'undefined' &&
-          window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
         return (
           <motion.div

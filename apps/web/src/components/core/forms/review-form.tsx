@@ -7,6 +7,7 @@ import {
   type ReviewFormProps,
 } from '@heyclaude/web-runtime/types/component.types';
 import { toasts, UI_CLASSES, Button, Label, Textarea } from '@heyclaude/web-runtime/ui';
+import { useBoolean } from '@heyclaude/web-runtime/hooks';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useId, useState, useTransition } from 'react';
 
@@ -41,7 +42,7 @@ export function ReviewForm({
   const [rating, setRating] = useState(existingReview?.rating || 0);
   const [reviewText, setReviewText] = useState(existingReview?.review_text || '');
   const [isPending, startTransition] = useTransition();
-  const [showRatingError, setShowRatingError] = useState(false);
+  const { value: showRatingError, setTrue: setShowRatingErrorTrue, setFalse: setShowRatingErrorFalse } = useBoolean();
   const router = useRouter();
   const pathname = usePathname();
   const { user, status } = useAuthenticatedUser({ context: 'ReviewForm' });
@@ -80,12 +81,12 @@ export function ReviewForm({
       }
 
       if (!isValid) {
-        setShowRatingError(true);
+        setShowRatingErrorTrue();
         toasts.error.validation('Please select a star rating');
         return;
       }
 
-      setShowRatingError(false);
+      setShowRatingErrorFalse();
 
       // User is authenticated - proceed with review submission
       startTransition(async () => {
@@ -158,7 +159,7 @@ export function ReviewForm({
       }
     });
     },
-    [user, status, openAuthModal, pathname, isValid, isEditing, contentType, contentSlug, rating, reviewText, existingReview, router, onSuccess, runLoggedAsync, setShowRatingError]
+    [user, status, openAuthModal, pathname, isValid, isEditing, contentType, contentSlug, rating, reviewText, existingReview, router, onSuccess, runLoggedAsync, setShowRatingErrorTrue, setShowRatingErrorFalse]
   );
 
   return (

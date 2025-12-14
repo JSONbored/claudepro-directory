@@ -1,0 +1,336 @@
+/**
+ * Shiki Code Block Styles - Modern, Clean Design
+ * Replaces sugar-high.css with Shiki-specific styling
+ * 
+ * Features:
+ * - Proper line spacing (fixed terrible line spacing issue)
+ * - Clean typography using Geist Mono
+ * - Dual theme support (light/dark via CSS variables)
+ * - Line numbers with proper alignment
+ * - Modern, minimal design matching Vercel/Linear quality
+ */
+
+/* ========================================
+   SHIKI CODE BLOCK BASE STYLES
+   ======================================== */
+
+/* Shiki output structure: <pre class="shiki"><code>...</code></pre> */
+.shiki {
+  /* Base typography - using design tokens for consistency */
+  /* Matches SEMANTIC_TYPOGRAPHY.code.block from design system */
+  font-family: "GeistMono", var(--font-geist-mono), ui-monospace, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.8125rem; /* 13px - matches FONT_SIZES.sm from design tokens */
+  line-height: 1.625; /* ~1.6 - matches LINE_HEIGHTS.relaxed for code blocks (fixed terrible line spacing issue) */
+  font-weight: 400; /* FONT_WEIGHTS.normal */
+  letter-spacing: 0; /* LETTER_SPACING.normal */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  
+  /* Layout - using design system spacing */
+  margin: 0;
+  padding: 0.75rem 0; /* 12px vertical padding */
+  overflow-x: auto;
+  background: transparent;
+  color: inherit;
+  
+  /* Code block container - using design system radius */
+  border-radius: 0.5rem; /* 8px - matches standard code block radius */
+}
+
+/* Code element inside Shiki pre */
+.shiki code {
+  display: block;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+}
+
+/* Individual lines (added by our transformer) */
+.shiki .line {
+  display: block;
+  padding: 0 1rem; /* 16px horizontal padding */
+  min-height: 1.625em; /* Match line-height (1.625) for consistent spacing */
+  position: relative;
+  white-space: pre;
+}
+
+/* Empty lines */
+.shiki .line:empty::before {
+  content: ' ';
+}
+
+/* ========================================
+   LINE NUMBERS
+   ======================================== */
+
+/* Line numbers via CSS counter (when data-line attribute exists) */
+.shiki[data-line-numbers] code {
+  counter-reset: line;
+}
+
+.shiki[data-line-numbers] .line {
+  counter-increment: line;
+}
+
+.shiki[data-line-numbers] .line::before {
+  content: counter(line);
+  display: inline-block;
+  width: 2.5rem;
+  margin-right: 1rem;
+  padding-right: 0.5rem;
+  text-align: right;
+  color: hsl(var(--muted-foreground) / 0.6);
+  user-select: none;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.7;
+}
+
+/* Alternative: Use data-line attribute (from transformer) */
+.shiki .line[data-line]::before {
+  content: attr(data-line);
+  display: inline-block;
+  width: 2.5rem;
+  margin-right: 1rem;
+  padding-right: 0.5rem;
+  text-align: right;
+  color: hsl(var(--muted-foreground) / 0.6);
+  user-select: none;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.7;
+}
+
+/* ========================================
+   CODE BLOCK WRAPPER
+   ======================================== */
+
+/* Wrapper for code blocks (matches existing structure) */
+.code-block-wrapper {
+  position: relative;
+  margin: 1.5rem 0; /* 24px vertical margin */
+  border-radius: 0.5rem; /* 8px - matches design system */
+  overflow: hidden;
+  background: hsl(var(--background)); /* Using design system semantic colors */
+  border: 1px solid hsl(var(--border)); /* Using design system semantic colors */
+}
+
+/* Pre element styling */
+.code-block-pre {
+  margin: 0;
+  padding: 0.75rem 0;
+  overflow-x: auto;
+  background: hsl(var(--background));
+  font-family: "GeistMono", var(--font-geist-mono), ui-monospace, "SF Mono", Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.6; /* Fixed: Proper line spacing */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Fallback for plain code blocks */
+.code-block-fallback {
+  padding: 1rem 1.25rem;
+  color: hsl(var(--muted-foreground));
+  font-style: italic;
+  background: hsl(var(--background));
+}
+
+/* ========================================
+   THEME SUPPORT (Shiki CSS Variables)
+   ======================================== */
+
+/* Shiki uses CSS variables for theming */
+/* Light theme variables are set by Shiki */
+/* Dark theme variables are set by Shiki */
+/* We use defaultColor: 'light' so light theme is default */
+
+/* Dark mode override */
+@media (prefers-color-scheme: dark) {
+  .shiki {
+    color: var(--shiki-dark);
+    background-color: var(--shiki-dark-bg);
+  }
+}
+
+[data-theme="dark"] .shiki {
+  color: var(--shiki-dark);
+  background-color: var(--shiki-dark-bg);
+}
+
+[data-theme="light"] .shiki {
+  color: var(--shiki-light);
+  background-color: var(--shiki-light-bg);
+}
+
+/* ========================================
+   LINE HIGHLIGHTING
+   ======================================== */
+
+/* Highlighted lines (for future use with transformerNotationHighlight) */
+.shiki .line.highlighted {
+  background: hsl(var(--accent) / 0.1); /* Using design system accent color with opacity */
+  border-left: 2px solid hsl(var(--accent)); /* Using design system accent color */
+  margin-left: -2px;
+  padding-left: calc(1rem - 2px);
+}
+
+/* Word highlighting (for transformerNotationWordHighlight) */
+.shiki .highlighted-word {
+  background: hsl(var(--accent) / 0.15);
+  border-radius: 0.125rem; /* 2px */
+  padding: 0.0625rem 0.125rem; /* 1px 2px */
+}
+
+/* Diff notation (for transformerNotationDiff) */
+.shiki .line.diff.add {
+  background: hsl(142 76% 36% / 0.1); /* Success green */
+  border-left: 2px solid hsl(142 76% 36%);
+}
+
+.shiki .line.diff.remove {
+  background: hsl(0 84% 60% / 0.1); /* Error red */
+  border-left: 2px solid hsl(0 84% 60%);
+}
+
+.shiki .line.diff {
+  margin-left: -2px;
+  padding-left: calc(1rem - 2px);
+}
+
+/* ========================================
+   INDENT GUIDES (for transformerRenderIndentGuides)
+   ======================================== */
+
+.shiki .indent {
+  display: inline-block;
+  position: relative;
+  left: var(--indent-offset, 0);
+}
+
+.shiki .indent:empty {
+  height: 1lh;
+  vertical-align: bottom;
+}
+
+.shiki .indent::before {
+  content: '';
+  position: absolute;
+  opacity: 0.15;
+  width: 1px;
+  height: 100%;
+  background-color: currentColor;
+  left: 0;
+}
+
+/* ========================================
+   WHITESPACE VISUALIZATION (for transformerRenderWhitespace)
+   ======================================== */
+
+.shiki .tab,
+.shiki .space {
+  position: relative;
+}
+
+.shiki .tab::before {
+  content: '⇥';
+  position: absolute;
+  opacity: 0.3;
+  color: hsl(var(--muted-foreground));
+}
+
+.shiki .space::before {
+  content: '·';
+  position: absolute;
+  opacity: 0.3;
+  color: hsl(var(--muted-foreground));
+}
+
+/* ========================================
+   SCROLLBAR STYLING
+   ======================================== */
+
+.shiki::-webkit-scrollbar,
+.code-block-pre::-webkit-scrollbar {
+  height: 8px;
+}
+
+.shiki::-webkit-scrollbar-track,
+.code-block-pre::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.shiki::-webkit-scrollbar-thumb,
+.code-block-pre::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 4px;
+}
+
+.shiki::-webkit-scrollbar-thumb:hover,
+.code-block-pre::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--border) / 0.8);
+}
+
+/* Firefox scrollbar */
+.shiki,
+.code-block-pre {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--border)) transparent;
+}
+
+/* ========================================
+   MOBILE OPTIMIZATIONS
+   ======================================== */
+
+@media (max-width: 640px) {
+  .shiki,
+  .code-block-pre {
+    font-size: 12px;
+    padding: 0.5rem 0;
+    line-height: 1.5;
+  }
+
+  .shiki .line,
+  .code-block-pre .line {
+    padding: 0 0.75rem;
+    min-height: 1.5em;
+  }
+
+  .shiki .line[data-line]::before,
+  .shiki[data-line-numbers] .line::before {
+    width: 2rem;
+    margin-right: 0.75rem;
+    padding-right: 0.375rem;
+    font-size: 11px;
+  }
+}
+
+/* ========================================
+   SELECTION STYLING
+   ======================================== */
+
+.shiki ::selection,
+.code-block-pre ::selection {
+  background-color: hsl(var(--accent) / 0.25);
+}
+
+/* ========================================
+   CODE BLOCK WITH LINE NUMBERS CLASS
+   ======================================== */
+
+/* Legacy class support (for existing code) */
+.code-with-line-numbers .shiki .line,
+.code-with-line-numbers .code-block-pre .line {
+  padding-left: 4rem; /* Space for line numbers */
+}
+
+.code-with-line-numbers .shiki .line[data-line]::before,
+.code-with-line-numbers .shiki[data-line-numbers] .line::before {
+  position: absolute;
+  left: 1rem;
+}

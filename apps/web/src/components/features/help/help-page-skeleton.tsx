@@ -13,6 +13,7 @@
 
 import { Skeleton } from '@heyclaude/web-runtime/ui';
 import { SPRING, STAGGER } from '@heyclaude/web-runtime/design-system';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
 
@@ -23,9 +24,7 @@ const KEYS_5 = Array.from({ length: 5 }, (_, i) => `skeleton-${i + 1}`);
  * Help page skeleton matching exact layout
  */
 export function HelpPageSkeleton() {
-  const prefersReducedMotion =
-    typeof window !== 'undefined' &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const prefersReducedMotion = useReducedMotion();
 
   return (
     <motion.div

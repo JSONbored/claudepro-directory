@@ -5,31 +5,13 @@ import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
 import { AlertTriangle } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES, Alert, AlertDescription, AlertTitle } from '@heyclaude/web-runtime/ui';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
+import { useDebounceValue, useBoolean } from '@heyclaude/web-runtime/hooks';
 import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 
 interface DuplicateWarningProps {
   contentType: Database['public']['Enums']['content_category'];
   name: string;
-}
-
-/**
- * Simple debounce hook
- */
-function useDebounce<T>(value: T, delay: number): T {
-  const [debouncedValue, setDebouncedValue] = useState<T>(value);
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedValue(value);
-    }, delay);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [value, delay]);
-
-  return debouncedValue;
 }
 
 /**
@@ -45,10 +27,10 @@ function useDebounce<T>(value: T, delay: number): T {
  * @returns A React node containing a suggestion Alert when applicable, a checking indicator while evaluating, or `null`
  *
  * @see getTimeoutConfig
- * @see useDebounce
+ * @see useDebounceValue
  */
 export function DuplicateWarning({ contentType: _contentType, name }: DuplicateWarningProps) {
-  const [checking, setChecking] = useState(false);
+  const { value: checking, setTrue: setCheckingTrue, setFalse: setCheckingFalse } = useBoolean();
   const [warning, setWarning] = useState<null | string>(null);
   const [debounceMs, setDebounceMs] = useState(300);
   const shouldReduceMotion = useReducedMotion();
@@ -59,7 +41,7 @@ export function DuplicateWarning({ contentType: _contentType, name }: DuplicateW
     setDebounceMs(config['timeout.ui.form_debounce_ms']);
   }, []);
 
-  const debouncedName = useDebounce(name, debounceMs);
+  const [debouncedName] = useDebounceValue(name, debounceMs);
 
   useEffect(() => {
     if (!debouncedName || debouncedName.length < 3) {
@@ -67,7 +49,7 @@ export function DuplicateWarning({ contentType: _contentType, name }: DuplicateW
       return;
     }
 
-    setChecking(true);
+    setCheckingTrue();
 
     // Simple client-side duplicate detection
     // Check if name is too generic
@@ -95,7 +77,7 @@ export function DuplicateWarning({ contentType: _contentType, name }: DuplicateW
       setWarning(null);
     }
 
-    setChecking(false);
+    setCheckingFalse();
   }, [debouncedName]);
 
   if (checking) {

@@ -292,6 +292,66 @@ function sanitizeFilename(name: string): string {
     info: (context: Record<string, unknown>, message: string) => void;
     warn: (context: Record<string, unknown>, message: string) => void;
   }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
 */
 async function handleJsonFormat(
   category: DatabaseGenerated['public']['Enums']['content_category'],
@@ -437,6 +497,56 @@ async function handleJsonFormat(
  * @param {boolean} includeMetadata Parameter description
  * @param {boolean} includeFooter Parameter description
   * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
     error: (context: Record<string, unknown>, message: string) => void;
     info: (context: Record<string, unknown>, message: string) => void;
     warn: (context: Record<string, unknown>, message: string) => void;
@@ -719,6 +829,66 @@ async function handleMarkdownFormat(
  * @see buildSecurityHeaders
  * @param {{ error: (context: Record<string, unknown>, message: string) => void; warn: (context: Record<string, unknown>, message: string) => void; info: (context: Record<string, unknown>, message: string) => void; debug: (context: Record<string, unknown>, message: string) => void }} logger Parameter description
   * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
     debug: (context: Record<string, unknown>, message: string) => void;
     error: (context: Record<string, unknown>, message: string) => void;
     info: (context: Record<string, unknown>, message: string) => void;

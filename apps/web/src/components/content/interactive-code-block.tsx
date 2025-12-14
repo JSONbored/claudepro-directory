@@ -24,6 +24,7 @@ import {
 } from '@heyclaude/web-runtime/icons';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import {
+  cn,
   copyScreenshotToClipboard,
   copyShareLink,
   downloadScreenshot,
@@ -40,6 +41,7 @@ import { motion } from 'motion/react';
 import { usePathname } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { LinkedinShareButton, TwitterShareButton } from 'react-share';
+import { useBoolean, useIsClient, useTimeout } from '@heyclaude/web-runtime/hooks';
 
 const CLIPBOARD_RESET_DEFAULT_MS = 2000;
 
@@ -122,7 +124,7 @@ export interface ProductionCodeBlockProps {
   code: string;
   /** Optional filename to display */
   filename?: string | undefined;
-  /** Pre-rendered HTML from Sugar High (server-side) */
+  /** Pre-rendered HTML from Shiki (server-side) */
   html: string;
   /** Programming language (for display) */
   language?: string | undefined;
@@ -244,6 +246,13 @@ function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: Sh
  * Displays optional filename and language badge, automatically collapses long blocks to `maxLines`
  * with an expand/collapse control, and uses sanitized server-rendered Shiki HTML when available.
  *
+ * Uses Shiki for VS Code-quality syntax highlighting with:
+ * - Dual theme support (light/dark via CSS variables)
+ * - Proper line spacing (fixed terrible line spacing issue)
+ * - Line numbers with proper alignment
+ * - 100+ language support
+ * - Design system integration (typography, colors, spacing)
+ *
  * @param html - Pre-rendered HTML produced by Shiki (will be sanitized on the client before insertion)
  * @param code - Raw source text shown/copyable/downloadable
  * @param language - Programming language label used for the language badge and filename extension inference
@@ -255,6 +264,7 @@ function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: Sh
  *
  * @see sanitizeShikiHtml
  * @see ShareDropdown
+ * @see highlightCode - Server-side Shiki highlighting utility
  */
 export function ProductionCodeBlock({
   html,
@@ -265,11 +275,11 @@ export function ProductionCodeBlock({
   showLineNumbers = true,
   className = '',
 }: ProductionCodeBlockProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [isCopied, setIsCopied] = useState(false);
-  const [isScreenshotting, setIsScreenshotting] = useState(false);
-  const [isShareOpen, setIsShareOpen] = useState(false);
-  const [needsCollapse, setNeedsCollapse] = useState(false);
+  const { value: isExpanded, toggle: toggleIsExpanded } = useBoolean();
+  const { value: isCopied, setTrue: setIsCopiedTrue, setFalse: setIsCopiedFalse } = useBoolean();
+  const { value: isScreenshotting, setTrue: setIsScreenshottingTrue, setFalse: setIsScreenshottingFalse } = useBoolean();
+  const { value: isShareOpen, toggle: toggleIsShareOpen, setFalse: setIsShareOpenFalse } = useBoolean();
+  const { value: needsCollapse, setValue: setNeedsCollapse } = useBoolean();
   const [clipboardResetDelay, setClipboardResetDelay] = useState(CLIPBOARD_RESET_DEFAULT_MS);
   const [safeHtml, setSafeHtml] = useState<string>(html);
   const preRef = useRef<HTMLPreElement>(null);
@@ -278,10 +288,11 @@ export function ProductionCodeBlock({
   const codeBlockRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const shouldReduceMotion = useReducedMotion();
+  const isClient = useIsClient();
 
   // Sanitize HTML on client side
   useEffect(() => {
-    if (typeof window !== 'undefined' && html) {
+    if (isClient && html) {
       sanitizeShikiHtml(html)
         .then((sanitized) => {
           setSafeHtml(sanitized);
@@ -300,7 +311,7 @@ export function ProductionCodeBlock({
             }
           );
           // Fallback to escaped plain text instead of raw HTML
-          if (typeof window !== 'undefined') {
+          if (isClient) {
             const div = document.createElement('div');
             div.textContent = html;
             setSafeHtml(div.innerHTML);
@@ -309,7 +320,7 @@ export function ProductionCodeBlock({
           }
         });
     }
-  }, [html]);
+  }, [html, isClient]);
 
   // Extract category and slug from pathname for tracking
   // Memoize to avoid repeated validation on every render
@@ -350,19 +361,55 @@ export function ProductionCodeBlock({
   useEffect(() => {
     const lines = code.split('\n').length;
     setNeedsCollapse(lines > maxLines);
-  }, [code, maxLines]);
+  }, [code, maxLines, setNeedsCollapse]);
 
   // Load timeout config on mount
   useEffect(() => {
-    const config = getTimeoutConfig();
-    const override = config['timeout.ui.clipboard_reset_delay_ms'];
-    if (typeof override === 'number' && Number.isFinite(override) && override > 0) {
-      setClipboardResetDelay(override);
+    try {
+      const config = getTimeoutConfig();
+      const override = config['timeout.ui.clipboard_reset_delay_ms'];
+      if (typeof override === 'number' && Number.isFinite(override) && override > 0) {
+        setClipboardResetDelay(override);
+      }
+    } catch (error) {
+      const normalized = normalizeError(error, 'Failed to load timeout config');
+      logClientWarn(
+        '[Config] Failed to load timeout config',
+        normalized,
+        'ProductionCodeBlock.loadConfig',
+        {
+          component: 'ProductionCodeBlock',
+          action: 'load-timeout-config',
+          category: 'config',
+          recoverable: true,
+        }
+      );
     }
   }, []);
 
+  // Use useTimeout for automatic reset after copy
+  const delay =
+    typeof clipboardResetDelay === 'number' &&
+    Number.isFinite(clipboardResetDelay) &&
+    clipboardResetDelay > 0
+      ? clipboardResetDelay
+      : CLIPBOARD_RESET_DEFAULT_MS;
+
+  useTimeout(() => {
+    if (isCopied) {
+      setIsCopiedFalse();
+    }
+  }, isCopied ? delay : null);
+
+  // Failsafe timeout for screenshot: Reset state after 5 seconds regardless of outcome
+  useTimeout(() => {
+    if (isScreenshotting) {
+      setIsScreenshottingFalse();
+    }
+  }, isScreenshotting ? 5000 : null);
+
   const handleCopy = async () => {
-    setIsCopied(true);
+    setIsCopiedTrue();
 
     try {
       await navigator.clipboard.writeText(code);
@@ -372,7 +419,7 @@ export function ProductionCodeBlock({
         logUnhandledPromise('interactive-code-block:copy', error, { category, slug });
       });
     } catch (error) {
-      setIsCopied(false);
+      setIsCopiedFalse();
       const normalized = normalizeError(error, 'Copy failed');
       logClientWarn(
         '[Clipboard] Copy failed',
@@ -399,16 +446,6 @@ export function ProductionCodeBlock({
       });
       return;
     }
-
-    // Use cached clipboard reset delay (fetched on mount)
-    // Validate delay is a valid positive number before using
-    const delay =
-      typeof clipboardResetDelay === 'number' &&
-      Number.isFinite(clipboardResetDelay) &&
-      clipboardResetDelay > 0
-        ? clipboardResetDelay
-        : CLIPBOARD_RESET_DEFAULT_MS;
-    setTimeout(() => setIsCopied(false), delay);
   };
 
   /**
@@ -420,12 +457,7 @@ export function ProductionCodeBlock({
   const handleScreenshot = async () => {
     if (!codeBlockRef.current || isScreenshotting) return;
 
-    setIsScreenshotting(true);
-
-    // Failsafe timeout: Reset state after 5 seconds regardless of outcome
-    const failsafeTimeout = setTimeout(() => {
-      setIsScreenshotting(false);
-    }, 5000);
+    setIsScreenshottingTrue();
 
     try {
       const screenshot = await generateCodeScreenshot({
@@ -491,8 +523,7 @@ export function ProductionCodeBlock({
         }
       );
     } finally {
-      clearTimeout(failsafeTimeout);
-      setIsScreenshotting(false);
+      setIsScreenshottingFalse();
     }
   };
 
@@ -624,7 +655,7 @@ export function ProductionCodeBlock({
         });
       });
 
-      setIsShareOpen(false);
+      setIsShareOpenFalse();
     } catch (error) {
       const normalized = normalizeError(error, 'Share failed');
       // Show error toast with "Retry" button
@@ -678,7 +709,7 @@ export function ProductionCodeBlock({
             <div className="relative">
               <motion.button
                 type="button"
-                onClick={() => setIsShareOpen(!isShareOpen)}
+                onClick={toggleIsShareOpen}
                 className={UI_CLASSES.CODE_BLOCK_BUTTON_ICON}
                 title="Share code"
               >
@@ -692,7 +723,7 @@ export function ProductionCodeBlock({
                   category={category}
                   slug={slug}
                   onShare={handleShare}
-                  onMouseLeave={() => setIsShareOpen(false)}
+                  onMouseLeave={() => setIsShareOpenFalse()}
                 />
               ) : null}
             </div>
@@ -760,7 +791,7 @@ export function ProductionCodeBlock({
             <div className="relative">
               <motion.button
                 type="button"
-                onClick={() => setIsShareOpen(!isShareOpen)}
+                onClick={toggleIsShareOpen}
                 className={UI_CLASSES.CODE_BLOCK_BUTTON_ICON}
                 title="Share code"
               >
@@ -774,7 +805,7 @@ export function ProductionCodeBlock({
                   category={category}
                   slug={slug}
                   onShare={handleShare}
-                  onMouseLeave={() => setIsShareOpen(false)}
+                  onMouseLeave={() => setIsShareOpenFalse()}
                 />
               ) : null}
             </div>
@@ -823,7 +854,15 @@ export function ProductionCodeBlock({
         {safeHtml ? (
           <div
             ref={divRef}
-            className={showLineNumbers ? 'code-with-line-numbers' : ''}
+            className={cn(
+              showLineNumbers && 'code-with-line-numbers',
+              // Shiki outputs <pre class="shiki"><code>...</code></pre>
+              // We need to ensure proper styling
+              '[&_.shiki]:!bg-transparent',
+              '[&_.shiki]:!p-0',
+              '[&_.shiki_code]:!bg-transparent',
+              '[&_.shiki_code]:!p-0'
+            )}
             // eslint-disable-next-line jsx-a11y/no-danger -- HTML is sanitized with DOMPurify with strict allowlist for Shiki
             // biome-ignore lint/security/noDangerouslySetInnerHtml: HTML is sanitized with DOMPurify using strict allowlist for Shiki syntax highlighting
             dangerouslySetInnerHTML={{ __html: safeHtml }}
@@ -839,7 +878,7 @@ export function ProductionCodeBlock({
       {needsCollapse ? (
         <button
           type="button"
-          onClick={() => setIsExpanded(!isExpanded)}
+          onClick={toggleIsExpanded}
           className="border-border/40 text-muted-foreground hover:text-foreground flex w-full items-center justify-center gap-1.5 border-t py-2 text-xs transition-colors"
         >
           <ChevronDown

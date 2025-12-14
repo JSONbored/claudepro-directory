@@ -25,6 +25,7 @@
 import { Search } from '@heyclaude/web-runtime/icons';
 import { Input, cn } from '@heyclaude/web-runtime/ui';
 import { useCallback, useEffect, useRef, useState, useId } from 'react';
+import { useDebounceValue } from '@heyclaude/web-runtime/hooks';
 
 import { useSearchContext } from '../context/search-provider';
 
@@ -76,22 +77,28 @@ export function SearchBar({
   useEffect(() => {
     // Only sync if local state differs and it's not from user typing
     // This handles browser back/forward navigation
-    // CRITICAL FIX: Add null check for inputRef.current to prevent focus error
-    if (query !== localQuery && inputRef.current && document.activeElement !== inputRef.current) {
+    // CRITICAL FIX: Add SSR-safe check for document
+    if (
+      typeof document !== 'undefined' &&
+      query !== localQuery &&
+      inputRef.current &&
+      document.activeElement !== inputRef.current
+    ) {
+      setLocalQuery(query);
+    } else if (query !== localQuery && typeof document === 'undefined') {
+      // SSR: sync immediately (no focus check needed)
       setLocalQuery(query);
     }
-  }, [query]); // Only depend on query, not localQuery
+  }, [query, localQuery]); // Include localQuery in deps for proper comparison
   
   // Debounced sync from local state to context (for search execution)
+  const [debouncedLocalQuery] = useDebounceValue(localQuery, 300);
+  
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (localQuery !== query) {
-        setQuery(localQuery);
-      }
-    }, 300); // 300ms debounce
-    
-    return () => clearTimeout(timer);
-  }, [localQuery, query, setQuery]);
+    if (debouncedLocalQuery !== query) {
+      setQuery(debouncedLocalQuery);
+    }
+  }, [debouncedLocalQuery, query, setQuery]);
 
   // Handle input change - immediate local update (no debounce)
   const handleChange = useCallback(

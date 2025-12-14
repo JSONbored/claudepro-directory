@@ -22,7 +22,6 @@ import {
   DialogDescription,
   DialogTitle,
 } from './dialog.tsx';
-import { SHADOWS } from '../../design-tokens/index.ts';
 
 const Command = ({
   className,
@@ -81,22 +80,17 @@ const CommandDialog = ({ children, open, onOpenChange, ...props }: DialogProps) 
     <Dialog {...dialogProps}>
       <DialogContent
         className={cn(
-          // Vercel exact pattern: Remove DialogContent padding, CMDK handles its own
+          // Premium command palette design - modern, beautiful
           'overflow-hidden p-0',
-          // Vercel exact: max-width: 640px
           'max-w-[640px]',
           'w-[95vw] sm:w-full',
-          // Vercel exact: border-radius: 12px (rounded-xl)
-          'rounded-xl',
-          // Vercel exact: border: 1px solid var(--gray6)
-          'border border-border',
-          // Vercel exact: background (dark mode: rgba(22, 22, 22, 0.7))
-          'bg-background',
+          'rounded-2xl', // Slightly larger radius for premium feel
+          'border border-border/80',
+          'bg-background/95 backdrop-blur-xl', // Glass morphism effect
+          'shadow-2xl', // Premium shadow
         )}
         style={{ 
-          // Vercel exact: box-shadow: var(--cmdk-shadow)
-          // Using semantic shadow token
-          boxShadow: SHADOWS.elevation.dark.medium 
+          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
         }}
       >
         <DialogTitle className="sr-only">Command Menu</DialogTitle>
@@ -130,16 +124,18 @@ const CommandInput = ({
     <CommandPrimitive.Input
       ref={ref}
       className={cn(
-        // Vercel exact pattern: font-size: 17px, padding: 8px 8px 16px 8px
-        'text-[17px]',
-        'px-2 py-2 pb-4', // 8px 8px 16px 8px
-        'border-b border-border mb-4', // border-bottom + margin-bottom: 16px
+        // Premium input design - clean, modern
+        'text-base', // Slightly larger for better readability
+        'px-4 py-3 pb-4',
+        'border-b border-border/60 mb-4',
         'bg-transparent',
         'text-foreground',
         'outline-none',
-        'rounded-none', // border-radius: 0
+        'rounded-none',
         'w-full',
-        'placeholder:text-muted-foreground',
+        'placeholder:text-muted-foreground/70',
+        'focus:border-border focus:placeholder:text-muted-foreground',
+        'transition-colors duration-200',
         className
       )}
       {...props}
@@ -256,29 +252,29 @@ const CommandItem = ({
   <CommandPrimitive.Item
     ref={ref}
     className={cn(
-      // Vercel exact pattern:
-      // height: 48px, border-radius: 8px, font-size: 14px, padding: 0 16px, gap: 8px
-      'h-12', // 48px
-      'rounded-lg', // 8px
-      'text-sm', // 14px
-      'px-4', // 0 16px
-      'gap-2', // 8px
+      // Premium command item design - beautiful, modern
+      'h-11', // Slightly smaller for better density
+      'rounded-lg',
+      'text-sm',
+      'px-3', // Tighter padding
+      'gap-2.5',
       'flex items-center',
       'cursor-pointer',
       'select-none',
       'outline-none',
-      // Vercel transitions: transition: all 150ms ease, transition-property: none
-      'transition-all duration-150 ease-out',
-      // Selected state: background: var(--grayA3), color: var(--gray12)
-      'data-[selected=true]:bg-accent/50 data-[selected=true]:text-foreground',
-      // Disabled state: color: var(--gray8)
-      'data-[disabled=true]:text-muted-foreground data-[disabled=true]:cursor-not-allowed',
-      // Active state: transition-property: background, background: var(--gray4)
-      'active:transition-[background] active:bg-accent/30',
-      // Item spacing: & + [cmdk-item] { margin-top: 4px }
-      '[&+&]:mt-1',
-      // Icon styling: width: 18px; height: 18px
-      '[&_svg]:w-[18px] [&_svg]:h-[18px] [&_svg]:shrink-0',
+      'transition-all duration-200 ease-out',
+      // Premium selected state with subtle glow
+      'data-[selected=true]:bg-accent/60 data-[selected=true]:text-foreground',
+      'data-[selected=true]:shadow-sm',
+      // Disabled state
+      'data-[disabled=true]:text-muted-foreground/50 data-[disabled=true]:cursor-not-allowed',
+      // Active state with smooth transition
+      'active:bg-accent/40 active:transition-colors',
+      // Item spacing
+      '[&+&]:mt-0.5',
+      // Icon styling
+      '[&_svg]:w-[18px] [&_svg]:h-[18px] [&_svg]:shrink-0 [&_svg]:text-muted-foreground',
+      'data-[selected=true]:[&_svg]:text-foreground',
       className
     )}
     {...props}

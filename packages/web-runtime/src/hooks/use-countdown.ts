@@ -1,6 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useBoolean, useInterval } from './index.ts';
+import { useCallback, useState } from 'react';
 
 /**
  * Options for useCountdown hook
@@ -108,67 +109,45 @@ export function useCountdown(
   } = options;
 
   const [count, setCount] = useState(countStart);
-  const [isRunning, setIsRunning] = useState(false);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const { value: isRunning, setTrue: startRunning, setFalse: stopRunning } = useBoolean();
+
+  // Use useInterval for countdown logic
+  useInterval(() => {
+    setCount((prev) => {
+      const next = isIncrement ? prev + 1 : prev - 1;
+
+      // Check if we've reached the stop value
+      if (isIncrement) {
+        if (countStop !== -Infinity && next >= countStop) {
+          stopRunning();
+          return countStop;
+        }
+      } else {
+        if (next <= countStop) {
+          stopRunning();
+          return countStop;
+        }
+      }
+
+      return next;
+    });
+  }, isRunning ? intervalMs : null);
 
   const startCountdown = useCallback(() => {
     if (isRunning) {
       return;
     }
-
-    setIsRunning(true);
-
-    intervalRef.current = setInterval(() => {
-      setCount((prev) => {
-        const next = isIncrement ? prev + 1 : prev - 1;
-
-        // Check if we've reached the stop value
-        if (isIncrement) {
-          if (countStop !== -Infinity && next >= countStop) {
-            setIsRunning(false);
-            if (intervalRef.current) {
-              clearInterval(intervalRef.current);
-              intervalRef.current = null;
-            }
-            return countStop;
-          }
-        } else {
-          if (next <= countStop) {
-            setIsRunning(false);
-            if (intervalRef.current) {
-              clearInterval(intervalRef.current);
-              intervalRef.current = null;
-            }
-            return countStop;
-          }
-        }
-
-        return next;
-      });
-    }, intervalMs);
-  }, [isRunning, isIncrement, countStop, intervalMs]);
+    startRunning();
+  }, [isRunning, startRunning]);
 
   const stopCountdown = useCallback(() => {
-    setIsRunning(false);
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-  }, []);
+    stopRunning();
+  }, [stopRunning]);
 
   const resetCountdown = useCallback(() => {
-    stopCountdown();
+    stopRunning();
     setCount(countStart);
-  }, [countStart, stopCountdown]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, []);
+  }, [countStart, stopRunning]);
 
   return [
     count,

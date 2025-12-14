@@ -33,10 +33,14 @@ import { type DraftFormData, DraftManager } from '@heyclaude/web-runtime/data/dr
 import { SPRING, STAGGER } from '@heyclaude/web-runtime/design-system';
 import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/design-tokens';
 import {
+  useBoolean,
   useConfetti,
+  useDebounceCallback,
   useFieldHighlight,
   useFormTracking,
   useLoggedAsync,
+  useStep,
+  useTimeout,
 } from '@heyclaude/web-runtime/hooks';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
@@ -175,12 +179,31 @@ export default function WizardSubmissionPage() {
   ) => Promise<T | undefined>;
 
   // Form state
-  const [currentStep, setCurrentStep] = useState(1);
+  // Use useStep hook for cleaner step management with automatic boundary checking
+  const [currentStep, { canGoToPrevStep, goToNextStep, goToPrevStep, setStep }] = useStep(5);
   const [formData, setFormData] = useState<FormData>(DEFAULT_FORM_DATA);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showCelebration, setShowCelebration] = useState(false);
+  const {
+    setFalse: setIsSubmittingFalse,
+    setTrue: setIsSubmittingTrue,
+    value: isSubmitting,
+  } = useBoolean();
+  const { setTrue: setShowCelebrationTrue, value: showCelebration } = useBoolean();
+
+  // Redirect after celebration completes (3000ms delay)
+  useTimeout(
+    () => {
+      if (showCelebration) {
+        router.push('/submit?success=true');
+      }
+    },
+    showCelebration ? 3000 : null
+  );
   const [templates, setTemplates] = useState<MergedTemplateItem[]>([]);
-  const [templatesLoading, setTemplatesLoading] = useState(false);
+  const {
+    setFalse: setTemplatesLoadingFalse,
+    setTrue: setTemplatesLoadingTrue,
+    value: templatesLoading,
+  } = useBoolean();
   const [socialProofStats, setSocialProofStats] = useState<{
     contributors?: { count: number; names: string[] };
     submissions?: number;
@@ -189,7 +212,11 @@ export default function WizardSubmissionPage() {
   }>({});
 
   // Thumbnail upload state
-  const [isUploadingThumbnail, setIsUploadingThumbnail] = useState(false);
+  const {
+    setFalse: setIsUploadingThumbnailFalse,
+    setTrue: setIsUploadingThumbnailTrue,
+    value: isUploadingThumbnail,
+  } = useBoolean();
   const [thumbnailPreview, setThumbnailPreview] = useState<null | string>(null);
 
   // Field highlighting for template application feedback
@@ -253,7 +280,7 @@ export default function WizardSubmissionPage() {
   // Load templates when submission type changes
   useEffect(() => {
     const loadTemplates = async () => {
-      setTemplatesLoading(true);
+      setTemplatesLoadingTrue();
       await runLoggedAsync(
         async () => {
           // Use static templates route (ISR) instead of API route
@@ -286,11 +313,11 @@ export default function WizardSubmissionPage() {
           rethrow: false,
         }
       );
-      setTemplatesLoading(false);
+      setTemplatesLoadingFalse();
     };
 
     void loadTemplates();
-  }, [formData.submission_type, runLoggedAsync]);
+  }, [formData.submission_type, runLoggedAsync, setTemplatesLoadingTrue, setTemplatesLoadingFalse]);
 
   // Load social proof stats on mount
   useEffect(() => {
@@ -408,7 +435,7 @@ export default function WizardSubmissionPage() {
       const previewUrl = URL.createObjectURL(file);
       setThumbnailPreview(previewUrl);
 
-      setIsUploadingThumbnail(true);
+      setIsUploadingThumbnailTrue();
 
       try {
         await runLoggedAsync(
@@ -540,10 +567,20 @@ export default function WizardSubmissionPage() {
           });
         }
       } finally {
-        setIsUploadingThumbnail(false);
+        setIsUploadingThumbnailFalse();
       }
     },
-    [user, status, openAuthModal, pathname, runLoggedAsync, updateFormData, setFormData]
+    [
+      user,
+      status,
+      openAuthModal,
+      pathname,
+      runLoggedAsync,
+      updateFormData,
+      setFormData,
+      setIsUploadingThumbnailTrue,
+      setIsUploadingThumbnailFalse,
+    ]
   );
 
   // Check if can proceed from current step (defined early for draft resume validation)
@@ -612,11 +649,12 @@ export default function WizardSubmissionPage() {
       setFormData(loadedFormData);
 
       // Resume wizard at the last step the user was on (clamped to valid range)
+      // useStep automatically clamps to valid range, so we just need to validate accessibility
       if (draft.last_step >= 1 && draft.last_step <= 5) {
         // Validate that we can proceed to this step using loaded form data
         const targetStep = draft.last_step;
         if (targetStep === 1 || canProceedFromStep(targetStep - 1, loadedFormData)) {
-          setCurrentStep(targetStep);
+          setStep(targetStep); // useStep's setStep automatically clamps to valid range
         }
       }
 
@@ -652,13 +690,16 @@ export default function WizardSubmissionPage() {
 
   // Auto-save draft on form data change (debounced)
   // buildDraftPayload already depends on formData, so we don't need formData in the dependency array
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
+  const debouncedSaveDraft = useDebounceCallback(
+    useCallback(() => {
       draftManager.save(buildDraftPayload(currentStep, qualityScore));
-    }, 2000);
+    }, [currentStep, draftManager, qualityScore, buildDraftPayload]),
+    2000
+  );
 
-    return () => clearTimeout(timeoutId);
-  }, [currentStep, draftManager, qualityScore, buildDraftPayload]);
+  useEffect(() => {
+    debouncedSaveDraft();
+  }, [debouncedSaveDraft]);
 
   // Check if can proceed from current step (wrapper using current formData)
   const canProceedFromCurrentStep = useCallback(
@@ -726,24 +767,24 @@ export default function WizardSubmissionPage() {
   // Handle next step
   const handleNext = useCallback(() => {
     if (canProceedFromCurrentStep(currentStep)) {
-      setCurrentStep((previous) => Math.min(previous + 1, 5));
+      goToNextStep(); // useStep automatically handles boundary checking
     }
-  }, [currentStep, canProceedFromCurrentStep]);
+  }, [currentStep, canProceedFromCurrentStep, goToNextStep]);
 
   // Handle previous step
   const handlePrevious = useCallback(() => {
-    setCurrentStep((previous) => Math.max(previous - 1, 1));
-  }, []);
+    goToPrevStep(); // useStep automatically handles boundary checking
+  }, [goToPrevStep]);
 
   // Handle step change (from progress indicator)
   const handleStepChange = useCallback(
     (step: number) => {
       const targetStep = steps.find((s) => s.number === step);
       if (targetStep?.isAccessible) {
-        setCurrentStep(step);
+        setStep(step); // useStep automatically clamps to valid range
       }
     },
-    [steps]
+    [steps, setStep]
   );
 
   // Handle save draft
@@ -769,7 +810,7 @@ export default function WizardSubmissionPage() {
       return;
     }
 
-    setIsSubmitting(true);
+    setIsSubmittingTrue();
 
     try {
       const result = await submitContentForReview({
@@ -800,7 +841,7 @@ export default function WizardSubmissionPage() {
       });
 
       if (result.data?.success) {
-        setShowCelebration(true);
+        setShowCelebrationTrue();
         draftManager.clear();
         toasts.success.submissionCreated(formData.submission_type);
 
@@ -809,11 +850,6 @@ export default function WizardSubmissionPage() {
         if (confettiEnabled) {
           celebrateSubmission();
         }
-
-        // Redirect after celebration
-        setTimeout(() => {
-          router.push('/submit?success=true');
-        }, 3000);
       } else {
         // Check if server error is auth-related
         const serverError = result.serverError || '';
@@ -868,7 +904,7 @@ export default function WizardSubmissionPage() {
         });
       }
     } finally {
-      setIsSubmitting(false);
+      setIsSubmittingFalse();
     }
   }, [
     user,
@@ -882,6 +918,9 @@ export default function WizardSubmissionPage() {
     router,
     log,
     celebrateSubmission,
+    setIsSubmittingTrue,
+    setIsSubmittingFalse,
+    setShowCelebrationTrue,
   ]);
 
   // Render step content
@@ -890,8 +929,8 @@ export default function WizardSubmissionPage() {
       case 1: {
         return (
           <StepTypeSelection
-            selected={formData.submission_type}
             onSelect={(type) => updateFormData({ submission_type: type })}
+            selected={formData.submission_type}
           />
         );
       }
@@ -900,6 +939,7 @@ export default function WizardSubmissionPage() {
           <StepBasicInfo
             data={formData}
             isUploadingThumbnail={isUploadingThumbnail}
+            thumbnailPreview={thumbnailPreview ?? formData.thumbnail_url ?? null}
             onChange={updateFormData}
             onImageUpload={handleImageUpload}
             onRemoveThumbnail={() => {
@@ -932,7 +972,6 @@ export default function WizardSubmissionPage() {
               });
               setThumbnailPreview(null);
             }}
-            thumbnailPreview={thumbnailPreview ?? formData.thumbnail_url ?? null}
           />
         );
       }
@@ -941,11 +980,11 @@ export default function WizardSubmissionPage() {
           <StepConfiguration
             data={formData.type_specific}
             getHighlightClasses={getHighlightClasses}
+            onApplyTemplate={applyTemplate}
+            onChange={(data) => updateFormData({ type_specific: data })}
             submissionType={formData.submission_type}
             templates={templates}
             templatesLoading={templatesLoading}
-            onApplyTemplate={applyTemplate}
-            onChange={(data) => updateFormData({ type_specific: data })}
           />
         );
       }
@@ -957,11 +996,11 @@ export default function WizardSubmissionPage() {
           <StepReviewSubmit
             data={formData}
             isSubmitting={isSubmitting}
+            qualityScore={qualityScore}
+            showCelebration={showCelebration}
             onSubmit={() => {
               void handleSubmit();
             }}
-            qualityScore={qualityScore}
-            showCelebration={showCelebration}
           />
         );
       }
@@ -979,16 +1018,16 @@ export default function WizardSubmissionPage() {
       </div>
       <WizardLayout
         canGoNext={canProceedFromCurrentStep(currentStep)}
-        canGoPrevious={currentStep > 1}
+        canGoPrevious={canGoToPrevStep}
         currentStep={currentStep}
         isLastStep={currentStep === 5}
-        qualityScore={qualityScore}
-        steps={steps}
-        submissionType={formData.submission_type}
         onNext={handleNext}
         onPrevious={handlePrevious}
         onSave={handleSave}
         onStepChange={handleStepChange}
+        qualityScore={qualityScore}
+        steps={steps}
+        submissionType={formData.submission_type}
       >
         {renderStepContent()}
 
@@ -1050,7 +1089,7 @@ function StepTypeSelection({
         </div>
       </motion.div>
 
-      <TypeSelectionCards selected={selected} onSelect={onSelect} />
+      <TypeSelectionCards onSelect={onSelect} selected={selected} />
     </div>
   );
 }
@@ -1155,34 +1194,34 @@ function StepBasicInfo({
         >
           <CardContent className="space-y-6 pt-6">
             <AnimatedFormField
-              required
               helpText="A clear, descriptive name"
               id="wizard-name"
               label="Name"
+              required
               validationState={nameValidation}
               {...(nameValidation === 'invalid'
                 ? { errorMessage: 'Name must be at least 3 characters' }
                 : {})}
               {...(nameValidation === 'valid' ? { successMessage: 'Great name!' } : {})}
-              showCharCount
               currentLength={data.name.length}
               maxLength={100}
+              showCharCount
             >
               <Input
                 className="pr-12"
                 id="wizard-name"
                 maxLength={100}
+                onChange={(event) => onChange({ name: event.target.value })}
                 placeholder="e.g., React Query Expert"
                 value={data.name}
-                onChange={(event) => onChange({ name: event.target.value })}
               />
             </AnimatedFormField>
 
             <AnimatedFormField
-              required
               helpText="Explain what your configuration does and how to use it"
               id="wizard-description"
               label="Description"
+              required
               validationState={descValidation}
               {...(descValidation === 'warning'
                 ? {
@@ -1192,31 +1231,31 @@ function StepBasicInfo({
               {...(descValidation === 'valid' && data.description.length >= 50
                 ? { successMessage: 'Excellent description!' }
                 : {})}
-              showCharCount
               currentLength={data.description.length}
               maxLength={500}
+              showCharCount
             >
               <Textarea
                 id="wizard-description"
                 maxLength={500}
-                onChange={(event) => onChange({ description: event.target.value })}
                 placeholder="Describe what your configuration does..."
                 rows={6}
                 value={data.description}
+                onChange={(event) => onChange({ description: event.target.value })}
               />
             </AnimatedFormField>
 
             <AnimatedFormField
-              required
               helpText="Your name or username"
               id="wizard-author"
               label="Author Name"
+              required
             >
               <Input
                 id="wizard-author"
-                onChange={(event) => onChange({ author: event.target.value })}
                 placeholder="Your name"
                 value={data.author}
+                onChange={(event) => onChange({ author: event.target.value })}
               />
             </AnimatedFormField>
 
@@ -1227,10 +1266,10 @@ function StepBasicInfo({
             >
               <Input
                 id="wizard-github"
-                onChange={(event) => onChange({ github_url: event.target.value })}
                 placeholder="https://github.com/..."
                 type="url"
                 value={data.github_url ?? ''}
+                onChange={(event) => onChange({ github_url: event.target.value })}
               />
             </AnimatedFormField>
 
@@ -1260,7 +1299,6 @@ function StepBasicInfo({
                       className="hidden"
                       disabled={isUploadingThumbnail}
                       id="thumbnail-upload"
-                      type="file"
                       onChange={(event) => {
                         const file = event.target.files?.[0];
                         if (file) {
@@ -1269,6 +1307,7 @@ function StepBasicInfo({
                         // Reset input to allow re-selecting the same file
                         event.target.value = '';
                       }}
+                      type="file"
                     />
                   </label>
                 </div>
@@ -1288,9 +1327,9 @@ function StepBasicInfo({
                         style={{ borderColor: TOKENS.colors.border.light }}
                       >
                         <Image
-                          fill
                           alt="Thumbnail preview"
                           className="object-cover"
+                          fill
                           src={thumbnailPreview}
                           unoptimized={thumbnailPreview.startsWith('blob:')}
                         />
@@ -1298,10 +1337,10 @@ function StepBasicInfo({
                       <motion.button
                         className="bg-destructive text-destructive-foreground absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full shadow-sm"
                         disabled={isUploadingThumbnail}
+                        onClick={onRemoveThumbnail}
                         type="button"
                         whileHover={shouldReduceMotion ? {} : { scale: 1.1 }}
                         whileTap={shouldReduceMotion ? {} : { scale: 0.9 }}
-                        onClick={onRemoveThumbnail}
                       >
                         <X className="h-4 w-4" />
                       </motion.button>
@@ -1404,8 +1443,8 @@ function StepConfiguration({
           <TemplateQuickSelect
             contentType={submissionType as Database['public']['Enums']['content_category']}
             maxVisible={3}
-            templates={templates}
             onApplyTemplate={onApplyTemplate}
+            templates={templates}
           />
         </motion.div>
       ) : null}
@@ -1425,22 +1464,22 @@ function StepConfiguration({
             {submissionType === SUBMISSION_TYPE_AGENTS && (
               <>
                 <AnimatedFormField
-                  required
-                  showCharCount
                   currentLength={((data['systemPrompt'] as string) || '').length}
                   helpText="The main prompt that defines the agent's behavior"
                   id="wizard-system-prompt"
                   label="System Prompt"
                   maxLength={2000}
+                  required
+                  showCharCount
                 >
                   <Textarea
                     className={getHighlightClasses?.('type_specific.systemPrompt')}
                     id="wizard-system-prompt"
                     maxLength={2000}
+                    onChange={(event) => onChange({ ...data, systemPrompt: event.target.value })}
                     placeholder="You are an expert in..."
                     rows={8}
                     value={(data['systemPrompt'] as string) || ''}
-                    onChange={(event) => onChange({ ...data, systemPrompt: event.target.value })}
                   />
                 </AnimatedFormField>
 
@@ -1454,6 +1493,9 @@ function StepConfiguration({
                       id="wizard-temperature"
                       max={1}
                       min={0}
+                      step={0.1}
+                      type="number"
+                      value={(data['temperature'] as number | undefined) ?? 0.7}
                       onChange={(event) => {
                         const raw = event.target.value;
                         const parsed = raw === '' ? undefined : Number.parseFloat(raw);
@@ -1462,9 +1504,6 @@ function StepConfiguration({
                           temperature: Number.isNaN(parsed as number) ? undefined : parsed,
                         });
                       }}
-                      step={0.1}
-                      type="number"
-                      value={(data['temperature'] as number | undefined) ?? 0.7}
                     />
                   </AnimatedFormField>
 
@@ -1477,6 +1516,9 @@ function StepConfiguration({
                       id="wizard-max-tokens"
                       max={4096}
                       min={100}
+                      step={100}
+                      type="number"
+                      value={(data['maxTokens'] as number | undefined) ?? 2048}
                       onChange={(event) => {
                         const raw = event.target.value;
                         const parsed = raw === '' ? undefined : Number.parseInt(raw, 10);
@@ -1485,9 +1527,6 @@ function StepConfiguration({
                           maxTokens: Number.isNaN(parsed as number) ? undefined : parsed,
                         });
                       }}
-                      step={100}
-                      type="number"
-                      value={(data['maxTokens'] as number | undefined) ?? 2048}
                     />
                   </AnimatedFormField>
                 </div>
@@ -1497,16 +1536,16 @@ function StepConfiguration({
             {submissionType === SUBMISSION_TYPE_MCP && (
               <>
                 <AnimatedFormField
-                  required
                   helpText="The npm package name"
                   id="wizard-npm-package"
                   label="NPM Package"
+                  required
                 >
                   <Input
                     id="wizard-npm-package"
-                    onChange={(event) => onChange({ ...data, npmPackage: event.target.value })}
                     placeholder="@modelcontextprotocol/server-..."
                     value={(data['npmPackage'] as string) || ''}
+                    onChange={(event) => onChange({ ...data, npmPackage: event.target.value })}
                   />
                 </AnimatedFormField>
 
@@ -1517,9 +1556,9 @@ function StepConfiguration({
                 >
                   <Input
                     id="wizard-install-command"
-                    onChange={(event) => onChange({ ...data, installCommand: event.target.value })}
                     placeholder="npm install -g @modelcontextprotocol/..."
                     value={(data['installCommand'] as string) || ''}
+                    onChange={(event) => onChange({ ...data, installCommand: event.target.value })}
                   />
                 </AnimatedFormField>
 
@@ -1530,15 +1569,15 @@ function StepConfiguration({
                 >
                   <Textarea
                     id="wizard-tools-description"
+                    placeholder="This server provides tools for..."
+                    rows={4}
+                    value={(data['toolsDescription'] as string) || ''}
                     onChange={(event) =>
                       onChange({
                         ...data,
                         toolsDescription: event.target.value,
                       })
                     }
-                    placeholder="This server provides tools for..."
-                    rows={4}
-                    value={(data['toolsDescription'] as string) || ''}
                   />
                 </AnimatedFormField>
               </>
@@ -1546,43 +1585,43 @@ function StepConfiguration({
 
             {submissionType === SUBMISSION_TYPE_RULES && (
               <AnimatedFormField
-                required
-                showCharCount
                 currentLength={((data['rulesContent'] as string) || '').length}
                 helpText="The expertise rules or guidelines"
                 id="wizard-rules-content"
                 label="Rules Content"
                 maxLength={3000}
+                required
+                showCharCount
               >
                 <Textarea
                   id="wizard-rules-content"
                   maxLength={3000}
-                  onChange={(event) => onChange({ ...data, rulesContent: event.target.value })}
                   placeholder="When working with TypeScript..."
                   rows={10}
                   value={(data['rulesContent'] as string) || ''}
+                  onChange={(event) => onChange({ ...data, rulesContent: event.target.value })}
                 />
               </AnimatedFormField>
             )}
 
             {submissionType === SUBMISSION_TYPE_COMMANDS && (
               <AnimatedFormField
-                required
-                showCharCount
                 currentLength={((data['commandContent'] as string) || '').length}
                 helpText="The shell command or script"
                 id="wizard-command-content"
                 label="Command Content"
                 maxLength={1000}
+                required
+                showCharCount
               >
                 <Textarea
                   className="font-mono"
                   id="wizard-command-content"
                   maxLength={1000}
+                  onChange={(event) => onChange({ ...data, commandContent: event.target.value })}
                   placeholder="#!/bin/bash..."
                   rows={6}
                   value={(data['commandContent'] as string) || ''}
-                  onChange={(event) => onChange({ ...data, commandContent: event.target.value })}
                 />
               </AnimatedFormField>
             )}
@@ -1694,8 +1733,6 @@ function StepExamplesTags({
             <div className="flex gap-2">
               <Input
                 className="flex-1"
-                placeholder="e.g., 'Create a React component'"
-                value={newExample}
                 onChange={(event) => setNewExample(event.target.value)}
                 onKeyDown={(event) => {
                   if (event.key === 'Enter') {
@@ -1703,14 +1740,16 @@ function StepExamplesTags({
                     addExample();
                   }
                 }}
+                placeholder="e.g., 'Create a React component'"
+                value={newExample}
               />
               <Button
                 disabled={!newExample.trim()}
+                onClick={addExample}
                 style={{
                   backgroundColor: TOKENS.colors.accent.primary,
                 }}
                 type="button"
-                onClick={addExample}
               >
                 <Plus className="h-4 w-4" />
               </Button>
@@ -1754,13 +1793,13 @@ function StepExamplesTags({
                         <span className="flex-1 text-sm leading-relaxed">{example}</span>
                         <motion.button
                           className="shrink-0 rounded-full p-1 opacity-0 transition-all group-hover:opacity-100"
+                          onClick={() => removeExample(index)}
                           style={{
                             color: TOKENS.colors.error.text,
                           }}
                           type="button"
                           whileHover={shouldReduceMotion ? {} : { scale: 1.1 }}
                           whileTap={shouldReduceMotion ? {} : { scale: 0.9 }}
-                          onClick={() => removeExample(index)}
                         >
                           <X className="h-4 w-4" />
                         </motion.button>
@@ -1819,8 +1858,6 @@ function StepExamplesTags({
               <Input
                 className="flex-1"
                 maxLength={30}
-                placeholder="e.g., 'react', 'typescript', 'api'"
-                value={newTag}
                 onChange={(event) => setNewTag(event.target.value)}
                 onKeyDown={(event) => {
                   if (event.key === 'Enter') {
@@ -1828,6 +1865,8 @@ function StepExamplesTags({
                     addTag();
                   }
                 }}
+                placeholder="e.g., 'react', 'typescript', 'api'"
+                value={newTag}
               />
               <motion.div
                 whileHover={shouldReduceMotion ? {} : { scale: 1.05 }}
@@ -1836,11 +1875,11 @@ function StepExamplesTags({
                 <Button
                   className="gap-2"
                   disabled={!newTag.trim()}
+                  onClick={addTag}
                   style={{
                     backgroundColor: TOKENS.colors.accent.primary,
                   }}
                   type="button"
-                  onClick={addTag}
                 >
                   <Plus className="h-4 w-4" />
                   Add
@@ -1876,13 +1915,13 @@ function StepExamplesTags({
                           {tag}
                           <button
                             className="hover:bg-accent/20 ml-1 rounded-full p-0.5 transition-colors"
-                            type="button"
                             onClick={() => {
                               const tagIndex = data.tags.indexOf(tag);
                               if (tagIndex !== -1) {
                                 removeTag(tagIndex);
                               }
                             }}
+                            type="button"
                           >
                             <X className="h-3 w-3" />
                           </button>

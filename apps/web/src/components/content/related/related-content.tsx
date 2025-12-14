@@ -10,6 +10,7 @@ import { getRelatedContent } from '@heyclaude/web-runtime/data';
 import { Sparkles } from '@heyclaude/web-runtime/icons';
 import { logClientError, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { UI_CLASSES, UnifiedBadge, UnifiedCardGrid, BaseCard, deepEqual } from '@heyclaude/web-runtime/ui';
+import { useIsClient, useIsMounted, useBoolean } from '@heyclaude/web-runtime/hooks';
 import { useEffect, useState, useRef } from 'react';
 
 // Use the generated composite type directly
@@ -121,9 +122,11 @@ export function RelatedContentClient({
   showTitle = true,
 }: SmartRelatedContentProps) {
   const [items, setItems] = useState<RelatedContentItemWithUI[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { value: loading, setFalse: setLoadingFalse } = useBoolean(true);
+  const isClient = useIsClient();
+  const isMounted = useIsMounted();
   const pathname: string =
-    providedPathname ?? (globalThis.window === undefined ? '/' : globalThis.location.pathname);
+    providedPathname ?? (isClient ? window.location.pathname : '/');
 
   // Use refs to track previous values and prevent unnecessary re-fetches
   // Only trigger effect when values actually change (deep comparison)
@@ -170,6 +173,7 @@ export function RelatedContentClient({
     }
 
     const fetchRelatedContent = async () => {
+      if (!isMounted()) return;
       try {
         const response = await getRelatedContent({
           currentPath: pathname,
@@ -180,6 +184,8 @@ export function RelatedContentClient({
           exclude,
           limit,
         });
+
+        if (!isMounted()) return;
 
         const convertedItems: RelatedContentItemWithUI[] = (response.items || [])
           .filter((item) => Boolean(item.category && item.slug && item.title))
@@ -209,6 +215,7 @@ export function RelatedContentClient({
 
         setItems(convertedItems);
       } catch (error) {
+        if (!isMounted()) return;
         logClientError(
           '[Content] Failed to fetch related content',
           normalizeError(error, 'Failed to fetch related content'),
@@ -220,8 +227,10 @@ export function RelatedContentClient({
           }
         );
         setItems([]);
-      } finally {
-        setLoading(false);
+        } finally {
+        if (isMounted()) {
+          setLoadingFalse();
+        }
       }
     };
 

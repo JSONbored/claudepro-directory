@@ -28,6 +28,7 @@ import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
 import { Fragment, useEffect, useState } from 'react';
+import { useBoolean } from '@heyclaude/web-runtime/hooks';
 
 import { getSocialLinks, logUnhandledPromise } from '@heyclaude/web-runtime/core';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
@@ -103,7 +104,7 @@ interface ConfigsDropdownProps {
 }
 
 function ConfigsDropdown({ link, getCategoryFromHref }: ConfigsDropdownProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const { value: isOpen, setValue: setIsOpen } = useBoolean();
   const [animationKey, setAnimationKey] = useState(0);
   const shouldReduceMotion = useReducedMotion();
 
@@ -292,7 +293,7 @@ interface DiscoverResourcesContributeDropdownProps {
 }
 
 function DiscoverResourcesContributeDropdown({ link, getCategoryFromHref }: DiscoverResourcesContributeDropdownProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const { value: isOpen, setValue: setIsOpen } = useBoolean();
   const [animationKey, setAnimationKey] = useState(0);
 
   useEffect(() => {
@@ -453,7 +454,7 @@ interface FallbackDropdownProps {
 }
 
 function FallbackDropdown({ link, getCategoryFromHref }: FallbackDropdownProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const { value: isOpen, setValue: setIsOpen } = useBoolean();
   const [animationKey, setAnimationKey] = useState(0);
 
   useEffect(() => {
@@ -847,13 +848,13 @@ function CommunityIconsRow({
 
 export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
   // Client-side hydration state to prevent SSR hydration mismatch with Radix UI IDs
-  const [isMounted, setIsMounted] = useState(false);
+  const { value: isMounted, setTrue: setIsMountedTrue } = useBoolean();
   const { openDrawer: openPinboardDrawer, isOpen: isPinboardOpen } = usePinboardDrawer();
   const { openPalette, isOpen: isCommandMenuOpen } = useCommandPalette();
 
   useEffect(() => {
-    setIsMounted(true);
-  }, []);
+    setIsMountedTrue();
+  }, [setIsMountedTrue]);
 
   // Don't render until mounted (prevents hydration mismatch with Radix UI generated IDs)
   if (!isMounted) {

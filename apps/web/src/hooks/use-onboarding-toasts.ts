@@ -12,7 +12,8 @@
 
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
+import { useLocalStorage } from '@heyclaude/web-runtime/hooks';
 
 interface OnboardingToast {
   delay?: number;
@@ -58,59 +59,41 @@ export function useOnboardingToasts({
   enabled = true,
   context = 'wizard',
 }: OnboardingToastsOptions = {}) {
-  const [hasSeenToasts, setHasSeenToasts] = useState(true);
   const [activeToasts] = useState<Set<string>>(new Set());
 
-  // Check localStorage on mount to determine if toasts have been seen
-  useEffect(() => {
-    if (!enabled) return;
-    try {
-      const seenToasts = localStorage.getItem(STORAGE_KEY);
-      const seenData = seenToasts ? JSON.parse(seenToasts) : {};
-      setHasSeenToasts(Boolean(seenData[context]));
-    } catch {
-      // Ignore localStorage errors
-      setHasSeenToasts(false);
+  // Use useLocalStorage for seen toasts data (stored as JSON object with context keys)
+  const { value: seenData, setValue: setSeenData, removeValue: removeSeenData } = useLocalStorage<Record<string, boolean>>(
+    STORAGE_KEY,
+    {
+      defaultValue: {},
+      syncAcrossTabs: false,
     }
-  }, [enabled, context]);
+  );
+
+  // Derive hasSeenToasts from seenData
+  const hasSeenToasts = enabled ? Boolean(seenData[context]) : true;
 
   // Mark toasts as seen in localStorage
-  const markToastsAsSeen = useCallback(async () => {
-    try {
-      const seenToasts = localStorage.getItem(STORAGE_KEY);
-      const seenData = seenToasts ? JSON.parse(seenToasts) : {};
-      seenData[context] = true;
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(seenData));
-      setHasSeenToasts(true);
-    } catch {
-      // Ignore errors when marking toasts as seen
-    }
-  }, [context]);
+  const markToastsAsSeen = useCallback(() => {
+    setSeenData((prev) => ({
+      ...prev,
+      [context]: true,
+    }));
+  }, [context, setSeenData]);
 
   // Reset toasts (for testing or user preference)
   const resetToasts = useCallback(() => {
-    try {
-      const seenToasts = localStorage.getItem(STORAGE_KEY);
-      const seenData = seenToasts ? JSON.parse(seenToasts) : {};
-
-      delete seenData[context];
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(seenData));
-
-      setHasSeenToasts(false);
-    } catch {
-      // Ignore localStorage errors
-    }
-  }, [context]);
+    setSeenData((prev) => {
+      const updated = { ...prev };
+      delete updated[context];
+      return updated;
+    });
+  }, [context, setSeenData]);
 
   // Reset all toasts across all contexts
   const resetAllToasts = useCallback(() => {
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-      setHasSeenToasts(false);
-    } catch {
-      // Ignore localStorage errors
-    }
-  }, []);
+    removeSeenData();
+  }, [removeSeenData]);
 
   return {
     hasSeenToasts,

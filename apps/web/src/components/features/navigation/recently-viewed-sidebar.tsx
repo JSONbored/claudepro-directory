@@ -43,7 +43,8 @@ import { MICROINTERACTIONS, STAGGER, DURATION } from '@heyclaude/web-runtime/des
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
-import { memo, useState, type MouseEvent } from 'react';
+import { memo, type MouseEvent } from 'react';
+import { useBoolean } from '@heyclaude/web-runtime/hooks';
 
 // =============================================================================
 // ITEM COMPONENT
@@ -60,7 +61,7 @@ const RecentlyViewedItemComponent = memo(function RecentlyViewedItemComponent({
   index,
   onRemove,
 }: RecentlyViewedItemProps) {
-  const [isHovered, setIsHovered] = useState(false);
+  const { value: isHovered, setTrue: setIsHoveredTrue, setFalse: setIsHoveredFalse } = useBoolean();
   const shouldReduceMotion = useReducedMotion();
 
   const href = `/${getCategoryRoute(item.category)}/${item.slug}`;
@@ -92,8 +93,8 @@ const RecentlyViewedItemComponent = memo(function RecentlyViewedItemComponent({
         ease: 'easeOut',
       }}
       className="group relative"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={setIsHoveredTrue}
+      onMouseLeave={setIsHoveredFalse}
     >
       <motion.div
         whileHover={
@@ -184,7 +185,7 @@ const RecentlyViewedItemComponent = memo(function RecentlyViewedItemComponent({
 
 export const RecentlyViewedSidebar = memo(function RecentlyViewedSidebar() {
   const { recentlyViewed, isLoaded, removeItem, clearAll } = useRecentlyViewed();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const { value: isCollapsed, toggle: toggleIsCollapsed } = useBoolean();
 
   // Always render - show empty state if no items
   // This ensures consistent sidebar layout across all pages
@@ -222,7 +223,7 @@ export const RecentlyViewedSidebar = memo(function RecentlyViewedSidebar() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setIsCollapsed(!isCollapsed)}
+            onClick={toggleIsCollapsed}
             className="h-7 w-7 p-0 xl:hidden"
             aria-label={isCollapsed ? 'Expand recently viewed' : 'Collapse recently viewed'}
           >

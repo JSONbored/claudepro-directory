@@ -12,6 +12,7 @@
 
 import { Skeleton } from '@heyclaude/web-runtime/ui';
 import { SPRING, STAGGER } from '@heyclaude/web-runtime/design-system';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
 
@@ -59,6 +60,8 @@ function QuickActionRowSkeleton() {
  * Account Dashboard Skeleton
  */
 export function AccountDashboardSkeleton() {
+  const prefersReducedMotion = useReducedMotion();
+  
   return (
     <motion.div
       className="space-y-6"
@@ -84,10 +87,6 @@ export function AccountDashboardSkeleton() {
         transition={{ ...SPRING.smooth, delay: 0.2 }}
       >
         {KEYS_3.map((key, i) => {
-          const prefersReducedMotion =
-            typeof window !== 'undefined' &&
-            window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
           return (
             <motion.div
               key={key}
@@ -153,10 +152,6 @@ export function AccountDashboardSkeleton() {
             {/* Content grid */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {KEYS_6.map((key, i) => {
-                const prefersReducedMotion =
-                  typeof window !== 'undefined' &&
-                  window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
                 return (
                   <motion.div
                     key={key}

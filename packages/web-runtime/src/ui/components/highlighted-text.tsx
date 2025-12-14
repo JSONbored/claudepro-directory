@@ -32,6 +32,7 @@
 import { logger } from '../../logger.ts';
 import { normalizeError } from '../../errors.ts';
 import { memo, useEffect, useState } from 'react';
+import { useBoolean } from '../../hooks/index.ts';
 
 export interface HighlightedTextProps {
   /** Pre-highlighted HTML string from edge function */
@@ -50,11 +51,11 @@ export interface HighlightedTextProps {
  */
 export const HighlightedText = memo(({ html, fallback, className = '' }: HighlightedTextProps) => {
   const [safeHtml, setSafeHtml] = useState<string | null>(null);
-  const [isClient, setIsClient] = useState(false);
+  const { value: isClient, setTrue: setIsClientTrue } = useBoolean();
 
   // Sanitize HTML on client side using dynamic import
   useEffect(() => {
-    setIsClient(true);
+    setIsClientTrue();
     if (typeof window !== 'undefined' && html) {
       import('dompurify')
         .then((DOMPurify) => {
@@ -87,7 +88,7 @@ export const HighlightedText = memo(({ html, fallback, className = '' }: Highlig
           setSafeHtml(null); // Trigger fallback rendering
         });
     }
-  }, [html, fallback]);
+  }, [html, fallback, setIsClientTrue]);
 
   // During SSR, render fallback or unsanitized HTML (will be sanitized on client)
   if (!isClient) {

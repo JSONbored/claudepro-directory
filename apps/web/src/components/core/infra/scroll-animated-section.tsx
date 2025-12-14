@@ -34,7 +34,8 @@ import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { type ReactNode } from 'react';
-import { memo, useEffect, useState } from 'react';
+import { memo, useEffect } from 'react';
+import { useBoolean } from '@heyclaude/web-runtime/hooks';
 
 export type AnimationVariant =
   | 'fade-in'
@@ -172,7 +173,7 @@ function LazySectionComponent({
   className = '',
   eager = false,
 }: LazySectionProps) {
-  const [isMounted, setIsMounted] = useState(false);
+  const { value: isMounted, setTrue: setIsMountedTrue } = useBoolean();
   const shouldReduceMotion = useReducedMotion();
   const baseVariantConfig = ANIMATION_VARIANTS[variant];
   
@@ -186,8 +187,8 @@ function LazySectionComponent({
 
   // Wait for client-side mount to prevent hydration mismatch with Motion.dev attributes
   useEffect(() => {
-    setIsMounted(true);
-  }, []);
+    setIsMountedTrue();
+  }, [setIsMountedTrue]);
 
   // Build transition configuration
   const transition = useSpring

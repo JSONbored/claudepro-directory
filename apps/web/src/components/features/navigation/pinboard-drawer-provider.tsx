@@ -1,9 +1,9 @@
 'use client';
 
-import { usePulse } from '@heyclaude/web-runtime/hooks';
+import { usePulse, useBoolean, useIsClient } from '@heyclaude/web-runtime/hooks';
 import { logClientWarn, logClientInfo, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { ErrorBoundary } from '@heyclaude/web-runtime/ui';
-import { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useMemo } from 'react';
 
 import { PinboardDrawer, type PinboardDrawerProps } from '@/src/components/features/navigation/pinboard-drawer';
 
@@ -39,7 +39,7 @@ interface PinboardDrawerContextValue {
 const PinboardDrawerContext = createContext<null | PinboardDrawerContextValue>(null);
 
 export function PinboardDrawerProvider({ children }: { children: React.ReactNode }) {
-  const [isOpen, setIsOpen] = useState(false);
+  const { value: isOpen, setTrue: setIsOpenTrue, setFalse: setIsOpenFalse, setValue: setIsOpen, toggle: toggleIsOpen } = useBoolean();
   const pulse = usePulse();
 
   const trackDrawerEvent = useCallback(
@@ -70,7 +70,7 @@ export function PinboardDrawerProvider({ children }: { children: React.ReactNode
           willSetTo: true,
         }
       );
-      setIsOpen(true);
+      setIsOpenTrue();
       logClientInfo(
         '[PinboardDrawerProvider] Opening drawer - AFTER setState',
         'PinboardDrawerProvider.openDrawer.after',
@@ -95,18 +95,16 @@ export function PinboardDrawerProvider({ children }: { children: React.ReactNode
         }
       );
     }
-  }, [trackDrawerEvent, isOpen]);
+  }, [trackDrawerEvent, isOpen, setIsOpenTrue]);
   const closeDrawer = useCallback(() => {
-    setIsOpen(false);
+    setIsOpenFalse();
     trackDrawerEvent('close');
-  }, [trackDrawerEvent]);
+  }, [trackDrawerEvent, setIsOpenFalse]);
   const toggleDrawer = useCallback(() => {
-    setIsOpen((prev) => {
-      const next = !prev;
-      trackDrawerEvent(next ? 'open' : 'close');
-      return next;
-    });
-  }, [trackDrawerEvent]);
+    const wasOpen = isOpen;
+    toggleIsOpen();
+    trackDrawerEvent(!wasOpen ? 'open' : 'close');
+  }, [trackDrawerEvent, isOpen, toggleIsOpen]);
 
   const contextValue = useMemo(
     () => ({
@@ -115,7 +113,7 @@ export function PinboardDrawerProvider({ children }: { children: React.ReactNode
       toggleDrawer,
       isOpen,
     }),
-    [openDrawer, closeDrawer, toggleDrawer, isOpen]
+    [openDrawer, closeDrawer, toggleDrawer, isOpen, setIsOpenFalse]
   );
 
   return (
@@ -125,7 +123,7 @@ export function PinboardDrawerProvider({ children }: { children: React.ReactNode
         <PinboardDrawerWithErrorHandling
           open={isOpen}
           onOpenChange={(open: boolean) => {
-            setIsOpen(open);
+            setIsOpen(open); // Use setValue for Radix UI onOpenChange callback
             if (!open) {
               // Ensure cleanup on close
             }
@@ -144,7 +142,7 @@ export function PinboardDrawerProvider({ children }: { children: React.ReactNode
               }
             );
             // Close drawer on error to prevent stuck state
-            setIsOpen(false);
+            setIsOpenFalse();
           }}
         />
       </ErrorBoundary>
@@ -154,12 +152,13 @@ export function PinboardDrawerProvider({ children }: { children: React.ReactNode
 
 export function usePinboardDrawer(): PinboardDrawerContextValue {
   const ctx = useContext(PinboardDrawerContext);
+  const isClient = useIsClient();
+  
   if (!ctx) {
     // During SSR, the provider isn't available yet (it's in client-side LayoutContent)
     // This is expected and handled gracefully with a no-op fallback
-    const isSSR = typeof window === 'undefined';
     
-    if (!isSSR) {
+    if (isClient) {
       // Only log warning on client-side (not during SSR)
       // SSR warnings are expected and handled by fallback
       const error = new Error('usePinboardDrawer called outside PinboardDrawerProvider');

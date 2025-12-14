@@ -27,6 +27,7 @@ const DEFAULT_PARTICLE_COLOR = '#F97316';
 import { useEffect, useRef } from 'react';
 import { useAnimationFrame } from '../../../hooks/motion/use-animation-frame.ts';
 import { usePageInView } from '../../../hooks/motion/use-page-in-view.ts';
+import { useReducedMotion } from '../../../hooks/motion/index.ts';
 
 interface Particle {
   x: number;
@@ -60,10 +61,9 @@ export function ParticlesBackground({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<Particle[]>([]);
   const isPageInView = usePageInView();
+  const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => {
-    // Check for reduced motion preference
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (disabled || prefersReducedMotion || !isPageInView) return;
 
     const canvas = canvasRef.current;

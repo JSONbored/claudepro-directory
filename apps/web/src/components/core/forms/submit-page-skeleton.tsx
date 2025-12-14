@@ -10,6 +10,7 @@
  */
 
 import { SPRING } from '@heyclaude/web-runtime/design-system';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import { SubmitPageHeroSkeleton } from './submit-page-hero-skeleton';
 import { SubmitPageSidebarSkeleton } from './submit-page-sidebar-skeleton';
@@ -20,9 +21,7 @@ import SubmitFormLoading from '@/src/app/submit/loading-form';
  * Submit page skeleton matching exact layout
  */
 export function SubmitPageSkeleton() {
-  const prefersReducedMotion =
-    typeof window !== 'undefined' &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const prefersReducedMotion = useReducedMotion();
 
   return (
     <motion.div

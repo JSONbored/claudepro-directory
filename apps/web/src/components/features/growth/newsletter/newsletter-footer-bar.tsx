@@ -8,11 +8,12 @@ import {
   NEWSLETTER_CTA_CONFIG,
 } from '@heyclaude/web-runtime/core';
 import { ensureNumber } from '@heyclaude/web-runtime/data/utils';
-import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
+import { useLoggedAsync, useTimeout, useLocalStorage } from '@heyclaude/web-runtime/hooks';
 import { Mail, X } from '@heyclaude/web-runtime/icons';
 import { DIMENSIONS, POSITION_PATTERNS, UI_CLASSES, Button } from '@heyclaude/web-runtime/ui';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useBoolean } from '@heyclaude/web-runtime/hooks';
 
 import { NewsletterForm } from './newsletter-form';
 
@@ -32,8 +33,8 @@ export function NewsletterFooterBar({
   ctaVariant = 'value_focused',
 }: NewsletterFooterBarProps) {
   const pathname = usePathname();
-  const [isVisible, setIsVisible] = useState(false);
-  const [isClient, setIsClient] = useState(false);
+  const { value: isVisible, setTrue: setIsVisibleTrue, setFalse: setIsVisibleFalse } = useBoolean();
+  const { value: isClient, setTrue: setIsClientTrue } = useBoolean();
   const [pagesWithInlineCTA, setPagesWithInlineCTA] = useState<string[]>([]);
   const [delayMs, setDelayMs] = useState(showAfterDelay ?? 30_000);
   const loadConfigs = useLoggedAsync({
@@ -77,32 +78,30 @@ export function NewsletterFooterBar({
         dismissible,
       });
     });
-  }, [dismissible, loadConfigs, pathname, respectInlineCTA, showAfterDelay]);
+  }, [dismissible, loadConfigs, pathname, respectInlineCTA, showAfterDelay, setIsClientTrue]);
 
   const hasInlineCTA =
     respectInlineCTA && pagesWithInlineCTA.some((page) => pathname?.startsWith(page));
 
   useEffect(() => {
-    setIsClient(true);
+    setIsClientTrue();
+  }, [setIsClientTrue]);
 
-    const isDismissed = localStorage.getItem('newsletter-bar-dismissed');
-
-    if (!isDismissed) {
-      const timer = setTimeout(() => {
-        setIsVisible(true);
-      }, delayMs);
-
-      return () => {
-        clearTimeout(timer);
-      };
+  // Use useLocalStorage hook for dismiss state
+  const { value: isDismissed, setValue: setIsDismissed } = useLocalStorage<string | null>('newsletter-bar-dismissed', {
+    defaultValue: null,
+    syncAcrossTabs: false,
+  });
+  
+  useTimeout(() => {
+    if (!isDismissed || isDismissed !== 'true') {
+      setIsVisibleTrue();
     }
-
-    return;
-  }, [delayMs]);
+  }, isDismissed === 'true' ? null : delayMs);
 
   const handleDismiss = () => {
-    setIsVisible(false);
-    localStorage.setItem('newsletter-bar-dismissed', 'true');
+    setIsVisibleFalse();
+    setIsDismissed('true');
   };
 
   if (!(isClient && isVisible) || hasInlineCTA) {

@@ -14,6 +14,7 @@
  */
 
 import { type ContentHeadingMetadata } from '@heyclaude/web-runtime/types/component.types';
+import { useIsClient, useMultipleIntersectionObserver, useReducedMotion } from '@heyclaude/web-runtime/hooks';
 import { cn, STATE_PATTERNS } from '@heyclaude/web-runtime/ui';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -44,6 +45,8 @@ export function SidebarToc({ headings, className, minHeadings = 2 }: SidebarTocP
   const normalizedHeadings = useMemo(() => normalizeHeadings(headings), [headings]);
   const [activeId, setActiveId] = useState<null | string>(null);
   const activeIdRef = useRef<null | string>(activeId);
+  const isClient = useIsClient();
+  const prefersReducedMotion = useReducedMotion();
 
   // Keep ref in sync with activeId state
   useEffect(() => {
@@ -56,17 +59,17 @@ export function SidebarToc({ headings, className, minHeadings = 2 }: SidebarTocP
   }, [normalizedHeadings]);
 
   const updateHash = useCallback((id: string) => {
-    if (typeof window === 'undefined' || !id) return;
+    if (!isClient || !id) return;
     const { pathname, search } = window.location;
     const currentHash = window.location.hash.replace('#', '');
     if (currentHash === id) return;
     const nextUrl = `${pathname}${search ? search : ''}#${id}`;
     window.history.replaceState(null, '', nextUrl);
-  }, []);
+  }, [isClient]);
 
   // Initialize active heading from URL hash or first heading
   useEffect(() => {
-    if (typeof window === 'undefined' || normalizedHeadings.length === 0) {
+    if (!isClient || normalizedHeadings.length === 0) {
       setActiveId(null);
       return;
     }
@@ -78,7 +81,7 @@ export function SidebarToc({ headings, className, minHeadings = 2 }: SidebarTocP
     }
 
     setActiveId(normalizedHeadings[0]?.id ?? null);
-  }, [normalizedHeadings]);
+  }, [normalizedHeadings, isClient]);
 
   // Sync URL hash when active changes
   useEffect(() => {
@@ -86,64 +89,56 @@ export function SidebarToc({ headings, className, minHeadings = 2 }: SidebarTocP
     updateHash(activeId);
   }, [activeId, updateHash]);
 
-  // IntersectionObserver for scroll-linked highlighting
+  // Use useMultipleIntersectionObserver hook for uniform implementation
+  const { observeElements, entries } = useMultipleIntersectionObserver({
+    rootMargin: '-20% 0px -60% 0px',
+    threshold: [0, 0.25, 0.5, 0.75, 1],
+  });
+
+  // Update active ID when intersection changes
   useEffect(() => {
-    if (typeof window === 'undefined' || normalizedHeadings.length === 0) {
+    if (entries.size === 0) return;
+    
+    // Find most visible element (same logic as getMostVisibleId but computed here)
+    const visibleEntries = Array.from(entries.values())
+      .filter((entry) => entry.isIntersecting || entry.intersectionRatio > 0)
+      .sort(
+        (a, b) =>
+          b.intersectionRatio - a.intersectionRatio ||
+          a.boundingClientRect.top - b.boundingClientRect.top
+      );
+
+    if (visibleEntries.length > 0) {
+      const firstEntry = visibleEntries[0];
+      if (firstEntry) {
+        const nextActiveId = firstEntry.target.id;
+        if (nextActiveId && nextActiveId !== activeIdRef.current) {
+          setActiveId(nextActiveId);
+        }
+      }
+    }
+  }, [entries]);
+
+  // Observe all heading elements
+  useEffect(() => {
+    if (!isClient || normalizedHeadings.length === 0) {
       return;
     }
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visibleEntries = entries
-          .filter((entry) => entry.isIntersecting || entry.intersectionRatio > 0)
-          .sort(
-            (a, b) =>
-              b.intersectionRatio - a.intersectionRatio ||
-              a.boundingClientRect.top - b.boundingClientRect.top
-          );
-
-        if (visibleEntries.length > 0) {
-          const firstEntry = visibleEntries[0];
-          if (firstEntry) {
-            const nextActiveId = firstEntry.target.id;
-            // Use ref to avoid stale closure
-            if (nextActiveId && nextActiveId !== activeIdRef.current) {
-              setActiveId(nextActiveId);
-            }
-          }
-        }
-      },
-      {
-        rootMargin: '-20% 0px -60% 0px',
-        threshold: [0, 0.25, 0.5, 0.75, 1],
-      }
-    );
-
-    if (typeof document === 'undefined') return;
-    
-    const elements = normalizedHeadings
-      .map((heading: NormalizedHeading) => document.getElementById(heading.id))
-      .filter((el: HTMLElement | null): el is HTMLElement => el !== null);
-
-    for (const el of elements) {
-      observer.observe(el);
-    }
-
-    return () => observer.disconnect();
-  }, [normalizedHeadings]);
+    const elementIds = normalizedHeadings.map((heading: NormalizedHeading) => heading.id);
+    observeElements(elementIds);
+  }, [normalizedHeadings, isClient, observeElements]);
 
   const handleHeadingClick = useCallback(
     (heading: NormalizedHeading) => {
-      if (typeof window === 'undefined') return;
+      if (!isClient) return;
       const element = document.getElementById(heading.id);
       if (!element) {
         updateHash(heading.id);
         return;
       }
 
-      const prefersReducedMotion = window.matchMedia(
-        '(prefers-reduced-motion: reduce)'
-      ).matches;
+      // Use reduced motion from hook (already checked at component level)
       const offset = 96; // Account for sticky header
       const top = window.scrollY + element.getBoundingClientRect().top - offset;
 
@@ -155,7 +150,7 @@ export function SidebarToc({ headings, className, minHeadings = 2 }: SidebarTocP
       setActiveId(heading.id);
       updateHash(heading.id);
     },
-    [updateHash]
+    [updateHash, isClient]
   );
 
   // Don't render if not enough headings

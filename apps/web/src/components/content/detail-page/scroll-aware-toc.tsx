@@ -14,8 +14,8 @@ import { motion, useScroll, useMotionValueEvent } from 'motion/react';
 import { AnimatePresence } from '@heyclaude/web-runtime/ui';
 import { useScrollDirection, cn } from '@heyclaude/web-runtime/ui';
 import { SPRING } from '@heyclaude/web-runtime/design-system';
+import { useBoolean } from '@heyclaude/web-runtime/hooks';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
-import { useState } from 'react';
 
 interface ScrollAwareTocProps {
   children: React.ReactNode;
@@ -24,7 +24,7 @@ interface ScrollAwareTocProps {
 
 export function ScrollAwareToc({ children, className }: ScrollAwareTocProps) {
   const { isScrollingDown } = useScrollDirection({ threshold: 30 });
-  const [hasScrolled, setHasScrolled] = useState(false);
+  const { value: hasScrolled, setValue: setHasScrolled } = useBoolean();
   const shouldReduceMotion = useReducedMotion();
   const { scrollY } = useScroll();
 

@@ -12,6 +12,7 @@
 
 import { Skeleton } from '@heyclaude/web-runtime/ui';
 import { SPRING, STAGGER } from '@heyclaude/web-runtime/design-system';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
 
@@ -21,6 +22,8 @@ const KEYS_6 = Array.from({ length: 6 }, (_, i) => `skeleton-${i + 1}`);
  * User Profile Skeleton
  */
 export function UserProfileSkeleton() {
+  const prefersReducedMotion = useReducedMotion();
+  
   return (
     <motion.div
       className="bg-background min-h-screen"
@@ -118,10 +121,6 @@ export function UserProfileSkeleton() {
                 {/* Content grid - Collections/Contributions */}
                 <div className="grid gap-4 sm:grid-cols-2">
                   {KEYS_6.map((key, i) => {
-                    const prefersReducedMotion =
-                      typeof window !== 'undefined' &&
-                      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
                     return (
                       <motion.div
                         key={key}

@@ -11,6 +11,7 @@
 
 import { Skeleton } from '@heyclaude/web-runtime/ui';
 import { SPRING, STAGGER } from '@heyclaude/web-runtime/design-system';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
 
@@ -20,6 +21,8 @@ const KEYS_9 = Array.from({ length: 9 }, (_, i) => `skeleton-${i + 1}`);
  * Search page skeleton matching exact layout
  */
 export function SearchPageSkeleton() {
+  const prefersReducedMotion = useReducedMotion();
+  
   return (
     <motion.main
       className="container mx-auto px-4 py-8"
@@ -59,10 +62,6 @@ export function SearchPageSkeleton() {
             {/* Results grid */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {KEYS_9.map((key, i) => {
-                const prefersReducedMotion =
-                  typeof window !== 'undefined' &&
-                  window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
                 return (
                   <motion.div
                     key={key}

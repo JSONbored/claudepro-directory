@@ -19,7 +19,8 @@ import { useTransform } from '@heyclaude/web-runtime/hooks/motion';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { memo, useRef, useState } from 'react';
+import { memo, useRef } from 'react';
+import { useBoolean } from '@heyclaude/web-runtime/hooks';
 
 import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';
 // NavigationCommandMenu is now rendered in CommandMenuWrapper (root-layout-wrapper.tsx)
@@ -33,8 +34,8 @@ import { UserMenu } from '@/src/components/core/layout/user-menu';
 // NavigationProps removed - component accepts no props
 
 const NavigationComponent = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
+  const { value: isOpen, setTrue: setIsOpenTrue, setValue: setIsOpenValue } = useBoolean();
+  const { value: isScrolled, setValue: setIsScrolled } = useBoolean();
   const pathname = usePathname();
 
   // Motion.dev scroll-based animations (Phase 1.5 - October 2025)
@@ -104,7 +105,7 @@ const NavigationComponent = () => {
                 </Link>
 
                 {/* Tablet Navigation (768px-1279px) - Horizontal scroll with Motion.dev */}
-                <NavigationTablet isActive={isActive} onMobileMenuOpen={() => setIsOpen(true)} />
+                <NavigationTablet isActive={isActive} onMobileMenuOpen={setIsOpenTrue} />
 
                 {/* Right Side Actions - Desktop Navigation + User Menu */}
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5}>
@@ -116,7 +117,7 @@ const NavigationComponent = () => {
                   <UserMenu className="hidden md:flex" />
 
                   {/* Mobile Menu - Show ONLY below md: (< 768px) */}
-                  <NavigationMobile isActive={isActive} isOpen={isOpen} onOpenChange={setIsOpen} />
+                  <NavigationMobile isActive={isActive} isOpen={isOpen} onOpenChange={setIsOpenValue} />
                 </div>
               </div>
             </div>

@@ -40,7 +40,8 @@ import {
 import { SPRING } from '../../design-system/index.ts';
 import { motion } from 'motion/react';
 import Link from 'next/link';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
+import { useBoolean } from '../../hooks/index.ts';
 
 /**
  * Link configuration for error fallback navigation
@@ -116,14 +117,14 @@ function SegmentErrorFallbackUI({
 }) {
   const { segment, title, description, resetText = 'Try again', links = [] } = config;
   const pulse = usePulse();
-  const [isResetting, setIsResetting] = useState(false);
+  const { value: isResetting, setTrue: setIsResettingTrue } = useBoolean();
 
   /**
    * Handle reset with recovery tracking.
    * Tracks the error boundary recovery event before calling reset.
    */
   const handleReset = useCallback(() => {
-    setIsResetting(true);
+    setIsResettingTrue();
     
     // Track recovery attempt via click interaction
     pulse
@@ -147,7 +148,7 @@ function SegmentErrorFallbackUI({
 
     // Proceed with reset
     reset();
-  }, [pulse, segment, error.digest, reset]);
+  }, [pulse, segment, error.digest, reset, setIsResettingTrue]);
 
   return (
     <motion.div

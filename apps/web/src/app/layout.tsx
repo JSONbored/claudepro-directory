@@ -1,7 +1,7 @@
 import './globals.css';
 import './view-transitions.css';
 import './micro-interactions.css';
-import './sugar-high.css';
+import './shiki-code-blocks.css';
 
 import { getComponentCardConfig } from '@heyclaude/web-runtime/config/static-configs';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';

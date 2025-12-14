@@ -346,52 +346,54 @@ export async function UnifiedDetailPage({
 
       // If we found code blocks, process each separately using shared-runtime utilities
       if (codeBlocks.length > 0) {
-        const processedBlocks = codeBlocks.map((block: ExtractedCodeBlock, index: number) => {
-          try {
-            // Use shared-runtime utilities directly (no edge function call)
-            const detectedLanguage = detectLanguage(
-              block.code,
-              block.language === 'text' ? undefined : block.language
-            );
-            const generatedFilename = generateFilename({
-              item: {
-                category: item.category,
-                slug: item.slug ?? null,
-                name: 'name' in item ? ((item as { name?: string }).name ?? null) : null,
-                hook_type:
-                  'hook_type' in item ? ((item as { hook_type?: string }).hook_type ?? null) : null,
-              },
-              language: detectedLanguage,
-            });
-            const highlightedHtml = highlightCode(block.code, detectedLanguage, {
-              showLineNumbers: true,
-            });
-            const headings = extractMarkdownHeadings(block.code);
-            // Map HeadingMetadata to ContentHeadingMetadata (same structure)
-            const contentHeadings: ContentHeadingMetadata[] | undefined =
-              headings.length > 0
-                ? headings.map((h) => ({
-                    id: h.id,
-                    anchor: h.anchor,
-                    title: h.title,
-                    level: h.level,
-                  }))
-                : undefined;
+        const processedBlocks = await Promise.all(
+          codeBlocks.map(async (block: ExtractedCodeBlock, index: number) => {
+            try {
+              // Use shared-runtime utilities directly (no edge function call)
+              const detectedLanguage = detectLanguage(
+                block.code,
+                block.language === 'text' ? undefined : block.language
+              );
+              const generatedFilename = generateFilename({
+                item: {
+                  category: item.category,
+                  slug: item.slug ?? null,
+                  name: 'name' in item ? ((item as { name?: string }).name ?? null) : null,
+                  hook_type:
+                    'hook_type' in item ? ((item as { hook_type?: string }).hook_type ?? null) : null,
+                },
+                language: detectedLanguage,
+              });
+              const highlightedHtml = await highlightCode(block.code, detectedLanguage, {
+                showLineNumbers: true,
+              });
+              const headings = extractMarkdownHeadings(block.code);
+              // Map HeadingMetadata to ContentHeadingMetadata (same structure)
+              const contentHeadings: ContentHeadingMetadata[] | undefined =
+                headings.length > 0
+                  ? headings.map((h) => ({
+                      id: h.id,
+                      anchor: h.anchor,
+                      title: h.title,
+                      level: h.level,
+                    }))
+                  : undefined;
 
-            return {
-              html: highlightedHtml,
-              code: block.code,
-              language: detectedLanguage,
-              filename: generatedFilename || `${item.slug || 'code'}-${index + 1}.txt`,
-              ...(contentHeadings && { headings: contentHeadings }),
-              markdownBefore: block.markdownBefore,
-              markdownAfter: block.markdownAfter,
-            };
-          } catch (error) {
-            logDetailProcessingWarning('contentData.codeBlock', error, item);
-            return null;
-          }
-        });
+              return {
+                html: highlightedHtml,
+                code: block.code,
+                language: detectedLanguage,
+                filename: generatedFilename || `${item.slug || 'code'}-${index + 1}.txt`,
+                ...(contentHeadings && { headings: contentHeadings }),
+                markdownBefore: block.markdownBefore,
+                markdownAfter: block.markdownAfter,
+              };
+            } catch (error) {
+              logDetailProcessingWarning('contentData.codeBlock', error, item);
+              return null;
+            }
+          })
+        );
 
         // Filter out null results and return array
         const validBlocks = processedBlocks.filter(
@@ -429,7 +431,7 @@ export async function UnifiedDetailPage({
         },
         language: detectedLanguage,
       });
-      const highlightedHtml = highlightCode(content, detectedLanguage, {
+      const highlightedHtml = await highlightCode(content, detectedLanguage, {
         showLineNumbers: true,
       });
       const headings = extractMarkdownHeadings(content);
@@ -481,33 +483,35 @@ export async function UnifiedDetailPage({
       };
 
       try {
-        const highlightedConfigs = Object.entries(config).map(([key, value]) => {
-          if (!value) return null;
+        const highlightedConfigs = await Promise.all(
+          Object.entries(config).map(async ([key, value]) => {
+            if (!value) return null;
 
-          const displayValue =
-            key === 'claudeDesktop' || key === 'claudeCode'
-              ? transformMcpConfigForDisplay(value)
-              : value;
+            const displayValue =
+              key === 'claudeDesktop' || key === 'claudeCode'
+                ? transformMcpConfigForDisplay(value)
+                : value;
 
-          const code = JSON.stringify(displayValue, null, 2);
+            const code = JSON.stringify(displayValue, null, 2);
 
-          // Use shared-runtime utilities directly
-          const html = highlightCode(code, 'json', { showLineNumbers: true });
-          const generatedFilename = generateFilename({
-            item: {
-              category: item.category,
-              slug: item.slug ?? null,
-              name: 'name' in item ? ((item as { name?: string }).name ?? null) : null,
-              hook_type:
-                'hook_type' in item ? ((item as { hook_type?: string }).hook_type ?? null) : null,
-            },
-            language: 'json',
-            format: 'multi',
-            section: key,
-          });
+            // Use shared-runtime utilities directly
+            const html = await highlightCode(code, 'json', { showLineNumbers: true });
+            const generatedFilename = generateFilename({
+              item: {
+                category: item.category,
+                slug: item.slug ?? null,
+                name: 'name' in item ? ((item as { name?: string }).name ?? null) : null,
+                hook_type:
+                  'hook_type' in item ? ((item as { hook_type?: string }).hook_type ?? null) : null,
+              },
+              language: 'json',
+              format: 'multi',
+              section: key,
+            });
 
-          return { key, html, code, filename: generatedFilename || 'config.json' };
-        });
+            return { key, html, code, filename: generatedFilename || 'config.json' };
+          })
+        );
 
         return {
           format: 'multi' as const,
@@ -538,14 +542,16 @@ export async function UnifiedDetailPage({
         };
 
         // Use shared-runtime utilities directly
-        const highlightedHookConfig = config.hookConfig
-          ? highlightCode(JSON.stringify(config.hookConfig, null, 2), 'json', {
-              showLineNumbers: true,
-            })
-          : null;
-        const highlightedScript = config.scriptContent
-          ? highlightCode(config.scriptContent, 'bash', { showLineNumbers: true })
-          : null;
+        const [highlightedHookConfig, highlightedScript] = await Promise.all([
+          config.hookConfig
+            ? highlightCode(JSON.stringify(config.hookConfig, null, 2), 'json', {
+                showLineNumbers: true,
+              })
+            : Promise.resolve(null),
+          config.scriptContent
+            ? highlightCode(config.scriptContent, 'bash', { showLineNumbers: true })
+            : Promise.resolve(null),
+        ]);
         const hookConfigFilename = config.hookConfig
           ? generateHookFilename(itemData, 'hookConfig', 'json')
           : null;
@@ -581,7 +587,7 @@ export async function UnifiedDetailPage({
       const code = JSON.stringify(configuration, null, 2);
 
       // Use shared-runtime utilities directly
-      const html = highlightCode(code, 'json', { showLineNumbers: true });
+      const html = await highlightCode(code, 'json', { showLineNumbers: true });
       const generatedFilename = generateFilename({
         item: {
           category: item.category,
@@ -623,58 +629,60 @@ export async function UnifiedDetailPage({
         title: string;
       }>;
 
-      const highlightedExamplesResults = examples.map((example) => {
-        // Validate required fields before processing
-        if (
-          typeof example.code !== 'string' ||
-          typeof example.language !== 'string' ||
-          typeof example.title !== 'string' ||
-          example.title.trim().length === 0
-        ) {
-          logDetailProcessingWarning(
-            'examplesData',
-            new Error(
-              `Invalid example entry: code=${typeof example.code}, language=${typeof example.language}, title=${typeof example.title}`
-            ),
-            item
-          );
-          return null;
-        }
+      const highlightedExamplesResults = await Promise.all(
+        examples.map(async (example) => {
+          // Validate required fields before processing
+          if (
+            typeof example.code !== 'string' ||
+            typeof example.language !== 'string' ||
+            typeof example.title !== 'string' ||
+            example.title.trim().length === 0
+          ) {
+            logDetailProcessingWarning(
+              'examplesData',
+              new Error(
+                `Invalid example entry: code=${typeof example.code}, language=${typeof example.language}, title=${typeof example.title}`
+              ),
+              item
+            );
+            return null;
+          }
 
-        try {
-          // Use shared-runtime utilities directly
-          const html = highlightCode(example.code, example.language, { showLineNumbers: true });
-          // Generate filename from title
-          const filename = `${example.title
-            .toLowerCase()
-            .replaceAll(/[^a-z0-9]+/g, '-')
-            .replaceAll(/^-+|-+$/g, '')}.${
-            {
-              typescript: 'ts',
-              javascript: 'js',
-              json: 'json',
-              bash: 'sh',
-              shell: 'sh',
-              python: 'py',
-              yaml: 'yml',
-              markdown: 'md',
-              plaintext: 'txt',
-            }[example.language] || 'txt'
-          }`;
+          try {
+            // Use shared-runtime utilities directly
+            const html = await highlightCode(example.code, example.language, { showLineNumbers: true });
+            // Generate filename from title
+            const filename = `${example.title
+              .toLowerCase()
+              .replaceAll(/[^a-z0-9]+/g, '-')
+              .replaceAll(/^-+|-+$/g, '')}.${
+              {
+                typescript: 'ts',
+                javascript: 'js',
+                json: 'json',
+                bash: 'sh',
+                shell: 'sh',
+                python: 'py',
+                yaml: 'yml',
+                markdown: 'md',
+                plaintext: 'txt',
+              }[example.language] || 'txt'
+            }`;
 
-          return {
-            title: example.title,
-            ...(example.description && { description: example.description }),
-            html,
-            code: example.code,
-            language: example.language,
-            filename,
-          };
-        } catch (error) {
-          logDetailProcessingWarning('examplesData', error, item);
-          return null;
-        }
-      });
+            return {
+              title: example.title,
+              ...(example.description && { description: example.description }),
+              html,
+              code: example.code,
+              language: example.language,
+              filename,
+            };
+          } catch (error) {
+            logDetailProcessingWarning('examplesData', error, item);
+            return null;
+          }
+        })
+      );
 
       // Filter out null results after Promise.all resolves
       const highlightedExamples = highlightedExamplesResults.filter(
@@ -708,56 +716,40 @@ export async function UnifiedDetailPage({
       const mcpbStepsFromMetadata = installation.mcpb?.steps || [];
       const shouldAutoGenerateMcpbSteps = hasMcpbPackage && mcpbStepsFromMetadata.length === 0;
 
-      // Use shared-runtime utilities directly (synchronous, no Promise.all needed)
-      const claudeCodeSteps = installation.claudeCode?.steps
-        ? installation.claudeCode.steps.map((step) => {
+      // Use shared-runtime utilities directly (async, need Promise.all)
+      const processSteps = async (steps: string[]) => {
+        return Promise.all(
+          steps.map(async (step) => {
             if (isCommandStep(step)) {
-              const html = highlightCode(step, 'bash', { showLineNumbers: true });
+              const html = await highlightCode(step, 'bash', { showLineNumbers: true });
               return { type: 'command' as const, html, code: step };
             }
             return { type: 'text' as const, text: step };
           })
-        : null;
-      const claudeDesktopSteps = installation.claudeDesktop?.steps
-        ? installation.claudeDesktop.steps.map((step) => {
-            if (isCommandStep(step)) {
-              const html = highlightCode(step, 'bash', { showLineNumbers: true });
-              return { type: 'command' as const, html, code: step };
-            }
-            return { type: 'text' as const, text: step };
-          })
-        : null;
-      const sdkSteps = installation.sdk?.steps
-        ? installation.sdk.steps.map((step) => {
-            if (isCommandStep(step)) {
-              const html = highlightCode(step, 'bash', { showLineNumbers: true });
-              return { type: 'command' as const, html, code: step };
-            }
-            return { type: 'text' as const, text: step };
-          })
-        : null;
-      // Process .mcpb steps from metadata OR auto-generate if package exists
-      const mcpbSteps =
+        );
+      };
+
+      const [claudeCodeSteps, claudeDesktopSteps, sdkSteps, mcpbSteps] = await Promise.all([
+        installation.claudeCode?.steps ? processSteps(installation.claudeCode.steps) : Promise.resolve(null),
+        installation.claudeDesktop?.steps ? processSteps(installation.claudeDesktop.steps) : Promise.resolve(null),
+        installation.sdk?.steps ? processSteps(installation.sdk.steps) : Promise.resolve(null),
         mcpbStepsFromMetadata.length > 0
-          ? mcpbStepsFromMetadata.map((step) => {
-              if (isCommandStep(step)) {
-                const html = highlightCode(step, 'bash', { showLineNumbers: true });
-                return { type: 'command' as const, html, code: step };
-              }
-              return { type: 'text' as const, text: step };
-            })
-          : shouldAutoGenerateMcpbSteps
-            ? [
-                {
-                  type: 'text' as const,
-                  text: 'Download the .mcpb package using the button above, then double-click the file to install in Claude Desktop.',
-                },
-                {
-                  type: 'text' as const,
-                  text: 'After installation, restart Claude Desktop to activate the MCP server.',
-                },
-              ]
-            : null;
+          ? processSteps(mcpbStepsFromMetadata)
+          : Promise.resolve(
+              shouldAutoGenerateMcpbSteps
+                ? [
+                    {
+                      type: 'text' as const,
+                      text: 'Download the .mcpb package using the button above, then double-click the file to install in Claude Desktop.',
+                    },
+                    {
+                      type: 'text' as const,
+                      text: 'After installation, restart Claude Desktop to activate the MCP server.',
+                    },
+                  ]
+                : null
+            ),
+      ]);
 
       return {
         claudeCode: claudeCodeSteps
@@ -831,7 +823,7 @@ export async function UnifiedDetailPage({
           }
           try {
             // Use shared-runtime utilities directly
-            const html = highlightCode(
+            const html = await highlightCode(
               section.code,
               typeof section.language === 'string' ? section.language : 'text',
               { showLineNumbers: true }
@@ -844,57 +836,61 @@ export async function UnifiedDetailPage({
         }
 
         if (section.type === 'code_group' && section.tabs) {
-          const tabs = section.tabs.map((tab) => {
-            if (typeof tab.code !== 'string') {
-              logDetailProcessingWarning(
-                'guideSections',
-                new Error(`Invalid code_group tab: code is ${typeof tab.code}`),
-                item
-              );
-              return tab;
-            }
-            try {
-              // Use shared-runtime utilities directly
-              const html = highlightCode(
-                tab.code,
-                typeof tab.language === 'string' ? tab.language : 'text',
-                { showLineNumbers: true }
-              );
-              return { ...tab, html };
-            } catch (error) {
-              logDetailProcessingWarning('guideSections', error, item);
-              return tab;
-            }
-          });
+          const tabs = await Promise.all(
+            section.tabs.map(async (tab) => {
+              if (typeof tab.code !== 'string') {
+                logDetailProcessingWarning(
+                  'guideSections',
+                  new Error(`Invalid code_group tab: code is ${typeof tab.code}`),
+                  item
+                );
+                return tab;
+              }
+              try {
+                // Use shared-runtime utilities directly
+                const html = await highlightCode(
+                  tab.code,
+                  typeof tab.language === 'string' ? tab.language : 'text',
+                  { showLineNumbers: true }
+                );
+                return { ...tab, html };
+              } catch (error) {
+                logDetailProcessingWarning('guideSections', error, item);
+                return tab;
+              }
+            })
+          );
           return { ...section, tabs };
         }
 
         if (section.type === 'steps' && section.steps) {
-          const steps = section.steps.map((step) => {
-            if (step.code) {
-              if (typeof step.code !== 'string') {
-                logDetailProcessingWarning(
-                  'guideSections',
-                  new Error(`Invalid steps step: code is ${typeof step.code}`),
-                  item
-                );
-                return step;
+          const steps = await Promise.all(
+            section.steps.map(async (step) => {
+              if (step.code) {
+                if (typeof step.code !== 'string') {
+                  logDetailProcessingWarning(
+                    'guideSections',
+                    new Error(`Invalid steps step: code is ${typeof step.code}`),
+                    item
+                  );
+                  return step;
+                }
+                try {
+                  // Use shared-runtime utilities directly
+                  const html = await highlightCode(
+                    step.code,
+                    typeof step.language === 'string' ? step.language : 'bash',
+                    { showLineNumbers: true }
+                  );
+                  return { ...step, html };
+                } catch (error) {
+                  logDetailProcessingWarning('guideSections', error, item);
+                  return step;
+                }
               }
-              try {
-                // Use shared-runtime utilities directly
-                const html = highlightCode(
-                  step.code,
-                  typeof step.language === 'string' ? step.language : 'bash',
-                  { showLineNumbers: true }
-                );
-                return { ...step, html };
-              } catch (error) {
-                logDetailProcessingWarning('guideSections', error, item);
-                return step;
-              }
-            }
-            return step;
-          });
+              return step;
+            })
+          );
           return { ...section, steps };
         }
 

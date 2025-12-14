@@ -16,7 +16,7 @@ import { Constants } from '@heyclaude/database-types';
 import { type Database } from '@heyclaude/database-types';
 import { logUnhandledPromise, isValidCategory } from '@heyclaude/web-runtime/core';
 import { getCategoryConfig } from '@heyclaude/web-runtime/data';
-import { useCopyToClipboard, usePulse, usePinboard } from '@heyclaude/web-runtime/hooks';
+import { useCopyToClipboard, usePulse, usePinboard, useIsClient } from '@heyclaude/web-runtime/hooks';
 import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
 import {
   ArrowLeft,
@@ -218,7 +218,8 @@ export function DetailHeaderActions({
   onCopyContent,
 }: DetailHeaderActionsProps) {
   const router = useRouter();
-  const referrer = globalThis.window === undefined ? undefined : globalThis.location.pathname;
+  const isClient = useIsClient();
+  const referrer = isClient ? window.location.pathname : undefined;
   const { copy: copyToClipboard } = useCopyToClipboard();
   // Cast item to ContentItem for property access (content is Json type)
   const contentItem = item as ContentItem;
@@ -265,10 +266,9 @@ export function DetailHeaderActions({
   const { openDrawer: openPinboardDrawer } = usePinboardDrawer();
   const pinned = isPinned(category, contentItem.slug);
 
-  const shareUrl =
-    globalThis.window === undefined
-      ? ''
-      : `${globalThis.location.origin}/${category}/${contentItem.slug}`;
+  const shareUrl = isClient
+    ? `${window.location.origin}/${category}/${contentItem.slug}`
+    : '';
 
   const handleTogglePin = () => {
     // Capture state BEFORE toggling to show correct toast
@@ -606,7 +606,7 @@ export function DetailHeaderActions({
                     `Check out ${displayTitle} on ClaudePro Directory!`
                   );
                   const twitterUrl = `https://twitter.com/intent/tweet?text=${tweetText}&url=${encodeURIComponent(shareUrlWithUtm)}`;
-                  if (typeof window !== 'undefined') {
+                  if (isClient) {
                     window.open(twitterUrl, '_blank', 'noopener,noreferrer,width=550,height=420');
                   }
                   await pulse
@@ -621,7 +621,7 @@ export function DetailHeaderActions({
                 onClick={async () => {
                   const shareUrlWithUtm = `${shareUrl}?utm_source=share&utm_medium=share&utm_campaign=${category}`;
                   const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrlWithUtm)}`;
-                  if (typeof window !== 'undefined') {
+                  if (isClient) {
                     window.open(linkedInUrl, '_blank', 'noopener,noreferrer,width=550,height=420');
                   }
                   await pulse

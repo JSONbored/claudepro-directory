@@ -21,6 +21,7 @@ import {
   Skeleton,
 } from './loading-skeleton.tsx';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/card.tsx';
+import { useReducedMotion } from '../../../hooks/motion/index.ts';
 import { motion } from 'motion/react';
 
 // Pre-generate skeleton keys for common counts
@@ -84,9 +85,7 @@ export function CategoryLoading({
 } = {}) {
   const selectedVariant = variant || 'grid3';
   const config = SKELETON_CONFIGS[selectedVariant] as SkeletonConfig;
-  const prefersReducedMotion =
-    typeof window !== 'undefined' &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const prefersReducedMotion = useReducedMotion();
 
   return (
     <motion.div
@@ -444,9 +443,7 @@ export function DetailPageLoading() {
  * Matches structure of guide pages (more text-heavy)
  */
 export function GuideDetailLoading() {
-  const prefersReducedMotion =
-    typeof window !== 'undefined' &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const prefersReducedMotion = useReducedMotion();
 
   return (
     <motion.div
@@ -546,9 +543,7 @@ export function GuideDetailLoading() {
  * This factory function is kept for backwards compatibility with getLoadingComponent('/search').
  */
 export function SearchResultsLoading() {
-  const prefersReducedMotion =
-    typeof window !== 'undefined' &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const prefersReducedMotion = useReducedMotion();
 
   return (
     <motion.div
@@ -595,9 +590,7 @@ export function SearchResultsLoading() {
  * This factory function is kept for backwards compatibility with getLoadingComponent('/').
  */
 export function HomePageLoading() {
-  const prefersReducedMotion =
-    typeof window !== 'undefined' &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const prefersReducedMotion = useReducedMotion();
 
   return (
     <motion.div
@@ -698,9 +691,7 @@ export function HomePageLoading() {
  * This factory function is kept for backwards compatibility with getLoadingComponent('/changelog').
  */
 export function ChangelogListLoading() {
-  const prefersReducedMotion =
-    typeof window !== 'undefined' &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const prefersReducedMotion = useReducedMotion();
 
   return (
     <motion.div
@@ -801,9 +792,7 @@ export function ChangelogListLoading() {
  * This factory function is kept for backwards compatibility with getLoadingComponent('/submit').
  */
 export function SubmitPageLoading() {
-  const prefersReducedMotion =
-    typeof window !== 'undefined' &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const prefersReducedMotion = useReducedMotion();
 
   return (
     <motion.div
@@ -956,9 +945,7 @@ export function SubmitPageLoading() {
  * Matches the company page structure: header, jobs list (left), stats sidebar (right)
  */
 export function CompanyProfileLoading() {
-  const prefersReducedMotion =
-    typeof window !== 'undefined' &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const prefersReducedMotion = useReducedMotion();
 
   return (
     <motion.div
@@ -1305,9 +1292,7 @@ export function createFormPageLoading(config: FormPageLoadingConfig = {}) {
   };
 
   function FormPageLoading() {
-    const prefersReducedMotion =
-      typeof window !== 'undefined' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const prefersReducedMotion = useReducedMotion();
 
     return (
       <motion.div
@@ -1497,9 +1482,7 @@ export function createListPageLoading(config: ListPageLoadingConfig = {}) {
   };
 
   function ListPageLoading() {
-    const prefersReducedMotion =
-      typeof window !== 'undefined' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const prefersReducedMotion = useReducedMotion();
 
     return (
       <div className={`container mx-auto ${maxWidthClasses[maxWidth]} px-4 py-8 space-y-6`}>
@@ -1548,9 +1531,6 @@ export function createListPageLoading(config: ListPageLoadingConfig = {}) {
         {/* Content Grid/List */}
         <div className={columns === 1 ? 'grid gap-4' : gridClasses[columns]}>
           {Array.from({ length: itemCount }).map((_, i) => {
-            const prefersReducedMotion =
-              typeof window !== 'undefined' &&
-              window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
             if (variant === 'list') {
               return (
@@ -1735,9 +1715,7 @@ export function createDetailPageLoading(config: DetailPageLoadingConfig = {}) {
   };
 
   function DetailPageLoading() {
-    const prefersReducedMotion =
-      typeof window !== 'undefined' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const prefersReducedMotion = useReducedMotion();
 
     return (
       <motion.div
@@ -1939,9 +1917,7 @@ export function createStaticPageLoading(config: StaticPageLoadingConfig = {}) {
   };
 
   function StaticPageLoading() {
-    const prefersReducedMotion =
-      typeof window !== 'undefined' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const prefersReducedMotion = useReducedMotion();
 
     return (
       <motion.div
@@ -2206,9 +2182,7 @@ export function createDashboardPageLoading(config: DashboardPageLoadingConfig = 
   };
 
   function DashboardPageLoading() {
-    const prefersReducedMotion =
-      typeof window !== 'undefined' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const prefersReducedMotion = useReducedMotion();
 
     return (
       <motion.div
@@ -2431,9 +2405,7 @@ export function createProfilePageLoading(config: ProfilePageLoadingConfig = {}) 
   };
 
   function ProfilePageLoading() {
-    const prefersReducedMotion =
-      typeof window !== 'undefined' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const prefersReducedMotion = useReducedMotion();
 
     return (
       <motion.div
@@ -2645,9 +2617,7 @@ export function createContactPageLoading(config: ContactPageLoadingConfig = {}) 
   };
 
   function ContactPageLoading() {
-    const prefersReducedMotion =
-      typeof window !== 'undefined' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const prefersReducedMotion = useReducedMotion();
 
     return (
       <motion.div

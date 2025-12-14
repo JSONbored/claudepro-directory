@@ -8,8 +8,9 @@ id: missing-await-nextresponse
 language: typescript
 rule:
   all:
-    - pattern: return NextResponse.$METHOD($$$)
-      kind: return_statement
+    - kind: return_statement
+      has:
+        pattern: return NextResponse.$METHOD($$$)
     - inside:
         pattern: async function $FUNC($$$) { $$$ }
     - not:
@@ -24,12 +25,13 @@ id: missing-nextresponse-error-handling
 language: typescript
 rule:
   all:
-    - pattern: NextResponse.$METHOD($$$)
-      kind: call_expression
+    - kind: call_expression
+      has:
+        pattern: NextResponse.$METHOD($$$)
     - inside:
         pattern: async function $FUNC($$$) { $$$ }
     - not:
         inside:
-          pattern: try { $$$ } catch ($ERROR) { $$$ }
+          kind: try_statement
 message: "NextResponse operations should be wrapped in try/catch for error handling. Add error handling around NextResponse calls"
 severity: warning

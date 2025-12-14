@@ -41,6 +41,7 @@ import { SPRING, STAGGER } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useMemo, useState } from 'react';
+import { useBoolean, useLocalStorage } from '@heyclaude/web-runtime/hooks';
 
 // Use generated type directly from @heyclaude/database-types
 type ContentTemplatesResult = Database['public']['Functions']['get_content_templates']['Returns'];
@@ -218,7 +219,7 @@ interface TemplateCardProps {
 }
 
 function TemplateCard({ template, onApply }: TemplateCardProps) {
-  const [isHovered, setIsHovered] = useState(false);
+  const { value: isHovered, setTrue: setIsHoveredTrue, setFalse: setIsHoveredFalse } = useBoolean();
   const shouldReduceMotion = useReducedMotion();
 
   // Extract stats from templateData (if available)
@@ -281,8 +282,8 @@ function TemplateCard({ template, onApply }: TemplateCardProps) {
     <motion.div
       layout={!shouldReduceMotion}
       variants={cardVariants}
-      onHoverStart={() => setIsHovered(true)}
-      onHoverEnd={() => setIsHovered(false)}
+      onHoverStart={setIsHoveredTrue}
+      onHoverEnd={setIsHoveredFalse}
     >
       <Card
         className={cn(
@@ -451,8 +452,8 @@ export function TemplateQuickSelect({
   maxVisible = 3,
   className,
 }: TemplateQuickSelectProps) {
-  const [expanded, setExpanded] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(false);
+  const { value: expanded, toggle: toggleExpanded } = useBoolean();
+  const { value: showOnboarding, setTrue: setShowOnboardingTrue, setFalse: setShowOnboardingFalse } = useBoolean();
   const shouldReduceMotion = useReducedMotion();
 
   // Filter and sort templates
@@ -466,13 +467,21 @@ export function TemplateQuickSelect({
     return filtered;
   }, [templates, contentType]);
 
+  // Use useLocalStorage for onboarding state
+  const { value: hasSeenTemplates, setValue: setHasSeenTemplates } = useLocalStorage<string | null>(
+    'hasSeenTemplateOnboarding',
+    {
+      defaultValue: null,
+      syncAcrossTabs: false,
+    }
+  );
+
   // Check if user has seen template onboarding
   useEffect(() => {
-    const hasSeenTemplates = localStorage.getItem('hasSeenTemplateOnboarding');
     if (!hasSeenTemplates && allTemplates.length > 0) {
-      setShowOnboarding(true);
+      setShowOnboardingTrue();
     }
-  }, [allTemplates.length]);
+  }, [allTemplates.length, hasSeenTemplates, setShowOnboardingTrue]);
 
   const displayTemplates = useMemo(() => {
     return expanded ? allTemplates : allTemplates.slice(0, maxVisible);
@@ -485,8 +494,8 @@ export function TemplateQuickSelect({
   }
 
   const handleDismissOnboarding = () => {
-    setShowOnboarding(false);
-    localStorage.setItem('hasSeenTemplateOnboarding', 'true');
+    setShowOnboardingFalse();
+    setHasSeenTemplates('true');
   };
 
   return (
@@ -545,7 +554,7 @@ export function TemplateQuickSelect({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setExpanded(!expanded)}
+            onClick={toggleExpanded}
             className="h-7 text-xs"
           >
             {expanded ? 'Show Less' : `View All (${allTemplates.length})`}

@@ -5,7 +5,8 @@ import { DURATION } from '../../design-system/index.ts';
 import { cn } from '../utils.ts';
 import { motion } from 'motion/react';
 import * as React from 'react';
-import { forwardRef, useState } from 'react';
+import { forwardRef } from 'react';
+import { useBoolean } from '@heyclaude/web-runtime/hooks';
 
 export interface InputProps extends React.ComponentProps<'input'> {
   error?: boolean;
@@ -14,7 +15,7 @@ export interface InputProps extends React.ComponentProps<'input'> {
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, error, errorId, onFocus, onBlur, ...props }, ref) => {
-    const [isFocused, setIsFocused] = useState(false);
+    const { value: isFocused, setTrue: setIsFocusedTrue, setFalse: setIsFocusedFalse } = useBoolean();
 
     return (
       <div className="relative">
@@ -41,11 +42,11 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           aria-invalid={error ? 'true' : undefined}
           aria-describedby={errorId || undefined}
           onFocus={(e) => {
-            setIsFocused(true);
+            setIsFocusedTrue();
             onFocus?.(e);
           }}
           onBlur={(e) => {
-            setIsFocused(false);
+            setIsFocusedFalse();
             onBlur?.(e);
           }}
           {...props}

@@ -1,0 +1,2 @@
+# This file ensures the migrations directory is tracked by git
+# Migration files will be added here after running: supabase db pull --linked

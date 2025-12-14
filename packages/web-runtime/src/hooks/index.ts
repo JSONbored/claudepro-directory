@@ -66,6 +66,7 @@ export * from './use-timeout.ts';
 // ============================================================================
 export * from './use-event-listener.ts';
 export * from './use-intersection-observer.ts';
+export * from './use-multiple-intersection-observer.ts';
 export * from './use-resize-observer.ts';
 export * from './use-countdown.ts';
 export * from './use-step.ts';

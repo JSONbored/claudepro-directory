@@ -11,7 +11,7 @@ import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
 import { ensureNumber } from '@heyclaude/web-runtime/data/utils';
 import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
-import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
+import { useLoggedAsync, useBoolean, useSessionStorage } from '@heyclaude/web-runtime/hooks';
 import { motion, useScroll } from 'motion/react';
 import { useEffect, useState } from 'react';
 
@@ -38,11 +38,18 @@ export function NewsletterScrollTrigger({
   threshold = 0.6,
   minScrollHeight,
 }: NewsletterScrollTriggerProps) {
-  const [isVisible, setIsVisible] = useState(false);
-  const [hasTriggered, setHasTriggered] = useState(false);
+  const { value: isVisible, setTrue: setIsVisibleTrue } = useBoolean();
+  const { value: hasTriggered, setTrue: setHasTriggeredTrue } = useBoolean();
   const [scrollHeightThreshold, setScrollHeightThreshold] = useState(minScrollHeight ?? 500);
   const { scrollYProgress } = useScroll();
   const shouldReduceMotion = useReducedMotion();
+  
+  // Use useSessionStorage hook for scroll trigger state
+  const [scrollShown, setScrollShown] = useSessionStorage<string | null>(
+    'newsletter-scroll-shown',
+    null,
+    { initializeWithValue: true }
+  );
   const loadScrollConfig = useLoggedAsync({
     scope: 'NewsletterScrollTrigger',
     defaultMessage: 'Failed to load newsletter scroll config',
@@ -81,30 +88,31 @@ export function NewsletterScrollTrigger({
   }, [category, loadScrollConfig, minScrollHeight, source]);
 
   useEffect(() => {
+    // Check if already shown from sessionStorage
+    if (scrollShown === 'true') {
+      setHasTriggeredTrue();
+      return;
+    }
+  }, [scrollShown, setHasTriggeredTrue]);
+
+  useEffect(() => {
     // Check if page is long enough for scroll trigger
     const documentHeight = document.documentElement.scrollHeight - window.innerHeight;
     if (documentHeight < scrollHeightThreshold) {
       return;
     }
 
-    // Check sessionStorage to see if already shown
-    const shown = sessionStorage.getItem('newsletter-scroll-shown');
-    if (shown === 'true') {
-      setHasTriggered(true);
-      return;
-    }
-
     // Listen to scroll progress
     const unsubscribe = scrollYProgress.on('change', (latest) => {
       if (latest >= threshold && !hasTriggered) {
-        setIsVisible(true);
-        setHasTriggered(true);
-        sessionStorage.setItem('newsletter-scroll-shown', 'true');
+        setIsVisibleTrue();
+        setHasTriggeredTrue();
+        setScrollShown('true');
       }
     });
 
     return () => unsubscribe();
-  }, [scrollYProgress, threshold, hasTriggered, scrollHeightThreshold]);
+  }, [scrollYProgress, threshold, hasTriggered, scrollHeightThreshold, setIsVisibleTrue, setHasTriggeredTrue, setScrollShown]);
 
   if (!isVisible || hasTriggered) {
     return null;

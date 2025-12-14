@@ -55,6 +55,7 @@ export * from './batch-processor.ts';
 export * from './timeout.ts';
 export * from './circuit-breaker.ts';
 export * from './code-highlight.ts';
+export * from './code-highlight-themes.ts';
 export * from './content-processing.ts';
 export * from './rate-limit.ts';
 export * from './webhook/crypto.ts';

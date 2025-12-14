@@ -2,6 +2,7 @@
 
 import { ListTree } from '@heyclaude/web-runtime/icons';
 import { type ContentHeadingMetadata } from '@heyclaude/web-runtime/types/component.types';
+import { useIsClient, useMultipleIntersectionObserver, useReducedMotion } from '@heyclaude/web-runtime/hooks';
 import { cn, STATE_PATTERNS } from '@heyclaude/web-runtime/ui';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -27,6 +28,8 @@ interface DetailTocProps {
 export function DetailToc({ headings, className }: DetailTocProps) {
   const normalizedHeadings = useMemo(() => normalizeHeadings(headings), [headings]);
   const [activeId, setActiveId] = useState<null | string>(null);
+  const isClient = useIsClient();
+  const prefersReducedMotion = useReducedMotion();
 
   const baseLevel = useMemo(() => {
     if (normalizedHeadings.length === 0) return 2;
@@ -34,28 +37,28 @@ export function DetailToc({ headings, className }: DetailTocProps) {
   }, [normalizedHeadings]);
 
   const updateHash = useCallback((id: string) => {
-    if (globalThis.window === undefined || !id) return;
-    const { pathname, search } = globalThis.location;
-    const currentHash = globalThis.location.hash.replace('#', '');
+    if (!isClient || !id) return;
+    const { pathname, search } = window.location;
+    const currentHash = window.location.hash.replace('#', '');
     if (currentHash === id) return;
     const nextUrl = `${pathname}${search ? search : ''}#${id}`;
-    globalThis.history.replaceState(null, '', nextUrl);
-  }, []);
+    window.history.replaceState(null, '', nextUrl);
+  }, [isClient]);
 
   useEffect(() => {
-    if (globalThis.window === undefined || normalizedHeadings.length === 0) {
+    if (!isClient || normalizedHeadings.length === 0) {
       setActiveId(null);
       return;
     }
 
-    const hash = globalThis.location.hash.replace('#', '');
+    const hash = window.location.hash.replace('#', '');
     if (hash && normalizedHeadings.some((heading) => heading.id === hash)) {
       setActiveId(hash);
       return;
     }
 
     setActiveId(normalizedHeadings[0]?.id ?? null);
-  }, [normalizedHeadings]);
+  }, [normalizedHeadings, isClient]);
 
   useEffect(() => {
     if (!activeId) return;
@@ -68,62 +71,56 @@ export function DetailToc({ headings, className }: DetailTocProps) {
     activeIdRef.current = activeId;
   }, [activeId]);
 
+  // Use useMultipleIntersectionObserver hook for uniform implementation
+  const { observeElements, entries } = useMultipleIntersectionObserver({
+    rootMargin: '-35% 0px -50% 0px',
+    threshold: [0, 0.25, 0.5, 0.75, 1],
+  });
+
+  // Update active ID when intersection changes
   useEffect(() => {
-    if (globalThis.window === undefined || normalizedHeadings.length === 0) {
+    if (entries.size === 0) return;
+    
+    // Find most visible element (same logic as getMostVisibleId but computed here)
+    const visibleEntries = Array.from(entries.values())
+      .filter((entry) => entry.isIntersecting || entry.intersectionRatio > 0)
+      .sort(
+        (a, b) =>
+          b.intersectionRatio - a.intersectionRatio ||
+          a.boundingClientRect.top - b.boundingClientRect.top
+      );
+
+    if (visibleEntries.length > 0) {
+      const firstEntry = visibleEntries[0];
+      if (firstEntry) {
+        const nextActiveId = firstEntry.target.id;
+        if (nextActiveId && nextActiveId !== activeIdRef.current) {
+          setActiveId(nextActiveId);
+        }
+      }
+    }
+  }, [entries]);
+
+  // Observe all heading elements
+  useEffect(() => {
+    if (!isClient || normalizedHeadings.length === 0) {
       return;
     }
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visibleEntries = entries
-          .filter((entry) => entry.isIntersecting || entry.intersectionRatio > 0)
-          .sort(
-            (a, b) =>
-              b.intersectionRatio - a.intersectionRatio ||
-              a.boundingClientRect.top - b.boundingClientRect.top
-          );
-
-        if (visibleEntries.length > 0) {
-          const firstEntry = visibleEntries[0];
-          if (firstEntry) {
-            const nextActiveId = firstEntry.target.id;
-            if (nextActiveId && nextActiveId !== activeIdRef.current) {
-              setActiveId(nextActiveId);
-            }
-          }
-        }
-      },
-      {
-        rootMargin: '-35% 0px -50% 0px',
-        threshold: [0, 0.25, 0.5, 0.75, 1],
-      }
-    );
-
-    if (typeof document === 'undefined') return;
-    
-    const elements = normalizedHeadings
-      .map((heading) => document.getElementById(heading.id))
-      .filter((el): el is HTMLElement => el !== null);
-
-    for (const el of elements) {
-      observer.observe(el);
-    }
-
-    return () => observer.disconnect();
-  }, [normalizedHeadings]);
+    const elementIds = normalizedHeadings.map((heading) => heading.id);
+    observeElements(elementIds);
+  }, [normalizedHeadings, isClient, observeElements]);
 
   const handleHeadingClick = useCallback(
     (heading: NormalizedHeading) => {
-      if (typeof window === 'undefined' || typeof document === 'undefined') return;
+      if (!isClient || typeof document === 'undefined') return;
       const element = document.getElementById(heading.id);
       if (!element) {
         updateHash(heading.id);
         return;
       }
 
-      const prefersReducedMotion = window.matchMedia(
-        '(prefers-reduced-motion: reduce)'
-      ).matches;
+      // Use reduced motion from hook (already checked at component level)
       const offset = 96;
       const top = window.scrollY + element.getBoundingClientRect().top - offset;
 
@@ -135,7 +132,7 @@ export function DetailToc({ headings, className }: DetailTocProps) {
       setActiveId(heading.id);
       updateHash(heading.id);
     },
-    [updateHash]
+    [updateHash, isClient]
   );
 
   if (normalizedHeadings.length < 3) {

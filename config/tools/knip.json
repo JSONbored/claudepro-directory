@@ -34,7 +34,6 @@
     "pino", // Used via packages/web-runtime/src/logger.ts (logging infrastructure)
     "react-error-boundary", // Used in content-search.tsx
     "sanitize-html", // Used in markdown/content processing
-    "sugar-high", // Used in interactive-code-block.tsx (syntax highlighting)
     "tailwind-merge", // Used via web-runtime/ui (cn utility)
     "zustand", // Used for state management
     // Workspace dependencies - used but not in individual package.json (monorepo pattern)

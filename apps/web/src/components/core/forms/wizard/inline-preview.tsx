@@ -21,7 +21,7 @@ import {
 import { SPRING, DURATION } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { AnimatePresence, motion } from 'motion/react';
-import { useState } from 'react';
+import { useBoolean } from '@heyclaude/web-runtime/hooks';
 
 interface InlinePreviewProps {
   className?: string;
@@ -47,8 +47,8 @@ interface InlinePreviewProps {
  * @see PreviewToggle
  */
 export function InlinePreview({ formData, qualityScore, className }: InlinePreviewProps) {
-  const [isVisible, setIsVisible] = useState(true);
-  const [isMobileModalOpen, setIsMobileModalOpen] = useState(false);
+  const { value: isVisible, toggle: toggleIsVisible } = useBoolean(true);
+  const { value: isMobileModalOpen, setTrue: setIsMobileModalOpenTrue, setFalse: setIsMobileModalOpenFalse } = useBoolean();
   const shouldReduceMotion = useReducedMotion();
 
   const previewCard = (
@@ -133,7 +133,7 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setIsVisible(!isVisible)}
+              onClick={toggleIsVisible}
               className="h-7 px-2"
             >
               {isVisible ? <Eye className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
@@ -172,7 +172,7 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
       {/* Mobile Floating Button + Modal */}
       <div className="lg:hidden">
         <Button
-          onClick={() => setIsMobileModalOpen(true)}
+          onClick={setIsMobileModalOpenTrue}
           size="sm"
           variant="outline"
           className="fixed right-4 bottom-4 z-50 gap-2 shadow-lg"
@@ -188,7 +188,7 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                onClick={() => setIsMobileModalOpen(false)}
+                onClick={setIsMobileModalOpenFalse}
                 className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
               />
               <motion.div
@@ -216,7 +216,7 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => setIsMobileModalOpen(false)}
+                      onClick={setIsMobileModalOpenFalse}
                       className="h-7 px-2 text-white hover:bg-white/10"
                     >
                       <X className="h-4 w-4" />

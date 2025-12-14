@@ -20,7 +20,8 @@ import {
   AnnouncementTitle,
 } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
-import { type ComponentType, useEffect, useState } from 'react';
+import { type ComponentType, useEffect } from 'react';
+import { useBoolean } from '@heyclaude/web-runtime/hooks';
 
 /**
  * Icon mapping for announcements
@@ -63,11 +64,11 @@ export function AnnouncementBannerClient({ announcement }: AnnouncementBannerCli
 
   // Client-side hydration state to prevent SSR mismatch
   // Banner only renders after client-side mount to avoid flash
-  const [isMounted, setIsMounted] = useState(false);
+  const { value: isMounted, setTrue: setIsMountedTrue } = useBoolean();
 
   useEffect(() => {
-    setIsMounted(true);
-  }, []);
+    setIsMountedTrue();
+  }, [setIsMountedTrue]);
 
   // Keyboard navigation: Escape key dismisses announcement
   useEffect(() => {

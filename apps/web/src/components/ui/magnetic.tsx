@@ -35,6 +35,7 @@ import {
   useSpring,
   type SpringOptions,
 } from 'motion/react';
+import { useMediaQuery, useIsClient } from '@heyclaude/web-runtime/hooks';
  
 type MagneticProps = {
   children: React.ReactElement;
@@ -61,11 +62,10 @@ function Magnetic({
 }: MagneticProps) {
   const localRef = React.useRef<HTMLDivElement>(null);
   React.useImperativeHandle(ref as any, () => localRef.current as HTMLDivElement);
- 
-  const isTouchDevice = React.useMemo(() => {
-    if (typeof window === 'undefined') return false;
-    return window.matchMedia('(pointer:coarse)').matches;
-  }, []);
+  
+  // Use useMediaQuery for touch device detection (replaces window.matchMedia)
+  const isTouchDevice = useMediaQuery('(pointer:coarse)');
+  const isClient = useIsClient();
  
   const [active, setActive] = React.useState(!onlyOnHover);
  
@@ -98,11 +98,11 @@ function Magnetic({
   );
  
   React.useEffect(() => {
-    if (disableOnTouch && isTouchDevice) return;
+    if (!isClient || (disableOnTouch && isTouchDevice)) return;
     const handle = (e: MouseEvent) => compute(e);
     window.addEventListener('mousemove', handle);
     return () => window.removeEventListener('mousemove', handle);
-  }, [compute, disableOnTouch, isTouchDevice]);
+  }, [compute, disableOnTouch, isTouchDevice, isClient]);
  
   return (
     <motion.div

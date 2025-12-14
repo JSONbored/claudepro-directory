@@ -29,6 +29,7 @@ import { useReducedMotion } from '../../../hooks/motion/index.ts';
 import { cn } from '../../utils.ts';
 import { motion } from 'motion/react';
 import { useEffect, useState, useRef } from 'react';
+import { useBoolean } from '../../../hooks/index.ts';
 
 interface TypingPlaceholderProps {
   /** Array of texts to cycle through */
@@ -67,8 +68,8 @@ export function TypingPlaceholder({
 }: TypingPlaceholderProps) {
   const [displayedText, setDisplayedText] = useState('');
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [isStarted, setIsStarted] = useState(false);
+  const { value: isDeleting, setTrue: setIsDeletingTrue, setFalse: setIsDeletingFalse } = useBoolean();
+  const { value: isStarted, setTrue: setIsStartedTrue } = useBoolean();
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Check for reduced motion
@@ -77,11 +78,11 @@ export function TypingPlaceholder({
   useEffect(() => {
     // Start after initial delay
     const startTimeout = setTimeout(() => {
-      setIsStarted(true);
+      setIsStartedTrue();
     }, initialDelay);
 
     return () => clearTimeout(startTimeout);
-  }, [initialDelay]);
+  }, [initialDelay, setIsStartedTrue]);
 
   // Main typing effect - use refs to track state without causing re-renders
   const currentIndexRef = useRef(currentTextIndex);
@@ -126,7 +127,7 @@ export function TypingPlaceholder({
           // Finished typing, pause then delete
           timeoutRef.current = setTimeout(() => {
             deletingRef.current = true;
-            setIsDeleting(true);
+            setIsDeletingTrue();
             type();
           }, pauseDuration);
         }
@@ -140,7 +141,7 @@ export function TypingPlaceholder({
         } else {
           // Finished deleting, move to next text
           deletingRef.current = false;
-          setIsDeleting(false);
+          setIsDeletingFalse();
           const nextIndex = (currentIndex + 1) % texts.length;
           if (nextIndex === 0 && !loop) {
             // Don't loop, stop at last text
@@ -165,7 +166,7 @@ export function TypingPlaceholder({
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [isStarted, texts, typingSpeed, deletingSpeed, pauseDuration, loop, onTextChange, prefersReducedMotion]);
+  }, [isStarted, texts, typingSpeed, deletingSpeed, pauseDuration, loop, onTextChange, prefersReducedMotion, setIsDeletingTrue, setIsDeletingFalse]);
 
   // Initialize with first text if reduced motion
   useEffect(() => {

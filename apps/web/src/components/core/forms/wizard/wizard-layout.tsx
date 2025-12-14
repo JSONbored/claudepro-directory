@@ -23,7 +23,8 @@ import { cn, Button } from '@heyclaude/web-runtime/ui';
 import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/design-tokens';
 import { useAnimateScoped } from '@heyclaude/web-runtime/hooks/motion';
 import { useRouter } from 'next/navigation';
-import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import { type ReactNode, useCallback, useEffect, useRef } from 'react';
+import { useBoolean } from '@heyclaude/web-runtime/hooks';
 
 import { ProgressIndicator, type WizardStep } from './progress-indicator';
 
@@ -68,8 +69,8 @@ export function WizardLayout({
 }: WizardLayoutProps) {
   const router = useRouter();
   const formTracking = useFormTracking();
-  const [isSaving, setIsSaving] = useState(false);
-  const [isNavigating, setIsNavigating] = useState(false);
+  const { value: isSaving, setTrue: setIsSavingTrue, setFalse: setIsSavingFalse } = useBoolean();
+  const { value: isNavigating, setTrue: setIsNavigatingTrue, setFalse: setIsNavigatingFalse } = useBoolean();
   const [, animate] = useAnimateScoped();
   const previousStepRef = useRef(currentStep);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -95,7 +96,7 @@ export function WizardLayout({
   const handleSave = useCallback(async () => {
     if (!onSave) return;
 
-    setIsSaving(true);
+    setIsSavingTrue();
     try {
       await onSave();
       await formTracking.trackDraftSaved({
@@ -116,9 +117,9 @@ export function WizardLayout({
         }
       );
     } finally {
-      setIsSaving(false);
+      setIsSavingFalse();
     }
-  }, [onSave, formTracking, submissionType, currentStep, qualityScore]);
+  }, [onSave, formTracking, submissionType, currentStep, qualityScore, setIsSavingTrue, setIsSavingFalse]);
 
   // Handle next step
   // Animate step transition programmatically
@@ -141,7 +142,7 @@ export function WizardLayout({
   const handleNext = useCallback(async () => {
     if (!(canGoNext && onNext)) return;
 
-    setIsNavigating(true);
+    setIsNavigatingTrue();
     try {
       await onNext();
       await formTracking.trackStepCompleted(currentStep, steps[currentStep - 1]?.label || '', {
@@ -161,9 +162,9 @@ export function WizardLayout({
         }
       );
     } finally {
-      setIsNavigating(false);
+      setIsNavigatingFalse();
     }
-  }, [canGoNext, onNext, formTracking, currentStep, steps, submissionType, qualityScore]);
+  }, [canGoNext, onNext, formTracking, currentStep, steps, submissionType, qualityScore, setIsNavigatingTrue, setIsNavigatingFalse]);
 
   // Handle previous step
   const handlePrevious = useCallback(() => {

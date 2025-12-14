@@ -36,9 +36,8 @@ id: missing-normalize-error-rpc
 language: typescript
 rule:
   all:
-    - pattern: catch ($ERROR) { $$$ }
-      kind: catch_clause
-    - inside:
+    - kind: catch_clause
+      inside:
         pattern: $SUPABASE.rpc($$$)
     - not:
         has:
@@ -52,13 +51,11 @@ id: missing-rpc-error-logging
 language: typescript
 rule:
   all:
-    - pattern: catch ($ERROR) { $$$ }
-      kind: catch_clause
-    - inside:
+    - kind: catch_clause
+      inside:
         pattern: $SUPABASE.rpc($$$)
     - not:
         has:
-          pattern: ($LOGGER|logger).$METHOD($$$)
-          regex: (error|warn)
+          regex: (logger|reqLogger)\.(error|warn)
 message: "RPC error handlers must log errors. Add: reqLogger.error('RPC call failed', normalized, { rpcName: '...', section: 'rpc-call' }) or logger.error('RPC call failed', normalized, { rpcName: '...' })"
 severity: error

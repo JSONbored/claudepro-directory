@@ -6,7 +6,8 @@ import { type ButtonStyleProps } from '@heyclaude/web-runtime/types/component.ty
 import { toasts, Button } from '@heyclaude/web-runtime/ui';
 import { COLORS } from '@heyclaude/web-runtime/design-tokens';
 import { Check, Copy } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useBoolean, useTimeout } from '@heyclaude/web-runtime/hooks';
 
 interface SimpleCopyButtonProps extends ButtonStyleProps {
   ariaLabel?: string;
@@ -54,40 +55,52 @@ export function SimpleCopyButton({
   className,
   disabled,
 }: SimpleCopyButtonProps) {
-  const [copied, setCopied] = useState(false);
+  const { value: copied, setTrue: setCopiedTrue, setFalse: setCopiedFalse } = useBoolean();
+  const [resetDelay, setResetDelay] = useState(2000);
+
+  // Load timeout config on mount
+  useEffect(() => {
+    try {
+      const result = getTimeoutConfig();
+      if (result) {
+        const delay = result['timeout.ui.clipboard_reset_delay_ms'];
+        if (typeof delay === 'number' && Number.isFinite(delay) && delay > 0) {
+          setResetDelay(delay);
+        }
+      }
+    } catch (configError) {
+      const normalizedConfigError = normalizeError(configError, 'Failed to load timeout config');
+      logClientWarn(
+        '[Config] Failed to load timeout config',
+        normalizedConfigError,
+        'SimpleCopyButton.loadConfig',
+        {
+          component: 'SimpleCopyButton',
+          action: 'load-timeout-config',
+          category: 'config',
+          recoverable: true,
+          hasContent: Boolean(content),
+          label: label ?? 'unnamed',
+        }
+      );
+    }
+  }, [content, label]);
+
+  // Use useTimeout for automatic reset
+  useTimeout(() => {
+    if (copied) {
+      setCopiedFalse();
+    }
+  }, copied ? resetDelay : null);
 
   const handleCopy = async (event?: React.MouseEvent) => {
     event?.stopPropagation(); // Prevent parent click handlers
 
     try {
       await navigator.clipboard.writeText(content);
-      setCopied(true);
+      setCopiedTrue();
       toasts.raw.success(successMessage);
       onCopySuccess?.();
-
-      let resetDelay = 2000;
-      try {
-        const result = await getTimeoutConfig();
-        if (result) {
-          resetDelay = result['timeout.ui.clipboard_reset_delay_ms'];
-        }
-      } catch (configError) {
-        const normalizedConfigError = normalizeError(configError, 'Failed to load timeout config');
-        logClientWarn(
-          '[Config] Failed to load timeout config',
-          normalizedConfigError,
-          'SimpleCopyButton.handleCopy',
-          {
-            component: 'SimpleCopyButton',
-            action: 'load-timeout-config',
-            category: 'config',
-            recoverable: true,
-            hasContent: Boolean(content),
-            label: label ?? 'unnamed',
-          }
-        );
-      }
-      setTimeout(() => setCopied(false), resetDelay);
     } catch (error) {
       const normalizedError = normalizeError(error, 'Copy operation failed');
       logClientWarn(

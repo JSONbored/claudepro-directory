@@ -2,6 +2,7 @@
 
 import { VALID_PROVIDERS } from '@heyclaude/web-runtime';
 import { ensureString } from '@heyclaude/web-runtime/data/utils';
+import { useBoolean } from '@heyclaude/web-runtime/hooks';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -33,7 +34,7 @@ interface LoginPanelClientProperties {
  * @see useNewsletterCount
  */
 export function LoginPanelClient({ redirectTo }: LoginPanelClientProperties) {
-  const [newsletterOptIn, setNewsletterOptIn] = useState(false);
+  const { setValue: setNewsletterOptIn, value: newsletterOptIn } = useBoolean();
   const [newsletterConfig, setNewsletterConfig] = useState<Record<string, unknown>>({});
   const { count, isLoading } = useNewsletterCount();
   const subscriberCountLabel = useMemo(() => formatSubscriberCount(count), [count]);
@@ -98,9 +99,9 @@ export function LoginPanelClient({ redirectTo }: LoginPanelClientProperties) {
           checked={newsletterOptIn}
           headline={tileProperties.tileHeadline}
           isLoadingCount={isLoading}
+          onChange={setNewsletterOptIn}
           safetyCopy={tileProperties.tileSafety}
           subscriberCountLabel={subscriberCountLabel}
-          onChange={setNewsletterOptIn}
         />
       }
       description="Choose your preferred sign-in method"

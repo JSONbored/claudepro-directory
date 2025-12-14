@@ -27,6 +27,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@heyclaude/web-runtime/ui';
+import { useBoolean } from '@heyclaude/web-runtime/hooks';
 import { type ComponentType, useState, useTransition } from 'react';
 
 type Identity = NonNullable<
@@ -83,7 +84,7 @@ const PROVIDER_CONFIG: Record<
  */
 export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientProps) {
   const [isPending, startTransition] = useTransition();
-  const [unlinkDialogOpen, setUnlinkDialogOpen] = useState(false);
+  const { value: unlinkDialogOpen, setTrue: setUnlinkDialogOpenTrue, setFalse: setUnlinkDialogOpenFalse } = useBoolean();
   const [providerToUnlink, setProviderToUnlink] = useState<
     Database['public']['Enums']['oauth_provider'] | null
   >(null);
@@ -117,7 +118,7 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
       return;
     }
     setProviderToUnlink(provider);
-    setUnlinkDialogOpen(true);
+    setUnlinkDialogOpenTrue();
   };
 
   const handleUnlinkConfirm = () => {
@@ -128,7 +129,7 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
 
       if (result?.data?.success) {
         successToasts.actionCompleted('Provider unlinked');
-        setUnlinkDialogOpen(false);
+        setUnlinkDialogOpenFalse();
         setProviderToUnlink(null);
         // Page will auto-revalidate via server action
       } else {
@@ -225,7 +226,7 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
       </div>
 
       {/* Unlink Confirmation Dialog */}
-      <Dialog open={unlinkDialogOpen} onOpenChange={setUnlinkDialogOpen}>
+      <Dialog open={unlinkDialogOpen} onOpenChange={(open) => open ? setUnlinkDialogOpenTrue() : setUnlinkDialogOpenFalse()}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -244,7 +245,7 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => setUnlinkDialogOpen(false)}
+              onClick={setUnlinkDialogOpenFalse}
               disabled={isPending}
             >
               Cancel

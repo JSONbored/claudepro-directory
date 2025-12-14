@@ -49,8 +49,8 @@ import { toasts } from '../../../client/toast.ts';
 import { MICROINTERACTIONS } from '../../../design-system/index.ts';
 import { COLORS } from '../../../design-tokens/index.ts';
 import { Check, Copy } from 'lucide-react';
-import { useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
+import { useBoolean, useTimeout } from '@heyclaude/web-runtime/hooks';
 import { Button } from '../button.tsx';
 
 /**
@@ -91,19 +91,23 @@ export function SimpleCopyButton({
   className,
   disabled,
 }: SimpleCopyButtonProps) {
-  const [copied, setCopied] = useState(false);
+  const { value: copied, setTrue: setCopiedTrue, setFalse: setCopiedFalse } = useBoolean();
+
+  // Reset copy state after timeout when copied is true
+  useTimeout(() => {
+    if (copied) {
+      setCopiedFalse();
+    }
+  }, copied ? UI_TIMEOUTS.clipboard_reset_delay_ms : null);
 
   const handleCopy = async (event?: React.MouseEvent) => {
     event?.stopPropagation(); // Prevent parent click handlers
 
     try {
       await navigator.clipboard.writeText(content);
-      setCopied(true);
+      setCopiedTrue();
       toasts.raw.success(successMessage);
       onCopySuccess?.();
-
-      // Use unified config for timeout
-      setTimeout(() => setCopied(false), UI_TIMEOUTS.clipboard_reset_delay_ms);
     } catch (error) {
       const normalized = normalizeError(error, 'SimpleCopyButton: clipboard write failed');
       logger.warn({ err: normalized,

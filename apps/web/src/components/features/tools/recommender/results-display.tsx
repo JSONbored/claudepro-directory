@@ -52,6 +52,7 @@ import {
   toasts,
 } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
+import { useBoolean } from '@heyclaude/web-runtime/hooks';
 import { usePathname } from 'next/navigation';
 import { useCallback, useState, useTransition } from 'react';
 
@@ -81,12 +82,12 @@ interface ResultsDisplayProps {
 }
 
 export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProps) {
-  const [showShareModal, setShowShareModal] = useState(false);
+  const { value: showShareModal, setTrue: setShowShareModalTrue, setFalse: setShowShareModalFalse } = useBoolean();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [isPending, startTransition] = useTransition();
   const [minScore, setMinScore] = useState(60);
   const [maxResults, setMaxResults] = useState(10);
-  const [showRefinePanel, setShowRefinePanel] = useState(false);
+  const { value: showRefinePanel, setValue: setShowRefinePanel } = useBoolean();
   const { openAuthModal } = useAuthModal();
   const pathname = usePathname();
   const { user, status } = useAuthenticatedUser({ context: 'ResultsDisplay' });
@@ -222,7 +223,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setShowShareModal(true)}
+            onClick={setShowShareModalTrue}
             className="gap-2"
           >
             <Share2 className={UI_CLASSES.ICON_SM} />
@@ -600,7 +601,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
         <ShareResults
           shareUrl={shareUrl}
           resultCount={results?.length ?? 0}
-          onClose={() => setShowShareModal(false)}
+          onClose={setShowShareModalFalse}
         />
       ) : null}
     </div>

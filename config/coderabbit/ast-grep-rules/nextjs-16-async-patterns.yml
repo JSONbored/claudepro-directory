@@ -8,10 +8,11 @@ id: missing-await-async-params
 language: typescript
 rule:
   all:
-    - pattern: export default async function $PAGE($PARAMS: { params: $TYPE }) { $$$ }
-      kind: function_declaration
+    - kind: function_declaration
       has:
-        pattern: params: Promise<$TYPE>
+        pattern: export default async function $PAGE($PARAMS) { $$$ }
+    - has:
+        regex: params:\s*Promise<
     - not:
         has:
           pattern: const $RESOLVED = await params
@@ -24,10 +25,11 @@ id: missing-await-async-search-params
 language: typescript
 rule:
   all:
-    - pattern: export default async function $PAGE($PARAMS: { searchParams: $TYPE }) { $$$ }
-      kind: function_declaration
+    - kind: function_declaration
       has:
-        pattern: searchParams: Promise<$TYPE>
+        pattern: export default async function $PAGE($PARAMS) { $$$ }
+    - has:
+        regex: searchParams:\s*Promise<
     - not:
         has:
           pattern: const $RESOLVED = await searchParams
@@ -40,8 +42,11 @@ id: missing-await-async-metadata
 language: typescript
 rule:
   all:
-    - pattern: export (async )?function generateMetadata($PARAMS: { params: Promise<$TYPE> }) { $$$ }
-      kind: function_declaration
+    - kind: function_declaration
+      has:
+        pattern: export (async )?function generateMetadata($PARAMS) { $$$ }
+    - has:
+        regex: params:\s*Promise<
     - not:
         has:
           pattern: const $RESOLVED = await params
@@ -52,15 +57,17 @@ severity: error
 # Rule: Detect incorrect metadata function signature (should accept Promise params)
 id: incorrect-metadata-signature
 language: typescript
+files:
+  - 'app/**/page.tsx'
 rule:
   all:
-    - pattern: export function generateMetadata($PARAMS: { params: $TYPE }) { $$$ }
-      kind: function_declaration
+    - kind: function_declaration
       has:
-        pattern: params: $TYPE
-        not:
-          pattern: Promise<$TYPE>
-    - inside:
-        pattern: app/**/page.tsx
+        pattern: export function generateMetadata($PARAMS) { $$$ }
+    - has:
+        regex: params:\s+\w+
+    - not:
+        has:
+          regex: params:\s*Promise<
 message: "Next.js 16 metadata functions must accept Promise params. Change: params: Type to params: Promise<Type>"
 severity: error

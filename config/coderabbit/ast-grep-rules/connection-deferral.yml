@@ -7,12 +7,13 @@
 # Rule: Detect non-deterministic operations before connection()
 id: non-deterministic-before-connection
 language: typescript
+files:
+  - 'app/**/*.tsx'
 rule:
   all:
-    - pattern: export default async function $COMPONENT($$$) { $$$ }
-      kind: function_declaration
-    - inside:
-        pattern: app/**/*.tsx
+    - kind: function_declaration
+      has:
+        pattern: export default async function $COMPONENT($$$) { $$$ }
     - has:
         pattern: (Date.now()|Math.random()|new Date()|performance.now()|crypto.randomUUID())($$$)
     - not:
@@ -25,12 +26,13 @@ severity: error
 # Rule: Detect missing connection() in server components with non-deterministic operations
 id: missing-connection-with-non-deterministic
 language: typescript
+files:
+  - 'app/**/*.tsx'
 rule:
   all:
-    - pattern: export default async function $COMPONENT($$$) { $$$ }
-      kind: function_declaration
-    - inside:
-        pattern: app/**/*.tsx
+    - kind: function_declaration
+      has:
+        pattern: export default async function $COMPONENT($$$) { $$$ }
     - has:
         pattern: (Date.now()|Math.random()|new Date()|performance.now()|crypto.randomUUID())($$$)
     - not:
@@ -43,12 +45,13 @@ severity: error
 # Rule: Detect connection() called after non-deterministic operations
 id: connection-after-non-deterministic
 language: typescript
+files:
+  - 'app/**/*.tsx'
 rule:
   all:
-    - pattern: export default async function $COMPONENT($$$) { $$$ }
-      kind: function_declaration
-    - inside:
-        pattern: app/**/*.tsx
+    - kind: function_declaration
+      has:
+        pattern: export default async function $COMPONENT($$$) { $$$ }
     - has:
         pattern: await connection()
     - has:

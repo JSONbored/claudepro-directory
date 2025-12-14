@@ -44,6 +44,7 @@ import type { Database } from '@heyclaude/database-types';
 import { useLocalStorage } from './use-local-storage.ts';
 import type { FilterState } from '../types/component.types.ts';
 import { useCallback, useState } from 'react';
+import { useBoolean } from './use-boolean.ts';
 
 /** Options for useUnifiedSearch hook */
 export interface UseUnifiedSearchOptions {
@@ -90,7 +91,7 @@ export function useUnifiedSearch({
   onFiltersChange,
 }: UseUnifiedSearchOptions = {}): UseUnifiedSearchReturn {
   const [searchQuery, setSearchQuery] = useState('');
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const { value: isFilterOpen, setValue: setIsFilterOpen } = useBoolean();
 
   // Persist sort preference in localStorage
   const { value: savedSort, setValue: setSavedSort } = useLocalStorage<

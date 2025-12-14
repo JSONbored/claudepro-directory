@@ -7,7 +7,7 @@
 
 import { normalizeError } from '@heyclaude/shared-runtime';
 import { isValidProvider, validateNextParameter } from '@heyclaude/web-runtime';
-import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks';
+import { useAuthenticatedUser, useBoolean, useTimeout } from '@heyclaude/web-runtime/hooks';
 import { AlertCircle, Loader2 } from '@heyclaude/web-runtime/icons';
 import { logClientError, logClientWarn } from '@heyclaude/web-runtime/logging/client';
 import {
@@ -49,6 +49,8 @@ export default function OAuthLinkCallbackPage({
   const [status, setStatus] = useState<'error' | 'loading'>('loading');
   const [errorMessage, setErrorMessage] = useState<null | string>(null);
   const [provider, setProvider] = useState<null | string>(null);
+  const { setTrue: setShouldRedirectTrue, value: shouldRedirect } = useBoolean();
+  const [redirectProvider, setRedirectProvider] = useState<null | string>(null);
   const hasAttempted = useRef<boolean>(false);
   const {
     isAuthenticated,
@@ -57,9 +59,24 @@ export default function OAuthLinkCallbackPage({
     user,
   } = useAuthenticatedUser({ context: 'OAuthLinkCallback' });
 
+  // Use useTimeout for redirect when user is not authenticated
+  useTimeout(
+    () => {
+      if (shouldRedirect && redirectProvider) {
+        const next = validateNextParameter(
+          searchParameters.get('next'),
+          '/account/connected-accounts'
+        );
+        router.push(
+          `/login?redirect=${encodeURIComponent(`/auth/link/${redirectProvider}?next=${encodeURIComponent(next)}`)}`
+        );
+      }
+    },
+    shouldRedirect ? 2000 : null
+  );
+
   useEffect(() => {
     let mounted = true;
-    let redirectTimeoutId: null | ReturnType<typeof setTimeout> = null;
 
     // Use shared validation utility to prevent open redirects
     /**
@@ -125,17 +142,11 @@ export default function OAuthLinkCallbackPage({
             provider: rawProvider,
             route,
           });
-          // Guard redirect with mounted check and store timeout ID for cleanup
-          redirectTimeoutId = setTimeout(() => {
-            if (!mounted) return; // Don't redirect if component unmounted
-            const next = validateNextParameter(
-              searchParameters.get('next'),
-              '/account/connected-accounts'
-            );
-            router.push(
-              `/login?redirect=${encodeURIComponent(`/auth/link/${rawProvider}?next=${encodeURIComponent(next)}`)}`
-            );
-          }, 2000);
+          // Set state to trigger useTimeout redirect
+          if (mounted) {
+            setRedirectProvider(rawProvider);
+            setShouldRedirectTrue();
+          }
           return;
         }
 
@@ -207,11 +218,6 @@ export default function OAuthLinkCallbackPage({
 
     return () => {
       mounted = false;
-      // Clear any pending redirect timeout on unmount
-      if (redirectTimeoutId) {
-        clearTimeout(redirectTimeoutId);
-        redirectTimeoutId = null;
-      }
     };
   }, [
     resolvedParameters.provider,
@@ -255,7 +261,7 @@ export default function OAuthLinkCallbackPage({
           </CardDescription>
         </CardHeader>
         <CardContent className={UI_CLASSES.FLEX_COL_GAP_2}>
-          <Button type="button" onClick={() => router.push('/account/connected-accounts')}>
+          <Button onClick={() => router.push('/account/connected-accounts')} type="button">
             Return to Connected Accounts
           </Button>
         </CardContent>

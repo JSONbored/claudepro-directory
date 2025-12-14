@@ -40,9 +40,9 @@ import {
   cloneElement,
   type HTMLAttributes,
   type ReactElement,
-  useState,
 } from 'react';
 import { Button, Tabs, TabsContent, TabsList, TabsTrigger, cn } from '@heyclaude/web-runtime/ui';
+import { useBoolean, useTimeout } from '@heyclaude/web-runtime/hooks';
 
 export type SnippetProps = ComponentProps<typeof Tabs>;
 
@@ -84,7 +84,14 @@ export const SnippetCopyButton = ({
   children,
   ...props
 }: SnippetCopyButtonProps) => {
-  const [isCopied, setIsCopied] = useState(false);
+  const { value: isCopied, setTrue: setIsCopiedTrue, setFalse: setIsCopiedFalse } = useBoolean();
+
+  // Use useTimeout for automatic reset
+  useTimeout(() => {
+    if (isCopied) {
+      setIsCopiedFalse();
+    }
+  }, isCopied ? timeout : null);
 
   const copyToClipboard = () => {
     if (
@@ -96,10 +103,8 @@ export const SnippetCopyButton = ({
     }
 
     navigator.clipboard.writeText(value).then(() => {
-      setIsCopied(true);
+      setIsCopiedTrue();
       onCopy?.();
-
-      setTimeout(() => setIsCopied(false), timeout);
     }, onError);
   };
 

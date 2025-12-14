@@ -32,6 +32,7 @@
  */
 
 import { cn } from '@heyclaude/web-runtime/ui';
+import { useBoolean, useTimeout, useInterval } from '@heyclaude/web-runtime/hooks';
 import { motion, type MotionProps } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
 
@@ -83,33 +84,32 @@ export const TypingAnimation = ({
   });
 
   const [displayedText, setDisplayedText] = useState<string>("");
-  const [started, setStarted] = useState(false);
+  const { value: started, setTrue: setStartedTrue } = useBoolean();
   const elementRef = useRef<HTMLElement | null>(null);
 
-  useEffect(() => {
-    const startTimeout = setTimeout(() => {
-      setStarted(true);
-    }, delay);
-    return () => clearTimeout(startTimeout);
-  }, [delay]);
+  useTimeout(() => {
+    setStartedTrue();
+  }, delay);
+
+  const [typingIndex, setTypingIndex] = useState(0);
 
   useEffect(() => {
+    if (!started) {
+      setTypingIndex(0);
+      setDisplayedText('');
+      return;
+    }
+    setTypingIndex(0);
+    setDisplayedText('');
+  }, [started, children]);
+
+  useInterval(() => {
     if (!started) return;
-
-    let i = 0;
-    const typingEffect = setInterval(() => {
-      if (i < children.length) {
-        setDisplayedText(children.substring(0, i + 1));
-        i++;
-      } else {
-        clearInterval(typingEffect);
-      }
-    }, duration);
-
-    return () => {
-      clearInterval(typingEffect);
-    };
-  }, [children, duration, started]);
+    if (typingIndex < children.length) {
+      setDisplayedText(children.substring(0, typingIndex + 1));
+      setTypingIndex((prev) => prev + 1);
+    }
+  }, started && typingIndex < children.length ? duration : null);
 
   return (
     <MotionComponent
@@ -125,9 +125,15 @@ export const TypingAnimation = ({
 interface TerminalProps {
   children: React.ReactNode;
   className?: string;
+  /**
+   * If true, wraps children in <pre><code> tags for simple terminal output.
+   * If false, allows custom structure (e.g., interactive terminals with input areas).
+   * @default true
+   */
+  wrapInPreCode?: boolean;
 }
 
-export const Terminal = ({ children, className }: TerminalProps) => {
+export const Terminal = ({ children, className, wrapInPreCode = true }: TerminalProps) => {
   return (
     <div
       className={cn(
@@ -142,9 +148,13 @@ export const Terminal = ({ children, className }: TerminalProps) => {
           <div className="h-2 w-2 rounded-full bg-green-500"></div>
         </div>
       </div>
-      <pre className="p-4">
-        <code className="grid gap-y-1 overflow-auto">{children}</code>
-      </pre>
+      {wrapInPreCode ? (
+        <pre className="p-4">
+          <code className="grid gap-y-1 overflow-auto">{children}</code>
+        </pre>
+      ) : (
+        <div className="p-4">{children}</div>
+      )}
     </div>
   );
 };

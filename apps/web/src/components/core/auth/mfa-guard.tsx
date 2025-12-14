@@ -7,8 +7,9 @@
 
 import { requiresMFAChallenge } from '@heyclaude/web-runtime';
 import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
+import { useBoolean } from '@heyclaude/web-runtime/hooks';
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 
 import { MFAChallengeDialog } from '@/src/components/features/account/mfa/mfa-challenge-dialog';
 
@@ -30,9 +31,9 @@ interface MFAGuardProps {
  * @see createSupabaseBrowserClient
  */
 export function MFAGuard({ children }: MFAGuardProps) {
-  const [checking, setChecking] = useState(true);
-  const [requiresMFA, setRequiresMFA] = useState(false);
-  const [mfaDialogOpen, setMfaDialogOpen] = useState(false);
+  const { value: checking, setFalse: setCheckingFalse } = useBoolean(true);
+  const { value: requiresMFA, setValue: setRequiresMFA } = useBoolean();
+  const { value: mfaDialogOpen, setValue: setMfaDialogOpen } = useBoolean();
   const router = useRouter();
   const supabase = createSupabaseBrowserClient();
 
@@ -50,7 +51,7 @@ export function MFAGuard({ children }: MFAGuardProps) {
     } catch {
       setRequiresMFA(false);
     } finally {
-      setChecking(false);
+      setCheckingFalse();
     }
   }, [supabase]);
 

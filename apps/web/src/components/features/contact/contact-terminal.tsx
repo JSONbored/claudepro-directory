@@ -27,9 +27,6 @@ import { Check, X } from '@heyclaude/web-runtime/icons';
 import { logClientError, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import {
   cn,
-  AnimatedSpan,
-  Terminal,
-  TypingAnimation,
   Button,
   Command,
   CommandEmpty,
@@ -45,11 +42,13 @@ import {
   SheetTitle,
   Textarea,
 } from '@heyclaude/web-runtime/ui';
+import { Terminal, AnimatedSpan, TypingAnimation } from '@/src/components/ui/terminal';
 import { STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { AnimatePresence, motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useBoolean } from '@heyclaude/web-runtime/hooks';
 
 // Internal type with non-nullable fields (after transformation)
 interface ContactCommand {
@@ -75,18 +74,18 @@ interface OutputLine {
 export function ContactTerminal() {
   const router = useRouter();
   const { fireConfetti } = useConfetti();
-  const [mounted, setMounted] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const { value: mounted, setTrue: setMountedTrue } = useBoolean();
+  const { value: isLoading, setTrue: setIsLoadingTrue, setFalse: setIsLoadingFalse } = useBoolean(true);
   const [loadError, setLoadError] = useState<null | string>(null);
   const [commands, setCommands] = useState<ContactCommand[]>([]);
   const [input, setInput] = useState('');
   const [output, setOutput] = useState<OutputLine[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const { value: showSuggestions, setFalse: setShowSuggestionsFalse, setValue: setShowSuggestions } = useBoolean();
+  const { value: isSheetOpen, setTrue: setIsSheetOpenTrue, setFalse: setIsSheetOpenFalse, setValue: setIsSheetOpenValue } = useBoolean();
   const [selectedCategory, setSelectedCategory] = useState<
     Database['public']['Enums']['contact_category']
   >('general' as Database['public']['Enums']['contact_category']);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { value: isSubmitting, setTrue: setIsSubmittingTrue, setFalse: setIsSubmittingFalse } = useBoolean();
   const inputRef = useRef<HTMLInputElement>(null);
   const outputEndRef = useRef<HTMLDivElement>(null);
   const shouldReduceMotion = useReducedMotion();
@@ -115,7 +114,7 @@ export function ContactTerminal() {
   // Define loadCommands with addOutput as dependency
   const loadCommands = useCallback(async () => {
     try {
-      setIsLoading(true);
+      setIsLoadingTrue();
       await runLoggedAsync(
         async () => {
           const result = await getContactCommands({});
@@ -161,13 +160,13 @@ export function ContactTerminal() {
       setLoadError('Failed to load commands. Please refresh the page.');
       addOutput('error', 'Failed to load commands. Please refresh the page.');
     } finally {
-      setIsLoading(false);
+      setIsLoadingFalse();
     }
   }, [addOutput, runLoggedAsync]);
 
   // Initial load effect
   useEffect(() => {
-    setMounted(true);
+    setMountedTrue();
     loadCommands().catch((error) => {
       logUnhandledPromise('ContactTerminal.loadCommands', error, {
         source: 'initial_load',
@@ -248,7 +247,7 @@ export function ContactTerminal() {
             setSelectedCategory(
               command.action_value as Database['public']['Enums']['contact_category']
             );
-            setIsSheetOpen(true);
+            setIsSheetOpenTrue();
             addOutput(
               'success',
               `Opening ${command.action_value} contact form...`,
@@ -342,14 +341,14 @@ export function ContactTerminal() {
       const commandText = input.trim();
       addOutput('command', `$ ${commandText}`);
       setInput('');
-      setShowSuggestions(false);
+      setShowSuggestionsFalse();
       executeCommand(commandText).catch((error) => {
         logUnhandledPromise('ContactTerminal.executeCommand', error, {
           command: commandText,
         });
       });
     } else if (e.key === 'Escape') {
-      setShowSuggestions(false);
+      setShowSuggestionsFalse();
     }
   };
 
@@ -366,7 +365,7 @@ export function ContactTerminal() {
 
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    setIsSubmittingTrue();
 
     const formData = new FormData(e.currentTarget);
     const name = formData.get('name') as string;
@@ -390,7 +389,7 @@ export function ContactTerminal() {
               "✓ Message sent successfully! We'll get back to you soon.",
               <Check className="h-3 w-3" />
             );
-            setIsSheetOpen(false);
+            setIsSheetOpenFalse();
             // Fire confetti (if enabled)
             const confettiEnabled = checkConfettiEnabled();
             if (confettiEnabled) {
@@ -434,7 +433,7 @@ export function ContactTerminal() {
         // Fire-and-forget tracking
       });
     } finally {
-      setIsSubmitting(false);
+      setIsSubmittingFalse();
     }
   };
 
@@ -452,7 +451,7 @@ export function ContactTerminal() {
   // Loading state
   if (isLoading) {
     return (
-      <Terminal className="relative flex min-h-[500px] flex-col">
+      <Terminal className="relative flex min-h-[500px] flex-col" wrapInPreCode={false}>
         <div className="flex flex-1 items-center justify-center">
           <motion.div
             initial={{ opacity: 0 }}
@@ -470,7 +469,7 @@ export function ContactTerminal() {
   // Error state
   if (loadError) {
     return (
-      <Terminal className="relative flex min-h-[500px] flex-col">
+      <Terminal className="relative flex min-h-[500px] flex-col" wrapInPreCode={false}>
         <div className="flex flex-1 items-center justify-center">
           <motion.div
             initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 10 }}
@@ -503,7 +502,7 @@ export function ContactTerminal() {
 
   return (
     <>
-      <Terminal className="relative flex min-h-[500px] flex-col">
+      <Terminal className="relative flex min-h-[500px] flex-col" wrapInPreCode={false}>
         {/* Output History */}
         <div className="mb-4 min-h-0 flex-1 overflow-y-auto">
           <AnimatePresence>
@@ -584,7 +583,7 @@ export function ContactTerminal() {
       </Terminal>
 
       {/* Contact Form Sheet */}
-      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpenValue}>
         <SheetContent>
           <SheetHeader>
             <SheetTitle>
@@ -636,7 +635,7 @@ export function ContactTerminal() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setIsSheetOpen(false)}
+                onClick={setIsSheetOpenFalse}
                 disabled={isSubmitting}
               >
                 Cancel

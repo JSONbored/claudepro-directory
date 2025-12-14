@@ -37,8 +37,18 @@ import {
 import { motion } from 'motion/react';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
+import { useIsClient } from '@heyclaude/web-runtime/hooks';
 
 import { ProductionCodeBlock } from '@/src/components/content/interactive-code-block';
+import { CodeTabs } from '@/src/components/ui/code-tabs';
+import {
+  Snippet,
+  SnippetCopyButton,
+  SnippetHeader,
+  SnippetTabsContent,
+  SnippetTabsList,
+  SnippetTabsTrigger,
+} from '@/src/components/ui/snippet';
 
 const ICONS: Record<Database['public']['Enums']['content_category'], LucideIcon> = {
   agents: Sparkles,
@@ -145,14 +155,11 @@ function downloadTextFile(filename: string, content: string) {
  */
 function TrustedHTML({ html, className }: { className?: string; html: string }) {
   // Hooks must be called unconditionally (Rules of Hooks)
-  const [safeHtml, setSafeHtml] = useState<string>(
-    globalThis.window === undefined ? html : '' // Start empty on client, will be set in useEffect
-  );
-  const [isClient, setIsClient] = useState(false);
+  const [safeHtml, setSafeHtml] = useState<string>('');
+  const isClient = useIsClient();
 
   useEffect(() => {
-    setIsClient(true);
-    if (globalThis.window !== undefined && html && typeof html === 'string') {
+    if (isClient && html && typeof html === 'string') {
       import('dompurify')
         .then((DOMPurify) => {
           const sanitized = DOMPurify.default.sanitize(html, {
@@ -199,7 +206,7 @@ function TrustedHTML({ html, className }: { className?: string; html: string }) 
           setSafeHtml(html);
         });
     }
-  }, [html]);
+  }, [html, isClient]);
 
   // Early return check after hooks (Rules of Hooks compliance)
   if (!html || typeof html !== 'string') {
@@ -216,13 +223,15 @@ function TrustedHTML({ html, className }: { className?: string; html: string }) 
 /**
  * Renders a tabbed interface for selecting and viewing multiple code blocks.
  *
- * Each tab displays a labeled code block and, when the active block includes a filename,
- * exposes a Download button that saves the block's code and invokes an optional download callback.
+ * Uses the new shadcn CodeTabs component for better UX and consistent design.
+ * Each tab displays a labeled code block with syntax highlighting, and when the active block
+ * includes a filename, exposes a Download button that saves the block's code and invokes
+ * an optional download callback.
  *
  * @param props.blocks - Array of code block objects. Each block must include `code`, `html`, `label`, and `language`. `filename` is optional; when present a Download button is shown for that block.
  * @param props.onDownload - Optional callback invoked after a block is downloaded.
  *
- * @see ProductionCodeBlock
+ * @see CodeTabs - New shadcn component for tabbed code display
  * @see downloadTextFile
  */
 function CodeGroupTabs({
@@ -238,43 +247,47 @@ function CodeGroupTabs({
   }>;
   onDownload?: () => void;
 }) {
-  const [activeIndex, setActiveIndex] = React.useState(0);
-  const activeBlock = blocks[activeIndex];
+  // Convert blocks array to codes Record for CodeTabs
+  // Use label as key, code as value
+  const codes = React.useMemo(() => {
+    const codesRecord: Record<string, string> = {};
+    for (const block of blocks) {
+      codesRecord[block.label] = block.code;
+    }
+    return codesRecord;
+  }, [blocks]);
 
-  if (!activeBlock) return null;
+  // Get language from first block (all blocks should have same language in a group)
+  const lang = blocks[0]?.language ?? 'text';
+
+  // Track active tab to show download button for correct file
+  const [activeTab, setActiveTab] = React.useState<string>(blocks[0]?.label ?? '');
+
+  // Find active block for download button
+  const activeBlock = React.useMemo(() => {
+    return blocks.find((block) => block.label === activeTab);
+  }, [blocks, activeTab]);
+
+  if (blocks.length === 0) return null;
 
   return (
     <div className="space-y-3">
-      {/* Tab buttons */}
-      <div className="border-border flex flex-wrap gap-1 border-b pb-2">
-        {blocks.map((block, index) => (
-          <button
-            key={`${block.label}-${index}`}
-            type="button"
-            onClick={() => setActiveIndex(index)}
-            className={cn(
-              'rounded-t-md px-3 py-1.5 text-xs font-medium transition-colors',
-              activeIndex === index
-                ? 'bg-accent/20 text-accent-foreground'
-                : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
-            )}
-          >
-            {block.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Active code block */}
-      <ProductionCodeBlock
-        html={activeBlock.html}
-        code={activeBlock.code}
-        language={activeBlock.language}
-        filename={activeBlock.filename}
-        maxLines={25}
+      {/* CodeTabs component with syntax highlighting */}
+      <CodeTabs
+        codes={codes}
+        lang={lang}
+        onValueChange={(value) => {
+          setActiveTab(value);
+        }}
+        copyButton={true}
+        onCopy={() => {
+          // Track copy action if needed
+          return true;
+        }}
       />
 
-      {/* Download button */}
-      {activeBlock.filename ? (
+      {/* Download button for active tab (if filename exists) */}
+      {activeBlock?.filename ? (
         <div className="mt-3">
           <Button
             variant="outline"
@@ -433,15 +446,30 @@ function Platform({
       {paths ? (
         <div>
           <h5 className="mb-2 text-sm font-medium">Configuration Paths</h5>
-          <div className="space-y-1 text-sm">
-            {Object.entries(paths).map(([k, p]) => (
-              <div key={k} className={UI_CLASSES.FLEX_GAP_2}>
-                <UnifiedBadge variant="base" style="outline" className="capitalize">
-                  {k}
-                </UnifiedBadge>
-                <code className="bg-muted rounded px-1 py-0.5 text-xs">{String(p)}</code>
-              </div>
-            ))}
+          <div className="space-y-2 text-sm">
+            {Object.entries(paths).map(([k, p]) => {
+              const pathValue = String(p);
+              return (
+                <div key={k} className="flex items-center gap-2">
+                  <UnifiedBadge variant="base" style="outline" className="capitalize shrink-0">
+                    {k}
+                  </UnifiedBadge>
+                  <Snippet defaultValue={k} className="flex-1">
+                    <SnippetHeader>
+                      <SnippetTabsList>
+                        <SnippetTabsTrigger value={k} className="sr-only">
+                          {k}
+                        </SnippetTabsTrigger>
+                      </SnippetTabsList>
+                      <SnippetCopyButton value={pathValue} />
+                    </SnippetHeader>
+                    <SnippetTabsContent value={k} className="text-xs py-2">
+                      {pathValue}
+                    </SnippetTabsContent>
+                  </Snippet>
+                </div>
+              );
+            })}
           </div>
         </div>
       ) : null}

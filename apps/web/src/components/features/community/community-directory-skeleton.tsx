@@ -12,6 +12,7 @@
 
 import { Skeleton } from '@heyclaude/web-runtime/ui';
 import { SPRING, STAGGER } from '@heyclaude/web-runtime/design-system';
+import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
 
@@ -47,6 +48,8 @@ function ProfileCardSkeleton() {
  * Directory tabs skeleton matching DirectoryTabs structure
  */
 function DirectoryTabsSkeleton() {
+  const prefersReducedMotion = useReducedMotion();
+  
   return (
     <div className="w-full">
       {/* Tabs list */}
@@ -58,10 +61,6 @@ function DirectoryTabsSkeleton() {
       {/* Tab content - Profile grid */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {KEYS_9.map((key, i) => {
-          const prefersReducedMotion =
-            typeof window !== 'undefined' &&
-            window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
           return (
             <motion.div
               key={key}
@@ -86,6 +85,8 @@ function DirectoryTabsSkeleton() {
  * Contributors sidebar skeleton matching ContributorsSidebar structure
  */
 function ContributorsSidebarSkeleton() {
+  const prefersReducedMotion = useReducedMotion();
+  
   return (
     <aside className="space-y-6">
       {/* Trending Contributors Card */}
@@ -100,10 +101,6 @@ function ContributorsSidebarSkeleton() {
         </CardHeader>
         <CardContent className="space-y-3">
           {KEYS_5.map((key, i) => {
-            const prefersReducedMotion =
-              typeof window !== 'undefined' &&
-              window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
             return (
               <motion.div
                 key={key}
@@ -146,10 +143,6 @@ function ContributorsSidebarSkeleton() {
         </CardHeader>
         <CardContent className="space-y-3">
           {KEYS_5.map((key, i) => {
-            const prefersReducedMotion =
-              typeof window !== 'undefined' &&
-              window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
             return (
               <motion.div
                 key={key}

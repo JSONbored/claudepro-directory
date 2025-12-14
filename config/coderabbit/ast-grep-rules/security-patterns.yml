@@ -7,15 +7,13 @@ id: missing-input-validation
 language: typescript
 rule:
   all:
-    - pattern: $SUPABASE.$METHOD($$$)
-      kind: call_expression
+    - kind: call_expression
       has:
         kind: member_expression
         regex: supabase\.(from|rpc)
     - not:
         precedes:
-          pattern: z\.object($$$)
-          kind: call_expression
+          pattern: z.object($$$)
 message: "Database queries should validate input with Zod schemas before execution. Add input validation using z.object() from zod"
 severity: error
 
@@ -25,10 +23,10 @@ id: unsafe-url-construction
 language: typescript
 rule:
   all:
-    - pattern: new URL($INPUT, $BASE)
-      kind: new_expression
+    - kind: new_expression
+      has:
+        pattern: new URL($INPUT, $BASE)
     - has:
-        kind: identifier
         regex: user|input|param|query|body
 message: "URL construction with user input must be validated/sanitized. Use URL validation or sanitization before constructing URLs"
 severity: error
@@ -37,12 +35,13 @@ severity: error
 # Rule: Detect missing auth checks in API routes
 id: missing-auth-in-api-route
 language: typescript
+files:
+  - 'app/api/**/*.ts'
 rule:
   all:
-    - pattern: export async function $METHOD($REQ: NextRequest) { $$$ }
-      kind: function_declaration
-    - inside:
-        pattern: app/api/**/*.ts
+    - kind: function_declaration
+      has:
+        pattern: 'export async function $METHOD($REQ: NextRequest) { $$$ }'
     - not:
         has:
           pattern: (getUser|checkAuth|verifyToken)($$$)
@@ -53,10 +52,13 @@ severity: error
 # Rule: Detect missing auth checks in server actions
 id: missing-auth-in-server-action
 language: typescript
+files:
+  - '**/actions/**/*.ts'
+  - '**/actions/**/*.tsx'
 rule:
   all:
-    - pattern: 'use server'
-    - has:
+    - kind: variable_declarator
+      has:
         pattern: export (const|function) $ACTION($$$) { $$$ }
     - not:
         has:
@@ -70,11 +72,11 @@ id: pii-logging-without-hash
 language: typescript
 rule:
   all:
-    - pattern: ($LOGGER|logger).$METHOD($$$, { $CONTEXT })
-      kind: call_expression
+    - kind: call_expression
+      has:
+        pattern: ($LOGGER|logger).$METHOD($$$, { $CONTEXT })
     - has:
-        pattern: (userId|user_id|email|phone|ssn): $VALUE
-          regex: userId|user_id|email|phone|ssn
+        regex: (userId|user_id|email|phone|ssn):\s*\$
     - not:
         inside:
           pattern: logger.child({ $$$ })
@@ -90,10 +92,12 @@ id: dangerous-eval-usage
 language: typescript
 rule:
   any:
-    - pattern: eval($$$)
-      kind: call_expression
-    - pattern: new Function($$$)
-      kind: new_expression
+    - kind: call_expression
+      has:
+        pattern: eval($$$)
+    - kind: new_expression
+      has:
+        pattern: new Function($$$)
 message: "eval() and Function() are dangerous and should be avoided. Use safer alternatives like JSON.parse() or schema validation"
 severity: error
 
@@ -103,10 +107,8 @@ id: unsafe-inner-html
 language: typescript
 rule:
   all:
-    - pattern: dangerouslySetInnerHTML={{ __html: $INPUT }}
-      kind: jsx_attribute
+    - pattern: 'dangerouslySetInnerHTML={{ __html: $INPUT }}'
     - has:
-        kind: identifier
         regex: user|input|param|query|body
 message: "User input in dangerouslySetInnerHTML must be sanitized. Use DOMPurify or similar sanitization library"
 severity: error
@@ -115,14 +117,15 @@ severity: error
 # Rule: Detect missing CORS headers in API routes
 id: missing-cors-headers
 language: typescript
+files:
+  - 'app/api/**/*.ts'
 rule:
   all:
-    - pattern: export async function $METHOD($REQ: NextRequest) { $$$ return NextResponse.$METHOD($$$) }
-      kind: function_declaration
-    - inside:
-        pattern: app/api/**/*.ts
+    - kind: function_declaration
+      has:
+        pattern: 'export async function $METHOD($REQ: NextRequest) { $$$ return NextResponse.$METHOD($$$) }'
     - not:
         has:
-          pattern: (Access-Control|CORS|cors)($$$)
+          regex: (Access-Control|CORS|cors)
 message: "API routes should include proper CORS headers. Use CORS middleware or set Access-Control-Allow-Origin headers"
 severity: warning

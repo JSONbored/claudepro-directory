@@ -8,6 +8,7 @@ import { type Database } from '@heyclaude/database-types';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { isValidInternalPath, getSafeExternalUrl } from '@heyclaude/web-runtime/core';
 import React, { useEffect, useState } from 'react';
+import { useIsClient } from '@heyclaude/web-runtime/hooks';
 
 import { Checklist } from '@/src/components/content/checklist';
 import { ProductionCodeBlock } from '@/src/components/content/interactive-code-block';
@@ -228,12 +229,11 @@ function TrustedHTML({ html, className, id }: { className?: string; html: string
   // Hooks must be called unconditionally before any early returns
   // Initialize with empty string during SSR to prevent XSS - will be sanitized on client
   const [safeHtml, setSafeHtml] = useState<string>('');
-  const [isClient, setIsClient] = useState(false);
-
+  const isClient = useIsClient();
+  
   useEffect(() => {
-    setIsClient(true);
     // Only sanitize on client - html should be pre-sanitized but we sanitize again for safety
-    if (globalThis.window !== undefined && html && typeof html === 'string') {
+    if (isClient && html && typeof html === 'string') {
       import('dompurify')
         .then((DOMPurify) => {
           const sanitized = DOMPurify.default.sanitize(html, {
@@ -302,7 +302,7 @@ function TrustedHTML({ html, className, id }: { className?: string; html: string
           setSafeHtml(html);
         });
     }
-  }, [html]);
+  }, [html, isClient]);
 
   // Early return AFTER all hooks
   if (!html || typeof html !== 'string') {

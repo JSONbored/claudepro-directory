@@ -28,7 +28,8 @@ import {
   CommandList,
   CommandShortcut,
 } from '@heyclaude/web-runtime/ui';
-import { useCallback, useEffect, useState, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
+import { useBoolean } from '../../hooks/index.ts';
 
 import { useSearchContext } from '../context/search-provider';
 
@@ -76,7 +77,7 @@ export function CommandPalette({
   quickActions = [],
 }: CommandPaletteProps) {
   const { query, setQuery, results } = useSearchContext();
-  const [internalOpen, setInternalOpen] = useState(false);
+  const { value: internalOpen, toggle: toggleInternalOpen, setValue: setInternalOpen } = useBoolean();
 
   // Generate unique ID for the input (for autofill support)
   const inputId = useMemo(() => `command-palette-input-${Math.random().toString(36).substring(2, 9)}`, []);
@@ -89,7 +90,7 @@ export function CommandPalette({
     if (onOpenChange) {
       onOpenChange(!isOpen);
     } else {
-      setInternalOpen((prev) => !prev);
+      toggleInternalOpen();
     }
   }, [onOpenChange, isOpen]);
 

@@ -138,13 +138,14 @@
   animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Only apply GPU acceleration to root transition, not all elements */
+/* GPU-accelerated root transition for smooth theme changes
+ * Optimized: Only uses opacity and clip-path (no expensive filters)
+ */
 ::view-transition-old(root),
 ::view-transition-new(root) {
-  will-change: transform, opacity;
+  will-change: opacity, clip-path;
   backface-visibility: hidden;
-  animation-duration: var(--duration-quick);
-  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  /* Duration and timing are set in globals.css for theme-specific animations */
 }
 
 /* ===========================

@@ -22,6 +22,7 @@ import {
   Input,
   Label,
 } from '@heyclaude/web-runtime/ui';
+import { useBoolean } from '@heyclaude/web-runtime/hooks';
 import { useCallback, useEffect, useState } from 'react';
 
 interface MFAChallengeDialogProps {
@@ -30,7 +31,7 @@ interface MFAChallengeDialogProps {
 }
 
 export function MFAChallengeDialog({ open, onVerified }: MFAChallengeDialogProps) {
-  const [loading, setLoading] = useState(false);
+  const { value: loading, setTrue: setLoadingTrue, setFalse: setLoadingFalse } = useBoolean();
   const [error, setError] = useState<null | string>(null);
   const [factors, setFactors] = useState<MFAFactor[]>([]);
   const [selectedFactor, setSelectedFactor] = useState<MFAFactor | null>(null);
@@ -44,7 +45,7 @@ export function MFAChallengeDialog({ open, onVerified }: MFAChallengeDialogProps
   });
 
   const loadFactors = useCallback(async () => {
-    setLoading(true);
+    setLoadingTrue();
     setError(null);
 
     try {
@@ -75,7 +76,7 @@ export function MFAChallengeDialog({ open, onVerified }: MFAChallengeDialogProps
       setError(message);
       errorToasts.actionFailed('load MFA factors', message);
     } finally {
-      setLoading(false);
+      setLoadingFalse();
     }
   }, [supabase, runLoggedAsync]);
 
@@ -85,7 +86,7 @@ export function MFAChallengeDialog({ open, onVerified }: MFAChallengeDialogProps
       return;
     }
 
-    setLoading(true);
+    setLoadingTrue();
     setError(null);
 
     try {
@@ -136,7 +137,7 @@ export function MFAChallengeDialog({ open, onVerified }: MFAChallengeDialogProps
       errorToasts.actionFailed('verify MFA', message);
       setVerifyCode('');
     } finally {
-      setLoading(false);
+      setLoadingFalse();
     }
   }, [supabase, selectedFactor, verifyCode, onVerified, runLoggedAsync]);
 

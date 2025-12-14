@@ -8,10 +8,9 @@
 import { type Database } from '@heyclaude/database-types';
 import { checkConfettiEnabled } from '@heyclaude/web-runtime/config/static-configs';
 import { getLayoutFlags } from '@heyclaude/web-runtime/data';
-import { useConfetti } from '@heyclaude/web-runtime/hooks';
+import { useConfetti, useSessionStorage } from '@heyclaude/web-runtime/hooks';
 import {
   logClientError,
-  logClientWarn,
   normalizeError,
 } from '@heyclaude/web-runtime/logging/client';
 import { DIMENSIONS, toasts, ErrorBoundary } from '@heyclaude/web-runtime/ui';
@@ -72,13 +71,6 @@ function CommandMenuWrapper({ children }: { children: React.ReactNode }) {
 const NEWSLETTER_OPT_IN_COOKIE = 'newsletter_opt_in';
 const NEWSLETTER_OPT_IN_SEEN_FLAG = 'newsletter_opt_in_seen';
 
-const buildStorageErrorContext = (error: unknown) => {
-  const normalized = normalizeError(error, 'Storage operation failed');
-  return {
-    error: normalized.message,
-  };
-};
-
 type WindowWithCookieStore = typeof globalThis &
   Window & {
     cookieStore?: {
@@ -136,28 +128,16 @@ export function LayoutContent({ children, announcement }: LayoutContentProps) {
     prefix.endsWith('/') ? pathname.startsWith(prefix) : pathname === prefix
   );
 
+  // Use useSessionStorage for newsletter toast flag
+  const [newsletterToastSeen, setNewsletterToastSeen] = useSessionStorage<string | null>(
+    NEWSLETTER_OPT_IN_SEEN_FLAG,
+    null,
+    { initializeWithValue: true }
+  );
+
   useEffect(() => {
     if (isAuthRoute) return;
-
-    let hasSeenToast = false;
-    try {
-      hasSeenToast = sessionStorage.getItem(NEWSLETTER_OPT_IN_SEEN_FLAG) === 'true';
-    } catch (error) {
-      const normalized = normalizeError(error, 'Unable to read newsletter toast flag from sessionStorage');
-      logClientWarn(
-        '[Storage] Unable to read newsletter toast flag',
-        normalized,
-        'LayoutContent.readToastFlag',
-        {
-          component: 'LayoutContent',
-          action: 'read-toast-flag',
-          category: 'storage',
-          ...buildStorageErrorContext(error),
-        }
-      );
-    }
-
-    if (hasSeenToast) return;
+    if (newsletterToastSeen === 'true') return;
 
     const cookieMatch = document.cookie.match(/newsletter_opt_in=([^;]+)/);
     if (!cookieMatch) return;
@@ -165,22 +145,7 @@ export function LayoutContent({ children, announcement }: LayoutContentProps) {
     const value = cookieMatch[1];
     if (value !== 'success') return;
 
-    try {
-      sessionStorage.setItem(NEWSLETTER_OPT_IN_SEEN_FLAG, 'true');
-    } catch (error) {
-      const normalized = normalizeError(error, 'Unable to set newsletter toast flag');
-      logClientWarn(
-        '[Storage] Unable to set newsletter toast flag',
-        normalized,
-        'LayoutContent.setToastFlag',
-        {
-          component: 'LayoutContent',
-          action: 'set-toast-flag',
-          category: 'storage',
-          ...buildStorageErrorContext(error),
-        }
-      );
-    }
+    setNewsletterToastSeen('true');
 
     toasts.raw.success("You're in!", {
       description: "We'll send the next Claude drop on Monday.",
@@ -207,7 +172,7 @@ export function LayoutContent({ children, announcement }: LayoutContentProps) {
         }
       );
     });
-  }, [fireConfetti, isAuthRoute, pathname]);
+  }, [fireConfetti, isAuthRoute, pathname, newsletterToastSeen, setNewsletterToastSeen]);
 
   // Auth routes: minimal wrapper with no height constraints for true fullscreen experience
   if (isAuthRoute) {

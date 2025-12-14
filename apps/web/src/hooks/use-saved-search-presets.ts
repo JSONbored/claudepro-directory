@@ -10,12 +10,13 @@
  * - Guards against SSR/localStorage absence to avoid hydration issues.
  */
 
-import { logClientError, logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
+import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import {
   type FilterState,
   type SavedSearchPreset,
 } from '@heyclaude/web-runtime/types/component.types';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useBoolean, useDebounceCallback, useLocalStorage } from '@heyclaude/web-runtime/hooks';
 
 const STORAGE_PREFIX = 'saved-search-presets:v1:';
 const PRESET_LIMIT = 5;
@@ -57,41 +58,43 @@ export function useSavedSearchPresets({
   );
 
   const canUseStorage = useMemo(() => !disableStorage && isStorageAvailable(), [disableStorage]);
-  const writeTimeoutRef = useRef<null | ReturnType<typeof setTimeout>>(null);
+
+  // Use useLocalStorage hook for modern storage management
+  const { value: storedPresets, setValue: setStoredPresets, error: storageError } = useLocalStorage<SavedSearchPreset[]>(
+    storageKey,
+    {
+      defaultValue: [],
+      syncAcrossTabs: false,
+    }
+  );
 
   const [presets, setPresets] = useState<SavedSearchPreset[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const { value: isLoaded, setTrue: setIsLoadedTrue } = useBoolean();
 
-  // Bootstrap from localStorage on mount (client-only)
+  // Log storage errors
   useEffect(() => {
-    if (!canUseStorage || isLoaded) return;
-
-    const stored = loadFromStorage(storageKey);
-    if (stored.length > 0) {
-      setPresets(stored);
+    if (storageError) {
+      logClientWarn(
+        '[Storage] localStorage error in useSavedSearchPresets',
+        storageError,
+        'useSavedSearchPresets.storage',
+        {
+          component: 'useSavedSearchPresets',
+          action: 'storage-error',
+          category: 'storage',
+          storageKey,
+        }
+      );
     }
-    setIsLoaded(true);
-  }, [canUseStorage, isLoaded, storageKey]);
+  }, [storageError, storageKey]);
 
-  // Cleanup pending debounced writes
-  useEffect(() => {
-    return () => {
-      if (writeTimeoutRef.current) {
-        clearTimeout(writeTimeoutRef.current);
-        writeTimeoutRef.current = null;
-      }
-    };
-  }, []);
-
-  const schedulePersist = useCallback(
-    (nextPresets: SavedSearchPreset[]) => {
-      if (!canUseStorage) return;
-      if (writeTimeoutRef.current) {
-        clearTimeout(writeTimeoutRef.current);
-      }
-      writeTimeoutRef.current = setTimeout(() => {
+  // Debounced persist function - now uses useLocalStorage setValue
+  const debouncedPersist = useDebounceCallback(
+    useCallback(
+      (nextPresets: SavedSearchPreset[]) => {
+        if (!canUseStorage) return;
         try {
-          globalThis.localStorage.setItem(storageKey, JSON.stringify(nextPresets));
+          setStoredPresets(nextPresets);
         } catch (error) {
           const normalized = normalizeError(error, 'Failed to persist presets');
           logClientWarn(
@@ -106,10 +109,36 @@ export function useSavedSearchPresets({
             }
           );
         }
-        writeTimeoutRef.current = null;
-      }, WRITE_DEBOUNCE_MS);
+      },
+      [canUseStorage, setStoredPresets]
+    ),
+    WRITE_DEBOUNCE_MS
+  );
+
+  // Bootstrap from localStorage on mount (client-only) - now uses useLocalStorage value
+  useEffect(() => {
+    if (!canUseStorage || isLoaded) return;
+
+    // Validate and sanitize stored presets
+    const stored = storedPresets && Array.isArray(storedPresets) 
+      ? enforcePresetLimit(
+          storedPresets
+            .map((preset) => sanitizePresetFromStorage(preset))
+            .filter((preset): preset is SavedSearchPreset => preset !== null)
+        )
+      : [];
+
+    if (stored.length > 0) {
+      setPresets(stored);
+    }
+    setIsLoadedTrue();
+  }, [canUseStorage, isLoaded, storageKey, setIsLoadedTrue, storedPresets]);
+
+  const schedulePersist = useCallback(
+    (nextPresets: SavedSearchPreset[]) => {
+      debouncedPersist(nextPresets);
     },
-    [canUseStorage, storageKey]
+    [debouncedPersist]
   );
 
   const updatePresets = useCallback(
@@ -220,7 +249,7 @@ export function useSavedSearchPresets({
     setPresets([]);
     if (canUseStorage) {
       try {
-        globalThis.localStorage.removeItem(storageKey);
+        setStoredPresets([]);
       } catch (error) {
         const normalized = normalizeError(error, 'Failed to clear presets');
         logClientWarn(
@@ -236,7 +265,7 @@ export function useSavedSearchPresets({
         );
       }
     }
-  }, [canUseStorage, storageKey]);
+  }, [canUseStorage, setStoredPresets]);
 
   return {
     presets,
@@ -268,45 +297,7 @@ function isStorageAvailable(): boolean {
   }
 }
 
-function loadFromStorage(key: string): SavedSearchPreset[] {
-  if (!isStorageAvailable()) return [];
-
-  try {
-    const raw = globalThis.localStorage.getItem(key);
-    if (!raw) return [];
-
-    const parsed = JSON.parse(raw) as SavedSearchPreset[];
-    if (!Array.isArray(parsed)) {
-      logClientWarn(
-        'useSavedSearchPresets: invalid preset payload',
-        undefined,
-        'useSavedSearchPresets.readPresets',
-        {
-          component: 'useSavedSearchPresets',
-          action: 'read-presets',
-        }
-      );
-      return [];
-    }
-
-    return enforcePresetLimit(
-      parsed
-        .map((preset) => sanitizePresetFromStorage(preset))
-        .filter((preset): preset is SavedSearchPreset => preset !== null)
-    );
-  } catch (error) {
-    logClientError(
-      'useSavedSearchPresets: failed to parse stored presets',
-      normalizeError(error, 'Failed to parse stored presets'),
-      'useSavedSearchPresets.readPresets',
-      {
-        component: 'useSavedSearchPresets',
-        action: 'read-presets',
-      }
-    );
-    return [];
-  }
-}
+// loadFromStorage function removed - now using useLocalStorage hook directly
 
 function sanitizePresetFromStorage(
   entry: Record<string, unknown> | SavedSearchPreset

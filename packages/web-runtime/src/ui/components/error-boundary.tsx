@@ -24,8 +24,9 @@ import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary';
 import type { FallbackProps } from 'react-error-boundary';
 import { SPRING } from '../../design-system/index.ts';
 import { motion } from 'motion/react';
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import type { ComponentType } from 'react';
+import { useBoolean } from '../../hooks/index.ts';
 import Link from 'next/link';
 import { ROUTES } from '@heyclaude/shared-runtime';
 
@@ -66,13 +67,13 @@ function ErrorCodeBlock({ content }: { content: string }) {
  * Matches design system with Motion.dev animations and consistent styling
  */
 function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
-  const [isResetting, setIsResetting] = useState(false);
+  const { value: isResetting, setTrue: setIsResettingTrue } = useBoolean();
 
   const handleReset = useCallback(() => {
-    setIsResetting(true);
+    setIsResettingTrue();
     resetErrorBoundary();
     window.location.reload();
-  }, [resetErrorBoundary]);
+  }, [resetErrorBoundary, setIsResettingTrue]);
 
   return (
     <motion.div

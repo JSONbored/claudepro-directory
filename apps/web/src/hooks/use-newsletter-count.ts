@@ -8,7 +8,8 @@
 
 import { POLLING_CONFIG } from '@heyclaude/web-runtime/config/unified-config';
 import { logClientError, logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
-import { useEffect, useRef, useState } from 'react';
+import { useInterval, useIsClient, useBoolean, useLocalStorage } from '@heyclaude/web-runtime/hooks';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 export interface UseNewsletterCountReturn {
   count: null | number;
@@ -29,12 +30,23 @@ const DEFAULT_POLL_INTERVAL_MS = 300_000; // 5 minutes
  */
 export function useNewsletterCount(): UseNewsletterCountReturn {
   const [count, setCount] = useState<null | number>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { value: isLoading, setFalse: setIsLoadingFalse } = useBoolean(true);
   const [error, setError] = useState<Error | null>(null);
   const [cacheTtlMs, setCacheTtlMs] = useState(LOCAL_STORAGE_CACHE_TTL_MS);
   const [pollIntervalMs, setPollIntervalMs] = useState(DEFAULT_POLL_INTERVAL_MS);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const { value: isTabVisible, setValue: setIsTabVisible } = useBoolean(true);
   const configLoadedRef = useRef(false);
+  const isClient = useIsClient();
+  
+  // Use useLocalStorage hooks for cache management
+  const { value: cachedCount, setValue: setCachedCount } = useLocalStorage<string | null>(CACHE_KEY, {
+    defaultValue: null,
+    syncAcrossTabs: false,
+  });
+  const { value: cacheTimestamp, setValue: setCacheTimestamp } = useLocalStorage<string | null>(CACHE_TIMESTAMP_KEY, {
+    defaultValue: null,
+    syncAcrossTabs: false,
+  });
 
   // Load config from unified config once when hook mounts (client-side only)
   useEffect(() => {
@@ -48,69 +60,78 @@ export function useNewsletterCount(): UseNewsletterCountReturn {
     setPollIntervalMs(pollInterval);
   }, []);
 
-  useEffect(() => {
-    const fetchCount = async () => {
-      // Check cache first
-      if (globalThis.window !== undefined) {
-        const cachedCount = localStorage.getItem(CACHE_KEY);
-        const cacheTs = localStorage.getItem(CACHE_TIMESTAMP_KEY);
-        const cacheAge = Date.now() - (cacheTs ? Number.parseInt(cacheTs, 10) : 0);
+  // Fetch count function (using useCallback to update ref)
+  const fetchCountRef = useRef<() => Promise<void>>(async () => {});
 
-        if (cachedCount && cacheAge < cacheTtlMs) {
-          setCount(Number.parseInt(cachedCount, 10));
-          setIsLoading(false);
+  const fetchCount = useCallback(async () => {
+    // Check cache first
+    if (isClient && cachedCount && cacheTimestamp) {
+      const cacheAge = Date.now() - Number.parseInt(cacheTimestamp, 10);
+
+      if (cacheAge < cacheTtlMs) {
+        const parsedCount = Number.parseInt(cachedCount, 10);
+        if (!Number.isNaN(parsedCount)) {
+          setCount(parsedCount);
+          setIsLoadingFalse();
           return;
         }
       }
+    }
 
-      // Fetch from API route (avoids HMR issues with server actions)
-      try {
-        const response = await fetch('/api/flux/email/count', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
+    // Fetch from API route (avoids HMR issues with server actions)
+    try {
+      const response = await fetch('/api/flux/email/count', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
-        if (!response.ok) {
-          throw new Error(`Failed to fetch newsletter count: ${response.status} ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        const newCount = data?.count ?? null;
-
-        if (newCount === null || typeof newCount !== 'number') {
-          throw new Error('Invalid newsletter count response');
-        } else {
-          setCount(newCount);
-          setIsLoading(false);
-          setError(null);
-
-          // Update cache
-          if (globalThis.window !== undefined) {
-            localStorage.setItem(CACHE_KEY, newCount.toString());
-            localStorage.setItem(CACHE_TIMESTAMP_KEY, Date.now().toString());
-          }
-        }
-      } catch (error_) {
-        const normalized = normalizeError(error_, 'Failed to fetch newsletter count');
-        logClientError(
-          '[Newsletter] Failed to fetch newsletter count',
-          normalized,
-          'useNewsletterCount.fetch',
-          {
-            component: 'useNewsletterCount',
-            action: 'fetch-count',
-            category: 'newsletter',
-          }
-        );
-        setError(error_ as Error);
-        setIsLoading(false);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch newsletter count: ${response.status} ${response.statusText}`);
       }
-    };
 
-    // Initial fetch
-    fetchCount().catch((error_) => {
+      const data = await response.json();
+      const newCount = data?.count ?? null;
+
+      if (newCount === null || typeof newCount !== 'number') {
+        throw new Error('Invalid newsletter count response');
+      } else {
+        setCount(newCount);
+        setIsLoadingFalse();
+        setError(null);
+
+        // Update cache using useLocalStorage hooks
+        if (isClient) {
+          setCachedCount(newCount.toString());
+          setCacheTimestamp(Date.now().toString());
+        }
+      }
+    } catch (error_: unknown) {
+      const normalized = normalizeError(error_, 'Failed to fetch newsletter count');
+      logClientError(
+        '[Newsletter] Failed to fetch newsletter count',
+        normalized,
+        'useNewsletterCount.fetch',
+        {
+          component: 'useNewsletterCount',
+          action: 'fetch-count',
+          category: 'newsletter',
+        }
+      );
+      setError(error_ as Error);
+      setIsLoadingFalse();
+    }
+  }, [cacheTtlMs, isClient, cachedCount, cacheTimestamp, setCachedCount, setCacheTimestamp]);
+
+  // Update ref when fetchCount changes
+  useEffect(() => {
+    fetchCountRef.current = fetchCount;
+  }, [fetchCount]);
+
+  // Initial fetch
+  useEffect(() => {
+    fetchCount().catch((error_: unknown) => {
       const normalized = normalizeError(error_, 'Initial newsletter count fetch failed');
       logClientWarn(
         '[Newsletter] Initial fetch failed',
@@ -123,34 +144,15 @@ export function useNewsletterCount(): UseNewsletterCountReturn {
         }
       );
     });
+  }, [fetchCount]);
 
-    // Start polling with current interval
-    intervalRef.current = setInterval(() => {
-      fetchCount().catch((error_) => {
-        const normalized = normalizeError(error_, 'Polling newsletter count fetch failed');
-        logClientWarn(
-          '[Newsletter] Polling fetch failed',
-          normalized,
-          'useNewsletterCount.poll',
-          {
-            component: 'useNewsletterCount',
-            action: 'poll-fetch',
-            category: 'newsletter',
-          }
-        );
-      });
-    }, pollIntervalMs);
-
-    // Visibility API: Pause polling when tab is hidden
+  // Visibility API: Track tab visibility
+  useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.hidden) {
-        if (intervalRef.current) {
-          clearInterval(intervalRef.current);
-          intervalRef.current = null;
-        }
-      } else {
-        // Resume polling when tab becomes visible
-        fetchCount().catch((error_) => {
+      setIsTabVisible(!document.hidden);
+      // Fetch immediately when tab becomes visible
+      if (!document.hidden && fetchCountRef.current) {
+        fetchCountRef.current().catch((error_: unknown) => {
           const normalized = normalizeError(error_, 'Resume newsletter count fetch failed');
           logClientWarn(
             '[Newsletter] Resume fetch failed',
@@ -163,33 +165,36 @@ export function useNewsletterCount(): UseNewsletterCountReturn {
             }
           );
         });
-        if (!intervalRef.current) {
-          intervalRef.current = setInterval(() => {
-            fetchCount().catch((error_) => {
-              const normalized = normalizeError(error_, 'Polling newsletter count fetch failed');
-              logClientWarn(
-                '[Newsletter] Polling fetch failed',
-                normalized,
-                'useNewsletterCount.poll',
-                {
-                  component: 'useNewsletterCount',
-                  action: 'poll-fetch',
-                  category: 'newsletter',
-                }
-              );
-            });
-          }, pollIntervalMs);
-        }
       }
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
-
     return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [cacheTtlMs, pollIntervalMs]);
+  }, []);
+
+  // Polling with useInterval (pauses when tab is hidden)
+  useInterval(
+    () => {
+      if (fetchCountRef.current) {
+        fetchCountRef.current().catch((error_: unknown) => {
+          const normalized = normalizeError(error_, 'Polling newsletter count fetch failed');
+          logClientWarn(
+            '[Newsletter] Polling fetch failed',
+            normalized,
+            'useNewsletterCount.poll',
+            {
+              component: 'useNewsletterCount',
+              action: 'poll-fetch',
+              category: 'newsletter',
+            }
+          );
+        });
+      }
+    },
+    isTabVisible ? pollIntervalMs : null // Pause when tab is hidden
+  );
 
   return { count, isLoading, error };
 }

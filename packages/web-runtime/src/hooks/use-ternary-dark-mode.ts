@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useLocalStorage } from './use-local-storage.ts';
 
 /**
  * Ternary dark mode value: 'system', 'dark', or 'light'
@@ -96,29 +97,24 @@ export function useTernaryDarkMode(
   const {
     defaultValue = 'system',
     localStorageKey = 'use-ternary-dark-mode',
-    initializeWithValue = true,
+    // Note: initializeWithValue is part of the API but not used internally
+    // useLocalStorage always initializes with defaultValue
+    // initializeWithValue: _initializeWithValue = true,
   } = options;
 
-  const [ternaryDarkMode, setTernaryDarkMode] = useState<TernaryDarkMode>(() => {
-    if (typeof window === 'undefined') {
-      return defaultValue;
+  // Use useLocalStorage for persistent storage
+  // Note: useLocalStorage always initializes with defaultValue, so initializeWithValue is handled
+  const { value: storedMode, setValue: setStoredMode } = useLocalStorage<TernaryDarkMode>(
+    localStorageKey,
+    {
+      defaultValue,
+      syncAcrossTabs: true,
     }
+  );
 
-    if (!initializeWithValue) {
-      return defaultValue;
-    }
-
-    try {
-      const stored = localStorage.getItem(localStorageKey);
-      if (stored === 'light' || stored === 'dark' || stored === 'system') {
-        return stored;
-      }
-    } catch {
-      // localStorage not available
-    }
-
-    return defaultValue;
-  });
+  // Use stored mode (useLocalStorage returns defaultValue if not found)
+  const ternaryDarkMode = storedMode;
+  const setTernaryDarkMode = setStoredMode;
 
   const [systemPreference, setSystemPreference] = useState<boolean>(() => {
     if (typeof window === 'undefined') {
@@ -137,18 +133,7 @@ export function useTernaryDarkMode(
     ternaryDarkMode === 'dark' ||
     (ternaryDarkMode === 'system' && systemPreference);
 
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    // Persist to localStorage
-    try {
-      localStorage.setItem(localStorageKey, ternaryDarkMode);
-    } catch {
-      // localStorage not available or quota exceeded
-    }
-  }, [ternaryDarkMode, localStorageKey]);
+  // useLocalStorage handles persistence automatically, no need for separate useEffect
 
   useEffect(() => {
     if (typeof window === 'undefined') {

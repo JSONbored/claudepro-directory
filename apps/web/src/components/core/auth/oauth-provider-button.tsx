@@ -11,7 +11,8 @@ import { cn, toasts } from '@heyclaude/web-runtime/ui';
 import { MICROINTERACTIONS, DURATION } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
-import { useCallback, useState } from 'react';
+import { useBoolean } from '@heyclaude/web-runtime/hooks';
+import { useCallback } from 'react';
 
 interface OAuthProviderButtonProps {
   className?: string;
@@ -56,7 +57,7 @@ export function OAuthProviderButton({
   className,
   newsletterOptIn = false,
 }: OAuthProviderButtonProps) {
-  const [loading, setLoading] = useState(false);
+  const { value: loading, setTrue: setLoadingTrue, setFalse: setLoadingFalse } = useBoolean();
   const shouldReduceMotion = useReducedMotion();
   const supabase = createSupabaseBrowserClient();
 
@@ -64,7 +65,7 @@ export function OAuthProviderButton({
   const IconComponent = config.icon;
 
   const handleSignIn = useCallback(async () => {
-    setLoading(true);
+    setLoadingTrue();
 
     const callbackUrl = new URL(`${globalThis.location.origin}/auth/callback`);
     callbackUrl.searchParams.set('newsletter', newsletterOptIn ? 'true' : 'false');
@@ -105,7 +106,7 @@ export function OAuthProviderButton({
           },
         },
       });
-      setLoading(false);
+      setLoadingFalse();
     }
   }, [provider, redirectTo, newsletterOptIn, supabase]);
 

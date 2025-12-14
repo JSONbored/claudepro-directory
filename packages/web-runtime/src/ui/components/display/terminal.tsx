@@ -2,6 +2,7 @@
 
 import { DURATION } from '../../../design-system/index.ts';
 import { cn } from '../../utils.ts';
+import { useBoolean, useInterval, useTimeout } from '../../../hooks/index.ts';
 import { type MotionProps, motion } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
 
@@ -48,33 +49,29 @@ export const TypingAnimation = ({
   });
 
   const [displayedText, setDisplayedText] = useState<string>('');
-  const [started, setStarted] = useState(false);
+  const { value: started, setTrue: setStartedTrue } = useBoolean();
+  const [typingIndex, setTypingIndex] = useState(0);
   const elementRef = useRef<HTMLElement | null>(null);
 
+  // Reset when children change
   useEffect(() => {
-    const startTimeout = setTimeout(() => {
-      setStarted(true);
-    }, delay);
-    return () => clearTimeout(startTimeout);
-  }, [delay]);
+    setTypingIndex(0);
+    setDisplayedText('');
+  }, [children]);
 
-  useEffect(() => {
+  // Use useTimeout for initial delay
+  useTimeout(() => {
+    setStartedTrue();
+  }, delay);
+
+  // Use useInterval for typing animation
+  useInterval(() => {
     if (!started) return;
-
-    let i = 0;
-    const typingEffect = setInterval(() => {
-      if (i < children.length) {
-        setDisplayedText(children.substring(0, i + 1));
-        i++;
-      } else {
-        clearInterval(typingEffect);
-      }
-    }, duration);
-
-    return () => {
-      clearInterval(typingEffect);
-    };
-  }, [children, duration, started]);
+    if (typingIndex < children.length) {
+      setDisplayedText(children.substring(0, typingIndex + 1));
+      setTypingIndex((prev) => prev + 1);
+    }
+  }, started && typingIndex < children.length ? duration : null);
 
   return (
     <MotionComponent

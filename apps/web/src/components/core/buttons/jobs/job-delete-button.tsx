@@ -12,7 +12,8 @@ import { Trash } from '@heyclaude/web-runtime/icons';
 import { type ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
 import { cn, toasts, UI_CLASSES, Button } from '@heyclaude/web-runtime/ui';
 import { usePathname, useRouter } from 'next/navigation';
-import { useCallback, useState, useTransition } from 'react';
+import { useCallback, useTransition } from 'react';
+import { useBoolean } from '@heyclaude/web-runtime/hooks';
 
 import { useAuthModal } from '@/src/hooks/use-auth-modal';
 
@@ -32,7 +33,7 @@ export function JobDeleteButton({
   const { user, status } = useAuthenticatedUser({ context: 'JobDeleteButton' });
   const { openAuthModal } = useAuthModal();
   const [isPending, startTransition] = useTransition();
-  const [isDeleting, setIsDeleting] = useState(false);
+  const { value: isDeleting, setTrue: setIsDeletingTrue, setFalse: setIsDeletingFalse } = useBoolean();
   const runLoggedAsync = useLoggedAsync({
     scope: 'JobDeleteButton',
     defaultMessage: 'Job deletion failed',
@@ -61,7 +62,7 @@ export function JobDeleteButton({
       return;
     }
 
-    setIsDeleting(true);
+    setIsDeletingTrue();
     // User is authenticated - proceed with delete action
     startTransition(async () => {
       try {
@@ -103,10 +104,10 @@ export function JobDeleteButton({
             },
           });
         }
-        setIsDeleting(false);
+        setIsDeletingFalse();
       }
     });
-  }, [user, status, openAuthModal, pathname, jobId, router, runLoggedAsync]);
+  }, [user, status, openAuthModal, pathname, jobId, router, runLoggedAsync, setIsDeletingTrue, setIsDeletingFalse]);
 
   return (
     <Button

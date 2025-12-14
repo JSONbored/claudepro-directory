@@ -26,7 +26,7 @@ import {
   cn,
 } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useBoolean } from '@heyclaude/web-runtime/hooks';
 
 export interface Navigation3DCardProps {
   href: string;
@@ -67,7 +67,7 @@ export function Navigation3DCard({
   category,
   className,
 }: Navigation3DCardProps) {
-  const [isHovered, setIsHovered] = useState(false);
+  const { value: isHovered, setTrue: setIsHoveredTrue, setFalse: setIsHoveredFalse } = useBoolean();
 
   const gradient = category
     ? categoryGradients[category] ?? defaultGradient
@@ -77,8 +77,8 @@ export function Navigation3DCard({
     <div
       className={cn('relative group/pin cursor-pointer h-full w-full flex items-center justify-center', className)}
       style={{ perspective: '1000px' }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={setIsHoveredTrue}
+      onMouseLeave={setIsHoveredFalse}
     >
       {/* Card with forward tilt transform (shadcn 3d-pin style) */}
       <div

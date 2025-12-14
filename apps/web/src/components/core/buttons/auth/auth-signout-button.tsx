@@ -11,8 +11,9 @@ import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { LogOut } from '@heyclaude/web-runtime/icons';
 import { type ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
 import { toasts, UI_CLASSES, Button } from '@heyclaude/web-runtime/ui';
+import { useBoolean } from '@heyclaude/web-runtime/hooks';
 import { useRouter } from 'next/navigation';
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 
 export type AuthSignOutScope = 'global' | 'local' | 'others';
 
@@ -33,7 +34,7 @@ export function AuthSignOutButton({
   disabled = false,
   scope = 'global',
 }: AuthSignOutButtonProps) {
-  const [loading, setLoading] = useState(false);
+  const { value: loading, setTrue: setLoadingTrue, setFalse: setLoadingFalse } = useBoolean();
   const router = useRouter();
   const supabase = createSupabaseBrowserClient();
   const runLoggedAsync = useLoggedAsync({
@@ -43,7 +44,7 @@ export function AuthSignOutButton({
   });
 
   const handleSignOut = useCallback(async () => {
-    setLoading(true);
+    setLoadingTrue();
     try {
       await runLoggedAsync(
         async () => {
@@ -75,7 +76,7 @@ export function AuthSignOutButton({
         },
       });
     } finally {
-      setLoading(false);
+      setLoadingFalse();
     }
   }, [scope, supabase, router, runLoggedAsync]);
 

@@ -19,8 +19,8 @@ import { useEffect, useState } from 'react';
 export interface ThemeToggleLayoutProps {
   /** Whether the toggle is checked (dark mode) */
   checked: boolean;
-  /** Callback when toggle state changes */
-  onCheckedChange: (checked: boolean) => void;
+  /** Callback when toggle state changes - receives checked state and optional event */
+  onCheckedChange: (checked: boolean, event?: React.MouseEvent) => void;
   /** Optional className for styling */
   className?: string;
   /** Optional aria-label for accessibility */
@@ -47,10 +47,10 @@ export function ThemeToggleLayout({
     setIsOn(checked);
   }, [checked]);
 
-  const toggleSwitch = () => {
+  const toggleSwitch = (event: React.MouseEvent) => {
     const newValue = !isOn;
     setIsOn(newValue);
-    onCheckedChange(newValue);
+    onCheckedChange(newValue, event);
   };
 
   return (

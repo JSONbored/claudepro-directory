@@ -16,6 +16,7 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';
 import { useMemo, useEffect, useLayoutEffect, useId, useState, useCallback, useRef } from 'react';
+import { useBoolean, useDebounceCallback } from '@heyclaude/web-runtime/hooks';
 
 type NavigationMenuItem = {
   path: string;
@@ -43,13 +44,12 @@ export function NavigationCommandMenu({
   open: controlledOpen,
   onOpenChange,
 }: NavigationCommandMenuProps) {
-  const [internalOpen, setInternalOpen] = useState(false);
+  const { value: internalOpen, setValue: setInternalOpen } = useBoolean();
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<DisplayableContent[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
+  const { value: isSearching, setTrue: setIsSearchingTrue, setFalse: setIsSearchingFalse } = useBoolean();
   const router = useRouter();
   const inputId = useId();
-  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const open = controlledOpen === undefined ? internalOpen : controlledOpen;
@@ -64,95 +64,89 @@ export function NavigationCommandMenu({
     }
   }, [controlledOpen, onOpenChange, internalOpen]);
 
+  // Get navigation data from static config (no RPC needed)
+  const navigationData = useMemo(() => getCommandMenuNavigationData(), []);
+
+  // Debounced search function
+  const performSearch = useCallback(async () => {
+    if (!open || !searchQuery.trim()) {
+      setSearchResults([]);
+      setIsSearchingFalse();
+      return;
+    }
+
+    // Cancel previous search
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    setIsSearchingTrue();
+
+    try {
+      const response = await fetch(
+        `/api/search?q=${encodeURIComponent(searchQuery.trim())}&limit=8&entities=content`,
+        { signal: controller.signal }
+      );
+
+      if (controller.signal.aborted) return;
+
+      if (!response.ok) {
+        throw new Error(`Search failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const results = (Array.isArray(data.results) ? data.results : []) as DisplayableContent[];
+
+      if (controller.signal.aborted) return;
+
+      setSearchResults(results);
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        return; // Ignore abort errors
+      }
+      const normalized = normalizeError(error, 'Search failed');
+      logClientError(
+        '[NavigationCommandMenu] Search error',
+        normalized,
+        'NavigationCommandMenu.searchError',
+        {
+          component: 'NavigationCommandMenu',
+          action: 'search-error',
+          query: searchQuery.trim(),
+        }
+      );
+      setSearchResults([]);
+    } finally {
+      if (!controller.signal.aborted) {
+        setIsSearchingFalse();
+        abortControllerRef.current = null;
+      }
+    }
+  }, [open, searchQuery, setIsSearchingTrue, setIsSearchingFalse]);
+
+  // Debounced search execution
+  const debouncedPerformSearch = useDebounceCallback(performSearch, 300);
+
+  // Trigger debounced search when query changes
+  useEffect(() => {
+    debouncedPerformSearch();
+  }, [debouncedPerformSearch]);
+
   // Reset search when menu closes
   useEffect(() => {
     if (!open) {
       setSearchQuery('');
       setSearchResults([]);
-      setIsSearching(false);
-      if (searchTimeoutRef.current) {
-        clearTimeout(searchTimeoutRef.current);
-      }
+      setIsSearchingFalse();
+      debouncedPerformSearch.cancel();
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
     }
-  }, [open]);
-
-  // Get navigation data from static config (no RPC needed)
-  const navigationData = useMemo(() => getCommandMenuNavigationData(), []);
-
-  // Search content when query changes (debounced)
-  useEffect(() => {
-    if (!open || !searchQuery.trim()) {
-      setSearchResults([]);
-      setIsSearching(false);
-      return;
-    }
-
-    // Cancel previous search
-    if (searchTimeoutRef.current) {
-      clearTimeout(searchTimeoutRef.current);
-    }
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-
-    // Debounce search (300ms)
-    searchTimeoutRef.current = setTimeout(async () => {
-      const controller = new AbortController();
-      abortControllerRef.current = controller;
-
-      setIsSearching(true);
-
-      try {
-        const response = await fetch(
-          `/api/search?q=${encodeURIComponent(searchQuery.trim())}&limit=8&entities=content`,
-          { signal: controller.signal }
-        );
-
-        if (controller.signal.aborted) return;
-
-        if (!response.ok) {
-          throw new Error(`Search failed: ${response.status}`);
-        }
-
-        const data = await response.json();
-        const results = (Array.isArray(data.results) ? data.results : []) as DisplayableContent[];
-
-        if (controller.signal.aborted) return;
-
-        setSearchResults(results);
-      } catch (error) {
-        if (error instanceof Error && error.name === 'AbortError') {
-          return; // Ignore abort errors
-        }
-        const normalized = normalizeError(error, 'Search failed');
-        logClientError(
-          '[NavigationCommandMenu] Search error',
-          normalized,
-          'NavigationCommandMenu.searchError',
-          {
-            component: 'NavigationCommandMenu',
-            action: 'search-error',
-            query: searchQuery.trim(),
-          }
-        );
-        setSearchResults([]);
-      } finally {
-        if (!controller.signal.aborted) {
-          setIsSearching(false);
-          abortControllerRef.current = null;
-        }
-      }
-    }, 300);
-
-    return () => {
-      if (searchTimeoutRef.current) {
-        clearTimeout(searchTimeoutRef.current);
-      }
-    };
-  }, [searchQuery, open]);
+  }, [open, setIsSearchingFalse, debouncedPerformSearch]);
 
   // Keyboard shortcut handler (⌘K / Ctrl+K)
   useEffect(() => {

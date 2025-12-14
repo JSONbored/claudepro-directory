@@ -9,7 +9,7 @@ import { DURATION } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { Check, type LucideIcon } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useState } from 'react';
+import { useBoolean } from '@heyclaude/web-runtime/hooks';
 
 interface ContentActionButtonProps extends ButtonStyleProps {
   action: (content: string) => Promise<void>;
@@ -82,7 +82,7 @@ export function ContentActionButton({
   className,
   disabled,
 }: ContentActionButtonProps) {
-  const [isLoading, setIsLoading] = useState(false);
+  const { value: isLoading, setTrue: setIsLoadingTrue, setFalse: setIsLoadingFalse } = useBoolean();
   const { isSuccess, triggerSuccess } = useButtonSuccess();
   const shouldReduceMotion = useReducedMotion();
   const runLoggedAsync = useLoggedAsync({
@@ -95,7 +95,10 @@ export function ContentActionButton({
     // Prevent race conditions
     if (isLoading || isSuccess) return;
 
+    setIsLoadingTrue();
+
     if (!isSafeFetchUrl(url)) {
+      setIsLoadingFalse();
       logClientWarn(
         '[Security] Unsafe URL blocked',
         new Error('Unsafe URL blocked'),
@@ -112,7 +115,6 @@ export function ContentActionButton({
       return;
     }
 
-    setIsLoading(true);
     try {
       await runLoggedAsync(
         async () => {
@@ -158,7 +160,7 @@ export function ContentActionButton({
         },
       });
     } finally {
-      setIsLoading(false);
+      setIsLoadingFalse();
     }
   };
 

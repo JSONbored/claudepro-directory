@@ -49,14 +49,15 @@ import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
+import { useBoolean } from '@heyclaude/web-runtime/hooks';
 
 interface UserMenuProps {
   className?: string;
 }
 
 export function UserMenu({ className }: UserMenuProps) {
-  const [signingOut, setSigningOut] = useState(false);
+  const { value: signingOut, setTrue: setSigningOutTrue, setFalse: setSigningOutFalse } = useBoolean();
   const router = useRouter();
   const shouldReduceMotion = useReducedMotion();
   const { user, status, supabaseClient } = useAuthenticatedUser({
@@ -66,7 +67,7 @@ export function UserMenu({ className }: UserMenuProps) {
   const supabase = supabaseClient;
 
   const handleSignOut = useCallback(async () => {
-    setSigningOut(true);
+    setSigningOutTrue();
 
     try {
       // Use 'local' scope to only sign out from current device
@@ -99,9 +100,9 @@ export function UserMenu({ className }: UserMenuProps) {
         },
       });
     } finally {
-      setSigningOut(false);
+      setSigningOutFalse();
     }
-  }, [supabase, router]);
+  }, [supabase, router, setSigningOutTrue, setSigningOutFalse]);
 
   // Loading state
   if (loading) {

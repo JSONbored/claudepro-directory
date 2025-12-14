@@ -23,7 +23,8 @@ import { SPRING, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system'
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
-import { useId, useMemo, useState } from 'react';
+import { useBoolean } from '@heyclaude/web-runtime/hooks';
+import { useId, useMemo } from 'react';
 
 /**
  * Email validation regex - simple but effective
@@ -47,7 +48,7 @@ const isValidEmail = (email: string): boolean => {
  */
 export function JobsPromo() {
   const { fireConfetti } = useConfetti();
-  const [showNewsletterForm, setShowNewsletterForm] = useState(false);
+  const { value: showNewsletterForm, toggle: toggleShowNewsletterForm, setFalse: setShowNewsletterFormFalse } = useBoolean();
   const shouldReduceMotion = useReducedMotion();
 
   const { email, setEmail, isSubmitting, subscribe, error, reset } = useNewsletter({
@@ -60,7 +61,7 @@ export function JobsPromo() {
       }
       // Reset form after success
       reset();
-      setShowNewsletterForm(false);
+      setShowNewsletterFormFalse();
     },
     logContext: {
       component: 'JobsPromo',
@@ -321,7 +322,7 @@ export function JobsPromo() {
             {/* Toggle Newsletter Form Button */}
             <motion.button
               type="button"
-              onClick={() => setShowNewsletterForm(!showNewsletterForm)}
+              onClick={toggleShowNewsletterForm}
               className={cn(
                 'w-full',
                 'flex items-center justify-center gap-2',

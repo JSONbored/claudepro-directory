@@ -18,6 +18,7 @@
  */
 
 import { createContext, useCallback, useContext, useState, type ReactNode } from 'react';
+import { useBoolean, useIsClient, useTimeout } from '@heyclaude/web-runtime/hooks';
 
 import { AuthModal } from './auth-modal';
 
@@ -49,24 +50,26 @@ const AuthModalContext = createContext<AuthModalContextType | undefined>(undefin
  * from anywhere in the application.
  */
 export function AuthModalProvider({ children }: { children: ReactNode }) {
-  const [isOpen, setIsOpen] = useState(false);
+  const { value: isOpen, setTrue: setIsOpenTrue, setValue: setIsOpen } = useBoolean();
   const [valueProposition, setValueProposition] = useState<string>('Sign in to continue');
   const [redirectTo, setRedirectTo] = useState<string | undefined>();
+  const { value: shouldReset, setTrue: setShouldResetTrue, setFalse: setShouldResetFalse } = useBoolean();
+  const isClient = useIsClient();
 
   // Lazy-load pathname and searchParams only when needed (inside openAuthModal)
   // This prevents "Uncached data was accessed outside of <Suspense>" errors
   // by deferring route data access until the modal is actually opened
   const getPathname = useCallback(() => {
     // Access pathname lazily via a function to avoid blocking render
-    if (typeof window === 'undefined') return '/';
+    if (!isClient) return '/';
     return window.location.pathname;
-  }, []);
+  }, [isClient]);
 
   const getSearchParams = useCallback(() => {
     // Access search params lazily via a function to avoid blocking render
-    if (typeof window === 'undefined') return '';
+    if (!isClient) return '';
     return window.location.search;
-  }, []);
+  }, [isClient]);
 
   const openAuthModal = useCallback(
     (options?: AuthModalOptions) => {
@@ -93,19 +96,25 @@ export function AuthModalProvider({ children }: { children: ReactNode }) {
         setRedirectTo(defaultRedirect);
       }
 
-      setIsOpen(true);
+      setIsOpenTrue();
     },
-    [getPathname, getSearchParams]
+    [getPathname, getSearchParams, setIsOpenTrue]
   );
 
   const closeAuthModal = useCallback(() => {
     setIsOpen(false);
-    // Reset state after animation completes (300ms)
-    setTimeout(() => {
+    // Trigger reset after animation completes (300ms)
+    setShouldResetTrue();
+  }, [setShouldResetTrue]);
+
+  // Reset state after animation completes (300ms) when modal closes
+  useTimeout(() => {
+    if (shouldReset) {
       setValueProposition('Sign in to continue');
       setRedirectTo(undefined);
-    }, 300);
-  }, []);
+      setShouldResetFalse();
+    }
+  }, shouldReset ? 300 : null);
 
   const contextValue: AuthModalContextType = {
     openAuthModal,

@@ -19,6 +19,7 @@ import {
   ANIMATION_CONSTANTS,
 } from '@heyclaude/web-runtime/ui';
 import { memo, useState, useEffect } from 'react';
+import { useBoolean } from '@heyclaude/web-runtime/hooks';
 
 import { SanitizedHTML } from './sanitized-html';
 
@@ -109,7 +110,7 @@ interface AccordionSectionItemProps {
  * @see ChangelogAccordionSections
  */
 function AccordionSectionItem({ section }: AccordionSectionItemProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const { value: isOpen, setValue: setIsOpen } = useBoolean();
   const [htmlContent, setHtmlContent] = useState<string>('');
 
   // Convert markdown to HTML on client side

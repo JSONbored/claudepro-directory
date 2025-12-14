@@ -25,7 +25,6 @@ import {
   cn,
 } from '@heyclaude/web-runtime/ui';
 import { SPRING, STAGGER, MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
-import { SHADOWS } from '@heyclaude/web-runtime/design-tokens';
 import { motion, AnimatePresence } from 'motion/react';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import Link from 'next/link';
@@ -87,15 +86,17 @@ export function PinboardDrawer({ open, onOpenChange }: PinboardDrawerProps) {
       <SheetContent 
         side="right" 
         className={cn(
-          // Modern drawer pattern - similar to Vercel/Raycast side panels
-          'w-full sm:max-w-[400px]',
+          // Premium drawer design - beautiful, modern
+          'w-full sm:max-w-[420px]', // Slightly wider for better content display
           'overflow-y-auto',
-          // Clean borders and rounded corners
-          'rounded-l-xl', // 12px border-radius
-          'border-l border-border',
-          'bg-background',
+          'rounded-l-2xl', // Larger radius for premium feel
+          'border-l border-border/80',
+          'bg-background/98 backdrop-blur-xl', // Glass morphism
+          'shadow-2xl', // Premium shadow
         )}
-        style={{ boxShadow: SHADOWS.elevation.dark.medium }}
+        style={{ 
+          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+        }}
       >
         <SheetHeader className={cn('mb-6 pb-4 border-b border-border/50')}>
           <SheetTitle className={cn('flex items-center gap-2 text-left text-lg font-semibold')}>
@@ -159,15 +160,16 @@ export function PinboardDrawer({ open, onOpenChange }: PinboardDrawerProps) {
                     whileTap={shouldReduceMotion ? {} : MICROINTERACTIONS.card.tap}
                     style={{ transformStyle: 'preserve-3d' }}
                     className={cn(
-                      // Modern card pattern - clean, minimal
-                      'rounded-lg', // 8px border-radius (matches Vercel items)
-                      'border border-border',
-                      'p-4', // 16px padding (comfortable spacing)
-                      'bg-background',
+                      // Premium card design - beautiful, modern
+                      'rounded-xl', // Larger radius for premium feel
+                      'border border-border/60',
+                      'p-4',
+                      'bg-background/50 backdrop-blur-sm', // Subtle glass effect
                       'group',
                       'cursor-pointer',
-                      'hover:bg-accent/50',
-                      'transition-colors duration-150 ease-out', // Vercel's 150ms ease
+                      'hover:bg-accent/40 hover:border-border/80',
+                      'hover:shadow-md',
+                      'transition-all duration-200 ease-out', // Smooth transitions
                     )}
                   >
                     <div className={cn('flex items-start justify-between gap-3')}>

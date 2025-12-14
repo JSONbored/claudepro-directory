@@ -60,9 +60,12 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
+  type RefObject,
 } from 'react';
 import { cn } from '@heyclaude/web-runtime/ui';
+import { useOnClickOutside, useScrollLock } from '@heyclaude/web-runtime/hooks';
 
 type DialogStackContextType = {
   activeIndex: number;
@@ -110,6 +113,21 @@ export const DialogStack = ({
     prop: open,
     ...(onOpenChange ? { onChange: onOpenChange } : {}),
   });
+
+  // Scroll lock: Lock body scroll when dialog stack is open
+  const { lock, unlock } = useScrollLock({ autoLock: false });
+  
+  useEffect(() => {
+    if (isOpen) {
+      lock();
+    } else {
+      unlock();
+    }
+    
+    return () => {
+      unlock(); // Ensure unlock on unmount
+    };
+  }, [isOpen, lock, unlock]);
 
   useEffect(() => {
     if (onOpenChange && isOpen !== undefined) {
@@ -241,10 +259,18 @@ export const DialogStackBody = ({
 }: DialogStackBodyProps) => {
   const context = useContext(DialogStackContext);
   const [totalDialogs, setTotalDialogs] = useState(Children.count(children));
+  const bodyRef = useRef<HTMLDivElement | null>(null);
 
   if (!context) {
     throw new Error('DialogStackBody must be used within a DialogStack');
   }
+
+  // Close dialog when clicking outside the body content
+  useOnClickOutside(bodyRef as RefObject<HTMLDivElement>, () => {
+    if (context.isOpen) {
+      context.setIsOpen(false);
+    }
+  });
 
   if (!context.isOpen) {
     return null;
@@ -266,7 +292,10 @@ export const DialogStackBody = ({
           )}
           {...(props as any)}
         >
-          <div className="pointer-events-auto relative flex w-full flex-col items-center justify-center">
+          <div
+            ref={bodyRef}
+            className="pointer-events-auto relative flex w-full flex-col items-center justify-center"
+          >
             {Children.map(children, (child, index) => {
               const childElement = child as ReactElement<{
                 index: number;

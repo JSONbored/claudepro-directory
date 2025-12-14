@@ -8,7 +8,7 @@
  */
 
 import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
-import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
+import { useBoolean, useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { Button, UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import { AlertCircle, CheckCircle2, ExternalLink, Shield, XCircle } from 'lucide-react';
 import Link from 'next/link';
@@ -37,7 +37,11 @@ interface OAuthConsentClientProps {
  */
 export function OAuthConsentClient({ authDetails, authorizationId }: OAuthConsentClientProps) {
   const router = useRouter();
-  const [isProcessing, setIsProcessing] = useState(false);
+  const {
+    setFalse: setIsProcessingFalse,
+    setTrue: setIsProcessingTrue,
+    value: isProcessing,
+  } = useBoolean();
   const [error, setError] = useState<null | string>(null);
 
   // Use useLoggedAsync for consistent error logging in async operations
@@ -53,7 +57,7 @@ export function OAuthConsentClient({ authDetails, authorizationId }: OAuthConsen
   const supabase = createSupabaseBrowserClient();
 
   const handleApprove = async () => {
-    setIsProcessing(true);
+    setIsProcessingTrue();
     setError(null);
 
     await runLoggedAsync(
@@ -69,13 +73,13 @@ export function OAuthConsentClient({ authDetails, authorizationId }: OAuthConsen
                 ? approveError
                 : 'Failed to approve authorization';
           setError(errorMessage);
-          setIsProcessing(false);
+          setIsProcessingFalse();
           return;
         }
 
         if (!data) {
           setError('No data returned from authorization approval');
-          setIsProcessing(false);
+          setIsProcessingFalse();
           return;
         }
 
@@ -87,7 +91,7 @@ export function OAuthConsentClient({ authDetails, authorizationId }: OAuthConsen
           globalThis.location.href = redirectTo;
         } else {
           setError('No redirect URL provided');
-          setIsProcessing(false);
+          setIsProcessingFalse();
         }
       },
       {
@@ -101,7 +105,7 @@ export function OAuthConsentClient({ authDetails, authorizationId }: OAuthConsen
   };
 
   const handleDeny = async () => {
-    setIsProcessing(true);
+    setIsProcessingTrue();
     setError(null);
 
     await runLoggedAsync(
@@ -117,7 +121,7 @@ export function OAuthConsentClient({ authDetails, authorizationId }: OAuthConsen
                 ? denyError
                 : 'Failed to deny authorization';
           setError(errorMessage);
-          setIsProcessing(false);
+          setIsProcessingFalse();
           return;
         }
 

@@ -16,6 +16,7 @@
 
 import { SPRING, STAGGER } from '../../../design-system/index.ts';
 import { cn } from '../../utils.ts';
+import { useBoolean, useInterval, useTimeout } from '../../../hooks/index.ts';
 import { motion, type Transition, useInView } from 'motion/react';
 import * as React from 'react';
 
@@ -62,8 +63,8 @@ export function RollingText({
   ...props
 }: RollingTextProps) {
   const [currentIndex, setCurrentIndex] = React.useState(0);
-  const [isExiting, setIsExiting] = React.useState(false);
-  const [isMounted, setIsMounted] = React.useState(false);
+  const { value: isExiting, setTrue: setIsExitingTrue, setFalse: setIsExitingFalse } = useBoolean();
+  const { value: isMounted, setTrue: setIsMountedTrue } = useBoolean();
   const localRef = React.useRef<HTMLSpanElement>(null);
 
   const isInView = useInView(localRef, {
@@ -73,25 +74,23 @@ export function RollingText({
 
   // Prevent hydration mismatch
   React.useEffect(() => {
-    setIsMounted(true);
+    setIsMountedTrue();
   }, []);
 
   // Cycle through words
-  React.useEffect(() => {
-    if (words.length <= 1) return;
+  const handleWordCycle = React.useCallback(() => {
+    setIsExitingTrue();
+  }, [setIsExitingTrue]);
 
-    const interval = setInterval(() => {
-      setIsExiting(true);
+  useInterval(handleWordCycle, words.length > 1 ? duration : null);
 
-      // Wait for exit animation, then switch word
-      setTimeout(() => {
-        setCurrentIndex((prev) => (prev + 1) % words.length);
-        setIsExiting(false);
-      }, 600); // Exit animation duration (match transition duration)
-    }, duration);
-
-    return () => clearInterval(interval);
-  }, [words, duration]);
+  // Handle word switch after exit animation
+  useTimeout(() => {
+    if (isExiting) {
+      setCurrentIndex((prev) => (prev + 1) % words.length);
+      setIsExitingFalse();
+    }
+  }, isExiting ? 600 : null);
 
   const currentWord = words[currentIndex] || '';
   const characters = React.useMemo(

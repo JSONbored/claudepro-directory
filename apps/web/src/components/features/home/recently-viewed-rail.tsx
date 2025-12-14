@@ -5,6 +5,7 @@ import { logUnhandledPromise } from '@heyclaude/web-runtime';
 import { usePulse, useRecentlyViewed, getCategoryRoute } from '@heyclaude/web-runtime/hooks';
 import { ArrowRight, Trash } from '@heyclaude/web-runtime/icons';
 import { cn, ConfigCard, Button, Skeleton, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@heyclaude/web-runtime/ui';
+import { useBoolean } from '@heyclaude/web-runtime/hooks';
 import { usePathname, useRouter } from 'next/navigation';
 import { memo, useCallback, useMemo, useEffect, useState } from 'react';
 
@@ -22,7 +23,7 @@ export const RecentlyViewedRail = memo(function RecentlyViewedRail() {
   const [enrichedItems, setEnrichedItems] = useState<
     Database['public']['CompositeTypes']['enriched_content_item'][]
   >([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { value: isLoading, setValue: setIsLoading } = useBoolean(true);
 
   const handleAuthRequired = useCallback(() => {
     openAuthModal({

@@ -27,6 +27,7 @@ import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion, useScroll } from 'motion/react';
 import { useSpring } from '@heyclaude/web-runtime/hooks/motion';
 import { useEffect, useState } from 'react';
+import { useBoolean } from '@heyclaude/web-runtime/hooks';
 
 export interface ReadProgressProps {
   /**
@@ -89,7 +90,7 @@ export function ReadProgress({
   },
 }: ReadProgressProps) {
   // ALL hooks must be called unconditionally before any early returns (Rules of Hooks)
-  const [isMounted, setIsMounted] = useState(false);
+  const { value: isMounted, setTrue: setIsMountedTrue } = useBoolean();
   const [navHeight, setNavHeight] = useState(0);
   const [navWidth, setNavWidth] = useState(0);
   const [navLeft, setNavLeft] = useState(0);
@@ -103,7 +104,7 @@ export function ReadProgress({
   // ALL useEffect hooks must be called unconditionally before any early returns (Rules of Hooks)
   // Dynamically measure navigation height
   useEffect(() => {
-    setIsMounted(true);
+    setIsMountedTrue();
 
     if (position !== 'below-nav') {
       return;
@@ -155,7 +156,7 @@ export function ReadProgress({
     // Subscribe to scroll progress changes
     const unsubscribe = scrollYProgress.on('change', updateProgress);
     return () => unsubscribe();
-  }, [scrollYProgress, isMounted]);
+  }, [scrollYProgress, isMounted, setIsMountedTrue]);
 
   // Don't render on server or before mount
   // This prevents hydration mismatches by ensuring server and client both render null initially

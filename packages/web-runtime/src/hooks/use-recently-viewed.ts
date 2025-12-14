@@ -41,7 +41,8 @@ import {
 import { normalizeError } from '../errors.ts';
 // Import directly from source files to avoid indirect imports through entries/core.ts
 import { logger } from '../logger.ts';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect } from 'react';
+import { useDebounceCallback } from './use-debounce-callback';
 import { create } from 'zustand';
 
 /**
@@ -243,7 +244,6 @@ function saveToStorage(items: RecentlyViewedItem[]): void {
  */
 export function useRecentlyViewed(): UseRecentlyViewedReturn {
   const { items, isLoaded, setItems, setLoaded } = useRecentlyViewedStore();
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Load from localStorage on mount (client-side only)
   useEffect(() => {
@@ -276,16 +276,12 @@ export function useRecentlyViewed(): UseRecentlyViewedReturn {
    * Debounced save to localStorage
    * Prevents excessive writes when rapidly adding items
    */
-  const debouncedSave = useCallback((itemsToSave: RecentlyViewedItem[]) => {
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-
-    saveTimeoutRef.current = setTimeout(() => {
+  const debouncedSave = useDebounceCallback(
+    useCallback((itemsToSave: RecentlyViewedItem[]) => {
       saveToStorage(itemsToSave);
-      saveTimeoutRef.current = null;
-    }, DEBOUNCE_MS);
-  }, []);
+    }, []),
+    DEBOUNCE_MS
+  );
 
   /**
    * Add item to recently viewed

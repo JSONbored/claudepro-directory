@@ -16,6 +16,7 @@
 import { X } from '../../icons.tsx';
 import { POSITION_PATTERNS, STATE_PATTERNS, UI_CLASSES } from '../constants.ts';
 import { cn } from '../utils.ts';
+import { useScrollLock } from '../../hooks/use-scroll-lock.ts';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import * as React from 'react';
 import { useCallback, useEffect, useRef } from 'react';
@@ -61,6 +62,44 @@ const DialogContent = ({
 }) => {
   // Internal ref to apply transform directly to DOM (bypasses Radix style overrides)
   const internalRef = useRef<React.ElementRef<typeof DialogPrimitive.Content> | null>(null);
+  
+  // Scroll lock: Lock body scroll when dialog is open
+  // Use manual control to sync with Radix's open state via data-state attribute
+  const { lock, unlock } = useScrollLock({ autoLock: false });
+  
+  // Monitor data-state attribute to sync scroll lock with dialog open state
+  useEffect(() => {
+    const element = internalRef.current;
+    if (!element) return;
+    
+    // Check initial state
+    const isOpen = element.getAttribute('data-state') === 'open';
+    if (isOpen) {
+      lock();
+    } else {
+      unlock();
+    }
+    
+    // Watch for state changes
+    const observer = new MutationObserver(() => {
+      const currentState = element.getAttribute('data-state');
+      if (currentState === 'open') {
+        lock();
+      } else if (currentState === 'closed') {
+        unlock();
+      }
+    });
+    
+    observer.observe(element, {
+      attributes: true,
+      attributeFilter: ['data-state'],
+    });
+    
+    return () => {
+      observer.disconnect();
+      unlock(); // Ensure unlock on unmount
+    };
+  }, [lock, unlock]);
   
   // Combine refs: support both internal and external refs
   const combinedRef = useCallback((node: React.ElementRef<typeof DialogPrimitive.Content> | null) => {

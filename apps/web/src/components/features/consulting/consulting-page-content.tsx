@@ -41,7 +41,8 @@ import { LazySection } from '@/src/components/core/infra/scroll-animated-section
 import { logClientError, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { motion } from 'motion/react';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useBoolean } from '@heyclaude/web-runtime/hooks';
+import { useEffect } from 'react';
 import {
   Code,
   Database,
@@ -57,7 +58,7 @@ import {
 } from 'lucide-react';
 
 export function ConsultingClient() {
-  const [calReady, setCalReady] = useState(false);
+  const { value: calReady, setTrue: setCalReadyTrue } = useBoolean();
   const shouldReduceMotion = useReducedMotion();
 
   useEffect(() => {
@@ -72,7 +73,7 @@ export function ConsultingClient() {
           hideEventTypeDetails: false,
           layout: 'month_view',
         });
-        setCalReady(true);
+        setCalReadyTrue();
       } catch (error: unknown) {
         logClientError(
           '[Consulting] Failed to initialize Cal.com',

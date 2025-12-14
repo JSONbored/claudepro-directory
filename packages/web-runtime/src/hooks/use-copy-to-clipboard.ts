@@ -5,6 +5,8 @@ import { getTimeoutConfig } from '../config/static-configs.ts';
 import { logger } from '../logger.ts';
 import { normalizeError } from '../errors.ts';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useBoolean } from './use-boolean.ts';
+import { useTimeout } from './use-timeout.ts';
 
 // Clipboard reset delay (loaded from static config)
 let DEFAULT_CLIPBOARD_RESET_DELAY = 2000;
@@ -74,9 +76,8 @@ export function useCopyToClipboard(
 ): UseCopyToClipboardReturn {
   const { onSuccess, onError, resetDelay = DEFAULT_CLIPBOARD_RESET_DELAY, context } = options;
 
-  const [copied, setCopied] = useState(false);
+  const { value: copied, setTrue: setCopiedTrue, setFalse: setCopiedFalse } = useBoolean();
   const [error, setError] = useState<Error | null>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const configLoadedRef = useRef(false);
 
   // Load config from static defaults
@@ -88,51 +89,35 @@ export function useCopyToClipboard(
     DEFAULT_CLIPBOARD_RESET_DELAY = config['timeout.ui.clipboard_reset_delay_ms'];
   }, []);
 
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, []);
+  // Reset copy state after timeout when copied is true
+  useTimeout(() => {
+    if (copied) {
+      setCopiedFalse();
+    }
+  }, copied ? resetDelay : null);
 
   const reset = useCallback(() => {
-    setCopied(false);
+    setCopiedFalse();
     setError(null);
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
-    }
-  }, []);
+  }, [setCopiedFalse]);
 
   const copy = useCallback(
     async (text: string): Promise<boolean> => {
       // OPTIMISTIC UI: Set copied immediately
-      setCopied(true);
+      setCopiedTrue();
       setError(null);
-
-      // Clear any existing timeout
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
 
       try {
         await navigator.clipboard.writeText(text);
 
-        // Success - schedule reset
-        timeoutRef.current = setTimeout(() => {
-          setCopied(false);
-          timeoutRef.current = null;
-        }, resetDelay);
-
+        // Success - useTimeout will handle reset automatically
         onSuccess?.();
         return true;
       } catch (err) {
         // ROLLBACK on error
         const normalized = normalizeError(err, 'Failed to copy to clipboard');
         setError(normalized);
-        setCopied(false);
+        setCopiedFalse();
 
         logger.warn({ err: normalized,
           category: 'clipboard',
@@ -146,7 +131,7 @@ export function useCopyToClipboard(
         return false;
       }
     },
-    [resetDelay, onSuccess, onError, context]
+    [resetDelay, onSuccess, onError, context, setCopiedTrue, setCopiedFalse]
   );
 
   return { copied, copy, error, reset };
@@ -218,38 +203,22 @@ export function useButtonSuccess(options: UseButtonSuccessOptions = {}): UseButt
   })();
 
   const actualDuration = duration ?? defaultDuration;
-  const [isSuccess, setIsSuccess] = useState(false);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const { value: isSuccess, setTrue: setIsSuccessTrue, setFalse: setIsSuccessFalse } = useBoolean();
 
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, []);
+  // Reset success state after timeout when isSuccess is true
+  useTimeout(() => {
+    if (isSuccess) {
+      setIsSuccessFalse();
+    }
+  }, isSuccess ? actualDuration : null);
 
   const triggerSuccess = useCallback(() => {
-    // Clear any existing timeout
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-
-    setIsSuccess(true);
-    timeoutRef.current = setTimeout(() => {
-      setIsSuccess(false);
-      timeoutRef.current = null;
-    }, actualDuration);
-  }, [actualDuration]);
+    setIsSuccessTrue();
+  }, [setIsSuccessTrue]);
 
   const reset = useCallback(() => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
-    }
-    setIsSuccess(false);
-  }, []);
+    setIsSuccessFalse();
+  }, [setIsSuccessFalse]);
 
   return { isSuccess, triggerSuccess, reset };
 }

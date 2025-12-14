@@ -187,6 +187,8 @@ export const FEATURE_FLAGS = {
   'intersection_observer.default_threshold': 0.1,
   'intersection_observer.default_root_margin': '0px',
   'analytics.vercel_enabled': false,
+  // Hero Section Feature Flags
+  'hero.partners_marquee.enabled': false,  // Partner marquee in hero section (disabled by default until logos are ready)
   // BetterStack Monitoring Feature Flags
   'monitoring.betterstack.enabled': true,  // Master switch - disable all BetterStack monitoring
   'monitoring.betterstack.inngest.enabled': true,  // Inngest function monitoring

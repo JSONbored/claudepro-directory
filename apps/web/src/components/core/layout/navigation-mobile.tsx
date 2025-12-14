@@ -30,7 +30,8 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { useBoolean } from '@heyclaude/web-runtime/hooks';
 
 import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';
 
@@ -82,13 +83,13 @@ interface NavigationMobileProps {
 const CONTACT_CHANNELS = getContactChannels();
 
 export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationMobileProps) {
-  const [isMounted, setIsMounted] = useState(false);
+  const { value: isMounted, setTrue: setIsMountedTrue } = useBoolean();
   const shouldReduceMotion = useReducedMotion();
   const dragControls = useDragControls();
 
   useEffect(() => {
-    setIsMounted(true);
-  }, []);
+    setIsMountedTrue();
+  }, [setIsMountedTrue]);
 
   // Don't render Sheet until mounted to prevent Radix UI ID hydration mismatch
   if (!isMounted) {
