@@ -49,3 +49,7 @@ supabase db pull --linked
 ```
 
 This will create migration files in `migrations/` that reflect your current production schema.
+
+---
+
+**Note**: This branch (`feat/prisma-migration`) is set up for Prisma migration work. The initial schema migration (`20251214190000_initial_schema.sql`) contains the complete production schema and will be applied automatically when Supabase creates the corresponding branch.
