@@ -1,0 +1,105 @@
+# Database Optimization Pattern Rules
+# Enforces database query optimization from .cursor/rules/performance-optimization-standards.mdc
+# Critical patterns for database performance and caching
+
+---
+# Rule: Detect missing request-scoped caching for RPC calls
+id: missing-request-scoped-cache-rpc
+language: typescript
+files:
+  - 'packages/data-layer/src/services/**/*.ts'
+rule:
+  all:
+    - kind: await_expression
+    - has:
+        pattern: await $SUPABASE.rpc($RPC_NAME, $ARGS)
+    - not:
+        inside:
+          pattern: withSmartCache($$$)
+message: "RPC calls in service methods should use withSmartCache() to prevent duplicate calls within the same request. Wrap: return withSmartCache('rpc_name', 'methodName', async () => { const { data, error } = await this.supabase.rpc(...); ... }, args)"
+severity: error
+
+---
+# Rule: Detect missing cacheLife() in cached functions
+id: missing-cache-life-directive
+language: typescript
+files:
+  - 'app/**/*.tsx'
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        pattern: export default async function $COMPONENT($$$) { $$$ }
+    - has:
+        regex: 'use cache'
+    - not:
+        has:
+          pattern: cacheLife($$$)
+message: "Cache Components must include cacheLife() profile. Add: cacheLife('hours') or cacheLife({ expire: 3600, revalidate: 300, stale: 60 }). Import cacheLife from 'next/cache'"
+severity: error
+
+---
+# Rule: Detect missing cacheTag() in cached functions
+id: missing-cache-tag-directive
+language: typescript
+files:
+  - 'app/**/*.tsx'
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        pattern: export default async function $COMPONENT($$$) { $$$ }
+    - has:
+        regex: 'use cache'
+    - not:
+        has:
+          pattern: cacheTag($$$)
+message: "Cache Components must include cacheTag() for invalidation. Add: cacheTag('resource-type') and cacheTag('resource-type-${id}') for hierarchical invalidation. Import cacheTag from 'next/cache'"
+severity: error
+
+---
+# Rule: Detect missing withSmartCache wrapper in service methods
+id: missing-smart-cache-wrapper
+language: typescript
+files:
+  - 'packages/data-layer/src/services/**/*.ts'
+rule:
+  all:
+    - kind: method_definition
+    - has:
+        pattern: await $OBJ.supabase.rpc($$$)
+    - not:
+        has:
+          pattern: withSmartCache($$$)
+message: "Service methods with RPC calls should use withSmartCache() for request-scoped caching. This prevents duplicate RPC calls within the same request lifecycle."
+severity: error
+
+---
+# Rule: Detect RPC calls without error destructuring
+id: missing-rpc-error-destructuring
+language: typescript
+rule:
+  all:
+    - kind: variable_declarator
+    - has:
+        pattern: const $RESULT = await $SUPABASE.rpc($$$)
+    - not:
+        has:
+          pattern: const { $DATA, error } = await $SUPABASE.rpc($$$)
+message: "RPC calls must destructure error from response. Use: const { data, error } = await supabase.rpc(...)"
+severity: error
+
+---
+# Rule: Detect missing error check after RPC call
+id: missing-rpc-error-check
+language: typescript
+rule:
+  all:
+    - kind: variable_declarator
+    - has:
+        pattern: const { $DATA, error } = await $SUPABASE.rpc($$$)
+    - not:
+        follows:
+          pattern: if (error) { $$$ }
+message: "RPC calls must check for errors after destructuring. Add: if (error) { throw error; } or handle error appropriately"
+severity: error

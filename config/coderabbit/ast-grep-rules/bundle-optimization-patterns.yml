@@ -1,0 +1,95 @@
+# Bundle Optimization Pattern Rules
+# Enforces bundle size optimization and code splitting patterns
+# Critical for fast page loads and optimal bundle sizes
+
+---
+# Rule: Detect inefficient barrel imports
+id: inefficient-barrel-import
+language: typescript
+rule:
+  all:
+    - kind: import_statement
+      has:
+        pattern: import { $ITEM } from '@heyclaude/web-runtime'
+      regex: (ui|hooks|data|actions|server)
+message: "Barrel import may include unused code. Consider specific import path for better tree-shaking: import { Button } from '@heyclaude/web-runtime/ui/button'"
+severity: info
+
+---
+# Rule: Detect default imports that prevent tree-shaking
+id: default-import-tree-shaking
+language: typescript
+rule:
+  all:
+    - kind: import_statement
+      has:
+        pattern: import $DEFAULT from '$MODULE'
+      regex: (lodash|ramda|date-fns|moment|dayjs)
+message: "Default import prevents tree-shaking. Use named imports: import { debounce } from 'lodash' instead of import _ from 'lodash'"
+severity: warning
+
+---
+# Rule: Detect missing dynamic import for conditionally used code
+id: missing-dynamic-import-conditional
+language: typescript
+rule:
+  all:
+    - kind: import_statement
+      has:
+        regex: (chart|editor|pdf|video|player|monaco|codemirror|ace|three|babylon|fabric|konva|d3|recharts|plotly|markdown|mermaid)
+    - inside:
+        has:
+          pattern: if ($CONDITION) { $$$ }
+    - not:
+        has:
+          pattern: await import($$$)
+message: "Heavy dependency used conditionally should use dynamic import for code splitting. Use: if (needed) { const { Lib } = await import('heavy-lib') }"
+severity: warning
+
+---
+# Rule: Detect full library imports when only one function needed
+id: full-library-import-single-function
+language: typescript
+rule:
+  all:
+    - kind: import_statement
+      has:
+        pattern: import * as $LIB from '$MODULE'
+      regex: (lodash|ramda|date-fns|utils|helpers)
+message: "Full library import when only one function is needed. Use named import: import { functionName } from 'library' instead of import * as lib"
+severity: info
+
+---
+# Rule: Detect missing code splitting for routes
+id: missing-code-splitting-routes
+language: typescript
+files:
+  - 'app/**/page.tsx'
+rule:
+  all:
+    - kind: import_statement
+      has:
+        regex: (chart|editor|pdf|video|player|monaco|codemirror|ace|three|babylon|fabric|konva|d3|recharts|plotly)
+    - not:
+        has:
+          pattern: await import($$$)
+message: "Heavy dependencies in route pages should use dynamic imports for code splitting. Use: const { Component } = await import('heavy-component')"
+severity: warning
+
+---
+# Rule: Detect missing lazy loading for heavy components
+id: missing-lazy-loading-components
+language: typescript
+rule:
+  all:
+    - kind: import_statement
+      has:
+        regex: (chart|editor|pdf|video|player|monaco|codemirror|ace|three|babylon|fabric|konva|d3|recharts|plotly)
+    - not:
+        has:
+          pattern: lazy($$$)
+    - not:
+        has:
+          pattern: await import($$$)
+message: "Heavy components should use React.lazy() or dynamic import for code splitting. Use: const Component = lazy(() => import('./Component'))"
+severity: info

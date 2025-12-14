@@ -1,0 +1,122 @@
+# Performance Pattern Rules
+# Enforces performance optimization standards from .cursor/rules/performance-optimization-standards.mdc
+# Critical patterns for speed, optimization, and resource efficiency
+
+---
+# Rule: Detect N+1 query problem (sequential RPC calls in loops)
+id: n-plus-one-query-pattern
+language: typescript
+rule:
+  all:
+    - any:
+      - kind: for_statement
+      - kind: for_in_statement
+      - kind: while_statement
+    - has:
+        pattern: await $SUPABASE.rpc($$$)
+message: "N+1 query detected: RPC calls inside loop. Use Promise.all() for parallel execution or batch query. Example: await Promise.all(items.map(item => supabase.rpc('get_item', { id: item.id })))"
+severity: error
+
+---
+# Rule: Detect missing dynamic imports for heavy dependencies
+id: missing-dynamic-import-heavy-deps
+language: typescript
+rule:
+  all:
+    - kind: import_statement
+    - has:
+        regex: (chart|editor|pdf|video|player|monaco|codemirror|ace|three|babylon|fabric|konva|d3|recharts|plotly)
+    - not:
+        has:
+          pattern: await import($$$)
+message: "Heavy dependency imported statically. Consider dynamic import for code splitting: const { HeavyLib } = await import('heavy-lib')"
+severity: warning
+
+---
+# Rule: Detect missing useMemo for expensive computations
+id: missing-usememo-expensive-computation
+language: typescript
+rule:
+  all:
+    - kind: variable_declarator
+    - has:
+        pattern: const $VAR = $COMPUTATION
+    - inside:
+        has:
+          regex: 'use client'
+    - has:
+        regex: (\.map\(|\.filter\(|\.reduce\(|\.sort\(|JSON\.parse|JSON\.stringify|\.flat\(|\.flatMap\()
+    - not:
+        has:
+          pattern: useMemo($$$)
+message: "Expensive computation in component without useMemo. Wrap with useMemo to prevent recalculation on every render. Example: const result = useMemo(() => expensiveComputation(), [deps])"
+severity: warning
+
+---
+# Rule: Detect missing useCallback for callback functions
+id: missing-usecallback-callbacks
+language: typescript
+rule:
+  all:
+    - kind: variable_declarator
+    - has:
+        pattern: const $CALLBACK = ($$$) => { $$$ }
+    - inside:
+        has:
+          regex: 'use client'
+    - not:
+        has:
+          pattern: useCallback($$$)
+message: "Callback functions in client components should use useCallback to prevent unnecessary re-renders. Wrap: const callback = useCallback(() => { ... }, [deps])"
+severity: warning
+
+---
+# Rule: Detect missing React.memo for components with expensive operations
+id: missing-react-memo-expensive
+language: typescript
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        pattern: export (function|const) $COMPONENT($PROPS) { $$$ }
+    - has:
+        regex: (\.map\(|\.filter\(|\.reduce\(|\.length > \d+|JSON\.parse|JSON\.stringify)
+    - not:
+        has:
+          pattern: memo($COMPONENT)
+message: "Component with expensive operations should use React.memo to prevent unnecessary re-renders. Wrap: export const Component = React.memo(function Component(props) { ... })"
+severity: warning
+
+---
+# Rule: Detect await in loops (should use Promise.all)
+id: await-in-loop
+language: typescript
+rule:
+  all:
+    - any:
+      - kind: for_statement
+      - kind: for_in_statement
+      - kind: while_statement
+    - has:
+        pattern: await $ASYNC($$$)
+message: "await in loop causes sequential execution. Use Promise.all() for parallel execution: await Promise.all(items.map(item => asyncOperation(item)))"
+severity: error
+
+---
+# Rule: Detect missing Suspense boundaries for async data
+id: missing-suspense-async-data
+language: typescript
+files:
+  - 'app/**/*.tsx'
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        pattern: export default async function $COMPONENT($$$) { $$$ }
+    - has:
+        pattern: await $DATA_FETCH($$$)
+    - not:
+        inside:
+          pattern: <Suspense>$$$</Suspense>
+message: "Async data fetching should be wrapped in Suspense boundary for better loading UX. Add: <Suspense fallback={<Loading />}>...</Suspense>"
+severity: warning
