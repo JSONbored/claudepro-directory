@@ -4,7 +4,7 @@
  * Related Content - Client-side fetching with UnifiedCardGrid
  */
 
-import { type Database } from '@heyclaude/database-types';
+import type { RelatedContentItem } from '@heyclaude/data-layer/types/composite-types';
 import { getContentItemUrl, isValidCategory } from '@heyclaude/web-runtime/core';
 import { getRelatedContent } from '@heyclaude/web-runtime/data';
 import { Sparkles } from '@heyclaude/web-runtime/icons';
@@ -13,8 +13,8 @@ import { UI_CLASSES, UnifiedBadge, UnifiedCardGrid, BaseCard, deepEqual } from '
 import { useIsClient, useIsMounted, useBoolean } from '@heyclaude/web-runtime/hooks';
 import { useEffect, useState, useRef } from 'react';
 
-// Use the generated composite type directly
-type RelatedContentItemWithUI = Database['public']['CompositeTypes']['related_content_item'] & {
+// Use the new composite type from @heyclaude/data-layer
+type RelatedContentItemWithUI = RelatedContentItem & {
   matchDetails?: {
     matchedKeywords: string[];
     matchedTags: string[];
@@ -191,17 +191,17 @@ export function RelatedContentClient({
           .filter((item) => Boolean(item.category && item.slug && item.title))
           .map((item): RelatedContentItemWithUI => {
             const result: RelatedContentItemWithUI = {
-              category: item.category,
-              slug: item.slug,
-              title: item.title,
-              description: item.description,
-              author: item.author,
-              date_added: item.date_added,
-              tags: item.tags,
-              score: item.score,
-              match_type: item.match_type,
-              views: item.views,
-              matched_tags: item.matched_tags,
+              category: item.category!,
+              slug: item.slug!,
+              title: item.title!,
+              description: item.description ?? '',
+              author: item.author ?? '',
+              date_added: item.date_added ?? '',
+              tags: item.tags ?? [],
+              score: item.score ?? 0,
+              match_type: item.match_type ?? '',
+              views: item.views ?? 0,
+              matched_tags: item.matched_tags ?? [],
             };
             if (item.match_type !== null && item.match_type !== undefined) {
               result.matchType = item.match_type;

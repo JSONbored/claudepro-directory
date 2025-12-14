@@ -69,7 +69,6 @@ import { normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   createApiOptionsHandler,
   createApiRoute,
-  createSupabaseAdminClient,
   pgmqSend,
   postCorsHeaders,
   unauthorizedResponse,
@@ -200,8 +199,7 @@ export const POST = createApiRoute({
     // 4. This is a trusted automation source, not user-facing functionality
     // 5. RLS policies on changelog table may restrict access that automation needs
 
-    const supabase = createSupabaseAdminClient();
-    const service = new ChangelogService(supabase);
+    const service = new ChangelogService();
 
     // Database RPC handles all transformations (slug generation, section conversion) internally
     // This eliminates CPU-intensive client-side processing (10-15% CPU savings)

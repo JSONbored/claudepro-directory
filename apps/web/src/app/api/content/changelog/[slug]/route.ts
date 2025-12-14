@@ -23,7 +23,6 @@ import {
   changelogEntryFormatSchema,
   createApiOptionsHandler,
   createApiRoute,
-  createSupabaseAnonClient,
   getOnlyCorsHeaders,
 } from '@heyclaude/web-runtime/server';
 import { NextResponse } from 'next/server';
@@ -55,8 +54,7 @@ export const GET = createApiRoute({
 
     logger.info({ format, slug }, 'Changelog entry request received');
 
-    const supabase = createSupabaseAnonClient();
-    const service = new ContentService(supabase);
+    const service = new ContentService();
     const data = await service.getChangelogEntryLlmsTxt({ p_slug: slug });
 
     if (!data) {
@@ -87,7 +85,7 @@ export const GET = createApiRoute({
     return new NextResponse(formatted, {
       headers: {
         'Content-Type': 'text/plain; charset=utf-8',
-        'X-Generated-By': 'supabase.rpc.generate_changelog_entry_llms_txt',
+        'X-Generated-By': 'prisma.rpc.generate_changelog_entry_llms_txt',
         ...buildSecurityHeaders(),
         ...getOnlyCorsHeaders,
         ...buildCacheHeaders('content_export'),

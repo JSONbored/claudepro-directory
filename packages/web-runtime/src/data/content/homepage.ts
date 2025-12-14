@@ -13,11 +13,10 @@ export async function getHomepageData(
 ): Promise<Database['public']['Functions']['get_homepage_optimized']['Returns'] | null> {
   'use cache';
 
-  // Dynamically import all dependencies to avoid class instance serialization issues
-  const [{ isBuildTime }, { createSupabaseAnonClient }] = await Promise.all([
-    import('../../build-time.ts'),
-    import('../../supabase/server-anon.ts'),
-  ]);
+  // CRITICAL: Defer to request time before any non-deterministic operations (Date.now(), etc.)
+  // Required by Next.js Cache Components for functions using 'use cache'
+  const { connection } = await import('next/server');
+  await connection();
 
   // CRITICAL: Use sorted, joined string for cache key to ensure stability
   // The categoryIds array order might vary, so we sort and join to create a stable key
@@ -31,18 +30,9 @@ export async function getHomepageData(
   cacheTag('trending');
 
   try {
-    // Use admin client during build for better performance, anon client at runtime
-    let client;
-    if (isBuildTime()) {
-      const { createSupabaseAdminClient } = await import('../../supabase/admin.ts');
-      client = createSupabaseAdminClient();
-    } else {
-      client = createSupabaseAnonClient();
-    }
-
-    // Dynamically import ContentService to avoid class instance serialization issues
+    // ContentService now uses Prisma (no constructor needed)
     const { ContentService } = await import('@heyclaude/data-layer');
-    const result = await new ContentService(client).getHomepageOptimized({
+    const result = await new ContentService().getHomepageOptimized({
       p_category_ids: [...categoryIds],
       p_limit: 6, // 6 items per category for featured sections (8 categories × 6 = 48 items total)
     });

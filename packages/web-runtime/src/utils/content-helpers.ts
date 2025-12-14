@@ -1,3 +1,4 @@
+import type { EnrichedContentItem } from '@heyclaude/data-layer/types/composite-types';
 import type { Database } from '@heyclaude/database-types';
 
 export function ensureStringArray(value: unknown): string[] {
@@ -11,7 +12,7 @@ export function ensureStringArray(value: unknown): string[] {
 }
 
 export function getMetadata(
-  item: Database['public']['CompositeTypes']['enriched_content_item'] | Database['public']['Tables']['content']['Row']
+  item: EnrichedContentItem | Database['public']['Tables']['content']['Row']
 ): Record<string, unknown> {
   const metadata = 'metadata' in item ? item.metadata : null;
   if (metadata && typeof metadata === 'object' && !Array.isArray(metadata) && metadata !== null) {

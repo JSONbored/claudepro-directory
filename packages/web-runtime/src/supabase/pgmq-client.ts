@@ -1,33 +1,13 @@
 /**
- * Typed pgmq_public schema client helper
- * Provides type-safe access to pgmq extension RPCs
+ * PGMQ Client - Prisma Implementation
  *
- * Uses ExtendedDatabase type to properly type pgmq_public schema operations
+ * Modernized for Prisma - uses $queryRaw to call pgmq_public schema functions.
+ * PGMQ is a PostgreSQL extension for message queues.
  */
 
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { getEnvVar } from '@heyclaude/shared-runtime';
-import type { ExtendedDatabase } from './database-extensions.types';
-
-let pgmqClient: SupabaseClient<ExtendedDatabase> | null = null;
-
-/**
- * Get or create the pgmq Supabase client
- * Uses service role key for full access to queues
- */
-function getPgmqClient(): SupabaseClient<ExtendedDatabase> {
-  if (!pgmqClient) {
-    const supabaseUrl = getEnvVar('NEXT_PUBLIC_SUPABASE_URL');
-    const serviceRoleKey = getEnvVar('SUPABASE_SERVICE_ROLE_KEY');
-
-    if (!supabaseUrl || !serviceRoleKey) {
-      throw new Error('Missing Supabase configuration for pgmq client');
-    }
-
-    pgmqClient = createClient<ExtendedDatabase>(supabaseUrl, serviceRoleKey);
-  }
-  return pgmqClient;
-}
+import { prisma } from '@heyclaude/data-layer';
+import { normalizeError } from '@heyclaude/shared-runtime';
+import { logger } from '../logging/server';
 
 /**
  * Message structure returned from pgmq read operations
@@ -43,6 +23,8 @@ export interface PgmqMessage<T = Record<string, unknown>> {
 /**
  * Type-safe wrapper for pgmq_public.send RPC
  *
+ * Modernized for Prisma - uses $queryRaw to call pgmq extension functions.
+ *
  * @param queueName - Name of the queue to send to
  * @param msg - Message payload (JSON-serializable object)
  * @param options - Optional parameters like sleep_seconds
@@ -53,19 +35,30 @@ export async function pgmqSend(
   msg: Record<string, unknown>,
   options?: { sleepSeconds?: number }
 ): Promise<{ msg_id: bigint } | null> {
-  const client = getPgmqClient();
-  const { data, error } = await client.schema('pgmq_public').rpc('send', {
-    queue_name: queueName,
-    message: msg,
-    sleep_seconds: options?.sleepSeconds ?? 0,
-  });
+  try {
+    const query = `SELECT * FROM pgmq_public.send($1, $2, $3)`;
+    const result = await prisma.$queryRawUnsafe(
+      query,
+      queueName,
+      JSON.stringify(msg),
+      options?.sleepSeconds ?? 0
+    ) as Array<{ msg_id: bigint }> | null;
 
-  if (error) throw error;
-  return data;
+    if (Array.isArray(result) && result.length > 0) {
+      return result[0] ?? null;
+    }
+    return null;
+  } catch (error) {
+    const normalized = normalizeError(error, 'PGMQ send failed');
+    logger.error({ err: normalized, queueName }, 'PGMQ send failed');
+    throw normalized;
+  }
 }
 
 /**
  * Type-safe wrapper for pgmq_public.read RPC
+ *
+ * Modernized for Prisma - uses $queryRaw to call pgmq extension functions.
  *
  * @param queueName - Name of the queue to read from
  * @param options - Read options (visibility timeout, batch size)
@@ -75,43 +68,70 @@ export async function pgmqRead<T = Record<string, unknown>>(
   queueName: string,
   options?: { vt?: number; qty?: number }
 ): Promise<PgmqMessage<T>[] | null> {
-  const client = getPgmqClient();
-  // Note: pgmq_public.read uses 'sleep_seconds' (visibility timeout) and 'n' (batch size)
-  const { data, error } = await client.schema('pgmq_public').rpc('read', {
-    queue_name: queueName,
-    sleep_seconds: options?.vt ?? 30,
-    n: options?.qty ?? 10,
-  });
+  try {
+    // pgmq_public.read uses 'sleep_seconds' (visibility timeout) and 'n' (batch size)
+    const query = `SELECT * FROM pgmq_public.read($1, $2, $3)`;
+    const result = await prisma.$queryRawUnsafe(
+      query,
+      queueName,
+      options?.vt ?? 30,
+      options?.qty ?? 10
+    ) as Array<{
+      msg_id: bigint;
+      read_ct: number;
+      enqueued_at: string;
+      vt: string;
+      message: Record<string, unknown>;
+    }> | null;
 
-  if (error) throw error;
+    if (result && result.length > 0) {
+      return result.map((msg: {
+        msg_id: bigint;
+        read_ct: number;
+        enqueued_at: string;
+        vt: string;
+        message: Record<string, unknown>;
+      }) => ({
+        ...msg,
+        message: msg.message as T,
+      }));
+    }
 
-  // Cast message to the expected type
-  if (data) {
-    return data.map((msg: { msg_id: bigint; read_ct: number; enqueued_at: string; vt: string; message: Record<string, unknown> }) => ({
-      ...msg,
-      message: msg.message as T,
-    }));
+    return null;
+  } catch (error) {
+    const normalized = normalizeError(error, 'PGMQ read failed');
+    logger.error({ err: normalized, queueName }, 'PGMQ read failed');
+    throw normalized;
   }
-
-  return null;
 }
 
 /**
  * Type-safe wrapper for pgmq_public.delete RPC
+ *
+ * Modernized for Prisma - uses $queryRaw to call pgmq extension functions.
  *
  * @param queueName - Name of the queue
  * @param msgId - Message ID to delete
  * @returns true if deleted, false if not found, null on error
  */
 export async function pgmqDelete(queueName: string, msgId: bigint): Promise<boolean | null> {
-  const client = getPgmqClient();
-  const { data, error } = await client.schema('pgmq_public').rpc('delete', {
-    queue_name: queueName,
-    message_id: msgId,
-  });
+  try {
+    const query = `SELECT * FROM pgmq_public.delete($1, $2)`;
+    const result = await prisma.$queryRawUnsafe(
+      query,
+      queueName,
+      msgId
+    ) as Array<boolean> | null;
 
-  if (error) throw error;
-  return data;
+    if (Array.isArray(result) && result.length > 0) {
+      return result[0] ?? null;
+    }
+    return null;
+  } catch (error) {
+    const normalized = normalizeError(error, 'PGMQ delete failed');
+    logger.error({ err: normalized, queueName, msgId: msgId.toString() }, 'PGMQ delete failed');
+    throw normalized;
+  }
 }
 
 /**

@@ -1,5 +1,6 @@
 'use client';
 
+import type { ReviewAggregateRating } from '@heyclaude/data-layer/types/composite-types';
 import { type Database } from '@heyclaude/database-types';
 import {
   deleteReview,
@@ -55,9 +56,7 @@ export function ReviewListSection({
   );
   const [page, setPage] = useState(1);
   const { value: hasMore, setValue: setHasMore } = useBoolean();
-  const [aggregateRating, setAggregateRating] = useState<
-    Database['public']['CompositeTypes']['review_aggregate_rating'] | null
-  >(null);
+  const [aggregateRating, setAggregateRating] = useState<ReviewAggregateRating | null>(null);
   const [editingReviewId, setEditingReviewId] = useState<null | string>(null);
   const router = useRouter();
   const pathname = usePathname();
@@ -89,7 +88,19 @@ export function ReviewListSection({
           setHasMore(Boolean(has_more));
 
           if (agg) {
-            setAggregateRating(agg);
+            // Handle nullable fields from RPC
+            setAggregateRating({
+              success: agg.success ?? false,
+              average: agg.average ?? 0,
+              count: agg.count ?? 0,
+              distribution: {
+                rating_1: agg.distribution?.rating_1 ?? 0,
+                rating_2: agg.distribution?.rating_2 ?? 0,
+                rating_3: agg.distribution?.rating_3 ?? 0,
+                rating_4: agg.distribution?.rating_4 ?? 0,
+                rating_5: agg.distribution?.rating_5 ?? 0,
+              },
+            });
           }
         }
       } catch (error) {
@@ -445,7 +456,7 @@ function ReviewCardItem({
   onDelete?: () => void;
   onEdit?: () => void;
   onMarkHelpful: (reviewId: string) => void;
-  review: Database['public']['CompositeTypes']['review_with_stats_item'];
+  review: import('@heyclaude/data-layer/types/composite-types').ReviewWithStatsItem;
 }) {
   const { value: showFullText, toggle: toggleShowFullText } = useBoolean();
   if (!(review.user && review.id && review.rating)) return null;

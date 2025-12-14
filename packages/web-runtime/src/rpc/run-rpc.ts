@@ -1,12 +1,7 @@
 import type { Database } from '@heyclaude/database-types';
-import { logActionFailure, normalizeError } from '../errors.ts';
+import { logActionFailure } from '../errors.ts';
 import { toLogContextValue } from '../logger.ts';
-export interface RpcClientLike {
-  rpc: (name: string, args: Record<string, unknown>) => Promise<{
-    data: unknown;
-    error: unknown;
-  }>;
-}
+import { BasePrismaService } from '@heyclaude/data-layer';
 
 export interface RunRpcContext {
   action: string;
@@ -14,32 +9,49 @@ export interface RunRpcContext {
   meta?: Record<string, unknown>;
 }
 
-export interface RunRpcDependencies {
-  createClient: () => Promise<RpcClientLike>;
-}
-
-export function createRunRpc<TExtraRpc extends string = never>({
-  createClient,
-}: RunRpcDependencies) {
-  return async function runRpc<ResultType>(
-    rpcName: keyof Database['public']['Functions'] | TExtraRpc,
+/**
+ * Prisma-based RPC wrapper
+ *
+ * Modernized for Prisma - uses BasePrismaService.callRpc() internally.
+ * All RPCs go through Prisma's $queryRaw for PostgreSQL function calls.
+ */
+class PrismaRpcService extends BasePrismaService {
+  /**
+   * Call RPC function via Prisma
+   *
+   * Uses BasePrismaService.callRpc() which executes PostgreSQL functions
+   * via Prisma's $queryRaw. Automatically detects mutations and disables caching.
+   */
+  async callRpcForAction<ResultType>(
+    rpcName: string,
     args: Record<string, unknown>,
     context: RunRpcContext
   ): Promise<ResultType> {
-    const supabase = await createClient();
-
     try {
-      const { data, error } = await supabase.rpc(rpcName as string, args);
-      if (error) {
-        throw normalizeError(error, `RPC ${String(rpcName)} failed`);
-      }
-      return data as ResultType;
+      // Detect mutations - these don't use caching
+      const isMutation = rpcName.includes('insert') || 
+                        rpcName.includes('update') || 
+                        rpcName.includes('delete') || 
+                        rpcName.includes('create') ||
+                        rpcName.includes('remove') ||
+                        rpcName.includes('ensure') ||
+                        rpcName.includes('toggle') ||
+                        rpcName.includes('add') ||
+                        rpcName.includes('remove');
+      
+      return await this.callRpc<ResultType>(
+        rpcName,
+        args,
+        { 
+          methodName: context.action,
+          useCache: !isMutation
+        }
+      );
     } catch (error) {
-      // Use dbQuery serializer for consistent database query formatting
-      // Convert dbQuery object to LogContextValue-compatible structure
+      // Format error with context for logging
       const dbQueryContext: Record<string, unknown> = {
         rpcName: String(rpcName),
-        args: toLogContextValue(args), // Convert args to LogContextValue-compatible type
+        args: toLogContextValue(args),
       };
       throw logActionFailure(context.action, error, {
         dbQuery: toLogContextValue(dbQueryContext),
@@ -49,5 +61,28 @@ export function createRunRpc<TExtraRpc extends string = never>({
         ) : {}),
       });
     }
+  }
+}
+
+// Singleton instance for RPC service
+const rpcService = new PrismaRpcService();
+
+/**
+ * Create a runRpc function for server actions
+ *
+ * Modernized for Prisma - all RPCs go through BasePrismaService.
+ * No longer uses Supabase client.
+ */
+export function createRunRpc<TExtraRpc extends string = never>() {
+  return async function runRpc<ResultType>(
+    rpcName: keyof Database['public']['Functions'] | TExtraRpc,
+    args: Record<string, unknown>,
+    context: RunRpcContext
+  ): Promise<ResultType> {
+    return rpcService.callRpcForAction<ResultType>(
+      rpcName as string,
+      args,
+      context
+    );
   };
 }

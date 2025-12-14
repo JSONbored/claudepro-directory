@@ -1,342 +1,183 @@
-import  { type Database } from '@heyclaude/database-types';
-import  { type SupabaseClient } from '@supabase/supabase-js';
+/**
+ * Newsletter Service - Prisma Implementation
+ *
+ * Fully modernized for Prisma ORM - no backward compatibility.
+ * All table types use Prisma types.
+ * RPC function types remain using Database type (Prisma doesn't generate RPC types).
+ */
 
+import type { Database } from '@heyclaude/database-types';
+import type { Prisma } from '@heyclaude/data-layer/prisma';
+import { prisma } from '../prisma/client.ts';
+import { BasePrismaService } from './base-prisma-service.ts';
 import { logRpcError } from '../utils/rpc-error-logging.ts';
-import { withSmartCache } from '../utils/request-cache.ts';
 
 export type SubscriberResult = Database['public']['Functions']['subscribe_newsletter']['Returns'];
 export type SubscriberArgs = Database['public']['Functions']['subscribe_newsletter']['Args'];
 
-export class NewsletterService {
-  constructor(private supabase: SupabaseClient<Database>) {}
-
-  async subscribeNewsletter(args: SubscriberArgs) {
-    try {
-      const { data, error } = await this.supabase.rpc('subscribe_newsletter', args);
-      
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'subscribe_newsletter',
-          operation: 'NewsletterService.subscribeNewsletter',
-          args: args,
-          isMutation: true, // This is a mutation (creates subscription)
-        });
-        throw error;
-      }
-      
-      return data;
-    } catch (error) {
-      // Error already logged above
-      throw error;
-    }
-  }
-
-  /**
-   * Gets newsletter subscriber count
-   * Uses request-scoped caching to avoid duplicate calls within the same request
-   */
-  async getNewsletterSubscriberCount() {
-    return withSmartCache(
-      'get_active_subscribers',
-      'getNewsletterSubscriberCount',
-      async () => {
-        try {
-          const { data, error } = await this.supabase.rpc('get_active_subscribers');
-          if (error) {
-            logRpcError(error, {
-              rpcName: 'get_active_subscribers',
-              operation: 'NewsletterService.getNewsletterSubscriberCount',
-            });
-            throw error;
-          }
-          
-          return data ? data.length : 0;
-        } catch (error) {
-          // Error already logged above
-          throw error;
-        }
-      },
-      undefined
+/**
+ * Newsletter Service using Prisma Client
+ *
+ * This service uses:
+ * - RPC wrapper for PostgreSQL functions
+ * - Direct Prisma queries for table operations
+ * - Request-scoped caching (via BasePrismaService)
+ * - Same public API as Supabase-based service
+ */
+export class NewsletterService extends BasePrismaService {
+  async subscribeNewsletter(args: SubscriberArgs): Promise<SubscriberResult> {
+    // Mutations don't use caching
+    return this.callRpc<SubscriberResult>(
+      'subscribe_newsletter',
+      args,
+      { methodName: 'subscribeNewsletter', useCache: false }
     );
   }
 
-  /**
-   * Calls the database RPC: get_active_subscribers
-   * Returns array of active subscriber email addresses
-   * Uses request-scoped caching to avoid duplicate calls within the same request
-   */
+  async getNewsletterSubscriberCount(): Promise<number> {
+    const result = await this.callRpc<Database['public']['Functions']['get_active_subscribers']['Returns']>(
+      'get_active_subscribers',
+      {},
+      { methodName: 'getNewsletterSubscriberCount' }
+    );
+    return Array.isArray(result) ? result.length : 0;
+  }
+
   async getActiveSubscribers(): Promise<
     Database['public']['Functions']['get_active_subscribers']['Returns']
   > {
-    return withSmartCache(
+    const result = await this.callRpc<Database['public']['Functions']['get_active_subscribers']['Returns']>(
       'get_active_subscribers',
-      'getActiveSubscribers',
-      async () => {
-        try {
-          const { data, error } = await this.supabase.rpc('get_active_subscribers');
-          if (error) {
-            logRpcError(error, {
-              rpcName: 'get_active_subscribers',
-              operation: 'NewsletterService.getActiveSubscribers',
-            });
-            throw error;
-          }
-          return data ?? [];
-        } catch (error) {
-          // Error already logged above
-          throw error;
-        }
-      },
-      undefined
+      {},
+      { methodName: 'getActiveSubscribers' }
     );
+    return result ?? [];
   }
-  
-  /**
-   * Calls the database RPC: get_newsletter_subscription_by_id
-   * Uses request-scoped caching to avoid duplicate calls within the same request
-   */
-  async getSubscriptionById(id: string) {
-    return withSmartCache(
+
+  async getSubscriptionById(
+    id: string
+  ): Promise<Database['public']['Functions']['get_newsletter_subscription_by_id']['Returns'][0] | null> {
+    const result = await this.callRpc<Database['public']['Functions']['get_newsletter_subscription_by_id']['Returns']>(
       'get_newsletter_subscription_by_id',
-      'getSubscriptionById',
-      async () => {
-        try {
-          const { data, error } = await this.supabase.rpc('get_newsletter_subscription_by_id', {
-            p_id: id,
-          });
-          
-          if (error) {
-            logRpcError(error, {
-              rpcName: 'get_newsletter_subscription_by_id',
-              operation: 'NewsletterService.getSubscriptionById',
-              args: { id },
-            });
-            throw error;
-          }
-          
-          // RPC returns SETOF (array), but we expect single row - return first element or null
-          return Array.isArray(data) && data.length > 0 ? data[0] : null;
-        } catch (error) {
-          // Error already logged above
-          throw error;
-        }
-      },
-      { id }
+      { p_id: id },
+      { methodName: 'getSubscriptionById' }
     );
+    return Array.isArray(result) && result.length > 0 ? (result[0] ?? null) : null;
   }
 
-  /**
-   * Gets newsletter subscription status by email
-   * Returns the subscription status for the given email
-   * Uses request-scoped caching to avoid duplicate calls within the same request
-   */
   async getSubscriptionStatusByEmail(email: string): Promise<{
-    status: Database['public']['Tables']['newsletter_subscriptions']['Row']['status'];
+    status: Prisma.newsletter_subscriptionsGetPayload<{}>['status'];
   } | null> {
-    return withSmartCache(
-      'newsletter_subscriptions.select',
-      'getSubscriptionStatusByEmail',
-      async () => {
-        try {
-          const { data, error } = await this.supabase
-            .from('newsletter_subscriptions')
-            .select('status')
-            .eq('email', email)
-            .single();
-
-          if (error) {
-            logRpcError(error, {
-              rpcName: 'newsletter_subscriptions.select',
-              operation: 'NewsletterService.getSubscriptionStatusByEmail',
-              args: { email },
-            });
-            return null;
-          }
-
-          return data;
-        } catch (error) {
-          // Error already logged above
-          return null;
-        }
-      },
-      { email }
-    );
+    const subscription = await prisma.newsletter_subscriptions.findUnique({
+      where: { email },
+      select: { status: true },
+    });
+    return subscription ?? null;
   }
 
-  /**
-   * Gets newsletter subscription engagement score by email
-   * Returns the engagement_score for the given email
-   * Uses request-scoped caching to avoid duplicate calls within the same request
-   */
   async getSubscriptionEngagementScore(email: string): Promise<{
-    engagement_score: Database['public']['Tables']['newsletter_subscriptions']['Row']['engagement_score'];
+    engagement_score: Prisma.newsletter_subscriptionsGetPayload<{}>['engagement_score'];
   } | null> {
-    return withSmartCache(
-      'newsletter_subscriptions.select',
-      'getSubscriptionEngagementScore',
-      async () => {
-        try {
-          const { data, error } = await this.supabase
-            .from('newsletter_subscriptions')
-            .select('engagement_score')
-            .eq('email', email)
-            .single();
-
-          if (error) {
-            logRpcError(error, {
-              rpcName: 'newsletter_subscriptions.select',
-              operation: 'NewsletterService.getSubscriptionEngagementScore',
-              args: { email },
-            });
-            return null;
-          }
-
-          return data;
-        } catch (error) {
-          // Error already logged above
-          return null;
-        }
-      },
-      { email }
-    );
+    const subscription = await prisma.newsletter_subscriptions.findUnique({
+      where: { email },
+      select: { engagement_score: true },
+    });
+    return subscription;
   }
 
-  /**
-   * Updates newsletter subscription last_email_sent_at timestamp
-   */
   async updateLastEmailSentAt(email: string): Promise<void> {
     try {
-      const { error } = await this.supabase
-        .from('newsletter_subscriptions')
-        .update({
-          last_email_sent_at: new Date().toISOString(),
-        })
-        .eq('email', email);
-
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'newsletter_subscriptions.update',
-          operation: 'NewsletterService.updateLastEmailSentAt',
-          args: { email },
-        });
-        throw error;
-      }
+      await prisma.newsletter_subscriptions.update({
+        where: { email },
+        data: {
+          last_email_sent_at: new Date(),
+        },
+      });
     } catch (error) {
-      // Error already logged above
+      logRpcError(error, {
+        rpcName: 'newsletter_subscriptions.update',
+        operation: 'NewsletterService.updateLastEmailSentAt',
+        args: { email },
+      });
       throw error;
     }
   }
 
-  /**
-   * Updates newsletter subscription last_active_at timestamp
-   */
   async updateLastActiveAt(email: string): Promise<void> {
     try {
-      const { error } = await this.supabase
-        .from('newsletter_subscriptions')
-        .update({
-          last_active_at: new Date().toISOString(),
-        })
-        .eq('email', email);
-
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'newsletter_subscriptions.update',
-          operation: 'NewsletterService.updateLastActiveAt',
-          args: { email },
-        });
-        throw error;
-      }
+      await prisma.newsletter_subscriptions.update({
+        where: { email },
+        data: {
+          last_active_at: new Date(),
+        },
+      });
     } catch (error) {
-      // Error already logged above
+      logRpcError(error, {
+        rpcName: 'newsletter_subscriptions.update',
+        operation: 'NewsletterService.updateLastActiveAt',
+        args: { email },
+      });
       throw error;
     }
   }
 
-  /**
-   * Updates newsletter subscription status
-   */
   async updateSubscriptionStatus(
     email: string,
-    status: Database['public']['Tables']['newsletter_subscriptions']['Update']['status']
+    status: Prisma.newsletter_subscriptionsUpdateInput['status']
   ): Promise<void> {
     try {
-      const updateData: Database['public']['Tables']['newsletter_subscriptions']['Update'] = {};
-      if (status !== undefined) {
-        updateData.status = status as NonNullable<typeof status>;
-      }
-      const { error } = await this.supabase
-        .from('newsletter_subscriptions')
-        .update(updateData)
-        .eq('email', email);
-
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'newsletter_subscriptions.update',
-          operation: 'NewsletterService.updateSubscriptionStatus',
-          args: { email, status },
-        });
-        throw error;
-      }
+      await prisma.newsletter_subscriptions.update({
+        where: { email },
+        data: {
+          status: status as NonNullable<typeof status>,
+        },
+      });
     } catch (error) {
-      // Error already logged above
+      logRpcError(error, {
+        rpcName: 'newsletter_subscriptions.update',
+        operation: 'NewsletterService.updateSubscriptionStatus',
+        args: { email, status },
+      });
       throw error;
     }
   }
 
-  /**
-   * Updates newsletter subscription engagement score
-   */
   async updateEngagementScore(email: string, engagementScore: number): Promise<void> {
     try {
-      const { error } = await this.supabase
-        .from('newsletter_subscriptions')
-        .update({
+      await prisma.newsletter_subscriptions.update({
+        where: { email },
+        data: {
           engagement_score: engagementScore,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('email', email);
-
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'newsletter_subscriptions.update',
-          operation: 'NewsletterService.updateEngagementScore',
-          args: { email, engagementScore },
-        });
-        throw error;
-      }
+          updated_at: new Date(),
+        },
+      });
     } catch (error) {
-      // Error already logged above
+      logRpcError(error, {
+        rpcName: 'newsletter_subscriptions.update',
+        operation: 'NewsletterService.updateEngagementScore',
+        args: { email, engagementScore },
+      });
       throw error;
     }
   }
 
-  /**
-   * Updates newsletter subscription with unsubscribed_at timestamp and status
-   */
   async unsubscribeWithTimestamp(email: string): Promise<void> {
     try {
-      const { error } = await this.supabase
-        .from('newsletter_subscriptions')
-        .update({
-          unsubscribed_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })
-        .eq('email', email);
-
-      if (error) {
-        logRpcError(error, {
-          rpcName: 'newsletter_subscriptions.update',
-          operation: 'NewsletterService.unsubscribeWithTimestamp',
-          args: { email },
-        });
-        throw error;
-      }
-
+      await prisma.newsletter_subscriptions.update({
+        where: { email },
+        data: {
+          unsubscribed_at: new Date(),
+          updated_at: new Date(),
+        },
+      });
       // Also update status to unsubscribed
       await this.updateSubscriptionStatus(email, 'unsubscribed');
     } catch (error) {
-      // Error already logged above
+      logRpcError(error, {
+        rpcName: 'newsletter_subscriptions.update',
+        operation: 'NewsletterService.unsubscribeWithTimestamp',
+        args: { email },
+      });
       throw error;
     }
   }

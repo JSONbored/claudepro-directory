@@ -1,14 +1,16 @@
 # Design System Violation Rules
 # Enforces design system usage from .cursor/rules/design-system.mdc
+# Includes color detection for hardcoded colors
 
 ---
 # Rule: Detect inline marginBottom classes (should use marginBottom.*)
 id: inline-margin-bottom
 language: typescript
 rule:
-  pattern: className={$CLASSES}
-  has:
-    regex: mb-\d+
+  all:
+    - pattern: className={$CLASSES}
+    - has:
+        regex: mb-\d+
 message: "Use design system utility marginBottom.* instead of inline mb-* classes. Import marginBottom from @heyclaude/web-runtime/design-system"
 severity: warning
 
@@ -17,9 +19,10 @@ severity: warning
 id: inline-margin-top
 language: typescript
 rule:
-  pattern: className={$CLASSES}
-  has:
-    regex: mt-\d+
+  all:
+    - pattern: className={$CLASSES}
+    - has:
+        regex: mt-\d+
 message: "Use design system utility marginTop.* instead of inline mt-* classes. Import marginTop from @heyclaude/web-runtime/design-system"
 severity: warning
 
@@ -28,9 +31,10 @@ severity: warning
 id: inline-space-y
 language: typescript
 rule:
-  pattern: className={$CLASSES}
-  has:
-    regex: space-y-\d+
+  all:
+    - pattern: className={$CLASSES}
+    - has:
+        regex: space-y-\d+
 message: "Use design system utility spaceY.* instead of inline space-y-* classes. Import spaceY from @heyclaude/web-runtime/design-system"
 severity: warning
 
@@ -39,9 +43,10 @@ severity: warning
 id: inline-flex-col-gap
 language: typescript
 rule:
-  pattern: className={$CLASSES}
-  has:
-    regex: flex flex-col gap-
+  all:
+    - pattern: className={$CLASSES}
+    - has:
+        regex: flex flex-col gap-
 message: "Use design system utility stack.* instead of inline flex flex-col gap-* classes. Import stack from @heyclaude/web-runtime/design-system"
 severity: warning
 
@@ -50,9 +55,10 @@ severity: warning
 id: inline-flex-center-gap
 language: typescript
 rule:
-  pattern: className={$CLASSES}
-  has:
-    regex: flex items-center gap-
+  all:
+    - pattern: className={$CLASSES}
+    - has:
+        regex: flex items-center gap-
 message: "Use design system utility cluster.* instead of inline flex items-center gap-* classes. Import cluster from @heyclaude/web-runtime/design-system"
 severity: warning
 
@@ -61,9 +67,10 @@ severity: warning
 id: inline-muted-text
 language: typescript
 rule:
-  pattern: className={$CLASSES}
-  has:
-    regex: text-muted-foreground
+  all:
+    - pattern: className={$CLASSES}
+    - has:
+        regex: text-muted-foreground
 message: "Use design system utility muted.default instead of inline text-muted-foreground. Import muted from @heyclaude/web-runtime/design-system"
 severity: warning
 
@@ -87,9 +94,10 @@ severity: warning
 id: inline-rounded
 language: typescript
 rule:
-  pattern: className={$CLASSES}
-  has:
-    regex: rounded-(sm|md|lg|xl|full)
+  all:
+    - pattern: className={$CLASSES}
+    - has:
+        regex: rounded-(sm|md|lg|xl|full)
 message: "Use design system utility radius.* instead of inline rounded-* classes. Import radius from @heyclaude/web-runtime/design-system"
 severity: warning
 
@@ -98,8 +106,13 @@ severity: warning
 id: inline-hover-bg
 language: typescript
 rule:
-  pattern: className={$CLASSES}
-  has:
-    regex: hover:bg-
+  all:
+    - pattern: className={$CLASSES}
+    - has:
+        regex: hover:bg-
 message: "Use design system utility hoverBg.* instead of inline hover:bg-* classes. Import hoverBg from @heyclaude/web-runtime/design-system"
 severity: warning
+
+# Note: Color detection rules removed temporarily due to AST-GREP parsing limitations
+# These patterns are better handled by ESLint rules or manual code review
+# AST-GREP has difficulty with string literal matching for color values

@@ -1,4 +1,4 @@
-import type { Database } from '@heyclaude/database-types';
+import type { config_format, primary_action_type } from '@heyclaude/data-layer/prisma';
 import type { LucideIcon } from 'lucide-react';
 
 export type SectionId =
@@ -58,7 +58,7 @@ export interface UnifiedCategoryConfig<TId extends string = string> {
   };
   detailPage: {
     displayConfig: boolean;
-    configFormat: Database['public']['Enums']['config_format'];
+    configFormat: config_format;
     tabs?: ReadonlyArray<TabConfig>;
   };
   sections: {
@@ -79,7 +79,7 @@ export interface UnifiedCategoryConfig<TId extends string = string> {
   };
   primaryAction: {
     label: string;
-    type: string;
+    type: primary_action_type;
   };
   secondaryActions?: Array<{
     label: string;
@@ -90,8 +90,10 @@ export interface UnifiedCategoryConfig<TId extends string = string> {
   [key: string]: unknown;
 }
 
+import type { content_category } from '@heyclaude/data-layer/prisma';
+
 export interface CategoryStatsConfig {
-  categoryId: Database['public']['Enums']['content_category'];
+  categoryId: content_category;
   icon: LucideIcon;
   displayText: string;
   delay: number;

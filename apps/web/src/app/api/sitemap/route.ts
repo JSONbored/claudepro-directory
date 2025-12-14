@@ -19,6 +19,7 @@
  */
 
 import 'server-only';
+
 import { MiscService } from '@heyclaude/data-layer';
 import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import {
@@ -34,7 +35,6 @@ import {
   buildCacheHeaders,
   createApiOptionsHandler,
   createApiRoute,
-  createSupabaseAnonClient,
   getOnlyCorsHeaders,
   jsonResponse,
   sitemapFormatSchema,
@@ -45,21 +45,13 @@ import { z } from 'zod';
 
 /**
  * Cached helper function to fetch sitemap URLs.
- * Uses Cache Components + `cacheLife('static')` to cache `get_site_urls` results
- * while still surfacing RPC failures (errors are not cached).
- *
- * Cache configuration: Uses 'static' profile (1 day stale, 6hr revalidate, 30 days expire)
- * defined in next.config.mjs. The cache key is based on the function signature, ensuring
- * consistent caching across requests.
- *
- * @returns {Promise<unknown[]>} Cached array of site URL rows from the `get_site_urls` RPC
+ * Uses Cache Components to cache results.
  */
 async function getCachedSiteUrls() {
   'use cache';
-  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire (defined in next.config.mjs)
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
 
-  const supabase = createSupabaseAnonClient();
-  const service = new MiscService(supabase);
+  const service = new MiscService();
   return service.getSiteUrls();
 }
 
@@ -95,7 +87,6 @@ function timingSafeEqual(a?: null | string, b?: null | string): boolean {
 export const GET = createApiRoute({
   cors: 'anon',
   handler: async ({ logger, query }) => {
-    // Zod schema ensures proper types
     const { format } = query;
 
     logger.info({ format }, 'Sitemap request received');
@@ -114,7 +105,7 @@ export const GET = createApiRoute({
           },
           'get_site_urls RPC failed'
         );
-        throw normalized; // Factory will handle error response
+        throw normalized;
       }
 
       if (!Array.isArray(data) || data.length === 0) {
@@ -189,14 +180,13 @@ export const GET = createApiRoute({
         getOnlyCorsHeaders,
         {
           ...buildCacheHeaders('sitemap'),
-          'X-Content-Source': 'supabase.mv_site_urls',
+          'X-Content-Source': 'prisma.mv_site_urls',
         }
       );
     }
 
     // XML format (default)
-    const supabase = createSupabaseAnonClient();
-    const service = new MiscService(supabase);
+    const service = new MiscService();
 
     const rpcArgs = {
       p_base_url: SITE_URL,
@@ -215,7 +205,7 @@ export const GET = createApiRoute({
         },
         'generate_sitemap_xml RPC failed'
       );
-      throw normalized; // Factory will handle error response
+      throw normalized;
     }
 
     if (!data) {
@@ -232,8 +222,8 @@ export const GET = createApiRoute({
     return new NextResponse(data, {
       headers: {
         'Content-Type': 'application/xml; charset=utf-8',
-        'X-Content-Source': 'supabase.mv_site_urls',
-        'X-Generated-By': 'supabase.rpc.generate_sitemap_xml',
+        'X-Content-Source': 'prisma.mv_site_urls',
+        'X-Generated-By': 'prisma.rpc.generate_sitemap_xml',
         'X-Robots-Tag': 'index, follow',
         ...buildSecurityHeaders(),
         ...getOnlyCorsHeaders,
@@ -331,11 +321,8 @@ export const POST = createApiRoute({
       );
     }
 
-    const supabase = createSupabaseAnonClient();
-    const service = new MiscService(supabase);
+    const service = new MiscService();
 
-    // Database RPC returns string[] directly (SETOF text) - no client-side extraction needed
-    // This eliminates CPU-intensive map/filter operations (5-10% CPU savings)
     let urlList: string[];
     try {
       urlList = await service.getSiteUrlsFormatted({
@@ -352,7 +339,7 @@ export const POST = createApiRoute({
         },
         'get_site_urls_formatted RPC failed'
       );
-      throw normalized; // Factory will handle error response
+      throw normalized;
     }
 
     if (!Array.isArray(urlList) || urlList.length === 0) {
@@ -361,7 +348,6 @@ export const POST = createApiRoute({
     }
 
     // Trigger Inngest function to handle IndexNow submission asynchronously
-    // This eliminates blocking external API call from Vercel function (reduces CPU/bandwidth usage)
     try {
       await inngest.send({
         data: {

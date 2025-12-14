@@ -1,0 +1,154 @@
+# Prisma Best Practices Pattern Rules
+# Enforces proper Prisma ORM usage and prevents common anti-patterns
+# Shareable across projects using Prisma
+
+---
+# Rule: Detect N+1 query pattern with Prisma
+id: prisma-n-plus-one-query
+language: typescript
+rule:
+  all:
+    - kind: for_statement
+    - has:
+        pattern: for ($VAR of $ARRAY) { $$$ }
+    - inside:
+        has:
+          pattern: await $PRISMA.($METHOD)($$$)
+    - has:
+        regex: prisma\.(findMany|findFirst|findUnique|create|update|delete)
+message: "N+1 query pattern detected. Use Prisma's include/select to fetch related data in a single query, or use Promise.all() for parallel queries. Example: await prisma.user.findMany({ include: { posts: true } });"
+severity: error
+
+---
+# Rule: Detect missing transaction for multiple related operations
+id: prisma-missing-transaction
+language: typescript
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        pattern: await $PRISMA.($METHOD1)($$$)
+    - has:
+        pattern: await $PRISMA.($METHOD2)($$$)
+    - has:
+        regex: prisma\.(create|update|delete)
+    - not:
+        has:
+          pattern: \$transaction|prisma\.\$transaction
+message: "Multiple related Prisma operations should use transactions to ensure atomicity. Wrap operations in prisma.$transaction([...]) to ensure all operations succeed or fail together."
+severity: warning
+
+---
+# Rule: Detect Prisma query without proper error handling
+id: prisma-missing-error-handling
+language: typescript
+rule:
+  all:
+    - kind: call_expression
+    - has:
+        pattern: await prisma\.($METHOD)($$$)
+    - not:
+        inside:
+          has:
+            pattern: try.*catch
+message: "Prisma queries should include error handling. Wrap in try/catch to handle PrismaClientKnownRequestError, PrismaClientValidationError, and other Prisma errors. Use normalizeError() for consistent error handling."
+severity: warning
+
+---
+# Rule: Detect Prisma query without select/include optimization
+id: prisma-missing-select-optimization
+language: typescript
+rule:
+  all:
+    - kind: call_expression
+    - has:
+        pattern: await prisma\.(findMany|findFirst|findUnique)($$$)
+    - not:
+        has:
+          regex: select:|include:
+message: "Prisma queries should use select or include to fetch only needed fields. This reduces data transfer and improves performance. Example: await prisma.user.findMany({ select: { id: true, name: true } });"
+severity: warning
+
+---
+# Rule: Detect Prisma query without where clause (potential full table scan)
+id: prisma-missing-where-clause
+language: typescript
+rule:
+  all:
+    - kind: call_expression
+    - has:
+        pattern: await prisma\.(findMany|findFirst)($$$)
+    - not:
+        has:
+          pattern: where:
+    - not:
+        inside:
+          has:
+            pattern: // All records|// Intentionally|// Testing
+message: "Prisma findMany/findFirst queries should include where clause to avoid full table scans. Add where: { ... } to filter results. If you need all records, add a comment explaining why."
+severity: warning
+
+---
+# Rule: Detect Prisma query without pagination for large datasets
+id: prisma-missing-pagination
+language: typescript
+rule:
+  all:
+    - kind: call_expression
+    - has:
+        pattern: await prisma\.findMany($$$)
+    - not:
+        has:
+          regex: take:|skip:|cursor:
+    - not:
+        inside:
+          has:
+            pattern: // Small dataset|// Cached|// Limited results
+message: "Prisma findMany queries for potentially large datasets should include pagination (take/skip or cursor). Add take: limit, skip: offset for pagination, or use cursor-based pagination for better performance."
+severity: warning
+
+---
+# Rule: Detect direct PrismaClient usage instead of singleton
+id: prisma-direct-client-usage
+language: typescript
+rule:
+  all:
+    - kind: new_expression
+    - has:
+        pattern: new PrismaClient($$$)
+    - not:
+        inside:
+          has:
+            pattern: // Test|// Migration|// One-time script
+message: "Don't create new PrismaClient instances. Use singleton pattern from @heyclaude/data-layer/prisma to ensure connection pooling and proper lifecycle management. Import: import { prisma } from '@heyclaude/data-layer/prisma';"
+severity: error
+
+---
+# Rule: Detect Prisma query without proper type safety
+id: prisma-missing-type-safety
+language: typescript
+rule:
+  all:
+    - kind: call_expression
+    - has:
+        pattern: await prisma\.($TABLE)\.($METHOD)($$$)
+    - has:
+        pattern: as any|as unknown
+message: "Prisma queries should use proper TypeScript types. Avoid 'as any' or 'as unknown'. Use Prisma's generated types (Prisma.tableGetPayload<{}>) for type safety. Import: import type { Prisma } from '@heyclaude/data-layer/prisma';"
+severity: error
+
+---
+# Rule: Detect Prisma query with raw SQL (should use Prisma methods)
+id: prisma-raw-sql-usage
+language: typescript
+rule:
+  all:
+    - kind: call_expression
+    - has:
+        pattern: prisma\.\$queryRaw|prisma\.\$executeRaw
+    - not:
+        inside:
+          has:
+            pattern: // Complex query|// Performance critical|// Migration
+message: "Avoid raw SQL queries when possible. Use Prisma's type-safe query methods (findMany, create, update, etc.) for better type safety and maintainability. Raw SQL should only be used for complex queries that Prisma can't handle."
+severity: warning

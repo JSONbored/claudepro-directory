@@ -1,10 +1,10 @@
 'use client';
 
-import { type Database } from '@heyclaude/database-types';
+import type { changelog } from '@heyclaude/data-layer/prisma';
 
 import { ChangelogTimelineView } from '@/src/components/features/changelog/changelog-timeline-view';
 
-type ChangelogEntry = Database['public']['Tables']['changelog']['Row'];
+type ChangelogEntry = changelog;
 
 export interface ChangelogListClientProps {
   categoryCounts: Record<string, number>;

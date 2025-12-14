@@ -1,0 +1,72 @@
+# Prisma Migration Pattern Rules
+# Enforces Prisma type migration from Supabase Database types
+# Critical for active Neon/Prisma migration (Phase 4)
+
+---
+# Rule: Detect Supabase Database types (should use Prisma)
+id: supabase-database-types-used
+language: typescript
+rule:
+  all:
+    - kind: type_annotation
+    - has:
+        regex: Database\[
+message: "Supabase Database types are deprecated. Use Prisma types instead: Database['public']['Tables']['table']['Row'] → Prisma.tableGetPayload<{}>, Database['public']['Enums']['enum'] → Prisma.enum. Import: import type { Prisma } from '@heyclaude/data-layer/prisma'"
+severity: error
+
+---
+# Rule: Detect imports from .generated.ts files
+id: generated-file-import
+language: typescript
+rule:
+  all:
+    - kind: import_statement
+    - has:
+        regex: \.generated
+message: "Generated files are deprecated. Remove import and use Prisma types instead. Delete .generated.ts files after migration."
+severity: error
+
+---
+# Rule: Detect missing Prisma type imports when using PrismaClient
+id: missing-prisma-type-import
+language: typescript
+rule:
+  all:
+    - kind: import_statement
+    - has:
+        regex: data-layer/prisma
+    - has:
+        regex: PrismaClient
+    - not:
+        has:
+          regex: Prisma[^C]|import type.*Prisma
+message: "When using PrismaClient, also import Prisma types for type safety: import type { Prisma } from '@heyclaude/data-layer/prisma'"
+severity: warning
+
+---
+# Rule: Detect incorrect Prisma type for mutations
+id: incorrect-prisma-type-mutation
+language: typescript
+rule:
+  all:
+    - kind: type_annotation
+    - has:
+        regex: Prisma\.\w+CreateInput
+    - has:
+        regex: update|delete|upsert|remove
+message: "Incorrect Prisma type for mutation. Use Prisma.tableUpdateInput for updates, Prisma.tableDeleteArgs for deletes. Check Prisma type documentation."
+severity: error
+
+---
+# Rule: Detect Database type imports that should be Prisma
+id: database-type-import-should-be-prisma
+language: typescript
+rule:
+  all:
+    - kind: import_statement
+    - has:
+        regex: database-types
+    - has:
+        regex: Database
+message: "Database type imports should be replaced with Prisma types. Only keep Database import for RPC function signatures and CompositeTypes (Prisma doesn't generate these). Use: import type { Prisma } from '@heyclaude/data-layer/prisma'"
+severity: warning

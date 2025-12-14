@@ -34,13 +34,13 @@
  */
 
 import 'server-only';
+
 import { MiscService } from '@heyclaude/data-layer';
 import { createErrorResponse, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   buildCacheHeaders,
   createApiOptionsHandler,
   createApiRoute,
-  createSupabaseAnonClient,
   getOnlyCorsHeaders,
   jsonResponse,
 } from '@heyclaude/web-runtime/server';
@@ -49,23 +49,19 @@ import { cacheLife } from 'next/cache';
 /**
  * Cached helper function to fetch API health status
  * Uses Cache Components to reduce function invocations
- * Database RPC returns frontend-ready camelCase data (no client-side transformation needed)
- *
- * @returns {Promise<unknown>} API health status data
  */
 async function getCachedApiHealthFormatted() {
   'use cache';
   cacheLife('quarter'); // 15min stale, 5min revalidate, 2hr expire - Health status changes infrequently
 
-  const supabase = createSupabaseAnonClient();
-  const service = new MiscService(supabase);
+  const service = new MiscService();
   return await service.getApiHealthFormatted();
 }
 
 /**
  * GET /api/status - Health check endpoint
  *
- * Queries the database via a Supabase anon client and returns a normalized health report.
+ * Queries the database via Prisma and returns a normalized health report.
  * HTTP status is 200 for `healthy` or `degraded`, and 503 for any other status.
  */
 export const GET = createApiRoute({
@@ -73,8 +69,6 @@ export const GET = createApiRoute({
   handler: async ({ logger }) => {
     logger.info({}, 'Status/health check request received');
 
-    // Database RPC returns frontend-ready camelCase data (no client-side transformation needed)
-    // This eliminates CPU-intensive object traversal and property mapping (10-15% CPU savings)
     let data: Awaited<ReturnType<typeof getCachedApiHealthFormatted>> | null = null;
     try {
       data = await getCachedApiHealthFormatted();
@@ -87,7 +81,6 @@ export const GET = createApiRoute({
         },
         'Health check RPC error'
       );
-      // Return error response directly to preserve RPC context
       return createErrorResponse(normalized, {
         logContext: {
           rpcName: 'get_api_health_formatted',
@@ -138,7 +131,7 @@ export const GET = createApiRoute({
     }
 
     return jsonResponse(responseData, statusCode, getOnlyCorsHeaders, {
-      'X-Generated-By': 'supabase.rpc.get_api_health_formatted',
+      'X-Generated-By': 'prisma.rpc.get_api_health_formatted',
       ...buildCacheHeaders('status'),
     });
   },

@@ -19,12 +19,11 @@
  * @see https://docs.polar.sh/integrate/webhooks/events
  */
 
-import type { Database as DatabaseGenerated, Json } from '@heyclaude/database-types';
+import type { Json } from '@heyclaude/database-types';
 import { normalizeError } from '@heyclaude/shared-runtime';
 
 import { MiscService } from '@heyclaude/data-layer';
 import { inngest } from '../../client';
-import { createSupabaseAdminClient } from '../../../supabase/admin';
 import { logger, createWebAppContextWithId } from '../../../logging/server';
 import { CONCURRENCY_LIMITS, RETRY_CONFIGS, ACCOUNT_CONCURRENCY_KEYS } from '../../config';
 import { sendCriticalFailureHeartbeat } from '../../utils/monitoring';
@@ -198,27 +197,22 @@ export const handlePolarWebhook = inngest.createFunction(
       rpcName: string;
       error?: string;
     }> => {
-      const supabase = createSupabaseAdminClient();
-
       logger.info({ ...logContext,
         rpcName: classification.rpcName,
         webhookId,
         jobId: jobId ?? null, }, 'Calling Polar RPC handler');
 
       try {
-        // Call the database RPC function
+        // Use MiscService to call the Polar webhook RPC function
         // The RPC functions handle their own idempotency via the webhook_id
-        const { error: rpcError } = await supabase.rpc(
-          classification.rpcName as keyof DatabaseGenerated['public']['Functions'],
+        const service = new MiscService();
+        await service.handlePolarWebhookRpc(
+          classification.rpcName!,
           {
             webhook_id: webhookId,
             webhook_data: payload as Json,
           }
         );
-
-        if (rpcError) {
-          throw new Error(rpcError.message);
-        }
 
         return {
           success: true,
@@ -243,8 +237,7 @@ export const handlePolarWebhook = inngest.createFunction(
     if (rpcResult.success) {
       await step.run('update-webhook-status', async () => {
         try {
-          const supabase = createSupabaseAdminClient();
-          const service = new MiscService(supabase);
+          const service = new MiscService();
           await service.updateWebhookEventStatus(webhookId);
 
           logger.info({ ...logContext,

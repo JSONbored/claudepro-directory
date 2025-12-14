@@ -1,8 +1,12 @@
 'use server';
 
 import { ContentService } from '@heyclaude/data-layer';
+import { type content_category } from '@heyclaude/data-layer/prisma';
 import { type Database } from '@heyclaude/database-types';
 import { cacheLife, cacheTag } from 'next/cache';
+
+import { normalizeError } from '../../errors.ts';
+import { logger } from '../../logger.ts';
 
 /**
  * Get similar content
@@ -15,16 +19,12 @@ import { cacheLife, cacheTag } from 'next/cache';
  */
 export async function getSimilarContent(input: {
   contentSlug: string;
-  contentType: Database['public']['Enums']['content_category'];
+  contentType: content_category;
   limit?: number;
 }): Promise<Database['public']['Functions']['get_similar_content']['Returns'] | null> {
   'use cache';
 
   const { contentSlug, contentType, limit = 6 } = input;
-
-  const { isBuildTime } = await import('../../build-time.ts');
-  const { createSupabaseAnonClient } = await import('../../supabase/server-anon.ts');
-  const { logger } = await import('../../logger.ts');
 
   // Configure cache - use 'hours' profile for similar content
   cacheLife('hours'); // 1hr stale, 15min revalidate, 1 day expire
@@ -38,16 +38,8 @@ export async function getSimilarContent(input: {
   });
 
   try {
-    // Use admin client during build for better performance, anon client at runtime
-    let client;
-    if (isBuildTime()) {
-      const { createSupabaseAdminClient } = await import('../../supabase/admin.ts');
-      client = createSupabaseAdminClient();
-    } else {
-      client = createSupabaseAnonClient();
-    }
-
-    const result = await new ContentService(client).getSimilarContent({
+    const service = new ContentService();
+    const result = await service.getSimilarContent({
       p_content_slug: contentSlug,
       p_content_type: contentType,
       p_limit: limit,
@@ -60,10 +52,9 @@ export async function getSimilarContent(input: {
 
     return result;
   } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
+    const normalized = normalizeError(error, 'getSimilarContent failed');
     reqLogger.error(
-      { contentSlug, contentType, err: errorForLogging, limit },
+      { contentSlug, contentType, err: normalized, limit },
       'getSimilarContent: failed'
     );
     return null;

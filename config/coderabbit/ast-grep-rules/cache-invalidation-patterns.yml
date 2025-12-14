@@ -1,0 +1,68 @@
+# Cache Invalidation Pattern Rules
+# Enforces proper cache tag invalidation after mutations
+# Critical for data consistency and cache correctness
+
+---
+# Rule: Detect mutations without cache tag invalidation
+id: missing-cache-invalidation-after-mutation
+language: typescript
+files:
+  - 'packages/web-runtime/src/actions/**/*.ts'
+  - 'apps/web/src/app/api/**/*.ts'
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        pattern: export (async )?function $ACTION($$$) { $$$ }
+    - has:
+        regex: create|update|delete|upsert|insert|remove|add
+    - has:
+        pattern: await $SERVICE.($METHOD)($$$)
+    - not:
+        has:
+          pattern: revalidateTag($$$)
+message: "Mutations must invalidate related cache tags. Add: revalidateTag('resource-type') and revalidateTag('resource-type-${id}') after mutation. Import revalidateTag from 'next/cache'"
+severity: error
+
+---
+# Rule: Detect incorrect cache life profile for dynamic data
+id: incorrect-cache-life-dynamic-data
+language: typescript
+files:
+  - 'app/**/*.tsx'
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        pattern: export default async function $COMPONENT($$$) { $$$ }
+    - has:
+        regex: 'use cache'
+    - has:
+        regex: cacheLife\(.*static.*\)|cacheLife\(.*stable.*\)|cacheLife\(.*max.*\)
+    - has:
+        regex: user|account|activity|notification|bookmark|recent|trending|search|session
+message: "Dynamic/user-specific data should use shorter cache life profiles ('minutes', 'quarter', 'half'). 'static'/'stable'/'max' are for rarely-changing content. Use: cacheLife('minutes') or cacheLife('quarter')"
+severity: warning
+
+---
+# Rule: Detect missing hierarchical cache tags
+id: missing-hierarchical-cache-tags
+language: typescript
+files:
+  - 'app/**/*.tsx'
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        pattern: export default async function $COMPONENT($$$) { $$$ }
+    - has:
+        regex: 'use cache'
+    - has:
+        pattern: cacheTag('content')
+    - has:
+        pattern: await params
+    - not:
+        has:
+          regex: cacheTag\(.*content-.*\)
+message: "Cache tags should be hierarchical for granular invalidation. Add: cacheTag('content-${category}') and cacheTag('content-${slug}') in addition to cacheTag('content')"
+severity: warning

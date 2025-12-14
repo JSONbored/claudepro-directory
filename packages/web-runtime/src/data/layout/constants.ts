@@ -1,10 +1,10 @@
-import { type Database } from '@heyclaude/database-types';
+import { type announcements } from '@heyclaude/data-layer/prisma';
 
 /**
  * Layout data interface
  */
 export interface LayoutData {
-  announcement: Database['public']['Tables']['announcements']['Row'] | null;
+  announcement: announcements | null;
   /** Navigation data - kept for backward compatibility, always returns empty structure */
   navigationData: {
     actions: null;

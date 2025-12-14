@@ -1,19 +1,19 @@
 import 'server-only';
-import { type Database } from '@heyclaude/database-types';
+import { type content_category } from '@heyclaude/data-layer/prisma';
+import { ContentCategory } from '@heyclaude/data-layer/prisma';
 
 import { isBuildTime } from '../../build-time.ts';
 import { getHomepageConfigBundle } from '../../config/static-configs.ts';
 import { logger } from '../../logger.ts';
 
-function isValidCategoryValue(
-  value: unknown
-): value is Database['public']['Enums']['content_category'] {
-  return typeof value === 'string' && value.length > 0;
+// Use Prisma-generated enum values directly - no manual arrays!
+const CONTENT_CATEGORY_VALUES = Object.values(ContentCategory) as readonly content_category[];
+
+function isValidCategoryValue(value: unknown): value is content_category {
+  return typeof value === 'string' && CONTENT_CATEGORY_VALUES.includes(value as content_category);
 }
 
-export function getHomepageFeaturedCategories(): ReadonlyArray<
-  Database['public']['Enums']['content_category']
-> {
+export function getHomepageFeaturedCategories(): readonly content_category[] {
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     module: 'data/config/categories',
@@ -39,7 +39,7 @@ export function getHomepageFeaturedCategories(): ReadonlyArray<
     'getHomepageFeaturedCategories: loaded categories'
   );
 
-  return categories as ReadonlyArray<Database['public']['Enums']['content_category']>;
+  return categories as readonly content_category[];
 }
 
 export function getHomepageTabCategories(): readonly string[] {

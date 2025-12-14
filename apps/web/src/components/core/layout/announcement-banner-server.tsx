@@ -5,7 +5,7 @@
  * Edge caching: Static config-controlled TTL for global cache
  */
 
-import { type Database } from '@heyclaude/database-types';
+import type { announcements } from '@heyclaude/data-layer/prisma';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { getActiveAnnouncement as fetchActiveAnnouncement } from '@heyclaude/web-runtime/server';
 import { cacheLife, cacheTag } from 'next/cache';
@@ -15,8 +15,11 @@ import { cacheLife, cacheTag } from 'next/cache';
  *
  * Uses 'use cache' to cache active announcement with cacheLife profile.
  * This data is public and same for all users, so it can be cached at build time.
+ * 
+ * Returns Prisma announcements type with Date objects. Client components should
+ * convert Date objects to strings if needed for serialization.
  */
-export async function getActiveAnnouncement(): Promise<Database['public']['Tables']['announcements']['Row'] | null> {
+export async function getActiveAnnouncement(): Promise<announcements | null> {
   'use cache';
   // Use 'hours' profile: 1hr stale, 15min revalidate, 1 day expire
   cacheLife('hours');

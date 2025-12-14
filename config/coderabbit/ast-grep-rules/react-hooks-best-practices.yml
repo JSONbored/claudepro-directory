@@ -1,0 +1,145 @@
+# React Hooks Best Practices Pattern Rules
+# Comprehensive React Hooks Rules and best practices
+# Shareable across React projects
+# Consolidated from: react-hooks-patterns.yml, react-hooks-best-practices.yml
+
+---
+# Rule: Detect hooks called conditionally
+id: conditional-hook-call
+language: typescript
+rule:
+  all:
+    - any:
+      - kind: if_statement
+      - kind: for_statement
+      - kind: while_statement
+    - has:
+        regex: use[A-Z]|useState|useEffect|useCallback|useMemo|useRef|useContext|useReducer
+message: "React hooks must be called unconditionally at the top level. Move hook call outside conditional/loop/nested function. Hooks must be called in the same order on every render."
+severity: error
+
+---
+# Rule: Detect hooks called in nested functions
+id: hook-in-nested-function
+language: typescript
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        pattern: function $NESTED($$$) { $$$ }
+    - inside:
+        has:
+          pattern: function $PARENT($$$) { $$$ }
+    - has:
+        regex: use[A-Z]|useState|useEffect|useCallback|useMemo
+message: "React hooks must be called at the top level of a component or custom hook, not inside nested functions, callbacks, or loops. Move hook to component level."
+severity: error
+
+---
+# Rule: Detect missing cleanup function in useEffect
+id: missing-useeffect-cleanup
+language: typescript
+rule:
+  all:
+    - kind: call_expression
+    - has:
+        pattern: useEffect($EFFECT, $DEPS)
+    - has:
+        regex: addEventListener|setInterval|setTimeout|subscribe|createConnection|AbortController
+    - not:
+        has:
+          pattern: return () => { $$$ }
+message: "useEffect with side effects (event listeners, timers, subscriptions) must include cleanup function. Add: return () => { removeEventListener(...); clearInterval(...); unsubscribe(...); } to prevent memory leaks."
+severity: error
+
+---
+# Rule: Detect missing cleanup in custom hooks
+id: missing-cleanup-custom-hook
+language: typescript
+files:
+  - 'packages/web-runtime/src/hooks/**/*.ts'
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        pattern: export function use$HOOK($$$) { $$$ }
+    - has:
+        regex: addEventListener|setInterval|setTimeout|subscribe|createConnection|AbortController
+    - not:
+        has:
+          pattern: return () => { $$$ }
+message: "Custom hooks with subscriptions/timers/event listeners must return cleanup function. Add: return () => { cleanup code }"
+severity: error
+
+---
+# Rule: Detect useState with object/array without functional update
+id: usestate-object-mutation
+language: typescript
+rule:
+  all:
+    - kind: call_expression
+    - has:
+        pattern: useState($INIT)
+    - has:
+        regex: useState\(\{|useState\(\[
+    - has:
+        pattern: $STATE\.(push|pop|splice|sort|reverse)|$STATE\.($KEY) =|$STATE\[$INDEX\] =
+message: "Don't mutate state objects/arrays directly. Use functional updates: setState(prev => ({ ...prev, key: value })) or setState(prev => [...prev, item]). Direct mutation causes bugs and doesn't trigger re-renders."
+severity: error
+
+---
+# Rule: Detect useMemo/useCallback without dependencies
+id: missing-memo-dependencies
+language: typescript
+rule:
+  all:
+    - kind: call_expression
+    - has:
+        pattern: (useMemo|useCallback)($FUNC, $DEPS)
+    - has:
+        pattern: (useMemo|useCallback)($FUNC, \[\])
+    - has:
+        pattern: $VAR|$FUNC
+message: "useMemo/useCallback should include all dependencies used in the callback. Empty dependency array [] is only correct if callback uses no external values. Add missing dependencies or use ESLint exhaustive-deps rule."
+severity: warning
+
+---
+# Rule: Detect custom hook not following 'use' naming convention
+id: custom-hook-naming
+language: typescript
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        pattern: export function $HOOK($$$) { $$$ }
+    - has:
+        regex: useState|useEffect|useCallback|useMemo|useRef
+    - not:
+        has:
+          pattern: function use[A-Z]
+message: "Custom hooks must start with 'use' prefix (e.g., useMyHook, not myHook). This is a React convention that enables ESLint to apply Rules of Hooks. Rename function to start with 'use'."
+severity: error
+
+---
+# Rule: Detect useCallback/useMemo overuse (unnecessary memoization)
+id: unnecessary-memoization
+language: typescript
+rule:
+  all:
+    - kind: call_expression
+    - has:
+        pattern: (useCallback|useMemo)($FUNC, $DEPS)
+    - has:
+        pattern: (useCallback|useMemo)(\(\) => $SIMPLE, $DEPS)
+message: "useCallback/useMemo is unnecessary for simple values or functions passed to native DOM elements. Only use for expensive computations or when passing to memoized components. Remove useCallback/useMemo for simple cases."
+severity: info
+
+---
+# Note: Missing useEffect dependency detection is better handled by ESLint exhaustive-deps rule
+# AST-GREP cannot reliably detect all dependency cases
+# This rule is informational only
+
+---
+# Note: React.memo detection for list items requires JSX pattern matching
+# This is better handled by ESLint rule: react/jsx-no-bind
+# AST-GREP has limitations with complex JSX pattern matching

@@ -146,8 +146,9 @@ export const fetchPaginatedContent = rateLimitedAction
           dataKeys: data ? Object.keys(data) : [], }, 'fetchPaginatedContent: no items in result, returning empty array');
         return [];
       }
-      // Return items directly - they are already properly typed as content_paginated_slim_item[]
-      const items = data.items as DisplayableContent[];
+      // Return items directly - convert ContentPaginatedSlimItem[] to DisplayableContent[]
+      // They're compatible types, just need explicit conversion
+      const items = (data.items ?? []) as unknown as DisplayableContent[];
       logger.info({ ...logContext,
         itemsCount: items.length, }, 'fetchPaginatedContent: returning items');
       return items;

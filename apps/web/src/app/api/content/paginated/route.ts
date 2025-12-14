@@ -26,7 +26,6 @@ import {
   categorySchema,
   createApiOptionsHandler,
   createApiRoute,
-  createSupabaseAnonClient,
   getOnlyCorsHeaders,
   jsonResponse,
   paginationSchema,
@@ -387,6 +386,56 @@ import { cacheLife } from 'next/cache';
   limit: number;
   offset: number;
 }} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
+ * @param {{
+  category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
+  limit: number;
+  offset: number;
+}} params Parameter description
 */
 async function getCachedPaginatedContent(params: {
   category?: DatabaseGenerated['public']['Enums']['content_category'] | undefined;
@@ -399,8 +448,7 @@ async function getCachedPaginatedContent(params: {
   'use cache';
   cacheLife({ expire: 2_592_000, revalidate: 21_600, stale: 86_400 }); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
-  const supabase = createSupabaseAnonClient();
-  const service = new ContentService(supabase);
+  const service = new ContentService();
   const rpcArgs: DatabaseGenerated['public']['Functions']['get_content_paginated_slim']['Args'] = {
     ...(params.category === undefined ? {} : { p_category: params.category }),
     p_limit: params.limit,
@@ -475,7 +523,7 @@ export const GET = createApiRoute({
     if (!Array.isArray(itemsValue)) {
       logger.warn({}, 'Content paginated returned invalid data structure');
       return jsonResponse([], 200, getOnlyCorsHeaders, {
-        'X-Generated-By': 'supabase.rpc.get_content_paginated_slim',
+        'X-Generated-By': 'prisma.rpc.get_content_paginated_slim',
         ...buildCacheHeaders('content_paginated'),
       });
     }

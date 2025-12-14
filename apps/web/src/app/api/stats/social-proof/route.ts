@@ -7,11 +7,6 @@
  * - Success rate
  * - Total user count
  *
- * Runtime: Node.js (required for Supabase client)
- * Caching: Two-layer caching strategy:
- * - Next.js Cache Components: 15min stale, 5min revalidate, 2hr expire (cacheLife('quarter'))
- * - HTTP Cache-Control: 5 minutes via Cache-Control headers (s-maxage=300)
- *
  * @example
  * ```ts
  * // Request
@@ -30,22 +25,20 @@
  * }
  * ```
  */
+
 import 'server-only';
+
 import { MiscService } from '@heyclaude/data-layer';
 import { type Database } from '@heyclaude/database-types';
-import {
-  createApiOptionsHandler,
-  createApiRoute,
-  createSupabaseAdminClient,
-} from '@heyclaude/web-runtime/server';
+import { createApiOptionsHandler, createApiRoute } from '@heyclaude/web-runtime/server';
 import { cacheLife } from 'next/cache';
 import { connection, NextResponse } from 'next/server';
 
 /**
+ *
  * Cached helper function to fetch social proof stats.
  * Uses database RPC function to do all aggregations in the database.
- *
- * @returns A promise resolving to social proof stats: contributors (count and names), submissions count, successRate (percentage or null), and totalUsers (count or null).
+ * @returns {Promise<unknown>} Return value description
  */
 async function getCachedSocialProofData(): Promise<{
   contributors: { count: number; names: string[] };
@@ -54,17 +47,12 @@ async function getCachedSocialProofData(): Promise<{
   totalUsers: null | number;
 }> {
   'use cache';
-  cacheLife('quarter'); // 15min stale, 5min revalidate, 2hr expire - Stats change frequently (defined in next.config.mjs)
+  cacheLife('quarter'); // 15min stale, 5min revalidate, 2hr expire
 
-  const supabase = createSupabaseAdminClient();
-  const service = new MiscService(supabase);
-
-  // Use database RPC to do all aggregations in database (much faster than multiple queries + client-side processing)
-  // RPC has two overloads - we're calling with no args, so we get the first overload's return type
+  const service = new MiscService();
   const data = await service.getSocialProofStats();
 
   // Extract the first overload's return type (no args version)
-  // The function has two overloads, but when called with no args, TypeScript infers the first one
   type SocialProofStatsFunction = Database['public']['Functions']['get_social_proof_stats'];
   type NoArgsOverload = Extract<SocialProofStatsFunction, { Args: never }>;
   type SocialProofStatsRow = NoArgsOverload['Returns'][number];
@@ -74,7 +62,6 @@ async function getCachedSocialProofData(): Promise<{
     Array.isArray(result) && result.length > 0 ? (result[0] as SocialProofStatsRow) : null;
 
   if (!row) {
-    // Return defaults if no data
     return {
       contributors: { count: 0, names: [] },
       submissions: 0,
@@ -83,8 +70,6 @@ async function getCachedSocialProofData(): Promise<{
     };
   }
 
-  // Map database return type to expected format
-  // TypeScript now knows row has the correct shape from the first overload
   return {
     contributors: {
       count: row.contributor_count ?? 0,
@@ -108,16 +93,11 @@ export const GET = createApiRoute({
   cors: 'anon',
   handler: async ({ logger }) => {
     // Explicitly defer to request time before using non-deterministic operations (Date.now())
-    // This is required by Cache Components for non-deterministic operations
     await connection();
 
-    // Fetch cached stats data
     const stats = await getCachedSocialProofData();
-
-    // Generate timestamp at request time (not cached)
     const timestamp = new Date().toISOString();
 
-    // Structured logging with cache tags and stats
     logger.info(
       {
         cacheTags: ['stats', 'social-proof'],
@@ -132,11 +112,9 @@ export const GET = createApiRoute({
     );
 
     // Generate ETag from timestamp and stats hash for conditional requests
-    // Using simple string concatenation instead of base64 to avoid potential collisions
     const statsHash = `${stats.contributors.count}-${stats.submissions}-${stats.successRate}-${stats.totalUsers}`;
     const etag = `"${timestamp}-${statsHash}"`;
 
-    // Return stats with ETag and Last-Modified headers
     return NextResponse.json(
       {
         stats,

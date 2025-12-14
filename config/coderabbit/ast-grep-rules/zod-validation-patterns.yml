@@ -1,0 +1,131 @@
+# Zod Validation Pattern Rules
+# Enforces proper Zod schema usage and validation patterns
+# Shareable across projects using Zod for validation
+
+---
+# Rule: Detect API routes without Zod validation
+id: missing-zod-validation-api-route
+language: typescript
+files:
+  - 'app/api/**/*.ts'
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        pattern: export (async )?function (GET|POST|PUT|DELETE)($$$) { $$$ }
+    - not:
+        has:
+          regex: querySchema|bodySchema|z\.object|z\.string|createApiRoute
+message: "API routes must validate inputs with Zod schemas. Use createApiRoute() factory with querySchema/bodySchema, or manually validate with z.object().parse(). Never trust user input."
+severity: error
+
+---
+# Rule: Detect Zod schema without descriptions
+id: zod-schema-missing-descriptions
+language: typescript
+rule:
+  all:
+    - kind: variable_declarator
+    - has:
+        pattern: const $SCHEMA = z\.object($$$)
+    - has:
+        pattern: z\.(string|number|boolean|array|object)($$$)
+    - not:
+        has:
+          pattern: \.describe\(
+message: "Zod schemas should include .describe() for better error messages and OpenAPI documentation. Add .describe('Field description') to all schema fields. Example: z.string().min(1).describe('User name');"
+severity: warning
+
+---
+# Rule: Detect Zod schema without proper constraints
+id: zod-schema-missing-constraints
+language: typescript
+rule:
+  all:
+    - kind: variable_declarator
+    - has:
+        pattern: const $SCHEMA = z\.object({ $FIELD: z\.string($$$) })
+    - has:
+        pattern: z\.string\(\)
+    - not:
+        has:
+          regex: \.min\(|\.max\(|\.email\(|\.url\(|\.uuid\(
+message: "Zod string schemas should include constraints (.min(), .max(), .email(), .url(), .uuid()) for validation. Unconstrained strings accept any input, including empty strings and malicious input."
+severity: warning
+
+---
+# Rule: Detect Zod schema without .meta() for OpenAPI
+id: zod-schema-missing-openapi-meta
+language: typescript
+files:
+  - 'packages/web-runtime/src/api/**/*.ts'
+  - 'app/api/**/*.ts'
+rule:
+  all:
+    - kind: variable_declarator
+    - has:
+        pattern: const $SCHEMA = z\.object($$$)
+    - has:
+        pattern: z\.(string|number|boolean)($$$)
+    - not:
+        has:
+          pattern: \.meta\(
+message: "Zod schemas for API routes should include .meta() for OpenAPI documentation generation. Add .meta({ description: '...', example: '...' }) after .describe(). Import 'zod-openapi' for type augmentation."
+severity: info
+
+---
+# Note: Manual validation detection is complex and may have false positives
+# This rule is informational - manual validation may be appropriate in some cases
+# Focus on API routes and server actions where Zod is required
+
+---
+# Rule: Detect unsafe Zod parsing (should use safeParse)
+id: unsafe-zod-parsing
+language: typescript
+rule:
+  all:
+    - kind: call_expression
+    - has:
+        pattern: $SCHEMA\.parse($INPUT)
+    - not:
+        inside:
+          has:
+            pattern: try.*catch|safeParse
+message: "Zod .parse() throws on validation errors. Use .safeParse() for better error handling, or wrap .parse() in try/catch. Example: const result = schema.safeParse(input); if (!result.success) { return error; }"
+severity: warning
+
+---
+# Rule: Detect Zod schema without .trim() for strings
+id: zod-schema-missing-trim
+language: typescript
+rule:
+  all:
+    - kind: variable_declarator
+    - has:
+        pattern: z\.string($$$)
+    - has:
+        pattern: z\.string\(\)
+    - not:
+        has:
+          pattern: \.trim\(
+message: "Zod string schemas should include .trim() to remove leading/trailing whitespace. This prevents issues with user input containing accidental spaces. Example: z.string().trim().min(1);"
+severity: warning
+
+---
+# Rule: Detect Zod schema without .coerce for query parameters
+id: zod-schema-missing-coerce
+language: typescript
+files:
+  - 'app/api/**/*.ts'
+rule:
+  all:
+    - kind: variable_declarator
+    - has:
+        pattern: const $SCHEMA = z\.object({ $NUM: z\.number($$$) })
+    - has:
+        pattern: z\.number\(
+    - not:
+        has:
+          pattern: z\.coerce\.number
+message: "Query parameters are strings by default. Use z.coerce.number() or z.coerce.boolean() to convert query params to correct types. Example: limit: z.coerce.number().int().min(1).max(100);"
+severity: warning

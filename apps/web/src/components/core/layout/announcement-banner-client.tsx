@@ -1,6 +1,6 @@
 'use client';
 
-import { type Database } from '@heyclaude/database-types';
+import type { announcement_icon } from '@heyclaude/data-layer/prisma';
 import { useAnnouncementDismissal } from '@heyclaude/web-runtime/hooks';
 import {
   AlertTriangle,
@@ -27,7 +27,7 @@ import { useBoolean } from '@heyclaude/web-runtime/hooks';
  * Icon mapping for announcements
  * Maps icon names from config to Lucide icon components
  */
-type AnnouncementIcon = Database['public']['Enums']['announcement_icon'];
+type AnnouncementIcon = announcement_icon;
 const ICON_MAP: Record<AnnouncementIcon, ComponentType<{ className?: string }>> = {
   ArrowUpRight,
   ArrowRight,
@@ -37,8 +37,10 @@ const ICON_MAP: Record<AnnouncementIcon, ComponentType<{ className?: string }>> 
   Sparkles,
 };
 
+import type { announcements } from '@heyclaude/data-layer/prisma';
+
 interface AnnouncementBannerClientProps {
-  announcement: Database['public']['Tables']['announcements']['Row'];
+  announcement: announcements;
 }
 
 /**

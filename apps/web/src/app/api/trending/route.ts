@@ -27,34 +27,32 @@
  */
 
 import 'server-only';
+
 import { TrendingService } from '@heyclaude/data-layer';
-import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
+import { type content_category } from '@heyclaude/data-layer/prisma';
 import {
   buildCacheHeaders,
   createApiOptionsHandler,
   createApiRoute,
-  createSupabaseAnonClient,
   getOnlyCorsHeaders,
   jsonResponse,
   trendingQuerySchema,
 } from '@heyclaude/web-runtime/server';
 import { cacheLife } from 'next/cache';
 
-type ContentCategory = DatabaseGenerated['public']['Enums']['content_category'];
+type ContentCategory = content_category;
 
 /****
  * Cached helper function to fetch trending metrics
  * Uses Cache Components to reduce function invocations
  * @param {ContentCategory | null} category
  * @param {number} limit
- 
- * @returns {unknown} Description of return value*/
+ */
 async function getCachedTrendingMetricsFormatted(category: ContentCategory | null, limit: number) {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
 
-  const supabase = createSupabaseAnonClient();
-  const service = new TrendingService(supabase);
+  const service = new TrendingService();
   return service.getTrendingMetricsFormatted({
     ...(category ? { p_category: category } : {}),
     p_limit: limit,
@@ -66,14 +64,12 @@ async function getCachedTrendingMetricsFormatted(category: ContentCategory | nul
  * Uses Cache Components to reduce function invocations
  * @param {ContentCategory | null} category
  * @param {number} limit
- 
- * @returns {unknown} Description of return value*/
+ */
 async function getCachedPopularContentFormatted(category: ContentCategory | null, limit: number) {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
 
-  const supabase = createSupabaseAnonClient();
-  const service = new TrendingService(supabase);
+  const service = new TrendingService();
   return service.getPopularContentFormatted({
     ...(category ? { p_category: category } : {}),
     p_limit: limit,
@@ -86,8 +82,7 @@ async function getCachedPopularContentFormatted(category: ContentCategory | null
  * @param {ContentCategory | null} category
  * @param {number} limit
  * @param {number} days
- 
- * @returns {unknown} Description of return value*/
+ */
 async function getCachedRecentContentFormatted(
   category: ContentCategory | null,
   limit: number,
@@ -96,8 +91,7 @@ async function getCachedRecentContentFormatted(
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
 
-  const supabase = createSupabaseAnonClient();
-  const service = new TrendingService(supabase);
+  const service = new TrendingService();
   return service.getRecentContentFormatted({
     ...(category ? { p_category: category } : {}),
     p_days: days,
@@ -105,18 +99,28 @@ async function getCachedRecentContentFormatted(
   });
 }
 
+/****
+ * Cached helper function to fetch sidebar trending content
+ * @param {ContentCategory | null} category
+ * @param {number} limit
+ */
 async function getCachedSidebarTrendingFormatted(category: ContentCategory | null, limit: number) {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
 
-  const supabase = createSupabaseAnonClient();
-  const service = new TrendingService(supabase);
+  const service = new TrendingService();
   return service.getSidebarTrendingFormatted({
     ...(category ? { p_category: category } : {}),
     p_limit: limit,
   });
 }
 
+/*****
+ * Cached helper function to fetch sidebar recent content
+ * @param {ContentCategory | null} category
+ * @param {number} limit
+ * @param {number} days
+ */
 async function getCachedSidebarRecentFormatted(
   category: ContentCategory | null,
   limit: number,
@@ -125,8 +129,7 @@ async function getCachedSidebarRecentFormatted(
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
 
-  const supabase = createSupabaseAnonClient();
-  const service = new TrendingService(supabase);
+  const service = new TrendingService();
   return service.getSidebarRecentFormatted({
     ...(category ? { p_category: category } : {}),
     p_days: days,
@@ -143,7 +146,6 @@ async function getCachedSidebarRecentFormatted(
 export const GET = createApiRoute({
   cors: 'anon',
   handler: async ({ logger, query, url }) => {
-    // Zod schema ensures proper types
     const { category, limit, mode, tab } = query;
 
     // Handle path-based sidebar route (/api/trending/sidebar)
@@ -197,7 +199,6 @@ async function handlePageTabs(
   logger.info({ category: category ?? 'all', limit, tab }, 'Processing trending page tabs');
 
   if (tab === 'trending') {
-    // Database RPC returns frontend-ready data (no client-side mapping needed)
     const trending = await getCachedTrendingMetricsFormatted(category, limit);
     return jsonResponse(
       {
@@ -211,7 +212,6 @@ async function handlePageTabs(
   }
 
   if (tab === 'popular') {
-    // Database RPC returns frontend-ready data (no client-side mapping needed)
     const popular = await getCachedPopularContentFormatted(category, limit);
     return jsonResponse(
       {
@@ -225,7 +225,6 @@ async function handlePageTabs(
   }
 
   if (tab === 'recent') {
-    // Database RPC returns frontend-ready data (no client-side mapping needed)
     const recent = await getCachedRecentContentFormatted(category, limit, 30);
     return jsonResponse(
       {
@@ -257,7 +256,7 @@ async function handleSidebar(
 
   logger.info({ category: sidebarCategory, limit }, 'Processing trending sidebar');
 
-  // Database RPCs return sidebar-ready data with formatted views and dates (no client-side mapping needed)
+  // Fetch trending and recent content in parallel
   const [trending, recent] = await Promise.all([
     getCachedSidebarTrendingFormatted(sidebarCategory, limit),
     getCachedSidebarRecentFormatted(sidebarCategory, limit, 30),

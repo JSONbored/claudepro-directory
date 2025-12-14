@@ -960,10 +960,8 @@ export async function enrollInOnboardingSequence(email: string): Promise<void> {
 
   try {
     // Dynamically import to avoid circular dependency issues
-    const { createSupabaseAdminClient } = await import('../supabase/admin');
     const { EmailService } = await import('@heyclaude/data-layer');
-    const supabase = createSupabaseAdminClient();
-    const service = new EmailService(supabase);
+    const service = new EmailService();
 
     const enrollArgs = {
       p_email: email,

@@ -1,4 +1,4 @@
-import { type Database } from '@heyclaude/database-types';
+import { type content_category } from '@heyclaude/data-layer/prisma';
 
 import { type TabConfig } from '../../../types/category.ts';
 
@@ -256,36 +256,31 @@ const COLLECTION_TABS: readonly TabConfig[] = [
   },
 ] as const;
 
-export const DEFAULT_TAB_CONFIGS: Readonly<
-  Record<Database['public']['Enums']['content_category'], null | readonly TabConfig[]>
-> = {
-  agents: AGENTS_TABS,
-  changelog: null,
-  collections: COLLECTION_TABS,
-  // Commands with Examples tab
-  commands: COMMANDS_TABS,
-  // Special layouts
-  guides: GUIDE_TABS,
-  // Categories WITHOUT structured examples → no Examples tab (examples embedded in content)
-  hooks: STANDARD_NO_EXAMPLES_TABS,
-  // No tabs
-  jobs: null,
-  // Categories WITH structured examples data → show Examples tab
-  mcp: STANDARD_TABS,
-  // Rules with Examples tab and full sections
-  rules: RULES_TABS,
-  skills: SKILLS_TABS,
-  statuslines: STANDARD_NO_EXAMPLES_TABS,
-} as const;
+export const DEFAULT_TAB_CONFIGS: Readonly<Record<content_category, null | readonly TabConfig[]>> =
+  {
+    agents: AGENTS_TABS,
+    changelog: null,
+    collections: COLLECTION_TABS,
+    // Commands with Examples tab
+    commands: COMMANDS_TABS,
+    // Special layouts
+    guides: GUIDE_TABS,
+    // Categories WITHOUT structured examples → no Examples tab (examples embedded in content)
+    hooks: STANDARD_NO_EXAMPLES_TABS,
+    // No tabs
+    jobs: null,
+    // Categories WITH structured examples data → show Examples tab
+    mcp: STANDARD_TABS,
+    // Rules with Examples tab and full sections
+    rules: RULES_TABS,
+    skills: SKILLS_TABS,
+    statuslines: STANDARD_NO_EXAMPLES_TABS,
+  } as const;
 
-export function getTabConfigForCategory(
-  categoryId: Database['public']['Enums']['content_category']
-): null | readonly TabConfig[] {
+export function getTabConfigForCategory(categoryId: content_category): null | readonly TabConfig[] {
   return DEFAULT_TAB_CONFIGS[categoryId] ?? null;
 }
 
-export function categorySupportsTabbing(
-  categoryId: Database['public']['Enums']['content_category']
-): boolean {
+export function categorySupportsTabbing(categoryId: content_category): boolean {
   return DEFAULT_TAB_CONFIGS[categoryId] !== null;
 }

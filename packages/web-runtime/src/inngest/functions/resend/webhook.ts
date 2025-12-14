@@ -23,7 +23,6 @@ import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { normalizeError } from '@heyclaude/shared-runtime';
 
 import { inngest, type ResendEmailEventData } from '../../client';
-import { createSupabaseAdminClient } from '../../../supabase/admin';
 import { logger, createWebAppContextWithId } from '../../../logging/server';
 import { CONCURRENCY_LIMITS, RETRY_CONFIGS } from '../../config';
 
@@ -56,13 +55,12 @@ function getEventAction(eventName: string): string {
  * Atomically increment an engagement counter for an email address.
  */
 async function incrementEngagementCounter(
-  supabase: ReturnType<typeof createSupabaseAdminClient>,
   email: string,
   counterField: 'emails_sent' | 'emails_delivered' | 'emails_opened' | 'emails_clicked',
   timestampField: 'last_sent_at' | 'last_delivered_at' | 'last_opened_at' | 'last_clicked_at',
   healthStatus?: string
 ): Promise<void> {
-  const service = new MiscService(supabase);
+  const service = new MiscService();
   const existing = await service.getEmailEngagementSummary(email);
 
   const now = new Date().toISOString();
@@ -132,15 +130,13 @@ export const handleResendWebhook = inngest.createFunction(
       emailId,
       emailCount: emails.length, }, 'Processing Resend webhook');
 
-    const supabase = createSupabaseAdminClient();
-
     // Route to appropriate handler based on event type
     switch (action) {
       case 'sent':
         // Track sent count
         for (const email of emails) {
           await step.run(`track-sent-${email}`, async () => {
-            await incrementEngagementCounter(supabase, email, 'emails_sent', 'last_sent_at');
+            await incrementEngagementCounter(email, 'emails_sent', 'last_sent_at');
           });
         }
         break;
@@ -149,11 +145,11 @@ export const handleResendWebhook = inngest.createFunction(
         // Track delivery and update subscription
         for (const email of emails) {
           await step.run(`track-delivered-${email}`, async () => {
-            await incrementEngagementCounter(supabase, email, 'emails_delivered', 'last_delivered_at');
+            await incrementEngagementCounter(email, 'emails_delivered', 'last_delivered_at');
           });
 
           await step.run(`update-subscription-delivered-${email}`, async () => {
-            const newsletterService = new NewsletterService(supabase);
+            const newsletterService = new NewsletterService();
             await newsletterService.updateLastEmailSentAt(email);
           });
         }
@@ -163,11 +159,11 @@ export const handleResendWebhook = inngest.createFunction(
         // Track opens, increase engagement score (+5)
         for (const email of emails) {
           await step.run(`track-opened-${email}`, async () => {
-            await incrementEngagementCounter(supabase, email, 'emails_opened', 'last_opened_at', 'active');
+            await incrementEngagementCounter(email, 'emails_opened', 'last_opened_at', 'active');
           });
 
           await step.run(`update-engagement-opened-${email}`, async () => {
-            const newsletterService = new NewsletterService(supabase);
+            const newsletterService = new NewsletterService();
             const subscription = await newsletterService.getSubscriptionEngagementScore(email);
 
             const currentScore = subscription?.engagement_score ?? 0;
@@ -183,11 +179,11 @@ export const handleResendWebhook = inngest.createFunction(
         // Track clicks, increase engagement score (+10)
         for (const email of emails) {
           await step.run(`track-clicked-${email}`, async () => {
-            await incrementEngagementCounter(supabase, email, 'emails_clicked', 'last_clicked_at', 'active');
+            await incrementEngagementCounter(email, 'emails_clicked', 'last_clicked_at', 'active');
           });
 
           await step.run(`update-engagement-clicked-${email}`, async () => {
-            const newsletterService = new NewsletterService(supabase);
+            const newsletterService = new NewsletterService();
             const subscription = await newsletterService.getSubscriptionEngagementScore(email);
 
             const currentScore = subscription?.engagement_score ?? 0;
@@ -205,7 +201,7 @@ export const handleResendWebhook = inngest.createFunction(
 
         for (const email of emails) {
           await step.run(`blocklist-bounce-${email}`, async () => {
-            const service = new MiscService(supabase);
+            const service = new MiscService();
             try {
               await service.upsertEmailBlocklist({
                 email,
@@ -220,12 +216,12 @@ export const handleResendWebhook = inngest.createFunction(
           });
 
           await step.run(`update-subscription-bounced-${email}`, async () => {
-            const newsletterService = new NewsletterService(supabase);
+            const newsletterService = new NewsletterService();
             await newsletterService.updateSubscriptionStatus(email, 'bounced');
           });
 
           await step.run(`update-engagement-bounced-${email}`, async () => {
-            const service = new MiscService(supabase);
+            const service = new MiscService();
             await service.upsertEmailEngagementSummary({
               email,
               emails_bounced: 1,
@@ -245,7 +241,7 @@ export const handleResendWebhook = inngest.createFunction(
 
         for (const email of emails) {
           await step.run(`blocklist-complaint-${email}`, async () => {
-            const service = new MiscService(supabase);
+            const service = new MiscService();
             try {
               await service.upsertEmailBlocklist({
                 email,
@@ -260,12 +256,12 @@ export const handleResendWebhook = inngest.createFunction(
           });
 
           await step.run(`unsubscribe-complaint-${email}`, async () => {
-            const newsletterService = new NewsletterService(supabase);
+            const newsletterService = new NewsletterService();
             await newsletterService.unsubscribeWithTimestamp(email);
           });
 
           await step.run(`update-engagement-complaint-${email}`, async () => {
-            const service = new MiscService(supabase);
+            const service = new MiscService();
             await service.upsertEmailEngagementSummary({
               email,
               emails_complained: 1,

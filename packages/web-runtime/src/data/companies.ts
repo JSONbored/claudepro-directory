@@ -1,15 +1,16 @@
 'use server';
 
 import { CompaniesService, SearchService } from '@heyclaude/data-layer';
-import { Constants, type Database } from '@heyclaude/database-types';
+import { type content_category } from '@heyclaude/data-layer/prisma';
+import { type Database } from '@heyclaude/database-types';
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { logger } from '../logger.ts';
-import { createSupabaseServerClient } from '../supabase/server.ts';
+// Note: CompaniesService now uses Prisma, so Supabase client imports removed
 
 import { normalizeRpcResult } from './content-helpers.ts';
 
-const JOBS_CATEGORY = Constants.public.Enums.content_category[9] as string; // 'jobs'
+const JOBS_CATEGORY: content_category = 'jobs';
 
 type GetCompanyAdminProfileReturn =
   Database['public']['Functions']['get_company_admin_profile']['Returns'];
@@ -46,9 +47,8 @@ export async function getCompanyAdminProfile(
   });
 
   try {
-    // Can use cookies() inside 'use cache: private'
-    const client = await createSupabaseServerClient();
-    const service = new CompaniesService(client);
+    // CompaniesService now uses Prisma (no constructor needed)
+    const service = new CompaniesService();
 
     const data = await service.getCompanyAdminProfile({ p_company_id: companyId });
 
@@ -86,9 +86,6 @@ export async function getCompanyProfile(
 ): Promise<Database['public']['Functions']['get_company_profile']['Returns'] | null> {
   'use cache';
 
-  const { isBuildTime } = await import('../build-time.ts');
-  const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
-
   // Configure cache - use 'half' profile for company profiles (changes every 30 minutes)
   cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
   cacheTag('companies');
@@ -101,16 +98,10 @@ export async function getCompanyProfile(
   });
 
   try {
-    // Use admin client during build for better performance, anon client at runtime
-    let client;
-    if (isBuildTime()) {
-      const { createSupabaseAdminClient } = await import('../supabase/admin.ts');
-      client = createSupabaseAdminClient();
-    } else {
-      client = createSupabaseAnonClient();
-    }
+    // CompaniesService now uses Prisma (no constructor needed)
+    const service = new CompaniesService();
 
-    const result = await new CompaniesService(client).getCompanyProfile({ p_slug: slug });
+    const result = await service.getCompanyProfile({ p_slug: slug });
 
     requestLogger.info(
       {
@@ -142,9 +133,6 @@ export async function getCompaniesList(
 ): Promise<Database['public']['Functions']['get_companies_list']['Returns']> {
   'use cache';
 
-  const { isBuildTime } = await import('../build-time.ts');
-  const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
-
   // Configure cache - use 'half' profile for company lists (changes every 30 minutes)
   cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
   cacheTag('companies');
@@ -156,16 +144,10 @@ export async function getCompaniesList(
   });
 
   try {
-    // Use admin client during build for better performance, anon client at runtime
-    let client;
-    if (isBuildTime()) {
-      const { createSupabaseAdminClient } = await import('../supabase/admin.ts');
-      client = createSupabaseAdminClient();
-    } else {
-      client = createSupabaseAnonClient();
-    }
+    // CompaniesService now uses Prisma (no constructor needed)
+    const service = new CompaniesService();
 
-    const result = await new CompaniesService(client).getCompaniesList({
+    const result = await service.getCompaniesList({
       p_limit: limit,
       p_offset: offset,
     });
@@ -209,7 +191,6 @@ async function fetchCompanySearchResults(
 ): Promise<CompanySearchResult[]> {
   'use cache';
   const { cacheLife, cacheTag } = await import('next/cache');
-  const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
 
   // Configure cache - use 'quarter' profile for company search (same as API route)
   cacheLife('quarter'); // 15min stale, 5min revalidate, 2hr expire
@@ -224,8 +205,7 @@ async function fetchCompanySearchResults(
   try {
     // Use SearchService directly (same as API route)
     // Follows architectural strategy: data layer -> database RPC -> DB
-    const supabase = createSupabaseAnonClient();
-    const searchService = new SearchService(supabase);
+    const searchService = new SearchService();
 
     const unifiedArgs: Database['public']['Functions']['search_unified']['Args'] = {
       p_entities: ['company'],

@@ -27,7 +27,6 @@ import {
   buildCacheHeaders,
   createApiOptionsHandler,
   createApiRoute,
-  createSupabaseAnonClient,
   getOnlyCorsHeaders,
   jsonResponse,
 } from '@heyclaude/web-runtime/server';
@@ -43,8 +42,7 @@ async function getCachedCategoryConfigs() {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
-  const supabase = createSupabaseAnonClient();
-  const service = new ContentService(supabase);
+  const service = new ContentService();
   return service.getCategoryConfigs();
 }
 
@@ -69,7 +67,7 @@ export const GET = createApiRoute({
     );
 
     return jsonResponse(data, 200, getOnlyCorsHeaders, {
-      'X-Generated-By': 'supabase.rpc.get_category_configs_with_features',
+      'X-Generated-By': 'prisma.rpc.get_category_configs_with_features',
       ...buildCacheHeaders('config'),
     });
   },

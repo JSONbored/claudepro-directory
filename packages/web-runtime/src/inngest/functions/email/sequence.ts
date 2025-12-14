@@ -9,7 +9,6 @@ import { EmailService } from '@heyclaude/data-layer';
 import { normalizeError } from '@heyclaude/shared-runtime';
 
 import { inngest } from '../../client';
-import { createSupabaseAdminClient } from '../../../supabase/admin';
 import { sendEmail } from '../../../integrations/resend';
 import { ONBOARDING_FROM } from '../../../email/config/email-config';
 import { logger, createWebAppContextWithId } from '../../../logging/server';
@@ -44,11 +43,9 @@ export const processEmailSequence = inngest.createFunction(
 
     logger.info(logContext, 'Email sequence processing started');
 
-    const supabase = createSupabaseAdminClient();
-
     // Step 1: Fetch due sequence emails
     const dueEmails = await step.run('fetch-due-emails', async (): Promise<SequenceEmailItem[]> => {
-      const service = new EmailService(supabase);
+      const service = new EmailService();
 
       try {
         const data = await service.getDueSequenceEmails();
@@ -100,7 +97,7 @@ export const processEmailSequence = inngest.createFunction(
 
         for (const emailItem of batch) {
           try {
-            await processSequenceEmail(emailItem, supabase, logContext);
+            await processSequenceEmail(emailItem, logContext);
             batchSent++;
           } catch (error) {
             const normalized = normalizeError(error, 'Failed to send sequence email');
@@ -149,12 +146,11 @@ export const processEmailSequence = inngest.createFunction(
  */
 async function processSequenceEmail(
   emailItem: SequenceEmailItem,
-  supabase: ReturnType<typeof createSupabaseAdminClient>,
   logContext: ReturnType<typeof createWebAppContextWithId>
 ): Promise<void> {
   const { email, step, id: sequenceEmailId } = emailItem;
 
-  const service = new EmailService(supabase);
+  const service = new EmailService();
 
   // IDEMPOTENCY: First, atomically claim this email by updating the step
   // This prevents duplicate sends if the function retries after sending but before updating

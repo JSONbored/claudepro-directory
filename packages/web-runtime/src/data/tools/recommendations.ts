@@ -1,19 +1,25 @@
 'use server';
 
 import { QuizService } from '@heyclaude/data-layer';
+import {
+  type experience_level,
+  type focus_area_type,
+  type integration_type,
+  type use_case_type,
+} from '@heyclaude/data-layer/prisma';
 import { type Database } from '@heyclaude/database-types';
 import { cacheLife, cacheTag } from 'next/cache';
 
+import { normalizeError } from '../../errors.ts';
 import { logger } from '../../index.ts';
-import { createSupabaseServerClient } from '../../supabase/server.ts';
 
 export interface RecommendationInput {
-  experienceLevel: Database['public']['Enums']['experience_level'];
-  focusAreas?: Array<Database['public']['Enums']['focus_area_type']>;
-  integrations?: Array<Database['public']['Enums']['integration_type']>;
+  experienceLevel: experience_level;
+  focusAreas?: focus_area_type[];
+  integrations?: integration_type[];
   limit?: number;
   toolPreferences: string[];
-  useCase: Database['public']['Enums']['use_case_type'];
+  useCase: use_case_type;
   viewerId?: string;
 }
 
@@ -28,8 +34,7 @@ export interface RecommendationInput {
  * - Minimum 30 seconds stale time (required for runtime prefetch)
  * - Cache keys include all input parameters
  * - Not prerendered (runs at request time)
- * @param input - Recommendation input parameters
- * @returns Promise resolving to recommendations result or null on error
+ * @param input
  */
 export async function getConfigRecommendations(
   input: RecommendationInput
@@ -59,9 +64,7 @@ export async function getConfigRecommendations(
   });
 
   try {
-    // Can use cookies() inside 'use cache: private'
-    const client = await createSupabaseServerClient();
-    const service = new QuizService(client);
+    const service = new QuizService();
 
     const result = await service.getRecommendations({
       p_experience_level: experienceLevel,
@@ -85,10 +88,9 @@ export async function getConfigRecommendations(
 
     return result;
   } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
+    const normalized = normalizeError(error, 'getConfigRecommendations failed');
     reqLogger.error(
-      { err: errorForLogging, experienceLevel, hasViewer: Boolean(viewerId), useCase },
+      { err: normalized, experienceLevel, hasViewer: Boolean(viewerId), useCase },
       'getConfigRecommendations: unexpected error'
     );
     return null;

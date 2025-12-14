@@ -24,13 +24,13 @@
  */
 
 import 'server-only';
+
 import { SearchService } from '@heyclaude/data-layer';
 import { createErrorResponse, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   buildCacheHeaders,
   createApiOptionsHandler,
   createApiRoute,
-  createSupabaseAnonClient,
   getWithAuthCorsHeaders,
   jsonResponse,
 } from '@heyclaude/web-runtime/server';
@@ -39,19 +39,12 @@ import { cacheLife } from 'next/cache';
 /**
  * Cached helper function to fetch search facets.
  * Uses Cache Components to reduce function invocations.
- * Database RPC returns frontend-ready data (no client-side mapping needed).
- *
- * Cache configuration: Uses 'static' profile (1 day stale, 6hr revalidate, 30 days expire)
- * defined in next.config.mjs. Search facets are public data that changes infrequently.
- *
- * @returns {Promise<unknown[]>} Array of formatted search facet objects from the database RPC
  */
 async function getCachedSearchFacetsFormatted() {
   'use cache';
-  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire (defined in next.config.mjs)
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
 
-  const supabase = createSupabaseAnonClient();
-  const service = new SearchService(supabase);
+  const service = new SearchService();
   return await service.getSearchFacetsFormatted();
 }
 
@@ -59,15 +52,12 @@ async function getCachedSearchFacetsFormatted() {
  * GET /api/search/facets - Get search facets
  *
  * Returns available search facets (categories, tags, authors) for filtering.
- * Database RPC returns frontend-ready data (no client-side mapping needed).
  */
 export const GET = createApiRoute({
   cors: 'auth',
   handler: async ({ logger }) => {
     logger.info({}, 'Facets request received');
 
-    // Database RPC returns frontend-ready data (no client-side mapping needed)
-    // This eliminates CPU-intensive array mapping and filtering (5-10% CPU savings)
     let data: Awaited<ReturnType<typeof getCachedSearchFacetsFormatted>> | null = null;
     try {
       data = await getCachedSearchFacetsFormatted();
@@ -82,7 +72,6 @@ export const GET = createApiRoute({
       });
     }
 
-    // RPC returns array of { category, content_count, tags, authors } - use directly
     const facets = Array.isArray(data) ? data : [];
 
     return jsonResponse(

@@ -1,10 +1,11 @@
 'use server';
 
-import { ContentService } from '@heyclaude/data-layer';
-import { type Database } from '@heyclaude/database-types';
-import { Constants } from '@heyclaude/database-types';
+import { ContentService, type ContentPaginatedSlimResult } from '@heyclaude/data-layer';
+import { type content_category } from '@heyclaude/data-layer/prisma';
 import { cacheLife, cacheTag } from 'next/cache';
 
+import { normalizeError } from '../../errors.ts';
+import { logger } from '../../logger.ts';
 import { generateContentTags } from '../content-helpers.ts';
 
 interface PaginatedContentParameters {
@@ -13,17 +14,26 @@ interface PaginatedContentParameters {
   offset: number;
 }
 
-const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
+// Prisma enum values for validation
+const CONTENT_CATEGORY_VALUES: readonly content_category[] = [
+  'agents',
+  'mcp',
+  'rules',
+  'commands',
+  'hooks',
+  'statuslines',
+  'skills',
+  'collections',
+  'guides',
+  'jobs',
+  'changelog',
+] as const;
 
-function toContentCategory(
-  value: null | string | undefined
-): Database['public']['Enums']['content_category'] | undefined {
+function toContentCategory(value: null | string | undefined): content_category | undefined {
   if (!value) return undefined;
   const lowered = value.trim().toLowerCase();
-  return CONTENT_CATEGORY_VALUES.includes(
-    lowered as Database['public']['Enums']['content_category']
-  )
-    ? (lowered as Database['public']['Enums']['content_category'])
+  return CONTENT_CATEGORY_VALUES.includes(lowered as content_category)
+    ? (lowered as content_category)
     : undefined;
 }
 
@@ -39,16 +49,10 @@ export async function getPaginatedContent({
   category,
   limit,
   offset,
-}: PaginatedContentParameters): Promise<
-  Database['public']['Functions']['get_content_paginated_slim']['Returns'] | null
-> {
+}: PaginatedContentParameters): Promise<ContentPaginatedSlimResult | null> {
   'use cache';
 
   const normalizedCategory = category ? toContentCategory(category) : undefined;
-
-  const { isBuildTime } = await import('../../build-time.ts');
-  const { createSupabaseAnonClient } = await import('../../supabase/server-anon.ts');
-  const { logger } = await import('../../logger.ts');
 
   // Configure cache - use 'static' profile for paginated content (changes daily)
   cacheLife('static'); // 1 day stale, 6 hours revalidate, 30 days expire
@@ -63,15 +67,6 @@ export async function getPaginatedContent({
   });
 
   try {
-    // Use admin client during build for better performance, anon client at runtime
-    let client;
-    if (isBuildTime()) {
-      const { createSupabaseAdminClient } = await import('../../supabase/admin.ts');
-      client = createSupabaseAdminClient();
-    } else {
-      client = createSupabaseAnonClient();
-    }
-
     const rpcArgs = {
       ...(normalizedCategory ? { p_category: normalizedCategory } : {}),
       p_limit: limit,
@@ -83,7 +78,8 @@ export async function getPaginatedContent({
       'getPaginatedContent: calling RPC get_content_paginated_slim'
     );
 
-    const result = await new ContentService(client).getContentPaginatedSlim(rpcArgs);
+    const service = new ContentService();
+    const result = await service.getContentPaginatedSlim(rpcArgs);
 
     reqLogger.info(
       {
@@ -102,10 +98,9 @@ export async function getPaginatedContent({
 
     return result;
   } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
+    const normalized = normalizeError(error, 'getPaginatedContent failed');
     reqLogger.error(
-      { category: normalizedCategory ?? category ?? 'all', err: errorForLogging, limit, offset },
+      { category: normalizedCategory ?? category ?? 'all', err: normalized, limit, offset },
       'getPaginatedContent: failed'
     );
     return null;

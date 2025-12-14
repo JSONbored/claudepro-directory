@@ -5,13 +5,18 @@
  * Database types are in @heyclaude/database-types (generated).
  */
 
+import type { submission_type } from '@heyclaude/data-layer/prisma';
+import type {
+  EnrichedContentItem,
+  RelatedContentItem,
+  SearchContentOptimizedRow,
+  SearchUnifiedRow,
+} from '@heyclaude/data-layer/types/composite-types';
 import type { Database } from '@heyclaude/database-types';
-import { Constants } from '@heyclaude/database-types';
 
-// Use generated type from database - search_content_optimized now returns composite type
-// Extract the row type from the results array in the composite type
-type SearchResult = Database['public']['CompositeTypes']['search_content_optimized_row'];
-type UnifiedSearchResult = Database['public']['CompositeTypes']['search_unified_row'];
+// Use new composite types from @heyclaude/data-layer
+type SearchResult = SearchContentOptimizedRow;
+type UnifiedSearchResult = SearchUnifiedRow;
 import type { LucideIcon } from '../icons.tsx';
 import type { ReactNode } from 'react';
 import type {
@@ -66,8 +71,8 @@ export type DisplayableContent =
   | ContentItem
   | SearchResult
   | UnifiedSearchResult
-  | Database['public']['CompositeTypes']['enriched_content_item']
-  | Database['public']['CompositeTypes']['related_content_item']
+  | EnrichedContentItem
+  | RelatedContentItem
   | HomepageContentItem;
 
 export interface ContentHeadingMetadata {
@@ -243,7 +248,7 @@ export interface TrendingContentProps {
 }
 
 export type ContentListServerProps<
-  T extends DisplayableContent = Database['public']['CompositeTypes']['enriched_content_item'],
+  T extends DisplayableContent = EnrichedContentItem,
 > = {
   title: string;
   description: string;
@@ -508,16 +513,24 @@ export interface FormFieldConfig {
 }
 
 /**
- * Submission content type - extracted from database enum
+ * Submission content type - extracted from Prisma enum
  * Use this type for type-safe submission content categories
  */
-export type SubmissionContentType = Database['public']['Enums']['submission_type'];
+export type SubmissionContentType = submission_type;
 
 /**
  * Submission content types array (for runtime use, e.g., form dropdowns)
- * Uses enum values directly from @heyclaude/database-types Constants
+ * Prisma enum values: agents, mcp, rules, commands, hooks, statuslines, skills
  */
-export const SUBMISSION_CONTENT_TYPES = Constants.public.Enums.submission_type;
+export const SUBMISSION_CONTENT_TYPES: readonly submission_type[] = [
+  'agents',
+  'mcp',
+  'rules',
+  'commands',
+  'hooks',
+  'statuslines',
+  'skills',
+] as const;
 
 export interface SubmissionFormSection {
   nameField: TextFieldDefinition | null;

@@ -22,7 +22,7 @@
  * - Responsive design
  */
 
-import { type Database } from '@heyclaude/database-types';
+import { type changelog } from '@heyclaude/data-layer/prisma';
 import { generatePageMetadata, getChangelogOverview } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG, QUERY_LIMITS } from '@heyclaude/web-runtime/data/config/constants';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
@@ -156,7 +156,7 @@ async function ChangelogContentWithData({
   reqLogger: ReturnType<typeof logger.child>;
 }) {
   // Fetch data outside JSX construction - handle errors before rendering
-  let sortedEntries: Array<Database['public']['Tables']['changelog']['Row']> = [];
+  let sortedEntries: changelog[] = [];
   let hasError = false;
 
   try {
@@ -168,7 +168,9 @@ async function ChangelogContentWithData({
       publishedOnly: true, // Only get published entries
     });
 
-    // Normalize entries: ensure contributors and keywords are arrays (never null)
+    // Convert RPC return data (string dates) to Prisma types (Date objects)
+    // RPC returns CompositeType (changelog_overview_entry) with string dates
+    // Prisma expects Date objects for timestamps
     // changelog_overview_entry has keywords but not contributors, so we default contributors to []
     const publishedEntries = (overview.entries ?? []).map((entry) => {
       // keywords is already text[] in database (may be null in overview)
@@ -183,24 +185,33 @@ async function ChangelogContentWithData({
         commit_count: null,
         content: entry.content ?? '',
         contributors,
-        created_at: entry.created_at ?? '',
+        created_at: new Date(entry.created_at ?? ''),
         git_commit_sha: null,
         json_ld: null,
         keywords,
         og_image: null,
         og_type: null,
+        release_date: entry.release_date ? new Date(entry.release_date) : new Date(),
         robots_follow: null,
         robots_index: null,
+        seo_description: entry.seo_description ?? null,
+        seo_title: entry.seo_title ?? null,
         source: null,
         twitter_card: null,
-        updated_at: entry.updated_at ?? '',
-      } as Database['public']['Tables']['changelog']['Row'];
+        updated_at: new Date(entry.updated_at ?? ''),
+      } as changelog;
     });
 
     // Sort entries by date (newest first) - EXACTLY matches Magic UI template
     sortedEntries = [...publishedEntries].toSorted((a, b) => {
-      const dateA = new Date(a.release_date).getTime();
-      const dateB = new Date(b.release_date).getTime();
+      const dateA =
+        a.release_date instanceof Date
+          ? a.release_date.getTime()
+          : new Date(a.release_date).getTime();
+      const dateB =
+        b.release_date instanceof Date
+          ? b.release_date.getTime()
+          : new Date(b.release_date).getTime();
       return dateB - dateA;
     });
   } catch (error) {

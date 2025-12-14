@@ -1,6 +1,7 @@
 'use server';
 
 import { SearchService } from '@heyclaude/data-layer';
+import { type content_category } from '@heyclaude/data-layer/prisma';
 import { type Database } from '@heyclaude/database-types';
 import { cacheLife, cacheTag } from 'next/cache';
 
@@ -25,14 +26,14 @@ type SearchFacetsRow = Database['public']['Functions']['get_search_facets']['Ret
 
 export interface SearchFacetSummary {
   authors: string[];
-  category: Database['public']['Enums']['content_category'];
+  category: content_category;
   contentCount: number;
   tags: string[];
 }
 
 export interface SearchFacetAggregate {
   authors: string[];
-  categories: Array<Database['public']['Enums']['content_category']>;
+  categories: content_category[];
   facets: SearchFacetSummary[];
   tags: string[];
 }
@@ -59,7 +60,7 @@ function normalizeFacetRow(row: SearchFacetsRow): SearchFacetSummary {
  */
 function extractAggregatedArrays(data: SearchFacetsRow[]): {
   authors: string[];
-  categories: Array<Database['public']['Enums']['content_category']>;
+  categories: content_category[];
   tags: string[];
 } {
   // RPC returns aggregated arrays in each row (same values)
@@ -98,9 +99,6 @@ function extractAggregatedArrays(data: SearchFacetsRow[]): {
 export async function getSearchFacets(): Promise<SearchFacetAggregate> {
   'use cache';
 
-  const { isBuildTime } = await import('../../build-time.ts');
-  const { createSupabaseAnonClient } = await import('../../supabase/server-anon.ts');
-
   // Configure cache - use 'hours' profile for search facets (changes hourly)
   cacheLife('hours'); // 1hr stale, 15min revalidate, 1 day expire
   cacheTag('search');
@@ -113,23 +111,7 @@ export async function getSearchFacets(): Promise<SearchFacetAggregate> {
   });
 
   try {
-    // Use admin client during build for better performance, anon client at runtime
-    let client;
-    if (isBuildTime()) {
-      const { createSupabaseAdminClient } = await import('../../supabase/admin.ts');
-      // NOTE: Admin client bypasses RLS and is required here because:
-      // 1. This function runs during static site generation (build time)
-      // 2. Search facets are public data (same for all users, no user-specific content)
-      // 3. Admin client provides better performance during build (no RLS overhead)
-      // 4. At runtime, we use anon client with RLS for security
-      // 5. The data being accessed is non-sensitive (public search facets)
-      client = createSupabaseAdminClient();
-    } else {
-      client = createSupabaseAnonClient();
-    }
-
-    // Use SearchService for proper data layer architecture
-    const service = new SearchService(client);
+    const service = new SearchService();
     const data = await service.getSearchFacets();
 
     const facets = data.map((row) => normalizeFacetRow(row));
@@ -174,9 +156,6 @@ export async function getPopularSearches(
 ): Promise<Database['public']['Functions']['get_trending_searches']['Returns']> {
   'use cache';
 
-  const { isBuildTime } = await import('../../build-time.ts');
-  const { createSupabaseAnonClient } = await import('../../supabase/server-anon.ts');
-
   // Configure cache - use 'hours' profile for popular searches (changes hourly)
   cacheLife('hours'); // 1hr stale, 15min revalidate, 1 day expire
   cacheTag('search');
@@ -190,23 +169,7 @@ export async function getPopularSearches(
   });
 
   try {
-    // Use admin client during build for better performance, anon client at runtime
-    let client;
-    if (isBuildTime()) {
-      const { createSupabaseAdminClient } = await import('../../supabase/admin.ts');
-      // NOTE: Admin client bypasses RLS and is required here because:
-      // 1. This function runs during static site generation (build time)
-      // 2. Popular searches are public data (same for all users, no user-specific content)
-      // 3. Admin client provides better performance during build (no RLS overhead)
-      // 4. At runtime, we use anon client with RLS for security
-      // 5. The data being accessed is non-sensitive (public search trends)
-      client = createSupabaseAdminClient();
-    } else {
-      client = createSupabaseAnonClient();
-    }
-
-    // Use SearchService for proper data layer architecture
-    const service = new SearchService(client);
+    const service = new SearchService();
     const data = await service.getTrendingSearches({
       limit_count: limit,
     });

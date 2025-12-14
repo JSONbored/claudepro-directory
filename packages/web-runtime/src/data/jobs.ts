@@ -1,4 +1,5 @@
 import 'server-only';
+
 import { JobsService, SearchService } from '@heyclaude/data-layer';
 import { type Database } from '@heyclaude/database-types';
 import { normalizeError } from '@heyclaude/shared-runtime';
@@ -28,17 +29,15 @@ export interface JobsFilterOptions {
 /***
  * Fetches jobs matching the provided filter options directly from the data source without using cache.
  *
- * @param {JobsFilterOptions} options - Filtering options (may include `searchQuery`, `category`, `employment`, `experience`, `remote`, `limit`, `offset`, `sort`)
+ * @param {JobsFilterOptions} options - Filtering options (searchQuery, category, employment, experience, remote, limit, offset, sort)
  * @returns The filtered jobs result, or `null` if an error occurs
  */
 async function getFilteredJobsDirect(options: JobsFilterOptions): Promise<JobsFilterResult | null> {
-  // Create request-scoped child logger
   const reqLogger = logger.child({
     module: 'data/jobs',
     operation: 'getFilteredJobsDirect',
   });
 
-  const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
   const { category, employment, experience, limit, offset, remote, searchQuery, sort } = options;
 
   const filtersLog: Record<string, boolean | null | number | string> = {
@@ -53,25 +52,19 @@ async function getFilteredJobsDirect(options: JobsFilterOptions): Promise<JobsFi
   };
 
   try {
-    const client = createSupabaseAnonClient();
-
-    // OPTIMIZATION: Use type guards instead of type assertions for runtime validation
-    // Build RPC args with proper type narrowing
+    // Build RPC args with proper type narrowing using type guards
     const rpcArguments: Database['public']['Functions']['filter_jobs']['Args'] = {};
 
     if (searchQuery) {
       rpcArguments.p_search_query = searchQuery;
     }
     if (category && category !== 'all' && isValidJobCategory(category)) {
-      // Type guard ensures category is valid job_category enum
       rpcArguments.p_category = category;
     }
     if (employment && employment !== 'any' && isValidJobType(employment)) {
-      // Type guard ensures employment is valid job_type enum
       rpcArguments.p_employment_type = employment;
     }
     if (experience && experience !== 'any' && isValidExperienceLevel(experience)) {
-      // Type guard ensures experience is valid experience_level enum
       rpcArguments.p_experience_level = experience;
     }
     if (remote !== undefined) {
@@ -84,13 +77,9 @@ async function getFilteredJobsDirect(options: JobsFilterOptions): Promise<JobsFi
       rpcArguments.p_offset = offset;
     }
 
-    // Type compatibility: SupabaseAnonClient is compatible with SupabaseClient<Database>
-    // Both are created from the same underlying Supabase client factory with Database type
-    // This is safe because createSupabaseAnonClient returns ReturnType<typeof createSupabaseClient<Database>>
-    // We use a type assertion here because TypeScript doesn't recognize the structural compatibility
-    return await new SearchService(client).filterJobs(rpcArguments);
+    const service = new SearchService();
+    return await service.filterJobs(rpcArguments);
   } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.warn(
       { err: errorForLogging, ...filtersLog, fallbackStrategy: 'null' },
@@ -101,18 +90,16 @@ async function getFilteredJobsDirect(options: JobsFilterOptions): Promise<JobsFi
 }
 
 /****
+ *
  * Get jobs list without filters (cached)
  * Uses 'use cache' to cache jobs lists. This data is public and same for all users.
  * Jobs lists change periodically, so we use the 'half' cacheLife profile.
  * @param {number} limit
  * @param {number} offset
- 
- * @returns {unknown} Description of return value*/
+ * @returns {Promise<unknown>} Return value description
+ */
 async function getJobsListCached(limit: number, offset: number): Promise<JobsFilterResult | null> {
   'use cache';
-
-  const { isBuildTime } = await import('../build-time.ts');
-  const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
 
   // Configure cache - use 'half' profile for jobs lists (changes every 30 minutes)
   cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
@@ -124,17 +111,6 @@ async function getJobsListCached(limit: number, offset: number): Promise<JobsFil
   });
 
   try {
-    // Use admin client during build for better performance, anon client at runtime
-    let client;
-    if (isBuildTime()) {
-      const { createSupabaseAdminClient } = await import('../supabase/admin.ts');
-      // Admin client required during build: bypasses RLS for faster static generation
-      // This is safe because build-time queries are read-only and don't expose user data
-      client = createSupabaseAdminClient();
-    } else {
-      client = createSupabaseAnonClient();
-    }
-
     const rpcArgs: Database['public']['Functions']['filter_jobs']['Args'] = {};
     if (limit !== undefined) {
       rpcArgs.p_limit = limit;
@@ -142,7 +118,9 @@ async function getJobsListCached(limit: number, offset: number): Promise<JobsFil
     if (offset !== undefined) {
       rpcArgs.p_offset = offset;
     }
-    const result = await new SearchService(client).filterJobs(rpcArgs);
+
+    const service = new SearchService();
+    const result = await service.filterJobs(rpcArgs);
 
     reqLogger.info(
       { hasResult: Boolean(result), limit, offset },
@@ -151,14 +129,14 @@ async function getJobsListCached(limit: number, offset: number): Promise<JobsFil
 
     return result;
   } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error({ err: errorForLogging, limit, offset }, 'getJobsListCached: failed');
     return null;
   }
 }
 
-/***********
+/**********
+*
  * Get filtered jobs with search/filters (cached)
  * Uses 'use cache' to cache filtered jobs. This data is public and same for all users.
  * Filtered jobs change periodically, so we use the 'half' cacheLife profile.
@@ -170,9 +148,9 @@ async function getJobsListCached(limit: number, offset: number): Promise<JobsFil
  * @param {boolean} remote
  * @param {number} limit
  * @param {number} offset
- * @param {string} sort
- 
- * @returns {unknown} Description of return value*/
+ * @param sort
+ * @returns {Promise<unknown>} Return value description
+ */
 async function getFilteredJobsCached(
   rpcArguments: Database['public']['Functions']['filter_jobs']['Args'],
   searchQuery: string,
@@ -186,9 +164,6 @@ async function getFilteredJobsCached(
 ): Promise<JobsFilterResult | null> {
   'use cache';
 
-  const { isBuildTime } = await import('../build-time.ts');
-  const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
-
   // Configure cache - use 'half' profile for filtered jobs (changes every 30 minutes)
   cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
   cacheTag('jobs-search');
@@ -199,18 +174,8 @@ async function getFilteredJobsCached(
   });
 
   try {
-    // Use admin client during build for better performance, anon client at runtime
-    let client;
-    if (isBuildTime()) {
-      const { createSupabaseAdminClient } = await import('../supabase/admin.ts');
-      // Admin client required during build: bypasses RLS for faster static generation
-      // This is safe because build-time queries are read-only and don't expose user data
-      client = createSupabaseAdminClient();
-    } else {
-      client = createSupabaseAnonClient();
-    }
-
-    const result = await new SearchService(client).filterJobs(rpcArguments);
+    const service = new SearchService();
+    const result = await service.filterJobs(rpcArguments);
 
     reqLogger.info(
       {
@@ -229,7 +194,6 @@ async function getFilteredJobsCached(
 
     return result;
   } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error(
       {
@@ -260,7 +224,6 @@ export async function getFilteredJobs(
   options: JobsFilterOptions,
   noCache = false
 ): Promise<JobsFilterResult | null> {
-  // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
     module: 'data/jobs',
     operation: 'getFilteredJobs',
@@ -291,7 +254,6 @@ export async function getFilteredJobs(
     try {
       return await getJobsListCached(limit ?? 0, offset ?? 0);
     } catch (error) {
-      // logger.error() normalizes errors internally, so pass raw error
       const errorForLogging: Error | string = error instanceof Error ? error : String(error);
       reqLogger.error(
         { err: errorForLogging, ...filtersLog },
@@ -305,7 +267,6 @@ export async function getFilteredJobs(
   if (noCache) {
     // Pulse the search for analytics (fire and forget)
     if (searchQuery) {
-      // Fire-and-forget analytics call - errors are logged but don't block the request
       void pulseJobSearch(searchQuery, {}, 0).catch((error: unknown) => {
         const normalized = normalizeError(error, 'Failed to pulse job search');
         logger.error(
@@ -321,7 +282,6 @@ export async function getFilteredJobs(
   try {
     // Pulse the search for analytics (fire and forget)
     if (searchQuery) {
-      // Fire-and-forget analytics call - errors are logged but don't block the request
       void pulseJobSearch(searchQuery, {}, 0).catch((error: unknown) => {
         const normalized = normalizeError(error, 'Failed to pulse job search');
         logger.error(
@@ -331,23 +291,19 @@ export async function getFilteredJobs(
       });
     }
 
-    // OPTIMIZATION: Use type guards instead of type assertions for runtime validation
-    // Build RPC args with proper type narrowing
+    // Build RPC args with proper type narrowing using type guards
     const rpcArguments: Database['public']['Functions']['filter_jobs']['Args'] = {};
 
     if (searchQuery) {
       rpcArguments.p_search_query = searchQuery;
     }
     if (category && category !== 'all' && isValidJobCategory(category)) {
-      // Type guard ensures category is valid job_category enum
       rpcArguments.p_category = category;
     }
     if (employment && employment !== 'any' && isValidJobType(employment)) {
-      // Type guard ensures employment is valid job_type enum
       rpcArguments.p_employment_type = employment;
     }
     if (experience && experience !== 'any' && isValidExperienceLevel(experience)) {
-      // Type guard ensures experience is valid experience_level enum
       rpcArguments.p_experience_level = experience;
     }
     if (remote !== undefined) {
@@ -372,7 +328,6 @@ export async function getFilteredJobs(
       sort ?? 'newest'
     );
   } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error({ err: errorForLogging, ...filtersLog }, 'Failed to fetch filtered jobs');
     return null;
@@ -388,10 +343,6 @@ export async function getFilteredJobs(
 export async function getJobBySlug(slug: string) {
   'use cache';
 
-  const { cacheLife, cacheTag } = await import('next/cache');
-  const { isBuildTime } = await import('../build-time.ts');
-  const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
-
   // Configure cache - use 'half' profile for job details (changes every 30 minutes)
   cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
   cacheTag(`job-${slug}`);
@@ -403,24 +354,13 @@ export async function getJobBySlug(slug: string) {
   });
 
   try {
-    // Use admin client during build for better performance, anon client at runtime
-    let client;
-    if (isBuildTime()) {
-      const { createSupabaseAdminClient } = await import('../supabase/admin.ts');
-      // Admin client required during build: bypasses RLS for faster static generation
-      // This is safe because build-time queries are read-only and don't expose user data
-      client = createSupabaseAdminClient();
-    } else {
-      client = createSupabaseAnonClient();
-    }
-
-    const result = await new JobsService(client).getJobBySlug({ p_slug: slug });
+    const service = new JobsService();
+    const result = await service.getJobBySlug({ p_slug: slug });
 
     reqLogger.info({ hasResult: Boolean(result), slug }, 'getJobBySlug: fetched successfully');
 
     return result;
   } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error({ err: errorForLogging, slug }, 'getJobBySlug: unexpected error');
     return null;
@@ -438,10 +378,6 @@ export async function getJobBySlug(slug: string) {
 export async function getFeaturedJobs(limit = 5) {
   'use cache';
 
-  const { cacheLife, cacheTag } = await import('next/cache');
-  const { isBuildTime } = await import('../build-time.ts');
-  const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
-
   // Configure cache - use 'half' profile for featured jobs (changes every 30 minutes)
   cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
   cacheTag('jobs-featured');
@@ -453,18 +389,8 @@ export async function getFeaturedJobs(limit = 5) {
   });
 
   try {
-    // Use admin client during build for better performance, anon client at runtime
-    let client;
-    if (isBuildTime()) {
-      const { createSupabaseAdminClient } = await import('../supabase/admin.ts');
-      // Admin client required during build: bypasses RLS for faster static generation
-      // This is safe because build-time queries are read-only and don't expose user data
-      client = createSupabaseAdminClient();
-    } else {
-      client = createSupabaseAnonClient();
-    }
-
-    const result = await new JobsService(client).getFeaturedJobs();
+    const service = new JobsService();
+    const result = await service.getFeaturedJobs();
 
     reqLogger.info(
       { count: result !== null && result !== undefined ? result.length : 0, limit },
@@ -476,7 +402,6 @@ export async function getFeaturedJobs(limit = 5) {
     }
     return result;
   } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error({ err: errorForLogging, limit }, 'getFeaturedJobs: unexpected error');
     return [];

@@ -19,15 +19,14 @@
 
 import 'server-only';
 import { ContentService } from '@heyclaude/data-layer';
+import { type content_category } from '@heyclaude/data-layer/prisma';
 import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
-import { Constants } from '@heyclaude/database-types';
 import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
 import {
   buildCacheHeaders,
   categoryContentFormatSchema,
   createApiOptionsHandler,
   createApiRoute,
-  createSupabaseAnonClient,
   getOnlyCorsHeaders,
   jsonResponse,
   notFoundResponse,
@@ -36,22 +35,32 @@ import { cacheLife } from 'next/cache';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
-/**
+// Prisma enum values for validation
+const CONTENT_CATEGORY_VALUES: readonly content_category[] = [
+  'agents',
+  'mcp',
+  'rules',
+  'commands',
+  'hooks',
+  'statuslines',
+  'skills',
+  'collections',
+  'guides',
+  'jobs',
+  'changelog',
+] as const;
+
+/***
  * Cached helper function to fetch category content list.
  * Uses Cache Components to reduce function invocations.
  * The category parameter becomes part of the cache key, so different categories have different cache entries.
- *
- * @param {DatabaseGenerated['public']['Enums']['content_category']} category - Content category enum value
- * @returns {Promise<unknown[]>} Category content list from the database (typically an array of content item objects)
+ * @param {content_category} category
  */
-async function getCachedCategoryContent(
-  category: DatabaseGenerated['public']['Enums']['content_category']
-) {
+async function getCachedCategoryContent(category: content_category) {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire (defined in next.config.mjs)
 
-  const supabase = createSupabaseAnonClient();
-  const service = new ContentService(supabase);
+  const service = new ContentService();
   return await service.getCategoryContentList({ p_category: category });
 }
 
@@ -68,8 +77,7 @@ async function getCachedCategoryLlmsTxt(
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
 
-  const supabase = createSupabaseAnonClient();
-  const service = new ContentService(supabase);
+  const service = new ContentService();
   return await service.getCategoryLlmsTxt({ p_category: category });
 }
 
@@ -95,12 +103,7 @@ export const GET = createApiRoute({
     const { category } = await context.params;
 
     // Validate category from path parameter
-    const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
-    if (
-      !CONTENT_CATEGORY_VALUES.includes(
-        category as DatabaseGenerated['public']['Enums']['content_category']
-      )
-    ) {
+    if (!CONTENT_CATEGORY_VALUES.includes(category as content_category)) {
       throw new Error(
         `Invalid category '${category}'. Valid categories: ${CONTENT_CATEGORY_VALUES.join(', ')}`
       );
@@ -128,7 +131,7 @@ export const GET = createApiRoute({
         );
 
         return jsonResponse(data, 200, getOnlyCorsHeaders, {
-          'X-Generated-By': 'supabase.rpc.get_category_content_list',
+          'X-Generated-By': 'prisma.rpc.get_category_content_list',
           ...buildSecurityHeaders(),
           ...buildCacheHeaders('content_export', {
             stale: 60 * 60 * 24 * 30, // 30 days stale-while-revalidate
@@ -153,7 +156,7 @@ export const GET = createApiRoute({
         return new NextResponse(formatted, {
           headers: {
             'Content-Type': 'text/plain; charset=utf-8',
-            'X-Generated-By': 'supabase.rpc.generate_category_llms_txt',
+            'X-Generated-By': 'prisma.rpc.generate_category_llms_txt',
             ...buildSecurityHeaders(),
             ...getOnlyCorsHeaders,
             ...buildCacheHeaders('content_export'),

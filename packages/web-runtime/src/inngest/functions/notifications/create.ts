@@ -10,7 +10,6 @@ import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 
 import { inngest } from '../../client';
-import { createSupabaseAdminClient } from '../../../supabase/admin';
 import { logger, createWebAppContextWithId } from '../../../logging/server';
 
 type NotificationType = DatabaseGenerated['public']['Enums']['notification_type'];
@@ -91,8 +90,6 @@ export const createNotification = inngest.createFunction(
     const notification = await step.run('create-notification', async (): Promise<{
       id: string;
     }> => {
-      const supabase = createSupabaseAdminClient();
-
       // Use provided ID or generate new one
       const notificationId = id ?? crypto.randomUUID();
 
@@ -113,7 +110,7 @@ export const createNotification = inngest.createFunction(
         notificationData.action_href = action_href;
       }
 
-      const service = new MiscService(supabase);
+      const service = new MiscService();
       const data = await service.insertNotification(notificationData);
 
       return { id: data.id };
@@ -194,8 +191,6 @@ export const broadcastNotification = inngest.createFunction(
     const notification = await step.run('create-broadcast-notification', async (): Promise<{
       id: string;
     }> => {
-      const supabase = createSupabaseAdminClient();
-
       const notificationId = crypto.randomUUID();
 
       // Build notification data carefully to avoid exactOptionalPropertyTypes issues
@@ -215,7 +210,7 @@ export const broadcastNotification = inngest.createFunction(
         notificationData.action_href = action_href;
       }
 
-      const service = new MiscService(supabase);
+      const service = new MiscService();
       const data = await service.insertNotification(notificationData);
 
       return { id: data.id };

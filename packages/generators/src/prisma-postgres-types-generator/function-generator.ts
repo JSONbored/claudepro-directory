@@ -1,0 +1,481 @@
+/**
+ * Generate TypeScript types and Zod schemas for PostgreSQL functions
+ */
+
+import {
+  type CompositeTypeAttribute,
+  type FunctionArg,
+  type FunctionMeta,
+} from '../toolkit/introspection.ts';
+import { mapPostgresTypeToZod } from '../toolkit/zod-mapper.ts';
+import type { GeneratorConfig, GeneratorOutput } from './types.ts';
+import {
+  mapPostgresTypeToTypeScript,
+  toCamelCase,
+  toPascalCase,
+  toSafeIdentifier,
+  type TypeMappingContext,
+} from './type-mapper.ts';
+
+/**
+ * Generate TypeScript types and Zod schemas for all functions
+ */
+export async function generateFunctionTypes(
+  functions: Record<string, FunctionMeta>,
+  compositeTypes: Record<string, CompositeTypeAttribute[]>,
+  enums: Record<string, string[]>,
+  config: GeneratorConfig
+): Promise<GeneratorOutput> {
+  const files: Record<string, string> = {};
+  const exports: string[] = [];
+
+  const context: TypeMappingContext = {
+    enums,
+    compositeTypes: Object.keys(compositeTypes),
+  };
+
+  for (const [functionName, functionMeta] of Object.entries(functions)) {
+    const safeName = toSafeIdentifier(functionName);
+    const dependencies = findFunctionDependencies(functionMeta, compositeTypes);
+    const content = generateFunctionFile(
+      functionName,
+      functionMeta,
+      compositeTypes,
+      enums,
+      context,
+      config,
+      dependencies
+    );
+    files[safeName] = content;
+    exports.push(safeName);
+  }
+
+  return { files, exports };
+}
+
+/**
+ * Extract base composite type from a PostgreSQL type string
+ * Handles nested arrays, SETOF, and array prefixes recursively
+ */
+function extractBaseCompositeType(
+  typeString: string,
+  compositeTypes: Record<string, CompositeTypeAttribute[]>
+): string | null {
+  if (!typeString) return null;
+
+  // Handle SETOF (returns set of rows)
+  if (typeString.toUpperCase().includes('SETOF')) {
+    const baseTypeMatch = typeString.match(/SETOF\s+(\w+)/i);
+    if (baseTypeMatch?.[1]) {
+      const baseType = baseTypeMatch[1];
+      // Recursively check if the base type is itself an array or composite
+      if (compositeTypes[baseType]) {
+        return baseType;
+      }
+      // If base type is an array (prefixed with _), extract further
+      if (baseType.startsWith('_')) {
+        return extractBaseCompositeType(baseType, compositeTypes);
+      }
+    }
+    return null;
+  }
+
+  // Handle array types (prefixed with _)
+  if (typeString.startsWith('_')) {
+    const baseType = typeString.slice(1);
+    // Check if base type is a composite
+    if (compositeTypes[baseType]) {
+      return baseType;
+    }
+    // If base type itself starts with _ (nested array), recurse
+    if (baseType.startsWith('_')) {
+      return extractBaseCompositeType(baseType, compositeTypes);
+    }
+    // If base type has [] suffix (explicit array notation), recurse
+    if (baseType.includes('[]')) {
+      return extractBaseCompositeType(baseType.replace('[]', ''), compositeTypes);
+    }
+  }
+
+  // Handle explicit array notation (some PostgreSQL types)
+  if (typeString.includes('[]')) {
+    const baseType = typeString.replace(/\[\]/g, '');
+    if (compositeTypes[baseType]) {
+      return baseType;
+    }
+    // Recurse to handle nested arrays
+    return extractBaseCompositeType(baseType, compositeTypes);
+  }
+
+  // Direct composite type
+  if (compositeTypes[typeString]) {
+    return typeString;
+  }
+
+  return null;
+}
+
+/**
+ * Find composite type dependencies for a function
+ */
+function findFunctionDependencies(
+  functionMeta: FunctionMeta,
+  compositeTypes: Record<string, CompositeTypeAttribute[]>
+): { imports: Set<string> } {
+  const imports = new Set<string>();
+
+  // Check function arguments
+  for (const arg of functionMeta.args) {
+    const baseType = extractBaseCompositeType(arg.udtName, compositeTypes);
+    if (baseType) {
+      imports.add(baseType);
+    }
+  }
+
+  // Check return type
+  if (functionMeta.returnType) {
+    const baseType = extractBaseCompositeType(functionMeta.returnType, compositeTypes);
+    if (baseType) {
+      imports.add(baseType);
+    }
+  }
+
+  return { imports };
+}
+
+/**
+ * Generate TypeScript and Zod code for a single function
+ */
+function generateFunctionFile(
+  functionName: string,
+  functionMeta: FunctionMeta,
+  compositeTypes: Record<string, CompositeTypeAttribute[]>,
+  enums: Record<string, string[]>,
+  context: TypeMappingContext,
+  config: GeneratorConfig,
+  dependencies: { imports: Set<string> }
+): string {
+  const safeName = toSafeIdentifier(functionName);
+  const argsTypeName = `${toPascalCase(safeName)}Args`;
+  const returnsTypeName = `${toPascalCase(safeName)}Returns`;
+  const argsSchemaName = `${toCamelCase(safeName)}ArgsSchema`;
+  const returnsSchemaName = `${toCamelCase(safeName)}ReturnsSchema`;
+
+  const lines: string[] = [
+    '/**',
+    ` * PostgreSQL Function: ${functionName}`,
+    ' * ',
+    ' * 🔒 AUTO-GENERATED - DO NOT EDIT',
+    ' * Generated by prisma-postgres-types-generator',
+    ' */',
+    '',
+  ];
+
+  // Import Zod if generating schemas
+  if (config.generateZod) {
+    lines.push("import { z } from 'zod';", '');
+  }
+
+  // Import composite types and schemas if needed
+  if (dependencies.imports.size > 0) {
+    const typeImports: string[] = [];
+    const schemaImports: string[] = [];
+    
+    for (const depName of Array.from(dependencies.imports).sort()) {
+      const depSafeName = toSafeIdentifier(depName);
+      const depTypeName = toPascalCase(depSafeName);
+      const depSchemaName = `${toCamelCase(depSafeName)}Schema`;
+      
+      // Import TypeScript type if generating types
+      if (config.generateTypes) {
+        typeImports.push(
+          `import type { ${depTypeName} } from '../composites/${depSafeName}';`
+        );
+      }
+      
+      // Import Zod schema if generating schemas
+      if (config.generateZod) {
+        schemaImports.push(
+          `import { ${depSchemaName} } from '../composites/${depSafeName}';`
+        );
+      }
+    }
+    
+    // Add imports (types first, then schemas)
+    if (typeImports.length > 0) {
+      lines.push(...typeImports);
+    }
+    if (schemaImports.length > 0) {
+      lines.push(...schemaImports);
+    }
+    if (typeImports.length > 0 || schemaImports.length > 0) {
+      lines.push('');
+    }
+  }
+
+  // Generate args type
+  if (config.generateTypes) {
+    lines.push('/**', ` * Arguments for PostgreSQL function: ${functionName}`, ' */');
+    lines.push(`export type ${argsTypeName} = {`);
+
+    for (const arg of functionMeta.args) {
+      const tsType = mapPostgresTypeToTypeScript(
+        arg.udtName,
+        arg.hasDefault, // Treat as nullable if has default
+        arg.hasDefault,
+        context
+      );
+
+      // Add JSDoc with parameter information
+      const description = `Parameter: ${arg.name} (${arg.udtName}${arg.hasDefault ? ', optional' : ''}${arg.mode === 'INOUT' ? ', INOUT' : ''})`;
+      lines.push(`  /** ${description} */`);
+      lines.push(`  ${toSafeIdentifier(arg.name)}: ${tsType};`);
+    }
+
+    lines.push('};', '');
+  }
+
+  // Generate args Zod schema
+  if (config.generateZod) {
+    lines.push('/**', ` * Zod schema for ${functionName} function arguments`, ' */');
+    lines.push(`export const ${argsSchemaName} = z.object({`);
+
+    for (const arg of functionMeta.args) {
+      const zodType = generateZodTypeForArg(arg, compositeTypes, enums);
+      const description = `Parameter: ${arg.name}`;
+      lines.push(`  /** ${description} */`);
+      lines.push(`  ${toSafeIdentifier(arg.name)}: ${zodType},`);
+    }
+
+    lines.push('});', '');
+
+    // Type inference from Zod
+    if (config.generateTypes) {
+      // Type was already defined above, add alias from Zod for validation
+      lines.push(
+        '/**',
+        ' * Type inference from Zod schema (should match type above)',
+        ' */'
+      );
+      lines.push(`export type ${argsTypeName}FromZod = z.infer<typeof ${argsSchemaName}>;`);
+      lines.push('');
+    } else {
+      // Only Zod generated, create the type from Zod
+      lines.push(
+        '/**',
+        ' * Type inference from Zod schema',
+        ' */'
+      );
+      lines.push(`export type ${argsTypeName} = z.infer<typeof ${argsSchemaName}>;`);
+      lines.push('');
+    }
+  }
+
+  // Generate return type
+  if (config.generateTypes) {
+    lines.push('/**', ` * Return type for PostgreSQL function: ${functionName}`, ' */');
+    
+    // Handle void return type
+    if (!functionMeta.returnType || functionMeta.returnType === 'void' || functionMeta.returnType === 'pg_catalog.void') {
+      lines.push(`export type ${returnsTypeName} = void;`);
+    } else {
+      const returnType = mapReturnType(
+        functionMeta.returnType,
+        context,
+        compositeTypes
+      );
+      lines.push(`export type ${returnsTypeName} = ${returnType};`);
+    }
+    lines.push('');
+  }
+
+  // Generate return Zod schema (if return type is known and not void)
+  if (config.generateZod && functionMeta.returnType && 
+      functionMeta.returnType !== 'void' && 
+      functionMeta.returnType !== 'pg_catalog.void') {
+    lines.push('/**', ` * Zod schema for ${functionName} function return type`, ' */');
+    
+    const zodReturnType = generateZodSchemaForReturnType(
+      functionMeta.returnType,
+      compositeTypes,
+      enums
+    );
+    
+    lines.push(`export const ${returnsSchemaName} = ${zodReturnType};`);
+    lines.push('');
+
+    // Type inference from Zod
+    if (config.generateTypes) {
+      // Type was already defined above, add alias from Zod for validation
+      lines.push(
+        '/**',
+        ' * Type inference from Zod schema (should match type above)',
+        ' */'
+      );
+      lines.push(`export type ${returnsTypeName}FromZod = z.infer<typeof ${returnsSchemaName}>;`);
+      lines.push('');
+    } else {
+      // Only Zod generated, create the type from Zod
+      lines.push(
+        '/**',
+        ' * Type inference from Zod schema',
+        ' */'
+      );
+      lines.push(`export type ${returnsTypeName} = z.infer<typeof ${returnsSchemaName}>;`);
+      lines.push('');
+    }
+  }
+
+  return lines.join('\n');
+}
+
+/**
+ * Generate Zod schema for a function return type
+ * Handles nested arrays, SETOF, and composite types recursively
+ */
+function generateZodSchemaForReturnType(
+  returnType: string,
+  compositeTypes: Record<string, CompositeTypeAttribute[]>,
+  enums: Record<string, string[]>
+): string {
+  // Handle SETOF (returns set of rows) - treat as array
+  if (returnType.toUpperCase().includes('SETOF')) {
+    const baseTypeMatch = returnType.match(/SETOF\s+(\w+)/i);
+    if (baseTypeMatch?.[1]) {
+      const baseType = baseTypeMatch[1];
+      // Recursively generate schema for base type
+      const baseSchema = generateZodSchemaForReturnType(baseType, compositeTypes, enums);
+      return `z.array(${baseSchema})`;
+    }
+    // Fallback for SETOF without clear base type
+    return 'z.array(z.unknown())';
+  }
+
+  // Handle array types (prefixed with _)
+  if (returnType.startsWith('_')) {
+    const baseType = returnType.slice(1);
+    // Recursively generate schema for base type (handles nested arrays)
+    const baseSchema = generateZodSchemaForReturnType(baseType, compositeTypes, enums);
+    return `z.array(${baseSchema})`;
+  }
+
+  // Handle explicit array notation (some PostgreSQL types)
+  if (returnType.includes('[]')) {
+    const baseType = returnType.replace(/\[\]/g, '');
+    // Recursively generate schema for base type (handles nested arrays)
+    const baseSchema = generateZodSchemaForReturnType(baseType, compositeTypes, enums);
+    return `z.array(${baseSchema})`;
+  }
+
+  // Check if return type is a composite - reference the generated schema
+  if (compositeTypes[returnType]) {
+    const compositeSchemaName = `${toCamelCase(toSafeIdentifier(returnType))}Schema`;
+    return compositeSchemaName;
+  }
+
+  // Scalar type - use zod-mapper
+  return mapPostgresTypeToZod(
+    {
+      udtName: returnType,
+      nullable: false,
+      hasDefault: false,
+      type: 'unknown',
+    },
+    enums
+  );
+}
+
+/**
+ * Generate Zod type string for a function argument
+ */
+function generateZodTypeForArg(
+  arg: FunctionArg,
+  compositeTypes: Record<string, CompositeTypeAttribute[]>,
+  enums: Record<string, string[]>
+): string {
+  // Handle composite types - reference generated schema instead of inline
+  if (compositeTypes[arg.udtName]) {
+    // Direct composite type - reference generated schema
+    const compositeSchemaName = `${toCamelCase(toSafeIdentifier(arg.udtName))}Schema`;
+    return compositeSchemaName;
+  }
+  
+  // Handle array composite types (prefixed with _)
+  if (arg.udtName.startsWith('_')) {
+    const baseType = arg.udtName.slice(1);
+    if (compositeTypes[baseType]) {
+      // Array of composite - reference the generated schema
+      const compositeSchemaName = `${toCamelCase(toSafeIdentifier(baseType))}Schema`;
+      return `z.array(${compositeSchemaName})`;
+    }
+  }
+
+  // Use existing zod-mapper utility for scalar types
+  return mapPostgresTypeToZod(
+    {
+      udtName: arg.udtName,
+      nullable: arg.hasDefault,
+      hasDefault: arg.hasDefault,
+      type: arg.type,
+    },
+    enums
+  );
+}
+
+/**
+ * Map PostgreSQL return type to TypeScript type
+ * 
+ * Handles:
+ * - Scalar types
+ * - Composite types (references generated type)
+ * - Array types (including nested arrays of composites)
+ * - SETOF types (treated as arrays, can be nested)
+ * - Table types (references Prisma types - TODO)
+ * - Void types
+ */
+function mapReturnType(
+  returnType: string,
+  context: TypeMappingContext,
+  compositeTypes?: Record<string, CompositeTypeAttribute[]>
+): string {
+  // Handle void
+  if (!returnType || returnType === 'void' || returnType === 'pg_catalog.void') {
+    return 'void';
+  }
+
+  // Handle SETOF (returns set of rows) - treat as array
+  if (returnType.toUpperCase().includes('SETOF')) {
+    // Extract base type from SETOF base_type
+    const baseTypeMatch = returnType.match(/SETOF\s+(\w+)/i);
+    if (baseTypeMatch?.[1]) {
+      const baseType = baseTypeMatch[1];
+      // Recursively map base type (handles nested arrays)
+      const baseTsType = mapReturnType(baseType, context, compositeTypes);
+      return `${baseTsType}[]`;
+    }
+  }
+
+  // Handle array types (prefixed with _)
+  if (returnType.startsWith('_')) {
+    const baseType = returnType.slice(1);
+    // Recursively map base type (handles nested arrays)
+    const baseTsType = mapReturnType(baseType, context, compositeTypes);
+    return `${baseTsType}[]`;
+  }
+
+  // Handle explicit array notation (some PostgreSQL types)
+  if (returnType.includes('[]')) {
+    const baseType = returnType.replace(/\[\]/g, '');
+    // Recursively map base type (handles nested arrays)
+    const baseTsType = mapReturnType(baseType, context, compositeTypes);
+    return `${baseTsType}[]`;
+  }
+
+  // Check if return type is a composite
+  if (compositeTypes && compositeTypes[returnType]) {
+    return toPascalCase(toSafeIdentifier(returnType));
+  }
+
+  // Scalar type
+  return mapPostgresTypeToTypeScript(returnType, false, false, context);
+}

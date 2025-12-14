@@ -1,8 +1,8 @@
 import 'server-only';
-import { type Database } from '@heyclaude/database-types';
+import { type content_category } from '@heyclaude/data-layer/prisma';
 
 export function generateContentTags(
-  category?: Database['public']['Enums']['content_category'] | null,
+  category?: content_category | null,
   slug?: null | string,
   additionalTags: string[] = []
 ): string[] {

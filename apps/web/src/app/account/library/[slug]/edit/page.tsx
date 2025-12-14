@@ -163,15 +163,31 @@ async function EditCollectionPageContent({
     notFound();
   }
 
-  const { bookmarks, collection } = collectionData;
+  const { bookmarks: rpcBookmarks, collection: rpcCollection } = collectionData;
 
-  if (!collection) {
+  if (!rpcCollection) {
     userLogger.warn(
       { section: 'data-fetch' },
       'EditCollectionPage: collection is null in response'
     );
     notFound();
   }
+
+  // Convert RPC return data (string dates) to Prisma types (Date objects)
+  // RPC returns: { created_at: string, updated_at: string, ... }
+  // Prisma expects: { created_at: Date, updated_at: Date, ... }
+  const collection = {
+    ...rpcCollection,
+    created_at: new Date(rpcCollection.created_at),
+    updated_at: new Date(rpcCollection.updated_at),
+  };
+
+  const bookmarks = (rpcBookmarks ?? []).map((b) => ({
+    ...b,
+    created_at: new Date(b.created_at),
+    notes: b.notes ?? null,
+    updated_at: new Date(b.updated_at),
+  }));
 
   // Final summary log
   userLogger.info({ section: 'data-fetch' }, 'EditCollectionPage: page render completed');
@@ -195,7 +211,7 @@ async function EditCollectionPageContent({
         </CardHeader>
         <CardContent>
           <CollectionForm
-            bookmarks={(bookmarks ?? []).map((b) => ({ ...b, notes: b.notes ?? '' }))}
+            bookmarks={bookmarks.map((b) => ({ ...b, notes: b.notes ?? '' }))}
             collection={{ ...collection, description: collection.description ?? '' }}
             mode="edit"
           />

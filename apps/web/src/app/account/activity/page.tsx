@@ -1,3 +1,4 @@
+import type { UserActivityTimelineItem } from '@heyclaude/data-layer/types/composite-types';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
@@ -259,7 +260,17 @@ async function ActivityPageContent({ reqLogger }: { reqLogger: ReturnType<typeof
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <ActivityTimeline activities={activities} />
+            <ActivityTimeline
+              activities={activities.filter(
+                (a): a is UserActivityTimelineItem & {
+                  id: string;
+                  type: string;
+                  title: string;
+                  body: string;
+                  user_id: string;
+                } => Boolean(a.id && a.type && a.title && a.body && a.user_id)
+              )}
+            />
           </CardContent>
         </Card>
       ) : (

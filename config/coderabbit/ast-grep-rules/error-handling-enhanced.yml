@@ -1,0 +1,53 @@
+# Enhanced Error Handling Pattern Rules
+# Industry-standard error handling patterns
+# Critical for preventing production crashes
+
+---
+# Rule: Detect unhandled promise rejections
+id: unhandled-promise-rejection
+language: typescript
+rule:
+  all:
+    - kind: call_expression
+    - has:
+        pattern: $ASYNC($$$)
+    - not:
+        inside:
+          has:
+            pattern: try.*catch|\.catch\(|await
+message: "Async function call without error handling. Add try/catch or .catch() to handle rejections. Unhandled rejections crash Node.js processes."
+severity: error
+
+---
+# Rule: Detect critical components without error boundaries
+id: missing-error-boundary-critical
+language: typescript
+files:
+  - 'app/**/page.tsx'
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        pattern: export default async function $PAGE($$$) { $$$ }
+    - has:
+        regex: payment|checkout|auth|login|signup|billing|subscription
+    - not:
+        has:
+          pattern: error.tsx|ErrorBoundary
+message: "Critical user flows (payment, auth, billing) must have error boundaries to prevent full app crashes. Create error.tsx file in route directory."
+severity: error
+
+---
+# Rule: Detect network calls without retry logic
+id: missing-retry-logic-network
+language: typescript
+rule:
+  all:
+    - kind: call_expression
+    - has:
+        pattern: fetch($URL, $OPTIONS)
+    - not:
+        has:
+          regex: retry|Retry|exponentialBackoff|withRetry
+message: "Network calls should include retry logic for transient failures. Use retry library (e.g., 'p-retry') or implement exponential backoff."
+severity: warning

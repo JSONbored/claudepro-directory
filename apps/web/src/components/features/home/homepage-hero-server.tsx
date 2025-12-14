@@ -20,5 +20,5 @@ export async function HomepageHeroServer({
   memberCount: number;
   stats?: Record<string, { featured: number; total: number } | number>;
 }) {
-  return <HomepageHeroClient memberCount={memberCount} stats={stats} />;
+  return <HomepageHeroClient memberCount={memberCount} {...(stats !== undefined ? { stats } : {})} />;
 }

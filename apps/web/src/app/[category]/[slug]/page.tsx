@@ -5,6 +5,7 @@
  *
  * ISR: 2 hours (7200s) - Detail pages change less frequently than list pages
  */
+import type { EnrichedContentItem } from '@heyclaude/data-layer/types/composite-types';
 import { type Database } from '@heyclaude/database-types';
 import { getDeploymentEnv } from '@heyclaude/shared-runtime/platform';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
@@ -73,18 +74,14 @@ export async function generateStaticParams() {
         // dynamicParams=true will handle invalid slugs on-demand
         const categoryParameters = topItems
           .filter(
-            (
-              item: Database['public']['Functions']['get_enriched_content_list']['Returns'][number]
-            ): item is Database['public']['Functions']['get_enriched_content_list']['Returns'][number] & {
+            (item: EnrichedContentItem): item is EnrichedContentItem & {
               slug: string;
             } => Boolean(item.slug)
           )
           .map(
-            (
-              item: Database['public']['Functions']['get_enriched_content_list']['Returns'][number] & {
-                slug: string;
-              }
-            ) => ({ category, slug: item.slug })
+            (item: EnrichedContentItem & {
+              slug: string;
+            }) => ({ category, slug: item.slug })
           );
 
         return { category, params: categoryParameters };

@@ -155,6 +155,7 @@
     "@types/node": "^25.0.1",
     "archiver": "^7.0.1",
     "concurrently": "^9.2.1",
+    "dotenv": "^17.2.3",
     "eslint": "^9.39.2",
     "eslint-config-next": "^16.0.10",
     "eslint-config-prettier": "^10.1.8",
@@ -178,13 +179,18 @@
     "eslint-plugin-unicorn": "^62.0.0",
     "eslint-plugin-vitest": "^0.5.4",
     "inngest-cli": "^1.15.0",
+    "jest-mock-extended": "^4.0.0",
     "jsdom": "^27.3.0",
     "knip": "^5.73.4",
     "lefthook": "^2.0.11",
     "openapi-typescript": "^7.10.1",
     "ora": "^9.0.0",
+    "postcss": "^8.5.6",
+    "postcss-value-parser": "^4.2.0",
     "prettier": "^3.7.4",
     "prettier-plugin-tailwindcss": "^0.7.2",
+    "prisma": "^7.1.0",
+    "prisma-zod-generator": "^2.1.2",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "server-only": "^0.0.1",
@@ -225,6 +231,13 @@
       "protobufjs",
       "sharp",
       "unrs-resolver"
+    ],
+    "onlyBuiltDependencies": [
+      "prisma-zod-generator"
     ]
+  },
+  "dependencies": {
+    "@prisma/client": "^7.1.0",
+    "@prisma/client-runtime-utils": "^7.1.0"
   }
 }

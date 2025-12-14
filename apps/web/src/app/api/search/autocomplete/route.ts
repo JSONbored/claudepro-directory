@@ -21,6 +21,7 @@
  */
 
 import 'server-only';
+
 import { SearchService } from '@heyclaude/data-layer';
 import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { createErrorResponse, normalizeError } from '@heyclaude/web-runtime/logging/server';
@@ -28,32 +29,24 @@ import {
   buildCacheHeaders,
   createApiOptionsHandler,
   createApiRoute,
-  createSupabaseAnonClient,
   getWithAuthCorsHeaders,
   jsonResponse,
   searchAutocompleteQuerySchema,
 } from '@heyclaude/web-runtime/server';
 import { cacheLife } from 'next/cache';
 
-/**
+/****
  * Cached helper function to fetch search autocomplete suggestions.
  * Uses Cache Components to reduce function invocations.
  * Cache key includes query and limit for per-query caching.
- * Database RPC returns frontend-ready data (no client-side mapping needed).
- *
- * Cache configuration: Uses 'quarter' profile (15min stale, 5min revalidate, 2hr expire)
- * defined in next.config.mjs. Autocomplete suggestions are more dynamic than static content.
- *
- * @param {string} query - Search query string to get autocomplete suggestions for
- * @param {number} limit - Maximum number of suggestions to return
- * @returns {Promise<unknown[]>} Array of formatted autocomplete suggestion objects from the database RPC
+ * @param {string} query
+ * @param {number} limit
  */
 async function getCachedSearchSuggestionsFormatted(query: string, limit: number) {
   'use cache';
-  cacheLife('quarter'); // 15min stale, 5min revalidate, 2hr expire (defined in next.config.mjs)
+  cacheLife('quarter'); // 15min stale, 5min revalidate, 2hr expire
 
-  const supabase = createSupabaseAnonClient();
-  const service = new SearchService(supabase);
+  const service = new SearchService();
   const rpcArgs: DatabaseGenerated['public']['Functions']['get_search_suggestions_formatted']['Args'] =
     {
       p_limit: limit,
@@ -72,20 +65,16 @@ async function getCachedSearchSuggestionsFormatted(query: string, limit: number)
 export const GET = createApiRoute({
   cors: 'auth',
   handler: async ({ logger, query }) => {
-    // TypeScript knows query is searchAutocompleteQuerySchema type
     const { limit, q } = query as { limit: number; q: string };
 
     // Additional validation: query must be at least 2 characters after trimming
     const trimmedQuery = q.trim();
     if (trimmedQuery.length < 2) {
-      // This should be caught by schema validation, but adding as safety check
       throw new Error('Query must be at least 2 characters');
     }
 
     logger.info({ limit, query: trimmedQuery }, 'Autocomplete request received');
 
-    // Database RPC returns frontend-ready data (no client-side mapping needed)
-    // This eliminates CPU-intensive array mapping and filtering (5-10% CPU savings)
     let data: Awaited<ReturnType<typeof getCachedSearchSuggestionsFormatted>> | null = null;
     try {
       data = await getCachedSearchSuggestionsFormatted(trimmedQuery, limit);
@@ -102,7 +91,6 @@ export const GET = createApiRoute({
       });
     }
 
-    // RPC returns array of { text, search_count, is_popular } - use directly
     const suggestions = Array.isArray(data) ? data : [];
 
     return jsonResponse(

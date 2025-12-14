@@ -1,5 +1,6 @@
 'use client';
 
+import type { EnrichedContentItem } from '@heyclaude/data-layer/types/composite-types';
 import { type Database } from '@heyclaude/database-types';
 import { logUnhandledPromise } from '@heyclaude/web-runtime';
 import { usePulse, useRecentlyViewed, getCategoryRoute } from '@heyclaude/web-runtime/hooks';
@@ -20,9 +21,7 @@ export const RecentlyViewedRail = memo(function RecentlyViewedRail() {
   const pathname = usePathname();
   const pulse = usePulse();
   const { openAuthModal } = useAuthModal();
-  const [enrichedItems, setEnrichedItems] = useState<
-    Database['public']['CompositeTypes']['enriched_content_item'][]
-  >([]);
+  const [enrichedItems, setEnrichedItems] = useState<EnrichedContentItem[]>([]);
   const { value: isLoading, setValue: setIsLoading } = useBoolean(true);
 
   const handleAuthRequired = useCallback(() => {

@@ -1,13 +1,12 @@
 import 'server-only';
+
 import { SeoService } from '@heyclaude/data-layer';
 import { type Database } from '@heyclaude/database-types';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
 import { cacheLife, cacheTag } from 'next/cache';
 
-import { isBuildTime } from '../../build-time.ts';
 import { normalizeError } from '../../errors.ts';
 import { logger } from '../../logger.ts';
-import { createSupabaseAnonClient } from '../../supabase/server-anon.ts';
 
 /**
  * Determines if RPC calls should be skipped due to missing environment variables
@@ -111,22 +110,7 @@ export async function getSEOMetadata(
   });
 
   try {
-    // Use admin client during build for better performance, anon client at runtime
-    let client;
-    if (isBuildTime()) {
-      const { createSupabaseAdminClient } = await import('../../supabase/admin.ts');
-      // NOTE: Admin client bypasses RLS and is required here because:
-      // 1. This function runs during static site generation (build time)
-      // 2. SEO metadata is public data (same for all users, no user-specific content)
-      // 3. Admin client provides better performance during build (no RLS overhead)
-      // 4. At runtime, we use anon client with RLS for security
-      // 5. The data being accessed is non-sensitive (public SEO metadata)
-      client = createSupabaseAdminClient();
-    } else {
-      client = createSupabaseAnonClient();
-    }
-
-    const service = new SeoService(client);
+    const service = new SeoService();
     const result = await service.generateMetadata({
       p_include: includeSchemas ? 'metadata,schemas' : 'metadata',
       p_route: route,
@@ -164,12 +148,14 @@ export async function getSEOMetadata(
   }
 }
 
-/**
+/***
  * Build base SEO metadata from RPC result
  * Extracted to reduce cognitive complexity
  *
- * @param {NonNullable<Database['public']['Functions']['generate_metadata_complete']['Returns']['metadata']>} metadata - Non-null metadata result from generate_metadata_complete RPC
- * @returns {SEOMetadataBase} Base SEO metadata object
+ * @param {NonNullable<
+    Database['public']['Functions']['generate_metadata_complete']['Returns']['metadata']
+  >} metadata - Non-null metadata result from generate_metadata_complete RPC
+ * @returns Base SEO metadata object
  */
 function buildBaseMetadata(
   metadata: NonNullable<

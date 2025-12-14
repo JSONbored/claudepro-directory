@@ -31,7 +31,6 @@ import {
   buildCacheHeaders,
   createApiOptionsHandler,
   createApiRoute,
-  createSupabaseAnonClient,
   getOnlyCorsHeaders,
   sitewideFormatSchema,
 } from '@heyclaude/web-runtime/server';
@@ -49,8 +48,7 @@ async function getCachedSitewideContent() {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
 
-  const supabase = createSupabaseAnonClient();
-  const service = new ContentService(supabase);
+  const service = new ContentService();
   return await service.getSitewideContentList({ p_limit: 5000 });
 }
 
@@ -69,8 +67,7 @@ export const GET = createApiRoute({
 
     logger.info({ format }, 'Sitewide content request received');
 
-    const supabase = createSupabaseAnonClient();
-    const service = new ContentService(supabase);
+    const service = new ContentService();
 
     // Handle JSON format - returns complete directory content list
     if (format === 'json') {
@@ -103,7 +100,7 @@ export const GET = createApiRoute({
           'Content-Type': 'application/json; charset=utf-8',
           // Compression hint (Next.js/Vercel handles actual compression automatically)
           Vary: 'Accept-Encoding',
-          'X-Generated-By': 'supabase.rpc.get_sitewide_content_list',
+          'X-Generated-By': 'prisma.rpc.get_sitewide_content_list',
           ...buildSecurityHeaders(),
           ...getOnlyCorsHeaders,
           // Hyper-optimized caching: 7 days TTL, 14 days stale (matches content_export preset)
@@ -130,7 +127,7 @@ export const GET = createApiRoute({
       return NextResponse.json(data, {
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
-          'X-Generated-By': 'supabase.rpc.generate_readme_data',
+          'X-Generated-By': 'prisma.rpc.generate_readme_data',
           ...buildSecurityHeaders(),
           ...getOnlyCorsHeaders,
           ...buildCacheHeaders('content_export'),
@@ -159,7 +156,7 @@ export const GET = createApiRoute({
     return new NextResponse(data, {
       headers: {
         'Content-Type': 'text/plain; charset=utf-8',
-        'X-Generated-By': 'supabase.rpc.generate_sitewide_llms_txt',
+        'X-Generated-By': 'prisma.rpc.generate_sitewide_llms_txt',
         ...buildSecurityHeaders(),
         ...getOnlyCorsHeaders,
         ...buildCacheHeaders('content_export'),

@@ -27,7 +27,6 @@ import {
   buildCacheHeaders,
   createApiOptionsHandler,
   createApiRoute,
-  createSupabaseAnonClient,
   getOnlyCorsHeaders,
   jsonResponse,
   notFoundResponse,
@@ -49,8 +48,8 @@ async function getCachedCompanyProfile(slug: string): Promise<{
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
-  const supabase = createSupabaseAnonClient();
-  const service = new CompaniesService(supabase);
+  // CompaniesService now uses Prisma (no constructor needed)
+  const service = new CompaniesService();
   const rpcArgs = {
     p_slug: slug,
   } satisfies DatabaseGenerated['public']['Functions']['get_company_profile']['Args'];
@@ -99,7 +98,7 @@ export const GET = createApiRoute({
     logger.info({ slug }, 'Company profile retrieved');
 
     return jsonResponse(profile, 200, getOnlyCorsHeaders, {
-      'X-Generated-By': 'supabase.rpc.get_company_profile',
+      'X-Generated-By': 'prisma.rpc.get_company_profile',
       ...buildCacheHeaders('company_profile'),
     });
   },

@@ -11,7 +11,8 @@
  * To update: Edit this file and redeploy.
  */
 
-import { Constants, type Database } from '@heyclaude/database-types';
+import { type content_category } from '@heyclaude/data-layer/prisma';
+import { ConfigFormat, PrimaryActionType } from '@heyclaude/data-layer/prisma';
 
 import {
   BookOpen,
@@ -27,7 +28,7 @@ import {
 } from '../../../icons.tsx';
 import { type UnifiedCategoryConfig } from '../../../types/category.ts';
 
-type ContentCategory = Database['public']['Enums']['content_category'];
+type ContentCategory = content_category;
 
 // Type-safe icon map with explicit key-value pairs
 const ICON_MAP: Record<string, LucideIcon> = {
@@ -51,9 +52,9 @@ function getIcon(key: string): LucideIcon {
   return FileText;
 }
 
-// Import enum values
-const CONFIG_FORMATS = Constants.public.Enums.config_format;
-const ACTION_TYPES = Constants.public.Enums.primary_action_type;
+// Use Prisma-generated enum value objects directly - no manual arrays needed!
+// Access values via: ConfigFormat.json, ConfigFormat.multi, ConfigFormat.hook
+// Access arrays via: Object.values(ConfigFormat)
 
 export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<ContentCategory>> = {
   agents: {
@@ -72,7 +73,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     description:
       "Browse specialized AI agents designed for specific tasks and workflows using Claude's capabilities.",
     detailPage: {
-      configFormat: CONFIG_FORMATS[0],
+      configFormat: ConfigFormat.json,
       displayConfig: true,
     },
     generateFullContent: true,
@@ -91,7 +92,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     pluralTitle: 'AI Agents',
     primaryAction: {
       label: 'Deploy Agent',
-      type: ACTION_TYPES[0],
+      type: PrimaryActionType.notification,
     },
     sections: {
       configuration: true,
@@ -125,7 +126,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     description:
       'Product updates, new features, bug fixes, and improvements to the ClaudePro Directory.',
     detailPage: {
-      configFormat: CONFIG_FORMATS[0],
+      configFormat: ConfigFormat.json,
       displayConfig: false,
     },
     generateFullContent: true,
@@ -145,7 +146,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     pluralTitle: 'Changelog',
     primaryAction: {
       label: 'Read Update',
-      type: ACTION_TYPES[3],
+      type: PrimaryActionType.scroll,
     },
     sections: {
       configuration: false,
@@ -179,7 +180,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     description:
       'Curated bundles of related content items organized by theme, use case, or workflow for easy discovery.',
     detailPage: {
-      configFormat: CONFIG_FORMATS[0],
+      configFormat: ConfigFormat.json,
       displayConfig: false,
     },
     generateFullContent: true,
@@ -199,7 +200,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     pluralTitle: 'Collections',
     primaryAction: {
       label: 'View Collection',
-      type: ACTION_TYPES[3],
+      type: PrimaryActionType.scroll,
     },
     sections: {
       configuration: false,
@@ -233,7 +234,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     description:
       'Custom slash commands to enhance your Claude Code workflow with reusable prompts and actions.',
     detailPage: {
-      configFormat: CONFIG_FORMATS[0],
+      configFormat: ConfigFormat.json,
       displayConfig: false,
     },
     generateFullContent: true,
@@ -253,7 +254,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     pluralTitle: 'Commands',
     primaryAction: {
       label: 'Copy Command',
-      type: ACTION_TYPES[1],
+      type: PrimaryActionType.copy_command,
     },
     sections: {
       configuration: true,
@@ -287,7 +288,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     description:
       'Comprehensive guides, tutorials, comparisons, and workflows for Claude. SEO-optimized content covering best practices, use cases, and troubleshooting.',
     detailPage: {
-      configFormat: CONFIG_FORMATS[0],
+      configFormat: ConfigFormat.json,
       displayConfig: false,
     },
     generateFullContent: true,
@@ -307,7 +308,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     pluralTitle: 'Guides',
     primaryAction: {
       label: 'Read Guide',
-      type: ACTION_TYPES[3],
+      type: PrimaryActionType.scroll,
     },
     sections: {
       configuration: false,
@@ -340,7 +341,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     contentLoader: 'hooks',
     description: 'Event-driven automation hooks that trigger during Claude Code operations.',
     detailPage: {
-      configFormat: CONFIG_FORMATS[2],
+      configFormat: ConfigFormat.hook,
       displayConfig: true,
     },
     generateFullContent: true,
@@ -360,7 +361,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     pluralTitle: 'Hooks',
     primaryAction: {
       label: 'View on GitHub',
-      type: ACTION_TYPES[5],
+      type: PrimaryActionType.github_link,
     },
     sections: {
       configuration: true,
@@ -394,7 +395,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     description:
       'Job listings for Claude-related positions, AI engineering roles, and opportunities to work with AI technology.',
     detailPage: {
-      configFormat: CONFIG_FORMATS[0],
+      configFormat: ConfigFormat.json,
       displayConfig: false,
     },
     generateFullContent: true,
@@ -414,7 +415,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     pluralTitle: 'Jobs',
     primaryAction: {
       label: 'View Job',
-      type: ACTION_TYPES[3],
+      type: PrimaryActionType.scroll,
     },
     sections: {
       configuration: false,
@@ -448,7 +449,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     description:
       "Model Context Protocol servers that extend Claude's capabilities with external tools and data sources.",
     detailPage: {
-      configFormat: CONFIG_FORMATS[0],
+      configFormat: ConfigFormat.json,
       displayConfig: true,
     },
     generateFullContent: true,
@@ -469,7 +470,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     pluralTitle: 'MCP Servers',
     primaryAction: {
       label: 'Download .mcpb',
-      type: ACTION_TYPES[4],
+      type: PrimaryActionType.download,
     },
     sections: {
       configuration: true,
@@ -502,7 +503,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     contentLoader: 'rules',
     description: "Custom rules to guide Claude's behavior and responses in your projects.",
     detailPage: {
-      configFormat: CONFIG_FORMATS[0],
+      configFormat: ConfigFormat.json,
       displayConfig: true,
     },
     generateFullContent: true,
@@ -521,7 +522,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     pluralTitle: 'CLAUDE.md',
     primaryAction: {
       label: 'Use Rule',
-      type: ACTION_TYPES[0],
+      type: PrimaryActionType.notification,
     },
     sections: {
       configuration: true,
@@ -555,7 +556,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     description:
       'Task-focused capability guides for Claude (PDF, DOCX, PPTX, XLSX, and more) with requirements and runnable examples.',
     detailPage: {
-      configFormat: CONFIG_FORMATS[0],
+      configFormat: ConfigFormat.json,
       displayConfig: false,
     },
     generateFullContent: true,
@@ -575,7 +576,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     pluralTitle: 'Skills',
     primaryAction: {
       label: 'Download Skill',
-      type: ACTION_TYPES[4],
+      type: PrimaryActionType.download,
     },
     sections: {
       configuration: true,
@@ -609,7 +610,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     description:
       'Customizable status line configurations for Claude Code CLI with real-time session information.',
     detailPage: {
-      configFormat: CONFIG_FORMATS[0],
+      configFormat: ConfigFormat.json,
       displayConfig: true,
     },
     generateFullContent: true,
@@ -629,7 +630,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     pluralTitle: 'Statuslines',
     primaryAction: {
       label: 'Copy Script',
-      type: ACTION_TYPES[2],
+      type: PrimaryActionType.copy_script,
     },
     sections: {
       configuration: true,

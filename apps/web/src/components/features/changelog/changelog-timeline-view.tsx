@@ -10,14 +10,14 @@
 
 'use client';
 
-import { type Database } from '@heyclaude/database-types';
+import type { changelog } from '@heyclaude/data-layer/prisma';
 import { useInfiniteScroll } from '@heyclaude/web-runtime/hooks';
 import { getChangelogPath } from '@heyclaude/web-runtime/utils/changelog';
 import Link from 'next/link';
 
 import { ChangelogContent } from './changelog-content';
 
-type ChangelogEntry = Database['public']['Tables']['changelog']['Row'];
+type ChangelogEntry = changelog;
 
 
 interface ChangelogTimelineViewProps {
@@ -46,8 +46,10 @@ export function ChangelogTimelineView({ entries }: ChangelogTimelineViewProps) {
   const displayedEntries = entries.slice(0, displayCount);
 
   // Format date helper - EXACTLY matches Magic UI template format
-  const formatDate = (date: Date): string => {
-    return date.toLocaleDateString('en-US', {
+  // Handle both Date objects (from Prisma) and string dates (from RPC)
+  const formatDate = (date: Date | string): string => {
+    const dateObj = date instanceof Date ? date : new Date(date);
+    return dateObj.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',

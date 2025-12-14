@@ -6,6 +6,10 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
+import type {
+  BookmarkItemInput,
+  UpdateUserProfileResultV2,
+} from '@heyclaude/data-layer/types/composite-types';
 import { Constants } from '@heyclaude/database-types';
 import { runRpc } from './run-rpc-instance.ts';
 import { authedAction } from './safe-action.ts';
@@ -135,7 +139,7 @@ export const updateProfile = authedAction
     })
   )
   .action(async ({ parsedInput, ctx }) => {
-    const result = await runRpc<Database['public']['CompositeTypes']['update_user_profile_result_v2']>(
+    const result = await runRpc<UpdateUserProfileResultV2>(
       'update_user_profile',
       {
         p_user_id: ctx.userId,
@@ -272,7 +276,7 @@ export const addBookmarkBatch = authedAction
   .action(async ({ parsedInput, ctx }) => {
 
     // Construct composite type array from parsed input
-    const items: Database['public']['CompositeTypes']['bookmark_item_input'][] =
+    const items: BookmarkItemInput[] =
       parsedInput.items.map((item) => ({
         content_type: item.content_type,
         content_slug: item.content_slug,

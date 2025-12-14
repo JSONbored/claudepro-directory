@@ -10,7 +10,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { NewsletterService } from '@heyclaude/data-layer';
 import { normalizeError } from '@heyclaude/shared-runtime';
 
-import { createSupabaseAdminClient } from '../../supabase/admin';
 import { logger, createWebAppContextWithId } from '../../logging/server';
 import { createErrorResponse } from '../../utils/error-handler';
 import { cacheLife } from 'next/cache';
@@ -24,8 +23,7 @@ async function getCachedNewsletterCount(): Promise<number> {
   'use cache';
   cacheLife('quarter'); // 15min stale, 5min revalidate, 2hr expire - Newsletter count changes frequently
 
-  const supabase = createSupabaseAdminClient();
-  const service = new NewsletterService(supabase);
+  const service = new NewsletterService();
   return await service.getNewsletterSubscriberCount();
 }
 

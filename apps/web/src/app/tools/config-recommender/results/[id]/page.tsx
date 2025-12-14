@@ -3,6 +3,7 @@
  * Personalized results from PostgreSQL RPC, shareable via URL-encoded answers.
  */
 
+import type { RecommendationItem } from '@heyclaude/data-layer/types/composite-types';
 import { Constants, type Database } from '@heyclaude/database-types';
 import { generatePageMetadata, getConfigRecommendations } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
@@ -194,7 +195,7 @@ function normalizeRecommendationResults(
   resultId: string,
   parentLogger?: ReturnType<typeof logger.child>
 ): Array<
-  Database['public']['CompositeTypes']['recommendation_item'] & {
+  RecommendationItem & {
     category: Database['public']['Enums']['content_category'];
     slug: string;
     title: string;
@@ -212,15 +213,28 @@ function normalizeRecommendationResults(
       });
 
   if (!results) return [];
-  const normalized = results.filter(
-    (
-      item
-    ): item is typeof item & {
-      category: Database['public']['Enums']['content_category'];
-      slug: string;
-      title: string;
-    } => Boolean(item.slug && item.title && item.category)
-  );
+  const normalized = results
+    .filter(
+      (item): item is RecommendationItem & {
+        category: Database['public']['Enums']['content_category'];
+        slug: string;
+        title: string;
+      } => Boolean(item.slug && item.title && item.category)
+    )
+    .map((item) => ({
+      ...item,
+      category: item.category!,
+      slug: item.slug!,
+      title: item.title!,
+      description: item.description ?? '',
+      author: item.author ?? '',
+      tags: item.tags ?? [],
+      match_score: item.match_score ?? 0,
+      match_percentage: item.match_percentage ?? 0,
+      primary_reason: item.primary_reason ?? '',
+      rank: item.rank ?? 0,
+      reasons: item.reasons ?? [],
+    }));
 
   if (normalized.length < results.length) {
     utilityLogger.warn(

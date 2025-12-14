@@ -2,38 +2,38 @@
  * Changelog Utilities - Date formatting and URL generation for changelog entries
  */
 
-import type { Database } from '@heyclaude/database-types';
+import type { changelog_category } from '@heyclaude/data-layer/prisma';
 import { APP_CONFIG } from '../data/config/constants.ts';
 
-export function formatChangelogDate(isoDate: string): string {
+export function formatChangelogDate(isoDate: string | Date): string {
   try {
-    const date = new Date(isoDate);
+    const date = isoDate instanceof Date ? isoDate : new Date(isoDate);
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
     });
   } catch {
-    return isoDate;
+    return isoDate instanceof Date ? isoDate.toISOString() : isoDate;
   }
 }
 
-export function formatChangelogDateShort(isoDate: string): string {
+export function formatChangelogDateShort(isoDate: string | Date): string {
   try {
-    const date = new Date(isoDate);
+    const date = isoDate instanceof Date ? isoDate : new Date(isoDate);
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
     });
   } catch {
-    return isoDate;
+    return isoDate instanceof Date ? isoDate.toISOString() : isoDate;
   }
 }
 
-export function formatChangelogDateISO8601(isoDate: string): string {
+export function formatChangelogDateISO8601(isoDate: string | Date): string {
   try {
-    const date = new Date(isoDate);
+    const date = isoDate instanceof Date ? isoDate : new Date(isoDate);
     return date.toISOString();
   } catch {
     return new Date().toISOString();
@@ -75,24 +75,24 @@ export function getChangelogPath(slug: string): string {
 
 export function getNonEmptyCategories(
   categories: unknown
-): Database['public']['Enums']['changelog_category'][] {
-  const nonEmpty: Database['public']['Enums']['changelog_category'][] = [];
+): changelog_category[] {
+  const nonEmpty: changelog_category[] = [];
 
   const cats = categories as Record<string, unknown>;
   if (!cats) return nonEmpty;
 
   if (Array.isArray(cats['Added']) && cats['Added'].length > 0)
-    nonEmpty.push('Added' as Database['public']['Enums']['changelog_category']);
+    nonEmpty.push('Added' as changelog_category);
   if (Array.isArray(cats['Changed']) && cats['Changed'].length > 0)
-    nonEmpty.push('Changed' as Database['public']['Enums']['changelog_category']);
+    nonEmpty.push('Changed' as changelog_category);
   if (Array.isArray(cats['Deprecated']) && cats['Deprecated'].length > 0)
-    nonEmpty.push('Deprecated' as Database['public']['Enums']['changelog_category']);
+    nonEmpty.push('Deprecated' as changelog_category);
   if (Array.isArray(cats['Removed']) && cats['Removed'].length > 0)
-    nonEmpty.push('Removed' as Database['public']['Enums']['changelog_category']);
+    nonEmpty.push('Removed' as changelog_category);
   if (Array.isArray(cats['Fixed']) && cats['Fixed'].length > 0)
-    nonEmpty.push('Fixed' as Database['public']['Enums']['changelog_category']);
+    nonEmpty.push('Fixed' as changelog_category);
   if (Array.isArray(cats['Security']) && cats['Security'].length > 0)
-    nonEmpty.push('Security' as Database['public']['Enums']['changelog_category']);
+    nonEmpty.push('Security' as changelog_category);
 
   return nonEmpty;
 }

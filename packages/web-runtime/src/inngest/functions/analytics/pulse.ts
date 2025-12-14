@@ -13,7 +13,6 @@ import { normalizeError } from '@heyclaude/shared-runtime';
 
 import { AccountService, SearchService } from '@heyclaude/data-layer';
 import { inngest } from '../../client';
-import { createSupabaseAdminClient } from '../../../supabase/admin';
 import { pgmqRead, pgmqDelete, type PgmqMessage } from '../../../supabase/pgmq-client';
 import { logger, createWebAppContextWithId } from '../../../logging/server';
 import { sendCronSuccessHeartbeat } from '../../utils/monitoring';
@@ -71,7 +70,6 @@ export const processPulseQueue = inngest.createFunction(
 
     logger.info(logContext, 'Pulse queue processing started');
 
-    const supabase = createSupabaseAdminClient();
 
     // Step 1: Read messages from queue
     const messages = await step.run('read-queue', async (): Promise<PulseQueueMessage[]> => {
@@ -159,7 +157,7 @@ export const processPulseQueue = inngest.createFunction(
               session_id: q.session_id,
             }));
 
-          const service = new SearchService(supabase);
+          const service = new SearchService();
           const result = await service.batchInsertSearchQueries({
             p_queries: searchQueryInputs,
           });
@@ -232,7 +230,7 @@ export const processPulseQueue = inngest.createFunction(
           }
 
           // Use AccountService for proper data layer architecture
-          const accountService = new AccountService(supabase);
+          const accountService = new AccountService();
           const result = await accountService.batchInsertUserInteractions({
             p_interactions: interactions,
           });

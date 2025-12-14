@@ -88,7 +88,7 @@ export * from './config/services.ts';
 export * from './config/time.ts';
 export * from './schemas/primitives.ts';
 export * from './schemas/env.ts';
-export * from './schemas/database.generated.ts';
+// database.generated.ts removed - migrated to Prisma types
 export * from './object-utils.ts';
 export * from './privacy.ts';
 export * from './utils/serialize.ts';

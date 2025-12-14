@@ -8,8 +8,9 @@ language: typescript
 rule:
   all:
     - kind: call_expression
-      has:
+    - has:
         kind: member_expression
+    - has:
         regex: supabase\.(from|rpc)
     - not:
         precedes:

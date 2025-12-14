@@ -1,5 +1,4 @@
-import { type Database } from '@heyclaude/database-types';
-import { Constants } from '@heyclaude/database-types';
+import { type changelog_category } from '@heyclaude/data-layer/prisma';
 import { z } from 'zod';
 
 import { normalizeError } from '../errors.ts';
@@ -15,6 +14,16 @@ const changeItemSchemaTransformed = changeItemSchema.transform((item) =>
   typeof item === 'string' ? { content: item } : item
 );
 
+// Prisma enum values for validation
+const VALID_CHANGELOG_CATEGORIES: readonly changelog_category[] = [
+  'Added',
+  'Changed',
+  'Deprecated',
+  'Fixed',
+  'Removed',
+  'Security',
+] as const;
+
 const changesSchema = z
   .object({
     Added: z.array(changeItemSchemaTransformed).optional(),
@@ -26,10 +35,9 @@ const changesSchema = z
   })
   .refine(
     (data) => {
-      const validCategories = Constants.public.Enums.changelog_category;
       const dataKeys = Object.keys(data);
       return dataKeys.every((key) =>
-        validCategories.includes(key as Database['public']['Enums']['changelog_category'])
+        VALID_CHANGELOG_CATEGORIES.includes(key as changelog_category)
       );
     },
     { message: 'Invalid changelog category in changes object' }

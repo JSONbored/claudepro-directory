@@ -4,8 +4,8 @@ import { QuizService } from '@heyclaude/data-layer';
 import { type Database } from '@heyclaude/database-types';
 import { cacheLife, cacheTag } from 'next/cache';
 
+import { normalizeError } from '../errors.ts';
 import { logger } from '../index.ts';
-import { createSupabaseServerClient } from '../supabase/server.ts';
 
 export type QuizConfigurationResult =
   Database['public']['Functions']['get_quiz_configuration']['Returns'];
@@ -35,19 +35,15 @@ export async function getQuizConfiguration(): Promise<null | QuizConfigurationRe
   });
 
   try {
-    // Can use cookies() inside 'use cache: private'
-    const client = await createSupabaseServerClient();
-    const service = new QuizService(client);
-
+    const service = new QuizService();
     const result = await service.getQuizConfiguration();
 
     reqLogger.info({ hasResult: Boolean(result) }, 'getQuizConfiguration: fetched successfully');
 
     return result;
   } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error({ err: errorForLogging }, 'getQuizConfiguration: unexpected error');
+    const normalized = normalizeError(error, 'getQuizConfiguration failed');
+    reqLogger.error({ err: normalized }, 'getQuizConfiguration: unexpected error');
     return null;
   }
 }

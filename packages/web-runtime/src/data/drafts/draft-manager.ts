@@ -13,17 +13,18 @@
  *
  * Usage:
  * ```tsx
- * const draftManager = new DraftManager(Constants.public.Enums.submission_type[0]); // 'agents'
+ * const draftManager = new DraftManager('agents'); // submission_type enum value
  * draftManager.save(formData);
  * const draft = draftManager.load();
  * ```
  */
 
-import { Constants } from '@heyclaude/database-types';
-
 import { normalizeError } from '../../errors.ts';
 import { logger } from '../../logger.ts';
-import { type SubmissionContentType } from '../../types/component.types.ts';
+import {
+  SUBMISSION_CONTENT_TYPES,
+  type SubmissionContentType,
+} from '../../types/component.types.ts';
 
 /**
  * Form data structure for drafts
@@ -351,7 +352,8 @@ export class DraftManager {
         description: data.description ?? '',
         examples: data.examples ?? [],
         name: data.name ?? '',
-        submission_type: data.submission_type ?? Constants.public.Enums.submission_type[0], // 'agents'
+        submission_type: (data.submission_type ??
+          SUBMISSION_CONTENT_TYPES[0]) as SubmissionContentType, // 'agents'
         tags: data.tags ?? [],
         type_specific: data.type_specific ?? {},
         ...(data.template_used ? { template_used: data.template_used } : {}),

@@ -1,25 +1,20 @@
 'use server';
 
 import { ContentService } from '@heyclaude/data-layer';
+import { type content_category } from '@heyclaude/data-layer/prisma';
+import { ContentCategory } from '@heyclaude/data-layer/prisma';
 import { type Database } from '@heyclaude/database-types';
-import { Constants } from '@heyclaude/database-types';
 import { cacheLife, cacheTag } from 'next/cache';
 
-import { isBuildTime } from '../../build-time.ts';
 import { normalizeError } from '../../errors.ts';
 import { logger } from '../../logger.ts';
-import { createSupabaseAnonClient } from '../../supabase/server-anon.ts';
 import { generateContentTags } from '../content-helpers.ts';
 
-const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
+// Use Prisma-generated enum values directly - no manual arrays!
+const CONTENT_CATEGORY_VALUES = Object.values(ContentCategory) as readonly content_category[];
 
-function isValidContentCategory(
-  value: string
-): value is Database['public']['Enums']['content_category'] {
-  return (
-    typeof value === 'string' &&
-    CONTENT_CATEGORY_VALUES.includes(value as Database['public']['Enums']['content_category'])
-  );
+function isValidContentCategory(value: string): value is content_category {
+  return typeof value === 'string' && CONTENT_CATEGORY_VALUES.includes(value as content_category);
 }
 
 export type ContentDetailData =
@@ -71,16 +66,7 @@ export async function getContentDetailComplete(input: {
   });
 
   try {
-    // Use admin client during build for better performance, anon client at runtime
-    let client;
-    if (isBuildTime()) {
-      const { createSupabaseAdminClient } = await import('../../supabase/admin.ts');
-      client = createSupabaseAdminClient();
-    } else {
-      client = createSupabaseAnonClient();
-    }
-
-    const service = new ContentService(client);
+    const service = new ContentService();
     const result = await service.getContentDetailComplete({ p_category: category, p_slug: slug });
 
     reqLogger.info(
@@ -142,16 +128,7 @@ export async function getContentDetailCore(input: {
   });
 
   try {
-    // Use admin client during build for better performance, anon client at runtime
-    let client;
-    if (isBuildTime()) {
-      const { createSupabaseAdminClient } = await import('../../supabase/admin.ts');
-      client = createSupabaseAdminClient();
-    } else {
-      client = createSupabaseAnonClient();
-    }
-
-    const service = new ContentService(client);
+    const service = new ContentService();
     const result = await service.getContentDetailCore({ p_category: category, p_slug: slug });
 
     reqLogger.info(
@@ -210,16 +187,7 @@ export async function getContentAnalytics(input: {
   });
 
   try {
-    // Use admin client during build for better performance, anon client at runtime
-    let client;
-    if (isBuildTime()) {
-      const { createSupabaseAdminClient } = await import('../../supabase/admin.ts');
-      client = createSupabaseAdminClient();
-    } else {
-      client = createSupabaseAnonClient();
-    }
-
-    const service = new ContentService(client);
+    const service = new ContentService();
     const result = await service.getContentAnalytics({ p_category: category, p_slug: slug });
 
     reqLogger.info(

@@ -3,12 +3,12 @@
  * Uses Activity type from user.actions (based on get_user_activity_timeline RPC)
  */
 
-import { type Database } from '@heyclaude/database-types';
+import type { UserActivityTimelineItem } from '@heyclaude/data-layer/types/composite-types';
 import { GitPullRequest } from '@heyclaude/web-runtime/icons';
 import { logger } from '@heyclaude/web-runtime/logging/server';
 import { Card, CardContent } from '@heyclaude/web-runtime/ui';
 
-type Activity = Database['public']['CompositeTypes']['user_activity_timeline_item'];
+type Activity = UserActivityTimelineItem;
 
 interface ActivityTimelineProps {
   activities: Activity[];

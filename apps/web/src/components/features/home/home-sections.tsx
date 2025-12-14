@@ -24,19 +24,7 @@ import {
   LazyFeaturedSections,
   LazyTabsSection,
 } from '@/src/components/features/home/lazy-home-sections';
-import { 
-  NumberTicker, 
-  Tooltip, 
-  TooltipContent, 
-  TooltipProvider, 
-  TooltipTrigger,
-  UnifiedBadge,
-} from '@heyclaude/web-runtime/ui';
-import { MICROINTERACTIONS, SPRING, VIEWPORT, STAGGER } from '@heyclaude/web-runtime/design-system';
 import { getCategoryConfigs } from '@heyclaude/web-runtime/data';
-import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { motion } from 'motion/react';
-import Link from 'next/link';
 
 /**
  * Inner component that uses search context

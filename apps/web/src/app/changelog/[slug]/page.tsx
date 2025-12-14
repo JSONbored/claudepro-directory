@@ -272,7 +272,15 @@ async function ChangelogEntryPageContent({
             className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} ${UI_CLASSES.TEXT_HELPER} ${UI_CLASSES.TEXT_BODY_SM}`}
           >
             <Calendar className={UI_CLASSES.ICON_SM} />
-            <time dateTime={entry.release_date}>{formatChangelogDate(entry.release_date)}</time>
+            <time
+              dateTime={
+                entry.release_date instanceof Date
+                  ? entry.release_date.toISOString()
+                  : entry.release_date
+              }
+            >
+              {formatChangelogDate(entry.release_date)}
+            </time>
           </div>
 
           <h1 className={UI_CLASSES.HEADING_H1}>{entry.title}</h1>
@@ -292,7 +300,7 @@ async function ChangelogEntryPageContent({
         <Separator className={UI_CLASSES.MARGIN_Y_RELAXED} />
 
         {/* Content */}
-        <ChangelogContent entry={entry} hideHeader />
+        <ChangelogContent hideHeader entry={entry} />
       </article>
     </>
   );

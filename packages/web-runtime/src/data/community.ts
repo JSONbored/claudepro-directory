@@ -1,10 +1,12 @@
 'use server';
 
 import { CommunityService, SearchService } from '@heyclaude/data-layer';
+import type { CommunityDirectoryUser } from '@heyclaude/data-layer/types/composite-types';
 import { type Database } from '@heyclaude/database-types';
+import { cacheLife, cacheTag } from 'next/cache';
 
+import { normalizeError } from '../errors.ts';
 import { logger, pulseUserSearch } from '../index.ts';
-import { createSupabaseServerClient } from '../supabase/server.ts';
 
 const DEFAULT_DIRECTORY_LIMIT = 100;
 
@@ -20,18 +22,15 @@ const DEFAULT_DIRECTORY_LIMIT = 100;
 async function searchUsersUnified(
   query: string,
   limit: number
-): Promise<Array<Database['public']['CompositeTypes']['community_directory_user']>> {
+): Promise<Array<CommunityDirectoryUser>> {
   'use cache';
-  const { cacheLife, cacheTag } = await import('next/cache');
-  const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
 
   // Configure cache - use 'quarter' profile for user search (same as API route)
   cacheLife('quarter'); // 15min stale, 5min revalidate, 2hr expire
   cacheTag('user-search');
   cacheTag('community');
 
-  const supabase = createSupabaseAnonClient();
-  const searchService = new SearchService(supabase);
+  const searchService = new SearchService();
 
   const unifiedArgs: Database['public']['Functions']['search_unified']['Args'] = {
     p_entities: ['user'],
@@ -60,20 +59,17 @@ export type CollectionDetailData =
   Database['public']['Functions']['get_user_collection_detail']['Returns'];
 
 /***
+ *
  * Get community directory via RPC (cached)
  * Uses 'use cache' to cache directory listings. This data is public and same for all users.
  * Community directory changes periodically, so we use the 'half' cacheLife profile.
  * @param {number} limit
- 
- * @returns {unknown} Description of return value*/
+ * @returns {Promise<unknown>} Return value description
+ */
 async function getCommunityDirectoryRpc(
   limit: number
 ): Promise<Database['public']['Functions']['get_community_directory']['Returns'] | null> {
   'use cache';
-
-  const { cacheLife, cacheTag } = await import('next/cache');
-  const { isBuildTime } = await import('../build-time.ts');
-  const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
 
   // Configure cache - use 'half' profile for community directory (changes every 30 minutes)
   cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
@@ -86,16 +82,8 @@ async function getCommunityDirectoryRpc(
   });
 
   try {
-    // Use admin client during build for better performance, anon client at runtime
-    let client;
-    if (isBuildTime()) {
-      const { createSupabaseAdminClient } = await import('../supabase/admin.ts');
-      client = createSupabaseAdminClient();
-    } else {
-      client = createSupabaseAnonClient();
-    }
-
-    const result = await new CommunityService(client).getCommunityDirectory({ p_limit: limit });
+    const service = new CommunityService();
+    const result = await service.getCommunityDirectory({ p_limit: limit });
 
     reqLogger.info(
       { hasResult: Boolean(result), limit },
@@ -104,9 +92,8 @@ async function getCommunityDirectoryRpc(
 
     return result;
   } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error({ err: errorForLogging, limit }, 'getCommunityDirectoryRpc failed');
+    const normalized = normalizeError(error, 'getCommunityDirectoryRpc failed');
+    reqLogger.error({ err: normalized, limit }, 'getCommunityDirectoryRpc failed');
     throw error;
   }
 }
@@ -129,13 +116,7 @@ export async function getCommunityDirectory(options: {
 
       // Fire-and-forget: Pulse user search
       pulseUserSearch(searchQuery.trim(), allUsers.length).catch((error) => {
-        // logger.error() normalizes errors internally, so pass raw error
-        const errorForLogging: Error | string =
-          error instanceof Error
-            ? error
-            : error instanceof String
-              ? error.toString()
-              : String(error);
+        const normalized = normalizeError(error, 'Failed to pulse user search');
         // Use child logger for callback to maintain isolation
         const callbackLogger = logger.child({
           module: 'data/community',
@@ -143,7 +124,7 @@ export async function getCommunityDirectory(options: {
         });
         callbackLogger.warn(
           {
-            err: errorForLogging,
+            err: normalized,
             resultCount: allUsers.length,
             searchQuery: searchQuery.trim(),
           },
@@ -157,10 +138,9 @@ export async function getCommunityDirectory(options: {
         top_contributors: [],
       };
     } catch (error) {
-      // logger.error() normalizes errors internally, so pass raw error
-      const errorForLogging: Error | string = error instanceof Error ? error : String(error);
+      const normalized = normalizeError(error, 'Community directory search failed');
       reqLogger.warn(
-        { err: errorForLogging, fallbackStrategy: 'rpc', limit, searchQuery: searchQuery.trim() },
+        { err: normalized, fallbackStrategy: 'rpc', limit, searchQuery: searchQuery.trim() },
         'Community directory search failed, using RPC fallback'
       );
       // Fall through to RPC fallback
@@ -194,7 +174,6 @@ export async function getPublicUserProfile(input: {
   'use cache: private';
 
   const { slug, viewerId } = input;
-  const { cacheLife, cacheTag } = await import('next/cache');
 
   // Configure cache
   cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
@@ -209,9 +188,7 @@ export async function getPublicUserProfile(input: {
   });
 
   try {
-    // Can use cookies() inside 'use cache: private'
-    const client = await createSupabaseServerClient();
-    const service = new CommunityService(client);
+    const service = new CommunityService();
 
     const result = await service.getUserProfile({
       p_user_slug: slug,
@@ -225,11 +202,10 @@ export async function getPublicUserProfile(input: {
 
     return result;
   } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
+    const normalized = normalizeError(error, 'getPublicUserProfile failed');
     reqLogger.error(
       {
-        err: errorForLogging,
+        err: normalized,
         slug,
         ...(viewerId ? { viewerId } : {}),
       },
@@ -263,7 +239,6 @@ export async function getPublicCollectionDetail(input: {
   'use cache: private';
 
   const { collectionSlug, userSlug, viewerId } = input;
-  const { cacheLife, cacheTag } = await import('next/cache');
 
   // Configure cache
   cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
@@ -278,9 +253,7 @@ export async function getPublicCollectionDetail(input: {
   });
 
   try {
-    // Can use cookies() inside 'use cache: private'
-    const client = await createSupabaseServerClient();
-    const service = new CommunityService(client);
+    const service = new CommunityService();
 
     const data = await service.getUserCollectionDetail({
       p_collection_slug: collectionSlug,
@@ -295,12 +268,11 @@ export async function getPublicCollectionDetail(input: {
 
     return data;
   } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
+    const normalized = normalizeError(error, 'getPublicCollectionDetail failed');
     reqLogger.error(
       {
         collectionSlug,
-        err: errorForLogging,
+        err: normalized,
         slug: userSlug,
         ...(viewerId ? { viewerId } : {}),
       },

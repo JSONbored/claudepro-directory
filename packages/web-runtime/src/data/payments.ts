@@ -1,12 +1,13 @@
 'use server';
 
 import { JobsService } from '@heyclaude/data-layer';
+import { type payment_plan_catalog } from '@heyclaude/data-layer/prisma';
 import { type Database } from '@heyclaude/database-types';
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { logger } from '../index.ts';
 
-type PaymentPlanRow = Database['public']['Tables']['payment_plan_catalog']['Row'];
+type PaymentPlanRow = payment_plan_catalog;
 type JobBillingSummaryRow = Database['public']['Views']['job_billing_summary']['Row'];
 
 type PaymentPlanCatalogRowSubset = Pick<
@@ -70,14 +71,9 @@ export async function getPaymentPlanCatalog(): Promise<PaymentPlanCatalogEntry[]
     operation: 'getPaymentPlanCatalog',
   });
 
-  // Use anon client to avoid cookies() inside cache scope
-  // Payment plan catalog is public data, so no authentication needed
-  const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
-  const supabase = createSupabaseAnonClient();
-
   try {
     // Use JobsService for proper data layer architecture
-    const jobsService = new JobsService(supabase);
+    const jobsService = new JobsService();
     const data = await jobsService.getPaymentPlanCatalog();
 
     // Type guard: Validate that data is an array and has expected structure
@@ -90,7 +86,8 @@ export async function getPaymentPlanCatalog(): Promise<PaymentPlanCatalogEntry[]
     }
 
     // Type guard: Validate each entry has required fields
-    const rows: PaymentPlanCatalogRowSubset[] = [];
+    // RPC returns data with string dates, convert to Prisma types (Date objects)
+    const rows: PaymentPlanRow[] = [];
     for (const entry of data) {
       if (
         typeof entry === 'object' &&
@@ -98,21 +95,24 @@ export async function getPaymentPlanCatalog(): Promise<PaymentPlanCatalogEntry[]
         'tier' in entry &&
         'price_cents' in entry
       ) {
-        rows.push(entry as PaymentPlanCatalogRowSubset);
+        rows.push(entry as PaymentPlanRow);
       }
     }
 
-    const result = rows.map((entry) => ({
-      benefits: sanitizeBenefits(entry.benefits),
-      billing_cycle_days: entry.billing_cycle_days,
-      description: entry.description,
-      is_subscription: entry.is_subscription,
-      job_expiry_days: entry.job_expiry_days,
-      plan: entry.plan,
-      price_cents: entry.price_cents,
-      product_type: entry.product_type,
-      tier: entry.tier,
-    }));
+    const result: PaymentPlanCatalogEntry[] = rows.map((entry) =>
+      // Extract subset fields (PaymentPlanCatalogEntry omits created_at/updated_at)
+      ({
+        benefits: sanitizeBenefits(entry.benefits),
+        billing_cycle_days: entry.billing_cycle_days,
+        description: entry.description,
+        is_subscription: entry.is_subscription,
+        job_expiry_days: entry.job_expiry_days,
+        plan: entry.plan,
+        price_cents: entry.price_cents,
+        product_type: entry.product_type,
+        tier: entry.tier,
+      })
+    );
 
     reqLogger.info({ count: result.length }, 'getPaymentPlanCatalog: fetched successfully');
 
@@ -158,12 +158,9 @@ export async function getJobBillingSummaries(jobIds: string[]): Promise<JobBilli
     operation: 'getJobBillingSummaries',
   });
 
-  const { createSupabaseServerClient } = await import('../supabase/server.ts');
-  const supabase = await createSupabaseServerClient();
-
   try {
     // Use JobsService for proper data layer architecture
-    const jobsService = new JobsService(supabase);
+    const jobsService = new JobsService();
     const data = await jobsService.getJobBillingSummaries({
       p_job_ids: jobIds,
     });

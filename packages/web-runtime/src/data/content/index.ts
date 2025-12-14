@@ -1,8 +1,16 @@
 import 'server-only';
-import { type ContentFilterOptions, ContentService, TrendingService } from '@heyclaude/data-layer';
+
+import {
+  type ContentFilterOptions,
+  ContentService,
+  TrendingService,
+  type EnrichedContentItem,
+} from '@heyclaude/data-layer';
+import { type content_category } from '@heyclaude/data-layer/prisma';
 import { type Database } from '@heyclaude/database-types';
 import { cacheLife, cacheTag } from 'next/cache';
 
+import { logger, toLogContextValue } from '../../logger.ts';
 import { QUERY_LIMITS } from '../config/constants.ts';
 import { generateContentTags } from '../content-helpers.ts';
 
@@ -13,13 +21,9 @@ import { generateContentTags } from '../content-helpers.ts';
  * @param category
  */
 export async function getContentByCategory(
-  category: Database['public']['Enums']['content_category']
-): Promise<Database['public']['Functions']['get_enriched_content_list']['Returns']> {
+  category: content_category
+): Promise<EnrichedContentItem[]> {
   'use cache';
-
-  const { isBuildTime } = await import('../../build-time.ts');
-  const { createSupabaseAnonClient } = await import('../../supabase/server-anon.ts');
-  const { logger } = await import('../../logger.ts');
 
   // Configure cache - use 'hours' profile for content lists
   cacheLife('hours'); // 1hr stale, 15min revalidate, 1 day expire
@@ -46,16 +50,8 @@ export async function getContentByCategory(
   );
 
   try {
-    // Use admin client during build for better performance, anon client at runtime
-    let client;
-    if (isBuildTime()) {
-      const { createSupabaseAdminClient } = await import('../../supabase/admin.ts');
-      client = createSupabaseAdminClient();
-    } else {
-      client = createSupabaseAnonClient();
-    }
-
-    const result = await new ContentService(client).getEnrichedContentList({
+    const service = new ContentService();
+    const result = await service.getEnrichedContentList({
       p_category: category,
       p_limit: QUERY_LIMITS.content.default,
       p_offset: 0,
@@ -74,7 +70,6 @@ export async function getContentByCategory(
 
     return result;
   } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error({ category, err: errorForLogging }, 'getContentByCategory: failed');
     return [];
@@ -89,14 +84,10 @@ export async function getContentByCategory(
  * @param slug
  */
 export async function getContentBySlug(
-  category: Database['public']['Enums']['content_category'],
+  category: content_category,
   slug: string
-): Promise<Database['public']['CompositeTypes']['enriched_content_item'] | null> {
+): Promise<EnrichedContentItem | null> {
   'use cache';
-
-  const { isBuildTime } = await import('../../build-time.ts');
-  const { createSupabaseAnonClient } = await import('../../supabase/server-anon.ts');
-  const { logger } = await import('../../logger.ts');
 
   // Configure cache - use 'hours' profile for content details
   cacheLife('hours'); // 1hr stale, 15min revalidate, 1 day expire
@@ -111,17 +102,8 @@ export async function getContentBySlug(
   });
 
   try {
-    // Use admin client during build for better performance, anon client at runtime
-    let client;
-    if (isBuildTime()) {
-      const { createSupabaseAdminClient } = await import('../../supabase/admin.ts');
-      client = createSupabaseAdminClient();
-    } else {
-      client = createSupabaseAnonClient();
-    }
-
-    // Manual service had getEnrichedContentBySlug which called get_enriched_content_list with p_slugs
-    const data = await new ContentService(client).getEnrichedContentList({
+    const service = new ContentService();
+    const data = await service.getEnrichedContentList({
       p_category: category,
       p_limit: 1,
       p_offset: 0,
@@ -136,14 +118,11 @@ export async function getContentBySlug(
 
     return result;
   } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error({ category, err: errorForLogging, slug }, 'getContentBySlug: failed');
     return null;
   }
 }
-
-// REMOVED: getFullContentBySlug - redundant wrapper, use getContentBySlug directly
 
 /**
  * Get all content with optional filters
@@ -153,12 +132,8 @@ export async function getContentBySlug(
  */
 export async function getAllContent(
   filters?: ContentFilterOptions
-): Promise<Array<Database['public']['CompositeTypes']['enriched_content_item']>> {
+): Promise<EnrichedContentItem[]> {
   'use cache';
-
-  const { isBuildTime } = await import('../../build-time.ts');
-  const { createSupabaseAnonClient } = await import('../../supabase/server-anon.ts');
-  const { logger, toLogContextValue } = await import('../../logger.ts');
 
   const category = filters?.categories?.[0];
 
@@ -178,16 +153,8 @@ export async function getAllContent(
   });
 
   try {
-    // Use admin client during build for better performance, anon client at runtime
-    let client;
-    if (isBuildTime()) {
-      const { createSupabaseAdminClient } = await import('../../supabase/admin.ts');
-      client = createSupabaseAdminClient();
-    } else {
-      client = createSupabaseAnonClient();
-    }
-
-    const result = await new ContentService(client).getContentPaginated({
+    const service = new ContentService();
+    const result = await service.getContentPaginated({
       ...(category ? { p_category: category } : {}),
       ...(filters?.tags ? { p_tags: filters.tags } : {}),
       ...(filters?.search ? { p_search: filters.search } : {}),
@@ -198,9 +165,9 @@ export async function getAllContent(
       p_order_direction: filters?.orderDirection ?? 'desc',
     });
 
-    const items = (result.items ?? []) as Array<
-      Database['public']['CompositeTypes']['enriched_content_item']
-    >;
+    // getContentPaginated returns ContentPaginatedSlimResult with items array
+    // Convert ContentPaginatedSlimItem[] to EnrichedContentItem[] (they're compatible)
+    const items = (result?.items ?? []) as unknown as EnrichedContentItem[];
 
     reqLogger.info(
       {
@@ -213,7 +180,6 @@ export async function getAllContent(
 
     return items;
   } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error(
       {
@@ -233,14 +199,9 @@ export async function getAllContent(
  * Content counts change periodically, so we use the 'half' cacheLife profile.
  * @param category
  */
-export async function getContentCount(
-  category?: Database['public']['Enums']['content_category']
-): Promise<number> {
+export async function getContentCount(category?: content_category): Promise<number> {
   'use cache';
 
-  const { isBuildTime } = await import('../../build-time.ts');
-  const { createSupabaseAnonClient } = await import('../../supabase/server-anon.ts');
-  const { logger } = await import('../../logger.ts');
   // Configure cache - use 'half' profile for content counts (changes every 30 minutes)
   cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
   const tags = generateContentTags(category);
@@ -254,16 +215,8 @@ export async function getContentCount(
   });
 
   try {
-    // Use admin client during build for better performance, anon client at runtime
-    let client;
-    if (isBuildTime()) {
-      const { createSupabaseAdminClient } = await import('../../supabase/admin.ts');
-      client = createSupabaseAdminClient();
-    } else {
-      client = createSupabaseAnonClient();
-    }
-
-    const result = await new ContentService(client).getContentPaginated({
+    const service = new ContentService();
+    const result = await service.getContentPaginated({
       ...(category ? { p_category: category } : {}),
       p_limit: 1,
       p_offset: 0,
@@ -276,7 +229,6 @@ export async function getContentCount(
 
     return count;
   } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error(
       { category: category ?? 'all', err: errorForLogging },
@@ -294,14 +246,11 @@ export async function getContentCount(
  * @param limit
  */
 export async function getTrendingContent(
-  category?: Database['public']['Enums']['content_category'],
+  category?: content_category,
   limit = 20
 ): Promise<Database['public']['Functions']['get_trending_content']['Returns']> {
   'use cache';
 
-  const { isBuildTime } = await import('../../build-time.ts');
-  const { createSupabaseAnonClient } = await import('../../supabase/server-anon.ts');
-  const { logger } = await import('../../logger.ts');
   // Configure cache - use 'half' profile for trending content (changes every 30 minutes)
   cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
   cacheTag('trending');
@@ -317,16 +266,8 @@ export async function getTrendingContent(
   });
 
   try {
-    // Use admin client during build for better performance, anon client at runtime
-    let client;
-    if (isBuildTime()) {
-      const { createSupabaseAdminClient } = await import('../../supabase/admin.ts');
-      client = createSupabaseAdminClient();
-    } else {
-      client = createSupabaseAnonClient();
-    }
-
-    const result = await new TrendingService(client).getTrendingContent({
+    const service = new TrendingService();
+    const result = await service.getTrendingContent({
       ...(category ? { p_category: category } : {}),
       p_limit: limit,
     });
@@ -338,7 +279,6 @@ export async function getTrendingContent(
 
     return result;
   } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error(
       { category: category ?? 'all', err: errorForLogging, limit },
@@ -347,8 +287,6 @@ export async function getTrendingContent(
     return [];
   }
 }
-
-// REMOVED: getFilteredContent - redundant wrapper, use getAllContent directly
 
 /**
  * Get configuration count (alias for getContentCount with no category)
@@ -360,7 +298,7 @@ export async function getConfigurationCount(): Promise<number> {
 }
 
 interface TrendingPageParameters {
-  category?: Database['public']['Enums']['content_category'] | null;
+  category?: content_category | null;
   limit?: number;
 }
 
@@ -389,9 +327,6 @@ export async function getTrendingPageData(
   const { category = null, limit = 12 } = parameters;
   const safeLimit = Math.min(Math.max(limit, 1), 100);
 
-  const { isBuildTime } = await import('../../build-time.ts');
-  const { createSupabaseAnonClient } = await import('../../supabase/server-anon.ts');
-  const { logger } = await import('../../logger.ts');
   // Configure cache - use 'half' profile for trending page data (changes every 30 minutes)
   cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
   cacheTag('trending');
@@ -403,16 +338,7 @@ export async function getTrendingPageData(
   });
 
   try {
-    // Use admin client during build for better performance, anon client at runtime
-    let client;
-    if (isBuildTime()) {
-      const { createSupabaseAdminClient } = await import('../../supabase/admin.ts');
-      client = createSupabaseAdminClient();
-    } else {
-      client = createSupabaseAnonClient();
-    }
-
-    const trendingService = new TrendingService(client);
+    const trendingService = new TrendingService();
 
     const [trending, popular, recent] = await Promise.all([
       trendingService.getTrendingMetrics({
@@ -448,7 +374,6 @@ export async function getTrendingPageData(
       trending,
     };
   } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
     reqLogger.error(
       { category: category ?? 'all', err: errorForLogging, limit: safeLimit },

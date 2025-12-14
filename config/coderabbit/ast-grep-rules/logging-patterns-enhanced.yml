@@ -1,0 +1,60 @@
+# Enhanced Logging Pattern Rules
+# Enforces request-scoped logging and proper log correlation
+# Critical for avoiding race conditions and log correlation
+
+---
+# Rule: Detect missing request-scoped logger in server components
+id: missing-request-scoped-logger
+language: typescript
+files:
+  - 'app/**/*.tsx'
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        pattern: export default async function $COMPONENT($$$) { $$$ }
+    - has:
+        regex: logger\.info|logger\.warn|logger\.error
+    - not:
+        has:
+          regex: logger\.child
+message: "Server components should use request-scoped loggers via logger.child() to avoid race conditions. Add: const reqLogger = logger.child({ requestId, operation, route }); and use reqLogger instead of logger."
+severity: error
+
+---
+# Rule: Detect missing requestId generation
+id: missing-request-id-generation
+language: typescript
+files:
+  - 'app/**/*.tsx'
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        pattern: export default async function $COMPONENT($$$) { $$$ }
+    - has:
+        regex: logger\.child
+    - not:
+        has:
+          pattern: generateRequestId|requestId
+message: "Server components must generate requestId for log correlation. Add: const requestId = generateRequestId(); and include in logger.child({ requestId, ... }). Import generateRequestId from @heyclaude/web-runtime/logging/server"
+severity: error
+
+---
+# Rule: Detect requestId generated before connection()
+id: request-id-before-connection
+language: typescript
+files:
+  - 'app/**/*.tsx'
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        pattern: export default async function $COMPONENT($$$) { $$$ }
+    - has:
+        pattern: generateRequestId()
+    - not:
+        follows:
+          pattern: await connection()
+message: "requestId must be generated after connection() to allow Date.now() in generateRequestId(). Move generateRequestId() after await connection()."
+severity: error

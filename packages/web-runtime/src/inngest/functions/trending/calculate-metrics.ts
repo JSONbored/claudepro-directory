@@ -9,7 +9,6 @@
 
 import { TrendingService } from '@heyclaude/data-layer';
 import { inngest } from '../../client';
-import { createSupabaseAdminClient } from '../../../supabase/admin';
 import { logger, createWebAppContextWithId } from '../../../logging/server';
 import { normalizeError } from '@heyclaude/shared-runtime';
 import { sendCronSuccessHeartbeat } from '../../utils/monitoring';
@@ -33,8 +32,7 @@ export const calculateTrendingMetrics = inngest.createFunction(
 
     logger.info(logContext, 'Trending metrics calculation started');
 
-    const supabase = createSupabaseAdminClient();
-    const trendingService = new TrendingService(supabase);
+    const trendingService = new TrendingService();
 
     // Step 1: Calculate time-windowed metrics from user_interactions
     const metricsResult = await step.run('calculate-time-metrics', async (): Promise<{

@@ -11,7 +11,6 @@ import { normalizeError, getEnvVar } from '@heyclaude/shared-runtime';
 import { revalidateTag } from 'next/cache';
 
 import { inngest } from '../../client';
-import { createSupabaseAdminClient } from '../../../supabase/admin';
 import { pgmqRead, pgmqDelete, type PgmqMessage } from '../../../supabase/pgmq-client';
 import { logger, createWebAppContextWithId } from '../../../logging/server';
 import { sendCronSuccessHeartbeat } from '../../utils/monitoring';
@@ -87,8 +86,6 @@ export const processChangelogNotifyQueue = inngest.createFunction(
     const logContext = createWebAppContextWithId('/inngest/changelog/notify', 'processChangelogNotifyQueue');
 
     logger.info(logContext, 'Changelog notify queue processing started');
-
-    const supabase = createSupabaseAdminClient();
 
     // Step 1: Read messages from queue
     const messages = await step.run('read-queue', async (): Promise<PgmqMessage<ChangelogReleaseJob>[]> => {
@@ -177,7 +174,7 @@ export const processChangelogNotifyQueue = inngest.createFunction(
             action_href: `/changelog/${job.slug}`,
           };
 
-          const service = new MiscService(supabase);
+          const service = new MiscService();
           await service.upsertNotification(notificationInsert);
 
           notificationInserted = true;

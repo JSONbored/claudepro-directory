@@ -13,6 +13,7 @@
  * ```
  */
 
+import type { UserCompaniesCompany } from '@heyclaude/data-layer/types/composite-types';
 import { type Database } from '@heyclaude/database-types';
 import { normalizeError } from '@heyclaude/shared-runtime';
 import {
@@ -44,8 +45,8 @@ import { useBoolean } from '@heyclaude/web-runtime/hooks';
 
 import { useAuthModal } from '@/src/hooks/use-auth-modal';
 
-// Use the generated composite type from the RPC return
-type CompanyCompositeType = Database['public']['CompositeTypes']['user_companies_company'];
+// Use the new composite type from @heyclaude/data-layer
+type CompanyCompositeType = UserCompaniesCompany;
 
 type AllowedImageMimeType = 'image/jpeg' | 'image/png' | 'image/webp';
 

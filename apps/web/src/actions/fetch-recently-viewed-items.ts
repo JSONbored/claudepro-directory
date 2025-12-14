@@ -10,6 +10,7 @@
  * all properties like author_profile_url, bookmark_count, source, etc.
  */
 
+import type { EnrichedContentItem } from '@heyclaude/data-layer/types/composite-types';
 import { type Database } from '@heyclaude/database-types';
 import { getContentBySlug } from '@heyclaude/web-runtime/data';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/data';
@@ -63,7 +64,7 @@ function mapRecentlyViewedToContentCategory(
  */
 export async function fetchRecentlyViewedItems(
   items: RecentlyViewedItemInput[]
-): Promise<Database['public']['CompositeTypes']['enriched_content_item'][]> {
+): Promise<EnrichedContentItem[]> {
   const reqLogger = logger.child({
     operation: 'fetchRecentlyViewedItems',
     module: 'actions/fetch-recently-viewed-items',
@@ -153,7 +154,7 @@ export async function fetchRecentlyViewedItems(
 
     // Filter out null items (deleted content)
     const validItems = enrichedItems.filter(
-      (item: Database['public']['CompositeTypes']['enriched_content_item'] | null): item is Database['public']['CompositeTypes']['enriched_content_item'] => item !== null
+      (item: EnrichedContentItem | null): item is EnrichedContentItem => item !== null
     );
 
     reqLogger.info(

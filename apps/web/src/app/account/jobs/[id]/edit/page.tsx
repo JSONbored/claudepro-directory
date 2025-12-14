@@ -3,7 +3,8 @@
  * Uses updateJob server action (calls update_job RPC)
  */
 
-import { Constants, type Database } from '@heyclaude/database-types';
+import { type job_category, type job_type, type jobs } from '@heyclaude/data-layer/prisma';
+import { Constants } from '@heyclaude/database-types';
 import { type CreateJobInput } from '@heyclaude/web-runtime/actions';
 import { updateJob } from '@heyclaude/web-runtime/actions';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
@@ -143,7 +144,7 @@ async function EditJobPageContent({
   userLogger.info({ section: 'data-fetch' }, 'EditJobPage: authentication successful');
 
   // Section: Job Data Fetch
-  let job: Database['public']['Tables']['jobs']['Row'] | null = null;
+  let job: jobs | null = null;
   try {
     job = await getUserJobById(user.id, id);
     userLogger.info({ hasJob: !!job, section: 'data-fetch' }, 'EditJobPage: job data loaded');
@@ -227,11 +228,11 @@ async function EditJobPageContent({
   };
 
   // Type guards to safely check enum values - use Constants
-  function isValidJobType(value: string): value is Database['public']['Enums']['job_type'] {
+  function isValidJobType(value: string): value is job_type {
     return (Constants.public.Enums.job_type as readonly string[]).includes(value);
   }
 
-  function isValidJobCategory(value: string): value is Database['public']['Enums']['job_category'] {
+  function isValidJobCategory(value: string): value is job_category {
     return (Constants.public.Enums.job_category as readonly string[]).includes(value);
   }
 
@@ -284,9 +285,9 @@ async function EditJobPageContent({
           requirements: job.requirements,
           tags: job.tags,
         }}
-        onSubmit={handleSubmit}
         planCatalog={planCatalog}
         submitLabel="Update Job Listing"
+        onSubmit={handleSubmit}
       />
     </div>
   );

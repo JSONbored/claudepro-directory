@@ -21,7 +21,7 @@
  * ```
  */
 import 'server-only';
-import { type Database } from '@heyclaude/database-types';
+import { type content_category } from '@heyclaude/data-layer/prisma';
 import { VALID_CATEGORIES } from '@heyclaude/web-runtime/core';
 import { getContentTemplates } from '@heyclaude/web-runtime/data';
 import {
@@ -39,11 +39,9 @@ import { z } from 'zod';
 /***
  * Cached helper function to fetch content templates
  * Uses Cache Components to reduce function invocations
- *
- * @param {Database['public']['Enums']['content_category']} category - The content category to fetch templates for
- * @returns Promise resolving to an array of template objects for the specified category
+ * @param {content_category} category
  */
-async function getCachedTemplatesForAPI(category: Database['public']['Enums']['content_category']) {
+async function getCachedTemplatesForAPI(category: content_category) {
   'use cache';
   cacheTag('templates');
   cacheTag(`templates-${category}`);
@@ -62,7 +60,7 @@ export const GET = createApiRoute({
   cors: 'anon',
   handler: async ({ logger, query }) => {
     const { category } = query as {
-      category: Database['public']['Enums']['content_category'] | null;
+      category: content_category | null;
     };
 
     // Handle category: schema transforms "all" to null, but this endpoint requires a specific category

@@ -1,6 +1,16 @@
 'use server';
 
 import { AccountService } from '@heyclaude/data-layer';
+import {
+  type bookmarks,
+  type content_category,
+  type jobs,
+  type user_tier,
+} from '@heyclaude/data-layer/prisma';
+import type {
+  UserCompleteDataResult,
+  UserCompaniesCompany,
+} from '@heyclaude/data-layer/types/composite-types';
 import { type Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { cacheLife, cacheTag } from 'next/cache';
@@ -21,10 +31,7 @@ const accountDashboardSchema = z.object({
     // eslint-disable-next-line unicorn/prefer-top-level-await -- zod .catch() is not a promise, it's a schema method
     name: z.string().nullable().catch(null),
     tier: z
-      .enum([...USER_TIER_VALUES] as [
-        Database['public']['Enums']['user_tier'],
-        ...Array<Database['public']['Enums']['user_tier']>,
-      ])
+      .enum([...USER_TIER_VALUES] as [user_tier, ...user_tier[]])
       .nullable()
       // eslint-disable-next-line unicorn/prefer-top-level-await -- zod .catch() is not a promise, it's a schema method
       .catch(null),
@@ -136,7 +143,9 @@ export async function getUserLibrary(
       'getUserLibrary: fetched successfully'
     );
 
-    return completeData.user_library;
+    // Type assertion: RPC returns Database types, but we're migrating to custom composite types
+    // TODO: Remove assertion when fully migrated to Prisma queries
+    return completeData.user_library as Database['public']['Functions']['get_user_library']['Returns'];
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
@@ -145,15 +154,25 @@ export async function getUserLibrary(
   }
 }
 
-export async function getUserBookmarksForCollections(
-  userId: string
-): Promise<Array<Database['public']['Tables']['bookmarks']['Row']>> {
+/**
+ * Get user bookmarks for collections
+ *
+ * Converts RPC return data (composite type with string dates) to Prisma bookmarks type (with Date objects).
+ * This function transforms the data structure from the RPC composite type to match Prisma table types.
+ *
+ * NOTE: The consuming code (CollectionForm) still uses Database types and will be migrated in Area 5 (UI Layer).
+ * This function returns Prisma types to prepare for that migration.
+ *
+ * @param userId - User ID
+ * @returns Array of bookmarks in Prisma format (with Date objects for timestamps)
+ */
+export async function getUserBookmarksForCollections(userId: string): Promise<bookmarks[]> {
   const data = await getUserLibrary(userId);
-  const bookmarks = data?.bookmarks ?? [];
-  return bookmarks
+  const bookmarksArray = data?.bookmarks ?? [];
+  return bookmarksArray
     .filter(
       (
-        b: (typeof bookmarks)[number]
+        b: (typeof bookmarksArray)[number]
       ): b is typeof b & {
         content_slug: string;
         content_type: string;
@@ -169,15 +188,15 @@ export async function getUserBookmarksForCollections(
         b.created_at !== null &&
         b.updated_at !== null
     )
-    .map((b: (typeof bookmarks)[number]) => ({
+    .map((b) => ({
       content_slug: b.content_slug,
-      content_type: b.content_type,
-      created_at: b.created_at,
+      content_type: b.content_type as bookmarks['content_type'], // RPC returns string, Prisma expects enum
+      created_at: new Date(b.created_at), // Convert string to Date for Prisma type
       id: b.id,
-      notes: b.notes,
-      updated_at: b.updated_at,
+      notes: b.notes ?? null,
+      updated_at: new Date(b.updated_at), // Convert string to Date for Prisma type
       user_id: b.user_id,
-    })) as Array<Database['public']['Tables']['bookmarks']['Row']>;
+    }));
 }
 
 /**
@@ -227,7 +246,9 @@ export async function getUserDashboard(
       'getUserDashboard: fetched successfully'
     );
 
-    return completeData.user_dashboard;
+    // Type assertion: RPC returns Database types, but we're migrating to custom composite types
+    // TODO: Remove assertion when fully migrated to Prisma queries
+    return completeData.user_dashboard as Database['public']['Functions']['get_user_dashboard']['Returns'];
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
@@ -236,13 +257,10 @@ export async function getUserDashboard(
   }
 }
 
-export async function getUserJobById(
-  userId: string,
-  jobId: string
-): Promise<Database['public']['Tables']['jobs']['Row'] | null> {
+export async function getUserJobById(userId: string, jobId: string): Promise<jobs | null> {
   const data = await getUserDashboard(userId);
-  const jobs = (data?.jobs as Array<Database['public']['Tables']['jobs']['Row']> | undefined) ?? [];
-  return jobs.find((job) => job.id === jobId) ?? null;
+  const jobsArray = (data?.jobs as jobs[] | undefined) ?? [];
+  return jobsArray.find((job) => job.id === jobId) ?? null;
 }
 
 /**
@@ -281,7 +299,7 @@ export async function getUserCompleteData(
     activityOffset?: number;
     activityType?: null | string;
   }
-): Promise<Database['public']['CompositeTypes']['user_complete_data_result'] | null> {
+): Promise<UserCompleteDataResult | null> {
   'use cache: private';
   cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
   cacheTag(`user-complete-data-${userId}`);
@@ -348,7 +366,7 @@ export async function getUserCompleteData(
     }
 
     // Use AccountService for proper architectural flow through data layer
-    const service = new AccountService(client);
+    const service = new AccountService();
 
     // Build RPC parameters - only include p_activity_type if it's provided (not null/undefined)
     const rpcParams: Database['public']['Functions']['get_user_complete_data']['Args'] = {
@@ -365,7 +383,10 @@ export async function getUserCompleteData(
       'getUserCompleteData: fetched successfully'
     );
 
-    return result;
+    // Type assertion: RPC returns Database types, but we're migrating to custom composite types
+    // The structure matches, but nullability differs slightly between Database types and our custom types
+    // TODO: Remove assertion when fully migrated to Prisma queries
+    return result as UserCompleteDataResult;
   } catch (error) {
     // Normalize error properly - handle both Error instances and Supabase error objects
     const normalizedError = normalizeError(error, 'getUserCompleteData: unexpected error occurred');
@@ -419,8 +440,7 @@ export async function getCollectionDetail(
   });
 
   try {
-    const client = await createSupabaseServerClient();
-    const service = new AccountService(client);
+    const service = new AccountService();
 
     const result = await service.getCollectionDetailWithItems({
       p_slug: slug,
@@ -543,8 +563,7 @@ export async function getSponsorshipAnalytics(
   });
 
   try {
-    const client = await createSupabaseServerClient();
-    const service = new AccountService(client);
+    const service = new AccountService();
 
     const result = await service.getSponsorshipAnalytics({
       p_sponsorship_id: sponsorshipId,
@@ -629,9 +648,7 @@ export async function getUserCompanies(
     );
 
     return {
-      companies: companiesArray as Array<
-        Database['public']['CompositeTypes']['user_companies_company']
-      >,
+      companies: companiesArray as unknown as Array<UserCompaniesCompany>,
     };
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
@@ -685,14 +702,16 @@ export async function getUserSponsorships(
 
     reqLogger.info(
       {
-        count: completeData.sponsorships.length,
+        count: completeData.sponsorships?.length ?? 0,
         hasResult: Boolean(completeData.sponsorships),
         userId,
       },
       'getUserSponsorships: fetched successfully'
     );
 
-    return completeData.sponsorships;
+    // Type assertion: RPC returns Database types, but we're migrating to custom composite types
+    // TODO: Remove assertion when fully migrated to Prisma queries
+    return (completeData.sponsorships ?? []) as Database['public']['Functions']['get_user_sponsorships']['Returns'];
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
     const errorForLogging: Error | string = error instanceof Error ? error : String(error);
@@ -704,11 +723,11 @@ export async function getUserSponsorships(
 export async function getUserCompanyById(
   userId: string,
   companyId: string
-): Promise<Database['public']['CompositeTypes']['user_companies_company'] | null> {
+): Promise<UserCompaniesCompany | null> {
   const data = await getUserCompanies(userId);
   const company = data?.companies?.find(
-    (c: Database['public']['CompositeTypes']['user_companies_company']) => c.id === companyId
-  );
+    (c) => c?.id === companyId
+  ) as UserCompaniesCompany | undefined;
   return company ?? null;
 }
 
@@ -740,8 +759,7 @@ export async function getSubmissionDashboard(
   });
 
   try {
-    const client = await createSupabaseServerClient();
-    const service = new AccountService(client);
+    const service = new AccountService();
 
     const result = await service.getSubmissionDashboard({
       p_contributors_limit: contributorsLimit,
@@ -1008,7 +1026,7 @@ export async function getUserIdentitiesData(
  */
 export async function isBookmarked(input: {
   content_slug: string;
-  content_type: Database['public']['Enums']['content_category'];
+  content_type: content_category;
   userId: string;
 }): Promise<boolean> {
   'use cache: private';
@@ -1025,8 +1043,7 @@ export async function isBookmarked(input: {
   });
 
   try {
-    const client = await createSupabaseServerClient();
-    const service = new AccountService(client);
+    const service = new AccountService();
     return await service.isBookmarked({
       p_content_slug: content_slug,
       p_content_type: content_type,
@@ -1068,8 +1085,7 @@ export async function isFollowing(input: {
   });
 
   try {
-    const client = await createSupabaseServerClient();
-    const service = new AccountService(client);
+    const service = new AccountService();
     return await service.isFollowing({
       follower_id: followerId,
       following_id: followingId,
@@ -1095,7 +1111,7 @@ export async function isFollowing(input: {
 export async function isBookmarkedBatch(input: {
   items: Array<{
     content_slug: string;
-    content_type: Database['public']['Enums']['content_category'];
+    content_type: content_category;
   }>;
   userId: string;
 }): Promise<Database['public']['Functions']['is_bookmarked_batch']['Returns']> {
@@ -1118,8 +1134,7 @@ export async function isBookmarkedBatch(input: {
   });
 
   try {
-    const client = await createSupabaseServerClient();
-    const service = new AccountService(client);
+    const service = new AccountService();
     return await service.isBookmarkedBatch({
       p_items: items,
       p_user_id: userId,
@@ -1162,8 +1177,7 @@ export async function isFollowingBatch(input: {
   });
 
   try {
-    const client = await createSupabaseServerClient();
-    const service = new AccountService(client);
+    const service = new AccountService();
     return await service.isFollowingBatch({
       p_followed_user_ids: followedUserIds,
       p_follower_id: followerId,

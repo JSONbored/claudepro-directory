@@ -16,13 +16,18 @@
     "heyclaude-analyze-dependencies": "./src/bin/analyze-dependencies.ts",
     "heyclaude-deploy-edge": "./src/bin/deploy-functions.ts",
     "heyclaude-sync-email": "./src/bin/sync-email-templates.ts",
-    "heyclaude-generate-services": "./src/bin/generate-services.ts",
-    "heyclaude-generate-zod": "./src/bin/generate-zod-schemas.ts",
     "heyclaude-generate-actions": "./src/bin/generate-server-actions.ts",
     "heyclaude-mcp-login": "./src/bin/mcp-login.ts",
     "heyclaude-bump-version": "./src/bin/bump-version.ts",
     "heyclaude-analyze-commits": "./src/bin/analyze-commits.ts",
-    "heyclaude-extract-changelog-entry": "./src/bin/extract-changelog-entry.ts"
+    "heyclaude-extract-changelog-entry": "./src/bin/extract-changelog-entry.ts",
+    "heyclaude-analyze-css": "./src/bin/analyze-css.ts",
+    "heyclaude-migrate-theme": "./src/bin/migrate-theme.ts",
+    "heyclaude-analyze-inline-styles": "./src/bin/analyze-inline-styles.ts",
+    "heyclaude-consolidate-variables": "./src/bin/consolidate-variables.ts",
+    "heyclaude-apply-variable-consolidation": "./src/bin/apply-variable-consolidation.ts",
+    "heyclaude-comprehensive-css-analysis": "./src/bin/comprehensive-css-analysis.ts",
+    "heyclaude-exhaustive-css-token-comparison": "./src/bin/exhaustive-css-token-comparison.ts"
   },
   "exports": {
     ".": {
@@ -49,19 +54,24 @@
     "@heyclaude/shared-runtime": "workspace:*",
     "@heyclaude/web-runtime": "workspace:*",
     "@iarna/toml": "^2.2.5",
+    "@prisma/generator-helper": "^7.1.0",
     "@supabase/supabase-js": "^2.87.1",
     "archiver": "^7.0.1",
     "escape-html": "^1.0.3",
     "jiti": "^2.6.1",
     "open": "^11.0.0",
     "ora": "^9.0.0",
+    "pg": "^8.13.1",
     "pino": "^10.1.0",
+    "postcss": "^8.5.6",
+    "postcss-value-parser": "^4.2.0",
     "resend": "^6.6.0",
     "ts-morph": "^27.0.2",
     "zod": "^4.1.13"
   },
   "devDependencies": {
     "@types/escape-html": "^1.0.4",
+    "@types/pg": "^8.11.10",
     "ts-morph": "^27.0.2"
   }
 }

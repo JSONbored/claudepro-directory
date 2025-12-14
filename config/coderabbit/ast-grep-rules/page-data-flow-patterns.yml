@@ -1,0 +1,199 @@
+# Page Data Flow Pattern Rules
+# Enforces correct data flow architecture between server and client components
+# Critical for preventing serialization errors and architectural issues
+# Shareable across Next.js projects
+
+---
+# Rule: Detect Date objects passed to client components without serialization
+id: date-object-to-client-component
+language: typescript
+rule:
+  all:
+    - kind: call_expression
+    - has:
+        pattern: new Date($$$)
+    - inside:
+        has:
+          pattern: <$COMPONENT $PROPS={$$$} />
+    - not:
+        has:
+          pattern: serializeForClient
+    - not:
+        has:
+          pattern: toISOString|toJSON
+message: "Date objects cannot be passed directly to Client Components. Use serializeForClient() to convert Date objects to ISO strings, or call .toISOString() before passing. Import: import { serializeForClient } from '@heyclaude/shared-runtime/utils/serialize';"
+severity: error
+
+---
+# Rule: Detect Date.now() or new Date() in server components passing to client
+id: date-now-to-client-component
+language: typescript
+files:
+  - 'app/**/*.tsx'
+rule:
+  all:
+    - kind: call_expression
+    - has:
+        regex: Date\.now|new Date\(
+    - inside:
+        has:
+          pattern: <$COMPONENT $PROPS={$$$} />
+    - not:
+        has:
+          pattern: serializeForClient
+message: "Date.now() or new Date() results cannot be passed directly to Client Components. Use serializeForClient() or convert to ISO string first. Import: import { serializeForClient } from '@heyclaude/shared-runtime/utils/serialize';"
+severity: error
+
+---
+# Rule: Detect non-serializable data passed to client components
+id: non-serializable-to-client-component
+language: typescript
+rule:
+  all:
+    - kind: new_expression
+    - has:
+        regex: new (Map|Set|Symbol|Function|class )
+    - inside:
+        has:
+          pattern: <$COMPONENT $PROPS={$$$} />
+    - not:
+        has:
+          pattern: serializeForClient
+message: "Non-serializable data (classes, functions, Map, Set, Symbol) cannot be passed to Client Components. Use serializeForClient() to convert to plain objects. Import: import { serializeForClient } from '@heyclaude/shared-runtime/utils/serialize';"
+severity: error
+
+---
+# Rule: Detect missing serializeForClient for complex objects passed to client
+id: missing-serialize-for-client
+language: typescript
+files:
+  - 'app/**/*.tsx'
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        pattern: export default async function $SERVER($$$) { $$$ }
+    - has:
+        pattern: await $DATA_FETCH($$$)
+    - has:
+        regex: data=|props=|items=|content=
+    - not:
+        has:
+          pattern: serializeForClient
+message: "Data fetched from server and passed to Client Components should be serialized with serializeForClient() to ensure Date objects, functions, and classes are properly converted. Add: const serialized = serializeForClient(data); before passing to Client Component."
+severity: warning
+
+---
+# Rule: Detect data fetching in client components (should be in server)
+id: data-fetching-in-client-component
+language: typescript
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        regex: 'use client'
+    - has:
+        pattern: await $SUPABASE.(from|rpc)($$$)
+    - not:
+        has:
+          pattern: useEffect|useSWR|useQuery
+message: "Direct data fetching (supabase.from, supabase.rpc) in client components is inefficient and exposes database credentials. Move data fetching to server component or use React Query/SWR for client-side data fetching. Server components should handle all database queries."
+severity: error
+
+---
+# Rule: Detect missing Suspense boundary for server component data
+id: missing-suspense-server-data
+language: typescript
+files:
+  - 'app/**/*.tsx'
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        pattern: export default async function $PAGE($$$) { $$$ }
+    - has:
+        pattern: await $DATA($$$)
+    - has:
+        pattern: <$CHILD_COMPONENT />
+    - not:
+        has:
+          pattern: <Suspense
+message: "Server components with async data fetching should wrap child components in Suspense boundaries for progressive rendering. Add: <Suspense fallback={<Skeleton />}><ChildComponent /></Suspense>"
+severity: warning
+
+---
+# Rule: Detect duplicate data fetching (same data fetched multiple times)
+id: duplicate-data-fetching
+language: typescript
+files:
+  - 'app/**/*.tsx'
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        pattern: export default async function $PAGE($$$) { $$$ }
+    - has:
+        pattern: await $FETCH1($ARGS)
+    - has:
+        pattern: await $FETCH2($ARGS)
+    - has:
+        regex: get|fetch|load
+message: "Same data may be fetched multiple times. Consider fetching once at page level and passing down, or using request-scoped caching (withSmartCache) to prevent duplicate RPC calls within the same request."
+severity: warning
+
+---
+# Rule: Detect missing request-scoped logger passing to child functions
+id: missing-logger-passing-to-child
+language: typescript
+files:
+  - 'app/**/*.tsx'
+  - 'packages/web-runtime/src/data/**/*.ts'
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        pattern: export default async function $PAGE($$$) { $$$ }
+    - has:
+        pattern: const reqLogger = logger.child({ $$$ })
+    - has:
+        pattern: await $DATA_FUNC($$$)
+    - not:
+        has:
+          pattern: reqLogger
+message: "Data fetching functions should receive request-scoped logger from parent component for proper log correlation. Pass reqLogger as parameter: await fetchData(args, reqLogger). This ensures all logs in the request lifecycle share the same context."
+severity: warning
+
+---
+# Rule: Detect server component passing functions to client component
+id: function-passed-to-client
+language: typescript
+rule:
+  all:
+    - kind: arrow_function
+    - has:
+        pattern: ($$$) => { $$$ }
+    - not:
+        inside:
+          has:
+            regex: 'use client'
+message: "Functions cannot be passed from Server Components to Client Components. Move function definition to Client Component, or use server actions for server-side operations. Functions are not serializable and will cause hydration errors."
+severity: error
+
+---
+# Rule: Detect missing error handling for data fetching in pages
+id: missing-error-handling-data-fetch
+language: typescript
+files:
+  - 'app/**/*.tsx'
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        pattern: export default async function $PAGE($$$) { $$$ }
+    - has:
+        pattern: await $DATA_FETCH($$$)
+    - not:
+        has:
+          pattern: try.*catch|\.catch\(
+message: "Data fetching in pages should include error handling. Wrap in try/catch or use .catch() to handle failures gracefully. Add error boundaries (error.tsx) for route-level error handling."
+severity: warning

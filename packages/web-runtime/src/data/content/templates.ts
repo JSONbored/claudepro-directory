@@ -1,7 +1,8 @@
 'use server';
 
+import { type content_category } from '@heyclaude/data-layer/prisma';
 import { type Database } from '@heyclaude/database-types';
-import { getEnvVar, serializeForClient } from '@heyclaude/shared-runtime';
+import { serializeForClient } from '@heyclaude/shared-runtime';
 // Temporarily removed cache imports - will be re-added when caching is re-implemented
 // import { cacheLife, cacheTag } from 'next/cache';
 
@@ -24,7 +25,7 @@ type MergedTemplateItem = ContentTemplateItem &
  * @param category
  */
 export async function getContentTemplates(
-  category: Database['public']['Enums']['content_category']
+  category: content_category
 ): Promise<MergedTemplateItem[]> {
   // Temporarily removed 'use cache' to fix serialization issues during prerendering
   // The issue is that Next.js tries to serialize the entire function closure when using 'use cache',
@@ -44,33 +45,9 @@ export async function getContentTemplates(
   });
 
   try {
-    // Dynamically import all dependencies to avoid class instance serialization issues
-    // All imports must be inside the cached function to prevent class instances from being captured
-    const [{ createSupabaseAnonClient }, { ContentService }] = await Promise.all([
-      import('../../supabase/server-anon.ts'),
-      import('@heyclaude/data-layer'),
-    ]);
-
-    // Check build time using getEnvVar to avoid direct process.env access
-    // Use admin client during build for better performance, anon client at runtime
-    // Create client inside try block to ensure it's not captured in closure
-    let client;
-    const nextPhase = getEnvVar('NEXT_PHASE');
-    const isBuild =
-      typeof process !== 'undefined' &&
-      (nextPhase === 'phase-production-build' || nextPhase === 'phase-production-server');
-
-    if (isBuild) {
-      const { createSupabaseAdminClient } = await import('../../supabase/admin.ts');
-      // Admin client required during build: bypasses RLS for faster static generation
-      // This is safe because build-time queries are read-only and don't expose user data
-      client = createSupabaseAdminClient();
-    } else {
-      client = createSupabaseAnonClient();
-    }
-
-    // Create ContentService instance and call method - all class instances are local to this scope
-    const result = await new ContentService(client).getContentTemplates({ p_category: category });
+    // ContentService now uses Prisma (no constructor needed)
+    const { ContentService } = await import('@heyclaude/data-layer');
+    const result = await new ContentService().getContentTemplates({ p_category: category });
 
     if (result === null || result === undefined) {
       return [];

@@ -1,3 +1,4 @@
+import { type content_category } from '@heyclaude/data-layer/prisma';
 import { type Database } from '@heyclaude/database-types';
 
 import { type CategoryStatsConfig, type UnifiedCategoryConfig } from '../../../types/category.ts';
@@ -35,10 +36,7 @@ export const getCategoryStatsConfig = (): readonly CategoryStatsConfig[] => {
   // Iterate over CATEGORY_CONFIGS entries directly to satisfy TypeScript's type system.
   // This ensures TypeScript knows config exists and is properly typed.
   const entries = Object.entries(CATEGORY_CONFIGS) as Array<
-    [
-      Database['public']['Enums']['content_category'],
-      UnifiedCategoryConfig<Database['public']['Enums']['content_category']>,
-    ]
+    [content_category, UnifiedCategoryConfig<content_category>]
   >;
 
   return entries.map(([categoryId, config], index): CategoryStatsConfig => {

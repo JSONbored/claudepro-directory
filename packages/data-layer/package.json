@@ -5,7 +5,22 @@
   "sideEffects": false,
   "exports": {
     ".": "./src/index.ts",
-    "./services/trending": "./src/services/trending.ts"
+    "./services/trending": "./src/services/trending.ts",
+    "./prisma": {
+      "types": "./src/prisma/index.ts",
+      "react-server": "./src/prisma/index.ts",
+      "default": "./src/prisma/index.ts"
+    },
+    "./prisma/client": {
+      "types": "./src/prisma/client.ts",
+      "react-server": "./src/prisma/client.ts",
+      "default": "./src/prisma/client.ts"
+    },
+    "./types/composite-types": {
+      "types": "./src/types/composite-types.ts",
+      "react-server": "./src/types/composite-types.ts",
+      "default": "./src/types/composite-types.ts"
+    }
   },
   "scripts": {
     "build": "tsc --build",
@@ -15,10 +30,14 @@
   "dependencies": {
     "@heyclaude/database-types": "workspace:*",
     "@heyclaude/shared-runtime": "workspace:*",
+    "@prisma/adapter-pg": "^7.1.0",
     "@supabase/supabase-js": "^2.87.1",
-    "pino": "^10.1.0"
+    "pg": "^8.16.3",
+    "pino": "^10.1.0",
+    "zod": "^4.1.13"
   },
   "devDependencies": {
+    "@types/pg": "^8.15.6",
     "typescript": "5.9.3"
   }
 }

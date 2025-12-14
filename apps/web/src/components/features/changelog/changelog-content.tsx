@@ -18,6 +18,7 @@
  * - No MDX dependencies
  */
 
+import type { changelog, changelog_category } from '@heyclaude/data-layer/prisma';
 import { type Database } from '@heyclaude/database-types';
 import { parseChangelogChanges } from '@heyclaude/web-runtime/data';
 import {
@@ -48,7 +49,7 @@ import {
 } from './changelog-content-utils';
 import { SanitizedHTML } from './sanitized-html';
 
-type ChangelogEntry = Database['public']['Tables']['changelog']['Row'];
+type ChangelogEntry = changelog;
 type ContentRow = Database['public']['Tables']['content']['Row'];
 type GuideSection = ContentRow['metadata'];
 
@@ -269,7 +270,7 @@ export const ChangelogContent = memo(
 
     // Get non-empty categories for badge display
     const nonEmptyCategories = CHANGELOG_CATEGORIES.filter(
-      (category): category is Database['public']['Enums']['changelog_category'] => {
+      (category): category is changelog_category => {
         const items = changes[category];
         return items !== undefined && Array.isArray(items) && items.length > 0;
       }
@@ -290,10 +291,10 @@ export const ChangelogContent = memo(
         >
           <h2 className={`${UI_CLASSES.HEADING_H2} mb-3`}>{entry.title}</h2>
           <time
-            dateTime={entry.release_date}
+            dateTime={entry.release_date instanceof Date ? entry.release_date.toISOString() : entry.release_date}
             className={`${UI_CLASSES.TEXT_BODY_SM} ${UI_CLASSES.TEXT_HELPER}`}
           >
-            {new Date(entry.release_date).toLocaleDateString('en-US', {
+            {(entry.release_date instanceof Date ? entry.release_date : new Date(entry.release_date)).toLocaleDateString('en-US', {
               year: 'numeric',
               month: 'long',
               day: 'numeric',

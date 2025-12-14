@@ -11,6 +11,9 @@ export * from '../edge/transform.ts';
 // Removed search-client.ts export - all search functions migrated to /api/search route
 export * from '../seo/og.ts';
 export * from '../auth/get-authenticated-user.ts';
+// Prisma Client (server-only, not isomorphic)
+// Re-export from data-layer to maintain backward compatibility
+export * from '@heyclaude/data-layer/prisma';
 
 // Static Config Getters (sync)
 export {

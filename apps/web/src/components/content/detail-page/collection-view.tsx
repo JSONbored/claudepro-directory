@@ -22,6 +22,7 @@
  * @see src/components/features/content/config-card.tsx - Embedded item cards
  */
 
+import type { EnrichedContentItem } from '@heyclaude/data-layer/types/composite-types';
 import { type Database } from '@heyclaude/database-types';
 import { ensureStringArray, getMetadata, isValidCategory } from '@heyclaude/web-runtime/core';
 import { getCategoryConfigs, getContentBySlug } from '@heyclaude/web-runtime/data';
@@ -40,7 +41,7 @@ import { Suspense } from 'react';
 
 interface ItemWithData {
   category: string;
-  data: Database['public']['CompositeTypes']['enriched_content_item'];
+  data: EnrichedContentItem;
   reason?: string;
   slug: string;
 }

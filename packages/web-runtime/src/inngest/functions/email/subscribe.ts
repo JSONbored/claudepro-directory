@@ -16,7 +16,6 @@ import { validateEmail, normalizeError } from '@heyclaude/shared-runtime';
 import { revalidateTag } from 'next/cache';
 
 import { inngest } from '../../client';
-import { createSupabaseAdminClient } from '../../../supabase/admin';
 import { renderEmailTemplate } from '../../../email/base-template';
 import { NewsletterWelcome } from '../../../email/templates/newsletter-welcome';
 import { HELLO_FROM } from '../../../email/config/email-config';
@@ -116,8 +115,7 @@ export const subscribeNewsletter = inngest.createFunction(
       subscriptionId: string;
       wasResubscribed: boolean;
     }> => {
-      const supabase = createSupabaseAdminClient();
-      const newsletterService = new NewsletterService(supabase);
+      const newsletterService = new NewsletterService();
 
       const newsletterSourceValues = Constants.public.Enums.newsletter_source;
       const copyTypeValues = Constants.public.Enums.copy_type;

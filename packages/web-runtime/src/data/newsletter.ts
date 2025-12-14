@@ -3,9 +3,6 @@
 import { NewsletterService } from '@heyclaude/data-layer';
 import { cacheLife, cacheTag } from 'next/cache';
 
-import { isBuildTime } from '../build-time.ts';
-import { createSupabaseAnonClient } from '../supabase/server-anon.ts';
-
 /**
  * Get newsletter subscriber count
  *
@@ -20,16 +17,7 @@ export async function getNewsletterSubscriberCount(): Promise<null | number> {
   cacheTag('newsletter');
   cacheTag('stats');
 
-  // Use admin client during build for better performance, anon client at runtime
-  let client;
-  if (isBuildTime()) {
-    const { createSupabaseAdminClient } = await import('../supabase/admin.ts');
-    client = createSupabaseAdminClient();
-  } else {
-    client = createSupabaseAnonClient();
-  }
-
-  const service = new NewsletterService(client);
+  const service = new NewsletterService();
   const result = await service.getNewsletterSubscriberCount();
   return result ?? 0;
 }

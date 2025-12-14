@@ -21,8 +21,8 @@
 
 import 'server-only';
 import { ContentService } from '@heyclaude/data-layer';
+import { type content_category } from '@heyclaude/data-layer/prisma';
 import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
-import { Constants } from '@heyclaude/database-types';
 import { APP_CONFIG, buildSecurityHeaders } from '@heyclaude/shared-runtime';
 import { normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
@@ -30,7 +30,6 @@ import {
   contentDetailQuerySchema,
   createApiOptionsHandler,
   createApiRoute,
-  createSupabaseAnonClient,
   getOnlyCorsHeaders,
   getWithAcceptCorsHeaders,
   notFoundResponse,
@@ -38,23 +37,32 @@ import {
 import { cacheLife } from 'next/cache';
 import { NextResponse } from 'next/server';
 
-/**
+// Prisma enum values for validation
+const CONTENT_CATEGORY_VALUES: readonly content_category[] = [
+  'agents',
+  'mcp',
+  'rules',
+  'commands',
+  'hooks',
+  'statuslines',
+  'skills',
+  'collections',
+  'guides',
+  'jobs',
+  'changelog',
+] as const;
+
+/****
  * Cached helper function to fetch full content record
  * Uses Cache Components to reduce function invocations
- *
- * @param {DatabaseGenerated['public']['Enums']['content_category']} category - Content category enum value
- * @param {string} slug - Content slug to identify the record
- * @returns {Promise<unknown>} Full content record from the database (JSON object with content details)
+ * @param {content_category} category
+ * @param {string} slug
  */
-async function getCachedContentFull(
-  category: DatabaseGenerated['public']['Enums']['content_category'],
-  slug: string
-) {
+async function getCachedContentFull(category: content_category, slug: string) {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
 
-  const supabase = createSupabaseAnonClient();
-  const service = new ContentService(supabase);
+  const service = new ContentService();
   const rpcArgs = {
     p_base_url: SITE_URL,
     p_category: category,
@@ -125,6 +133,66 @@ function sanitizeFilename(name: string): string {
  * @see {@link get_api_content_full}
  * @param {{ error: (context: Record<string, unknown>, message: string) => void; warn: (context: Record<string, unknown>, message: string) => void; info: (context: Record<string, unknown>, message: string) => void; debug: (context: Record<string, unknown>, message: string) => void }} logger Parameter description
   * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
     debug: (context: Record<string, unknown>, message: string) => void;
     error: (context: Record<string, unknown>, message: string) => void;
     info: (context: Record<string, unknown>, message: string) => void;
@@ -589,7 +657,7 @@ async function handleJsonFormat(
   return new NextResponse(jsonData, {
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
-      'X-Generated-By': 'supabase.rpc.get_api_content_full',
+      'X-Generated-By': 'prisma.rpc.get_api_content_full',
       ...buildSecurityHeaders(),
       ...getOnlyCorsHeaders,
       ...buildCacheHeaders('content_export'),
@@ -896,6 +964,56 @@ async function handleJsonFormat(
     info: (context: Record<string, unknown>, message: string) => void;
     warn: (context: Record<string, unknown>, message: string) => void;
   }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
 */
 async function handleMarkdownFormat(
   category: DatabaseGenerated['public']['Enums']['content_category'],
@@ -908,8 +1026,7 @@ async function handleMarkdownFormat(
     warn: (context: Record<string, unknown>, message: string) => void;
   }
 ) {
-  const supabase = createSupabaseAnonClient();
-  const service = new ContentService(supabase);
+  const service = new ContentService();
   const rpcArgs = {
     p_category: category,
     p_include_footer: includeFooter,
@@ -1024,7 +1141,7 @@ async function handleMarkdownFormat(
       'Content-Disposition': `inline; filename="${safeFilename}"`,
       'Content-Type': 'text/markdown; charset=utf-8',
       'X-Content-ID': safeContentId,
-      'X-Generated-By': 'supabase.rpc.generate_markdown_export',
+      'X-Generated-By': 'prisma.rpc.generate_markdown_export',
       ...buildSecurityHeaders(),
       ...getWithAcceptCorsHeaders,
       ...buildCacheHeaders('content_export'),
@@ -1396,6 +1513,66 @@ async function handleMarkdownFormat(
     info: (context: Record<string, unknown>, message: string) => void;
     warn: (context: Record<string, unknown>, message: string) => void;
   }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
+ * @param {{
+    debug: (context: Record<string, unknown>, message: string) => void;
+    error: (context: Record<string, unknown>, message: string) => void;
+    info: (context: Record<string, unknown>, message: string) => void;
+    warn: (context: Record<string, unknown>, message: string) => void;
+  }} logger Parameter description
 */
 async function handleItemLlmsTxt(
   category: DatabaseGenerated['public']['Enums']['content_category'],
@@ -1407,8 +1584,7 @@ async function handleItemLlmsTxt(
     warn: (context: Record<string, unknown>, message: string) => void;
   }
 ) {
-  const supabase = createSupabaseAnonClient();
-  const service = new ContentService(supabase);
+  const service = new ContentService();
   const rpcArgs = {
     p_category: category,
     p_slug: slug,
@@ -1499,7 +1675,7 @@ async function handleItemLlmsTxt(
   return new NextResponse(formatted, {
     headers: {
       'Content-Type': 'text/plain; charset=utf-8',
-      'X-Generated-By': 'supabase.rpc.generate_item_llms_txt',
+      'X-Generated-By': 'prisma.rpc.generate_item_llms_txt',
       ...buildSecurityHeaders(),
       ...getOnlyCorsHeaders,
       ...buildCacheHeaders('content_export'),
@@ -1523,8 +1699,7 @@ async function handleStorageFormat(
     'Handling storage format'
   );
 
-  const supabase = createSupabaseAnonClient();
-  const service = new ContentService(supabase);
+  const service = new ContentService();
 
   // Support both 'skills' and 'mcp' categories for storage format
   if (category === 'skills') {
@@ -1574,7 +1749,7 @@ async function handleStorageFormat(
       return NextResponse.json(metadata, {
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
-          'X-Generated-By': 'supabase.rpc.get_skill_storage_path',
+          'X-Generated-By': 'prisma.rpc.get_skill_storage_path',
           ...buildSecurityHeaders(),
           ...getOnlyCorsHeaders,
           ...buildCacheHeaders('content_export'),
@@ -1585,9 +1760,12 @@ async function handleStorageFormat(
 
     // Get public URL from Supabase Storage and redirect instead of proxying
     // This eliminates bandwidth usage through Vercel Functions (60-80% savings)
+    // Note: Storage still uses Supabase, so we create a minimal client for storage operations
+    const { createSupabaseAnonClient } = await import('@heyclaude/web-runtime/server');
+    const storageClient = createSupabaseAnonClient();
     const {
       data: { publicUrl },
-    } = supabase.storage.from(bucket).getPublicUrl(objectPath);
+    } = storageClient.storage.from(bucket).getPublicUrl(objectPath);
 
     logger.info(
       {
@@ -1661,7 +1839,7 @@ async function handleStorageFormat(
       return NextResponse.json(metadata, {
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
-          'X-Generated-By': 'supabase.rpc.get_mcpb_storage_path',
+          'X-Generated-By': 'prisma.rpc.get_mcpb_storage_path',
           ...buildSecurityHeaders(),
           ...getOnlyCorsHeaders,
           ...buildCacheHeaders('content_export'),
@@ -1672,9 +1850,12 @@ async function handleStorageFormat(
 
     // Get public URL from Supabase Storage and redirect instead of proxying
     // This eliminates bandwidth usage through Vercel Functions (60-80% savings)
+    // Note: Storage still uses Supabase, so we create a minimal client for storage operations
+    const { createSupabaseAnonClient } = await import('@heyclaude/web-runtime/server');
+    const storageClient = createSupabaseAnonClient();
     const {
       data: { publicUrl },
-    } = supabase.storage.from(bucket).getPublicUrl(objectPath);
+    } = storageClient.storage.from(bucket).getPublicUrl(objectPath);
 
     logger.info(
       {
@@ -1728,12 +1909,7 @@ export const GET = createApiRoute({
     const { category, slug } = await context.params;
 
     // Validate category from path parameter
-    const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
-    if (
-      !CONTENT_CATEGORY_VALUES.includes(
-        category as DatabaseGenerated['public']['Enums']['content_category']
-      )
-    ) {
+    if (!CONTENT_CATEGORY_VALUES.includes(category as content_category)) {
       throw new Error(
         `Invalid category '${category}'. Valid categories: ${CONTENT_CATEGORY_VALUES.join(', ')}`
       );

@@ -1,16 +1,17 @@
 'use server';
 
 import { MiscService } from '@heyclaude/data-layer';
-import { type Database } from '@heyclaude/database-types';
-import { Constants } from '@heyclaude/database-types';
+import type { FormFieldConfigItem } from '@heyclaude/data-layer/types/composite-types';
 import { cacheLife, cacheTag } from 'next/cache';
 
+import { normalizeError } from '../../errors.ts';
 import { logger } from '../../logger.ts';
 import {
   type FieldDefinition,
   type NumberFieldDefinition,
   type SelectFieldDefinition,
   type SelectOption,
+  SUBMISSION_CONTENT_TYPES,
   type SubmissionContentType,
   type SubmissionFormConfig,
   type SubmissionFormSection,
@@ -18,12 +19,8 @@ import {
   type TextFieldDefinition,
 } from '../../types/component.types.ts';
 
-const SUBMISSION_CONTENT_TYPES = Constants.public.Enums
-  .submission_type as readonly SubmissionContentType[];
 const FORM_FIELDS_CACHE_TAG = 'submission-form-fields';
 const FORM_FIELDS_CACHE_SECONDS = 60 * 60 * 6;
-
-type FormFieldConfigItem = Database['public']['CompositeTypes']['form_field_config_item'];
 
 function mapField(item: FormFieldConfigItem): FieldDefinition | null {
   if (!item.name || !item.label || !item.type) {
@@ -117,18 +114,16 @@ function emptySection(): SubmissionFormSection {
 }
 
 /***
+ *
  * Fetch fields for a content type (cached)
  * Uses 'use cache' to cache form field configuration. This data is public and same for all users.
  * @param {SubmissionContentType} contentType
- 
- * @returns {unknown} Description of return value*/
+ * @returns {Promise<unknown>} Return value description
+ */
 async function fetchFieldsForContentType(
   contentType: SubmissionContentType
 ): Promise<SubmissionFormSection> {
   'use cache';
-
-  const { isBuildTime } = await import('../../build-time.ts');
-  const { createSupabaseAnonClient } = await import('../../supabase/server-anon.ts');
 
   // Configure cache - use 'hours' profile for form field templates (changes every 2 hours)
   cacheLife('hours'); // 1hr stale, 15min revalidate, 1 day expire
@@ -143,18 +138,8 @@ async function fetchFieldsForContentType(
   });
 
   try {
-    // Use admin client during build for better performance, anon client at runtime
-    let client;
-    if (isBuildTime()) {
-      const { createSupabaseAdminClient } = await import('../../supabase/admin.ts');
-      // Admin client required during build: bypasses RLS for faster static generation
-      // This is safe because build-time queries are read-only and don't expose user data
-      client = createSupabaseAdminClient();
-    } else {
-      client = createSupabaseAnonClient();
-    }
-
-    const result = await new MiscService(client).getFormFieldConfig({ p_form_type: contentType });
+    const service = new MiscService();
+    const result = await service.getFormFieldConfig({ p_form_type: contentType });
 
     if (
       result === null ||
@@ -162,7 +147,6 @@ async function fetchFieldsForContentType(
       result.fields === null ||
       result.fields === undefined
     ) {
-      // logger.error() normalizes errors internally, so pass raw error
       requestLogger.error(
         {
           contentType,
@@ -220,12 +204,11 @@ async function fetchFieldsForContentType(
 
     return section;
   } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
+    const normalized = normalizeError(error, 'fetchFieldsForContentType failed');
     requestLogger.error(
       {
         contentType,
-        err: errorForLogging,
+        err: normalized,
         source: 'SubmissionFormConfig',
       },
       'fetchFieldsForContentType: failed'

@@ -1,4 +1,4 @@
-import { type Database } from '@heyclaude/database-types';
+import type { CreateJobWithPaymentResult } from '@heyclaude/data-layer/types/composite-types';
 import { type CreateJobInput } from '@heyclaude/web-runtime/actions';
 import { createJob } from '@heyclaude/web-runtime/actions';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
@@ -132,7 +132,7 @@ export default async function NewJobPage() {
 
     // Type the result data using generated database types
     type CreateJobResult =
-      Database['public']['CompositeTypes']['create_job_with_payment_result'] & {
+      CreateJobWithPaymentResult & {
         checkoutUrl?: null | string;
       };
     const jobResult = result.data as CreateJobResult;

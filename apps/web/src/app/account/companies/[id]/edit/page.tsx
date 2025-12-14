@@ -2,7 +2,7 @@
  * Edit Company Page - Update existing company via edge function
  */
 
-import { type Database } from '@heyclaude/database-types';
+import type { UserCompaniesCompany } from '@heyclaude/data-layer/types/composite-types';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
@@ -144,7 +144,7 @@ async function EditCompanyPageContent({
   );
 
   // Section: Company Data Fetch
-  let company: Database['public']['CompositeTypes']['user_companies_company'] | null = null;
+  let company: UserCompaniesCompany | null = null;
   let hasError = false;
   try {
     company = await getUserCompanyById(user.id, id);

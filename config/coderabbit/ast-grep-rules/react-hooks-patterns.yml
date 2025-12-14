@@ -1,0 +1,56 @@
+# React Hooks Pattern Rules
+# Enforces proper React hook usage and prevents hook violations
+# Critical for React hook system integrity
+
+---
+# Rule: Detect hooks called conditionally
+id: conditional-hook-call
+language: typescript
+rule:
+  all:
+    - any:
+      - kind: if_statement
+      - kind: for_statement
+      - kind: while_statement
+    - has:
+        regex: use[A-Z]|useState|useEffect|useCallback|useMemo|useRef|useContext|useReducer
+message: "React hooks must be called unconditionally at the top level. Move hook call outside conditional/loop/nested function."
+severity: error
+
+---
+# Rule: Detect missing cleanup in custom hooks
+id: missing-cleanup-custom-hook
+language: typescript
+files:
+  - 'packages/web-runtime/src/hooks/**/*.ts'
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        pattern: export function use$HOOK($$$) { $$$ }
+    - has:
+        regex: addEventListener|setInterval|setTimeout|subscribe|createConnection|AbortController
+    - not:
+        has:
+          pattern: return () => { $$$ }
+message: "Custom hooks with subscriptions/timers/event listeners must return cleanup function. Add: return () => { cleanup code }"
+severity: error
+
+---
+# Rule: Detect custom hooks not starting with 'use'
+id: custom-hook-naming
+language: typescript
+files:
+  - 'packages/web-runtime/src/hooks/**/*.ts'
+rule:
+  all:
+    - kind: function_declaration
+    - has:
+        pattern: export function $HOOK($$$) { $$$ }
+    - has:
+        regex: useState|useEffect|useCallback|useMemo|useRef
+    - not:
+        has:
+          pattern: function use
+message: "Custom hooks must start with 'use' prefix. Rename: function use$HOOK(...) to follow React hook naming conventions."
+severity: error

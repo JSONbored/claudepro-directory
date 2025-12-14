@@ -10,9 +10,12 @@
     "rootDir": "src",
     "outDir": "dist",
     "baseUrl": ".",
+    "skipLibCheck": true,
     "paths": {
       "@heyclaude/database-types": ["../database-types/src/index.ts"],
-      "@heyclaude/shared-runtime/*": ["../shared-runtime/src/*"]
+      "@heyclaude/database-types/*": ["../database-types/src/*"],
+      "@heyclaude/shared-runtime/*": ["../shared-runtime/src/*"],
+      "@generated/prisma/*": ["../generators/dist/prisma/*"]
     }
   },
   "include": ["src/**/*"],

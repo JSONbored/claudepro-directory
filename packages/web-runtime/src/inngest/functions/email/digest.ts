@@ -13,7 +13,6 @@ import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { normalizeError } from '@heyclaude/shared-runtime';
 
 import { inngest } from '../../client';
-import { createSupabaseAdminClient } from '../../../supabase/admin';
 import { getResendClient } from '../../../integrations/resend';
 import { HELLO_FROM } from '../../../email/config/email-config';
 import { logger, createWebAppContextWithId } from '../../../logging/server';
@@ -43,15 +42,13 @@ export const sendWeeklyDigest = inngest.createFunction(
 
     logger.info(logContext, 'Weekly digest started');
 
-    const supabase = createSupabaseAdminClient();
-
     // Step 1: Check rate limiting
     const rateLimitCheck = await step.run('check-rate-limit', async (): Promise<{
       rateLimited: boolean;
       hoursSinceLastRun?: number;
       nextAllowedAt?: string;
     }> => {
-      const service = new MiscService(supabase);
+      const service = new MiscService();
       const lastRunData = await service.getAppSetting('last_digest_email_timestamp');
 
       if (lastRunData?.setting_value) {
@@ -88,7 +85,7 @@ export const sendWeeklyDigest = inngest.createFunction(
       const previousWeekStart = getPreviousWeekStart();
       
       try {
-        const contentService = new ContentService(supabase);
+        const contentService = new ContentService();
         const digest = await contentService.getWeeklyDigest({
           p_week_start: previousWeekStart,
         });
@@ -115,7 +112,7 @@ export const sendWeeklyDigest = inngest.createFunction(
 
     // Step 3: Fetch subscribers
     const subscribers = await step.run('fetch-subscribers', async (): Promise<string[]> => {
-      const newsletterService = new NewsletterService(supabase);
+      const newsletterService = new NewsletterService();
 
       try {
         const data = await newsletterService.getActiveSubscribers();
@@ -147,7 +144,7 @@ export const sendWeeklyDigest = inngest.createFunction(
 
     // Step 5: Update last run timestamp
     await step.run('update-timestamp', async () => {
-      const service = new MiscService(supabase);
+      const service = new MiscService();
       const currentTimestamp = new Date().toISOString();
       
       try {

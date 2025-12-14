@@ -9,7 +9,6 @@
 id: no-console-usage
 language: typescript
 rule:
-  pattern: console.$METHOD($$$)
   kind: call_expression
   has:
     kind: member_expression

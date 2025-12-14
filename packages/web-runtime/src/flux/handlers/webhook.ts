@@ -14,7 +14,6 @@ import { normalizeError, verifySvixSignature } from '@heyclaude/shared-runtime';
 
 type ContentCategory = DatabaseGenerated['public']['Enums']['content_category'];
 
-import { createSupabaseAdminClient } from '../../supabase/admin';
 import { logger, createWebAppContextWithId } from '../../logging/server';
 import { createErrorResponse } from '../../utils/error-handler';
 
@@ -339,8 +338,7 @@ async function ingestWebhookEvent(
   let webhookId: string | null = null;
   
   if (svixId) {
-    const supabase = createSupabaseAdminClient();
-    const miscService = new MiscService(supabase);
+    const miscService = new MiscService();
     
     // Use MiscService for proper data layer architecture
     const existing = await miscService.getWebhookEventBySvixId({

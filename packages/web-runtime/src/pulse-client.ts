@@ -1,5 +1,6 @@
 'use client';
 
+import type { RecommendationItem } from '@heyclaude/data-layer/types/composite-types';
 import type { Database } from '@heyclaude/database-types';
 import { getEnvVar } from '@heyclaude/shared-runtime';
 import { logger } from './logger.ts';
@@ -10,7 +11,7 @@ import { logger } from './logger.ts';
 type ConfigRecommendationsResponse = {
   success: boolean;
   recommendations: {
-    results: Database['public']['CompositeTypes']['recommendation_item'][] | null;
+    results: RecommendationItem[] | null;
     total_matches: number | null;
     algorithm: string | null;
     summary: {

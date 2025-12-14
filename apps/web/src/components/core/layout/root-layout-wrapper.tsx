@@ -5,7 +5,6 @@
 
 'use client';
 
-import { type Database } from '@heyclaude/database-types';
 import { checkConfettiEnabled } from '@heyclaude/web-runtime/config/static-configs';
 import { getLayoutFlags } from '@heyclaude/web-runtime/data';
 import { useConfetti, useSessionStorage } from '@heyclaude/web-runtime/hooks';
@@ -102,8 +101,10 @@ async function clearNewsletterOptInCookie() {
   }
 }
 
+import type { announcements } from '@heyclaude/data-layer/prisma';
+
 interface LayoutContentProps {
-  announcement: Database['public']['Tables']['announcements']['Row'] | null;
+  announcement: announcements | null;
   children: React.ReactNode;
 }
 

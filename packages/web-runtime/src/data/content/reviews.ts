@@ -1,15 +1,16 @@
 'use server';
 
 import { ContentService } from '@heyclaude/data-layer';
+import { type content_category } from '@heyclaude/data-layer/prisma';
 import { type Database } from '@heyclaude/database-types';
 import { cacheLife, cacheTag } from 'next/cache';
 
+import { normalizeError } from '../../errors.ts';
 import { logger } from '../../index.ts';
-import { createSupabaseServerClient } from '../../supabase/server.ts';
 
 interface ReviewsWithStatsParameters {
   contentSlug: string;
-  contentType: Database['public']['Enums']['content_category'];
+  contentType: content_category;
   limit?: number;
   offset?: number;
   sortBy?: string;
@@ -49,9 +50,7 @@ export async function getReviewsWithStatsData(
   });
 
   try {
-    // Can use cookies() inside 'use cache: private'
-    const client = await createSupabaseServerClient();
-    const service = new ContentService(client);
+    const service = new ContentService();
 
     const result = await service.getReviewsWithStats({
       p_content_slug: contentSlug,
@@ -69,10 +68,9 @@ export async function getReviewsWithStatsData(
 
     return result;
   } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
+    const normalized = normalizeError(error, 'getReviewsWithStatsData failed');
     reqLogger.error(
-      { contentSlug, contentType, err: errorForLogging, hasUser: Boolean(userId) },
+      { contentSlug, contentType, err: normalized, hasUser: Boolean(userId) },
       'getReviewsWithStatsData: unexpected error'
     );
     return null;

@@ -26,7 +26,6 @@ import {
   changelogFormatSchema,
   createApiOptionsHandler,
   createApiRoute,
-  createSupabaseAnonClient,
   getOnlyCorsHeaders,
 } from '@heyclaude/web-runtime/server';
 import { cacheLife } from 'next/cache';
@@ -41,8 +40,7 @@ async function getCachedChangelogLlmsTxt(): Promise<null | string> {
   'use cache';
   cacheLife({ expire: 2_592_000, revalidate: 21_600, stale: 86_400 }); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
-  const supabase = createSupabaseAnonClient();
-  const service = new ContentService(supabase);
+  const service = new ContentService();
   return service.getChangelogLlmsTxt();
 }
 
@@ -78,7 +76,7 @@ export const GET = createApiRoute({
     return new NextResponse(formatted, {
       headers: {
         'Content-Type': 'text/plain; charset=utf-8',
-        'X-Generated-By': 'supabase.rpc.generate_changelog_llms_txt',
+        'X-Generated-By': 'prisma.rpc.generate_changelog_llms_txt',
         ...buildSecurityHeaders(),
         ...getOnlyCorsHeaders,
         ...buildCacheHeaders('content_export'),

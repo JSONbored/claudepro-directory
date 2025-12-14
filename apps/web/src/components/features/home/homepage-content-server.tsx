@@ -15,6 +15,11 @@ import { HomePageClient } from '@/src/components/features/home/home-sections';
  * This allows the hero section and search facets to stream immediately while content loads
  */
 async function HomepageContentData() {
+  // CRITICAL: Defer to request time before any non-deterministic operations (Date.now(), etc.)
+  // Required by Next.js Cache Components for Server Components
+  const { connection } = await import('next/server');
+  await connection();
+
   // Use cache-safe logger for Suspense boundary components that run during prerendering
   // Dynamically import to avoid serialization issues
   const { createLogger } = await import('@heyclaude/shared-runtime/logger/index.ts');

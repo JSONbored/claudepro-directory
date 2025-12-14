@@ -31,7 +31,6 @@ import {
   buildCacheHeaders,
   createApiOptionsHandler,
   createApiRoute,
-  createSupabaseAnonClient,
   feedQuerySchema,
   getOnlyCorsHeaders,
 } from '@heyclaude/web-runtime/server';
@@ -76,7 +75,6 @@ async function getCachedFeedPayload(
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
-  const supabase = createSupabaseAnonClient();
   // Use module-level logger since this runs in cached context
   // Import logger for cached context (dynamic import to avoid circular deps)
   const { logger: cachedLogger } = await import('@heyclaude/web-runtime/logging/server');
@@ -90,7 +88,7 @@ async function getCachedFeedPayload(
     warn: (context: Record<string, unknown>, message: string) =>
       loggerInstance.warn(context as Parameters<typeof loggerInstance.warn>[0], message),
   };
-  return generateFeedPayload(type, category, supabase, wrappedLogger);
+  return generateFeedPayload(type, category, wrappedLogger);
 }
 
 /******
@@ -102,8 +100,7 @@ async function getCachedFeedPayload(
  *
  * @param {FeedType} type - Feed format to generate: 'rss' or 'atom'
  * @param {null | string} category - Content category name, `'changelog'` for changelog feeds, `null` for all content
- * @param {ReturnType<typeof createSupabaseAnonClient>} supabase - Supabase anonymous client used to call database RPCs
- * @param {ReturnType<typeof logger.child>} reqLogger - Optional request-scoped logger used for RPC call logging and error context
+ * @param {Logger} reqLogger - Optional request-scoped logger used for RPC call logging and error context
  * @returns An object containing `xml` (the feed XML string), `contentType` (HTTP Content-Type header value), and `source` (a short label describing the feed origin)
  * @see ContentService
  * @see toContentCategory
@@ -117,10 +114,9 @@ interface Logger {
 async function generateFeedPayload(
   type: FeedType,
   category: null | string,
-  supabase: ReturnType<typeof createSupabaseAnonClient>,
   reqLogger?: Logger
 ): Promise<{ contentType: string; source: string; xml: string }> {
-  const service = new ContentService(supabase);
+  const service = new ContentService();
 
   if (category === 'changelog') {
     if (type === 'rss') {
@@ -250,7 +246,7 @@ export const GET = createApiRoute({
       headers: {
         'Content-Type': payload.contentType,
         'X-Content-Source': payload.source,
-        'X-Generated-By': 'supabase.functions.feeds',
+        'X-Generated-By': 'prisma.functions.feeds',
         'X-Robots-Tag': 'index, follow',
         ...buildSecurityHeaders(),
         ...getOnlyCorsHeaders,

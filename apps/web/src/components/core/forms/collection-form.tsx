@@ -15,7 +15,7 @@
  * ```
  */
 
-import { type Database } from '@heyclaude/database-types';
+import type { bookmarks, user_collections } from '@heyclaude/data-layer/prisma';
 import { createCollection, updateCollection } from '@heyclaude/web-runtime/actions';
 import { useAuthenticatedUser, useFormSubmit } from '@heyclaude/web-runtime/hooks';
 import {
@@ -32,8 +32,8 @@ import { useId, useState } from 'react';
 
 import { useAuthModal } from '@/src/hooks/use-auth-modal';
 
-type Bookmark = Database['public']['Tables']['bookmarks']['Row'];
-type CollectionData = Database['public']['Tables']['user_collections']['Row'];
+type Bookmark = bookmarks;
+type CollectionData = user_collections;
 
 interface CollectionFormProps {
   /** User's existing bookmarks to optionally add to collection */
@@ -149,7 +149,13 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
           throw new Error('Collection creation failed');
         }
 
-        return result.data.collection;
+        // Convert RPC return data (string dates) to Prisma types (Date objects)
+        const rpcCollection = result.data.collection;
+        return {
+          ...rpcCollection,
+          created_at: new Date(rpcCollection.created_at),
+          updated_at: new Date(rpcCollection.updated_at),
+        };
       } else if (collection) {
         const result = await updateCollection({
           id: collection.id,
@@ -163,7 +169,13 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
           throw new Error('Collection update failed');
         }
 
-        return result.data.collection;
+        // Convert RPC return data (string dates) to Prisma types (Date objects)
+        const rpcCollection = result.data.collection;
+        return {
+          ...rpcCollection,
+          created_at: new Date(rpcCollection.created_at),
+          updated_at: new Date(rpcCollection.updated_at),
+        };
       }
 
       throw new Error('Invalid form state');

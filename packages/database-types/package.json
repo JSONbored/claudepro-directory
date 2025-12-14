@@ -9,10 +9,21 @@
     "type-check": "tsc --noEmit",
     "lint": "echo 'Skipping lint for generated types'"
   },
+  "dependencies": {
+    "zod": "^4.1.13"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./src/index.ts"
+    },
+    "./postgres-types": {
+      "types": "./dist/postgres-types/index.d.ts",
+      "default": "./src/postgres-types/index.ts"
+    },
+    "./postgres-types/*": {
+      "types": "./dist/postgres-types/*.d.ts",
+      "default": "./src/postgres-types/*.ts"
     }
   }
 }

@@ -135,9 +135,7 @@ export async function onJobUpdated(
       if (!jobTitle) {
         // Fetch the actual title from the database using JobsService
         try {
-          const { createSupabaseAdminClient } = await import('../../supabase/admin.ts');
-          const supabase = createSupabaseAdminClient();
-          const jobsService = new JobsService(supabase);
+          const jobsService = new JobsService();
           const title = await jobsService.getJobTitleById({
             p_job_id: result.job_id,
           });

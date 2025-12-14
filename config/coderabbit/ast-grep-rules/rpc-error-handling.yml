@@ -8,8 +8,9 @@ id: missing-rpc-error-destructuring
 language: typescript
 rule:
   all:
-    - pattern: const $RESULT = await $SUPABASE.rpc($$$)
-      kind: variable_declarator
+    - kind: variable_declarator
+    - has:
+        pattern: const $RESULT = await $SUPABASE.rpc($$$)
     - not:
         has:
           pattern: const { $DATA, error } = await $SUPABASE.rpc($$$)
@@ -22,8 +23,9 @@ id: missing-rpc-error-check
 language: typescript
 rule:
   all:
-    - pattern: const { $DATA, error } = await $SUPABASE.rpc($$$)
-      kind: variable_declarator
+    - kind: variable_declarator
+    - has:
+        pattern: const { $DATA, error } = await $SUPABASE.rpc($$$)
     - not:
         follows:
           pattern: if (error) { $$$ }

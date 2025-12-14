@@ -1,11 +1,8 @@
 'use server';
 
 import { MiscService } from '@heyclaude/data-layer';
-import { type Database } from '@heyclaude/database-types';
+import { type announcements } from '@heyclaude/data-layer/prisma';
 import { cacheLife, cacheTag } from 'next/cache';
-
-import { isBuildTime } from '../build-time.ts';
-import { createSupabaseAnonClient } from '../supabase/server-anon.ts';
 
 /**
  * Get active announcement
@@ -13,24 +10,29 @@ import { createSupabaseAnonClient } from '../supabase/server-anon.ts';
  * Uses 'use cache' to cache announcement data. This data is public and same for all users.
  * Announcements change periodically, so we use the 'half' cacheLife profile.
  */
-export async function getActiveAnnouncement(): Promise<
-  Database['public']['Tables']['announcements']['Row'] | null
-> {
+export async function getActiveAnnouncement(): Promise<announcements | null> {
   'use cache';
 
   // Configure cache - use 'half' profile for announcements (changes every 30 minutes)
   cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
   cacheTag('announcements');
 
-  // Use admin client during build for better performance, anon client at runtime
-  let client;
-  if (isBuildTime()) {
-    const { createSupabaseAdminClient } = await import('../supabase/admin.ts');
-    client = createSupabaseAdminClient();
-  } else {
-    client = createSupabaseAnonClient();
+  const service = new MiscService();
+  const result = await service.getActiveAnnouncement();
+
+  // RPC returns data with string dates, convert to Prisma types (Date objects)
+  if (!result) {
+    return null;
   }
 
-  const service = new MiscService(client);
-  return service.getActiveAnnouncement();
+  // Convert RPC return data (string dates) to Prisma types (Date objects)
+  // RPC returns: { created_at: string, updated_at: string, start_date: string | null, end_date: string | null, ... }
+  // Prisma expects: { created_at: Date, updated_at: Date, start_date: Date | null, end_date: Date | null, ... }
+  return {
+    ...result,
+    created_at: new Date(result.created_at),
+    end_date: result.end_date ? new Date(result.end_date) : null,
+    start_date: result.start_date ? new Date(result.start_date) : null,
+    updated_at: new Date(result.updated_at),
+  } as announcements;
 }

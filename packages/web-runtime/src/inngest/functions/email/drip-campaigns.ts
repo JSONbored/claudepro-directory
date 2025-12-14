@@ -11,7 +11,6 @@
 
 import { JobsService, NewsletterService } from '@heyclaude/data-layer';
 import { inngest } from '../../client';
-import { createSupabaseAdminClient } from '../../../supabase/admin';
 import { sendEmail } from '../../../integrations/resend';
 import { logger, createWebAppContextWithId } from '../../../logging/server';
 import { getEnvVar, escapeHtml } from '@heyclaude/shared-runtime';
@@ -129,8 +128,7 @@ export const newsletterDripCampaign = inngest.createFunction(
     await step.sleep('wait-for-digest', '4 days');
 
     const stillSubscribed = await step.run('check-subscription', async () => {
-      const supabase = createSupabaseAdminClient();
-      const newsletterService = new NewsletterService(supabase);
+      const newsletterService = new NewsletterService();
       const subscription = await newsletterService.getSubscriptionStatusByEmail(email);
 
       // Check if status is a valid active status
@@ -234,8 +232,7 @@ export const jobPostingDripCampaign = inngest.createFunction(
     await step.sleep('wait-for-report', '5 days'); // 2 + 5 = 7 days
 
     const jobStats = await step.run('get-job-stats', async () => {
-      const supabase = createSupabaseAdminClient();
-      const jobsService = new JobsService(supabase);
+      const jobsService = new JobsService();
       return await jobsService.getJobStatsById(jobId);
     });
 
@@ -262,8 +259,7 @@ export const jobPostingDripCampaign = inngest.createFunction(
 
       // Check if job is still active
       const stillActive = await step.run('check-job-status', async () => {
-        const supabase = createSupabaseAdminClient();
-        const jobsService = new JobsService(supabase);
+        const jobsService = new JobsService();
         const data = await jobsService.getJobStatusById(jobId);
 
         return data?.status === 'active';
