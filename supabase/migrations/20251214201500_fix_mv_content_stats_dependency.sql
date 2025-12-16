@@ -27,12 +27,10 @@ SELECT
   c.updated_at,
   c.date_added,
   c.source,
-  c.source_table,
   c.view_count,
   c.copy_count,
   c.bookmark_count,
   c.popularity_score,
-  c.trending_score,
   c.features,
   c.use_cases,
   c.metadata
