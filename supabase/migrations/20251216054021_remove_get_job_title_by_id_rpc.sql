@@ -1,0 +1,15 @@
+-- Migration: Remove get_job_title_by_id RPC function
+-- Version: 20251216054021
+-- Applied via: Supabase MCP
+-- Date: 2025-12-16
+--
+-- Description: Remove get_job_title_by_id RPC function - converted to Prisma direct query
+--
+-- This function was a simple SELECT title FROM jobs WHERE id = ? query.
+-- The service now uses Prisma directly in JobsService.getJobTitleById():
+--   prisma.jobs.findUnique({ where: { id }, select: { title: true } })
+--
+-- Related Changes:
+-- - packages/data-layer/src/services/jobs.ts: Converted getJobTitleById() to use Prisma
+
+DROP FUNCTION IF EXISTS public.get_job_title_by_id(uuid);
