@@ -12,20 +12,21 @@
  * Uses extensible generator registry to support multiple content categories.
  */
 
-import { Constants, type Database as DatabaseGenerated } from '@heyclaude/database-types';
+import type { content_category, contentModel } from '@heyclaude/data-layer/prisma';
+import { ContentCategory } from '@heyclaude/data-layer/prisma';
 import { badRequestResponse, errorResponse, getOnlyCorsHeaders, jsonResponse, methodNotAllowedResponse } from '@heyclaude/edge-runtime/utils/http.ts';
 import { initRequestLogging, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime/utils/logger-helpers.ts';
 import { parseJsonBody } from '@heyclaude/edge-runtime/utils/parse-json-body.ts';
 import { pgmqSend } from '@heyclaude/edge-runtime/utils/pgmq-client.ts';
-import { supabaseServiceRole } from '@heyclaude/edge-runtime/clients/supabase.ts';
+// Supabase client no longer needed - using Prisma for database operations
 import { buildSecurityHeaders } from '@heyclaude/shared-runtime/security-headers.ts';
 import { logError, logInfo, logger } from '@heyclaude/shared-runtime/logging.ts';
 import { timingSafeEqual } from '@heyclaude/shared-runtime/crypto-utils.ts';
 import { getGenerator, getSupportedCategories, isCategorySupported } from './registry.ts';
 import type { GeneratePackageRequest, GeneratePackageResponse } from './types.ts';
 
-// Use generated type directly from database
-type ContentRow = DatabaseGenerated['public']['Tables']['content']['Row'];
+// Use Prisma generated type
+type ContentRow = content;
 
 const CORS = getOnlyCorsHeaders;
 
@@ -150,14 +151,12 @@ export async function handleGeneratePackage(
    */
   function isValidContentCategory(
     value: unknown
-  ): value is DatabaseGenerated['public']['Enums']['content_category'] {
+  ): value is content_category {
     if (typeof value !== 'string') {
       return false;
     }
-    // Use enum values directly from @heyclaude/database-types Constants
-    return Constants.public.Enums.content_category.includes(
-      value as DatabaseGenerated['public']['Enums']['content_category']
-    );
+    // Use Prisma enum value object
+    return ContentCategory.includes(value as content_category);
   }
 
   if (!isValidContentCategory(category)) {
@@ -183,16 +182,34 @@ export async function handleGeneratePackage(
     );
   }
 
-  // Fetch content from database
-  const { data: content, error: fetchError } = await supabaseServiceRole
-    .from('content')
-    .select('*')
-    .eq('id', content_id)
-    .single();
-
-  if (fetchError || !content) {
+  // Fetch content from database using Prisma
+  import { prisma } from '@heyclaude/data-layer/prisma/client.ts';
+  let content;
+  try {
+    content = await prisma.content.findUnique({
+      where: { id: content_id },
+    });
+  } catch (fetchError) {
     if (logContext) {
       await logError('Content not found', logContext, fetchError);
+    }
+    return jsonResponse(
+      {
+        error: 'Not Found',
+        message: `Content with ID '${content_id}' not found`,
+        content_id,
+      },
+      404,
+      {
+        ...CORS,
+        ...buildSecurityHeaders(),
+      }
+    );
+  }
+
+  if (!content) {
+    if (logContext) {
+      await logError('Content not found', logContext);
     }
     return jsonResponse(
       {

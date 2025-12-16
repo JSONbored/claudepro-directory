@@ -2,24 +2,30 @@
   "name": "@heyclaude/data-layer",
   "version": "1.1.0",
   "private": true,
+  "type": "module",
   "sideEffects": false,
   "exports": {
-    ".": "./src/index.ts",
-    "./services/trending": "./src/services/trending.ts",
+    ".": {
+      "development": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./src/index.ts"
+    },
+    "./services/trending": {
+      "development": "./src/services/trending.ts",
+      "types": "./dist/services/trending.d.ts",
+      "default": "./src/services/trending.ts"
+    },
     "./prisma": {
-      "types": "./src/prisma/index.ts",
+      "development": "./src/prisma/index.ts",
+      "types": "./dist/prisma/index.d.ts",
       "react-server": "./src/prisma/index.ts",
       "default": "./src/prisma/index.ts"
     },
     "./prisma/client": {
-      "types": "./src/prisma/client.ts",
+      "development": "./src/prisma/client.ts",
+      "types": "./dist/prisma/client.d.ts",
       "react-server": "./src/prisma/client.ts",
       "default": "./src/prisma/client.ts"
-    },
-    "./types/composite-types": {
-      "types": "./src/types/composite-types.ts",
-      "react-server": "./src/types/composite-types.ts",
-      "default": "./src/types/composite-types.ts"
     }
   },
   "scripts": {
@@ -31,13 +37,13 @@
     "@heyclaude/database-types": "workspace:*",
     "@heyclaude/shared-runtime": "workspace:*",
     "@prisma/adapter-pg": "^7.1.0",
-    "@supabase/supabase-js": "^2.87.1",
+    "@supabase/supabase-js": "^2.87.3",
     "pg": "^8.16.3",
     "pino": "^10.1.0",
-    "zod": "^4.1.13"
+    "zod": "^4.2.0"
   },
   "devDependencies": {
-    "@types/pg": "^8.15.6",
+    "@types/pg": "^8.16.0",
     "typescript": "5.9.3"
   }
 }

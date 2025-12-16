@@ -28,7 +28,8 @@
     "heyclaude-apply-variable-consolidation": "./src/bin/apply-variable-consolidation.ts",
     "heyclaude-comprehensive-css-analysis": "./src/bin/comprehensive-css-analysis.ts",
     "heyclaude-exhaustive-css-token-comparison": "./src/bin/exhaustive-css-token-comparison.ts",
-    "heyclaude-migrate-inline-styles": "./src/bin/migrate-inline-styles.ts"
+    "heyclaude-migrate-inline-styles": "./src/bin/migrate-inline-styles.ts",
+    "heyclaude-migrate-ui-classes": "./src/bin/migrate-ui-classes.ts"
   },
   "exports": {
     ".": {
@@ -56,23 +57,25 @@
     "@heyclaude/web-runtime": "workspace:*",
     "@iarna/toml": "^2.2.5",
     "@prisma/generator-helper": "^7.1.0",
-    "@supabase/supabase-js": "^2.87.1",
+    "@supabase/supabase-js": "^2.87.3",
     "archiver": "^7.0.1",
     "escape-html": "^1.0.3",
+    "glob": "^13.0.0",
     "jiti": "^2.6.1",
     "open": "^11.0.0",
     "ora": "^9.0.0",
-    "pg": "^8.13.1",
+    "pg": "^8.16.3",
     "pino": "^10.1.0",
     "postcss": "^8.5.6",
     "postcss-value-parser": "^4.2.0",
     "resend": "^6.6.0",
     "ts-morph": "^27.0.2",
-    "zod": "^4.1.13"
+    "zod": "^4.2.0",
+    "zod-openapi": "^5.4.5"
   },
   "devDependencies": {
     "@types/escape-html": "^1.0.4",
-    "@types/pg": "^8.11.10",
+    "@types/pg": "^8.16.0",
     "ts-morph": "^27.0.2"
   }
 }

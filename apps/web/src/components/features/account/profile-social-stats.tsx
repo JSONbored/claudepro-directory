@@ -8,9 +8,9 @@
 
 import { NumberTicker } from '@heyclaude/web-runtime/ui';
 import { Users } from '@heyclaude/web-runtime/icons';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useInView } from 'motion/react';
 import { useRef } from 'react';
+import { cluster, marginTop, gap, iconSize } from "@heyclaude/web-runtime/design-system";
 
 export interface ProfileSocialStatsProps {
   /**
@@ -35,9 +35,9 @@ export function ProfileSocialStats({
   const isInView = useInView(ref, { once: true, margin: '-50px' });
 
   return (
-    <div ref={ref} className="mt-3 flex items-center gap-4 text-sm">
-      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
-        <Users className="h-4 w-4" />
+    <div ref={ref} className={`${marginTop.default} flex items-center ${gap.default} text-sm`}>
+      <div className={cluster.tight}>
+        <Users className={`${iconSize.sm}`} />
         <NumberTicker
           value={followerCount}
           delay={isInView ? 200 : 0}

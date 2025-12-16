@@ -8,7 +8,7 @@
  * which is a client component for tab navigation and swipe gestures.
  */
 
-import { type Database } from '@heyclaude/database-types';
+import type { GetContentDetailCompleteReturns } from '@heyclaude/database-types/postgres-types';
 import { isValidCategory } from '@heyclaude/web-runtime/core';
 import { logClientWarn } from '@heyclaude/web-runtime/logging/client';
 import {
@@ -21,6 +21,7 @@ import dynamic from 'next/dynamic';
 import { JSONSectionRenderer } from '@/src/components/content/json-to-sections';
 import { ReviewListSection } from '@/src/components/core/domain/reviews/review-list-section';
 import { markdownToHtml } from '@/src/lib/utils/markdown-to-html';
+import { paddingTop } from "@heyclaude/web-runtime/design-system";
 
 // Dynamic import for unified section component (code splitting)
 const UnifiedSection = dynamic(() => import('@/src/components/content/sections/unified-section'));
@@ -43,7 +44,7 @@ export interface TabSectionRendererProps {
   item:
     | ContentItem
     | (ContentItem &
-        Database['public']['Functions']['get_content_detail_complete']['Returns']['content']);
+        NonNullable<GetContentDetailCompleteReturns['content']>);
   sectionData: ProcessedSectionData;
   sectionId: SectionId;
 }
@@ -261,7 +262,7 @@ export function TabSectionRenderer({
       const validSlug = item.slug ?? '';
       if (!validSlug) return null;
       return (
-        <div className="border-t pt-8">
+        <div className={`border-t ${paddingTop.relaxed}`}>
           <ReviewListSection contentType={validCategory} contentSlug={validSlug} />
         </div>
       );

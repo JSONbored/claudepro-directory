@@ -1,9 +1,9 @@
 'use server';
 
 import { ContentService } from '@heyclaude/data-layer';
-import { type content_category } from '@heyclaude/data-layer/prisma';
+import type { content_category } from '@heyclaude/data-layer/prisma';
 import { ContentCategory } from '@heyclaude/data-layer/prisma';
-import { type Database } from '@heyclaude/database-types';
+import type { GetRelatedContentReturns } from '@heyclaude/database-types/postgres-types';
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { normalizeError } from '../../errors.ts';
@@ -28,7 +28,7 @@ export interface RelatedContentInput {
 }
 
 export interface RelatedContentResult {
-  items: Database['public']['Functions']['get_related_content']['Returns'];
+  items: GetRelatedContentReturns;
 }
 
 /**
@@ -48,8 +48,8 @@ export async function getRelatedContent(input: RelatedContentInput): Promise<Rel
     };
   }
 
-  // Configure cache - use 'hours' profile for related content (changes hourly)
-  cacheLife('hours'); // 1hr stale, 15min revalidate, 1 day expire
+  // Configure cache - use 'static' profile for optimal SEO (1 day stale, 6hr revalidate, 30 days expire)
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
   const tags = generateContentTags(category, null, ['related-content']);
   for (const tag of tags) {
     cacheTag(tag);

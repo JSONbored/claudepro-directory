@@ -1,10 +1,10 @@
-import  { type Database } from '@heyclaude/database-types';
+import type { webhook_eventsModel } from '@heyclaude/database-types/prisma';
 
-import { ensureEnvVars } from '../toolkit/env.js';
-import { logger } from '../toolkit/logger.js';
-import { createServiceRoleClient } from '../toolkit/supabase.js';
+import { ensureEnvVars } from '../toolkit/env.ts';
+import { logger } from '../toolkit/logger.ts';
+import { createServiceRoleClient } from '../toolkit/supabase.ts';
 
-type WebhookEventRow = Database['public']['Tables']['webhook_events']['Row'];
+type WebhookEventRow = webhook_eventsModel;
 
 interface Options {
   id?: string;

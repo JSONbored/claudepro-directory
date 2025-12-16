@@ -1,6 +1,7 @@
 'use server';
 
-import type { Database, Json } from '@heyclaude/database-types';
+import type { JsonValue } from '@heyclaude/data-layer/prisma';
+import type { content_category } from '@heyclaude/data-layer/prisma';
 import { logger } from './logger.ts';
 import { normalizeError } from './errors.ts';
 import { pgmqSend } from './supabase/pgmq-client.ts';
@@ -10,11 +11,11 @@ const PULSE_QUEUE_NAME = 'pulse';
 
 export interface PulseEvent {
   user_id?: string | null;
-  content_type: Database['public']['Enums']['content_category'] | null;
+  content_type: content_category | null;
   content_slug: string | null;
   interaction_type: string;
   session_id?: string | null;
-  metadata?: Json | null;
+  metadata?: JsonValue | null;
 }
 
 /**

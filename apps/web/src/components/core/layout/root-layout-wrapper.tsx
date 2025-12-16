@@ -101,10 +101,11 @@ async function clearNewsletterOptInCookie() {
   }
 }
 
-import type { announcements } from '@heyclaude/data-layer/prisma';
+import type { announcementsModel } from '@heyclaude/data-layer/prisma';
+import { paddingX, paddingY } from "@heyclaude/web-runtime/design-system";
 
 interface LayoutContentProps {
-  announcement: announcements | null;
+  announcement: announcementsModel | null;
   children: React.ReactNode;
 }
 
@@ -189,7 +190,7 @@ export function LayoutContent({ children, announcement }: LayoutContentProps) {
     <>
       <a
         href="#main-content"
-        className="focus:bg-primary focus:text-primary-foreground sr-only rounded-md focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2"
+        className={`focus:bg-primary focus:text-primary-foreground sr-only rounded-md focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:${paddingX.default} focus:${paddingY.tight}`}
       >
         Skip to main content
       </a>

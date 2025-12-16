@@ -1,4 +1,3 @@
-import  { type Database } from '@heyclaude/database-types';
 import { createClient } from '@supabase/supabase-js';
 
 export const DEFAULT_SUPABASE_URL = 'https://hgtjdifxfapoltfflowc.supabase.co';
@@ -20,5 +19,7 @@ export function getServiceRoleConfig() {
 
 export function createServiceRoleClient() {
   const { supabaseUrl, serviceRoleKey } = getServiceRoleConfig();
-  return createClient<Database>(supabaseUrl, serviceRoleKey);
+  // Note: Database type removed - all database queries should use Prisma services
+  // This client is only for auth/storage operations if needed
+  return createClient(supabaseUrl, serviceRoleKey);
 }

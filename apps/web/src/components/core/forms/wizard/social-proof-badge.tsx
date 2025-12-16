@@ -12,7 +12,7 @@
 
 import { Award, CheckCircle, Sparkles, TrendingUp, Users } from '@heyclaude/web-runtime/icons';
 import { cn } from '@heyclaude/web-runtime/ui';
-import { SPRING } from '@heyclaude/web-runtime/design-system';
+import { SPRING, size, weight, muted, iconSize, cluster, gap, paddingX, paddingY } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 
@@ -53,16 +53,16 @@ export function SocialProofBadge({
         animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }}
         transition={SPRING.smooth}
         className={cn(
-          'flex items-center gap-2 rounded-lg border border-purple-500/30',
-          'bg-purple-500/10 px-3 py-2',
+          cn(cluster.compact, 'rounded-lg border border-purple-500/30'),
+          cn('bg-purple-500/10', paddingX.default, paddingY.compact),
           className
         )}
       >
-        <Award className="h-4 w-4 text-purple-400" />
-        <div className="flex flex-col">
-          <span className="text-xs font-medium text-purple-300">Top Contributors</span>
+        <Award className={`${iconSize.sm} text-purple-400`} />
+        <div className={`flex flex-col`}>
+          <span className={`${size.xs} ${weight.medium} text-purple-300`}>Top Contributors</span>
           {names.length > 0 && (
-            <span className="text-[10px] text-purple-400/80">
+            <span className={cn(size['2xs'], 'text-purple-400/80')}>
               {names.slice(0, 2).join(', ')}
               {names.length > 2 && ` +${names.length - 2}`}
             </span>
@@ -77,15 +77,15 @@ export function SocialProofBadge({
         animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
         transition={SPRING.smooth}
         className={cn(
-          'flex items-center gap-2 rounded-lg border border-blue-500/30',
-          'bg-blue-500/10 px-3 py-2',
+          cn(cluster.compact, 'rounded-lg border border-blue-500/30'),
+          cn('bg-blue-500/10', paddingX.default, paddingY.compact),
           className
         )}
       >
-        <TrendingUp className="h-4 w-4 text-blue-400" />
-        <div className="flex flex-col">
-          <span className="text-xs font-medium text-blue-300">{count} submissions</span>
-          <span className="text-[10px] text-blue-400/80">this week</span>
+        <TrendingUp className={`${iconSize.sm} text-blue-400`} />
+        <div className={`flex flex-col`}>
+          <span className={`${size.xs} ${weight.medium} text-blue-300`}>{count} submissions</span>
+          <span className={cn(size['2xs'], 'text-blue-400/80')}>this week</span>
         </div>
       </motion.div>
     ),
@@ -96,15 +96,15 @@ export function SocialProofBadge({
         animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }}
         transition={SPRING.bouncy}
         className={cn(
-          'flex items-center gap-2 rounded-lg border border-green-500/30',
-          'bg-green-500/10 px-3 py-2',
+          cn(cluster.compact, 'rounded-lg border border-green-500/30'),
+          cn('bg-green-500/10', paddingX.default, paddingY.compact),
           className
         )}
       >
-        <CheckCircle className="h-4 w-4 text-green-400" />
-        <div className="flex flex-col">
-          <span className="text-xs font-medium text-green-300">{percentage}% approved</span>
-          <span className="text-[10px] text-green-400/80">success rate</span>
+        <CheckCircle className={`${iconSize.sm} text-green-400`} />
+        <div className={`flex flex-col`}>
+          <span className={`${size.xs} ${weight.medium} text-green-300`}>{percentage}% approved</span>
+          <span className={cn(size['2xs'], 'text-green-400/80')}>success rate</span>
         </div>
       </motion.div>
     ),
@@ -115,13 +115,13 @@ export function SocialProofBadge({
         animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
         transition={SPRING.smooth}
         className={cn(
-          'flex items-center gap-2 rounded-lg border border-amber-500/30',
-          'bg-amber-500/10 px-3 py-2',
+          cn(cluster.compact, 'rounded-lg border border-amber-500/30'),
+          cn('bg-amber-500/10', paddingX.default, paddingY.compact),
           className
         )}
       >
-        <Users className="h-4 w-4 text-amber-400" />
-        <span className="text-xs font-medium text-amber-300">
+        <Users className={`${iconSize.sm} text-amber-400`} />
+        <span className={`${size.xs} ${weight.medium} text-amber-300`}>
           Join {count.toLocaleString()} users
         </span>
       </motion.div>
@@ -234,12 +234,12 @@ export function InlineSocialProof({
       initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
       animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }}
       transition={SPRING.smooth}
-      className={cn('text-muted-foreground inline-flex items-center gap-1.5 text-xs', className)}
+      className={cn(muted.default, 'inline-flex', cluster.compact, gap['1.5'], size.xs, className)}
     >
       {icons[icon]}
       <span>
         {text}
-        {subtext ? <span className="text-muted-foreground/60"> {subtext}</span> : null}
+        {subtext ? <span className={`${muted.default}/60`}> {subtext}</span> : null}
       </span>
     </motion.div>
   );

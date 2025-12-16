@@ -17,6 +17,7 @@ import {
 import { useEffect, useState } from 'react';
 
 import { Status, StatusIndicator, StatusLabel } from '@/src/components/ui/status';
+import { spaceY, gap, size, iconSizeRect } from "@heyclaude/web-runtime/design-system";
 
 interface ApiHealthData {
   checks?: Record<string, unknown>;
@@ -80,13 +81,13 @@ export function StatusPageContent() {
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
+      <div className={`${spaceY.comfortable}`}>
         <Card>
           <CardHeader>
-            <div className="bg-muted h-6 w-32 animate-pulse rounded" />
+            <div className={`bg-muted ${iconSizeRect['6x32']} animate-pulse rounded`} />
           </CardHeader>
           <CardContent>
-            <div className="bg-muted h-4 w-48 animate-pulse rounded" />
+            <div className={`bg-muted ${iconSizeRect['4x48']} animate-pulse rounded`} />
           </CardContent>
         </Card>
       </div>
@@ -96,7 +97,7 @@ export function StatusPageContent() {
   const status = healthData?.status ? mapApiStatusToComponentStatus(healthData.status) : 'offline';
 
   return (
-    <div className="space-y-6">
+    <div className={`${spaceY.relaxed}`}>
       {/* Main Status Card */}
       <Card>
         <CardHeader>
@@ -104,7 +105,7 @@ export function StatusPageContent() {
           <CardDescription>Current health status of the API</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-4">
+          <div className={`flex items-center ${gap.default}`}>
             <Status status={status}>
               <StatusIndicator />
               <StatusLabel>
@@ -113,21 +114,21 @@ export function StatusPageContent() {
                   : 'Unknown'}
               </StatusLabel>
             </Status>
-            {error ? <p className="text-destructive text-sm">{error}</p> : null}
+            {error ? <p className={`text-destructive ${size.sm}`}>{error}</p> : null}
           </div>
         </CardContent>
       </Card>
 
       {/* Additional Information */}
       {healthData ? (
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className={`grid ${gap.default} md:grid-cols-2`}>
           {healthData.database ? (
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Database</CardTitle>
+                <CardTitle className={`${size.lg}`}>Database</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground text-sm capitalize">{healthData.database}</p>
+                <p className={`text-muted-foreground ${size.sm} capitalize`}>{healthData.database}</p>
               </CardContent>
             </Card>
           ) : null}
@@ -135,10 +136,10 @@ export function StatusPageContent() {
           {healthData.version ? (
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Version</CardTitle>
+                <CardTitle className={`${size.lg}`}>Version</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground font-mono text-sm">{healthData.version}</p>
+                <p className={`text-muted-foreground font-mono ${size.sm}`}>{healthData.version}</p>
               </CardContent>
             </Card>
           ) : null}
@@ -146,10 +147,10 @@ export function StatusPageContent() {
           {healthData.timestamp ? (
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Last Updated</CardTitle>
+                <CardTitle className={`${size.lg}`}>Last Updated</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground text-sm">
+                <p className={`text-muted-foreground ${size.sm}`}>
                   {new Date(healthData.timestamp).toLocaleString()}
                 </p>
               </CardContent>

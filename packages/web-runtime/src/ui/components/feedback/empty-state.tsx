@@ -43,9 +43,9 @@ import {
   AlertCircle,
   AlertTriangle,
 } from '../../../icons.tsx';
-import { UI_CLASSES } from '../../constants.ts';
+import { gap } from '../../../design-system/index.ts';
 import { cn } from '../../utils.ts';
-import { SUBMISSION_FORM_TOKENS as TOKENS } from '../../../design-tokens/submission-form.ts';
+// TOKENS removed - using direct Tailwind utilities
 import { SPRING, STAGGER } from '../../../design-system/index.ts';
 import type { LucideIcon } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -80,26 +80,26 @@ export interface EmptyStateProps {
 }
 
 /**
- * Variant color configurations
+ * Variant color configurations - using Tailwind utilities (NO inline styles)
  */
 const variantConfig = {
   default: {
-    iconBg: `${TOKENS.colors.accent.primary}10`,
-    iconColor: TOKENS.colors.accent.primary,
+    iconBgClass: 'bg-color-accent-primary/10',
+    iconColorClass: 'text-color-accent-primary',
   },
   search: {
-    iconBg: `${TOKENS.colors.info.bg}`,
-    iconColor: TOKENS.colors.info.text,
+    iconBgClass: 'bg-color-info-bg',
+    iconColorClass: 'text-color-info',
   },
   error: {
-    iconBg: `${TOKENS.colors.error.bg}`,
-    iconColor: TOKENS.colors.error.text,
+    iconBgClass: 'bg-color-error-bg',
+    iconColorClass: 'text-color-error',
   },
   success: {
-    iconBg: `${TOKENS.colors.success.bg}`,
-    iconColor: TOKENS.colors.success.text,
+    iconBgClass: 'bg-color-success-bg',
+    iconColorClass: 'text-color-success',
   },
-};
+} as const;
 
 /**
  * Generic Empty State Component
@@ -193,12 +193,9 @@ export function EmptyState({
       {/* Animated Icon */}
       <motion.div
         {...iconAnimation}
-        className="mb-6 rounded-full p-6"
-        style={{
-          backgroundColor: colors.iconBg,
-        }}
+        className={cn("mb-6 rounded-full p-6", colors.iconBgClass)}
       >
-        <Icon className="h-12 w-12" style={{ color: colors.iconColor }} aria-hidden="true" />
+        <Icon className={cn('h-12 w-12', colors.iconColorClass)} aria-hidden="true" />
       </motion.div>
 
       {/* Title */}
@@ -211,7 +208,7 @@ export function EmptyState({
       {(actionLabel || secondaryActionLabel || renderAction || renderSecondaryAction) && (
         <motion.div
           {...ctaAnimation}
-          className={cn(UI_CLASSES.SPACE_DEFAULT, 'flex flex-col sm:flex-row')}
+          className={cn(gap.default, 'flex flex-col sm:flex-row')}
         >
           {renderActionButton()}
           {renderSecondaryActionButton()}
@@ -240,14 +237,10 @@ export function CompactEmptyState({
       className={cn('flex flex-col items-center justify-center px-4 py-8 text-center', className)}
     >
       <div
-        className="mb-3 rounded-full p-3"
-        style={{
-          backgroundColor: `${TOKENS.colors.accent.primary}10`,
-        }}
+        className="mb-3 rounded-full p-3 bg-color-accent-primary/10"
       >
         <Icon
-          className="h-6 w-6"
-          style={{ color: TOKENS.colors.accent.primary }}
+          className="h-6 w-6 text-color-accent-primary"
           aria-hidden="true"
         />
       </div>

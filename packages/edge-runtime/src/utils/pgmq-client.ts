@@ -7,7 +7,10 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { edgeEnv } from '@heyclaude/edge-runtime/config/env.ts';
-import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
+import type {
+  GetPgmqQueueMetricsArgs,
+  GetPgmqQueueMetricsReturns,
+} from '@heyclaude/database-types/postgres-types';
 import type { ExtendedDatabase } from '@heyclaude/edge-runtime/database-extensions.types.ts';
 import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
 import { logger } from '@heyclaude/edge-runtime/utils/logger.ts';
@@ -23,10 +26,10 @@ const {
 const pgmqSupabaseClient = createClient<ExtendedDatabase>(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 /**
- * Typed Supabase client for public schema RPC operations
- * Uses generated Database type from @heyclaude/database-types (ONLY generated types)
+ * Untyped Supabase client for public schema RPC operations
+ * Uses Prisma postgres-types for function signatures instead of Database type
  */
-const publicSchemaClient = createClient<DatabaseGenerated>(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+const publicSchemaClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 /**
  * Type-safe wrapper for pgmq_public.send RPC
@@ -88,7 +91,7 @@ export async function pgmqDelete(queueName: string, msgId: bigint): Promise<bool
  * Uses public.get_pgmq_queue_metrics wrapper function (calls pgmq.metrics internally)
  * This wrapper is needed because PostgREST doesn't expose pgmq schema directly
  *
- * Uses generated types from @heyclaude/database-types via Database type
+ * Uses Prisma-generated postgres-types for function signatures
  */
 export async function pgmqMetrics(queueName: string): Promise<{
   queue_length: number;
@@ -98,13 +101,10 @@ export async function pgmqMetrics(queueName: string): Promise<{
   try {
     // Use wrapper function in public schema (get_pgmq_queue_metrics)
     // This function calls pgmq.metrics internally and is exposed via PostgREST
-    // Uses ONLY generated types from @heyclaude/database-types
-    type Args = DatabaseGenerated['public']['Functions']['get_pgmq_queue_metrics']['Args'];
-    type Returns = DatabaseGenerated['public']['Functions']['get_pgmq_queue_metrics']['Returns'];
+    // Uses Prisma-generated postgres-types
+    const args: GetPgmqQueueMetricsArgs = { p_queue_name: queueName };
 
-    const args: Args = { p_queue_name: queueName };
-
-    // Call RPC - use satisfies to ensure args match generated type
+    // Call RPC
     const rpcResult = await publicSchemaClient.rpc('get_pgmq_queue_metrics', args);
 
     if (rpcResult.error) throw rpcResult.error;
@@ -117,7 +117,7 @@ export async function pgmqMetrics(queueName: string): Promise<{
     }
 
     // Validate each result has the expected structure
-    const results = data.filter((item): item is Returns[number] => {
+    const results = data.filter((item): item is GetPgmqQueueMetricsReturns[number] => {
       if (typeof item !== 'object' || item === null) {
         return false;
       }
@@ -129,7 +129,7 @@ export async function pgmqMetrics(queueName: string): Promise<{
         return desc?.value;
       };
       const queueLength = getProperty(item, 'queue_length');
-      return typeof queueLength === 'number';
+      return typeof queueLength === 'number' || queueLength === null;
     });
 
     if (!(results && Array.isArray(results)) || results.length === 0) {

@@ -4,7 +4,6 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '@heyclaude/database-types';
 import { normalizeError } from '@heyclaude/shared-runtime';
 import { getAuthenticatorAssuranceLevel, type AuthenticatorAssuranceLevel } from './mfa.ts';
 
@@ -25,7 +24,7 @@ export function extractAALFromClaims(claims: Record<string, unknown>): Authentic
  * Use this in server-side code to enforce MFA requirements
  */
 export async function hasAAL2(
-  supabase: SupabaseClient<Database>
+  supabase: SupabaseClient
 ): Promise<{ hasAAL2: boolean; error: Error | null }> {
   try {
     const { data, error } = await getAuthenticatorAssuranceLevel(supabase);

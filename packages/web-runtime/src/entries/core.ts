@@ -60,8 +60,8 @@ export type { JobType } from '../ui/constants.ts';
 export type { NotificationRecord } from '../notifications.ts';
 export { generateConfigRecommendations } from '../pulse-client.ts';
 export type { UseCopyToClipboardOptions } from '../hooks/use-copy-to-clipboard.ts';
-import type { Database } from '@heyclaude/database-types';
-export type SearchFilters = Partial<Database['public']['Functions']['search_content_optimized']['Args']> & {
+import type { SearchContentOptimizedArgs } from '@heyclaude/database-types/postgres-types';
+export type SearchFilters = Partial<SearchContentOptimizedArgs> & {
   sort?: 'relevance' | 'popularity' | 'newest' | 'alphabetical';
 };
 export * from '../types/app.schema.ts';

@@ -17,13 +17,13 @@
  * @module web-runtime/search/components/search-filters
  */
 
-import { type Database } from '@heyclaude/database-types';
+import type { content_category } from '@heyclaude/data-layer/prisma';
 import { SPRING, DURATION } from '@heyclaude/web-runtime/design-system';
 import { isValidCategory } from '@heyclaude/web-runtime/core';
 import { getCategoryConfig } from '@heyclaude/web-runtime/data';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
+import { between, wrap, gap } from '@heyclaude/web-runtime/design-system';
 import {
-  UI_CLASSES,
   UnifiedBadge,
   Button,
   Label,
@@ -180,7 +180,7 @@ export function SearchFilters({
                 {availableCategories.map((cat) => {
                   const displayName = isValidCategory(cat)
                     ? getCategoryConfig(
-                        cat as Database['public']['Enums']['content_category']
+                        cat as content_category
                       )?.typeName ?? cat
                     : cat;
                   return (
@@ -304,7 +304,7 @@ export function SearchFilters({
         >
           <div className="border-border/50 border-t pt-3" />
           <div>
-            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mb-3`}>
+            <div className={`${between.center} mb-3`}>
               <legend className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                 Tags
               </legend>
@@ -323,7 +323,7 @@ export function SearchFilters({
               className="border-border/50 h-40 w-full rounded-md border p-4 md:h-48"
               aria-label="Select tags to filter by"
             >
-              <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
+              <div className={`${wrap} ${gap.compact}`}>
                 {availableTags.map((tag, index) => (
                   <motion.button
                     key={tag}

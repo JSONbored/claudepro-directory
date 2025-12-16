@@ -10,7 +10,21 @@
  * 6. Enrolls in onboarding sequence
  */
 
-import { Constants, type Database as DatabaseGenerated } from '@heyclaude/database-types';
+import type {
+  newsletter_source,
+  copy_type,
+  content_category,
+} from '@heyclaude/data-layer/prisma';
+import type {
+  newsletter_sync_status,
+} from '@heyclaude/database-types/prisma';
+import {
+  NewsletterSource,
+  ContentCategory,
+} from '@heyclaude/data-layer/prisma';
+import {
+  copy_type as CopyTypeEnum,
+} from '@heyclaude/database-types/prisma';
 import type { SubscribeNewsletterArgs } from '@heyclaude/database-types/postgres-types';
 import { NewsletterService } from '@heyclaude/data-layer';
 import { validateEmail, normalizeError } from '@heyclaude/shared-runtime';
@@ -87,7 +101,7 @@ export const subscribeNewsletter = inngest.createFunction(
     // Step 3: Sync contact to Resend
     const syncResult = await step.run('sync-to-resend', async (): Promise<{
       resendContactId: string | null;
-      syncStatus: DatabaseGenerated['public']['Enums']['newsletter_sync_status'];
+      syncStatus: newsletter_sync_status;
       syncError: string | null;
       topicIds: string[];
     }> => {
@@ -118,33 +132,29 @@ export const subscribeNewsletter = inngest.createFunction(
     }> => {
       const newsletterService = new NewsletterService();
 
-      const newsletterSourceValues = Constants.public.Enums.newsletter_source;
-      const copyTypeValues = Constants.public.Enums.copy_type;
-      const contentCategoryValues = Constants.public.Enums.content_category;
+      const newsletterSourceValues = Object.values(NewsletterSource) as readonly newsletter_source[];
+      const copyTypeValues = Object.values(CopyTypeEnum) as readonly copy_type[];
+      const contentCategoryValues = Object.values(ContentCategory) as readonly content_category[];
 
       const isValidNewsletterSource = (
         value: string | null | undefined
-      ): value is DatabaseGenerated['public']['Enums']['newsletter_source'] => {
+      ): value is newsletter_source => {
         if (!value) return false;
-        return newsletterSourceValues.includes(
-          value as DatabaseGenerated['public']['Enums']['newsletter_source']
-        );
+        return newsletterSourceValues.includes(value as newsletter_source);
       };
 
       const isValidCopyType = (
         value: string | null | undefined
-      ): value is DatabaseGenerated['public']['Enums']['copy_type'] => {
+      ): value is copy_type => {
         if (!value) return false;
-        return copyTypeValues.includes(value as DatabaseGenerated['public']['Enums']['copy_type']);
+        return copyTypeValues.includes(value as copy_type);
       };
 
       const isValidContentCategory = (
         value: string | null | undefined
-      ): value is DatabaseGenerated['public']['Enums']['content_category'] => {
+      ): value is content_category => {
         if (!value) return false;
-        return contentCategoryValues.includes(
-          value as DatabaseGenerated['public']['Enums']['content_category']
-        );
+        return contentCategoryValues.includes(value as content_category);
       };
 
       const getNumberProperty = (obj: Record<string, string | number>, key: string): number => {
@@ -157,14 +167,14 @@ export const subscribeNewsletter = inngest.createFunction(
         return 0;
       };
 
-      const finalSource: DatabaseGenerated['public']['Enums']['newsletter_source'] =
+      const finalSource: newsletter_source =
         isValidNewsletterSource(source) ? source : 'footer';
 
       // Build rpcArgs object, only including properties with values (for exactOptionalPropertyTypes)
       const rpcArgs: SubscribeNewsletterArgs = {
         p_email: validatedEmail,
         p_source: finalSource,
-        p_sync_status: syncResult.syncStatus,
+        p_sync_status: syncResult['syncStatus'] as newsletter_sync_status,
         p_engagement_score: getNumberProperty(contactProperties, 'engagement_score'),
         p_primary_interest: primaryInterest,
         p_total_copies: getNumberProperty(contactProperties, 'total_copies'),
@@ -176,9 +186,11 @@ export const subscribeNewsletter = inngest.createFunction(
       if (copyType && isValidCopyType(copyType)) { rpcArgs.p_copy_type = copyType; }
       if (copyCategory && isValidContentCategory(copyCategory)) { rpcArgs.p_copy_category = copyCategory; }
       if (copySlug) { rpcArgs.p_copy_slug = copySlug; }
-      if (syncResult.resendContactId) { rpcArgs.p_resend_contact_id = syncResult.resendContactId; }
-      if (syncResult.syncError) { rpcArgs.p_sync_error = syncResult.syncError; }
-      if (syncResult.topicIds.length > 0) { rpcArgs.p_resend_topics = syncResult.topicIds; }
+      if (syncResult['resendContactId']) { rpcArgs.p_resend_contact_id = syncResult['resendContactId'] as string; }
+      if (syncResult['syncError']) { rpcArgs.p_sync_error = syncResult['syncError'] as string; }
+      if (syncResult['topicIds'] && Array.isArray(syncResult['topicIds']) && syncResult['topicIds'].length > 0) { 
+        rpcArgs.p_resend_topics = syncResult['topicIds'] as string[]; 
+      }
 
       const rpcResult = await newsletterService.subscribeNewsletter(rpcArgs);
 
@@ -272,8 +284,8 @@ export const subscribeNewsletter = inngest.createFunction(
     logger.info({ ...logContext,
       durationMs,
       subscriptionId: subscription.subscriptionId,
-      resendContactId: syncResult.resendContactId,
-      syncStatus: syncResult.syncStatus,
+      resendContactId: String(syncResult['resendContactId'] ?? ''),
+      syncStatus: String(syncResult['syncStatus'] ?? ''),
       emailSent: welcomeEmailResult.sent,
       emailId: welcomeEmailResult.emailId, }, 'Newsletter subscription completed');
 
@@ -281,8 +293,8 @@ export const subscribeNewsletter = inngest.createFunction(
       success: true,
       subscriptionId: subscription.subscriptionId,
       email: validatedEmail,
-      resendContactId: syncResult.resendContactId,
-      syncStatus: syncResult.syncStatus,
+      resendContactId: syncResult['resendContactId'],
+      syncStatus: syncResult['syncStatus'],
       emailSent: welcomeEmailResult.sent,
       emailId: welcomeEmailResult.emailId,
     };

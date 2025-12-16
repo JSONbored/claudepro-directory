@@ -1,44 +1,38 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { PrismockClient } from 'prismock';
 import { NewsletterService } from './newsletter.ts';
-import type { Database } from '@heyclaude/database-types';
-import type { SupabaseClient, PostgrestError } from '@supabase/supabase-js';
 
+// Mock the prisma singleton with Prismock
+vi.mock('../prisma/client.ts', () => {
+  const { setupPrismockMock } = require('../test-utils/prisma-mock.ts');
+  return {
+    prisma: setupPrismockMock(),
+  };
+});
+
+// Mock the RPC error logging utility
 vi.mock('../utils/rpc-error-logging.ts', () => ({
   logRpcError: vi.fn(),
 }));
 
-// Helper to create proper PostgrestError objects
-function createPostgrestError(message: string, code: string): PostgrestError {
-  return {
-    message,
-    code,
-    details: '',
-    hint: null,
-    name: 'PostgrestError',
-  };
-}
-
-// Helper to create proper mock responses
-function createMockResponse<T>(data: T | null) {
-  return {
-    data,
-    error: null,
-    count: null,
-    status: 200,
-    statusText: 'OK' as const,
-  };
-}
+// Mock request cache
+vi.mock('../utils/request-cache.ts', () => ({
+  withSmartCache: vi.fn((_key, _method, fn) => fn()),
+}));
 
 describe('NewsletterService', () => {
-  let mockSupabase: SupabaseClient<Database>;
   let newsletterService: NewsletterService;
+  let prismock: PrismockClient;
 
-  beforeEach(() => {
-    mockSupabase = {
-      rpc: vi.fn(),
-    } as unknown as SupabaseClient<Database>;
-
-    newsletterService = new NewsletterService(mockSupabase);
+  beforeEach(async () => {
+    // Get the mocked prisma instance (Prismock)
+    const { prisma } = await import('../prisma/client.ts');
+    prismock = prisma as PrismockClient;
+    
+    // Reset Prismock data before each test
+    prismock.reset();
+    
+    newsletterService = new NewsletterService();
   });
 
   describe('subscribeNewsletter', () => {
@@ -50,45 +44,38 @@ describe('NewsletterService', () => {
         p_copy_slug: 'test-agent' 
       };
 
-      vi.mocked(mockSupabase.rpc).mockResolvedValue(createMockResponse(mockData));
+      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
 
       const result = await newsletterService.subscribeNewsletter(args);
 
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('subscribe_newsletter', args);
+      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
+        expect.stringContaining('subscribe_newsletter'),
+        'test@example.com',
+        'agents',
+        'test-agent'
+      );
       expect(result).toEqual(mockData);
     });
 
     it('should handle duplicate subscription gracefully', async () => {
-      const mockError = createPostgrestError('Email already subscribed', 'DUPLICATE');
+      const mockError = new Error('Email already subscribed');
       const args = { 
         p_email: 'test@example.com',
         p_copy_category: 'agents' as const 
       };
 
-      vi.mocked(mockSupabase.rpc).mockResolvedValue({
-        data: null,
-        error: mockError,
-        count: null,
-        status: 409,
-        statusText: 'Conflict',
-      });
+      vi.mocked(prismock.$queryRawUnsafe).mockRejectedValue(mockError);
 
-      await expect(newsletterService.subscribeNewsletter(args)).rejects.toThrow();
+      await expect(newsletterService.subscribeNewsletter(args)).rejects.toThrow('Email already subscribed');
     });
 
     it('should handle RPC errors', async () => {
-      const mockError = createPostgrestError('Invalid request', 'VALIDATION_ERROR');
+      const mockError = new Error('Invalid request');
       const args = { p_email: 'test@example.com' };
 
-      vi.mocked(mockSupabase.rpc).mockResolvedValue({
-        data: null,
-        error: mockError,
-        count: null,
-        status: 400,
-        statusText: 'Bad Request',
-      });
+      vi.mocked(prismock.$queryRawUnsafe).mockRejectedValue(mockError);
 
-      await expect(newsletterService.subscribeNewsletter(args)).rejects.toThrow();
+      await expect(newsletterService.subscribeNewsletter(args)).rejects.toThrow('Invalid request');
     });
   });
 
@@ -114,7 +101,7 @@ describe('NewsletterService', () => {
 
   describe('edge cases', () => {
     it('should handle database timeout', async () => {
-      vi.mocked(mockSupabase.rpc).mockRejectedValue(new Error('Query timeout'));
+      vi.mocked(prismock.$queryRawUnsafe).mockRejectedValue(new Error('Query timeout'));
 
       await expect(newsletterService.subscribeNewsletter({ p_email: 'test@example.com' })).rejects.toThrow('Query timeout');
     });

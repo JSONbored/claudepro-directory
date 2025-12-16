@@ -17,7 +17,7 @@ import { fileURLToPath } from 'node:url';
 import * as postcss from 'postcss';
 import valueParser from 'postcss-value-parser';
 
-import { logger } from '../toolkit/logger.js';
+import { logger } from '../toolkit/logger.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const SCRIPT_DIR = dirname(__filename);
@@ -26,10 +26,10 @@ const PROJECT_ROOT = join(SCRIPT_DIR, '../../../../');
 interface ValueMatch {
   cssVariable: string;
   cssValue: string;
-  tokenPath?: string;
-  tokenValue?: string;
-  uiClass?: string;
-  uiClassValue?: string;
+  tokenPath?: string | undefined;
+  tokenValue?: string | undefined;
+  uiClass?: string | undefined;
+  uiClassValue?: string | undefined;
   matchType: 'exact' | 'near' | 'none';
   recommendation: string;
 }
@@ -80,14 +80,16 @@ function loadSpacingTokens(): Map<string, string> {
     const scaleContent = readFileSync(scalePath, 'utf-8');
     const scaleMatch = scaleContent.match(/export const SPACING_SCALE = \{([^}]+)\}/s);
     
-    if (scaleMatch) {
+    if (scaleMatch && scaleMatch[1]) {
       const entries = scaleMatch[1].matchAll(/(\w+):\s*['"]([^'"]+)['"]/g);
       for (const match of entries) {
-        tokens.set(`SPACING.scale.${match[1]}`, match[2]);
-        tokens.set(`SPACING.marginBottom.${match[1]}`, match[2]);
-        tokens.set(`SPACING.marginTop.${match[1]}`, match[2]);
-        tokens.set(`SPACING.padding.${match[1]}`, match[2]);
-        tokens.set(`SPACING.gap.${match[1]}`, match[2]);
+        if (match[1] && match[2]) {
+          tokens.set(`SPACING.scale.${match[1]}`, match[2]);
+          tokens.set(`SPACING.marginBottom.${match[1]}`, match[2]);
+          tokens.set(`SPACING.marginTop.${match[1]}`, match[2]);
+          tokens.set(`SPACING.padding.${match[1]}`, match[2]);
+          tokens.set(`SPACING.gap.${match[1]}`, match[2]);
+        }
       }
     }
   } catch (error) {
@@ -106,10 +108,12 @@ function loadTypographyTokens(): Map<string, string> {
     const fontSizeContent = readFileSync(fontSizePath, 'utf-8');
     const fontSizeMatch = fontSizeContent.match(/export const FONT_SIZES = \{([^}]+)\}/s);
     
-    if (fontSizeMatch) {
+    if (fontSizeMatch && fontSizeMatch[1]) {
       const entries = fontSizeMatch[1].matchAll(/(\w+):\s*['"]([^'"]+)['"]/g);
       for (const match of entries) {
-        tokens.set(`TYPOGRAPHY.fontSizes.${match[1]}`, match[2]);
+        if (match[1] && match[2]) {
+          tokens.set(`TYPOGRAPHY.fontSizes.${match[1]}`, match[2]);
+        }
       }
     }
   } catch (error) {
@@ -129,19 +133,23 @@ function loadShadowTokens(): Map<string, string> {
     
     // Extract dark shadows
     const darkMatch = shadowContent.match(/dark:\s*\{([^}]+)\}/s);
-    if (darkMatch) {
+    if (darkMatch && darkMatch[1]) {
       const entries = darkMatch[1].matchAll(/(\w+):\s*['"]([^'"]+)['"]/g);
       for (const match of entries) {
-        tokens.set(`SHADOWS.elevation.dark.${match[1]}`, match[2]);
+        if (match[1] && match[2]) {
+          tokens.set(`SHADOWS.elevation.dark.${match[1]}`, match[2]);
+        }
       }
     }
     
     // Extract light shadows
     const lightMatch = shadowContent.match(/light:\s*\{([^}]+)\}/s);
-    if (lightMatch) {
+    if (lightMatch && lightMatch[1]) {
       const entries = lightMatch[1].matchAll(/(\w+):\s*['"]([^'"]+)['"]/g);
       for (const match of entries) {
-        tokens.set(`SHADOWS.elevation.light.${match[1]}`, match[2]);
+        if (match[1] && match[2]) {
+          tokens.set(`SHADOWS.elevation.light.${match[1]}`, match[2]);
+        }
       }
     }
   } catch (error) {
@@ -161,28 +169,34 @@ function loadColorTokens(): Map<string, string> {
     
     // Extract BRAND_COLORS
     const brandMatch = paletteContent.match(/export const BRAND_COLORS = \{([^}]+)\}/s);
-    if (brandMatch) {
+    if (brandMatch && brandMatch[1]) {
       const entries = brandMatch[1].matchAll(/(\w+):\s*['"]([^'"]+)['"]/g);
       for (const match of entries) {
-        tokens.set(`COLORS.palette.brand.${match[1]}`, match[2]);
+        if (match[1] && match[2]) {
+          tokens.set(`COLORS.palette.brand.${match[1]}`, match[2]);
+        }
       }
     }
     
     // Extract NEUTRAL_COLORS.dark
     const neutralDarkMatch = paletteContent.match(/dark:\s*\{([^}]+)\}/s);
-    if (neutralDarkMatch) {
+    if (neutralDarkMatch && neutralDarkMatch[1]) {
       const entries = neutralDarkMatch[1].matchAll(/(\w+):\s*['"]([^'"]+)['"]/g);
       for (const match of entries) {
-        tokens.set(`COLORS.palette.neutral.dark.${match[1]}`, match[2]);
+        if (match[1] && match[2]) {
+          tokens.set(`COLORS.palette.neutral.dark.${match[1]}`, match[2]);
+        }
       }
     }
     
     // Extract NEUTRAL_COLORS.light
     const neutralLightMatch = paletteContent.match(/light:\s*\{([^}]+)\}/s);
-    if (neutralLightMatch) {
+    if (neutralLightMatch && neutralLightMatch[1]) {
       const entries = neutralLightMatch[1].matchAll(/(\w+):\s*['"]([^'"]+)['"]/g);
       for (const match of entries) {
-        tokens.set(`COLORS.palette.neutral.light.${match[1]}`, match[2]);
+        if (match[1] && match[2]) {
+          tokens.set(`COLORS.palette.neutral.light.${match[1]}`, match[2]);
+        }
       }
     }
   } catch (error) {
@@ -202,10 +216,12 @@ function loadUIClasses(): Map<string, string> {
     
     // Extract UI_CLASSES object
     const uiClassesMatch = constantsContent.match(/export const UI_CLASSES = \{([^}]+)\}/s);
-    if (uiClassesMatch) {
+    if (uiClassesMatch && uiClassesMatch[1]) {
       const entries = uiClassesMatch[1].matchAll(/(\w+):\s*['"]([^'"]+)['"]/g);
       for (const match of entries) {
-        classes.set(`UI_CLASSES.${match[1]}`, match[2]);
+        if (match[1] && match[2]) {
+          classes.set(`UI_CLASSES.${match[1]}`, match[2]);
+        }
       }
     }
   } catch (error) {
@@ -222,7 +238,7 @@ function normalizeValue(value: string): string {
   
   // Normalize var() references - extract the referenced variable name
   const varMatch = normalized.match(/var\(--([^)]+)\)/);
-  if (varMatch) {
+  if (varMatch && varMatch[1]) {
     normalized = varMatch[1]; // Use the variable name for comparison
   }
   
@@ -247,21 +263,23 @@ function compareSpacing(
       let numericValue: string | null = null;
       
       parsed.walk((node) => {
-        if (node.type === 'word' && /^\d+(\.\d+)?(rem|px|em)$/.test(node.value)) {
-          numericValue = node.value;
+        if (node.type === 'word' && typeof node.value === 'string' && /^\d+(\.\d+)?(rem|px|em)$/.test(node.value)) {
+          numericValue = node.value as string;
         }
       });
 
-      if (numericValue) {
+      if (numericValue !== null) {
+        // TypeScript needs explicit assertion here due to closure type narrowing
+        const valueStr: string = numericValue;
         // Normalize to rem
-        const normalized = numericValue.endsWith('px') 
-          ? `${parseFloat(numericValue) / 16}rem`
-          : numericValue;
+        const normalized: string = valueStr.endsWith('px')
+          ? `${parseFloat(valueStr) / 16}rem`
+          : valueStr;
 
         // Find matching token
         let bestMatch: { path: string; value: string } | null = null;
         for (const [tokenPath, tokenValue] of spacingTokens.entries()) {
-          if (tokenValue === normalized || tokenValue === numericValue) {
+          if (tokenValue === normalized || tokenValue === valueStr) {
             bestMatch = { path: tokenPath, value: tokenValue };
             break;
           }
@@ -269,7 +287,7 @@ function compareSpacing(
 
         matches.push({
           cssVariable: cssVar,
-          cssValue: numericValue,
+          cssValue: valueStr,
           tokenPath: bestMatch?.path,
           tokenValue: bestMatch?.value,
           matchType: bestMatch ? 'exact' : 'none',
@@ -299,21 +317,23 @@ function compareTypography(
       let fontSizeValue: string | null = null;
       
       parsed.walk((node) => {
-        if (node.type === 'word' && /^\d+(\.\d+)?(rem|px|em)$/.test(node.value)) {
-          fontSizeValue = node.value;
+        if (node.type === 'word' && typeof node.value === 'string' && /^\d+(\.\d+)?(rem|px|em)$/.test(node.value)) {
+          fontSizeValue = node.value as string;
         }
       });
 
-      if (fontSizeValue) {
+      if (fontSizeValue !== null) {
+        // TypeScript needs explicit assertion here due to closure type narrowing
+        const valueStr: string = fontSizeValue;
         // Normalize to rem
-        const normalized = fontSizeValue.endsWith('px') 
-          ? `${parseFloat(fontSizeValue) / 16}rem`
-          : fontSizeValue;
+        const normalized: string = valueStr.endsWith('px')
+          ? `${parseFloat(valueStr) / 16}rem`
+          : valueStr;
 
         // Find matching token
         let bestMatch: { path: string; value: string } | null = null;
         for (const [tokenPath, tokenValue] of typographyTokens.entries()) {
-          if (tokenValue === normalized || tokenValue === fontSizeValue) {
+          if (tokenValue === normalized || tokenValue === valueStr) {
             bestMatch = { path: tokenPath, value: tokenValue };
             break;
           }
@@ -321,7 +341,7 @@ function compareTypography(
 
         matches.push({
           cssVariable: cssVar,
-          cssValue: fontSizeValue,
+          cssValue: valueStr,
           tokenPath: bestMatch?.path,
           tokenValue: bestMatch?.value,
           matchType: bestMatch ? 'exact' : 'none',
@@ -377,7 +397,7 @@ function compareShadows(
 // Compare radius values
 function compareRadius(
   cssVariables: Map<string, { value: string; context: string }>,
-  uiClasses: Map<string, string>
+  _uiClasses: Map<string, string>
 ): ValueMatch[] {
   const matches: ValueMatch[] = [];
   

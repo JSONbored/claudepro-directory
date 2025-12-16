@@ -1,13 +1,13 @@
 'use server';
 
 import { CommunityService, SearchService } from '@heyclaude/data-layer';
-import type { CommunityDirectoryUser } from '@heyclaude/data-layer/types/composite-types';
+import type { CommunityDirectoryUser } from '@heyclaude/database-types/postgres-types';
 import type {
   SearchUnifiedArgs,
   GetCommunityDirectoryReturns,
   GetUserProfileReturns,
   GetUserCollectionDetailReturns,
-} from '@heyclaude/database-types/postgres-types/functions';
+} from '@heyclaude/database-types/postgres-types';
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { normalizeError } from '../errors.ts';
@@ -30,8 +30,8 @@ async function searchUsersUnified(
 ): Promise<Array<CommunityDirectoryUser>> {
   'use cache';
 
-  // Configure cache - use 'quarter' profile for user search (same as API route)
-  cacheLife('quarter'); // 15min stale, 5min revalidate, 2hr expire
+  // Configure cache - use 'stable' profile for optimal SEO (6hr stale, 1hr revalidate, 7 days expire)
+  cacheLife('stable'); // 6hr stale, 1hr revalidate, 7 days expire - optimized for SEO
   cacheTag('user-search');
   cacheTag('community');
 
@@ -75,8 +75,8 @@ async function getCommunityDirectoryRpc(
 ): Promise<GetCommunityDirectoryReturns | null> {
   'use cache';
 
-  // Configure cache - use 'half' profile for community directory (changes every 30 minutes)
-  cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
+  // Configure cache - use 'static' profile for optimal SEO (1 day stale, 6hr revalidate, 30 days expire)
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
   cacheTag('community');
   cacheTag('users');
 

@@ -153,9 +153,7 @@ export async function getSEOMetadata(
  * Build base SEO metadata from RPC result
  * Extracted to reduce cognitive complexity
  *
- * @param {NonNullable<
-    Database['public']['Functions']['generate_metadata_complete']['Returns']['metadata']
-  >} metadata - Non-null metadata result from generate_metadata_complete RPC
+ * @param {NonNullable<GenerateMetadataCompleteReturns['metadata']>} metadata - Non-null metadata result from generate_metadata_complete RPC
  * @returns Base SEO metadata object
  */
 function buildBaseMetadata(

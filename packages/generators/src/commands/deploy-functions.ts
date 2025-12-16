@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 
 import * as TOML from '@iarna/toml';
 
-import { logger } from '../toolkit/logger.js';
+import { logger } from '../toolkit/logger.ts';
 
 const IGNORED_DIRECTORIES = new Set(['_shared', 'node_modules']);
 

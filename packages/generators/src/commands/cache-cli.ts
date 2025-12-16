@@ -4,8 +4,8 @@ import {
   getCacheKeys,
   getCacheStats,
   printCache,
-} from '../toolkit/cache.js';
-import { logger } from '../toolkit/logger.js';
+} from '../toolkit/cache.ts';
+import { logger } from '../toolkit/logger.ts';
 
 export type CacheCommand = 'clear' | 'help' | 'info';
 

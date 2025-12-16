@@ -7,7 +7,7 @@
  * Performance: Eliminated from client bundle, server-rendered for instant display
  */
 
-import { type Database } from '@heyclaude/database-types';
+import type { GetContentDetailCompleteReturns } from '@heyclaude/database-types/postgres-types';
 import {
   ensureStringArray,
   formatCopyCount,
@@ -17,14 +17,14 @@ import {
 import { formatDate } from '@heyclaude/web-runtime/data/utils';
 import { Calendar, Copy, Eye, Tag, User } from '@heyclaude/web-runtime/icons';
 import { type ContentItem } from '@heyclaude/web-runtime/types/component.types';
-import { UI_CLASSES, UnifiedBadge } from '@heyclaude/web-runtime/ui';
+import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
+import { cluster, iconSize, wrap, gap, paddingX, marginX, marginBottom } from '@heyclaude/web-runtime/design-system';
 
 export interface DetailMetadataProps {
   copyCount?: number | undefined;
   item:
     | ContentItem
-    | (ContentItem &
-        Database['public']['Functions']['get_content_detail_complete']['Returns']['content']);
+    | (ContentItem & GetContentDetailCompleteReturns['content']);
   viewCount?: number | undefined;
 }
 
@@ -62,11 +62,11 @@ const SOCIAL_LINK_SNAPSHOT = getSocialLinks();
 function getSafeAuthorProfileHref(
   item:
     | ContentItem
-    | (ContentItem &
-        Database['public']['Functions']['get_content_detail_complete']['Returns']['content'])
+    | (ContentItem & GetContentDetailCompleteReturns['content'])
 ): string {
   // Cast item to handle both ContentItem and RPC return types
-  const contentItem = item as ContentItem & {
+  // Type narrowing: item is ContentItem or compatible, extend with additional properties
+  const contentItem = item satisfies ContentItem & {
     author_user_id?: string | null;
     author_user_slug?: string | null;
   };
@@ -74,10 +74,10 @@ function getSafeAuthorProfileHref(
   // Priority 1: If author_user_id is set, link to internal user profile
   // Check for author_user_slug (from get_content_detail_complete RPC) or author_user_id (from direct content table access)
   const authorUserSlug =
-    ('author_user_slug' in contentItem && typeof contentItem.author_user_slug === 'string'
-      ? contentItem.author_user_slug
+    ('author_user_slug' in contentItem && typeof contentItem['author_user_slug'] === 'string'
+      ? contentItem['author_user_slug']
       : null) ||
-    ('author_user_id' in contentItem && contentItem.author_user_id
+    ('author_user_id' in contentItem && contentItem['author_user_id']
       ? null // We'd need to query for slug, but RPC should provide it
       : null);
 
@@ -206,10 +206,10 @@ export function DetailMetadata({ item, viewCount, copyCount }: DetailMetadataPro
   if (!(hasMetadata || hasTags)) return null;
 
   return (
-    <div className="container mx-auto px-4">
+    <div className={`container ${marginX.auto} ${paddingX.default}`}>
       {/* Author, Date & View Count Metadata */}
       {hasMetadata ? (
-        <div className="text-muted-foreground mb-4 flex flex-wrap gap-4 text-sm">
+        <div className={`text-muted-foreground ${marginBottom.default} flex flex-wrap ${gap.default} text-sm`}>
           {'author' in item && item.author
             ? (() => {
                 // Get safe author profile URL - this function validates and sanitizes the URL
@@ -224,8 +224,8 @@ export function DetailMetadata({ item, viewCount, copyCount }: DetailMetadataPro
                 // Check if this is an internal user profile link
                 const isInternalProfile = validatedUrl.startsWith('/u/');
                 return (
-                  <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                    <User className={UI_CLASSES.ICON_SM} />
+                  <div className={cluster.compact}>
+                    <User className={iconSize.sm} />
                     {isInternalProfile ? (
                       <a
                         href={validatedUrl}
@@ -248,20 +248,20 @@ export function DetailMetadata({ item, viewCount, copyCount }: DetailMetadataPro
               })()
             : null}
           {'date_added' in item && item.date_added ? (
-            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-              <Calendar className={UI_CLASSES.ICON_SM} />
+            <div className={cluster.compact}>
+              <Calendar className={iconSize.sm} />
               <span>{formatDate(item.date_added)}</span>
             </div>
           ) : null}
           {typeof viewCount === 'number' && viewCount > 0 && (
-            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-              <Eye className={UI_CLASSES.ICON_SM} />
+            <div className={cluster.compact}>
+              <Eye className={iconSize.sm} />
               <span>{formatViewCount(viewCount)}</span>
             </div>
           )}
           {typeof copyCount === 'number' && copyCount > 0 && (
-            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-              <Copy className={UI_CLASSES.ICON_SM} />
+            <div className={cluster.compact}>
+              <Copy className={iconSize.sm} />
               <span>{formatCopyCount(copyCount)}</span>
             </div>
           )}
@@ -269,8 +269,8 @@ export function DetailMetadata({ item, viewCount, copyCount }: DetailMetadataPro
       ) : null}
       {/* Tags */}
       {hasTags && tags.length > 0 ? (
-        <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
-          <Tag className={`${UI_CLASSES.ICON_SM} text-muted-foreground`} />
+        <div className={`${wrap} ${gap.compact}`}>
+          <Tag className={`${iconSize.sm} text-muted-foreground`} />
           {tags.map((tag) => (
             <UnifiedBadge key={tag} variant="base" style="outline" className="text-xs">
               {tag}

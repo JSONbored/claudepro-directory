@@ -28,11 +28,11 @@ import {
 import {
   getResponsiveGridClass,
   POSITION_PATTERNS,
-  UI_CLASSES,
   Input,
   Label,
   Textarea,
 } from '@heyclaude/web-runtime/ui';
+import { spaceY, iconSize, paddingX, paddingY } from "@heyclaude/web-runtime/design-system";
 
 // ============================================================================
 // GRID LAYOUT SYSTEM
@@ -77,7 +77,7 @@ function TextFieldRenderer({ field, formId }: FieldRendererProps) {
   const iconPosition = field.iconPosition || 'left';
 
   return (
-    <div className={`${UI_CLASSES.FORM_FIELD_SPACING} ${gridClass}`}>
+    <div className={`${spaceY.compact} ${gridClass}`}>
       <Label htmlFor={fieldId}>{field.label}</Label>
       {Icon ? (
         <div className="relative">
@@ -85,7 +85,7 @@ function TextFieldRenderer({ field, formId }: FieldRendererProps) {
             <div
               className={`${POSITION_PATTERNS.ABSOLUTE_TOP_HALF_LEFT} text-muted-foreground -translate-y-1/2`}
             >
-              <Icon className={UI_CLASSES.ICON_SM} />
+              <Icon className={iconSize.sm} />
             </div>
           )}
           <Input
@@ -100,7 +100,7 @@ function TextFieldRenderer({ field, formId }: FieldRendererProps) {
             <div
               className={`${POSITION_PATTERNS.ABSOLUTE_TOP_HALF_RIGHT} text-muted-foreground -translate-y-1/2`}
             >
-              <Icon className={UI_CLASSES.ICON_SM} />
+              <Icon className={iconSize.sm} />
             </div>
           )}
         </div>
@@ -142,7 +142,7 @@ function TextareaFieldRenderer({ field, formId }: FieldRendererProps) {
   const monoClass = field.monospace ? 'font-mono text-sm' : '';
 
   return (
-    <div className={`${UI_CLASSES.FORM_FIELD_SPACING} ${gridClass}`}>
+    <div className={`${spaceY.compact} ${gridClass}`}>
       <Label htmlFor={fieldId}>{field.label}</Label>
       <Textarea
         id={fieldId}
@@ -175,7 +175,7 @@ function NumberFieldRenderer({ field, formId }: FieldRendererProps) {
   const gridClass = GRID_COLUMN_CLASSES[field.gridColumn || 'full'];
 
   return (
-    <div className={`${UI_CLASSES.FORM_FIELD_SPACING} ${gridClass}`}>
+    <div className={`${spaceY.compact} ${gridClass}`}>
       <Label htmlFor={fieldId}>{field.label}</Label>
       <Input
         id={fieldId}
@@ -210,14 +210,14 @@ function SelectFieldRenderer({ field, formId }: FieldRendererProps) {
   const gridClass = GRID_COLUMN_CLASSES[field.gridColumn || 'full'];
 
   return (
-    <div className={`${UI_CLASSES.FORM_FIELD_SPACING} ${gridClass}`}>
+    <div className={`${spaceY.compact} ${gridClass}`}>
       <Label htmlFor={fieldId}>{field.label}</Label>
       <select
         id={fieldId}
         name={field.name}
         required={field.required}
         defaultValue={field.defaultValue}
-        className="border-input bg-background flex h-10 w-full rounded-md border px-3 py-2 text-sm"
+        className={`border-input bg-background flex h-10 w-full rounded-md border ${paddingX.compact} ${paddingY.tight} text-sm`}
       >
         {field.options.map((option) => (
           <option key={option.value} value={option.value}>

@@ -2,7 +2,7 @@
  * Edit Company Page - Update existing company via edge function
  */
 
-import type { UserCompaniesCompany } from '@heyclaude/data-layer/types/composite-types';
+import type { UserCompaniesCompany } from '@heyclaude/database-types/postgres-types';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
@@ -28,6 +28,7 @@ import { Suspense } from 'react';
 import { CompanyForm } from '@/src/components/core/forms/company-form';
 
 import Loading from './loading';
+import { spaceY, marginBottom, muted } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Provide metadata for the edit-company route and ensure a server-side connection before performing non-deterministic operations.
@@ -168,7 +169,7 @@ async function EditCompanyPageContent({
 
   if (hasError) {
     return (
-      <div className="space-y-6">
+      <div className={`${spaceY.relaxed}`}>
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl">Company unavailable</CardTitle>
@@ -198,10 +199,10 @@ async function EditCompanyPageContent({
   );
 
   return (
-    <div className="space-y-6">
+    <div className={`${spaceY.relaxed}`}>
       <div>
-        <h1 className="mb-2 text-3xl font-bold">Edit Company</h1>
-        <p className="text-muted-foreground">Update your company profile information</p>
+        <h1 className={`${marginBottom.compact} text-3xl font-bold`}>Edit Company</h1>
+        <p className={`${muted.default}`}>Update your company profile information</p>
       </div>
 
       <CompanyForm initialData={company} mode="edit" />

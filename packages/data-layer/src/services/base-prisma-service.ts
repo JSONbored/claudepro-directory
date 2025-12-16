@@ -13,7 +13,9 @@
 import { prisma } from '../prisma/client.ts';
 import { logRpcError } from '../utils/rpc-error-logging.ts';
 import { withSmartCache } from '../utils/request-cache.ts';
-import type { Prisma } from '../../../generators/dist/prisma/index.js';
+// Extract TransactionClient type from prisma.$transaction method
+// This avoids namespace import issues while still getting the correct type
+type TransactionClient = Parameters<Parameters<typeof prisma.$transaction>[0]>[0];
 
 /**
  * Base class for Prisma-based services
@@ -204,7 +206,7 @@ export abstract class BasePrismaService {
    * ```
    */
   protected async transaction<T>(
-    callback: (tx: Prisma.TransactionClient) => Promise<T>
+    callback: (tx: TransactionClient) => Promise<T>
   ): Promise<T> {
     return prisma.$transaction(callback);
   }

@@ -40,8 +40,8 @@
  * ```
  */
 
-import type { Database } from '@heyclaude/database-types';
-import { Constants } from '@heyclaude/database-types';
+import type { experience_level, content_category } from '@heyclaude/data-layer/prisma';
+import { ExperienceLevel, ContentCategory } from '@heyclaude/data-layer/prisma';
 import { ensureStringArray, getMetadata } from '../../../utils/content-helpers.ts';
 import { getCategoryDisplayName } from '../../../utils/category-display-names.ts';
 // Import client-safe utilities directly from content.ts
@@ -69,8 +69,8 @@ import {
   Sparkles,
 } from '../../../icons.tsx';
 import type { ConfigCardProps, ContentItem } from '../../../types/component.types.ts';
-import { BADGE_COLORS, UI_CLASSES } from '../../constants.ts';
-import { COLORS } from '../../../design-tokens/index.ts';
+import { size, weight, iconSize, marginRight, gap, hoverBg } from '../../../design-system/index.ts';
+// COLORS removed - using direct Tailwind utilities
 import { getDisplayTitle } from '../../utils.ts';
 import { toasts } from '../../../client/toast.ts';
 import { BaseCard, type BaseCardProps } from './base-card.tsx';
@@ -108,11 +108,11 @@ export interface GenericConfigCardProps extends ConfigCardProps {
 // Experience level validation helper
 function isExperienceLevel(
   value: unknown
-): value is Database['public']['Enums']['experience_level'] {
-  const EXPERIENCE_LEVEL_VALUES = Constants.public.Enums.experience_level;
+): value is experience_level {
+  const EXPERIENCE_LEVEL_VALUES = Object.values(ExperienceLevel) as readonly experience_level[];
   return (
     typeof value === 'string' &&
-    EXPERIENCE_LEVEL_VALUES.includes(value as Database['public']['Enums']['experience_level'])
+    EXPERIENCE_LEVEL_VALUES.includes(value as experience_level)
   );
 }
 
@@ -133,6 +133,7 @@ export const ConfigCard = memo(
     showBorderBeam,
     searchQuery,
     onAuthRequired,
+    initialBookmarked,
   }: GenericConfigCardProps) => {
     try {
       const displayTitle = getDisplayTitle({
@@ -140,11 +141,11 @@ export const ConfigCard = memo(
         slug: 'slug' in item ? (typeof item.slug === 'string' ? item.slug : null) : null,
         category: 'category' in item && isValidCategory(item.category) ? item.category : null,
       });
-      const cardCategory: Database['public']['Enums']['content_category'] = isValidCategory(
-        item.category ?? Constants.public.Enums.content_category[0]
+      const cardCategory: content_category = isValidCategory(
+        item.category ?? ContentCategory.agents
       )
-        ? ((item.category ?? Constants.public.Enums.content_category[0]) as Database['public']['Enums']['content_category'])
-        : Constants.public.Enums.content_category[0];
+        ? ((item.category ?? ContentCategory.agents) as content_category)
+        : ContentCategory.agents;
       const cardSlug = typeof item.slug === 'string' ? item.slug : null;
       const { togglePin, isPinned } = usePinboard();
       const cardConfig = useComponentCardConfig();
@@ -233,12 +234,12 @@ export const ConfigCard = memo(
       // Track card clicks
       const handleCardClickPulse = useCallback(() => {
         if (!item.slug) return;
-        const category = isValidCategory(item.category ?? Constants.public.Enums.content_category[0])
-          ? (item.category ?? Constants.public.Enums.content_category[0])
-          : Constants.public.Enums.content_category[0];
+        const category = isValidCategory(item.category ?? ContentCategory.agents)
+          ? (item.category ?? ContentCategory.agents)
+          : ContentCategory.agents;
         pulse
           .click({
-            category: category as Database['public']['Enums']['content_category'],
+            category: category as content_category,
             slug: item.slug,
             metadata: {
               action: 'card_click',
@@ -249,7 +250,7 @@ export const ConfigCard = memo(
           })
           .catch((error) => {
             logClientError('ConfigCard: card click pulse failed', normalizeError(error), 'ConfigCard.handleCardClick', {
-              category: (item.category ?? Constants.public.Enums.content_category[0]) as Database['public']['Enums']['content_category'],
+              category: (item.category ?? ContentCategory.agents) as content_category,
               slug: item.slug ?? '',
             });
           });
@@ -265,12 +266,12 @@ export const ConfigCard = memo(
 
           if (hasHighlights && item.slug) {
             hasTrackedHighlight.current = true;
-            const category = isValidCategory(item.category ?? Constants.public.Enums.content_category[0])
-              ? (item.category ?? Constants.public.Enums.content_category[0])
-              : Constants.public.Enums.content_category[0];
+            const category = isValidCategory(item.category ?? ContentCategory.agents)
+              ? (item.category ?? ContentCategory.agents)
+              : ContentCategory.agents;
             pulse
               .search({
-                category: category as Database['public']['Enums']['content_category'],
+                category: category as content_category,
                 slug: item.slug,
                 query: searchQuery.trim(),
                 metadata: {
@@ -288,7 +289,7 @@ export const ConfigCard = memo(
               })
               .catch((error) => {
                 logClientError('ConfigCard: highlight analytics pulse failed', normalizeError(error), 'ConfigCard.handleHighlight', {
-                  category: category as Database['public']['Enums']['content_category'],
+                  category: category as content_category,
                   slug: item.slug ?? '',
                 });
               });
@@ -299,9 +300,9 @@ export const ConfigCard = memo(
       // Compute targetPath early
       const targetPath = item.slug
         ? getContentItemUrl({
-            category: (isValidCategory(item.category ?? Constants.public.Enums.content_category[0])
-              ? (item.category ?? Constants.public.Enums.content_category[0])
-              : Constants.public.Enums.content_category[0]) as Database['public']['Enums']['content_category'],
+            category: (isValidCategory(item.category ?? ContentCategory.agents)
+              ? (item.category ?? ContentCategory.agents)
+              : ContentCategory.agents) as content_category,
             slug: item.slug,
             subcategory:
               'subcategory' in item ? (item.subcategory as string | null | undefined) : undefined,
@@ -314,17 +315,17 @@ export const ConfigCard = memo(
         const url = `${typeof window !== 'undefined' ? window.location.origin : ''}${targetPath}`;
         await copyLink(url);
 
-        const category = isValidCategory(item.category ?? Constants.public.Enums.content_category[0])
-          ? (item.category ?? Constants.public.Enums.content_category[0])
-          : Constants.public.Enums.content_category[0];
+        const category = isValidCategory(item.category ?? ContentCategory.agents)
+          ? (item.category ?? ContentCategory.agents)
+          : ContentCategory.agents;
         pulse
           .copy({
-            category: category as Database['public']['Enums']['content_category'],
+            category: category as content_category,
             slug: item.slug,
           })
           .catch((error) => {
             logClientError('ConfigCard: swipe copy pulse failed', normalizeError(error), 'ConfigCard.handleSwipeLeftCopy', {
-              category: category as Database['public']['Enums']['content_category'],
+              category: category as content_category,
               slug: item.slug ?? undefined,
             });
           });
@@ -361,7 +362,7 @@ export const ConfigCard = memo(
           return;
         }
 
-        const categoryValue = item.category ?? Constants.public.Enums.content_category[0];
+        const categoryValue = item.category ?? ContentCategory.agents;
         if (!isValidCategory(categoryValue)) {
           const normalized = normalizeError(
             'Invalid content type',
@@ -376,7 +377,7 @@ export const ConfigCard = memo(
           return;
         }
 
-        const validatedCategory = categoryValue as Database['public']['Enums']['content_category'];
+        const validatedCategory = categoryValue as content_category;
 
         // User is authenticated - proceed with bookmark action
         try {
@@ -602,7 +603,7 @@ export const ConfigCard = memo(
       const hasRating = ratingData && ratingData.count > 0;
 
       // Extract collection-specific metadata
-      const isCollection = item.category === Constants.public.Enums.content_category[8]; // 'collections'
+      const isCollection = item.category === ContentCategory.collections;
       const collectionType = 'collectionType' in item ? item.collectionType : undefined;
       const collectionDifficulty = 'difficulty' in item ? item.difficulty : undefined;
       const itemCount = 'itemCount' in item ? item.itemCount : undefined;
@@ -646,12 +647,12 @@ export const ConfigCard = memo(
         ...(item.slug ? { viewTransitionSlug: item.slug } : {}),
         onBeforeNavigate: handleCardClickPulse,
         renderTopBadges: () => {
-          const rawCategory = item.category ?? Constants.public.Enums.content_category[0];
-          const category: Database['public']['Enums']['content_category'] = isValidCategory(
+          const rawCategory = item.category ?? ContentCategory.agents;
+          const category: content_category = isValidCategory(
             rawCategory
           )
-            ? (rawCategory as Database['public']['Enums']['content_category'])
-            : Constants.public.Enums.content_category[0];
+            ? (rawCategory as content_category)
+            : ContentCategory.agents;
           return (
             <>
               {showCategory && (
@@ -683,9 +684,15 @@ export const ConfigCard = memo(
                         <UnifiedBadge
                           variant="base"
                           style="outline"
-                          className={`${UI_CLASSES.TEXT_BADGE} ${BADGE_COLORS.collectionType[collectionType as keyof typeof BADGE_COLORS.collectionType] || ''}`}
+                          className={`${size.xs} ${weight.semibold} ${
+                            collectionType === 'starter-kit' ? 'bg-color-badge-collectiontype-starter-kit-bg text-color-badge-collectiontype-starter-kit-text border-color-badge-collectiontype-starter-kit-border' :
+                            collectionType === 'workflow' ? 'bg-color-badge-collectiontype-workflow-bg text-color-badge-collectiontype-workflow-text border-color-badge-collectiontype-workflow-border' :
+                            collectionType === 'advanced-system' ? 'bg-color-badge-collectiontype-advanced-system-bg text-color-badge-collectiontype-advanced-system-text border-color-badge-collectiontype-advanced-system-border' :
+                            collectionType === 'use-case' ? 'bg-color-badge-collectiontype-use-case-bg text-color-badge-collectiontype-use-case-text border-color-badge-collectiontype-use-case-border' :
+                            ''
+                          }`}
                         >
-                          <Layers className={UI_CLASSES.ICON_XS_LEADING} aria-hidden="true" />
+                          <Layers className={`${iconSize.xs} ${marginRight.tight}`} aria-hidden="true" />
                           {COLLECTION_TYPE_LABELS[collectionType as keyof typeof COLLECTION_TYPE_LABELS]}
                         </UnifiedBadge>
                       </div>
@@ -709,7 +716,12 @@ export const ConfigCard = memo(
                           <UnifiedBadge
                             variant="base"
                             style="outline"
-                            className={`${UI_CLASSES.TEXT_BADGE} ${BADGE_COLORS.difficulty[collectionDifficulty]}`}
+                            className={`${size.xs} ${weight.semibold} ${
+                              collectionDifficulty === 'beginner' ? 'bg-color-badge-difficulty-beginner-bg text-color-badge-difficulty-beginner-text border-color-badge-difficulty-beginner-border' :
+                              collectionDifficulty === 'intermediate' ? 'bg-color-badge-difficulty-intermediate-bg text-color-badge-difficulty-intermediate-text border-color-badge-difficulty-intermediate-border' :
+                              collectionDifficulty === 'advanced' ? 'bg-color-badge-difficulty-advanced-bg text-color-badge-difficulty-advanced-text border-color-badge-difficulty-advanced-border' :
+                              ''
+                            }`}
                           >
                             {collectionDifficulty}
                           </UnifiedBadge>
@@ -737,7 +749,7 @@ export const ConfigCard = memo(
                         <UnifiedBadge
                           variant="base"
                           style="outline"
-                          className={`${UI_CLASSES.BADGE_METADATA} ${UI_CLASSES.TEXT_BADGE}`}
+                          className={`border-muted-foreground/20 text-muted-foreground ${size.xs} ${weight.semibold}`}
                         >
                           {itemCount} {itemCount === 1 ? 'item' : 'items'}
                         </UnifiedBadge>
@@ -756,25 +768,20 @@ export const ConfigCard = memo(
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div
-                        className="isolate"
-                        style={{
-                          color: COLORS.semantic.featured.dark.text,
-                          borderColor: COLORS.semantic.featured.dark.border,
-                          background: `linear-gradient(to right, ${COLORS.semantic.featured.dark.gradientFrom}, ${COLORS.semantic.featured.dark.gradientTo})`,
-                        }}
+                        className="isolate text-color-featured-text-dark border-color-featured-border bg-gradient-to-r from-color-featured-gradient-from to-color-featured-gradient-to"
                       >
                         <UnifiedBadge
                           variant="base"
                           style="secondary"
-                          className={`fade-in slide-in-from-top-2 animate-in ${UI_CLASSES.SPACE_TIGHT} font-semibold shadow-sm transition-all duration-300 hover:from-amber-500/15 hover:to-yellow-500/15 hover:shadow-md`}
+                          className={`fade-in slide-in-from-top-2 animate-in ${gap.tight} font-semibold shadow-sm transition-all duration-300 hover:from-amber-500/15 hover:to-yellow-500/15 hover:shadow-md`}
                         >
                           {featuredRank && featuredRank <= 3 ? (
                             <Award
-                              className={`${UI_CLASSES.ICON_XS} text-amber-500`}
+                              className={`${iconSize.xs} text-amber-500`}
                               aria-hidden="true"
                             />
                           ) : (
-                            <Sparkles className={UI_CLASSES.ICON_XS} aria-hidden="true" />
+                            <Sparkles className={iconSize.xs} aria-hidden="true" />
                           )}
                           Featured
                           {featuredRank && <span className="text-xs opacity-75">#{featuredRank}</span>}
@@ -860,16 +867,16 @@ export const ConfigCard = memo(
                     <Button
                       variant="ghost"
                       size="sm"
-                      className={`${UI_CLASSES.ICON_BUTTON_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
+                      className={`h-7 w-7 p-0 ${hoverBg.default} hover:text-accent`}
                       onClick={(e) => {
                         e.stopPropagation();
                         if (!item.slug) return;
-                        const category = isValidCategory(item.category ?? Constants.public.Enums.content_category[0])
-                          ? (item.category ?? Constants.public.Enums.content_category[0])
-                          : Constants.public.Enums.content_category[0];
+                        const category = isValidCategory(item.category ?? ContentCategory.agents)
+                          ? (item.category ?? ContentCategory.agents)
+                          : ContentCategory.agents;
                         pulse
                           .click({
-                            category: category as Database['public']['Enums']['content_category'],
+                            category: category as content_category,
                             slug: item.slug,
                             metadata: {
                               action: 'external_link',
@@ -879,7 +886,7 @@ export const ConfigCard = memo(
                           })
                           .catch((error) => {
                             logClientError('ConfigCard: GitHub link click pulse failed', normalizeError(error), 'ConfigCard.handleGitHubClick', {
-                              category: category as Database['public']['Enums']['content_category'],
+                              category: category as content_category,
                               slug: item.slug ?? undefined,
                             });
                           });
@@ -899,7 +906,7 @@ export const ConfigCard = memo(
                       }}
                       aria-label={`View ${displayTitle} repository on GitHub`}
                     >
-                      <Github className={UI_CLASSES.ICON_XS} aria-hidden="true" />
+                      <Github className={iconSize.xs} aria-hidden="true" />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -917,16 +924,16 @@ export const ConfigCard = memo(
                       <Button
                         variant="ghost"
                         size="sm"
-                        className={`${UI_CLASSES.ICON_BUTTON_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
+                        className={`h-7 w-7 p-0 ${hoverBg.default} hover:text-accent`}
                         onClick={(e) => {
                           e.stopPropagation();
                           if (!item.slug) return;
-                          const category = isValidCategory(item.category ?? Constants.public.Enums.content_category[0])
-                            ? (item.category ?? Constants.public.Enums.content_category[0])
-                            : Constants.public.Enums.content_category[0];
+                          const category = isValidCategory(item.category ?? ContentCategory.agents)
+                            ? (item.category ?? ContentCategory.agents)
+                            : ContentCategory.agents;
                           pulse
                             .click({
-                              category: category as Database['public']['Enums']['content_category'],
+                              category: category as content_category,
                               slug: item.slug,
                               metadata: {
                                 action: 'external_link',
@@ -957,7 +964,7 @@ export const ConfigCard = memo(
                         }}
                         aria-label={`View ${displayTitle} documentation`}
                       >
-                        <ExternalLink className={UI_CLASSES.ICON_XS} aria-hidden="true" />
+                        <ExternalLink className={iconSize.xs} aria-hidden="true" />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
@@ -977,11 +984,12 @@ export const ConfigCard = memo(
                 {item.slug && (
                   <BookmarkButton
                     contentType={
-                      isValidCategory(item.category ?? Constants.public.Enums.content_category[0])
-                        ? (item.category as Database['public']['Enums']['content_category'])
-                        : Constants.public.Enums.content_category[0]
+                      isValidCategory(item.category ?? ContentCategory.agents)
+                        ? (item.category as content_category)
+                        : ContentCategory.agents
                     }
                     contentSlug={item.slug}
+                    {...(initialBookmarked !== undefined ? { initialBookmarked } : {})}
                     {...(onAuthRequired ? { onAuthRequired } : {})}
                   />
                 )}
@@ -1014,7 +1022,7 @@ export const ConfigCard = memo(
                     <Button
                       variant={pinned ? 'secondary' : 'ghost'}
                       size="sm"
-                      className={`${UI_CLASSES.ICON_BUTTON_SM} ${pinned ? '' : UI_CLASSES.BUTTON_GHOST_ICON}`}
+                      className={`h-7 w-7 p-0 ${pinned ? '' : `${hoverBg.default} hover:text-accent`}`}
                       onClick={handlePinToggle}
                       aria-label={pinned ? 'Unpin from pinboard' : 'Pin to pinboard'}
                     >
@@ -1026,9 +1034,9 @@ export const ConfigCard = memo(
                             animate={MICROINTERACTIONS.iconTransition.animate}
                             exit={MICROINTERACTIONS.iconTransition.exit}
                             transition={MICROINTERACTIONS.iconTransition.transition}
-                            style={{ color: 'var(--claude-orange)' }}
+                            className="text-color-accent-primary"
                           >
-                            <Pin className={UI_CLASSES.ICON_XS} fill="currentColor" aria-hidden="true" />
+                            <Pin className={iconSize.xs} fill="currentColor" aria-hidden="true" />
                           </motion.div>
                         ) : (
                           <motion.div
@@ -1038,7 +1046,7 @@ export const ConfigCard = memo(
                             exit={MICROINTERACTIONS.iconTransition.exit}
                             transition={MICROINTERACTIONS.iconTransition.transition}
                           >
-                            <Pin className={UI_CLASSES.ICON_XS} aria-hidden="true" />
+                            <Pin className={iconSize.xs} aria-hidden="true" />
                           </motion.div>
                         )}
                       </AnimatePresence>
@@ -1065,7 +1073,7 @@ export const ConfigCard = memo(
                     <Button
                       variant="ghost"
                       size="sm"
-                      className={`${UI_CLASSES.ICON_BUTTON_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
+                      className={`h-7 w-7 p-0 ${hoverBg.default} hover:text-accent`}
                       onClick={(event) => {
                         event.stopPropagation();
                         copyInlineValue(
@@ -1086,7 +1094,7 @@ export const ConfigCard = memo(
                       }}
                       aria-label="Copy configuration JSON"
                     >
-                      <FileJson className={UI_CLASSES.ICON_XS} aria-hidden="true" />
+                      <FileJson className={iconSize.xs} aria-hidden="true" />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -1110,14 +1118,14 @@ export const ConfigCard = memo(
                           errorMessage="Failed to copy link"
                           variant="ghost"
                           size="sm"
-                          className={UI_CLASSES.ICON_BUTTON_SM}
-                          iconClassName={UI_CLASSES.ICON_XS}
+                          className="h-7 w-7 p-0"
+                          iconClassName={iconSize.xs}
                           ariaLabel={`Copy link to ${displayTitle}`}
                           onCopySuccess={() => {
-                            const category: Database['public']['Enums']['content_category'] =
-                              isValidCategory(item.category ?? Constants.public.Enums.content_category[0])
-                                ? (item.category as Database['public']['Enums']['content_category'])
-                                : Constants.public.Enums.content_category[0];
+                            const category: content_category =
+                              isValidCategory(item.category ?? ContentCategory.agents)
+                                ? (item.category as content_category)
+                                : ContentCategory.agents;
                             if (item.slug) {
                               pulse.copy({ category, slug: item.slug }).catch((error) => {
                                 logClientError('ConfigCard: copy button pulse failed', normalizeError(error), 'ConfigCard.handleCopyButton', {
@@ -1153,7 +1161,7 @@ export const ConfigCard = memo(
                     <Button
                       variant="ghost"
                       size="sm"
-                      className={`${UI_CLASSES.ICON_BUTTON_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
+                      className={`h-7 w-7 p-0 ${hoverBg.default} hover:text-accent`}
                       onClick={(e) => {
                         e.stopPropagation();
                         if (isSafeCategoryAndSlug(item.category, item.slug)) {
@@ -1176,7 +1184,7 @@ export const ConfigCard = memo(
                         }}
                         aria-label={`View details for ${displayTitle}${cardConfig.showViewCount && viewCount !== undefined && typeof viewCount === 'number' ? ` - ${formatViewCount(viewCount)}` : ''}`}
                       >
-                        <Eye className={UI_CLASSES.ICON_XS} aria-hidden="true" />
+                        <Eye className={iconSize.xs} aria-hidden="true" />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>

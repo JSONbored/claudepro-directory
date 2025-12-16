@@ -17,7 +17,8 @@ declare namespace Deno {
  * Provided by Supabase Edge Runtime
  */
 // Make this a module by importing something (even if empty)
-import type {} from '@heyclaude/database-types';
+// Using postgres-types path since main database-types export was removed
+import type {} from '@heyclaude/database-types/postgres-types';
 
 declare global {
   // deno-lint-ignore no-var

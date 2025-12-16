@@ -9,12 +9,12 @@
  * - claudepro://category/{category}/{format}
  * - claudepro://sitewide/{format}
  *
- * Implementation: MCP Resources → Next.js API Routes → Supabase Database
+ * Implementation: MCP Resources → Next.js API Routes → Prisma ORM
  * Benefits: 95%+ cache hit rate, 10-100x DB query reduction, CDN-level caching
  */
 
-import type { Database } from '@heyclaude/database-types';
-import { Constants } from '@heyclaude/database-types';
+import type { content_category } from '@heyclaude/data-layer/prisma';
+import { ContentCategory } from '@heyclaude/data-layer/prisma';
 import { logError } from '@heyclaude/shared-runtime/logging.ts';
 import { McpErrorCode, createErrorResponse } from '../lib/errors.ts';
 import { sanitizeString } from '../lib/utils.ts';
@@ -39,10 +39,8 @@ interface McpResource {
  */
 function isValidContentCategory(
   value: string
-): value is Database['public']['Enums']['content_category'] {
-  return Constants.public.Enums.content_category.includes(
-    value as Database['public']['Enums']['content_category']
-  );
+): value is content_category {
+  return ContentCategory.includes(value as content_category);
 }
 
 /**

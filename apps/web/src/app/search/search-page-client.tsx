@@ -19,9 +19,10 @@ import {
 } from '@heyclaude/web-runtime/search';
 import { type FilterState } from '@heyclaude/web-runtime/types/component.types';
 import { usePathname } from 'next/navigation';
-import { Suspense, useCallback } from 'react';
+import { Suspense, useCallback, useMemo } from 'react';
 
 import { useAuthModal } from '@/src/hooks/use-auth-modal';
+import { spaceY, padding } from "@heyclaude/web-runtime/design-system";
 
 export interface SearchPageClientProps {
   /** Available authors for filters */
@@ -34,10 +35,9 @@ export interface SearchPageClientProps {
 
 /**
  * SearchPageClient - Unified search for /search page
- * @param root0
- * @param root0.availableTags
- * @param root0.availableAuthors
- * @param root0.availableCategories
+ * 
+ * React Compiler automatically handles memoization (reactCompiler: true in next.config.mjs).
+ * We only use useMemo/useCallback here to ensure stable prop references for child components.
  */
 export function SearchPageClient({
   availableAuthors = [],
@@ -47,11 +47,23 @@ export function SearchPageClient({
   const pulse = usePulse();
   const { openAuthModal } = useAuthModal();
   const pathname = usePathname();
-  const searchFunction = useSearchAPI({
-    apiPath: '/api/search',
-    limit: 50,
-    offset: 0,
-  });
+  
+  // OPTIMIZATION: Memoize prop arrays to ensure stable references
+  const stableAuthors = useMemo(() => availableAuthors, [availableAuthors]);
+  const stableCategories = useMemo(() => availableCategories, [availableCategories]);
+  const stableTags = useMemo(() => availableTags, [availableTags]);
+  
+  // OPTIMIZATION: Memoize search API configuration to prevent recreation
+  const searchApiConfig = useMemo(
+    () => ({
+      apiPath: '/api/search',
+      limit: 50,
+      offset: 0,
+    }),
+    []
+  );
+  
+  const searchFunction = useSearchAPI(searchApiConfig);
 
   // Handle search with analytics
   const handleSearch = useCallback(
@@ -87,10 +99,16 @@ export function SearchPageClient({
       valueProposition: 'Sign in to save bookmarks',
     });
   }, [openAuthModal, pathname]);
+  
+  // OPTIMIZATION: Memoize default filters to prevent recreation
+  const defaultFilters = useMemo(() => ({}), []);
+  
+  // OPTIMIZATION: Memoize default query to prevent recreation
+  const defaultQuery = useMemo(() => '', []);
 
   return (
-    <SearchProvider defaultFilters={{}} defaultQuery="" onSearch={handleSearch}>
-      <div className="space-y-6">
+    <SearchProvider defaultFilters={defaultFilters} defaultQuery={defaultQuery} onSearch={handleSearch}>
+      <div className={`${spaceY.relaxed}`}>
         {/* Search Bar */}
         <SearchBar
           placeholder="Search agents, MCP servers, rules, commands..."
@@ -100,19 +118,19 @@ export function SearchPageClient({
 
         {/* Search Filters */}
         <Suspense
-          fallback={<div className="text-muted-foreground p-4 text-center">Loading filters...</div>}
+          fallback={<div className={`text-muted-foreground ${padding.default} text-center`}>Loading filters...</div>}
         >
           <SearchFilters
-            availableAuthors={availableAuthors}
-            availableCategories={availableCategories}
-            availableTags={availableTags}
+            availableAuthors={stableAuthors}
+            availableCategories={stableCategories}
+            availableTags={stableTags}
           />
         </Suspense>
 
         {/* Search Results */}
         <Suspense
           fallback={
-            <div className="text-muted-foreground p-8 text-center">Loading search results...</div>
+            <div className={`text-muted-foreground ${padding.relaxed} text-center`}>Loading search results...</div>
           }
         >
           <SearchResults onAuthRequired={handleAuthRequired} showActions showCategory />

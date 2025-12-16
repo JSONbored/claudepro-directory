@@ -1,4 +1,4 @@
-import type { UserActivityTimelineItem } from '@heyclaude/data-layer/types/composite-types';
+import type { UserActivityTimelineItem } from '@heyclaude/database-types/postgres-types';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
@@ -15,7 +15,6 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  UI_CLASSES,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
@@ -27,6 +26,7 @@ import { SignInButton } from '@/src/components/core/auth/sign-in-button';
 import { ActivityTimeline } from '@/src/components/features/user-activity/activity-timeline';
 
 import Loading from './loading';
+import { cluster, iconSize, spaceY, marginBottom, gap, paddingBottom, marginTop } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Produce the Metadata for the account Activity route.
@@ -108,7 +108,7 @@ async function ActivityPageContent({ reqLogger }: { reqLogger: ReturnType<typeof
       'ActivityPage: unauthenticated access attempt detected'
     );
     return (
-      <div className="space-y-6">
+      <div className={`${spaceY.relaxed}`}>
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl">Sign in required</CardTitle>
@@ -184,7 +184,7 @@ async function ActivityPageContent({ reqLogger }: { reqLogger: ReturnType<typeof
   // Only show global fallback when both fail
   if (!hasSummary && !hasTimeline) {
     return (
-      <div className="space-y-6">
+      <div className={`${spaceY.relaxed}`}>
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl">Activity unavailable</CardTitle>
@@ -222,28 +222,28 @@ async function ActivityPageContent({ reqLogger }: { reqLogger: ReturnType<typeof
   );
 
   return (
-    <div className="space-y-6">
+    <div className={`${spaceY.relaxed}`}>
       {/* Header */}
       <div>
-        <h1 className="mb-2 text-3xl font-bold">Activity</h1>
+        <h1 className={`${marginBottom.compact} text-3xl font-bold`}>Activity</h1>
         <p className="text-muted-foreground">Your contribution history and community activity</p>
       </div>
 
       {/* Stats Overview - only render if summary is available */}
       {summary == null ? null : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className={`grid grid-cols-1 ${gap.default} md:grid-cols-2`}>
           <Card>
-            <CardHeader className="pb-3">
+            <CardHeader className={`${paddingBottom.compact}`}>
               <CardTitle className="text-sm">Submissions</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <GitPullRequest className={`${UI_CLASSES.ICON_MD} ${UI_CLASSES.ICON_INFO}`} />
+              <div className={cluster.compact}>
+                <GitPullRequest className={`${iconSize.md} text-blue-500 dark:text-blue-400`} />
                 <span className="text-2xl font-bold">
                   {summary.merged_submissions}/{summary.total_submissions}
                 </span>
               </div>
-              <p className="text-muted-foreground mt-1 text-xs">Merged</p>
+              <p className={`text-muted-foreground ${marginTop.tight} text-xs`}>Merged</p>
             </CardContent>
           </Card>
         </div>

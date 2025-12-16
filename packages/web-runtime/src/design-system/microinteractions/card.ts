@@ -15,7 +15,7 @@
 import { type Transition } from 'motion/react';
 
 import { SPRING } from '../animations/spring.ts';
-import { COLORS } from '../../design-tokens/index.ts';
+// COLORS removed - using CSS variables for dynamic Framer Motion animations
 
 /**
  * Spring transitions for card interactions
@@ -39,9 +39,9 @@ export const CARD = {
    * Requires parent container with perspective: '1000px' and transformStyle: 'preserve-3d'
    */
   hover: {
-    // Use semantic primary color token - theme-aware (component must use useTheme hook)
-    // Note: This is a static value - components using this should override with theme-aware value
-    borderColor: COLORS.semantic.primary.dark.base, // Orange border from semantic tokens
+    // Using CSS variable for border color (already defined in globals.css @theme)
+    // This is used in Framer Motion whileHover, so we use CSS variable for dynamic theme support
+    borderColor: 'var(--claude-orange)', // Orange border - matches oklch(74% 0.2 35)
     // Use filter: drop-shadow() for performance (GPU-accelerated, not boxShadow)
     filter: 'drop-shadow(0 8px 16px rgba(0, 0, 0, 0.15))',
     scale: 1.01, // Subtle scale (reduced from 1.02)

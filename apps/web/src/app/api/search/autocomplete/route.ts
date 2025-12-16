@@ -23,7 +23,7 @@
 import 'server-only';
 
 import { SearchService } from '@heyclaude/data-layer';
-import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
+import type { GetSearchSuggestionsFormattedArgs } from '@heyclaude/database-types/postgres-types';
 import { createErrorResponse, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   buildCacheHeaders,
@@ -47,11 +47,10 @@ async function getCachedSearchSuggestionsFormatted(query: string, limit: number)
   cacheLife('quarter'); // 15min stale, 5min revalidate, 2hr expire
 
   const service = new SearchService();
-  const rpcArgs: DatabaseGenerated['public']['Functions']['get_search_suggestions_formatted']['Args'] =
-    {
-      p_limit: limit,
-      p_query: query,
-    };
+  const rpcArgs: GetSearchSuggestionsFormattedArgs = {
+    p_limit: limit,
+    p_query: query,
+  };
 
   return await service.getSearchSuggestionsFormatted(rpcArgs);
 }

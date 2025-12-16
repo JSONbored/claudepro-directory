@@ -12,17 +12,16 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  NavLink,
-  UI_CLASSES,
+  NavLink
 } from '@heyclaude/web-runtime/ui';
 import { FolderOpen } from '@heyclaude/web-runtime/icons';
 import { motion } from 'motion/react';
-import { MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
+import { MICROINTERACTIONS, between, paddingY, marginBottom, gap } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
-import type { Database } from '@heyclaude/database-types';
+import type { GetUserProfileReturns } from '@heyclaude/database-types/postgres-types';
 
 export interface ProfileCollectionsSectionProps {
-  collections: Database['public']['Functions']['get_user_profile']['Returns']['collections'];
+  collections: GetUserProfileReturns['collections'];
   slug: string;
   getSafeCollectionUrl: (userSlug: string, collectionSlug: string) => null | string;
 }
@@ -40,8 +39,8 @@ export function ProfileCollectionsSection({
   if (!collections || collections.length === 0) {
     return (
       <Card>
-        <CardContent className="flex flex-col items-center py-12">
-          <FolderOpen className="text-muted-foreground mb-4 h-12 w-12" />
+        <CardContent className={`flex flex-col items-center ${paddingY.section}`}>
+          <FolderOpen className={`text-muted-foreground ${marginBottom.default} h-12 w-12`} />
           <p className="text-muted-foreground">No public collections yet</p>
         </CardContent>
       </Card>
@@ -49,7 +48,7 @@ export function ProfileCollectionsSection({
   }
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2">
+    <div className={`grid ${gap.default} sm:grid-cols-2`}>
       {collections
         .filter(
           (
@@ -75,7 +74,7 @@ export function ProfileCollectionsSection({
               whileTap={shouldReduceMotion ? {} : MICROINTERACTIONS.card.tap}
               transition={MICROINTERACTIONS.card.transition}
             >
-              <Card className={UI_CLASSES.CARD_INTERACTIVE}>
+              <Card className="card-gradient transition-smooth group cursor-pointer border-border/50">
                 <NavLink href={safeCollectionUrl}>
                   <CardHeader>
                     <CardTitle className="text-lg">{collection.name}</CardTitle>
@@ -87,7 +86,7 @@ export function ProfileCollectionsSection({
                   </CardHeader>
                   <CardContent>
                     <div
-                      className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} text-sm`}
+                      className={`${between.center} text-sm`}
                     >
                       <span className="text-muted-foreground">
                         {collection.item_count ?? 0}{' '}

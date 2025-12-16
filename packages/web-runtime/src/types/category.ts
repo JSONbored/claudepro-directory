@@ -1,4 +1,8 @@
-import type { config_format, primary_action_type } from '@heyclaude/data-layer/prisma';
+import type {
+  config_format,
+  primary_action_type,
+  content_category,
+} from '@heyclaude/data-layer/prisma';
 import type { LucideIcon } from 'lucide-react';
 
 export type SectionId =
@@ -89,8 +93,6 @@ export interface UnifiedCategoryConfig<TId extends string = string> {
   contentLoader: string;
   [key: string]: unknown;
 }
-
-import type { content_category } from '@heyclaude/data-layer/prisma';
 
 export interface CategoryStatsConfig {
   categoryId: content_category;

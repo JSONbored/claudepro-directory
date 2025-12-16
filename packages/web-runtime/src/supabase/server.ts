@@ -9,11 +9,10 @@ import { env } from '@heyclaude/shared-runtime/schemas/env';
 
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-import type { Database } from '@heyclaude/database-types';
 import { logger } from '../logger.ts';
 import { normalizeError } from '../errors.ts';
 
-type SupabaseServerClient = ReturnType<typeof createServerClient<Database>>;
+type SupabaseServerClient = ReturnType<typeof createServerClient>;
 
 export async function createSupabaseServerClient(): Promise<SupabaseServerClient> {
   const cookieStore = await cookies();
@@ -35,7 +34,7 @@ export async function createSupabaseServerClient(): Promise<SupabaseServerClient
     );
   }
 
-  return createServerClient<Database>(supabaseUrl, supabaseAnonKey, {
+  return createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
       getAll() {
         const allCookies = cookieStore.getAll();

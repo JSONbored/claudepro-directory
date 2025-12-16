@@ -4,15 +4,17 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { performance } from 'node:perf_hooks';
 
-import  { type Database, type Json } from '@heyclaude/database-types';
+import type { contentModel, JsonValue } from '@heyclaude/database-types/prisma';
 
-import { computeHash, hasHashChanged, setHash } from '../toolkit/cache.js';
-import { callEdgeFunction } from '../toolkit/edge.js';
-import { ensureEnvVars } from '../toolkit/env.js';
-import { logger } from '../toolkit/logger.js';
-import { createServiceRoleClient, DEFAULT_SUPABASE_URL } from '../toolkit/supabase.js';
+type Json = JsonValue;
 
-type McpRow = Database['public']['Tables']['content']['Row'] & { category: 'mcp' };
+import { computeHash, hasHashChanged, setHash } from '../toolkit/cache.ts';
+import { callEdgeFunction } from '../toolkit/edge.ts';
+import { ensureEnvVars } from '../toolkit/env.ts';
+import { logger } from '../toolkit/logger.ts';
+import { createServiceRoleClient, DEFAULT_SUPABASE_URL } from '../toolkit/supabase.ts';
+
+type McpRow = contentModel & { category: 'mcp' };
 
 interface McpMetadata {
   [key: string]: Json | undefined;

@@ -4,12 +4,11 @@
  * Get content filtered by specific tags with AND/OR logic support.
  */
 
-import type { Database } from '@heyclaude/database-types';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { ContentPaginatedItem, GetContentPaginatedReturns } from '@heyclaude/database-types/postgres-types';
+import { ContentService } from '@heyclaude/data-layer/services/content.ts';
 import { logError } from '@heyclaude/shared-runtime/logging.ts';
 import type { GetContentByTagInput } from '../lib/types.ts';
 
-type ContentPaginatedItem = Database['public']['CompositeTypes']['content_paginated_item'];
 
 /**
  * Fetches content matching the provided tags (with optional AND/OR logic and category) and returns a human-readable summary plus structured metadata.
@@ -24,10 +23,10 @@ type ContentPaginatedItem = Database['public']['CompositeTypes']['content_pagina
  *   - `_meta`: Structured metadata including `items` (formatted results with slug, title, category, truncated description, tags, matchingTags, author, dateAdded), `tags`, `logic`, `category` (or `'all'`), and `count` (number of returned items).
  */
 export async function handleGetContentByTag(
-  supabase: SupabaseClient<Database>,
   input: GetContentByTagInput
 ) {
   const { tags, logic, category, limit } = input;
+  const contentService = new ContentService();
 
   // Use get_content_paginated with proper parameters
   const rpcArgs = {
@@ -38,17 +37,15 @@ export async function handleGetContentByTag(
     p_limit: limit,
     p_offset: 0,
   };
-  const { data, error } = await supabase.rpc('get_content_paginated', rpcArgs);
-
-  if (error) {
-    // Use dbQuery serializer for consistent database query formatting
-    await logError('RPC call failed in getContentByTag', {
-      dbQuery: {
-        rpcName: 'get_content_paginated',
-        args: rpcArgs, // Will be redacted by Pino's redact config
-      },
+  
+  let data: GetContentPaginatedReturns;
+  try {
+    data = await contentService.getContentPaginated(rpcArgs);
+  } catch (error) {
+    await logError('ContentService.getContentPaginated failed in getContentByTag', {
+      args: rpcArgs,
     }, error);
-    throw new Error(`Failed to fetch content by tags: ${error.message}`);
+    throw new Error(`Failed to fetch content by tags: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 
   // Extract items from paginated result

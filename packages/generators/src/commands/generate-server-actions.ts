@@ -5,14 +5,14 @@ import { fileURLToPath } from 'node:url';
 import { createJiti } from 'jiti';
 import ora from 'ora';
 
-import { ensureEnvVars } from '../toolkit/env.js';
+import { ensureEnvVars } from '../toolkit/env.ts';
 import {
   type CompositeTypeAttribute,
   type FunctionMeta,
   getDatabaseMeta,
-} from '../toolkit/introspection.js';
-import { logger } from '../toolkit/logger.js';
-import { mapPostgresTypeToZod } from '../toolkit/zod-mapper.js';
+} from '../toolkit/introspection.ts';
+import { logger } from '../toolkit/logger.ts';
+import { mapPostgresTypeToZod } from '../toolkit/zod-mapper.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const SCRIPT_DIR = join(__filename, '..');
@@ -108,6 +108,13 @@ export async function runGenerateServerActions(targetAction?: string) {
 
 function toKebabCase(str: string) {
   return str.replaceAll(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+}
+
+function toPascalCase(str: string): string {
+  return str
+    .split('_')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join('');
 }
 
 
@@ -235,12 +242,15 @@ async function generateActionFile(
 
   // Legacy: invalidateCacheConfigKeys is deprecated - migrate to revalidateTags in actions.config.ts
 
+  // Generate import for return type from Prisma-generated postgres-types
+  const returnTypeImport = `import type { ${toPascalCase(config.rpc)}Returns } from '@heyclaude/database-types/postgres-types';`;
+  
   const imports = [
     "import { z } from 'zod';",
     "import { authedAction } from './safe-action';",
     "import { runRpc } from './run-rpc-instance';",
     // "import { logActionFailure } from '../errors';", // Removed - Lazy imported
-    "import type { Database } from '@heyclaude/database-types';",
+    returnTypeImport,
   ];
 
   const hasRevalidatePath = config.revalidatePaths && config.revalidatePaths.length > 0;
@@ -283,7 +293,7 @@ export const ${actionName} = authedAction
   .inputSchema(${inputSchemaRef})
   .action(async ({ parsedInput, ctx }) => {
     try {
-      const rawResult = await runRpc<Database['public']['Functions']['${config.rpc}']['Returns']>(
+      const rawResult = await runRpc<${toPascalCase(config.rpc)}Returns>(
         '${config.rpc}',
         {
           ${rpcArgs.join(',\n          ')}
@@ -297,7 +307,7 @@ export const ${actionName} = authedAction
       ${
         config.returnStyle === 'first_row'
           ? `
-      const result = (Array.isArray(rawResult) ? rawResult[0] : rawResult) as Database['public']['Functions']['${config.rpc}']['Returns'] extends (infer U)[] ? U : Database['public']['Functions']['${config.rpc}']['Returns'];
+      const result = (Array.isArray(rawResult) ? rawResult[0] : rawResult) as ${toPascalCase(config.rpc)}Returns extends (infer U)[] ? U : ${toPascalCase(config.rpc)}Returns;
       `
           : `
       const result = rawResult;

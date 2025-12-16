@@ -13,11 +13,12 @@
 
 import { STAGGER } from '../../design-system/index.ts';
 import { Check, ChevronRight, Circle } from '../../icons.tsx';
-import { DIMENSIONS, POSITION_PATTERNS, UI_CLASSES } from '../constants.ts';
+import { DIMENSIONS, POSITION_PATTERNS } from '../constants.ts';
+import { iconSize } from '../../design-system/index.ts';
 import { cn } from '../utils.ts';
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { motion } from 'motion/react';
-import type * as React from 'react';
+import * as React from 'react';
 
 const DropdownMenu = DropdownMenuPrimitive.Root;
 
@@ -119,37 +120,29 @@ const DropdownMenuContent = ({
 };
 DropdownMenuContent.displayName = DropdownMenuPrimitive.Content.displayName;
 
-const DropdownMenuItem = ({
-  className,
-  inset,
-  ref,
-  ...props
-}: React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Item> & {
-  inset?: boolean;
-} & {
-  ref?: React.RefObject<React.ElementRef<typeof DropdownMenuPrimitive.Item> | null>;
-}) => {
-  // Item animation variants for stagger effect
-  const item = {
-    hidden: { opacity: 0, x: -8 },
-    show: { opacity: 1, x: 0 },
-  };
-
+const DropdownMenuItem = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.Item>,
+  React.PropsWithChildren<
+    Omit<React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Item>, 'children'> & {
+      inset?: boolean;
+    }
+  >
+>(({ className, inset, children, ...props }, ref) => {
   return (
-    <DropdownMenuPrimitive.Item ref={ref} asChild={true} {...props}>
-      <motion.div
-        className={cn(
-          'relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-orange-500/5 data-disabled:pointer-events-none data-disabled:opacity-50',
-          inset && 'pl-8',
-          className
-        )}
-        variants={item}
-      >
-        {props.children}
-      </motion.div>
+    <DropdownMenuPrimitive.Item
+      ref={ref}
+      className={cn(
+        'relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-orange-500/5 data-disabled:pointer-events-none data-disabled:opacity-50',
+        'animate-in fade-in slide-in-from-left-2 duration-200',
+        inset && 'pl-8',
+        className
+      )}
+      {...props}
+    >
+      {children}
     </DropdownMenuPrimitive.Item>
   );
-};
+});
 DropdownMenuItem.displayName = DropdownMenuPrimitive.Item.displayName;
 
 const DropdownMenuCheckboxItem = ({
@@ -174,7 +167,7 @@ const DropdownMenuCheckboxItem = ({
       className={`${POSITION_PATTERNS.ABSOLUTE_LEFT_ICON} flex h-3.5 w-3.5 items-center justify-center`}
     >
       <DropdownMenuPrimitive.ItemIndicator>
-        <Check className={UI_CLASSES.ICON_SM} />
+        <Check className={iconSize.sm} />
       </DropdownMenuPrimitive.ItemIndicator>
     </span>
     {children}

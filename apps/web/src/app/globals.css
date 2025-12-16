@@ -56,107 +56,12 @@
      COLOR DEFINITIONS - Both Themes
      ======================================== */
 
-  /* Dark Mode Colors */
-  --dark-bg-primary: oklch(24% 0.008 60);
-  --dark-bg-secondary: oklch(28% 0.006 60);
-  --dark-bg-tertiary: oklch(32% 0.008 60);
-  --dark-bg-quaternary: oklch(36% 0.009 60);
-  --dark-bg-selected: oklch(40% 0.01 60);
-  --dark-bg-code: oklch(12% 0.003 60);
-  --dark-bg-overlay: oklch(18% 0.005 0 / 0.8);
-
-  --dark-text-primary: oklch(94% 0.005 60);
-  --dark-text-secondary: oklch(78% 0.008 60);
-  --dark-text-tertiary: oklch(
-    72% 0.01 60
-  ); /* Increased from 69% to 72% for improved WCAG AA contrast (4.5:1 minimum) */
-  --dark-text-disabled: oklch(57% 0.012 60);
-  --dark-text-inverse: oklch(100% 0 0);
-
-  --dark-border-default: oklch(30% 0.005 60 / 0.5);
-  --dark-border-light: oklch(28% 0.005 60 / 0.3);
-  --dark-border-medium: oklch(34% 0.008 60 / 0.6);
-  --dark-border-strong: oklch(74% 0.2 35);
-
-  /* Light Mode Colors - Claude Desktop Light */
-  --light-bg-primary: oklch(99% 0.003 90);
-  --light-bg-secondary: oklch(97.5% 0.005 85);
-  --light-bg-tertiary: oklch(96% 0.007 80);
-  --light-bg-quaternary: oklch(94% 0.008 75);
-  --light-bg-selected: oklch(92% 0.025 42);
-  --light-bg-code: oklch(98% 0.004 85);
-  --light-bg-overlay: oklch(98% 0.003 90 / 0.9);
-
-  --light-text-primary: oklch(18% 0.014 75);
-  --light-text-secondary: oklch(42% 0.012 70);
-  --light-text-tertiary: oklch(
-    44% 0.01 65
-  ); /* Decreased from 67% to 44% for improved WCAG AA contrast (4.5:1 minimum) on light backgrounds */
-  --light-text-disabled: oklch(68% 0.008 60);
-  --light-text-inverse: oklch(100% 0 0);
-
-  --light-border-default: oklch(92% 0.006 75);
-  --light-border-light: oklch(95% 0.004 80);
-  --light-border-medium: oklch(88% 0.008 70);
-  --light-border-strong: oklch(70% 0.2 35);
-
   /* Shared Brand Colors - EXACT match to logo icon (#F97316 / #FB923C range) */
   --claude-orange: oklch(74% 0.2 35);
   --claude-orange-hover: oklch(78% 0.19 35);
   --claude-orange-active: oklch(70% 0.21 35);
   --claude-orange-light: oklch(82% 0.17 37);
   --claude-orange-muted: oklch(65% 0.18 33);
-
-  /* Light mode adjustments for orange */
-  --light-accent: oklch(70% 0.2 35);
-  --light-accent-hover: oklch(54% 0.17 40);
-  --light-accent-active: oklch(50% 0.175 39);
-  --light-accent-subtle: oklch(95% 0.035 42);
-
-  /* Semantic Colors - Dark Mode */
-  --dark-success: oklch(72% 0.19 145); /* Increased from 64% for WCAG AA contrast (4.5:1) */
-  --dark-success-bg: oklch(35% 0.08 145 / 0.15);
-  --dark-success-border: oklch(64% 0.19 145 / 0.3);
-  --dark-warning: oklch(75% 0.155 65); /* Increased from 68% for WCAG AA contrast (4.5:1) */
-  --dark-warning-bg: oklch(45% 0.08 65 / 0.15);
-  --dark-warning-border: oklch(68% 0.155 65 / 0.3);
-  --dark-error: oklch(70% 0.195 25); /* Increased from 63% for WCAG AA contrast (4.5:1) */
-  --dark-error-bg: oklch(40% 0.08 25 / 0.15);
-  --dark-error-border: oklch(63% 0.195 25 / 0.3);
-  --dark-info: oklch(
-    78% 0.168 250
-  ); /* Increased from 65% for WCAG AA contrast (4.5:1) - was worst at 2.82:1 */
-  --dark-info-bg: oklch(40% 0.08 250 / 0.15);
-  --dark-info-border: oklch(65% 0.168 250 / 0.3);
-
-  /* Semantic Colors - Light Mode */
-  --light-success: oklch(52% 0.18 145);
-  --light-success-bg: oklch(96% 0.08 145 / 0.2);
-  --light-success-border: oklch(52% 0.18 145 / 0.3);
-  --light-warning: oklch(58% 0.16 65);
-  --light-warning-bg: oklch(97% 0.08 65 / 0.2);
-  --light-warning-border: oklch(58% 0.16 65 / 0.3);
-  --light-error: oklch(53% 0.19 25);
-  --light-error-bg: oklch(97% 0.08 25 / 0.2);
-  --light-error-border: oklch(53% 0.19 25 / 0.3);
-  --light-info: oklch(54% 0.17 250);
-  --light-info-bg: oklch(97% 0.08 250 / 0.2);
-  --light-info-border: oklch(54% 0.17 250 / 0.3);
-
-  /* Shadows - Different for each theme */
-  --dark-shadow-xs: 0 1px 2px oklch(0% 0 0 / 0.02);
-  --dark-shadow-sm: 0 1px 2px oklch(0% 0 0 / 0.04);
-  --dark-shadow-md: 0 2px 4px oklch(0% 0 0 / 0.06), 0 1px 2px oklch(0% 0 0 / 0.04);
-  --dark-shadow-lg: 0 4px 6px oklch(0% 0 0 / 0.08), 0 2px 4px oklch(0% 0 0 / 0.05);
-  --dark-shadow-xl: 0 8px 10px oklch(0% 0 0 / 0.1), 0 4px 6px oklch(0% 0 0 / 0.06);
-  --dark-shadow-2xl: 0 12px 20px oklch(0% 0 0 / 0.15);
-
-  --light-shadow-xs: 0 1px 2px oklch(0% 0 0 / 0.03);
-  --light-shadow-sm: 0 1px 3px oklch(0% 0 0 / 0.06);
-  --light-shadow-md: 0 4px 6px oklch(0% 0 0 / 0.08);
-  --light-shadow-lg: 0 10px 15px oklch(0% 0 0 / 0.1);
-  --light-shadow-xl: 0 15px 20px oklch(0% 0 0 / 0.12);
-  --light-shadow-2xl: 0 20px 30px oklch(0% 0 0 / 0.18);
 
   /* ========================================
      BRAND & UTILITY COLORS - OKLCH
@@ -166,6 +71,31 @@
   --color-discord: oklch(58% 0.185 272); /* #5865F2 */
   --color-discord-hover: oklch(58% 0.185 272 / 0.1);
   --color-discord-border: oklch(58% 0.185 272 / 0.3);
+
+  /* Newsletter/CTA Brand Colors */
+  --color-newsletter-bg: oklch(97% 0.012 145); /* #F6F8F4 - Light green/beige background */
+  --color-newsletter-bg-hover: oklch(97% 0.012 145 / 0.9); /* Hover state */
+  --color-newsletter-text: oklch(10% 0.006 60); /* #141816 - Dark text on light background */
+  --color-newsletter-border: oklch(97% 0.012 145 / 0.5); /* Border variant */
+  --color-newsletter-ring: oklch(97% 0.012 145 / 0.2); /* Focus ring variant */
+
+  /* Social Media Brand Colors */
+  --color-twitter: oklch(65% 0.15 250); /* #1DA1F2 - Twitter blue */
+  --color-twitter-bg: oklch(65% 0.15 250 / 0.2); /* Twitter blue with opacity */
+  --color-linkedin: oklch(50% 0.12 250); /* #0A66C2 - LinkedIn blue */
+  --color-linkedin-bg: oklch(50% 0.12 250 / 0.2); /* LinkedIn blue with opacity */
+
+  /* Form Button Text Color */
+  --color-form-button-text: oklch(10% 0.005 60); /* #1A1A1D - Dark text for buttons with light backgrounds */
+
+  /* OG Image Colors (ImageResponse requires inline styles, but defined here for consistency) */
+  --color-og-bg-dark: oklch(10% 0.006 60); /* #1a1410 - Dark background for OG images */
+  --color-og-bg-pattern: oklch(16% 0.008 60); /* #2a2010 - Pattern background for OG images */
+  --color-og-border-dark: oklch(24% 0.008 60); /* #3a3020 - Dark border for OG images */
+  --color-og-text-white: oklch(100% 0 0); /* #ffffff - White text for OG images */
+  --color-og-text-muted: oklch(65% 0.01 60); /* #9ca3af - Muted gray text for OG images */
+  --color-og-accent: oklch(74% 0.2 35); /* #f97316 - Claude orange for OG images */
+  --color-og-accent-light: oklch(82% 0.17 37); /* #fb923c - Light orange for OG gradients */
 
   /* Syntax Highlighting Colors - Polar-style muted palette */
   --color-syntax-keyword: #7dd3fc; /* Light blue */
@@ -270,68 +200,444 @@
      ======================================== */
 
   /* Active theme colors - defaults to dark */
-  --background: var(--dark-bg-primary);
-  --card: var(--dark-bg-secondary);
-  --color-bg-tertiary: var(--dark-bg-tertiary);
-  --color-bg-quaternary: var(--dark-bg-quaternary);
-  --color-bg-selected: var(--dark-bg-selected);
-  --color-bg-code: var(--dark-bg-code);
-  --color-bg-overlay: var(--dark-bg-overlay);
-  --muted-foreground: var(--dark-text-secondary);
-  --color-text-tertiary: var(--dark-text-tertiary);
-  --color-text-disabled: var(--dark-text-disabled);
-  --color-text-inverse: var(--dark-text-inverse); /* Near-black for WCAG AA contrast (>7:1 ratio) on orange buttons */
+  --background: oklch(24% 0.008 60);
+  --card: oklch(28% 0.006 60);
+  --foreground: oklch(95% 0.005 60); /* Text color - high contrast on dark background */
+  --primary: var(--claude-orange); /* Primary brand color */
+  --secondary: var(--color-bg-tertiary); /* Secondary surface color */
+  --muted: var(--color-bg-tertiary); /* Muted surface color */
+  --destructive: var(--color-error); /* Destructive/error color */
+  --color-bg-tertiary: oklch(32% 0.008 60);
+  --color-bg-quaternary: oklch(36% 0.009 60);
+  --color-bg-selected: oklch(40% 0.01 60);
+  --color-bg-code: oklch(12% 0.003 60);
+  --color-bg-overlay: oklch(18% 0.005 0 / 0.8);
+  --muted-foreground: oklch(78% 0.008 60);
+  --color-text-tertiary: oklch(
+    72% 0.01 60
+  ); /* Increased from 69% to 72% for improved WCAG AA contrast (4.5:1 minimum) */
+  --color-text-disabled: oklch(57% 0.012 60);
+  --color-text-inverse: oklch(100% 0 0); /* Near-black for WCAG AA contrast (>7:1 ratio) on orange buttons */
   --color-accent-hover: var(--claude-orange-hover);
   --color-accent-active: var(--claude-orange-active);
   --color-accent-light: var(--claude-orange-light);
   --color-accent-muted: var(--claude-orange-muted);
   --color-accent-subtle: oklch(45% 0.08 35);
 
-  --border: var(--dark-border-default);
-  --color-border-light: var(--dark-border-light);
-  --color-border-medium: var(--dark-border-medium);
-  --color-border-strong: var(--dark-border-strong);
+  --border: oklch(30% 0.005 60 / 0.5);
+  --color-border-light: oklch(28% 0.005 60 / 0.3);
+  --color-border-medium: oklch(34% 0.008 60 / 0.6);
+  --color-border-strong: oklch(74% 0.2 35);
 
-  --color-success: var(--dark-success);
-  --color-success-bg: var(--dark-success-bg);
-  --color-success-border: var(--dark-success-border);
-  --color-warning: var(--dark-warning);
-  --color-warning-bg: var(--dark-warning-bg);
-  --color-warning-border: var(--dark-warning-border);
-  --color-error: var(--dark-error);
-  --color-error-bg: var(--dark-error-bg);
-  --color-error-border: var(--dark-error-border);
-  --color-info: var(--dark-info);
-  --color-info-bg: var(--dark-info-bg);
-  --color-info-border: var(--dark-info-border);
-  --shadow-sm: var(--dark-shadow-sm);
-  --shadow-md: var(--dark-shadow-md);
-  --shadow-lg: var(--dark-shadow-lg);
-  --shadow-xl: var(--dark-shadow-xl);
-  --shadow-2xl: var(--dark-shadow-2xl);
+  --color-success: oklch(72% 0.19 145); /* Increased from 64% for WCAG AA contrast (4.5:1) */
+  --color-success-bg: oklch(35% 0.08 145 / 0.15);
+  --color-success-border: oklch(64% 0.19 145 / 0.3);
+  --color-warning: oklch(75% 0.155 65); /* Increased from 68% for WCAG AA contrast (4.5:1) */
+  --color-warning-bg: oklch(45% 0.08 65 / 0.15);
+  --color-warning-border: oklch(68% 0.155 65 / 0.3);
+  --color-error: oklch(70% 0.195 25); /* Increased from 63% for WCAG AA contrast (4.5:1) */
+  --color-error-bg: oklch(40% 0.08 25 / 0.15);
+  --color-error-border: oklch(63% 0.195 25 / 0.3);
+  --color-info: oklch(
+    78% 0.168 250
+  ); /* Increased from 65% for WCAG AA contrast (4.5:1) - was worst at 2.82:1 */
+  --color-info-bg: oklch(40% 0.08 250 / 0.15);
+  --color-info-border: oklch(65% 0.168 250 / 0.3);
+  --shadow-sm: 0 1px 2px oklch(0% 0 0 / 0.04);
+  --shadow-md: 0 2px 4px oklch(0% 0 0 / 0.06), 0 1px 2px oklch(0% 0 0 / 0.04);
+  --shadow-lg: 0 4px 6px oklch(0% 0 0 / 0.08), 0 2px 4px oklch(0% 0 0 / 0.05);
+  --shadow-xl: 0 8px 10px oklch(0% 0 0 / 0.1), 0 4px 6px oklch(0% 0 0 / 0.06);
+  --shadow-2xl: 0 12px 20px oklch(0% 0 0 / 0.15);
 
+  /* ========================================
+     TOKENS COLORS - New Values Only
+     (Existing values mapped to variables above)
+     ======================================== */
+
+  /* Text Colors - New */
+  --color-text-primary: oklch(94% 0.005 60); /* TOKENS: colors.text.primary (slightly different from --foreground) */
+
+  /* Accent Colors - New */
+  --color-accent-primary: var(--claude-orange); /* TOKENS: colors.accent.primary (maps to existing) */
+  --color-accent-glow: oklch(74% 0.2 35 / 0.15); /* TOKENS: colors.accent.glow */
+
+  /* Border Colors - New */
+  --color-border-focus: oklch(74% 0.2 35 / 0.4); /* TOKENS: colors.border.focus */
+
+  /* Field Colors - New */
+  --color-field-idle: oklch(26% 0.006 60); /* TOKENS: colors.field.idle */
+  --color-field-hover: oklch(28% 0.008 60); /* TOKENS: colors.field.hover */
+  --color-field-focus: oklch(28% 0.008 60); /* TOKENS: colors.field.focus */
+  --color-field-disabled: oklch(24% 0.005 60); /* TOKENS: colors.field.disabled */
+  --color-field-error: oklch(26% 0.006 60); /* TOKENS: colors.field.error */
+
+  /* Semantic State Glow Colors - New */
+  --color-success-glow: oklch(72% 0.19 145 / 0.15); /* TOKENS: colors.success.glow */
+  --color-error-glow: oklch(70% 0.195 25 / 0.15); /* TOKENS: colors.error.glow */
+  --color-warning-glow: oklch(75% 0.155 65 / 0.15); /* TOKENS: colors.warning.glow */
+  --color-info-glow: oklch(78% 0.168 250 / 0.15); /* TOKENS: colors.info.glow */
+
+  /* Category Colors - Submission Form Variants (different from main category colors) */
+  --color-category-agents-submission: oklch(64% 0.19 145); /* TOKENS: colors.category.agents */
+  --color-category-mcp-submission: oklch(58% 0.195 305); /* TOKENS: colors.category.mcp */
+  --color-category-rules-submission: oklch(58% 0.19 250); /* TOKENS: colors.category.rules */
+  --color-category-commands-submission: oklch(77% 0.2 38); /* TOKENS: colors.category.commands */
+  --color-category-hooks-submission: oklch(65% 0.24 350); /* TOKENS: colors.category.hooks */
+  --color-category-statuslines-submission: oklch(60% 0.2 290); /* TOKENS: colors.category.statuslines */
+  --color-category-skills-submission: oklch(65% 0.2 310); /* TOKENS: colors.category.skills */
+
+  /* Shadow Glow Effects - New */
+  --shadow-xs: 0 1px 2px oklch(0% 0 0 / 0.02); /* TOKENS: shadows.xs */
+  --shadow-glow-orange: 0 0 0 4px oklch(74% 0.2 35 / 0.15); /* TOKENS: shadows.glow.orange */
+  --shadow-glow-green: 0 0 0 4px oklch(72% 0.19 145 / 0.15); /* TOKENS: shadows.glow.green */
+  --shadow-glow-red: 0 0 0 4px oklch(70% 0.195 25 / 0.15); /* TOKENS: shadows.glow.red */
+  --shadow-glow-blue: 0 0 0 4px oklch(78% 0.168 250 / 0.15); /* TOKENS: shadows.glow.blue */
+  --shadow-glow-soft: 0 8px 32px -4px oklch(60% 0.2 280 / 0.15); /* TOKENS: shadows.glow.soft */
+  --shadow-glow-medium: 0 12px 48px -8px oklch(60% 0.2 280 / 0.25); /* TOKENS: shadows.glow.medium */
+  --shadow-glow-orange-large: 0 10px 40px -20px oklch(74% 0.2 35 / 0.8); /* Large orange glow shadow */
+  --shadow-glow-orange-large-hover: 0 10px 40px -20px oklch(74% 0.2 35 / 0.6); /* Large orange glow shadow (hover) */
+
+  /* ========================================
+     COLORS.SEMANTIC - New Values Only
+     (Most values already exist above)
+     ======================================== */
+
+  /* Featured Colors - New */
+  --color-featured-text-light: oklch(58% 0.16 65); /* COLORS.semantic.featured.light.text */
+  --color-featured-text-dark: oklch(82% 0.17 37); /* COLORS.semantic.featured.dark.text */
+  --color-featured-border: oklch(58% 0.16 65 / 0.3); /* COLORS.semantic.featured.*.border */
+  --color-featured-gradient-from: oklch(58% 0.16 65 / 0.1); /* COLORS.semantic.featured.*.gradientFrom */
+  --color-featured-gradient-to: oklch(66% 0.155 65 / 0.1); /* COLORS.semantic.featured.*.gradientTo */
+
+  /* Sponsored Colors - New */
+  --color-sponsored-text-light: oklch(64% 0.22 290); /* COLORS.semantic.sponsored.light.text */
+  --color-sponsored-text-dark: oklch(78% 0.168 290); /* COLORS.semantic.sponsored.dark.text */
+  --color-sponsored-border: oklch(64% 0.22 290 / 0.3); /* COLORS.semantic.sponsored.*.border */
+  --color-sponsored-gradient-from: oklch(64% 0.22 290 / 0.1); /* COLORS.semantic.sponsored.*.gradientFrom */
+  --color-sponsored-gradient-to: oklch(68% 0.26 350 / 0.1); /* COLORS.semantic.sponsored.*.gradientTo */
+
+  /* Social Proof Colors - New */
+  --color-social-view-text-light: oklch(54% 0.17 250); /* COLORS.semantic.social.view.light.text */
+  --color-social-view-text-dark: oklch(78% 0.168 250); /* COLORS.semantic.social.view.dark.text */
+  --color-social-copy-text-light: oklch(62% 0.19 145); /* COLORS.semantic.social.copy.light.text */
+  --color-social-copy-text-dark: oklch(72% 0.19 145); /* COLORS.semantic.social.copy.dark.text */
+  --color-social-bookmark-text-light: oklch(66% 0.155 65); /* COLORS.semantic.social.bookmark.light.text */
+  --color-social-bookmark-text-dark: oklch(82% 0.17 37); /* COLORS.semantic.social.bookmark.dark.text */
+
+  /* Swipe Gesture Colors - New */
+  --color-swipe-copy-text-light: oklch(52% 0.18 145); /* COLORS.semantic.swipe.copy.light.text */
+  --color-swipe-copy-text-dark: oklch(72% 0.19 145); /* COLORS.semantic.swipe.copy.dark.text */
+  --color-swipe-copy-border: oklch(52% 0.18 145 / 0.3); /* COLORS.semantic.swipe.copy.*.border */
+  --color-swipe-copy-bg: oklch(52% 0.18 145 / 0.2); /* COLORS.semantic.swipe.copy.*.background */
+  --color-swipe-bookmark-text-light: oklch(54% 0.17 250); /* COLORS.semantic.swipe.bookmark.light.text */
+  --color-swipe-bookmark-text-dark: oklch(78% 0.168 250); /* COLORS.semantic.swipe.bookmark.dark.text */
+  --color-swipe-bookmark-border: oklch(54% 0.17 250 / 0.3); /* COLORS.semantic.swipe.bookmark.*.border */
+  --color-swipe-bookmark-bg: oklch(54% 0.17 250 / 0.2); /* COLORS.semantic.swipe.bookmark.*.background */
+
+  /* Search Bar Colors - New (RGB for Motion.dev, OKLCH for CSS) */
+  --color-search-focus-border-oklch: oklch(74% 0.2 35 / 0.7); /* COLORS.semantic.search.focus.borderColor.oklch */
+  --color-search-focus-border-rgb: rgba(249, 115, 22, 0.7); /* COLORS.semantic.search.focus.borderColor.rgb */
+  --color-search-focus-shadow-oklch: oklch(74% 0.2 35 / 0.2); /* COLORS.semantic.search.focus.shadowColor.oklch */
+  --color-search-focus-shadow-rgb: rgba(249, 115, 22, 0.2); /* COLORS.semantic.search.focus.shadowColor.rgb */
+  --color-search-glow-from: rgba(249, 115, 22, 0.5); /* COLORS.semantic.search.focus.glow.from */
+  --color-search-glow-via: rgba(249, 115, 22, 0.35); /* COLORS.semantic.search.focus.glow.via */
+  --color-search-glow-to: rgba(249, 115, 22, 0.15); /* COLORS.semantic.search.focus.glow.to */
+  --color-search-particle-base: rgba(249, 115, 22, 0.4); /* COLORS.semantic.search.particle.base */
+  --color-search-particle-shadow: rgba(249, 115, 22, 0.5); /* COLORS.semantic.search.particle.shadow */
+
+  /* ========================================
+     BADGE_COLORS - Convert Tailwind to OKLCH
+     (Currently uses Tailwind classes, converting to OKLCH for @theme)
+     ======================================== */
+
+  /* Badge Category Colors - Converted from Tailwind */
+  --color-badge-category-agents: oklch(68% 0.22 145); /* purple-500 → OKLCH equivalent */
+  --color-badge-category-agents-bg: oklch(68% 0.22 145 / 0.1); /* purple-500/10 */
+  --color-badge-category-agents-text: oklch(78% 0.18 145); /* purple-400 → OKLCH equivalent */
+  --color-badge-category-agents-border: oklch(68% 0.22 145 / 0.2); /* purple-500/20 */
+  
+  --color-badge-category-mcp: oklch(62% 0.22 305); /* cyan-500 → OKLCH equivalent */
+  --color-badge-category-mcp-bg: oklch(62% 0.22 305 / 0.1);
+  --color-badge-category-mcp-text: oklch(72% 0.18 305); /* cyan-400 */
+  --color-badge-category-mcp-border: oklch(62% 0.22 305 / 0.2);
+  
+  --color-badge-category-commands: oklch(75% 0.22 38); /* blue-500 → OKLCH equivalent */
+  --color-badge-category-commands-bg: oklch(75% 0.22 38 / 0.1);
+  --color-badge-category-commands-text: oklch(78% 0.18 38); /* blue-400 */
+  --color-badge-category-commands-border: oklch(75% 0.22 38 / 0.2);
+  
+  --color-badge-category-rules: oklch(75% 0.18 65); /* amber-500 → OKLCH equivalent */
+  --color-badge-category-rules-bg: oklch(75% 0.18 65 / 0.1);
+  --color-badge-category-rules-text: oklch(82% 0.17 65); /* amber-400 */
+  --color-badge-category-rules-border: oklch(75% 0.18 65 / 0.2);
+  
+  --color-badge-category-hooks: oklch(68% 0.22 145); /* green-500 → OKLCH equivalent */
+  --color-badge-category-hooks-bg: oklch(68% 0.22 145 / 0.1);
+  --color-badge-category-hooks-text: oklch(72% 0.19 145); /* green-400 */
+  --color-badge-category-hooks-border: oklch(68% 0.22 145 / 0.2);
+  
+  --color-badge-category-statuslines: oklch(60% 0.18 290); /* teal-500 → OKLCH equivalent */
+  --color-badge-category-statuslines-bg: oklch(60% 0.18 290 / 0.1);
+  --color-badge-category-statuslines-text: oklch(70% 0.17 290); /* teal-400 */
+  --color-badge-category-statuslines-border: oklch(60% 0.18 290 / 0.2);
+  
+  --color-badge-category-collections: oklch(62% 0.22 270); /* indigo-500 → OKLCH equivalent */
+  --color-badge-category-collections-bg: oklch(62% 0.22 270 / 0.1);
+  --color-badge-category-collections-text: oklch(72% 0.19 270); /* indigo-400 */
+  --color-badge-category-collections-border: oklch(62% 0.22 270 / 0.2);
+  
+  --color-badge-category-skills: oklch(68% 0.22 310); /* pink-500 → OKLCH equivalent */
+  --color-badge-category-skills-bg: oklch(68% 0.22 310 / 0.1);
+  --color-badge-category-skills-text: oklch(78% 0.19 310); /* pink-400 */
+  --color-badge-category-skills-border: oklch(68% 0.22 310 / 0.2);
+  
+  --color-badge-category-guides: oklch(68% 0.22 280); /* violet-500 → OKLCH equivalent */
+  --color-badge-category-guides-bg: oklch(68% 0.22 280 / 0.1);
+  --color-badge-category-guides-text: oklch(78% 0.19 280); /* violet-400 */
+  --color-badge-category-guides-border: oklch(68% 0.22 280 / 0.2);
+  
+  --color-badge-category-jobs: oklch(74% 0.2 35); /* orange-500 → OKLCH equivalent (matches claude-orange) */
+  --color-badge-category-jobs-bg: oklch(74% 0.2 35 / 0.1);
+  --color-badge-category-jobs-text: oklch(78% 0.19 35); /* orange-400 */
+  --color-badge-category-jobs-border: oklch(74% 0.2 35 / 0.2);
+  
+  --color-badge-category-changelog: oklch(60% 0.005 60); /* slate-500 → OKLCH equivalent */
+  --color-badge-category-changelog-bg: oklch(60% 0.005 60 / 0.1);
+  --color-badge-category-changelog-text: oklch(72% 0.005 60); /* slate-400 */
+  --color-badge-category-changelog-border: oklch(60% 0.005 60 / 0.2);
+  
+  --color-badge-category-default: oklch(60% 0.005 60); /* gray-500 → OKLCH equivalent */
+  --color-badge-category-default-bg: oklch(60% 0.005 60 / 0.1);
+  --color-badge-category-default-text: oklch(72% 0.005 60); /* gray-400 */
+  --color-badge-category-default-border: oklch(60% 0.005 60 / 0.2);
+
+  /* Badge Job Type Colors */
+  --color-badge-jobtype-fulltime: oklch(68% 0.22 145); /* green-500 */
+  --color-badge-jobtype-fulltime-bg: oklch(68% 0.22 145 / 0.1);
+  --color-badge-jobtype-fulltime-text: oklch(72% 0.19 145); /* green-400 */
+  --color-badge-jobtype-fulltime-border: oklch(68% 0.22 145 / 0.2);
+  
+  --color-badge-jobtype-parttime: oklch(75% 0.22 38); /* blue-500 */
+  --color-badge-jobtype-parttime-bg: oklch(75% 0.22 38 / 0.1);
+  --color-badge-jobtype-parttime-text: oklch(78% 0.18 38); /* blue-400 */
+  --color-badge-jobtype-parttime-border: oklch(75% 0.22 38 / 0.2);
+  
+  --color-badge-jobtype-contract: oklch(74% 0.2 35); /* orange-500 */
+  --color-badge-jobtype-contract-bg: oklch(74% 0.2 35 / 0.1);
+  --color-badge-jobtype-contract-text: oklch(78% 0.19 35); /* orange-400 */
+  --color-badge-jobtype-contract-border: oklch(74% 0.2 35 / 0.2);
+  
+  --color-badge-jobtype-freelance: oklch(68% 0.22 145); /* purple-500 */
+  --color-badge-jobtype-freelance-bg: oklch(68% 0.22 145 / 0.1);
+  --color-badge-jobtype-freelance-text: oklch(78% 0.18 145); /* purple-400 */
+  --color-badge-jobtype-freelance-border: oklch(68% 0.22 145 / 0.2);
+  
+  --color-badge-jobtype-internship: oklch(62% 0.22 305); /* cyan-500 */
+  --color-badge-jobtype-internship-bg: oklch(62% 0.22 305 / 0.1);
+  --color-badge-jobtype-internship-text: oklch(72% 0.18 305); /* cyan-400 */
+  --color-badge-jobtype-internship-border: oklch(62% 0.22 305 / 0.2);
+  
+  --color-badge-jobtype-remote: oklch(68% 0.22 145); /* emerald-500 */
+  --color-badge-jobtype-remote-bg: oklch(68% 0.22 145 / 0.1);
+  --color-badge-jobtype-remote-text: oklch(72% 0.19 145); /* emerald-400 */
+  --color-badge-jobtype-remote-border: oklch(68% 0.22 145 / 0.2);
+
+  /* Badge Difficulty Colors */
+  --color-badge-difficulty-beginner: oklch(68% 0.22 145); /* green-500 */
+  --color-badge-difficulty-beginner-bg: oklch(68% 0.22 145 / 0.1);
+  --color-badge-difficulty-beginner-text: oklch(72% 0.19 145); /* green-400 */
+  --color-badge-difficulty-beginner-border: oklch(68% 0.22 145 / 0.2);
+  
+  --color-badge-difficulty-intermediate: oklch(75% 0.18 65); /* yellow-500 */
+  --color-badge-difficulty-intermediate-bg: oklch(75% 0.18 65 / 0.1);
+  --color-badge-difficulty-intermediate-text: oklch(82% 0.17 65); /* yellow-400 */
+  --color-badge-difficulty-intermediate-border: oklch(75% 0.18 65 / 0.2);
+  
+  --color-badge-difficulty-advanced: oklch(70% 0.195 25); /* red-500 */
+  --color-badge-difficulty-advanced-bg: oklch(70% 0.195 25 / 0.1);
+  --color-badge-difficulty-advanced-text: oklch(75% 0.19 25); /* red-400 */
+  --color-badge-difficulty-advanced-border: oklch(70% 0.195 25 / 0.2);
+
+  /* Badge Status Colors (reuse semantic colors) */
+  --color-badge-status-success: var(--color-success); /* Maps to existing */
+  --color-badge-status-success-bg: var(--color-success-bg);
+  --color-badge-status-success-text: var(--color-success);
+  --color-badge-status-success-border: var(--color-success-border);
+  
+  --color-badge-status-warning: var(--color-warning);
+  --color-badge-status-warning-bg: var(--color-warning-bg);
+  --color-badge-status-warning-text: var(--color-warning);
+  --color-badge-status-warning-border: var(--color-warning-border);
+  
+  --color-badge-status-error: var(--color-error);
+  --color-badge-status-error-bg: var(--color-error-bg);
+  --color-badge-status-error-text: var(--color-error);
+  --color-badge-status-error-border: var(--color-error-border);
+  
+  --color-badge-status-info: var(--color-info);
+  --color-badge-status-info-bg: var(--color-info-bg);
+  --color-badge-status-info-text: var(--color-info);
+  --color-badge-status-info-border: var(--color-info-border);
+
+  /* Badge Collection Type Colors */
+  --color-badge-collectiontype-starter-kit: oklch(75% 0.22 38); /* blue-500 */
+  --color-badge-collectiontype-starter-kit-bg: oklch(75% 0.22 38 / 0.1);
+  --color-badge-collectiontype-starter-kit-text: oklch(78% 0.18 38); /* blue-400 */
+  --color-badge-collectiontype-starter-kit-border: oklch(75% 0.22 38 / 0.2);
+  
+  --color-badge-collectiontype-workflow: oklch(68% 0.22 145); /* purple-500 */
+  --color-badge-collectiontype-workflow-bg: oklch(68% 0.22 145 / 0.1);
+  --color-badge-collectiontype-workflow-text: oklch(78% 0.18 145); /* purple-400 */
+  --color-badge-collectiontype-workflow-border: oklch(68% 0.22 145 / 0.2);
+  
+  --color-badge-collectiontype-advanced-system: oklch(70% 0.195 25); /* red-500 */
+  --color-badge-collectiontype-advanced-system-bg: oklch(70% 0.195 25 / 0.1);
+  --color-badge-collectiontype-advanced-system-text: oklch(75% 0.19 25); /* red-400 */
+  --color-badge-collectiontype-advanced-system-border: oklch(70% 0.195 25 / 0.2);
+  
+  --color-badge-collectiontype-use-case: oklch(68% 0.22 145); /* green-500 */
+  --color-badge-collectiontype-use-case-bg: oklch(68% 0.22 145 / 0.1);
+  --color-badge-collectiontype-use-case-text: oklch(72% 0.19 145); /* green-400 */
+  --color-badge-collectiontype-use-case-border: oklch(68% 0.22 145 / 0.2);
+
+  /* Badge Changelog Category Colors (light/dark variants) */
+  --color-badge-changelog-added: oklch(68% 0.22 145); /* green-500 */
+  --color-badge-changelog-added-bg: oklch(68% 0.22 145 / 0.1);
+  --color-badge-changelog-added-text-light: oklch(52% 0.18 145); /* green-700 */
+  --color-badge-changelog-added-text-dark: oklch(72% 0.19 145); /* green-400 */
+  --color-badge-changelog-added-border: oklch(68% 0.22 145 / 0.2);
+  
+  --color-badge-changelog-changed: oklch(75% 0.22 38); /* blue-500 */
+  --color-badge-changelog-changed-bg: oklch(75% 0.22 38 / 0.1);
+  --color-badge-changelog-changed-text-light: oklch(58% 0.19 250); /* blue-700 */
+  --color-badge-changelog-changed-text-dark: oklch(78% 0.18 38); /* blue-400 */
+  --color-badge-changelog-changed-border: oklch(75% 0.22 38 / 0.2);
+  
+  --color-badge-changelog-deprecated: oklch(75% 0.18 65); /* yellow-500 */
+  --color-badge-changelog-deprecated-bg: oklch(75% 0.18 65 / 0.1);
+  --color-badge-changelog-deprecated-text-light: oklch(58% 0.16 65); /* yellow-700 */
+  --color-badge-changelog-deprecated-text-dark: oklch(82% 0.17 65); /* yellow-400 */
+  --color-badge-changelog-deprecated-border: oklch(75% 0.18 65 / 0.2);
+  
+  --color-badge-changelog-removed: oklch(70% 0.195 25); /* red-500 */
+  --color-badge-changelog-removed-bg: oklch(70% 0.195 25 / 0.1);
+  --color-badge-changelog-removed-text-light: oklch(53% 0.19 25); /* red-700 */
+  --color-badge-changelog-removed-text-dark: oklch(75% 0.19 25); /* red-400 */
+  --color-badge-changelog-removed-border: oklch(70% 0.195 25 / 0.2);
+  
+  --color-badge-changelog-fixed: oklch(68% 0.22 145); /* purple-500 */
+  --color-badge-changelog-fixed-bg: oklch(68% 0.22 145 / 0.1);
+  --color-badge-changelog-fixed-text-light: oklch(64% 0.22 290); /* purple-700 */
+  --color-badge-changelog-fixed-text-dark: oklch(78% 0.18 145); /* purple-400 */
+  --color-badge-changelog-fixed-border: oklch(68% 0.22 145 / 0.2);
+  
+  --color-badge-changelog-security: oklch(74% 0.2 35); /* orange-500 */
+  --color-badge-changelog-security-bg: oklch(74% 0.2 35 / 0.1);
+  --color-badge-changelog-security-text-light: oklch(58% 0.19 38); /* orange-700 */
+  --color-badge-changelog-security-text-dark: oklch(78% 0.19 35); /* orange-400 */
+  --color-badge-changelog-security-border: oklch(74% 0.2 35 / 0.2);
+
+  /* Badge Submission Status Colors */
+  --color-badge-submissionstatus-pending: oklch(75% 0.18 65); /* yellow-500 */
+  --color-badge-submissionstatus-pending-bg: oklch(75% 0.18 65 / 0.1);
+  --color-badge-submissionstatus-pending-text: oklch(82% 0.17 65); /* yellow-400 */
+  --color-badge-submissionstatus-pending-border: oklch(75% 0.18 65 / 0.2);
+  
+  --color-badge-submissionstatus-approved: oklch(75% 0.22 38); /* blue-500 */
+  --color-badge-submissionstatus-approved-bg: oklch(75% 0.22 38 / 0.1);
+  --color-badge-submissionstatus-approved-text: oklch(78% 0.18 38); /* blue-400 */
+  --color-badge-submissionstatus-approved-border: oklch(75% 0.22 38 / 0.2);
+  
+  --color-badge-submissionstatus-merged: oklch(68% 0.22 145); /* green-500 */
+  --color-badge-submissionstatus-merged-bg: oklch(68% 0.22 145 / 0.1);
+  --color-badge-submissionstatus-merged-text: oklch(72% 0.19 145); /* green-400 */
+  --color-badge-submissionstatus-merged-border: oklch(68% 0.22 145 / 0.2);
+  
+  --color-badge-submissionstatus-rejected: oklch(70% 0.195 25); /* red-500 */
+  --color-badge-submissionstatus-rejected-bg: oklch(70% 0.195 25 / 0.1);
+  --color-badge-submissionstatus-rejected-text: oklch(75% 0.19 25); /* red-400 */
+  --color-badge-submissionstatus-rejected-border: oklch(70% 0.195 25 / 0.2);
+  
+  --color-badge-submissionstatus-spam: oklch(60% 0.005 60); /* gray-500 */
+  --color-badge-submissionstatus-spam-bg: oklch(60% 0.005 60 / 0.1);
+  --color-badge-submissionstatus-spam-text: oklch(72% 0.005 60); /* gray-400 */
+  --color-badge-submissionstatus-spam-border: oklch(60% 0.005 60 / 0.2);
+
+  /* Badge Member Type Colors */
+  --color-badge-membertype-owner: oklch(68% 0.22 145); /* purple-500 */
+  --color-badge-membertype-owner-bg: oklch(68% 0.22 145 / 0.1);
+  --color-badge-membertype-owner-text: oklch(78% 0.18 145); /* purple-400 */
+  --color-badge-membertype-owner-border: oklch(68% 0.22 145 / 0.3);
+  
+  --color-badge-membertype-contributor-bg: oklch(74% 0.2 35 / 0.1); /* accent/10 */
+  --color-badge-membertype-contributor-text: var(--claude-orange); /* accent */
+  --color-badge-membertype-contributor-border: oklch(74% 0.2 35 / 0.3); /* accent/30 */
+  
+  --color-badge-membertype-member-text: var(--muted-foreground); /* muted-foreground */
+  --color-badge-membertype-member-border: oklch(78% 0.008 60 / 0.2); /* muted-foreground/20 */
+
+  /* Badge Job Status Colors */
+  --color-badge-jobstatus-draft: oklch(75% 0.18 65); /* yellow-500 */
+  --color-badge-jobstatus-draft-bg: oklch(75% 0.18 65 / 0.1);
+  --color-badge-jobstatus-draft-text: oklch(82% 0.17 65); /* yellow-400 */
+  --color-badge-jobstatus-draft-border: oklch(75% 0.18 65 / 0.2);
+  
+  --color-badge-jobstatus-pending-payment: oklch(74% 0.2 35); /* orange-500 */
+  --color-badge-jobstatus-pending-payment-bg: oklch(74% 0.2 35 / 0.1);
+  --color-badge-jobstatus-pending-payment-text: oklch(78% 0.19 35); /* orange-400 */
+  --color-badge-jobstatus-pending-payment-border: oklch(74% 0.2 35 / 0.2);
+  
+  --color-badge-jobstatus-pending-review: oklch(75% 0.22 38); /* blue-500 */
+  --color-badge-jobstatus-pending-review-bg: oklch(75% 0.22 38 / 0.1);
+  --color-badge-jobstatus-pending-review-text: oklch(78% 0.18 38); /* blue-400 */
+  --color-badge-jobstatus-pending-review-border: oklch(75% 0.22 38 / 0.2);
+  
+  --color-badge-jobstatus-active: oklch(68% 0.22 145); /* green-500 */
+  --color-badge-jobstatus-active-bg: oklch(68% 0.22 145 / 0.1);
+  --color-badge-jobstatus-active-text: oklch(72% 0.19 145); /* green-400 */
+  --color-badge-jobstatus-active-border: oklch(68% 0.22 145 / 0.2);
+  
+  --color-badge-jobstatus-expired: oklch(70% 0.195 25); /* red-500 */
+  --color-badge-jobstatus-expired-bg: oklch(70% 0.195 25 / 0.1);
+  --color-badge-jobstatus-expired-text: oklch(75% 0.19 25); /* red-400 */
+  --color-badge-jobstatus-expired-border: oklch(70% 0.195 25 / 0.2);
+  
+  --color-badge-jobstatus-rejected: oklch(70% 0.195 25); /* red-500 */
+  --color-badge-jobstatus-rejected-bg: oklch(70% 0.195 25 / 0.1);
+  --color-badge-jobstatus-rejected-text: oklch(75% 0.19 25); /* red-400 */
+  --color-badge-jobstatus-rejected-border: oklch(70% 0.195 25 / 0.2);
+  
+  --color-badge-jobstatus-deleted: oklch(60% 0.005 60); /* gray-500 */
+  --color-badge-jobstatus-deleted-bg: oklch(60% 0.005 60 / 0.1);
+  --color-badge-jobstatus-deleted-text: oklch(72% 0.005 60); /* gray-400 */
+  --color-badge-jobstatus-deleted-border: oklch(60% 0.005 60 / 0.2);
+
+  /* Primary color - maps to Claude orange brand color */
+  --primary-foreground: var(--color-text-inverse);
+  
   /* Tailwind CSS variable mappings for shadcn/ui compatibility */
-  --color-background: var(--color-bg-primary);
-  --color-foreground: var(--color-text-primary);
-  --color-card: var(--color-bg-secondary);
-  --color-card-foreground: var(--color-text-primary);
-  --color-popover: var(--color-bg-secondary);
-  --color-popover-foreground: var(--color-text-primary);
-  --color-primary: var(--color-accent);
-  --color-primary-foreground: var(--color-text-inverse);
-  --color-secondary: var(--color-bg-tertiary);
-  --color-secondary-foreground: var(--color-text-secondary);
-  --color-muted: var(--color-bg-tertiary);
-  --color-muted-foreground: var(--color-text-tertiary);
-  --color-border: var(--color-border-default);
-  --color-input: var(--color-bg-secondary);
-  --color-ring: var(--color-accent);
-  --color-destructive: var(--color-error);
-  --color-destructive-foreground: var(--color-text-primary);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--foreground);
+  --color-popover: var(--card);
+  --color-popover-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground); /* Maps to semantic --muted-foreground */
+  --color-border: var(--border);
+  --color-input: var(--card);
+  --color-ring: var(--primary);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--foreground);
 
-  /* Typography - Shared */
-  --font-family-sans: var(--font-inter, "Inter"), system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-family-mono: var(--font-geist-mono, "GeistMono"), "SF Mono", Consolas, "Monaco", monospace;
+  /* REMOVED: Duplicate typography variables
+   * These duplicate the @theme block definitions above.
+   * Use --font-sans and --font-mono from @theme block instead.
+   */
 
   /* Font Sizes */
   --font-size-xs: 0.75rem;
@@ -365,17 +671,12 @@
   --tracking-wider: 0.05em;
   --tracking-widest: 0.1em;
 
-  /* Border Radius */
-  --radius: 0.375rem;
-  --radius-none: 0;
-  --radius-xs: 0.125rem;
-  --radius-sm: 0.25rem;
-  --radius-md: 0.375rem;
-  --radius-lg: 0.5rem;
-  --radius-xl: 0.75rem;
-  --radius-2xl: 1rem;
-  --radius-3xl: 1.5rem;
-  --radius-full: 9999px;
+  /* REMOVED: Duplicate border radius definitions
+   * These duplicate the @theme block definitions above (lines 28-31).
+   * The @theme block versions use calc() to derive from --radius, which is correct.
+   * Additional radius values (--radius-xs, --radius-xl, etc.) are defined in @theme block
+   * and auto-generate Tailwind utilities.
+   */
 
   /* Spacing */
   --spacing-0: 0;
@@ -449,45 +750,52 @@
    ======================================== */
 @media (prefers-color-scheme: light) {
   :root:not(.dark) {
-    --background: var(--light-bg-primary);
-    --card: var(--light-bg-secondary);
-    --color-bg-tertiary: var(--light-bg-tertiary);
-    --color-bg-quaternary: var(--light-bg-quaternary);
-    --color-bg-selected: var(--light-bg-selected);
-    --color-bg-code: var(--light-bg-code);
-    --color-bg-overlay: var(--light-bg-overlay);
-    --muted-foreground: var(--light-text-secondary);
-    --color-text-tertiary: var(--light-text-tertiary);
-    --color-text-disabled: var(--light-text-disabled);
-    --color-text-inverse: var(--light-text-inverse);
-    --color-accent-hover: var(--light-accent-hover);
-    --color-accent-active: var(--light-accent-active);
-    --color-accent-subtle: var(--light-accent-subtle);
+    --background: oklch(99% 0.003 90);
+    --card: oklch(97.5% 0.005 85);
+    --foreground: oklch(15% 0.005 60); /* Text color - dark on light background */
+    --primary: var(--claude-orange); /* Primary brand color (same in both themes) */
+    --secondary: var(--color-bg-tertiary); /* Secondary surface color */
+    --muted: var(--color-bg-tertiary); /* Muted surface color */
+    --destructive: var(--color-error); /* Destructive/error color */
+    --color-bg-tertiary: oklch(96% 0.007 80);
+    --color-bg-quaternary: oklch(94% 0.008 75);
+    --color-bg-selected: oklch(92% 0.025 42);
+    --color-bg-code: oklch(98% 0.004 85);
+    --color-bg-overlay: oklch(98% 0.003 90 / 0.9);
+    --muted-foreground: oklch(42% 0.012 70);
+    --color-text-tertiary: oklch(
+      44% 0.01 65
+    ); /* Decreased from 67% to 44% for improved WCAG AA contrast (4.5:1 minimum) on light backgrounds */
+    --color-text-disabled: oklch(68% 0.008 60);
+    --color-text-inverse: oklch(100% 0 0);
+    --color-accent-hover: oklch(54% 0.17 40);
+    --color-accent-active: oklch(50% 0.175 39);
+    --color-accent-subtle: oklch(95% 0.035 42);
     --color-accent-light: var(--claude-orange-light);
     --color-accent-muted: var(--claude-orange-muted);
 
-    --border: var(--light-border-default);
-    --color-border-light: var(--light-border-light);
-    --color-border-medium: var(--light-border-medium);
-    --color-border-strong: var(--light-border-strong);
+    --border: oklch(92% 0.006 75);
+    --color-border-light: oklch(95% 0.004 80);
+    --color-border-medium: oklch(88% 0.008 70);
+    --color-border-strong: oklch(70% 0.2 35);
 
-    --color-success: var(--light-success);
-    --color-success-bg: var(--light-success-bg);
-    --color-success-border: var(--light-success-border);
-    --color-warning: var(--light-warning);
-    --color-warning-bg: var(--light-warning-bg);
-    --color-warning-border: var(--light-warning-border);
-    --color-error: var(--light-error);
-    --color-error-bg: var(--light-error-bg);
-    --color-error-border: var(--light-error-border);
-    --color-info: var(--light-info);
-    --color-info-bg: var(--light-info-bg);
-    --color-info-border: var(--light-info-border);
-    --shadow-sm: var(--light-shadow-sm);
-    --shadow-md: var(--light-shadow-md);
-    --shadow-lg: var(--light-shadow-lg);
-    --shadow-xl: var(--light-shadow-xl);
-    --shadow-2xl: var(--light-shadow-2xl);
+    --color-success: oklch(52% 0.18 145);
+    --color-success-bg: oklch(96% 0.08 145 / 0.2);
+    --color-success-border: oklch(52% 0.18 145 / 0.3);
+    --color-warning: oklch(58% 0.16 65);
+    --color-warning-bg: oklch(97% 0.08 65 / 0.2);
+    --color-warning-border: oklch(58% 0.16 65 / 0.3);
+    --color-error: oklch(53% 0.19 25);
+    --color-error-bg: oklch(97% 0.08 25 / 0.2);
+    --color-error-border: oklch(53% 0.19 25 / 0.3);
+    --color-info: oklch(54% 0.17 250);
+    --color-info-bg: oklch(97% 0.08 250 / 0.2);
+    --color-info-border: oklch(54% 0.17 250 / 0.3);
+    --shadow-sm: 0 1px 3px oklch(0% 0 0 / 0.06);
+    --shadow-md: 0 4px 6px oklch(0% 0 0 / 0.08);
+    --shadow-lg: 0 10px 15px oklch(0% 0 0 / 0.1);
+    --shadow-xl: 0 15px 20px oklch(0% 0 0 / 0.12);
+    --shadow-2xl: 0 20px 30px oklch(0% 0 0 / 0.18);
   }
 }
 
@@ -495,111 +803,129 @@
    FORCED LIGHT MODE
    ======================================== */
 .light {
-  --background: var(--light-bg-primary);
-  --card: var(--light-bg-secondary);
-  --color-bg-tertiary: var(--light-bg-tertiary);
-  --color-bg-quaternary: var(--light-bg-quaternary);
-  --color-bg-selected: var(--light-bg-selected);
-  --color-bg-code: var(--light-bg-code);
-  --color-bg-overlay: var(--light-bg-overlay);
-  --muted-foreground: var(--light-text-secondary);
-  --color-text-tertiary: var(--light-text-tertiary);
-  --color-text-disabled: var(--light-text-disabled);
-  --color-text-inverse: var(--light-text-inverse); /* Near-black for WCAG AA contrast (>7:1 ratio) on orange buttons */
-  --color-accent-hover: var(--light-accent-hover);
-  --color-accent-active: var(--light-accent-active);
-  --color-accent-subtle: var(--light-accent-subtle);
+  --background: oklch(99% 0.003 90);
+  --card: oklch(97.5% 0.005 85);
+  --foreground: oklch(15% 0.005 60); /* Text color - dark on light background */
+  --primary: var(--claude-orange); /* Primary brand color (same in both themes) */
+  --secondary: var(--color-bg-tertiary); /* Secondary surface color */
+  --muted: var(--color-bg-tertiary); /* Muted surface color */
+  --destructive: var(--color-error); /* Destructive/error color */
+  --color-bg-tertiary: oklch(96% 0.007 80);
+  --color-bg-quaternary: oklch(94% 0.008 75);
+  --color-bg-selected: oklch(92% 0.025 42);
+  --color-bg-code: oklch(98% 0.004 85);
+  --color-bg-overlay: oklch(98% 0.003 90 / 0.9);
+  --muted-foreground: oklch(42% 0.012 70);
+  --color-text-tertiary: oklch(
+    44% 0.01 65
+  ); /* Decreased from 67% to 44% for improved WCAG AA contrast (4.5:1 minimum) on light backgrounds */
+  --color-text-disabled: oklch(68% 0.008 60);
+  --color-text-inverse: oklch(100% 0 0); /* Near-black for WCAG AA contrast (>7:1 ratio) on orange buttons */
+  --color-accent-hover: oklch(54% 0.17 40);
+  --color-accent-active: oklch(50% 0.175 39);
+  --color-accent-subtle: oklch(95% 0.035 42);
   --color-accent-light: var(--claude-orange-light);
   --color-accent-muted: var(--claude-orange-muted);
 
-  --border: var(--light-border-default);
-  --color-border-light: var(--light-border-light);
-  --color-border-medium: var(--light-border-medium);
-  --color-border-strong: var(--light-border-strong);
+  --border: oklch(92% 0.006 75);
+  --color-border-light: oklch(95% 0.004 80);
+  --color-border-medium: oklch(88% 0.008 70);
+  --color-border-strong: oklch(70% 0.2 35);
 
-  --color-success: var(--light-success);
-  --color-success-bg: var(--light-success-bg);
-  --color-success-border: var(--light-success-border);
-  --color-warning: var(--light-warning);
-  --color-warning-bg: var(--light-warning-bg);
-  --color-warning-border: var(--light-warning-border);
-  --color-error: var(--light-error);
-  --color-error-bg: var(--light-error-bg);
-  --color-error-border: var(--light-error-border);
-  --color-info: var(--light-info);
-  --color-info-bg: var(--light-info-bg);
-  --color-info-border: var(--light-info-border);
-  --shadow-sm: var(--light-shadow-sm);
-  --shadow-md: var(--light-shadow-md);
-  --shadow-lg: var(--light-shadow-lg);
-  --shadow-xl: var(--light-shadow-xl);
-  --shadow-2xl: var(--light-shadow-2xl);
+  --color-success: oklch(52% 0.18 145);
+  --color-success-bg: oklch(96% 0.08 145 / 0.2);
+  --color-success-border: oklch(52% 0.18 145 / 0.3);
+  --color-warning: oklch(58% 0.16 65);
+  --color-warning-bg: oklch(97% 0.08 65 / 0.2);
+  --color-warning-border: oklch(58% 0.16 65 / 0.3);
+  --color-error: oklch(53% 0.19 25);
+  --color-error-bg: oklch(97% 0.08 25 / 0.2);
+  --color-error-border: oklch(53% 0.19 25 / 0.3);
+  --color-info: oklch(54% 0.17 250);
+  --color-info-bg: oklch(97% 0.08 250 / 0.2);
+  --color-info-border: oklch(54% 0.17 250 / 0.3);
+  --shadow-sm: 0 1px 3px oklch(0% 0 0 / 0.06);
+  --shadow-md: 0 4px 6px oklch(0% 0 0 / 0.08);
+  --shadow-lg: 0 10px 15px oklch(0% 0 0 / 0.1);
+  --shadow-xl: 0 15px 20px oklch(0% 0 0 / 0.12);
+  --shadow-2xl: 0 20px 30px oklch(0% 0 0 / 0.18);
 }
 
 /* ========================================
    FORCED DARK MODE
    ======================================== */
 .dark {
-  --background: var(--dark-bg-primary);
-  --card: var(--dark-bg-secondary);
-  --color-bg-tertiary: var(--dark-bg-tertiary);
-  --color-bg-quaternary: var(--dark-bg-quaternary);
-  --color-bg-selected: var(--dark-bg-selected);
-  --color-bg-code: var(--dark-bg-code);
-  --color-bg-overlay: var(--dark-bg-overlay);
-  --muted-foreground: var(--dark-text-secondary);
-  --color-text-tertiary: var(--dark-text-tertiary);
-  --color-text-disabled: var(--dark-text-disabled);
-  --color-text-inverse: var(--dark-text-inverse); /* Near-black for WCAG AA contrast (>7:1 ratio) on orange buttons */
+  --background: oklch(24% 0.008 60);
+  --card: oklch(28% 0.006 60);
+  --foreground: oklch(95% 0.005 60); /* Text color - high contrast on dark background */
+  --primary: var(--claude-orange); /* Primary brand color (same in both themes) */
+  --secondary: var(--color-bg-tertiary); /* Secondary surface color */
+  --muted: var(--color-bg-tertiary); /* Muted surface color */
+  --destructive: var(--color-error); /* Destructive/error color */
+  --color-bg-tertiary: oklch(32% 0.008 60);
+  --color-bg-quaternary: oklch(36% 0.009 60);
+  --color-bg-selected: oklch(40% 0.01 60);
+  --color-bg-code: oklch(12% 0.003 60);
+  --color-bg-overlay: oklch(18% 0.005 0 / 0.8);
+  --muted-foreground: oklch(78% 0.008 60);
+  --color-text-tertiary: oklch(
+    72% 0.01 60
+  ); /* Increased from 69% to 72% for improved WCAG AA contrast (4.5:1 minimum) */
+  --color-text-disabled: oklch(57% 0.012 60);
+  --color-text-inverse: oklch(100% 0 0); /* Near-black for WCAG AA contrast (>7:1 ratio) on orange buttons */
   --color-accent-hover: var(--claude-orange-hover);
   --color-accent-active: var(--claude-orange-active);
   --color-accent-subtle: oklch(45% 0.08 35);
   --color-accent-light: var(--claude-orange-light);
   --color-accent-muted: var(--claude-orange-muted);
 
-  --border: var(--dark-border-default);
-  --color-border-light: var(--dark-border-light);
-  --color-border-medium: var(--dark-border-medium);
-  --color-border-strong: var(--dark-border-strong);
+  --border: oklch(30% 0.005 60 / 0.5);
+  --color-border-light: oklch(28% 0.005 60 / 0.3);
+  --color-border-medium: oklch(34% 0.008 60 / 0.6);
+  --color-border-strong: oklch(74% 0.2 35);
 
-  --color-success: var(--dark-success);
-  --color-success-bg: var(--dark-success-bg);
-  --color-success-border: var(--dark-success-border);
-  --color-warning: var(--dark-warning);
-  --color-warning-bg: var(--dark-warning-bg);
-  --color-warning-border: var(--dark-warning-border);
-  --color-error: var(--dark-error);
-  --color-error-bg: var(--dark-error-bg);
-  --color-error-border: var(--dark-error-border);
-  --color-info: var(--dark-info);
-  --color-info-bg: var(--dark-info-bg);
-  --color-info-border: var(--dark-info-border);
-  --shadow-sm: var(--dark-shadow-sm);
-  --shadow-md: var(--dark-shadow-md);
-  --shadow-lg: var(--dark-shadow-lg);
-  --shadow-xl: var(--dark-shadow-xl);
-  --shadow-2xl: var(--dark-shadow-2xl);
+  --color-success: oklch(72% 0.19 145); /* Increased from 64% for WCAG AA contrast (4.5:1) */
+  --color-success-bg: oklch(35% 0.08 145 / 0.15);
+  --color-success-border: oklch(64% 0.19 145 / 0.3);
+  --color-warning: oklch(75% 0.155 65); /* Increased from 68% for WCAG AA contrast (4.5:1) */
+  --color-warning-bg: oklch(45% 0.08 65 / 0.15);
+  --color-warning-border: oklch(68% 0.155 65 / 0.3);
+  --color-error: oklch(70% 0.195 25); /* Increased from 63% for WCAG AA contrast (4.5:1) */
+  --color-error-bg: oklch(40% 0.08 25 / 0.15);
+  --color-error-border: oklch(63% 0.195 25 / 0.3);
+  --color-info: oklch(
+    78% 0.168 250
+  ); /* Increased from 65% for WCAG AA contrast (4.5:1) - was worst at 2.82:1 */
+  --color-info-bg: oklch(40% 0.08 250 / 0.15);
+  --color-info-border: oklch(65% 0.168 250 / 0.3);
+  --shadow-sm: 0 1px 2px oklch(0% 0 0 / 0.04);
+  --shadow-md: 0 2px 4px oklch(0% 0 0 / 0.06), 0 1px 2px oklch(0% 0 0 / 0.04);
+  --shadow-lg: 0 4px 6px oklch(0% 0 0 / 0.08), 0 2px 4px oklch(0% 0 0 / 0.05);
+  --shadow-xl: 0 8px 10px oklch(0% 0 0 / 0.1), 0 4px 6px oklch(0% 0 0 / 0.06);
+  --shadow-2xl: 0 12px 20px oklch(0% 0 0 / 0.15);
 }
 
 @layer base {
   :root {
     /* Custom gradient variables */
-    --gradient-primary: linear-gradient(135deg, var(--color-accent), var(--color-accent-hover));
-    --gradient-hero: linear-gradient(135deg, var(--color-bg-primary), var(--color-bg-secondary));
-    --gradient-card: linear-gradient(145deg, var(--color-bg-secondary), var(--color-bg-tertiary));
-    --gradient-border: linear-gradient(90deg, transparent, var(--color-accent) / 0.2, transparent);
+    --gradient-primary: linear-gradient(135deg, var(--primary), var(--color-accent-hover));
+    --gradient-hero: linear-gradient(135deg, var(--background), var(--card));
+    --gradient-card: linear-gradient(145deg, var(--card), var(--color-bg-tertiary));
+    --gradient-border: linear-gradient(90deg, transparent, var(--primary) / 0.2, transparent);
 
     /* Shadow effects */
-    --shadow-glow: 0 0 20px var(--color-accent) / 0.1;
-    --shadow-orange: 0 0 20px var(--color-accent) / 0.3;
+    --shadow-glow: 0 0 20px var(--primary) / 0.1;
+    --shadow-orange: 0 0 20px var(--primary) / 0.3;
 
     /* Transition presets */
     --transition-fast: all var(--duration-fast) cubic-bezier(0.4, 0, 0.2, 1);
     --transition-normal: all var(--duration-quick) cubic-bezier(0.4, 0, 0.2, 1);
     --transition-slow: all var(--duration-default) cubic-bezier(0.4, 0, 0.2, 1);
 
-    /* Monospace font family */
-    --font-mono: "JetBrains Mono", "SF Mono", Consolas, "Monaco", monospace;
+    /* REMOVED: Duplicate --font-mono definition
+     * This was overriding the @theme block definition with "JetBrains Mono" instead of "GeistMono".
+     * The @theme block already defines --font-mono correctly, so this override is removed.
+     */
   }
 
   * {
@@ -613,7 +939,7 @@
       "calt" 1;
     font-family: var(--font-inter, "Inter"), system-ui, sans-serif;
     background-color: var(--background);
-    color: var(--border);
+    color: var(--foreground);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     transition:
@@ -624,7 +950,7 @@
 
   code {
     @apply text-sm;
-    font-family: var(--font-family-mono);
+    font-family: var(--font-mono);
     background: var(--color-bg-code);
     color: var(--muted-foreground);
     padding: 0.125rem 0.25rem;
@@ -632,136 +958,13 @@
   }
 }
 
-/* Utility Classes */
-@layer utilities {
-  /* Background Utilities */
-  .bg-primary {
-    background-color: var(--background);
-  }
-  .bg-secondary {
-    background-color: var(--card);
-  }
-  .bg-tertiary {
-    background-color: var(--color-bg-tertiary);
-  }
-  .bg-quaternary {
-    background-color: var(--color-bg-quaternary);
-  }
-  .bg-selected {
-    background-color: var(--color-bg-selected);
-  }
-  .bg-code {
-    background-color: var(--color-bg-code);
-  }
-
-  /* Text Color Utilities */
-  .text-primary {
-    color: var(--border);
-  }
-  .text-secondary {
-    color: var(--muted-foreground);
-  }
-  .text-tertiary {
-    color: var(--color-text-tertiary);
-  }
-  .text-disabled {
-    color: var(--color-text-disabled);
-  }
-  .text-inverse {
-    color: var(--color-text-inverse);
-  }
-
-  /* Accent Color Utilities */
-  .text-accent {
-    color: var(--primary);
-  }
-  .text-accent-hover {
-    color: var(--color-accent-hover);
-  }
-  .text-accent-light {
-    color: var(--color-accent-light);
-  }
-  .bg-accent {
-    background-color: var(--primary);
-  }
-  .bg-accent-hover {
-    background-color: var(--color-accent-hover);
-  }
-  .bg-accent-subtle {
-    background-color: var(--color-accent-subtle);
-  }
-
-  /* Border Utilities */
-  .border-default {
-    border-color: var(--border);
-  }
-  .border-light {
-    border-color: var(--color-border-light);
-  }
-  .border-medium {
-    border-color: var(--color-border-medium);
-  }
-  .border-strong {
-    border-color: var(--color-border-strong);
-  }
-
-  /* Semantic Color Utilities */
-  .text-success {
-    color: var(--color-success);
-  }
-  .text-warning {
-    color: var(--color-warning);
-  }
-  .text-error {
-    color: var(--color-error);
-  }
-  .text-info {
-    color: var(--color-info);
-  }
-
-  .bg-success {
-    background-color: var(--color-success-bg);
-  }
-  .bg-warning {
-    background-color: var(--color-warning-bg);
-  }
-  .bg-error {
-    background-color: var(--color-error-bg);
-  }
-  .bg-info {
-    background-color: var(--color-info-bg);
-  }
-
-  .border-success {
-    border-color: var(--color-success-border);
-  }
-  .border-warning {
-    border-color: var(--color-warning-border);
-  }
-  .border-error {
-    border-color: var(--color-error-border);
-  }
-  .border-info {
-    border-color: var(--color-info-border);
-  }
-
-  /* Transition Utilities */
-  .transition-smooth {
-    transition: var(--transition-normal);
-  }
-
-  .transition-colors-smooth {
-    transition: color var(--duration-quick) var(--ease-in-out);
-  }
-
-  .transition-fast {
-    transition: var(--transition-fast);
-  }
-
-  .transition-slow {
-    transition: var(--transition-slow);
-  }
-}
+/* REMOVED: Unused utility classes
+ * These custom utility classes (e.g., .bg-primary, .text-primary, .transition-smooth)
+ * were defined but never used in the codebase. Components use Tailwind utilities instead.
+ * 
+ * Note: Tailwind's built-in utilities (bg-primary, text-primary, etc.) are used via className,
+ * not these custom classes. These custom classes would conflict with Tailwind's utilities.
+ */
 
 /* Global Link Reset - Removes Browser Default Underlines */
 @layer base {
@@ -811,39 +1014,36 @@
 @layer components {
   /* Typography/Prose Styles - Basic prose utility classes for markdown content */
   .prose {
-    color: var(--border);
+    color: var(--foreground);
     max-width: 65ch;
   }
 
   .prose-invert {
-    color: var(--border);
+    color: var(--foreground);
   }
 
   .prose-slate {
-    color: var(--border);
+    color: var(--foreground);
   }
 
   .prose-neutral {
-    color: var(--border);
+    color: var(--foreground);
   }
 
-  .prose-sm {
-    font-size: var(--font-size-sm);
-  }
-
-  .not-prose {
-    /* Reset prose styles */
-  }
+  /* REMOVED: Duplicate .prose-sm and .not-prose
+   * These are defined in @utility below, which is the modern Tailwind v4 approach.
+   * The @utility versions are used via className.
+   */
 
   /* Dark mode prose invert variant */
   @media (prefers-color-scheme: dark) {
     .dark\:prose-invert {
-      color: var(--border);
+      color: var(--foreground);
     }
   }
 
   .dark .dark\:prose-invert {
-    color: var(--border);
+    color: var(--foreground);
   }
 
   /* Hero Section with Claude Orange Gradient */
@@ -853,8 +1053,8 @@
 
   /* Card styling with warm charcoal background */
   .card-gradient {
-    background: var(--color-card);
-    border: 1px solid var(--color-border);
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: var(--radius);
     transition: var(--transition-normal);
   }
@@ -876,208 +1076,21 @@
     box-shadow: var(--shadow-orange);
   }
 
-  /* Claude Card */
-  .claude-card {
-    background-color: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-sm);
-    transition: all var(--duration-quick) var(--ease-in-out);
-  }
-
-  .claude-card:hover {
-    background-color: var(--color-bg-tertiary);
-    /* border-color removed - handled by motion.dev whileHover for interactive cards */
-    box-shadow: var(--shadow-md);
-  }
-
-  /* Claude Buttons */
-  .claude-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--spacing-2) var(--spacing-4);
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
-    border-radius: var(--radius-md);
-    transition: all var(--duration-fast) var(--ease-in-out);
-    cursor: pointer;
-    user-select: none;
-  }
-
-  .claude-btn-primary {
-    background-color: var(--primary);
-    color: white;
-    border: 1px solid var(--primary);
-  }
-
-  .claude-btn-primary:hover {
-    background-color: var(--color-accent-hover);
-    border-color: var(--color-accent-hover);
-    box-shadow: 0 0 0 1px var(--primary) / 0.2;
-  }
-
-  .claude-btn-primary:active {
-    background-color: var(--color-accent-active);
-  }
-
-  .claude-btn-primary:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 2px var(--primary) / 0.5;
-  }
-
-  .claude-btn-secondary {
-    background-color: var(--color-bg-tertiary);
-    color: var(--border);
-    border: 1px solid var(--border);
-  }
-
-  .claude-btn-secondary:hover {
-    background-color: var(--color-bg-quaternary);
-    border-color: var(--color-border-medium);
-  }
-
-  .claude-btn-ghost {
-    background-color: transparent;
-    color: var(--muted-foreground);
-    border: 1px solid transparent;
-  }
-
-  .claude-btn-ghost:hover {
-    background-color: var(--color-bg-tertiary);
-    color: var(--border);
-  }
-
-  /* Claude Input */
-  .claude-input {
-    width: 100%;
-    padding: var(--spacing-2) var(--spacing-3);
-    background-color: var(--card);
-    color: var(--border);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    font-size: var(--font-size-sm);
-    transition: all var(--duration-fast) var(--ease-in-out);
-  }
-
-  .claude-input:hover {
-    border-color: var(--color-border-medium);
-  }
-
-  .claude-input:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 2px var(--primary) / 0.2;
-  }
-
-  .claude-input::placeholder {
-    color: var(--color-text-tertiary);
-  }
-
-  .claude-input:disabled {
-    background-color: var(--background);
-    color: var(--color-text-disabled);
-    cursor: not-allowed;
-  }
-
-  /* Claude Badge */
-  .claude-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: var(--spacing-0_5) var(--spacing-2);
-    background-color: var(--color-accent-subtle);
-    color: var(--color-accent-light);
-    border: 1px solid var(--color-accent-muted);
-    border-radius: var(--radius-sm);
-    font-size: var(--font-size-xs);
-    font-weight: var(--font-weight-medium);
-    letter-spacing: var(--tracking-wide);
-  }
-
-  /* Claude Link */
-  .claude-link {
-    color: var(--primary);
-    text-decoration: none;
-    transition: all var(--duration-fast) var(--ease-in-out);
-    text-underline-offset: 2px;
-  }
-
-  .claude-link:hover {
-    color: var(--color-accent-hover);
-    text-decoration: underline;
-  }
-
-  .claude-link:active {
-    color: var(--color-accent-active);
-  }
-
-  /* Claude Code Block */
-  .claude-code {
-    display: block;
-    padding: var(--spacing-4);
-    background-color: var(--color-bg-code);
-    border: 1px solid var(--color-border-light);
-    border-radius: var(--radius-md);
-    font-family: var(--font-family-mono);
-    font-size: var(--font-size-sm);
-    line-height: var(--leading-relaxed);
-    overflow-x: auto;
-    color: var(--muted-foreground);
-  }
-
-  .claude-code-inline {
-    padding: var(--spacing-0_5) var(--spacing-1);
-    background-color: var(--color-bg-code);
-    border: 1px solid var(--color-border-light);
-    border-radius: var(--radius-xs);
-    font-family: var(--font-family-mono);
-    font-size: 0.875em;
-    color: var(--color-accent-light);
-  }
+  /* REMOVED: Unused .claude-* component classes
+   * These classes were defined but never used in the codebase.
+   * Components now use shadcn/ui components and Tailwind utilities instead.
+   */
 
   /* ========================================
      CODE BLOCK ENHANCEMENTS
      Phase 1: Unified styling + max-height
      ======================================== */
 
-  /* Shiki code highlighting - line and word highlights */
-  /* These styles work with Shiki transformers for highlighting */
-  .line--highlighted,
-  .shiki .line.highlighted {
-    background-color: var(--color-accent-subtle);
-    border-left: 2px solid var(--primary);
-    padding-left: 0.75rem;
-    margin-left: -0.75rem;
-    display: block;
-  }
-
-  .word--highlighted,
-  .shiki .highlighted-word {
-    background-color: var(--color-accent-subtle);
-    border-radius: 0.25rem;
-    padding: 0.125rem 0.25rem;
-    color: var(--color-accent-light);
-  }
-
-  /* Line numbers for code blocks using data-line attribute (Shiki compatible) */
-  .line-number::before,
-  .shiki .line[data-line]::before {
-    content: attr(data-line);
-    display: inline-block;
-    width: 2rem;
-    margin-right: 1.5rem;
-    padding-right: 0.5rem;
-    text-align: right;
-    color: var(--color-text-tertiary);
-    opacity: 0.6;
-    user-select: none;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .line-number,
-  .shiki .line {
-    display: block;
-  }
+  /* REMOVED: Duplicate Shiki code highlighting styles
+   * These styles are duplicated in shiki-code-blocks.css which has more comprehensive
+   * and modern implementations. The shiki-code-blocks.css file is the source of truth
+   * for Shiki styling.
+   */
 
   /* ========================================
      SEARCH RESULT HIGHLIGHTING
@@ -1131,38 +1144,11 @@
      PRODUCTION-GRADE CUSTOM SCROLLBARS
      ======================================== */
 
-  /* Horizontal & vertical scrollbar for code blocks */
-  pre::-webkit-scrollbar {
-    height: 10px;
-    width: 10px;
-  }
-
-  pre::-webkit-scrollbar-track {
-    background: var(--color-bg-muted);
-    border-radius: 999px;
-    margin: 0.25rem;
-  }
-
-  pre::-webkit-scrollbar-thumb {
-    background: var(--color-border);
-    border-radius: 999px;
-    transition: background 200ms ease-in-out;
-  }
-
-  pre::-webkit-scrollbar-thumb:hover {
-    background: var(--color-border-medium);
-  }
-
-  pre::-webkit-scrollbar-corner {
-    background: var(--color-bg-muted);
-  }
-
-  /* Firefox scrollbar styling */
-  pre {
-    scrollbar-width: thin;
-    scrollbar-color: var(--color-border-medium) transparent;
-    scrollbar-gutter: stable;
-  }
+  /* REMOVED: Duplicate pre scrollbar styles
+   * These are duplicated in shiki-code-blocks.css which has more comprehensive
+   * styling for both .shiki and .code-block-pre elements.
+   * The shiki-code-blocks.css file is the source of truth for code block scrollbars.
+   */
 
   /* General scrollbar styling for containers */
   .custom-scrollbar::-webkit-scrollbar {
@@ -1221,53 +1207,9 @@
     height: 0 !important;
   }
 
-  /* Claude Navigation */
-  .claude-nav-item {
-    padding: var(--spacing-2) var(--spacing-3);
-    color: var(--muted-foreground);
-    border-radius: var(--radius-md);
-    transition: all var(--duration-fast) var(--ease-in-out);
-    cursor: pointer;
-  }
-
-  .claude-nav-item:hover {
-    background-color: var(--color-bg-tertiary);
-    color: var(--border);
-  }
-
-  .claude-nav-item.active {
-    background-color: var(--color-accent-subtle);
-    color: var(--primary);
-    font-weight: var(--font-weight-medium);
-  }
-
-  /* Claude Divider */
-  .claude-divider {
-    height: 1px;
-    background-color: var(--border);
-    margin: var(--spacing-4) 0;
-  }
-
-  /* Claude List Item */
-  .claude-list-item {
-    padding: var(--spacing-3) var(--spacing-4);
-    border-bottom: 1px solid var(--color-border-light);
-    transition: background-color var(--duration-fast) var(--ease-in-out);
-  }
-
-  .claude-list-item:hover {
-    background-color: var(--color-bg-tertiary);
-  }
-
-  .claude-list-item:last-child {
-    border-bottom: none;
-  }
-
-  .claude-list-item.selected {
-    background-color: var(--color-bg-selected);
-    border-left: 2px solid var(--primary);
-    padding-left: calc(var(--spacing-4) - 2px);
-  }
+  /* REMOVED: Unused .claude-nav-item, .claude-divider, .claude-list-item classes
+   * These were defined but never used. Navigation and lists now use shadcn/ui components.
+   */
 
   /* ========================================
      SHA-2099: Custom Utility Classes
@@ -1377,7 +1319,7 @@
   .nav-backdrop {
     background: color-mix(in oklch, var(--color-background), transparent 5%);
     backdrop-filter: blur(8px);
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--border);
   }
 
   .nav-link {
@@ -1393,14 +1335,9 @@
     color: var(--color-primary);
   }
 
-  /* Light mode specific adjustments */
-  .light .claude-card {
-    box-shadow: 0 1px 3px oklch(0% 0 0 / 0.08);
-  }
-
-  .light .claude-btn-primary {
-    font-weight: 600;
-  }
+  /* REMOVED: Unused .light .claude-* adjustments
+   * These were for removed .claude-* classes.
+   */
 
   /* Smooth theme transition - REMOVED conflicting universal selector */
   /* Now handled by micro-interactions.css with targeted selectors for better performance */
@@ -1546,22 +1483,22 @@
   transition: color var(--duration-quick) var(--ease-in-out);
 }
 
-/* Prose typography utilities */
+/* Prose typography utilities - consolidated (duplicates removed from @layer components) */
 @utility prose {
-  color: var(--border);
+  color: var(--foreground);
   max-width: 65ch;
 }
 
 @utility prose-invert {
-  color: var(--border);
+  color: var(--foreground);
 }
 
 @utility prose-slate {
-  color: var(--border);
+  color: var(--foreground);
 }
 
 @utility prose-neutral {
-  color: var(--border);
+  color: var(--foreground);
 }
 
 @utility prose-sm {
@@ -1573,17 +1510,10 @@
   max-width: none;
 }
 
-/* Component utility classes - also defined in @layer components for hover states */
-@utility card-gradient {
-  background: var(--color-card);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  transition: var(--transition-normal);
-}
-
-@utility glow-effect {
-  box-shadow: var(--shadow-glow);
-}
+/* REMOVED: Duplicate @utility card-gradient and glow-effect
+ * These are defined in @layer components above, which include hover states.
+ * The @layer components versions are the source of truth since they have hover states.
+ */
 
 /* ========================================
    KEYFRAME ANIMATIONS
@@ -1629,16 +1559,11 @@
   }
 }
 
-@keyframes scale-in {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
+/* REMOVED: Duplicate scale-in keyframe
+ * This keyframe is identical to the one in view-transitions.css.
+ * The view-transitions.css version is used for View Transitions API.
+ * For other uses, we can reference view-transitions.css or use Tailwind's built-in animations.
+ */
 
 @keyframes pulse-accent {
   0%,
@@ -1756,7 +1681,7 @@
 }
 
 .animate-scale-in {
-  animation: scale-in var(--duration-quick) var(--ease-out) both;
+  animation: scale-in var(--duration-quick) var(--ease-out) both; /* Uses scale-in from view-transitions.css */
 }
 
 .animate-pulse {
@@ -1765,6 +1690,8 @@
 
 .animate-shimmer {
   animation: shimmer var(--duration-maximum) linear infinite;
+  /* Note: background-position is not GPU-accelerated, but shimmer is subtle and acceptable */
+  will-change: background-position;
 }
 
 .animate-gridMove {
@@ -1810,6 +1737,10 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out forwards;
 }
 
 @keyframes slideInFromLeft {
@@ -1861,31 +1792,10 @@ body {
 }
 
 /* ========================================
-   CSS CONTAINER QUERIES & CONTAINMENT
+   CSS CONTAINMENT (Performance Isolation)
    ======================================== */
 
-/* Container Query Definitions */
-.container-responsive {
-  container-type: inline-size;
-  container-name: responsive;
-}
-
-.container-card {
-  container-type: inline-size;
-  container-name: card;
-}
-
-.container-sidebar {
-  container-type: inline-size;
-  container-name: sidebar;
-}
-
-.container-content {
-  container-type: inline-size;
-  container-name: content;
-}
-
-/* CSS Containment for performance isolation */
+/* CSS Containment for performance isolation - kept as these may be used */
 .contain-layout {
   contain: layout;
 }
@@ -1906,216 +1816,10 @@ body {
   contain: content;
 }
 
-/* Container Query Responsive Styles */
-@container responsive (min-width: 320px) {
-  .container-responsive-text {
-    font-size: 0.875rem;
-  }
-
-  .container-responsive-padding {
-    padding: 0.75rem;
-  }
-
-  .container-responsive-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-}
-
-@container responsive (min-width: 480px) {
-  .container-responsive-text {
-    font-size: 1rem;
-  }
-
-  .container-responsive-padding {
-    padding: 1rem;
-  }
-
-  .container-responsive-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.25rem;
-  }
-}
-
-@container responsive (min-width: 640px) {
-  .container-responsive-text {
-    font-size: 1.125rem;
-  }
-
-  .container-responsive-padding {
-    padding: 1.5rem;
-  }
-
-  .container-responsive-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
-  }
-}
-
-@container responsive (min-width: 768px) {
-  .container-responsive-text {
-    font-size: 1.25rem;
-  }
-
-  .container-responsive-padding {
-    padding: 2rem;
-  }
-
-  .container-responsive-grid {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 2rem;
-  }
-}
-
-/* Card Container Queries */
-@container card (max-width: 400px) {
-  .card-title {
-    font-size: 1rem;
-  }
-
-  .card-description {
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-  }
-
-  .card-content {
-    padding: 0.75rem;
-  }
-
-  .card-actions {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-}
-
-@container card (min-width: 401px) {
-  .card-title {
-    font-size: 1.25rem;
-  }
-
-  .card-description {
-    font-size: 1rem;
-    line-height: 1.5rem;
-  }
-
-  .card-content {
-    padding: 1.25rem;
-  }
-
-  .card-actions {
-    flex-direction: row;
-    gap: 1rem;
-  }
-}
-
-/* Sidebar Container Queries */
-@container sidebar (max-width: 250px) {
-  .sidebar-item {
-    padding: 0.5rem;
-    font-size: 0.875rem;
-  }
-
-  .sidebar-icon {
-    width: 1.25rem;
-    height: 1.25rem;
-  }
-
-  .sidebar-label {
-    display: none;
-  }
-}
-
-@container sidebar (min-width: 251px) {
-  .sidebar-item {
-    padding: 0.75rem 1rem;
-    font-size: 1rem;
-  }
-
-  .sidebar-icon {
-    width: 1.5rem;
-    height: 1.5rem;
-  }
-
-  .sidebar-label {
-    display: inline;
-  }
-}
-
-/* Content Area Container Queries */
-@container content (min-width: 320px) and (max-width: 640px) {
-  .content-columns {
-    columns: 1;
-  }
-
-  .content-header {
-    font-size: 1.5rem;
-  }
-}
-
-@container content (min-width: 641px) and (max-width: 1024px) {
-  .content-columns {
-    columns: 2;
-    column-gap: 2rem;
-  }
-
-  .content-header {
-    font-size: 2rem;
-  }
-}
-
-@container content (min-width: 1025px) {
-  .content-columns {
-    columns: 3;
-    column-gap: 2.5rem;
-  }
-
-  .content-header {
-    font-size: 2.5rem;
-  }
-}
-
-/* CSS Subgrid Support */
-.grid-subgrid {
-  display: grid;
-  grid-template-rows: subgrid;
-  grid-template-columns: subgrid;
-}
-
-.subgrid-rows {
-  display: grid;
-  grid-template-rows: subgrid;
-}
-
-.subgrid-cols {
-  display: grid;
-  grid-template-columns: subgrid;
-}
-
-/* Complex layout with subgrid */
-.layout-parent {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  grid-template-rows: auto 1fr auto;
-  gap: 1rem;
-}
-
-.layout-child {
-  grid-column: span 12;
-  display: grid;
-  grid-template-columns: subgrid;
-}
-
-@container responsive (min-width: 768px) {
-  .layout-child {
-    grid-column: span 6;
-  }
-}
-
-@container responsive (min-width: 1024px) {
-  .layout-child {
-    grid-column: span 4;
-  }
-}
+/* REMOVED: Unused container query definitions and subgrid layouts
+ * These were defined but never used in the codebase.
+ * Components use Tailwind responsive utilities instead.
+ */
 
 /* ========================================
    CMDK (Command Menu) STYLES
@@ -2132,7 +1836,7 @@ body {
   border-radius: 0.5rem;
   overflow: hidden;
   font-family: var(--font-sans);
-  border: 1px solid var(--color-border);
+    border: 1px solid var(--border);
   box-shadow: 0 10px 38px -10px rgba(22, 23, 24, 0.35), 0 10px 20px -15px rgba(22, 23, 24, 0.2);
   outline: none;
 }
@@ -2271,7 +1975,7 @@ body {
 }
 
 [cmdk-item][data-disabled='true'] {
-  color: var(--color-muted-foreground);
+  color: var(--muted-foreground);
   cursor: not-allowed;
   opacity: 0.5;
   pointer-events: none;
@@ -2317,7 +2021,7 @@ body {
 [cmdk-separator] {
   height: 1px;
   width: 100%;
-  background: var(--color-border);
+    background: var(--border);
   margin: 0.25rem 0;
 }
 
@@ -2363,116 +2067,7 @@ body {
 }
 /* ---break---
 */
-@theme inline {
-  --font-sans: sans-serif;
-  --font-mono: monospace;
-  --font-serif: serif;
-  --radius: 0.5rem;
-  --tracking-tighter: calc(var(--tracking-normal) - 0.05em);
-  --tracking-tight: calc(var(--tracking-normal) - 0.025em);
-  --tracking-wide: calc(var(--tracking-normal) + 0.025em);
-  --tracking-wider: calc(var(--tracking-normal) + 0.05em);
-  --tracking-widest: calc(var(--tracking-normal) + 0.1em);
-  --shadow-2xl: var(--shadow-2xl);
-  --shadow-xl: var(--shadow-xl);
-  --shadow-lg: var(--shadow-lg);
-  --shadow-md: var(--shadow-md);
-  --shadow-sm: var(--shadow-sm);
-  --shadow-2xs: var(--shadow-2xs);
-  --shadow-spread: var(--shadow-spread);
-  --shadow-opacity: var(--shadow-opacity);
-  --color-shadow-color: var(--shadow-color);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-destructive: var(--destructive);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-  --color-foreground: var(--foreground);
-  --color-background: var(--background);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
-}
-/* ---break---
-*/
-:root {
-  --background: oklch(1.0000 0 0);
-  --card: oklch(0.9702 0 0);
-  --primary: oklch(0.6916 0.1669 37.2264);
-  --secondary: oklch(0.9491 0 0);
-  --muted-foreground: oklch(0.5624 0 0);
-  --destructive: oklch(0.6368 0.2078 25.3313);
-  --border: oklch(0.9067 0 0);
-  --chart-2: oklch(0.6731 0.1624 144.2083);
-  --chart-3: oklch(0.6582 0.1690 248.8135);
-  --chart-4: oklch(0.8442 0.1722 84.9338);
-  --chart-5: oklch(0.5168 0.2151 321.2386);
-  --radius: 0.5rem;
-  --font-sans: sans-serif;
-  --font-serif: serif;
-  --font-mono: monospace;
-  --shadow-color: #000000;
-  --shadow-opacity: 0.05;
-  --shadow-spread: 0rem;
-  --shadow-2xs: 0rem 0.25rem 0.5rem 0rem hsl(0 0% 0% / 0.03);
-  --shadow-sm: 0rem 0.25rem 0.5rem 0rem hsl(0 0% 0% / 0.05), 0rem 1px 2px -1px hsl(0 0% 0% / 0.05);
-  --shadow-md: 0rem 0.25rem 0.5rem 0rem hsl(0 0% 0% / 0.05), 0rem 2px 4px -1px hsl(0 0% 0% / 0.05);
-  --shadow-lg: 0rem 0.25rem 0.5rem 0rem hsl(0 0% 0% / 0.05), 0rem 4px 6px -1px hsl(0 0% 0% / 0.05);
-  --shadow-xl: 0rem 0.25rem 0.5rem 0rem hsl(0 0% 0% / 0.05), 0rem 8px 10px -1px hsl(0 0% 0% / 0.05);
-  --shadow-2xl: 0rem 0.25rem 0.5rem 0rem hsl(0 0% 0% / 0.13);
-}
-/* ---break---
-*/
-.dark {
-  --background: oklch(0.2221 0 0);
-  --card: oklch(0.2645 0 0);
-  --primary: oklch(0.6916 0.1669 37.2264);
-  --secondary: oklch(0.3092 0 0);
-  --muted-foreground: oklch(0.7058 0 0);
-  --destructive: oklch(0.6368 0.2078 25.3313);
-  --border: oklch(0.3600 0 0);
-  --chart-2: oklch(0.6731 0.1624 144.2083);
-  --chart-3: oklch(0.6582 0.1690 248.8135);
-  --chart-4: oklch(0.8442 0.1722 84.9338);
-  --chart-5: oklch(0.5168 0.2151 321.2386);
-  --radius: 0.5rem;
-  --font-sans: sans-serif;
-  --font-serif: serif;
-  --font-mono: monospace;
-  --shadow-color: #000000;
-  --shadow-opacity: 0.2;
-  --shadow-spread: -0.25rem;
-  --shadow-2xs: 0rem 0.5rem 0.75rem -0.25rem hsl(0 0% 0% / 0.10);
-  --shadow-sm: 0rem 0.5rem 0.75rem -0.25rem hsl(0 0% 0% / 0.20), 0rem 1px 2px -1.25px hsl(0 0% 0% / 0.20);
-  --shadow-md: 0rem 0.5rem 0.75rem -0.25rem hsl(0 0% 0% / 0.20), 0rem 2px 4px -1.25px hsl(0 0% 0% / 0.20);
-  --shadow-lg: 0rem 0.5rem 0.75rem -0.25rem hsl(0 0% 0% / 0.20), 0rem 4px 6px -1.25px hsl(0 0% 0% / 0.20);
-  --shadow-xl: 0rem 0.5rem 0.75rem -0.25rem hsl(0 0% 0% / 0.20), 0rem 8px 10px -1.25px hsl(0 0% 0% / 0.20);
-  --shadow-2xl: 0rem 0.5rem 0.75rem -0.25rem hsl(0 0% 0% / 0.50);
-}
+/* REMOVED: Duplicate @theme inline block and duplicate :root/.dark definitions
+ * These were duplicating the @theme block and @media/.light/.dark definitions above.
+ * All theme variables are now properly defined in the @theme block and theme-specific sections.
+ */

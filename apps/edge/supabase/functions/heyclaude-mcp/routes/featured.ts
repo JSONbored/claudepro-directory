@@ -5,16 +5,16 @@
  * Uses the get_content_paginated_slim RPC for each category in parallel.
  */
 
-import type { Database } from '@heyclaude/database-types';
-import { Constants } from '@heyclaude/database-types';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { content_category } from '@heyclaude/data-layer/prisma';
+import { ContentCategory } from '@heyclaude/data-layer/prisma';
+import { ContentService } from '@heyclaude/data-layer/services/content.ts';
 import { logError } from '@heyclaude/shared-runtime/logging.ts';
 import type { GetFeaturedInput } from '../lib/types.ts';
 
 /**
  * Retrieve and assemble featured homepage content grouped by category.
  *
- * Fetches featured items for a fixed set of categories, aggregates successful RPC responses
+ * Fetches featured items for a fixed set of categories, aggregates successful responses
  * into a per-category `featured` structure, and builds a single text summary listing up to
  * three items per category. If no featured content is available, returns a default text message.
  *
@@ -23,13 +23,13 @@ import type { GetFeaturedInput } from '../lib/types.ts';
  *  - `_meta`: metadata with `featured` (per-category arrays of items), `categories` (array of category keys present in `featured`), and `totalItems` (total number of items across all categories).
  */
 export async function handleGetFeatured(
-  supabase: SupabaseClient<Database>,
   _input: GetFeaturedInput
 ) {
+  const contentService = new ContentService();
   // get_homepage_optimized returns empty categoryData due to RPC issues
   // Use get_content_paginated_slim as fallback for featured content
   // Use explicit enum string values to avoid fragility from enum ordering changes
-  const allowedCategoryValues: Database['public']['Enums']['content_category'][] = [
+  const allowedCategoryValues: content_category[] = [
     'agents',
     'rules',
     'commands',
@@ -37,15 +37,15 @@ export async function handleGetFeatured(
     'collections',
     'mcp',
   ];
-  const validCategories = Constants.public.Enums.content_category.filter(
-    (cat: Database['public']['Enums']['content_category']) => allowedCategoryValues.includes(cat)
+  const validCategories = ContentCategory.filter(
+    (cat: content_category) => allowedCategoryValues.includes(cat)
   );
   const featured: Record<string, unknown[]> = {};
 
   // OPTIMIZATION: Fetch all categories in parallel instead of sequentially
   // This reduces latency from sum(query_times) to max(query_time) - ~83% improvement
-  const categoryQueries = validCategories.map((category: Database['public']['Enums']['content_category']) =>
-    supabase.rpc('get_content_paginated_slim', {
+  const categoryQueries = validCategories.map((category: content_category) =>
+    contentService.getContentPaginatedSlim({
       p_category: category,
       p_limit: 6,
       p_offset: 0,
@@ -64,38 +64,14 @@ export async function handleGetFeatured(
     if (!category) continue; // Skip if category is undefined
 
     if (result.status === 'fulfilled') {
-      const { data, error } = result.value;
-
-      if (error) {
-        // Use dbQuery serializer for consistent database query formatting
-        await logError('RPC call failed in getFeatured', {
-          dbQuery: {
-            rpcName: 'get_content_paginated_slim',
-            args: {
-              p_category: category,
-              p_limit: 6,
-              p_offset: 0,
-              p_order_by: 'popularity_score',
-              p_order_direction: 'desc',
-            },
-          },
-          category,
-        }, error);
-        // Continue gracefully - category will be missing from featured object
-        continue;
+      const typedData = result.value;
+      
+      // Validate response structure
+      if (!typedData || typeof typedData !== 'object') {
+        continue; // Skip malformed responses
       }
-
-      if (data) {
-        // Type the RPC return value
-        type PaginatedSlimResult = Database['public']['CompositeTypes']['content_paginated_slim_result'];
-        const typedData = data as PaginatedSlimResult;
-        
-        // Validate response structure
-        if (!typedData || typeof typedData !== 'object') {
-          continue; // Skip malformed responses
-        }
-        
-        if (typedData.items) {
+      
+      if (typedData.items) {
           // p_limit: 6 already restricts results, so slice is unnecessary
           type FeaturedItem = {
             slug: string;
@@ -129,19 +105,16 @@ export async function handleGetFeatured(
         }
       }
     } else if (result.status === 'rejected') {
-      // Promise was rejected - log with dbQuery serializer
-      await logError('RPC promise rejected in getFeatured', {
-        dbQuery: {
-          rpcName: 'get_content_paginated_slim',
-          args: {
-            p_category: category,
-            p_limit: 6,
-            p_offset: 0,
-            p_order_by: 'popularity_score',
-            p_order_direction: 'desc',
-          },
-        },
+      // Promise was rejected - log error
+      await logError('ContentService.getContentPaginatedSlim failed in getFeatured', {
         category,
+        args: {
+          p_category: category,
+          p_limit: 6,
+          p_offset: 0,
+          p_order_by: 'popularity_score',
+          p_order_direction: 'desc',
+        },
       }, result.reason);
       // Continue gracefully - category will be missing from featured object
     }

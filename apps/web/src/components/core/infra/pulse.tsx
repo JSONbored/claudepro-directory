@@ -21,8 +21,9 @@
  * @module components/infra/pulse
  */
 
-import { type Database } from '@heyclaude/database-types';
+import type { content_category } from '@heyclaude/data-layer/prisma';
 import { trackInteraction } from '@heyclaude/web-runtime/client';
+import { getOrCreateSessionId } from '@heyclaude/web-runtime/logging/client';
 import { getPollingConfig } from '@heyclaude/web-runtime/config/static-configs';
 import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
@@ -30,7 +31,7 @@ import { useEffect, useState } from 'react';
 
 export type PulseProps =
   | {
-      category: Database['public']['Enums']['content_category'];
+      category: content_category;
       delay?: number;
       metadata?: Record<string, unknown>;
       slug: string;
@@ -178,6 +179,7 @@ function ViewVariant({
         interaction_type: 'view',
         content_type: category,
         content_slug: slug,
+        session_id: getOrCreateSessionId(), // Automatically include session ID for better tracking
         metadata: metadata ?? null,
       }).catch((error) => {
         logUnhandledPromise('Pulse:view', error, { category, slug });

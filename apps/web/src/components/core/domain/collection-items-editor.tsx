@@ -21,7 +21,6 @@ import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/cl
 import { ExternalLink, Plus, Trash } from '@heyclaude/web-runtime/icons';
 import {
   toasts,
-  UI_CLASSES,
   UnifiedBadge,
   Button,
   Select,
@@ -31,11 +30,13 @@ import {
   SelectValue,
   Separator,
   Reorder,
+  cn,
 } from '@heyclaude/web-runtime/ui';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useState, useTransition } from 'react';
 
 import { useAuthModal } from '@/src/hooks/use-auth-modal';
+import { cluster, iconSize, stack, size, weight, muted, spaceY, padding, marginTop, marginY, paddingY, paddingBottom, gap } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Validate slug is safe for use in URLs
@@ -281,25 +282,25 @@ export function CollectionItemManager({
   );
 
   return (
-    <div className="space-y-4">
+    <div className={spaceY.comfortable}>
       {/* Add Item Section */}
-      <div className="flex items-end gap-2 pb-4">
-        <div className="flex-1">
-          <div className="mb-2 block text-sm font-medium">Add Bookmark to Collection</div>
+      <div className={cn('flex items-end', gap.compact, paddingBottom.default)}>
+        <div className={`flex-1`}>
+          <div className={`mb-2 block text-sm font-medium`}>Add Bookmark to Collection</div>
           <Select value={selectedBookmarkId} onValueChange={setSelectedBookmarkId}>
             <SelectTrigger>
               <SelectValue placeholder="Select a bookmark to add" />
             </SelectTrigger>
             <SelectContent>
               {availableToAdd.length === 0 ? (
-                <div className="text-muted-foreground p-2 text-sm">
+                <div className={cn(muted.default, padding.tight, size.sm)}>
                   All bookmarks have been added
                 </div>
               ) : (
                 availableToAdd.map((bookmark) => (
                   <SelectItem key={bookmark.id} value={bookmark.id}>
-                    <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                      <UnifiedBadge variant="base" style="outline" className="text-xs capitalize">
+                    <div className={cluster.compact}>
+                      <UnifiedBadge variant="base" style="outline" className={`${size.xs} capitalize`}>
                         {bookmark.content_type}
                       </UnifiedBadge>
                       {bookmark.content_slug}
@@ -313,19 +314,19 @@ export function CollectionItemManager({
         <Button
           onClick={handleAdd}
           disabled={!selectedBookmarkId || isPending}
-          className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
+          className={cluster.compact}
         >
-          <Plus className={UI_CLASSES.ICON_SM} />
+          <Plus className={iconSize.sm} />
           Add
         </Button>
       </div>
 
-      <Separator className="my-4" />
+      <Separator className={`${marginY.default}`} />
 
       {/* Items List */}
       {items.length === 0 ? (
-        <div className="rounded-lg border border-dashed py-12 text-center">
-          <p className="text-muted-foreground">
+        <div className={`rounded-lg border border-dashed ${paddingY.section} text-center`}>
+          <p className={muted.default}>
             No items in this collection yet. Add bookmarks above to get started.
           </p>
         </div>
@@ -345,14 +346,14 @@ export function CollectionItemManager({
           values={items}
           onReorder={shouldReduceMotion || isPending ? () => {} : handleReorder}
           as="div"
-          className="space-y-2"
+          className={spaceY.compact}
         >
           {items.map((item: CollectionItem, index: number) => (
             <Reorder.Item
               key={item.id}
               value={item}
               as="div"
-              className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} bg-card hover:bg-accent/50 rounded-lg border p-3 transition-colors ${
+              className={`${cluster.default} bg-card hover:bg-accent/50 rounded-lg border p-3 transition-colors ${
                 shouldReduceMotion || isPending ? '' : 'cursor-grab active:cursor-grabbing'
               }`}
               dragListener={!shouldReduceMotion && !isPending}
@@ -360,8 +361,7 @@ export function CollectionItemManager({
               {/* Drag Handle - Only visible when drag is enabled */}
               {!shouldReduceMotion && !isPending && (
                 <div
-                  className="text-muted-foreground flex flex-col gap-0.5 cursor-grab active:cursor-grabbing"
-                  style={{ touchAction: 'none' }}
+                  className={cn(muted.default, stack.default, 'gap-3.5 cursor-grab active:cursor-grabbing touch-none')}
                   aria-label="Drag handle"
                 >
                   <div className="h-0.5 w-3 rounded-full bg-current" />
@@ -371,25 +371,25 @@ export function CollectionItemManager({
               )}
 
               {/* Order Number */}
-              <div className="text-muted-foreground w-8 text-center text-sm font-medium">
+              <div className={cn(muted.default, 'w-8 text-center', size.sm, weight.medium)}>
                 #{index + 1}
               </div>
 
               {/* Content Info */}
-              <div className="flex-1">
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                  <UnifiedBadge variant="base" style="outline" className="text-xs capitalize">
+              <div className={`flex-1`}>
+                <div className={cluster.compact}>
+                  <UnifiedBadge variant="base" style="outline" className={`${size.xs} capitalize`}>
                     {item.content_type}
                   </UnifiedBadge>
-                  <span className="text-sm font-medium">{item.content_slug}</span>
+                  <span className={`${size.sm} ${weight.medium}`}>{item.content_slug}</span>
                 </div>
                 {item.notes ? (
-                  <p className="text-muted-foreground mt-1 text-xs">{item.notes}</p>
+                  <p className={cn(muted.default, marginTop.tight, size.xs)}>{item.notes}</p>
                 ) : null}
               </div>
 
               {/* Actions */}
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+              <div className={cluster.tight}>
                 {(() => {
                   const safeContentUrl = getSafeContentUrl(item.content_type, item.content_slug);
                   if (!safeContentUrl) return null;
@@ -397,23 +397,23 @@ export function CollectionItemManager({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className={`${UI_CLASSES.ICON_XL} p-0`}
+                      className={`${iconSize.xl} p-0`}
                       onClick={() => window.open(safeContentUrl, '_blank')}
                       aria-label="View item"
                     >
-                      <ExternalLink className={UI_CLASSES.ICON_SM} />
+                      <ExternalLink className={iconSize.sm} />
                     </Button>
                   );
                 })()}
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`${UI_CLASSES.ICON_XL} text-destructive hover:text-destructive p-0`}
+                  className={`${iconSize.xl} text-destructive hover:text-destructive p-0`}
                   onClick={() => handleRemove(item.id)}
                   disabled={isPending}
                   aria-label="Remove item"
                 >
-                  <Trash className={UI_CLASSES.ICON_SM} />
+                  <Trash className={iconSize.sm} />
                 </Button>
               </div>
             </Reorder.Item>

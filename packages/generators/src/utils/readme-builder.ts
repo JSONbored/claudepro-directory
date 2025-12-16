@@ -1,4 +1,5 @@
-import  { type Database as DatabaseGenerated } from '@heyclaude/database-types';
+import type { GenerateReadmeDataReturns } from '@heyclaude/database-types/postgres-types/functions/generate_readme_data';
+import type { ReadmeCategory } from '@heyclaude/database-types/postgres-types/composites/readme_category';
 
 const SITE_URL = process.env['NEXT_PUBLIC_SITE_URL'] ?? 'https://claudepro.directory';
 
@@ -27,7 +28,7 @@ const ICON_EMOJI_MAP: Record<string, string> = {
  * // const md = buildReadmeMarkdown(rpcResult);
  */
 export function buildReadmeMarkdown(
-  data: DatabaseGenerated['public']['Functions']['generate_readme_data']['Returns']
+  data: GenerateReadmeDataReturns
 ): string {
   // Composite type fields are snake_case as defined in the database
   // Supabase RPC returns them as snake_case in JSON
@@ -35,7 +36,7 @@ export function buildReadmeMarkdown(
   const totalCount = data.total_count ?? 0;
 
   const categorySections = categories
-    .map((cat) => {
+    .map((cat: ReadmeCategory) => {
       if (!cat.items || cat.items.length === 0) return '';
 
       // Handle nullable fields from composite type

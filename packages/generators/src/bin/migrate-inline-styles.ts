@@ -1,5 +1,5 @@
 #!/usr/bin/env tsx
-import { migrateInlineStyles } from '../commands/migrate-inline-styles.js';
+import { migrateInlineStyles } from '../commands/migrate-inline-styles.ts';
 
 const args = process.argv.slice(2);
 const dryRun = args.includes('--dry-run') || args.includes('-d');

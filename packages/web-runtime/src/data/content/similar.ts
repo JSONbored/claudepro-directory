@@ -1,8 +1,8 @@
 'use server';
 
 import { ContentService } from '@heyclaude/data-layer';
-import { type content_category } from '@heyclaude/data-layer/prisma';
-import type { GetSimilarContentReturns } from '@heyclaude/database-types/postgres-types/functions';
+import type { content_category } from '@heyclaude/data-layer/prisma';
+import type { GetSimilarContentReturns } from '@heyclaude/database-types/postgres-types';
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { normalizeError } from '../../errors.ts';
@@ -26,8 +26,8 @@ export async function getSimilarContent(input: {
 
   const { contentSlug, contentType, limit = 6 } = input;
 
-  // Configure cache - use 'hours' profile for similar content
-  cacheLife('hours'); // 1hr stale, 15min revalidate, 1 day expire
+  // Configure cache - use 'static' profile for optimal SEO (1 day stale, 6hr revalidate, 30 days expire)
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
   cacheTag('content');
   cacheTag('similar');
   cacheTag(`content-${contentSlug}`);

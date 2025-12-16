@@ -1,13 +1,13 @@
 'use server';
 
 import { QuizService } from '@heyclaude/data-layer';
-import {
-  type experience_level,
-  type focus_area_type,
-  type integration_type,
-  type use_case_type,
+import type {
+  experience_level,
+  focus_area_type,
+  integration_type,
+  use_case_type,
 } from '@heyclaude/data-layer/prisma';
-import { type Database } from '@heyclaude/database-types';
+import type { GetRecommendationsReturns } from '@heyclaude/database-types/postgres-types';
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { normalizeError } from '../../errors.ts';
@@ -38,7 +38,7 @@ export interface RecommendationInput {
  */
 export async function getConfigRecommendations(
   input: RecommendationInput
-): Promise<Database['public']['Functions']['get_recommendations']['Returns'] | null> {
+): Promise<GetRecommendationsReturns | null> {
   'use cache: private';
 
   const {

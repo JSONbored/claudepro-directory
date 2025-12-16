@@ -62,6 +62,7 @@ logContext, startTime)
 ```
 
 **Required Elements**:
+
 - ✅ `startTime = Date.now()` at page start
 - ✅ Single `requestId` per request
 - ✅ `logContext` with route, operation, requestId
@@ -95,6 +96,7 @@ export async function POST(request: NextRequest) {
 ```
 
 **Required Elements**:
+
 - ✅ Use `createErrorResponse` for all errors
 - ✅ Include route, operation, method in context
 - ✅ RequestId included in logContext
@@ -116,6 +118,7 @@ export const myAction = actionClient
 ```
 
 **Required Elements**:
+
 - ✅ Use `actionClient` wrapper (automatically logs errors)
 - ✅ Include `actionName` and `category` in metadata
 - ✅ RequestId is automatically generated
@@ -154,6 +157,7 @@ export function MyComponent() {
 ```
 
 **Required Elements**:
+
 - ✅ Use `useLoggedAsync` for all async operations
 - ✅ Include `scope` (component name)
 - ✅ Provide meaningful error messages
@@ -211,6 +215,7 @@ async function criticalMutation(args: RpcArgs) {
 ```
 
 **Required Elements**:
+
 - ✅ Log all RPC errors with business context (requestId, userId, operation)
 - ✅ Log critical operations (mutations, sensitive queries) for audit trail
 - ✅ Never use `console.*` - always use structured logging
@@ -245,6 +250,7 @@ async function callExternalApi() {
 ```
 
 **Required Elements**:
+
 - ✅ Use `withExternalApiLogging` wrapper (when available)
 - ✅ Log API name, method, path
 - ✅ Track performance via external monitoring
@@ -291,6 +297,7 @@ export default function MyErrorBoundary({
 ```
 
 **Required Elements**:
+
 - ✅ Log error with `logger.error()`
 - ✅ Use `normalizeError()` for error
 - ✅ Include route, operation, requestId in context
@@ -315,6 +322,7 @@ try {
 ```
 
 **Required Elements**:
+
 - ✅ Always use `normalizeError()`
 - ✅ Always log with `logger.error()`
 - ✅ Always include context
@@ -355,11 +363,13 @@ Duration tracking has been removed from the codebase. Use external monitoring to
 ## Request ID Patterns
 
 ### Current Pattern
+
 ```typescript
 const requestId = generateRequestId(); // Generate in each page/component
 ```
 
 ### Server Actions
+
 ```typescript
 // Server actions use separate requestId (acceptable pattern)
 const actionRequestId = generateRequestId();
@@ -385,6 +395,7 @@ See [ESLint Architectural Rules](../tools/ESLINT_RULES.md) for complete document
 ## Common Mistakes to Avoid
 
 ❌ **Don't**:
+
 - Use `console.*` instead of `logger.*`
 - Generate multiple requestIds in same request lifecycle
 - Skip error logging in catch blocks
@@ -392,6 +403,7 @@ See [ESLint Architectural Rules](../tools/ESLINT_RULES.md) for complete document
 - Log without context
 
 ✅ **Do**:
+
 - Use structured logging (`logger.*`)
 - Use single requestId per request
 - Always log errors in catch blocks

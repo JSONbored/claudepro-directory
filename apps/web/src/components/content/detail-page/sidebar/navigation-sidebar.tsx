@@ -4,9 +4,9 @@
  * DetailSidebar - Sidebar orchestrator for detail pages
  */
 
-import { Constants, type Database } from '@heyclaude/database-types';
+import { ContentCategory } from '@heyclaude/data-layer/prisma';
+import type { GetContentDetailCompleteReturns } from '@heyclaude/database-types/postgres-types';
 import {
-  type CategoryType,
   ensureStringArray,
   getContentItemUrl,
   getMetadata,
@@ -20,9 +20,7 @@ import { Copy, ExternalLink, Github, Thermometer } from '@heyclaude/web-runtime/
 import { logClientWarn } from '@heyclaude/web-runtime/logging/client';
 import { type ContentItem } from '@heyclaude/web-runtime/types/component.types';
 import {
-  BADGE_COLORS,
   getDisplayTitle,
-  UI_CLASSES,
   UnifiedBadge,
   Button,
   Card,
@@ -30,6 +28,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
+import { iconSize, marginRight, cluster, size, muted, between, spaceY, marginBottom, gap, marginLeft } from '@heyclaude/web-runtime/design-system';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { memo } from 'react';
@@ -142,19 +141,19 @@ export interface DetailSidebarProps {
     | ((
         item:
           | ContentItem
-          | Database['public']['Functions']['get_content_detail_complete']['Returns']['content'],
+          | GetContentDetailCompleteReturns['content'],
         relatedItems:
           | ContentItem[]
-          | Database['public']['Functions']['get_content_detail_complete']['Returns']['related'],
+          | GetContentDetailCompleteReturns['related'],
         router: ReturnType<typeof useRouter>
       ) => React.ReactNode)
     | undefined;
   item:
     | ContentItem
-    | Database['public']['Functions']['get_content_detail_complete']['Returns']['content'];
+    | GetContentDetailCompleteReturns['content'];
   relatedItems:
     | ContentItem[]
-    | Database['public']['Functions']['get_content_detail_complete']['Returns']['related'];
+    | GetContentDetailCompleteReturns['related'];
 }
 
 /**
@@ -174,27 +173,37 @@ export const DetailSidebar = memo(function DetailSidebar({
   const router = useRouter();
   const pulse = usePulse();
 
-  // Cast item to ContentItem for property access (content is Json type from RPC)
-  const contentItem = item as ContentItem;
+  // Early return if item is null (can happen with GetContentDetailCompleteReturns['content'])
+  if (!item) {
+    return null;
+  }
+
+  // Type guard: Check if item is Record<string, unknown> (from GetContentDetailCompleteReturns)
+  // and extract category/slug safely, or use ContentItem properties directly
+  const itemCategory = 'category' in item && typeof item.category === 'string' ? item.category : null;
+  const itemSlug = 'slug' in item && typeof item.slug === 'string' ? item.slug : null;
 
   // Default sidebar using SidebarCard with inline configuration
   const githubUrl = config.metadata?.githubPathPrefix
-    ? `${SOCIAL_LINK_SNAPSHOT.github}/blob/main/${config.metadata.githubPathPrefix}/${contentItem.slug}.json`
-    : contentItem.category
-      ? `${SOCIAL_LINK_SNAPSHOT.github}/blob/main/content/${contentItem.category}/${contentItem.slug}.json`
+    ? `${SOCIAL_LINK_SNAPSHOT.github}/blob/main/${config.metadata.githubPathPrefix}/${itemSlug}.json`
+    : itemCategory
+      ? `${SOCIAL_LINK_SNAPSHOT.github}/blob/main/content/${itemCategory}/${itemSlug}.json`
       : null;
 
   const showGitHubLink = config.metadata?.showGitHubLink ?? true;
-  const hasDocumentationUrl = 'documentation_url' in contentItem && contentItem.documentation_url;
-  const metadata = getMetadata(contentItem);
+  const hasDocumentationUrl = 'documentation_url' in item && typeof item.documentation_url === 'string' && item.documentation_url;
+  // Type narrowing: getMetadata accepts ContentItem or EnrichedContentItem
+  // item is ContentItem | GetContentDetailCompleteReturns['content'], both compatible
+  const metadata = getMetadata(item as ContentItem);
   const hasConfiguration =
     metadata['configuration'] && typeof metadata['configuration'] === 'object';
-  const packageName = metadata['package'] as string | undefined;
+  // Type guard for package name
+  const packageName = typeof metadata['package'] === 'string' ? metadata['package'] : undefined;
   const hasPackage = !!packageName;
   const hasAuth = 'requiresAuth' in metadata;
   const hasPermissions = 'permissions' in metadata;
   const permissions = hasPermissions ? ensureStringArray(metadata['permissions']) : [];
-  const hasSource = 'source' in contentItem && contentItem.source;
+  const hasSource = 'source' in item && typeof item.source === 'string' && item.source;
   // Type guard for Record<string, unknown> (object but not array or null)
   function isValidRecord(value: unknown): value is Record<string, unknown> {
     return (
@@ -210,27 +219,36 @@ export const DetailSidebar = memo(function DetailSidebar({
   const configurationObject = isValidRecord(metadata['configuration'])
     ? metadata['configuration']
     : null;
-  const quickActions = useDetailQuickActions({
-    item: contentItem,
-    metadata,
-    packageName: packageName ?? null,
-    configurationObject,
-    mcpServers,
-  });
+  // Type guard: Check if item is ContentItem (has id property) vs Record<string, unknown>
+  // ContentItem is contentModel which has proper types including 'id'
+  const isContentItem = (value: ContentItem | GetContentDetailCompleteReturns['content']): value is ContentItem => {
+    return value !== null && typeof value === 'object' && 'id' in value && typeof value.id === 'string';
+  };
+
+  // Only call useDetailQuickActions if item is ContentItem (not Record<string, unknown>)
+  const quickActions = isContentItem(item)
+    ? useDetailQuickActions({
+        item: item,
+        metadata,
+        packageName: packageName ?? null,
+        configurationObject,
+        mcpServers,
+      })
+    : [];
 
   if (customRenderer) {
-    return <div className="space-y-6">{customRenderer(item, relatedItems, router)}</div>;
+    return <div className={`${spaceY.relaxed}`}>{customRenderer(item, relatedItems, router)}</div>;
   }
 
   return (
-    <div className="space-y-6">
+    <div className={`${spaceY.relaxed}`}>
       {/* Resources Card */}
       {!!(showGitHubLink || hasDocumentationUrl) && (
         <Card>
           <CardHeader>
             <CardTitle>Resources</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className={`${spaceY.default}`}>
             {showGitHubLink && githubUrl ? (
               <Button
                 variant="outline"
@@ -238,8 +256,8 @@ export const DetailSidebar = memo(function DetailSidebar({
                 onClick={() => {
                   pulse
                     .click({
-                      category: isValidCategory(contentItem.category) ? contentItem.category : null,
-                      slug: contentItem.slug || null,
+                      category: itemCategory && isValidCategory(itemCategory) ? itemCategory : null,
+                      slug: itemSlug || null,
                       metadata: {
                         action: 'external_link',
                         link_type: 'github',
@@ -251,8 +269,8 @@ export const DetailSidebar = memo(function DetailSidebar({
                         'NavigationSidebar: GitHub link click pulse failed',
                         error,
                         {
-                          category: contentItem.category ?? 'null',
-                          slug: contentItem.slug ?? 'null',
+                          category: itemCategory ?? 'null',
+                          slug: itemSlug ?? 'null',
                         }
                       );
                     });
@@ -260,17 +278,18 @@ export const DetailSidebar = memo(function DetailSidebar({
                 asChild
               >
                 <a href={githubUrl} target="_blank" rel="noopener noreferrer">
-                  <Github className={UI_CLASSES.ICON_SM_LEADING} />
+                  <Github className={`${iconSize.sm} ${marginRight.compact}`} />
                   View on GitHub
                 </a>
               </Button>
             ) : null}
             {hasDocumentationUrl &&
-            'documentation_url' in contentItem &&
-            contentItem.documentation_url
+            'documentation_url' in item &&
+            typeof item.documentation_url === 'string' &&
+            item.documentation_url
               ? (() => {
                   // Validate and sanitize documentation URL before rendering
-                  const safeDocUrl = getSafeDocumentationUrl(contentItem.documentation_url);
+                  const safeDocUrl = getSafeDocumentationUrl(item.documentation_url);
                   if (!safeDocUrl) {
                     logClientWarn(
                       '[Content] Invalid documentation URL rejected',
@@ -280,9 +299,9 @@ export const DetailSidebar = memo(function DetailSidebar({
                         component: 'NavigationSidebar',
                         action: 'render-documentation-link',
                         category: 'content',
-                        itemCategory: contentItem.category ?? 'null',
-                        slug: contentItem.slug ?? 'null',
-                        url: contentItem.documentation_url ?? 'null',
+                        itemCategory: itemCategory ?? 'null',
+                        slug: itemSlug ?? 'null',
+                        url: item.documentation_url ?? 'null',
                       }
                     );
                     // Don't render link if URL is invalid or unsafe
@@ -295,10 +314,10 @@ export const DetailSidebar = memo(function DetailSidebar({
                       onClick={() => {
                         pulse
                           .click({
-                            category: isValidCategory(contentItem.category)
-                              ? contentItem.category
+                            category: itemCategory && isValidCategory(itemCategory)
+                              ? itemCategory
                               : null,
-                            slug: contentItem.slug || null,
+                            slug: itemSlug || null,
                             metadata: {
                               action: 'external_link',
                               link_type: 'documentation',
@@ -310,8 +329,8 @@ export const DetailSidebar = memo(function DetailSidebar({
                               'NavigationSidebar: documentation link click pulse failed',
                               error,
                               {
-                                category: contentItem.category ?? 'null',
-                                slug: contentItem.slug ?? 'null',
+                                category: itemCategory ?? 'null',
+                                slug: itemSlug ?? 'null',
                               }
                             );
                           });
@@ -319,7 +338,7 @@ export const DetailSidebar = memo(function DetailSidebar({
                       asChild
                     >
                       <a href={safeDocUrl} target="_blank" rel="noopener noreferrer">
-                        <ExternalLink className={UI_CLASSES.ICON_SM_LEADING} />
+                        <ExternalLink className={`${iconSize.sm} ${marginRight.compact}`} />
                         Documentation
                       </a>
                     </Button>
@@ -336,16 +355,26 @@ export const DetailSidebar = memo(function DetailSidebar({
           <CardHeader>
             <CardTitle>{`${config.typeName} Details`}</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {contentItem.category ? (
+          <CardContent className={`${spaceY.comfortable}`}>
+            {itemCategory ? (
               <div>
-                <h4 className="mb-1 font-medium">Category</h4>
+                <h4 className={`${marginBottom.tight} font-medium`}>Category</h4>
                 <UnifiedBadge
                   variant="base"
                   style="default"
                   className={`text-xs font-medium ${
-                    BADGE_COLORS.category[contentItem.category as CategoryType] ||
-                    BADGE_COLORS.category.default
+                    itemCategory === 'agents' ? 'bg-color-badge-category-agents-bg text-color-badge-category-agents-text border-color-badge-category-agents-border' :
+                    itemCategory === 'mcp' ? 'bg-color-badge-category-mcp-bg text-color-badge-category-mcp-text border-color-badge-category-mcp-border' :
+                    itemCategory === 'commands' ? 'bg-color-badge-category-commands-bg text-color-badge-category-commands-text border-color-badge-category-commands-border' :
+                    itemCategory === 'rules' ? 'bg-color-badge-category-rules-bg text-color-badge-category-rules-text border-color-badge-category-rules-border' :
+                    itemCategory === 'hooks' ? 'bg-color-badge-category-hooks-bg text-color-badge-category-hooks-text border-color-badge-category-hooks-border' :
+                    itemCategory === 'statuslines' ? 'bg-color-badge-category-statuslines-bg text-color-badge-category-statuslines-text border-color-badge-category-statuslines-border' :
+                    itemCategory === 'collections' ? 'bg-color-badge-category-collections-bg text-color-badge-category-collections-text border-color-badge-category-collections-border' :
+                    itemCategory === 'skills' ? 'bg-color-badge-category-skills-bg text-color-badge-category-skills-text border-color-badge-category-skills-border' :
+                    itemCategory === 'guides' ? 'bg-color-badge-category-guides-bg text-color-badge-category-guides-text border-color-badge-category-guides-border' :
+                    itemCategory === 'jobs' ? 'bg-color-badge-category-jobs-bg text-color-badge-category-jobs-text border-color-badge-category-jobs-border' :
+                    itemCategory === 'changelog' ? 'bg-color-badge-category-changelog-bg text-color-badge-category-changelog-text border-color-badge-category-changelog-border' :
+                    'bg-color-badge-category-default-bg text-color-badge-category-default-text border-color-badge-category-default-border'
                   }`}
                 >
                   {config.typeName}
@@ -361,21 +390,23 @@ export const DetailSidebar = memo(function DetailSidebar({
               ) {
                 return null;
               }
-              const config = metadata['configuration'] as { temperature?: number };
-              if (typeof config.temperature !== 'number') {
+              // Type guard: We already checked it's an object and not null
+              const config = metadata['configuration'] as Record<string, unknown>;
+              const temperature = config['temperature'];
+              if (typeof temperature !== 'number') {
                 return null;
               }
               return (
                 <div>
-                  <h4 className="mb-1 font-medium">Temperature</h4>
-                  <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                    <Thermometer className={`${UI_CLASSES.ICON_XS} text-orange-500`} />
+                  <h4 className={`${marginBottom.tight} font-medium`}>Temperature</h4>
+                  <div className={cluster.compact}>
+                    <Thermometer className={`${iconSize.xs} text-orange-500`} />
                     <UnifiedBadge
                       variant="base"
                       style="outline"
                       className="border-orange-500/30 bg-orange-500/10 text-xs font-medium text-orange-600"
                     >
-                      {String(config.temperature)}
+                      {String(temperature)}
                     </UnifiedBadge>
                   </div>
                 </div>
@@ -384,7 +415,7 @@ export const DetailSidebar = memo(function DetailSidebar({
 
             {hasPackage && packageName ? (
               <div>
-                <h4 className="mb-1 font-medium">Package</h4>
+                <h4 className={`${marginBottom.tight} font-medium`}>Package</h4>
                 <UnifiedBadge variant="base" style="outline" className="font-mono text-xs">
                   {packageName}
                 </UnifiedBadge>
@@ -393,17 +424,19 @@ export const DetailSidebar = memo(function DetailSidebar({
 
             {hasAuth ? (
               <div>
-                <h4 className="mb-1 font-medium">Authentication</h4>
-                <p className={UI_CLASSES.TEXT_SM_MUTED}>
-                  {(metadata['requiresAuth'] as boolean) ? 'Required' : 'Not required'}
+                <h4 className={`${marginBottom.tight} font-medium`}>Authentication</h4>
+                <p className={`${size.sm} ${muted.default}`}>
+                  {typeof metadata['requiresAuth'] === 'boolean' && metadata['requiresAuth']
+                    ? 'Required'
+                    : 'Not required'}
                 </p>
               </div>
             ) : null}
 
             {hasPermissions && permissions.length > 0 ? (
               <div>
-                <h4 className="mb-1 font-medium">Permissions</h4>
-                <div className="flex flex-wrap gap-1">
+                <h4 className={`${marginBottom.tight} font-medium`}>Permissions</h4>
+                <div className={`flex flex-wrap ${gap.micro}`}>
                   {permissions.map((perm) => (
                     <UnifiedBadge key={perm} variant="base" style="outline" className="text-xs">
                       {perm}
@@ -413,11 +446,11 @@ export const DetailSidebar = memo(function DetailSidebar({
               </div>
             ) : null}
 
-            {hasSource && 'source' in contentItem && contentItem.source ? (
+            {hasSource && 'source' in item && typeof item.source === 'string' && item.source ? (
               <div>
-                <h4 className="mb-1 font-medium">Source</h4>
+                <h4 className={`${marginBottom.tight} font-medium`}>Source</h4>
                 <UnifiedBadge variant="base" style="outline">
-                  {contentItem.source}
+                  {item.source}
                 </UnifiedBadge>
               </div>
             ) : null}
@@ -430,15 +463,15 @@ export const DetailSidebar = memo(function DetailSidebar({
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className={`${spaceY.compact}`}>
             {quickActions.map((action) => (
               <Button
                 key={action.key}
                 variant="secondary"
-                className="w-full justify-start gap-3 text-left"
+                className={`w-full justify-start ${gap.compact} text-left`}
                 onClick={action.onClick}
               >
-                <Copy className={UI_CLASSES.ICON_SM_LEADING} />
+                <Copy className={`${iconSize.sm} ${marginRight.compact}`} />
                 <div className="text-left">
                   <div className="text-sm font-medium">{action.label}</div>
                   {action.description ? (
@@ -457,17 +490,17 @@ export const DetailSidebar = memo(function DetailSidebar({
           <CardHeader>
             <CardTitle>{`Related ${config.typeName}s`}</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className={`${spaceY.default}`}>
             {relatedItems.slice(0, 5).map((relatedItem) => {
               const relatedCategory =
                 'category' in relatedItem &&
-                typeof relatedItem.category === 'string' &&
-                isValidCategory(relatedItem.category)
-                  ? relatedItem.category
-                  : Constants.public.Enums.content_category[0]; // 'agents'
+                typeof relatedItem['category'] === 'string' &&
+                isValidCategory(relatedItem['category'])
+                  ? relatedItem['category']
+                  : ContentCategory.agents; // 'agents'
               const relatedSlug =
-                'slug' in relatedItem && typeof relatedItem.slug === 'string'
-                  ? relatedItem.slug
+                'slug' in relatedItem && typeof relatedItem['slug'] === 'string'
+                  ? relatedItem['slug']
                   : '';
               // Validate and sanitize URL before using
               const safeRelatedUrl = getSafeContentItemUrl(relatedCategory, relatedSlug);
@@ -492,7 +525,7 @@ export const DetailSidebar = memo(function DetailSidebar({
                 <Link
                   key={relatedSlug}
                   href={safeRelatedUrl}
-                  className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} border-border hover:bg-muted/50 block w-full cursor-pointer rounded-lg border p-3 text-left transition-colors`}
+                  className={`${between.center} border-border hover:bg-muted/50 block w-full cursor-pointer rounded-lg border p-3 text-left transition-colors`}
                 >
                   <div className="min-w-0 flex-1">
                     <h4 className="truncate text-sm font-medium">
@@ -511,7 +544,7 @@ export const DetailSidebar = memo(function DetailSidebar({
                         : ''}
                     </p>
                   </div>
-                  <ExternalLink className="text-muted-foreground ml-2 h-4 w-4 shrink-0" />
+                  <ExternalLink className={`text-muted-foreground ${marginLeft.tight} h-4 w-4 shrink-0`} />
                 </Link>
               );
             })}

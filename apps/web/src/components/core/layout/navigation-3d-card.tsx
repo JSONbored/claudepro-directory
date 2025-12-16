@@ -15,7 +15,7 @@
  * - Hardware-accelerated transforms
  */
 
-import type { Database } from '@heyclaude/database-types';
+import type { content_category } from '@heyclaude/data-layer/prisma';
 import type { LucideIcon } from '@heyclaude/web-runtime/icons';
 import {
   UnifiedBadge,
@@ -27,13 +27,14 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { useBoolean } from '@heyclaude/web-runtime/hooks';
+import { padding, paddingBottom, marginBottom, marginTop, paddingX, paddingY, muted, size, center, stack } from "@heyclaude/web-runtime/design-system";
 
 export interface Navigation3DCardProps {
   href: string;
   label: string;
   description?: string;
   icon?: LucideIcon | undefined;
-  category?: Database['public']['Enums']['content_category'] | undefined;
+  category?: content_category | undefined;
   badge?: string;
   className?: string;
 }
@@ -42,7 +43,7 @@ export interface Navigation3DCardProps {
  * Category color configuration for gradient blocks (shadcn 3d-pin style)
  */
 const categoryGradients: Record<
-  Database['public']['Enums']['content_category'],
+  content_category,
   string
 > = {
   agents: 'from-violet-500 via-purple-500 to-blue-500',
@@ -75,8 +76,7 @@ export function Navigation3DCard({
 
   const cardContent = (
     <div
-      className={cn('relative group/pin cursor-pointer h-full w-full flex items-center justify-center', className)}
-      style={{ perspective: '1000px' }}
+      className={cn('relative group/pin cursor-pointer h-full w-full perspective-[1000px]', center, className)}
       onMouseEnter={setIsHoveredTrue}
       onMouseLeave={setIsHoveredFalse}
     >
@@ -95,20 +95,20 @@ export function Navigation3DCard({
           'group-hover/pin:border-white/[0.2] transition-all duration-700 overflow-hidden'
         )}
       >
-        <div className="flex basis-full flex-col p-2 tracking-tight text-slate-100/50 w-full h-full">
+        <div className={cn(stack.none, 'basis-full', padding.tight, 'tracking-tight text-slate-100/50 w-full h-full')}>
           {/* Title */}
-          <h3 className="max-w-xs !pb-1 !m-0 font-bold text-[11px] text-slate-100 leading-tight">
+          <h3 className={cn('max-w-xs', paddingBottom.micro, '!m-0 font-bold', size['3xs'], 'text-slate-100 leading-tight')}>
             {label}
           </h3>
 
           {/* Badge (if category) */}
           {category && (
-            <div className="mb-1">
+            <div className={marginBottom.tight}>
               <UnifiedBadge
                 variant="category"
                 category={category}
                 href={null}
-                className="text-[8px] px-1 py-0"
+                className={cn('text-[8px]', paddingX.micro, paddingY.default)}
               />
             </div>
           )}
@@ -116,7 +116,9 @@ export function Navigation3DCard({
           {/* Gradient block at bottom (shadcn 3d-pin style) */}
           <div
             className={cn(
-              'flex flex-1 w-full rounded-lg mt-1 bg-gradient-to-br',
+              'flex flex-1 w-full rounded-lg',
+              marginTop.tight,
+              'bg-gradient-to-br',
               gradient
             )}
           />
@@ -136,8 +138,8 @@ export function Navigation3DCard({
             </Link>
           </TooltipTrigger>
           <TooltipContent side="bottom" className="max-w-xs text-xs">
-            <div className="font-semibold mb-0.5">{label}</div>
-            <div className="text-muted-foreground">{description}</div>
+            <div className={cn('font-semibold', marginBottom['4.5'])}>{label}</div>
+            <div className={`${muted.default}`}>{description}</div>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>

@@ -2,12 +2,12 @@
  * Types for package generation system
  */
 
-import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
+import type { contentModel } from '@heyclaude/database-types/prisma';
 
 /**
- * Content row type (from database)
+ * Content row type (from Prisma)
  */
-export type ContentRow = DatabaseGenerated['public']['Tables']['content']['Row'];
+export type ContentRow = contentModel;
 
 /**
  * Result of package generation
@@ -49,12 +49,14 @@ export interface PackageGenerator {
   getDatabaseFields(): string[];
 }
 
+import type { content_category } from '@heyclaude/data-layer/prisma';
+
 /**
  * Request body for package generation
  */
 export interface GeneratePackageRequest {
   content_id: string;
-  category: DatabaseGenerated['public']['Enums']['content_category'];
+  category: content_category;
 }
 
 /**
@@ -63,7 +65,7 @@ export interface GeneratePackageRequest {
 export interface GeneratePackageResponse {
   success: boolean;
   content_id: string;
-  category: DatabaseGenerated['public']['Enums']['content_category'];
+  category: content_category;
   slug: string;
   storage_url: string | null; // URL when generation completes, null for async/queued cases
   metadata?: Record<string, unknown>;

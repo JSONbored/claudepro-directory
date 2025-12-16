@@ -1,6 +1,6 @@
 'use server';
 
-import type { GetHomepageOptimizedReturns } from '@heyclaude/database-types/postgres-types/functions';
+import type { GetHomepageOptimizedReturns } from '@heyclaude/database-types/postgres-types';
 import { cacheLife, cacheTag } from 'next/cache';
 
 /**
@@ -23,8 +23,9 @@ export async function getHomepageData(
   // This prevents cache misses due to array order differences
   const sortedCategoryIds = [...categoryIds].toSorted().join(',');
 
-  // Configure cache - use 'hours' profile for homepage data that changes hourly
-  cacheLife('hours'); // 1hr stale, 15min revalidate, 1 day expire
+  // Configure cache - use 'static' profile for homepage data that changes infrequently
+  // Homepage content updates are not hourly, so longer cache improves performance significantly
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
   cacheTag('homepage');
   cacheTag('content');
   cacheTag('trending');

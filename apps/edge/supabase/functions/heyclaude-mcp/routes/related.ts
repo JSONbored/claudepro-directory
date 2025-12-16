@@ -3,27 +3,26 @@
  * Uses get_related_content RPC for consistent behavior with web app
  */
 
-import type { Database } from '@heyclaude/database-types';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { RelatedContentItem, GetRelatedContentReturns } from '@heyclaude/database-types/postgres-types';
+import { ContentService } from '@heyclaude/data-layer/services/content.ts';
 import { logError } from '@heyclaude/shared-runtime/logging.ts';
 import type { GetRelatedContentInput } from '../lib/types.ts';
 
-type RelatedContentItem = Database['public']['CompositeTypes']['related_content_item'];
 
 /**
  * Retrieves related content for a given slug and category and returns a textual summary and metadata.
  *
  * @param input - Query parameters: `slug` of the source item, `category` to match, and optional `limit` for number of results.
  * @returns A payload containing a single text content block summarizing the related items and an `_meta` object with `items`, `source`, and `count` (when results exist) or an empty `items` array when none are found.
- * @throws Error when the backend RPC call to fetch related content fails.
+ * @throws Error when the service call to fetch related content fails.
  */
 export async function handleGetRelatedContent(
-  supabase: SupabaseClient<Database>,
   input: GetRelatedContentInput
 ) {
   const { slug, category, limit } = input;
+  const contentService = new ContentService();
 
-  // Call get_related_content RPC directly with correct parameter order
+  // Call get_related_content with correct parameter order
   // Signature: p_category, p_slug, p_tags, p_limit, p_exclude_slugs
   const rpcArgs = {
     p_category: category,
@@ -32,17 +31,15 @@ export async function handleGetRelatedContent(
     p_limit: limit,
     p_exclude_slugs: [],
   };
-  const { data, error } = await supabase.rpc('get_related_content', rpcArgs);
-
-  if (error) {
-    // Use dbQuery serializer for consistent database query formatting
-    await logError('RPC call failed in getRelatedContent', {
-      dbQuery: {
-        rpcName: 'get_related_content',
-        args: rpcArgs, // Will be redacted by Pino's redact config
-      },
+  
+  let data: GetRelatedContentReturns;
+  try {
+    data = await contentService.getRelatedContent(rpcArgs);
+  } catch (error) {
+    await logError('ContentService.getRelatedContent failed in getRelatedContent', {
+      args: rpcArgs,
     }, error);
-    throw new Error(`Failed to fetch related content: ${error.message}`);
+    throw new Error(`Failed to fetch related content: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 
   if (!data || data.length === 0) {

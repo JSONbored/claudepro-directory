@@ -16,6 +16,7 @@ import { Suspense } from 'react';
 import { CollectionForm } from '@/src/components/core/forms/collection-form';
 
 import Loading from './loading';
+import { spaceY, marginBottom, muted, iconSize, gap } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Dynamic Rendering Required
@@ -193,16 +194,16 @@ async function EditCollectionPageContent({
   userLogger.info({ section: 'data-fetch' }, 'EditCollectionPage: page render completed');
 
   return (
-    <div className="space-y-6">
+    <div className={`${spaceY.relaxed}`}>
       <div>
         <Link href={`/account/library/${slug}`}>
-          <Button className="mb-4 flex items-center gap-2" variant="ghost">
-            <ArrowLeft className="h-4 w-4" />
+          <Button className={`${marginBottom.default} flex items-center ${gap.tight}`} variant="ghost">
+            <ArrowLeft className={`${iconSize.sm}`} />
             Back to Collection
           </Button>
         </Link>
-        <h1 className="mb-2 text-3xl font-bold">Edit Collection</h1>
-        <p className="text-muted-foreground">Update your collection details and settings</p>
+        <h1 className={`${marginBottom.compact} text-3xl font-bold`}>Edit Collection</h1>
+        <p className={`${muted.default}`}>Update your collection details and settings</p>
       </div>
 
       <Card>

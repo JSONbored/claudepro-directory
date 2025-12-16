@@ -1,6 +1,6 @@
 'use server';
 
-import { type content_category } from '@heyclaude/data-layer/prisma';
+import type { content_category } from '@heyclaude/data-layer/prisma';
 import type { GetContentTemplatesReturns } from '@heyclaude/database-types/postgres-types';
 import { serializeForClient } from '@heyclaude/shared-runtime';
 // Temporarily removed cache imports - will be re-added when caching is re-implemented
@@ -29,7 +29,7 @@ export async function getContentTemplates(
 ): Promise<MergedTemplateItem[]> {
   // Temporarily removed 'use cache' to fix serialization issues during prerendering
   // The issue is that Next.js tries to serialize the entire function closure when using 'use cache',
-  // and class instances (Supabase client, ContentService) created inside the function are being captured.
+  // and class instances (Prisma client, ContentService) created inside the function are being captured.
 
   // Configure cache - use 'hours' profile for templates (changes every 2 hours)
   // Note: cacheLife/cacheTag require 'use cache', so these are currently no-ops

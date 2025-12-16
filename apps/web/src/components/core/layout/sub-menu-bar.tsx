@@ -10,7 +10,7 @@
  * Inspired by Claude Code's sub-menu design with very light separators.
  */
 
-import { type Database } from '@heyclaude/database-types';
+import type { content_category } from '@heyclaude/data-layer/prisma';
 import { isValidCategory } from '@heyclaude/web-runtime/core';
 import { Bookmark, Search } from '@heyclaude/web-runtime/icons';
 import { Breadcrumbs, Button, cn } from '@heyclaude/web-runtime/ui';
@@ -21,6 +21,7 @@ import { GitHubStarsButton } from '@/src/components/core/buttons/external/github
 import { ExploreDropdown } from '@/src/components/content/explore-dropdown';
 import { usePinboardDrawer } from '@/src/components/features/navigation/pinboard-drawer-provider';
 import { useCommandPalette } from '@/src/components/features/navigation/command-palette-provider';
+import { paddingX, marginX, marginBottom, gap, border, iconSize } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Determines if sub-menu bar should be shown based on pathname
@@ -51,7 +52,7 @@ function shouldShowSubMenu(pathname: string): boolean {
  * - Other pages (no category, but may have sitewide exports)
  */
 function extractRouteInfo(pathname: string): {
-  category?: Database['public']['Enums']['content_category'];
+  category?: content_category;
   slug?: string;
   pageType: 'detail' | 'category' | 'home';
   // Additional route types for ExploreDropdown
@@ -89,7 +90,7 @@ function extractRouteInfo(pathname: string): {
   
   // Handle content category routes
   if (isValidCategory(firstSegment)) {
-    const category = firstSegment as Database['public']['Enums']['content_category'];
+    const category = firstSegment as content_category;
     
     if (segments.length === 1) {
       return { category, pageType: 'category' };
@@ -131,20 +132,20 @@ export function SubMenuBar() {
   }
   
   return (
-    <div className="border-border/30 bg-background/95 border-b backdrop-blur-sm">
-      <div className="container mx-auto px-4">
+    <div className={`border-${border.default}/30 bg-background/95 border-b backdrop-blur-sm`}>
+      <div className={`container ${marginX.auto} ${paddingX.default}`}>
         <div className="flex items-center justify-between h-10">
           {/* Breadcrumbs on the left - hidden on homepage */}
           {!isHomepage ? (
-            <div className="flex-1 min-w-0">
-              <Breadcrumbs className="mb-0" />
+            <div className={`flex-1 min-w-0`}>
+              <Breadcrumbs className={`${marginBottom.default}`} />
             </div>
           ) : (
             <div className="flex-1" /> // Spacer to push right content to the right
           )}
           
           {/* Right side: Search + Pinboard + GitHub Stars icons + Explore here dropdown */}
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className={`flex items-center ${gap.tight} flex-shrink-0`}>
             <Button
               variant="ghost"
               size="sm"
@@ -156,7 +157,7 @@ export function SubMenuBar() {
               aria-label={isCommandMenuOpen ? "Close command menu" : "Open command menu"}
               title="Search navigation (⌘K)"
             >
-              <Search className={cn("h-4 w-4", isCommandMenuOpen && "fill-current")} />
+              <Search className={cn(iconSize.sm, isCommandMenuOpen && "fill-current")} />
             </Button>
             <Button
               variant="ghost"
@@ -168,7 +169,7 @@ export function SubMenuBar() {
               )}
               aria-label={isPinboardOpen ? "Close pinboard" : "Open pinboard"}
             >
-              <Bookmark className={cn("h-4 w-4", isPinboardOpen && "fill-current")} />
+              <Bookmark className={cn(iconSize.sm, isPinboardOpen && "fill-current")} />
             </Button>
             <GitHubStarsButton size="sm" variant="ghost" />
             <ExploreDropdown

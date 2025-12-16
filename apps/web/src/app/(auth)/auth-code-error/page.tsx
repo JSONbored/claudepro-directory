@@ -9,13 +9,13 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
-  UI_CLASSES,
+  CardTitle
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import Link from 'next/link';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
+import { stack, marginBottom, marginX, size } from "@heyclaude/web-runtime/design-system";
 
 const AUTH_CODE_ERROR_PATH = ROUTES.AUTH_AUTH_CODE_ERROR;
 
@@ -51,13 +51,13 @@ export default function AuthCodeError(properties: PagePropsWithSearchParams) {
       fallback={
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <div className="bg-destructive/10 mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full">
-              <AlertCircle className="text-destructive h-6 w-6" />
+            <div className={`bg-destructive/10 ${marginX.auto} ${marginBottom.default} flex h-12 w-12 items-center justify-center rounded-full`}>
+              <AlertCircle className={`text-destructive h-6 w-6`} />
             </div>
-            <CardTitle className="text-2xl">Authentication Error</CardTitle>
+            <CardTitle className={`${size['2xl']}`}>Authentication Error</CardTitle>
             <CardDescription>Loading error details...</CardDescription>
           </CardHeader>
-          <CardContent className={UI_CLASSES.FLEX_COL_GAP_2}>
+          <CardContent className={stack.compact}>
             <Button asChild>
               <Link href={ROUTES.LOGIN}>Try Again</Link>
             </Button>
@@ -129,15 +129,15 @@ async function AuthCodeErrorContent({
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
-        <div className="bg-destructive/10 mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full">
-          <AlertCircle className="text-destructive h-6 w-6" />
+        <div className={`bg-destructive/10 ${marginX.auto} ${marginBottom.default} flex h-12 w-12 items-center justify-center rounded-full`}>
+          <AlertCircle className={`text-destructive h-6 w-6`} />
         </div>
-        <CardTitle className="text-2xl">Authentication Error</CardTitle>
+        <CardTitle className={`${size['2xl']}`}>Authentication Error</CardTitle>
         <CardDescription>
           There was a problem signing you in. This could be due to an invalid or expired link.
         </CardDescription>
       </CardHeader>
-      <CardContent className={UI_CLASSES.FLEX_COL_GAP_2}>
+      <CardContent className={stack.compact}>
         <Button asChild>
           <Link href={ROUTES.LOGIN}>Try Again</Link>
         </Button>

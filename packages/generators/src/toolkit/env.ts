@@ -8,7 +8,7 @@ import { readFile } from 'node:fs/promises';
 
 import { normalizeError } from '@heyclaude/shared-runtime';
 
-import { logger } from './logger.js';
+import { logger } from './logger.ts';
 
 const ENV_FILES = ['.env.edge.local', '.env.local', '.env.db.local', '.env'];
 

@@ -13,4 +13,3 @@ export * from './services/quiz.ts';
 export * from './services/email.ts';
 export { BasePrismaService } from './services/base-prisma-service.ts';
 export { prisma } from './prisma/client.ts';
-export * from './types/composite-types.ts';

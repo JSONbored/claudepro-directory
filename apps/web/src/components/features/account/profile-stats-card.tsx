@@ -7,7 +7,7 @@
  */
 
 import { motion } from 'motion/react';
-import { MICROINTERACTIONS, SPRING } from '@heyclaude/web-runtime/design-system';
+import { MICROINTERACTIONS, SPRING, spaceY, size, between, muted } from '@heyclaude/web-runtime/design-system';
 import {
   Card,
   CardContent,
@@ -15,7 +15,6 @@ import {
   CardTitle,
   NumberTicker,
   UnifiedBadge,
-  UI_CLASSES,
 } from '@heyclaude/web-runtime/ui';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { useInView } from 'motion/react';
@@ -64,12 +63,12 @@ export function ProfileStatsCard({ title, stats }: ProfileStatsCardProps) {
     >
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">{title}</CardTitle>
+          <CardTitle className={`${size.sm}`}>{title}</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className={`${spaceY.default}`}>
           {stats.map((stat, index) => (
-            <div key={stat.label} className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-              <span className={UI_CLASSES.TEXT_SM_MUTED}>{stat.label}</span>
+            <div key={stat.label} className={between.center}>
+              <span className={`${size.sm} ${muted.default}`}>{stat.label}</span>
               {typeof stat.value === 'number' && stat.animated !== false ? (
                 <UnifiedBadge variant="base" style="secondary">
                   <NumberTicker

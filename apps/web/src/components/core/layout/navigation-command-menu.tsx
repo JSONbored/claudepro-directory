@@ -5,7 +5,6 @@ import { getCommandMenuNavigationData } from '@heyclaude/web-runtime/config/navi
 import { logClientWarn, logClientError, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import type { DisplayableContent } from '@heyclaude/web-runtime/types/component.types';
 import {
-  UI_CLASSES,
   CommandDialog,
   CommandEmpty,
   CommandGroup,
@@ -17,6 +16,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { useMemo, useEffect, useLayoutEffect, useId, useState, useCallback, useRef } from 'react';
 import { useBoolean, useDebounceCallback } from '@heyclaude/web-runtime/hooks';
+import { cluster, iconSize, gap, truncate, size } from "@heyclaude/web-runtime/design-system";
 
 type NavigationMenuItem = {
   path: string;
@@ -183,16 +183,16 @@ export function NavigationCommandMenu({
         onSelect={() => handleSelect(href)}
         className="group cursor-pointer"
       >
-        <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+        <span className={cluster.compact}>
           {getIcon('FileText')}
           <div className="flex flex-col items-start flex-1 min-w-0">
-            <span className="truncate w-full">{result.title}</span>
+            <span className={`${truncate.single} w-full`}>{result.title}</span>
             {result.description ? (
-              <span className={`text-muted-foreground text-xs transition-colors ${UI_CLASSES.GROUP_HOVER_ACCENT} line-clamp-1`}>
+              <span className={`text-muted-foreground ${size.xs} transition-colors group-hover:text-accent line-clamp-1`}>
                 {result.description}
               </span>
             ) : null}
-            <span className="text-muted-foreground text-xs capitalize">{result.category}</span>
+            <span className={`text-muted-foreground ${size.xs} capitalize`}>{result.category}</span>
           </div>
         </span>
       </CommandItem>
@@ -208,7 +208,7 @@ export function NavigationCommandMenu({
     // Type guard: check if it's a valid React component
     if (typeof Icon === 'function') {
       const IconComponent = Icon as React.ComponentType<{ className?: string }>;
-      return <IconComponent className={`${UI_CLASSES.ICON_SM} text-muted-foreground shrink-0`} />;
+      return <IconComponent className={`${iconSize.sm} text-muted-foreground shrink-0`} />;
     }
     return null;
   };
@@ -221,13 +221,13 @@ export function NavigationCommandMenu({
     const uniqueKey = `${groupName}-${path}-${item.title}-${index}`;
     return (
       <CommandItem key={uniqueKey} onSelect={() => handleSelect(path)} className="group cursor-pointer">
-        <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+        <span className={cluster.compact}>
           {getIcon(item.icon_name)}
           <div className="flex flex-col items-start">
             <span>{item.title}</span>
             {item.description ? (
               <span
-                className={`text-muted-foreground text-xs transition-colors ${UI_CLASSES.GROUP_HOVER_ACCENT}`}
+                className={`text-muted-foreground ${size.xs} transition-colors group-hover:text-accent`}
               >
                 {item.description}
               </span>
@@ -274,7 +274,7 @@ export function NavigationCommandMenu({
         <CommandList>
           {hasSearchQuery && isSearching && (
             <CommandEmpty className="text-muted-foreground">
-              <span className="inline-flex items-center gap-2">
+              <span className={`inline-flex items-center ${gap.tight}`}>
                 <span className="h-4 w-4 animate-spin rounded-full border-2 border-accent border-t-transparent" />
                 Searching...
               </span>

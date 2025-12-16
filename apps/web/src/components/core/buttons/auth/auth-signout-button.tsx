@@ -10,7 +10,8 @@ import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { LogOut } from '@heyclaude/web-runtime/icons';
 import { type ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
-import { toasts, UI_CLASSES, Button } from '@heyclaude/web-runtime/ui';
+import { toasts, Button } from '@heyclaude/web-runtime/ui';
+import { iconSize, marginRight } from '@heyclaude/web-runtime/design-system';
 import { useBoolean } from '@heyclaude/web-runtime/hooks';
 import { useRouter } from 'next/navigation';
 import { useCallback } from 'react';
@@ -88,7 +89,7 @@ export function AuthSignOutButton({
       variant={variant}
       className={className}
     >
-      <LogOut className={UI_CLASSES.ICON_SM_LEADING} />
+      <LogOut className={`${iconSize.sm} ${marginRight.compact}`} />
       {loading ? 'Signing out...' : 'Sign out'}
     </Button>
   );

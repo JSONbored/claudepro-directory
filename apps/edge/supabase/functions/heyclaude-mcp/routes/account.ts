@@ -5,8 +5,6 @@
  * Supports newsletter opt-in during account creation.
  */
 
-import type { Database } from '@heyclaude/database-types';
-import type { SupabaseClient } from '@supabase/supabase-js';
 import { logError } from '@heyclaude/shared-runtime/logging.ts';
 import { edgeEnv } from '@heyclaude/edge-runtime/config/env.ts';
 import { getEnvVar } from '@heyclaude/shared-runtime/env.ts';
@@ -54,13 +52,11 @@ function generateOAuthUrl(
 /**
  * Creates account creation instructions and OAuth URLs
  *
- * @param supabase - Authenticated Supabase client (not used but kept for consistency)
  * @param input - Tool input with provider, newsletter opt-in, and optional redirect
  * @returns Account creation instructions with OAuth URLs
  * @throws If provider is invalid
  */
 export async function handleCreateAccount(
-  supabase: SupabaseClient<Database>,
   input: CreateAccountInput
 ) {
   const { provider = 'github', newsletterOptIn = false, redirectTo } = input;

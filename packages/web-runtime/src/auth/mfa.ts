@@ -4,7 +4,6 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '@heyclaude/database-types';
 import { logger, normalizeError } from '../index';
 
 /**
@@ -77,7 +76,7 @@ export interface AALResponse {
  * List all MFA factors for the current user
  */
 export async function listMFAFactors(
-  supabase: SupabaseClient<Database>
+  supabase: SupabaseClient
 ): Promise<{ factors: MFAFactor[]; error: Error | null }> {
   try {
     const { data, error } = await supabase.auth.mfa.listFactors();
@@ -122,7 +121,7 @@ export async function listMFAFactors(
  * Enroll a new TOTP factor
  */
 export async function enrollTOTPFactor(
-  supabase: SupabaseClient<Database>
+  supabase: SupabaseClient
 ): Promise<{ data: MFAEnrollResponse | null; error: Error | null }> {
   try {
     const { data, error } = await supabase.auth.mfa.enroll({
@@ -167,7 +166,7 @@ export async function enrollTOTPFactor(
  * Create a challenge for MFA verification
  */
 export async function createMFAChallenge(
-  supabase: SupabaseClient<Database>,
+  supabase: SupabaseClient,
   factorId: string
 ): Promise<{ data: MFAChallengeResponse | null; error: Error | null }> {
   try {
@@ -204,7 +203,7 @@ export async function createMFAChallenge(
  * Verify an MFA challenge code
  */
 export async function verifyMFAChallenge(
-  supabase: SupabaseClient<Database>,
+  supabase: SupabaseClient,
   factorId: string,
   challengeId: string,
   code: string
@@ -244,7 +243,7 @@ export async function verifyMFAChallenge(
  * Unenroll an MFA factor
  */
 export async function unenrollMFAFactor(
-  supabase: SupabaseClient<Database>,
+  supabase: SupabaseClient,
   factorId: string
 ): Promise<{ success: boolean; error: Error | null }> {
   try {
@@ -274,7 +273,7 @@ export async function unenrollMFAFactor(
  * Get the current Authenticator Assurance Level
  */
 export async function getAuthenticatorAssuranceLevel(
-  supabase: SupabaseClient<Database>
+  supabase: SupabaseClient
 ): Promise<{ data: AALResponse | null; error: Error | null }> {
   try {
     const { data, error } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
@@ -314,7 +313,7 @@ export async function getAuthenticatorAssuranceLevel(
  * Returns true if currentLevel is aal1 but nextLevel is aal2
  */
 export async function requiresMFAChallenge(
-  supabase: SupabaseClient<Database>
+  supabase: SupabaseClient
 ): Promise<{ requires: boolean; error: Error | null }> {
   try {
     const { data, error } = await getAuthenticatorAssuranceLevel(supabase);

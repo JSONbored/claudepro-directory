@@ -1,4 +1,4 @@
-import type { Database } from '@heyclaude/database-types';
+import type { content_category } from '@heyclaude/data-layer/prisma';
 
 export function formatViewCount(count: number): string {
   if (count >= 1000) {
@@ -19,7 +19,7 @@ export function sanitizeSlug(slug: string): string {
 }
 
 export function getContentItemUrl(item: {
-  category: Database['public']['Enums']['content_category'];
+  category: content_category;
   slug: string;
   subcategory?: string | null | undefined;
 }): string {

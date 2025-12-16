@@ -107,7 +107,7 @@ export function mapPostgresTypeToZod(
                 udtName: baseType,
                 nullable: false,
                 hasDefault: false,
-                type: col.type,
+                ...(col.type ? { type: col.type } : {}),
               },
               enums
             );

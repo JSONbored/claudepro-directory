@@ -1,0 +1,42 @@
+{
+  "ignoreMatches": [
+    "@heyclaude/*",
+    "@types/*",
+    "eslint",
+    "prettier",
+    "typescript",
+    "@playwright/test",
+    "@testing-library/*",
+    "vitest",
+    "tsx",
+    "turbo",
+    "prisma",
+    "@prisma/*",
+    "lefthook",
+    "inngest-cli",
+    "vercel",
+    "concurrently",
+    "knip",
+    "ts-prune",
+    "madge",
+    "skott"
+  ],
+  "ignoreDirs": [
+    "node_modules",
+    ".next",
+    "dist",
+    "build",
+    ".turbo",
+    "coverage",
+    ".vercel",
+    ".netlify"
+  ],
+  "ignorePatterns": [
+    "*.test.ts",
+    "*.test.tsx",
+    "*.spec.ts",
+    "*.spec.tsx",
+    "*.config.*",
+    "*.generated.*"
+  ]
+}

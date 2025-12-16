@@ -5,8 +5,8 @@
  *
  * ISR: 2 hours (7200s) - Detail pages change less frequently than list pages
  */
-import type { EnrichedContentItem } from '@heyclaude/data-layer/types/composite-types';
-import { type Database } from '@heyclaude/database-types';
+import type { EnrichedContentItem } from '@heyclaude/database-types/postgres-types';
+import type { contentModel, content_category } from '@heyclaude/data-layer/prisma';
 import { getDeploymentEnv } from '@heyclaude/shared-runtime/platform';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
 import { ensureStringArray, isValidCategory } from '@heyclaude/web-runtime/core';
@@ -66,7 +66,7 @@ export async function generateStaticParams() {
       try {
         // Type assertion: categories from getHomepageCategoryIds are valid category enum values
         const items = await getContentByCategory(
-          category as Database['public']['Enums']['content_category']
+          category as content_category
         );
         const topItems = items.slice(0, MAX_ITEMS_PER_CATEGORY);
 
@@ -143,8 +143,9 @@ export async function generateStaticParams() {
     // Pre-fetch all content details in batches to populate cache
     // Batched fetching prevents connection pool exhaustion while still being efficient
     // Each call will populate the Next.js Cache Components cache
-    // Batch size of 10 allows concurrent fetching without overwhelming the database
-    const BATCH_SIZE = 10;
+    // OPTIMIZATION: Increased batch size to 20 (from 10) for better build performance
+    // With staticGenerationMaxConcurrency: 12, this allows efficient parallel fetching
+    const BATCH_SIZE = 20;
     const batches: Array<Array<{ category: string; slug: string }>> = [];
     for (let i = 0; i < parameters.length; i += BATCH_SIZE) {
       batches.push(parameters.slice(i, i + BATCH_SIZE));
@@ -161,7 +162,7 @@ export async function generateStaticParams() {
             // Call getContentDetailCore to populate cache
             // This will make the database call and cache the result
             await getContentDetailCore({
-              category: category as Database['public']['Enums']['content_category'],
+              category: category as content_category,
               slug,
             });
           } catch (error) {
@@ -430,7 +431,7 @@ async function DetailPageContent({
     notFound();
   }
 
-  const fullItem = coreData.content as Database['public']['Tables']['content']['Row'] | null;
+  const fullItem = coreData.content as contentModel | null;
 
   // Null safety: If content doesn't exist in database, return 404
   if (!fullItem) {
@@ -524,7 +525,7 @@ async function DetailPageContent({
           category === COLLECTION_CATEGORY && fullItem.category === COLLECTION_CATEGORY ? (
             <CollectionDetailView
               collection={
-                fullItem as Database['public']['Tables']['content']['Row'] & {
+                fullItem as contentModel & {
                   category: 'collections';
                 }
               }

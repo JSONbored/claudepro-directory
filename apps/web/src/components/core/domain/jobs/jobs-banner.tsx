@@ -6,19 +6,19 @@
 
 'use client';
 
-import { type Database } from '@heyclaude/database-types';
+import type { newsletter_source } from '@heyclaude/data-layer/prisma';
 import { checkConfettiEnabled } from '@heyclaude/web-runtime/config/static-configs';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { useConfetti, useNewsletter } from '@heyclaude/web-runtime/hooks';
 import { Check, ChevronUp, Loader2, Mail, Send, TrendingUp } from '@heyclaude/web-runtime/icons';
 import {
   cn,
-  UI_CLASSES,
   Button,
   Card,
   CardContent,
   Input,
 } from '@heyclaude/web-runtime/ui';
+import { spaceY, padding, marginBottom, size, muted, between, cluster, iconSize, gap, marginTop, weight } from '@heyclaude/web-runtime/design-system';
 import { SPRING, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { AnimatePresence, motion } from 'motion/react';
@@ -52,7 +52,7 @@ export function JobsPromo() {
   const shouldReduceMotion = useReducedMotion();
 
   const { email, setEmail, isSubmitting, subscribe, error, reset } = useNewsletter({
-    source: 'inline' as Database['public']['Enums']['newsletter_source'],
+    source: 'inline' as newsletter_source,
     successMessage: 'You will receive email updates when new AI roles are posted.',
     onSuccess: async () => {
       const confettiEnabled = checkConfettiEnabled();
@@ -88,8 +88,8 @@ export function JobsPromo() {
       <Card
         className={cn(
           'group relative overflow-hidden rounded-xl border transition-all duration-300',
-          'border-accent/70 shadow-[0_10px_40px_-20px_rgba(255,138,76,0.8)]',
-          'hover:border-accent/40 hover:shadow-[0_10px_40px_-20px_rgba(255,138,76,0.6)]'
+          'border-accent/70 shadow-shadow-glow-orange-large',
+          'hover:border-accent/40 hover:shadow-shadow-glow-orange-large-hover'
         )}
       >
         {/* Gradient overlay on hover */}
@@ -101,17 +101,17 @@ export function JobsPromo() {
           aria-hidden="true"
         />
 
-        <CardContent className={cn(UI_CLASSES.SPACE_Y_4, UI_CLASSES.PADDING_COMFORTABLE, 'relative')}>
+        <CardContent className={cn(spaceY.comfortable, padding.comfortable, 'relative')}>
           {/* Header Section - Job Posting Promotion */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: STAGGER.slow }}
           >
-            <h3 className={cn(UI_CLASSES.MARGIN_TIGHT, 'text-xl leading-tight font-bold')}>
+            <h3 className={cn(marginBottom.tight, 'text-xl leading-tight font-bold')}>
               Hire Claude Developers
             </h3>
-            <p className={UI_CLASSES.TEXT_SM_MUTED}>
+            <p className={`${size.sm} ${muted.default}`}>
               Growing community of AI engineers actively building with Claude
             </p>
           </motion.div>
@@ -119,18 +119,18 @@ export function JobsPromo() {
           {/* Growth Metrics */}
           <motion.div
             className={cn(
-              UI_CLASSES.SPACE_Y_2,
+              spaceY.compact,
               'bg-card/50 rounded-lg border border-border/50',
-              UI_CLASSES.PADDING_COMPACT
+              padding.compact
             )}
             initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
             animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }}
             transition={{ delay: STAGGER.relaxed, ...SPRING.smooth }}
           >
-            <div className={cn(UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN, UI_CLASSES.TEXT_SM)}>
-              <span className={UI_CLASSES.TEXT_MUTED}>Active community</span>
+            <div className={cn(between.center, size.sm)}>
+              <span className={muted.default}>Active community</span>
               <motion.span
-                className="font-semibold"
+                className={`${weight.semibold}`}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: STAGGER.loose }}
@@ -138,26 +138,26 @@ export function JobsPromo() {
                 1,700/month
               </motion.span>
             </div>
-            <div className={cn(UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN, UI_CLASSES.TEXT_SM)}>
-              <span className={UI_CLASSES.TEXT_MUTED}>Growth rate</span>
+            <div className={cn(between.center, size.sm)}>
+              <span className={muted.default}>Growth rate</span>
               <motion.span
                 className={cn(
-                  UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1,
+                  cluster.tight,
                   'font-semibold',
-                  UI_CLASSES.ICON_SUCCESS
+                  'text-green-500 dark:text-green-400'
                 )}
                 initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -10 }}
                 animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
                 transition={{ delay: STAGGER.extended }}
               >
-                <TrendingUp className={UI_CLASSES.ICON_XS} />
+                <TrendingUp className={iconSize.xs} />
                 Month 2
               </motion.span>
             </div>
           </motion.div>
 
           {/* Value Props */}
-          <div className={UI_CLASSES.SPACE_Y_2}>
+          <div className={spaceY.compact}>
             {[
               'Specialized AI talent pool',
               '30-day featured visibility',
@@ -165,15 +165,15 @@ export function JobsPromo() {
             ].map((text, i) => (
               <motion.div
                 key={text}
-                className={UI_CLASSES.FLEX_ITEMS_START_GAP_2}
+                className={`flex items-start ${gap.compact}`}
                 initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -10 }}
                 animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
                 transition={{ delay: STAGGER.loose + i * STAGGER.fast }}
               >
                 <Check
-                  className={cn(UI_CLASSES.FLEX_SHRINK_0_MT_0_5, UI_CLASSES.ICON_SM, 'text-accent')}
+                  className={cn(`flex-shrink-0 ${marginTop.micro}`, iconSize.sm, 'text-accent')}
                 />
-                <span className={UI_CLASSES.TEXT_SM}>{text}</span>
+                <span className={size.sm}>{text}</span>
               </motion.div>
             ))}
           </div>
@@ -191,16 +191,16 @@ export function JobsPromo() {
                   mass: 0.8,
                 }}
                 style={{ overflow: 'hidden' }}
-                className="border-border/50 space-y-3 rounded-lg border bg-card/30 p-4"
+                className={`border-border/50 ${spaceY.default} rounded-lg border bg-card/30 ${padding.default}`}
               >
-                <div className="space-y-1">
-                  <h4 className="text-sm font-semibold">Get job alerts</h4>
-                  <p className="text-muted-foreground text-xs">
+                <div className={`${spaceY.tight}`}>
+                  <h4 className={`${size.sm} ${weight.semibold}`}>Get job alerts</h4>
+                  <p className={`text-muted-foreground ${size.xs}`}>
                     Get email updates when new AI roles are posted.
                   </p>
                 </div>
 
-                <form onSubmit={handleNewsletterSubmit} className="space-y-2">
+                <form onSubmit={handleNewsletterSubmit} className={`${spaceY.compact}`}>
                   {/* Email Input with integrated submit button (same as NewsletterForm) */}
                   <div className="relative w-full">
                     <Input
@@ -234,7 +234,7 @@ export function JobsPromo() {
                           className={cn(
                             'absolute right-2 top-1/2 -translate-y-1/2',
                             'flex h-8 w-8 items-center justify-center rounded-md',
-                            'bg-[#F6F8F4] text-background',
+                            'bg-color-newsletter-bg text-background',
                             'cursor-not-allowed'
                           )}
                           initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.8 }}
@@ -252,10 +252,10 @@ export function JobsPromo() {
                           className={cn(
                             'absolute right-2 top-1/2 -translate-y-1/2',
                             'flex h-8 w-8 items-center justify-center rounded-md',
-                            'bg-[#F6F8F4] text-background',
+                            'bg-color-newsletter-bg text-background',
                             'shadow-sm transition-all duration-200',
-                            'hover:bg-[#F6F8F4]/90 hover:shadow-md',
-                            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F6F8F4] focus-visible:ring-offset-2',
+                            'hover:bg-color-newsletter-bg-hover hover:shadow-md',
+                            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-color-newsletter-bg focus-visible:ring-offset-2',
                             'active:scale-95'
                           )}
                           initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -8, scale: 0.8 }}
@@ -282,7 +282,7 @@ export function JobsPromo() {
                   {error ? (
                     <motion.p
                       id={errorId}
-                      className="text-destructive text-sm"
+                      className={`text-destructive ${size.sm}`}
                       role="alert"
                       initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -4 }}
                       animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
@@ -293,7 +293,7 @@ export function JobsPromo() {
                     </motion.p>
                   ) : null}
 
-                  <p className={cn(UI_CLASSES.TEXT_XS_MUTED, 'leading-snug')}>
+                  <p className={cn(`${size.xs} ${muted.default}`, 'leading-snug')}>
                     We only send relevant AI roles. Unsubscribe anytime.
                   </p>
                 </form>
@@ -302,7 +302,7 @@ export function JobsPromo() {
           </AnimatePresence>
 
           {/* Action Buttons */}
-          <div className={cn(UI_CLASSES.SPACE_Y_2)}>
+          <div className={cn(spaceY.compact)}>
             {/* Post Job CTA */}
             <motion.div
               initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 10 }}
@@ -313,7 +313,7 @@ export function JobsPromo() {
             >
               <Button
                 asChild
-                className="w-full bg-[#F6F8F4] text-background hover:bg-[#F6F8F4]/90"
+                className="w-full bg-color-newsletter-bg text-background hover:bg-color-newsletter-bg-hover"
               >
                 <Link href={ROUTES.PARTNER}>View Pricing & Post Job</Link>
               </Button>
@@ -347,7 +347,7 @@ export function JobsPromo() {
 
           {/* Trust Signal */}
           <motion.p
-            className={cn('text-center', UI_CLASSES.TEXT_XS_MUTED)}
+            className={cn('text-center', `${size.xs} ${muted.default}`)}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: STAGGER.ultimate }}

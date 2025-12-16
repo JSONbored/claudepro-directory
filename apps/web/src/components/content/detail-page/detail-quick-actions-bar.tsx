@@ -5,6 +5,7 @@ import { type ContentItem } from '@heyclaude/web-runtime/types/component.types';
 import { cn, Button, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@heyclaude/web-runtime/ui';
 
 import { useDetailQuickActions } from './use-detail-quick-actions';
+import { paddingX, paddingY, padding, marginBottom, gap, iconSizeRect, muted, between, size, spaceY, weight } from "@heyclaude/web-runtime/design-system";
 
 interface DetailQuickActionsBarProps {
   className?: string;
@@ -55,24 +56,24 @@ export function DetailQuickActionsBar({
 
   return (
     <section
-      className={cn('sticky top-16 z-20 mb-8 space-y-3', className)}
+      className={cn('sticky top-16 z-20 mb-8', spaceY.default, className)}
       aria-label="Quick actions"
     >
       <a
         href="#detail-main-content"
-        className="focus-visible:bg-background/90 sr-only focus-visible:not-sr-only focus-visible:absolute focus-visible:-top-3 focus-visible:left-3 focus-visible:z-30 focus-visible:rounded-md focus-visible:px-3 focus-visible:py-2 focus-visible:text-sm focus-visible:shadow-lg"
+        className={`focus-visible:bg-background/90 sr-only focus-visible:not-sr-only focus-visible:absolute focus-visible:-top-3 focus-visible:left-3 focus-visible:z-30 focus-visible:rounded-md focus-visible:${paddingX.compact} focus-visible:${paddingY.tight} focus-visible:text-sm focus-visible:shadow-lg`}
       >
         Skip quick actions
       </a>
-      <div className="border-border/60 bg-card/80 supports-[backdrop-filter]:bg-card/60 rounded-2xl border p-3 shadow-sm backdrop-blur">
-        <div className="text-muted-foreground mb-2 flex items-center justify-between gap-3 text-xs tracking-wide uppercase">
-          <div className="flex items-center gap-2">
+      <div className={`border-border/60 bg-card/80 supports-[backdrop-filter]:bg-card/60 rounded-2xl border ${padding.compact} shadow-sm backdrop-blur`}>
+        <div className={cn(muted.default, marginBottom.compact, between.center, gap.compact, size.xs, 'tracking-wide uppercase')}>
+          <div className={`flex items-center ${gap.tight}`}>
             <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
             <span>Quick actions</span>
           </div>
-          <span className="text-muted-foreground/80 font-semibold">{quickActions.length}</span>
+          <span className={cn('text-muted-foreground/80', weight.semibold)}>{quickActions.length}</span>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className={`flex flex-wrap ${gap.tight}`}>
           {quickActions.map((action) => (
             <TooltipProvider key={action.key}>
               <Tooltip>
@@ -81,16 +82,16 @@ export function DetailQuickActionsBar({
                     type="button"
                     variant="secondary"
                     size="sm"
-                    className="grow basis-[10rem] justify-center gap-2 whitespace-nowrap"
+                    className={`grow basis-[10rem] justify-center ${gap.tight} whitespace-nowrap`}
                     onClick={action.onClick}
                   >
-                    <span className="bg-primary/70 h-1.5 w-1.5 rounded-full" aria-hidden="true" />
+                    <span className={cn('bg-primary/70', iconSizeRect['1.5x1.5'], 'rounded-full')} aria-hidden="true" />
                     <span className="text-sm font-semibold">{action.label}</span>
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>{action.label}</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className={cn(size.xs, muted.default)}>
                     {action.description || 'Quick action for this item'}
                   </p>
                 </TooltipContent>

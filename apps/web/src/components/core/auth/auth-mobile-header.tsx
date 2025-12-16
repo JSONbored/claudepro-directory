@@ -4,8 +4,7 @@
 
 'use client';
 
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
+import { STAGGER, DURATION, padding, gap, marginTop } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 
@@ -19,24 +18,23 @@ import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';
  * @returns The JSX element for the mobile authentication header.
  *
  * @see HeyClaudeLogo
- * @see UI_CLASSES.CARD_BODY_SPACING
+ * @see padding.comfortable
  */
 export function AuthMobileHeader() {
   const shouldReduceMotion = useReducedMotion();
   return (
     <motion.div
-      className={UI_CLASSES.CARD_BODY_SPACING}
-      style={{ backgroundColor: 'oklch(74% 0.2 35)' }}
+      className={`${padding.comfortable} bg-color-accent-primary`}
       initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -20 }}
       animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
       transition={{ duration: DURATION.moderate }}
     >
-      <div className="flex items-center gap-3">
+      <div className={`flex items-center ${gap.compact}`}>
         <HeyClaudeLogo size="md" inView duration={1.2} />
       </div>
 
       <motion.p
-        className="mt-2 text-xs text-white/90"
+        className={`${marginTop.compact} text-xs text-white/90`}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: DURATION.moderate, delay: STAGGER.default }}

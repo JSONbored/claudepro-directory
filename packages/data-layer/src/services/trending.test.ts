@@ -1,21 +1,38 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { PrismockClient } from 'prismock';
 import { TrendingService } from './trending.ts';
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '@heyclaude/database-types';
 
+// Mock the prisma singleton with Prismock
+vi.mock('../prisma/client.ts', () => {
+  const { setupPrismockMock } = require('../test-utils/prisma-mock.ts');
+  return {
+    prisma: setupPrismockMock(),
+  };
+});
+
+// Mock the RPC error logging utility
 vi.mock('../utils/rpc-error-logging.ts', () => ({
   logRpcError: vi.fn(),
 }));
 
+// Mock request cache
+vi.mock('../utils/request-cache.ts', () => ({
+  withSmartCache: vi.fn((_key, _method, fn) => fn()),
+}));
+
 describe('TrendingService', () => {
   let service: TrendingService;
-  let mockSupabase: SupabaseClient<Database>;
+  let prismock: PrismockClient;
 
-  beforeEach(() => {
-    mockSupabase = {
-      rpc: vi.fn(),
-    } as unknown as SupabaseClient<Database>;
-    service = new TrendingService(mockSupabase);
+  beforeEach(async () => {
+    // Get the mocked prisma instance (Prismock)
+    const { prisma } = await import('../prisma/client.ts');
+    prismock = prisma as PrismockClient;
+    
+    // Reset Prismock data before each test
+    prismock.reset();
+    
+    service = new TrendingService();
   });
 
   describe('getTrendingContent', () => {
@@ -39,10 +56,7 @@ describe('TrendingService', () => {
         },
       ];
 
-      vi.mocked(mockSupabase.rpc).mockResolvedValue({
-        data: mockData,
-        error: null,
-      } as any);
+      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue(mockData as any);
 
       const result = await service.getTrendingContent({
         p_category: null,
@@ -50,17 +64,15 @@ describe('TrendingService', () => {
       });
 
       expect(result).toEqual(mockData);
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('get_trending_content', {
-        p_category: null,
-        p_limit: 10,
-      });
+      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
+        expect.stringContaining('get_trending_content'),
+        null,
+        10
+      );
     });
 
     it('returns empty array when no trending content', async () => {
-      vi.mocked(mockSupabase.rpc).mockResolvedValue({
-        data: [],
-        error: null,
-      } as any);
+      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([] as any);
 
       const result = await service.getTrendingContent({
         p_category: null,
@@ -73,40 +85,36 @@ describe('TrendingService', () => {
     it('handles category filtering', async () => {
       const mockData = [{ id: 'content-1', category: 'agents' as const }];
 
-      vi.mocked(mockSupabase.rpc).mockResolvedValue({
-        data: mockData,
-        error: null,
-      } as any);
+      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue(mockData as any);
 
       // Test with category filter
       await service.getTrendingContent({ p_category: 'agents', p_limit: 5 });
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('get_trending_content', {
-        p_category: 'agents',
-        p_limit: 5,
-      });
+      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
+        expect.stringContaining('get_trending_content'),
+        'agents',
+        5
+      );
 
       // Test without category filter
       await service.getTrendingContent({ p_category: null, p_limit: 5 });
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('get_trending_content', {
-        p_category: null,
-        p_limit: 5,
-      });
+      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
+        expect.stringContaining('get_trending_content'),
+        null,
+        5
+      );
     });
 
     it('throws error on database failure', async () => {
-      const mockError = { message: 'Database error', code: 'PGRST_ERROR' };
+      const mockError = new Error('Database error');
 
-      vi.mocked(mockSupabase.rpc).mockResolvedValue({
-        data: null,
-        error: mockError,
-      } as any);
+      vi.mocked(prismock.$queryRawUnsafe).mockRejectedValue(mockError);
 
       await expect(
         service.getTrendingContent({
           p_category: null,
           p_limit: 10,
         })
-      ).rejects.toEqual(mockError);
+      ).rejects.toThrow('Database error');
     });
 
     it('returns results sorted by trending score from materialized view', async () => {
@@ -116,10 +124,7 @@ describe('TrendingService', () => {
         { id: '3', category: 'agents' as const, slug: 'item-3' },
       ];
 
-      vi.mocked(mockSupabase.rpc).mockResolvedValue({
-        data: mockData,
-        error: null,
-      } as any);
+      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue(mockData as any);
 
       const result = await service.getTrendingContent({
         p_category: null,

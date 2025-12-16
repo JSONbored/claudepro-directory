@@ -26,6 +26,7 @@ export const stack = {
 
 export const cluster = {
   none: 'flex items-center',
+  micro: 'flex items-center gap-0.5',
   tight: 'flex items-center gap-1',
   compact: 'flex items-center gap-2',
   default: 'flex items-center gap-3',
@@ -73,10 +74,12 @@ export const container = 'container mx-auto px-4';
  * Used when gap appears independently (e.g., in grid layouts)
  */
 export const gap = {
-  micro: 'gap-1',
-  tight: 'gap-2',
-  compact: 'gap-3',
-  default: 'gap-4',
-  comfortable: 'gap-6',
-  relaxed: 'gap-8',
-} as const;
+  micro: 'gap-0.5',
+  tight: 'gap-1',
+  '1.5': 'gap-1.5', // 0.375rem = 6px (common pattern found in codebase)
+  compact: 'gap-2',
+  default: 'gap-3',
+  comfortable: 'gap-4',
+  relaxed: 'gap-6',
+  loose: 'gap-8',
+} as const satisfies Record<string, string>;

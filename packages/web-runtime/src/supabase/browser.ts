@@ -6,9 +6,8 @@
 import { env } from '@heyclaude/shared-runtime/schemas/env';
 
 import { createBrowserClient } from '@supabase/ssr';
-import type { Database } from '@heyclaude/database-types';
 
-type SupabaseBrowserClient = ReturnType<typeof createBrowserClient<Database>>;
+type SupabaseBrowserClient = ReturnType<typeof createBrowserClient>;
 
 export function createSupabaseBrowserClient(): SupabaseBrowserClient {
   try {
@@ -29,7 +28,7 @@ export function createSupabaseBrowserClient(): SupabaseBrowserClient {
       );
     }
 
-    return createBrowserClient<Database>(supabaseUrl, supabaseAnonKey);
+    return createBrowserClient(supabaseUrl, supabaseAnonKey);
   } catch (error) {
     // In production, log but don't crash - return a mock client that will fail gracefully
     if (typeof window !== 'undefined') {

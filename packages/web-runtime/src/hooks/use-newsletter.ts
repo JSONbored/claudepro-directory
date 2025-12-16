@@ -27,7 +27,7 @@
 
 'use client';
 
-import type { Database } from '@heyclaude/database-types';
+import type { newsletter_source, copy_type, content_category } from '@heyclaude/data-layer/prisma';
 import { logClientError, logClientWarn } from '../utils/client-logger.ts';
 import { usePulse } from './use-pulse.ts';
 import { toasts } from '../client/toast.ts';
@@ -36,7 +36,7 @@ import { useCallback, useState, useTransition } from 'react';
 /** Options for useNewsletter hook */
 export interface UseNewsletterOptions {
   /** Source identifier for tracking where signup originated */
-  source: Database['public']['Enums']['newsletter_source'];
+  source: newsletter_source;
   /** Callback on successful subscription */
   onSuccess?: () => void;
   /** Callback on subscription error */
@@ -49,8 +49,8 @@ export interface UseNewsletterOptions {
   showToasts?: boolean;
   /** Optional metadata for contextual tracking */
   metadata?: {
-    copy_type?: Database['public']['Enums']['copy_type'];
-    copy_category?: Database['public']['Enums']['content_category'];
+    copy_type?: copy_type;
+    copy_category?: content_category;
     copy_slug?: string;
     [key: string]: unknown;
   };

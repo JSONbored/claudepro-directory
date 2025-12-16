@@ -7,7 +7,7 @@
  * Uses web-runtime utilities for logging and configuration
  */
 
-import type { Database } from '@heyclaude/database-types';
+import type { confetti_variant } from '@heyclaude/data-layer/prisma';
 // Import directly from source files to avoid indirect imports through entries/core.ts
 import { logger } from '../logger.ts';
 import { normalizeError } from '../errors.ts';
@@ -17,9 +17,9 @@ import { useCallback } from 'react';
 
 export function useConfetti() {
   const fireConfetti = useCallback(
-    (variant: Database['public']['Enums']['confetti_variant'] = 'success') => {
+    (variant: confetti_variant = 'success') => {
       try {
-        const configs: Record<Database['public']['Enums']['confetti_variant'], confetti.Options> = {
+        const configs: Record<confetti_variant, confetti.Options> = {
           // Green + gold for success actions (bookmark, save, etc)
           success: {
             particleCount: CONFETTI_CONFIG['success.particle_count'],

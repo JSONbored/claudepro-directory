@@ -15,7 +15,6 @@ import { usePinboard } from '@heyclaude/web-runtime/hooks';
 import { BookmarkMinus, BookmarkPlus } from '@heyclaude/web-runtime/icons';
 import { logClientInfo, logClientWarn } from '@heyclaude/web-runtime/logging/client';
 import {
-  UI_CLASSES,
   Button,
   Sheet,
   SheetContent,
@@ -24,6 +23,7 @@ import {
   SheetTitle,
   cn,
 } from '@heyclaude/web-runtime/ui';
+import { iconSize, marginRight, cluster, gap, marginBottom, between, muted, size, marginTop, spaceY, paddingBottom, paddingX } from '@heyclaude/web-runtime/design-system';
 import { SPRING, STAGGER, MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
 import { motion, AnimatePresence } from 'motion/react';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
@@ -99,18 +99,18 @@ export function PinboardDrawer({ open, onOpenChange }: PinboardDrawerProps) {
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05)',
         }}
       >
-        <SheetHeader className={cn('mb-6 pb-4 border-b border-border/50')}>
+        <SheetHeader className={cn(marginBottom.comfortable, paddingBottom.default, 'border-b border-border/50')}>
           <SheetTitle className={cn('flex items-center gap-2 text-left text-lg font-semibold')}>
-            <BookmarkPlus className={UI_CLASSES.ICON_SM_LEADING} />
+            <BookmarkPlus className={`${iconSize.sm} ${marginRight.compact}`} />
             Pinned
           </SheetTitle>
-          <SheetDescription className={cn('text-left text-sm text-muted-foreground mt-1')}>
+          <SheetDescription className={cn('text-left text-sm text-muted-foreground', marginTop.tight)}>
             Your saved items for quick access
           </SheetDescription>
         </SheetHeader>
 
         {/* Compact header with count and clear action */}
-        <div className={cn('flex items-center justify-between mb-4 text-xs text-muted-foreground')}>
+        <div className={cn(between.center, marginBottom.default, size.xs, muted.default)}>
           <span className={cn('font-medium')}>
             {hasPins ? `${pinnedItems.length} item${pinnedItems.length !== 1 ? 's' : ''}` : 'Empty'}
           </span>
@@ -119,7 +119,7 @@ export function PinboardDrawer({ open, onOpenChange }: PinboardDrawerProps) {
               variant="ghost" 
               size="sm" 
               onClick={clearAll}
-              className={cn('text-xs h-7 px-2 hover:text-destructive')}
+              className={cn('text-xs h-7', paddingX.compact, 'hover:text-destructive')}
             >
               Clear all
             </Button>
@@ -127,13 +127,13 @@ export function PinboardDrawer({ open, onOpenChange }: PinboardDrawerProps) {
         </div>
 
         {/* Content area with compact spacing - Beautiful, modern design with staggered animations */}
-        <div className={cn('space-y-3')}>
+        <div className={cn(spaceY.default)}>
           {!isLoaded && (
             <motion.div
               initial={shouldReduceMotion ? {} : { opacity: 0, y: 10 }}
               animate={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
               transition={SPRING.smooth}
-              className={cn('rounded-md border border-dashed border-border/60 p-3 space-y-2')}
+              className={cn('rounded-md border border-dashed border-border/60 p-3', spaceY.compact)}
             >
               <div className={cn('h-3 w-2/3 animate-pulse rounded bg-muted/60')} />
               <div className={cn('h-2.5 w-5/6 animate-pulse rounded bg-muted/40')} />
@@ -143,8 +143,7 @@ export function PinboardDrawer({ open, onOpenChange }: PinboardDrawerProps) {
 
           {isLoaded && hasPins ? (
             <motion.ul 
-              className={cn('space-y-2')}
-              style={{ perspective: '1000px' }}
+              className={cn(spaceY.compact, 'perspective-[1000px]')}
             >
               <AnimatePresence mode="popLayout">
                 {pinnedItems.map((item, index) => (
@@ -159,8 +158,8 @@ export function PinboardDrawer({ open, onOpenChange }: PinboardDrawerProps) {
                     }}
                     whileHover={shouldReduceMotion ? {} : MICROINTERACTIONS.card.hover}
                     whileTap={shouldReduceMotion ? {} : MICROINTERACTIONS.card.tap}
-                    style={{ transformStyle: 'preserve-3d' }}
                     className={cn(
+                      '[transform-style:preserve-3d]',
                       // Premium card design - beautiful, modern, Vercel/Linear quality
                       'rounded-xl', // Larger radius for premium feel
                       'border border-border/60',
@@ -177,7 +176,7 @@ export function PinboardDrawer({ open, onOpenChange }: PinboardDrawerProps) {
                   >
                     <div className={cn('flex items-start justify-between gap-3')}>
                       <div className={cn('flex-1 min-w-0')}>
-                        <div className={cn('flex items-center gap-1.5 mb-1')}>
+                        <div className={cn(cluster.compact, gap['1.5'], marginBottom.tight)}>
                           <p className={cn('text-xs text-muted-foreground uppercase tracking-wide truncate')}>
                             {item.category}
                             {item.typeName ? ` • ${item.typeName}` : ''}
@@ -188,14 +187,15 @@ export function PinboardDrawer({ open, onOpenChange }: PinboardDrawerProps) {
                           className={cn(
                             'block font-medium text-sm',
                             'hover:text-accent transition-colors duration-200',
-                            'truncate mb-1'
+                            'truncate',
+                            marginBottom.tight
                           )}
                           onClick={() => onOpenChange(false)}
                         >
                           {item.title}
                         </Link>
                         {item.description ? (
-                          <p className={cn('text-muted-foreground text-xs line-clamp-1 mb-1')}>
+                          <p className={cn('text-muted-foreground text-xs line-clamp-1', marginBottom.tight)}>
                             {item.description}
                           </p>
                         ) : null}
@@ -232,7 +232,7 @@ export function PinboardDrawer({ open, onOpenChange }: PinboardDrawerProps) {
               transition={SPRING.smooth}
               className={cn('rounded-md border border-dashed border-border/60 p-6 text-center')}
             >
-              <p className={cn('font-medium mb-2')}>Nothing pinned yet</p>
+              <p className={cn('font-medium', marginBottom.compact)}>Nothing pinned yet</p>
               <p className={cn('text-muted-foreground text-sm')}>
                 Pin items from detail pages to build your shortlist.
               </p>

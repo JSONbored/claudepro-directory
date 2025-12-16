@@ -5,7 +5,7 @@
  * Handles INSERT and UPDATE events for the jobs table.
  */
 
-import type { Prisma } from '@heyclaude/data-layer/prisma';
+import type { jobsModel } from '@heyclaude/data-layer/prisma';
 import { normalizeError, getEnvVar, sanitizeForDiscord } from '@heyclaude/shared-runtime';
 
 import { inngest } from '../../client';
@@ -13,7 +13,7 @@ import { pgmqRead, pgmqDelete, type PgmqMessage } from '../../../supabase/pgmq-c
 import { logger, createWebAppContextWithId } from '../../../logging/server';
 import { sendCronSuccessHeartbeat } from '../../utils/monitoring';
 
-type JobRow = Prisma.jobsGetPayload<{}>;
+type JobRow = jobsModel;
 
 const DISCORD_JOBS_QUEUE = 'discord_jobs';
 const BATCH_SIZE = 10;
@@ -165,22 +165,22 @@ export const processDiscordJobsQueue = inngest.createFunction(
 
         try {
           // Skip DELETE events
-          if (payload.type === 'DELETE') {
+          if (payload['type'] === 'DELETE') {
             return { success: true, sent: false, reason: 'delete_event' };
           }
 
-          const job = payload.record;
+          const job = payload['record'] as JobRow;
 
           // Skip drafts and placeholders for INSERT
-          if (payload.type === 'INSERT') {
-            if (job.status === 'draft' || job.is_placeholder) {
+          if (payload['type'] === 'INSERT') {
+            if (job['status'] === 'draft' || job['is_placeholder']) {
               return { success: true, sent: false, reason: 'draft_or_placeholder' };
             }
           }
 
           // For UPDATE, check if monitored fields changed
-          if (payload.type === 'UPDATE') {
-            const oldRecord = payload.old_record;
+          if (payload['type'] === 'UPDATE') {
+            const oldRecord = payload['old_record'] as JobRow | undefined;
             if (!oldRecord) {
               return { success: true, sent: false, reason: 'no_old_record' };
             }
@@ -196,7 +196,7 @@ export const processDiscordJobsQueue = inngest.createFunction(
 
           // Build and send Discord embed
           // Inngest serializes Date objects to strings, so we need to cast
-          const embed = buildJobEmbed(job as unknown as JobRow, payload.type === 'INSERT');
+          const embed = buildJobEmbed(job, payload['type'] === 'INSERT');
           if (!embed) {
             return { success: true, sent: false, reason: 'invalid_slug' };
           }
@@ -205,7 +205,7 @@ export const processDiscordJobsQueue = inngest.createFunction(
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              content: payload.type === 'INSERT'
+              content: payload['type'] === 'INSERT'
                 ? '🎉 **New Job Posted**'
                 : '📝 **Job Updated**',
               embeds: [embed],
@@ -214,14 +214,14 @@ export const processDiscordJobsQueue = inngest.createFunction(
 
           if (!discordResponse.ok) {
             logger.warn({ ...logContext,
-              jobId: job.id,
+              jobId: String(job['id']),
               status: discordResponse.status, }, 'Discord webhook failed');
             return { success: false, sent: false };
           }
 
           logger.info({ ...logContext,
-            jobId: job.id,
-            type: payload.type, }, 'Discord job notification sent');
+            jobId: String(job['id']),
+            type: String(payload['type']), }, 'Discord job notification sent');
 
           return { success: true, sent: true };
         } catch (error) {

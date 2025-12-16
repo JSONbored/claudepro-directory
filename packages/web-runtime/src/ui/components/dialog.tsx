@@ -14,7 +14,8 @@
  */
 
 import { X } from '../../icons.tsx';
-import { POSITION_PATTERNS, STATE_PATTERNS, UI_CLASSES } from '../constants.ts';
+import { POSITION_PATTERNS, STATE_PATTERNS } from '../constants.ts';
+import { iconSize, size, weight, size as textSize, leading } from '../../design-system/index.ts';
 import { cn } from '../utils.ts';
 import { useScrollLock } from '../../hooks/use-scroll-lock.ts';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
@@ -237,7 +238,7 @@ const DialogContent = ({
             'data-[state=open]:bg-accent data-[state=open]:text-muted-foreground'
           )}
         >
-          <X className={UI_CLASSES.ICON_SM} />
+          <X className={iconSize.sm} />
           <span className="sr-only">Close</span>
         </DialogPrimitive.Close>
       </DialogPrimitive.Content>
@@ -268,7 +269,7 @@ const DialogTitle = ({
 }) => (
   <DialogPrimitive.Title
     ref={ref}
-    className={cn(UI_CLASSES.HEADING_H5, 'leading-none tracking-tight', className)}
+    className={cn(`${size.lg} ${weight.semibold}`, 'leading-none tracking-tight', className)}
     {...props}
   />
 );
@@ -283,7 +284,7 @@ const DialogDescription = ({
 }) => (
   <DialogPrimitive.Description
     ref={ref}
-    className={cn(UI_CLASSES.TEXT_BODY_SM, 'text-muted-foreground', className)}
+    className={cn(`${textSize.sm} ${leading.normal}`, 'text-muted-foreground', className)}
     {...props}
   />
 );

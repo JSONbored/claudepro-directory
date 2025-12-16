@@ -5,7 +5,8 @@
 
 import { ArrowDownIcon, ArrowUpIcon, MinusIcon } from '@heyclaude/web-runtime/icons';
 import { type MetricsDisplayProps } from '@heyclaude/web-runtime/types/component.types';
-import { cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { cn } from '@heyclaude/web-runtime/ui';
+import { iconSize, cluster, grid, size, weight, tracking, marginY, marginBottom, marginTop } from "@heyclaude/web-runtime/design-system";
 
 // Lightweight Badge component for delta display
 function BadgeDelta({
@@ -17,11 +18,11 @@ function BadgeDelta({
 }) {
   const icon =
     deltaType === 'increase' ? (
-      <ArrowUpIcon className={UI_CLASSES.ICON_XS} />
+      <ArrowUpIcon className={iconSize.xs} />
     ) : deltaType === 'decrease' ? (
-      <ArrowDownIcon className={UI_CLASSES.ICON_XS} />
+      <ArrowDownIcon className={iconSize.xs} />
     ) : (
-      <MinusIcon className={UI_CLASSES.ICON_XS} />
+      <MinusIcon className={iconSize.xs} />
     );
 
   const colorClass =
@@ -51,16 +52,16 @@ export function MetricsDisplay(props: MetricsDisplayProps) {
   const validMetrics = metrics;
 
   return (
-    <section itemScope itemType="https://schema.org/Dataset" className="my-12">
+    <section itemScope itemType="https://schema.org/Dataset" className={`${marginY.default}`}>
       {title || description ? (
-        <div className="mb-8 text-center">
+        <div className={`${marginBottom.relaxed} text-center`}>
           {title ? (
-            <h3 className="text-foreground mb-3 text-xl font-semibold" itemProp="name">
+            <h3 className={`text-foreground ${marginBottom.default} ${size.xl} ${weight.semibold}`} itemProp="name">
               {title}
             </h3>
           ) : null}
           {description ? (
-            <p className="text-muted-foreground mx-auto max-w-3xl text-lg" itemProp="description">
+            <p className={`text-muted-foreground mx-auto max-w-3xl ${size.lg}`} itemProp="description">
               {description}
             </p>
           ) : null}
@@ -68,7 +69,7 @@ export function MetricsDisplay(props: MetricsDisplayProps) {
       ) : null}
 
       {/* Grid layout - responsive columns */}
-      <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
+      <div className={`grid gap-6 ${grid.cols1} md:${grid.cols2} lg:${grid.cols3}`}>
         {validMetrics.map((metric, index) => {
           const metricLabel = metric.label || `Metric ${index + 1}`;
           const metricValue = metric.value;
@@ -93,20 +94,20 @@ export function MetricsDisplay(props: MetricsDisplayProps) {
               )}
             >
               {/* Metric Label */}
-              <p className="text-muted-foreground text-sm font-medium tracking-wide uppercase">
+              <p className={`text-muted-foreground ${size.sm} ${weight.medium} ${tracking.wide} uppercase`}>
                 {metricLabel}
               </p>
 
               {/* Metric Value */}
-              <p className="from-foreground to-muted-foreground mt-2 bg-linear-to-r bg-clip-text text-3xl font-bold text-transparent">
+              <p className={`from-foreground to-muted-foreground ${marginTop.compact} bg-linear-to-r bg-clip-text ${size['3xl']} ${weight.bold} text-transparent`}>
                 {metricValue}
               </p>
 
               {/* Change indicator */}
               {metricChange ? (
-                <div className={`mt-4 ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}`}>
-                  <BadgeDelta deltaType={deltaType} className="font-semibold" />
-                  <span className="text-muted-foreground text-sm font-medium">{metricChange}</span>
+                <div className={`${marginTop.default} ${cluster.compact}`}>
+                  <BadgeDelta deltaType={deltaType} className={`${weight.semibold}`} />
+                  <span className={`text-muted-foreground ${size.sm} ${weight.medium}`}>{metricChange}</span>
                 </div>
               ) : null}
             </div>

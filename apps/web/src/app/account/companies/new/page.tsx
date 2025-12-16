@@ -13,6 +13,7 @@ import { Suspense } from 'react';
 import { CompanyForm } from '@/src/components/core/forms/company-form';
 
 import Loading from './loading';
+import { spaceY, marginBottom, muted } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Dynamic Rendering Required
@@ -82,10 +83,10 @@ async function NewCompanyPageContent() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className={`${spaceY.relaxed}`}>
       <div>
-        <h1 className="mb-2 text-3xl font-bold">Create Company</h1>
-        <p className="text-muted-foreground">
+        <h1 className={`${marginBottom.compact} text-3xl font-bold`}>Create Company</h1>
+        <p className={`${muted.default}`}>
           Add a new company profile to post jobs and showcase your organization
         </p>
       </div>

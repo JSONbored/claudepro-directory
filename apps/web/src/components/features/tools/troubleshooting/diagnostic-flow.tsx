@@ -8,7 +8,6 @@
 import { CheckCircle } from '@heyclaude/web-runtime/icons';
 import { type DiagnosticFlowProps } from '@heyclaude/web-runtime/types/component.types';
 import {
-  UI_CLASSES,
   Button,
   Card,
   CardContent,
@@ -17,6 +16,7 @@ import {
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
 import React from 'react';
+import { marginY, spaceY, marginBottom, paddingTop, gap, cluster, iconSize, size, muted } from "@heyclaude/web-runtime/design-system";
 
 export function DiagnosticFlow(props: DiagnosticFlowProps) {
   // Database CHECK constraint validates structure - no runtime validation needed
@@ -60,17 +60,17 @@ export function DiagnosticFlow(props: DiagnosticFlowProps) {
   const isComplete = currentStepData?.solution !== undefined;
 
   return (
-    <Card itemScope itemType="https://schema.org/HowTo" className="my-8">
+    <Card itemScope itemType="https://schema.org/HowTo" className={`${marginY.relaxed}`}>
       <CardHeader>
         <CardTitle>{title}</CardTitle>
         {description ? <CardDescription>{description}</CardDescription> : null}
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <div className={`${spaceY.comfortable}`}>
           {path.length > 0 && (
-            <div className={UI_CLASSES.TEXT_SM_MUTED}>
-              <p className="mb-2 font-medium">Diagnostic Path:</p>
-              <ol className="list-inside list-decimal space-y-1">
+            <div className={`${size.sm} ${muted.default}`}>
+              <p className={`${marginBottom.compact} font-medium`}>Diagnostic Path:</p>
+              <ol className={`list-inside list-decimal ${spaceY.tight}`}>
                 {path.map((step) => (
                   <li key={step}>{step}</li>
                 ))}
@@ -79,24 +79,24 @@ export function DiagnosticFlow(props: DiagnosticFlowProps) {
           )}
 
           <Card className="bg-muted/30">
-            <CardContent className="pt-6">
+            <CardContent className={`${paddingTop.comfortable}`}>
               {isComplete ? (
-                <div className="space-y-4">
+                <div className={`${spaceY.comfortable}`}>
                   <div
-                    className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-green-600 dark:text-green-400`}
+                    className={`${cluster.compact} text-green-600 dark:text-green-400`}
                   >
-                    <CheckCircle className={UI_CLASSES.ICON_MD} />
+                    <CheckCircle className={iconSize.md} />
                     <p className="font-medium">Solution Found:</p>
                   </div>
-                  <p className="text-muted-foreground">{currentStepData?.solution}</p>
+                  <p className={`${muted.default}`}>{currentStepData?.solution}</p>
                   <Button onClick={reset} variant="outline">
                     Start Over
                   </Button>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className={`${spaceY.comfortable}`}>
                   <p className="text-lg font-medium">{currentStepData?.question}</p>
-                  <div className="flex gap-4">
+                  <div className={`flex ${gap.default}`}>
                     <Button onClick={() => handleAnswer('yes')} variant="default">
                       Yes
                     </Button>

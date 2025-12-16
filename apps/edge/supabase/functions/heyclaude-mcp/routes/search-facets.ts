@@ -5,28 +5,26 @@
  * Helps AI agents understand what filters are available.
  */
 
-import type { Database } from '@heyclaude/database-types';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { GetSearchFacetsReturns } from '@heyclaude/database-types/postgres-types';
+import { SearchService } from '@heyclaude/data-layer/services/search.ts';
 import { logError } from '@heyclaude/shared-runtime/logging.ts';
 
 /**
  * Fetches available search facets (categories, tags, authors).
  *
- * @param supabase - Authenticated Supabase client
  * @returns Search facets with categories, tags, and authors
- * @throws If RPC fails
+ * @throws If service call fails
  */
-export async function handleGetSearchFacets(
-  supabase: SupabaseClient<Database>
-) {
-  // Call RPC for search facets
-  const { data, error } = await supabase.rpc('get_search_facets');
-
-  if (error) {
-    await logError('Search facets RPC failed', {
-      rpcName: 'get_search_facets',
-    }, error);
-    throw new Error(`Failed to fetch search facets: ${error.message}`);
+export async function handleGetSearchFacets() {
+  const searchService = new SearchService();
+  
+  // Get search facets using SearchService
+  let data: GetSearchFacetsReturns;
+  try {
+    data = await searchService.getSearchFacets();
+  } catch (error) {
+    await logError('SearchService.getSearchFacets failed', {}, error);
+    throw new Error(`Failed to fetch search facets: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 
   // Format response

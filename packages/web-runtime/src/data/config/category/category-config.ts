@@ -11,7 +11,7 @@
  * To update: Edit this file and redeploy.
  */
 
-import { type content_category } from '@heyclaude/data-layer/prisma';
+import type { content_category } from '@heyclaude/data-layer/prisma';
 import { ConfigFormat, PrimaryActionType } from '@heyclaude/data-layer/prisma';
 
 import {

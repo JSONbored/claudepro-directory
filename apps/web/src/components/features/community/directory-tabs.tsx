@@ -8,6 +8,7 @@
 
 import { Tabs, TabsList, TabsTrigger, TabsContent, LayoutGroup } from '@heyclaude/web-runtime/ui';
 import type { ReactNode } from 'react';
+import { marginBottom, spaceY } from "@heyclaude/web-runtime/design-system";
 
 export interface DirectoryTabsProps {
   /**
@@ -36,19 +37,19 @@ export function DirectoryTabs({
 }: DirectoryTabsProps) {
   return (
     <LayoutGroup>
-      <Tabs defaultValue="all" className="w-full">
-        <TabsList className="mb-6">
+      <Tabs defaultValue="all" className={`w-full`}>
+        <TabsList className={`${marginBottom.comfortable}`}>
           <TabsTrigger value="all">All Members</TabsTrigger>
           <TabsTrigger value="contributors">Contributors</TabsTrigger>
           <TabsTrigger value="new">New Members</TabsTrigger>
         </TabsList>
-        <TabsContent value="all" className="space-y-6">
+        <TabsContent value="all" className={`${spaceY.relaxed}`}>
           {allMembers}
         </TabsContent>
-        <TabsContent value="contributors" className="space-y-6">
+        <TabsContent value="contributors" className={`${spaceY.relaxed}`}>
           {contributors}
         </TabsContent>
-        <TabsContent value="new" className="space-y-6">
+        <TabsContent value="new" className={`${spaceY.relaxed}`}>
           {newMembers}
         </TabsContent>
       </Tabs>

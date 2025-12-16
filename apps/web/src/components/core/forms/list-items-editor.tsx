@@ -23,13 +23,13 @@ import { X } from '@heyclaude/web-runtime/icons';
 import {
   cn,
   toasts,
-  UI_CLASSES,
   UnifiedBadge,
   Button,
   Input,
   Label,
 } from '@heyclaude/web-runtime/ui';
 import { useState } from 'react';
+import { wrap, gap, iconSize, between, size, marginTop, paddingRight, marginLeft, spaceY } from "@heyclaude/web-runtime/design-system";
 
 // =============================================================================
 // TYPES
@@ -209,12 +209,12 @@ export function ListItemManager(props: ListItemManagerProps) {
   const showMinError = minItems && items.length < minItems && items.length > 0;
 
   return (
-    <div className={cn('space-y-2', className)}>
+    <div className={cn(spaceY.compact, className)}>
       {/* Label */}
       <Label>{label}</Label>
 
       {/* Input + Button */}
-      <div className={UI_CLASSES.FLEX_GAP_2}>
+      <div className={`flex gap-2`}>
         <Input
           value={currentInput}
           onChange={(e) => setCurrentInput(e.target.value)}
@@ -234,11 +234,11 @@ export function ListItemManager(props: ListItemManagerProps) {
       </div>
 
       {/* Description */}
-      {description ? <p className="text-muted-foreground text-xs">{description}</p> : null}
+      {description ? <p className={`text-muted-foreground ${size.xs}`}>{description}</p> : null}
 
       {/* Counter */}
       {showCounter && maxItems ? (
-        <p className="text-muted-foreground text-xs">
+        <p className={`text-muted-foreground ${size.xs}`}>
           {items.length}/{maxItems} {label.toLowerCase()} {items.length === 1 ? 'item' : 'items'}
         </p>
       ) : null}
@@ -248,23 +248,23 @@ export function ListItemManager(props: ListItemManagerProps) {
         <>
           {/* Badge variant */}
           {props.variant === 'badge' && (
-            <div className={`${UI_CLASSES.FLEX_WRAP_GAP_2} mt-3`}>
+            <div className={`${wrap} ${gap.compact} ${marginTop.default}`}>
               {items.map((item, index) => (
                 <UnifiedBadge
                   key={item}
                   variant="base"
                   style={props.badgeStyle || 'secondary'}
-                  className="gap-1 pr-1"
+                  className={`${gap.micro} ${paddingRight.micro}`}
                 >
                   {item}
                   <button
                     type="button"
                     onClick={() => handleRemove(index)}
-                    className="hover:text-destructive ml-1"
+                    className={`hover:text-destructive ${marginLeft.micro}`}
                     aria-label={`Remove ${item}`}
                     disabled={disabled}
                   >
-                    <X className={UI_CLASSES.ICON_XS} />
+                    <X className={iconSize.xs} />
                   </button>
                 </UnifiedBadge>
               ))}
@@ -273,16 +273,16 @@ export function ListItemManager(props: ListItemManagerProps) {
 
           {/* List variant */}
           {props.variant === 'list' && (
-            <div className="space-y-2">
+            <div className={`${spaceY.compact}`}>
               {items.map((item, index) => {
                 // Generate stable key from item content hash
                 const itemKey = `item-${item.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)}-${item.length}`;
                 return (
                   <div
                     key={itemKey}
-                    className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} rounded border p-2`}
+                    className={`${between.center} rounded border p-2`}
                   >
-                    <span className="text-sm">{item}</span>
+                    <span className={`${size.sm}`}>{item}</span>
                     <Button
                       type="button"
                       variant="ghost"
@@ -301,7 +301,7 @@ export function ListItemManager(props: ListItemManagerProps) {
 
           {/* Custom variant */}
           {props.variant === 'custom' && (
-            <div className="space-y-2">
+            <div className={`${spaceY.compact}`}>
               {items.map((item, index) => props.renderItem(item, index, () => handleRemove(index)))}
             </div>
           )}
@@ -310,21 +310,21 @@ export function ListItemManager(props: ListItemManagerProps) {
 
       {/* Min items error */}
       {showMinError ? (
-        <p className="text-destructive text-xs">
+        <p className={`text-destructive ${size.xs}`}>
           At least {minItems} {label.toLowerCase()} {minItems === 1 ? 'is' : 'are'} required
         </p>
       ) : null}
 
       {/* Custom error message */}
       {errorMessage ? (
-        <p className="text-destructive text-xs" role="alert">
+        <p className={`text-destructive ${size.xs}`} role="alert">
           {errorMessage}
         </p>
       ) : null}
 
       {/* Empty state message for required fields */}
       {minItems && items.length === 0 ? (
-        <p className="text-destructive text-xs">
+        <p className={`text-destructive ${size.xs}`}>
           At least {minItems} {label.toLowerCase()} {minItems === 1 ? 'is' : 'are'} required
         </p>
       ) : null}

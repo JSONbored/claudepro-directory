@@ -15,7 +15,8 @@
  */
 
 import { cn } from '../../ui/utils.ts';
-import { STATE_PATTERNS, UI_CLASSES } from '../../ui/constants.ts';
+import { STATE_PATTERNS } from '../../ui/constants.ts';
+import { paddingX, paddingY } from '../../design-system/index.ts';
 import { MICROINTERACTIONS } from '../../design-system/index.ts';
 import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
@@ -43,7 +44,7 @@ const buttonVariants = cva(
         link: 'text-primary underline-offset-4 hover:underline',
       },
       size: {
-        default: `h-10 ${UI_CLASSES.CONTAINER_PADDING_SM}`,
+        default: `h-10 ${paddingX.default} ${paddingY.tight}`,
         sm: 'h-9 rounded-md px-3',
         lg: 'h-11 rounded-md px-8',
         icon: 'h-10 w-10',
@@ -153,7 +154,7 @@ const Button = ({
 
   // Wrap with motion animations if button is enabled
   if (disabled) {
-    return <div style={{ display: 'inline-block' }}>{buttonElement}</div>;
+    return <div className="inline-block">{buttonElement}</div>;
   }
 
   return (
@@ -161,7 +162,7 @@ const Button = ({
       whileHover={MICROINTERACTIONS.button.hover}
       whileTap={MICROINTERACTIONS.button.tap}
       transition={MICROINTERACTIONS.button.transition}
-      style={{ display: 'inline-block' }}
+      className="inline-block"
     >
       {buttonElement}
     </motion.div>

@@ -6,7 +6,18 @@
  */
 
 import { Resend } from 'resend';
-import { Constants, type Database, type Database as DatabaseGenerated } from '@heyclaude/database-types';
+import type {
+  content_category,
+  newsletter_source,
+  newsletter_interest,
+} from '@heyclaude/data-layer/prisma';
+import type {
+  newsletter_sync_status,
+} from '@heyclaude/database-types/prisma';
+import {
+  newsletter_interest as NewsletterInterest,
+} from '@heyclaude/database-types/prisma';
+import type { EnrollInEmailSequenceArgs } from '@heyclaude/database-types/postgres-types';
 import { withTimeout, TIMEOUT_PRESETS } from '@heyclaude/shared-runtime';
 import { normalizeError } from '../errors';
 import { logger, type LogContext } from '../logger';
@@ -211,16 +222,15 @@ export const RESEND_TOPIC_IDS = {
   platform_updates: 'f84d94d8-76aa-4abf-8ff6-3dfd916b56e6',
 } as const;
 
-const NEWSLETTER_INTEREST_VALUES = Constants.public.Enums.newsletter_interest;
+const NEWSLETTER_INTEREST_VALUES = Object.values(NewsletterInterest) as readonly newsletter_interest[];
 const NEWSLETTER_INTEREST_SET = new Set(NEWSLETTER_INTEREST_VALUES);
 
 export function resolveNewsletterInterest(
-  copyCategory?: DatabaseGenerated['public']['Enums']['content_category'] | string | null,
-  fallback: DatabaseGenerated['public']['Enums']['newsletter_interest'] = 'general'
-): DatabaseGenerated['public']['Enums']['newsletter_interest'] {
+  copyCategory?: content_category | string | null,
+  fallback: newsletter_interest = 'general'
+): newsletter_interest {
   if (copyCategory) {
-    const normalized =
-      copyCategory.toString().toLowerCase() as DatabaseGenerated['public']['Enums']['newsletter_interest'];
+    const normalized = copyCategory.toString().toLowerCase() as newsletter_interest;
     if (NEWSLETTER_INTEREST_SET.has(normalized)) {
       return normalized;
     }
@@ -232,8 +242,8 @@ export function resolveNewsletterInterest(
  * Determine initial Resend topic IDs to assign to a new contact based on content category.
  */
 export function inferInitialTopics(
-  _source: Database['public']['Enums']['newsletter_source'] | string | null,
-  copyCategory?: Database['public']['Enums']['content_category'] | string | null
+  _source: newsletter_source | string | null,
+  copyCategory?: content_category | string | null
 ): string[] {
   const topics: string[] = [];
 
@@ -321,7 +331,7 @@ async function assignTopicsToContact(
  * Calculate initial engagement score based on signup context
  */
 export function calculateInitialEngagementScore(
-  source: Database['public']['Enums']['newsletter_source'] | string | null,
+  source: newsletter_source | string | null,
   copyType?: string | null
 ): number {
   let score = 50; // Neutral baseline
@@ -367,10 +377,10 @@ export function calculateInitialEngagementScore(
  * Build contact properties object for Resend.
  */
 export function buildContactProperties(params: {
-  source: Database['public']['Enums']['newsletter_source'] | string | null;
+  source: newsletter_source | string | null;
   copyType?: string | null;
   referrer?: string | null;
-  primaryInterest: DatabaseGenerated['public']['Enums']['newsletter_interest'];
+  primaryInterest: newsletter_interest;
 }): Record<string, string | number> {
   const { source, copyType, referrer, primaryInterest } = params;
   const sourceValue: string | null = source ?? null;
@@ -817,12 +827,12 @@ export const sendEmailUnsafe = sendEmailInternal;
 export async function syncContactToResend(
   email: string,
   contactProperties: Record<string, string | number>,
-  validatedSource: Database['public']['Enums']['newsletter_source'] | string | null,
-  copy_category: Database['public']['Enums']['content_category'] | string | null | undefined,
+  validatedSource: newsletter_source | string | null,
+  copy_category: content_category | string | null | undefined,
   resendClient?: Resend
 ): Promise<{
   resendContactId: string | null;
-  syncStatus: DatabaseGenerated['public']['Enums']['newsletter_sync_status'];
+  syncStatus: newsletter_sync_status;
   syncError: string | null;
   topicIds: string[];
 }> {
@@ -834,7 +844,7 @@ export async function syncContactToResend(
   };
 
   let resendContactId: string | null = null;
-  let syncStatus: DatabaseGenerated['public']['Enums']['newsletter_sync_status'] = 'synced';
+  let syncStatus: newsletter_sync_status = 'synced';
   let syncError: string | null = null;
   let topicIds: string[] = [];
   const resendEnv = getResendEnv();
@@ -965,7 +975,7 @@ export async function enrollInOnboardingSequence(email: string): Promise<void> {
 
     const enrollArgs = {
       p_email: email,
-    } satisfies DatabaseGenerated['public']['Functions']['enroll_in_email_sequence']['Args'];
+    } satisfies EnrollInEmailSequenceArgs;
 
     await service.enrollInEmailSequence(enrollArgs);
     logger.info(logContext, 'Enrolled in onboarding sequence');

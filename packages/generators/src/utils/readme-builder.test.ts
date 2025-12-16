@@ -1,8 +1,8 @@
 import { describe, expect, it, beforeEach, afterEach } from 'vitest';
 import { buildReadmeMarkdown } from './readme-builder.ts';
-import type { Database } from '@heyclaude/database-types';
+import type { GenerateReadmeDataReturns } from '@heyclaude/database-types/postgres-types';
 
-type ReadmeData = Database['public']['Functions']['generate_readme_data']['Returns'];
+type ReadmeData = GenerateReadmeDataReturns;
 
 describe('buildReadmeMarkdown', () => {
   const originalEnv = process.env['NEXT_PUBLIC_SITE_URL'];

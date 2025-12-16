@@ -5,16 +5,27 @@
  * and ensure type safety at runtime.
  */
 
-import { Constants, type Database } from '@heyclaude/database-types';
+import type {
+  content_category,
+  job_type,
+  experience_level,
+  job_category,
+} from '@heyclaude/data-layer/prisma';
+import {
+  ContentCategory,
+  JobType,
+  ExperienceLevel,
+  JobCategory,
+} from '@heyclaude/data-layer/prisma';
 
 /**
  * Type guard for content_category enum
  */
 export function isValidContentCategory(
   value: string
-): value is Database['public']['Enums']['content_category'] {
-  return Constants.public.Enums.content_category.includes(
-    value as Database['public']['Enums']['content_category']
+): value is content_category {
+  return (Object.values(ContentCategory) as readonly content_category[]).includes(
+    value as content_category
   );
 }
 
@@ -23,9 +34,9 @@ export function isValidContentCategory(
  */
 export function isValidJobType(
   value: string
-): value is Database['public']['Enums']['job_type'] {
-  return Constants.public.Enums.job_type.includes(
-    value as Database['public']['Enums']['job_type']
+): value is job_type {
+  return (Object.values(JobType) as readonly job_type[]).includes(
+    value as job_type
   );
 }
 
@@ -34,9 +45,9 @@ export function isValidJobType(
  */
 export function isValidExperienceLevel(
   value: string
-): value is Database['public']['Enums']['experience_level'] {
-  return Constants.public.Enums.experience_level.includes(
-    value as Database['public']['Enums']['experience_level']
+): value is experience_level {
+  return (Object.values(ExperienceLevel) as readonly experience_level[]).includes(
+    value as experience_level
   );
 }
 
@@ -45,8 +56,8 @@ export function isValidExperienceLevel(
  */
 export function isValidJobCategory(
   value: string
-): value is Database['public']['Enums']['job_category'] {
-  return Constants.public.Enums.job_category.includes(
-    value as Database['public']['Enums']['job_category']
+): value is job_category {
+  return (Object.values(JobCategory) as readonly job_category[]).includes(
+    value as job_category
   );
 }

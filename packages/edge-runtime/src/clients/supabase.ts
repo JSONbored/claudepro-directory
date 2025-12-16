@@ -1,6 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
 import { edgeEnv } from '@heyclaude/edge-runtime/config/env.ts';
-import type { Database } from '@heyclaude/database-types';
 
 const {
   supabase: {
@@ -11,9 +10,8 @@ const {
   site: { siteUrl: SITE_URL_VALUE },
 } = edgeEnv;
 
-// Use Database type from @heyclaude/database-types (generated types only)
-// This ensures proper type inference for RPC functions and table operations
-export const supabaseAnon = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY);
-export const supabaseServiceRole = createClient<Database>(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+// Supabase clients for auth/storage operations only (database queries use Prisma)
+export const supabaseAnon = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+export const supabaseServiceRole = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 export const SITE_URL = SITE_URL_VALUE;

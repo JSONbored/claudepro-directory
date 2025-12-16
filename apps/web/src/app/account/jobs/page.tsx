@@ -1,5 +1,5 @@
 import type { GetUserDashboardReturns } from '@heyclaude/database-types/postgres-types';
-import { type Database } from '@heyclaude/database-types';
+import type { jobsModel, job_plan, job_tier } from '@heyclaude/data-layer/prisma';
 import { type JobBillingSummaryEntry } from '@heyclaude/web-runtime/data';
 import {
   generatePageMetadata,
@@ -23,14 +23,12 @@ import {
   Alert,
   AlertDescription,
   AlertTitle,
-  BADGE_COLORS,
   Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  UI_CLASSES,
   UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
 import { type JobStatus } from '@heyclaude/web-runtime/ui/constants';
@@ -46,6 +44,7 @@ import { JobToggleButton } from '@/src/components/core/buttons/jobs/job-toggle-b
 
 import Loading from './loading';
 import JobsListLoading from './loading-list';
+import { between, cluster, spaceY, marginBottom, marginRight, paddingY, gap, marginTop, padding } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Dynamic Rendering Required
@@ -53,11 +52,11 @@ import JobsListLoading from './loading-list';
  * Runtime: Node.js (required for authenticated user data and Supabase server client)
  */
 
-const JOB_PLAN_LABELS: Record<Database['public']['Enums']['job_plan'], string> = {
+const JOB_PLAN_LABELS: Record<job_plan, string> = {
   'one-time': 'One-Time',
   subscription: 'Subscription',
 };
-const JOB_TIER_LABELS: Record<Database['public']['Enums']['job_tier'], string> = {
+const JOB_TIER_LABELS: Record<job_tier, string> = {
   featured: 'Featured',
   standard: 'Standard',
 };
@@ -111,12 +110,12 @@ function humanizeStatus(value?: null | string): string {
 /***
  * Get the human-readable label for a job plan.
  *
- * @param {Database['public']['Enums']['job_plan'] | null} plan - The job plan enum value; may be `undefined` or `null`
+ * @param {job_plan | null} plan - The job plan enum value; may be `undefined` or `null`
  * @returns The human-readable label for `plan`; defaults to the One-Time label when `plan` is missing.
  *
  * @see JOB_PLAN_LABELS
  */
-function resolvePlanLabel(plan?: Database['public']['Enums']['job_plan'] | null): string {
+function resolvePlanLabel(plan?: job_plan | null): string {
   if (!plan) {
     return JOB_PLAN_LABELS['one-time'];
   }
@@ -126,12 +125,12 @@ function resolvePlanLabel(plan?: Database['public']['Enums']['job_plan'] | null)
 /***
  * Resolve a human-readable label for a job tier.
  *
- * @param {Database['public']['Enums']['job_tier'] | null} tier - The job tier enum value; when `undefined` or `null`, the standard tier label is used
+ * @param {job_tier | null} tier - The job tier enum value; when `undefined` or `null`, the standard tier label is used
  * @returns The label corresponding to `tier`, or the Standard tier label when no tier is provided
  *
  * @see JOB_TIER_LABELS
  */
-function resolveTierLabel(tier?: Database['public']['Enums']['job_tier'] | null): string {
+function resolveTierLabel(tier?: job_tier | null): string {
   if (!tier) {
     return JOB_TIER_LABELS.standard;
   }
@@ -144,10 +143,20 @@ function resolveTierLabel(tier?: Database['public']['Enums']['job_tier'] | null)
  * @param {JobStatus} status - The job status to map
  * @returns The color token string associated with the provided `status`
  *
- * @see BADGE_COLORS.jobStatus
+ * Direct Tailwind utilities - no wrapper needed
  */
+const jobStatusBadgeMap: Record<JobStatus, string> = {
+  draft: 'bg-color-badge-jobstatus-draft-bg text-color-badge-jobstatus-draft-text border-color-badge-jobstatus-draft-border',
+  pending_payment: 'bg-color-badge-jobstatus-pending-payment-bg text-color-badge-jobstatus-pending-payment-text border-color-badge-jobstatus-pending-payment-border',
+  pending_review: 'bg-color-badge-jobstatus-pending-review-bg text-color-badge-jobstatus-pending-review-text border-color-badge-jobstatus-pending-review-border',
+  active: 'bg-color-badge-jobstatus-active-bg text-color-badge-jobstatus-active-text border-color-badge-jobstatus-active-border',
+  expired: 'bg-color-badge-jobstatus-expired-bg text-color-badge-jobstatus-expired-text border-color-badge-jobstatus-expired-border',
+  rejected: 'bg-color-badge-jobstatus-rejected-bg text-color-badge-jobstatus-rejected-text border-color-badge-jobstatus-rejected-border',
+  deleted: 'bg-color-badge-jobstatus-deleted-bg text-color-badge-jobstatus-deleted-text border-color-badge-jobstatus-deleted-border',
+};
+
 function getStatusColor(status: JobStatus): string {
-  return BADGE_COLORS.jobStatus[status];
+  return jobStatusBadgeMap[status];
 }
 
 /**
@@ -220,7 +229,7 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
       'MyJobsPage: unauthenticated access attempt detected'
     );
     return (
-      <div className="space-y-6">
+      <div className={`${spaceY.relaxed}`}>
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl">Sign in required</CardTitle>
@@ -248,7 +257,7 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
   userLogger.info({ section: 'data-fetch' }, 'MyJobsPage: authentication successful');
 
   return (
-    <div className="space-y-6">
+    <div className={`${spaceY.relaxed}`}>
       {/* Payment success alert - rendered immediately if paymentStatus is present */}
       {paymentStatus === 'success' && paymentJobId ? (
         <Suspense fallback={null}>
@@ -316,13 +325,13 @@ async function PaymentSuccessAlert({
   }
 
   // Extract jobs from dashboard
-  const jobs: Array<Database['public']['Tables']['jobs']['Row']> = (() => {
+  const jobs: Array<jobsModel> = (() => {
     const jobsData = data?.jobs;
     if (jobsData === undefined || jobsData === null || !Array.isArray(jobsData)) {
       return [];
     }
     return jobsData.filter(
-      (item): item is Database['public']['Tables']['jobs']['Row'] =>
+      (item): item is jobsModel =>
         item !== null && typeof item === 'object' && 'id' in item && typeof item['id'] === 'string'
     );
   })();
@@ -380,7 +389,7 @@ async function PaymentSuccessAlert({
     <Alert className="border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-200/30 dark:bg-emerald-950/40 dark:text-emerald-100">
       <CheckCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-300" />
       <AlertTitle>Payment confirmed</AlertTitle>
-      <AlertDescription className="space-y-1 text-sm">
+      <AlertDescription className={`${spaceY.tight} text-sm`}>
         <p>
           {paymentJob?.title ? `${paymentJob.title} is now live.` : 'Your job listing is now live.'}
         </p>
@@ -468,14 +477,14 @@ async function JobsListWithHeader({
 
   // Validate and convert jobs from Json to jobs table rows
   // The RPC returns jobs as Json | null, so we need runtime validation
-  const jobs: Array<Database['public']['Tables']['jobs']['Row']> = (() => {
+  const jobs: Array<jobsModel> = (() => {
     const jobsData = data?.jobs;
     if (jobsData === undefined || jobsData === null || !Array.isArray(jobsData)) {
       return [];
     }
 
     return jobsData.filter(
-      (item): item is Database['public']['Tables']['jobs']['Row'] =>
+      (item): item is jobsModel =>
         // Validate required fields for jobs table row
         // Use bracket notation for index signature properties
         item !== null &&
@@ -511,16 +520,16 @@ async function JobsListWithHeader({
 
   return (
     <>
-      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+      <div className={between.center}>
         <div>
-          <h1 className="mb-2 text-3xl font-bold">My Job Listings</h1>
+          <h1 className={`${marginBottom.compact} text-3xl font-bold`}>My Job Listings</h1>
           <p className="text-muted-foreground">
             {jobs.length} {jobs.length === 1 ? 'listing' : 'listings'}
           </p>
         </div>
         <Button asChild>
           <Link href={ROUTES.ACCOUNT_JOBS_NEW}>
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className={`${marginRight.tight} h-4 w-4`} />
             Post a Job
           </Link>
         </Button>
@@ -528,15 +537,15 @@ async function JobsListWithHeader({
 
       {jobs.length === 0 ? (
         <Card>
-          <CardContent className="flex flex-col items-center py-12">
-            <Briefcase className="text-muted-foreground mb-4 h-12 w-12" />
-            <h3 className="mb-2 text-xl font-semibold">No job listings yet</h3>
-            <p className="text-muted-foreground mb-4 max-w-md text-center">
+          <CardContent className={`flex flex-col items-center ${paddingY.section}`}>
+            <Briefcase className={`text-muted-foreground ${marginBottom.default} h-12 w-12`} />
+            <h3 className={`${marginBottom.compact} text-xl font-semibold`}>No job listings yet</h3>
+            <p className={`text-muted-foreground ${marginBottom.default} max-w-md text-center`}>
               Post your first job listing to reach talented developers in the Claude community
             </p>
             <Button asChild>
               <Link href={ROUTES.ACCOUNT_JOBS_NEW}>
-                <Plus className="mr-2 h-4 w-4" />
+                <Plus className={`${marginRight.tight} h-4 w-4`} />
                 Post Your First Job
               </Link>
             </Button>
@@ -577,7 +586,7 @@ async function JobsListWithBilling({
   userLogger,
 }: {
   jobIds: string[];
-  jobs: Array<Database['public']['Tables']['jobs']['Row']>;
+  jobs: Array<jobsModel>;
   userLogger: ReturnType<typeof logger.child>;
 }) {
   let billingSummaries: JobBillingSummaryEntry[] = [];
@@ -603,19 +612,19 @@ async function JobsListWithBilling({
   }
 
   const getPlanBadge = (
-    plan: Database['public']['Enums']['job_plan'] | null | undefined,
-    tier?: Database['public']['Enums']['job_tier'] | null
+    plan: job_plan | null | undefined,
+    tier?: job_tier | null
   ) => {
     if (tier === 'featured') {
       return (
-        <UnifiedBadge className={UI_CLASSES.STATUS_PUBLISHED} variant="base">
+        <UnifiedBadge className="bg-blue-500/10 text-blue-400 border-blue-500/20" variant="base">
           Featured
         </UnifiedBadge>
       );
     }
     if (plan === 'subscription') {
       return (
-        <UnifiedBadge className={UI_CLASSES.STATUS_PREMIUM} variant="base">
+        <UnifiedBadge className="bg-purple-500/10 text-purple-400 border-purple-500/20" variant="base">
           Subscription
         </UnifiedBadge>
       );
@@ -624,7 +633,7 @@ async function JobsListWithBilling({
   };
 
   return (
-    <div className="grid gap-4">
+    <div className={`grid ${gap.default}`}>
       {jobs.map((job) => {
         const summary = billingSummaryMap.get(job.id);
         const planLabel = resolvePlanLabel(summary?.plan ?? job.plan);
@@ -661,9 +670,9 @@ async function JobsListWithBilling({
         return (
           <Card key={job.id}>
             <CardHeader>
-              <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
+              <div className={between.start}>
                 <div className="flex-1">
-                  <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                  <div className={cluster.compact}>
                     <UnifiedBadge
                       className={getStatusColor(job.status)}
                       style="outline"
@@ -673,7 +682,7 @@ async function JobsListWithBilling({
                     </UnifiedBadge>
                     {getPlanBadge(job.plan, job.tier)}
                   </div>
-                  <CardTitle className="mt-2">{job.title}</CardTitle>
+                  <CardTitle className={`${marginTop.compact}`}>{job.title}</CardTitle>
                   <CardDescription>
                     {job.company} • {job.location ?? 'Remote'} • {job.type}
                   </CardDescription>
@@ -682,8 +691,8 @@ async function JobsListWithBilling({
             </CardHeader>
 
             <CardContent>
-              <div className="text-muted-foreground mb-4 flex flex-wrap gap-4 text-sm">
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+              <div className={`text-muted-foreground ${marginBottom.default} flex flex-wrap ${gap.default} text-sm`}>
+                <div className={cluster.tight}>
                   <Eye className="h-4 w-4" />
                   {job.view_count ?? 0} views
                 </div>
@@ -691,14 +700,14 @@ async function JobsListWithBilling({
                 {job.expires_at ? <div>Expires {formatRelativeDate(job.expires_at)}</div> : null}
               </div>
               {showBillingCard ? (
-                <div className="border-muted bg-muted/20 mb-4 rounded-lg border border-dashed p-3 text-xs sm:text-sm">
-                  <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+                <div className={`border-muted bg-muted/20 ${marginBottom.default} rounded-lg border border-dashed ${padding.compact} text-xs sm:text-sm`}>
+                  <div className={between.center}>
                     <span className="text-foreground font-semibold">Billing</span>
                     <UnifiedBadge className="capitalize" style="outline" variant="base">
                       {planLabel} • {tierLabel}
                     </UnifiedBadge>
                   </div>
-                  <div className="text-muted-foreground mt-2 space-y-1">
+                  <div className={`text-muted-foreground ${marginTop.compact} ${spaceY.tight}`}>
                     {planPriceLabel ? <p>Price: {planPriceLabel}</p> : null}
                     {renewalCopy ? <p>{renewalCopy}</p> : null}
                     {paymentCopy ? <p>{paymentCopy}</p> : null}
@@ -706,17 +715,17 @@ async function JobsListWithBilling({
                 </div>
               ) : null}
 
-              <div className={UI_CLASSES.FLEX_GAP_2}>
+              <div className={`flex ${gap.tight}`}>
                 <Button asChild size="sm" variant="outline">
                   <Link href={`/account/jobs/${job.id}/edit`}>
-                    <Edit className="mr-1 h-3 w-3" />
+                    <Edit className={`${marginRight.micro} h-3 w-3`} />
                     Edit
                   </Link>
                 </Button>
 
                 <Button asChild size="sm" variant="outline">
                   <Link href={`/account/jobs/${job.id}/analytics`}>
-                    <BarChart className="mr-1 h-3 w-3" />
+                    <BarChart className={`${marginRight.micro} h-3 w-3`} />
                     Analytics
                   </Link>
                 </Button>
@@ -724,7 +733,7 @@ async function JobsListWithBilling({
                 {job.slug ? (
                   <Button asChild size="sm" variant="ghost">
                     <Link href={`/jobs/${job.slug}`}>
-                      <ExternalLink className="mr-1 h-3 w-3" />
+                      <ExternalLink className={`${marginRight.micro} h-3 w-3`} />
                       View
                     </Link>
                   </Button>

@@ -13,7 +13,8 @@
  */
 
 import { EventSchemas, Inngest } from 'inngest';
-import type { Database } from '@heyclaude/database-types';
+import type { content_category } from '@heyclaude/data-layer/prisma';
+import type { contentModel } from '@heyclaude/data-layer/prisma';
 import {
   getDeploymentEnv,
   getDeploymentPullRequestId,
@@ -215,7 +216,7 @@ type Events = {
     data: PolarWebhookEventData;
   };
 
-  // Supabase database webhook events (content changes)
+  // Supabase webhook events (content changes)
   'supabase/content-changed': {
     data: SupabaseContentChangedEventData;
   };
@@ -265,7 +266,7 @@ export interface ResendEmailEventData {
 }
 
 /**
- * Supabase database webhook event data structure
+ * Supabase webhook event data structure
  * @see https://supabase.com/docs/guides/database/webhooks
  */
 export interface SupabaseContentChangedEventData {
@@ -276,15 +277,15 @@ export interface SupabaseContentChangedEventData {
   /** Database event type: INSERT, UPDATE, DELETE */
   eventType: 'INSERT' | 'UPDATE' | 'DELETE';
   /** Content category (all categories supported for README updates, package generation only for skills/mcp) */
-  category: Database['public']['Enums']['content_category'];
+  category: content_category;
   /** Content ID (UUID) */
   contentId: string;
   /** Content slug */
   slug?: string | undefined;
   /** New record data (partial ContentRow) */
-  record: Partial<Database['public']['Tables']['content']['Row']>;
+  record: Partial<contentModel>;
   /** Old record data (for UPDATE/DELETE) */
-  oldRecord?: Partial<Database['public']['Tables']['content']['Row']> | undefined;
+  oldRecord?: Partial<contentModel> | undefined;
   /** Full webhook payload */
   payload: Record<string, unknown>;
 }

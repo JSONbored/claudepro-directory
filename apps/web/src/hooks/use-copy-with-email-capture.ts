@@ -15,7 +15,7 @@
 
 'use client';
 
-import { type Database } from '@heyclaude/database-types';
+import type { content_category, copy_type } from '@heyclaude/data-layer/prisma';
 import { type UseCopyToClipboardOptions } from '@heyclaude/web-runtime/core';
 import { useCopyToClipboard } from '@heyclaude/web-runtime/hooks';
 import { useCallback } from 'react';
@@ -28,12 +28,12 @@ export interface EmailCaptureContext {
   /**
    * Content category (agents, mcp, etc.)
    */
-  category?: Database['public']['Enums']['content_category'];
+  category?: content_category;
 
   /**
    * Type of content being copied
    */
-  copyType: Database['public']['Enums']['copy_type'];
+  copyType: copy_type;
 
   /**
    * Referrer URL for attribution

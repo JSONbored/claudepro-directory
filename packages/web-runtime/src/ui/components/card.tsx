@@ -5,7 +5,7 @@
  */
 
 import { cn } from '../../ui/utils.ts';
-import { UI_CLASSES } from '../../ui/constants.ts';
+import { stack } from '../../design-system/index.ts';
 import type * as React from 'react';
 import { memo } from 'react';
 
@@ -14,7 +14,7 @@ const Card = memo(function Card({ className, ...props }: React.ComponentProps<'d
     <div
       data-slot="card"
       className={cn(
-        UI_CLASSES.FLEX_COL_GAP_6,
+        stack.relaxed,
         'rounded-xl border bg-card py-6 text-card-foreground shadow-sm',
         className
       )}

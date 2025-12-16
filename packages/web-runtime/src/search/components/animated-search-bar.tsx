@@ -20,7 +20,7 @@
  */
 
 import { MICROINTERACTIONS, SPRING, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
-import { COLORS } from '@heyclaude/web-runtime/design-tokens';
+// COLORS removed - using CSS variables in Tailwind arbitrary values for dynamic gradients
 import {
   useReducedMotion,
   usePageInView,
@@ -254,14 +254,15 @@ export function AnimatedSearchBar({
     });
   }, []);
 
-  // PERFORMANCE FIX: Memoize color values to avoid re-evaluating design tokens on every render
+  // Using CSS variables for dynamic gradients (already defined in globals.css)
+  // These are used in inline styles for Framer Motion animations (necessary for dynamic values)
   const focusGlowGradient = useMemo(
     () =>
-      `linear-gradient(to right, ${COLORS.semantic.search.focus.glow.from}, ${COLORS.semantic.search.focus.glow.via}, ${COLORS.semantic.search.focus.glow.to})`,
+      `linear-gradient(to right, var(--color-search-glow-from), var(--color-search-glow-via), var(--color-search-glow-to))`,
     []
   );
-  const particleBaseColor = useMemo(() => COLORS.semantic.search.particle.base, []);
-  const particleShadowColor = useMemo(() => COLORS.semantic.search.particle.shadow, []);
+  const particleBaseColor = useMemo(() => 'var(--color-search-particle-base)', []);
+  const particleShadowColor = useMemo(() => 'var(--color-search-particle-shadow)', []);
 
   // Build style object - exclude Motion values during SSR
   const baseStyle =

@@ -1,13 +1,13 @@
 'use server';
 
 import { ContentService } from '@heyclaude/data-layer';
-import { type content_category } from '@heyclaude/data-layer/prisma';
+import type { content_category } from '@heyclaude/data-layer/prisma';
 import { ContentCategory } from '@heyclaude/data-layer/prisma';
 import type {
   GetContentDetailCompleteReturns,
   GetContentDetailCoreReturns,
   GetContentAnalyticsReturns,
-} from '@heyclaude/database-types/postgres-types/functions';
+} from '@heyclaude/database-types/postgres-types';
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { normalizeError } from '../../errors.ts';
@@ -55,9 +55,9 @@ export async function getContentDetailComplete(input: {
     return null;
   }
 
-  // Configure cache - use 'hours' profile for content detail (changes every 4 hours)
+  // Configure cache - use 'detail' profile for optimal SEO (2hr stale, 30min revalidate, 1 day expire)
   // Category and slug are automatically part of cache key
-  cacheLife('hours'); // 1hr stale, 15min revalidate, 1 day expire
+  cacheLife('detail'); // 2hr stale, 30min revalidate, 1 day expire - optimized for SEO
   const tags = generateContentTags(category, slug);
   for (const tag of tags) {
     cacheTag(tag);
@@ -120,9 +120,9 @@ export async function getContentDetailCore(input: {
     return null;
   }
 
-  // Configure cache - use 'hours' profile for content detail core (changes every 4 hours)
+  // Configure cache - use 'detail' profile for optimal SEO (2hr stale, 30min revalidate, 1 day expire)
   // Category and slug are automatically part of cache key
-  cacheLife('hours'); // 1hr stale, 15min revalidate, 1 day expire
+  cacheLife('detail'); // 2hr stale, 30min revalidate, 1 day expire - optimized for SEO
   const tags = generateContentTags(category, slug);
   for (const tag of tags) {
     cacheTag(tag);
@@ -182,9 +182,9 @@ export async function getContentAnalytics(input: {
     return null;
   }
 
-  // Configure cache - use 'hours' profile for content analytics (changes every 4 hours)
+  // Configure cache - use 'detail' profile for optimal SEO (2hr stale, 30min revalidate, 1 day expire)
   // Category and slug are automatically part of cache key
-  cacheLife('hours'); // 1hr stale, 15min revalidate, 1 day expire
+  cacheLife('detail'); // 2hr stale, 30min revalidate, 1 day expire - optimized for SEO
   const tags = generateContentTags(category, slug);
   for (const tag of tags) {
     cacheTag(tag);

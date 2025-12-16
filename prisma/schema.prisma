@@ -1,11 +1,20 @@
 generator client {
-  provider = "prisma-client-js"
-  output   = "../packages/generators/dist/prisma"
+  provider = "prisma-client"
+  output   = "../packages/database-types/src/prisma"
+  engineType = "client"
+  moduleFormat = "esm"
 }
 
 generator zod {
   provider = "prisma-zod-generator"
-  output   = "../packages/generators/dist/prisma/zod"
+  output   = "../packages/database-types/src/prisma/zod"
+}
+
+generator json-types {
+  provider  = "prisma-json-types-generator"
+  namespace = "PrismaJson"
+  allowAny  = false
+  output    = "../packages/database-types/src/prisma/json-types"
 }
 
 generator postgres-types {
@@ -14,6 +23,16 @@ generator postgres-types {
   schema   = "public"
   generateTypes = true
   generateZod = true
+}
+
+generator openapi {
+  provider = "prisma-openapi"
+  output   = "../packages/database-types/src/openapi"
+}
+
+generator docs {
+  provider = "node node_modules/.pnpm/prisma-docs-generator@0.8.0/node_modules/prisma-docs-generator/dist/index.js"
+  output   = "../packages/database-types/docs"
 }
 
 datasource db {
@@ -26,6 +45,7 @@ datasource db {
 model audit_log_entries {
   instance_id String?   @db.Uuid
   id          String    @id @db.Uuid
+  /// [AuditLogPayload]
   payload     Json?     @db.Json
   created_at  DateTime? @db.Timestamptz(6)
   ip_address  String    @default("") @db.VarChar(64)
@@ -62,6 +82,7 @@ model flow_state {
 model identities {
   provider_id     String
   user_id         String     @db.Uuid
+  /// [IdentityData]
   identity_data   Json
   provider        String
   last_sign_in_at DateTime?  @db.Timestamptz(6)
@@ -112,6 +133,7 @@ model mfa_challenges {
   verified_at            DateTime?   @db.Timestamptz(6)
   ip_address             String      @db.Inet
   otp_code               String?
+  /// [WebAuthnSessionData]
   web_authn_session_data Json?
   mfa_factors            mfa_factors @relation(fields: [factor_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "mfa_challenges_auth_factor_id_fkey")
 
@@ -132,8 +154,10 @@ model mfa_factors {
   secret                       String?
   phone                        String?
   last_challenged_at           DateTime?        @unique @db.Timestamptz(6)
+  /// [WebAuthnCredential]
   web_authn_credential         Json?
   web_authn_aaguid             String?          @db.Uuid
+  /// [WebAuthnSessionData]
   last_webauthn_challenge_data Json?
   mfa_challenges               mfa_challenges[]
   users                        auth_users       @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
@@ -267,6 +291,7 @@ model saml_providers {
   entity_id         String        @unique
   metadata_xml      String
   metadata_url      String?
+  /// [AttributeMapping]
   attribute_mapping Json?
   created_at        DateTime?     @db.Timestamptz(6)
   updated_at        DateTime?     @db.Timestamptz(6)
@@ -392,7 +417,9 @@ model auth_users {
   email_change                                                String?                   @db.VarChar(255)
   email_change_sent_at                                        DateTime?                 @db.Timestamptz(6)
   last_sign_in_at                                             DateTime?                 @db.Timestamptz(6)
+  /// [RawAppMetaData]
   raw_app_meta_data                                           Json?
+  /// [RawUserMetaData]
   raw_user_meta_data                                          Json?
   is_super_admin                                              Boolean?
   created_at                                                  DateTime?                 @db.Timestamptz(6)
@@ -477,12 +504,14 @@ model announcements {
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model app_settings {
   setting_key    String               @id
+  /// [AppSettingValue]
   setting_value  Json                 @default("{}")
   setting_type   setting_type
   enabled        Boolean              @default(true)
   description    String
   category       app_setting_category
   version        Int                  @default(1)
+  /// [AppSettingValue]
   previous_value Json?
   created_at     DateTime             @default(now()) @db.Timestamptz(6)
   updated_at     DateTime             @default(now()) @db.Timestamptz(6)
@@ -527,9 +556,11 @@ model category_configs {
   show_on_homepage      Boolean             @default(true)
   keywords              String
   meta_description      String
+  /// [CategorySections]
   sections              Json                @default("{\"examples\": false, \"features\": true, \"security\": false, \"use_cases\": true, \"installation\": true, \"configuration\": true, \"troubleshooting\": true}")
   primary_action_type   primary_action_type
   primary_action_label  String
+  /// [PrimaryActionConfig]
   primary_action_config Json?
   search_placeholder    String
   empty_state_message   String?
@@ -539,11 +570,15 @@ model category_configs {
   config_format         config_format?
   created_at            DateTime            @default(now()) @db.Timestamptz(6)
   updated_at            DateTime            @default(now()) @db.Timestamptz(6)
+  /// [ValidationConfig]
   validation_config     Json?               @default("{}")
+  /// [GenerationConfig]
   generation_config     Json?               @default("{}")
   schema_name           String?
+  /// [ApiSchema]
   api_schema            Json?               @default(dbgenerated("jsonb_build_object('fields', jsonb_build_array('slug', 'title', 'description', 'author', 'tags', 'created_at', 'updated_at'), 'exclude', jsonb_build_array('seo_title', 'meta_description', 'color_scheme', 'icon_name', 'show_on_homepage', 'internal_notes', 'display_config', 'sections', 'primary_action_config', 'validation_config', 'generation_config'))"))
   metadata_fields       String[]            @default([])
+  /// [CategoryBadges]
   badges                Json?               @default("[]")
   category              content_category    @id
 
@@ -568,6 +603,7 @@ model changelog {
   title           String
   slug            String            @unique
   tldr            String?
+  /// [ChangelogChanges]
   changes         Json              @default("{\"Added\": [], \"Fixed\": [], \"Changed\": [], \"Removed\": [], \"Security\": [], \"Deprecated\": []}")
   content         String
   raw_content     String
@@ -583,10 +619,12 @@ model changelog {
   twitter_card    String?
   robots_index    Boolean?
   robots_follow   Boolean?
+  /// [JsonLd]
   json_ld         Json?
   git_commit_sha  String?
   commit_count    Int?
   contributors    String[]
+  /// [ChangelogMetadata]
   metadata        Json?
   source          changelog_source? @default(manual)
   seo_title       String?
@@ -638,6 +676,7 @@ model companies {
   featured           Boolean?      @default(false)
   created_at         DateTime      @default(now()) @db.Timestamptz(6)
   updated_at         DateTime      @default(now()) @db.Timestamptz(6)
+  /// [JsonLd]
   json_ld            Json?
   users              public_users? @relation(fields: [owner_id], references: [id], onUpdate: NoAction)
   jobs               jobs[]
@@ -666,6 +705,7 @@ model contact_commands {
   action_value     String?
   confetti_variant confetti_variant?
   aliases          String[]                 @default([])
+  /// [ContactCommandMetadata]
   metadata         Json?                    @default("{}")
   created_at       DateTime                 @default(now()) @db.Timestamptz(6)
   updated_at       DateTime                 @default(now()) @db.Timestamptz(6)
@@ -685,6 +725,7 @@ model contact_submissions {
   status                                        submission_status @default(pending)
   user_id                                       String?           @db.Uuid
   session_id                                    String?
+  /// [Metadata]
   metadata                                      Json?             @default("{}")
   response_sent_at                              DateTime?         @db.Timestamptz(6)
   responded_by                                  String?           @db.Uuid
@@ -716,7 +757,9 @@ model content {
   documentation_url    String?
   features             String[]
   use_cases            String[]
+  /// [ContentExamples]
   examples             Json?                 @default("[]")
+  /// [ContentMetadata]
   metadata             Json                  @default("{}")
   git_hash             String?
   synced_at            DateTime?             @db.Timestamptz(6)
@@ -732,6 +775,7 @@ model content {
   twitter_card         String?
   robots_index         Boolean?
   robots_follow        Boolean?
+  /// [JsonLd]
   json_ld              Json?
   view_count           Int                   @default(0)
   bookmark_count       Int                   @default(0)
@@ -809,6 +853,7 @@ model content_generation_tracking {
   validation_passed  Boolean           @default(false)
   validation_errors  String[]
   github_pr_url      String?
+  /// [DiscoveryMetadata]
   discovery_metadata Json?
   generated_at       DateTime          @default(now()) @db.Timestamptz(6)
   updated_at         DateTime          @default(now()) @db.Timestamptz(6)
@@ -830,6 +875,7 @@ model content_similarities {
   content_a_slug     String
   content_b_slug     String
   similarity_score   Decimal           @db.Decimal(5, 4)
+  /// [SimilarityFactors]
   similarity_factors Json?             @default("{}")
   calculated_at      DateTime          @default(now()) @db.Timestamptz(6)
   content_a_type     content_category?
@@ -854,6 +900,7 @@ model content_submissions {
   author_profile_url                            String?
   github_url                                    String?
   tags                                          String[]          @default([])
+  /// [ContentSubmissionData]
   content_data                                  Json              @default("{}")
   moderator_notes                               String?
   moderated_at                                  DateTime?         @db.Timestamptz(6)
@@ -891,6 +938,7 @@ model content_templates {
   category      content_category
   name          String
   description   String
+  /// [TemplateData]
   template_data Json
   display_order Int              @default(0)
   is_featured   Boolean          @default(false)
@@ -1062,6 +1110,7 @@ model form_field_configs {
   grid_column   form_grid_column    @default(full)
   icon_name     form_field_icon?
   icon_position form_icon_position? @default(left)
+  /// [FormFieldConfig]
   config        Json?               @default("{}")
   enabled       Boolean             @default(true)
   created_at    DateTime            @default(now()) @db.Timestamptz(6)
@@ -1097,6 +1146,7 @@ model job_subscription_audit_log {
   subscription_id String?  @db.Uuid
   issue           String
   resolved        Boolean  @default(false)
+  /// [AuditLogDetails]
   details         Json?
   created_at      DateTime @default(now()) @db.Timestamptz(6)
   jobs            jobs     @relation(fields: [job_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
@@ -1144,6 +1194,7 @@ model jobs {
   locked_price               Decimal?                     @db.Decimal(10, 2)
   tier                       job_tier                     @default(standard)
   is_placeholder             Boolean                      @default(false)
+  /// [JsonLd]
   json_ld                    Json?
   discord_message_id         String?
   job_subscription_audit_log job_subscription_audit_log[]
@@ -1291,6 +1342,7 @@ model payment_plan_catalog {
   billing_cycle_days Int?
   job_expiry_days    Int                  @default(30)
   description        String?
+  /// [PaymentPlanBenefits]
   benefits           Json?
   created_at         DateTime             @default(now()) @db.Timestamptz(6)
   updated_at         DateTime             @default(now()) @db.Timestamptz(6)
@@ -1314,6 +1366,7 @@ model payments {
   product_type         payment_product_type
   product_id           String?                    @db.Uuid
   plan                 job_plan?
+  /// [Metadata]
   metadata             Json?
   paid_at              DateTime?                  @db.Timestamptz(6)
   created_at           DateTime                   @default(now()) @db.Timestamptz(6)
@@ -1423,6 +1476,7 @@ model script_artifacts {
   script        String
   artifact_name String
   hash          String
+  /// [Metadata]
   metadata      Json?
   generated_at  DateTime @default(now()) @db.Timestamptz(6)
   generated_by  String?
@@ -1437,6 +1491,7 @@ model script_cache {
   cache_key  String   @id
   script     String
   hash       String
+  /// [Metadata]
   metadata   Json?
   updated_at DateTime @default(now()) @db.Timestamptz(6)
 
@@ -1505,6 +1560,7 @@ model static_routes {
   twitter_card    String?
   robots_index    Boolean?
   robots_follow   Boolean?
+  /// [JsonLd]
   json_ld         Json?
   seo_title       String?
   seo_description String?
@@ -1649,6 +1705,7 @@ model user_interactions {
   content_type     content_category?
   content_slug     String?
   session_id       String?
+  /// [Metadata]
   metadata         Json?             @default("{}")
   created_at       DateTime          @default(now()) @db.Timestamptz(6)
   interaction_type interaction_type
@@ -1736,6 +1793,7 @@ model public_users {
   bookmark_count                                       Int                    @default(0)
   display_name                                         String?
   profile_public                                       Boolean?               @default(true)
+  /// [JsonLd]
   json_ld                                              Json?
   tier                                                 user_tier?             @default(free)
   role                                                 user_role              @default(user)
@@ -1782,6 +1840,7 @@ model webhook_event_runs {
   attempt          Int
   status           webhook_delivery_status @default(running)
   error            String?
+  /// [Metadata]
   metadata         Json?
   started_at       DateTime                @default(now()) @db.Timestamptz(6)
   finished_at      DateTime?               @db.Timestamptz(6)
@@ -1801,6 +1860,7 @@ model webhook_events {
   id                 String               @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   type               webhook_event_type
   created_at         DateTime             @db.Timestamptz(6)
+  /// [Data]
   data               Json                 @default("{}")
   processed          Boolean?             @default(false)
   processed_at       DateTime?            @db.Timestamptz(6)
@@ -1978,12 +2038,12 @@ enum changelog_source {
 
 enum company_size {
   just_me
+  two_to_ten                    @map("2-10")
+  eleven_to_fifty               @map("11-50")
+  fifty_one_to_two_hundred      @map("51-200")
+  two_hundred_one_to_five_hundred @map("201-500")
+  five_hundred_plus             @map("500+")
 
-  // 2-10 @map("2-10")
-  // 11-50 @map("11-50")
-  // 51-200 @map("51-200")
-  // 201-500 @map("201-500")
-  // 500+ @map("500+")
   @@schema("public")
 }
 

@@ -12,7 +12,7 @@ import type {
   integration_type,
   use_case_type,
 } from '@heyclaude/data-layer/prisma';
-import { Constants } from '@heyclaude/database-types';
+import { ContentCategory } from '@heyclaude/data-layer/prisma';
 import type { GetRecommendationsReturns } from '@heyclaude/database-types/postgres-types';
 import { addBookmarkBatch } from '@heyclaude/web-runtime/actions';
 import { getContentItemUrl, isValidCategory, sanitizeSlug } from '@heyclaude/web-runtime/core';
@@ -34,7 +34,6 @@ import {
 } from '@heyclaude/web-runtime/icons';
 import {
   POSITION_PATTERNS,
-  UI_CLASSES,
   BookmarkButton,
   UnifiedBadge,
   BaseCard,
@@ -59,6 +58,7 @@ import {
   TooltipTrigger,
   toasts,
 } from '@heyclaude/web-runtime/ui';
+import { cluster, iconSize, between, gap, marginRight, marginTop, center, stack, paddingY, spaceY, marginX, paddingTop, marginBottom } from '@heyclaude/web-runtime/design-system';
 import Link from 'next/link';
 import { useBoolean } from '@heyclaude/web-runtime/hooks';
 import { usePathname } from 'next/navigation';
@@ -187,26 +187,26 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
   const categories = ['all', ...new Set((results ?? []).map((r) => r.category).filter(Boolean))];
 
   return (
-    <div className="space-y-8">
-      <div className="space-y-4 text-center">
-        <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_CENTER_GAP_2}>
-          <Sparkles className={`${UI_CLASSES.ICON_LG} text-primary`} />
+    <div className={`${spaceY.loose}`}>
+      <div className={`${spaceY.comfortable} text-center`}>
+        <div className={`${cluster.compact} justify-center`}>
+          <Sparkles className={`${iconSize.lg} text-primary`} />
           <h1 className="text-3xl font-bold md:text-4xl">Your Personalized Recommendations</h1>
         </div>
 
-        <p className="text-muted-foreground mx-auto max-w-2xl text-lg">
+        <p className={`text-muted-foreground ${marginX.auto} max-w-2xl text-lg`}>
           Based on your preferences, we found{' '}
           <strong>{total_matches ?? 0} matching configurations</strong>. Here are the top{' '}
           {results?.length ?? 0} best fits for your needs.
         </p>
 
-        <div className="flex-wrap items-center justify-center gap-3">
+        <div className={`flex-wrap items-center justify-center ${gap.compact}`}>
           <UnifiedBadge variant="base" style="secondary" className="text-sm">
-            <TrendingUp className={UI_CLASSES.ICON_XS_LEADING} />
+            <TrendingUp className={`${iconSize.xs} ${marginRight.tight}`} />
             {(summary?.avg_match_score ?? 0).toFixed(0)}% Avg Match
           </UnifiedBadge>
           <UnifiedBadge variant="base" style="secondary" className="text-sm">
-            <BarChart className={UI_CLASSES.ICON_XS_LEADING} />
+            <BarChart className={`${iconSize.xs} ${marginRight.tight}`} />
             {(summary?.diversity_score ?? 0).toFixed(0)}% Diversity
           </UnifiedBadge>
           <UnifiedBadge variant="base" style="outline" className="text-sm">
@@ -217,29 +217,29 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
           </UnifiedBadge>
         </div>
 
-        <div className="flex-wrap items-center justify-center gap-3">
+        <div className={`flex-wrap items-center justify-center ${gap.compact}`}>
           <Button
             variant="default"
             size="sm"
             onClick={handleSaveAll}
             disabled={isPending}
-            className="gap-2"
+            className={`${gap.tight}`}
           >
-            <Bookmark className={UI_CLASSES.ICON_SM} />
+            <Bookmark className={iconSize.sm} />
             {isPending ? 'Saving...' : 'Save All to Library'}
           </Button>
           <Button
             variant="outline"
             size="sm"
             onClick={setShowShareModalTrue}
-            className="gap-2"
+            className={`${gap.tight}`}
           >
-            <Share2 className={UI_CLASSES.ICON_SM} />
+            <Share2 className={iconSize.sm} />
             Share Results
           </Button>
           <Button variant="outline" size="sm" asChild>
-            <Link href={ROUTES.TOOLS_CONFIG_RECOMMENDER} className="gap-2">
-              <RefreshCw className={UI_CLASSES.ICON_SM} />
+            <Link href={ROUTES.TOOLS_CONFIG_RECOMMENDER} className={`${gap.tight}`}>
+              <RefreshCw className={iconSize.sm} />
               Start Over
             </Link>
           </Button>
@@ -248,8 +248,8 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
 
       <Collapsible open={showRefinePanel} onOpenChange={setShowRefinePanel}>
         <CollapsibleTrigger asChild>
-          <Button variant="ghost" size="sm" className="w-full gap-2">
-            <Settings className={UI_CLASSES.ICON_SM} />
+          <Button variant="ghost" size="sm" className={`w-full ${gap.tight}`}>
+            <Settings className={iconSize.sm} />
             Adjust Preferences
             <ChevronDown
               className={`h-4 w-4 transition-transform ${showRefinePanel ? 'rotate-180' : ''}`}
@@ -257,16 +257,16 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
           </Button>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <Card className="mt-4">
+          <Card className={`${marginTop.default}`}>
             <CardHeader>
               <CardTitle className="text-lg">Refine Your Results</CardTitle>
               <CardDescription>
                 Adjust these settings to fine-tune your recommendations
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-2">
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+            <CardContent className={`${spaceY.relaxed}`}>
+              <div className={`${spaceY.compact}`}>
+                <div className={between.center}>
                   <span className="text-sm font-medium">Minimum Match Score</span>
                   <span className="text-muted-foreground text-sm">{minScore}%</span>
                 </div>
@@ -284,8 +284,8 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                 </p>
               </div>
 
-              <div className="space-y-2">
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+              <div className={`${spaceY.compact}`}>
+                <div className={between.center}>
                   <span className="text-sm font-medium">Maximum Results</span>
                   <span className="text-muted-foreground text-sm">{maxResults}</span>
                 </div>
@@ -303,9 +303,9 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                 </p>
               </div>
 
-              <div className="pt-4">
-                <Separator className="mb-4" />
-                <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} text-sm`}>
+              <div className={`${paddingTop.default}`}>
+                <Separator className={`${marginBottom.default}`} />
+                <div className={`${between.center} text-sm`}>
                   <span className="text-muted-foreground">Showing results:</span>
                   <span className="font-medium">
                     {filteredResults.length} of {results?.length ?? 0}
@@ -323,22 +323,22 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
           <CardDescription>We matched configurations based on these preferences</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
+          <div className={`grid ${gap.compact} sm:grid-cols-2 md:grid-cols-3`}>
             <div>
               <span className="text-sm font-medium">Use Case</span>
-              <p className="text-muted-foreground mt-1 text-sm capitalize">
+              <p className={`text-muted-foreground ${marginTop.tight} text-sm capitalize`}>
                 {String(answers.useCase).replace('-', ' ')}
               </p>
             </div>
             <div>
               <span className="text-sm font-medium">Experience Level</span>
-              <p className="text-muted-foreground mt-1 text-sm capitalize">
+              <p className={`text-muted-foreground ${marginTop.tight} text-sm capitalize`}>
                 {String(answers.experienceLevel)}
               </p>
             </div>
             <div>
               <span className="text-sm font-medium">Tool Preferences</span>
-              <p className="text-muted-foreground mt-1 text-sm">
+              <p className={`text-muted-foreground ${marginTop.tight} text-sm`}>
                 {Array.isArray(answers.toolPreferences) ? answers.toolPreferences.join(', ') : ''}
               </p>
             </div>
@@ -347,7 +347,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
             answers.p_integrations.length > 0 ? (
               <div>
                 <span className="text-sm font-medium">Integrations</span>
-                <p className="text-muted-foreground mt-1 text-sm">
+                <p className={`text-muted-foreground ${marginTop.tight} text-sm`}>
                   {answers.p_integrations.join(', ')}
                 </p>
               </div>
@@ -357,7 +357,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
             answers.p_focus_areas.length > 0 ? (
               <div>
                 <span className="text-sm font-medium">Focus Areas</span>
-                <p className="text-muted-foreground mt-1 text-sm">
+                <p className={`text-muted-foreground ${marginTop.tight} text-sm`}>
                   {answers.p_focus_areas.join(', ')}
                 </p>
               </div>
@@ -365,7 +365,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
             {answers.teamSize ? (
               <div>
                 <span className="text-sm font-medium">Team Size</span>
-                <p className="text-muted-foreground mt-1 text-sm capitalize">
+                <p className={`text-muted-foreground ${marginTop.tight} text-sm capitalize`}>
                   {String(answers.teamSize)}
                 </p>
               </div>
@@ -395,8 +395,8 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
           })}
         </TabsList>
 
-        <TabsContent value={selectedCategory} className="mt-6">
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <TabsContent value={selectedCategory} className={`${marginTop.comfortable}`}>
+          <div className={`grid ${gap.comfortable} md:grid-cols-2 lg:grid-cols-3`}>
             {filteredResults
               .filter(
                 (
@@ -410,8 +410,8 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                 }
               )
               .map((result) => {
-                // Only allow categories from the explicit allowlist - use Constants
-                const allowedCategories = Constants.public.Enums.content_category;
+                // Only allow categories from the explicit allowlist - use Prisma enum
+                const allowedCategories = Object.values(ContentCategory);
                 // Validate slug pattern: alphanumeric start, then alphanumeric/hyphens/underscores, 3-32 chars
                 const slugPattern = /^[a-zA-Z0-9][a-zA-Z0-9-_]{2,32}$/;
                 if (
@@ -437,9 +437,9 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                     ? result.author
                     : undefined;
                 const getMatchScoreColor = (score: number) => {
-                  if (score >= 90) return UI_CLASSES.SCORE_EXCELLENT;
-                  if (score >= 75) return UI_CLASSES.SCORE_GOOD;
-                  if (score >= 60) return UI_CLASSES.SCORE_FAIR;
+                  if (score >= 90) return 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20';
+                  if (score >= 75) return 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20';
+                  if (score >= 60) return 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/20';
                   return 'text-muted-foreground';
                 };
                 const getMatchGradient = (score: number) => {
@@ -460,7 +460,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                               style="secondary"
                               className={`${getMatchScoreColor(matchScore)} px-3 py-1 text-base font-bold`}
                             >
-                              <Sparkles className={UI_CLASSES.ICON_XS_LEADING} />
+                              <Sparkles className={`${iconSize.xs} ${marginRight.tight}`} />
                               {matchScore}%
                             </UnifiedBadge>
                           </TooltipTrigger>
@@ -478,7 +478,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                           style="outline"
                           className="bg-background/80 backdrop-blur-sm"
                         >
-                          <Award className={UI_CLASSES.ICON_XS_LEADING} />#{rank}
+                          <Award className={`${iconSize.xs} ${marginRight.tight}`} />#{rank}
                         </UnifiedBadge>
                       </div>
                     )}
@@ -519,10 +519,10 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                         renderContent={() => (
                           <>
                             <div
-                              className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_2} bg-accent/50 mb-3 rounded-lg p-3`}
+                              className={`flex items-start ${gap.compact} bg-accent/50 mb-3 rounded-lg p-3`}
                             >
                               <Info
-                                className={`text-primary h-4 w-4 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
+                                className={`text-primary h-4 w-4 flex-shrink-0 ${marginTop.micro}`}
                               />
                               <div>
                                 <p className="text-sm font-medium">Why recommended:</p>
@@ -531,7 +531,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                             </div>
 
                             {reasons.length > 1 && (
-                              <div className="flex flex-wrap gap-1">
+                              <div className={`flex flex-wrap ${gap.micro}`}>
                                 {reasons.slice(1, 4).map((reason) => (
                                   <UnifiedBadge
                                     key={`${result.slug}-${reason.message}`}
@@ -550,13 +550,13 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="group -mx-4 mt-2 -mb-4 w-full"
+                            className={`group -${marginX.default} ${marginTop.compact} -${marginBottom.default} w-full`}
                             asChild
                           >
-                            <span className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_CENTER_GAP_2}>
+                            <span className={`${cluster.compact} justify-center`}>
                               View Details
                               <ArrowRight
-                                className={`${UI_CLASSES.ICON_SM} transition-transform group-hover:translate-x-1`}
+                                className={`${iconSize.sm} transition-transform group-hover:translate-x-1`}
                               />
                             </span>
                           </Button>
@@ -571,7 +571,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
 
           {filteredResults.length === 0 && (
             <Card>
-              <CardContent className={UI_CLASSES.FLEX_COL_ITEMS_CENTER_JUSTIFY_CENTER}>
+              <CardContent className={`${stack.none} ${center} ${paddingY.section}`}>
                 <p className="text-muted-foreground">No results in this category</p>
               </CardContent>
             </Card>
@@ -581,21 +581,21 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
 
       <Card className="border-primary/20 bg-primary/5">
         <CardHeader>
-          <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-            <Sparkles className={`${UI_CLASSES.ICON_MD} text-primary`} />
+          <CardTitle className={cluster.compact}>
+            <Sparkles className={`${iconSize.md} text-primary`} />
             What's Next?
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className={`${spaceY.comfortable}`}>
           <p className="text-muted-foreground text-sm">
             Ready to start using these configurations? Click any card to view detailed setup
             instructions, examples, and documentation.
           </p>
-          <div className={UI_CLASSES.FLEX_WRAP_GAP_3}>
+          <div className={`flex flex-wrap ${gap.default}`}>
             <Button asChild>
-              <Link href="/" className="gap-2">
+              <Link href="/" className={`${gap.tight}`}>
                 Browse All Configs
-                <ArrowRight className={UI_CLASSES.ICON_SM} />
+                <ArrowRight className={iconSize.sm} />
               </Link>
             </Button>
             <Button variant="outline" asChild>

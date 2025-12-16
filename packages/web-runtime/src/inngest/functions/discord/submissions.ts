@@ -5,7 +5,7 @@
  * Handles INSERT (new submission) and UPDATE (status changes, especially merged) events.
  */
 
-import type { Prisma } from '@heyclaude/data-layer/prisma';
+import type { content_submissionsModel } from '@heyclaude/data-layer/prisma';
 import { normalizeError, getEnvVar } from '@heyclaude/shared-runtime';
 
 import { inngest } from '../../client';
@@ -13,7 +13,7 @@ import { pgmqRead, pgmqDelete, type PgmqMessage } from '../../../supabase/pgmq-c
 import { logger, createWebAppContextWithId } from '../../../logging/server';
 import { sendCronSuccessHeartbeat } from '../../utils/monitoring';
 
-type ContentSubmission = Prisma.content_submissionsGetPayload<{}>;
+type ContentSubmission = content_submissionsModel;
 
 const DISCORD_SUBMISSIONS_QUEUE = 'discord_submissions';
 const BATCH_SIZE = 10;
@@ -175,16 +175,16 @@ export const processDiscordSubmissionsQueue = inngest.createFunction(
 
         try {
           // Skip DELETE events
-          if (payload.type === 'DELETE') {
+          if (payload['type'] === 'DELETE') {
             return { success: true, sent: false, reason: 'delete_event' };
           }
 
-          const submission = payload.record;
+          const submission = payload['record'] as ContentSubmission;
 
           // Handle INSERT - new submission notification (admin channel)
-          if (payload.type === 'INSERT' && adminWebhookUrl) {
+          if (payload['type'] === 'INSERT' && adminWebhookUrl) {
             // Inngest serializes Date objects to strings, so we need to cast
-            const embed = buildSubmissionEmbed(submission as unknown as ContentSubmission, true);
+            const embed = buildSubmissionEmbed(submission, true);
             
             // Send with timeout to avoid hanging
             const controller = new AbortController();
@@ -205,7 +205,7 @@ export const processDiscordSubmissionsQueue = inngest.createFunction(
               clearTimeout(timeoutId);
               if (fetchError instanceof Error && fetchError.name === 'AbortError') {
                 logger.warn({ ...logContext,
-                  submissionId: submission.id, }, 'Discord submission notification timed out');
+                  submissionId: String(submission['id']), }, 'Discord submission notification timed out');
               }
               return { success: false, sent: false };
             }
@@ -213,23 +213,23 @@ export const processDiscordSubmissionsQueue = inngest.createFunction(
 
             if (!response.ok) {
               logger.warn({ ...logContext,
-                submissionId: submission.id,
+                submissionId: String(submission['id']),
                 status: response.status, }, 'Discord submission notification failed');
               return { success: false, sent: false };
             }
 
             logger.info({ ...logContext,
-              submissionId: submission.id, }, 'Discord submission notification sent');
+              submissionId: String(submission['id']), }, 'Discord submission notification sent');
 
             return { success: true, sent: true };
           }
 
           // Handle UPDATE - check if status changed to 'merged'
-          if (payload.type === 'UPDATE') {
-            const oldRecord = payload.old_record;
+          if (payload['type'] === 'UPDATE') {
+            const oldRecord = payload['old_record'] as ContentSubmission | undefined;
             
             // Check if status changed to 'merged'
-            const wasMerged = oldRecord?.status !== 'merged' && submission.status === 'merged';
+            const wasMerged = oldRecord?.['status'] !== 'merged' && submission['status'] === 'merged';
 
             if (wasMerged && announcementWebhookUrl) {
               // Inngest serializes Date objects to strings, so we need to cast
@@ -254,7 +254,7 @@ export const processDiscordSubmissionsQueue = inngest.createFunction(
                 clearTimeout(timeoutId);
                 if (fetchError instanceof Error && fetchError.name === 'AbortError') {
                   logger.warn({ ...logContext,
-                    submissionId: submission.id, }, 'Discord merged notification timed out');
+                    submissionId: String(submission['id']), }, 'Discord merged notification timed out');
                 }
                 return { success: false, sent: false };
               }
@@ -262,13 +262,13 @@ export const processDiscordSubmissionsQueue = inngest.createFunction(
 
               if (!response.ok) {
                 logger.warn({ ...logContext,
-                  submissionId: submission.id,
+                  submissionId: String(submission['id']),
                   status: response.status, }, 'Discord merged notification failed');
                 return { success: false, sent: false };
               }
 
               logger.info({ ...logContext,
-                submissionId: submission.id, }, 'Discord merged notification sent');
+                submissionId: String(submission['id']), }, 'Discord merged notification sent');
 
               return { success: true, sent: true };
             }

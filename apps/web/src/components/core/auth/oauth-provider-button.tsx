@@ -8,7 +8,7 @@ import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
 import { DiscordBrandIcon, GithubBrandIcon, GoogleBrandIcon } from '@heyclaude/web-runtime/icons';
 import { logClientError, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { cn, toasts } from '@heyclaude/web-runtime/ui';
-import { MICROINTERACTIONS, DURATION } from '@heyclaude/web-runtime/design-system';
+import { MICROINTERACTIONS, DURATION, size, weight, radius } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import { useBoolean } from '@heyclaude/web-runtime/hooks';
@@ -125,9 +125,9 @@ export function OAuthProviderButton({
       <motion.div
         className={cn(
           'flex h-16 w-16 items-center justify-center rounded-full border bg-white/5',
+          'border-color-border-focus',
           loading && 'cursor-wait'
         )}
-        style={{ borderColor: 'oklch(74% 0.2 35 / 0.3)' }}
         {...(loading || shouldReduceMotion
           ? {}
           : {
@@ -141,7 +141,7 @@ export function OAuthProviderButton({
       >
         {loading ? (
           <motion.div
-            className="h-7 w-7 rounded-full border-2 border-white/20 border-t-white/80"
+            className={`h-7 w-7 ${radius['full']} border-2 border-white/20 border-t-white/80`}
             animate={shouldReduceMotion ? {} : { rotate: 360 }}
             transition={
               shouldReduceMotion
@@ -150,14 +150,14 @@ export function OAuthProviderButton({
             }
           />
         ) : (
-          <div style={{ width: '28px', height: '28px' }} className="text-foreground">
-            <IconComponent style={{ width: '28px', height: '28px', display: 'block' }} />
+          <div className="h-7 w-7 text-foreground">
+            <IconComponent className="h-7 w-7 block" />
           </div>
         )}
       </motion.div>
 
       {/* Label below */}
-      <span className="text-foreground text-sm font-medium">
+      <span className={`text-foreground ${size.sm} ${weight.medium}`}>
         {loading ? 'Signing in...' : config.label}
       </span>
     </button>

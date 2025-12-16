@@ -2,8 +2,8 @@
 
 import { normalizeError } from '@heyclaude/shared-runtime';
 
-import { runGenerateSkillPackages } from '../commands/generate-skill-packages.js';
-import { logger } from '../toolkit/logger.js';
+import { runGenerateSkillPackages } from '../commands/generate-skill-packages.ts';
+import { logger } from '../toolkit/logger.ts';
 
 runGenerateSkillPackages()
   .then(() => {

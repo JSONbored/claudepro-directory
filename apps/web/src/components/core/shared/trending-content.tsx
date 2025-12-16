@@ -21,6 +21,7 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import { Award } from '@heyclaude/web-runtime/icons';
 import { useId } from 'react';
+import { spaceY, marginX, marginRight, marginBottom, muted } from "@heyclaude/web-runtime/design-system";
 
 interface TabConfig {
   emptyMessage: string;
@@ -73,9 +74,9 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
   };
 
   return (
-    <Tabs defaultValue="trending" className="space-y-8">
+    <Tabs defaultValue="trending" className={`${spaceY.loose}`}>
       <TabsList
-        className="mx-auto grid w-full max-w-md grid-cols-3"
+        className={`${marginX.auto} grid w-full max-w-md grid-cols-3`}
         role="tablist"
         aria-label="Trending content categories"
       >
@@ -96,13 +97,13 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
                     value={config.value}
                     aria-label={`View ${config.label.toLowerCase()} configurations`}
                   >
-                    <Icon className="mr-2 h-4 w-4" aria-hidden="true" />
+                    <Icon className={`${marginRight.tight} h-4 w-4`} aria-hidden="true" />
                     {config.label}
                   </TabsTrigger>
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>{config.heading}</p>
-                  <p className="text-xs text-muted-foreground">{tooltipContent}</p>
+                  <p className={`text-xs ${muted.default}`}>{tooltipContent}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -119,12 +120,12 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
           <TabsContent
             key={config.value}
             value={config.value}
-            className="space-y-8"
+            className={`${spaceY.loose}`}
             role="tabpanel"
             aria-labelledby={headingId}
           >
             <div>
-              <h2 id={headingId} className="mb-4 text-2xl font-bold">
+              <h2 id={headingId} className={`${marginBottom.default} text-2xl font-bold`}>
                 {config.heading}
               </h2>
               <UnifiedCardGrid
@@ -152,14 +153,14 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
                                   style="default"
                                   aria-label={`Rank ${index + 1}`}
                                 >
-                                  <Award className="mr-1 h-3 w-3" aria-hidden="true" />
+                                  <Award className={`${marginRight.micro} h-3 w-3`} aria-hidden="true" />
                                   #{index + 1}
                                 </UnifiedBadge>
                               </div>
                             </TooltipTrigger>
                             <TooltipContent>
                               <p>Rank #{index + 1}</p>
-                              <p className="text-xs text-muted-foreground">
+                              <p className={`text-xs ${muted.default}`}>
                                 {index === 0 
                                   ? 'Most trending this week'
                                   : index === 1

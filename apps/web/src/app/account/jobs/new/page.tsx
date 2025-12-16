@@ -1,15 +1,20 @@
-import type { CreateJobWithPaymentResult } from '@heyclaude/data-layer/types/composite-types';
+import type { CreateJobWithPaymentResult } from '@heyclaude/database-types/postgres-types';
 import { type CreateJobInput } from '@heyclaude/web-runtime/actions';
 import { createJob } from '@heyclaude/web-runtime/actions';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata, getPaymentPlanCatalog } from '@heyclaude/web-runtime/server';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { connection } from 'next/server';
+import { Suspense, lazy } from 'react';
 
-import { JobForm } from '@/src/components/core/forms/job-form';
+// OPTIMIZATION: Dynamic import for large form component (763 lines) - only loads when needed
+const JobForm = lazy(
+  () => import('@/src/components/core/forms/job-form').then((mod) => ({ default: mod.JobForm }))
+);
+
+import { size, weight, tracking, muted, marginBottom, spaceY } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Dynamic Rendering Required
@@ -130,7 +135,7 @@ export default async function NewJobPage() {
       throw normalized;
     }
 
-    // Type the result data using generated database types
+    // Type the result data using Prisma-generated types
     type CreateJobResult =
       CreateJobWithPaymentResult & {
         checkoutUrl?: null | string;
@@ -193,15 +198,17 @@ export default async function NewJobPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className={spaceY.relaxed}>
       <div>
-        <h1 className={`mb-2 ${UI_CLASSES.HEADING_H2}`}>Post a Job</h1>
-        <p className="text-muted-foreground">
+        <h1 className={`${marginBottom.compact} ${size['3xl']} ${weight.semibold} ${tracking.tight}`}>Post a Job</h1>
+        <p className={`${muted.default}`}>
           Create a new job listing to reach talented developers
         </p>
       </div>
 
-      <JobForm planCatalog={planCatalog} submitLabel="Create Job Listing" onSubmit={handleSubmit} />
+      <Suspense fallback={<div className={`${muted.default} ${size.sm}`}>Loading job form...</div>}>
+        <JobForm planCatalog={planCatalog} submitLabel="Create Job Listing" onSubmit={handleSubmit} />
+      </Suspense>
     </div>
   );
 }

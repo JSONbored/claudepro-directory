@@ -3,7 +3,7 @@
  * Uses getUserLibrary data function for fetching bookmarks and collections
  */
 
-import { type Database } from '@heyclaude/database-types';
+import type { GetUserLibraryReturns } from '@heyclaude/database-types/postgres-types';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
@@ -30,7 +30,6 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
-  UI_CLASSES,
   UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
@@ -40,6 +39,7 @@ import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import Loading from './loading';
+import { between, cluster, grid, size, weight, truncate, spaceY, marginBottom, marginTop } from "@heyclaude/web-runtime/design-system";
 
 // Extract collections category value to avoid fragile enum index access
 const COLLECTIONS_TAB_VALUE = 'collections' as const;
@@ -129,10 +129,10 @@ async function LibraryPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
       'LibraryPage: unauthenticated access attempt detected'
     );
     return (
-      <div className="space-y-6">
+      <div className={spaceY.relaxed}>
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Sign in required</CardTitle>
+            <CardTitle className={`${size['2xl']}`}>Sign in required</CardTitle>
             <CardDescription>Please sign in to view your library.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -154,7 +154,7 @@ async function LibraryPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
   userLogger.info({ section: 'data-fetch' }, 'LibraryPage: authentication successful');
 
   // Section: Library Data Fetch
-  let data: Database['public']['Functions']['get_user_library']['Returns'] | null = null;
+  let data: GetUserLibraryReturns | null = null;
   try {
     data = await getUserLibrary(user.id);
     if (data === null) {
@@ -178,10 +178,10 @@ async function LibraryPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
 
   if (!data) {
     return (
-      <div className="space-y-6">
+      <div className={spaceY.relaxed}>
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">My Library</CardTitle>
+            <CardTitle className={`${size['2xl']}`}>My Library</CardTitle>
             <CardDescription>
               Unable to load your library right now. Please refresh or try again later.
             </CardDescription>
@@ -225,16 +225,16 @@ async function LibraryPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
   );
 
   return (
-    <div className="space-y-6">
-      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+    <div className={spaceY.relaxed}>
+      <div className={between.center}>
         <div>
-          <h1 className="mb-2 text-3xl font-bold">My Library</h1>
+          <h1 className={`${marginBottom.compact} ${size['3xl']} ${weight.bold}`}>My Library</h1>
           <p className="text-muted-foreground">
             {bookmarkCount} bookmarks • {collectionCount} collections
           </p>
         </div>
         <Link href={ROUTES.ACCOUNT_LIBRARY_NEW}>
-          <Button className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+          <Button className={cluster.compact}>
             <Plus className="h-4 w-4" />
             New Collection
           </Button>
@@ -242,47 +242,47 @@ async function LibraryPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
       </div>
 
       <Tabs className="w-full" defaultValue="bookmarks">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
-          <TabsTrigger className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} value="bookmarks">
+        <TabsList className={`grid w-full max-w-md ${grid.cols2}`}>
+          <TabsTrigger className={cluster.compact} value="bookmarks">
             <BookmarkIcon className="h-4 w-4" />
             Bookmarks ({bookmarkCount})
           </TabsTrigger>
-          <TabsTrigger className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} value={COLLECTIONS_TAB_VALUE}>
+          <TabsTrigger className={cluster.compact} value={COLLECTIONS_TAB_VALUE}>
             <FolderOpen className="h-4 w-4" />
             Collections ({collectionCount})
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent className="space-y-4" value="bookmarks">
+        <TabsContent className={spaceY.default} value="bookmarks">
           {bookmarks.length === 0 ? (
             <Card>
-              <CardContent className="flex flex-col items-center py-12">
-                <BookmarkIcon className="text-muted-foreground mb-4 h-12 w-12" />
-                <h3 className="mb-2 text-xl font-semibold">No bookmarks yet</h3>
+              <CardContent className={`flex flex-col items-center py-12`}>
+                <BookmarkIcon className={`text-muted-foreground ${marginBottom.default} h-12 w-12`} />
+                <h3 className={`${marginBottom.compact} ${size.xl} ${weight.semibold}`}>No bookmarks yet</h3>
                 <p className="text-muted-foreground max-w-md text-center">
                   Start exploring the directory and bookmark your favorite agents, MCP servers,
                   rules, and more!
                 </p>
-                <NavLink className="mt-4" href="/">
+                <NavLink className={marginTop.default} href="/">
                   Browse Directory →
                 </NavLink>
               </CardContent>
             </Card>
           ) : (
-            <div className="grid gap-4">
+            <div className={`grid gap-4`}>
               {bookmarks.map((bookmark) => (
                 <Card key={bookmark.id}>
                   <CardHeader>
-                    <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
-                      <div className="flex-1">
-                        <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                          <UnifiedBadge className="capitalize" style="outline" variant="base">
+                    <div className={between.start}>
+                      <div className={`flex-1`}>
+                        <div className={cluster.compact}>
+                          <UnifiedBadge className={`capitalize`} style="outline" variant="base">
                             {bookmark.content_type}
                           </UnifiedBadge>
-                          <CardTitle className="text-lg">{bookmark.content_slug}</CardTitle>
+                          <CardTitle className={`${size.lg}`}>{bookmark.content_slug}</CardTitle>
                         </div>
                         {bookmark.notes ? (
-                          <CardDescription className="mt-2">{bookmark.notes}</CardDescription>
+                          <CardDescription className={marginTop.compact}>{bookmark.notes}</CardDescription>
                         ) : null}
                       </div>
                       <NavLink
@@ -294,7 +294,7 @@ async function LibraryPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-muted-foreground text-xs">
+                    <p className={`text-muted-foreground ${size.xs}`}>
                       Saved{' '}
                       {bookmark.created_at
                         ? new Date(bookmark.created_at).toLocaleDateString()
@@ -307,18 +307,18 @@ async function LibraryPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
           )}
         </TabsContent>
 
-        <TabsContent className="space-y-4" value={COLLECTIONS_TAB_VALUE}>
+        <TabsContent className={spaceY.default} value={COLLECTIONS_TAB_VALUE}>
           {collections.length === 0 ? (
             <Card>
-              <CardContent className="flex flex-col items-center py-12">
-                <FolderOpen className="text-muted-foreground mb-4 h-12 w-12" />
-                <h3 className="mb-2 text-xl font-semibold">No collections yet</h3>
-                <p className="text-muted-foreground mb-4 max-w-md text-center">
+              <CardContent className={`flex flex-col items-center py-12`}>
+                <FolderOpen className={`text-muted-foreground ${marginBottom.default} h-12 w-12`} />
+                <h3 className={`${marginBottom.compact} ${size.xl} ${weight.semibold}`}>No collections yet</h3>
+                <p className={`text-muted-foreground ${marginBottom.default} max-w-md text-center`}>
                   Organize your bookmarks into custom collections! Group related configurations
                   together and share them with others.
                 </p>
                 <Link href={ROUTES.ACCOUNT_LIBRARY_NEW}>
-                  <Button className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                  <Button className={cluster.compact}>
                     <Plus className="h-4 w-4" />
                     Create Your First Collection
                   </Button>
@@ -326,24 +326,24 @@ async function LibraryPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
               </CardContent>
             </Card>
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className={`grid gap-4 sm:${grid.cols2}`}>
               {collections.map((collection) => (
-                <Card className={UI_CLASSES.CARD_INTERACTIVE} key={collection.id}>
+                <Card className="card-gradient transition-smooth group cursor-pointer border-border/50" key={collection.id}>
                   <Link href={`/account/library/${collection.slug}`}>
                     <CardHeader>
-                      <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
-                        <div className="flex-1">
-                          <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} mb-2`}>
+                      <div className={between.start}>
+                        <div className={`flex-1`}>
+                          <div className={`${cluster.compact} ${marginBottom.compact}`}>
                             <Layers className="text-primary h-4 w-4" />
                             {collection.is_public ? (
-                              <UnifiedBadge className="text-xs" style="outline" variant="base">
+                              <UnifiedBadge className={`${size.xs}`} style="outline" variant="base">
                                 Public
                               </UnifiedBadge>
                             ) : null}
                           </div>
-                          <CardTitle className="text-lg">{collection.name}</CardTitle>
+                          <CardTitle className={`${size.lg}`}>{collection.name}</CardTitle>
                           {collection.description ? (
-                            <CardDescription className="mt-2 line-clamp-2">
+                            <CardDescription className={`${marginTop.compact} ${truncate.lines2}`}>
                               {collection.description}
                             </CardDescription>
                           ) : null}
@@ -351,11 +351,11 @@ async function LibraryPageContent({ reqLogger }: { reqLogger: ReturnType<typeof 
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                        <p className="text-muted-foreground text-xs">
+                      <div className={between.center}>
+                        <p className={`text-muted-foreground ${size.xs}`}>
                           {collection.item_count} {collection.item_count === 1 ? 'item' : 'items'}
                         </p>
-                        <p className="text-muted-foreground text-xs">
+                        <p className={`text-muted-foreground ${size.xs}`}>
                           {collection.view_count} views
                         </p>
                       </div>

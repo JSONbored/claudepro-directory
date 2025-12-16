@@ -55,11 +55,5 @@ export { TEXT_ANIMATIONS } from './text/index.ts';
 export * from './styles/index.ts';
 
 // Design Tokens (V2 - Colors, Typography, Spacing, Shadows, States, Accessibility, Responsive)
-export * from '../design-tokens/index.ts';
-export { COLORS } from '../design-tokens/index.ts';
-export { TYPOGRAPHY } from '../design-tokens/index.ts';
-export { SPACING } from '../design-tokens/index.ts';
-export { SHADOWS } from '../design-tokens/index.ts';
-export { STATES } from '../design-tokens/index.ts';
-export { ACCESSIBILITY } from '../design-tokens/index.ts';
-export { RESPONSIVE } from '../design-tokens/index.ts';
+// Design tokens removed - all values migrated to globals.css @theme block
+// Components now use direct Tailwind utilities generated from @theme

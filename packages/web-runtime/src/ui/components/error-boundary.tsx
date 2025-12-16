@@ -16,7 +16,7 @@ import type {
   ErrorFallbackProps,
 } from '../../types/component.types.ts';
 import { createErrorBoundaryFallback } from '../../client/error-handler.ts';
-import { UI_CLASSES } from '../../ui/constants.ts';
+import { responsive } from '../../design-system/index.ts';
 import { useCopyToClipboard } from '../../hooks/index.ts';
 import { Button } from './button.tsx';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './card.tsx';
@@ -126,7 +126,7 @@ function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
             )}
 
             <motion.div
-              className={UI_CLASSES.FLEX_COL_SM_ROW_GAP_3}
+              className={responsive.col}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ ...SPRING.smooth, delay: 0.3 }}

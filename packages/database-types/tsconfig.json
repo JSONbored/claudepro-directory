@@ -8,8 +8,36 @@
     "incremental": true,
     "tsBuildInfoFile": "./.tsbuildinfo",
     "rootDir": "src",
-    "outDir": "dist"
+    "outDir": "dist",
+    "skipLibCheck": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false
   },
-  "include": ["src/**/*"],
-  "exclude": ["dist", "node_modules", "**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"]
+  "include": [
+    "src/**/*",
+    "src/prisma-json-types.ts",
+    "src/prisma/index.ts",
+    "src/prisma/client.ts",
+    "src/prisma/enums.ts",
+    "src/prisma/models.ts",
+    "src/prisma/internal/prismaNamespace.ts",
+    "src/prisma/pjtg.ts"
+  ],
+  "exclude": [
+    "dist",
+    "node_modules",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "src/prisma/browser.ts",
+    "src/prisma/default.ts",
+    "src/prisma/edge.ts",
+    "src/prisma/index-browser.ts",
+    "src/prisma/internal/**/*",
+    "!src/prisma/internal/prismaNamespace.ts",
+    "src/prisma/zod/**/*",
+    "src/prisma/json-types/**/*",
+    "src/postgres-types/**/*"
+  ]
 }

@@ -8,14 +8,18 @@
  */
 
 import { SearchService } from '@heyclaude/data-layer/services/search.ts';
-import type { Database } from '@heyclaude/database-types';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type {
+  SearchUnifiedRow,
+  SearchContentOptimizedRow,
+  SearchContentOptimizedArgs,
+  SearchUnifiedArgs,
+} from '@heyclaude/database-types/postgres-types';
 import { getSearchUsageHints } from '../lib/usage-hints.ts';
 import type { SearchContentInput } from '../lib/types.ts';
 
-// Use generated types from database - functions now return composite types
-type UnifiedSearchResult = Database['public']['CompositeTypes']['search_unified_row'];
-type ContentSearchResult = Database['public']['CompositeTypes']['search_content_optimized_row'];
+// Use Prisma-generated postgres-types
+type UnifiedSearchResult = SearchUnifiedRow;
+type ContentSearchResult = SearchContentOptimizedRow;
 
 /**
  * Fetches unified search results matching the given search filters and returns a text summary plus metadata.
@@ -24,15 +28,13 @@ type ContentSearchResult = Database['public']['CompositeTypes']['search_content_
  * @returns An object with `content` (a single text block summarizing matched items) and `_meta` containing `items` (formatted items with slug, title, category, truncated description, tags, author, and dateAdded), `total`, `page`, `limit`, and `hasMore`.
  */
 export async function handleSearchContent(
-  supabase: SupabaseClient<Database>,
   input: SearchContentInput
 ) {
   const { query, category, tags, page, limit } = input;
   const offset = (page - 1) * limit;
 
-  // Use SearchService for consistent behavior with web app
-  // Follows architectural strategy: data layer -> database RPC -> DB
-  const searchService = new SearchService(supabase);
+  // Use SearchService for consistent behavior with web app (Prisma-based, no Supabase client needed)
+  const searchService = new SearchService();
 
   // Use search_content_optimized when category/tags are provided (matches API route behavior)
   // Use search_unified for simple queries without filters
@@ -43,7 +45,7 @@ export async function handleSearchContent(
 
   if (hasFilters) {
     // Use search_content_optimized for filtered searches (matches API route 'content' search type)
-    const contentArgs: Database['public']['Functions']['search_content_optimized']['Args'] = {
+    const contentArgs: SearchContentOptimizedArgs = {
       p_query: query || '',
       p_limit: limit,
       p_offset: offset,
@@ -58,7 +60,7 @@ export async function handleSearchContent(
     total = typeof contentResponse.total_count === 'number' ? contentResponse.total_count : results.length;
   } else {
     // Use search_unified for simple queries (matches API route 'unified' search type)
-    const unifiedArgs: Database['public']['Functions']['search_unified']['Args'] = {
+    const unifiedArgs: SearchUnifiedArgs = {
       p_query: query || '',
       p_entities: ['content'],
       p_limit: limit,

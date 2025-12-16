@@ -24,6 +24,7 @@ import 'server-only';
 import { SearchService } from '@heyclaude/data-layer';
 import {
   type content_category,
+  ContentCategory,
   type experience_level,
   type job_category,
   type job_type,
@@ -36,7 +37,7 @@ import type {
   SearchUnifiedArgs,
   SearchUnifiedRow,
 } from '@heyclaude/database-types/postgres-types';
-import { type Json } from '@heyclaude/database-types';
+import type { Json } from '@heyclaude/data-layer/prisma';
 import { normalizeError } from '@heyclaude/shared-runtime';
 import {
   buildCacheHeaders,
@@ -58,7 +59,7 @@ type SearchType = 'content' | 'jobs' | 'unified';
 
 const DEFAULT_ENTITIES = ['content', 'company', 'job', 'user'] as const;
 
-// Use generated database types directly - no custom types
+// Use Prisma-generated types directly - no custom types
 // Functions now return composite types, so we extract the row types from the results array
 // Also include jobs composite type for filter_jobs results
 type SearchResultRow =
@@ -73,24 +74,12 @@ type HighlightedSearchResult = SearchResultRow;
  *
  * Convert string array to content_category enum array
  * Filters out invalid categories and returns only valid enum values
- * Uses generated database types
+ * Uses Prisma-generated types
  * @param {string[] | undefined} categories
- * @returns {Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined} Return value description
+ * @returns {Array<content_category> | undefined} Return value description
  */
-// Prisma enum values for validation
-const CONTENT_CATEGORY_VALUES: readonly content_category[] = [
-  'agents',
-  'mcp',
-  'rules',
-  'commands',
-  'hooks',
-  'statuslines',
-  'skills',
-  'collections',
-  'guides',
-  'jobs',
-  'changelog',
-] as const;
+// Use Prisma enum object for validation (ensures sync with database)
+const CONTENT_CATEGORY_VALUES = Object.values(ContentCategory) as readonly content_category[];
 
 function toContentCategoryArray(categories: string[] | undefined): SearchContentOptimizedArgs['p_categories'] {
   if (!categories || categories.length === 0) return undefined;
@@ -307,7 +296,7 @@ export const OPTIONS = createApiOptionsHandler('auth');
  * Cached helper function to execute search queries.
  * All parameters become part of the cache key, so different searches have different cache entries.
  *
- * Uses generated database types - categories must be enum array, not string array
+ * Uses Prisma-generated enum types - categories must be enum array, not string array
  *
  * @param params
  * @param params.authors
@@ -356,7 +345,7 @@ export async function getCachedSearchResults(params: {
  *
  * @param {{
   authors?: string[] | undefined;
-  categories?: DatabaseGenerated['public']['Enums']['content_category'][] | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -372,7 +361,7 @@ export async function getCachedSearchResults(params: {
 }} params
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -388,7 +377,7 @@ export async function getCachedSearchResults(params: {
 }} params.authors - Optional list of author slugs to filter content results.
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -404,7 +393,7 @@ export async function getCachedSearchResults(params: {
 }} params.categories - Optional list of content categories to filter content results (enum array, not string array).
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -420,7 +409,7 @@ export async function getCachedSearchResults(params: {
 }} params.entities - Optional list of entity types to include for unified searches; when omitted or empty, defaults to DEFAULT_ENTITIES.
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -436,7 +425,7 @@ export async function getCachedSearchResults(params: {
 }} params.jobCategory - Optional job category to filter job searches.
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -452,7 +441,7 @@ export async function getCachedSearchResults(params: {
 }} params.jobEmployment - Optional employment type to filter job searches.
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -468,7 +457,7 @@ export async function getCachedSearchResults(params: {
 }} params.jobExperience - Optional experience level to filter job searches.
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -484,7 +473,7 @@ export async function getCachedSearchResults(params: {
 }} params.jobRemote - Optional flag to restrict job searches to remote-only roles; included in job backend args only when defined.
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -500,7 +489,7 @@ export async function getCachedSearchResults(params: {
 }} params.limit - Maximum number of results to return.
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -516,7 +505,7 @@ export async function getCachedSearchResults(params: {
 }} params.offset - Number of results to skip (pagination offset).
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -532,7 +521,7 @@ export async function getCachedSearchResults(params: {
 }} params.query - The raw search query string; may be empty.
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -548,7 +537,7 @@ export async function getCachedSearchResults(params: {
 }} params.searchService - SearchService instance used to perform backend searches.
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -564,7 +553,7 @@ export async function getCachedSearchResults(params: {
 }} params.searchType - The type of search to perform: `'jobs'`, `'unified'`, or `'content'`.
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -580,7 +569,7 @@ export async function getCachedSearchResults(params: {
 }} params.sort - Sort order to apply for content searches.
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -597,7 +586,7 @@ export async function getCachedSearchResults(params: {
  * @returns An object containing `results` (array of matching rows) and `totalCount` (the total number of matching items; prefers a backend-provided total when available, otherwise falls back to `results.length`).
   * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -613,7 +602,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -629,7 +618,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -645,7 +634,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -661,7 +650,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -677,7 +666,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -693,7 +682,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -709,7 +698,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -725,7 +714,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -741,7 +730,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -757,7 +746,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -773,7 +762,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -789,7 +778,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -805,7 +794,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -821,7 +810,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -837,7 +826,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -853,7 +842,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -869,7 +858,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -885,7 +874,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -901,7 +890,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -917,7 +906,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -933,7 +922,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -949,7 +938,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -965,7 +954,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -981,7 +970,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -997,7 +986,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -1013,7 +1002,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -1029,7 +1018,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -1045,7 +1034,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -1061,7 +1050,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -1077,7 +1066,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -1093,7 +1082,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -1109,7 +1098,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -1125,7 +1114,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -1141,7 +1130,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -1157,7 +1146,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -1173,7 +1162,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -1189,7 +1178,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -1205,7 +1194,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -1221,7 +1210,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -1237,7 +1226,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -1253,7 +1242,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -1269,7 +1258,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -1285,7 +1274,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -1301,7 +1290,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -1317,7 +1306,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -1333,7 +1322,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -1349,7 +1338,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -1365,7 +1354,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -1381,7 +1370,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -1397,7 +1386,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -1413,7 +1402,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -1429,7 +1418,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -1445,7 +1434,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -1461,7 +1450,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -1477,7 +1466,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -1493,7 +1482,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -1509,7 +1498,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -1525,7 +1514,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -1541,7 +1530,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -1557,7 +1546,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -1573,7 +1562,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -1589,7 +1578,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -1605,7 +1594,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;
@@ -1621,7 +1610,7 @@ export async function getCachedSearchResults(params: {
 }} params Parameter description
  * @param {{
   authors?: string[] | undefined;
-  categories?: Array<DatabaseGenerated['public']['Enums']['content_category']> | undefined; // Use generated enum type
+  categories?: content_category[] | undefined; // Use Prisma-generated enum type
   entities?: string[] | undefined;
   jobCategory?: JobCategory | undefined;
   jobEmployment?: JobEmployment | undefined;

@@ -10,14 +10,14 @@
  */
 
 import { motion } from 'motion/react';
-import { MICROINTERACTIONS, SPRING } from '@heyclaude/web-runtime/design-system';
+import { MICROINTERACTIONS, SPRING, cluster, marginTop, iconSize, muted, size } from '@heyclaude/web-runtime/design-system';
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   NumberTicker,
-  UI_CLASSES,
+  cn,
 } from '@heyclaude/web-runtime/ui';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import type { LucideIcon } from 'lucide-react';
@@ -95,10 +95,10 @@ export function AnimatedStatsCard({
         </CardHeader>
         <CardContent>
           {customContent ? (
-            <div className="mt-2">{customContent}</div>
+            <div className={`${marginTop.compact}`}>{customContent}</div>
           ) : (
-            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-              {Icon && <Icon className="text-primary h-5 w-5" />}
+            <div className={cluster.compact}>
+              {Icon && <Icon className={`text-primary ${iconSize.md}`} />}
               <span className="text-3xl font-bold">
                 <NumberTicker
                   value={value}
@@ -109,7 +109,7 @@ export function AnimatedStatsCard({
               </span>
             </div>
           )}
-          <p className="text-muted-foreground mt-2 text-xs">{description}</p>
+          <p className={cn(muted.default, marginTop.compact, size.xs)}>{description}</p>
         </CardContent>
       </Card>
     </motion.div>

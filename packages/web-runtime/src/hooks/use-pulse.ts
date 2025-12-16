@@ -23,7 +23,7 @@
  * @module hooks/use-pulse
  */
 
-import type { Database } from '@heyclaude/database-types';
+import type { content_category } from '@heyclaude/data-layer/prisma';
 import {
   type NewsletterEventType,
   trackInteraction,
@@ -37,7 +37,7 @@ import { useMemo } from 'react';
  * Parameters for copy tracking
  */
 export interface PulseCopyParams {
-  category: Database['public']['Enums']['content_category'];
+  category: content_category;
   slug: string;
   metadata?: Record<string, unknown> | null;
 }
@@ -46,7 +46,7 @@ export interface PulseCopyParams {
  * Parameters for click tracking
  */
 export interface PulseClickParams {
-  category: Database['public']['Enums']['content_category'] | null;
+  category: content_category | null;
   slug: string | null;
   metadata?: Record<string, unknown> | null;
 }
@@ -56,7 +56,7 @@ export interface PulseClickParams {
  */
 export interface PulseShareParams {
   platform: SharePlatform;
-  category?: Database['public']['Enums']['content_category'] | null;
+  category?: content_category | null;
   slug?: string | null;
   url: string;
 }
@@ -65,7 +65,7 @@ export interface PulseShareParams {
  * Parameters for screenshot tracking
  */
 export interface PulseScreenshotParams {
-  category: Database['public']['Enums']['content_category'];
+  category: content_category;
   slug: string;
   metadata?: Record<string, unknown> | null;
 }
@@ -74,7 +74,7 @@ export interface PulseScreenshotParams {
  * Parameters for download tracking
  */
 export interface PulseDownloadParams {
-  category: Database['public']['Enums']['content_category'];
+  category: content_category;
   slug: string;
   action_type?: 'download_zip' | 'download_markdown' | 'llmstxt' | 'download_mcpb' | 'download_code';
 }
@@ -83,7 +83,7 @@ export interface PulseDownloadParams {
  * Parameters for bookmark tracking
  */
 export interface PulseBookmarkParams {
-  category: Database['public']['Enums']['content_category'];
+  category: content_category;
   slug: string;
   action: 'add' | 'remove';
 }
@@ -92,7 +92,7 @@ export interface PulseBookmarkParams {
  * Parameters for filter tracking
  */
 export interface PulseFilterParams {
-  category: Database['public']['Enums']['content_category'] | null;
+  category: content_category | null;
   filters: Record<string, unknown>;
   metadata?: Record<string, unknown> | null;
 }
@@ -101,7 +101,7 @@ export interface PulseFilterParams {
  * Parameters for search tracking
  */
 export interface PulseSearchParams {
-  category: Database['public']['Enums']['content_category'];
+  category: content_category;
   slug: string;
   query: string;
   metadata?: Record<string, unknown> | null;
@@ -119,7 +119,7 @@ export interface PulseNewsletterParams {
  * Parameters for view tracking
  */
 export interface PulseViewParams {
-  category: Database['public']['Enums']['content_category'];
+  category: content_category;
   slug: string;
   metadata?: Record<string, unknown> | null;
 }

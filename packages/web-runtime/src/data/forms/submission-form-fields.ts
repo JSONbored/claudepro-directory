@@ -125,8 +125,8 @@ async function fetchFieldsForContentType(
 ): Promise<SubmissionFormSection> {
   'use cache';
 
-  // Configure cache - use 'hours' profile for form field templates (changes every 2 hours)
-  cacheLife('hours'); // 1hr stale, 15min revalidate, 1 day expire
+  // Configure cache - use 'static' profile for optimal SEO (1 day stale, 6hr revalidate, 30 days expire)
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
   cacheTag('templates');
   cacheTag(`submission-${contentType}`);
 

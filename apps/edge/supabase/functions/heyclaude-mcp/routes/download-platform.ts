@@ -5,8 +5,7 @@
  * Returns formatted content with installation instructions.
  */
 
-import type { Database } from '@heyclaude/database-types';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import { prisma } from '@heyclaude/data-layer/prisma/client.ts';
 import { logError } from '@heyclaude/shared-runtime/logging.ts';
 import { McpErrorCode, createErrorResponse } from '../lib/errors.ts';
 import { sanitizeString, isValidSlug } from '../lib/utils.ts';
@@ -25,13 +24,11 @@ import {
 /**
  * Fetches content and formats it for the specified platform.
  *
- * @param supabase - Authenticated Supabase client
  * @param input - Tool input with category, slug, platform, and optional targetDirectory
  * @returns Formatted content with installation instructions
  * @throws If content not found or formatting fails
  */
 export async function handleDownloadContentForPlatform(
-  supabase: SupabaseClient<Database>,
   input: DownloadContentForPlatformInput
 ) {
   // Sanitize and validate inputs
@@ -59,37 +56,36 @@ export async function handleDownloadContentForPlatform(
     throw new Error(error.message);
   }
 
-  // Fetch content using the same query as getContentDetail
-  const { data, error } = await supabase
-    .from('content')
-    .select(`
-      slug,
-      title,
-      display_title,
-      category,
-      description,
-      content,
-      tags,
-      author,
-      author_profile_url,
-      date_added,
-      created_at,
-      updated_at,
-      metadata,
-      view_count,
-      bookmark_count,
-      copy_count
-    `)
-    .eq('category', category)
-    .eq('slug', slug)
-    .single();
-
-  if (error) {
-    // PGRST116: JSON object requested, multiple (or no) rows returned
-    if ((error as any).code === 'PGRST116') {
-      throw new Error(`Content not found: ${category}/${slug}`);
-    }
-
+  // Fetch content using Prisma (same query as getContentDetail)
+  let data;
+  try {
+    data = await prisma.content.findUnique({
+      where: {
+        category_slug: {
+          category,
+          slug,
+        },
+      },
+      select: {
+        slug: true,
+        title: true,
+        display_title: true,
+        category: true,
+        description: true,
+        content: true,
+        tags: true,
+        author: true,
+        author_profile_url: true,
+        date_added: true,
+        created_at: true,
+        updated_at: true,
+        metadata: true,
+        view_count: true,
+        bookmark_count: true,
+        copy_count: true,
+      },
+    });
+  } catch (error) {
     await logError('Database query failed in downloadContentForPlatform', {
       dbQuery: {
         table: 'content',
@@ -101,7 +97,11 @@ export async function handleDownloadContentForPlatform(
         },
       },
     }, error);
-    throw new Error(`Failed to fetch content: ${error.message}`);
+    throw new Error(`Failed to fetch content: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+
+  if (!data) {
+    throw new Error(`Content not found: ${category}/${slug}`);
   }
 
   // Build ContentItem structure

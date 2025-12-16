@@ -61,12 +61,13 @@ import { nonEmptyString } from '@heyclaude/shared-runtime';
 import { type LucideIcon } from '@heyclaude/web-runtime/icons';
 import {
   DIMENSIONS,
-  UI_CLASSES,
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
+  cn,
 } from '@heyclaude/web-runtime/ui';
+import { paddingX, between, iconSize, marginTop, transition } from '@heyclaude/web-runtime/design-system';
 import Link from 'next/link';
 import { z } from 'zod';
 
@@ -107,7 +108,6 @@ export type CategoryNavigationCardProps = z.infer<typeof categoryNavigationCardP
  * @see CategoryNavigationCardProps
  * @see categoryInfoSchema
  * @see Tooltip
- * @see UI_CLASSES
  */
 export function CategoryNavigationCard({
   currentCategory,
@@ -117,7 +117,7 @@ export function CategoryNavigationCard({
   // Database CHECK constraint validates structure - no runtime validation needed
   return (
     <TooltipProvider delayDuration={300}>
-      <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} px-1`}>
+      <div className={cn(between.center, paddingX.micro)}>
         {Object.entries(categories).map(([key, info]) => {
           const Icon = info.icon;
           const isActive = currentCategory === key;
@@ -127,19 +127,18 @@ export function CategoryNavigationCard({
               <TooltipTrigger asChild>
                 <Link
                   href={`${basePath}/${key}`}
-                  className={`rounded-lg p-2 transition-all ${
+                  className={`rounded-lg p-2 ${transition.quick} ${
                     isActive
                       ? info.activeColor || 'bg-primary/10 text-primary'
                       : `text-muted-foreground ${info.color || 'hover:bg-muted/50 hover:text-primary'}`
                   }`}
-                  style={{ transitionDuration: 'var(--duration-quick)' }}
                 >
-                  <Icon className={UI_CLASSES.ICON_SM} />
+                  <Icon className={iconSize.sm} />
                 </Link>
               </TooltipTrigger>
               <TooltipContent side="bottom" className={`${DIMENSIONS.TOOLTIP_MAX} text-xs`}>
-                <div className="font-semibold">{info.label}</div>
-                <div className="text-muted-foreground mt-0.5">{info.description}</div>
+                <div className="font-semibold">{info['label']}</div>
+                <div className={`text-muted-foreground ${marginTop.default}.5`}>{info['description']}</div>
               </TooltipContent>
             </Tooltip>
           );

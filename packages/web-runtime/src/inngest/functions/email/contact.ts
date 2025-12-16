@@ -6,7 +6,8 @@
  * - Sends user confirmation email
  */
 
-import { Constants } from '@heyclaude/database-types';
+import type { contact_category } from '@heyclaude/data-layer/prisma';
+import { ContactCategory } from '@heyclaude/data-layer/prisma';
 import { normalizeError, escapeHtml } from '@heyclaude/shared-runtime';
 
 import { inngest } from '../../client';
@@ -40,7 +41,7 @@ export const sendContactEmails = inngest.createFunction(
     const { submissionId, name, email, category, message } = event.data;
 
     // Validate category
-    const contactCategoryValues = Constants.public.Enums.contact_category;
+    const contactCategoryValues = Object.values(ContactCategory) as readonly contact_category[];
     const isValidCategory = contactCategoryValues.includes(category as ContactCategory);
     
     if (!isValidCategory) {

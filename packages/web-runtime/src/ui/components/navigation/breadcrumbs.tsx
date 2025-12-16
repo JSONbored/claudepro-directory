@@ -39,7 +39,7 @@
  * using the database's build_breadcrumb_json_ld RPC function
  */
 
-import { type Database } from '@heyclaude/database-types';
+import type { content_category } from '@heyclaude/data-layer/prisma';
 import { isValidCategory } from '@heyclaude/web-runtime/core';
 import { getCategoryConfig } from '@heyclaude/web-runtime/data/config/category';
 import Link from 'next/link';
@@ -112,7 +112,7 @@ function generateBreadcrumbs(
     // Default: use category config if segment is a valid category, otherwise format the segment
     else {
       const label = isValidCategory(segment)
-        ? getCategoryConfig(segment as Database['public']['Enums']['content_category'])?.typeName ?? formatSegmentLabel(segment)
+        ? getCategoryConfig(segment as content_category)?.typeName ?? formatSegmentLabel(segment)
         : formatSegmentLabel(segment);
       items.push({ label, href: currentPath });
     }

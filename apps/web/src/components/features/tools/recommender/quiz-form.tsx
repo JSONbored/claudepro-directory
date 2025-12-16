@@ -5,8 +5,6 @@
  * All questions/options fetched from PostgreSQL.
  */
 
-import { type Database } from '@heyclaude/database-types';
-import { Constants } from '@heyclaude/database-types';
 import { getQuizConfigurationAction } from '@heyclaude/web-runtime/actions';
 import { generateConfigRecommendations } from '@heyclaude/web-runtime/core';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
@@ -20,10 +18,11 @@ import {
   CardTitle,
   Separator,
   DIMENSIONS,
+  cn,
   toasts,
-  UI_CLASSES,
   InlineSpinner,
 } from '@heyclaude/web-runtime/ui';
+import { cluster, between, iconSize, marginRight, marginLeft, size, weight, gap, muted, spaceY, center, padding, marginTop, marginY } from '@heyclaude/web-runtime/design-system';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState, useTransition } from 'react';
 import { z } from 'zod';
@@ -31,14 +30,15 @@ import { z } from 'zod';
 import { QuestionCard } from './question-card';
 import { QuizProgress } from './quiz-progress';
 
-// Use enum values directly from @heyclaude/database-types Constants
-const EXPERIENCE_LEVEL_VALUES = Constants.public.Enums.experience_level;
-const FOCUS_AREA_TYPE_VALUES = Constants.public.Enums.focus_area_type;
-const INTEGRATION_TYPE_VALUES = Constants.public.Enums.integration_type;
-const USE_CASE_TYPE_VALUES = Constants.public.Enums.use_case_type;
-
-// Use generated type directly from @heyclaude/database-types
+import { ExperienceLevel, FocusAreaType, IntegrationType, UseCaseType } from '@heyclaude/data-layer/prisma';
+import type { experience_level, focus_area_type, integration_type, use_case_type } from '@heyclaude/data-layer/prisma';
 import type { GetQuizConfigurationReturns } from '@heyclaude/database-types/postgres-types';
+
+// Use enum values directly from Prisma enum objects
+const EXPERIENCE_LEVEL_VALUES = Object.values(ExperienceLevel) as readonly experience_level[];
+const FOCUS_AREA_TYPE_VALUES = Object.values(FocusAreaType) as readonly focus_area_type[];
+const INTEGRATION_TYPE_VALUES = Object.values(IntegrationType) as readonly integration_type[];
+const USE_CASE_TYPE_VALUES = Object.values(UseCaseType) as readonly use_case_type[];
 type QuizConfigurationResult = GetQuizConfigurationReturns;
 
 interface QuizQuestion {
@@ -89,27 +89,27 @@ function mapQuizConfigToQuestions(config: null | QuizConfigurationResult): null 
 // Manual Zod schema (database validates via RPC function)
 const quizAnswersSchema = z.object({
   useCase: z.enum([...USE_CASE_TYPE_VALUES] as [
-    Database['public']['Enums']['use_case_type'],
-    ...Database['public']['Enums']['use_case_type'][],
+    use_case_type,
+    ...use_case_type[],
   ]),
   experienceLevel: z.enum([...EXPERIENCE_LEVEL_VALUES] as [
-    Database['public']['Enums']['experience_level'],
-    ...Database['public']['Enums']['experience_level'][],
+    experience_level,
+    ...experience_level[],
   ]),
   toolPreferences: z.array(z.string()).min(1).max(5),
   p_integrations: z
     .array(
       z.enum([...INTEGRATION_TYPE_VALUES] as [
-        Database['public']['Enums']['integration_type'],
-        ...Database['public']['Enums']['integration_type'][],
+        integration_type,
+        ...integration_type[],
       ])
     )
     .optional(),
   p_focus_areas: z
     .array(
       z.enum([...FOCUS_AREA_TYPE_VALUES] as [
-        Database['public']['Enums']['focus_area_type'],
-        ...Database['public']['Enums']['focus_area_type'][],
+        focus_area_type,
+        ...focus_area_type[],
       ])
     )
     .optional(),
@@ -344,7 +344,7 @@ export function QuizForm() {
 
   if (!quizConfig) {
     return (
-      <div className="flex items-center justify-center p-12">
+      <div className={cn(center, padding.section)}>
         <InlineSpinner size="lg" />
       </div>
     );
@@ -371,7 +371,7 @@ export function QuizForm() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className={spaceY.relaxed}>
       <QuizProgress
         currentQuestion={currentQuestion}
         totalQuestions={totalQuestions}
@@ -380,14 +380,14 @@ export function QuizForm() {
 
       <Card className="relative overflow-hidden">
         <CardHeader>
-          <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-            <span className="text-muted-foreground text-sm">
+          <CardTitle className={cluster.compact}>
+            <span className={cn(muted.default, size.sm)}>
               Question {currentQuestion} of {totalQuestions}
             </span>
           </CardTitle>
         </CardHeader>
 
-        <CardContent className="space-y-6">
+        <CardContent className={spaceY.relaxed}>
           {currentQuestionData.id === 'review' ? (
             <QuestionCard
               question={currentQuestionData.question}
@@ -395,57 +395,57 @@ export function QuizForm() {
                 description: currentQuestionData.description,
               })}
             >
-              <div className="space-y-4">
-                <div className="bg-muted space-y-2 rounded-lg p-4">
+              <div className={spaceY.comfortable}>
+                <div className={`bg-muted ${spaceY.compact} rounded-lg ${padding.default}`}>
                   <div>
-                    <span className="font-medium">Use Case:</span>{' '}
-                    <span className="text-muted-foreground">
+                    <span className={`${weight.medium}`}>Use Case:</span>{' '}
+                    <span className={muted.default}>
                       {answers.useCase?.replace('-', ' ')}
                     </span>
                   </div>
                   <div>
-                    <span className="font-medium">Experience:</span>{' '}
-                    <span className="text-muted-foreground">{answers.experienceLevel}</span>
+                    <span className={`${weight.medium}`}>Experience:</span>{' '}
+                    <span className={muted.default}>{answers.experienceLevel}</span>
                   </div>
                   <div>
-                    <span className="font-medium">Tool Preferences:</span>{' '}
-                    <span className="text-muted-foreground">
+                    <span className={`${weight.medium}`}>Tool Preferences:</span>{' '}
+                    <span className={muted.default}>
                       {answers.toolPreferences?.join(', ')}
                     </span>
                   </div>
                   {answers.p_integrations && answers.p_integrations.length > 0 ? (
                     <div>
-                      <span className="font-medium">Integrations:</span>{' '}
-                      <span className="text-muted-foreground">
+                      <span className={`${weight.medium}`}>Integrations:</span>{' '}
+                      <span className={muted.default}>
                         {answers.p_integrations.join(', ')}
                       </span>
                     </div>
                   ) : null}
                   {answers.p_focus_areas && answers.p_focus_areas.length > 0 ? (
                     <div>
-                      <span className="font-medium">Focus Areas:</span>{' '}
-                      <span className="text-muted-foreground">
+                      <span className={`${weight.medium}`}>Focus Areas:</span>{' '}
+                      <span className={muted.default}>
                         {answers.p_focus_areas.join(', ')}
                       </span>
                     </div>
                   ) : null}
                   {answers.teamSize ? (
                     <div>
-                      <span className="font-medium">Team Size:</span>{' '}
-                      <span className="text-muted-foreground">{answers.teamSize}</span>
+                      <span className={`${weight.medium}`}>Team Size:</span>{' '}
+                      <span className={muted.default}>{answers.teamSize}</span>
                     </div>
                   ) : null}
                 </div>
 
                 <Card className="border-primary/20 bg-primary/5">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-lg">
-                      <Sparkles className={`${UI_CLASSES.ICON_MD} text-primary`} />
+                    <CardTitle className={cn(cluster.compact, gap.compact, size.lg)}>
+                      <Sparkles className={`${iconSize.md} text-primary`} />
                       What happens next?
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <ul className="text-muted-foreground space-y-2 text-sm">
+                    <ul className={cn(muted.default, spaceY.compact, size.sm)}>
                       <li>? We'll analyze 147+ configurations</li>
                       <li>? Match them to your specific needs</li>
                       <li>? Show you the top 8-10 best fits</li>
@@ -500,34 +500,34 @@ export function QuizForm() {
                             : 'border-border cursor-not-allowed opacity-50'
                       }`}
                     >
-                      <div className="font-medium">{option.label}</div>
-                      <div className="text-muted-foreground mt-1 text-sm">{option.description}</div>
+                      <div className={`${weight.medium}`}>{option.label}</div>
+                      <div className={cn(muted.default, marginTop.tight, size.sm)}>{option.description}</div>
                     </button>
                   );
                 })}
               </div>
               {fieldKey && errors[fieldKey] ? (
-                <p className="text-destructive mt-2 text-sm">{errors[fieldKey]}</p>
+                <p className={`text-destructive ${marginTop.compact} ${size.sm}`}>{errors[fieldKey]}</p>
               ) : null}
             </QuestionCard>
           )}
 
-          <Separator className="my-6" />
-          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+          <Separator className={`${marginY.comfortable}`} />
+          <div className={between.center}>
             <Button
               type="button"
               variant="outline"
               onClick={goToPrevious}
               disabled={currentQuestion === 1 || isPending}
             >
-              <ArrowLeft className={UI_CLASSES.ICON_SM_LEADING} />
+              <ArrowLeft className={`${iconSize.sm} ${marginRight.compact}`} />
               Previous
             </Button>
 
             {currentQuestion < totalQuestions ? (
               <Button type="button" onClick={goToNext} disabled={isPending}>
                 Next
-                <ArrowRight className="ml-2 h-4 w-4" />
+                <ArrowRight className={cn(marginLeft.compact, iconSize.sm)} />
               </Button>
             ) : (
               <Button
@@ -540,7 +540,7 @@ export function QuizForm() {
                   <InlineSpinner size="sm" message="Generating..." />
                 ) : (
                   <>
-                    <Sparkles className={UI_CLASSES.ICON_SM_LEADING} />
+                    <Sparkles className={`${iconSize.sm} ${marginRight.compact}`} />
                     Get Results
                   </>
                 )}

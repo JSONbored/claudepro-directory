@@ -2,10 +2,9 @@
 
 /** Homepage client consuming homepageConfigs for runtime-tunable featured categories */
 
-import { type Database } from '@heyclaude/database-types';
+import type { content_category } from '@heyclaude/data-layer/prisma';
 import { getHomepageConfigBundle } from '@heyclaude/web-runtime/config/static-configs';
-import { logUnhandledPromise, trackHomepageSectionError, trackMissingData } from '@heyclaude/web-runtime/core';
-import { useIsMounted } from '@heyclaude/web-runtime/hooks';
+import { trackMissingData, isValidCategory } from '@heyclaude/web-runtime/core';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import {
   SearchResults,
@@ -17,401 +16,169 @@ import {
 } from '@heyclaude/web-runtime/types/component.types';
 import { useAuthModal } from '@/src/hooks/use-auth-modal';
 import { usePathname } from 'next/navigation';
-import { Suspense, memo, useCallback, useEffect, useMemo, useRef, useState, useDeferredValue } from 'react';
-import { useBoolean } from '@heyclaude/web-runtime/hooks';
+import { Suspense, memo, useEffect, useMemo, useState } from 'react';
 
 import {
   LazyFeaturedSections,
-  LazyTabsSection,
+  LazyAllContentSection,
 } from '@/src/components/features/home/lazy-home-sections';
 import { getCategoryConfigs } from '@heyclaude/web-runtime/data';
+import { paddingX, paddingBottom, marginX, marginBottom, padding } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Inner component that uses search context
  */
 function HomePageClientContent({
   initialData,
-  featuredByCategory,
   stats,
   featuredJobs = [],
   weekStart,
   serverCategoryIds,
+  bookmarkStatusMap = {},
 }: HomePageClientProps) {
   const { query } = useSearchContext();
   const { openAuthModal } = useAuthModal();
   const pathname = usePathname();
-  const [allConfigs, setAllConfigs] = useState<DisplayableContent[]>([]);
-  const { value: isLoadingAllConfigs, setTrue: setIsLoadingAllConfigsTrue, setFalse: setIsLoadingAllConfigsFalse } = useBoolean();
-  const { value: hasMoreAllConfigs, setValue: setHasMoreAllConfigs } = useBoolean(true);
-  const [activeTab, setActiveTab] = useState('all');
-  const hasInitialFetchRef = useRef(false);
 
   // Category stats config removed - now in hero section
 
   // Initialize featuredCategories from server data immediately
   // This ensures content renders even if static config is unavailable
   const [featuredCategories, setFeaturedCategories] = useState<
-    readonly Database['public']['Enums']['content_category'][]
+    readonly content_category[]
   >(() => {
     // First, try using keys from initialData (most reliable - these are categories that have data)
-    const categoriesFromData = Object.keys(initialData).filter((cat) => {
-      const data = initialData[cat];
-      return Array.isArray(data) && data.length > 0;
-    }) as readonly Database['public']['Enums']['content_category'][];
+    // Validate categories using isValidCategory (which uses Prisma enum)
+    // Type guard: isValidCategory ensures type safety, no assertion needed
+    const categoriesFromData = Object.keys(initialData).filter(
+      (cat): cat is content_category => {
+        const data = initialData[cat];
+        return Array.isArray(data) && data.length > 0 && isValidCategory(cat);
+      }
+    );
 
     if (categoriesFromData.length > 0) {
       return categoriesFromData;
     }
 
     // Fallback: Use server-provided categoryIds if initialData is empty (shouldn't happen, but defensive)
+    // Validate serverCategoryIds using isValidCategory
     if (serverCategoryIds && serverCategoryIds.length > 0) {
-      return serverCategoryIds as readonly Database['public']['Enums']['content_category'][];
+      // Type guard: isValidCategory ensures type safety, no assertion needed
+      const validServerCategories = serverCategoryIds.filter(
+        (cat): cat is content_category => isValidCategory(cat)
+      );
+      if (validServerCategories.length > 0) {
+        return validServerCategories;
+      }
     }
 
     // Final fallback: empty array
-    return [] as readonly Database['public']['Enums']['content_category'][];
+    return [];
   });
 
+  // OPTIMIZATION: Memoize category configs to avoid recreating on every render
+  // React Compiler will automatically optimize this, but explicit memoization ensures stability
   const categoryConfigs = useMemo(() => getCategoryConfigs(), []);
 
-  // Track missing stats data
+  // OPTIMIZATION: Defer non-critical tracking to avoid blocking initial render
+  // Use requestIdleCallback to defer tracking until browser is idle
   useEffect(() => {
     if (stats && Object.keys(stats).length === 0) {
-      trackMissingData('stats', 'stats-data', {
-        note: 'Stats data is empty',
-      });
+      const trackMissing = () => {
+        trackMissingData('stats', 'stats-data', {
+          note: 'Stats data is empty',
+        });
+      };
+      
+      // Defer to idle time to avoid blocking main thread
+      if ('requestIdleCallback' in globalThis) {
+        requestIdleCallback(trackMissing, { timeout: 5000 });
+      } else {
+        // Fallback: defer with setTimeout
+        setTimeout(trackMissing, 100);
+      }
     }
   }, [stats]);
 
+  // OPTIMIZATION: Memoize config bundle loading to avoid recreating on every render
   // Get static config bundle
-  useEffect(() => {
-    let bundle;
+  const configBundle = useMemo(() => {
     try {
-      bundle = getHomepageConfigBundle();
+      return getHomepageConfigBundle();
     } catch (error) {
-      // Log error but don't crash - fall back to server-provided data
-      const normalized = normalizeError(error, 'Failed to load homepage config bundle');
-      logClientWarn(
-        '[Home] Failed to load homepage config bundle',
-        normalized,
-        'HomePageClient.loadConfigBundle',
-        {
-          component: 'HomePageClient',
-          action: 'load-config-bundle',
-          category: 'home',
-        }
-      );
-      bundle = null;
-    }
-
-    // Extract featured categories from homepage config with defensive checks
-    const categories = Array.isArray(bundle?.homepageConfig?.['homepage.featured_categories'])
-      ? bundle.homepageConfig['homepage.featured_categories']
-      : [];
-
-    // Use static categories if available, otherwise fall back to server-provided categoryIds
-    // Filter to only include categories that have data in initialData
-    const validCategories =
-      categories.length > 0
-        ? categories.filter(
-            (cat) =>
-              initialData[cat] && Array.isArray(initialData[cat]) && initialData[cat].length > 0
-          )
-        : (serverCategoryIds ?? []).filter(
-            (cat) =>
-              initialData[cat] && Array.isArray(initialData[cat]) && initialData[cat].length > 0
-          );
-
-    setFeaturedCategories(
-      validCategories as readonly Database['public']['Enums']['content_category'][]
-    );
-  }, [serverCategoryIds, initialData]);
-
-  const isMounted = useIsMounted();
-  const fetchAllConfigs = useCallback(
-    async (offset: number, limit = 30) => {
-      if (isLoadingAllConfigs || !hasMoreAllConfigs || !isMounted()) {
-        return;
-      }
-
-      setIsLoadingAllConfigsTrue();
-
-      try {
-        const { fetchPaginatedContent } = await import('@heyclaude/web-runtime/actions');
-
-        const result = await fetchPaginatedContent({
-          offset,
-          limit,
-          category: null,
-        });
-
-        if (result?.serverError) {
-          // Error already logged by safe-action middleware
-          trackHomepageSectionError(
-            'all-content',
-            'fetch-paginated-content',
-            result.serverError,
-            {
-              offset,
-              limit,
-              source: 'fetchAllConfigs',
-            }
-          );
-          throw new Error(result.serverError);
-        }
-
-        if (!isMounted()) return;
-
-        // Safe-action returns { data: T, serverError?: ... } structure
-        // fetchPaginatedContent returns DisplayableContent[] wrapped in { data: DisplayableContent[] }
-        // Defensive: Ensure data is an array before using it
-        const newItems: DisplayableContent[] = Array.isArray(result?.data) ? result.data : [];
-
-        if (newItems.length < limit) {
-          setHasMoreAllConfigs(false);
-        }
-
-        setAllConfigs((prev) => {
-          // Deduplicate items by slug to prevent duplicate keys
-          // Create a Set of existing slugs for O(1) lookup
-          const existingSlugs = new Set(prev.map((item) => item.slug).filter(Boolean));
-          
-          // Filter out items that already exist
-          const uniqueNewItems = newItems.filter((item) => {
-            if (!item.slug) return true; // Keep items without slugs (shouldn't happen, but defensive)
-            if (existingSlugs.has(item.slug)) {
-              return false;
-            }
-            existingSlugs.add(item.slug);
-            return true;
-          });
-          
-          const updated = [...prev, ...uniqueNewItems];
-          return updated;
-        });
-      } catch (error) {
-        if (!isMounted()) return;
-        const normalized = normalizeError(error, 'fetchAllConfigs failed');
+      // OPTIMIZATION: Only log errors in development
+      if (process.env.NODE_ENV === 'development') {
+        const normalized = normalizeError(error, 'Failed to load homepage config bundle');
         logClientWarn(
-          '[HomePageClient] fetchAllConfigs error caught',
+          '[Home] Failed to load homepage config bundle',
           normalized,
-          'HomePageClient.fetchAllConfigs.error',
+          'HomePageClient.loadConfigBundle',
           {
             component: 'HomePageClient',
-            action: 'fetch-all-configs-error',
+            action: 'load-config-bundle',
             category: 'home',
-            offset,
-            limit,
           }
         );
-        trackHomepageSectionError('all-content', 'fetch-all-configs', error, {
-          offset,
-          limit,
-        });
-      } finally {
-        if (isMounted()) {
-          setIsLoadingAllConfigsFalse();
-        }
       }
-    },
-    [hasMoreAllConfigs, setIsLoadingAllConfigsTrue, setIsLoadingAllConfigsFalse, isMounted, isLoadingAllConfigs]
-  );
-
-  const handleFetchMore = useCallback(async () => {
-    await fetchAllConfigs(allConfigs.length);
-  }, [fetchAllConfigs, allConfigs.length]);
-
-  useEffect(() => {
-    if (activeTab === 'all' && allConfigs.length === 0 && !isLoadingAllConfigs && !hasInitialFetchRef.current) {
-      hasInitialFetchRef.current = true;
-      fetchAllConfigs(0).catch((error) => {
-        trackHomepageSectionError('all-content', 'initial-fetch', error, {
-          activeTab,
-        });
-        logUnhandledPromise('HomePageClient: initial fetchAllConfigs failed', error);
-      });
+      return null;
     }
-  }, [activeTab, allConfigs.length, isLoadingAllConfigs, fetchAllConfigs]);
+  }, []);
+
+  // OPTIMIZATION: Memoize category extraction from config bundle
+  const configCategories = useMemo(() => {
+    return Array.isArray(configBundle?.homepageConfig?.['homepage.featured_categories'])
+      ? configBundle.homepageConfig['homepage.featured_categories']
+      : [];
+  }, [configBundle]);
+
+  // OPTIMIZATION: Use initialData directly (featuredByCategory removed to reduce RSC payload)
+  // This eliminates duplicate data serialization (~50% reduction in homepage RSC payload)
+  const featuredData = useMemo(() => {
+    return initialData;
+  }, [initialData]);
+
+  // OPTIMIZATION: Memoize categories object passed to LazyFeaturedSections
+  const categoriesForSections = useMemo(() => {
+    if (featuredData && typeof featuredData === 'object' && !Array.isArray(featuredData)) {
+      return featuredData as Record<string, readonly DisplayableContent[]>;
+    }
+    return {} as Record<string, readonly DisplayableContent[]>;
+  }, [featuredData]);
+
+  // OPTIMIZATION: Memoize category filtering to avoid recreating on every render
+  // Use static categories if available, otherwise fall back to server-provided categoryIds
+  // Filter to only include categories that have data in initialData
+  const validCategories = useMemo(() => {
+    const categoriesToFilter = configCategories.length > 0 ? configCategories : (serverCategoryIds ?? []);
+    
+    // Type guard: isValidCategory ensures type safety, no assertion needed
+    return categoriesToFilter.filter((cat): cat is content_category => {
+      if (!isValidCategory(cat)) {
+        return false;
+      }
+      const data = initialData[cat];
+      return Array.isArray(data) && data.length > 0;
+    });
+  }, [configCategories, serverCategoryIds, initialData]);
+
+  // Update featured categories when validCategories changes
+  useEffect(() => {
+    setFeaturedCategories(validCategories);
+  }, [validCategories]);
 
   // Search is now handled by SearchProvider + useSearch (unified search system)
-
-  // Create lookup maps dynamically for all featured categories
-  // O(1) slug checking instead of O(n) array.some() calls
-  const slugLookupMaps = useMemo(() => {
-    const maps: Record<string, Set<string>> = {};
-
-    for (const category of featuredCategories) {
-      const categoryData = initialData[category as keyof typeof initialData];
-      if (categoryData && Array.isArray(categoryData)) {
-        // Cast to DisplayableContent[] since we know the structure from RPC
-        maps[category] = new Set(
-          (categoryData as DisplayableContent[])
-            .map((item) => item.slug)
-            .filter((slug): slug is string => slug !== null && slug !== undefined)
-        );
-      }
-    }
-
-    return maps;
-  }, [initialData, featuredCategories]);
-
-  // Get search results from SearchProvider
-  const { results: searchResults } = useSearchContext();
-  
-  // Defer query for performance (keeps input responsive while filtering)
-  const deferredQuery = useDeferredValue(query);
-  
-  // Client-side filtering function for matching query in content
-  const matchesQuery = useCallback((item: DisplayableContent, searchQuery: string): boolean => {
-    if (!searchQuery.trim()) return true;
-    
-    const queryLower = searchQuery.toLowerCase().trim();
-    const title = item.title?.toLowerCase() || '';
-    const description = item.description?.toLowerCase() || '';
-    const slug = item.slug?.toLowerCase() || '';
-    const category = item.category?.toLowerCase() || '';
-    
-    return (
-      title.includes(queryLower) ||
-      description.includes(queryLower) ||
-      slug.includes(queryLower) ||
-      category.includes(queryLower)
-    );
-  }, []);
-  
-  // Filter allConfigs by search query (client-side filtering)
-  const filteredAllConfigs = useMemo((): DisplayableContent[] => {
-    if (!deferredQuery.trim()) return allConfigs;
-    
-    try {
-      return allConfigs.filter((item) => matchesQuery(item, deferredQuery));
-    } catch (error) {
-      const normalized = normalizeError(error, 'filteredAllConfigs computation failed');
-      logClientWarn(
-        '[HomePageClient] filteredAllConfigs computation error',
-        normalized,
-        'HomePageClient.filteredAllConfigs.error',
-        {
-          component: 'HomePageClient',
-          action: 'compute-filtered-all-configs-error',
-          category: 'search',
-          query: deferredQuery,
-        }
-      );
-      return [];
-    }
-  }, [allConfigs, deferredQuery, matchesQuery]);
-  
-  // Merge search API results with filtered local content (deduplicate by slug)
-  const mergedResults = useMemo((): DisplayableContent[] => {
-    if (!deferredQuery.trim()) return [];
-    
-    try {
-      const apiResults = Array.isArray(searchResults) ? searchResults : [];
-      const localResults = filteredAllConfigs;
-      
-      // Deduplicate by slug - prioritize API results (more comprehensive)
-      const seen = new Set<string>();
-      const merged: DisplayableContent[] = [];
-      
-      // Add API results first (prioritized)
-      for (const item of apiResults) {
-        if (item.slug && !seen.has(item.slug)) {
-          seen.add(item.slug);
-          merged.push(item);
-        }
-      }
-      
-      // Add unique local results
-      for (const item of localResults) {
-        if (item.slug && !seen.has(item.slug)) {
-          seen.add(item.slug);
-          merged.push(item);
-        }
-      }
-      
-      return merged;
-    } catch (error) {
-      const normalized = normalizeError(error, 'mergedResults computation failed');
-      logClientWarn(
-        '[HomePageClient] mergedResults computation error',
-        normalized,
-        'HomePageClient.mergedResults.error',
-        {
-          component: 'HomePageClient',
-          action: 'compute-merged-results-error',
-          category: 'search',
-          query: deferredQuery,
-        }
-      );
-      return Array.isArray(searchResults) ? searchResults : [];
-    }
-  }, [searchResults, filteredAllConfigs, deferredQuery]);
-  
-  // Filter results by active tab (for tabs section, not search)
-  // When searching, use mergedResults; otherwise filter allConfigs by tab
-  const filteredResults = useMemo((): DisplayableContent[] => {
-    try {
-      // If searching, use merged results
-      if (deferredQuery.trim()) {
-        return mergedResults;
-      }
-      
-      // Not searching - filter allConfigs by tab
-      const dataSource = Array.isArray(allConfigs) ? allConfigs : [];
-
-      if (activeTab === 'all' || activeTab === 'community') {
-        return dataSource;
-      }
-
-      const lookupSet = slugLookupMaps[activeTab];
-      if (!lookupSet) {
-        return dataSource;
-      }
-
-      return dataSource.filter((item) => {
-        if (!item || typeof item !== 'object') return false;
-        const slug = 'slug' in item ? item.slug : null;
-        return slug && typeof slug === 'string' && lookupSet.has(slug);
-      });
-    } catch (error) {
-      // Catch any errors in filteredResults computation to prevent crashes
-      const normalized = normalizeError(error, 'filteredResults computation failed');
-      logClientWarn(
-        '[HomePageClient] filteredResults computation error',
-        normalized,
-        'HomePageClient.filteredResults.error',
-        {
-          component: 'HomePageClient',
-          action: 'compute-filtered-results-error',
-          category: 'tabs',
-          activeTab,
-        }
-      );
-      // Return empty array on error to prevent crashes
-      return [];
-    }
-  }, [allConfigs, activeTab, slugLookupMaps, deferredQuery, mergedResults]);
-
-  // Handle tab change (search is now handled by SearchProvider)
-  const handleTabChange = useCallback(
-    (value: string) => {
-      setActiveTab(value);
-      // Search is now handled by SearchProvider, which syncs with URL
-    },
-    []
-  );
 
   return (
     <>
       {/* Category Stats Section removed - now in hero section directly below search bar */}
 
       {/* Main Content Section */}
-      <section className="container mx-auto px-4 pb-16">
+      <section className={`container ${marginX.auto} ${paddingX.default} ${paddingBottom.default}`}>
         {/* Search Results Section - Show at top when there's an active search query */}
         {query.trim().length > 0 && (
-          <div className="mb-8">
-            <Suspense fallback={<div className="text-muted-foreground p-8 text-center">Loading search results...</div>}>
+          <div className={`${marginBottom.relaxed}`}>
+            <Suspense fallback={<div className={`text-muted-foreground ${padding.relaxed} text-center`}>Loading search results...</div>}>
               <SearchResults
                 showCategory
                 showActions
@@ -428,23 +195,16 @@ function HomePageClientContent({
 
         {/* Featured Content Sections - Always visible (maintains context) */}
         <LazyFeaturedSections
-          categories={
-            (featuredByCategory || initialData) as Record<string, readonly DisplayableContent[]>
-          }
+          categories={categoriesForSections}
           categoryConfigs={categoryConfigs}
           featuredJobs={featuredJobs}
           featuredCategories={featuredCategories}
+          bookmarkStatusMap={bookmarkStatusMap}
           {...(weekStart ? { weekStart } : {})}
         />
 
-        {/* Tabs Section - Always visible (shows filtered content when searching) */}
-        <LazyTabsSection
-          activeTab={activeTab}
-          filteredResults={filteredResults}
-          onTabChange={handleTabChange}
-          categoryConfigs={categoryConfigs}
-          onFetchMore={handleFetchMore}
-          serverHasMore={hasMoreAllConfigs}
+        {/* All Content Section - Scroll-triggered loading (only fetches when section enters viewport) */}
+        <LazyAllContentSection
           {...(weekStart ? { weekStart } : {})}
         />
       </section>

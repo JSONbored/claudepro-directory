@@ -24,14 +24,17 @@ import { AuthModalProvider } from '@/src/components/core/auth/auth-modal-provide
 import { Pulse } from '@/src/components/core/infra/pulse';
 import { PulseCannon } from '@/src/components/core/infra/pulse-cannon';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
+import { WebVitalsReporter } from '@/src/components/core/infra/web-vitals-reporter';
 import { LayoutContent } from '@/src/components/core/layout/root-layout-wrapper';
 import { Toaster } from '@/src/components/primitives/feedback/sonner';
 
 // Component config is now static
 
 // Self-hosted fonts - no external requests, faster FCP, GDPR compliant
+// OPTIMIZATION: Use 'swap' instead of 'optional' for faster text rendering (reduces LCP)
+// 'swap' shows fallback immediately, then swaps to custom font when loaded
 const inter = localFont({
-  display: 'optional',
+  display: 'swap', // Changed from 'optional' - shows text immediately with fallback, then swaps
   fallback: [
     'system-ui',
     '-apple-system',
@@ -48,7 +51,7 @@ const inter = localFont({
 });
 
 const geist = localFont({
-  display: 'optional',
+  display: 'swap', // Changed from 'optional' - shows text immediately with fallback, then swaps
   fallback: ['system-ui', '-apple-system', 'sans-serif'],
   preload: true,
   src: '../fonts/GeistVF.woff2',
@@ -57,7 +60,7 @@ const geist = localFont({
 });
 
 const geistMono = localFont({
-  display: 'optional',
+  display: 'swap', // Changed from 'optional' - shows text immediately with fallback, then swaps
   fallback: ['Menlo', 'Monaco', 'Courier New', 'monospace'],
   preload: true,
   src: '../fonts/GeistMonoVF.woff2',
@@ -192,8 +195,8 @@ export async function generateMetadata(): Promise<Metadata> {
  */
 function LayoutFallback({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-background flex min-h-screen flex-col">
-      <main className="flex-1" id="main-content">
+    <div className={`bg-background flex min-h-screen flex-col`}>
+      <main className={`flex-1`} id="main-content">
         {children}
       </main>
     </div>
@@ -297,9 +300,6 @@ export default function RootLayout({
 
         {/* Preconnect for critical third-party resources */}
         <link crossOrigin="anonymous" href="https://umami.claudepro.directory" rel="preconnect" />
-
-        {/* TweakCN Live Preview - Theme preview tool */}
-        <script src="https://tweakcn.com/live-preview.min.js" />
       </head>
       <body className="font-sans">
         {/* Suspense boundary for structured data - streams after initial HTML */}
@@ -330,6 +330,8 @@ export default function RootLayout({
             </LazyMotionProvider>
           </ThemeProvider>
         </ComponentConfigContextProvider>
+        {/* Web Vitals Reporter - Tracks Core Web Vitals metrics */}
+        <WebVitalsReporter />
         {/* Pulse Cannon - Unified pulse loading system (loads after page idle) */}
         {/* Zero initial bundle impact - all pulse services lazy-loaded */}
         <PulseCannon />

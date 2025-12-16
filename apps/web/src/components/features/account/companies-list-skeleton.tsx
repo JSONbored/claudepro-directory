@@ -9,7 +9,7 @@
  */
 
 import { Skeleton } from '@heyclaude/web-runtime/ui';
-import { SPRING, STAGGER } from '@heyclaude/web-runtime/design-system';
+import { SPRING, STAGGER, spaceY, marginBottom, gap, iconSize } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import { Card, CardContent, CardHeader } from '@heyclaude/web-runtime/ui';
@@ -24,7 +24,7 @@ export function CompaniesListSkeleton() {
 
   return (
     <motion.div
-      className="space-y-6"
+      className={`${spaceY.relaxed}`}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={SPRING.smooth}
@@ -37,7 +37,7 @@ export function CompaniesListSkeleton() {
         transition={{ ...SPRING.smooth, delay: 0.1 }}
       >
         <div>
-          <Skeleton size="xl" width="lg" className="mb-2 h-9" />
+          <Skeleton size="xl" width="lg" className={`${marginBottom.compact} h-9`} />
           <Skeleton size="sm" width="md" className="h-5" />
         </div>
         <Skeleton size="md" width="lg" rounded="md" className="h-10" />
@@ -45,7 +45,7 @@ export function CompaniesListSkeleton() {
 
       {/* Companies list */}
       <motion.div
-        className="grid gap-4"
+        className={`grid ${gap.default}`}
         initial={!prefersReducedMotion ? { opacity: 0, y: 20 } : false}
         animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
         transition={{ ...SPRING.smooth, delay: 0.2 }}
@@ -60,18 +60,18 @@ export function CompaniesListSkeleton() {
             <Card>
               <CardHeader>
                 <div className="flex items-start justify-between">
-                  <div className="flex flex-1 items-start gap-4">
+                  <div className={`flex flex-1 items-start ${gap.default}`}>
                     {/* Logo */}
-                    <Skeleton size="lg" width="lg" rounded="lg" className="h-16 w-16" />
-                    <div className="flex-1 space-y-2">
-                      <div className="flex items-center gap-2">
+                    <Skeleton size="lg" width="lg" rounded="lg" className={`${iconSize['3xl']}`} />
+                    <div className={`flex-1 ${spaceY.compact}`}>
+                      <div className={`flex items-center ${gap.tight}`}>
                         <Skeleton size="lg" width="md" className="h-7" />
                         <Skeleton size="sm" width="xs" rounded="full" className="h-6" />
                       </div>
                       <Skeleton size="sm" width="2xl" className="h-4" />
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className={`flex items-center ${gap.tight}`}>
                     <Skeleton size="sm" width="xs" rounded="md" className="h-8" />
                     <Skeleton size="sm" width="xs" rounded="md" className="h-8" />
                   </div>

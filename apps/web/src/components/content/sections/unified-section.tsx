@@ -1,8 +1,8 @@
 'use client';
 
-import { type Database } from '@heyclaude/database-types';
+import type { content_category } from '@heyclaude/data-layer/prisma';
 import { isValidCategory } from '@heyclaude/web-runtime/core';
-import { SPRING } from '@heyclaude/web-runtime/design-system';
+import { SPRING, spaceY, marginTop, marginRight, marginBottom, paddingY, marginY, iconSizeRect, paddingLeft } from '@heyclaude/web-runtime/design-system';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import {
@@ -25,7 +25,6 @@ import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/cl
 import { type UnifiedSectionProps } from '@heyclaude/web-runtime/types/component.types';
 import {
   cn,
-  UI_CLASSES,
   UnifiedBadge,
   Button,
   Card,
@@ -34,12 +33,19 @@ import {
   CardHeader,
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
+import { iconSize, size, muted, cluster, gap } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { useIsClient } from '@heyclaude/web-runtime/hooks';
 
-import { ProductionCodeBlock } from '@/src/components/content/interactive-code-block';
+import dynamic from 'next/dynamic';
+
+// Lazy load large code block component (889 lines) - only loads when code blocks are rendered
+const ProductionCodeBlock = dynamic(
+  () => import('@/src/components/content/interactive-code-block').then((mod) => ({ default: mod.ProductionCodeBlock })),
+  { ssr: true }
+);
 import { CodeTabs } from '@/src/components/ui/code-tabs';
 import {
   Snippet,
@@ -50,7 +56,7 @@ import {
   SnippetTabsTrigger,
 } from '@/src/components/ui/snippet';
 
-const ICONS: Record<Database['public']['Enums']['content_category'], LucideIcon> = {
+const ICONS: Record<content_category, LucideIcon> = {
   agents: Sparkles,
   mcp: Package,
   commands: Terminal,
@@ -86,7 +92,7 @@ function Wrapper({
   className,
   children,
 }: {
-  category?: Database['public']['Enums']['content_category'];
+  category?: content_category;
   children: React.ReactNode;
   className?: string;
   description?: string;
@@ -105,8 +111,8 @@ function Wrapper({
     >
       <Card className={cn('', className)}>
         <CardHeader>
-          <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-            <Icon className={UI_CLASSES.ICON_MD} />
+          <CardTitle className={cluster.compact}>
+            <Icon className={iconSize.md} />
             {title}
           </CardTitle>
           {description ? <CardDescription>{description}</CardDescription> : null}
@@ -271,7 +277,7 @@ function CodeGroupTabs({
   if (blocks.length === 0) return null;
 
   return (
-    <div className="space-y-3">
+    <div className={`${spaceY.default}`}>
       {/* CodeTabs component with syntax highlighting */}
       <CodeTabs
         codes={codes}
@@ -288,7 +294,7 @@ function CodeGroupTabs({
 
       {/* Download button for active tab (if filename exists) */}
       {activeBlock?.filename ? (
-        <div className="mt-3">
+        <div className={`${marginTop.default}`}>
           <Button
             variant="outline"
             size="sm"
@@ -297,7 +303,7 @@ function CodeGroupTabs({
               onDownload?.();
             }}
           >
-            <Download className="mr-2 h-4 w-4" />
+            <Download className={cn(marginRight.tight, iconSize.sm)} />
             Download {activeBlock.filename}
           </Button>
         </div>
@@ -312,15 +318,13 @@ function CodeGroupTabs({
  * @param items - Strings to display as list rows; each string becomes one list item.
  * @param color - CSS class(es) applied to the dot indicator (typically Tailwind color classes).
  * @returns The rendered list element.
- *
- * @see UI_CLASSES
  */
 function List({ items, color }: { color: string; items: string[] }) {
   return (
-    <ul className="space-y-2">
+    <ul className={`${spaceY.compact}`}>
       {items.map((item) => (
-        <li key={item.slice(0, 50)} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
-          <div className={cn('mt-2 h-1.5 w-1.5 shrink-0 rounded-full', color)} />
+        <li key={item.slice(0, 50)} className={`flex items-start ${gap.default}`}>
+          <div className={cn(marginTop.compact, iconSizeRect['1.5x1.5'], 'shrink-0 rounded-full', color)} />
           <span className="text-sm leading-relaxed">{item}</span>
         </li>
       ))}
@@ -356,12 +360,12 @@ const getEnhancedListKey = (item: EnhancedListItem, index: number) => {
  */
 function EnhancedList({ items, color }: { color: string; items: EnhancedListItem[] }) {
   return (
-    <ul className="space-y-4">
+    <ul className={`${spaceY.comfortable}`}>
       {items.map((item, index) => {
         if (typeof item === 'string') {
           return (
-            <li key={getEnhancedListKey(item, index)} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
-              <div className={cn('mt-2 h-1.5 w-1.5 shrink-0 rounded-full', color)} />
+            <li key={getEnhancedListKey(item, index)} className={`flex items-start ${gap.default}`}>
+              <div className={cn(marginTop.compact, iconSizeRect['1.5x1.5'], 'shrink-0 rounded-full', color)} />
               <span className="text-sm leading-relaxed">{item}</span>
             </li>
           );
@@ -372,12 +376,12 @@ function EnhancedList({ items, color }: { color: string; items: EnhancedListItem
         const content = 'answer' in item ? item.answer : item.solution;
 
         return (
-          <li key={getEnhancedListKey(item, index)} className="space-y-2">
-            <div className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
-              <div className={cn('mt-2 h-1.5 w-1.5 shrink-0 rounded-full', color)} />
-              <div className="space-y-1">
+          <li key={getEnhancedListKey(item, index)} className={`${spaceY.compact}`}>
+            <div className={`flex items-start ${gap.default}`}>
+              <div className={cn(marginTop.compact, iconSizeRect['1.5x1.5'], 'shrink-0 rounded-full', color)} />
+              <div className={`${spaceY.tight}`}>
                 <p className="text-foreground text-sm font-medium">{title}</p>
-                <p className="text-muted-foreground text-sm leading-relaxed">{content}</p>
+                <p className={cn(muted.default, size.sm, 'leading-relaxed')}>{content}</p>
               </div>
             </div>
           </li>
@@ -420,13 +424,13 @@ function Platform({
       : `platform-${name.toLowerCase()}-text-${step.text}-${index}`;
 
   return (
-    <div className="space-y-4">
+    <div className={`${spaceY.comfortable}`}>
       <h4 className="font-medium">{name}</h4>
-      <div className="space-y-3">
+      <div className={`${spaceY.default}`}>
         {steps.map((step, index) =>
           step.type === 'command' ? (
-            <div key={getStepKey(step, index)} className="space-y-2">
-              <div className="text-muted-foreground text-sm">Step {index + 1}: Run command</div>
+            <div key={getStepKey(step, index)} className={`${spaceY.compact}`}>
+              <div className={cn(muted.default, size.sm)}>Step {index + 1}: Run command</div>
               <ProductionCodeBlock
                 html={step.html}
                 code={step.code}
@@ -436,8 +440,8 @@ function Platform({
               />
             </div>
           ) : (
-            <div key={getStepKey(step, index)} className="flex items-start gap-3">
-              <div className="bg-primary mt-2 h-1.5 w-1.5 shrink-0 rounded-full" />
+            <div key={getStepKey(step, index)} className={`flex items-start ${gap.compact}`}>
+              <div className={cn('bg-primary', marginTop.compact, iconSizeRect['1.5x1.5'], 'shrink-0 rounded-full')} />
               <span className="text-sm leading-relaxed">{step.text}</span>
             </div>
           )
@@ -445,12 +449,12 @@ function Platform({
       </div>
       {paths ? (
         <div>
-          <h5 className="mb-2 text-sm font-medium">Configuration Paths</h5>
-          <div className="space-y-2 text-sm">
+          <h5 className={`${marginBottom.compact} text-sm font-medium`}>Configuration Paths</h5>
+          <div className={`${spaceY.compact} text-sm`}>
             {Object.entries(paths).map(([k, p]) => {
               const pathValue = String(p);
               return (
-                <div key={k} className="flex items-center gap-2">
+                <div key={k} className={`flex items-center ${gap.tight}`}>
                   <UnifiedBadge variant="base" style="outline" className="capitalize shrink-0">
                     {k}
                   </UnifiedBadge>
@@ -463,7 +467,7 @@ function Platform({
                       </SnippetTabsList>
                       <SnippetCopyButton value={pathValue} />
                     </SnippetHeader>
-                    <SnippetTabsContent value={k} className="text-xs py-2">
+                    <SnippetTabsContent value={k} className={`text-xs ${paddingY.tight}`}>
                       {pathValue}
                     </SnippetTabsContent>
                   </Snippet>
@@ -588,7 +592,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
           />
           {/* Download button below code block for better UX */}
           {props.filename ? (
-            <div className="mt-3">
+            <div className={`${marginTop.default}`}>
               <Button
                 variant="outline"
                 size="sm"
@@ -597,7 +601,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                   trackDownload();
                 }}
               >
-                <Download className="mr-2 h-4 w-4" />
+                <Download className={cn(marginRight.tight, iconSize.sm)} />
                 Download {props.filename}
               </Button>
             </div>
@@ -628,7 +632,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
               maxLines={20}
             />
             {block.filename ? (
-              <div className="mt-3">
+              <div className={`${marginTop.default}`}>
                 <Button
                   variant="outline"
                   size="sm"
@@ -637,7 +641,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                     trackDownload();
                   }}
                 >
-                  <Download className="mr-2 h-4 w-4" />
+                  <Download className={cn(marginRight.tight, iconSize.sm)} />
                   Download {block.filename}
                 </Button>
               </div>
@@ -672,21 +676,21 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
           {...(props.icon && { icon: props.icon })}
           {...(props.className && { className: props.className })}
         >
-          <div className="space-y-6">
+          <div className={`${spaceY.relaxed}`}>
             {props.examples.map((ex, i) => (
               <article
                 key={`${ex.title}-${i}`}
-                className="space-y-3"
+                className={`${spaceY.default}`}
                 itemScope
                 itemType="https://schema.org/SoftwareSourceCode"
               >
-                <div className="space-y-1">
+                <div className={`${spaceY.tight}`}>
                   <h4 className="text-foreground text-base font-semibold" itemProp="name">
                     {ex.title}
                   </h4>
                   {ex.description ? (
                     <p
-                      className="text-muted-foreground text-sm leading-relaxed"
+                      className={cn(muted.default, size.sm, 'leading-relaxed')}
                       itemProp="description"
                     >
                       {ex.description}
@@ -706,7 +710,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                   />
                   {/* Download button for example code */}
                   {ex.filename ? (
-                    <div className="mt-3">
+                    <div className={`${marginTop.default}`}>
                       <Button
                         variant="outline"
                         size="sm"
@@ -715,7 +719,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                           trackDownload();
                         }}
                       >
-                        <Download className="mr-2 h-4 w-4" />
+                        <Download className={cn(marginRight.tight, iconSize.sm)} />
                         Download {ex.filename}
                       </Button>
                     </div>
@@ -736,7 +740,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
             description="Add these configurations to your Claude Desktop or Claude Code setup"
             {...(props.className && { className: props.className })}
           >
-            <div className="space-y-6">
+            <div className={`${spaceY.relaxed}`}>
               {props.configs.map((c) => (
                 <div key={c.key}>
                   <ProductionCodeBlock
@@ -748,7 +752,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                   />
                   {/* Download button for config */}
                   {c.filename ? (
-                    <div className="mt-3">
+                    <div className={`${marginTop.default}`}>
                       <Button
                         variant="outline"
                         size="sm"
@@ -757,7 +761,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                           trackDownload();
                         }}
                       >
-                        <Download className="mr-2 h-4 w-4" />
+                        <Download className={cn(marginRight.tight, iconSize.sm)} />
                         Download {c.filename}
                       </Button>
                     </div>
@@ -776,9 +780,9 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
             description="Hook setup and script content"
             {...(props.className && { className: props.className })}
           >
-            <div className="space-y-4">
+            <div className={`${spaceY.comfortable}`}>
               {props.hookConfig ? (
-                <div className="space-y-2">
+                <div className={`${spaceY.compact}`}>
                   <ProductionCodeBlock
                     html={props.hookConfig.html}
                     code={props.hookConfig.code}
@@ -802,7 +806,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                 </div>
               ) : null}
               {props.scriptContent ? (
-                <div className="space-y-2">
+                <div className={`${spaceY.compact}`}>
                   <ProductionCodeBlock
                     html={props.scriptContent.html}
                     code={props.scriptContent.code}
@@ -845,7 +849,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
           />
           {/* Download button for configuration */}
           {props.filename ? (
-            <div className="mt-3">
+            <div className={`${marginTop.default}`}>
               <Button
                 variant="outline"
                 size="sm"
@@ -854,7 +858,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
                   trackDownload();
                 }}
               >
-                <Download className="mr-2 h-4 w-4" />
+                <Download className={cn(marginRight.tight, iconSize.sm)} />
                 Download {props.filename}
               </Button>
             </div>
@@ -872,7 +876,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
           description="Setup instructions and requirements"
           {...(props.className && { className: props.className })}
         >
-          <div className="space-y-6">
+          <div className={`${spaceY.relaxed}`}>
             {d.claudeCode ? (
               <Platform
                 name="Claude Code Setup"
@@ -891,7 +895,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
             {d.mcpb ? <Platform name="One-Click Install (.mcpb)" steps={d.mcpb.steps} /> : null}
             {d.requirements && d.requirements.length > 0 ? (
               <div>
-                <h4 className="mb-2 font-medium">Requirements</h4>
+                <h4 className={`${marginBottom.compact} font-medium`}>Requirements</h4>
                 <List items={d.requirements} color="bg-orange-500" />
               </div>
             ) : null}
@@ -911,7 +915,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
           {...(props.category && { category: props.category })}
           {...(props.className && { className: props.className })}
         >
-          <div className="prose prose-slate dark:prose-invert prose-headings:font-semibold prose-headings:text-foreground prose-p:text-foreground/90 prose-p:leading-relaxed prose-ul:my-4 prose-ol:my-4 prose-li:my-2 prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-strong:font-semibold prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-muted prose-pre:text-foreground prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-4 prose-blockquote:italic max-w-none">
+          <div className={cn('prose prose-slate dark:prose-invert prose-headings:font-semibold prose-headings:text-foreground prose-p:text-foreground/90 prose-p:leading-relaxed', `prose-ul:${marginY.default}`, `prose-ol:${marginY.default}`, `prose-li:${marginY.tight}`, 'prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-strong:font-semibold prose-code:text-foreground prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-pre:bg-muted prose-pre:text-foreground prose-blockquote:border-l-4 prose-blockquote:border-primary', `prose-blockquote:${paddingLeft.default}`, 'prose-blockquote:italic max-w-none')}>
             <TrustedHTML html={props.html} />
           </div>
         </Wrapper>

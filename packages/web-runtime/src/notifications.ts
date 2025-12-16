@@ -1,16 +1,17 @@
 import { env } from '@heyclaude/shared-runtime/schemas/env';
-import type { Database } from '@heyclaude/database-types';
+import type { notificationsModel } from '@heyclaude/data-layer/prisma';
+import type { notification_type, notification_priority } from '@heyclaude/data-layer/prisma';
 import { logger } from './logger.ts';
 import { normalizeError } from './errors.ts';
 
-export type NotificationRecord = Database['public']['Tables']['notifications']['Row'];
+export type NotificationRecord = notificationsModel;
 
 export interface NotificationCreateInput {
   id?: string;
   title: string;
   message: string;
-  type: Database['public']['Enums']['notification_type'];
-  priority?: Database['public']['Enums']['notification_priority'];
+  type: notification_type;
+  priority?: notification_priority;
   action_label?: string | null;
   action_href?: string | null;
   action_onclick?: string | null;

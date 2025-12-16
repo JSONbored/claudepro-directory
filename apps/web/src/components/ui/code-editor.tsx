@@ -42,6 +42,7 @@ import { Button, cn } from '@heyclaude/web-runtime/ui';
 import { useBoolean, useTimeout, useInterval } from '@heyclaude/web-runtime/hooks';
 import { getThemeConfig } from '@heyclaude/shared-runtime';
 import { Copy, Check } from 'lucide-react';
+import { paddingX, padding, size } from "@heyclaude/web-runtime/design-system";
 
 type CopyButtonProps = {
   content: string;
@@ -255,7 +256,7 @@ function CodeEditor({
       {...(props as any)}
     >
       {header ? (
-        <div className="bg-muted border-b border-border/75 dark:border-border/50 relative flex flex-row items-center justify-between gap-y-2 h-10 px-4">
+        <div className={`bg-muted border-b border-border/75 dark:border-border/50 relative flex flex-row items-center justify-between gap-y-2 h-10 ${paddingX.default}`}>
           {dots && (
             <div className="flex flex-row gap-x-2">
               <div className="size-2 rounded-full bg-red-500"></div>
@@ -282,7 +283,7 @@ function CodeEditor({
                   {typeof icon !== 'string' ? icon : null}
                 </div>
               ) : null}
-              <figcaption className="flex-1 truncate text-muted-foreground text-[13px]">
+              <figcaption className={cn('flex-1 truncate text-muted-foreground', size['sm-md'])}>
                 {title}
               </figcaption>
             </div>
@@ -311,11 +312,11 @@ function CodeEditor({
       )}
       <div
         ref={editorRef}
-        className="h-[calc(100%-2.75rem)] w-full text-sm p-4 font-mono relative overflow-auto flex-1"
+        className={`h-[calc(100%-2.75rem)] w-full text-sm ${padding.default} font-mono relative overflow-auto flex-1`}
       >
         <div
           className={cn(
-            '[&>pre,_&_code]:!bg-transparent [&>pre,_&_code]:[background:transparent_!important] [&>pre,_&_code]:border-none [&_code]:!text-[13px]',
+            `[&>pre,_&_code]:!bg-transparent [&>pre,_&_code]:[background:transparent_!important] [&>pre,_&_code]:border-none [&_code]:${size['sm-md']}`,
             cursor &&
               !isDone &&
               "[&_.line:last-of-type::after]:content-['|'] [&_.line:last-of-type::after]:animate-pulse [&_.line:last-of-type::after]:inline-block [&_.line:last-of-type::after]:w-[1ch] [&_.line:last-of-type::after]:-translate-px",

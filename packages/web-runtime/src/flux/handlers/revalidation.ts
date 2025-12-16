@@ -8,7 +8,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidateTag } from 'next/cache';
 
-import { Constants, type Database as DatabaseGenerated } from '@heyclaude/database-types';
+import type { content_category } from '@heyclaude/data-layer/prisma';
+import { ContentCategory } from '@heyclaude/data-layer/prisma';
 import { getEnvVar, normalizeError } from '@heyclaude/shared-runtime';
 
 import { pgmqRead, pgmqDelete } from '../../supabase/pgmq-client';
@@ -66,9 +67,9 @@ function isValidRevalidationPayload(value: unknown): value is RevalidationPayloa
  */
 function isValidContentCategory(
   value: string
-): value is DatabaseGenerated['public']['Enums']['content_category'] {
-  const validCategories = Constants.public.Enums.content_category;
-  return validCategories.includes(value as DatabaseGenerated['public']['Enums']['content_category']);
+): value is content_category {
+  const validCategories = Object.values(ContentCategory) as readonly content_category[];
+  return validCategories.includes(value as content_category);
 }
 
 /**

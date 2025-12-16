@@ -1,13 +1,13 @@
 'use server';
 
 import { CompaniesService, SearchService } from '@heyclaude/data-layer';
-import { type content_category } from '@heyclaude/data-layer/prisma';
+import type { content_category } from '@heyclaude/data-layer/prisma';
 import type {
   GetCompanyAdminProfileReturns,
   GetCompanyProfileReturns,
   GetCompaniesListReturns,
   SearchUnifiedArgs,
-} from '@heyclaude/database-types/postgres-types/functions';
+} from '@heyclaude/database-types/postgres-types';
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { logger } from '../logger.ts';
@@ -90,8 +90,8 @@ export async function getCompanyProfile(
 ): Promise<GetCompanyProfileReturns | null> {
   'use cache';
 
-  // Configure cache - use 'half' profile for company profiles (changes every 30 minutes)
-  cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
+  // Configure cache - use 'static' profile for optimal SEO (1 day stale, 6hr revalidate, 30 days expire)
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
   cacheTag('companies');
   cacheTag(JOBS_CATEGORY);
   cacheTag(`company-${slug}`);
@@ -137,8 +137,8 @@ export async function getCompaniesList(
 ): Promise<GetCompaniesListReturns> {
   'use cache';
 
-  // Configure cache - use 'half' profile for company lists (changes every 30 minutes)
-  cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
+  // Configure cache - use 'static' profile for optimal SEO (1 day stale, 6hr revalidate, 30 days expire)
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
   cacheTag('companies');
   cacheTag(JOBS_CATEGORY);
 
@@ -196,8 +196,8 @@ async function fetchCompanySearchResults(
   'use cache';
   const { cacheLife, cacheTag } = await import('next/cache');
 
-  // Configure cache - use 'quarter' profile for company search (same as API route)
-  cacheLife('quarter'); // 15min stale, 5min revalidate, 2hr expire
+  // Configure cache - use 'stable' profile for optimal SEO (6hr stale, 1hr revalidate, 7 days expire)
+  cacheLife('stable'); // 6hr stale, 1hr revalidate, 7 days expire - optimized for SEO
   cacheTag('company-search');
   cacheTag('companies');
 

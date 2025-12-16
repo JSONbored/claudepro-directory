@@ -1,6 +1,6 @@
 'use server';
 
-import type { Database } from '@heyclaude/database-types';
+import type { content_category } from '@heyclaude/data-layer/prisma';
 import { logger } from '../logger.ts';
 import { normalizeError } from '../errors.ts';
 import type { ContentHeadingMetadata } from '../types/component.types.ts';
@@ -18,7 +18,7 @@ export interface HighlightCodeOptions {
 }
 
 export interface ProcessContentItem {
-  category: Database['public']['Enums']['content_category'] | null;
+  category: content_category | null;
   slug?: string | null;
   name?: string | null;
   hook_type?: string | null;

@@ -18,8 +18,8 @@
 
 import { normalizeError } from '@heyclaude/shared-runtime';
 
-import { runExtractChangelogEntry } from '../commands/extract-changelog-entry.js';
-import { logger } from '../toolkit/logger.js';
+import { runExtractChangelogEntry } from '../commands/extract-changelog-entry.ts';
+import { logger } from '../toolkit/logger.ts';
 
 runExtractChangelogEntry().catch((error) => {
   logger.error(

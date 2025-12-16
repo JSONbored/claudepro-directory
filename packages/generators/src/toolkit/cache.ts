@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 
 import { normalizeError } from '@heyclaude/shared-runtime';
 
-import { logger } from './logger.js';
+import { logger } from './logger.ts';
 
 const ROOT = fileURLToPath(new URL('../../../../', import.meta.url));
 const CACHE_DIR = path.join(ROOT, '.build-cache');

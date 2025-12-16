@@ -4,22 +4,24 @@
  * Related Content - Client-side fetching with UnifiedCardGrid
  */
 
-import type { RelatedContentItem } from '@heyclaude/data-layer/types/composite-types';
+import type { RelatedContentItem } from '@heyclaude/database-types/postgres-types';
+import type { content_category } from '@heyclaude/data-layer/prisma';
 import { getContentItemUrl, isValidCategory } from '@heyclaude/web-runtime/core';
 import { getRelatedContent } from '@heyclaude/web-runtime/data';
 import { Sparkles } from '@heyclaude/web-runtime/icons';
 import { logClientError, normalizeError } from '@heyclaude/web-runtime/logging/client';
-import { UI_CLASSES, UnifiedBadge, UnifiedCardGrid, BaseCard, deepEqual } from '@heyclaude/web-runtime/ui';
+import { UnifiedBadge, UnifiedCardGrid, BaseCard, deepEqual, cn } from '@heyclaude/web-runtime/ui';
 import { useIsClient, useIsMounted, useBoolean } from '@heyclaude/web-runtime/hooks';
 import { useEffect, useState, useRef } from 'react';
+import { iconSize, cluster, marginY, marginBottom, padding, paddingX, paddingY } from "@heyclaude/web-runtime/design-system";
 
 // Use the new composite type from @heyclaude/data-layer
 type RelatedContentItemWithUI = RelatedContentItem & {
   matchDetails?: {
     matchedKeywords: string[];
     matchedTags: string[];
-  };
-  matchType?: string;
+  } | undefined;
+  matchType?: string | undefined;
 };
 
 export interface SmartRelatedContentProps {
@@ -201,6 +203,13 @@ export function RelatedContentClient({
               score: item.score ?? 0,
               match_type: item.match_type ?? '',
               views: item.views ?? 0,
+              ...(item.match_type ? {
+                matchType: item.match_type,
+                matchDetails: {
+                  matchedKeywords: [],
+                  matchedTags: item.tags ?? [],
+                },
+              } : {}),
               matched_tags: item.matched_tags ?? [],
             };
             if (item.match_type !== null && item.match_type !== undefined) {
@@ -254,18 +263,18 @@ export function RelatedContentClient({
     <section
       itemScope
       itemType="https://schema.org/ItemList"
-      className="my-12"
+      className={`${marginY.default}`}
       aria-label="Related content"
     >
       {showTitle ? (
-        <div className="border-primary/20 from-primary/5 to-primary/10 mb-8 rounded-xl border bg-linear-to-r p-4 sm:p-6">
-          <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-            <div className="flex items-center gap-3 sm:gap-4">
-              <div className="bg-primary/10 shrink-0 rounded-lg p-2">
-                <Sparkles className={`${UI_CLASSES.ICON_MD} text-primary sm:h-6 sm:w-6`} />
+        <div className={`border-primary/20 from-primary/5 to-primary/10 ${marginBottom.relaxed} rounded-xl border bg-linear-to-r ${padding.default} sm:${padding.comfortable}`}>
+          <div className={`flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center`}>
+            <div className={`${cluster.default} sm:gap-4`}>
+              <div className={`bg-primary/10 shrink-0 rounded-lg ${padding.tight}`}>
+                <Sparkles className={`${iconSize.md} text-primary sm:h-6 sm:w-6`} />
               </div>
               <div className="min-w-0">
-                <h2 className="text-foreground mb-1 text-xl font-bold sm:text-2xl" itemProp="name">
+                <h2 className={`text-foreground ${marginBottom.tight} text-xl font-bold sm:text-2xl`} itemProp="name">
                   {title}
                 </h2>
                 <p className="text-muted-foreground text-xs sm:text-sm">
@@ -276,7 +285,7 @@ export function RelatedContentClient({
             <UnifiedBadge
               variant="base"
               style="secondary"
-              className="shrink-0 border-primary/30 bg-primary/10 text-primary px-2 py-1 text-xs font-medium sm:px-3 sm:text-sm"
+              className={`shrink-0 border-primary/30 bg-primary/10 text-primary ${paddingX.tight} ${paddingY.micro} text-xs font-medium sm:${paddingX.compact} sm:text-sm`}
             >
               AI Powered
             </UnifiedBadge>
@@ -291,17 +300,20 @@ export function RelatedContentClient({
         emptyMessage="No related content available"
         loadingMessage="Finding related content..."
         renderCard={(item) => {
+          // Type narrowing: item is DisplayableContent, cast to RelatedContentItemWithUI
           const relatedItem = item as RelatedContentItemWithUI;
-          const matchBadge = getMatchTypeBadge(relatedItem.matchType ?? 'unknown');
+          const matchBadge = getMatchTypeBadge(relatedItem.matchType ?? (relatedItem as RelatedContentItem).match_type ?? 'unknown');
           const categoryBadge = getCategoryBadgeClass(relatedItem.category ?? 'unknown');
+          
+          // Type narrowing: Ensure category is valid content_category
+          const itemCategory = relatedItem.category ?? 'agents';
+          const validCategory = isValidCategory(itemCategory) ? itemCategory : 'agents';
 
           return (
             <BaseCard
               key={`${relatedItem.category}-${relatedItem.slug}`}
               targetPath={getContentItemUrl({
-                category: isValidCategory(relatedItem.category ?? 'agents')
-                  ? (relatedItem.category ?? 'agents')
-                  : 'agents',
+                category: validCategory as content_category,
                 slug: relatedItem.slug ?? '',
               })}
               displayTitle={relatedItem.title ?? relatedItem.slug ?? ''}
@@ -311,9 +323,9 @@ export function RelatedContentClient({
               compactMode
               ariaLabel={`Related: ${relatedItem.title}`}
               renderTopBadges={() => (
-                <div className="flex w-full items-center justify-between gap-2">
+                <div className={`flex w-full items-center justify-between gap-2`}>
                   <UnifiedBadge
-                    className={`${categoryBadge} shrink-0 border px-2 py-1 text-xs font-medium sm:px-3 sm:text-sm`}
+                    className={cn(categoryBadge, 'shrink-0 border', paddingX.compact, paddingY.tight, 'text-xs font-medium', 'sm:' + paddingX.compact, 'sm:text-sm')}
                     variant="base"
                     style="secondary"
                   >
@@ -323,7 +335,7 @@ export function RelatedContentClient({
                     <UnifiedBadge
                       variant="base"
                       style={matchBadge.variant}
-                      className="text-2xs shrink-0 border px-1.5 py-1 font-medium sm:px-2 sm:text-xs"
+                      className={`text-2xs shrink-0 border ${paddingX.micro}.5 ${paddingY.micro} font-medium sm:${paddingX.tight} sm:text-xs`}
                     >
                       {matchBadge.label}
                     </UnifiedBadge>

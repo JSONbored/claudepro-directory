@@ -6,8 +6,6 @@
  */
 
 import { ContentService } from '@heyclaude/data-layer/services/content.ts';
-import type { Database } from '@heyclaude/database-types';
-import type { SupabaseClient } from '@supabase/supabase-js';
 import { logError } from '@heyclaude/shared-runtime/logging.ts';
 import { McpErrorCode, createErrorResponse } from '../lib/errors.ts';
 import type { GetChangelogInput } from '../lib/types.ts';
@@ -15,13 +13,11 @@ import type { GetChangelogInput } from '../lib/types.ts';
 /**
  * Fetches changelog in LLMs.txt format.
  *
- * @param supabase - Authenticated Supabase client
  * @param input - Tool input with optional format (default: 'llms-txt')
  * @returns Changelog content in requested format
  * @throws If changelog generation fails
  */
 export async function handleGetChangelog(
-  supabase: SupabaseClient<Database>,
   input: GetChangelogInput
 ) {
   const format = input.format || 'llms-txt';
@@ -36,7 +32,7 @@ export async function handleGetChangelog(
   }
 
   try {
-    const contentService = new ContentService(supabase);
+    const contentService = new ContentService();
     const data = await contentService.getChangelogLlmsTxt();
 
     if (!data) {

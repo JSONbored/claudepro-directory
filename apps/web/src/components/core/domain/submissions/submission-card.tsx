@@ -1,9 +1,8 @@
+import { SubmissionStatus } from '@heyclaude/data-layer/prisma';
 import type { submission_status, submission_type } from '@heyclaude/data-layer/prisma';
-import { Constants } from '@heyclaude/database-types';
 import type { UserDashboardSubmission } from '@heyclaude/database-types/postgres-types';
 import { logger } from '@heyclaude/web-runtime/logging/server';
 import {
-  UI_CLASSES,
   UnifiedBadge,
   Card,
   CardContent,
@@ -14,6 +13,7 @@ import {
 import { type ReactElement } from 'react';
 
 import { ContentLinkButton, PrLinkButton } from './submission-link-buttons';
+import { between, cluster, marginTop, marginBottom, gap, padding } from "@heyclaude/web-runtime/design-system";
 
 type UserSubmission = UserDashboardSubmission;
 
@@ -125,9 +125,9 @@ export function SubmissionCard({
   return (
     <Card key={submission.id ?? `submission-${index}`}>
       <CardHeader>
-        <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
+        <div className={between.start}>
           <div className="flex-1">
-            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+            <div className={cluster.compact}>
               {status ? (
                 getStatusBadge(status)
               ) : (
@@ -153,8 +153,8 @@ export function SubmissionCard({
                 </UnifiedBadge>
               )}
             </div>
-            <CardTitle className="mt-2">{submission.content_name ?? 'Untitled'}</CardTitle>
-            <CardDescription className="mt-1">
+            <CardTitle className={`${marginTop.compact}`}>{submission.content_name ?? 'Untitled'}</CardTitle>
+            <CardDescription className={`${marginTop.tight}`}>
               Slug: <code className="text-xs">{submission.content_slug ?? 'N/A'}</code>
             </CardDescription>
           </div>
@@ -162,7 +162,7 @@ export function SubmissionCard({
       </CardHeader>
 
       <CardContent>
-        <div className="text-muted-foreground mb-4 flex flex-wrap gap-4 text-sm">
+        <div className={`text-muted-foreground ${marginBottom.default} flex flex-wrap ${gap.default} text-sm`}>
           <div>
             Submitted {submission.created_at ? formatSubmissionDate(submission.created_at) : 'N/A'}
           </div>
@@ -180,22 +180,22 @@ export function SubmissionCard({
           ) : null}
         </div>
 
-        {status === Constants.public.Enums.submission_status[2] && submission.rejection_reason ? (
-          <div className="mb-4 rounded border border-red-500/20 bg-red-500/10 p-3">
-            <p className="mb-1 text-sm font-medium text-red-400">Rejection Reason:</p>
+        {status === SubmissionStatus.rejected && submission.rejection_reason ? (
+          <div className={`${marginBottom.default} rounded border border-red-500/20 bg-red-500/10 ${padding.compact}`}>
+            <p className={`${marginBottom.tight} text-sm font-medium text-red-400`}>Rejection Reason:</p>
             <p className="text-muted-foreground text-sm">{submission.rejection_reason}</p>
           </div>
         ) : null}
 
-        {status === Constants.public.Enums.submission_status[4] && ( // 'merged'
-          <div className="mb-4 rounded border border-green-500/20 bg-green-500/10 p-3">
+        {status === SubmissionStatus.merged && ( // 'merged'
+          <div className={`${marginBottom.default} rounded border border-green-500/20 bg-green-500/10 ${padding.compact}`}>
             <p className="text-sm font-medium text-green-400">
               🎉 Your contribution is now live on ClaudePro Directory!
             </p>
           </div>
         )}
 
-        <div className={UI_CLASSES.FLEX_GAP_2}>
+        <div className={`flex ${gap.tight}`}>
           {prLinkProps ? <PrLinkButton href={prLinkProps.href} /> : null}
           {contentLinkProps ? <ContentLinkButton href={contentLinkProps.href} /> : null}
         </div>

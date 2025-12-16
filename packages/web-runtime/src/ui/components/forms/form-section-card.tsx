@@ -39,7 +39,7 @@
 import { SPRING } from '../../../design-system/index.ts';
 import type { LucideIcon } from '../../../icons.tsx';
 import { cn } from '../../utils.ts';
-import { UI_CLASSES } from '../../constants.ts';
+import { paddingBottom, cluster, padding, iconSize, size, weight, muted, marginTop } from '../../../design-system/index.ts';
 import { motion } from 'motion/react';
 import type { ReactNode } from 'react';
 import { BorderBeam } from '../animation/border-beam.tsx';
@@ -150,36 +150,36 @@ export function FormSectionCard({
           />
         )}
 
-        <CardHeader className={UI_CLASSES.CARD_HEADER_DEFAULT}>
-          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3}>
+        <CardHeader className={paddingBottom.default}>
+          <div className={cluster.default}>
             {/* Icon with step number */}
             <div
               className={cn(
                 'rounded-lg',
-                UI_CLASSES.PADDING_TIGHT,
+                padding.tight,
                 themeConfig.iconBg,
-                UI_CLASSES.FLEX_SHRINK_0
+                'flex-shrink-0'
               )}
             >
-              <Icon className={cn(UI_CLASSES.ICON_MD, themeConfig.iconText)} />
+              <Icon className={cn(iconSize.md, themeConfig.iconText)} />
             </div>
 
             {/* Title and description */}
-            <div className={UI_CLASSES.FLEX_1}>
+            <div className="flex-1">
               <CardTitle
-                className={cn(UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2, UI_CLASSES.TEXT_CARD_TITLE)}
+                className={cn(cluster.compact, `${size.lg} ${weight.semibold}`)}
               >
                 <span className={cn('font-semibold', themeConfig.iconText)}>{step}.</span>
                 {title}
               </CardTitle>
-              <p className={cn(UI_CLASSES.TEXT_CARD_DESCRIPTION, UI_CLASSES.MARGIN_TOP_MICRO)}>
+              <p className={cn(`${size.sm} ${muted.default}`, marginTop.micro)}>
                 {description}
               </p>
             </div>
           </div>
         </CardHeader>
 
-        <CardContent className={UI_CLASSES.CARD_CONTENT_DEFAULT}>{children}</CardContent>
+        <CardContent className="pt-0">{children}</CardContent>
       </Card>
     </motion.div>
   );

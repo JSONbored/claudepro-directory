@@ -6,16 +6,15 @@
 
 'use client';
 
-import { type Database } from '@heyclaude/database-types';
+import type { content_category } from '@heyclaude/data-layer/prisma';
 import { PRIMARY_NAVIGATION, SECONDARY_NAVIGATION } from '@heyclaude/web-runtime/config/navigation';
-import { SPRING, MICROINTERACTIONS, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
+import { SPRING, MICROINTERACTIONS, STAGGER, DURATION, gap, spaceY, size, weight, muted, tracking, paddingX, paddingY, marginBottom, marginTop, marginLeft, cluster, center, padding, marginY, marginX, paddingTop } from '@heyclaude/web-runtime/design-system';
 import { Bookmark, ChevronDown, Github, MessageSquare, PlusCircle, Search } from '@heyclaude/web-runtime/icons';
 import {
   ANIMATION_CONSTANTS,
   DIMENSIONS,
   POSITION_PATTERNS,
   STATE_PATTERNS,
-  UI_CLASSES,
   UnifiedBadge,
   PrefetchLink,
   NavigationHoverCard,
@@ -42,7 +41,7 @@ import { useCommandPalette } from '@/src/components/features/navigation/command-
 /**
  * Get category from href for badge display
  */
-function getCategoryFromHref(href: string): Database['public']['Enums']['content_category'] | null {
+function getCategoryFromHref(href: string): content_category | null {
   if (href.includes('/agents')) return 'agents';
   if (href.includes('/mcp')) return 'mcp';
   if (href.includes('/commands')) return 'commands';
@@ -69,9 +68,10 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
   const linkProps = {
     href,
     prefetch: true,
-    className: `group relative px-2 py-1 text-xs font-medium ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} no-underline ${
-      active ? 'text-foreground' : 'text-foreground/80 hover:text-foreground'
-    } ${className}`,
+    className: cn('group relative', paddingX.compact, paddingY.tight, 'text-xs font-medium', ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT, 'no-underline',
+      active ? 'text-foreground' : 'text-foreground/80 hover:text-foreground',
+      className
+    ),
     ...(active && { 'aria-current': 'page' as const }),
     ...(onClick && { onClick }),
     style: {
@@ -100,7 +100,7 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
  */
 interface ConfigsDropdownProps {
   link: typeof PRIMARY_NAVIGATION[0];
-  getCategoryFromHref: (href: string) => Database['public']['Enums']['content_category'] | null;
+  getCategoryFromHref: (href: string) => content_category | null;
 }
 
 function ConfigsDropdown({ link, getCategoryFromHref }: ConfigsDropdownProps) {
@@ -124,7 +124,7 @@ function ConfigsDropdown({ link, getCategoryFromHref }: ConfigsDropdownProps) {
       <NavigationHoverCardTrigger asChild>
         <button
           type="button"
-          className={`group relative flex items-center px-2 py-1 font-medium ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_NAV} ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT}`}
+          className={cn('group relative flex items-center', paddingX.compact, paddingY.tight, 'font-medium', size.xs, 'text-foreground/80 hover:text-foreground', ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT)}
           aria-label={`Open ${link.label} menu`}
         >
           <span className="relative">
@@ -134,7 +134,7 @@ function ConfigsDropdown({ link, getCategoryFromHref }: ConfigsDropdownProps) {
               aria-hidden="true"
             />
           </span>
-          <ChevronDown className="ml-1 h-2.5 w-2.5 opacity-50" />
+          <ChevronDown className={cn(marginLeft.tight, 'h-2.5 w-2.5 opacity-50')} />
         </button>
       </NavigationHoverCardTrigger>
       <NavigationHoverCardContent
@@ -142,7 +142,7 @@ function ConfigsDropdown({ link, getCategoryFromHref }: ConfigsDropdownProps) {
         alignOffset={-16}
         className={cn(
           'w-[720px] xl:w-[800px]',
-          UI_CLASSES.PADDING_DEFAULT,
+          padding.default,
           'relative overflow-hidden rounded-xl border border-border/60 bg-background/95 backdrop-blur-xl shadow-2xl'
         )}
         sideOffset={8}
@@ -162,7 +162,7 @@ function ConfigsDropdown({ link, getCategoryFromHref }: ConfigsDropdownProps) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: DURATION.micro }}
-              className={cn('relative z-10 grid grid-cols-[.6fr_1.4fr]', UI_CLASSES.SPACE_COMFORTABLE)}
+              className={cn('relative z-10 grid grid-cols-[.6fr_1.4fr]', spaceY.comfortable)}
             >
               {/* Left Column: Hero Card */}
               <div>
@@ -173,15 +173,15 @@ function ConfigsDropdown({ link, getCategoryFromHref }: ConfigsDropdownProps) {
                 >
                   <Link
                     href="/tools/config-recommender"
-                    className="group/hero block rounded-lg border border-border/50 bg-card/50 p-4"
+                    className={`group/hero block rounded-lg border border-border/50 bg-card/50 ${padding.default}`}
                   >
-                  <div className="mb-3">
-                    <h3 className="font-semibold text-base mb-1">{link.label}</h3>
+                  <div className={marginBottom.default}>
+                    <h3 className={cn('font-semibold text-base', marginBottom.tight)}>{link.label}</h3>
                     <p className="text-muted-foreground text-sm leading-tight">
                       {link.description || 'Browse all configuration types for Claude Code'}
                     </p>
                   </div>
-                  <div className="flex items-center gap-2 text-xs font-medium text-accent">
+                  <div className={`flex items-center ${gap.tight} text-xs font-medium text-accent`}>
                     <span>Explore All</span>
                     <ChevronDown className="h-3 w-3 rotate-[-90deg]" />
                   </div>
@@ -208,7 +208,7 @@ function ConfigsDropdown({ link, getCategoryFromHref }: ConfigsDropdownProps) {
                   return (
                     <div className={cn('grid gap-4', columns.length === 1 ? 'grid-cols-1' : columns.length === 2 ? 'grid-cols-2' : 'grid-cols-3')}>
                       {columns.map((columnLinks, colIndex) => (
-                        <div key={`${link.label}-column-${colIndex}`} className="space-y-2 max-h-[280px] overflow-y-auto overflow-x-hidden scrollbar-hide">
+                        <div key={`${link.label}-column-${colIndex}`} className={`${spaceY.compact} max-h-[280px] overflow-y-auto overflow-x-hidden scrollbar-hide`}>
                           {columnLinks.map((child, childIndex) => {
                             const category = getCategoryFromHref(child.href);
                             const ChildIcon = child.icon;
@@ -231,9 +231,9 @@ function ConfigsDropdown({ link, getCategoryFromHref }: ConfigsDropdownProps) {
                                     <Link
                                       href={child.href}
                                       prefetch
-                                      className={cn('group/item block rounded-lg px-2.5 py-2 text-sm leading-none no-underline outline-none', STATE_PATTERNS.HOVER_BG_STRONG, STATE_PATTERNS.FOCUS_RING, 'overflow-hidden')}
+                                      className={cn('group/item block rounded-lg', paddingX['2.5'], paddingY.compact, 'text-sm leading-none no-underline outline-none', STATE_PATTERNS.HOVER_BG_STRONG, STATE_PATTERNS.FOCUS_RING, 'overflow-hidden')}
                                     >
-                                      <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                                      <div className={cn(cluster.compact, marginBottom.micro, 'flex-wrap')}>
                                         {ChildIcon && (
                                           <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-muted/50 text-muted-foreground group-hover/item:bg-muted group-hover/item:text-foreground">
                                             <ChildIcon className="h-3.5 w-3.5" />
@@ -245,18 +245,18 @@ function ConfigsDropdown({ link, getCategoryFromHref }: ConfigsDropdownProps) {
                                             variant="category" 
                                             category={category} 
                                             href={null}
-                                            className="shrink-0 text-[10px] px-1.5 py-0" 
+                                            className={cn('shrink-0', size['2xs'], paddingX['1.5'], paddingY.zero)} 
                                           />
                                         )}
                                         {child.isNew && (
                                           <UnifiedBadge variant="new-badge" badgeVariant="default" className="shrink-0" />
                                         )}
                                         {child.external && (
-                                          <span className="text-muted-foreground text-xs shrink-0 ml-auto">↗</span>
+                                          <span className={cn('text-muted-foreground text-xs shrink-0', marginLeft.auto)}>↗</span>
                                         )}
                                       </div>
                                       {child.description && (
-                                        <p className="text-muted-foreground text-[11px] leading-snug break-words word-break-break-word line-clamp-1 ml-8">
+                                        <p className={cn('text-muted-foreground', size['3xs'], 'leading-snug break-words word-break-break-word line-clamp-1', marginLeft.relaxed)}>
                                           {child.description}
                                         </p>
                                       )}
@@ -264,7 +264,7 @@ function ConfigsDropdown({ link, getCategoryFromHref }: ConfigsDropdownProps) {
                                   </motion.div>
                                 </motion.div>
                                 {!isLastInColumn && (
-                                  <div className="h-px bg-border/30 my-1.5" />
+                                  <div className={`h-px bg-border/30 ${marginY.micro}`} />
                                 )}
                               </div>
                             );
@@ -289,7 +289,7 @@ function ConfigsDropdown({ link, getCategoryFromHref }: ConfigsDropdownProps) {
  */
 interface DiscoverResourcesContributeDropdownProps {
   link: typeof PRIMARY_NAVIGATION[0];
-  getCategoryFromHref: (href: string) => Database['public']['Enums']['content_category'] | null;
+  getCategoryFromHref: (href: string) => content_category | null;
 }
 
 function DiscoverResourcesContributeDropdown({ link, getCategoryFromHref }: DiscoverResourcesContributeDropdownProps) {
@@ -312,7 +312,7 @@ function DiscoverResourcesContributeDropdown({ link, getCategoryFromHref }: Disc
       <NavigationHoverCardTrigger asChild>
         <button
           type="button"
-          className={`group relative flex items-center px-2 py-1 font-medium ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_NAV} ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT}`}
+          className={cn('group relative flex items-center', paddingX.compact, paddingY.tight, 'font-medium', size.xs, 'text-foreground/80 hover:text-foreground', ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT)}
           aria-label={`Open ${link.label} menu`}
         >
           <span className="relative">
@@ -322,7 +322,7 @@ function DiscoverResourcesContributeDropdown({ link, getCategoryFromHref }: Disc
               aria-hidden="true"
             />
           </span>
-          <ChevronDown className="ml-1 h-2.5 w-2.5 opacity-50" />
+          <ChevronDown className={cn(marginLeft.tight, 'h-2.5 w-2.5 opacity-50')} />
         </button>
       </NavigationHoverCardTrigger>
       <NavigationHoverCardContent
@@ -331,7 +331,7 @@ function DiscoverResourcesContributeDropdown({ link, getCategoryFromHref }: Disc
         className={cn(
           DIMENSIONS.NAV_DROPDOWN_BASE,
           DIMENSIONS.NAV_DROPDOWN_BASE_LG,
-          UI_CLASSES.PADDING_DEFAULT,
+          padding.default,
           'relative overflow-hidden rounded-xl border border-border/60 bg-background/95 backdrop-blur-xl shadow-2xl'
         )}
         sideOffset={8}
@@ -351,18 +351,18 @@ function DiscoverResourcesContributeDropdown({ link, getCategoryFromHref }: Disc
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: DURATION.micro }}
-              className={cn('relative z-10 grid', UI_CLASSES.SPACE_DEFAULT, DIMENSIONS.NAV_DROPDOWN_INNER_SM, DIMENSIONS.NAV_DROPDOWN_BASE_MD, 'md:grid-cols-2', DIMENSIONS.NAV_DROPDOWN_INNER_LG)}
+              className={cn('relative z-10 grid', spaceY.default, DIMENSIONS.NAV_DROPDOWN_INNER_SM, DIMENSIONS.NAV_DROPDOWN_BASE_MD, 'md:grid-cols-2', DIMENSIONS.NAV_DROPDOWN_INNER_LG)}
             >
               {link.sections!.map((section, sectionIndex) => {
                 const isLastSection = sectionIndex === link.sections!.length - 1;
                 return (
                   <li key={`${link.label}-${section.heading}`}>
-                    <div className="mb-2">
-                      <p className="text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-wider px-2">
+                    <div className={marginBottom.compact}>
+                      <p className={cn(size['2xs'], weight.semibold, muted.default, 'opacity-70 uppercase', tracking.wide, paddingX.compact)}>
                         {section.heading}
                       </p>
                     </div>
-                    <div className={UI_CLASSES.SPACE_Y_TIGHT}>
+                    <div className={spaceY.tight}>
                       {section.links.map((child, childIndex) => {
                         const isLastInSection = childIndex === section.links.length - 1;
                         const ChildIcon = child.icon;
@@ -384,16 +384,16 @@ function DiscoverResourcesContributeDropdown({ link, getCategoryFromHref }: Disc
                                 <Link
                                   href={child.href}
                                   prefetch
-                                  className={cn('group/item block rounded-lg px-3 py-2.5 text-sm leading-none no-underline outline-none', STATE_PATTERNS.HOVER_BG_STRONG, STATE_PATTERNS.FOCUS_RING, 'overflow-hidden')}
+                                  className={cn('group/item block rounded-lg', paddingX.compact, paddingY['2.5'], 'text-sm leading-none no-underline outline-none', STATE_PATTERNS.HOVER_BG_STRONG, STATE_PATTERNS.FOCUS_RING, 'overflow-hidden')}
                                 >
-                                  <div className="flex items-start gap-3">
+                                  <div className={`flex items-start ${gap.compact}`}>
                                     {ChildIcon && (
                                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted/50 text-muted-foreground group-hover/item:bg-muted group-hover/item:text-foreground">
                                         <ChildIcon className="h-4 w-4" />
                                       </div>
                                     )}
                                     <div className="flex-1 min-w-0">
-                                      <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                                      <div className={cn(cluster.compact, marginBottom.micro, 'flex-wrap')}>
                                         <div className="font-medium break-words word-break-break-word">{child.label}</div>
                                         {(() => {
                                           const category = getCategoryFromHref(child.href);
@@ -402,7 +402,7 @@ function DiscoverResourcesContributeDropdown({ link, getCategoryFromHref }: Disc
                                               variant="category" 
                                               category={category} 
                                               href={null}
-                                              className="shrink-0 text-[10px] px-1.5 py-0" 
+                                              className={cn('shrink-0', size['2xs'], paddingX['1.5'], paddingY.zero)} 
                                             />
                                           ) : null;
                                         })()}
@@ -410,7 +410,7 @@ function DiscoverResourcesContributeDropdown({ link, getCategoryFromHref }: Disc
                                           <UnifiedBadge variant="new-badge" badgeVariant="default" className="shrink-0" />
                                         )}
                                         {child.external && (
-                                          <span className="text-muted-foreground text-xs shrink-0 ml-auto">↗</span>
+                                          <span className={cn('text-muted-foreground text-xs shrink-0', marginLeft.auto)}>↗</span>
                                         )}
                                       </div>
                                       {child.description && (
@@ -424,14 +424,14 @@ function DiscoverResourcesContributeDropdown({ link, getCategoryFromHref }: Disc
                               </motion.div>
                             </motion.div>
                             {!isLastInSection && (
-                              <div className="h-px bg-border/30 mx-3" />
+                              <div className={`h-px bg-border/30 ${marginX.compact}`} />
                             )}
                           </div>
                         );
                       })}
                   </div>
                     {!isLastSection && (
-                      <div className="h-px bg-border/40 my-3 mx-2" />
+                      <div className={`h-px bg-border/40 ${marginY.compact} ${marginX.tight}`} />
                     )}
                   </li>
                 );
@@ -450,7 +450,7 @@ function DiscoverResourcesContributeDropdown({ link, getCategoryFromHref }: Disc
  */
 interface FallbackDropdownProps {
   link: typeof PRIMARY_NAVIGATION[0];
-  getCategoryFromHref: (href: string) => Database['public']['Enums']['content_category'] | null;
+  getCategoryFromHref: (href: string) => content_category | null;
 }
 
 function FallbackDropdown({ link, getCategoryFromHref }: FallbackDropdownProps) {
@@ -473,7 +473,7 @@ function FallbackDropdown({ link, getCategoryFromHref }: FallbackDropdownProps) 
       <NavigationHoverCardTrigger asChild>
         <button
           type="button"
-          className={`group relative flex items-center px-2 py-1 font-medium ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_NAV} ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT}`}
+          className={cn('group relative flex items-center', paddingX.compact, paddingY.tight, 'font-medium', size.xs, 'text-foreground/80 hover:text-foreground', ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT)}
           aria-label={`Open ${link.label} menu`}
         >
           <span className="relative">
@@ -483,7 +483,7 @@ function FallbackDropdown({ link, getCategoryFromHref }: FallbackDropdownProps) 
               aria-hidden="true"
             />
           </span>
-          <ChevronDown className="ml-1 h-2.5 w-2.5 opacity-50" />
+          <ChevronDown className={cn(marginLeft.tight, 'h-2.5 w-2.5 opacity-50')} />
         </button>
       </NavigationHoverCardTrigger>
       <NavigationHoverCardContent
@@ -491,7 +491,7 @@ function FallbackDropdown({ link, getCategoryFromHref }: FallbackDropdownProps) 
         alignOffset={-16}
         className={cn(
           'w-64',
-          UI_CLASSES.PADDING_COMPACT,
+          padding.compact,
           'relative overflow-hidden rounded-xl border border-border/60 bg-background/95 backdrop-blur-xl shadow-2xl'
         )}
         sideOffset={8}
@@ -514,17 +514,17 @@ function FallbackDropdown({ link, getCategoryFromHref }: FallbackDropdownProps) 
               className="relative z-10"
             >
               {link.sections ? (
-                <div className={UI_CLASSES.SPACE_Y_COMFORTABLE}>
+                <div className={spaceY.comfortable}>
                   {link.sections.map((section, sectionIndex) => {
                     const isLastSection = sectionIndex === (link.sections?.length ?? 0) - 1;
                     return (
                       <div key={`${link.label}-${section.heading}`}>
-                        <div className="px-2 py-1 mb-1.5">
-                          <p className="text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-wider">
+                        <div className={cn(paddingX.compact, paddingY.tight, marginBottom['1.5'])}>
+                          <p className={cn(size['2xs'], weight.semibold, muted.default, 'opacity-70 uppercase', tracking.wide)}>
                             {section.heading}
                           </p>
                         </div>
-                        <div className={UI_CLASSES.SPACE_Y_TIGHT}>
+                        <div className={spaceY.tight}>
                           {section.links.map((child, childIndex) => {
                             const ChildIcon = child.icon;
                             const isLastInSection = childIndex === section.links.length - 1;
@@ -547,16 +547,16 @@ function FallbackDropdown({ link, getCategoryFromHref }: FallbackDropdownProps) 
                                 <Link
                                   href={child.href}
                                   prefetch
-                                  className={cn('group/item block rounded-lg px-3 py-2.5 text-sm leading-none no-underline outline-none', STATE_PATTERNS.HOVER_BG_STRONG, STATE_PATTERNS.FOCUS_RING, 'overflow-hidden')}
+                                  className={cn('group/item block rounded-lg', paddingX.compact, paddingY['2.5'], 'text-sm leading-none no-underline outline-none', STATE_PATTERNS.HOVER_BG_STRONG, STATE_PATTERNS.FOCUS_RING, 'overflow-hidden')}
                                 >
-                                <div className="flex items-start gap-3">
+                                <div className={`flex items-start ${gap.compact}`}>
                                   {ChildIcon && (
                                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted/50 text-muted-foreground group-hover/item:bg-muted group-hover/item:text-foreground">
                                       <ChildIcon className="h-4 w-4" />
                                     </div>
                                   )}
                                   <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                                    <div className={`flex items-center ${gap.tight} ${marginBottom.default}.5 flex-wrap`}>
                                       <div className="font-medium break-words word-break-break-word">{child.label}</div>
                                       {(() => {
                                         const category = getCategoryFromHref(child.href);
@@ -565,7 +565,7 @@ function FallbackDropdown({ link, getCategoryFromHref }: FallbackDropdownProps) 
                                             variant="category" 
                                             category={category} 
                                             href={null}
-                                            className="shrink-0 text-[10px] px-1.5 py-0" 
+                                            className={cn('shrink-0', size['2xs'], paddingX['1.5'], paddingY.zero)} 
                                           />
                                         ) : null;
                                       })()}
@@ -573,7 +573,7 @@ function FallbackDropdown({ link, getCategoryFromHref }: FallbackDropdownProps) 
                                         <UnifiedBadge variant="new-badge" badgeVariant="default" className="shrink-0" />
                                       )}
                                       {child.external && (
-                                        <span className="text-muted-foreground text-xs shrink-0 ml-auto">↗</span>
+                                        <span className={`text-muted-foreground text-xs shrink-0 ${marginLeft.auto}`}>↗</span>
                                       )}
                                     </div>
                                     {child.description && (
@@ -587,21 +587,21 @@ function FallbackDropdown({ link, getCategoryFromHref }: FallbackDropdownProps) 
                               </motion.div>
                             </motion.div>
                             {!isLastInSection && (
-                              <div className="h-px bg-border/30 mx-3" />
+                              <div className={`h-px bg-border/30 ${marginX.compact}`} />
                             )}
                           </div>
                           );
                         })}
                       </div>
                       {!isLastSection && (
-                        <div className="h-px bg-border/40 my-3 mx-2" />
+                        <div className={`h-px bg-border/40 ${marginY.compact} ${marginX.tight}`} />
                       )}
                     </div>
                   );
                 })}
                 </div>
               ) : link.children ? (
-                <div className={UI_CLASSES.SPACE_Y_TIGHT}>
+                        <div className={spaceY.tight}>
                   {link.children.map((child, childIndex) => {
                     const ChildIcon = child.icon;
                     return (
@@ -622,16 +622,16 @@ function FallbackDropdown({ link, getCategoryFromHref }: FallbackDropdownProps) 
                           <Link
                             href={child.href}
                             prefetch
-                            className={cn('group/item block rounded-lg px-3 py-2.5 text-sm leading-none no-underline outline-none', STATE_PATTERNS.HOVER_BG_SUBTLE, STATE_PATTERNS.FOCUS_RING)}
+                            className={cn('group/item block rounded-lg', paddingX.compact, paddingY['2.5'], 'text-sm leading-none no-underline outline-none', STATE_PATTERNS.HOVER_BG_SUBTLE, STATE_PATTERNS.FOCUS_RING)}
                           >
-                          <div className="flex items-start gap-3">
+                          <div className={`flex items-start ${gap.compact}`}>
                                   {ChildIcon && (
                                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted/50 text-muted-foreground group-hover/item:bg-muted group-hover/item:text-foreground">
                                       <ChildIcon className="h-4 w-4" />
                                     </div>
                                   )}
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-0.5">
+                              <div className={cn(cluster.compact, marginBottom.micro)}>
                                 <div className="font-medium">{child.label}</div>
                                 {child.isNew && (
                                   <UnifiedBadge variant="new-badge" badgeVariant="default" className="shrink-0" />
@@ -760,8 +760,8 @@ function CommunityIconsRow({
   };
   
   return (
-    <div className="border-t border-border/30 mt-4 pt-4">
-      <div className="flex items-center justify-center gap-3 px-2">
+    <div className={cn('border-t border-border/30', marginTop.default, paddingTop.default)}>
+      <div className={cn(center, gap.default, paddingX.compact)}>
         {/* Search / Command Menu */}
         <motion.div
           whileHover={MICROINTERACTIONS.button.hover}
@@ -835,7 +835,7 @@ function CommunityIconsRow({
           >
             <Github className="h-4 w-4" />
             {githubStars !== null && (
-              <span className="absolute -top-1 -right-1 text-[10px] font-medium text-accent">
+              <span className={cn('absolute -top-1 -right-1', size['2xs'], weight.medium, 'text-accent')}>
                 {githubStars > 999 ? `${(githubStars / 1000).toFixed(1)}k` : githubStars.toLocaleString()}
               </span>
             )}
@@ -860,7 +860,7 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
   if (!isMounted) {
     return (
       <nav
-        className={`hidden xl:flex ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-xs`}
+        className={`hidden xl:flex ${cluster.compact} text-xs`}
         aria-label="Primary navigation"
       >
         {/* Placeholder to maintain layout during SSR */}
@@ -875,7 +875,7 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
 
   return (
     <nav
-      className={`hidden xl:flex ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-xs`}
+        className={`hidden xl:flex ${cluster.compact} text-xs`}
       aria-label="Primary navigation"
     >
       {PRIMARY_NAVIGATION.map((link) => {
@@ -886,7 +886,7 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
               <NavigationHoverCardTrigger asChild>
                 <button
                   type="button"
-                  className={`group relative flex items-center px-2 py-1 font-medium ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_NAV} ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT}`}
+                  className={cn('group relative flex items-center', paddingX.compact, paddingY.tight, 'font-medium', size.xs, 'text-foreground/80 hover:text-foreground', ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT)}
                   aria-label={`Open ${link.label} menu`}
                 >
                   <span className="relative">
@@ -896,7 +896,7 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
                       aria-hidden="true"
                     />
                   </span>
-                  <ChevronDown className="ml-1 h-2.5 w-2.5 opacity-50" />
+                  <ChevronDown className={cn(marginLeft.tight, 'h-2.5 w-2.5 opacity-50')} />
                 </button>
               </NavigationHoverCardTrigger>
               <NavigationHoverCardContent
@@ -904,7 +904,7 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
                 alignOffset={-16}
                 className={cn(
                   DIMENSIONS.NAV_DROPDOWN_JOBS,
-                  UI_CLASSES.PADDING_DEFAULT,
+                  padding.default,
                   'relative overflow-hidden rounded-xl border border-border/60 bg-background/95 backdrop-blur-xl shadow-2xl'
                 )}
                 sideOffset={8}
@@ -916,9 +916,9 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
                   duration={4}
                   borderWidth={1.5}
                 />
-                <div className={cn('relative z-10 grid grid-cols-2', UI_CLASSES.SPACE_COMFORTABLE)}>
+                <div className={cn('relative z-10 grid grid-cols-2', gap.comfortable)}>
                   {/* Left Column: Post a Job CTA + Quick Links */}
-                  <div className={UI_CLASSES.SPACE_Y_3}>
+                  <div className={spaceY.default}>
                     {/* Post a Job Hero Card */}
                     <motion.div
                       whileHover={MICROINTERACTIONS.card.hover}
@@ -927,9 +927,9 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
                     >
                       <Link
                         href="/account/jobs/new"
-                        className="group/cta block rounded-lg border-2 border-accent/20 bg-gradient-to-br from-accent/10 to-accent/5 p-4"
+                        className={`group/cta block rounded-lg border-2 border-accent/20 bg-gradient-to-br from-accent/10 to-accent/5 ${padding.default}`}
                       >
-                      <div className="flex items-center gap-3 mb-2">
+                      <div className={cn(cluster.default, marginBottom.compact)}>
                         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/20 group-hover/cta:bg-accent/30 transition-colors">
                           <PlusCircle className="h-5 w-5 text-accent" />
                         </div>
@@ -938,10 +938,10 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
                           <p className="text-xs text-muted-foreground">Reach talented developers</p>
                         </div>
                       </div>
-                      <p className="text-xs text-muted-foreground mb-3">
+                      <p className={cn('text-xs text-muted-foreground', marginBottom.default)}>
                         Featured listings available. Premium placement options.
                       </p>
-                      <div className="flex items-center gap-2 text-xs font-medium text-accent">
+                      <div className={`flex items-center ${gap.tight} text-xs font-medium text-accent`}>
                         <span>Create Listing</span>
                         <ChevronDown className="h-3 w-3 rotate-[-90deg]" />
                       </div>
@@ -949,7 +949,7 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
                     </motion.div>
 
                     {/* Quick Links */}
-                    <div className="space-y-0.5">
+                    <div className={`${spaceY.default}.5`}>
                       {link.sections[0]?.links.map((child) => {
                         const ChildIcon = child.icon;
                         return (
@@ -965,7 +965,7 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
                             <Link
                               href={child.href}
                               prefetch
-                              className="flex items-center gap-2 px-2 py-1.5 text-sm rounded-md group/item"
+                              className={`flex items-center ${gap.tight} ${paddingX.tight} ${paddingY.micro}.5 text-sm rounded-md group/item`}
                             >
                               {ChildIcon && (
                                 <ChildIcon className="h-4 w-4 text-muted-foreground group-hover/item:text-accent" />
@@ -980,19 +980,19 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
 
                   {/* Right Column: Featured Jobs Preview */}
                   <div>
-                    <div className="px-2 py-1 mb-2">
-                      <p className="text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-wider">
+                    <div className={`${paddingX.tight} ${paddingY.micro} ${marginBottom.compact}`}>
+                      <p className={cn(size['2xs'], weight.semibold, 'text-muted-foreground/70 uppercase', tracking.wide)}>
                         Featured Jobs
                       </p>
                     </div>
-                    <div className="space-y-2">
-                      <div className="rounded-md border border-border/50 bg-card/50 p-3 text-sm">
+                    <div className={`${spaceY.compact}`}>
+                      <div className={`rounded-md border border-border/50 bg-card/50 ${padding.compact} text-sm`}>
                         <p className="text-muted-foreground text-xs">
                           Featured job previews will appear here
                         </p>
                         <Link
                           href="/jobs?featured=true"
-                          className="text-xs text-accent hover:underline mt-2 inline-block"
+                          className={`text-xs text-accent hover:underline ${marginTop.compact} inline-block`}
                         >
                           View all featured jobs →
                         </Link>
@@ -1045,7 +1045,7 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
         return (
           <NavLink key={link.label} href={link.href} isActive={isActive}>
             {link.isNew ? (
-              <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5}>
+              <span className={cn(cluster.compact, gap['1.5'])}>
                 {link.label}
                 <UnifiedBadge variant="new-indicator" label={`New: ${link.label}`} />
               </span>
@@ -1060,7 +1060,7 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
         <NavigationHoverCardTrigger asChild>
           <button
             type="button"
-            className={`group relative flex items-center px-2 py-1 font-medium ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_NAV} ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT}`}
+            className={cn('group relative flex items-center', paddingX.compact, paddingY.tight, 'font-medium', size.xs, 'text-foreground/80 hover:text-foreground', ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT)}
             aria-label="Open additional navigation menu"
           >
             <span className="relative">
@@ -1070,7 +1070,7 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
                 aria-hidden="true"
               />
             </span>
-            <ChevronDown className="ml-1 h-2.5 w-2.5 opacity-50" />
+            <ChevronDown className={cn(marginLeft.tight, 'h-2.5 w-2.5 opacity-50')} />
           </button>
         </NavigationHoverCardTrigger>
         <NavigationHoverCardContent
@@ -1078,7 +1078,7 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
           alignOffset={-16}
           className={cn(
             'w-80',
-            UI_CLASSES.PADDING_DEFAULT,
+            padding.default,
             'relative overflow-hidden rounded-xl border border-border/60 bg-background/95 backdrop-blur-xl shadow-2xl'
           )}
           sideOffset={8}
@@ -1091,15 +1091,15 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
                   borderWidth={1.5}
                 />
           {/* Support group with enhanced layout */}
-          <div className={cn('relative z-10', UI_CLASSES.SPACE_Y_DEFAULT)}>
+          <div className={cn('relative z-10', spaceY.default)}>
             {SECONDARY_NAVIGATION.map((group, groupIndex) => {
               const isLastGroup = groupIndex === SECONDARY_NAVIGATION.length - 1;
               return (
                 <div key={group.heading}>
-                  <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-2 py-1.5 mb-2">
+                  <div className={cn(size['2xs'], weight.semibold, muted.default, 'uppercase', tracking.wide, paddingX.compact, paddingY['1.5'], marginBottom.compact)}>
                     {group.heading}
                   </div>
-                  <ul className="grid gap-1">
+                  <ul className={`grid ${gap.micro}`}>
                     {group.links
                       // Filter out Pinboard, Discord, and GitHub from vertical list (they'll be in horizontal icon row at bottom)
                       .filter((link) => {
@@ -1115,7 +1115,7 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
                     <Fragment key={`${group.heading}-${link.label}-fragment`}>
                       {linkIndex > 0 && (
                         <li key={`${group.heading}-${link.label}-divider`}>
-                          <div className="h-px bg-border/30 my-1 mx-3" />
+                          <div className={`h-px bg-border/30 ${marginY.micro} ${marginX.compact}`} />
                         </li>
                       )}
                       <li key={`${group.heading}-${link.label}`}>
@@ -1132,16 +1132,16 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
                             href={link.href}
                             prefetch={!link.external}
                             {...(link.external && { target: '_blank', rel: 'noopener noreferrer' })}
-                            className="group/item block rounded-lg px-3 py-2.5 text-sm leading-none no-underline outline-none focus:bg-accent/5"
+                            className={`group/item block rounded-lg ${paddingX.compact} ${paddingY.tight}.5 text-sm leading-none no-underline outline-none focus:bg-accent/5`}
                           >
-                            <div className="flex items-start gap-3">
+                            <div className={`flex items-start ${gap.compact}`}>
                               {LinkIcon && (
                                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted/50 text-muted-foreground group-hover/item:bg-muted group-hover/item:text-foreground">
                                   <LinkIcon className="h-4 w-4" />
                                 </div>
                               )}
                               <div className="flex-1 min-w-0 overflow-hidden">
-                                <div className="font-medium mb-0.5 break-words">{link.label}</div>
+                                <div className={cn('font-medium', marginBottom.micro, 'break-words')}>{link.label}</div>
                                 {link.description && (
                                   <p className="text-muted-foreground text-xs leading-snug break-words line-clamp-2">
                                     {link.description}
@@ -1157,7 +1157,7 @@ export function NavigationDesktop({ isActive }: NavigationDesktopProps) {
                   })}
                   </ul>
                   {!isLastGroup && (
-                    <div className="h-px bg-border/40 my-4 mx-2" />
+                    <div className={`h-px bg-border/40 ${marginY.default} ${marginX.tight}`} />
                   )}
                 </div>
               );

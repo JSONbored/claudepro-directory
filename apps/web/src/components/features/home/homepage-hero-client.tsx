@@ -28,18 +28,17 @@ import {
   TooltipTrigger,
   UnifiedBadge,
   HighlightText,
+  cn,
   ScrambledText,
 } from '@heyclaude/web-runtime/ui';
 import { 
   SPRING, 
   STAGGER, 
   MICROINTERACTIONS,
-  VIEWPORT,
-} from '@heyclaude/web-runtime/design-system';
+  VIEWPORT, paddingX, paddingTop, paddingBottom, marginX, marginBottom, gap, paddingY, maxWidth, size, weight, leading, tracking, gradient } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import { memo, useMemo } from 'react';
-import { type Database } from '@heyclaude/database-types';
 import { getCategoryConfigs, getCategoryStatsConfig } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import Link from 'next/link';
@@ -60,7 +59,8 @@ function HomepageHeroClientComponent({
   const { isSearchFocused, setSearchFocused } = useHeroSearchConnection();
   const shouldReduceMotion = useReducedMotion();
   
-  // Category stats config for counters
+  // OPTIMIZATION: Memoize category configs to avoid recreating on every render
+  // React Compiler will automatically optimize this, but explicit memoization ensures stability
   const categoryStatsConfig = useMemo(() => getCategoryStatsConfig(), []);
   const categoryConfigs = useMemo(() => getCategoryConfigs(), []);
 
@@ -72,15 +72,7 @@ function HomepageHeroClientComponent({
       {/* Subtle Background Texture - Modern 2025 Pattern */}
       {!shouldReduceMotion && (
         <div 
-          className="absolute inset-0 opacity-[0.015] dark:opacity-[0.03]"
-          style={{
-            backgroundImage: `
-              radial-gradient(circle at 20% 50%, var(--claude-orange) 0%, transparent 50%),
-              radial-gradient(circle at 80% 80%, var(--claude-orange) 0%, transparent 50%)
-            `,
-            backgroundSize: '100% 100%',
-            backgroundPosition: 'center',
-          }}
+          className={`absolute inset-0 opacity-[0.015] dark:opacity-[0.03] ${gradient.heroTexture}`}
           aria-hidden="true"
         />
       )}
@@ -88,59 +80,34 @@ function HomepageHeroClientComponent({
       {/* Hero Content Container */}
       <motion.div
         key={isSearchFocused ? 'focused' : 'unfocused'}
-        className="relative z-10 flex flex-col"
-        style={{
-          paddingTop: 'clamp(4rem, 10vw, 7rem)',
-          paddingBottom: 'clamp(3rem, 8vw, 5rem)',
-        }}
+        className={`relative z-10 flex flex-col ${paddingTop.hero} ${paddingBottom.hero} sm:${paddingTop.heroLarge} sm:${paddingBottom.heroLarge} lg:${paddingTop.heroXLarge} lg:${paddingBottom.heroXLarge}`}
         {...(isSearchFocused
           ? {
               animate: shouldReduceMotion
-                ? {
-                    opacity: MICROINTERACTIONS.hero.focused.opacity,
-                  }
+                ? { opacity: MICROINTERACTIONS.hero.focused.opacity }
                 : {
                     opacity: MICROINTERACTIONS.hero.focused.opacity,
                     scale: MICROINTERACTIONS.hero.focused.scale,
                   },
             }
           : {
-              animate: shouldReduceMotion
-                ? {
-                    opacity: 1,
-                  }
-                : {
-                    opacity: 1,
-                    scale: 1,
-                  },
+              animate: shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1 },
             })}
         transition={MICROINTERACTIONS.hero.transition}
       >
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-4xl">
+        <div className={`container ${marginX.auto} ${paddingX.default} sm:${paddingX.comfortable} lg:${paddingX.relaxed}`}>
+          <div className={`${marginX.auto} ${maxWidth['4xl']}`}>
             {/* Hero Content - Centered with Perfect Hierarchy */}
             <div className="text-center">
               {/* Main Heading - Stunning Typography */}
-              <div
-                style={{
-                  marginBottom: 'clamp(1.5rem, 4vw, 2rem)',
-                }}
-              >
+              <div className={`${marginBottom.default} sm:${marginBottom.comfortable} lg:${marginBottom.relaxed}`}>
                 <motion.h1
-                  className="flex items-center justify-center"
+                  className={`flex items-center justify-center ${size['3xl']} sm:${size['4xl']} lg:${size['5xl']} ${weight.bold} ${leading.tight} ${tracking.tight} text-foreground ${marginBottom.compact} sm:${marginBottom.default}`}
                   initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 24 }}
                   animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
                   transition={{
                     ...SPRING.hero,
                     delay: STAGGER.tight,
-                  }}
-                  style={{
-                    fontSize: 'clamp(1.75rem, 4.5vw, 3rem)', // Smaller heading
-                    fontWeight: 700,
-                    lineHeight: 1.1,
-                    letterSpacing: '-0.025em',
-                    marginBottom: 'clamp(0.75rem, 2vw, 1rem)',
-                    color: 'var(--color-foreground)', // White text for heading
                   }}
                 >
                   <motion.span 
@@ -155,20 +122,12 @@ function HomepageHeroClientComponent({
                   </motion.span>
                 </motion.h1>
                 <motion.h1
-                  className="flex items-center justify-center"
+                  className={`flex items-center justify-center ${size['3xl']} sm:${size['4xl']} lg:${size['5xl']} ${weight.bold} ${leading.tight} ${tracking.tight} text-foreground ${gap.compact}`}
                   initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 24 }}
                   animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
                   transition={{
                     ...SPRING.hero,
                     delay: STAGGER.tight + STAGGER.micro * 0.5,
-                  }}
-                  style={{
-                    fontSize: 'clamp(1.75rem, 4.5vw, 3rem)', // Smaller heading
-                    fontWeight: 700,
-                    lineHeight: 1.1,
-                    letterSpacing: '-0.025em',
-                    gap: '0.5rem', // Proper spacing between Claude and HighlightText
-                    color: 'var(--color-foreground)', // White text for heading
                   }}
                 >
                   <motion.span
@@ -206,18 +165,12 @@ function HomepageHeroClientComponent({
 
               {/* Description - Enhanced Readability with Scrambled Text */}
               <motion.div
-                className="text-muted-foreground mx-auto max-w-2xl"
+                className={`text-muted-foreground ${marginX.auto} ${maxWidth['2xl']} ${size.base} sm:${size.lg} lg:${size.xl} ${leading.relaxed} ${weight.normal} ${marginBottom.comfortable} sm:${marginBottom.loose} lg:${marginBottom.hero}`}
                 initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
                 animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
                 transition={{
                   ...SPRING.smooth,
                   delay: STAGGER.tight + STAGGER.micro * 1.5,
-                }}
-                style={{
-                  fontSize: 'clamp(1rem, 2vw, 1.25rem)', // Smaller subheading
-                  lineHeight: 1.65,
-                  marginBottom: 'clamp(2.5rem, 6vw, 3.5rem)',
-                  fontWeight: 400,
                 }}
               >
                 <ScrambledText
@@ -225,11 +178,7 @@ function HomepageHeroClientComponent({
                   duration={1.2}
                   speed={0.5}
                   scrambleChars=".:"
-                  style={{
-                    fontSize: 'inherit',
-                    lineHeight: 'inherit',
-                    display: 'block',
-                  }}
+                  className="block"
                 >
                   Join{' '}
                   <TooltipProvider delayDuration={300}>
@@ -260,14 +209,13 @@ function HomepageHeroClientComponent({
 
               {/* Search Bar - Integrated with Perfect Spacing */}
               <motion.div
-                className="mx-auto max-w-2xl"
+                className={`${marginX.auto} ${maxWidth['2xl']} ${marginBottom.default} sm:${marginBottom.comfortable}`}
                 initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
                 animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
                 transition={{
                   ...SPRING.smooth,
                   delay: STAGGER.tight + STAGGER.micro * 2.5,
                 }}
-                style={{ marginBottom: 'clamp(1.5rem, 4vw, 2rem)' }}
               >
                 <HomepageSearchBar onFocusChange={setSearchFocused} />
               </motion.div>
@@ -275,31 +223,35 @@ function HomepageHeroClientComponent({
               {/* Category Stats Section - Directly Below Search Bar */}
               {stats && typeof stats === 'object' && Object.keys(stats).length > 0 && (
                 <motion.div
-                  className="mx-auto max-w-4xl"
+                  className={`${marginX.auto} ${maxWidth['4xl']} ${marginBottom.comfortable} sm:${marginBottom.loose} lg:${marginBottom.hero}`}
                   initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
                   animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
                   transition={{
                     ...SPRING.smooth,
                     delay: STAGGER.tight + STAGGER.micro * 3,
                   }}
-                  style={{ marginBottom: 'clamp(2.5rem, 6vw, 4rem)' }}
                 >
-                  {/* Mobile Stats - Horizontal scroll */}
+                  {/* OPTIMIZATION: Single TooltipProvider for both mobile and desktop stats */}
                   <TooltipProvider delayDuration={300}>
+                    {/* Mobile Stats - Horizontal scroll */}
                     <motion.div
-                      className="flex gap-2 overflow-x-auto pb-2 md:hidden"
+                      className={`flex ${gap.tight} overflow-x-auto ${paddingBottom.tight} md:hidden`}
                       initial={{ opacity: 0, y: 20 }}
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={VIEWPORT.default}
                       transition={SPRING.smooth}
                     >
                       {categoryStatsConfig.map(({ categoryId, delay }, index: number) => {
-                        const categoryRoute = ROUTES[categoryId.toUpperCase() as keyof typeof ROUTES];
+                        // Type guard: categoryId is already content_category from CategoryStatsConfig
+                        // Map to ROUTES key safely
+                        const routeKey = categoryId.toUpperCase() as keyof typeof ROUTES;
+                        const categoryRoute = routeKey in ROUTES ? ROUTES[routeKey] : `/${categoryId}`;
                         const count =
                           typeof stats[categoryId] === 'number'
                             ? stats[categoryId]
                             : stats[categoryId]?.total || 0;
-                        const categoryConfig = categoryConfigs[categoryId as Database['public']['Enums']['content_category']];
+                        // Type guard: categoryId is already content_category, no assertion needed
+                        const categoryConfig = categoryConfigs[categoryId];
                         const tooltipText = categoryConfig?.description || `View all ${categoryId} configurations`;
 
                         return (
@@ -311,7 +263,7 @@ function HomepageHeroClientComponent({
                                 aria-label={`View all ${categoryId} configurations`}
                               >
                                 <motion.div
-                                  className="flex min-w-fit items-center gap-1.5 rounded-md border border-border/30 px-2 py-1 whitespace-nowrap transition-colors cursor-help bg-transparent"
+                                  className={cn('flex min-w-fit items-center', gap['1.5'], 'rounded-md border border-border/30', paddingX.tight, paddingY.micro, 'whitespace-nowrap transition-colors cursor-help bg-transparent')}
                                   initial={{ opacity: 0, x: -8 }}
                                   whileInView={{ 
                                     opacity: 1, 
@@ -353,18 +305,20 @@ function HomepageHeroClientComponent({
                         );
                       })}
                     </motion.div>
-                  </TooltipProvider>
 
-                  {/* Desktop Stats */}
-                  <TooltipProvider delayDuration={300}>
-                    <div className="hidden flex-wrap justify-center gap-2 md:flex lg:gap-2">
+                    {/* Desktop Stats */}
+                    <div className={`hidden flex-wrap justify-center ${gap.tight} md:flex lg:${gap.tight}`}>
                       {categoryStatsConfig.map(({ categoryId, delay }, index: number) => {
-                        const categoryRoute = ROUTES[categoryId.toUpperCase() as keyof typeof ROUTES];
+                        // Type guard: categoryId is already content_category from CategoryStatsConfig
+                        // Map to ROUTES key safely
+                        const routeKey = categoryId.toUpperCase() as keyof typeof ROUTES;
+                        const categoryRoute = routeKey in ROUTES ? ROUTES[routeKey] : `/${categoryId}`;
                         const count =
                           typeof stats[categoryId] === 'number'
                             ? stats[categoryId]
                             : stats[categoryId]?.total || 0;
-                        const categoryConfig = categoryConfigs[categoryId as Database['public']['Enums']['content_category']];
+                        // Type guard: categoryId is already content_category, no assertion needed
+                        const categoryConfig = categoryConfigs[categoryId];
                         const tooltipText = categoryConfig?.description || `View all ${categoryId} configurations`;
 
                         return (
@@ -376,7 +330,7 @@ function HomepageHeroClientComponent({
                                 aria-label={`View all ${categoryId} configurations`}
                               >
                                 <motion.div
-                                  className="flex items-center gap-1.5 rounded-md border border-border/30 px-3 py-1.5 transition-colors cursor-help bg-transparent"
+                                  className={cn('flex items-center', gap['1.5'], 'rounded-md border border-border/30', paddingX.compact, paddingY['1.5'], 'transition-colors cursor-help bg-transparent')}
                                   initial={{ opacity: 0, y: 8 }}
                                   whileInView={{ 
                                     opacity: 1, 

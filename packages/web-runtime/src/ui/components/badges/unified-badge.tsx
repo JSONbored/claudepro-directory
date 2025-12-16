@@ -41,12 +41,12 @@
  * ```
  */
 
-import type { Database } from '@heyclaude/database-types';
-import { SPRING, DURATION } from '../../../design-system/index.ts';
+import type { content_category, sponsorship_tier } from '@heyclaude/data-layer/prisma';
+import { SPRING, DURATION, iconSize, marginRight, size, weight, tracking } from '../../../design-system/index.ts';
 import { Star, TrendingUp, Zap } from '../../../icons.tsx';
-import { ANIMATION_CONSTANTS, UI_CLASSES } from '../../constants.ts';
+import { ANIMATION_CONSTANTS } from '../../constants.ts';
 import { cn } from '../../utils.ts';
-import { COLORS } from '../../../design-tokens/index.ts';
+// COLORS removed - using direct Tailwind utilities
 import { cva } from 'class-variance-authority';
 import { motion } from 'motion/react';
 import { useReducedMotion } from '../../../hooks/motion/index.ts';
@@ -58,7 +58,7 @@ import Link from 'next/link';
  * Maps category to route path, with special handling for CLAUDE.md → /rules
  */
 function getCategoryRoute(
-  category: Database['public']['Enums']['content_category']
+  category: content_category
 ): string {
   // Special case: rules category (CLAUDE.md) maps to /rules
   if (category === 'rules') {
@@ -75,7 +75,7 @@ function getCategoryRoute(
  * This matches the display names used in config-card.tsx for consistency
  */
 function getCategoryDisplayName(
-  category: Database['public']['Enums']['content_category']
+  category: content_category
 ): string {
   switch (category) {
     case 'mcp':
@@ -139,7 +139,7 @@ const categoryBadgeStyles = {
   collections: 'badge-category-collections',
   guides: 'badge-category-guides',
   skills: 'badge-category-skills',
-} as const satisfies Partial<Record<Database['public']['Enums']['content_category'], string>>;
+} as const satisfies Partial<Record<content_category, string>>;
 
 const sourceBadgeStyles = {
   official: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
@@ -196,7 +196,7 @@ export type UnifiedBadgeProps =
   | {
       /** Category/content-type badge */
       variant: 'category';
-      category: Database['public']['Enums']['content_category'];
+      category: content_category;
       /** Optional children. If not provided, automatically uses category display name (e.g., rules → "CLAUDE.md") */
       children?: React.ReactNode;
       className?: string;
@@ -220,7 +220,7 @@ export type UnifiedBadgeProps =
   | {
       /** Sponsored/promoted content badge */
       variant: 'sponsored';
-      tier: Database['public']['Enums']['sponsorship_tier'];
+      tier: sponsorship_tier;
       showIcon?: boolean;
       className?: string;
     }
@@ -439,9 +439,9 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
         case 'featured':
           return <Star className="mr-1 h-3 w-3 fill-current" aria-hidden="true" />;
         case 'promoted':
-          return <TrendingUp className={UI_CLASSES.ICON_XS_LEADING} aria-hidden="true" />;
+          return <TrendingUp className={`${iconSize.xs} ${marginRight.tight}`} aria-hidden="true" />;
         case 'spotlight':
-          return <Zap className={UI_CLASSES.ICON_XS_LEADING} aria-hidden="true" />;
+          return <Zap className={`${iconSize.xs} ${marginRight.tight}`} aria-hidden="true" />;
         default:
           return null;
       }
@@ -597,7 +597,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
         className={cn(
           'inline-flex items-center justify-center',
           'px-2.5 py-0.5',
-          'font-semibold text-[10px] uppercase tracking-wider',
+          cn(weight.semibold, size['2xs'], 'uppercase', tracking.wide),
           'rounded-full border',
           variantStyles[badgeVariant],
           props.className
@@ -627,11 +627,11 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
           ? `${(count / 1000).toFixed(1)}k`
           : `${Math.floor(count / 1000)}k`;
 
-    // Minimal semantic colors - just the text color, no background
-    const colorStyles = {
-      view: COLORS.semantic.social.view.dark.text,
-      copy: COLORS.semantic.social.copy.dark.text,
-      bookmark: COLORS.semantic.social.bookmark.dark.text,
+    // Minimal semantic colors - using Tailwind utilities (NO inline styles)
+    const colorClasses = {
+      view: 'text-color-social-view-text-dark',
+      copy: 'text-color-social-copy-text-dark',
+      bookmark: 'text-color-social-bookmark-text-dark',
     };
 
     // Custom font size: text-[10px] instead of text-xs (12px) for minimal badge overlays
@@ -640,11 +640,11 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
       <span
         className={cn(
           '-top-1 -right-1 absolute',
-          'font-semibold text-[10px] tabular-nums leading-none',
+          cn(weight.semibold, size['2xs'], 'tabular-nums leading-none'),
           'pointer-events-none',
+          colorClasses[type],
           props.className
         )}
-        style={{ color: colorStyles[type] }}
         aria-hidden="true"
       >
         {displayCount}

@@ -1,23 +1,22 @@
 'use client';
 
-import { type Database } from '@heyclaude/database-types';
+import type { newsletter_source } from '@heyclaude/data-layer/prisma';
 import { checkConfettiEnabled } from '@heyclaude/web-runtime/config/static-configs';
 import { NEWSLETTER_CTA_CONFIG } from '@heyclaude/web-runtime/core';
 import { useConfetti, useNewsletter } from '@heyclaude/web-runtime/hooks';
 import { ArrowRight, Loader2 } from '@heyclaude/web-runtime/icons';
 import {
   cn,
-  UI_CLASSES,
   Input,
 } from '@heyclaude/web-runtime/ui';
-import { SPRING, DURATION } from '@heyclaude/web-runtime/design-system';
+import { SPRING, DURATION, stack, size, iconSize } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { AnimatePresence, motion } from 'motion/react';
 import { useId, useMemo } from 'react';
 
 export interface NewsletterFormProps {
   className?: string;
-  source: Database['public']['Enums']['newsletter_source'];
+  source: newsletter_source;
 }
 
 /**
@@ -55,9 +54,9 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className={cn('w-full', className)}>
-      <div className={UI_CLASSES.FLEX_COL_GAP_3}>
+      <div className={stack.default}>
         {/* Integrated input with submit button inside */}
-        <div className="relative w-full">
+        <div className={`relative w-full`}>
           <Input
             type="email"
             placeholder="Enter your email"
@@ -69,7 +68,7 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
               'h-12 w-full pr-14 text-base',
               'border-border bg-background',
               'transition-all duration-200 ease-out',
-              'focus:border-[#F6F8F4]/50 focus:ring-2 focus:ring-[#F6F8F4]/20 focus:outline-none',
+              'focus:border-color-newsletter-border focus:ring-2 focus:ring-color-newsletter-ring focus:outline-none',
               error && 'border-destructive focus:border-destructive focus:ring-destructive/20',
               isSubmitting && 'cursor-not-allowed opacity-60',
               showSubmitButton && 'pr-14'
@@ -89,7 +88,7 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
                 className={cn(
                   'absolute right-2 top-1/2 -translate-y-1/2',
                   'flex h-10 w-10 items-center justify-center rounded-lg',
-                  'bg-[#F6F8F4] text-background',
+                  'bg-color-newsletter-bg text-background',
                   'cursor-not-allowed'
                 )}
                 initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.8 }}
@@ -98,7 +97,7 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
                 transition={{ duration: DURATION.quick }}
                 aria-label="Subscribing..."
               >
-                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                <Loader2 className={`${iconSize.sm} animate-spin`} aria-hidden="true" />
               </motion.button>
             ) : showSubmitButton ? (
               <motion.button
@@ -107,10 +106,10 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
                 className={cn(
                   'absolute right-2 top-1/2 -translate-y-1/2',
                   'flex h-10 w-10 items-center justify-center rounded-lg',
-                  'bg-[#F6F8F4] text-background',
+                  'bg-color-newsletter-bg text-background',
                   'shadow-sm transition-all duration-200',
-                  'hover:bg-[#F6F8F4]/90 hover:shadow-md',
-                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F6F8F4] focus-visible:ring-offset-2',
+                  'hover:bg-color-newsletter-bg-hover hover:shadow-md',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-color-newsletter-bg focus-visible:ring-offset-2',
                   'active:scale-95'
                 )}
                 initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -8, scale: 0.8 }}
@@ -126,7 +125,7 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
                   whileHover={shouldReduceMotion ? {} : { rotate: 15 }}
                   transition={SPRING.bouncy}
                 >
-                  <ArrowRight className="h-5 w-5" aria-hidden="true" />
+                  <ArrowRight className={`${iconSize.md}`} aria-hidden="true" />
                 </motion.div>
               </motion.button>
             ) : null}
@@ -137,7 +136,7 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
         {error ? (
           <motion.p
             id={errorId}
-            className="text-destructive text-sm"
+            className={`text-destructive ${size.sm}`}
             role="alert"
             initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -4 }}
             animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}

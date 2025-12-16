@@ -7,7 +7,7 @@
  * Note: Prisma Client is NOT isomorphic (doesn't work in Deno/Edge Functions).
  * This is fine because:
  * - Data layer services are used in Next.js (Node.js)
- * - Edge Functions will continue using Supabase client
+ * - Edge Functions use Prisma client for database operations (Supabase client only for auth/storage)
  * - We can create separate Prisma adapters for different environments
  *
  * Prisma 7.1.0+ requires an adapter for the "client" engine type.
@@ -15,22 +15,19 @@
  */
 
 // Import PrismaClient from generated location
-// Prisma generates to packages/generators/dist/prisma (relative to prisma/schema.prisma)
-// From packages/data-layer/src/prisma/client.ts, that's ../../../generators/dist/prisma
-// Use createRequire for CommonJS compatibility in ESM context
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-const { PrismaClient } = require('../../../generators/dist/prisma/index.js');
-// Import type separately for TypeScript
-import type { PrismaClient as PrismaClientType } from '../../../generators/dist/prisma/index.js';
+// Use client.ts explicitly for backend (has PrismaClient and all server types)
+import { PrismaClient } from '@heyclaude/database-types/prisma/client';
+// Prisma namespace is exported from client.ts and used for type annotations
 
 // Import PostgreSQL adapter (Prisma 7.1.0+ requirement)
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
 import { requireEnvVar } from '@heyclaude/shared-runtime';
 
+type PrismaClientInstance = InstanceType<typeof PrismaClient>;
+
 const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClientType | undefined;
+  prisma: PrismaClientInstance | undefined;
 };
 
 /**

@@ -4,7 +4,7 @@
 
 'use client';
 
-import { STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
+import { STAGGER, DURATION, marginBottom, gap, marginTop, muted } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import { type ReactNode } from 'react';
@@ -35,20 +35,20 @@ export function AuthFormPanel({
 }: AuthFormPanelProps) {
   const shouldReduceMotion = useReducedMotion();
   return (
-    <div className="w-full">
+    <div className={`w-full`}>
       <motion.div
-        className="mb-12"
+        className={`${marginBottom.loose}`}
         initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -10 }}
         animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
         transition={{ duration: DURATION.moderate, delay: STAGGER.slow }}
       >
-        <h2 className="mb-4 text-center text-3xl font-bold">{title}</h2>
-        <p className="text-muted-foreground text-center text-sm">{description}</p>
+        <h2 className={`${marginBottom.default} text-center text-3xl font-bold`}>{title}</h2>
+        <p className={`${muted.default} text-center text-sm`}>{description}</p>
       </motion.div>
 
       {/* Icon grid - 3 columns */}
       <motion.div
-        className="flex items-center justify-center gap-4"
+        className={`flex items-center justify-center ${gap.default}`}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: DURATION.moderate, delay: STAGGER.loose }}
@@ -58,7 +58,7 @@ export function AuthFormPanel({
 
       {afterContent ? (
         <motion.div
-          className="mt-8"
+          className={`${marginTop.relaxed}`}
           initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 10 }}
           animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
           transition={{ duration: DURATION.slow, delay: STAGGER.extended }}

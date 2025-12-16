@@ -5,20 +5,16 @@
  * success rate, and total user count. Provides social proof data for engagement.
  */
 
-import type { Database } from '@heyclaude/database-types';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import { prisma } from '@heyclaude/data-layer/prisma/client.ts';
 import { logError } from '@heyclaude/shared-runtime/logging.ts';
 
 /**
  * Fetches social proof statistics from the community.
  *
- * @param supabase - Authenticated Supabase client (should use admin/service role for stats)
  * @returns Social proof stats including contributors, submissions, success rate, and total users
  * @throws If database queries fail
  */
-export async function handleGetSocialProofStats(
-  supabase: SupabaseClient<Database>
-) {
+export async function handleGetSocialProofStats() {
   try {
     // Calculate date ranges
     const weekAgo = new Date();
@@ -26,24 +22,37 @@ export async function handleGetSocialProofStats(
     const monthAgo = new Date();
     monthAgo.setDate(monthAgo.getDate() - 30);
 
-    // Execute all queries in parallel
+    // Execute all queries in parallel using Prisma
     const [recentResult, monthResult, contentResult] = await Promise.allSettled([
-      supabase
-        .from('content_submissions')
-        .select('id, status, created_at, author')
-        .gte('created_at', weekAgo.toISOString())
-        .order('created_at', { ascending: false }),
-      supabase
-        .from('content_submissions')
-        .select('status')
-        .gte('created_at', monthAgo.toISOString()),
-      supabase.from('content').select('id', { count: 'exact', head: true }),
+      prisma.content_submissions.findMany({
+        where: {
+          created_at: { gte: weekAgo },
+        },
+        select: {
+          id: true,
+          status: true,
+          created_at: true,
+          author: true,
+        },
+        orderBy: {
+          created_at: 'desc',
+        },
+      }),
+      prisma.content_submissions.findMany({
+        where: {
+          created_at: { gte: monthAgo },
+        },
+        select: {
+          status: true,
+        },
+      }),
+      prisma.content.count(),
     ]);
 
     // Extract results and handle errors
     interface SubmissionRow {
-      author: null | string;
-      created_at: string;
+      author: string | null;
+      created_at: Date;
       id: string;
       status: string;
     }
@@ -51,58 +60,31 @@ export async function handleGetSocialProofStats(
       status: string;
     }
 
-    let recentSubmissions: null | SubmissionRow[] = null;
-    let submissionsError: unknown = null;
+    let recentSubmissions: SubmissionRow[] = [];
     if (recentResult.status === 'fulfilled') {
-      const response = recentResult.value as { data: null | SubmissionRow[]; error: unknown };
-      recentSubmissions = response.data;
-      submissionsError = response.error ?? null;
+      recentSubmissions = recentResult.value as SubmissionRow[];
     } else {
-      submissionsError = recentResult.reason;
+      await logError('Failed to fetch recent submissions', {}, recentResult.reason);
     }
 
-    if (submissionsError !== null && submissionsError !== undefined) {
-      await logError('Failed to fetch recent submissions', {
-        error: submissionsError,
-      });
-    }
-
-    let monthSubmissions: null | StatusRow[] = null;
-    let monthError: unknown = null;
+    let monthSubmissions: StatusRow[] = [];
     if (monthResult.status === 'fulfilled') {
-      const response = monthResult.value as { data: null | StatusRow[]; error: unknown };
-      monthSubmissions = response.data;
-      monthError = response.error ?? null;
+      monthSubmissions = monthResult.value as StatusRow[];
     } else {
-      monthError = monthResult.reason;
+      await logError('Failed to fetch month submissions', {}, monthResult.reason);
     }
 
-    if (monthError !== null && monthError !== undefined) {
-      await logError('Failed to fetch month submissions', {
-        error: monthError,
-      });
-    }
-
-    let contentCount: null | number = null;
-    let contentError: unknown = null;
+    let contentCount: number = 0;
     if (contentResult.status === 'fulfilled') {
-      const response = contentResult.value as { count: null | number; error: unknown };
-      contentCount = response.count;
-      contentError = response.error ?? null;
+      contentCount = contentResult.value as number;
     } else {
-      contentError = contentResult.reason;
-    }
-
-    if (contentError !== null && contentError !== undefined) {
-      await logError('Failed to fetch content count', {
-        error: contentError,
-      });
+      await logError('Failed to fetch content count', {}, contentResult.reason);
     }
 
     // Calculate stats
-    const submissionCount = recentSubmissions?.length ?? 0;
-    const total = monthSubmissions?.length ?? 0;
-    const approved = monthSubmissions?.filter((s) => s.status === 'merged').length ?? 0;
+    const submissionCount = recentSubmissions.length;
+    const total = monthSubmissions.length;
+    const approved = monthSubmissions.filter((s) => s.status === 'merged').length;
     const successRate = total > 0 ? Math.round((approved / total) * 100) : null;
 
     // Get top contributors this week (unique authors with most submissions)
@@ -129,7 +111,7 @@ export async function handleGetSocialProofStats(
         return name.trim();
       });
 
-    const totalUsers = contentCount ?? null;
+    const totalUsers = contentCount;
     const timestamp = new Date().toISOString();
 
     // Create text summary

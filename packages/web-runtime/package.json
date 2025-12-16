@@ -6,15 +6,18 @@
   "sideEffects": false,
   "exports": {
     ".": {
-      "types": "./src/index.ts",
+      "development": "./src/index.ts",
+      "types": "./dist/index.d.ts",
       "default": "./src/index.ts"
     },
     "./server": {
-      "types": "./src/server.ts",
+      "development": "./src/server.ts",
+      "types": "./dist/server.d.ts",
       "default": "./src/server.ts"
     },
     "./server-edge": {
-      "types": "./src/server-edge.ts",
+      "development": "./src/server-edge.ts",
+      "types": "./dist/server-edge.d.ts",
       "default": "./src/server-edge.ts"
     },
     "./actions": {
@@ -74,6 +77,10 @@
       "types": "./src/utils/url-safety.ts",
       "default": "./src/utils/url-safety.ts"
     },
+    "./utils/optimize-avatar-url": {
+      "types": "./src/utils/optimize-avatar-url.ts",
+      "default": "./src/utils/optimize-avatar-url.ts"
+    },
     "./config/actions": {
       "types": "./src/config/actions.config.ts",
       "default": "./src/config/actions.config.ts"
@@ -85,6 +92,10 @@
     "./hooks/use-authenticated-user": {
       "types": "./src/hooks/use-authenticated-user.ts",
       "default": "./src/hooks/use-authenticated-user.ts"
+    },
+    "./prisma-zod-schemas": {
+      "types": "./src/prisma-zod-schemas.ts",
+      "default": "./src/prisma-zod-schemas.ts"
     },
     "./utils/auth-redirect": {
       "types": "./src/utils/auth-redirect.ts",
@@ -109,6 +120,10 @@
     "./data/config/constants": {
       "types": "./src/data/config/constants.ts",
       "default": "./src/data/config/constants.ts"
+    },
+    "./data/config/version": {
+      "types": "./src/data/config/version.ts",
+      "default": "./src/data/config/version.ts"
     },
     "./data/layout/flags": {
       "types": "./src/data/layout/flags.ts",
@@ -230,8 +245,9 @@
     "@radix-ui/react-use-controllable-state": "^1.2.2",
     "@radix-ui/react-visually-hidden": "^1.2.4",
     "@react-email/components": "^1.0.1",
+    "@tanstack/react-virtual": "^3.13.13",
     "@supabase/ssr": "^0.8.0",
-    "@supabase/supabase-js": "^2.87.1",
+    "@supabase/supabase-js": "^2.87.3",
     "canvas-confetti": "^1.9.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -251,7 +267,7 @@
     "server-only": "^0.0.1",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0",
-    "zod": "^4.1.13",
+    "zod": "^4.2.0",
     "zustand": "^5.0.9"
   },
   "scripts": {

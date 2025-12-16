@@ -47,7 +47,7 @@ import { UI_TIMEOUTS } from '../../../config/unified-config.ts';
 import type { ButtonStyleProps } from '../../../types/component.types.ts';
 import { toasts } from '../../../client/toast.ts';
 import { MICROINTERACTIONS } from '../../../design-system/index.ts';
-import { COLORS } from '../../../design-tokens/index.ts';
+// COLORS removed - using direct Tailwind utilities
 import { Check, Copy } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useBoolean, useTimeout } from '@heyclaude/web-runtime/hooks';
@@ -147,7 +147,7 @@ export function SimpleCopyButton({
               animate={MICROINTERACTIONS.iconTransition.animate}
               exit={MICROINTERACTIONS.iconTransition.exit}
               transition={MICROINTERACTIONS.iconTransition.transition}
-              style={{ color: COLORS.semantic.social.copy.dark.text }}
+              className="text-color-social-copy-text-dark"
             >
               <Check className={iconClassName} aria-hidden="true" />
             </motion.div>

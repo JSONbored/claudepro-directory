@@ -1,7 +1,7 @@
-import { type Database } from '@heyclaude/database-types';
+import type { content_category } from '@heyclaude/data-layer/prisma';
 
 const CATEGORY_DISPLAY_NAMES: Record<
-  Database['public']['Enums']['content_category'],
+  content_category,
   { pluralTitle: string; description: string }
 > = {
   agents: {
@@ -51,7 +51,7 @@ const CATEGORY_DISPLAY_NAMES: Record<
 };
 
 export function getCategoryDisplayName(
-  category: Database['public']['Enums']['content_category']
+  category: content_category
 ): { pluralTitle: string; description: string } {
   return CATEGORY_DISPLAY_NAMES[category] ?? {
     pluralTitle: category,

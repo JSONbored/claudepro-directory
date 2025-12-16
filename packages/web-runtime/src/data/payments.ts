@@ -1,14 +1,14 @@
 'use server';
 
 import { JobsService } from '@heyclaude/data-layer';
-import { type payment_plan_catalog } from '@heyclaude/data-layer/prisma';
-import { type Database } from '@heyclaude/database-types';
+import type { payment_plan_catalogModel } from '@heyclaude/data-layer/prisma';
+import type { JobBillingSummary } from '@heyclaude/database-types/postgres-types';
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { logger } from '../index.ts';
 
-type PaymentPlanRow = payment_plan_catalog;
-type JobBillingSummaryRow = Database['public']['Views']['job_billing_summary']['Row'];
+type PaymentPlanRow = payment_plan_catalogModel;
+type JobBillingSummaryRow = JobBillingSummary;
 
 type PaymentPlanCatalogRowSubset = Pick<
   PaymentPlanRow,

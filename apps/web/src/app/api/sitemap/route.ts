@@ -21,7 +21,7 @@
 import 'server-only';
 
 import { MiscService } from '@heyclaude/data-layer';
-import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
+import type { GenerateSitemapXmlArgs } from '@heyclaude/database-types/postgres-types';
 import {
   APP_CONFIG,
   buildSecurityHeaders,
@@ -188,9 +188,9 @@ export const GET = createApiRoute({
     // XML format (default)
     const service = new MiscService();
 
-    const rpcArgs = {
+    const rpcArgs: GenerateSitemapXmlArgs = {
       p_base_url: SITE_URL,
-    } satisfies DatabaseGenerated['public']['Functions']['generate_sitemap_xml']['Args'];
+    };
 
     let data;
     try {

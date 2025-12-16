@@ -3,7 +3,7 @@
  *
  * Fully modernized for Prisma ORM - no backward compatibility.
  * All table types use Prisma types.
- * RPC function types remain using Database type (Prisma doesn't generate RPC types).
+ * RPC function types use postgres-types generator (Prisma doesn't generate RPC types).
  */
 
 import type {
@@ -26,11 +26,22 @@ import type {
   InsertWebhookEventArgs,
   InsertWebhookEventReturns,
 } from '@heyclaude/database-types/postgres-types';
-import type { Json } from '@heyclaude/database-types';
-import type { Prisma } from '@heyclaude/data-layer/prisma';
 import { prisma } from '../prisma/client.ts';
 import { BasePrismaService } from './base-prisma-service.ts';
 import { logRpcError } from '../utils/rpc-error-logging.ts';
+import { withSmartCache } from '../utils/request-cache.ts';
+
+// Type helpers: Extract model types from Prisma query results
+type SponsoredContent = Awaited<ReturnType<typeof prisma.sponsored_content.findUnique>>;
+type AppSetting = Awaited<ReturnType<typeof prisma.app_settings.findUnique>>;
+type EmailEngagementSummary = Awaited<ReturnType<typeof prisma.email_engagement_summary.findUnique>>;
+type Notification = Awaited<ReturnType<typeof prisma.notifications.create>>;
+
+// Type helpers: Extract input types from Prisma operations
+type AppSettingCreateInput = Parameters<typeof prisma.app_settings.create>[0]['data'];
+type EmailEngagementSummaryCreateInput = Parameters<typeof prisma.email_engagement_summary.create>[0]['data'];
+type EmailBlocklistCreateInput = Parameters<typeof prisma.email_blocklist.create>[0]['data'];
+type NotificationCreateInput = Parameters<typeof prisma.notifications.create>[0]['data'];
 
 /**
  * Misc Service using Prisma Client
@@ -130,32 +141,56 @@ export class MiscService extends BasePrismaService {
     );
   }
 
+  /**
+   * Get sponsored content by ID
+   * 
+   * OPTIMIZATION: Uses request-scoped caching to prevent duplicate queries in same request.
+   */
   async getSponsoredContentById(sponsoredId: string): Promise<{
-    content_type: Prisma.sponsored_contentGetPayload<{}>['content_type'];
+    content_type: NonNullable<SponsoredContent>['content_type'];
   } | null> {
-    const sponsored = await prisma.sponsored_content.findUnique({
-      where: { id: sponsoredId },
-      select: { content_type: true },
-    });
-    return sponsored;
+    return withSmartCache(
+      'getSponsoredContentById',
+      'getSponsoredContentById',
+      async () => {
+        const sponsored = await prisma.sponsored_content.findUnique({
+          where: { id: sponsoredId },
+          select: { content_type: true },
+        });
+        return sponsored;
+      },
+      { sponsoredId } // Cache key
+    );
   }
 
+  /**
+   * Get app setting by key
+   * 
+   * OPTIMIZATION: Uses request-scoped caching to prevent duplicate queries in same request.
+   */
   async getAppSetting(settingKey: string): Promise<{
-    setting_value: Prisma.app_settingsGetPayload<{}>['setting_value'];
-    updated_at: Prisma.app_settingsGetPayload<{}>['updated_at'];
+    setting_value: NonNullable<AppSetting>['setting_value'];
+    updated_at: NonNullable<AppSetting>['updated_at'];
   } | null> {
-    const setting = await prisma.app_settings.findUnique({
-      where: { setting_key: settingKey },
-      select: {
-        setting_value: true,
-        updated_at: true,
+    return withSmartCache(
+      'getAppSetting',
+      'getAppSetting',
+      async () => {
+        const setting = await prisma.app_settings.findUnique({
+          where: { setting_key: settingKey },
+          select: {
+            setting_value: true,
+            updated_at: true,
+          },
+        });
+        return setting;
       },
-    });
-    return setting;
+      { settingKey } // Cache key
+    );
   }
 
   async upsertAppSetting(
-    setting: Prisma.app_settingsCreateInput
+    setting: AppSettingCreateInput
   ): Promise<void> {
     try {
       await prisma.app_settings.upsert({
@@ -173,17 +208,29 @@ export class MiscService extends BasePrismaService {
     }
   }
 
+  /**
+   * Get email engagement summary by email
+   * 
+   * OPTIMIZATION: Uses request-scoped caching to prevent duplicate queries in same request.
+   */
   async getEmailEngagementSummary(email: string): Promise<
-    Prisma.email_engagement_summaryGetPayload<{}> | null
+    EmailEngagementSummary | null
   > {
-    const summary = await prisma.email_engagement_summary.findUnique({
-      where: { email },
-    });
-    return summary;
+    return withSmartCache(
+      'getEmailEngagementSummary',
+      'getEmailEngagementSummary',
+      async () => {
+        const summary = await prisma.email_engagement_summary.findUnique({
+          where: { email },
+        });
+        return summary;
+      },
+      { email } // Cache key
+    );
   }
 
   async upsertEmailEngagementSummary(
-    engagement: Prisma.email_engagement_summaryCreateInput
+    engagement: EmailEngagementSummaryCreateInput
   ): Promise<void> {
     try {
       await prisma.email_engagement_summary.upsert({
@@ -202,7 +249,7 @@ export class MiscService extends BasePrismaService {
   }
 
   async upsertEmailBlocklist(
-    blocklistEntry: Prisma.email_blocklistCreateInput
+    blocklistEntry: EmailBlocklistCreateInput
   ): Promise<void> {
     try {
       await prisma.email_blocklist.upsert({
@@ -225,8 +272,8 @@ export class MiscService extends BasePrismaService {
       await prisma.webhook_events.update({
         where: { id: webhookId },
         data: {
+          processed: true,
           processed_at: new Date(),
-          status: 'processed',
         },
       });
     } catch (error) {
@@ -240,7 +287,7 @@ export class MiscService extends BasePrismaService {
   }
 
   async upsertNotification(
-    notification: Prisma.notificationsCreateInput
+    notification: NotificationCreateInput
   ): Promise<void> {
     try {
       await prisma.notifications.upsert({
@@ -259,8 +306,8 @@ export class MiscService extends BasePrismaService {
   }
 
   async insertNotification(
-    notification: Prisma.notificationsCreateInput
-  ): Promise<Prisma.notificationsGetPayload<{}>> {
+    notification: NotificationCreateInput
+  ): Promise<Notification> {
     try {
       const result = await prisma.notifications.create({
         data: notification,
@@ -312,7 +359,7 @@ export class MiscService extends BasePrismaService {
     rpcName: string,
     args: {
       webhook_id: string;
-      webhook_data: Json;
+      webhook_data: unknown;
     }
   ): Promise<void> {
     // Mutations don't use caching

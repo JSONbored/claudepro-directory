@@ -1,6 +1,6 @@
 import { execSync } from 'node:child_process';
 
-import { logger } from '../toolkit/logger.js';
+import { logger } from '../toolkit/logger.ts';
 
 const EXCLUDE_PATTERNS = [
   // Next.js framework exports

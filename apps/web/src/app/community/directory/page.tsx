@@ -1,4 +1,4 @@
-import { type Database } from '@heyclaude/database-types';
+import type { GetCommunityDirectoryReturns } from '@heyclaude/database-types/postgres-types';
 import { generatePageMetadata, getCommunityDirectory } from '@heyclaude/web-runtime/data';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { Skeleton } from '@heyclaude/web-runtime/ui';
@@ -8,6 +8,7 @@ import { Suspense } from 'react';
 import { ContributorsSidebar } from '@/src/components/features/community/contributors-sidebar';
 import { DirectoryTabs } from '@/src/components/features/community/directory-tabs';
 import { ProfileSearchClient } from '@/src/components/features/community/profile-search';
+import { paddingX, paddingY, marginX, marginBottom, gap, muted } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Provide metadata for the Community Directory page.
@@ -50,8 +51,7 @@ async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string 
     route: '/community/directory',
   });
 
-  let directoryData: Database['public']['Functions']['get_community_directory']['Returns'] | null =
-    null;
+  let directoryData: GetCommunityDirectoryReturns | null = null;
   try {
     directoryData = await getCommunityDirectory({ limit: DEFAULT_DIRECTORY_LIMIT, searchQuery });
   } catch (error) {
@@ -154,17 +154,17 @@ async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string 
     }));
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className={`container ${marginX.auto} ${paddingX.default} ${paddingY.relaxed}`}>
       {/* Header */}
-      <div className="mx-auto mb-12 max-w-3xl text-center">
-        <h1 className="mb-4 text-4xl font-bold">Community Directory</h1>
-        <p className="text-muted-foreground text-lg">
+      <div className={`${marginX.auto} ${marginBottom.loose} max-w-3xl text-center`}>
+        <h1 className={`${marginBottom.default} text-4xl font-bold`}>Community Directory</h1>
+        <p className={`${muted.default} text-lg`}>
           Connect with Claude Code contributors, power users, and community experts
         </p>
       </div>
 
       {/* Two-column layout: Main content + Sidebar */}
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
+      <div className={`grid grid-cols-1 ${gap.relaxed} lg:grid-cols-4`}>
         {/* Main Content - Tabbed User Grid */}
         <div className="lg:col-span-3">
           <DirectoryTabs
@@ -205,7 +205,7 @@ export default function CommunityDirectoryPage({ searchParams }: CommunityDirect
   // Data layer caching is already in place for optimal performance
 
   return (
-    <Suspense fallback={<Skeleton className="h-screen w-full" size="xl" />}>
+    <Suspense fallback={<Skeleton className={`h-screen w-full`} size="xl" />}>
       <CommunityDirectoryPageContent searchParams={searchParams} />
     </Suspense>
   );

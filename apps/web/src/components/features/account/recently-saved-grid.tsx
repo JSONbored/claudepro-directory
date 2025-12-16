@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useCallback } from 'react';
 
 import { useAuthModal } from '@/src/hooks/use-auth-modal';
+import { gap } from "@heyclaude/web-runtime/design-system";
 
 interface RecentlySavedGridProps {
   items: DisplayableContent[];
@@ -22,7 +23,7 @@ export function RecentlySavedGrid({ items }: RecentlySavedGridProps) {
     });
   }, [openAuthModal, pathname]);
   return (
-    <div className="grid gap-4 md:grid-cols-2">
+    <div className={`grid ${gap.default} md:grid-cols-2`}>
       {items.map((item) => {
         const slug = (item as { slug?: null | string }).slug ?? undefined;
         const category = (item as { category?: null | string }).category ?? 'agents';

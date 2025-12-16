@@ -4,11 +4,10 @@
  */
 
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '@heyclaude/database-types';
 import { getEnvVar } from '@heyclaude/shared-runtime';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
 
-type SupabaseAdminClient = ReturnType<typeof createSupabaseClient<Database>>;
+type SupabaseAdminClient = ReturnType<typeof createSupabaseClient>;
 
 /**
  * Check if we're in build phase
@@ -48,7 +47,7 @@ export function createSupabaseAdminClient(): SupabaseAdminClient {
     );
   }
 
-  return createSupabaseClient<Database>(supabaseUrl, supabaseServiceKey, {
+  return createSupabaseClient(supabaseUrl, supabaseServiceKey, {
     auth: {
       persistSession: false,
       autoRefreshToken: false,

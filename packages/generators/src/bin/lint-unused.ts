@@ -1,4 +1,4 @@
 #!/usr/bin/env tsx
-import { runLintUnusedTypes } from '../commands/lint-unused.js';
+import { runLintUnusedTypes } from '../commands/lint-unused.ts';
 
 runLintUnusedTypes();

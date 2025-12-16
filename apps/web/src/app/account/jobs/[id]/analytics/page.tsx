@@ -12,14 +12,12 @@ import { formatRelativeDate } from '@heyclaude/web-runtime/data/utils';
 import { ArrowLeft, ExternalLink } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  BADGE_COLORS,
   Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  UI_CLASSES,
   UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
 import { type JobStatus } from '@heyclaude/web-runtime/ui/constants';
@@ -33,6 +31,7 @@ import { Suspense } from 'react';
 import { MetricsDisplay } from '@/src/components/features/analytics/metrics-display';
 
 import Loading from './loading';
+import { between, spaceY, marginBottom, marginRight, gap, padding, marginTop, marginLeft, muted } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Dynamic Rendering Required
@@ -53,10 +52,20 @@ function formatStatus(rawStatus: string): string {
  * @param {JobStatus} status - The job status to map
  * @returns The CSS/color token associated with `status`
  *
- * @see BADGE_COLORS.jobStatus
+ * Direct Tailwind utilities - no wrapper needed
  */
+const jobStatusBadgeMap: Record<JobStatus, string> = {
+  draft: 'bg-color-badge-jobstatus-draft-bg text-color-badge-jobstatus-draft-text border-color-badge-jobstatus-draft-border',
+  pending_payment: 'bg-color-badge-jobstatus-pending-payment-bg text-color-badge-jobstatus-pending-payment-text border-color-badge-jobstatus-pending-payment-border',
+  pending_review: 'bg-color-badge-jobstatus-pending-review-bg text-color-badge-jobstatus-pending-review-text border-color-badge-jobstatus-pending-review-border',
+  active: 'bg-color-badge-jobstatus-active-bg text-color-badge-jobstatus-active-text border-color-badge-jobstatus-active-border',
+  expired: 'bg-color-badge-jobstatus-expired-bg text-color-badge-jobstatus-expired-text border-color-badge-jobstatus-expired-border',
+  rejected: 'bg-color-badge-jobstatus-rejected-bg text-color-badge-jobstatus-rejected-text border-color-badge-jobstatus-rejected-border',
+  deleted: 'bg-color-badge-jobstatus-deleted-bg text-color-badge-jobstatus-deleted-text border-color-badge-jobstatus-deleted-border',
+};
+
 function getStatusColor(status: JobStatus): string {
-  return BADGE_COLORS.jobStatus[status];
+  return jobStatusBadgeMap[status];
 }
 
 /**
@@ -175,7 +184,7 @@ async function JobAnalyticsPageContent({
       'JobAnalyticsPage: job not found or not owned by user'
     );
     return (
-      <div className="space-y-6">
+      <div className={`${spaceY.relaxed}`}>
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl">Job analytics unavailable</CardTitle>
@@ -207,23 +216,23 @@ async function JobAnalyticsPageContent({
   );
 
   return (
-    <div className="space-y-6">
+    <div className={`${spaceY.relaxed}`}>
       <div>
-        <Button asChild className="mb-4" size="sm" variant="ghost">
+        <Button asChild className={`${marginBottom.default}`} size="sm" variant="ghost">
           <Link href={ROUTES.ACCOUNT_JOBS}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
+            <ArrowLeft className={`${marginRight.tight} h-4 w-4`} />
             Back to Jobs
           </Link>
         </Button>
-        <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+        <div className={between.center}>
           <div>
-            <h1 className="mb-2 text-3xl font-bold">Job Analytics</h1>
-            <p className="text-muted-foreground">{job.title}</p>
+            <h1 className={`${marginBottom.compact} text-3xl font-bold`}>Job Analytics</h1>
+            <p className={`${muted.default}`}>{job.title}</p>
           </div>
           {job.slug ? (
             <Button asChild variant="outline">
               <Link href={`${ROUTES.JOBS}/${job.slug}`}>
-                <ExternalLink className="mr-2 h-4 w-4" />
+                <ExternalLink className={`${marginRight.tight} h-4 w-4`} />
                 View Listing
               </Link>
             </Button>
@@ -233,7 +242,7 @@ async function JobAnalyticsPageContent({
 
       <Card>
         <CardHeader>
-          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+          <div className={between.center}>
             <CardTitle>Listing Details</CardTitle>
             <UnifiedBadge className={getStatusColor(status)} style="outline" variant="base">
               {formatStatus(status)}
@@ -241,32 +250,32 @@ async function JobAnalyticsPageContent({
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-4 text-sm">
+          <div className={`grid grid-cols-2 ${gap.default} text-sm`}>
             <div>
-              <p className="text-muted-foreground">Company</p>
+              <p className={`${muted.default}`}>Company</p>
               <p className="font-medium">{job.company}</p>
             </div>
             <div>
-              <p className="text-muted-foreground">Location</p>
+              <p className={`${muted.default}`}>Location</p>
               <p className="font-medium">{job.location ?? 'Not specified'}</p>
             </div>
             <div>
-              <p className="text-muted-foreground">Plan</p>
+              <p className={`${muted.default}`}>Plan</p>
               <p className="font-medium capitalize">{job.plan}</p>
             </div>
             <div>
-              <p className="text-muted-foreground">Type</p>
+              <p className={`${muted.default}`}>Type</p>
               <p className="font-medium capitalize">{job.type}</p>
             </div>
             {job.posted_at ? (
               <div>
-                <p className="text-muted-foreground">Posted</p>
+                <p className={`${muted.default}`}>Posted</p>
                 <p className="font-medium">{formatRelativeDate(job.posted_at)}</p>
               </div>
             ) : null}
             {job.expires_at ? (
               <div>
-                <p className="text-muted-foreground">Expires</p>
+                <p className={`${muted.default}`}>Expires</p>
                 <p className="font-medium">{formatRelativeDate(job.expires_at)}</p>
               </div>
             ) : null}
@@ -310,9 +319,9 @@ async function JobAnalyticsPageContent({
           <CardTitle>Performance Insights</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
+          <div className={`${spaceY.comfortable}`}>
             {viewCount === 0 && (
-              <div className="bg-muted/50 rounded-lg p-4">
+              <div className={`bg-muted/50 rounded-lg ${padding.default}`}>
                 <p className="text-sm">
                   Your job listing hasn&apos;t received any views yet. Try sharing it on social
                   media or updating the description to make it more discoverable.
@@ -321,11 +330,11 @@ async function JobAnalyticsPageContent({
             )}
 
             {viewCount > 0 && clickCount === 0 && (
-              <div className="rounded-lg border border-yellow-500/20 bg-yellow-500/10 p-4">
+              <div className={`rounded-lg border border-yellow-500/20 bg-yellow-500/10 ${padding.default}`}>
                 <p className="text-sm text-yellow-400">
                   Your listing is getting views but no clicks. Consider:
                 </p>
-                <ul className="mt-2 ml-4 list-disc text-sm text-yellow-400">
+                <ul className={`${marginTop.compact} ${marginLeft.default} list-disc text-sm text-yellow-400`}>
                   <li>Making the job title more descriptive</li>
                   <li>Highlighting competitive benefits</li>
                   <li>Adding salary information</li>
@@ -334,16 +343,16 @@ async function JobAnalyticsPageContent({
             )}
 
             {Number.parseFloat(ctr) > 5 && (
-              <div className="rounded-lg border border-green-500/20 bg-green-500/10 p-4">
+              <div className={`rounded-lg border border-green-500/20 bg-green-500/10 ${padding.default}`}>
                 <p className="text-sm text-green-400">
                   Great performance! Your CTR of {ctr}% is above average. Keep it up!
                 </p>
               </div>
             )}
 
-            <div className="text-muted-foreground text-sm">
-              <p className="mb-2 font-medium">Tips to improve visibility:</p>
-              <ul className="ml-4 list-disc space-y-1">
+            <div className={`${muted.default} text-sm`}>
+              <p className={`${marginBottom.compact} font-medium`}>Tips to improve visibility:</p>
+              <ul className={`${marginLeft.default} list-disc ${spaceY.tight}`}>
                 <li>Use clear, descriptive job titles</li>
                 <li>Include relevant technologies in tags</li>
                 <li>Specify remote/hybrid work options</li>

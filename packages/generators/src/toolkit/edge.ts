@@ -1,7 +1,7 @@
 import { normalizeError } from '@heyclaude/shared-runtime';
 
-import { logger } from './logger.js';
-import { getServiceRoleConfig, getSupabaseUrl } from './supabase.js';
+import { logger } from './logger.ts';
+import { getServiceRoleConfig, getSupabaseUrl } from './supabase.ts';
 
 export interface EdgeFetchOptions {
   requireAuth?: boolean;

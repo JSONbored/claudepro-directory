@@ -11,7 +11,8 @@ import { toggleJobStatus } from '@heyclaude/web-runtime/actions';
 import { useAuthenticatedUser, useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { Pause, Play } from '@heyclaude/web-runtime/icons';
 import { type ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
-import { toasts, UI_CLASSES, Button } from '@heyclaude/web-runtime/ui';
+import { toasts, Button } from '@heyclaude/web-runtime/ui';
+import { iconSize, iconLeading } from '@heyclaude/web-runtime/design-system';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useTransition } from 'react';
 
@@ -140,12 +141,12 @@ export function JobToggleButton({
     >
       {currentStatus === 'active' ? (
         <>
-          <Pause className={UI_CLASSES.ICON_XS_LEADING} />
+          <Pause className={`${iconSize.xs} ${iconLeading.normal}`} />
           Pause
         </>
       ) : (
         <>
-          <Play className={UI_CLASSES.ICON_XS_LEADING} />
+          <Play className={`${iconSize.xs} ${iconLeading.normal}`} />
           Resume
         </>
       )}

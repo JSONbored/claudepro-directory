@@ -9,7 +9,6 @@
 import { createServerClient } from '@supabase/ssr';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import type { Database } from '@heyclaude/database-types';
 import { getEnvVar } from '@heyclaude/shared-runtime';
 import { normalizeErrorEdge as normalizeError } from '../errors-edge.ts';
 
@@ -42,7 +41,7 @@ export async function updateSupabaseSession(
   let supabaseResponse: NextResponse | null = null;
 
   try {
-    const supabase = createServerClient<Database>(supabaseUrl, supabaseAnonKey, {
+    const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
       cookies: {
         getAll() {
           return request.cookies.getAll();

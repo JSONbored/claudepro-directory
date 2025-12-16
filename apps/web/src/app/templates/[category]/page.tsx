@@ -9,7 +9,7 @@
  * Cache: Handled by getContentTemplates data layer function
  */
 
-import { type Database } from '@heyclaude/database-types';
+import type { content_category } from '@heyclaude/data-layer/prisma';
 import { VALID_CATEGORIES } from '@heyclaude/web-runtime/core';
 import { getContentTemplates } from '@heyclaude/web-runtime/data';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
@@ -36,12 +36,12 @@ export default async function TemplatesPage({ params }: { params: Promise<{ cate
   // Validate category
   if (
     !category ||
-    !VALID_CATEGORIES.includes(category as Database['public']['Enums']['content_category'])
+    !VALID_CATEGORIES.includes(category as content_category)
   ) {
     notFound();
   }
 
-  const validCategory = category as Database['public']['Enums']['content_category'];
+  const validCategory = category as content_category;
 
   let templates: Awaited<ReturnType<typeof getContentTemplates>> = [];
   try {

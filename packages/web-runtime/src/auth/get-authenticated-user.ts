@@ -1,5 +1,4 @@
 import type { SupabaseClient, User } from '@supabase/supabase-js';
-import type { Database } from '@heyclaude/database-types';
 import { logger } from '../logger.ts';
 import { normalizeError } from '../errors.ts';
 import { createSupabaseServerClient } from '../supabase/server.ts';
@@ -23,7 +22,7 @@ export async function getAuthenticatedUser(
 }
 
 export async function getAuthenticatedUserFromClient(
-  supabase: SupabaseClient<Database>,
+  supabase: SupabaseClient,
   options?: AuthGuardOptions
 ): Promise<AuthenticatedUserResult> {
   const contextLabel = options?.context || 'auth_guard';

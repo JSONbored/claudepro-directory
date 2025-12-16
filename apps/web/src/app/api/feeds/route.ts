@@ -29,7 +29,6 @@ import type {
   GenerateContentAtomFeedArgs,
   GenerateContentRssFeedArgs,
 } from '@heyclaude/database-types/postgres-types';
-import { Constants } from '@heyclaude/database-types';
 import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
 import { normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
@@ -41,11 +40,11 @@ import {
 } from '@heyclaude/web-runtime/server';
 import { cacheLife } from 'next/cache';
 import { NextResponse } from 'next/server';
-
-const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
-const FEED_LIMIT = 50;
-
+import { ContentCategory } from '@heyclaude/data-layer/prisma';
 import type { content_category } from '@heyclaude/data-layer/prisma';
+
+const CONTENT_CATEGORY_VALUES = Object.values(ContentCategory) as readonly content_category[];
+const FEED_LIMIT = 50;
 
 type ContentCategory = content_category;
 type FeedType = 'atom' | 'rss';

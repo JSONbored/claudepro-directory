@@ -14,14 +14,16 @@ import {
   CardTitle,
   NavLink,
   UnifiedBadge,
+  cn,
 } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
-import { MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
+import { MICROINTERACTIONS, gap, marginBottom, border, cluster, muted, size } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
-import type { Database } from '@heyclaude/database-types';
+import type { GetUserProfileReturns } from '@heyclaude/database-types/postgres-types';
+import type { content_category } from '@heyclaude/data-layer/prisma';
 
 export interface ProfileContributionsSectionProps {
-  contributions: Database['public']['Functions']['get_user_profile']['Returns']['contributions'];
+  contributions: GetUserProfileReturns['contributions'];
   getSafeContentUrl: (type: string, slug: string) => null | string;
 }
 
@@ -39,13 +41,13 @@ export function ProfileContributionsSection({
   }
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className={`grid ${gap.default} sm:grid-cols-2 lg:grid-cols-3`}>
       {contributions
         .filter(
           (
             item
           ): item is typeof item & {
-            content_type: Database['public']['Enums']['content_category'];
+            content_type: content_category;
             id: string;
             name: null | string;
             slug: string;
@@ -67,10 +69,10 @@ export function ProfileContributionsSection({
               whileTap={shouldReduceMotion ? {} : MICROINTERACTIONS.card.tap}
               transition={MICROINTERACTIONS.card.transition}
             >
-              <Card className="border-border/50 cursor-pointer">
+              <Card className={`border-${border.default}/50 cursor-pointer`}>
                 <NavLink href={safeContentUrl}>
                   <CardHeader>
-                    <div className="mb-2 flex items-center justify-between">
+                    <div className={`${marginBottom.compact} flex items-center justify-between`}>
                       <UnifiedBadge variant="base" style="secondary" className="text-xs">
                         {item.content_type}
                       </UnifiedBadge>
@@ -86,7 +88,7 @@ export function ProfileContributionsSection({
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-muted-foreground flex items-center gap-2 text-xs">
+                    <div className={cn(muted.default, cluster.tight, gap.tight, size.xs)}>
                       <span>{item.view_count ?? 0} views</span>
                       <span>•</span>
                       <span>{item.download_count ?? 0} downloads</span>

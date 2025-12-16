@@ -1,7 +1,8 @@
 'use client';
 
 import { Check } from '../../icons.tsx';
-import { STATE_PATTERNS, UI_CLASSES } from '../constants.ts';
+import { STATE_PATTERNS } from '../constants.ts';
+import { iconSize } from '../../design-system/index.ts';
 import { cn } from '../utils.ts';
 import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
 import type * as React from 'react';
@@ -22,7 +23,7 @@ const Checkbox = ({
     {...props}
   >
     <CheckboxPrimitive.Indicator className={cn('flex items-center justify-center text-current')}>
-      <Check className={UI_CLASSES.ICON_SM} />
+      <Check className={iconSize.sm} />
     </CheckboxPrimitive.Indicator>
   </CheckboxPrimitive.Root>
 );

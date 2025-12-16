@@ -13,13 +13,20 @@
 
 'use client';
 
-import { type Database } from '@heyclaude/database-types';
+import type {
+  contact_action_type,
+  contact_category,
+  confetti_variant,
+  contact_command_icon,
+} from '@heyclaude/data-layer/prisma';
+import { ContactActionType } from '@heyclaude/data-layer/prisma';
 import {
   getContactCommands,
   submitContactForm,
   trackTerminalCommandAction,
   trackTerminalFormSubmissionAction,
 } from '@heyclaude/web-runtime/actions';
+import { contact_action_typeSchema } from '@heyclaude/web-runtime/prisma-zod-schemas';
 import { checkConfettiEnabled } from '@heyclaude/web-runtime/config/static-configs';
 import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
 import { useLoggedAsync, useConfetti } from '@heyclaude/web-runtime/hooks';
@@ -43,7 +50,7 @@ import {
   Textarea,
 } from '@heyclaude/web-runtime/ui';
 import { Terminal, AnimatedSpan, TypingAnimation } from '@/src/components/ui/terminal';
-import { STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
+import { STAGGER, DURATION, spaceY, marginX, marginBottom, marginTop, gap, marginLeft, paddingTop } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { AnimatePresence, motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
@@ -52,13 +59,13 @@ import { useBoolean } from '@heyclaude/web-runtime/hooks';
 
 // Internal type with non-nullable fields (after transformation)
 interface ContactCommand {
-  action_type: Database['public']['Enums']['contact_action_type'];
+  action_type: contact_action_type;
   action_value: null | string;
   aliases: string[];
   category: string;
-  confetti_variant: Database['public']['Enums']['confetti_variant'] | null;
+  confetti_variant: confetti_variant | null;
   description: null | string;
-  icon_name: Database['public']['Enums']['contact_command_icon'] | null;
+  icon_name: contact_command_icon | null;
   id: string;
   requires_auth: boolean;
   text: string;
@@ -82,9 +89,9 @@ export function ContactTerminal() {
   const [output, setOutput] = useState<OutputLine[]>([]);
   const { value: showSuggestions, setFalse: setShowSuggestionsFalse, setValue: setShowSuggestions } = useBoolean();
   const { value: isSheetOpen, setTrue: setIsSheetOpenTrue, setFalse: setIsSheetOpenFalse, setValue: setIsSheetOpenValue } = useBoolean();
-  const [selectedCategory, setSelectedCategory] = useState<
-    Database['public']['Enums']['contact_category']
-  >('general' as Database['public']['Enums']['contact_category']);
+  const [selectedCategory, setSelectedCategory] = useState<contact_category>(
+    'general' as contact_category
+  );
   const { value: isSubmitting, setTrue: setIsSubmittingTrue, setFalse: setIsSubmittingFalse } = useBoolean();
   const inputRef = useRef<HTMLInputElement>(null);
   const outputEndRef = useRef<HTMLDivElement>(null);
@@ -128,7 +135,7 @@ export function ContactTerminal() {
               icon_name: cmd.icon_name,
               action_type:
                 cmd.action_type ??
-                ('internal' as Database['public']['Enums']['contact_action_type']),
+                ContactActionType.internal,
               action_value: cmd.action_value,
               confetti_variant: cmd.confetti_variant,
               requires_auth: cmd.requires_auth ?? false,
@@ -199,7 +206,7 @@ export function ContactTerminal() {
       addOutput('output', 'Type for suggestions or try: help, report-bug, request-feature');
       trackTerminalCommandAction({
         command_id: 'unknown',
-        action_type: 'internal' as Database['public']['Enums']['contact_action_type'], // Default fallback for unknown commands
+        action_type: ContactActionType.internal, // Default fallback for unknown commands
         success: false,
         error_reason: 'command_not_found',
         execution_time_ms: Date.now() - startTime,
@@ -245,7 +252,7 @@ export function ContactTerminal() {
         case 'sheet': {
           if (command.action_value) {
             setSelectedCategory(
-              command.action_value as Database['public']['Enums']['contact_category']
+              command.action_value as contact_category
             );
             setIsSheetOpenTrue();
             addOutput(
@@ -271,9 +278,11 @@ export function ContactTerminal() {
         }
       }
 
+      // Use schema to validate and ensure proper type (contact_action_typeSchema outputs contact_action_type)
+      const actionType = contact_action_typeSchema.parse(command.action_type ?? ContactActionType.internal);
       trackTerminalCommandAction({
         command_id: command.id ?? '',
-        action_type: command.action_type ?? 'internal',
+        action_type: actionType,
         success: true,
         execution_time_ms: Date.now() - startTime,
       }).catch(() => {
@@ -297,9 +306,11 @@ export function ContactTerminal() {
           commandId: command.id ?? 'unknown',
         }
       );
+      // Use schema to validate and ensure proper type (contact_action_typeSchema outputs contact_action_type)
+      const actionType = contact_action_typeSchema.parse(command.action_type ?? ContactActionType.internal);
       trackTerminalCommandAction({
         command_id: command.id ?? '',
-        action_type: command.action_type ?? 'internal',
+        action_type: actionType,
         success: false,
         error_reason: normalized.message,
         execution_time_ms: Date.now() - startTime,
@@ -456,7 +467,7 @@ export function ContactTerminal() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="space-y-2 text-center"
+            className={`${spaceY.compact} text-center`}
           >
             <div className="text-primary animate-pulse text-sm">Loading terminal...</div>
             <div className="text-muted-foreground text-xs">Initializing commands</div>
@@ -474,10 +485,10 @@ export function ContactTerminal() {
           <motion.div
             initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 10 }}
             animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-            className="space-y-4 text-center"
+            className={`${spaceY.comfortable} text-center`}
           >
-            <X className="text-destructive mx-auto h-8 w-8" />
-            <div className="space-y-2">
+            <X className={`text-destructive ${marginX.auto} h-8 w-8`} />
+            <div className={`${spaceY.compact}`}>
               <div className="text-destructive text-sm font-medium">{loadError}</div>
               <Button
                 variant="outline"
@@ -504,7 +515,7 @@ export function ContactTerminal() {
     <>
       <Terminal className="relative flex min-h-[500px] flex-col" wrapInPreCode={false}>
         {/* Output History */}
-        <div className="mb-4 min-h-0 flex-1 overflow-y-auto">
+        <div className={`${marginBottom.default} min-h-0 flex-1 overflow-y-auto`}>
           <AnimatePresence>
             {output.map((line, index) => (
               <motion.div
@@ -519,7 +530,7 @@ export function ContactTerminal() {
                   line.type === 'command' && 'text-primary font-semibold'
                 )}
               >
-                {line.icon ? <span className="mt-0.5">{line.icon}</span> : null}
+                {line.icon ? <span className={marginTop['4.5']}>{line.icon}</span> : null}
                 {line.type === 'command' ? (
                   <TypingAnimation duration={20}>{line.content}</TypingAnimation>
                 ) : (
@@ -535,7 +546,7 @@ export function ContactTerminal() {
         <div className="relative">
           {/* Suggestions Dropdown */}
           {showSuggestions && filteredCommands.length > 0 ? (
-            <div className="absolute right-0 bottom-full left-0 mb-2">
+            <div className={`absolute right-0 bottom-full left-0 ${marginBottom.compact}`}>
               <Command className="bg-popover rounded-lg border shadow-lg">
                 <CommandList className="max-h-[200px]">
                   <CommandEmpty>No commands found.</CommandEmpty>
@@ -547,11 +558,11 @@ export function ContactTerminal() {
                         onSelect={() => handleSuggestionSelect(cmd.text)}
                         className="cursor-pointer"
                       >
-                        <div className="flex w-full items-center gap-2">
+                        <div className={`flex w-full items-center ${gap.tight}`}>
                           <span className="text-primary font-mono text-xs">$</span>
                           <span className="text-sm font-medium">{cmd.text}</span>
                           {cmd.description ? (
-                            <span className="text-muted-foreground ml-auto truncate text-xs">
+                            <span className={`text-muted-foreground ${marginLeft.auto} truncate text-xs`}>
                               {cmd.description}
                             </span>
                           ) : null}
@@ -565,7 +576,7 @@ export function ContactTerminal() {
           ) : null}
 
           {/* Input Prompt */}
-          <div className="border-border flex items-center gap-2 border-t pt-4">
+          <div className={`border-border flex items-center ${gap.tight} border-t ${paddingTop.default}`}>
             <span className="text-primary text-sm font-semibold">$</span>
             <input
               ref={inputRef}
@@ -594,8 +605,8 @@ export function ContactTerminal() {
             </SheetDescription>
           </SheetHeader>
 
-          <form onSubmit={handleFormSubmit} className="mt-6 space-y-4">
-            <div className="space-y-2">
+          <form onSubmit={handleFormSubmit} className={`${marginTop.comfortable} ${spaceY.comfortable}`}>
+            <div className={`${spaceY.compact}`}>
               <Label htmlFor="name">Name</Label>
               <Input
                 id="name"
@@ -606,7 +617,7 @@ export function ContactTerminal() {
               />
             </div>
 
-            <div className="space-y-2">
+            <div className={`${spaceY.compact}`}>
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
@@ -618,7 +629,7 @@ export function ContactTerminal() {
               />
             </div>
 
-            <div className="space-y-2">
+            <div className={`${spaceY.compact}`}>
               <Label htmlFor="message">Message</Label>
               <Textarea
                 id="message"
@@ -631,7 +642,7 @@ export function ContactTerminal() {
               />
             </div>
 
-            <div className="flex justify-end gap-2">
+            <div className={`flex justify-end ${gap.tight}`}>
               <Button
                 type="button"
                 variant="outline"

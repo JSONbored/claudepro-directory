@@ -16,7 +16,7 @@
  * @see https://supabase.com/docs/guides/database/webhooks
  */
 
-import type { Prisma } from '@heyclaude/data-layer/prisma';
+import type { contentModel } from '@heyclaude/data-layer/prisma';
 import { normalizeError } from '@heyclaude/shared-runtime';
 
 import { inngest } from '../../client';
@@ -24,7 +24,7 @@ import { logger, createWebAppContextWithId } from '../../../logging/server';
 import { RETRY_CONFIGS } from '../../config/index';
 
 // Type for content row from database
-type ContentRow = Prisma.contentGetPayload<{}>;
+type ContentRow = contentModel;
 
 /**
  * Result type for workflow triggers

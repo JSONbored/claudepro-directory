@@ -20,8 +20,8 @@
 
 import { normalizeError } from '@heyclaude/shared-runtime';
 
-import { runAnalyzeCommits } from '../commands/analyze-commits.js';
-import { logger } from '../toolkit/logger.js';
+import { runAnalyzeCommits } from '../commands/analyze-commits.ts';
+import { logger } from '../toolkit/logger.ts';
 
 runAnalyzeCommits().catch((error) => {
   logger.error(

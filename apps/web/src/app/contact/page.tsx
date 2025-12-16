@@ -12,6 +12,7 @@ import { ContactTerminal } from '@/src/components/features/contact/contact-termi
 import { ContactTerminalErrorBoundary } from '@/src/components/features/contact/contact-terminal-error-boundary';
 
 import Loading from './loading';
+import { paddingX, paddingY, marginX, marginBottom, marginTop, iconSize, gap } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Generate metadata for the Contact page while ensuring evaluation happens at request time.
@@ -116,9 +117,9 @@ function ContactPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger
   const terminalEnabled = false; // Default for static generation
 
   return (
-    <div className="container mx-auto max-w-6xl px-4 py-8 sm:py-12">
-      <div className="mb-8 text-center">
-        <h1 className="mb-4 text-3xl font-bold sm:text-4xl">Contact Us</h1>
+    <div className={`container ${marginX.auto} max-w-6xl ${paddingX.default} ${paddingY.relaxed} sm:${paddingY.section}`}>
+      <div className={`${marginBottom.relaxed} text-center`}>
+        <h1 className={`${marginBottom.default} text-3xl font-bold sm:text-4xl`}>Contact Us</h1>
         <p className="text-muted-foreground text-lg">
           {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Feature flag placeholder */}
           {terminalEnabled
@@ -130,8 +131,8 @@ function ContactPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger
       {/* Interactive Terminal (Feature Flagged) */}
       {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Feature flag placeholder */}
       {terminalEnabled && (
-        <div className="mb-12 flex justify-center">
-          <div className="w-full max-w-4xl">
+        <div className={`${marginBottom.loose} flex justify-center`}>
+          <div className={`w-full max-w-4xl`}>
             <ContactTerminalErrorBoundary>
               <ContactTerminal />
             </ContactTerminalErrorBoundary>
@@ -141,15 +142,15 @@ function ContactPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger
 
       {/* Traditional Contact Options */}
       {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Feature flag placeholder */}
-      <div className={terminalEnabled ? 'mt-12' : ''}>
-        <h2 className="mb-6 text-center text-2xl font-semibold">
+      <div className={terminalEnabled ? marginTop.loose : ''}>
+        <h2 className={`${marginBottom.comfortable} text-center text-2xl font-semibold`}>
           {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Feature flag placeholder */}
           {terminalEnabled ? 'Or reach us directly:' : 'Get in Touch'}
         </h2>
 
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className={`grid ${gap.comfortable} md:grid-cols-2`}>
           {!channels.github && !channels.discord && !channels.email && (
-            <div className="text-muted-foreground col-span-2 py-8 text-center">
+            <div className={`text-muted-foreground col-span-2 ${paddingY.relaxed} text-center`}>
               <p>Contact channels are currently being configured. Please check back soon.</p>
             </div>
           )}
@@ -157,17 +158,17 @@ function ContactPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger
           {channels.github ? (
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Github className="h-5 w-5" />
+                <CardTitle className={`flex items-center ${gap.tight}`}>
+                  <Github className={`${iconSize.md}`} />
                   GitHub Discussions
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground mb-4">
+                <p className={`text-muted-foreground ${marginBottom.default}`}>
                   Join the conversation, ask questions, and share ideas with the community.
                 </p>
                 <NavLink
-                  className="inline-flex items-center gap-2"
+                  className={`inline-flex items-center ${gap.tight}`}
                   external
                   href={`${channels.github}/discussions`}
                 >
@@ -181,17 +182,17 @@ function ContactPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger
           {channels.discord ? (
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <DiscordIcon className="h-5 w-5" />
+                <CardTitle className={`flex items-center ${gap.tight}`}>
+                  <DiscordIcon className={`${iconSize.md}`} />
                   Discord Community
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground mb-4">
+                <p className={`text-muted-foreground ${marginBottom.default}`}>
                   Chat with other users, get help, and stay updated on the latest developments.
                 </p>
                 <NavLink
-                  className="inline-flex items-center gap-2"
+                  className={`inline-flex items-center ${gap.tight}`}
                   external
                   href={channels.discord}
                 >
@@ -205,17 +206,17 @@ function ContactPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger
           {channels.github ? (
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MessageSquare className="h-5 w-5" />
+                <CardTitle className={`flex items-center ${gap.tight}`}>
+                  <MessageSquare className={`${iconSize.md}`} />
                   Report an Issue
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground mb-4">
+                <p className={`text-muted-foreground ${marginBottom.default}`}>
                   Found a bug or have a feature request? Open an issue on GitHub.
                 </p>
                 <NavLink
-                  className="inline-flex items-center gap-2"
+                  className={`inline-flex items-center ${gap.tight}`}
                   external
                   href={`${channels.github}/issues/new`}
                 >
@@ -229,17 +230,17 @@ function ContactPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger
           {channels.email ? (
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Mail className="h-5 w-5" />
+                <CardTitle className={`flex items-center ${gap.tight}`}>
+                  <Mail className={`${iconSize.md}`} />
                   Email Support
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground mb-4">
+                <p className={`text-muted-foreground ${marginBottom.default}`}>
                   For private inquiries, partnerships, or other matters, reach us via email.
                 </p>
                 <NavLink
-                  className="inline-flex items-center gap-2"
+                  className={`inline-flex items-center ${gap.tight}`}
                   external
                   href={`mailto:${channels.email}`}
                 >
@@ -252,21 +253,21 @@ function ContactPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger
       </div>
 
       {/* Additional Information */}
-      <div className="prose prose-invert mx-auto mt-12 max-w-none">
-        <h2 className="mb-4 text-2xl font-semibold">Frequently Asked Questions</h2>
-        <p className="mb-4">
+      <div className={`prose prose-invert ${marginX.auto} ${marginTop.default} max-w-none`}>
+        <h2 className={`${marginBottom.default} text-2xl font-semibold`}>Frequently Asked Questions</h2>
+        <p className={`${marginBottom.default}`}>
           Before reaching out, you might find answers in our{' '}
           <NavLink href="/help">Help Center</NavLink>.
         </p>
 
-        <h2 className="mt-8 mb-4 text-2xl font-semibold">Response Time</h2>
-        <p className="mb-4">
+        <h2 className={`${marginTop.relaxed} ${marginBottom.default} text-2xl font-semibold`}>Response Time</h2>
+        <p className={`${marginBottom.default}`}>
           We typically respond to inquiries within 24-48 hours during business days. For urgent
           matters, please use GitHub Issues or Discord for faster community support.
         </p>
 
-        <h2 className="mt-8 mb-4 text-2xl font-semibold">Contributing</h2>
-        <p className="mb-4">
+        <h2 className={`${marginTop.relaxed} ${marginBottom.default} text-2xl font-semibold`}>Contributing</h2>
+        <p className={`${marginBottom.default}`}>
           Interested in contributing to {APP_CONFIG.name}? Check out our{' '}
           <NavLink href="/submit">submission guidelines</NavLink> or{' '}
           <NavLink href="/partner">partner program</NavLink>.

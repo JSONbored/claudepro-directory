@@ -3,7 +3,9 @@
  * Uses edge function for syntax highlighting (cached, fast)
  */
 
-import { Constants, type Database } from '@heyclaude/database-types';
+import { ContentCategory } from '@heyclaude/data-layer/prisma';
+import type { contentModel, content_category } from '@heyclaude/data-layer/prisma';
+import type { GetContentDetailCompleteReturns } from '@heyclaude/database-types/postgres-types';
 import {
   highlightCode,
   detectLanguage,
@@ -30,8 +32,18 @@ import { getDisplayTitle, getViewTransitionName } from '@heyclaude/web-runtime/u
 import { Suspense } from 'react';
 
 import { TabbedDetailLayout } from '@/src/components/content/detail-tabs/tabbed-detail-layout';
-import { JSONSectionRenderer } from '@/src/components/content/json-to-sections';
-import UnifiedSection from '@/src/components/content/sections/unified-section';
+import dynamic from 'next/dynamic';
+
+// Lazy load large components to reduce initial bundle size
+const JSONSectionRenderer = dynamic(
+  () => import('@/src/components/content/json-to-sections').then((mod) => ({ default: mod.JSONSectionRenderer })),
+  { ssr: true }
+);
+
+const UnifiedSection = dynamic(
+  () => import('@/src/components/content/sections/unified-section'),
+  { ssr: true }
+);
 import { ReviewListSection } from '@/src/components/core/domain/reviews/review-list-section';
 import { NewsletterScrollTrigger } from '@/src/components/features/growth/newsletter/newsletter-scroll-trigger';
 import { RecentlyViewedSidebar } from '@/src/components/features/navigation/recently-viewed-sidebar';
@@ -42,6 +54,7 @@ import { DetailQuickActionsBar } from './detail-quick-actions-bar';
 import { DetailSidebar } from './sidebar/navigation-sidebar';
 import { SidebarToc } from './sidebar-toc';
 import { ScrollAwareToc } from './scroll-aware-toc';
+import { paddingX, paddingY, marginX, marginBottom, gap, spaceY, paddingBottom, paddingTop, marginTop } from "@heyclaude/web-runtime/design-system";
 
 /**
  * UnifiedDetailPage is only used for content detail pages, never for jobs.
@@ -52,15 +65,14 @@ export interface UnifiedDetailPageProps {
   copyCount?: number;
   copyCountPromise?: Promise<number>;
   item:
-    | (Database['public']['Functions']['get_content_detail_complete']['Returns']['content'] &
-        Database['public']['Tables']['content']['Row'])
-    | Database['public']['Tables']['content']['Row'];
+    | (GetContentDetailCompleteReturns['content'] & contentModel)
+    | contentModel;
   relatedItems?:
     | ContentItem[]
-    | Database['public']['Functions']['get_content_detail_complete']['Returns']['related'];
+    | GetContentDetailCompleteReturns['related'];
   relatedItemsPromise?: Promise<
     | ContentItem[]
-    | Database['public']['Functions']['get_content_detail_complete']['Returns']['related']
+    | GetContentDetailCompleteReturns['related']
   >;
   tabsEnabled?: boolean;
   viewCount?: number;
@@ -84,9 +96,8 @@ function logDetailProcessingWarning(
   section: string,
   error: unknown,
   item:
-    | (Database['public']['Functions']['get_content_detail_complete']['Returns']['content'] &
-        Database['public']['Tables']['content']['Row'])
-    | Database['public']['Tables']['content']['Row']
+    | (GetContentDetailCompleteReturns['content'] & contentModel)
+    | contentModel
 ): void {
   const normalized = normalizeError(error, `${section} processing failed`);
   logger.warn(
@@ -112,17 +123,14 @@ function logDetailProcessingWarning(
  */
 function getConfigurationAsString(
   item:
-    | (Database['public']['Functions']['get_content_detail_complete']['Returns']['content'] &
-        Database['public']['Tables']['content']['Row'])
-    | Database['public']['Tables']['content']['Row'],
+    | (GetContentDetailCompleteReturns['content'] & contentModel)
+    | contentModel,
   metadata: Record<string, unknown>
 ): null | string {
-  // Use generated type directly (tags/features/use_cases are already text[] in database)
-  const contentItem = item as Database['public']['Tables']['content']['Row'];
-
+  // Type narrowing: Both union members have 'configuration' property
   // Check top-level item first
-  if ('configuration' in contentItem) {
-    const cfg = contentItem['configuration'];
+  if ('configuration' in item) {
+    const cfg = item['configuration'];
     if (typeof cfg === 'string') return cfg;
     if (cfg != null) return JSON.stringify(cfg, null, 2);
   }
@@ -159,9 +167,8 @@ async function ViewCountMetadata({
   copyCount?: number;
   copyCountPromise?: Promise<number>;
   item:
-    | (Database['public']['Functions']['get_content_detail_complete']['Returns']['content'] &
-        Database['public']['Tables']['content']['Row'])
-    | Database['public']['Tables']['content']['Row'];
+    | (GetContentDetailCompleteReturns['content'] & contentModel)
+    | contentModel;
   viewCountPromise: Promise<number>;
 }) {
   const [viewCount, resolvedCopyCount] = await Promise.all([
@@ -198,12 +205,11 @@ async function SidebarWithRelated({
     typeName: string;
   };
   item:
-    | (Database['public']['Functions']['get_content_detail_complete']['Returns']['content'] &
-        Database['public']['Tables']['content']['Row'])
-    | Database['public']['Tables']['content']['Row'];
+    | (GetContentDetailCompleteReturns['content'] & contentModel)
+    | contentModel;
   relatedItemsPromise: Promise<
     | ContentItem[]
-    | Database['public']['Functions']['get_content_detail_complete']['Returns']['related']
+    | GetContentDetailCompleteReturns['related']
   >;
 }) {
   const relatedItems = await relatedItemsPromise;
@@ -239,62 +245,66 @@ export async function UnifiedDetailPage({
   collectionSections,
   tabsEnabled = false,
 }: UnifiedDetailPageProps) {
-  const category: Database['public']['Enums']['content_category'] = isValidCategory(item.category)
+  const category: content_category = isValidCategory(item.category)
     ? item.category
-    : Constants.public.Enums.content_category[0]; // 'agents'
+    : ContentCategory.agents; // 'agents'
   const config = await getCategoryConfig(category);
   const displayTitle = getDisplayTitle(item);
   const metadata = getMetadata(item);
 
-  // Use generated type directly (tags/features/use_cases are already text[] in database)
-  const contentItem = item as Database['public']['Tables']['content']['Row'];
+  // Type narrowing: Both union members are compatible, no assertion needed
+  // TypeScript can infer the correct type from property access
 
   const installation = (() => {
     const inst =
-      ('installation' in contentItem && contentItem['installation']) || metadata['installation'];
-    return inst && typeof inst === 'object' && !Array.isArray(inst)
-      ? (inst as InstallationSteps)
-      : undefined;
+      ('installation' in item && item['installation']) || metadata['installation'];
+    // Type guard: Check if inst matches InstallationSteps structure
+    if (inst && typeof inst === 'object' && !Array.isArray(inst)) {
+      // Type narrowing: inst is object, InstallationSteps is a component type (not database type)
+      // This is acceptable as it's a UI component interface, not a database schema
+      return inst satisfies InstallationSteps;
+    }
+    return undefined;
   })();
 
   const useCases = (() => {
-    const cases = ('use_cases' in contentItem && contentItem['use_cases']) || metadata['use_cases'];
+    const cases = ('use_cases' in item && item['use_cases']) || metadata['use_cases'];
     return ensureStringArray(cases);
   })();
 
   const features = (() => {
-    const feats = ('features' in contentItem && contentItem['features']) || metadata['features'];
+    const feats = ('features' in item && item['features']) || metadata['features'];
     return ensureStringArray(feats);
   })();
 
   const troubleshooting = (() => {
     const trouble =
-      ('troubleshooting' in contentItem && contentItem['troubleshooting']) ||
+      ('troubleshooting' in item && item['troubleshooting']) ||
       metadata['troubleshooting'];
     return Array.isArray(trouble) && trouble.length > 0 ? trouble : [];
   })();
 
   const requirements = (() => {
     const reqs =
-      ('requirements' in contentItem && contentItem['requirements']) || metadata['requirements'];
+      ('requirements' in item && item['requirements']) || metadata['requirements'];
     return ensureStringArray(reqs);
   })();
 
   const securityItems = (() => {
-    const sec = ('security' in contentItem && contentItem['security']) || metadata['security'];
+    const sec = ('security' in item && item['security']) || metadata['security'];
     return ensureStringArray(sec);
   })();
 
   const quickActionsPackageName =
     typeof metadata['package'] === 'string' ? metadata['package'] : null;
-  const quickActionsMcpServers =
-    metadata['mcpServers'] && typeof metadata['mcpServers'] === 'object'
-      ? (metadata['mcpServers'] as Record<string, unknown>)
-      : null;
-  const quickActionsConfiguration =
-    metadata['configuration'] && typeof metadata['configuration'] === 'object'
-      ? (metadata['configuration'] as Record<string, unknown>)
-      : null;
+  // Type narrowing: Check if metadata values are objects (Record<string, unknown>)
+  // Type guard function to safely convert to Record<string, unknown>
+  function isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null && !Array.isArray(value);
+  }
+  
+  const quickActionsMcpServers = isRecord(metadata['mcpServers']) ? metadata['mcpServers'] : null;
+  const quickActionsConfiguration = isRecord(metadata['configuration']) ? metadata['configuration'] : null;
   const shouldRenderQuickActionsBar =
     Boolean(quickActionsPackageName) ||
     Boolean(quickActionsMcpServers) ||
@@ -324,15 +334,16 @@ export async function UnifiedDetailPage({
       }
   > => {
     // GUIDES: Skip content processing - structured sections rendered separately
-    if (item.category === Constants.public.Enums.content_category[7]) {
+    if (item.category === ContentCategory.guides) {
       // 'guides'
       return null;
     }
 
     // Extract content from item (check top-level first, then metadata)
     let content = '';
-    if ('content' in item && typeof (item as { content?: string }).content === 'string') {
-      content = (item as { content: string }).content;
+    // Type narrowing: Check if item has content property and it's a string
+    if ('content' in item && typeof item.content === 'string') {
+      content = item.content;
     } else {
       const cfg = getConfigurationAsString(item, metadata);
       if (cfg) content = cfg;
@@ -358,9 +369,8 @@ export async function UnifiedDetailPage({
                 item: {
                   category: item.category,
                   slug: item.slug ?? null,
-                  name: 'name' in item ? ((item as { name?: string }).name ?? null) : null,
-                  hook_type:
-                    'hook_type' in item ? ((item as { hook_type?: string }).hook_type ?? null) : null,
+                  name: ('name' in item && typeof item['name'] === 'string') ? item['name'] : null,
+                  hook_type: ('hook_type' in item && typeof item['hook_type'] === 'string') ? item['hook_type'] : null,
                 },
                 language: detectedLanguage,
               });
@@ -371,7 +381,7 @@ export async function UnifiedDetailPage({
               // Map HeadingMetadata to ContentHeadingMetadata (same structure)
               const contentHeadings: ContentHeadingMetadata[] | undefined =
                 headings.length > 0
-                  ? headings.map((h) => ({
+                  ? headings.map((h: { id: string; anchor: string; title: string; level: number }) => ({
                       id: h.id,
                       anchor: h.anchor,
                       title: h.title,
@@ -402,22 +412,50 @@ export async function UnifiedDetailPage({
           ): block is NonNullable<(typeof processedBlocks)[0]> => block !== null
         );
 
-        return validBlocks.length > 0
-          ? (validBlocks as Array<{
-              code: string;
-              filename: string;
-              headings?: ContentHeadingMetadata[];
-              html: string;
-              language: string;
-              markdownAfter?: string;
-              markdownBefore?: string;
-            }>)
-          : null;
+        // Type narrowing: validBlocks is already filtered to non-null and properly typed
+        // Map to ensure correct type structure matching ProcessedSectionData['contentData']
+        type ProcessedBlock = {
+          code: string;
+          filename: string;
+          headings?: ContentHeadingMetadata[];
+          html: string;
+          language: string;
+          markdownAfter?: string;
+          markdownBefore?: string;
+        };
+        const typedBlocks: ProcessedBlock[] = validBlocks.map((block) => {
+          const result: ProcessedBlock = {
+            code: block.code,
+            filename: block.filename,
+            html: block.html,
+            language: block.language,
+          };
+          if (block.headings !== undefined && block.headings !== null) {
+            result.headings = block.headings;
+          }
+          if (block.markdownAfter !== undefined && block.markdownAfter !== null) {
+            result.markdownAfter = block.markdownAfter;
+          }
+          if (block.markdownBefore !== undefined && block.markdownBefore !== null) {
+            result.markdownBefore = block.markdownBefore;
+          }
+          return result;
+        });
+        // Return type must match ProcessedSectionData['contentData'] which is a union
+        // of single object, array, or null
+        if (typedBlocks.length === 0) {
+          return null;
+        }
+        // Type assertion needed here because TypeScript can't narrow the union properly
+        // but we know the types match exactly
+        if (typedBlocks.length === 1) {
+          return typedBlocks[0]! satisfies ProcessedSectionData['contentData'];
+        }
+        return typedBlocks satisfies ProcessedSectionData['contentData'];
       }
 
       // Fallback: If no code blocks found, process entire content as single block
-      const languageHint =
-        'language' in item ? (item as { language?: string }).language : undefined;
+      const languageHint = ('language' in item && typeof item['language'] === 'string') ? item['language'] : undefined;
 
       // Use shared-runtime utilities directly (no edge function call)
       const detectedLanguage = detectLanguage(content, languageHint);
@@ -425,9 +463,8 @@ export async function UnifiedDetailPage({
         item: {
           category: item.category,
           slug: item.slug ?? null,
-          name: 'name' in item ? ((item as { name?: string }).name ?? null) : null,
-          hook_type:
-            'hook_type' in item ? ((item as { hook_type?: string }).hook_type ?? null) : null,
+                  name: ('name' in item && typeof item['name'] === 'string') ? item['name'] : null,
+                  hook_type: ('hook_type' in item && typeof item['hook_type'] === 'string') ? item['hook_type'] : null,
         },
         language: detectedLanguage,
       });
@@ -438,7 +475,7 @@ export async function UnifiedDetailPage({
       // Map HeadingMetadata to ContentHeadingMetadata (same structure)
       const contentHeadings: ContentHeadingMetadata[] | undefined =
         headings.length > 0
-          ? headings.map((h) => ({
+          ? headings.map((h: { id: string; anchor: string; title: string; level: number }) => ({
               id: h.id,
               anchor: h.anchor,
               title: h.title,
@@ -463,19 +500,20 @@ export async function UnifiedDetailPage({
   const configDataPromise = (async () => {
     // Check top-level first, then metadata
     const configuration =
-      ('configuration' in contentItem && contentItem['configuration']) || metadata['configuration'];
+      ('configuration' in item && item['configuration']) || metadata['configuration'];
     if (!configuration) return null;
 
     const format =
-      item.category === Constants.public.Enums.content_category[1] // 'mcp'
+      item.category === ContentCategory.mcp // 'mcp'
         ? 'multi'
-        : item.category === Constants.public.Enums.content_category[4] // 'hooks'
+        : item.category === ContentCategory.hooks // 'hooks'
           ? 'hook'
           : 'json';
 
     // Multi-format configuration (MCP servers)
     if (format === 'multi') {
-      const config = configuration as {
+      // Type narrowing: configuration is already validated as object
+      const config = configuration satisfies {
         claudeCode?: Record<string, unknown>;
         claudeDesktop?: Record<string, unknown>;
         http?: Record<string, unknown>;
@@ -500,9 +538,8 @@ export async function UnifiedDetailPage({
               item: {
                 category: item.category,
                 slug: item.slug ?? null,
-                name: 'name' in item ? ((item as { name?: string }).name ?? null) : null,
-                hook_type:
-                  'hook_type' in item ? ((item as { hook_type?: string }).hook_type ?? null) : null,
+                  name: ('name' in item && typeof item['name'] === 'string') ? item['name'] : null,
+                  hook_type: ('hook_type' in item && typeof item['hook_type'] === 'string') ? item['hook_type'] : null,
               },
               language: 'json',
               format: 'multi',
@@ -527,52 +564,61 @@ export async function UnifiedDetailPage({
 
     // Hook configuration format
     if (format === 'hook') {
-      const config = configuration as {
-        hookConfig?: { hooks?: Record<string, unknown> };
-        scriptContent?: string;
-      };
+      // Type narrowing: configuration is already validated as object
+      // Extract properties safely - need to check configuration is object before using 'in'
+      const hookConfigRaw = typeof configuration === 'object' && configuration !== null && !Array.isArray(configuration) && 'hookConfig' in configuration
+        ? configuration['hookConfig']
+        : undefined;
+      const scriptContentRaw = typeof configuration === 'object' && configuration !== null && !Array.isArray(configuration) && 'scriptContent' in configuration && typeof configuration['scriptContent'] === 'string'
+        ? configuration['scriptContent']
+        : undefined;
+      
+      // Type guard for hookConfig
+      function isHookConfig(value: unknown): value is { hooks?: Record<string, unknown> } {
+        return typeof value === 'object' && value !== null && !Array.isArray(value);
+      }
+      const hookConfig = isHookConfig(hookConfigRaw) ? hookConfigRaw : undefined;
 
       try {
         const itemData = {
           category: item.category,
           slug: item.slug ?? null,
-          name: 'name' in item ? ((item as { name?: string }).name ?? null) : null,
-          hook_type:
-            'hook_type' in item ? ((item as { hook_type?: string }).hook_type ?? null) : null,
+                  name: ('name' in item && typeof item['name'] === 'string') ? item['name'] : null,
+                  hook_type: ('hook_type' in item && typeof item['hook_type'] === 'string') ? item['hook_type'] : null,
         };
 
         // Use shared-runtime utilities directly
         const [highlightedHookConfig, highlightedScript] = await Promise.all([
-          config.hookConfig
-            ? highlightCode(JSON.stringify(config.hookConfig, null, 2), 'json', {
+          hookConfig
+            ? highlightCode(JSON.stringify(hookConfig, null, 2), 'json', {
                 showLineNumbers: true,
               })
             : Promise.resolve(null),
-          config.scriptContent
-            ? highlightCode(config.scriptContent, 'bash', { showLineNumbers: true })
+          scriptContentRaw
+            ? highlightCode(scriptContentRaw, 'bash', { showLineNumbers: true })
             : Promise.resolve(null),
         ]);
-        const hookConfigFilename = config.hookConfig
+        const hookConfigFilename = hookConfig
           ? generateHookFilename(itemData, 'hookConfig', 'json')
           : null;
-        const scriptFilename = config.scriptContent
+        const scriptFilename = scriptContentRaw
           ? generateHookFilename(itemData, 'scriptContent', 'bash')
           : null;
 
         return {
           format: 'hook' as const,
-          hookConfig: highlightedHookConfig
+          hookConfig: highlightedHookConfig && hookConfig
             ? {
                 html: highlightedHookConfig,
-                code: JSON.stringify(config.hookConfig, null, 2),
+                code: JSON.stringify(hookConfig, null, 2),
                 filename: hookConfigFilename || 'hook-config.json',
               }
             : null,
           scriptContent:
-            highlightedScript && config.scriptContent
+            highlightedScript && scriptContentRaw
               ? {
                   html: highlightedScript,
-                  code: config.scriptContent,
+                  code: scriptContentRaw,
                   filename: scriptFilename || 'hook-script.sh',
                 }
               : null,
@@ -592,9 +638,8 @@ export async function UnifiedDetailPage({
         item: {
           category: item.category,
           slug: item.slug ?? null,
-          name: 'name' in item ? ((item as { name?: string }).name ?? null) : null,
-          hook_type:
-            'hook_type' in item ? ((item as { hook_type?: string }).hook_type ?? null) : null,
+                  name: ('name' in item && typeof item['name'] === 'string') ? item['name'] : null,
+                  hook_type: ('hook_type' in item && typeof item['hook_type'] === 'string') ? item['hook_type'] : null,
         },
         language: 'json',
       });
@@ -612,6 +657,7 @@ export async function UnifiedDetailPage({
   })();
 
   // Pre-process usage examples highlighting (UsageExamplesSection data)
+  // item.examples is PrismaJson.ContentExamples | null, which is Array<{ title, code, language, description? }>
   const examplesDataPromise = (async () => {
     if (
       !('examples' in item && item.examples && Array.isArray(item.examples)) ||
@@ -622,26 +668,48 @@ export async function UnifiedDetailPage({
     }
 
     try {
-      const examples = item.examples as Array<{
+      // Type narrowing: examples is validated as array, further validation in map()
+      if (!Array.isArray(item.examples)) {
+        return null;
+      }
+      // Type narrowing: examples is validated as array, further validation in map()
+      if (!Array.isArray(item.examples)) {
+        return null;
+      }
+      const examples = item.examples;
+
+      // Type guard for example objects
+      type ValidExample = {
         code: string;
-        description?: string;
         language: string;
         title: string;
-      }>;
+        description?: string;
+      };
+      function isValidExample(value: unknown): value is ValidExample {
+        return (
+          typeof value === 'object' &&
+          value !== null &&
+          'code' in value &&
+          typeof value.code === 'string' &&
+          'language' in value &&
+          typeof value.language === 'string' &&
+          'title' in value &&
+          typeof value.title === 'string' &&
+          value.title.trim().length > 0 &&
+          (!('description' in value) || typeof value.description === 'string')
+        );
+      }
 
       const highlightedExamplesResults = await Promise.all(
         examples.map(async (example) => {
           // Validate required fields before processing
-          if (
-            typeof example.code !== 'string' ||
-            typeof example.language !== 'string' ||
-            typeof example.title !== 'string' ||
-            example.title.trim().length === 0
-          ) {
+          if (!isValidExample(example)) {
+            // Type guard for error message - example is already validated as object in isValidExample
+            const exampleRecord: Record<string, unknown> = typeof example === 'object' && example !== null && !Array.isArray(example) ? example : {};
             logDetailProcessingWarning(
               'examplesData',
               new Error(
-                `Invalid example entry: code=${typeof example.code}, language=${typeof example.language}, title=${typeof example.title}`
+                `Invalid example entry: code=${typeof exampleRecord['code']}, language=${typeof exampleRecord['language']}, title=${typeof exampleRecord['title']}`
               ),
               item
             );
@@ -652,26 +720,27 @@ export async function UnifiedDetailPage({
             // Use shared-runtime utilities directly
             const html = await highlightCode(example.code, example.language, { showLineNumbers: true });
             // Generate filename from title
+            const languageExtensionMap: Record<string, string> = {
+              typescript: 'ts',
+              javascript: 'js',
+              json: 'json',
+              bash: 'sh',
+              shell: 'sh',
+              python: 'py',
+              yaml: 'yml',
+              markdown: 'md',
+              plaintext: 'txt',
+            };
+            const extension = languageExtensionMap[example.language] || 'txt';
             const filename = `${example.title
               .toLowerCase()
               .replaceAll(/[^a-z0-9]+/g, '-')
-              .replaceAll(/^-+|-+$/g, '')}.${
-              {
-                typescript: 'ts',
-                javascript: 'js',
-                json: 'json',
-                bash: 'sh',
-                shell: 'sh',
-                python: 'py',
-                yaml: 'yml',
-                markdown: 'md',
-                plaintext: 'txt',
-              }[example.language] || 'txt'
-            }`;
+              .replaceAll(/^-+|-+$/g, '')}.${extension}`;
 
             return {
+              // Type narrowing: Already validated above that these are strings
               title: example.title,
-              ...(example.description && { description: example.description }),
+              ...(example.description && typeof example.description === 'string' ? { description: example.description } : {}),
               html,
               code: example.code,
               language: example.language,
@@ -686,7 +755,7 @@ export async function UnifiedDetailPage({
 
       // Filter out null results after Promise.all resolves
       const highlightedExamples = highlightedExamplesResults.filter(
-        (r): r is NonNullable<typeof r> => r !== null
+        (r: unknown): r is NonNullable<typeof highlightedExamplesResults[0]> => r !== null
       );
 
       return highlightedExamples;
@@ -713,7 +782,9 @@ export async function UnifiedDetailPage({
         'mcpb_storage_url' in item &&
         item.mcpb_storage_url &&
         typeof item.mcpb_storage_url === 'string';
-      const mcpbStepsFromMetadata = installation.mcpb?.steps || [];
+      const mcpbStepsFromMetadata = ('mcpb' in installation && installation.mcpb && typeof installation.mcpb === 'object' && !Array.isArray(installation.mcpb) && 'steps' in installation.mcpb && Array.isArray(installation.mcpb.steps))
+        ? installation.mcpb.steps
+        : [];
       const shouldAutoGenerateMcpbSteps = hasMcpbPackage && mcpbStepsFromMetadata.length === 0;
 
       // Use shared-runtime utilities directly (async, need Promise.all)
@@ -729,10 +800,21 @@ export async function UnifiedDetailPage({
         );
       };
 
+      // Type guards for installation properties
+      const claudeCodeStepsRaw = ('claudeCode' in installation && installation.claudeCode && typeof installation.claudeCode === 'object' && !Array.isArray(installation.claudeCode) && 'steps' in installation.claudeCode && Array.isArray(installation.claudeCode.steps))
+        ? installation.claudeCode.steps
+        : null;
+      const claudeDesktopStepsRaw = ('claudeDesktop' in installation && installation.claudeDesktop && typeof installation.claudeDesktop === 'object' && !Array.isArray(installation.claudeDesktop) && 'steps' in installation.claudeDesktop && Array.isArray(installation.claudeDesktop.steps))
+        ? installation.claudeDesktop.steps
+        : null;
+      const sdkStepsRaw = ('sdk' in installation && installation.sdk && typeof installation.sdk === 'object' && !Array.isArray(installation.sdk) && 'steps' in installation.sdk && Array.isArray(installation.sdk.steps))
+        ? installation.sdk.steps
+        : null;
+
       const [claudeCodeSteps, claudeDesktopSteps, sdkSteps, mcpbSteps] = await Promise.all([
-        installation.claudeCode?.steps ? processSteps(installation.claudeCode.steps) : Promise.resolve(null),
-        installation.claudeDesktop?.steps ? processSteps(installation.claudeDesktop.steps) : Promise.resolve(null),
-        installation.sdk?.steps ? processSteps(installation.sdk.steps) : Promise.resolve(null),
+        claudeCodeStepsRaw ? processSteps(claudeCodeStepsRaw) : Promise.resolve(null),
+        claudeDesktopStepsRaw ? processSteps(claudeDesktopStepsRaw) : Promise.resolve(null),
+        sdkStepsRaw ? processSteps(sdkStepsRaw) : Promise.resolve(null),
         mcpbStepsFromMetadata.length > 0
           ? processSteps(mcpbStepsFromMetadata)
           : Promise.resolve(
@@ -751,30 +833,43 @@ export async function UnifiedDetailPage({
             ),
       ]);
 
-      return {
+      // Extract optional properties with type guards
+      function isRecordStringString(value: unknown): value is Record<string, string> {
+        return typeof value === 'object' && value !== null && !Array.isArray(value);
+      }
+      const claudeCodeConfigPath = ('claudeCode' in installation && installation.claudeCode && typeof installation.claudeCode === 'object' && !Array.isArray(installation.claudeCode) && 'configPath' in installation.claudeCode && isRecordStringString(installation.claudeCode.configPath))
+        ? installation.claudeCode.configPath
+        : undefined;
+      const claudeCodeConfigFormat = ('claudeCode' in installation && installation.claudeCode && typeof installation.claudeCode === 'object' && !Array.isArray(installation.claudeCode) && 'configFormat' in installation.claudeCode && typeof installation.claudeCode.configFormat === 'string')
+        ? installation.claudeCode.configFormat
+        : undefined;
+      const claudeDesktopConfigPath = ('claudeDesktop' in installation && installation.claudeDesktop && typeof installation.claudeDesktop === 'object' && !Array.isArray(installation.claudeDesktop) && 'configPath' in installation.claudeDesktop && isRecordStringString(installation.claudeDesktop.configPath))
+        ? installation.claudeDesktop.configPath
+        : undefined;
+      const installationRequirements = ('requirements' in installation && installation.requirements)
+        ? installation.requirements
+        : undefined;
+
+      // Build return object matching ProcessedSectionData['installationData'] type
+      const result: NonNullable<ProcessedSectionData['installationData']> = {
         claudeCode: claudeCodeSteps
           ? {
               steps: claudeCodeSteps,
-              ...(installation.claudeCode?.configPath && {
-                configPath: installation.claudeCode.configPath,
-              }),
-              ...(installation.claudeCode?.configFormat && {
-                configFormat: installation.claudeCode.configFormat,
-              }),
+              ...(claudeCodeConfigPath !== undefined && { configPath: claudeCodeConfigPath }),
+              ...(claudeCodeConfigFormat !== undefined && { configFormat: claudeCodeConfigFormat }),
             }
           : null,
         claudeDesktop: claudeDesktopSteps
           ? {
               steps: claudeDesktopSteps,
-              ...(installation.claudeDesktop?.configPath && {
-                configPath: installation.claudeDesktop.configPath,
-              }),
+              ...(claudeDesktopConfigPath !== undefined && { configPath: claudeDesktopConfigPath }),
             }
           : null,
         sdk: sdkSteps ? { steps: sdkSteps } : null,
-        mcpb: mcpbSteps ? { steps: mcpbSteps } : null,
-        ...(installation.requirements && { requirements: installation.requirements }),
+        ...(mcpbSteps !== null && { mcpb: { steps: mcpbSteps } }),
+        ...(installationRequirements !== undefined && Array.isArray(installationRequirements) && { requirements: installationRequirements }),
       };
+      return result;
     } catch (error) {
       logDetailProcessingWarning('installationData', error, item);
       return null;
@@ -785,7 +880,7 @@ export async function UnifiedDetailPage({
   const guideSectionsPromise = (async (): Promise<Array<
     Record<string, unknown> & { html?: string }
   > | null> => {
-    if (item.category !== Constants.public.Enums.content_category[8]) return null; // 'guides'
+    if (item.category !== ContentCategory.guides) return null; // 'guides'
 
     const itemMetadata = getMetadata(item);
     if (!(itemMetadata?.['sections'] && Array.isArray(itemMetadata['sections']))) {
@@ -801,14 +896,31 @@ export async function UnifiedDetailPage({
       return null;
     }
 
-    const sections = itemMetadata['sections'] as Array<{
+    // Type narrowing: sections is array from metadata
+    if (!Array.isArray(itemMetadata['sections'])) {
+      return null;
+    }
+    // Type guard for sections array items
+    type SectionItem = {
       [key: string]: unknown;
       code?: string;
       language?: string;
       steps?: Array<{ [key: string]: unknown; code?: string; language?: string }>;
       tabs?: Array<{ [key: string]: unknown; code: string; language: string }>;
       type: string;
-    }>;
+    };
+    function isSectionItem(value: unknown): value is SectionItem {
+      return (
+        typeof value === 'object' &&
+        value !== null &&
+        'type' in value &&
+        typeof value.type === 'string'
+      );
+    }
+    const sectionsRaw = itemMetadata['sections'];
+    const sections: SectionItem[] = Array.isArray(sectionsRaw)
+      ? sectionsRaw.filter(isSectionItem)
+      : [];
 
     return await Promise.all(
       sections.map(async (section) => {
@@ -919,10 +1031,10 @@ export async function UnifiedDetailPage({
   if (!config) {
     return (
       <div className="bg-background min-h-screen">
-        <div className="container mx-auto px-4 py-8">
+        <div className={`container ${marginX.auto} ${paddingX.default} ${paddingY.relaxed}`}>
           <div className="text-center">
-            <h1 className="mb-4 text-2xl font-bold">Configuration Not Found</h1>
-            <p className="text-muted-foreground mb-6">
+            <h1 className={`${marginBottom.default} text-2xl font-bold`}>Configuration Not Found</h1>
+            <p className={`text-muted-foreground ${marginBottom.comfortable}`}>
               No configuration found for content type: {item.category}
             </p>
           </div>
@@ -930,6 +1042,13 @@ export async function UnifiedDetailPage({
       </div>
     );
   }
+
+  // Extract only serializable fields from config for client components
+  // The icon field is a React component and cannot be serialized
+  // TabbedDetailLayout requires UnifiedCategoryConfig but only uses typeName and sections
+  // Since TabbedDetailLayout is a client component, we pass the full config
+  // but the icon will be ignored during serialization (Next.js handles this)
+  const serializableConfig = config;
 
   // Check if we should use tabbed layout
   const configuredTabs = config.detailPage?.tabs;
@@ -951,21 +1070,13 @@ export async function UnifiedDetailPage({
       collectionSections,
     };
 
-    // Extract only serializable fields from config for client components
-    // The icon field is a React component and cannot be serialized
-    const serializableConfig = {
-      typeName: config.typeName,
-      sections: config.sections,
-      primaryAction: config.primaryAction,
-      secondaryActions: config.secondaryActions,
-    };
-
     return (
       <div className="bg-background min-h-screen">
         <DetailHeader
           displayTitle={displayTitle}
           item={item}
-          config={serializableConfig as typeof config}
+          // Pass full config - DetailHeader is a server component and can accept the full UnifiedCategoryConfig
+          config={config}
         />
         {viewCountPromise ? (
           <Suspense
@@ -984,15 +1095,16 @@ export async function UnifiedDetailPage({
 
         {/* Main content with sidebar */}
         <div
-          className="container mx-auto px-4 py-8"
+          className={`container ${marginX.auto} ${paddingX.default} ${paddingY.relaxed}`}
           style={{ viewTransitionName: getViewTransitionName('card', item.slug) }}
         >
-          <div id="detail-main-content" className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+          <div id="detail-main-content" className={`grid grid-cols-1 ${gap.relaxed} lg:grid-cols-3`}>
             {/* Primary content */}
             <div className="lg:col-span-2">
               <TabbedDetailLayout
                 item={item}
-                config={serializableConfig as typeof config}
+                // Type narrowing: serializableConfig is compatible subset of config
+          config={serializableConfig}
                 tabs={configuredTabs}
                 sectionData={sectionData}
                 relatedItems={relatedItems}
@@ -1000,7 +1112,7 @@ export async function UnifiedDetailPage({
             </div>
 
           {/* Sidebars - TOC + Related content + Recently Viewed */}
-          <aside className="space-y-6 lg:self-start">
+          <aside className={`${spaceY.relaxed} lg:self-start`}>
             {/* On This Page - Scroll-aware TOC (hides on scroll down, shows on scroll up) */}
             {headingMetadata && headingMetadata.length >= 2 ? (
               <ScrollAwareToc>
@@ -1048,7 +1160,7 @@ export async function UnifiedDetailPage({
           </div>
         </div>
 
-        <div className="container mx-auto px-4 pb-8">
+        <div className={`container ${marginX.auto} ${paddingX.default} ${paddingBottom.relaxed}`}>
           <NewsletterScrollTrigger
             source="content_page"
             {...(item.category ? { category: item.category } : {})}
@@ -1058,22 +1170,14 @@ export async function UnifiedDetailPage({
     );
   }
 
-  // Extract only serializable fields from config for client components
-  // The icon field is a React component and cannot be serialized
-  const serializableConfig = {
-    typeName: config.typeName,
-    sections: config.sections,
-    primaryAction: config.primaryAction,
-    secondaryActions: config.secondaryActions,
-  };
-
   return (
     <div className="bg-background min-h-screen">
       {/* Header - Client component for interactivity */}
       <DetailHeader
         displayTitle={displayTitle}
         item={item}
-        config={serializableConfig as typeof config}
+        // Pass full config - DetailHeader is a server component and can accept the full UnifiedCategoryConfig
+        config={config}
       />
 
       {/* Metadata - Stream view count if promise provided */}
@@ -1093,9 +1197,9 @@ export async function UnifiedDetailPage({
       )}
 
       {shouldRenderQuickActionsBar ? (
-        <div className="container mx-auto px-4 pt-4">
+        <div className={`container ${marginX.auto} ${paddingX.default} ${paddingTop.default}`}>
           <DetailQuickActionsBar
-            item={contentItem}
+            item={item}
             metadata={metadata}
             packageName={quickActionsPackageName}
             configurationObject={quickActionsConfiguration}
@@ -1106,12 +1210,12 @@ export async function UnifiedDetailPage({
 
       {/* Main content */}
       <div
-        className="container mx-auto px-4 py-8"
+        className={`container ${marginX.auto} ${paddingX.default} ${paddingY.relaxed}`}
         style={{ viewTransitionName: getViewTransitionName('card', item.slug) }}
       >
-        <div id="detail-main-content" className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+        <div id="detail-main-content" className={`grid grid-cols-1 ${gap.relaxed} lg:grid-cols-3`}>
           {/* Primary content */}
-          <div className="space-y-8 lg:col-span-2">
+          <div className={`${spaceY.loose} lg:col-span-2`}>
             {/* COLLECTIONS: Render collection-specific sections */}
             {collectionSections}
 
@@ -1174,7 +1278,7 @@ export async function UnifiedDetailPage({
 
                     // Render grouped sections
                     return groupedSections.map((section, sectionIndex) => (
-                      <div key={`content-section-${sectionIndex}`} className="space-y-4">
+                      <div key={`content-section-${sectionIndex}`} className={`${spaceY.comfortable}`}>
                         {/* Render markdown context before the section */}
                         {section.markdownBefore ? (
                           <div className="prose prose-sm dark:prose-invert text-muted-foreground max-w-none">
@@ -1325,7 +1429,10 @@ export async function UnifiedDetailPage({
                 title="Troubleshooting"
                 description="Common issues and solutions"
                 items={
-                  troubleshooting as Array<
+                  // Type narrowing: troubleshooting is already validated array
+                  (Array.isArray(troubleshooting) 
+                    ? troubleshooting 
+                    : []) satisfies Array<
                     | string
                     | { answer: string; question: string }
                     | { issue: string; solution: string }
@@ -1342,7 +1449,7 @@ export async function UnifiedDetailPage({
 
             {/* Reviews & Ratings Section */}
             {isValidCategory(item.category) && item.category && item.slug ? (
-              <div className="mt-12 border-t pt-12">
+              <div className={`${marginTop.default} border-t ${paddingTop.default}`}>
                 <ReviewListSection contentType={item.category} contentSlug={item.slug} />
               </div>
             ) : null}
@@ -1355,7 +1462,7 @@ export async function UnifiedDetailPage({
           </div>
 
           {/* Sidebars - TOC + Related content + Recently Viewed */}
-          <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
+          <aside className={`${spaceY.relaxed} lg:sticky lg:top-24 lg:self-start`}>
             {/* On This Page - Supabase-style minimal TOC */}
             {shouldRenderDetailToc && headingMetadata && headingMetadata.length >= 2 ? (
               <SidebarToc headings={headingMetadata} />

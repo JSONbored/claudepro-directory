@@ -66,6 +66,12 @@ export function validateZodSchemas(
   // Basic validation - check that schema files exist and have valid syntax
   // Full runtime validation would require importing and testing the schemas
   // This is a basic check that can be expanded later
+  
+  // Check if composites directory exists (where Zod schemas are generated)
+  const compositesDir = join(outputDir, 'composites');
+  if (!existsSync(compositesDir)) {
+    errors.push(`Composites directory does not exist: ${compositesDir}`);
+  }
 
   return {
     valid: errors.length === 0,

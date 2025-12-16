@@ -7,13 +7,13 @@
  * Runs every 5 minutes to process batched analytics events.
  */
 
-import type { Database, Json } from '@heyclaude/database-types';
-import { Constants } from '@heyclaude/database-types';
+import type { JsonValue } from '@heyclaude/data-layer/prisma';
 import type {
   SearchQueryInput,
   UserInteractionInput,
-} from '@heyclaude/database-types/postgres-types/composites';
-import { type content_category } from '@heyclaude/data-layer/prisma';
+} from '@heyclaude/database-types/postgres-types';
+import type { content_category, interaction_type } from '@heyclaude/data-layer/prisma';
+import { ContentCategory, InteractionType } from '@heyclaude/data-layer/prisma';
 import { normalizeError } from '@heyclaude/shared-runtime';
 
 import { AccountService, SearchService } from '@heyclaude/data-layer';
@@ -31,7 +31,7 @@ interface PulseEvent {
   content_slug: string | null;
   interaction_type: string;
   session_id?: string | null;
-  metadata?: Json | null;
+  metadata?: JsonValue | null;
 }
 
 type PulseQueueMessage = PgmqMessage<PulseEvent>;
@@ -41,16 +41,17 @@ function isValidContentCategory(
   value: unknown
 ): value is content_category {
   if (typeof value !== 'string') return false;
-  const validValues = Constants.public.Enums.content_category;
+
+  const validValues = Object.values(ContentCategory) as readonly content_category[];
   return validValues.includes(value as content_category);
 }
 
 function isValidInteractionType(
   value: unknown
-): value is Database['public']['Enums']['interaction_type'] {
+): value is interaction_type {
   if (typeof value !== 'string') return false;
-  const validValues = Constants.public.Enums.interaction_type;
-  return validValues.includes(value as Database['public']['Enums']['interaction_type']);
+  const validValues = Object.values(InteractionType) as readonly interaction_type[];
+  return validValues.includes(value as interaction_type);
 }
 
 function isValidPulseEvent(value: unknown): value is PulseEvent {
@@ -114,7 +115,7 @@ export const processPulseQueue = inngest.createFunction(
       const interactionEvents: PulseQueueMessage[] = [];
 
       for (const msg of messages) {
-        if (msg.message.interaction_type === 'search') {
+        if (msg.message['interaction_type'] === 'search') {
           searchEvents.push(msg);
         } else {
           interactionEvents.push(msg);
@@ -141,7 +142,7 @@ export const processPulseQueue = inngest.createFunction(
 
           const searchQueries = searchEvents.map((msg) => {
             const event = msg.message;
-            const metadata = event.metadata as Record<string, unknown> | null;
+              const metadata = event['metadata'] as Record<string, unknown> | null;
 
             return {
               query: typeof metadata?.['query'] === 'string' ? metadata['query'] : null,
@@ -149,7 +150,7 @@ export const processPulseQueue = inngest.createFunction(
                 ? (metadata['filters'] as Record<string, unknown>)
                 : null,
               result_count: typeof metadata?.['result_count'] === 'number' ? metadata['result_count'] : null,
-              user_id: event.user_id && isValidUUID(event.user_id) ? event.user_id : null,
+              user_id: event['user_id'] && isValidUUID(event['user_id']) ? event['user_id'] : null,
               session_id: event.session_id && isValidUUID(event.session_id) ? event.session_id : null,
             };
           });

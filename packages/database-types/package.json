@@ -10,20 +10,66 @@
     "lint": "echo 'Skipping lint for generated types'"
   },
   "dependencies": {
-    "zod": "^4.1.13"
+    "zod": "^4.2.0"
   },
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./src/index.ts"
+    "./prisma": {
+      "development": "./src/prisma/index.ts",
+      "types": "./dist/prisma/index.d.ts",
+      "default": "./src/prisma/index.ts"
+    },
+    "./prisma/client": {
+      "development": "./src/prisma/client.ts",
+      "types": "./dist/prisma/client.d.ts",
+      "default": "./src/prisma/client.ts"
+    },
+    "./prisma/browser": {
+      "development": "./src/prisma/browser.ts",
+      "types": "./dist/prisma/browser.d.ts",
+      "default": "./src/prisma/browser.ts"
+    },
+    "./prisma/enums": {
+      "development": "./src/prisma/enums.ts",
+      "types": "./dist/prisma/enums.d.ts",
+      "default": "./src/prisma/enums.ts"
+    },
+    "./prisma/models": {
+      "development": "./src/prisma/models.ts",
+      "types": "./dist/prisma/models.d.ts",
+      "default": "./src/prisma/models.ts"
+    },
+    "./prisma/zod": {
+      "development": "./src/prisma/zod/index.ts",
+      "types": "./dist/prisma/zod/index.d.ts",
+      "default": "./src/prisma/zod/index.ts"
+    },
+    "./prisma/zod/*": {
+      "development": "./src/prisma/zod/*.ts",
+      "types": "./dist/prisma/zod/*.d.ts",
+      "default": "./src/prisma/zod/*.ts"
     },
     "./postgres-types": {
+      "development": "./src/postgres-types/index.ts",
       "types": "./dist/postgres-types/index.d.ts",
       "default": "./src/postgres-types/index.ts"
     },
     "./postgres-types/*": {
+      "development": "./src/postgres-types/*.ts",
       "types": "./dist/postgres-types/*.d.ts",
       "default": "./src/postgres-types/*.ts"
+    },
+    "./openapi": {
+      "types": "./dist/openapi/openapi.d.ts",
+      "default": "./src/openapi/openapi.yaml"
+    },
+    "./openapi/openapi.yaml": {
+      "default": "./src/openapi/openapi.yaml"
+    },
+    "./docs": {
+      "default": "./docs/index.html"
+    },
+    "./docs/index.html": {
+      "default": "./docs/index.html"
     }
   }
 }

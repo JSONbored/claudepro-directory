@@ -24,8 +24,8 @@
 
 import { normalizeError } from '@heyclaude/shared-runtime';
 
-import { runBumpVersion } from '../commands/bump-version.js';
-import { logger } from '../toolkit/logger.js';
+import { runBumpVersion } from '../commands/bump-version.ts';
+import { logger } from '../toolkit/logger.ts';
 
 runBumpVersion().catch((error) => {
   logger.error(

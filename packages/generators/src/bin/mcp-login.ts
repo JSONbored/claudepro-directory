@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
-import { mcpLogin } from '../commands/mcp-login.js';
-import { logger } from '../toolkit/logger.js';
+import { mcpLogin } from '../commands/mcp-login.ts';
+import { logger } from '../toolkit/logger.ts';
 
 mcpLogin().catch((error: unknown) => {
   const errorObj = error instanceof Error ? error : new Error(String(error));

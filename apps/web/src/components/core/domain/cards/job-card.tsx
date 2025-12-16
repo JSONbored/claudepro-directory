@@ -1,6 +1,6 @@
 'use client';
 
-import { type JobType, logUnhandledPromise } from '@heyclaude/web-runtime/core';
+import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
 import { formatRelativeDate } from '@heyclaude/web-runtime/data/utils';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import {
@@ -13,16 +13,16 @@ import {
 } from '@heyclaude/web-runtime/icons';
 import { type JobCardProps } from '@heyclaude/web-runtime/types/component.types';
 import {
-  BADGE_COLORS,
-  UI_CLASSES,
   UnifiedBadge,
   HighlightedText,
   Button,
   Card,
+  cn,
   CardContent,
   CardHeader,
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
+import { size, muted, weight, paddingBottom, cluster, iconSize, wrap, gap, marginRight, spaceY, marginBottom, paddingTop, marginLeft } from '@heyclaude/web-runtime/design-system';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useMemo } from 'react';
@@ -103,7 +103,7 @@ export function JobCard({ job }: JobCardProps) {
         <HighlightedText
           html={job.description_highlighted}
           fallback={job.description}
-          className={UI_CLASSES.TEXT_CARD_DESCRIPTION}
+          className={`${size.sm} ${muted.default}`}
         />
       );
     }
@@ -112,25 +112,25 @@ export function JobCard({ job }: JobCardProps) {
 
   return (
     <Card
-      className={`${UI_CLASSES.CARD_GRADIENT_HOVER} relative ${
+      className={`card-gradient transition-smooth group relative ${
         isFeatured
-          ? `${UI_CLASSES.JOB_FEATURED_BORDER} ${UI_CLASSES.JOB_FEATURED_GRADIENT} ${UI_CLASSES.JOB_FEATURED_GLOW}`
+          ? `border-2 border-orange-500/50 bg-gradient-to-br from-orange-500/5 to-orange-600/10 shadow-lg shadow-orange-500/10`
           : ''
       }`}
     >
       {isFeatured ? (
         <div className="absolute -top-2 -right-2 z-10">
-          <UnifiedBadge variant="base" style="default" className={UI_CLASSES.JOB_FEATURED_BADGE}>
-            <Star className={UI_CLASSES.ICON_XS_LEADING} />
+          <UnifiedBadge variant="base" style="default" className="bg-orange-500 text-white border-orange-500">
+            <Star className={`${iconSize.xs} ${marginRight.tight}`} />
             Featured
           </UnifiedBadge>
         </div>
       ) : null}
 
-      <CardHeader className={UI_CLASSES.CARD_HEADER_DEFAULT}>
+      <CardHeader className={paddingBottom.default}>
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} mb-2`}>
+            <div className={`${cluster.default} ${marginBottom.compact}`}>
               {job.company_logo ? (
                 <Image
                   src={job.company_logo}
@@ -143,46 +143,52 @@ export function JobCard({ job }: JobCardProps) {
               ) : null}
               <div>
                 <CardTitle
-                  className={`${UI_CLASSES.TEXT_CARD_TITLE} transition-colors-smooth group-hover:text-accent text-xl`}
+                  className={`${size.lg} ${weight.semibold} transition-colors-smooth group-hover:text-accent text-xl`}
                 >
                   <Link href={`/jobs/${job.slug}`}>{highlightedTitle}</Link>
                 </CardTitle>
                 <div
-                  className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} ${UI_CLASSES.TEXT_METADATA}`}
+                  className={`${cluster.compact} ${size.xs} ${muted.default}`}
                 >
-                  <Building className={UI_CLASSES.ICON_SM} />
+                  <Building className={iconSize.sm} />
                   <span className="font-medium">{job.company}</span>
                 </div>
               </div>
             </div>
 
-            <div className={`${UI_CLASSES.FLEX_WRAP_GAP_3} text-muted-foreground text-sm`}>
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
-                <MapPin className={UI_CLASSES.ICON_SM} />
+            <div className={`${wrap} ${gap.default} text-muted-foreground text-sm`}>
+              <div className={cluster.tight}>
+                <MapPin className={iconSize.sm} />
                 {job.location}
               </div>
               {job.posted_at ? (
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
-                  <Clock className={UI_CLASSES.ICON_SM} />
+                <div className={cluster.tight}>
+                  <Clock className={iconSize.sm} />
                   {formatRelativeDate(job.posted_at)}
                 </div>
               ) : null}
               {job.salary ? (
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
-                  <DollarSign className={UI_CLASSES.ICON_SM} />
+                <div className={cluster.tight}>
+                  <DollarSign className={iconSize.sm} />
                   {job.salary}
                 </div>
               ) : null}
             </div>
           </div>
 
-          <div className={`flex flex-col items-end ${UI_CLASSES.SPACE_COMPACT}`}>
+          <div className={`flex flex-col items-end ${spaceY.tight}`}>
             {job.type ? (
               <UnifiedBadge
                 variant="base"
                 style="default"
                 className={
-                  BADGE_COLORS.jobType[job.type as JobType] || 'bg-muted text-muted-foreground'
+                  job.type === 'full-time' ? 'bg-color-badge-jobtype-fulltime-bg text-color-badge-jobtype-fulltime-text border-color-badge-jobtype-fulltime-border' :
+                  job.type === 'part-time' ? 'bg-color-badge-jobtype-parttime-bg text-color-badge-jobtype-parttime-text border-color-badge-jobtype-parttime-border' :
+                  job.type === 'contract' ? 'bg-color-badge-jobtype-contract-bg text-color-badge-jobtype-contract-text border-color-badge-jobtype-contract-border' :
+                  job.type === 'freelance' ? 'bg-color-badge-jobtype-freelance-bg text-color-badge-jobtype-freelance-text border-color-badge-jobtype-freelance-border' :
+                  job.type === 'internship' ? 'bg-color-badge-jobtype-internship-bg text-color-badge-jobtype-internship-text border-color-badge-jobtype-internship-border' :
+                  job.type === 'remote' ? 'bg-color-badge-jobtype-remote-bg text-color-badge-jobtype-remote-text border-color-badge-jobtype-remote-border' :
+                  'bg-muted text-muted-foreground'
                 }
               >
                 {job.type.replace('-', ' ')}
@@ -197,30 +203,30 @@ export function JobCard({ job }: JobCardProps) {
         </div>
       </CardHeader>
 
-      <CardContent className={UI_CLASSES.CARD_CONTENT_DEFAULT}>
-        <p className={`${UI_CLASSES.MARGIN_DEFAULT} line-clamp-2`}>{highlightedDescription}</p>
+      <CardContent className={`${paddingTop.default}`}>
+        <p className={`${marginBottom.default} line-clamp-2`}>{highlightedDescription}</p>
 
-        <div className={UI_CLASSES.MARGIN_DEFAULT}>
-          <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
+        <div className={marginBottom.default}>
+          <div className={`${wrap} ${gap.compact}`}>
             {(job.tags || []).slice(0, 4).map((tag: string) => (
               <UnifiedBadge
                 key={tag}
                 variant="base"
                 style="outline"
-                className={UI_CLASSES.TEXT_BADGE}
+                className={`${size.xs} ${weight.semibold}`}
               >
                 {tag}
               </UnifiedBadge>
             ))}
             {Array.isArray(job.tags) && job.tags.length > 4 && (
-              <UnifiedBadge variant="base" style="outline" className={UI_CLASSES.TEXT_BADGE}>
+              <UnifiedBadge variant="base" style="outline" className={`${size.xs} ${weight.semibold} text-foreground`}>
                 +{job.tags.length - 4} more
               </UnifiedBadge>
             )}
           </div>
         </div>
 
-        <div className={`flex ${UI_CLASSES.SPACE_DEFAULT}`}>
+        <div className={`flex ${gap.default}`}>
           <Button
             asChild
             className="flex-1"
@@ -251,7 +257,7 @@ export function JobCard({ job }: JobCardProps) {
               return (
                 <a href={validatedUrl} target="_blank" rel="noopener noreferrer">
                   Apply Now
-                  <ExternalLink className={`ml-2 ${UI_CLASSES.ICON_SM}`} />
+                  <ExternalLink className={cn(marginLeft.compact, iconSize.sm)} />
                 </a>
               );
             })()}

@@ -21,8 +21,14 @@
 
 import 'server-only';
 import { ContentService } from '@heyclaude/data-layer';
-import { type content_category } from '@heyclaude/data-layer/prisma';
-import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
+import type {
+  GetApiContentFullArgs,
+  GenerateMarkdownExportArgs,
+  GenerateItemLlmsTxtArgs,
+  GetSkillStoragePathArgs,
+  GetMcpbStoragePathArgs,
+} from '@heyclaude/database-types/postgres-types';
+import { type content_category, ContentCategory } from '@heyclaude/data-layer/prisma';
 import { APP_CONFIG, buildSecurityHeaders } from '@heyclaude/shared-runtime';
 import { normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
@@ -37,20 +43,8 @@ import {
 import { cacheLife } from 'next/cache';
 import { NextResponse } from 'next/server';
 
-// Prisma enum values for validation
-const CONTENT_CATEGORY_VALUES: readonly content_category[] = [
-  'agents',
-  'mcp',
-  'rules',
-  'commands',
-  'hooks',
-  'statuslines',
-  'skills',
-  'collections',
-  'guides',
-  'jobs',
-  'changelog',
-] as const;
+// Use Prisma enum object for validation (ensures sync with database)
+const CONTENT_CATEGORY_VALUES = Object.values(ContentCategory) as readonly content_category[];
 
 /****
  * Cached helper function to fetch full content record
@@ -67,7 +61,7 @@ async function getCachedContentFull(category: content_category, slug: string) {
     p_base_url: SITE_URL,
     p_category: category,
     p_slug: slug,
-  } satisfies DatabaseGenerated['public']['Functions']['get_api_content_full']['Args'];
+  } satisfies GetApiContentFullArgs;
 
   return await service.getApiContentFull(rpcArgs);
 }
@@ -125,7 +119,7 @@ function sanitizeFilename(name: string): string {
  * - returns a 404 JSON response when no content is found,
  * - returns an error response produced by `createErrorResponse` when the RPC returns an error.
  *
- * @param {DatabaseGenerated['public']['Enums']['content_category']} category - Content category enum value used to scope the lookup
+ * @param {content_category} category - Content category enum value used to scope the lookup
  * @param {string} slug - Content slug to identify the record
  * @param {ReturnType<typeof logger.child>} reqLogger - Scoped request logger used to record RPC errors and context
  * @returns A NextResponse containing the exported JSON content on success, a 404 JSON response if not found, or an error response created from RPC errors
@@ -542,7 +536,7 @@ function sanitizeFilename(name: string): string {
   }} logger Parameter description
 */
 async function handleJsonFormat(
-  category: DatabaseGenerated['public']['Enums']['content_category'],
+  category: content_category,
   slug: string,
   logger: {
     debug: (context: Record<string, unknown>, message: string) => void;
@@ -673,7 +667,7 @@ async function handleJsonFormat(
  * `generate_markdown_export` RPC for the given `category` and `slug`, and returns a
  * NextResponse containing the generated Markdown or a structured JSON error.
  *
- * @param {DatabaseGenerated['public']['Enums']['content_category']} category - DatabaseGenerated['public']['Enums']['content_category']: content category to export
+ * @param {content_category} category - content category to export
  * @param {string} slug - string: content record slug to export
  * @param {URL} url - URL: request URL used to read query params `includeMetadata` and `includeFooter`
  * @param {ReturnType<typeof logger.child>} reqLogger - ReturnType<typeof logger.child>: request-scoped logger for error and context logging
@@ -1016,7 +1010,7 @@ async function handleJsonFormat(
   }} logger Parameter description
 */
 async function handleMarkdownFormat(
-  category: DatabaseGenerated['public']['Enums']['content_category'],
+  category: content_category,
   slug: string,
   includeMetadata: boolean,
   includeFooter: boolean,
@@ -1032,7 +1026,7 @@ async function handleMarkdownFormat(
     p_include_footer: includeFooter,
     p_include_metadata: includeMetadata,
     p_slug: slug,
-  } satisfies DatabaseGenerated['public']['Functions']['generate_markdown_export']['Args'];
+  } satisfies GenerateMarkdownExportArgs;
 
   let data;
   try {
@@ -1156,7 +1150,7 @@ async function handleMarkdownFormat(
  * Calls the `generate_item_llms_txt` Supabase RPC with the provided category and slug and responds with
  * the RPC-produced text when found; returns a JSON error response when the item is not found or the RPC fails.
  *
- * @param {DatabaseGenerated['public']['Enums']['content_category']} category - Database content category enum identifying the type of content to export
+ * @param {content_category} category - Database content category enum identifying the type of content to export
  * @param {string} slug - Content slug identifying the specific item to export
  * @param {ReturnType<typeof logger.child>} reqLogger - Scoped logger used for request-scoped logging and RPC error reporting
  * @returns A NextResponse containing the LLMs.txt content as `text/plain; charset=utf-8` with appropriate security and cache headers on success, or a JSON error response (status 4xx/5xx) on RPC errors or when content is not found
@@ -1575,7 +1569,7 @@ async function handleMarkdownFormat(
   }} logger Parameter description
 */
 async function handleItemLlmsTxt(
-  category: DatabaseGenerated['public']['Enums']['content_category'],
+  category: content_category,
   slug: string,
   logger: {
     debug: (context: Record<string, unknown>, message: string) => void;
@@ -1588,7 +1582,7 @@ async function handleItemLlmsTxt(
   const rpcArgs = {
     p_category: category,
     p_slug: slug,
-  } satisfies DatabaseGenerated['public']['Functions']['generate_item_llms_txt']['Args'];
+  } satisfies GenerateItemLlmsTxtArgs;
 
   let data;
   try {
@@ -1685,7 +1679,7 @@ async function handleItemLlmsTxt(
 }
 
 async function handleStorageFormat(
-  category: DatabaseGenerated['public']['Enums']['content_category'],
+  category: content_category,
   slug: string,
   metadataMode: boolean,
   logger: {
@@ -1705,7 +1699,7 @@ async function handleStorageFormat(
   if (category === 'skills') {
     const rpcArgs = {
       p_slug: slug,
-    } satisfies DatabaseGenerated['public']['Functions']['get_skill_storage_path']['Args'];
+    } satisfies GetSkillStoragePathArgs;
 
     let data;
     try {
@@ -1795,7 +1789,7 @@ async function handleStorageFormat(
   if (category === 'mcp') {
     const rpcArgs = {
       p_slug: slug,
-    } satisfies DatabaseGenerated['public']['Functions']['get_mcpb_storage_path']['Args'];
+    } satisfies GetMcpbStoragePathArgs;
 
     let data;
     try {
@@ -1935,7 +1929,7 @@ export const GET = createApiRoute({
     switch (format) {
       case 'json': {
         return handleJsonFormat(
-          category as DatabaseGenerated['public']['Enums']['content_category'],
+          category as content_category,
           slug,
           {
             debug: (context: Record<string, unknown>, message: string) =>
@@ -1952,7 +1946,7 @@ export const GET = createApiRoute({
       case 'llms':
       case 'llms-txt': {
         return handleItemLlmsTxt(
-          category as DatabaseGenerated['public']['Enums']['content_category'],
+          category as content_category,
           slug,
           {
             debug: (context: Record<string, unknown>, message: string) =>
@@ -1969,7 +1963,7 @@ export const GET = createApiRoute({
       case 'markdown':
       case 'md': {
         return handleMarkdownFormat(
-          category as DatabaseGenerated['public']['Enums']['content_category'],
+          category as content_category,
           slug,
           includeMetadata ?? true,
           includeFooter ?? false,
@@ -1985,7 +1979,7 @@ export const GET = createApiRoute({
       }
       case 'storage': {
         return handleStorageFormat(
-          category as DatabaseGenerated['public']['Enums']['content_category'],
+          category as content_category,
           slug,
           metadataMode ?? false,
           {

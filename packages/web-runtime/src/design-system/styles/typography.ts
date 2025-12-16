@@ -18,15 +18,19 @@ export const muted = {
 } as const;
 
 export const size = {
-  xs: 'text-xs',
-  sm: 'text-sm',
-  base: 'text-base',
-  lg: 'text-lg',
-  xl: 'text-xl',
-  '2xl': 'text-2xl',
-  '3xl': 'text-3xl',
-  '4xl': 'text-4xl',
-} as const;
+  '2xs': 'text-[10px]', // 0.625rem = 10px (common pattern: 46 uses)
+  '3xs': 'text-[11px]', // 0.6875rem = 11px (common pattern: multiple uses)
+  xs: 'text-xs', // 0.75rem = 12px
+  sm: 'text-sm', // 0.875rem = 14px
+  base: 'text-base', // 1rem = 16px
+  'sm-md': 'text-[13px]', // 0.8125rem = 13px (common pattern: multiple uses)
+  lg: 'text-lg', // 1.125rem = 18px
+  xl: 'text-xl', // 1.25rem = 20px
+  '2xl': 'text-2xl', // 1.5rem = 24px
+  '3xl': 'text-3xl', // 1.875rem = 30px
+  '4xl': 'text-4xl', // 2.25rem = 36px
+  '5xl': 'text-5xl', // 3rem = 48px (hero headings)
+} as const satisfies Record<string, string>;
 
 export const weight = {
   normal: 'font-normal',

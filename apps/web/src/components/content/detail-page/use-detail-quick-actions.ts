@@ -85,7 +85,7 @@ export function useDetailQuickActions({
       ? null
       : mcpServers !== undefined
         ? mcpServers
-        : metadata['mcpServers'] && typeof metadata['mcpServers'] === 'object'
+        : metadata['mcpServers'] && typeof metadata['mcpServers'] === 'object' && !Array.isArray(metadata['mcpServers'])
           ? (metadata['mcpServers'] as Record<string, unknown>)
           : null;
 
@@ -94,7 +94,7 @@ export function useDetailQuickActions({
       ? null
       : configurationObject !== undefined
         ? configurationObject
-        : metadata['configuration'] && typeof metadata['configuration'] === 'object'
+        : metadata['configuration'] && typeof metadata['configuration'] === 'object' && !Array.isArray(metadata['configuration'])
           ? (metadata['configuration'] as Record<string, unknown>)
           : null;
 

@@ -33,7 +33,7 @@
 
 import { normalizeError } from '@heyclaude/shared-runtime';
 
-import { logger } from '../toolkit/logger.js';
+import { logger } from '../toolkit/logger.ts';
 
 /**
  * Analyzes commit messages and determines version bump type.

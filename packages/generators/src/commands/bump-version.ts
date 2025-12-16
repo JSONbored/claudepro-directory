@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 import { normalizeError } from '@heyclaude/shared-runtime';
 
-import { logger } from '../toolkit/logger.js';
+import { logger } from '../toolkit/logger.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);

@@ -1,5 +1,5 @@
+import { sponsorship_tier as sponsorshipTierEnum } from '@heyclaude/database-types/prisma';
 import type { sponsorship_tier } from '@heyclaude/data-layer/prisma';
-import { Constants } from '@heyclaude/database-types';
 import type { GetSponsorshipAnalyticsReturns } from '@heyclaude/database-types/postgres-types';
 import {
   generatePageMetadata,
@@ -14,7 +14,6 @@ import {
   CardHeader,
   CardTitle,
   POSITION_PATTERNS,
-  UI_CLASSES,
   UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
@@ -27,6 +26,7 @@ import { SignInButton } from '@/src/components/core/auth/sign-in-button';
 import { MetricsDisplay } from '@/src/components/features/analytics/metrics-display';
 
 import Loading from './loading';
+import { cluster, spaceY, gap } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Dynamic Rendering Required
@@ -129,7 +129,7 @@ async function SponsorshipAnalyticsPageContent({
       'SponsorshipAnalyticsPage: unauthenticated access attempt'
     );
     return (
-      <div className="space-y-6">
+      <div className={`${spaceY.relaxed}`}>
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl">Sign in required</CardTitle>
@@ -194,9 +194,9 @@ async function SponsorshipAnalyticsPageContent({
   }
 
   // After null check, TypeScript narrows types - use generated types directly
-  // Validate tier value at runtime using database enum constants
+  // Validate tier value at runtime using Prisma enum object
   const rawTier = sponsorship.tier as string; // Widen to string for validation
-  const validTiers = Constants.public.Enums.sponsorship_tier;
+  const validTiers = Object.values(sponsorshipTierEnum) as readonly sponsorship_tier[];
 
   // Type guard to check if tier is a valid enum value
   // Uses database enum constants directly - leverages readonly array includes
@@ -243,10 +243,10 @@ async function SponsorshipAnalyticsPageContent({
   }
 
   return (
-    <div className="space-y-6">
+    <div className={`${spaceY.relaxed}`}>
       {/* Header */}
       <div>
-        <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+        <div className={cluster.compact}>
           <UnifiedBadge showIcon tier={safeTier} variant="sponsored" />
           <h1 className="text-3xl font-bold">Sponsorship Analytics</h1>
         </div>
@@ -296,8 +296,8 @@ async function SponsorshipAnalyticsPageContent({
           <CardTitle>Campaign Details</CardTitle>
           <CardDescription>Current sponsorship configuration</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+        <CardContent className={`${spaceY.comfortable}`}>
+          <div className={`grid grid-cols-2 ${gap.default}`}>
             <div>
               <p className="text-sm font-medium">Content Type</p>
               <p className="text-muted-foreground">{sponsorship.content_type}</p>
@@ -324,7 +324,7 @@ async function SponsorshipAnalyticsPageContent({
 
             <div>
               <p className="text-sm font-medium">Status</p>
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+              <div className={cluster.compact}>
                 <UnifiedBadge style={sponsorship.active ? 'default' : 'outline'} variant="base">
                   {sponsorship.active ? 'Active' : 'Inactive'}
                 </UnifiedBadge>
@@ -348,7 +348,7 @@ async function SponsorshipAnalyticsPageContent({
           <CardDescription>Last 30 days</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
+          <div className={`${spaceY.compact}`}>
             {Array.from({ length: 30 }, (_, index) => {
               const date = new Date();
               date.setDate(date.getDate() - (29 - index));
@@ -358,11 +358,11 @@ async function SponsorshipAnalyticsPageContent({
               const maxImpressions = Math.max(...impressionsMap.values(), 1);
 
               return (
-                <div className="grid grid-cols-12 items-center gap-2" key={dayKey}>
+                <div className={`grid grid-cols-12 items-center ${gap.tight}`} key={dayKey}>
                   <div className="text-muted-foreground col-span-2 text-xs">
                     {date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}
                   </div>
-                  <div className="col-span-10 grid grid-cols-2 gap-1">
+                  <div className={`col-span-10 grid grid-cols-2 ${gap.micro}`}>
                     {/* Impressions bar */}
                     <div className="bg-muted relative h-8 overflow-hidden rounded">
                       <div
@@ -402,7 +402,7 @@ async function SponsorshipAnalyticsPageContent({
           <CardDescription>Improve your campaign performance</CardDescription>
         </CardHeader>
         <CardContent>
-          <ul className="space-y-2 text-sm">
+          <ul className={`${spaceY.compact} text-sm`}>
             <li>• CTR above 2% is excellent for sponsored content</li>
             <li>• Featured tier gets 3x more impressions than promoted</li>
             <li>• Premium tier includes newsletter promotion for extra reach</li>

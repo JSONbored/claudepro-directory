@@ -4,11 +4,10 @@
  */
 
 import { TrendingService } from '@heyclaude/data-layer/services/trending.ts';
-import type { Database } from '@heyclaude/database-types';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { GetRecentContentReturns } from '@heyclaude/database-types/postgres-types';
 import type { GetRecentInput } from '../lib/types.ts';
 
-type RecentContentItem = Database['public']['Functions']['get_recent_content']['Returns'][number];
+type RecentContentItem = GetRecentContentReturns[number];
 
 /**
  * Retrieve recent content (optionally filtered by category) and return a formatted textual summary plus metadata.
@@ -20,11 +19,11 @@ type RecentContentItem = Database['public']['Functions']['get_recent_content']['
  *   - `_meta.category`: the requested category or `'all'`,
  *   - `_meta.count`: the number of items (when items are present).
  */
-export async function handleGetRecent(supabase: SupabaseClient<Database>, input: GetRecentInput) {
+export async function handleGetRecent(input: GetRecentInput) {
   const { category, limit } = input;
 
-  // Use TrendingService for consistent behavior with web app
-  const trendingService = new TrendingService(supabase);
+  // Use TrendingService for consistent behavior with web app (Prisma-based, no Supabase client needed)
+  const trendingService = new TrendingService();
 
   const data = await trendingService.getRecentContent({
     ...(category ? { p_category: category } : {}),

@@ -4,19 +4,26 @@
 
 'use client';
 
-import type { Prisma } from '@heyclaude/data-layer/prisma';
+import type { contentModel } from '@heyclaude/data-layer/prisma';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { isValidInternalPath, getSafeExternalUrl } from '@heyclaude/web-runtime/core';
 import React, { useEffect, useState } from 'react';
 import { useIsClient } from '@heyclaude/web-runtime/hooks';
 
 import { Checklist } from '@/src/components/content/checklist';
-import { ProductionCodeBlock } from '@/src/components/content/interactive-code-block';
+import dynamic from 'next/dynamic';
 import { UnifiedContentBlock } from '@/src/components/content/markdown-content-block';
+
+// Lazy load large code block component (889 lines) - only loads when code blocks are rendered
+const ProductionCodeBlock = dynamic(
+  () => import('@/src/components/content/interactive-code-block').then((mod) => ({ default: mod.ProductionCodeBlock })),
+  { ssr: true }
+);
 import { ComparisonTable } from '@/src/components/core/domain/comparison-table';
 import { UnifiedContentBox } from '@/src/components/core/domain/content/featured-content-box';
+import { marginBottom, paddingX, paddingY, padding, spaceY, paddingLeft, marginTop, gap } from "@heyclaude/web-runtime/design-system";
 
-type ContentRow = Prisma.contentGetPayload<{}>;
+type ContentRow = contentModel;
 type GuideSections = ContentRow['metadata'];
 
 interface JSONSectionRendererProps {
@@ -386,14 +393,14 @@ function render_section(section: Section, index: number): React.ReactNode {
     case 'code_group': {
       return (
         <div key={key} id={section.id} className={section.className}>
-          {section.title ? <h3 className="mb-4 text-lg font-semibold">{section.title}</h3> : null}
+          {section.title ? <h3 className={`${marginBottom.default} text-lg font-semibold`}>{section.title}</h3> : null}
           <div className="overflow-hidden rounded-lg border">
             {section.tabs.map((tab: CodeTab, idx: number) => (
               <details key={`${tab.label}-${idx}`} className="border-b last:border-0">
-                <summary className="hover:bg-muted/50 cursor-pointer px-4 py-3 font-medium">
+                <summary className={`hover:bg-muted/50 cursor-pointer ${paddingX.default} ${paddingY.compact} font-medium`}>
                   {tab.label} {tab.filename ? `• ${tab.filename}` : null}
                 </summary>
-                <div className="p-4">
+                <div className={`${padding.default}`}>
                   <ProductionCodeBlock
                     html={tab.html || ''}
                     code={tab.code}
@@ -525,17 +532,17 @@ function render_section(section: Section, index: number): React.ReactNode {
     case 'tabs': {
       return (
         <div key={key} id={section.id} className={section.className}>
-          {section.title ? <h3 className="mb-4 text-lg font-semibold">{section.title}</h3> : null}
+          {section.title ? <h3 className={`${marginBottom.default} text-lg font-semibold`}>{section.title}</h3> : null}
           {section.description ? (
-            <p className="text-muted-foreground mb-4">{section.description}</p>
+            <p className={`text-muted-foreground ${marginBottom.default}`}>{section.description}</p>
           ) : null}
           <div className="overflow-hidden rounded-lg border">
             {section.items.map((item: TabItem, idx: number) => (
               <details key={`${item.value}-${idx}`} className="border-b last:border-0">
-                <summary className="hover:bg-muted/50 cursor-pointer px-4 py-3 font-medium">
+                <summary className={`hover:bg-muted/50 cursor-pointer ${paddingX.default} ${paddingY.compact} font-medium`}>
                   {item.label}
                 </summary>
-                <TrustedHTML html={item.content} className="p-4" />
+                <TrustedHTML html={item.content} className={`${padding.default}`} />
               </details>
             ))}
           </div>
@@ -584,16 +591,16 @@ function render_section(section: Section, index: number): React.ReactNode {
     case 'steps': {
       return (
         <div key={key} id={section.id} className={section.className}>
-          {section.title ? <h3 className="mb-4 text-lg font-semibold">{section.title}</h3> : null}
-          <div className="space-y-6">
+          {section.title ? <h3 className={`${marginBottom.default} text-lg font-semibold`}>{section.title}</h3> : null}
+          <div className={`${spaceY.relaxed}`}>
             {section.steps.map((step: StepItem) => (
-              <div key={step.number} className="border-primary border-l-4 pl-6">
-                <h4 className="mb-2 text-lg font-semibold">
+              <div key={step.number} className={`border-primary border-l-4 ${paddingLeft.comfortable}`}>
+                <h4 className={`${marginBottom.compact} text-lg font-semibold`}>
                   Step {step.number}: {step.title}
                 </h4>
-                <p className="text-muted-foreground mb-4">{step.description}</p>
+                <p className={`text-muted-foreground ${marginBottom.default}`}>{step.description}</p>
                 {step.timeEstimate ? (
-                  <p className="text-muted-foreground mb-2 text-sm">⏱️ {step.timeEstimate}</p>
+                  <p className={`text-muted-foreground ${marginBottom.compact} text-sm`}>⏱️ {step.timeEstimate}</p>
                 ) : null}
                 {step.code ? (
                   <ProductionCodeBlock
@@ -603,7 +610,7 @@ function render_section(section: Section, index: number): React.ReactNode {
                   />
                 ) : null}
                 {step.notes ? (
-                  <p className="text-muted-foreground mt-2 text-sm italic">{step.notes}</p>
+                  <p className={`text-muted-foreground ${marginTop.compact} text-sm italic`}>{step.notes}</p>
                 ) : null}
               </div>
             ))}
@@ -635,12 +642,12 @@ function render_section(section: Section, index: number): React.ReactNode {
     case 'related_content': {
       return (
         <div key={key} id={section.id} className={section.className}>
-          {section.title ? <h3 className="mb-4 text-lg font-semibold">{section.title}</h3> : null}
+          {section.title ? <h3 className={`${marginBottom.default} text-lg font-semibold`}>{section.title}</h3> : null}
           {section.description ? (
-            <p className="text-muted-foreground mb-4">{section.description}</p>
+            <p className={`text-muted-foreground ${marginBottom.default}`}>{section.description}</p>
           ) : null}
           {section.resources && section.resources.length > 0 ? (
-            <div className="grid gap-4">
+            <div className={`grid ${gap.default}`}>
               {section.resources.map((r: ResourceItem) => {
                 // Infer external flag from URL pattern: if explicitly set to true, use it;
                 // otherwise infer from URL pattern (http:// or https:// indicates external)
@@ -678,11 +685,11 @@ function render_section(section: Section, index: number): React.ReactNode {
                   return (
                     <div
                       key={resourceKey}
-                      className="rounded-lg border p-4 opacity-50"
+                      className={`rounded-lg border ${padding.default} opacity-50`}
                       title="Invalid or unsafe URL - cannot display link"
                     >
-                      <h4 className="mb-1 font-semibold">{r.title}</h4>
-                      <p className="text-muted-foreground mb-2 text-sm">{r.description}</p>
+                      <h4 className={`${marginBottom.tight} font-semibold`}>{r.title}</h4>
+                      <p className={`text-muted-foreground ${marginBottom.compact} text-sm`}>{r.description}</p>
                       <span className="text-destructive text-xs uppercase">
                         {r.type} • Invalid URL
                       </span>
@@ -698,10 +705,10 @@ function render_section(section: Section, index: number): React.ReactNode {
                     href={safeUrl}
                     target={isExternal ? '_blank' : undefined}
                     rel={isExternal ? 'noopener noreferrer' : undefined}
-                    className="hover:bg-muted/50 rounded-lg border p-4 transition-colors"
+                    className={`hover:bg-muted/50 rounded-lg border ${padding.default} transition-colors`}
                   >
-                    <h4 className="mb-1 font-semibold">{r.title}</h4>
-                    <p className="text-muted-foreground mb-2 text-sm">{r.description}</p>
+                    <h4 className={`${marginBottom.tight} font-semibold`}>{r.title}</h4>
+                    <p className={`text-muted-foreground ${marginBottom.compact} text-sm`}>{r.description}</p>
                     <span className="text-primary text-xs uppercase">{r.type}</span>
                   </a>
                 );
@@ -803,7 +810,7 @@ export function JSONSectionRenderer({ sections }: JSONSectionRendererProps) {
   }
 
   return (
-    <div className="space-y-8">
+    <div className={`${spaceY.loose}`}>
       {normalizedSections.map((section, index) => {
         const key = section.id || `section-${index}`;
         return (

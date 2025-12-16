@@ -13,6 +13,8 @@ export * from '../seo/og.ts';
 export * from '../auth/get-authenticated-user.ts';
 // Prisma Client (server-only, not isomorphic)
 // Re-export from data-layer to maintain backward compatibility
+// Note: This re-exports prisma singleton and types from @heyclaude/data-layer/prisma
+// which itself re-exports from @heyclaude/database-types/prisma
 export * from '@heyclaude/data-layer/prisma';
 
 // Static Config Getters (sync)

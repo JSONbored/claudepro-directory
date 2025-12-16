@@ -8,7 +8,6 @@
 import { Facebook, Linkedin, Mail, Share2, Twitter } from '@heyclaude/web-runtime/icons';
 import { logClientInfo } from '@heyclaude/web-runtime/logging/client';
 import {
-  UI_CLASSES,
   SimpleCopyButton,
   Button,
   Dialog,
@@ -18,6 +17,7 @@ import {
   DialogTitle,
   Input,
 } from '@heyclaude/web-runtime/ui';
+import { cluster, iconSize, spaceY, gap } from "@heyclaude/web-runtime/design-system";
 
 interface ShareResultsProps {
   onClose: () => void;
@@ -41,8 +41,8 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-            <Share2 className={UI_CLASSES.ICON_MD} />
+          <DialogTitle className={cluster.compact}>
+            <Share2 className={iconSize.md} />
             Share Your Results
           </DialogTitle>
           <DialogDescription>
@@ -50,9 +50,9 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className={`${spaceY.comfortable}`}>
           {/* Copy link */}
-          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+          <div className={cluster.compact}>
             <Input
               readOnly
               value={shareUrl}
@@ -66,7 +66,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
               variant="outline"
               size="icon"
               className="shrink-0"
-              iconClassName={UI_CLASSES.ICON_SM}
+              iconClassName={iconSize.sm}
               ariaLabel="Copy share link"
               onCopySuccess={() => {
                 logClientInfo(
@@ -83,8 +83,8 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
           </div>
 
           {/* Social share buttons */}
-          <div className="grid grid-cols-2 gap-3">
-            <Button variant="outline" size="sm" asChild className="gap-2">
+          <div className={`grid grid-cols-2 ${gap.compact}`}>
+            <Button variant="outline" size="sm" asChild className={`${gap.tight}`}>
               <a
                 href={shareLinks.twitter}
                 target="_blank"
@@ -101,12 +101,12 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
                   );
                 }}
               >
-                <Twitter className={UI_CLASSES.ICON_SM} />
+                <Twitter className={iconSize.sm} />
                 Twitter
               </a>
             </Button>
 
-            <Button variant="outline" size="sm" asChild className="gap-2">
+            <Button variant="outline" size="sm" asChild className={`${gap.tight}`}>
               <a
                 href={shareLinks.linkedin}
                 target="_blank"
@@ -123,12 +123,12 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
                   );
                 }}
               >
-                <Linkedin className={UI_CLASSES.ICON_SM} />
+                <Linkedin className={iconSize.sm} />
                 LinkedIn
               </a>
             </Button>
 
-            <Button variant="outline" size="sm" asChild className="gap-2">
+            <Button variant="outline" size="sm" asChild className={`${gap.tight}`}>
               <a
                 href={shareLinks.facebook}
                 target="_blank"
@@ -145,12 +145,12 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
                   );
                 }}
               >
-                <Facebook className={UI_CLASSES.ICON_SM} />
+                <Facebook className={iconSize.sm} />
                 Facebook
               </a>
             </Button>
 
-            <Button variant="outline" size="sm" asChild className="gap-2">
+            <Button variant="outline" size="sm" asChild className={`${gap.tight}`}>
               <a
                 href={shareLinks.email}
                 onClick={() => {
@@ -165,7 +165,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
                   );
                 }}
               >
-                <Mail className={UI_CLASSES.ICON_SM} />
+                <Mail className={iconSize.sm} />
                 Email
               </a>
             </Button>

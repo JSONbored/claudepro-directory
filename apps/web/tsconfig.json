@@ -6,14 +6,12 @@
     "tsBuildInfoFile": "./.tsbuildinfo",
     "noEmit": true,
     "baseUrl": ".",
+    "skipLibCheck": true,
     "paths": {
       "@/*": ["./*"],
       "@/src/*": ["./src/*"],
-      "@heyclaude/database-types": ["../../packages/database-types/dist/index"],
       "@heyclaude/shared-runtime": ["../../packages/shared-runtime/src/index.ts"],
-      "@heyclaude/shared-runtime/*": ["../../packages/shared-runtime/src/*"],
-      "@heyclaude/web-runtime": ["../../packages/web-runtime/src/index.ts"],
-      "@heyclaude/data-layer": ["../../packages/data-layer/dist/index"]
+      "@heyclaude/shared-runtime/*": ["../../packages/shared-runtime/src/*"]
     }
   },
   "include": [

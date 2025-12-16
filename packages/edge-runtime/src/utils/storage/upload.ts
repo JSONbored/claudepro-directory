@@ -1,6 +1,4 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-
-import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
 import { createUtilityContext } from '@heyclaude/shared-runtime/logging.ts';
 import { logger } from '@heyclaude/edge-runtime/utils/logger.ts';
@@ -36,7 +34,7 @@ export interface UploadObjectOptions {
   pathOptions?: BuildStorageObjectPathOptions;
   cacheControl?: string;
   upsert?: boolean;
-  client?: SupabaseClient<DatabaseGenerated>;
+  client?: SupabaseClient;
   validationPolicy?: FileValidationPolicy;
 }
 

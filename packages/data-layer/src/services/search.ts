@@ -24,11 +24,9 @@ import type {
   BatchInsertSearchQueriesReturns,
   GetTrendingSearchesArgs,
   GetTrendingSearchesReturns,
-} from '@heyclaude/database-types/postgres-types/functions';
-import type {
   SearchContentOptimizedResult,
   SearchUnifiedResult,
-} from '@heyclaude/database-types/postgres-types/composites';
+} from '@heyclaude/database-types/postgres-types';
 import { BasePrismaService } from './base-prisma-service.ts';
 
 /**

@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 
-import { runConsolidateVariables } from '../commands/consolidate-variables.js';
+import { runConsolidateVariables } from '../commands/consolidate-variables.ts';
 
 const args = process.argv.slice(2);
 const dryRun = args.includes('--dry-run') || args.includes('-d');

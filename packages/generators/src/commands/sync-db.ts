@@ -6,9 +6,9 @@ import { fileURLToPath } from 'node:url';
 import { normalizeError } from '@heyclaude/shared-runtime';
 import ora from 'ora';
 
-import { computeHash, hasHashChanged, setHash } from '../toolkit/cache.js';
-import { ensureEnvVars } from '../toolkit/env.js';
-import { logger } from '../toolkit/logger.js';
+import { computeHash, hasHashChanged, setHash } from '../toolkit/cache.ts';
+import { ensureEnvVars } from '../toolkit/env.ts';
+import { logger } from '../toolkit/logger.ts';
 
 // ============================================================================
 // Constants
@@ -18,7 +18,6 @@ const ROOT = fileURLToPath(new URL('../../../../', import.meta.url));
 
 // Output files
 const SCHEMA_FILE = path.join(ROOT, 'apps/edge/schema.sql');
-const TYPES_FILE = path.join(ROOT, 'packages/database-types/src/index.ts');
 
 const DEFAULT_SCHEMA = 'public';
 
@@ -307,131 +306,6 @@ function generateSchemaDump(params: {
   }
 }
 
-// ============================================================================
-// Step 2: TypeScript Types
-// ============================================================================
-
-function generateTypes(params: {
-  cachedHash?: null | string | undefined;
-  dryRun: boolean;
-  envConfig: EnvConfig;
-  isForce: boolean;
-  projectId: string;
-  schema: string;
-}): StepResult {
-  const { isForce, cachedHash, schema, projectId, dryRun, envConfig } = params;
-  const startTime = performance.now();
-  const spinner = ora();
-
-  try {
-    logger.info(`\n${'='.repeat(80)}`, { script: 'sync-database-schema' });
-    logger.info(`📘 STEP 2: TypeScript Types (${schema}) -> ${TYPES_FILE}`, {
-      script: 'sync-database-schema',
-    });
-    logger.info(`${'='.repeat(80)}\n`, { script: 'sync-database-schema' });
-
-    // Check if regeneration needed
-    if (!isForce) {
-      spinner.start('Checking for schema changes...');
-      // OPTIMIZATION: Use cached hash if provided (avoids redundant database query)
-      const currentHash = cachedHash === undefined ? getSchemaHash(schema, envConfig) : cachedHash;
-
-      if (currentHash && !hasHashChanged(`db-schema:${schema}`, currentHash)) {
-        spinner.info('Schema unchanged - skipping type generation');
-        return {
-          step: 'TypeScript Types',
-          success: true,
-          skipped: true,
-          duration_ms: Math.round(performance.now() - startTime),
-          reason: 'No changes detected',
-        };
-      }
-      spinner.succeed('Schema changed - generating types...');
-    }
-
-    spinner.start('Generating TypeScript types from Supabase...');
-
-    // Use --project-id instead of --db-url (handles SSL automatically via Supabase API)
-    const typeCommandArgs = [
-      'supabase',
-      'gen',
-      'types',
-      'typescript',
-      '--project-id',
-      projectId,
-      '--schema',
-      schema,
-    ];
-    const typeCommandStr = `npx ${typeCommandArgs.map((arg) => (/\s/.test(arg) ? `"${arg}"` : arg)).join(' ')}`;
-    let output = '';
-    if (dryRun) {
-      spinner.info('[dry-run] Skipping type generation execution');
-      logger.info(`Would run: ${typeCommandStr}`);
-    } else {
-      output = execFileSync('npx', typeCommandArgs, {
-        encoding: 'utf8',
-        stdio: 'pipe',
-      });
-
-      writeFileSync(TYPES_FILE, output, 'utf8');
-
-      logger.info('🛠️  Emitting declaration artifacts (packages/database-types/dist)...', {
-        script: 'sync-database-schema',
-      });
-      execSync('pnpm tsc -b packages/database-types/tsconfig.json', {
-        cwd: ROOT,
-        stdio: 'pipe',
-      });
-
-      // Validate
-      if (!(output.includes('export type') || output.includes('export interface'))) {
-        throw new Error('Generated types appear invalid');
-      }
-    }
-
-    // Store hash (use cached value, no need to refresh)
-    const currentHash =
-      dryRun || cachedHash !== undefined ? (cachedHash ?? null) : getSchemaHash(schema, envConfig);
-    const duration = Math.round(performance.now() - startTime);
-
-    if (currentHash) {
-      setHash(`db-schema:${schema}`, currentHash, {
-        reason: 'Database types regenerated',
-        duration,
-      });
-    }
-
-    spinner.succeed(
-      `Type generation ${dryRun ? 'validated (dry run)' : 'complete'} (${formatDuration(duration)})`
-    );
-
-    return {
-      step: 'TypeScript Types',
-      success: true,
-      skipped: dryRun,
-      duration_ms: Math.round(performance.now() - startTime),
-      ...(dryRun ? { reason: 'Dry run' } : {}),
-    };
-  } catch (error) {
-    spinner.fail('Type generation failed');
-    const typeGenError = normalizeError(error, 'Type generation failed');
-    logger.error(
-      `   ${typeGenError.message}`,
-      typeGenError,
-      {
-        script: 'sync-database-schema',
-        step: 'TypeScript Types',
-      }
-    );
-    return {
-      step: 'TypeScript Types',
-      success: false,
-      skipped: false,
-      duration_ms: Math.round(performance.now() - startTime),
-      reason: normalizeError(error, "Operation failed").message,
-    };
-  }
-}
 
 function runPackageBuilds(params: {
   dryRun: boolean;
@@ -543,10 +417,7 @@ function runTypeVerification(dryRun: boolean): StepResult {
 export async function runSyncDb() {
   const args = process.argv.slice(2);
   const isForce = args.includes('--force');
-  const onlyDump = args.includes('--only-dump');
-  const onlyTypes = args.includes('--only-types');
   const skipDump = args.includes('--skip-dump');
-  const skipTypes = args.includes('--skip-types');
   const skipPackageBuilds = args.includes('--skip-package-builds');
   const schemaArg = getOptionValue(args, '--schema');
   const reportPath = getOptionValue(args, '--report');
@@ -555,30 +426,23 @@ export async function runSyncDb() {
   const schema = (schemaArg ?? DEFAULT_SCHEMA).trim() || DEFAULT_SCHEMA;
 
   // Determine which operations to run
-  const runDump = onlyDump || !(onlyTypes || skipDump);
-  const runTypes = onlyTypes || !(onlyDump || skipTypes);
-  // Package builds should be opt-in, not opt-out, to avoid circular dependency:
-  // You need to regenerate types FIRST, then fix type errors, then optionally build
-  const runPackageBuildsStep = runTypes && !skipPackageBuilds && args.includes('--build-packages');
+  const runDump = !skipDump;
+  // Package builds should be opt-in, not opt-out, to avoid circular dependency
+  const runPackageBuildsStep = !skipPackageBuilds && args.includes('--build-packages');
 
   // Ensure env vars are loaded
-  await ensureEnvVars(['SUPABASE_PROJECT_ID', 'POSTGRES_URL_NON_POOLING']);
+  await ensureEnvVars(['POSTGRES_URL_NON_POOLING']);
 
   const envConfig: EnvConfig = {
-    projectId: process.env['SUPABASE_PROJECT_ID'] ?? null,
+    projectId: null,
     dbUrl: process.env['POSTGRES_URL_NON_POOLING'] ?? null,
   };
 
-  const projectId =
-    runTypes || verify
-      ? requireEnvVar(envConfig.projectId, 'SUPABASE_PROJECT_ID')
-      : (envConfig.projectId ?? '');
   const dbUrl = runDump
     ? requireEnvVar(envConfig.dbUrl, 'POSTGRES_URL_NON_POOLING')
     : envConfig.dbUrl;
   const effectiveEnvConfig: EnvConfig = {
     ...envConfig,
-    projectId,
     dbUrl: dbUrl ?? null,
   };
 
@@ -591,10 +455,6 @@ export async function runSyncDb() {
   logger.info(`  Schema dump: ${runDump ? 'Yes' : 'No'}`, {
     script: 'sync-database-schema',
     runDump,
-  });
-  logger.info(`  Type generation: ${runTypes ? 'Yes' : 'No'}`, {
-    script: 'sync-database-schema',
-    runTypes,
   });
   logger.info(
     `  Package builds: ${runPackageBuildsStep ? 'Yes' : 'No'}${
@@ -614,36 +474,29 @@ export async function runSyncDb() {
   const results: StepResult[] = [];
 
   try {
-    if (!dryRun && (runDump || runTypes)) {
+    if (!dryRun && runDump) {
       ensureSupabaseCli();
     }
 
     // OPTIMIZATION: Single schema hash query for all checks
     let cachedSchemaHashForRun: null | string | undefined;
 
-    if (!isForce && effectiveEnvConfig.dbUrl) {
-      if (runDump && runTypes) {
-        logger.info('🔍 Checking if database schema has changed...\n', {
-          script: 'sync-database-schema',
-        });
-        cachedSchemaHashForRun = getSchemaHash(schema, effectiveEnvConfig);
+    if (!isForce && effectiveEnvConfig.dbUrl && runDump) {
+      logger.info('🔍 Checking if database schema has changed...\n', {
+        script: 'sync-database-schema',
+      });
+      cachedSchemaHashForRun = getSchemaHash(schema, effectiveEnvConfig);
 
-        if (cachedSchemaHashForRun) {
-          const schemaUpToDate = !(
-            hasHashChanged(`schema-dump:${schema}`, cachedSchemaHashForRun) ||
-            hasHashChanged(`db-schema:${schema}`, cachedSchemaHashForRun)
-          );
+      if (cachedSchemaHashForRun) {
+        const schemaUpToDate = !hasHashChanged(`schema-dump:${schema}`, cachedSchemaHashForRun);
 
-          if (schemaUpToDate) {
-            logger.info('✅ Database schema unchanged - all artifacts up to date');
-            logger.info('   Use --force to regenerate anyway\n');
-            return;
-          }
-
-          logger.info('📊 Database schema has changed - syncing artifacts\n');
+        if (schemaUpToDate) {
+          logger.info('✅ Database schema unchanged - all artifacts up to date');
+          logger.info('   Use --force to regenerate anyway\n');
+          return;
         }
-      } else if (runDump || runTypes) {
-        cachedSchemaHashForRun = getSchemaHash(schema, effectiveEnvConfig);
+
+        logger.info('📊 Database schema has changed - syncing artifacts\n');
       }
     }
 
@@ -662,23 +515,6 @@ export async function runSyncDb() {
       const dumpResult = results.at(-1);
       if (!dumpResult?.success) {
         throw new Error('Schema dump failed - aborting');
-      }
-    }
-
-    if (runTypes) {
-      results.push(
-        generateTypes({
-          isForce,
-          cachedHash: cachedSchemaHashForRun ?? undefined,
-          schema,
-          projectId: requireEnvVar(effectiveEnvConfig.projectId, 'SUPABASE_PROJECT_ID'),
-          dryRun,
-          envConfig: effectiveEnvConfig,
-        })
-      );
-      const typesResult = results.at(-1);
-      if (!typesResult?.success) {
-        throw new Error('Type generation failed - aborting');
       }
     }
 

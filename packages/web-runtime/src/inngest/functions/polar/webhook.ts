@@ -19,7 +19,7 @@
  * @see https://docs.polar.sh/integrate/webhooks/events
  */
 
-import type { Json } from '@heyclaude/database-types';
+import type { Json } from '@heyclaude/data-layer/prisma';
 import { normalizeError } from '@heyclaude/shared-runtime';
 
 import { MiscService } from '@heyclaude/data-layer';

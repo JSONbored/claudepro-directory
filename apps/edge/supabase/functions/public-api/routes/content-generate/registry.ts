@@ -5,13 +5,13 @@
  * Easy to extend: just add new generator to this map.
  */
 
-import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
+import type { content_category } from '@heyclaude/data-layer/prisma';
 
 import { McpGenerator } from './generators/mcp.ts';
 import { SkillsGenerator } from './generators/skills.ts';
 import type { PackageGenerator } from './types.ts';
 
-type ContentCategory = DatabaseGenerated['public']['Enums']['content_category'];
+type ContentCategory = content_category;
 
 /**
  * Registry of category generators

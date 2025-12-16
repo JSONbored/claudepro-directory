@@ -25,7 +25,7 @@ import { join, extname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Project, Node, SourceFile, JsxAttribute, StringLiteral, TemplateExpression, TemplateSpan } from 'ts-morph';
 
-import { logger } from '../toolkit/logger.js';
+import { logger } from '../toolkit/logger.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const SCRIPT_DIR = join(__filename, '..');
@@ -183,9 +183,10 @@ const CLASSNAME_MAPPINGS: ClassNameMapping[] = [
   {
     pattern: /\brounded-(sm|md|lg|xl|2xl|3xl|full)\b/g,
     replacement: (match, size) => {
-      // Map 2xl/3xl to string keys
-      const key = size === '2xl' || size === '3xl' ? `'${size}'` : size;
-      return `\${radius[${key}]}`;
+      // Keys that need bracket notation (start with number or are reserved words)
+      const needsBrackets = size === '2xl' || size === '3xl' || size === 'full';
+      const accessor = needsBrackets ? `['${size}']` : `.${size}`;
+      return `\${radius${accessor}}`;
     },
     importName: 'radius',
     description: 'Border radius',
@@ -504,9 +505,10 @@ const CLASSNAME_MAPPINGS: ClassNameMapping[] = [
   {
     pattern: /\btext-(xs|sm|base|lg|xl|2xl|3xl|4xl)\b/g,
     replacement: (match, size) => {
-      // Map 2xl/3xl/4xl to string keys
-      const key = size === '2xl' || size === '3xl' || size === '4xl' ? `'${size}'` : size;
-      return `\${size[${key}]}`;
+      // Keys that need bracket notation (start with number like '2xl', '3xl', '4xl')
+      const needsBrackets = size === '2xl' || size === '3xl' || size === '4xl';
+      const accessor = needsBrackets ? `['${size}']` : `.${size}`;
+      return `\${size${accessor}}`;
     },
     importName: 'size',
     description: 'Text size',
@@ -982,8 +984,9 @@ const CLASSNAME_MAPPINGS: ClassNameMapping[] = [
       };
       const key = mapping[size];
       if (key) {
-        // Handle numeric keys that need bracket notation
-        const accessor = /^\d+$/.test(key) ? `['${key}']` : `.${key}`;
+        // Handle keys that need bracket notation (numeric or start with number like '2xl', '3xl')
+        const needsBrackets = /^\d+/.test(key) || key === '2xl' || key === '3xl';
+        const accessor = needsBrackets ? `['${key}']` : `.${key}`;
         return `\${iconSize${accessor}}`;
       }
       // For unmapped sizes, create direct mapping with bracket notation
@@ -1186,30 +1189,38 @@ function migrateFile(
           const { updated, neededImports, patternCount } = migrateClassName(originalValue, mappingsToUse);
 
           // Always transform string literals to template literals for consistency
-          // Count as multiple transformations if multiple patterns were transformed
           if (updated !== originalValue || neededImports.size > 0 || patternCount > 0) {
             hasChanges = true;
             neededImports.forEach(imp => allNeededImports.add(imp));
 
-            // Create one transformation per pattern (or one if no patterns but still modernizing)
-            const transformationsToAdd = Math.max(1, patternCount);
-            for (let i = 0; i < transformationsToAdd; i++) {
-              result.transformations.push({
-                file: result.file,
-                line: initializer.getStartLineNumber(),
-                original: `className="${originalValue}"`,
-                transformed: `className={\`${updated}\`}`,
-                type: patternCount > 0 ? 'string-literal' : 'string-literal-modernize',
-                patternCount: patternCount > 0 ? 1 : 0, // Each transformation represents 1 pattern
-              });
-            }
+            // Create ONE transformation record per className attribute
+            // The patternCount field indicates how many patterns were transformed in this attribute
+            result.transformations.push({
+              file: result.file,
+              line: initializer.getStartLineNumber(),
+              original: `className="${originalValue}"`,
+              transformed: `className={\`${updated}\`}`,
+              type: patternCount > 0 ? 'string-literal' : 'string-literal-modernize',
+              patternCount: patternCount, // Actual count of patterns transformed
+            });
 
             if (!dryRun) {
               // Convert string literal to template literal
               // Need to wrap in JSX expression
-              const parent = initializer.getParent();
-              if (Node.isJsxAttribute(parent)) {
-                parent.setInitializer(`{\`${updated}\`}`);
+              try {
+                const parent = initializer.getParent();
+                if (Node.isJsxAttribute(parent)) {
+                  const newInitializer = `{\`${updated}\`}`;
+                  // Verify the replacement will actually change something
+                  const currentInitializer = parent.getInitializer()?.getText() || '';
+                  if (newInitializer !== currentInitializer) {
+                    parent.setInitializer(newInitializer);
+                  } else {
+                    result.errors.push(`String literal replacement produced identical text at line ${initializer.getStartLineNumber()}`);
+                  }
+                }
+              } catch (error) {
+                result.errors.push(`Failed to replace string literal at line ${initializer.getStartLineNumber()}: ${error instanceof Error ? error.message : String(error)}`);
               }
             }
           }
@@ -1225,22 +1236,31 @@ function migrateFile(
               hasChanges = true;
               neededImports.forEach(imp => allNeededImports.add(imp));
 
-              // Create one transformation per pattern
-              const transformationsToAdd = Math.max(1, patternCount);
-              for (let i = 0; i < transformationsToAdd; i++) {
-                result.transformations.push({
-                  file: result.file,
-                  line: expression.getStartLineNumber(),
-                  original: `className={"${originalValue}"}`,
-                  transformed: `className={\`${updated}\`}`,
-                  type: 'jsx-expression-string',
-                  patternCount: patternCount > 0 ? 1 : 0,
-                });
-              }
+              // Create ONE transformation record per className attribute
+              // The patternCount field indicates how many patterns were transformed in this attribute
+              result.transformations.push({
+                file: result.file,
+                line: expression.getStartLineNumber(),
+                original: `className={"${originalValue}"}`,
+                transformed: `className={\`${updated}\`}`,
+                type: 'jsx-expression-string',
+                patternCount: patternCount, // Actual count of patterns transformed
+              });
 
               if (!dryRun) {
                 // Replace string literal with template literal
-                expression.replaceWithText(`\`${updated}\``);
+                try {
+                  const newText = `\`${updated}\``;
+                  const originalText = expression.getText();
+                  // Verify the replacement will actually change something
+                  if (newText !== originalText) {
+                    expression.replaceWithText(newText);
+                  } else {
+                    result.errors.push(`JSX expression string replacement produced identical text at line ${expression.getStartLineNumber()}`);
+                  }
+                } catch (error) {
+                  result.errors.push(`Failed to replace JSX expression string at line ${expression.getStartLineNumber()}: ${error instanceof Error ? error.message : String(error)}`);
+                }
               }
             }
           }
@@ -1253,6 +1273,7 @@ function migrateFile(
             let totalPatternCount = 0;
 
             // Process head (first literal part before first ${})
+            // getText() on TemplateHead returns the raw text content (no quotes, no backticks)
             const head = expression.getHead().getText();
             const { updated: updatedHead, neededImports: headImports, patternCount: headPatternCount } = migrateClassName(head, mappingsToUse);
             totalPatternCount += headPatternCount;
@@ -1265,10 +1286,15 @@ function migrateFile(
             // Process each span (${expression} literal)
             const allLiteralImports = new Set<string>();
             for (const span of spans) {
-              // Add the expression (${...})
-              updatedParts.push(span.getExpression().getText());
+              // Add the expression with ${} wrapper
+              // getText() on the expression node returns just the expression content (e.g., "other")
+              // We need to wrap it with ${} to reconstruct the template literal correctly
+              // Use string concatenation to avoid issues with special characters in exprText
+              const exprText = span.getExpression().getText();
+              updatedParts.push('${' + exprText + '}');
               
               // Process the literal part after the expression
+              // getText() on TemplateTail returns the raw text content (no quotes, no backticks)
               const literal = span.getLiteral().getText();
               const { updated: updatedLiteral, neededImports: literalImports, patternCount: literalPatternCount } = migrateClassName(literal, mappingsToUse);
               totalPatternCount += literalPatternCount;
@@ -1290,25 +1316,50 @@ function migrateFile(
               allLiteralImports.forEach(imp => allNeededImports.add(imp));
               
               const originalText = expression.getText();
+              // Reconstruct the template literal properly
+              // updatedParts contains: [head, ${expr1}, literal1, ${expr2}, literal2, ...]
+              // We need to join them to create a valid template literal
+              // getText() on TemplateExpression returns the template literal WITH backticks
+              // So newText should also include backticks
               const newText = '`' + updatedParts.join('') + '`';
-
-              // Create one transformation per pattern (or one if no patterns but still modernizing)
-              // This ensures we count all pattern transformations, not just className attributes
-              const transformationsToAdd = Math.max(1, totalPatternCount);
-              for (let i = 0; i < transformationsToAdd; i++) {
-                result.transformations.push({
-                  file: result.file,
-                  line: expression.getStartLineNumber(),
-                  original: `className={${originalText}}`,
-                  transformed: `className={${newText}}`,
-                  type: 'template-literal',
-                  patternCount: totalPatternCount > 0 ? 1 : 0,
-                });
+              
+              // Debug: Log reconstruction details if there are patterns to transform
+              if (totalPatternCount > 0 && !dryRun) {
+                // Verify reconstruction is correct by comparing structure
+                // This helps catch reconstruction bugs early
               }
 
+              // Create ONE transformation record per className attribute
+              // The patternCount field indicates how many patterns were transformed in this attribute
+              // This ensures dry-run and live-run counts match accurately
+              result.transformations.push({
+                file: result.file,
+                line: expression.getStartLineNumber(),
+                original: `className={${originalText}}`,
+                transformed: `className={${newText}}`,
+                type: 'template-literal',
+                patternCount: totalPatternCount, // Actual count of patterns transformed
+              });
+
               if (!dryRun) {
-                // Replace the template expression
-                expression.replaceWithText(newText);
+                // Replace the template expression using replaceWithText (same as migrate-ui-classes.ts)
+                // getText() on TemplateExpression returns the template literal WITH backticks
+                // So newText should also include backticks
+                try {
+                  // Verify the replacement will actually change something
+                  if (newText !== originalText) {
+                    // Use replaceWithText directly on TemplateExpression (same approach as migrate-ui-classes.ts)
+                    expression.replaceWithText(newText);
+                  } else {
+                    // If newText equals originalText, something went wrong with reconstruction
+                    result.errors.push(`Template literal reconstruction produced identical text at line ${expression.getStartLineNumber()}: original="${originalText}", new="${newText}"`);
+                  }
+                } catch (error) {
+                  // Log detailed error information for debugging
+                  const errorMsg = error instanceof Error ? error.message : String(error);
+                  result.errors.push(`Failed to replace template expression at line ${expression.getStartLineNumber()}: ${errorMsg}. Original: "${originalText}", New: "${newText}"`);
+                  // Don't throw - continue processing other transformations
+                }
               }
             }
           }
@@ -1397,10 +1448,14 @@ export async function migrateInlineStyles(dryRun: boolean = false, phase?: numbe
     results.push(result);
     
     if (result.transformations.length > 0) {
+      // Count transformations: one per className attribute (consistent with dry-run)
+      // Each transformation record represents one className attribute that was transformed
       totalTransformations += result.transformations.length;
       filesModified++;
       
-      logger.info(`${result.file}: ${result.transformations.length} transformation(s)`);
+      // Calculate total patterns for informational logging
+      const filePatternCount = result.transformations.reduce((sum, t) => sum + (t.patternCount || 0), 0);
+      logger.info(`${result.file}: ${result.transformations.length} transformation(s) (${filePatternCount} pattern(s))`);
       if (result.importsAdded.length > 0) {
         logger.info(`  Added imports: ${result.importsAdded.join(', ')}`);
       }

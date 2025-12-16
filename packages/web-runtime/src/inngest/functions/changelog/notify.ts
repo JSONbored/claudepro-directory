@@ -6,7 +6,7 @@
  */
 
 import { MiscService } from '@heyclaude/data-layer';
-import type { Prisma } from '@heyclaude/data-layer/prisma';
+import type { notificationsCreateInput } from '@heyclaude/database-types/prisma';
 import { normalizeError, getEnvVar } from '@heyclaude/shared-runtime';
 import { revalidateTag } from 'next/cache';
 
@@ -164,7 +164,7 @@ export const processChangelogNotifyQueue = inngest.createFunction(
           }
 
           // 2. Insert notification (critical path)
-          const notificationInsert: Prisma.notificationsCreateInput = {
+          const notificationInsert: notificationsCreateInput = {
             id: job.entryId,
             title: job.title,
             message: job.tldr || 'We just shipped a fresh Claude Pro Directory release.',

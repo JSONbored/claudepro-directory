@@ -12,7 +12,6 @@ import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { AlertCircle, Loader2, Shield } from '@heyclaude/web-runtime/icons';
 import {
   errorToasts,
-  UI_CLASSES,
   Button,
   Dialog,
   DialogContent,
@@ -24,6 +23,7 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import { useBoolean } from '@heyclaude/web-runtime/hooks';
 import { useCallback, useEffect, useState } from 'react';
+import { iconSize, marginRight, gap, padding, paddingY, spaceY, paddingX } from "@heyclaude/web-runtime/design-system";
 
 interface MFAChallengeDialogProps {
   onVerified: () => void;
@@ -161,8 +161,8 @@ export function MFAChallengeDialog({ open, onVerified }: MFAChallengeDialogProps
     >
       <DialogContent className="sm:max-w-md" onPointerDownOutside={(e) => e.preventDefault()}>
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Shield className={UI_CLASSES.ICON_SM} />
+          <DialogTitle className={`flex items-center ${gap.tight}`}>
+            <Shield className={iconSize.sm} />
             Two-Factor Authentication Required
           </DialogTitle>
           <DialogDescription>
@@ -171,20 +171,20 @@ export function MFAChallengeDialog({ open, onVerified }: MFAChallengeDialogProps
         </DialogHeader>
 
         {error ? (
-          <div className="bg-destructive/10 text-destructive flex items-center gap-2 rounded-md p-3 text-sm">
-            <AlertCircle className={UI_CLASSES.ICON_SM} />
+          <div className={`bg-destructive/10 text-destructive flex items-center ${gap.tight} rounded-md ${padding.compact} text-sm`}>
+            <AlertCircle className={iconSize.sm} />
             <span>{error}</span>
           </div>
         ) : null}
 
         {loading && factors.length === 0 ? (
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className={`${UI_CLASSES.ICON_XL} text-muted-foreground animate-spin`} />
+          <div className={`flex items-center justify-center ${paddingY.relaxed}`}>
+            <Loader2 className={`${iconSize.xl} text-muted-foreground animate-spin`} />
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className={`${spaceY.comfortable}`}>
             {factors.length > 1 && (
-              <div className="space-y-2">
+              <div className={`${spaceY.compact}`}>
                 <Label>Select authenticator</Label>
                 <select
                   value={selectedFactor?.id || ''}
@@ -192,7 +192,7 @@ export function MFAChallengeDialog({ open, onVerified }: MFAChallengeDialogProps
                     const factor = factors.find((f) => f.id === e.target.value);
                     setSelectedFactor(factor || null);
                   }}
-                  className="border-input bg-background ring-offset-background flex h-10 w-full rounded-md border px-3 py-2 text-sm"
+                  className={`border-input bg-background ring-offset-background flex h-10 w-full rounded-md border ${paddingX.compact} ${paddingY.tight} text-sm`}
                   disabled={loading}
                 >
                   {factors.map((factor) => (
@@ -204,7 +204,7 @@ export function MFAChallengeDialog({ open, onVerified }: MFAChallengeDialogProps
               </div>
             )}
 
-            <div className="space-y-2">
+            <div className={`${spaceY.compact}`}>
               <Label htmlFor="mfa-code">Enter 6-digit code</Label>
               <Input
                 id="mfa-code"
@@ -243,7 +243,7 @@ export function MFAChallengeDialog({ open, onVerified }: MFAChallengeDialogProps
             >
               {loading ? (
                 <>
-                  <Loader2 className={`${UI_CLASSES.ICON_SM_LEADING} animate-spin`} />
+                  <Loader2 className={`${iconSize.sm} ${marginRight.compact} animate-spin`} />
                   Verifying...
                 </>
               ) : (

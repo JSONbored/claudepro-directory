@@ -157,6 +157,7 @@ import {
 import { Button, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, cn } from '@heyclaude/web-runtime/ui';
 import { useBoolean, useTimeout } from '@heyclaude/web-runtime/hooks';
 import { getThemeConfig } from '@heyclaude/shared-runtime';
+import { paddingX, paddingY, gap, iconSize, cluster, muted, size, marginTop } from "@heyclaude/web-runtime/design-system";
 
 export type BundledLanguage = string;
 
@@ -299,14 +300,15 @@ const wordHighlightClassNames = cn(
 );
 
 const codeBlockClassName = cn(
-  'mt-0 bg-background text-sm',
-  '[&_pre]:py-4',
+  marginTop.zero,
+  'bg-background text-sm',
+  '[&_pre]:py-4', // Shiki-specific: pre padding (4 = 1rem = 16px)
   '[&_.shiki]:!bg-[var(--shiki-bg)]',
   '[&_code]:w-full',
   '[&_code]:grid',
   '[&_code]:overflow-x-auto',
   '[&_code]:bg-transparent',
-  '[&_.line]:px-4',
+  '[&_.line]:px-4', // Shiki-specific: line padding (4 = 1rem = 16px)
   '[&_.line]:w-full',
   '[&_.line]:relative'
 );
@@ -427,10 +429,10 @@ export const CodeBlockFilename = ({
 
   return (
     <div
-      className="flex items-center gap-2 bg-secondary px-4 py-1.5 text-muted-foreground text-xs"
+      className={cn(cluster.tight, gap.tight, 'bg-secondary', paddingX.default, paddingY.micro, muted.default, size.xs)}
       {...(props as any)}
     >
-      {Icon && <Icon className="h-4 w-4 shrink-0" />}
+      {Icon && <Icon className={`${iconSize.sm} shrink-0`} />}
       <span className="flex-1 truncate">{children}</span>
     </div>
   );
@@ -451,10 +453,7 @@ export const CodeBlockSelectTrigger = ({
   ...props
 }: CodeBlockSelectTriggerProps) => (
   <SelectTrigger
-    className={cn(
-      'w-fit border-none text-muted-foreground text-xs shadow-none',
-      className
-    )}
+    className={cn('w-fit border-none shadow-none', muted.default, size.xs, className)}
     {...(props as any)}
   />
 );
@@ -548,7 +547,7 @@ export const CodeBlockCopyButton = ({
       variant="ghost"
       {...(props as any)}
     >
-      {children ?? <Icon className="text-muted-foreground" size={14} />}
+      {children ?? <Icon className={muted.default} size={14} />}
     </Button>
   );
 };
@@ -557,7 +556,7 @@ type CodeBlockFallbackProps = HTMLAttributes<HTMLDivElement>;
 
 const CodeBlockFallback = ({ children, ...props }: CodeBlockFallbackProps) => (
   <div {...(props as any)}>
-    <pre className="w-full">
+    <pre className={`w-full`}>
       <code>
         {children
           ?.toString()

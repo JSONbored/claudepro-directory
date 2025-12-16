@@ -6,8 +6,12 @@
  */
 
 import { MiscService } from '@heyclaude/data-layer';
-import type { Prisma } from '@heyclaude/data-layer/prisma';
-import { Constants } from '@heyclaude/database-types';
+import type { notification_type, notification_priority } from '@heyclaude/data-layer/prisma';
+import type { notificationsCreateInput } from '@heyclaude/database-types/prisma';
+import {
+  NotificationType,
+  NotificationPriority,
+} from '@heyclaude/data-layer/prisma';
 
 import { inngest } from '../../client';
 import { logger, createWebAppContextWithId } from '../../../logging/server';
@@ -16,14 +20,14 @@ type NotificationType = 'announcement' | 'feedback';
 type NotificationPriority = 'high' | 'medium' | 'low';
 
 // Type guards
-function isValidNotificationType(value: string): value is NotificationType {
-  const validTypes = Constants.public.Enums.notification_type;
-  return validTypes.includes(value as NotificationType);
+function isValidNotificationType(value: string): value is notification_type {
+  const validTypes = Object.values(NotificationType) as readonly notification_type[];
+  return validTypes.includes(value as notification_type);
 }
 
-function isValidNotificationPriority(value: string): value is NotificationPriority {
-  const validPriorities = Constants.public.Enums.notification_priority;
-  return validPriorities.includes(value as NotificationPriority);
+function isValidNotificationPriority(value: string): value is notification_priority {
+  const validPriorities = Object.values(NotificationPriority) as readonly notification_priority[];
+  return validPriorities.includes(value as notification_priority);
 }
 
 /**
@@ -94,7 +98,7 @@ export const createNotification = inngest.createFunction(
       const notificationId = id ?? crypto.randomUUID();
 
       // Build notification data carefully to avoid exactOptionalPropertyTypes issues
-      const notificationData: Prisma.notificationsCreateInput = {
+      const notificationData: notificationsCreateInput = {
         id: notificationId,
         title: title.trim(),
         message: message.trim(),
@@ -194,7 +198,7 @@ export const broadcastNotification = inngest.createFunction(
       const notificationId = crypto.randomUUID();
 
       // Build notification data carefully to avoid exactOptionalPropertyTypes issues
-      const notificationData: Prisma.notificationsCreateInput = {
+      const notificationData: notificationsCreateInput = {
         id: notificationId,
         title: title.trim(),
         message: message.trim(),

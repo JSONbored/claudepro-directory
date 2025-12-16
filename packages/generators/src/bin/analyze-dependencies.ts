@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 
-import { runAnalyzeDependencies } from '../commands/analyze-dependencies.js';
+import { runAnalyzeDependencies } from '../commands/analyze-dependencies.ts';
 
 runAnalyzeDependencies().catch((error) => {
   console.error('Analysis failed:', error);

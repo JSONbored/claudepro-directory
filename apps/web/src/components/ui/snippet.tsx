@@ -43,6 +43,7 @@ import {
 } from 'react';
 import { Button, Tabs, TabsContent, TabsList, TabsTrigger, cn } from '@heyclaude/web-runtime/ui';
 import { useBoolean, useTimeout } from '@heyclaude/web-runtime/hooks';
+import { truncate, gap, marginTop, padding, size } from "@heyclaude/web-runtime/design-system";
 
 export type SnippetProps = ComponentProps<typeof Tabs>;
 
@@ -119,7 +120,7 @@ export const SnippetCopyButton = ({
 
   return (
     <Button
-      className="opacity-0 transition-opacity group-hover:opacity-100"
+      className={`opacity-0 transition-opacity group-hover:opacity-100`}
       onClick={copyToClipboard}
       size="icon"
       variant="ghost"
@@ -140,7 +141,7 @@ export const SnippetTabsTrigger = ({
   className,
   ...props
 }: SnippetTabsTriggerProps) => (
-  <TabsTrigger className={cn('gap-1.5', className)} {...(props as any)} />
+  <TabsTrigger className={cn(gap['1.5'], className)} {...(props as any)} />
 );
 
 export type SnippetTabsContentProps = ComponentProps<typeof TabsContent>;
@@ -152,10 +153,10 @@ export const SnippetTabsContent = ({
 }: SnippetTabsContentProps) => (
   <TabsContent
     asChild
-    className={cn('mt-0 bg-background p-4 text-sm', className)}
+    className={cn(marginTop.zero, 'bg-background', padding.default, size.sm, className)}
     {...(props as any)}
   >
-    <pre className="truncate">{children}</pre>
+    <pre className={`${truncate.single}`}>{children}</pre>
   </TabsContent>
 );
 

@@ -1,9 +1,10 @@
 import { FeaturedSectionSkeleton, Skeleton } from '@heyclaude/web-runtime/ui';
 import dynamic from 'next/dynamic';
+import { marginBottom, spaceY } from "@heyclaude/web-runtime/design-system";
 
 // Re-export section prop types so consumers can name the inferred component types without TS4023 issues.
 export type { FeaturedSectionsProps } from '@/src/components/features/home/featured-sections';
-export type { TabsSectionProps } from '@/src/components/features/home/homepage-tabs';
+export type { AllContentSectionProps } from '@/src/components/features/home/all-content-section';
 
 /**
  * Lazy-loaded FeaturedSections with skeleton loading state
@@ -18,7 +19,7 @@ export const LazyFeaturedSections = dynamic(
     })),
   {
     loading: () => (
-      <div className="mb-16 space-y-16">
+      <div className={`${marginBottom.hero} ${spaceY.default}`}>
         {/* 5 featured categories + 1 jobs section */}
         {Array.from({ length: 6 }).map((_, i) => (
           <FeaturedSectionSkeleton key={`featured-loading-${i + 1}`} />
@@ -30,30 +31,28 @@ export const LazyFeaturedSections = dynamic(
 );
 
 /**
- * Lazy-loaded TabsSection with skeleton loading state
- * OPTIMIZATION (2025-10-22): Enabled SSR for better perceived performance
- * SSR renders tabs immediately, eliminating skeleton flash
- * Interactive functionality works client-side after hydration
+ * Lazy-loaded AllContentSection with skeleton loading state
+ * OPTIMIZATION: Scroll-triggered loading - only fetches when section enters viewport
+ * This eliminates function calls for users who don't scroll to this section
  */
-export const LazyTabsSection = dynamic(
+export const LazyAllContentSection = dynamic(
   () =>
-    import('@/src/components/features/home/homepage-tabs').then((mod) => ({
-      default: mod.TabsSection,
+    import('@/src/components/features/home/all-content-section').then((mod) => ({
+      default: mod.AllContentSection,
     })),
   {
     loading: () => (
-      <div className="space-y-8">
-        {/* Tabs skeleton */}
-        <div className="bg-muted flex gap-2 rounded-lg p-1">
-          {Array.from({ length: 7 }).map((_, i) => (
-            <Skeleton key={`tab-skeleton-${i + 1}`} size="lg" width="3xl" className="flex-1" />
-          ))}
+      <div className={`${spaceY.loose}`}>
+        {/* Section header skeleton */}
+        <div className={`${marginBottom.relaxed}`}>
+          <Skeleton size="lg" width="3xl" className="h-8 w-64 mb-2" />
+          <Skeleton size="md" width="2xl" className="h-4 w-96" />
         </div>
         {/* Content skeleton */}
         <FeaturedSectionSkeleton />
       </div>
     ),
-    ssr: true, // SSR enabled: Better UX, tabs render immediately
+    ssr: false, // Client-only: Uses Intersection Observer for scroll-triggered loading
   }
 );
 

@@ -24,16 +24,17 @@
  * Dynamic rendering behavior is determined by the parent layout and page configuration.
  */
 
+import { ContentCategory, SubmissionType } from '@heyclaude/data-layer/prisma';
 import type { content_category } from '@heyclaude/data-layer/prisma';
-import { Constants } from '@heyclaude/database-types';
 import type { GetContentTemplatesReturns } from '@heyclaude/database-types/postgres-types';
 import { getEnvVar, normalizeError } from '@heyclaude/shared-runtime';
 import { submitContentForReview } from '@heyclaude/web-runtime/actions';
 import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
 import { checkConfettiEnabled } from '@heyclaude/web-runtime/config/static-configs';
 import { type DraftFormData, DraftManager } from '@heyclaude/web-runtime/data/drafts/draft-manager';
-import { SPRING, STAGGER } from '@heyclaude/web-runtime/design-system';
-import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/design-tokens';
+import { SPRING, STAGGER, marginTop, spaceY, marginBottom, paddingTop, paddingRight, gap, paddingX, paddingY, padding, marginX, marginLeft } from '@heyclaude/web-runtime/design-system';
+import { cn } from '@heyclaude/web-runtime/ui';
+// TOKENS removed - using direct Tailwind utilities
 import {
   useBoolean,
   useConfetti,
@@ -114,15 +115,15 @@ interface FormData {
   type_specific: Record<string, unknown>;
 }
 
-// Use Constants for default enum values
-const DEFAULT_CONTENT_CATEGORY = Constants.public.Enums.content_category[0]; // 'agents'
-const DEFAULT_SUBMISSION_TYPE = Constants.public.Enums.submission_type[0]; // 'agents'
+// Use Prisma enum objects directly (no type assertions needed)
+const DEFAULT_CONTENT_CATEGORY = ContentCategory.agents;
+const DEFAULT_SUBMISSION_TYPE = SubmissionType.agents;
 
-// Submission type enum values for comparisons
-const SUBMISSION_TYPE_AGENTS = Constants.public.Enums.submission_type[0]; // 'agents'
-const SUBMISSION_TYPE_MCP = Constants.public.Enums.submission_type[1]; // 'mcp'
-const SUBMISSION_TYPE_RULES = Constants.public.Enums.submission_type[2]; // 'rules'
-const SUBMISSION_TYPE_COMMANDS = Constants.public.Enums.submission_type[3]; // 'commands'
+// Submission type enum values for comparisons (use enum object directly)
+const SUBMISSION_TYPE_AGENTS = SubmissionType.agents;
+const SUBMISSION_TYPE_MCP = SubmissionType.mcp;
+const SUBMISSION_TYPE_RULES = SubmissionType.rules;
+const SUBMISSION_TYPE_COMMANDS = SubmissionType.commands;
 
 const DEFAULT_FORM_DATA: FormData = {
   author: '',
@@ -1035,7 +1036,7 @@ export default function WizardSubmissionPage() {
 
         {/* Social Proof Bar - Bottom of wizard */}
         {Object.keys(socialProofStats).length > 0 && (
-          <div className="mt-8 flex justify-center">
+          <div className={`${marginTop.relaxed} flex justify-center`}>
             <SocialProofBar stats={socialProofStats} />
           </div>
         )}
@@ -1067,7 +1068,7 @@ function StepTypeSelection({
 }) {
   const shouldReduceMotion = useReducedMotion();
   return (
-    <div className="space-y-8">
+    <div className={`${spaceY.loose}`}>
       <motion.div
         animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
         className="text-center"
@@ -1076,17 +1077,17 @@ function StepTypeSelection({
       >
         <motion.div
           animate={shouldReduceMotion ? { opacity: 1 } : { scale: 1 }}
-          className="mb-4 inline-flex"
+          className={`${marginBottom.default} inline-flex`}
           initial={shouldReduceMotion ? { opacity: 0 } : { scale: 0 }}
           transition={{ ...SPRING.bouncy, delay: STAGGER.default }}
         >
-          <Sparkles className="h-12 w-12" style={{ color: TOKENS.colors.accent.primary }} />
+          <Sparkles className="h-12 w-12 text-color-accent-primary" />
         </motion.div>
         <h2 className="text-foreground text-3xl font-bold">Choose Your Submission Type</h2>
-        <p className="text-muted-foreground mt-3 text-lg">
+        <p className={`text-muted-foreground ${marginTop.default} text-lg`}>
           What would you like to share with the community?
         </p>
-        <div className="mt-4 flex justify-center">
+        <div className={`${marginTop.default} flex justify-center`}>
           <StepSocialProof step={1} />
         </div>
       </motion.div>
@@ -1162,7 +1163,7 @@ function StepBasicInfo({
 
   const shouldReduceMotion = useReducedMotion();
   return (
-    <div className="space-y-8">
+    <div className={`${spaceY.loose}`}>
       <motion.div
         animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
         className="text-center"
@@ -1171,14 +1172,14 @@ function StepBasicInfo({
       >
         <motion.div
           animate={shouldReduceMotion ? { opacity: 1 } : { scale: 1 }}
-          className="mb-4 inline-flex"
+          className={`${marginBottom.default} inline-flex`}
           initial={shouldReduceMotion ? { opacity: 0 } : { scale: 0 }}
           transition={{ ...SPRING.bouncy, delay: STAGGER.default }}
         >
-          <FileText className="h-12 w-12" style={{ color: TOKENS.colors.accent.primary }} />
+          <FileText className="h-12 w-12 text-color-accent-primary" />
         </motion.div>
         <h2 className="text-foreground text-3xl font-bold">Tell us about it</h2>
-        <p className="text-muted-foreground mt-3 text-lg">
+        <p className={`text-muted-foreground ${marginTop.default} text-lg`}>
           Give your submission a clear name and description
         </p>
       </motion.div>
@@ -1188,13 +1189,8 @@ function StepBasicInfo({
         initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
         transition={{ ...SPRING.smooth, delay: STAGGER.fast }}
       >
-        <Card
-          style={{
-            backgroundColor: TOKENS.colors.background.secondary,
-            borderColor: TOKENS.colors.border.light,
-          }}
-        >
-          <CardContent className="space-y-6 pt-6">
+        <Card className="bg-card border-color-border-light">
+          <CardContent className={`${spaceY.relaxed} ${paddingTop.comfortable}`}>
             <AnimatedFormField
               helpText="A clear, descriptive name"
               id="wizard-name"
@@ -1210,7 +1206,7 @@ function StepBasicInfo({
               showCharCount
             >
               <Input
-                className="pr-12"
+                className={`${paddingRight.default}`}
                 id="wizard-name"
                 maxLength={100}
                 onChange={(event) => onChange({ name: event.target.value })}
@@ -1281,16 +1277,18 @@ function StepBasicInfo({
               id="wizard-thumbnail"
               label="Thumbnail Image (Optional)"
             >
-              <div className="space-y-4">
+              <div className={`${spaceY.comfortable}`}>
                 {/* File Input */}
-                <div className="flex items-center gap-4">
+                <div className={`flex items-center ${gap.default}`}>
                   <label
-                    className="hover:bg-accent/50 flex cursor-pointer items-center gap-2 rounded-lg border border-dashed px-4 py-3 transition-colors"
+                    className={cn(
+                      'hover:bg-accent/50 flex cursor-pointer items-center rounded-lg border border-dashed transition-colors',
+                      gap.tight,
+                      paddingX.default,
+                      paddingY.compact,
+                      isUploadingThumbnail && 'opacity-60 pointer-events-none'
+                    )}
                     htmlFor="thumbnail-upload"
-                    style={{
-                      borderColor: TOKENS.colors.border.light,
-                      ...(isUploadingThumbnail && { opacity: 0.6, pointerEvents: 'none' }),
-                    }}
                   >
                     <ImageIcon className="text-muted-foreground h-5 w-5" />
                     <span className="text-sm font-medium">
@@ -1324,10 +1322,7 @@ function StepBasicInfo({
                       initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
                       transition={SPRING.smooth}
                     >
-                      <div
-                        className="relative h-32 w-32 overflow-hidden rounded-lg border"
-                        style={{ borderColor: TOKENS.colors.border.light }}
-                      >
+                      <div className="relative h-32 w-32 overflow-hidden rounded-lg border border-color-border-light">
                         <Image
                           alt="Thumbnail preview"
                           className="object-cover"
@@ -1401,7 +1396,7 @@ function StepConfiguration({
   const hasTemplates = templates && templates.length > 0;
   const shouldReduceMotion = useReducedMotion();
   return (
-    <div className="space-y-8">
+    <div className={`${spaceY.loose}`}>
       <motion.div
         animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
         className="text-center"
@@ -1410,17 +1405,17 @@ function StepConfiguration({
       >
         <motion.div
           animate={shouldReduceMotion ? { opacity: 1 } : { scale: 1 }}
-          className="mb-4 inline-flex"
+          className={`${marginBottom.default} inline-flex`}
           initial={shouldReduceMotion ? { opacity: 0 } : { scale: 0 }}
           transition={{ ...SPRING.bouncy, delay: STAGGER.default }}
         >
-          <Code className="h-12 w-12" style={{ color: TOKENS.colors.accent.primary }} />
+          <Code className="h-12 w-12 text-color-accent-primary" />
         </motion.div>
         <h2 className="text-foreground text-3xl font-bold">Configuration Details</h2>
-        <p className="text-muted-foreground mt-3 text-lg">
+        <p className={`text-muted-foreground ${marginTop.default} text-lg`}>
           Type-specific settings for your {submissionType}
         </p>
-        <div className="mt-4 flex justify-center">
+        <div className={`${marginTop.default} flex justify-center`}>
           <StepSocialProof step={3} />
         </div>
       </motion.div>
@@ -1456,13 +1451,8 @@ function StepConfiguration({
         initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
         transition={{ ...SPRING.smooth, delay: STAGGER.fast }}
       >
-        <Card
-          style={{
-            backgroundColor: TOKENS.colors.background.secondary,
-            borderColor: TOKENS.colors.border.light,
-          }}
-        >
-          <CardContent className="space-y-6 pt-6">
+        <Card className="bg-card border-color-border-light">
+          <CardContent className={`${spaceY.relaxed} ${paddingTop.comfortable}`}>
             {submissionType === SUBMISSION_TYPE_AGENTS && (
               <>
                 <AnimatedFormField
@@ -1485,7 +1475,7 @@ function StepConfiguration({
                   />
                 </AnimatedFormField>
 
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className={`grid ${gap.default} sm:grid-cols-2`}>
                   <AnimatedFormField
                     helpText="0.0 to 1.0 (default: 0.7)"
                     id="wizard-temperature"
@@ -1683,7 +1673,7 @@ function StepExamplesTags({
 
   const shouldReduceMotion = useReducedMotion();
   return (
-    <div className="space-y-8">
+    <div className={`${spaceY.loose}`}>
       <motion.div
         animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
         className="text-center"
@@ -1692,47 +1682,42 @@ function StepExamplesTags({
       >
         <motion.div
           animate={shouldReduceMotion ? { opacity: 1 } : { scale: 1 }}
-          className="mb-4 inline-flex"
+          className={`${marginBottom.default} inline-flex`}
           initial={shouldReduceMotion ? { opacity: 0 } : { scale: 0 }}
           transition={{ ...SPRING.bouncy, delay: STAGGER.default }}
         >
-          <Sparkles className="h-12 w-12" style={{ color: TOKENS.colors.accent.primary }} />
+          <Sparkles className="h-12 w-12 text-color-accent-primary" />
         </motion.div>
         <h2 className="text-foreground text-3xl font-bold">Examples & Tags</h2>
-        <p className="text-muted-foreground mt-3 text-lg">
+        <p className={`text-muted-foreground ${marginTop.default} text-lg`}>
           Help others understand and discover your submission
         </p>
-        <div className="mt-4 flex justify-center">
+        <div className={`${marginTop.default} flex justify-center`}>
           <StepSocialProof step={4} />
         </div>
       </motion.div>
 
       <motion.div
         animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-        className="space-y-6"
+        className={`${spaceY.relaxed}`}
         initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
         transition={{ ...SPRING.smooth, delay: STAGGER.fast }}
       >
         {/* Examples Section */}
-        <Card
-          style={{
-            backgroundColor: TOKENS.colors.background.secondary,
-            borderColor: TOKENS.colors.border.light,
-          }}
-        >
+        <Card className="bg-card border-color-border-light">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className={`flex items-center ${gap.tight}`}>
               <Code className="h-5 w-5" />
               Usage Examples
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className={`${spaceY.comfortable}`}>
             <p className="text-muted-foreground text-sm">
               Add examples to show how your configuration is used
             </p>
 
             {/* Add Example Input */}
-            <div className="flex gap-2">
+            <div className={`flex ${gap.tight}`}>
               <Input
                 className="flex-1"
                 onChange={(event) => setNewExample(event.target.value)}
@@ -1748,9 +1733,7 @@ function StepExamplesTags({
               <Button
                 disabled={!newExample.trim()}
                 onClick={addExample}
-                style={{
-                  backgroundColor: TOKENS.colors.accent.primary,
-                }}
+                className="bg-color-accent-primary"
                 type="button"
               >
                 <Plus className="h-4 w-4" />
@@ -1760,7 +1743,7 @@ function StepExamplesTags({
             {/* Examples List */}
             <AnimatePresence mode="popLayout">
               {data.examples.length > 0 ? (
-                <div className="space-y-2">
+                <div className={`${spaceY.compact}`}>
                   {data.examples.map((example, index) => {
                     // Use example content as stable key (examples should be unique)
                     const exampleKey = `example-${example}`;
@@ -1769,7 +1752,7 @@ function StepExamplesTags({
                         animate={
                           shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1, x: 0 }
                         }
-                        className="group hover:border-accent/50 flex items-start gap-3 rounded-lg border p-3 transition-all"
+                        className={`group hover:border-accent/50 flex items-start ${gap.compact} rounded-lg border border-color-border-light ${padding.compact} transition-all bg-background border-border`}
                         exit={
                           shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.9, x: 20 }
                         }
@@ -1777,28 +1760,25 @@ function StepExamplesTags({
                           shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.9, x: -20 }
                         }
                         key={exampleKey}
-                        style={{
-                          backgroundColor: TOKENS.colors.background.primary,
-                          borderColor: TOKENS.colors.border.default,
-                        }}
                         transition={SPRING.snappy}
                       >
                         <div
-                          className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold"
-                          style={{
-                            backgroundColor: `${TOKENS.colors.accent.primary}20`,
-                            color: TOKENS.colors.accent.primary,
-                          }}
+                          className={cn(
+                          marginTop['4.5'],
+                          'flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold',
+                          'bg-color-accent-primary/20 text-color-accent-primary'
+                        )}
                         >
                           {index + 1}
                         </div>
                         <span className="flex-1 text-sm leading-relaxed">{example}</span>
                         <motion.button
-                          className="shrink-0 rounded-full p-1 opacity-0 transition-all group-hover:opacity-100"
+                          className={cn(
+                            'shrink-0 rounded-full opacity-0 transition-all group-hover:opacity-100',
+                            padding.micro,
+                            'text-color-error'
+                          )}
                           onClick={() => removeExample(index)}
-                          style={{
-                            color: TOKENS.colors.error.text,
-                          }}
                           type="button"
                           whileHover={shouldReduceMotion ? {} : { scale: 1.1 }}
                           whileTap={shouldReduceMotion ? {} : { scale: 0.9 }}
@@ -1812,13 +1792,10 @@ function StepExamplesTags({
               ) : (
                 <motion.div
                   animate={{ opacity: 1 }}
-                  className="rounded-lg border border-dashed p-8 text-center"
+                  className={`rounded-lg border border-dashed border-color-border-light ${padding.relaxed} text-center`}
                   initial={{ opacity: 0 }}
-                  style={{
-                    borderColor: TOKENS.colors.border.light,
-                  }}
                 >
-                  <Code className="text-muted-foreground mx-auto mb-3 h-10 w-10" />
+                  <Code className={`text-muted-foreground ${marginX.auto} ${marginBottom.compact} h-10 w-10`} />
                   <p className="text-muted-foreground text-sm">
                     No examples yet. Add some to help users understand!
                   </p>
@@ -1835,28 +1812,23 @@ function StepExamplesTags({
         initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
         transition={{ ...SPRING.smooth, delay: STAGGER.default }}
       >
-        <Card
-          style={{
-            backgroundColor: TOKENS.colors.background.secondary,
-            borderColor: TOKENS.colors.border.light,
-          }}
-        >
+        <Card className="bg-card border-color-border-light">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className={`flex items-center ${gap.tight}`}>
               <Tag className="h-5 w-5" />
               Tags
-              <span className="text-muted-foreground ml-auto text-sm font-normal">
+              <span className={`text-muted-foreground ${marginLeft.auto} text-sm font-normal`}>
                 {data.tags.length} tags
               </span>
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className={`${spaceY.comfortable}`}>
             <p className="text-muted-foreground text-sm">
               Add tags to help users discover your submission
             </p>
 
             {/* Add Tag Input */}
-            <div className="flex gap-2">
+            <div className={`flex ${gap.tight}`}>
               <Input
                 className="flex-1"
                 maxLength={30}
@@ -1875,12 +1847,9 @@ function StepExamplesTags({
                 whileTap={shouldReduceMotion ? {} : { scale: 0.95 }}
               >
                 <Button
-                  className="gap-2"
+                  className={`${gap.tight} border-color-border-light`}
                   disabled={!newTag.trim()}
                   onClick={addTag}
-                  style={{
-                    backgroundColor: TOKENS.colors.accent.primary,
-                  }}
                   type="button"
                 >
                   <Plus className="h-4 w-4" />
@@ -1892,7 +1861,7 @@ function StepExamplesTags({
             {/* Tags List */}
             <AnimatePresence mode="popLayout">
               {data.tags.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
+                <div className={`flex flex-wrap ${gap.tight}`}>
                   {data.tags.map((tag) => {
                     // Use tag content as key (tags should be unique)
                     const tagKey = `tag-${tag}`;
@@ -1906,17 +1875,12 @@ function StepExamplesTags({
                         whileHover={shouldReduceMotion ? {} : { scale: 1.05 }}
                       >
                         <Badge
-                          className="group gap-1.5 pr-1 text-sm"
-                          style={{
-                            backgroundColor: `${TOKENS.colors.accent.primary}15`,
-                            borderColor: `${TOKENS.colors.accent.primary}30`,
-                            color: TOKENS.colors.accent.primary,
-                          }}
+                          className={cn('group', gap['1.5'], paddingRight.micro, 'text-sm', 'bg-color-accent-primary/15 border-color-accent-primary/30 text-color-accent-primary')}
                           variant="secondary"
                         >
                           {tag}
                           <button
-                            className="hover:bg-accent/20 ml-1 rounded-full p-0.5 transition-colors"
+                            className={cn('hover:bg-accent/20', marginLeft.micro, 'rounded-full p-4.5 transition-colors')}
                             onClick={() => {
                               const tagIndex = data.tags.indexOf(tag);
                               if (tagIndex !== -1) {
@@ -1935,13 +1899,10 @@ function StepExamplesTags({
               ) : (
                 <motion.div
                   animate={{ opacity: 1 }}
-                  className="rounded-lg border border-dashed p-6 text-center"
+                  className={`rounded-lg border border-dashed border-color-border-light ${padding.comfortable} text-center`}
                   initial={{ opacity: 0 }}
-                  style={{
-                    borderColor: TOKENS.colors.border.light,
-                  }}
                 >
-                  <Tag className="text-muted-foreground mx-auto mb-2 h-8 w-8" />
+                  <Tag className={`text-muted-foreground ${marginX.auto} ${marginBottom.compact} h-8 w-8`} />
                   <p className="text-muted-foreground text-sm">
                     No tags yet. Add tags to improve discoverability!
                   </p>

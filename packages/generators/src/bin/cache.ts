@@ -2,8 +2,8 @@
 
 import { normalizeError } from '@heyclaude/shared-runtime';
 
-import { runCacheCli, showCacheCliHelp } from '../commands/cache-cli.js';
-import { logger } from '../toolkit/logger.js';
+import { runCacheCli, showCacheCliHelp } from '../commands/cache-cli.ts';
+import { logger } from '../toolkit/logger.ts';
 
 const args = process.argv.slice(2).filter((arg) => arg !== '--');
 const [command, pattern] = args;

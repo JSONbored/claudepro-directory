@@ -4,7 +4,7 @@
  * CompanySelector - Search or create companies (database-first via RPC)
  */
 
-import { type Database } from '@heyclaude/database-types';
+import type { companiesModel } from '@heyclaude/data-layer/prisma';
 import {
   createCompany,
   getCompanyByIdAction,
@@ -12,7 +12,6 @@ import {
 } from '@heyclaude/web-runtime/actions';
 import { logClientError, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import {
-  UI_CLASSES,
   Button,
   Input,
   Label,
@@ -20,12 +19,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@heyclaude/web-runtime/ui';
+import { getFormDataString } from '@heyclaude/shared-runtime';
 import { Building2, Plus, Search } from 'lucide-react';
 import { useCallback, useEffect, useId, useRef, useState, useTransition } from 'react';
 import { useBoolean, useDebounceValue } from '@heyclaude/web-runtime/hooks';
+import { iconSize, size, muted, cluster, spaceY, padding } from "@heyclaude/web-runtime/design-system";
 
 type Company = Pick<
-  Database['public']['Tables']['companies']['Row'],
+  companiesModel,
   'description' | 'id' | 'logo' | 'name' | 'slug' | 'website'
 >;
 
@@ -78,7 +79,10 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
     getCompanyByIdAction({ companyId: value })
       .then((result) => {
         if (!cancelled && result?.data) {
-          setSelectedCompany(result.data as Company);
+          // Type narrowing: result.data is Company from server action
+          if (result.data && typeof result.data === 'object' && 'id' in result.data) {
+            setSelectedCompany(result.data satisfies Company);
+          }
         }
         if (result?.serverError) {
           // Error already logged by safe-action middleware
@@ -139,7 +143,10 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
         return; // Stale request - ignore results
       }
       
-      const payload = result?.data as undefined | { companies?: Company[]; debounceMs?: number };
+      // Type narrowing: result.data has companies array
+      const payload = result?.data && typeof result.data === 'object' && !Array.isArray(result.data) && 'companies' in result.data
+        ? (result.data as { companies?: Company[]; debounceMs?: number })
+        : undefined;
       const companies = payload?.companies ?? [];
       setCompanies(
         companies.map(
@@ -211,8 +218,9 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
   const handleCreate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const name = (formData.get('name') as string) || '';
-    const website = (formData.get('website') as string) || '';
+    // OPTIMIZATION: Use type-safe FormData utilities
+    const name = getFormDataString(formData, 'name') || '';
+    const website = getFormDataString(formData, 'website') || '';
 
     if (!name.trim()) return;
 
@@ -257,9 +265,9 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
   };
 
   return (
-    <div className="space-y-2">
+    <div className={`${spaceY.compact}`}>
       <Label htmlFor={buttonId}>
-        Company <span className="text-destructive">*</span>
+        Company <span className={`text-destructive`}>*</span>
       </Label>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
@@ -268,25 +276,25 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className="w-full justify-between"
+            className={`w-full justify-between`}
           >
             {selectedCompany ? (
-              <span className="flex items-center gap-2">
-                <Building2 className={UI_CLASSES.ICON_SM} />
+              <span className={`${cluster.compact}`}>
+                <Building2 className={iconSize.sm} />
                 {selectedCompany.name}
               </span>
             ) : (
-              <span className="text-muted-foreground">
+              <span className={`${muted.default}`}>
                 {defaultCompanyName || 'Select or create company...'}
               </span>
             )}
-            <Search className={`${UI_CLASSES.ICON_SM} opacity-50`} />
+            <Search className={`${iconSize.sm} opacity-50`} />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[400px] p-0" align="start">
+        <PopoverContent className={`w-[400px] ${padding.default}`} align="start">
           {showCreateForm ? (
-            <form onSubmit={handleCreate} className="space-y-3 p-4">
-              <div className="space-y-2">
+            <form onSubmit={handleCreate} className={`${spaceY.default} ${padding.default}`}>
+              <div className={`${spaceY.compact}`}>
                 <Label htmlFor={nameInputId}>Company Name</Label>
                 <Input
                   id={nameInputId}
@@ -296,7 +304,7 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
                   defaultValue={searchQuery}
                 />
               </div>
-              <div className="space-y-2">
+              <div className={`${spaceY.compact}`}>
                 <Label htmlFor={websiteInputId}>Website (Optional)</Label>
                 <Input
                   id={websiteInputId}
@@ -305,8 +313,8 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
                   placeholder="https://company.com"
                 />
               </div>
-              <div className="flex gap-2">
-                <Button type="submit" size="sm" className="flex-1">
+              <div className={`flex gap-2`}>
+                <Button type="submit" size="sm" className={`flex-1`}>
                   Create
                 </Button>
                 <Button
@@ -323,7 +331,7 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
               </div>
             </form>
           ) : (
-            <div className="space-y-2 p-2">
+            <div className={`${spaceY.compact} ${padding.tight}`}>
               <Input
                 placeholder="Search companies..."
                 value={searchQuery}
@@ -331,31 +339,31 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
                 className="h-9"
               />
               {isSearching ? (
-                <p className={`${UI_CLASSES.TEXT_SM_MUTED} px-2 py-4`}>Searching...</p>
+                <p className={`${size.sm} ${muted.default} px-2 py-4`}>Searching...</p>
               ) : companies.length > 0 ? (
-                <div className="max-h-[200px] space-y-1 overflow-y-auto">
+                <div className={`max-h-[200px] ${spaceY.tight} overflow-y-auto`}>
                   {companies.map((company) => (
                     <button
                       key={company.id}
                       type="button"
                       onClick={() => handleSelect(company)}
-                      className="hover:bg-accent flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm"
+                      className={`hover:bg-accent flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm`}
                     >
-                      <Building2 className={UI_CLASSES.ICON_SM} />
+                      <Building2 className={iconSize.sm} />
                       <span>{company.name}</span>
                     </button>
                   ))}
                 </div>
               ) : searchQuery.length >= 2 ? (
-                <p className={`${UI_CLASSES.TEXT_SM_MUTED} px-2 py-4`}>No companies found</p>
+                <p className={`${size.sm} ${muted.default} px-2 py-4`}>No companies found</p>
               ) : null}
               <Button
                 type="button"
                 variant="outline"
-                className="w-full"
+                className={`w-full`}
                 onClick={() => setShowCreateForm(true)}
               >
-                <Plus className={UI_CLASSES.ICON_SM} />
+                <Plus className={iconSize.sm} />
                 Create new company
               </Button>
             </div>

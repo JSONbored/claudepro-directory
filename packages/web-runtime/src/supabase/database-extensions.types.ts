@@ -1,13 +1,11 @@
 /**
- * Database Type Extensions
+ * Database Type Extensions for PGMQ
  *
- * Extends the auto-generated Database type to include extension schemas
- * that are not included in the generated types (e.g., pgmq_public).
+ * Minimal type definition for pgmq_public schema operations.
+ * Since we're migrating to Prisma, this is only needed for PGMQ RPC typing.
  *
  * This file is NOT auto-generated and should be manually maintained.
  */
-
-import type { Database } from '@heyclaude/database-types';
 
 /**
  * pgmq_public schema types for PostgreSQL Message Queue extension
@@ -48,9 +46,9 @@ interface PgmqPublicSchema {
 }
 
 /**
- * Extended Database type that includes extension schemas
- * Properly extends Database to preserve all type inference while adding pgmq_public
+ * Extended type for PGMQ operations only (minimal, no Database dependency)
+ * Minimal type that only includes pgmq_public schema (no Database extension)
  */
-export interface ExtendedDatabase extends Database {
+export interface ExtendedDatabase {
   pgmq_public: PgmqPublicSchema;
 }

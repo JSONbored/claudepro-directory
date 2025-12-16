@@ -2,17 +2,17 @@
 
 /** Featured sections consuming homepageConfigs for runtime-tunable categories */
 
-import { type Database } from '@heyclaude/database-types';
+import type { content_category } from '@heyclaude/data-layer/prisma';
 import type { Jobs } from '@heyclaude/database-types/postgres-types';
-import { trackMissingData, getTrendingSlugs, isNewSince } from '@heyclaude/web-runtime/core';
+import { trackMissingData, getTrendingSlugs, isNewSince, isValidCategory } from '@heyclaude/web-runtime/core';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ExternalLink } from '@heyclaude/web-runtime/icons';
 import {
   type DisplayableContent,
   type UnifiedCategoryConfig,
 } from '@heyclaude/web-runtime/types/component.types';
-import { UI_CLASSES, UnifiedBadge, UnifiedCardGrid, ConfigCard, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, BlurText } from '@heyclaude/web-runtime/ui';
-import { SPRING, TEXT_ANIMATIONS, STAGGER, VIEWPORT } from '@heyclaude/web-runtime/design-system';
+import { UnifiedBadge, UnifiedCardGrid, ConfigCard, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, BlurText, cn } from '@heyclaude/web-runtime/ui';
+import { SPRING, TEXT_ANIMATIONS, STAGGER, VIEWPORT, between, iconSize, cluster, stack, grid, marginBottom, size, tracking, paddingY, spaceY } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import Link from 'next/link';
@@ -27,6 +27,7 @@ interface FeaturedSectionProps {
   items: readonly DisplayableContent[];
   title: string;
   weekStart?: string;
+  bookmarkStatusMap?: Record<string, boolean>;
 }
 
 /**
@@ -39,7 +40,7 @@ interface FeaturedSectionProps {
  * Impact: ~180ms savings per state change (30 cards × 6ms each)
  */
 const FeaturedSection: FC<FeaturedSectionProps> = memo(
-  ({ title, href, items, weekStart }: FeaturedSectionProps) => {
+  ({ title, href, items, weekStart, bookmarkStatusMap = {} }: FeaturedSectionProps) => {
     const { openAuthModal } = useAuthModal();
     const pathname = usePathname();
     const shouldReduceMotion = useReducedMotion();
@@ -68,7 +69,7 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
 
     return (
       <div>
-        <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mb-8`}>
+        <div className={cn(between.center, marginBottom.relaxed)}>
           <BlurText
             text={title}
             delay={50}
@@ -81,8 +82,8 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
             animationTo={[...TEXT_ANIMATIONS.blur.to]}
             stepDuration={0.35}
           />
-          <Link href={href} className="text-accent flex items-center gap-2 hover:underline">
-            View all <ExternalLink className={UI_CLASSES.ICON_SM} />
+          <Link href={href} className={`text-accent ${cluster.compact} hover:underline`}>
+            View all <ExternalLink className={iconSize.sm} />
           </Link>
         </div>
         <UnifiedCardGrid
@@ -113,7 +114,7 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
               >
                 {showNew || showTrending ? (
                   <TooltipProvider delayDuration={300}>
-                    <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
+                    <div className={`absolute top-3 left-3 z-10 ${stack.compact}`}>
                       {showNew ? (
                         <Tooltip>
                           <TooltipTrigger asChild>
@@ -121,7 +122,7 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
                               <UnifiedBadge
                                 variant="base"
                                 style="secondary"
-                                className="text-[10px] tracking-wide uppercase pointer-events-auto"
+                                className={cn(size['2xs'], tracking.wide, 'uppercase pointer-events-auto')}
                               >
                                 New this week
                               </UnifiedBadge>
@@ -139,7 +140,7 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
                               <UnifiedBadge
                                 variant="base"
                                 style="outline"
-                                className="text-[10px] tracking-wide uppercase pointer-events-auto"
+                                className={cn(size['2xs'], tracking.wide, 'uppercase pointer-events-auto')}
                               >
                                 Trending
                               </UnifiedBadge>
@@ -157,6 +158,11 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
                   item={item}
                   showBorderBeam={index < 3}
                   onAuthRequired={handleAuthRequired}
+                  initialBookmarked={
+                    item.slug && isValidCategory(item.category ?? 'agents')
+                      ? bookmarkStatusMap[`${item.category}:${item.slug}`] ?? false
+                      : false
+                  }
                 />
               </motion.div>
             );
@@ -175,9 +181,11 @@ FeaturedSection.displayName = 'FeaturedSection';
 export interface FeaturedSectionsProps {
   categories: Record<string, readonly DisplayableContent[]>;
   categoryConfigs: Record<string, UnifiedCategoryConfig>;
-  featuredCategories: readonly Database['public']['Enums']['content_category'][];
+  featuredCategories: readonly content_category[];
   featuredJobs?: ReadonlyArray<Jobs>;
   weekStart?: string;
+  /** Bookmark status map (key: "content_type:content_slug", value: boolean) - from server-side batch check */
+  bookmarkStatusMap?: Record<string, boolean>;
 }
 
 const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({
@@ -186,8 +194,12 @@ const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({
   featuredJobs = [],
   featuredCategories,
   weekStart,
+  bookmarkStatusMap = {},
 }) => {
   const shouldReduceMotion = useReducedMotion();
+  
+  // OPTIMIZATION: Memoize displayed jobs to prevent recreation on every render
+  const displayedJobs = useMemo(() => featuredJobs.slice(0, 6), [featuredJobs]);
 
   // Track missing featured categories
   useEffect(() => {
@@ -201,9 +213,9 @@ const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({
   }, [featuredCategories.length, categories, categoryConfigs, featuredJobs.length]);
 
   return (
-    <div className="mb-16 space-y-16">
+    <div className={cn(marginBottom.hero, spaceY.hero)}>
       {featuredCategories.length === 0 && (
-        <div className="text-muted-foreground py-8 text-center">
+        <div className={`text-muted-foreground ${paddingY.relaxed} text-center`}>
           No featured categories available.
         </div>
       )}
@@ -253,15 +265,16 @@ const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({
             title={`Featured ${config.pluralTitle}`}
             href={`/${config.urlSlug}`}
             items={items}
+            bookmarkStatusMap={bookmarkStatusMap}
             {...(weekStart ? { weekStart } : {})}
           />
         );
       })}
 
       {/* Featured Jobs - Dynamic from database */}
-      {featuredJobs.length > 0 && (
+      {displayedJobs.length > 0 && (
         <div>
-          <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mb-8`}>
+          <div className={cn(between.center, marginBottom.relaxed)}>
             <BlurText
               text="Featured Jobs"
               delay={50}
@@ -279,13 +292,13 @@ const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({
             />
             <Link
               href={ROUTES.JOBS}
-              className="text-accent flex items-center gap-2 hover:underline"
+              className={`text-accent ${cluster.compact} hover:underline`}
             >
-              View all <ExternalLink className={UI_CLASSES.ICON_SM} />
+              View all <ExternalLink className={iconSize.sm} />
             </Link>
           </div>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {featuredJobs.slice(0, 6).map((job, index) => (
+          <div className={`grid ${grid.cols1} gap-6 md:${grid.cols2} lg:${grid.cols3}`}>
+            {displayedJobs.map((job, index) => (
               <motion.div
                 key={job.slug}
                 initial={
@@ -305,7 +318,7 @@ const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({
               >
                 <JobCard job={job} />
               </motion.div>
-            ))}
+              ))}
           </div>
         </div>
       )}

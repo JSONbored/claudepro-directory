@@ -232,6 +232,10 @@ function LazySectionComponent({
       }}
       transition={transition}
       className={className}
+      style={{
+        // GPU acceleration hint for better compositing
+        willChange: shouldReduceMotion ? 'auto' : 'transform, opacity',
+      }}
     >
       {children}
     </motion.div>

@@ -8,7 +8,8 @@
  * This tool collects data and provides instructions/URLs for submission.
  */
 
-import type { Database } from '@heyclaude/database-types';
+import type { submission_type, content_category } from '@heyclaude/data-layer/prisma';
+import { SubmissionType, ContentCategory } from '@heyclaude/data-layer/prisma';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { logError } from '@heyclaude/shared-runtime/logging.ts';
 import { getEnvVar } from '@heyclaude/shared-runtime/env.ts';
@@ -21,37 +22,15 @@ const APP_URL = getEnvVar('APP_URL') || 'https://claudepro.directory';
 /**
  * Validates submission type
  */
-function isValidSubmissionType(type: string): type is Database['public']['Enums']['submission_type'] {
-  const validTypes: Database['public']['Enums']['submission_type'][] = [
-    'agents',
-    'mcp',
-    'rules',
-    'commands',
-    'hooks',
-    'statuslines',
-    'skills',
-  ];
-  return validTypes.includes(type as Database['public']['Enums']['submission_type']);
+function isValidSubmissionType(type: string): type is submission_type {
+  return SubmissionType.includes(type as submission_type);
 }
 
 /**
  * Validates category
  */
-function isValidCategory(category: string): category is Database['public']['Enums']['content_category'] {
-  const validCategories: Database['public']['Enums']['content_category'][] = [
-    'agents',
-    'mcp',
-    'rules',
-    'commands',
-    'hooks',
-    'statuslines',
-    'skills',
-    'collections',
-    'guides',
-    'jobs',
-    'changelog',
-  ];
-  return validCategories.includes(category as Database['public']['Enums']['content_category']);
+function isValidCategory(category: string): category is content_category {
+  return ContentCategory.includes(category as content_category);
 }
 
 /**
@@ -124,13 +103,11 @@ function formatSubmissionData(data: SubmitContentInput, sanitized: {
  * This tool uses MCP elicitation to collect submission data step-by-step,
  * then provides instructions and URLs for completing the submission via the web interface.
  *
- * @param supabase - Authenticated Supabase client (not used but kept for consistency)
  * @param input - Tool input with submission data (may be partial for elicitation)
  * @returns Submission instructions and pre-filled URL
  * @throws If validation fails
  */
 export async function handleSubmitContent(
-  supabase: SupabaseClient<Database>,
   input: SubmitContentInput
 ) {
   // Sanitize string inputs

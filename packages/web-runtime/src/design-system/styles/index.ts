@@ -17,9 +17,15 @@
  * ```
  */
 
-export * from './layout.js';
-export * from './spacing.js';
-export * from './typography.js';
-export * from './interactive.js';
-export * from './icons.js';
-export * from './borders.js';
+export * from './layout.ts';
+export * from './spacing.ts';
+export * from './typography.ts';
+export * from './interactive.ts';
+export * from './icons.ts';
+export * from './borders.ts';
+export * from './animations.ts';
+// colors.ts and shadows.ts deleted - use direct Tailwind utilities from @theme
+export * from './badges.ts';
+export * from './gradients.ts';
+// shadows.ts deleted - use direct Tailwind utilities from @theme
+export * from './dimensions.ts';

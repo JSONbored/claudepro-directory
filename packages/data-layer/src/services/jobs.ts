@@ -3,7 +3,7 @@
  *
  * Fully modernized for Prisma ORM - no backward compatibility.
  * All table types use Prisma types.
- * RPC function types remain using Database type (Prisma doesn't generate RPC types).
+ * RPC function types use postgres-types generator (Prisma doesn't generate RPC types).
  */
 
 import type {
@@ -20,9 +20,11 @@ import type {
   GetJobTitleByIdArgs,
   GetJobTitleByIdReturns,
 } from '@heyclaude/database-types/postgres-types';
-import type { Prisma } from '@heyclaude/data-layer/prisma';
 import { prisma } from '../prisma/client.ts';
 import { BasePrismaService } from './base-prisma-service.ts';
+
+// Type helper: Extract model type from Prisma query result
+type Job = Awaited<ReturnType<typeof prisma.jobs.findUnique>>;
 export class JobsService extends BasePrismaService {
   async getJobs(): Promise<GetJobsListReturns> {
     return this.callRpc<GetJobsListReturns>(
@@ -69,9 +71,9 @@ export class JobsService extends BasePrismaService {
   }
 
   async getJobStatsById(jobId: string): Promise<{
-    view_count: Prisma.jobsGetPayload<{}>['view_count'];
-    click_count: Prisma.jobsGetPayload<{}>['click_count'];
-    status: Prisma.jobsGetPayload<{}>['status'];
+    view_count: NonNullable<Job>['view_count'];
+    click_count: NonNullable<Job>['click_count'];
+    status: NonNullable<Job>['status'];
   } | null> {
     const job = await prisma.jobs.findUnique({
       where: { id: jobId },
@@ -85,8 +87,8 @@ export class JobsService extends BasePrismaService {
   }
 
   async getJobStatusById(jobId: string): Promise<{
-    status: Prisma.jobsGetPayload<{}>['status'];
-    expires_at: Prisma.jobsGetPayload<{}>['expires_at'];
+    status: NonNullable<Job>['status'];
+    expires_at: NonNullable<Job>['expires_at'];
   } | null> {
     const job = await prisma.jobs.findUnique({
       where: { id: jobId },

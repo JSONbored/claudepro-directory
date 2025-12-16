@@ -2,8 +2,8 @@
 
 import { normalizeError } from '@heyclaude/shared-runtime';
 
-import { runGenerateReadme } from '../commands/generate-readme.js';
-import { logger } from '../toolkit/logger.js';
+import { runGenerateReadme } from '../commands/generate-readme.ts';
+import { logger } from '../toolkit/logger.ts';
 
 runGenerateReadme()
   .then(() => {

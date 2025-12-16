@@ -2,18 +2,36 @@
  * Component Types - Consolidated Component Props and Types
  *
  * This file contains ALL component types, props, and related TypeScript definitions.
- * Database types are in @heyclaude/database-types (generated).
+ * Prisma types are in @heyclaude/database-types/prisma (generated).
  */
 
-import type { submission_type } from '@heyclaude/data-layer/prisma';
+import type {
+  content_category,
+  copy_type,
+  experience_level,
+  form_field_type,
+  form_grid_column,
+  form_icon_position,
+  job_category,
+  job_plan,
+  job_tier,
+  job_type,
+  sort_option,
+  submission_type,
+  trending_period,
+  workplace_type,
+  contentModel,
+} from '@heyclaude/data-layer/prisma';
 import type {
   EnrichedContentItem,
   RelatedContentItem,
   SearchContentOptimizedRow,
   SearchUnifiedRow,
-} from '@heyclaude/data-layer/types/composite-types';
-import type { Database } from '@heyclaude/database-types';
-import type { Jobs } from '@heyclaude/database-types/postgres-types';
+} from '@heyclaude/database-types/postgres-types';
+import type {
+  GetContentDetailCompleteReturns,
+  Jobs,
+} from '@heyclaude/database-types/postgres-types';
 
 // Use new composite types from @heyclaude/data-layer
 type SearchResult = SearchContentOptimizedRow;
@@ -35,9 +53,9 @@ export type {
 
 /**
  * ContentItem - Base content item type derived from content table
- * Uses generated types directly from @heyclaude/database-types
+ * Uses generated Prisma types directly
  */
-export type ContentItem = Database['public']['Tables']['content']['Row'];
+export type ContentItem = contentModel;
 
 // ============================================================================
 // Core Content Types
@@ -45,9 +63,9 @@ export type ContentItem = Database['public']['Tables']['content']['Row'];
 
 /**
  * Copy Type - type of content being copied
- * Uses generated enum directly from @heyclaude/database-types
+ * Uses generated Prisma enum directly
  */
-export type CopyType = Database['public']['Enums']['copy_type'];
+export type CopyType = copy_type;
 
 /**
  * HomepageContentItem - Simplified content item for homepage display
@@ -62,7 +80,7 @@ export type HomepageContentItem = {
   source: string;
   created_at: string;
   date_added: string;
-  category: Database['public']['Enums']['content_category'];
+  category: content_category;
   view_count: number;
   copy_count: number;
   featured: boolean;
@@ -96,6 +114,8 @@ export interface ConfigCardProps {
   searchQuery?: string;
   /** Optional callback when authentication is required for bookmark action */
   onAuthRequired?: () => void;
+  /** Optional initial bookmarked state (from server-side batch check) */
+  initialBookmarked?: boolean;
 }
 
 // ============================================================================
@@ -109,7 +129,7 @@ export interface ConfigCardProps {
 export interface SearchFilterOptions {
   tags: string[];
   authors: string[];
-  categories: Database['public']['Enums']['content_category'][];
+  categories: content_category[];
 }
 
 export interface HomePageClientProps {
@@ -127,6 +147,8 @@ export interface HomePageClientProps {
   weekStart?: string;
   /** Server-provided category IDs (fallback if static config unavailable) */
   serverCategoryIds?: readonly string[];
+  /** Bookmark status map (key: "content_type:content_slug", value: boolean) - from server-side batch check */
+  bookmarkStatusMap?: Record<string, boolean>;
 }
 
 export interface ContentListWithLoadMoreProps {
@@ -172,13 +194,13 @@ export type JobCardJobType = {
   description: string | null;
   salary: string | null;
   remote: boolean;
-  type: Database['public']['Enums']['job_type'] | null;
-  workplace: Database['public']['Enums']['workplace_type'];
-  experience: Database['public']['Enums']['experience_level'];
-  category: Database['public']['Enums']['job_category'] | null;
+  type: job_type | null;
+  workplace: workplace_type;
+  experience: experience_level;
+  category: job_category | null;
   tags: string[];
-  plan: Database['public']['Enums']['job_plan'];
-  tier: Database['public']['Enums']['job_tier'] | null;
+  plan: job_plan;
+  tier: job_tier | null;
   posted_at: string;
   expires_at: string;
   view_count: number;
@@ -191,8 +213,8 @@ export interface JobCardProps {
 }
 
 export interface FilterState {
-  sort?: Database['public']['Enums']['sort_option'];
-  category?: Database['public']['Enums']['content_category'];
+  sort?: sort_option;
+  category?: content_category;
   author?: string;
   dateRange?: string;
   popularity?: [number, number];
@@ -243,9 +265,9 @@ export interface TrendingContentProps {
   trending?: DisplayableContent[];
   popular?: DisplayableContent[];
   recent?: DisplayableContent[];
-  category?: Database['public']['Enums']['content_category'];
+  category?: content_category;
   limit?: number;
-  period?: Database['public']['Enums']['trending_period'];
+  period?: trending_period;
 }
 
 export type ContentListServerProps<
@@ -258,14 +280,14 @@ export type ContentListServerProps<
   type: string;
   searchPlaceholder?: string;
   badges?: Array<{ icon?: string; text: string }>;
-  category?: Database['public']['Enums']['content_category'];
+  category?: content_category;
   featured?: boolean;
   gridCols?: string;
 };
 
 export type RelatedConfigsProps<T extends ContentItem = ContentItem> = {
   items: T[];
-  category?: Database['public']['Enums']['content_category'];
+  category?: content_category;
 };
 
 export type FloatingSearchSidebarProps = {
@@ -281,7 +303,7 @@ export type ContentSearchClientProps<T extends DisplayableContent = DisplayableC
   title: string;
   icon: string;
   type?: string;
-  category?: Database['public']['Enums']['content_category'];
+  category?: content_category;
   availableTags?: string[];
   availableAuthors?: string[];
   availableCategories?: string[];
@@ -292,7 +314,7 @@ export type ContentSearchClientProps<T extends DisplayableContent = DisplayableC
    */
   quickTags?: string[];
   quickAuthors?: string[];
-  quickCategories?: Database['public']['Enums']['content_category'][];
+  quickCategories?: content_category[];
   /**
    * Suggested fallback content for empty states, typically from homepage data.
    * Defaults to zeroStateSuggestions/items when not provided.
@@ -302,25 +324,25 @@ export type ContentSearchClientProps<T extends DisplayableContent = DisplayableC
 
 export type ContentSidebarProps<T extends ContentItem = ContentItem> = {
   content: T[];
-  category?: Database['public']['Enums']['content_category'];
+  category?: content_category;
 };
 
 export type SortDropdownProps = {
-  value?: Database['public']['Enums']['sort_option'];
-  onChange?: (value: Database['public']['Enums']['sort_option']) => void;
+  value?: sort_option;
+  onChange?: (value: sort_option) => void;
 };
 
 export interface SearchOptions {
   query?: string;
-  category?: Database['public']['Enums']['content_category'];
-  sort?: Database['public']['Enums']['sort_option'];
+  category?: content_category;
+  sort?: sort_option;
   limit?: number;
   offset?: number;
 }
 
 export interface UseSearchProps {
   initialQuery?: string;
-  initialCategory?: Database['public']['Enums']['content_category'];
+  initialCategory?: content_category;
   debounceMs?: number;
 }
 
@@ -333,7 +355,7 @@ export interface UseSearchProps {
  */
 export interface ReviewFormProps {
   variant: 'form';
-  contentType: Database['public']['Enums']['content_category'];
+  contentType: content_category;
   contentSlug: string;
   existingReview?: {
     id: string;
@@ -349,7 +371,7 @@ export interface ReviewFormProps {
  */
 export interface ReviewSectionProps {
   variant: 'section';
-  contentType: Database['public']['Enums']['content_category'];
+  contentType: content_category;
   contentSlug: string;
   currentUserId?: string | undefined;
 }
@@ -453,9 +475,9 @@ export interface ActionButtonConfig {
 
 // Local type definitions for form field types
 
-export type FieldType = Database['public']['Enums']['form_field_type'];
-export type GridColumn = Database['public']['Enums']['form_grid_column'];
-export type IconPosition = Database['public']['Enums']['form_icon_position'];
+export type FieldType = form_field_type;
+export type GridColumn = form_grid_column;
+export type IconPosition = form_icon_position;
 
 export interface SelectOption {
   value: string;
@@ -521,17 +543,10 @@ export type SubmissionContentType = submission_type;
 
 /**
  * Submission content types array (for runtime use, e.g., form dropdowns)
- * Prisma enum values: agents, mcp, rules, commands, hooks, statuslines, skills
+ * Uses Prisma enum object to ensure sync with database
  */
-export const SUBMISSION_CONTENT_TYPES: readonly submission_type[] = [
-  'agents',
-  'mcp',
-  'rules',
-  'commands',
-  'hooks',
-  'statuslines',
-  'skills',
-] as const;
+import { SubmissionType as SubmissionTypeEnum } from '@heyclaude/data-layer/prisma';
+export const SUBMISSION_CONTENT_TYPES = Object.values(SubmissionTypeEnum) as readonly submission_type[];
 
 export interface SubmissionFormSection {
   nameField: TextFieldDefinition | null;
@@ -810,15 +825,14 @@ export interface ProcessedSectionData {
  */
 export interface TabbedDetailLayoutProps {
   item:
-    | Database['public']['Tables']['content']['Row']
-    | (Database['public']['Functions']['get_content_detail_complete']['Returns']['content'] &
-        Database['public']['Tables']['content']['Row']);
-  config: UnifiedCategoryConfig<Database['public']['Enums']['content_category']>;
+    | contentModel
+    | (GetContentDetailCompleteReturns['content'] & contentModel);
+  config: UnifiedCategoryConfig<content_category>;
   tabs: ReadonlyArray<TabConfig>;
   sectionData: ProcessedSectionData;
   relatedItems?:
     | ContentItem[]
-    | Database['public']['Functions']['get_content_detail_complete']['Returns']['related'];
+    | GetContentDetailCompleteReturns['related'];
 }
 
 // ============================================================================
@@ -832,7 +846,7 @@ export type ListProps = BaseProps & {
   title: string;
   description: string;
   items: string[];
-  category?: Database['public']['Enums']['content_category'];
+  category?: content_category;
   icon?: LucideIcon;
   dotColor?: string;
 };
@@ -943,8 +957,7 @@ export type InstallProps = BaseProps & {
   };
   item:
     | ContentItem
-    | (Database['public']['Functions']['get_content_detail_complete']['Returns']['content'] &
-        ContentItem);
+    | (GetContentDetailCompleteReturns['content'] & ContentItem);
 };
 
 export type TextProps = BaseProps & {
@@ -953,7 +966,7 @@ export type TextProps = BaseProps & {
   description?: string;
   html: string;
   icon?: LucideIcon;
-  category?: Database['public']['Enums']['content_category'];
+  category?: content_category;
 };
 
 export type UnifiedSectionProps =

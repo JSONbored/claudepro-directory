@@ -13,7 +13,7 @@
  * - Debounced persistence to reduce localStorage writes
  */
 
-import type { Database } from '@heyclaude/database-types';
+import type { content_category } from '@heyclaude/data-layer/prisma';
 // Import directly from source files to avoid indirect imports through entries/core.ts
 import { logger } from '../logger.ts';
 import { normalizeError } from '../errors.ts';
@@ -21,7 +21,7 @@ import { usePulse } from './use-pulse.ts';
 import { useCallback, useEffect, useRef } from 'react';
 import { create } from 'zustand';
 
-export type PinboardCategory = Database['public']['Enums']['content_category'];
+export type PinboardCategory = content_category;
 
 export interface PinboardItem {
   category: PinboardCategory;

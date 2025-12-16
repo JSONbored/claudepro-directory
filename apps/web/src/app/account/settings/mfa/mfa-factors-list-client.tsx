@@ -2,7 +2,8 @@
 
 import { useBoolean } from '@heyclaude/web-runtime/hooks';
 import { Shield } from '@heyclaude/web-runtime/icons';
-import { Button, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { Button } from '@heyclaude/web-runtime/ui';
+import { iconSize, marginRight, spaceY } from '@heyclaude/web-runtime/design-system';
 import { useState } from 'react';
 
 import { EnrollMFADialog } from '@/src/components/features/account/mfa/enroll-mfa-dialog';
@@ -21,10 +22,10 @@ export function MFAFactorsListClient() {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-end">
+    <div className={`${spaceY.comfortable}`}>
+      <div className={`flex justify-end`}>
         <Button onClick={setEnrollDialogOpenTrue}>
-          <Shield className={UI_CLASSES.ICON_SM_LEADING} />
+          <Shield className={`${iconSize.sm} ${marginRight.compact}`} />
           Add Authenticator
         </Button>
       </div>

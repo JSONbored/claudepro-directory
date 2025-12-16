@@ -5,8 +5,8 @@
  * and provides autocomplete functionality for AI agents.
  */
 
-import type { Database } from '@heyclaude/database-types';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { GetSearchSuggestionsFromHistoryArgs, GetSearchSuggestionsFromHistoryReturns } from '@heyclaude/database-types/postgres-types';
+import { SearchService } from '@heyclaude/data-layer/services/search.ts';
 import { logError } from '@heyclaude/shared-runtime/logging.ts';
 import { McpErrorCode, createErrorResponse } from '../lib/errors.ts';
 import { sanitizeString } from '../lib/utils.ts';
@@ -15,15 +15,14 @@ import type { GetSearchSuggestionsInput } from '../lib/types.ts';
 /**
  * Fetches search suggestions based on query history.
  *
- * @param supabase - Authenticated Supabase client
  * @param input - Tool input with query (min 2 chars) and optional limit (1-20, default 10)
  * @returns Search suggestions with text, search count, and popularity indicator
- * @throws If query is too short or RPC fails
+ * @throws If query is too short or service call fails
  */
 export async function handleGetSearchSuggestions(
-  supabase: SupabaseClient<Database>,
   input: GetSearchSuggestionsInput
 ) {
+  const searchService = new SearchService();
   // Sanitize and validate inputs
   const query = sanitizeString(input.query);
   const limit = input.limit ?? 10;
@@ -46,22 +45,21 @@ export async function handleGetSearchSuggestions(
     throw new Error(error.message);
   }
 
-  // Call RPC for search suggestions
-  const rpcArgs: Database['public']['Functions']['get_search_suggestions_from_history']['Args'] =
-    {
-      p_query: query,
-      p_limit: limit,
-    };
+  // Get search suggestions using SearchService
+  const rpcArgs: GetSearchSuggestionsFromHistoryArgs = {
+    p_query: query,
+    p_limit: limit,
+  };
 
-  const { data, error } = await supabase.rpc('get_search_suggestions_from_history', rpcArgs);
-
-  if (error) {
-    await logError('Search suggestions RPC failed', {
-      rpcName: 'get_search_suggestions_from_history',
+  let data: GetSearchSuggestionsFromHistoryReturns;
+  try {
+    data = await searchService.getSearchSuggestions(rpcArgs);
+  } catch (error) {
+    await logError('SearchService.getSearchSuggestions failed', {
       query,
       limit,
     }, error);
-    throw new Error(`Failed to fetch search suggestions: ${error.message}`);
+    throw new Error(`Failed to fetch search suggestions: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 
   // Format response

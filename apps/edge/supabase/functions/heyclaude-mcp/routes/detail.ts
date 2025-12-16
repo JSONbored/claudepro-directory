@@ -5,8 +5,7 @@
  * Uses direct table query for content details.
  */
 
-import type { Database } from '@heyclaude/database-types';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import { prisma } from '@heyclaude/data-layer/prisma/client.ts';
 import { logError } from '@heyclaude/shared-runtime/logging.ts';
 import { McpErrorCode, createErrorResponse } from '../lib/errors.ts';
 import { sanitizeString, isValidSlug } from '../lib/utils.ts';
@@ -16,14 +15,13 @@ import type { GetContentDetailInput } from '../lib/types.ts';
 /**
  * Fetches a content item by slug and category and returns a markdown-like text summary plus a normalized `_meta` details object.
  *
- * Queries the `content` table for the specified item, normalizes missing fields with sensible defaults, and builds a readable text block and metadata summary.
+ * Queries the `content` table for the specified item using Prisma, normalizes missing fields with sensible defaults, and builds a readable text block and metadata summary.
  *
  * @param input - Object containing `slug` and `category` of the content item to retrieve
  * @returns An object with `content` — an array containing a single text block (`type: 'text'`, `text`: string) — and `_meta` — a details object containing `slug`, `title`, `displayTitle`, `category`, `description`, `content`, `tags`, `author`, `authorProfileUrl`, `dateAdded`, `dateUpdated`, `createdAt`, `metadata`, and `stats` (`views`, `bookmarks`, `copies`)
  * @throws If no content is found for the provided category/slug, or if the database query fails (the error is logged and rethrown)
  */
 export async function handleGetContentDetail(
-  supabase: SupabaseClient<Database>,
   input: GetContentDetailInput
 ) {
   // Sanitize and validate inputs
@@ -39,38 +37,36 @@ export async function handleGetContentDetail(
     throw new Error(error.message);
   }
 
-  // Query the content table directly since get_content_detail_complete returns nested nulls
-  const { data, error } = await supabase
-    .from('content')
-    .select(`
-      slug,
-      title,
-      display_title,
-      category,
-      description,
-      content,
-      tags,
-      author,
-      author_profile_url,
-      date_added,
-      created_at,
-      updated_at,
-      metadata,
-      view_count,
-      bookmark_count,
-      copy_count
-    `)
-    .eq('category', category)
-    .eq('slug', slug)
-    .single();
-
-  if (error) {
-    // PGRST116: JSON object requested, multiple (or no) rows returned
-    if ((error as any).code === 'PGRST116') {
-      throw new Error(`Content not found: ${category}/${slug}`);
-    }
-
-    // Use dbQuery serializer for consistent database query formatting
+  // Query the content table using Prisma
+  let data;
+  try {
+    data = await prisma.content.findUnique({
+      where: {
+        category_slug: {
+          category,
+          slug,
+        },
+      },
+      select: {
+        slug: true,
+        title: true,
+        display_title: true,
+        category: true,
+        description: true,
+        content: true,
+        tags: true,
+        author: true,
+        author_profile_url: true,
+        date_added: true,
+        created_at: true,
+        updated_at: true,
+        metadata: true,
+        view_count: true,
+        bookmark_count: true,
+        copy_count: true,
+      },
+    });
+  } catch (error) {
     await logError('Database query failed in getContentDetail', {
       dbQuery: {
         table: 'content',
@@ -82,7 +78,11 @@ export async function handleGetContentDetail(
         },
       },
     }, error);
-    throw new Error(`Failed to fetch content details: ${error.message}`);
+    throw new Error(`Failed to fetch content details: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+
+  if (!data) {
+    throw new Error(`Content not found: ${category}/${slug}`);
   }
 
   // Format the response - data is now a single object, not an array

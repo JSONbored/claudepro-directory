@@ -5,9 +5,21 @@
  * All slug generation in PostgreSQL via job_slug() function.
  */
 
-import { type Database } from '@heyclaude/database-types';
-import { Constants } from '@heyclaude/database-types';
-import { normalizeError } from '@heyclaude/shared-runtime';
+import {
+  JobType,
+  JobCategory,
+  WorkplaceType,
+  ExperienceLevel,
+} from '@heyclaude/data-layer/prisma';
+import { job_plan as jobPlanEnum } from '@heyclaude/database-types/prisma';
+import type {
+  job_plan,
+  job_type,
+  job_category,
+  workplace_type,
+  experience_level,
+} from '@heyclaude/data-layer/prisma';
+import { normalizeError, getFormDataString, getFormDataStringRequired, getFormDataEnum, getFormDataBoolean } from '@heyclaude/shared-runtime';
 import { type CreateJobInput } from '@heyclaude/web-runtime/actions';
 import { type PaymentPlanCatalogEntry } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
@@ -15,12 +27,12 @@ import { useAuthenticatedUser, useLoggedAsync } from '@heyclaude/web-runtime/hoo
 import { Star } from '@heyclaude/web-runtime/icons';
 import {
   toasts,
-  UI_CLASSES,
   FormField,
   Button,
   Card,
   CardContent,
   CardDescription,
+  cn,
   CardHeader,
   CardTitle,
   Checkbox,
@@ -31,6 +43,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@heyclaude/web-runtime/ui';
+import { size, muted, between, iconSize, grid, weight, spaceY, marginTop, padding, paddingLeft } from '@heyclaude/web-runtime/design-system';
 import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useId, useMemo, useState, useTransition } from 'react';
 
@@ -38,15 +51,16 @@ import { useAuthModal } from '@/src/hooks/use-auth-modal';
 import { CompanySelector } from '@/src/components/core/forms/company-selector';
 import { ListItemManager } from '@/src/components/core/forms/list-items-editor';
 
-// Use enum values directly from @heyclaude/database-types Constants
-const JOB_PLAN_VALUES = Constants.public.Enums.job_plan;
-const WORKPLACE_TYPE_VALUES = Constants.public.Enums.workplace_type;
-const EXPERIENCE_LEVEL_VALUES = Constants.public.Enums.experience_level;
-const PLAN_LABELS: Record<Database['public']['Enums']['job_plan'], string> = {
+// Use Prisma enum value objects as arrays for runtime use
+// Type-safe: Object.values() returns the enum values, which are already the correct types
+const JOB_PLAN_VALUES: readonly job_plan[] = Object.values(jobPlanEnum);
+const WORKPLACE_TYPE_VALUES: readonly workplace_type[] = Object.values(WorkplaceType);
+const EXPERIENCE_LEVEL_VALUES: readonly experience_level[] = Object.values(ExperienceLevel);
+const PLAN_LABELS: Record<job_plan, string> = {
   'one-time': 'One-Time',
   subscription: 'Subscription',
 };
-const PLAN_DESCRIPTION_FALLBACK: Record<Database['public']['Enums']['job_plan'], string> = {
+const PLAN_DESCRIPTION_FALLBACK: Record<job_plan, string> = {
   'one-time': '30 days of visibility, pay once',
   subscription: 'Recurring visibility with easy renewals',
 };
@@ -65,7 +79,7 @@ interface PlanOption {
   featuredPriceCents: null | number;
   isSubscription: boolean;
   jobExpiryDays: null | number;
-  plan: Database['public']['Enums']['job_plan'];
+  plan: job_plan;
   standardPriceCents: null | number;
 }
 
@@ -106,11 +120,12 @@ function formatPlanPrice(cents: number, isSubscription: boolean): string {
 /**
  * Helper function to check if value is a valid WorkplaceType
  */
-function isWorkplaceType(value: unknown): value is Database['public']['Enums']['workplace_type'] {
-  return (
-    typeof value === 'string' &&
-    WORKPLACE_TYPE_VALUES.includes(value as Database['public']['Enums']['workplace_type'])
-  );
+function isWorkplaceType(value: unknown): value is workplace_type {
+  if (typeof value !== 'string') {
+    return false;
+  }
+  // Type-safe: WORKPLACE_TYPE_VALUES is readonly workplace_type[], so includes() is type-safe
+  return WORKPLACE_TYPE_VALUES.includes(value as workplace_type);
 }
 
 /**
@@ -118,11 +133,12 @@ function isWorkplaceType(value: unknown): value is Database['public']['Enums']['
  */
 function isExperienceLevel(
   value: unknown
-): value is Database['public']['Enums']['experience_level'] {
-  return (
-    typeof value === 'string' &&
-    EXPERIENCE_LEVEL_VALUES.includes(value as Database['public']['Enums']['experience_level'])
-  );
+): value is experience_level {
+  if (typeof value !== 'string') {
+    return false;
+  }
+  // Type-safe: EXPERIENCE_LEVEL_VALUES is readonly experience_level[], so includes() is type-safe
+  return EXPERIENCE_LEVEL_VALUES.includes(value as experience_level);
 }
 
 interface JobFormProps {
@@ -172,7 +188,7 @@ export function JobForm({
     }
 
     const grouped = new Map<
-      Database['public']['Enums']['job_plan'],
+      job_plan,
       { featured?: PaymentPlanCatalogEntry; standard?: PaymentPlanCatalogEntry }
     >();
 
@@ -186,10 +202,11 @@ export function JobForm({
       grouped.set(entry.plan, current);
     }
 
-    const derived = JOB_PLAN_VALUES.map((plan) => {
+    const derived: PlanOption[] = [];
+    for (const plan of JOB_PLAN_VALUES) {
       const group = grouped.get(plan);
       if (!group?.standard) {
-        return null;
+        continue;
       }
       const standard = group.standard;
       const featured = group.featured;
@@ -198,7 +215,7 @@ export function JobForm({
       const featuredDelta =
         hasPrice !== null && featuredPrice !== null ? featuredPrice - hasPrice : null;
 
-      return {
+      derived.push({
         plan,
         isSubscription: Boolean(standard.is_subscription),
         standardPriceCents: hasPrice,
@@ -208,16 +225,25 @@ export function JobForm({
         billingCycleDays: standard.billing_cycle_days ?? null,
         description: standard.description ?? featured?.description ?? null,
         benefits: standard.benefits ?? featured?.benefits ?? null,
-      } satisfies PlanOption;
-    }).filter(Boolean) as PlanOption[];
+      });
+    }
 
     return derived.length > 0 ? derived : LEGACY_PLAN_OPTIONS;
   }, [planCatalog]);
-  const [selectedPlan, setSelectedPlan] = useState<Database['public']['Enums']['job_plan']>(() => {
-    if (initialData?.plan && PLAN_LABELS[initialData.plan]) {
+  // Type guard for job_plan
+  function isJobPlan(value: unknown): value is job_plan {
+    return typeof value === 'string' && JOB_PLAN_VALUES.includes(value as job_plan);
+  }
+
+  const [selectedPlan, setSelectedPlan] = useState<job_plan>(() => {
+    if (initialData?.plan && isJobPlan(initialData.plan) && initialData.plan in PLAN_LABELS) {
       return initialData.plan;
     }
-    return planOptions[0]?.plan ?? 'one-time';
+    const defaultPlan = planOptions[0]?.plan ?? 'one-time';
+    if (isJobPlan(defaultPlan)) {
+      return defaultPlan;
+    }
+    return 'one-time'; // Fallback
   });
   useEffect(() => {
     if (!planOptions.some((option) => option.plan === selectedPlan) && planOptions[0]) {
@@ -277,54 +303,62 @@ export function JobForm({
 
     const formData = new FormData(e.currentTarget);
 
-    const location = formData.get('location') as string;
-    const salary = formData.get('salary') as string;
-    const workplaceRaw = formData.get('workplace') as string;
-    const experienceRaw = formData.get('experience') as string;
-    const contactEmail = formData.get('contact_email') as string;
-    const companyLogo = formData.get('company_logo') as string;
+    // OPTIMIZATION: Use type-safe FormData utilities instead of type assertions
+    const location = getFormDataString(formData, 'location');
+    const salary = getFormDataString(formData, 'salary');
+    const contactEmail = getFormDataString(formData, 'contact_email');
+    const companyLogo = getFormDataString(formData, 'company_logo');
 
-    // Validate workplace type
-    const workplace: Database['public']['Enums']['workplace_type'] | null | undefined = workplaceRaw
-      ? isWorkplaceType(workplaceRaw)
-        ? workplaceRaw
-        : null
-      : null;
+    // Validate workplace type using type guard
+    const workplace = getFormDataEnum(formData, 'workplace', isWorkplaceType);
 
-    // Validate experience level
-    const experience: Database['public']['Enums']['experience_level'] | null | undefined =
-      experienceRaw ? (isExperienceLevel(experienceRaw) ? experienceRaw : null) : null;
+    // Validate experience level using type guard
+    const experience = getFormDataEnum(formData, 'experience', isExperienceLevel);
+
+    // Validate job type using type guard
+    function isJobType(value: unknown): value is job_type {
+      return typeof value === 'string' && Object.values(JobType).includes(value as job_type);
+    }
+
+    // Validate job category using type guard
+    function isJobCategory(value: unknown): value is job_category {
+      return typeof value === 'string' && Object.values(JobCategory).includes(value as job_category);
+    }
+
+    const jobType = getFormDataEnum(formData, 'type', isJobType);
+    const category = getFormDataEnum(formData, 'category', isJobCategory);
+
+    if (!jobType || !category) {
+      throw new Error('Invalid job type or category');
+    }
 
     const jobData: CreateJobInput = {
-      title: formData.get('title') as string,
+      title: getFormDataStringRequired(formData, 'title'),
       company: companyName,
       company_id: companyId || undefined,
       location: location || undefined,
-      description: formData.get('description') as string,
+      description: getFormDataStringRequired(formData, 'description'),
       salary: salary || undefined,
-      remote: formData.get('remote') === 'on',
-      type: formData.get('type') as Database['public']['Enums']['job_type'],
+      remote: getFormDataBoolean(formData, 'remote'),
+      type: jobType,
       workplace: workplace || undefined,
       experience: experience || undefined,
-      category: formData.get('category') as Database['public']['Enums']['job_category'],
+      category: category,
       tags,
       requirements,
       benefits,
-      link: formData.get('link') as string,
+      link: getFormDataString(formData, 'link') || '',
       plan: (() => {
-        const planRaw = formData.get('plan');
-        if (
-          typeof planRaw === 'string' &&
-          JOB_PLAN_VALUES.includes(planRaw as Database['public']['Enums']['job_plan'])
-        ) {
-          return planRaw as Database['public']['Enums']['job_plan'];
+        const planRaw = getFormDataString(formData, 'plan');
+        if (planRaw && isJobPlan(planRaw)) {
+          return planRaw;
         }
         throw new Error('Invalid job plan');
       })(),
       tier: isFeatured ? 'featured' : 'standard',
       contact_email: contactEmail || undefined,
       company_logo: companyLogo || undefined,
-    } as unknown as CreateJobInput;
+    } satisfies CreateJobInput;
 
     startTransition(async () => {
       try {
@@ -384,13 +418,13 @@ export function JobForm({
   }, [user, status, openAuthModal, pathname, onSubmit, runLoggedAsync]);
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className={`${spaceY.relaxed}`}>
       <Card>
         <CardHeader>
           <CardTitle>Job Details</CardTitle>
           <CardDescription>Basic information about the position</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className={`${spaceY.comfortable}`}>
           <FormField
             variant="input"
             label="Job Title"
@@ -409,19 +443,19 @@ export function JobForm({
             defaultCompanyName={initialData?.company || undefined}
           />
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className={`grid ${grid.cols2} gap-4`}>
             <FormField
               variant="select"
               label="Employment Type"
               name="type"
-              defaultValue={initialData?.type || Constants.public.Enums.job_type[0]} // 'full-time'
+              defaultValue={initialData?.type ?? JobType.full_time ?? ''} // 'full-time'
               required
             >
-              <SelectItem value={Constants.public.Enums.job_type[0]}>Full Time</SelectItem>
-              <SelectItem value={Constants.public.Enums.job_type[1]}>Part Time</SelectItem>
-              <SelectItem value={Constants.public.Enums.job_type[2]}>Contract</SelectItem>
-              <SelectItem value={Constants.public.Enums.job_type[4]}>Internship</SelectItem>
-              <SelectItem value={Constants.public.Enums.job_type[3]}>Freelance</SelectItem>
+              <SelectItem value={JobType.full_time ?? ''}>Full Time</SelectItem>
+              <SelectItem value={JobType.part_time ?? ''}>Part Time</SelectItem>
+              <SelectItem value={JobType.contract ?? ''}>Contract</SelectItem>
+              <SelectItem value={JobType.internship ?? ''}>Internship</SelectItem>
+              <SelectItem value={JobType.freelance ?? ''}>Freelance</SelectItem>
             </FormField>
 
             <FormField
@@ -429,10 +463,10 @@ export function JobForm({
               label="Workplace"
               name="workplace"
               defaultValue={
-                (initialData?.workplace as
-                  | Database['public']['Enums']['workplace_type']
-                  | undefined) ||
-                (WORKPLACE_TYPE_VALUES[0] as Database['public']['Enums']['workplace_type'])
+                (initialData?.workplace && isWorkplaceType(initialData.workplace)
+                  ? initialData.workplace
+                  : null) ||
+                (WORKPLACE_TYPE_VALUES[0] ?? 'remote')
               }
               required
             >
@@ -444,7 +478,7 @@ export function JobForm({
             </FormField>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className={`grid ${grid.cols2} gap-4`}>
             <FormField
               variant="input"
               label="Location"
@@ -458,10 +492,10 @@ export function JobForm({
               label="Experience Level"
               name="experience"
               defaultValue={
-                (initialData?.experience as
-                  | Database['public']['Enums']['experience_level']
-                  | undefined) ||
-                (EXPERIENCE_LEVEL_VALUES[0] as Database['public']['Enums']['experience_level'])
+                (initialData?.experience && isExperienceLevel(initialData.experience)
+                  ? initialData.experience
+                  : null) ||
+                (EXPERIENCE_LEVEL_VALUES[0] ?? 'mid')
               }
               placeholder="Select level"
             >
@@ -473,7 +507,7 @@ export function JobForm({
             </FormField>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className={`grid ${grid.cols2} gap-4`}>
             <FormField
               variant="select"
               label="Category"
@@ -579,7 +613,7 @@ export function JobForm({
           <CardTitle>Application Details</CardTitle>
           <CardDescription>How candidates can apply</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className={`${spaceY.comfortable}`}>
           <FormField
             variant="input"
             label="Application URL"
@@ -619,9 +653,11 @@ export function JobForm({
           <Select
             name="plan"
             value={selectedPlan}
-            onValueChange={(value) =>
-              setSelectedPlan(value as Database['public']['Enums']['job_plan'])
-            }
+            onValueChange={(value) => {
+              if (isJobPlan(value)) {
+                setSelectedPlan(value);
+              }
+            }}
           >
             <SelectTrigger>
               <SelectValue />
@@ -630,13 +666,13 @@ export function JobForm({
               {planOptions.map((option) => (
                 <SelectItem key={option.plan} value={option.plan}>
                   <div>
-                    <div className="font-medium">
+                    <div className={`${weight.medium}`}>
                       {PLAN_LABELS[option.plan]}
                       {option.standardPriceCents !== null && (
                         <> - {formatPlanPrice(option.standardPriceCents, option.isSubscription)}</>
                       )}
                     </div>
-                    <div className={UI_CLASSES.TEXT_XS_MUTED}>
+                    <div className={`${size.xs} ${muted.default}`}>
                       {option.description ?? PLAN_DESCRIPTION_FALLBACK[option.plan]}
                     </div>
                   </div>
@@ -645,17 +681,17 @@ export function JobForm({
             </SelectContent>
           </Select>
           {selectedPlanOption ? (
-            <div className="border-border/50 bg-muted/20 mt-4 rounded-lg border p-4 text-sm">
-              <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
+            <div className={`border-border/50 bg-muted/20 ${marginTop.default} rounded-lg border p-4 ${size.sm}`}>
+              <div className={between.start}>
                 <div>
-                  <div className="font-semibold">{PLAN_LABELS[selectedPlanOption.plan]}</div>
-                  <p className={`${UI_CLASSES.TEXT_XS_MUTED} mt-1`}>
+                  <div className={`${weight.semibold}`}>{PLAN_LABELS[selectedPlanOption.plan]}</div>
+                  <p className={`${size.xs} ${muted.default} ${marginTop.tight}`}>
                     {selectedPlanOption.description ??
                       PLAN_DESCRIPTION_FALLBACK[selectedPlanOption.plan]}
                   </p>
                 </div>
                 {selectedPlanOption.standardPriceCents !== null && (
-                  <span className="text-base font-semibold">
+                  <span className={`${size.base} ${weight.semibold}`}>
                     {formatPlanPrice(
                       selectedPlanOption.standardPriceCents,
                       selectedPlanOption.isSubscription
@@ -664,10 +700,10 @@ export function JobForm({
                 )}
               </div>
               {planInfoSubtitle ? (
-                <p className={`${UI_CLASSES.TEXT_XS_MUTED} mt-2`}>{planInfoSubtitle}</p>
+                <p className={`${size.xs} ${muted.default} ${marginTop.compact}`}>{planInfoSubtitle}</p>
               ) : null}
               {selectedPlanOption.benefits ? (
-                <ul className="text-muted-foreground mt-3 list-disc space-y-1 pl-4 text-xs">
+                <ul className={cn('text-muted-foreground', marginTop.default, 'list-disc', spaceY.tight, paddingLeft.default, size.xs)}>
                   {selectedPlanOption.benefits.map((benefit) => (
                     <li key={benefit}>{benefit}</li>
                   ))}
@@ -675,29 +711,29 @@ export function JobForm({
               ) : null}
             </div>
           ) : null}
-          <p className={`${UI_CLASSES.TEXT_XS_MUTED} mt-2`}>
+          <p className={`${size.xs} ${muted.default} ${marginTop.compact}`}>
             Payment via Polar.sh after submission. Job goes live immediately after payment
             confirmation.
           </p>
 
-          <div className="mt-4 rounded-lg border border-orange-500/30 bg-orange-500/5 p-4">
-            <div className="flex items-start gap-3">
+          <div className={`${marginTop.default} rounded-lg border border-orange-500/30 bg-orange-500/5 ${padding.default}`}>
+            <div className={`flex items-start gap-3`}>
               <Checkbox
                 id={featuredCheckboxId}
                 checked={isFeatured}
-                onCheckedChange={(checked) => setIsFeatured(checked as boolean)}
+                onCheckedChange={(checked) => setIsFeatured(Boolean(checked))}
               />
-              <div className="flex-1">
+              <div className={`flex-1`}>
                 <Label
                   htmlFor={featuredCheckboxId}
-                  className="flex cursor-pointer items-center gap-2 text-sm font-semibold"
+                  className={`flex cursor-pointer items-center gap-2 text-sm font-semibold`}
                 >
-                  <Star className={`${UI_CLASSES.ICON_SM} text-orange-500`} />
+                  <Star className={`${iconSize.sm} text-orange-500`} />
                   Make this a Featured Listing
                 </Label>
-                <p className={`${UI_CLASSES.TEXT_XS_MUTED} mt-1`}>{featuredUpsellDescription}</p>
+                <p className={`${size.xs} ${muted.default} ${marginTop.tight}`}>{featuredUpsellDescription}</p>
                 {featuredUpgradeLabel ? (
-                  <p className="mt-2 text-sm font-medium text-orange-600 dark:text-orange-400">
+                  <p className={`${marginTop.compact} ${size.sm} ${weight.medium} text-orange-600 dark:text-orange-400`}>
                     {featuredUpgradeLabel}
                   </p>
                 ) : null}
@@ -711,7 +747,7 @@ export function JobForm({
       <input type="hidden" name="requirements" value={JSON.stringify(requirements)} />
       <input type="hidden" name="benefits" value={JSON.stringify(benefits)} />
 
-      <div className="flex gap-4">
+      <div className={`flex gap-4`}>
         <Button
           type="submit"
           disabled={isPending || tags.length === 0 || requirements.length === 0}

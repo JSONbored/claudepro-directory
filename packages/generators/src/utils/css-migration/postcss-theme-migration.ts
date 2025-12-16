@@ -66,13 +66,13 @@ function themeMigrationPlugin(options: ThemeMigrationOptions = {}): Plugin {
           const transformation: Transformation = {
             original: originalSelector,
             transformed: newSelector,
-            line: rule.source?.start?.line,
+            ...(rule.source?.start?.line !== undefined ? { line: rule.source.start.line } : {}),
           };
 
           transformations.push(transformation);
 
           if (verbose) {
-            console.log(`  [${transformation.line}] ${originalSelector} → ${newSelector}`);
+            console.log(`  [${transformation.line ?? '?'}] ${originalSelector} → ${newSelector}`);
           }
 
           if (!dryRun) {
@@ -99,13 +99,13 @@ function themeMigrationPlugin(options: ThemeMigrationOptions = {}): Plugin {
           const transformation: Transformation = {
             original: originalSelector,
             transformed: newSelector,
-            line: rule.source?.start?.line,
+            ...(rule.source?.start?.line !== undefined ? { line: rule.source.start.line } : {}),
           };
 
           transformations.push(transformation);
 
           if (verbose) {
-            console.log(`  [${transformation.line}] ${originalSelector} → ${newSelector}`);
+            console.log(`  [${transformation.line ?? '?'}] ${originalSelector} → ${newSelector}`);
           }
 
           if (!dryRun) {

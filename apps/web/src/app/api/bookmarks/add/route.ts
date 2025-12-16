@@ -18,6 +18,7 @@
 import 'server-only';
 
 import { addBookmark } from '@heyclaude/web-runtime/actions';
+import { content_categorySchema } from '@heyclaude/web-runtime/prisma-zod-schemas';
 import {
   createApiOptionsHandler,
   createApiRoute,
@@ -28,19 +29,7 @@ import { z } from 'zod';
 
 const addBookmarkSchema = z.object({
   content_slug: z.string(),
-  content_type: z.enum([
-    'agents',
-    'mcp',
-    'rules',
-    'commands',
-    'hooks',
-    'statuslines',
-    'skills',
-    'collections',
-    'guides',
-    'jobs',
-    'changelog',
-  ]),
+  content_type: content_categorySchema,
   notes: z.string().optional(),
 });
 

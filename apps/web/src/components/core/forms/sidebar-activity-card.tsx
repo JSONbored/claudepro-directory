@@ -6,11 +6,10 @@
 
 'use client';
 
-import { type Database } from '@heyclaude/database-types';
+import type { content_category } from '@heyclaude/data-layer/prisma';
 import { CheckCircle, Clock, Lightbulb } from '@heyclaude/web-runtime/icons';
 import {
   cn,
-  UI_CLASSES,
   UnifiedBadge,
   NavLink,
   Card,
@@ -21,6 +20,7 @@ import {
   TabsList,
   TabsTrigger,
 } from '@heyclaude/web-runtime/ui';
+import { cluster, iconSize, padding, spaceY, size, muted, gap, paddingBottom, marginTop } from '@heyclaude/web-runtime/design-system';
 import { DURATION } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
@@ -28,14 +28,14 @@ import { motion } from 'motion/react';
 interface SidebarActivityCardProps {
   recentMerged: Array<{
     content_name: string;
-    content_type: Database['public']['Enums']['content_category'];
+    content_type: content_category;
     id: number | string;
     merged_at: string;
     merged_at_formatted?: string;
     user?: null | { name: string; slug: string };
   }>;
   tips: string[];
-  typeLabels: Partial<Record<Database['public']['Enums']['content_category'], string>>;
+  typeLabels: Partial<Record<content_category, string>>;
 }
 
 /**
@@ -75,37 +75,36 @@ const createTabContentVariants = (shouldReduceMotion: boolean) => ({
  *
  * @see UnifiedBadge
  * @see NavLink
- * @see UI_CLASSES
  */
 export function SidebarActivityCard({ recentMerged, tips, typeLabels }: SidebarActivityCardProps) {
   const shouldReduceMotion = useReducedMotion();
   return (
     <Card>
-      <Tabs defaultValue="recent" className="w-full">
-        <CardHeader className={UI_CLASSES.CARD_HEADER_TIGHT}>
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="recent" className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5}>
-              <Clock className={UI_CLASSES.ICON_XS} />
+      <Tabs defaultValue="recent" className={`w-full`}>
+        <CardHeader className={`${paddingBottom.compact}`}>
+          <TabsList className={`grid w-full grid-cols-2`}>
+            <TabsTrigger value="recent" className={cn(cluster.tight, gap['1.5'])}>
+              <Clock className={iconSize.xs} />
               Recent
             </TabsTrigger>
-            <TabsTrigger value="tips" className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5}>
-              <Lightbulb className={UI_CLASSES.ICON_XS} />
+            <TabsTrigger value="tips" className={cn(cluster.tight, gap['1.5'])}>
+              <Lightbulb className={iconSize.xs} />
               Tips
             </TabsTrigger>
           </TabsList>
         </CardHeader>
 
-        <CardContent className={UI_CLASSES.PADDING_COMFORTABLE}>
+        <CardContent className={padding.comfortable}>
           {/* Recent Submissions Tab */}
-          <TabsContent value="recent" className="mt-0">
+          <TabsContent value="recent" className={`${marginTop.default}`}>
             <motion.div
               initial="hidden"
               animate="visible"
               variants={createTabContentVariants(shouldReduceMotion)}
-              className={UI_CLASSES.SPACE_Y_3}
+              className={spaceY.default}
             >
               {recentMerged.length === 0 ? (
-                <p className={cn(UI_CLASSES.TEXT_SM_MUTED, 'py-4 text-center')}>
+                <p className={cn(`${size.sm} ${muted.default}`, 'py-4 text-center')}>
                   No recent submissions yet
                 </p>
               ) : (
@@ -113,23 +112,23 @@ export function SidebarActivityCard({ recentMerged, tips, typeLabels }: SidebarA
                   <div
                     key={submission.id}
                     className={cn(
-                      UI_CLASSES.FLEX_ITEMS_START_GAP_2,
+                      `flex items-start ${gap.compact}`,
                       'border-border/50 border-b pb-3 last:border-0 last:pb-0'
                     )}
                   >
                     <CheckCircle
-                      className={cn('mt-0.5 shrink-0', UI_CLASSES.ICON_SM, UI_CLASSES.ICON_SUCCESS)}
+                      className={cn(marginTop.micro, 'shrink-0', iconSize.sm, 'text-green-500 dark:text-green-400')}
                     />
-                    <div className="min-w-0 flex-1">
-                      <p className={cn('truncate font-medium', UI_CLASSES.TEXT_SM)}>
+                    <div className={`min-w-0 flex-1`}>
+                      <p className={cn('truncate font-medium', size.sm)}>
                         {submission.content_name}
                       </p>
-                      <div className={cn(UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2, 'mt-1 flex-wrap')}>
-                        <UnifiedBadge variant="base" style="outline" className={UI_CLASSES.TEXT_XS}>
+                      <div className={cn(cluster.compact, marginTop.tight, 'flex-wrap')}>
+                        <UnifiedBadge variant="base" style="outline" className={size.xs}>
                           {typeLabels[submission.content_type]}
                         </UnifiedBadge>
                         {submission.user ? (
-                          <span className={UI_CLASSES.TEXT_XS_MUTED}>
+                          <span className={`${size.xs} ${muted.default}`}>
                             by{' '}
                             <NavLink href={`/u/${submission.user.slug}`}>
                               @{submission.user.name}
@@ -137,7 +136,7 @@ export function SidebarActivityCard({ recentMerged, tips, typeLabels }: SidebarA
                           </span>
                         ) : null}
                       </div>
-                      <p className={cn('mt-1', UI_CLASSES.TEXT_XS_MUTED)}>
+                      <p className={cn(marginTop.tight, `${size.xs} ${muted.default}`)}>
                         {submission.merged_at_formatted || submission.merged_at}
                       </p>
                     </div>
@@ -148,13 +147,13 @@ export function SidebarActivityCard({ recentMerged, tips, typeLabels }: SidebarA
           </TabsContent>
 
           {/* Tips Tab */}
-          <TabsContent value="tips" className="mt-0">
+          <TabsContent value="tips" className={`${marginTop.default}`}>
             <motion.div initial="hidden" animate="visible" variants={createTabContentVariants(shouldReduceMotion)}>
-              <ul className="list-none space-y-2">
+              <ul className={`list-none ${spaceY.compact}`}>
                 {tips.map((tip) => (
-                  <li key={tip} className={UI_CLASSES.FLEX_ITEMS_START_GAP_2}>
-                    <span className="mt-0.5 text-xs text-blue-400">•</span>
-                    <span className={UI_CLASSES.TEXT_XS_MUTED}>{tip}</span>
+                  <li key={tip} className={`flex items-start ${gap.compact}`}>
+                    <span className={cn(marginTop['4.5'], size.xs, 'text-blue-400')}>•</span>
+                    <span className={`${size.xs} ${muted.default}`}>{tip}</span>
                   </li>
                 ))}
               </ul>

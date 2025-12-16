@@ -6,8 +6,6 @@
  */
 
 import { TrendingService } from '@heyclaude/data-layer/services/trending.ts';
-import type { Database } from '@heyclaude/database-types';
-import type { SupabaseClient } from '@supabase/supabase-js';
 import type { GetTrendingInput } from '../lib/types.ts';
 
 /**
@@ -21,13 +19,12 @@ import type { GetTrendingInput } from '../lib/types.ts';
  *   - `_meta.count` (when items exist): the number of returned items
  */
 export async function handleGetTrending(
-  supabase: SupabaseClient<Database>,
   input: GetTrendingInput
 ) {
   const { category, limit } = input;
 
-  // Use TrendingService for consistent behavior with web app
-  const trendingService = new TrendingService(supabase);
+  // Use TrendingService for consistent behavior with web app (Prisma-based, no Supabase client needed)
+  const trendingService = new TrendingService();
   const data = await trendingService.getTrendingContent({
     ...(category ? { p_category: category } : {}),
     p_limit: limit,

@@ -7,8 +7,8 @@
 'use client';
 
 import { CheckCircle, Clock, Send, Sparkles, Users } from '@heyclaude/web-runtime/icons';
-import { cn, UI_CLASSES, BorderBeam } from '@heyclaude/web-runtime/ui';
-import { SPRING, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
+import { cn, BorderBeam } from '@heyclaude/web-runtime/ui';
+import { SPRING, STAGGER, DURATION, paddingY, marginBottom, spaceY, cluster, paddingX, size, muted, leading, wrap, gap, iconSize, center, weight } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 
@@ -88,7 +88,6 @@ const createIconVariants = (shouldReduceMotion: boolean) => ({
  * @returns A React element representing the Submit page hero section
  *
  * @see BorderBeam
- * @see UI_CLASSES
  * @see cn
  */
 export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
@@ -97,8 +96,8 @@ export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
     <motion.div
       className={cn(
         'border-border/50 bg-card relative overflow-hidden rounded-2xl border',
-        UI_CLASSES.PADDING_RELAXED,
-        UI_CLASSES.MARGIN_RELAXED,
+        paddingY.relaxed,
+        marginBottom.relaxed,
         className
       )}
       initial="hidden"
@@ -108,35 +107,35 @@ export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
       {/* BorderBeam animation for visual interest */}
       <BorderBeam size={250} duration={20} colorFrom="#9333ea" colorTo="#a855f7" borderWidth={1} />
 
-      <div className="relative z-10 grid gap-6 lg:grid-cols-[1fr_auto]">
+      <div className={`relative z-10 grid ${gap.comfortable} lg:grid-cols-[1fr_auto]`}>
         {/* Left: Content */}
-        <div className={UI_CLASSES.SPACE_Y_4}>
+        <div className={spaceY.comfortable}>
           {/* Badge */}
           <motion.div variants={createItemVariants(shouldReduceMotion)}>
             <div
               className={cn(
                 'border-primary/20 bg-primary/10 inline-flex rounded-full border',
-                UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2,
-                UI_CLASSES.PADDING_X_DEFAULT,
+                cluster.compact,
+                paddingX.default,
                 'py-1.5',
-                UI_CLASSES.TEXT_SM
+                size.sm
               )}
             >
               <motion.div variants={createIconVariants(shouldReduceMotion)}>
-                <Sparkles className={cn(UI_CLASSES.ICON_SM, 'text-primary')} />
+                <Sparkles className={cn(iconSize.sm, 'text-primary')} />
               </motion.div>
-              <span className="text-primary font-medium">Community Contributions</span>
+              <span className={`text-primary ${weight.medium}`}>Community Contributions</span>
             </div>
           </motion.div>
 
           {/* Title */}
-          <motion.h1 className="text-4xl font-bold lg:text-5xl" variants={createItemVariants(shouldReduceMotion)}>
+          <motion.h1 className={`${size['4xl']} ${weight.bold} lg:text-5xl`} variants={createItemVariants(shouldReduceMotion)}>
             Share Your Configuration
           </motion.h1>
 
           {/* Description */}
           <motion.p
-            className={cn('max-w-2xl', UI_CLASSES.TEXT_BODY_LG, UI_CLASSES.TEXT_MUTED)}
+            className={cn('max-w-2xl', `${size.lg} ${leading.relaxed}`, muted.default)}
             variants={createItemVariants(shouldReduceMotion)}
           >
             Contribute to the largest Claude configuration library. No JSON formatting required - we
@@ -145,19 +144,19 @@ export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
 
           {/* Feature badges */}
           <motion.div
-            className={cn(UI_CLASSES.FLEX_WRAP_ITEMS_CENTER_GAP_3, UI_CLASSES.TEXT_SM_MUTED)}
+            className={cn(`${wrap} items-center ${gap.default}`, `${size.sm} ${muted.default}`)}
             variants={createItemVariants(shouldReduceMotion)}
           >
-            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5}>
-              <CheckCircle className={cn(UI_CLASSES.ICON_SM, UI_CLASSES.ICON_SUCCESS)} />
+            <div className={cn(cluster.tight, gap['1.5'])}>
+              <CheckCircle className={cn(iconSize.sm, 'text-green-500 dark:text-green-400')} />
               <span>Auto PR creation</span>
             </div>
-            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5}>
-              <Clock className={cn(UI_CLASSES.ICON_SM, UI_CLASSES.ICON_INFO)} />
+            <div className={cn(cluster.tight, gap['1.5'])}>
+              <Clock className={cn(iconSize.sm, 'text-blue-500 dark:text-blue-400')} />
               <span>Fast review</span>
             </div>
-            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5}>
-              <Users className={cn(UI_CLASSES.ICON_SM, 'text-purple-500')} />
+            <div className={cn(cluster.tight, gap['1.5'])}>
+              <Users className={cn(iconSize.sm, 'text-purple-500')} />
               <span>{stats.total}+ configs</span>
             </div>
           </motion.div>
@@ -165,7 +164,7 @@ export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
 
         {/* Right: Illustration (hidden on mobile) */}
         <motion.div
-          className={cn('hidden lg:flex', UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_CENTER)}
+          className={cn('hidden lg:flex', center)}
           variants={createItemVariants(shouldReduceMotion)}
         >
           <motion.div
@@ -176,7 +175,7 @@ export function SubmitPageHero({ stats, className }: SubmitPageHeroProps) {
             <div
               className={cn(
                 'border-primary/20 bg-primary/10 h-32 w-32 rounded-2xl border',
-                UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_CENTER
+                center
               )}
             >
               <Send className="text-primary h-16 w-16" />

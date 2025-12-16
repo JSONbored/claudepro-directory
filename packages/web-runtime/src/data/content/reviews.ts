@@ -1,8 +1,8 @@
 'use server';
 
 import { ContentService } from '@heyclaude/data-layer';
-import { type content_category } from '@heyclaude/data-layer/prisma';
-import type { GetReviewsWithStatsReturns } from '@heyclaude/database-types/postgres-types/functions';
+import type { content_category } from '@heyclaude/data-layer/prisma';
+import type { GetReviewsWithStatsReturns } from '@heyclaude/database-types/postgres-types';
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { normalizeError } from '../../errors.ts';

@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
-import { runReplayWebhook } from '../commands/replay-webhook.js';
-import { logger } from '../toolkit/logger.js';
+import { runReplayWebhook } from '../commands/replay-webhook.ts';
+import { logger } from '../toolkit/logger.ts';
 
 runReplayWebhook()
   .then(() => {

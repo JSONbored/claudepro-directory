@@ -5,7 +5,6 @@
  * Collections, reviews, posts with PostgreSQL RPC functions for business logic.
  */
 
-import { Constants, type Database } from '@heyclaude/database-types';
 import { optionalAuthAction, rateLimitedAction } from './safe-action.ts';
 // Lazy loaded to avoid server-only side effects
 // import { getPaginatedContent as getPaginatedContentData } from '../data/content/paginated.ts';
@@ -14,15 +13,10 @@ import { z } from 'zod';
 import type { DisplayableContent } from '../types/component.types.ts';
 import { logger, createWebAppContextWithId } from '../logging/server.ts';
 import { normalizeError } from '../errors.ts';
-
-// Use enum values directly from @heyclaude/database-types Constants
-const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
+import { content_categorySchema } from '../prisma-zod-schemas.ts';
 
 const getReviewsSchema = z.object({
-  content_type: z.enum([...CONTENT_CATEGORY_VALUES] as [
-    Database['public']['Enums']['content_category'],
-    ...Database['public']['Enums']['content_category'][],
-  ]),
+  content_type: content_categorySchema,
   content_slug: z
     .string()
     .max(200)
@@ -94,11 +88,7 @@ export const getReviewsWithStats = optionalAuthAction
 const fetchPaginatedContentSchema = z.object({
   offset: z.number().int().min(0).default(0),
   limit: z.number().int().min(1).max(100).default(30),
-  category: z
-    .enum([...CONTENT_CATEGORY_VALUES] as [
-      Database['public']['Enums']['content_category'],
-      ...Database['public']['Enums']['content_category'][],
-    ])
+  category: content_categorySchema
     .nullable()
     .default(null),
 });

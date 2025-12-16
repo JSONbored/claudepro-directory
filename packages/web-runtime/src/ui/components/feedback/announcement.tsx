@@ -1,8 +1,9 @@
 'use client';
 
-import type { Database } from '@heyclaude/database-types';
+import type { announcement_variant } from '@heyclaude/data-layer/prisma';
 import { baseBadgeVariants } from '../badges/unified-badge.tsx';
 import { ANIMATION_CONSTANTS } from '../../constants.ts';
+import { size, weight, tracking } from '../../../design-system/index.ts';
 import { cn } from '../../utils.ts';
 import type * as React from 'react';
 
@@ -38,7 +39,8 @@ export interface AnnouncementProps extends React.OutputHTMLAttributes<HTMLOutput
    * Badge variant for styling
    * @default "outline"
    */
-  variant?: Database['public']['Enums']['announcement_variant'];
+
+  variant?: announcement_variant;
 
   /**
    * Enable themed styling with additional visual effects
@@ -90,7 +92,7 @@ export function AnnouncementTag({ className, ...props }: AnnouncementTagProps) {
         // Base styles
         'inline-flex items-center justify-center',
         'px-1.5 py-0.5',
-        'font-semibold text-[10px] uppercase tracking-wider',
+        cn(weight.semibold, size['2xs'], 'uppercase', tracking.wide),
         'rounded',
         'bg-accent text-accent-foreground',
         'shrink-0',

@@ -1033,7 +1033,6 @@ export default tseslint.config(
       'architectural-rules/require-supabase-client-context': 'error',
       'architectural-rules/require-rpc-error-handling': 'error',
       'architectural-rules/no-direct-database-queries-in-components': 'error',
-      'architectural-rules/require-generated-types-for-database-queries': 'warn',
 
       // Cache & Performance Rules
       'architectural-rules/require-cache-tags-for-mutations': 'warn',

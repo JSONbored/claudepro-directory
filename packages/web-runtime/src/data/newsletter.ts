@@ -12,8 +12,8 @@ import { cacheLife, cacheTag } from 'next/cache';
 export async function getNewsletterSubscriberCount(): Promise<null | number> {
   'use cache';
 
-  // Configure cache - use 'quarter' profile for newsletter count (changes every 5 minutes)
-  cacheLife('quarter'); // 15min stale, 5min revalidate, 2 hours expire
+  // Configure cache - use 'stable' profile for optimal SEO (6hr stale, 1hr revalidate, 7 days expire)
+  cacheLife('stable'); // 6hr stale, 1hr revalidate, 7 days expire - optimized for SEO
   cacheTag('newsletter');
   cacheTag('stats');
 

@@ -1,11 +1,11 @@
 'use server';
 
 import { AccountService } from '@heyclaude/data-layer';
-import {
-  type bookmarks,
-  type content_category,
-  type jobs,
-  type user_tier,
+import type {
+  bookmarksModel,
+  content_category,
+  jobsModel,
+  user_tier,
 } from '@heyclaude/data-layer/prisma';
 import type {
   GetAccountDashboardReturns,
@@ -27,8 +27,7 @@ import type {
 } from '@heyclaude/database-types/postgres-types';
 import type {
   UserCompaniesCompany,
-} from '@heyclaude/data-layer/types/composite-types';
-import { Constants } from '@heyclaude/database-types';
+} from '@heyclaude/database-types/postgres-types';
 import { cacheLife, cacheTag } from 'next/cache';
 import { z } from 'zod';
 
@@ -36,8 +35,9 @@ import { getAuthenticatedUserFromClient } from '../auth/get-authenticated-user.t
 import { normalizeError } from '../errors.ts';
 import { logger } from '../index.ts';
 import { createSupabaseServerClient } from '../supabase/server.ts';
+import { UserTier } from '@heyclaude/data-layer/prisma';
 
-const USER_TIER_VALUES = Constants.public.Enums.user_tier;
+const USER_TIER_VALUES = Object.values(UserTier) as readonly user_tier[];
 
 const accountDashboardSchema = z.object({
   // eslint-disable-next-line unicorn/prefer-top-level-await -- zod .catch() is not a promise, it's a schema method
@@ -159,7 +159,7 @@ export async function getUserLibrary(
       'getUserLibrary: fetched successfully'
     );
 
-    // Type assertion: RPC returns Database types, but we're migrating to custom composite types
+    // Type assertion: RPC returns postgres-types, using custom composite types for consistency
     // TODO: Remove assertion when fully migrated to Prisma queries
     return completeData.user_library as GetUserLibraryReturns;
   } catch (error) {
@@ -176,13 +176,13 @@ export async function getUserLibrary(
  * Converts RPC return data (composite type with string dates) to Prisma bookmarks type (with Date objects).
  * This function transforms the data structure from the RPC composite type to match Prisma table types.
  *
- * NOTE: The consuming code (CollectionForm) still uses Database types and will be migrated in Area 5 (UI Layer).
+ * NOTE: The consuming code (CollectionForm) uses Prisma types for type safety.
  * This function returns Prisma types to prepare for that migration.
  *
  * @param userId - User ID
  * @returns Array of bookmarks in Prisma format (with Date objects for timestamps)
  */
-export async function getUserBookmarksForCollections(userId: string): Promise<bookmarks[]> {
+export async function getUserBookmarksForCollections(userId: string): Promise<bookmarksModel[]> {
   const data = await getUserLibrary(userId);
   const bookmarksArray = data?.bookmarks ?? [];
   return bookmarksArray
@@ -206,7 +206,7 @@ export async function getUserBookmarksForCollections(userId: string): Promise<bo
     )
     .map((b) => ({
       content_slug: b.content_slug,
-      content_type: b.content_type as bookmarks['content_type'], // RPC returns string, Prisma expects enum
+      content_type: b.content_type as bookmarksModel['content_type'], // RPC returns string, Prisma expects enum
       created_at: new Date(b.created_at), // Convert string to Date for Prisma type
       id: b.id,
       notes: b.notes ?? null,
@@ -262,7 +262,7 @@ export async function getUserDashboard(
       'getUserDashboard: fetched successfully'
     );
 
-    // Type assertion: RPC returns Database types, but we're migrating to custom composite types
+    // Type assertion: RPC returns postgres-types, using custom composite types for consistency
     // TODO: Remove assertion when fully migrated to Prisma queries
     return completeData.user_dashboard as GetUserDashboardReturns;
   } catch (error) {
@@ -273,9 +273,9 @@ export async function getUserDashboard(
   }
 }
 
-export async function getUserJobById(userId: string, jobId: string): Promise<jobs | null> {
+export async function getUserJobById(userId: string, jobId: string): Promise<jobsModel | null> {
   const data = await getUserDashboard(userId);
-  const jobsArray = (data?.jobs as jobs[] | undefined) ?? [];
+  const jobsArray = (data?.jobs as jobsModel[] | undefined) ?? [];
   return jobsArray.find((job) => job.id === jobId) ?? null;
 }
 
@@ -399,7 +399,7 @@ export async function getUserCompleteData(
       'getUserCompleteData: fetched successfully'
     );
 
-    // Type assertion: RPC returns Database types, but we're migrating to custom composite types
+    // Type assertion: RPC returns postgres-types, using custom composite types for consistency
     // The structure matches, but nullability differs slightly between Database types and our custom types
     // TODO: Remove assertion when fully migrated to Prisma queries
     return result as GetUserCompleteDataReturns;
@@ -725,7 +725,7 @@ export async function getUserSponsorships(
       'getUserSponsorships: fetched successfully'
     );
 
-    // Type assertion: RPC returns Database types, but we're migrating to custom composite types
+    // Type assertion: RPC returns postgres-types, using custom composite types for consistency
     // TODO: Remove assertion when fully migrated to Prisma queries
     return (completeData.sponsorships ?? []) as GetUserSponsorshipsReturns;
   } catch (error) {

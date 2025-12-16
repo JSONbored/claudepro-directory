@@ -12,7 +12,7 @@ import type {
   GetUserProfileReturns,
   GetUserCollectionDetailArgs,
   GetUserCollectionDetailReturns,
-} from '@heyclaude/database-types/postgres-types/functions';
+} from '@heyclaude/database-types/postgres-types';
 import { BasePrismaService } from './base-prisma-service.ts';
 
 /**

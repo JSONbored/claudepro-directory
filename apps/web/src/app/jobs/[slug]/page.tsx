@@ -2,7 +2,7 @@
  * Job Detail Page - Database-first job listing display
  */
 
-import { Constants } from '@heyclaude/database-types';
+import { ContentCategory } from '@heyclaude/data-layer/prisma';
 import { getSafeMailtoUrl, getSafeWebsiteUrl, isValidCategory } from '@heyclaude/web-runtime/core';
 import { getCategoryConfig } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
@@ -26,9 +26,9 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  UI_CLASSES,
   UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
+import { cluster, gap, wrap, muted, paddingX, paddingY, marginX, marginBottom, marginRight, padding, spaceY, marginTop } from '@heyclaude/web-runtime/design-system';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import Link from 'next/link';
@@ -134,7 +134,7 @@ export async function generateStaticParams() {
       return [{ slug: 'placeholder' }];
     }
 
-    return jobs.map((job) => ({ slug: job.slug }));
+    return jobs.map((job: { slug: string }) => ({ slug: job.slug }));
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load jobs for static params');
     reqLogger.error(
@@ -267,57 +267,57 @@ async function JobPageContent({
   return (
     <>
       <Pulse
-        category={Constants.public.Enums.content_category[9]} // 'jobs'
+        category={ContentCategory.jobs} // 'jobs'
         slug={slug}
         variant="view"
       />
       <StructuredData route={`/jobs/${slug}`} />
 
-      <div className="bg-background min-h-screen">
+      <div className={`bg-background min-h-screen`}>
         <div className="border-border/50 bg-card/30 border-b">
-          <div className="container mx-auto px-4 py-8">
-            <Button asChild className="mb-6" variant="ghost">
+          <div className={`container ${marginX.auto} ${paddingX.default} ${paddingY.relaxed}`}>
+            <Button asChild className={`${marginBottom.comfortable}`} variant="ghost">
               <Link href={ROUTES.JOBS}>
-                <ArrowLeft className="mr-2 h-4 w-4" />
+                <ArrowLeft className={`${marginRight.tight} h-4 w-4`} />
                 Back to Jobs
               </Link>
             </Button>
 
             <div className="max-w-4xl">
-              <div className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_3} mb-6 gap-4`}>
-                <div className="bg-accent/10 rounded-lg p-3">
-                  <Building2 className="text-primary h-6 w-6" />
+              <div className={`flex items-start ${gap.default} ${marginBottom.comfortable} gap-4`}>
+                <div className={`bg-accent/10 rounded-lg ${padding.compact}`}>
+                  <Building2 className={`text-primary h-6 w-6`} />
                 </div>
                 <div className="flex-1">
-                  <h1 className="mb-2 text-3xl font-bold">{job.title}</h1>
-                  <p className="text-muted-foreground text-xl">{job.company}</p>
+                  <h1 className={`${marginBottom.compact} text-3xl font-bold`}>{job.title}</h1>
+                  <p className={`${muted.default} text-xl`}>{job.company}</p>
                 </div>
               </div>
 
-              <div className="text-muted-foreground mb-4 flex flex-wrap gap-4 text-sm">
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+              <div className={`${muted.default} ${marginBottom.default} flex flex-wrap gap-4 text-sm`}>
+                <div className={cluster.tight}>
                   <MapPin className="h-4 w-4" />
                   <span>{job.location}</span>
                 </div>
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+                <div className={cluster.tight}>
                   <DollarSign className="h-4 w-4" />
                   <span>{job.salary ?? 'Competitive'}</span>
                 </div>
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+                <div className={cluster.tight}>
                   <Clock className="h-4 w-4" />
                   <span>{job.type}</span>
                 </div>
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+                <div className={cluster.tight}>
                   <Users className="h-4 w-4" />
                   <span>{job.category}</span>
                 </div>
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+                <div className={cluster.tight}>
                   <Calendar className="h-4 w-4" />
                   <span>Posted {job.posted_at}</span>
                 </div>
               </div>
 
-              <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
+              <div className={`${wrap} ${gap.compact}`}>
                 {tags.map((skill: string) => (
                   <UnifiedBadge key={skill} style="secondary" variant="base">
                     {skill}
@@ -328,15 +328,15 @@ async function JobPageContent({
           </div>
         </div>
 
-        <div className="container mx-auto px-4 py-12">
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-            <div className="space-y-8 lg:col-span-2">
+        <div className={`container ${marginX.auto} ${paddingX.default} ${paddingY.section}`}>
+          <div className={`grid grid-cols-1 ${gap.relaxed} lg:grid-cols-3`}>
+            <div className={`${spaceY.loose} lg:col-span-2`}>
               <Card>
                 <CardHeader>
                   <CardTitle>About this role</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground">{job.description}</p>
+                  <p className={`${muted.default}`}>{job.description}</p>
                 </CardContent>
               </Card>
 
@@ -345,10 +345,10 @@ async function JobPageContent({
                   <CardTitle>Requirements</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ul className="space-y-2">
+                  <ul className={`${spaceY.compact}`}>
                     {requirements.map((request: string) => (
-                      <li className={UI_CLASSES.FLEX_ITEMS_START_GAP_3} key={request}>
-                        <span className="text-accent mt-1">•</span>
+                      <li className={`flex items-start ${gap.default}`} key={request}>
+                        <span className={`text-accent ${marginTop.tight}`}>•</span>
                         <span>{request}</span>
                       </li>
                     ))}
@@ -362,10 +362,10 @@ async function JobPageContent({
                     <CardTitle>Benefits</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <ul className="space-y-2">
+                    <ul className={`${spaceY.compact}`}>
                       {benefits.map((benefit: string) => (
-                        <li className={UI_CLASSES.FLEX_ITEMS_START_GAP_3} key={benefit}>
-                          <span className="mt-1 text-green-500">✓</span>
+                        <li className={`flex items-start ${gap.default}`} key={benefit}>
+                          <span className={`${marginTop.tight} text-green-500`}>✓</span>
                           <span>{benefit}</span>
                         </li>
                       ))}
@@ -375,13 +375,13 @@ async function JobPageContent({
               )}
             </div>
 
-            <div className="space-y-6">
+            <div className={`${spaceY.relaxed}`}>
               {/* Apply Actions */}
               <Card>
                 <CardHeader>
                   <CardTitle>Apply for this position</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
+                <CardContent className={`${spaceY.compact}`}>
                   {(() => {
                     const safeJobLink = getSafeWebsiteUrl(job.link);
                     if (!safeJobLink) return null;
@@ -393,7 +393,7 @@ async function JobPageContent({
                     return (
                       <Button asChild className="w-full">
                         <a href={validatedUrl} rel="noopener noreferrer" target="_blank">
-                          <ExternalLink className="mr-2 h-4 w-4" />
+                          <ExternalLink className={`${marginRight.tight} h-4 w-4`} />
                           Apply Now
                         </a>
                       </Button>
@@ -405,7 +405,7 @@ async function JobPageContent({
                     return (
                       <Button asChild className="w-full" variant="outline">
                         <a href={safeMailtoUrl}>
-                          <Building2 className="mr-2 h-4 w-4" />
+                          <Building2 className={`${marginRight.tight} h-4 w-4`} />
                           Contact Company
                         </a>
                       </Button>
@@ -419,20 +419,20 @@ async function JobPageContent({
                 <CardHeader>
                   <CardTitle>Job Details</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-sm`}>
-                    <Clock className="text-muted-foreground h-4 w-4" />
+                <CardContent className={`${spaceY.compact}`}>
+                  <div className={`${cluster.compact} text-sm`}>
+                    <Clock className={`${muted.default} h-4 w-4`} />
                     <span>
                       {(job.type ?? 'Unknown').charAt(0).toUpperCase() +
                         (job.type ?? 'Unknown').slice(1)}
                     </span>
                   </div>
-                  <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-sm`}>
-                    <MapPin className="text-muted-foreground h-4 w-4" />
+                  <div className={`${cluster.compact} text-sm`}>
+                    <MapPin className={`${muted.default} h-4 w-4`} />
                     <span>{job.remote ? 'Remote Available' : 'On-site'}</span>
                   </div>
-                  <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-sm`}>
-                    <Users className="text-muted-foreground h-4 w-4" />
+                  <div className={`${cluster.compact} text-sm`}>
+                    <Users className={`${muted.default} h-4 w-4`} />
                     <span>
                       {job.category && isValidCategory(job.category)
                         ? (getCategoryConfig(job.category)?.typeName ?? job.category)

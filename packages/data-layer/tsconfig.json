@@ -11,17 +11,13 @@
     "outDir": "dist",
     "baseUrl": ".",
     "skipLibCheck": true,
-    "paths": {
-      "@heyclaude/database-types": ["../database-types/src/index.ts"],
-      "@heyclaude/database-types/*": ["../database-types/src/*"],
-      "@heyclaude/shared-runtime/*": ["../shared-runtime/src/*"],
-      "@generated/prisma/*": ["../generators/dist/prisma/*"]
-    }
+    "allowImportingTsExtensions": true
   },
   "include": ["src/**/*"],
   "exclude": ["dist", "node_modules", "**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"],
   "references": [
     { "path": "../database-types/tsconfig.json" },
-    { "path": "../shared-runtime/tsconfig.json" }
+    { "path": "../shared-runtime/tsconfig.json" },
+    { "path": "../generators/tsconfig.json" }
   ]
 }

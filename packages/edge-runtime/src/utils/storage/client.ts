@@ -1,11 +1,11 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { supabaseAnon, supabaseServiceRole } from '@heyclaude/edge-runtime/clients/supabase.ts';
-import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
 import { createUtilityContext } from '@heyclaude/shared-runtime/logging.ts';
 import { logger } from '@heyclaude/edge-runtime/utils/logger.ts';
 
-export type StorageServiceClient = SupabaseClient<DatabaseGenerated>;
+// Storage clients don't need Database type - storage operations don't use database queries
+export type StorageServiceClient = SupabaseClient;
 
 export interface BuildStorageObjectPathOptions {
   /**

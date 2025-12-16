@@ -1,7 +1,6 @@
 'use server';
 
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '@heyclaude/database-types';
 import { createSupabaseAdminClient } from '../supabase/admin.ts';
 import { type AllowedImageMimeType, type ImageUploadResult } from './image-utils.ts';
 
@@ -12,7 +11,7 @@ interface UploadParams {
   mimeType: AllowedImageMimeType;
   userId: string;
   fileName?: string;
-  supabase?: SupabaseClient<Database>;
+  supabase?: SupabaseClient;
 }
 
 export async function uploadImageToStorage({
@@ -55,7 +54,7 @@ export async function uploadImageToStorage({
 export async function deleteImageFromStorage(
   bucket: string,
   path: string,
-  supabase?: SupabaseClient<Database>
+  supabase?: SupabaseClient
 ): Promise<boolean> {
   const client = supabase ?? (await createSupabaseAdminClient());
   const { error } = await client.storage.from(bucket).remove([path]);

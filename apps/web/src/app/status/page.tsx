@@ -9,6 +9,7 @@ import { Suspense } from 'react';
 
 import { StatusPageContent } from './status-page-content';
 import { StatusPageSkeleton } from './status-page-skeleton';
+import { paddingX, paddingY, marginX, marginBottom, muted } from "@heyclaude/web-runtime/design-system";
 
 export const metadata = {
   description: 'Real-time system status and API health information',
@@ -17,10 +18,10 @@ export const metadata = {
 
 export default function StatusPage() {
   return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="mb-8">
-        <h1 className="mb-2 text-3xl font-bold">System Status</h1>
-        <p className="text-muted-foreground">Real-time status of our API and services</p>
+    <div className={`container ${marginX.auto} ${paddingX.default} ${paddingY.section}`}>
+      <div className={`${marginBottom.relaxed}`}>
+        <h1 className={`${marginBottom.compact} text-3xl font-bold`}>System Status</h1>
+        <p className={`${muted.default}`}>Real-time status of our API and services</p>
       </div>
 
       <Suspense fallback={<StatusPageSkeleton />}>

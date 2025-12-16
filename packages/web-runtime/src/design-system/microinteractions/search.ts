@@ -12,7 +12,7 @@
  */
 
 import { SPRING } from '../animations/spring.ts';
-import { COLORS } from '../../design-tokens/index.ts';
+// COLORS removed - using CSS variables for dynamic Framer Motion animations
 
 /**
  * Search Bar Microinteractions
@@ -51,12 +51,12 @@ export const SEARCH = {
    * BEAUTIFUL: Vibrant orange focus with higher opacity for visibility
    * 
    * NOTE: Uses RGB colors for Motion.dev animations (OKLCH not animatable)
-   * OKLCH versions available in COLORS.semantic.search.focus for CSS use
+   * OKLCH versions available as CSS variables in globals.css @theme block
    */
   focus: {
-    // RGB for Motion.dev animations (OKLCH not animatable)
-    borderColor: COLORS.semantic.search.focus.borderColor.rgb, // rgba(249, 115, 22, 0.7)
-    boxShadow: `0 0 0 3px ${COLORS.semantic.search.focus.shadowColor.rgb}`, // rgba(249, 115, 22, 0.2)
+    // Using CSS variables for Motion.dev animations (RGB format required)
+    borderColor: 'var(--color-search-focus-border-rgb)', // rgba(249, 115, 22, 0.7)
+    boxShadow: '0 0 0 3px var(--color-search-focus-shadow-rgb)', // rgba(249, 115, 22, 0.2)
     scale: 1.02,
     transition: {
       ...SPRING.hover,

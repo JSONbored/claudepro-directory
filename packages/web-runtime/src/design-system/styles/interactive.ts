@@ -41,10 +41,117 @@ export const focusRing = {
   none: 'focus-visible:outline-none',
 } as const;
 
+/**
+ * Transition Utilities
+ * Semantic transition patterns using Tailwind classes
+ * 
+ * Maps DURATION values to Tailwind transition classes.
+ * Uses CSS variables from globals.css for consistency.
+ * 
+ * @example
+ * ```tsx
+ * import { transition } from '@heyclaude/web-runtime/design-system';
+ * 
+ * <div className={transition.default}>Smooth transition</div>
+ * <div className={transition.colors}>Color transition only</div>
+ * ```
+ */
 export const transition = {
-  fast: 'transition-all duration-150 ease-out',
-  default: 'transition-all duration-200 ease-out',
+  /**
+   * Micro transition - 100ms (0.1s)
+   * Best for: Very quick state changes
+   */
+  micro: 'transition-all duration-[var(--duration-micro)] ease-out',
+  
+  /**
+   * Fast transition - 150ms (0.15s)
+   * Best for: Quick feedback, icon state changes
+   */
+  fast: 'transition-all duration-[var(--duration-fast)] ease-out',
+  
+  /**
+   * Quick transition - 200ms (0.2s)
+   * Best for: Form field transitions, button feedback
+   */
+  quick: 'transition-all duration-[var(--duration-quick)] ease-out',
+  
+  /**
+   * Comfortable transition - 250ms (0.25s)
+   * Best for: Modal transitions, card animations
+   */
+  comfortable: 'transition-all duration-[var(--duration-comfortable)] ease-out',
+  
+  /**
+   * Default transition - 300ms (0.3s)
+   * Best for: Button interactions, card hovers (most common)
+   */
+  default: 'transition-all duration-[var(--duration-default)] ease-out',
+  
+  /**
+   * Balanced transition - 350ms (0.35s)
+   * Best for: Card transitions, view transitions
+   */
+  balanced: 'transition-all duration-[var(--duration-balanced)] ease-out',
+  
+  /**
+   * Slow transition - 400ms (0.4s)
+   * Best for: Page transitions, modal entrances
+   */
+  slow: 'transition-all duration-[var(--duration-slow)] ease-out',
+  
+  /**
+   * Moderate transition - 500ms (0.5s)
+   * Best for: Auth panels, form submissions
+   */
+  moderate: 'transition-all duration-[var(--duration-moderate)] ease-out',
+  
+  /**
+   * Extended transition - 600ms (0.6s)
+   * Best for: Brand panels, hero sections
+   */
+  extended: 'transition-all duration-[var(--duration-extended)] ease-out',
+  
+  /**
+   * Relaxed transition - 700ms (0.7s)
+   * Best for: View transitions, circle blur effects
+   */
+  relaxed: 'transition-all duration-[var(--duration-relaxed)] ease-out',
+  
+  /**
+   * Long transition - 800ms (0.8s)
+   * Best for: Loading spinners, rotation animations
+   */
+  long: 'transition-all duration-[var(--duration-long)] ease-out',
+  
+  /**
+   * Very long transition - 1000ms (1.0s)
+   * Best for: Complex animations, rotation loops
+   */
+  veryLong: 'transition-all duration-[var(--duration-very-long)] ease-out',
+  
+  /**
+   * Color-only transition (no duration specified, uses default)
+   * Best for: Color changes only
+   */
   colors: 'transition-colors',
+  
+  /**
+   * Transform-only transition
+   * Best for: Transform animations only
+   */
+  transform: 'transition-transform',
+  
+  /**
+   * Opacity-only transition
+   * Best for: Fade in/out animations
+   */
+  opacity: 'transition-opacity',
+  
+  /**
+   * All properties with custom easing
+   * Best for: Smooth, natural animations
+   */
+  smooth: 'transition-all duration-[var(--duration-default)] ease-in-out',
 } as const;
 
 export const interactive = 'cursor-pointer select-none';

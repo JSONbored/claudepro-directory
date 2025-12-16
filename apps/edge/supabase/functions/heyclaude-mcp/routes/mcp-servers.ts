@@ -5,17 +5,15 @@
  */
 
 import { ContentService } from '@heyclaude/data-layer/services/content.ts';
-import type { Database } from '@heyclaude/database-types';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { ContentPaginatedItem } from '@heyclaude/database-types/postgres-types';
+import { prisma } from '@heyclaude/data-layer/prisma/client.ts';
 import { logError } from '@heyclaude/shared-runtime/logging.ts';
 import type { GetMcpServersInput } from '../lib/types.ts';
 
-type ContentPaginatedItem = Database['public']['CompositeTypes']['content_paginated_item'];
 
 /**
  * Fetches MCP entries from the HeyClaude directory, enriches them with available metadata and download URLs, and returns a formatted text summary plus a metadata payload containing the full server representations.
  *
- * @param supabase - Supabase client used to read content and metadata rows
  * @param input - Input options; `limit` controls the maximum number of MCP items to fetch
  * @returns An object with:
  *  - `content`: an array containing a single text item with a human-readable list of MCP servers and a total count
@@ -24,13 +22,12 @@ type ContentPaginatedItem = Database['public']['CompositeTypes']['content_pagina
  * Each server object in `_meta.servers` includes: `slug`, `title`, `description` (trimmed to 200 chars), `author`, `dateAdded`, `tags`, `mcpbUrl` (string or `null`), `requiresAuth` (boolean), `tools` (array of `{ name, description }`), `configuration` (object), and `stats` (`views` and `bookmarks`).
  */
 export async function handleGetMcpServers(
-  supabase: SupabaseClient<Database>,
   input: GetMcpServersInput
 ) {
   const { limit } = input;
 
-  // Use ContentService to get MCP content
-  const contentService = new ContentService(supabase);
+  // Use ContentService to get MCP content (Prisma-based, no Supabase client needed)
+  const contentService = new ContentService();
 
   const result = await contentService.getContentPaginated({
     p_category: 'mcp',
@@ -56,17 +53,25 @@ export async function handleGetMcpServers(
   }
 
   // Fetch metadata separately since content_paginated_item doesn't include it
+  // Use Prisma to query content table directly
   const slugs = result.items
     .map((item: ContentPaginatedItem) => item.slug)
     .filter((slug): slug is string => typeof slug === 'string' && slug !== null);
 
-  const { data: metadataRows, error: metadataError } = await supabase
-    .from('content')
-    .select('slug, metadata, mcpb_storage_url')
-    .in('slug', slugs)
-    .eq('category', 'mcp');
-
-  if (metadataError) {
+  let metadataRows: Array<{ slug: string; metadata: unknown; mcpb_storage_url: string | null }> = [];
+  try {
+    metadataRows = await prisma.content.findMany({
+      where: {
+        slug: { in: slugs },
+        category: 'mcp',
+      },
+      select: {
+        slug: true,
+        metadata: true,
+        mcpb_storage_url: true,
+      },
+    });
+  } catch (error) {
     // Use dbQuery serializer for consistent database query formatting
     await logError('Database query failed in getMcpServers', {
       dbQuery: {
@@ -78,7 +83,7 @@ export async function handleGetMcpServers(
           category: 'mcp',
         },
       },
-    }, metadataError);
+    }, error);
     // Continue without metadata - not critical
   }
 
@@ -87,13 +92,11 @@ export async function handleGetMcpServers(
     string,
     { metadata: Record<string, unknown>; mcpb_storage_url: string | null }
   >();
-  if (metadataRows && !metadataError) {
-    for (const row of metadataRows) {
-      metadataMap.set(row.slug, {
-        metadata: (row.metadata as Record<string, unknown>) || {},
-        mcpb_storage_url: row.mcpb_storage_url,
-      });
-    }
+  for (const row of metadataRows) {
+    metadataMap.set(row.slug, {
+      metadata: (row.metadata as Record<string, unknown>) || {},
+      mcpb_storage_url: row.mcpb_storage_url,
+    });
   }
 
   // Format MCP servers with complete metadata

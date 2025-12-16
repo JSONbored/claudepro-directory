@@ -10,8 +10,9 @@ import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/cl
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import { Github } from '@heyclaude/web-runtime/icons';
 import { type ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
-import { cn, UI_CLASSES, Button } from '@heyclaude/web-runtime/ui';
+import { cn, Button } from '@heyclaude/web-runtime/ui';
 import { useEffect, useState } from 'react';
+import { iconSize } from "@heyclaude/web-runtime/design-system";
 
 export interface GitHubStarsButtonProps extends ButtonStyleProps {
   repoUrl?: string;
@@ -146,7 +147,7 @@ export function GitHubStarsButton({
       )}
       aria-label={`Star us on GitHub${stars !== null ? ` - ${stars} stars` : ''}`}
     >
-      <Github className={size === 'icon' ? 'h-4 w-4' : UI_CLASSES.ICON_SM} aria-hidden="true" />
+      <Github className={size === 'icon' ? 'h-4 w-4' : iconSize.sm} aria-hidden="true" />
       {formattedStars !== null && (
         <span 
           className={cn(

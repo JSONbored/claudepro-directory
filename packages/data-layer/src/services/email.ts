@@ -3,16 +3,18 @@
  *
  * Fully modernized for Prisma ORM - no backward compatibility.
  * All table types use Prisma types.
- * RPC function types remain using Database type (Prisma doesn't generate RPC types).
+ * RPC function types use postgres-types generator (Prisma doesn't generate RPC types).
  */
 
 import type {
   GetDueSequenceEmailsReturns,
   EnrollInEmailSequenceArgs,
 } from '@heyclaude/database-types/postgres-types';
-import type { Prisma } from '@heyclaude/data-layer/prisma';
 import { prisma } from '../prisma/client.ts';
 import { BasePrismaService } from './base-prisma-service.ts';
+
+// Type helper: Extract model type from Prisma query result
+type EmailSequence = Awaited<ReturnType<typeof prisma.email_sequences.findUnique>>;
 
 export class EmailService extends BasePrismaService {
   /**
@@ -38,7 +40,7 @@ export class EmailService extends BasePrismaService {
   async claimEmailSequenceStep(
     sequenceId: string,
     expectedStep: number
-  ): Promise<Prisma.email_sequencesGetPayload<{}> | null> {
+  ): Promise<EmailSequence | null> {
     try {
       const result = await prisma.email_sequences.updateMany({
         where: {

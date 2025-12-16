@@ -5,7 +5,7 @@
  * Uses React Hook Form + generated Zod schema for validation.
  */
 
-import { type Database } from '@heyclaude/database-types';
+import type { public_usersModel } from '@heyclaude/data-layer/prisma';
 import { normalizeError } from '@heyclaude/shared-runtime';
 import { refreshProfileFromOAuth, updateProfile } from '@heyclaude/web-runtime/actions/user';
 import { useAuthenticatedUser, useLoggedAsync } from '@heyclaude/web-runtime/hooks';
@@ -13,7 +13,7 @@ import {
   extractFirstFieldFromTuple,
   isPostgresTupleString,
 } from '@heyclaude/web-runtime';
-import { toasts, UI_CLASSES, FormField, ToggleField, Button } from '@heyclaude/web-runtime/ui';
+import { toasts, FormField, ToggleField, Button, cn } from '@heyclaude/web-runtime/ui';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { usePathname } from 'next/navigation';
 import { useCallback, useTransition } from 'react';
@@ -23,10 +23,11 @@ import { z } from 'zod';
 
 import { useAuthModal } from '@/src/hooks/use-auth-modal';
 import { ListItemManager } from '@/src/components/core/forms/list-items-editor';
+import { spaceY, paddingTop, gap } from "@heyclaude/web-runtime/design-system";
 
 // Profile data consolidated into users table - use generated types
 type ProfileData = Pick<
-  Database['public']['Tables']['users']['Row'],
+  public_usersModel,
   | 'bio'
   | 'display_name'
   | 'follow_email'
@@ -217,7 +218,7 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
   }, [user, status, openAuthModal, pathname, runLoggedAsync, reset]);
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className={UI_CLASSES.FORM_SECTION_SPACING}>
+    <form onSubmit={handleSubmit(onSubmit)} className={spaceY.relaxed}>
       <FormField
         variant="input"
         label="Name"
@@ -305,7 +306,7 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
         description="Press Enter or click Add"
       />
 
-      <div className={`${UI_CLASSES.FORM_GROUP_SPACING} pt-2`}>
+      <div className={cn(spaceY.comfortable, paddingTop.compact)}>
         <ToggleField
           label="Public profile"
           description="Allow others to view your profile"
@@ -323,7 +324,7 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
         />
       </div>
 
-      <div className="flex gap-3 pt-4">
+      <div className={cn('flex', gap.compact, paddingTop.default)}>
         <Button type="submit" disabled={isPending || !isDirty}>
           {isPending ? 'Saving...' : 'Save Changes'}
         </Button>

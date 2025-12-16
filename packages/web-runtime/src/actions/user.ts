@@ -5,35 +5,38 @@
  * PostgreSQL validates ALL data. TypeScript provides compile-time types only.
  */
 
-import type { Database } from '@heyclaude/database-types';
 import type {
   BookmarkItemInput,
   UpdateUserProfileResultV2,
-} from '@heyclaude/data-layer/types/composite-types';
-import { Constants } from '@heyclaude/database-types';
+} from '@heyclaude/database-types/postgres-types';
+import type {
+  follow_action,
+  submission_status,
+} from '@heyclaude/data-layer/prisma';
 import { runRpc } from './run-rpc-instance.ts';
 import { authedAction } from './safe-action.ts';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
 import { logger } from '../logger.ts';
+import {
+  content_categorySchema,
+  follow_actionSchema,
+} from '../prisma-zod-schemas.ts';
 
 // Export input types for generated bookmark actions (can't export from 'use server' files)
 const addBookmarkSchema = z.object({
-  content_type: z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'skills', 'collections', 'guides', 'jobs', 'changelog']),
+  content_type: content_categorySchema,
   content_slug: z.string(),
   notes: z.string().optional()
 });
 
 const removeBookmarkSchema = z.object({
-  content_type: z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'skills', 'collections', 'guides', 'jobs', 'changelog']),
+  content_type: content_categorySchema,
   content_slug: z.string()
 });
 
 export type AddBookmarkInput = z.infer<typeof addBookmarkSchema>;
 export type RemoveBookmarkInput = z.infer<typeof removeBookmarkSchema>;
-
-// Use enum values directly from @heyclaude/database-types Constants
-const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
 
 // UUID validation regex pattern (RFC 4122 compliant)
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -57,7 +60,7 @@ type SubmissionActivity = {
   description: string | null;
   content_type: string;
   submission_url: string | null;
-  status: Database['public']['Enums']['submission_status'];
+  status: submission_status;
   updated_at: string;
 };
 
@@ -237,10 +240,7 @@ export const isBookmarkedAction = authedAction
   .metadata({ actionName: 'isBookmarked', category: 'user' })
   .inputSchema(
     z.object({
-      content_type: z.enum([...CONTENT_CATEGORY_VALUES] as [
-        Database['public']['Enums']['content_category'],
-        ...Database['public']['Enums']['content_category'][],
-      ]),
+      content_type: content_categorySchema,
       content_slug: z
         .string()
         .max(200)
@@ -266,10 +266,7 @@ export const addBookmarkBatch = authedAction
       items: z
         .array(
           z.object({
-            content_type: z.enum([...CONTENT_CATEGORY_VALUES] as [
-              Database['public']['Enums']['content_category'],
-              ...Database['public']['Enums']['content_category'][],
-            ]),
+            content_type: content_categorySchema,
             content_slug: z.string().min(1),
           })
         )
@@ -309,9 +306,7 @@ export const addBookmarkBatch = authedAction
   });
 
 const followSchema = z.object({
-  action: z.enum(['follow', 'unfollow']) satisfies z.ZodType<
-    Database['public']['Enums']['follow_action']
-  >,
+  action: follow_actionSchema,
   user_id: z.string(), // Database validates UUID format
   slug: z.string(),
 });
@@ -328,7 +323,7 @@ export const toggleFollow = authedAction
       {
         p_follower_id: ctx.userId,
         p_following_id: user_id,
-        p_action: action satisfies Database['public']['Enums']['follow_action'],
+        p_action: action satisfies follow_action,
       },
       {
         action: 'user.toggleFollow',
@@ -374,10 +369,7 @@ export const getBookmarkStatusBatch = authedAction
     z.object({
       items: z.array(
         z.object({
-          content_type: z.enum([...CONTENT_CATEGORY_VALUES] as [
-            Database['public']['Enums']['content_category'],
-            ...Database['public']['Enums']['content_category'][],
-          ]),
+          content_type: content_categorySchema,
           content_slug: z.string(),
         })
       ),
@@ -466,7 +458,23 @@ export async function ensureUserRecord(params: {
 }) {
   'use server';
 
-  await runRpc<Database['public']['Tables']['users']['Row']>(
+  await runRpc<{
+    id: string;
+    email: string | null;
+    name: string | null;
+    image: string | null;
+    slug: string | null;
+    display_name: string | null;
+    bio: string | null;
+    work: string | null;
+    website: string | null;
+    social_x_link: string | null;
+    interests: string[] | null;
+    profile_public: boolean;
+    follow_email: boolean;
+    created_at: Date;
+    updated_at: Date;
+  }>(
     'ensure_user_record',
     {
       p_id: params.id,

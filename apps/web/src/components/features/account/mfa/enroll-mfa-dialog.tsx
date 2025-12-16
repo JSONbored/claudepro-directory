@@ -12,7 +12,6 @@ import { AlertCircle, Loader2, Shield } from '@heyclaude/web-runtime/icons';
 import {
   errorToasts,
   successToasts,
-  UI_CLASSES,
   Button,
   Dialog,
   DialogContent,
@@ -26,6 +25,7 @@ import {
 import { useBoolean } from '@heyclaude/web-runtime/hooks';
 import Image from 'next/image';
 import { useState } from 'react';
+import { iconSize, marginRight, gap, padding, spaceY } from "@heyclaude/web-runtime/design-system";
 
 interface EnrollMFADialogProps {
   onEnrolled: () => void;
@@ -162,8 +162,8 @@ export function EnrollMFADialog({ open, onOpenChange, onEnrolled }: EnrollMFADia
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Shield className={UI_CLASSES.ICON_SM} />
+          <DialogTitle className={`flex items-center ${gap.tight}`}>
+            <Shield className={iconSize.sm} />
             Enable Two-Factor Authentication
           </DialogTitle>
           <DialogDescription>
@@ -174,14 +174,14 @@ export function EnrollMFADialog({ open, onOpenChange, onEnrolled }: EnrollMFADia
         </DialogHeader>
 
         {error ? (
-          <div className="bg-destructive/10 text-destructive flex items-center gap-2 rounded-md p-3 text-sm">
-            <AlertCircle className={UI_CLASSES.ICON_SM} />
+          <div className={`bg-destructive/10 text-destructive flex items-center ${gap.tight} rounded-md ${padding.compact} text-sm`}>
+            <AlertCircle className={iconSize.sm} />
             <span>{error}</span>
           </div>
         ) : null}
 
         {step === 'enroll' && (
-          <div className="space-y-4">
+          <div className={`${spaceY.comfortable}`}>
             <div className="text-muted-foreground text-sm">
               Click &quot;Start Setup&quot; to generate a QR code. Scan it with an authenticator app
               like Google Authenticator, Authy, or 1Password.
@@ -189,7 +189,7 @@ export function EnrollMFADialog({ open, onOpenChange, onEnrolled }: EnrollMFADia
             <Button onClick={handleEnroll} disabled={loading} className="w-full">
               {loading ? (
                 <>
-                  <Loader2 className={`${UI_CLASSES.ICON_SM_LEADING} animate-spin`} />
+                  <Loader2 className={`${iconSize.sm} ${marginRight.compact} animate-spin`} />
                   Generating QR Code...
                 </>
               ) : (
@@ -200,22 +200,21 @@ export function EnrollMFADialog({ open, onOpenChange, onEnrolled }: EnrollMFADia
         )}
 
         {step === 'verify' && qrCode ? (
-          <div className="space-y-4">
-            <div className="flex flex-col items-center gap-4">
-              <div className="bg-background rounded-lg border p-4">
+          <div className={`${spaceY.comfortable}`}>
+            <div className={`flex flex-col items-center ${gap.default}`}>
+              <div className={`bg-background rounded-lg border ${padding.default}`}>
                 {qrCode ? (
                   <Image
                     src={qrCode}
                     alt="MFA QR Code"
                     width={192}
                     height={192}
-                    className="h-48 w-48"
-                    style={{ imageRendering: 'crisp-edges' }}
+                    className="h-48 w-48 [image-rendering:crisp-edges]"
                   />
                 ) : null}
               </div>
               {secret ? (
-                <div className="w-full space-y-2">
+                <div className={`w-full ${spaceY.compact}`}>
                   <Label htmlFor="secret" className="text-xs">
                     Or enter this secret manually:
                   </Label>
@@ -230,7 +229,7 @@ export function EnrollMFADialog({ open, onOpenChange, onEnrolled }: EnrollMFADia
               ) : null}
             </div>
 
-            <div className="space-y-2">
+            <div className={`${spaceY.compact}`}>
               <Label htmlFor="verify-code">Enter 6-digit code</Label>
               <Input
                 id="verify-code"
@@ -257,7 +256,7 @@ export function EnrollMFADialog({ open, onOpenChange, onEnrolled }: EnrollMFADia
             >
               {loading ? (
                 <>
-                  <Loader2 className={`${UI_CLASSES.ICON_SM_LEADING} animate-spin`} />
+                  <Loader2 className={`${iconSize.sm} ${marginRight.compact} animate-spin`} />
                   Verifying...
                 </>
               ) : (

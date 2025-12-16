@@ -18,15 +18,15 @@ import { join, extname, relative, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as postcss from 'postcss';
 
-import { logger } from '../toolkit/logger.js';
+import { logger } from '../toolkit/logger.ts';
 import {
   analyzeVariableConsolidation,
   findVariableMappings,
   findRemovableVariables,
   findConflicts,
   type ConsolidationReport,
-} from '../utils/css-migration/variable-consolidation.js';
-import variableConsolidationPlugin, { transformations } from '../utils/css-migration/postcss-variable-consolidation.js';
+} from '../utils/css-migration/variable-consolidation.ts';
+import variableConsolidationPlugin, { transformations } from '../utils/css-migration/postcss-variable-consolidation.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const SCRIPT_DIR = join(__filename, '..');

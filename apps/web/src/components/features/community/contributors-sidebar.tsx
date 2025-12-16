@@ -16,18 +16,19 @@ import { sanitizeSlug } from '@heyclaude/web-runtime/core';
 import { Award, Medal, TrendingUp } from '@heyclaude/web-runtime/icons';
 import {
   POSITION_PATTERNS,
-  UI_CLASSES,
   UnifiedBadge,
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
+import { optimizeAvatarUrl } from '@heyclaude/web-runtime/utils/optimize-avatar-url';
 import Image from 'next/image';
 import Link from 'next/link';
 import { memo } from 'react';
 
 import { type UserProfile } from '@/src/components/core/domain/cards/user-profile-card';
+import { iconSize, between, cluster, spaceY, padding } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Validate slug is safe for use in URLs
@@ -123,16 +124,16 @@ export interface ContributorsSidebarProps {
 
 function ContributorsSidebarComponent({ topContributors, newMembers }: ContributorsSidebarProps) {
   return (
-    <aside className={`${POSITION_PATTERNS.STICKY_TOP_4} space-y-6`}>
+    <aside className={`${POSITION_PATTERNS.STICKY_TOP_4} ${spaceY.comfortable}`}>
       {/* Trending Contributors */}
       <Card>
         <CardHeader>
-          <div className="flex items-center gap-2">
-            <TrendingUp className={`${UI_CLASSES.ICON_SM} text-accent`} />
+          <div className={`${cluster.compact}`}>
+            <TrendingUp className={`${iconSize.sm} text-accent`} />
             <CardTitle className="text-sm">Trending Contributors</CardTitle>
           </div>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className={`${spaceY.default}`}>
           {topContributors.slice(0, 5).map((contributor, index) => {
             const slug = contributor.slug || 'unknown';
             const safeUrl = getSafeUserProfileUrl(slug);
@@ -151,24 +152,24 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
               <Link
                 key={slug}
                 href={validatedUrl}
-                className="hover:bg-muted/50 flex items-center gap-3 rounded-lg p-2 transition-colors"
+                className={`hover:bg-muted/50 ${cluster.default} rounded-lg p-2 transition-colors`}
               >
                 <div className="relative shrink-0">
                   {contributor.image ? (
                     <Image
-                      src={contributor.image}
+                      src={optimizeAvatarUrl(contributor.image, 40) ?? contributor.image}
                       alt={displayName}
                       width={40}
                       height={40}
                       className="h-10 w-10 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="bg-accent flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold">
+                    <div className={`bg-accent flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold`}>
                       {displayName.charAt(0).toUpperCase()}
                     </div>
                   )}
                   {index < 3 && (
-                    <div className="bg-background absolute -right-1 -bottom-1 rounded-full p-1">
+                    <div className={`bg-background absolute -right-1 -bottom-1 rounded-full ${padding.micro}`}>
                       <Medal
                         className={`h-3 w-3 ${
                           index === 0
@@ -181,11 +182,11 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
                     </div>
                   )}
                 </div>
-                <div className="min-w-0 flex-1">
+                <div className={`min-w-0 flex-1`}>
                   <p className="truncate text-sm font-medium">{displayName}</p>
                   {contributor.total_contributions !== undefined && (
-                    <div className="text-muted-foreground flex items-center gap-1 text-xs">
-                      <Award className={UI_CLASSES.ICON_XS} />
+                    <div className={`text-muted-foreground ${cluster.tight} text-xs`}>
+                      <Award className={iconSize.xs} />
                       <span>{contributor.total_contributions} contributions</span>
                     </div>
                   )}
@@ -202,7 +203,7 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
           <CardHeader>
             <CardTitle className="text-sm">New Members</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className={`${spaceY.default}`}>
             {newMembers.slice(0, 5).map((member) => {
               const slug = member.slug || 'unknown';
               const safeUrl = getSafeUserProfileUrl(slug);
@@ -221,22 +222,22 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
                 <Link
                   key={slug}
                   href={validatedUrl}
-                  className="hover:bg-muted/50 flex items-center gap-3 rounded-lg p-2 transition-colors"
+                  className={`hover:bg-muted/50 ${cluster.default} rounded-lg p-2 transition-colors`}
                 >
                   {member.image ? (
                     <Image
-                      src={member.image}
+                      src={optimizeAvatarUrl(member.image, 32) ?? member.image}
                       alt={displayName}
                       width={32}
                       height={32}
-                      className={`${UI_CLASSES.ICON_XL} shrink-0 rounded-full object-cover`}
+                      className={`${iconSize.xl} shrink-0 rounded-full object-cover`}
                     />
                   ) : (
-                    <div className="bg-accent flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold">
+                    <div className={`bg-accent flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold`}>
                       {displayName.charAt(0).toUpperCase()}
                     </div>
                   )}
-                  <div className="min-w-0 flex-1">
+                  <div className={`min-w-0 flex-1`}>
                     <p className="truncate text-sm font-medium">{displayName}</p>
                     {member.work ? (
                       <p className="text-muted-foreground truncate text-xs">{member.work}</p>
@@ -254,8 +255,8 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
         <CardHeader>
           <CardTitle className="text-sm">Community Stats</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2">
-          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+        <CardContent className={`${spaceY.compact}`}>
+          <div className={between.center}>
             <span className="text-muted-foreground text-xs">Total Members</span>
             <UnifiedBadge variant="base" style="secondary" className="text-xs">
               {topContributors.length + newMembers.length}

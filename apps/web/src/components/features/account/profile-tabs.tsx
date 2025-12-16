@@ -8,6 +8,7 @@
 
 import { Tabs, TabsList, TabsTrigger, TabsContent, LayoutGroup } from '@heyclaude/web-runtime/ui';
 import type { ReactNode } from 'react';
+import { marginBottom, spaceY } from "@heyclaude/web-runtime/design-system";
 
 export interface ProfileTabsProps {
   /**
@@ -36,19 +37,19 @@ export function ProfileTabs({
 }: ProfileTabsProps) {
   return (
     <LayoutGroup>
-      <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="mb-6">
+      <Tabs defaultValue="overview" className={`w-full`}>
+        <TabsList className={`${marginBottom.comfortable}`}>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="collections">Collections</TabsTrigger>
           <TabsTrigger value="contributions">Contributions</TabsTrigger>
         </TabsList>
-        <TabsContent value="overview" className="space-y-6">
+        <TabsContent value="overview" className={`${spaceY.relaxed}`}>
           {overview}
         </TabsContent>
-        <TabsContent value="collections" className="space-y-6">
+        <TabsContent value="collections" className={`${spaceY.relaxed}`}>
           {collections}
         </TabsContent>
-        <TabsContent value="contributions" className="space-y-6">
+        <TabsContent value="contributions" className={`${spaceY.relaxed}`}>
           {contributions}
         </TabsContent>
       </Tabs>

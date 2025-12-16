@@ -19,7 +19,8 @@ import {
   User as UserIcon,
 } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import { UI_CLASSES, Button, Card } from '@heyclaude/web-runtime/ui';
+import { Button, Card } from '@heyclaude/web-runtime/ui';
+import { size, muted, padding, marginBottom, paddingBottom, gap, spaceY, marginRight, weight } from '@heyclaude/web-runtime/design-system';
 import { type User } from '@supabase/supabase-js';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -115,8 +116,8 @@ export async function AccountSidebar({
   const imageSrc = userImageMetadata || profile?.image || null;
 
   return (
-    <Card className="h-fit p-4 md:col-span-1">
-      <div className="mb-6 flex items-center gap-3 border-b pb-4">
+    <Card className={`h-fit ${padding.default} md:col-span-1`}>
+      <div className={`${marginBottom.comfortable} flex items-center ${gap.compact} border-b ${paddingBottom.default}`}>
         {imageSrc ? (
           <Image
             src={imageSrc}
@@ -133,21 +134,21 @@ export async function AccountSidebar({
           </div>
         )}
         <div className="flex-1">
-          <p className="font-medium">{profile?.name ?? userNameMetadata}</p>
-          <p className={UI_CLASSES.TEXT_XS_MUTED}>{user.email ?? ''}</p>
+          <p className={`${weight.medium}`}>{profile?.name ?? userNameMetadata}</p>
+          <p className={`${size.xs} ${muted.default}`}>{user.email ?? ''}</p>
           {profile?.slug ? (
-            <Link href={`/u/${profile.slug}`} className="text-accent text-xs hover:underline">
+            <Link href={`/u/${profile.slug}`} className={`text-accent ${size.xs} hover:underline`}>
               View Profile
             </Link>
           ) : null}
         </div>
       </div>
 
-      <nav className="space-y-2">
+      <nav className={`${spaceY.compact}`}>
         {navigation.map((item) => (
           <Link key={item.name} href={item.href}>
-            <Button variant="ghost" className="w-full justify-start text-sm">
-              <item.icon className="mr-2 h-4 w-4" />
+            <Button variant="ghost" className={`w-full justify-start ${size.sm}`}>
+              <item.icon className={`${marginRight.tight} h-4 w-4`} />
               {item.name}
             </Button>
           </Link>

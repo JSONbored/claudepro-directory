@@ -1,15 +1,12 @@
 import { performance } from 'node:perf_hooks';
 
-import  { type Database } from '@heyclaude/database-types';
-import { transformSkillToMarkdown } from '@heyclaude/web-runtime/transformers/skill-to-md';
+import { transformSkillToMarkdown, type SkillRow } from '@heyclaude/web-runtime/transformers/skill-to-md';
 import archiver from 'archiver';
 
-import { computeHash, hasHashChanged, setHash } from '../toolkit/cache.js';
-import { ensureEnvVars } from '../toolkit/env.js';
-import { logger } from '../toolkit/logger.js';
-import { createServiceRoleClient, DEFAULT_SUPABASE_URL } from '../toolkit/supabase.js';
-
-type SkillRow = Database['public']['Tables']['content']['Row'] & { category: 'skills' };
+import { computeHash, hasHashChanged, setHash } from '../toolkit/cache.ts';
+import { ensureEnvVars } from '../toolkit/env.ts';
+import { logger } from '../toolkit/logger.ts';
+import { createServiceRoleClient, DEFAULT_SUPABASE_URL } from '../toolkit/supabase.ts';
 
 const CONCURRENCY = 5;
 const FIXED_DATE = new Date('2024-01-01T00:00:00.000Z');

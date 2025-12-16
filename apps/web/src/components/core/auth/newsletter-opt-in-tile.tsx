@@ -5,6 +5,7 @@ import { type CheckedState } from '@radix-ui/react-checkbox';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import { useId } from 'react';
+import { gap, paddingX, paddingY } from "@heyclaude/web-runtime/design-system";
 
 interface NewsletterOptInTileProps {
   badgePrefix?: string;
@@ -70,14 +71,14 @@ export function NewsletterOptInTile({
         'group relative w-full overflow-hidden rounded-2xl border p-6 text-left transition-all duration-300 cursor-pointer',
         'from-card/80 via-card/60 to-card/30 bg-linear-to-br backdrop-blur-xl',
         checked
-          ? 'border-accent/70 shadow-[0_10px_40px_-20px_rgba(255,138,76,0.8)]'
-          : 'hover:border-accent/40 border-white/10 hover:shadow-[0_10px_40px_-20px_rgba(255,138,76,0.6)]'
+          ? 'border-accent/70 shadow-shadow-glow-orange-large'
+          : 'hover:border-accent/40 border-white/10 hover:shadow-shadow-glow-orange-large-hover'
       )}
     >
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-col gap-3">
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white/90">
+      <div className={`flex flex-col ${gap.comfortable}`}>
+        <div className={`flex flex-col ${gap.compact}`}>
+          <div className={`flex flex-wrap items-center ${gap.compact}`}>
+            <span className={`inline-flex items-center rounded-full bg-white/10 ${paddingX.compact} ${paddingY.micro} text-xs font-semibold text-white/90`}>
               {badgeLabel}
             </span>
           </div>
@@ -86,10 +87,10 @@ export function NewsletterOptInTile({
           </div>
         </div>
 
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className={`flex flex-col ${gap.tight} sm:flex-row sm:items-center sm:justify-between`}>
           <label
             htmlFor={checkboxId}
-            className="text-foreground flex cursor-pointer items-center gap-3 text-sm font-medium"
+            className={`text-foreground flex cursor-pointer items-center ${gap.compact} text-sm font-medium`}
             onClick={(event) => event.stopPropagation()}
           >
             <Checkbox

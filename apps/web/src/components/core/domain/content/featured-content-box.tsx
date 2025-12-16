@@ -16,7 +16,6 @@ import {
 } from '@heyclaude/web-runtime/types/component.types';
 import {
   cn,
-  UI_CLASSES,
   Alert,
   AlertDescription,
   AlertTitle,
@@ -25,7 +24,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
-import { COLORS } from '@heyclaude/web-runtime/design-tokens';
+import { between, iconSize, gap, cluster, marginY, marginBottom, spaceY, marginLeft, paddingTop, marginTop, paddingLeft, padding, muted } from '@heyclaude/web-runtime/design-system';
+// COLORS removed - using direct Tailwind utilities
 import { useCallback, useState } from 'react';
 
 export type AccordionVariant = AccordionProps & {
@@ -125,15 +125,15 @@ function AccordionBox(props: AccordionVariant) {
   );
 
   return (
-    <section className="my-8" aria-label={title || 'Accordion section'}>
+    <section className={`${marginY.relaxed}`} aria-label={title || 'Accordion section'}>
       {title ? (
-        <div className="mb-6">
-          <h3 className="mb-2 text-xl font-bold">{title}</h3>
-          {description ? <p className="text-muted-foreground">{description}</p> : null}
+        <div className={`${marginBottom.comfortable}`}>
+          <h3 className={`${marginBottom.compact} text-xl font-bold`}>{title}</h3>
+          {description ? <p className={muted.default}>{description}</p> : null}
         </div>
       ) : null}
 
-      <div className="space-y-2">
+      <div className={`${spaceY.compact}`}>
         {validItems.map((item, index) => (
           <Card
             key={`accordion-item-${index}-${item.title}`}
@@ -148,17 +148,17 @@ function AccordionBox(props: AccordionVariant) {
               aria-expanded={openItems.has(index)}
             >
               <CardHeader className="hover:bg-muted/30 transition-colors">
-                <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} itemProp="name">
+                <CardTitle className={between.center} itemProp="name">
                   <span>{item.title}</span>
-                  <div className="ml-4 shrink-0">
+                  <div className={`${marginLeft.default} shrink-0`}>
                     {openItems.has(index) ? (
                       <ChevronUp
-                        className={`${UI_CLASSES.ICON_SM} text-muted-foreground transition-transform`}
+                        className={cn(iconSize.sm, muted.default, 'transition-transform')}
                         aria-hidden="true"
                       />
                     ) : (
                       <ChevronDown
-                        className={`${UI_CLASSES.ICON_SM} text-muted-foreground transition-transform`}
+                        className={cn(iconSize.sm, muted.default, 'transition-transform')}
                         aria-hidden="true"
                       />
                     )}
@@ -168,7 +168,7 @@ function AccordionBox(props: AccordionVariant) {
             </button>
 
             {openItems.has(index) && (
-              <CardContent className="pt-0" itemScope itemType="https://schema.org/Answer">
+              <CardContent className={`${paddingTop.default}`} itemScope itemType="https://schema.org/Answer">
                 <div itemProp="text">{item.content}</div>
               </CardContent>
             )}
@@ -204,26 +204,26 @@ function FAQBox(props: FAQVariant) {
   }
 
   return (
-    <section className="my-8 space-y-6">
-      <div className="mb-6">
-        <h2 className="mb-2 text-2xl font-bold">{title}</h2>
-        {description ? <p className="text-muted-foreground">{description}</p> : null}
+    <section className={`${marginY.relaxed} ${spaceY.relaxed}`}>
+      <div className={`${marginBottom.comfortable}`}>
+        <h2 className={`${marginBottom.compact} text-2xl font-bold`}>{title}</h2>
+        {description ? <p className={muted.default}>{description}</p> : null}
       </div>
 
-      <div className="space-y-4">
+      <div className={`${spaceY.comfortable}`}>
         {validQuestions.map((faq) => (
           <Card key={faq.question} className="border-border bg-code/50 border backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className="flex items-start gap-3 text-lg font-semibold">
-                <div className="bg-primary/10 mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
+              <CardTitle className={`flex items-start ${gap.compact} text-lg font-semibold`}>
+                <div className={cn('bg-primary/10', marginTop['4.5'], 'flex h-6 w-6 shrink-0 items-center justify-center rounded-full')}>
                   <span className="text-primary text-sm font-bold">Q</span>
                 </div>
                 {faq.question}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="pl-9">
-                <div className="text-muted-foreground leading-relaxed">{faq.answer}</div>
+              <div className={`${paddingLeft.default}`}>
+                <div className={cn(muted.default, 'leading-relaxed')}>{faq.answer}</div>
               </div>
             </CardContent>
           </Card>
@@ -249,58 +249,60 @@ function InfoBoxComponent(props: InfoBoxVariant) {
 
   const currentVariant = variant || 'info';
 
-  // Map variant to semantic color tokens
-  const colorMap = {
+  // Map variant to Tailwind utility classes (NO inline styles)
+  const variantClasses = {
     info: {
-      border: COLORS.semantic.info.dark.border,
-      background: COLORS.semantic.info.dark.background,
-      icon: COLORS.semantic.info.dark.text,
+      borderClass: 'border-color-info-border',
+      bgClass: 'bg-color-info-bg',
+      iconClass: 'text-color-info',
     },
     warning: {
-      border: COLORS.semantic.warning.dark.border,
-      background: COLORS.semantic.warning.dark.background,
-      icon: COLORS.semantic.warning.dark.text,
+      borderClass: 'border-color-warning-border',
+      bgClass: 'bg-color-warning-bg',
+      iconClass: 'text-color-warning',
     },
     success: {
-      border: COLORS.semantic.success.dark.border,
-      background: COLORS.semantic.success.dark.background,
-      icon: COLORS.semantic.success.dark.text,
+      borderClass: 'border-color-success-border',
+      bgClass: 'bg-color-success-bg',
+      iconClass: 'text-color-success',
     },
     error: {
-      border: COLORS.semantic.error.dark.border,
-      background: COLORS.semantic.error.dark.background,
-      icon: COLORS.semantic.error.dark.text,
+      borderClass: 'border-color-error-border',
+      bgClass: 'bg-color-error-bg',
+      iconClass: 'text-color-error',
     },
   } as const;
 
-  const colors = colorMap[currentVariant];
+  const classes = variantClasses[currentVariant];
 
   const iconMap: Record<'error' | 'info' | 'success' | 'warning', React.ReactElement> = {
-    info: <Info className={UI_CLASSES.ICON_MD} style={{ color: colorMap.info.icon }} />,
-    warning: <AlertTriangle className={UI_CLASSES.ICON_MD} style={{ color: colorMap.warning.icon }} />,
-    success: <CheckCircle className={UI_CLASSES.ICON_MD} style={{ color: colorMap.success.icon }} />,
-    error: <AlertTriangle className={UI_CLASSES.ICON_MD} style={{ color: colorMap.error.icon }} />,
+    info: <Info className={cn(iconSize.md, variantClasses.info.iconClass)} />,
+    warning: <AlertTriangle className={cn(iconSize.md, variantClasses.warning.iconClass)} />,
+    success: <CheckCircle className={cn(iconSize.md, variantClasses.success.iconClass)} />,
+    error: <AlertTriangle className={cn(iconSize.md, variantClasses.error.iconClass)} />,
   };
 
   return (
     <div
       itemScope
       itemType="https://schema.org/Note"
-      className="my-6 rounded-r-lg border-l-4 p-6"
-      style={{
-        borderLeftColor: colors.border,
-        backgroundColor: colors.background,
-      }}
+      className={cn(
+        marginY.comfortable,
+        'rounded-r-lg border-l-4',
+        padding.comfortable,
+        classes.borderClass,
+        classes.bgClass
+      )}
     >
       {title ? (
-        <div className={cn(UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2, 'mb-3')}>
+        <div className={cn(cluster.compact, marginBottom.compact)}>
           {iconMap[currentVariant]}
           <h4 className="text-foreground font-semibold" itemProp="name">
             {title}
           </h4>
         </div>
       ) : null}
-      <div itemProp="text" className="text-muted-foreground leading-relaxed">
+      <div itemProp="text" className={cn(muted.default, 'leading-relaxed')}>
         {children}
       </div>
     </div>
@@ -325,16 +327,16 @@ function CalloutComponent(props: CalloutVariant) {
   const { type, title, children } = props;
 
   return (
-    <Alert className="my-6">
-      <div className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
-        {type === 'info' && <Info className={UI_CLASSES.ICON_SM} />}
-        {type === 'warning' && <AlertTriangle className={UI_CLASSES.ICON_SM} />}
-        {type === 'error' && <AlertTriangle className={UI_CLASSES.ICON_SM} />}
-        {type === 'success' && <CheckCircle className={UI_CLASSES.ICON_SM} />}
-        {type === 'tip' && <Zap className={UI_CLASSES.ICON_SM} />}
+    <Alert className={`${marginY.comfortable}`}>
+      <div className={`flex items-start ${gap.default}`}>
+        {type === 'info' && <Info className={iconSize.sm} />}
+        {type === 'warning' && <AlertTriangle className={iconSize.sm} />}
+        {type === 'error' && <AlertTriangle className={iconSize.sm} />}
+        {type === 'success' && <CheckCircle className={iconSize.sm} />}
+        {type === 'tip' && <Zap className={iconSize.sm} />}
         <div className="flex-1">
           {title ? <AlertTitle>{title}</AlertTitle> : null}
-          <AlertDescription className="mt-2">{children}</AlertDescription>
+          <AlertDescription className={`${marginTop.compact}`}>{children}</AlertDescription>
         </div>
       </div>
     </Alert>

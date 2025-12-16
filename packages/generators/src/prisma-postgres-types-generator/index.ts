@@ -12,10 +12,11 @@
 // CommonJS/ESM compatibility for @prisma/generator-helper
 import pkg from '@prisma/generator-helper';
 const { generatorHandler } = pkg;
-import { mkdir, writeFile } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
+import { mkdir, writeFile, readFile } from 'node:fs/promises';
+import { join } from 'node:path';
 
 import { generateCompositeTypes } from './composite-generator.ts';
+import { generateEnumSchemas } from './enum-generator.ts';
 import { generateFunctionTypes } from './function-generator.ts';
 import { introspectDatabase } from './introspect.ts';
 import type { GeneratorConfig } from './types.ts';
@@ -37,17 +38,17 @@ generatorHandler({
       // Parse generator configuration
       const config: GeneratorConfig = {
         output: generator.output?.value || './dist/prisma/postgres-types',
-        schema: (generator.config?.schema as string) || 'public',
-        generateTypes: generator.config?.generateTypes !== false,
-        generateZod: generator.config?.generateZod !== false,
-        includeFunctions: generator.config?.includeFunctions as string[] | undefined,
-        excludeFunctions: generator.config?.excludeFunctions as string[] | undefined,
+        schema: (generator.config?.['schema'] as string) || 'public',
+        generateTypes: (generator.config?.['generateTypes'] as boolean | undefined) !== false,
+        generateZod: (generator.config?.['generateZod'] as boolean | undefined) !== false,
+        ...(generator.config?.['includeFunctions'] ? { includeFunctions: generator.config['includeFunctions'] as string[] } : {}),
+        ...(generator.config?.['excludeFunctions'] ? { excludeFunctions: generator.config['excludeFunctions'] as string[] } : {}),
       };
 
       // Get database connection string from datasource
       // Prisma generator helper provides datasources in options.datasources or options.dmmf.datasources
-      const datasources = options.datasources || options.dmmf?.datasources || [];
-      const datasource = datasources[0];
+      const datasources = options.datasources || (options.dmmf as { datasources?: unknown[] } | undefined)?.datasources || [];
+      const datasource = datasources[0] as { url?: string | { value?: string; fromEnvVar?: string } } | undefined;
       if (!datasource) {
         throw new Error('No datasource found in Prisma schema');
       }
@@ -56,9 +57,10 @@ generatorHandler({
       // datasource.url can be a string or an object with .value property
       const urlValue = typeof datasource.url === 'string' 
         ? datasource.url 
-        : datasource.url?.value || datasource.url?.fromEnvVar 
-          ? process.env[datasource.url.fromEnvVar] || ''
-          : '';
+        : (datasource.url as { value?: string; fromEnvVar?: string })?.value || 
+          ((datasource.url as { fromEnvVar?: string })?.fromEnvVar 
+            ? process.env[(datasource.url as { fromEnvVar: string }).fromEnvVar] || ''
+            : '');
 
       let connectionString: string;
       if (urlValue.startsWith('env("') || urlValue.startsWith('env(\'')) {
@@ -126,12 +128,34 @@ generatorHandler({
       ? await generateCompositeTypes(metadata.compositeTypes, metadata.enums, config)
       : { files: {}, exports: [] };
 
+    // Generate enum schemas (matching prisma-zod-generator format but with correct database values)
+    // Output to prisma-zod-generator's location to replace/fix its incorrect enum schemas
+    const enumOutput = config.generateZod
+      ? generateEnumSchemas(metadata.enums, config)
+      : { files: {}, exports: [] };
+
     // Ensure output directories exist
     const outputDir = config.output;
     const functionsDir = join(outputDir, 'functions');
     const compositesDir = join(outputDir, 'composites');
     await mkdir(functionsDir, { recursive: true });
     await mkdir(compositesDir, { recursive: true });
+    
+    // Write enum schema files to prisma-zod-generator's enum schemas location
+    // This replaces the official package's incorrect enum schemas with correct ones
+    if (config.generateZod && enumOutput.files) {
+      // Determine the prisma-zod-generator output path from Prisma schema
+      // The official generator outputs to: packages/database-types/src/prisma/zod
+      // We need to output enum schemas to: packages/database-types/src/prisma/zod/schemas/enums/
+      const prismaZodOutput = join(process.cwd(), 'packages/database-types/src/prisma/zod');
+      const enumSchemasDir = join(prismaZodOutput, 'schemas', 'enums');
+      await mkdir(enumSchemasDir, { recursive: true });
+      
+      for (const [fileName, content] of Object.entries(enumOutput.files)) {
+        const filePath = join(enumSchemasDir, fileName);
+        await writeFile(filePath, content, 'utf-8');
+      }
+    }
 
     // Write function files
     for (const [functionName, content] of Object.entries(functionOutput.files)) {
@@ -155,6 +179,67 @@ generatorHandler({
     // Write main index file
     const mainIndex = generateMainIndexFile(functionOutput.exports, compositeOutput.exports);
     await writeFile(join(outputDir, 'index.ts'), mainIndex, 'utf-8');
+
+    // ============================================
+    // Post-Generation Fixes
+    // ============================================
+    // These files are deleted/overwritten by Prisma generators and need to be recreated/fixed
+    // This ensures @heyclaude/database-types/prisma exports work correctly
+    
+    // 1. Create/update packages/database-types/src/prisma/index.ts barrel export
+    const prismaIndexPath = join(process.cwd(), 'packages/database-types/src/prisma/index.ts');
+    const prismaIndexContent = `/**
+ * Prisma Types Barrel Export
+ * 
+ * Central export point for all Prisma-generated types:
+ * - Enums (enum types and value objects)
+ * - Models (table types)
+ * - Client (PrismaClient and Prisma namespace)
+ * - Internal types (Prisma namespace types)
+ * 
+ * This file is manually maintained and re-exports from Prisma-generated files.
+ * Prisma generates: client.ts, browser.ts, enums.ts, models.ts, etc.
+ * This index file provides a single import point: @heyclaude/database-types/prisma
+ * 
+ * NOTE: This file is recreated automatically after \`prisma generate\` runs.
+ */
+
+// Re-export all enums (types and value objects)
+export * from './enums.ts';
+
+// Re-export all model types
+export * from './models.ts';
+
+// Re-export Prisma namespace and client types
+export type { Prisma } from './client.ts';
+export { PrismaClient } from './client.ts';
+
+// Re-export internal Prisma namespace types (JsonValue, etc.)
+export type * from './internal/prismaNamespace.ts';
+
+// Re-export pjtg (prisma-json-types-generator namespace anchor)
+export * from './pjtg.ts';
+`;
+    await writeFile(prismaIndexPath, prismaIndexContent, 'utf-8');
+
+    // 2. Fix pjtg.ts import extension (prisma-json-types-generator generates without .ts extension)
+    // This must run AFTER json-types generator, so we're placed after it in schema.prisma
+    const pjtgPath = join(process.cwd(), 'packages/database-types/src/prisma/pjtg.ts');
+    try {
+      const pjtgContent = await readFile(pjtgPath, 'utf-8');
+      // Fix the import to use .ts extension for NodeNext module resolution
+      const fixedPjtgContent = pjtgContent.replace(
+        "import * as Prisma from './internal/prismaNamespace';",
+        "import * as Prisma from './internal/prismaNamespace.ts';"
+      );
+      
+      if (pjtgContent !== fixedPjtgContent) {
+        await writeFile(pjtgPath, fixedPjtgContent, 'utf-8');
+      }
+    } catch (error) {
+      // pjtg.ts might not exist in some configurations, that's okay
+      // This is a non-critical fix
+    }
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -210,7 +295,9 @@ function generateMainIndexFile(
     ' * ',
     ' * This module exports TypeScript types and Zod schemas for:',
     ' * - PostgreSQL functions (RPCs)',
+    ` *   (${functionExports.length} function${functionExports.length !== 1 ? 's' : ''})`,
     ' * - PostgreSQL composite types',
+    ` *   (${compositeExports.length} composite type${compositeExports.length !== 1 ? 's' : ''})`,
     ' */',
     '',
     '/**',

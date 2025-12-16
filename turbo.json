@@ -55,6 +55,12 @@
       "dependsOn": ["^build", "generate:service-worker:exec"]
     },
     "lint:build": {
+      "dependsOn": [
+        "@heyclaude/database-types#build",
+        "@heyclaude/shared-runtime#build",
+        "@heyclaude/data-layer#build",
+        "@heyclaude/web-runtime#build"
+      ],
       "outputs": [],
       "inputs": [
         "packages/web-runtime/src/data/**/*",
@@ -66,9 +72,32 @@
       ],
       "cache": true
     },
+    "prisma:generate:exec": {
+      "outputs": [
+        "packages/database-types/src/prisma/**",
+        "packages/database-types/src/postgres-types/**",
+        "packages/database-types/src/openapi/**",
+        "packages/database-types/docs/**"
+      ],
+      "inputs": [
+        "prisma/schema.prisma",
+        "package.json",
+        "pnpm-lock.yaml",
+        "scripts/post-prisma-generate.ts",
+        "packages/generators/src/prisma-postgres-types-generator/**/*"
+      ],
+      "cache": true
+    },
     "type-check": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["@heyclaude/database-types#build"],
       "outputs": [],
+      "inputs": [
+        "src/**/*.{ts,tsx}",
+        "tsconfig.json",
+        "package.json",
+        "!**/*.test.{ts,tsx}",
+        "!**/*.spec.{ts,tsx}"
+      ],
       "cache": true,
       "interactive": false
     },
@@ -99,9 +128,11 @@
     "generators:build": {
       "outputs": ["packages/generators/dist/**", "packages/generators/.tsbuildinfo"],
       "inputs": [
-        "packages/generators/src/**/*",
+        "packages/generators/src/**/*.{ts,tsx}",
         "packages/generators/tsconfig.json",
-        "packages/generators/package.json"
+        "packages/generators/package.json",
+        "!packages/generators/src/**/*.test.{ts,tsx}",
+        "!packages/generators/src/**/*.spec.{ts,tsx}"
       ],
       "cache": true,
       "dependsOn": [
@@ -113,7 +144,13 @@
     },
     "@heyclaude/web-runtime#build": {
       "outputs": ["dist/**", ".tsbuildinfo"],
-      "inputs": ["src/**/*", "tsconfig.json", "package.json"],
+      "inputs": [
+        "src/**/*.{ts,tsx}",
+        "tsconfig.json",
+        "package.json",
+        "!**/*.test.{ts,tsx}",
+        "!**/*.spec.{ts,tsx}"
+      ],
       "cache": true,
       "dependsOn": [
         "@heyclaude/database-types#build",
@@ -123,19 +160,39 @@
     },
     "@heyclaude/data-layer#build": {
       "outputs": ["dist/**", ".tsbuildinfo"],
-      "inputs": ["src/**/*", "tsconfig.json", "package.json"],
+      "inputs": [
+        "src/**/*.{ts,tsx}",
+        "tsconfig.json",
+        "package.json",
+        "!**/*.test.{ts,tsx}",
+        "!**/*.spec.{ts,tsx}"
+      ],
       "cache": true,
       "dependsOn": ["@heyclaude/database-types#build", "@heyclaude/shared-runtime#build"]
     },
     "@heyclaude/shared-runtime#build": {
       "outputs": ["dist/**", ".tsbuildinfo"],
-      "inputs": ["src/**/*", "tsconfig.json", "package.json"],
+      "inputs": [
+        "src/**/*.{ts,tsx}",
+        "tsconfig.json",
+        "package.json",
+        "!**/*.test.{ts,tsx}",
+        "!**/*.spec.{ts,tsx}"
+      ],
       "cache": true,
       "dependsOn": ["@heyclaude/database-types#build"]
     },
     "@heyclaude/database-types#build": {
+      "dependsOn": ["prisma:generate:exec"],
       "outputs": ["dist/**", ".tsbuildinfo"],
-      "inputs": ["src/**/*", "tsconfig.json", "package.json"],
+      "inputs": [
+        "src/**/*.{ts,tsx}",
+        "tsconfig.json",
+        "package.json",
+        "prisma/schema.prisma",
+        "!**/*.test.{ts,tsx}",
+        "!**/*.spec.{ts,tsx}"
+      ],
       "cache": true
     },
     "dev:exec": {
@@ -164,16 +221,6 @@
     "sync:db:full:exec": {
       "dependsOn": ["generators:build"],
       "cache": false,
-      "passThroughEnv": [
-        "SUPABASE_SERVICE_ROLE_KEY",
-        "NEXT_PUBLIC_SUPABASE_URL",
-        "SUPABASE_PROJECT_REF"
-      ]
-    },
-    "sync:db:types:exec": {
-      "dependsOn": ["generators:build"],
-      "outputs": ["packages/database-types/src/**/*"],
-      "cache": true,
       "passThroughEnv": [
         "SUPABASE_SERVICE_ROLE_KEY",
         "NEXT_PUBLIC_SUPABASE_URL",

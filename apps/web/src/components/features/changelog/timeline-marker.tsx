@@ -7,21 +7,18 @@
 
 'use client';
 
-import { type Database } from '@heyclaude/database-types';
+import type { changelogModel } from '@heyclaude/data-layer/prisma';
 import { ANIMATION_CONSTANTS } from '@heyclaude/web-runtime/ui';
 import { formatChangelogDateShort } from '@heyclaude/web-runtime/utils/changelog';
 import Link from 'next/link';
+import { marginBottom } from "@heyclaude/web-runtime/design-system";
 
 interface TimelineMarkerProps {
-  entry: Database['public']['Tables']['changelog']['Row'];
+  entry: changelogModel;
   isActive: boolean;
   onClick?: (() => void) | undefined;
   targetPath: string;
 }
-
-// Sticky offset accounts for fixed header (64px) + padding (32px)
-// This matches the scroll-mt-24 on entry headers for proper alignment
-const TIMELINE_MARKER_STICKY_OFFSET = '96px';
 
 /**
  * Render a sticky timeline entry with a marker, connector, and link to a changelog item.
@@ -32,20 +29,20 @@ const TIMELINE_MARKER_STICKY_OFFSET = '96px';
  * - Connects to vertical timeline line
  * - Stays sticky until next entry scrolls into view
  *
- * @param entry - A changelog row from the public database schema used to render title and release date
+ * @param entry - A changelog row from Prisma schema used to render title and release date
  * @param isActive - Controls visual emphasis (z-index, text styles, and marker color) when the related content section is active
  * @param targetPath - Destination URL the marker links to
  * @param onClick - Optional click handler invoked when the link is activated
  * @returns A JSX element representing the timeline marker for the provided changelog entry
  *
  * @see formatChangelogDateShort
- * @see TIMELINE_MARKER_STICKY_OFFSET
+ * Sticky offset accounts for fixed header (64px) + padding (32px) = 96px
+ * This matches the scroll-mt-24 on entry headers for proper alignment
  */
 export function TimelineMarker({ entry, isActive, targetPath, onClick }: TimelineMarkerProps) {
   return (
     <div
-      className={`relative ${isActive ? 'z-20' : 'z-10'}`}
-      style={{ position: 'sticky', top: TIMELINE_MARKER_STICKY_OFFSET }}
+      className={`relative sticky top-24 ${isActive ? 'z-20' : 'z-10'}`}
     >
       {/* Horizontal connector line from marker dot to timeline - Brighter, more visible */}
       {/* Aligned with h2 title baseline (text-3xl ~30px, so baseline at ~28px) */}
@@ -71,15 +68,15 @@ export function TimelineMarker({ entry, isActive, targetPath, onClick }: Timelin
         {/* Title and date - Matches entry header structure exactly (h2 + date with mb-3 spacing) */}
         <div className="flex min-w-0 flex-col">
           <h3
-            className={`text-base leading-tight mb-3 ${isActive ? 'text-foreground font-semibold' : 'text-muted-foreground font-normal'} group-hover:text-foreground ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} line-clamp-2`}
+            className={`text-base leading-tight ${marginBottom.default} ${isActive ? 'text-foreground font-semibold' : 'text-muted-foreground font-normal'} group-hover:text-foreground ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} line-clamp-2`}
           >
             {entry.title}
           </h3>
           <time
-            dateTime={entry.release_date}
+            dateTime={entry.release_date instanceof Date ? entry.release_date.toISOString() : entry.release_date}
             className={`text-xs leading-tight text-muted-foreground ${isActive ? 'opacity-100' : 'opacity-60'}`}
           >
-            {formatChangelogDateShort(entry.release_date)}
+            {formatChangelogDateShort(entry.release_date instanceof Date ? entry.release_date : entry.release_date)}
           </time>
         </div>
       </Link>

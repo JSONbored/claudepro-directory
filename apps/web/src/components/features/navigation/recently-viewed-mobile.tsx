@@ -3,17 +3,18 @@
 import { useRecentlyViewed, getCategoryRoute, useLocalStorage } from '@heyclaude/web-runtime/hooks';
 import { Clock, Trash, X } from '@heyclaude/web-runtime/icons';
 import {
-  UI_CLASSES,
   Button,
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
+  cn,
 } from '@heyclaude/web-runtime/ui';
 import { useBoolean } from '@heyclaude/web-runtime/hooks';
 import Link from 'next/link';
 import { useEffect } from 'react';
+import { between, paddingX, paddingY, gap, spaceY, paddingBottom, padding, marginTop } from "@heyclaude/web-runtime/design-system";
 
 const DISMISS_KEY = 'heyclaude_recently_viewed_mobile_dismissed';
 
@@ -66,7 +67,7 @@ export function RecentlyViewedMobileTray() {
     <>
       <button
         type="button"
-        className="border-border/60 bg-card/90 fixed bottom-20 left-1/2 z-40 flex -translate-x-1/2 items-center gap-2 rounded-full border px-4 py-2 text-sm shadow-lg backdrop-blur md:hidden"
+        className={`border-border/60 bg-card/90 fixed bottom-20 left-1/2 z-40 flex -translate-x-1/2 items-center ${gap.tight} rounded-full border ${paddingX.default} ${paddingY.tight} text-sm shadow-lg backdrop-blur md:hidden`}
         onClick={setOpenTrue}
       >
         <Clock className="h-4 w-4" aria-hidden="true" />
@@ -74,29 +75,29 @@ export function RecentlyViewedMobileTray() {
       </button>
 
       <Sheet open={open} onOpenChange={(open) => open ? setOpenTrue() : setOpenFalse()}>
-        <SheetContent side="bottom" className="h-[80vh] overflow-y-auto px-0 md:hidden">
-          <SheetHeader className="px-6">
+        <SheetContent side="bottom" className={`h-[80vh] overflow-y-auto ${paddingX.default} md:hidden`}>
+          <SheetHeader className={`${paddingX.comfortable}`}>
             <SheetTitle>Recently Viewed</SheetTitle>
             <SheetDescription>Your locally saved browsing history.</SheetDescription>
           </SheetHeader>
-          <div className="space-y-4 px-6 pb-6">
-            <div className="text-muted-foreground flex items-center gap-2 text-sm">
-              <Button variant="ghost" size="sm" onClick={clearAll} className="gap-2">
+          <div className={`${spaceY.comfortable} ${paddingX.comfortable} ${paddingBottom.comfortable}`}>
+            <div className={`text-muted-foreground flex items-center ${gap.tight} text-sm`}>
+              <Button variant="ghost" size="sm" onClick={clearAll} className={`${gap.tight}`}>
                 <Trash className="h-4 w-4" aria-hidden="true" />
                 Clear all
               </Button>
-              <Button variant="ghost" size="sm" onClick={handleDismissForever} className="gap-2">
+              <Button variant="ghost" size="sm" onClick={handleDismissForever} className={`${gap.tight}`}>
                 <X className="h-4 w-4" aria-hidden="true" />
                 Don't show again
               </Button>
             </div>
-            <ul className="space-y-3">
+            <ul className={`${spaceY.default}`}>
               {sortedItems.map((item) => (
                 <li
                   key={`${item.category}-${item.slug}`}
-                  className="border-border/50 rounded-xl border p-4"
+                  className={`border-border/50 rounded-xl border ${padding.default}`}
                 >
-                  <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+                  <div className={between.center}>
                     <div>
                       <p className="text-muted-foreground text-xs uppercase">{item.category}</p>
                       <Link
@@ -117,14 +118,14 @@ export function RecentlyViewedMobileTray() {
                     </button>
                   </div>
                   {item.description ? (
-                    <p className="text-muted-foreground mt-2 line-clamp-3 text-sm">
+                    <p className={`text-muted-foreground ${marginTop.compact} line-clamp-3 text-sm`}>
                       {item.description}
                     </p>
                   ) : null}
                   {item.tags && item.tags.length > 0 ? (
-                    <div className="text-muted-foreground mt-3 flex flex-wrap gap-2 text-xs">
+                    <div className={`text-muted-foreground ${marginTop.default} flex flex-wrap ${gap.tight} text-xs`}>
                       {item.tags.slice(0, 3).map((tag) => (
-                        <span key={tag} className="bg-muted rounded-full px-2 py-0.5">
+                        <span key={tag} className={cn('bg-muted rounded-full', paddingX.tight, paddingY['1.5'])}>
                           #{tag}
                         </span>
                       ))}

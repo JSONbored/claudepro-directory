@@ -15,7 +15,7 @@
 import { type Transition } from 'motion/react';
 
 import { SPRING } from '../animations/spring.ts';
-import { COLORS } from '../../design-tokens/index.ts';
+// COLORS removed - using CSS variables for dynamic Framer Motion animations
 
 /**
  * Spring transitions for icon button interactions
@@ -34,7 +34,7 @@ export const ICON_BUTTON = {
    * Uses COLORS tokens for consistent brand color (matches var(--claude-orange))
    */
   active: {
-    color: COLORS.semantic.primary.dark.base, // Brand orange - matches var(--claude-orange) = oklch(74% 0.2 35)
+    color: 'var(--claude-orange)', // Brand orange - matches oklch(74% 0.2 35)
     scale: 1.05,
     transition: SPRING_SMOOTH,
   },

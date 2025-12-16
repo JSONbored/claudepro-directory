@@ -16,8 +16,7 @@
 
 import { CheckCircle } from '@heyclaude/web-runtime/icons';
 import { cn } from '@heyclaude/web-runtime/ui';
-import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/design-tokens';
-import { SPRING, DURATION } from '@heyclaude/web-runtime/design-system';
+import { SPRING, DURATION, marginBottom, padding, gap, paddingX, paddingY, marginLeft, marginX, marginTop, muted, size, iconSize, between } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion, useAnimateScoped } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import { useEffect, useRef } from 'react';
@@ -83,7 +82,11 @@ export function ProgressIndicator({
         // Find the checkmark element and animate it directly
         const checkIcon = stepIndicatorsRef.current.querySelector(
           `[data-step-id="${newlyCompletedStep.id}"] .check-icon`
-        ) as HTMLElement;
+        );
+        // Type narrowing: element is HTMLElement from querySelector
+        if (!(checkIcon instanceof HTMLElement)) {
+          return;
+        }
         
         if (checkIcon) {
           animate(checkIcon, 
@@ -104,30 +107,22 @@ export function ProgressIndicator({
         <motion.div
           initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -10 }}
           animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-          className="border-border/50 bg-background-secondary mb-4 flex items-center justify-between rounded-lg border p-3"
-          style={{
-            borderColor: TOKENS.colors.border.light,
-            backgroundColor: TOKENS.colors.background.secondary,
-          }}
+          className={cn('border-color-border-light bg-card', marginBottom.default, between.center, 'rounded-lg border', padding.compact)}
         >
-          <span className="text-muted-foreground text-sm">Form Completion</span>
-          <div className="flex items-center gap-2">
+          <span className={cn(muted.default, size.sm)}>Form Completion</span>
+          <div className={`flex items-center ${gap.tight}`}>
             <div className="bg-background h-2 w-32 overflow-hidden rounded-full">
               <motion.div
-                className="h-full rounded-full"
+                className={cn(
+                  'h-full rounded-full',
+                  qualityScore >= 90 ? 'bg-color-success' :
+                  qualityScore >= 70 ? 'bg-color-accent-primary' :
+                  qualityScore >= 40 ? 'bg-color-warning' :
+                  'bg-color-error'
+                )}
                 initial={{ width: 0 }}
                 animate={{ width: `${qualityScore}%` }}
                 transition={{ duration: DURATION.moderate, ease: 'easeOut' }}
-                style={{
-                  backgroundColor:
-                    qualityScore >= 90
-                      ? TOKENS.colors.success.text
-                      : qualityScore >= 70
-                        ? TOKENS.colors.accent.primary
-                        : qualityScore >= 40
-                          ? TOKENS.colors.warning.text
-                          : TOKENS.colors.error.text,
-                }}
               />
             </div>
             <span className="min-w-[3ch] text-right text-sm font-semibold">{qualityScore}%</span>
@@ -136,16 +131,12 @@ export function ProgressIndicator({
       )}
 
       {/* Progress Bar */}
-      <div className="bg-background relative mb-8 h-1 w-full overflow-hidden rounded-full">
+      <div className={`bg-background relative ${marginBottom.relaxed} h-1 w-full overflow-hidden rounded-full`}>
         <motion.div
-          className="absolute top-0 left-0 h-full rounded-full"
+          className="absolute top-0 left-0 h-full rounded-full bg-color-accent-primary shadow-glow-orange"
           initial={{ width: 0 }}
           animate={{ width: `${progressPercentage}%` }}
           transition={SPRING.smooth}
-          style={{
-            backgroundColor: TOKENS.colors.accent.primary,
-            boxShadow: TOKENS.shadows.glow.orange,
-          }}
         />
       </div>
 
@@ -162,20 +153,16 @@ export function ProgressIndicator({
                 'group relative flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all',
                 step.isCurrent && 'scale-110',
                 step.isAccessible && 'cursor-pointer hover:scale-110',
-                !step.isAccessible && 'cursor-not-allowed opacity-50'
-              )}
-              style={{
-                borderColor:
-                  step.isCompleted || step.isCurrent
-                    ? TOKENS.colors.accent.primary
-                    : TOKENS.colors.border.default,
-                backgroundColor: step.isCompleted
-                  ? TOKENS.colors.accent.primary
+                !step.isAccessible && 'cursor-not-allowed opacity-50',
+                step.isCompleted || step.isCurrent
+                  ? 'border-color-accent-primary'
+                  : 'border-border',
+                step.isCompleted
+                  ? 'bg-color-accent-primary'
                   : step.isCurrent
-                    ? TOKENS.colors.background.elevated
-                    : TOKENS.colors.background.secondary,
-                boxShadow: step.isCurrent ? TOKENS.shadows.glow.orange : 'none',
-              }}
+                    ? 'bg-color-bg-quaternary shadow-glow-orange'
+                    : 'bg-card'
+              )}
             >
               {step.isCompleted ? (
                 <motion.div
@@ -192,13 +179,13 @@ export function ProgressIndicator({
                   }
                   transition={SPRING.bouncy}
                 >
-                  <CheckCircle className="check-icon h-5 w-5 text-white" />
+                  <CheckCircle className={cn('check-icon', iconSize.md, 'text-white')} />
                 </motion.div>
               ) : (
                 <span
                   className={cn(
                     'text-sm font-semibold',
-                    step.isCurrent ? 'text-accent-primary' : 'text-muted-foreground'
+                    step.isCurrent ? 'text-accent-primary' : muted.default
                   )}
                 >
                   {step.number}
@@ -208,12 +195,13 @@ export function ProgressIndicator({
               {/* Tooltip on hover */}
               {step.description && step.isAccessible ? (
                 <div
-                  className="pointer-events-none absolute -top-12 left-1/2 z-50 -translate-x-1/2 rounded-md px-3 py-1.5 text-xs whitespace-nowrap opacity-0 transition-opacity group-hover:opacity-100"
-                  style={{
-                    backgroundColor: TOKENS.colors.background.elevated,
-                    border: `1px solid ${TOKENS.colors.border.medium}`,
-                    boxShadow: TOKENS.shadows.lg,
-                  }}
+                  className={cn(
+                    'pointer-events-none absolute -top-12 left-1/2 z-50 -translate-x-1/2 rounded-md',
+                    paddingX.compact,
+                    paddingY['1.5'],
+                    'text-xs whitespace-nowrap opacity-0 transition-opacity group-hover:opacity-100',
+                    'bg-color-bg-quaternary border border-color-border-medium shadow-lg'
+                  )}
                 >
                   {step.description}
                 </div>
@@ -221,7 +209,7 @@ export function ProgressIndicator({
             </button>
 
             {/* Label */}
-            <div className="ml-3 flex-1">
+            <div className={`${marginLeft.compact} flex-1`}>
               <div
                 className={cn(
                   'text-sm font-medium',
@@ -234,22 +222,15 @@ export function ProgressIndicator({
 
             {/* Connector Line */}
             {index < steps.length - 1 && (
-              <div className="relative mx-4 h-0.5 flex-1">
-                <div
-                  className="absolute inset-0 rounded-full"
-                  style={{ backgroundColor: TOKENS.colors.border.default }}
-                />
+              <div className={`relative ${marginX.default} h-0.5 flex-1`}>
+                <div className="absolute inset-0 rounded-full bg-border" />
                 <motion.div
-                  className="absolute inset-0 rounded-full"
+                  className="absolute inset-0 rounded-full bg-color-accent-primary origin-left"
                   initial={{ scaleX: 0 }}
                   animate={{
                     scaleX: step.isCompleted ? 1 : 0,
                   }}
                   transition={SPRING.smooth}
-                  style={{
-                    backgroundColor: TOKENS.colors.accent.primary,
-                    transformOrigin: 'left',
-                  }}
                 />
               </div>
             )}
@@ -258,7 +239,7 @@ export function ProgressIndicator({
       </div>
 
       {/* Step Indicators - Mobile (Compact) */}
-      <div className="flex items-center justify-center gap-2 md:hidden">
+      <div className={`flex items-center justify-center ${gap.tight} md:hidden`}>
         {steps.map((step) => (
           <button
             key={step.id}
@@ -269,20 +250,16 @@ export function ProgressIndicator({
               'flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all',
               step.isCurrent && 'scale-125',
               step.isAccessible && 'cursor-pointer',
-              !step.isAccessible && 'cursor-not-allowed opacity-50'
-            )}
-            style={{
-              borderColor:
-                step.isCompleted || step.isCurrent
-                  ? TOKENS.colors.accent.primary
-                  : TOKENS.colors.border.default,
-              backgroundColor: step.isCompleted
-                ? TOKENS.colors.accent.primary
+              !step.isAccessible && 'cursor-not-allowed opacity-50',
+              step.isCompleted || step.isCurrent
+                ? 'border-color-accent-primary'
+                : 'border-border',
+              step.isCompleted
+                ? 'bg-color-accent-primary'
                 : step.isCurrent
-                  ? TOKENS.colors.background.elevated
-                  : TOKENS.colors.background.secondary,
-              boxShadow: step.isCurrent ? TOKENS.shadows.glow.orange : 'none',
-            }}
+                  ? 'bg-color-bg-quaternary shadow-glow-orange'
+                  : 'bg-card'
+            )}
             aria-label={step.label}
             title={step.label}
           >
@@ -303,11 +280,11 @@ export function ProgressIndicator({
       </div>
 
       {/* Current Step Label - Mobile Only */}
-      <div className="mt-4 text-center md:hidden">
+      <div className={`${marginTop.default} text-center md:hidden`}>
         <div className="text-foreground text-sm font-medium">
           {steps.find((s) => s.isCurrent)?.label || 'Step'}
         </div>
-        <div className="text-muted-foreground mt-1 text-xs">
+        <div className={`text-muted-foreground ${marginTop.tight} text-xs`}>
           Step {currentStep} of {steps.length}
         </div>
       </div>

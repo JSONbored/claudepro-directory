@@ -28,7 +28,7 @@ export function AnimatedCard({ children }: AnimatedCardProps) {
       whileHover={shouldReduceMotion ? {} : MICROINTERACTIONS.card.hover}
       whileTap={shouldReduceMotion ? {} : MICROINTERACTIONS.card.tap}
       transition={MICROINTERACTIONS.card.transition}
-      className="block"
+      className={`block`}
     >
       {children}
     </motion.div>

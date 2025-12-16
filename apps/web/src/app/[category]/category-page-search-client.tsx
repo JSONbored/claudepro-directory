@@ -9,7 +9,7 @@
  * @module apps/web/src/app/[category]/category-page-search-client
  */
 
-import { type Database } from '@heyclaude/database-types';
+import type { content_category } from '@heyclaude/data-layer/prisma';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import {
   SearchBar,
@@ -20,9 +20,10 @@ import {
 } from '@heyclaude/web-runtime/search';
 import { type FilterState } from '@heyclaude/web-runtime/types/component.types';
 import { usePathname } from 'next/navigation';
-import { Suspense, useCallback } from 'react';
+import { Suspense, useCallback, useMemo } from 'react';
 
 import { useAuthModal } from '@/src/hooks/use-auth-modal';
+import { spaceY, padding } from "@heyclaude/web-runtime/design-system";
 
 export interface CategoryPageSearchClientProps {
   /** Available authors for filters */
@@ -32,19 +33,16 @@ export interface CategoryPageSearchClientProps {
   /** Available tags for filters */
   availableTags?: readonly string[];
   /** Category for this page */
-  category: Database['public']['Enums']['content_category'];
+  category: content_category;
   /** Search placeholder text */
   searchPlaceholder: string;
 }
 
 /**
  * CategoryPageSearchClient - Unified search for category pages
- * @param root0
- * @param root0.category
- * @param root0.searchPlaceholder
- * @param root0.availableTags
- * @param root0.availableAuthors
- * @param root0.availableCategories
+ * 
+ * React Compiler automatically handles memoization (reactCompiler: true in next.config.mjs).
+ * We only use useMemo/useCallback here to ensure stable prop references for child components.
  */
 export function CategoryPageSearchClient({
   availableAuthors = [],
@@ -56,11 +54,24 @@ export function CategoryPageSearchClient({
   const pulse = usePulse();
   const { openAuthModal } = useAuthModal();
   const pathname = usePathname();
-  const searchFunction = useSearchAPI({
-    apiPath: '/api/search',
-    limit: 50,
-    offset: 0,
-  });
+  
+  // OPTIMIZATION: Memoize prop arrays to ensure stable references for child components
+  // React Compiler handles component memoization automatically
+  const stableAuthors = useMemo(() => availableAuthors, [availableAuthors]);
+  const stableCategories = useMemo(() => availableCategories, [availableCategories]);
+  const stableTags = useMemo(() => availableTags, [availableTags]);
+  
+  // OPTIMIZATION: Memoize search API configuration to prevent recreation
+  const searchApiConfig = useMemo(
+    () => ({
+      apiPath: '/api/search',
+      limit: 50,
+      offset: 0,
+    }),
+    []
+  );
+  
+  const searchFunction = useSearchAPI(searchApiConfig);
 
   // Handle search with analytics
   const handleSearch = useCallback(
@@ -103,27 +114,30 @@ export function CategoryPageSearchClient({
     });
   }, [openAuthModal, pathname]);
 
+  // OPTIMIZATION: Memoize defaultFilters to ensure stable reference
+  const defaultFilters = useMemo(() => ({ category }), [category]);
+
   return (
-    <SearchProvider defaultFilters={{ category }} defaultQuery="" onSearch={handleSearch}>
-      <div className="space-y-6">
+    <SearchProvider defaultFilters={defaultFilters} defaultQuery="" onSearch={handleSearch}>
+      <div className={`${spaceY.relaxed}`}>
         {/* Search Bar */}
         <SearchBar placeholder={searchPlaceholder} size="lg" variant="default" />
 
         {/* Search Filters */}
         <Suspense
-          fallback={<div className="text-muted-foreground p-4 text-center">Loading filters...</div>}
+          fallback={<div className={`text-muted-foreground ${padding.default} text-center`}>Loading filters...</div>}
         >
           <SearchFilters
-            availableAuthors={availableAuthors}
-            availableCategories={availableCategories}
-            availableTags={availableTags}
+            availableAuthors={stableAuthors}
+            availableCategories={stableCategories}
+            availableTags={stableTags}
           />
         </Suspense>
 
         {/* Search Results */}
         <Suspense
           fallback={
-            <div className="text-muted-foreground p-8 text-center">Loading search results...</div>
+            <div className={`text-muted-foreground ${padding.relaxed} text-center`}>Loading search results...</div>
           }
         >
           <SearchResults showActions showCategory onAuthRequired={handleAuthRequired} />

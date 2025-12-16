@@ -1,4 +1,5 @@
-import { type changelog_category } from '@heyclaude/data-layer/prisma';
+import type { changelog_category } from '@heyclaude/data-layer/prisma';
+import { ChangelogCategory } from '@heyclaude/data-layer/prisma';
 import { z } from 'zod';
 
 import { normalizeError } from '../errors.ts';
@@ -14,15 +15,8 @@ const changeItemSchemaTransformed = changeItemSchema.transform((item) =>
   typeof item === 'string' ? { content: item } : item
 );
 
-// Prisma enum values for validation
-const VALID_CHANGELOG_CATEGORIES: readonly changelog_category[] = [
-  'Added',
-  'Changed',
-  'Deprecated',
-  'Fixed',
-  'Removed',
-  'Security',
-] as const;
+// Use Prisma enum object for validation (ensures sync with database)
+const VALID_CHANGELOG_CATEGORIES = Object.values(ChangelogCategory) as readonly changelog_category[];
 
 const changesSchema = z
   .object({

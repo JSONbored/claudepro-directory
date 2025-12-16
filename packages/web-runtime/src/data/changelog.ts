@@ -1,7 +1,10 @@
 import 'server-only';
 import { ChangelogService } from '@heyclaude/data-layer';
-import { type changelog, type changelog_category, type Prisma } from '@heyclaude/data-layer/prisma';
-import type { ChangelogOverviewEntry, GetChangelogOverviewReturns } from '@heyclaude/database-types/postgres-types';
+import type { changelogModel, changelog_category, JsonValue } from '@heyclaude/data-layer/prisma';
+import type {
+  GetChangelogOverviewReturns,
+  ChangelogOverviewEntry,
+} from '@heyclaude/database-types/postgres-types';
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { normalizeError } from '../errors.ts';
@@ -59,8 +62,8 @@ export async function getChangelogOverview(
 
   const { category, featuredOnly = false, limit = 50, offset = 0, publishedOnly = true } = options;
 
-  // Configure cache - use 'hours' profile for changelog overview (changes hourly)
-  cacheLife('hours'); // 1hr stale, 15min revalidate, 1 day expire
+  // Configure cache - use 'static' profile for optimal SEO (1 day stale, 6hr revalidate, 30 days expire)
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
   cacheTag(CHANGELOG_TAG);
   if (category) {
     cacheTag(`changelog-category-${category}`);
@@ -117,11 +120,11 @@ export async function getChangelogOverview(
  * Changelog entries change periodically, so we use the 'hours' cacheLife profile.
  * @param slug
  */
-export async function getChangelogEntryBySlug(slug: string): Promise<changelog | null> {
+export async function getChangelogEntryBySlug(slug: string): Promise<changelogModel | null> {
   'use cache';
 
-  // Configure cache - use 'hours' profile for changelog entries (changes every 2 hours)
-  cacheLife('hours'); // 1hr stale, 15min revalidate, 1 day expire
+  // Configure cache - use 'static' profile for optimal SEO (1 day stale, 6hr revalidate, 30 days expire)
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
   cacheTag(CHANGELOG_TAG);
   cacheTag(`changelog-${slug}`);
 
@@ -148,9 +151,9 @@ export async function getChangelogEntryBySlug(slug: string): Promise<changelog |
     // Prisma expects: { created_at: Date, updated_at: Date, release_date: Date, ... }
     // Also: contributors and keywords are String[] in Prisma (not nullable)
     // Note: RPC return type (changelog_detail_entry) doesn't have contributors field
-    const normalizedEntry: changelog = {
+    const normalizedEntry: changelogModel = {
       canonical_url: null,
-      changes: (entry.changes ?? {}) as Prisma.JsonValue,
+      changes: (entry.changes ?? {}) as JsonValue,
       commit_count: null,
       content: entry.content ?? '',
       contributors: [], // RPC doesn't return contributors, use empty array
@@ -161,7 +164,7 @@ export async function getChangelogEntryBySlug(slug: string): Promise<changelog |
       id: entry.id ?? '',
       json_ld: null,
       keywords: Array.isArray(entry.keywords) ? entry.keywords : [],
-      metadata: (entry.metadata ?? null) as Prisma.JsonValue | null,
+      metadata: (entry.metadata ?? null) as JsonValue | null,
       og_image: null,
       og_type: null,
       published: entry.published ?? false,
@@ -217,8 +220,8 @@ export async function getChangelog(): Promise<{
 }
 
 function normalizeChangelogEntry(
-  entry: changelog | ChangelogOverviewEntry
-): Omit<changelog, 'contributors' | 'keywords'> & {
+  entry: changelogModel | ChangelogOverviewEntry
+): Omit<changelogModel, 'contributors' | 'keywords'> & {
   contributors: string[];
   keywords: string[];
 } {
@@ -245,10 +248,10 @@ function normalizeChangelogEntry(
     'contributors' in entry && Array.isArray(entry.contributors) ? entry.contributors : [];
   const keywords = Array.isArray(entry.keywords) ? entry.keywords : [];
 
-  const fullEntry: changelog = {
+  const fullEntry: changelogModel = {
     ...entry,
     canonical_url: null,
-    changes: (entry.changes ?? {}) as Prisma.JsonValue,
+    changes: (entry.changes ?? {}) as JsonValue,
     commit_count: null,
     content: entry.content ?? '',
     contributors,
@@ -266,7 +269,7 @@ function normalizeChangelogEntry(
     source: null,
     twitter_card: null,
     updated_at,
-  } as changelog;
+  } as changelogModel;
 
   return {
     ...fullEntry,
@@ -277,7 +280,7 @@ function normalizeChangelogEntry(
 
 export async function getAllChangelogEntries(): Promise<
   Array<
-    Omit<changelog, 'contributors' | 'keywords'> & {
+    Omit<changelogModel, 'contributors' | 'keywords'> & {
       contributors: string[];
       keywords: string[];
     }
@@ -296,7 +299,7 @@ export async function getAllChangelogEntries(): Promise<
 
 export async function getRecentChangelogEntries(limit = 5): Promise<
   Array<
-    Omit<changelog, 'contributors' | 'keywords'> & {
+    Omit<changelogModel, 'contributors' | 'keywords'> & {
       contributors: string[];
       keywords: string[];
     }
@@ -313,7 +316,7 @@ export async function getRecentChangelogEntries(limit = 5): Promise<
 
 export async function getChangelogEntriesByCategory(category: changelog_category): Promise<
   Array<
-    Omit<changelog, 'contributors' | 'keywords'> & {
+    Omit<changelogModel, 'contributors' | 'keywords'> & {
       contributors: string[];
       keywords: string[];
     }
@@ -333,7 +336,7 @@ export async function getChangelogEntriesByCategory(category: changelog_category
 
 export async function getFeaturedChangelogEntries(limit = 3): Promise<
   Array<
-    Omit<changelog, 'contributors' | 'keywords'> & {
+    Omit<changelogModel, 'contributors' | 'keywords'> & {
       contributors: string[];
       keywords: string[];
     }

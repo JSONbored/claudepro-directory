@@ -1,4 +1,4 @@
-import { type Database } from '@heyclaude/database-types';
+import type { content_category, contentModel } from '@heyclaude/data-layer/prisma';
 import { ensureStringArray } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
@@ -33,6 +33,7 @@ import { DashboardTabs } from '@/src/components/features/account/dashboard-tabs'
 import { RecentlySavedGrid } from '@/src/components/features/account/recently-saved-grid';
 
 import Loading from './loading';
+import { spaceY, marginBottom, gap, paddingY, padding, marginTop, muted } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Generate metadata for the account page at request time.
@@ -88,7 +89,7 @@ export default async function AccountDashboard() {
       'AccountDashboard: unauthenticated access attempt detected'
     );
     return (
-      <div className="space-y-6">
+      <div className={`${spaceY.relaxed}`}>
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl">Sign in required</CardTitle>
@@ -139,7 +140,7 @@ export default async function AccountDashboard() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className={`${spaceY.relaxed}`}>
       {/* Dashboard header and stats - streams in Suspense */}
       <Suspense fallback={<Loading />}>
         <DashboardHeaderAndStats bundleData={bundleData} userLogger={userLogger} />
@@ -234,12 +235,12 @@ function DashboardHeaderAndStats({
   return (
     <>
       <div>
-        <h1 className="mb-2 text-3xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground">Welcome back, {profile?.name ?? 'User'}!</p>
+        <h1 className={`${marginBottom.compact} text-3xl font-bold`}>Dashboard</h1>
+        <p className={`${muted.default}`}>Welcome back, {profile?.name ?? 'User'}!</p>
       </div>
 
       {/* Stats cards */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <div className={`grid grid-cols-1 ${gap.default} md:grid-cols-3`}>
         <AnimatedStatsCard
           description="Saved items"
           icon={Bookmark}
@@ -274,7 +275,7 @@ function DashboardHeaderAndStats({
             <CardTitle>Quick Actions</CardTitle>
             <CardDescription>Common tasks and features</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className={`${spaceY.default}`}>
             {resumeBookmarkHref ? (
               <QuickActionRow
                 description="Continue where you left off"
@@ -336,7 +337,7 @@ async function DashboardContent({
   const recentlySavedContentResults = await Promise.all(
     recentBookmarks.map(async (bookmark) => {
       try {
-        const category = bookmark.content_type as Database['public']['Enums']['content_category'];
+        const category = bookmark.content_type as content_category;
         const slug = bookmark.content_slug as string;
         const detail = await getContentDetailCore({ category, slug });
         return detail?.content ?? null;
@@ -356,7 +357,7 @@ async function DashboardContent({
     })
   );
   const recentlySavedContent = recentlySavedContentResults.filter(
-    (item): item is Database['public']['Tables']['content']['Row'] =>
+    (item): item is contentModel =>
       item !== null && typeof item === 'object'
   );
 
@@ -367,7 +368,7 @@ async function DashboardContent({
         <Suspense
           fallback={
             <Card>
-              <CardContent className="py-12">
+              <CardContent className={`${paddingY.section}`}>
                 <div className="h-48 animate-pulse" />
               </CardContent>
             </Card>
@@ -380,11 +381,11 @@ async function DashboardContent({
         </Suspense>
       }
       overview={
-        <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
+        <div className={`grid ${gap.comfortable} lg:grid-cols-[2fr_1fr]`}>
           <Suspense
             fallback={
               <Card>
-                <CardContent className="py-12">
+                <CardContent className={`${paddingY.section}`}>
                   <div className="h-48 animate-pulse" />
                 </CardContent>
               </Card>
@@ -399,7 +400,7 @@ async function DashboardContent({
           <Suspense
             fallback={
               <Card>
-                <CardContent className="py-12">
+                <CardContent className={`${paddingY.section}`}>
                   <div className="h-48 animate-pulse" />
                 </CardContent>
               </Card>
@@ -418,7 +419,7 @@ async function DashboardContent({
         <Suspense
           fallback={
             <Card>
-              <CardContent className="py-12">
+              <CardContent className={`${paddingY.section}`}>
                 <div className="h-48 animate-pulse" />
               </CardContent>
             </Card>
@@ -453,7 +454,7 @@ function RecentlySavedSection({
   recentlySavedContent,
   userLogger,
 }: {
-  recentlySavedContent: Array<Database['public']['Tables']['content']['Row']>;
+  recentlySavedContent: Array<contentModel>;
   userLogger: ReturnType<typeof logger.child>;
 }) {
   userLogger.info(
@@ -504,7 +505,7 @@ function RecommendationsSection({
 }: {
   bookmarkedSlugs: Set<string>;
   homepageData: Awaited<ReturnType<typeof getAccountDashboardBundle>>['homepage'];
-  recentlySavedContent: Array<Database['public']['Tables']['content']['Row']>;
+  recentlySavedContent: Array<contentModel>;
   userLogger: ReturnType<typeof logger.child>;
 }) {
   const savedTags = new Set<string>();
@@ -580,34 +581,34 @@ function RecommendationsSection({
         <CardTitle>Recommended next</CardTitle>
         <CardDescription>Suggestions based on your saved tags</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className={`${spaceY.comfortable}`}>
         {recommendations.length > 0 ? (
-          <ul className="space-y-3">
+          <ul className={`${spaceY.default}`}>
             {recommendations.map((item) => {
               const firstTag = ensureStringArray(item.tags)[0];
               const itemHref = `/${item.category}/${item.slug}`;
               const similarHref = firstTag ? `/search?tags=${encodeURIComponent(firstTag)}` : null;
               return (
                 <li
-                  className="border-border/60 bg-muted/20 rounded-xl border p-3"
+                  className={`border-border/60 bg-muted/20 rounded-xl border ${padding.compact}`}
                   key={`${item.category}-${item.slug}`}
                 >
-                  <div className="flex items-start justify-between gap-3">
+                  <div className={`flex items-start justify-between ${gap.compact}`}>
                     <div>
                       <p className="font-semibold">{item.title}</p>
                       {item.description ? (
-                        <p className="text-muted-foreground line-clamp-2 text-sm">
+                        <p className={`${muted.default} line-clamp-2 text-sm`}>
                           {item.description}
                         </p>
                       ) : null}
                     </div>
-                    <div className="flex flex-col items-end gap-2">
+                    <div className={`flex flex-col items-end ${gap.tight}`}>
                       <NavLink className="text-sm font-medium" href={itemHref}>
                         Explore →
                       </NavLink>
                       {similarHref ? (
                         <NavLink
-                          className="text-muted-foreground hover:text-foreground text-xs"
+                          className={`${muted.default} hover:text-foreground text-xs`}
                           href={similarHref}
                         >
                           Explore similar →
@@ -620,7 +621,7 @@ function RecommendationsSection({
             })}
           </ul>
         ) : (
-          <p className="text-muted-foreground text-sm">
+          <p className={`${muted.default} text-sm`}>
             Start bookmarking configs to receive personalized recommendations.
           </p>
         )}
@@ -653,10 +654,10 @@ function QuickActionRow({
   title: string;
 }) {
   return (
-    <div className="border-border/50 flex items-center justify-between gap-4 rounded-xl border p-3">
+    <div className={`border-border/50 flex items-center justify-between ${gap.default} rounded-xl border ${padding.compact}`}>
       <div>
         <p className="font-medium">{title}</p>
-        <p className="text-muted-foreground text-sm">{description}</p>
+        <p className={`${muted.default} text-sm`}>{description}</p>
       </div>
       <NavLink className="text-sm font-semibold" href={href}>
         Open →
@@ -678,12 +679,12 @@ function QuickActionRow({
  */
 function EmptyRecentlySavedState() {
   return (
-    <div className="border-border/70 rounded-2xl border border-dashed p-6 text-center">
+    <div className={`border-border/70 rounded-2xl border border-dashed ${padding.comfortable} text-center`}>
       <p className="font-medium">No saved configs yet</p>
-      <p className="text-muted-foreground text-sm">
+      <p className={`${muted.default} text-sm`}>
         Browse the directory and bookmark your favorite configurations to see them here.
       </p>
-      <NavLink className="mt-4 inline-flex font-semibold" href={ROUTES.HOME}>
+      <NavLink className={`${marginTop.default} inline-flex font-semibold`} href={ROUTES.HOME}>
         Explore directory →
       </NavLink>
     </div>

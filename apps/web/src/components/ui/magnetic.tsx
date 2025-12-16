@@ -74,17 +74,56 @@ function Magnetic({
   const x = useSpring(rawX, springOptions);
   const y = useSpring(rawY, springOptions);
  
+  // Cache element bounds to avoid forced reflows
+  const boundsRef = React.useRef<{ left: number; top: number; width: number; height: number; cx: number; cy: number } | null>(null);
+  const updateBoundsRef = React.useCallback(() => {
+    if (!localRef.current) {
+      boundsRef.current = null;
+      return;
+    }
+    const rect = localRef.current.getBoundingClientRect();
+    boundsRef.current = {
+      left: rect.left,
+      top: rect.top,
+      width: rect.width,
+      height: rect.height,
+      cx: rect.left + rect.width / 2,
+      cy: rect.top + rect.height / 2,
+    };
+  }, []);
+
+  // Update bounds on mount and resize (batched via ResizeObserver)
+  React.useEffect(() => {
+    if (!isClient || (disableOnTouch && isTouchDevice)) return;
+    
+    updateBoundsRef();
+    
+    const resizeObserver = new ResizeObserver(() => {
+      // Batch bounds updates to avoid forced reflows
+      requestAnimationFrame(updateBoundsRef);
+    });
+    
+    if (localRef.current) {
+      resizeObserver.observe(localRef.current);
+    }
+    
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [isClient, disableOnTouch, isTouchDevice, updateBoundsRef]);
+
   const compute = React.useCallback(
     (e: MouseEvent | React.MouseEvent) => {
-      if (!localRef.current) return;
-      const { left, top, width, height } =
-        localRef.current.getBoundingClientRect();
-      const cx = left + width / 2;
-      const cy = top + height / 2;
+      if (!localRef.current || !boundsRef.current) {
+        updateBoundsRef();
+        if (!boundsRef.current) return;
+      }
+      
+      const { cx, cy } = boundsRef.current;
       const dx = e.clientX - cx;
       const dy = e.clientY - cy;
       const dist = Math.hypot(dx, dy);
- 
+
       if ((active || !onlyOnHover) && dist <= range) {
         const factor = (1 - dist / range) * strength;
         rawX.set(dx * factor);
@@ -94,7 +133,7 @@ function Magnetic({
         rawY.set(0);
       }
     },
-    [active, onlyOnHover, range, strength, rawX, rawY],
+    [active, onlyOnHover, range, strength, rawX, rawY, updateBoundsRef],
   );
  
   React.useEffect(() => {
@@ -107,7 +146,14 @@ function Magnetic({
   return (
     <motion.div
       ref={localRef}
-      style={{ display: 'inline-block', ...style, x, y }}
+      className="inline-block"
+      style={{
+        ...style,
+        x,
+        y,
+        // GPU acceleration hint for smooth magnetic effect
+        willChange: active ? 'transform' : 'auto',
+      }}
       onMouseEnter={(e) => {
         if (onlyOnHover) setActive(true);
         onMouseEnter?.(e);

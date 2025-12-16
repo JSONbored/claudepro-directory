@@ -17,8 +17,8 @@
 
 import { AlertCircle, AlertTriangle, CheckCircle, Info } from '@heyclaude/web-runtime/icons';
 import { cn, Label } from '@heyclaude/web-runtime/ui';
-import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/design-tokens';
-import { SPRING, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
+// TOKENS removed - using direct Tailwind utilities
+import { SPRING, STAGGER, gap, marginTop, between, spaceY } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion, useAnimateScoped } from '@heyclaude/web-runtime/hooks/motion';
 import { AnimatePresence, motion } from 'motion/react';
 import { type FocusEvent, type ReactNode, useCallback, useEffect, useRef } from 'react';
@@ -168,7 +168,7 @@ export function AnimatedFormField({
             }
             transition={SPRING.bouncy}
           >
-            <CheckCircle className="h-5 w-5" style={{ color: TOKENS.colors.success.text }} />
+            <CheckCircle className="h-5 w-5 text-color-success" />
           </motion.div>
         );
       }
@@ -180,7 +180,7 @@ export function AnimatedFormField({
             exit={shouldReduceMotion ? { opacity: 0 } : { scale: 0 }}
             transition={SPRING.snappy}
           >
-            <AlertCircle className="h-5 w-5" style={{ color: TOKENS.colors.error.text }} />
+            <AlertCircle className="h-5 w-5 text-color-error" />
           </motion.div>
         );
       }
@@ -192,7 +192,7 @@ export function AnimatedFormField({
             exit={shouldReduceMotion ? { opacity: 0 } : { scale: 0 }}
             transition={SPRING.snappy}
           >
-            <AlertTriangle className="h-5 w-5" style={{ color: TOKENS.colors.warning.text }} />
+            <AlertTriangle className="h-5 w-5 text-color-warning" />
           </motion.div>
         );
       }
@@ -202,59 +202,59 @@ export function AnimatedFormField({
     }
   };
 
-  // Get border color based on state
-  const getBorderColor = () => {
-    if (isFocused) return TOKENS.colors.accent.primary;
-    if (!hasInteracted) return TOKENS.colors.border.default;
+  // Get border color class based on state - returns Tailwind utility classes
+  const getBorderColorClass = () => {
+    if (isFocused) return 'border-color-accent-primary';
+    if (!hasInteracted) return 'border-border';
 
     switch (validationState) {
       case 'valid': {
-        return TOKENS.colors.success.border;
+        return 'border-color-success-border';
       }
       case 'invalid': {
-        return TOKENS.colors.error.border;
+        return 'border-color-error-border';
       }
       case 'warning': {
-        return TOKENS.colors.warning.border;
+        return 'border-color-warning-border';
       }
       default: {
-        return TOKENS.colors.border.default;
+        return 'border-border';
       }
     }
   };
 
-  // Get glow effect based on state
-  const getGlowEffect = () => {
-    if (!isFocused && validationState === 'idle') return 'none';
+  // Get glow effect class based on state - returns Tailwind utility classes
+  const getGlowEffectClass = () => {
+    if (!isFocused && validationState === 'idle') return '';
 
-    if (isFocused) return TOKENS.shadows.glow.orange;
+    if (isFocused) return 'shadow-glow-orange';
 
     switch (validationState) {
       case 'valid': {
-        return TOKENS.shadows.glow.green;
+        return 'shadow-glow-green';
       }
       case 'invalid': {
-        return TOKENS.shadows.glow.red;
+        return 'shadow-glow-red';
       }
       default: {
-        return 'none';
+        return '';
       }
     }
   };
 
   return (
     <motion.div
-      className={cn('space-y-2', className)}
+      className={cn(spaceY.compact, className)}
       initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 10 }}
       animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
       transition={SPRING.smooth}
     >
       {/* Label Row */}
-      <div className="flex items-center justify-between">
-        <Label htmlFor={id} className="flex items-center gap-1.5">
+      <div className={between.center}>
+        <Label htmlFor={id} className={cn('flex items-center', gap['1.5'])}>
           <span>{label}</span>
           {required ? (
-            <span className="text-accent-primary" style={{ color: TOKENS.colors.accent.primary }}>
+            <span className="text-color-accent-primary">
               *
             </span>
           ) : null}
@@ -283,14 +283,12 @@ export function AnimatedFormField({
       {/* Field Container with Validation Icon */}
       <div className="relative">
         <motion.div
-          className={cn('relative transition-all', fieldClassName)}
-          animate={{
-            borderColor: getBorderColor(),
-          }}
-          transition={{ duration: DURATION.quick }}
-          style={{
-            boxShadow: getGlowEffect(),
-          }}
+          className={cn(
+            'relative transition-all border',
+            fieldClassName,
+            getBorderColorClass(),
+            getGlowEffectClass()
+          )}
           onFocus={handleFocus}
           onBlur={handleBlur}
         >
@@ -318,29 +316,26 @@ export function AnimatedFormField({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -5 }}
             transition={SPRING.smooth}
-            className="flex items-start gap-2"
+            className={`flex items-start ${gap.tight}`}
           >
             {/* Icon for messages */}
             {messageType === 'error' && (
               <AlertCircle
-                className="mt-0.5 h-4 w-4 shrink-0"
-                style={{ color: TOKENS.colors.error.text }}
+                className={cn(marginTop['4.5'], 'h-4 w-4 shrink-0', 'text-color-error')}
               />
             )}
             {messageType === 'warning' && (
               <AlertTriangle
-                className="mt-0.5 h-4 w-4 shrink-0"
-                style={{ color: TOKENS.colors.warning.text }}
+                className={cn(marginTop['4.5'], 'h-4 w-4 shrink-0', 'text-color-warning')}
               />
             )}
             {messageType === 'success' && (
               <CheckCircle
-                className="mt-0.5 h-4 w-4 shrink-0"
-                style={{ color: TOKENS.colors.success.text }}
+                className={cn(marginTop['4.5'], 'h-4 w-4 shrink-0', 'text-color-success')}
               />
             )}
             {messageType === 'help' && (
-              <Info className="text-muted-foreground mt-0.5 h-4 w-4 shrink-0" />
+              <Info className={cn('text-muted-foreground', marginTop['4.5'], 'h-4 w-4 shrink-0')} />
             )}
 
             {/* Message Text */}
@@ -350,18 +345,14 @@ export function AnimatedFormField({
                 messageType === 'error' && 'font-medium',
                 messageType === 'warning' && 'font-medium',
                 messageType === 'success' && 'font-medium',
-                messageType === 'help' && 'text-muted-foreground'
+                messageType === 'help' && 'text-muted-foreground',
+                marginTop['4.5'],
+                'h-4 w-4 shrink-0',
+                messageType === 'error' ? 'text-color-error' :
+                messageType === 'warning' ? 'text-color-warning' :
+                messageType === 'success' ? 'text-color-success' :
+                undefined
               )}
-              style={{
-                color:
-                  messageType === 'error'
-                    ? TOKENS.colors.error.text
-                    : messageType === 'warning'
-                      ? TOKENS.colors.warning.text
-                      : messageType === 'success'
-                        ? TOKENS.colors.success.text
-                        : undefined,
-              }}
             >
               {message}
             </span>
@@ -371,17 +362,13 @@ export function AnimatedFormField({
 
       {/* Focus Indicator (bottom border animation) */}
       <motion.div
-        className="h-0.5 w-full rounded-full"
+        className="h-0.5 w-full rounded-full bg-color-accent-primary origin-left border-color-border-light"
         initial={{ scaleX: 0, opacity: 0 }}
         animate={{
           scaleX: isFocused ? 1 : 0,
           opacity: isFocused ? 1 : 0,
         }}
         transition={SPRING.snappy}
-        style={{
-          backgroundColor: TOKENS.colors.accent.primary,
-          transformOrigin: 'left',
-        }}
       />
     </motion.div>
   );

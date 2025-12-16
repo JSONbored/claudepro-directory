@@ -1,46 +1,38 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { PrismockClient } from 'prismock';
 import { ContentService } from './content.ts';
-import type { Database } from '@heyclaude/database-types';
-import type { SupabaseClient, PostgrestError } from '@supabase/supabase-js';
 
-// Mock rpc-error-logging
+// Mock the prisma singleton with Prismock
+vi.mock('../prisma/client.ts', () => {
+  const { setupPrismockMock } = require('../test-utils/prisma-mock.ts');
+  return {
+    prisma: setupPrismockMock(),
+  };
+});
+
+// Mock the RPC error logging utility
 vi.mock('../utils/rpc-error-logging.ts', () => ({
   logRpcError: vi.fn(),
 }));
 
-// Helper to create proper PostgrestError objects
-function createPostgrestError(message: string, code: string): PostgrestError {
-  return {
-    message,
-    code,
-    details: '',
-    hint: null,
-    name: 'PostgrestError',
-  };
-}
-
-// Helper to create proper mock responses
-function createMockResponse<T>(data: T | null) {
-  return {
-    data,
-    error: null,
-    count: null,
-    status: 200,
-    statusText: 'OK' as const,
-  };
-}
+// Mock request cache
+vi.mock('../utils/request-cache.ts', () => ({
+  withSmartCache: vi.fn((_key, _method, fn) => fn()),
+}));
 
 describe('ContentService', () => {
-  let mockSupabase: SupabaseClient<Database>;
   let contentService: ContentService;
+  let prismock: PrismockClient;
 
-  beforeEach(() => {
-    // Create mock Supabase client
-    mockSupabase = {
-      rpc: vi.fn(),
-    } as unknown as SupabaseClient<Database>;
-
-    contentService = new ContentService(mockSupabase);
+  beforeEach(async () => {
+    // Get the mocked prisma instance (Prismock)
+    const { prisma } = await import('../prisma/client.ts');
+    prismock = prisma as PrismockClient;
+    
+    // Reset Prismock data before each test
+    prismock.reset();
+    
+    contentService = new ContentService();
   });
 
   describe('getSitewideReadme', () => {
@@ -50,34 +42,29 @@ describe('ContentService', () => {
         last_updated: '2024-01-01',
       };
 
-      vi.mocked(mockSupabase.rpc).mockResolvedValue(createMockResponse(mockData));
+      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
 
       const result = await contentService.getSitewideReadme();
 
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('generate_readme_data');
+      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
+        expect.stringContaining('generate_readme_data')
+      );
       expect(result).toEqual(mockData);
     });
 
     it('should throw error when RPC fails', async () => {
-      const mockError = createPostgrestError('Database error', 'PGRST116');
+      const mockError = new Error('Database error');
 
-      vi.mocked(mockSupabase.rpc).mockResolvedValue({
-        data: null,
-        error: mockError,
-        count: null,
-        status: 400,
-        statusText: 'Bad Request',
-      });
+      vi.mocked(prismock.$queryRawUnsafe).mockRejectedValue(mockError);
 
-      await expect(contentService.getSitewideReadme()).rejects.toThrow();
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('generate_readme_data');
+      await expect(contentService.getSitewideReadme()).rejects.toThrow('Database error');
     });
 
     it('should handle null data gracefully', async () => {
-      vi.mocked(mockSupabase.rpc).mockResolvedValue(createMockResponse(null));
+      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([] as any);
 
       const result = await contentService.getSitewideReadme();
-      expect(result).toBeNull();
+      expect(result).toBeUndefined();
     });
   });
 
@@ -88,26 +75,22 @@ describe('ContentService', () => {
         categories: ['agents', 'skills'],
       };
 
-      vi.mocked(mockSupabase.rpc).mockResolvedValue(createMockResponse(mockData));
+      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
 
       const result = await contentService.getSitewideLlmsTxt();
 
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('generate_sitewide_llms_txt');
+      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
+        expect.stringContaining('generate_sitewide_llms_txt')
+      );
       expect(result).toEqual(mockData);
     });
 
     it('should throw error on RPC failure', async () => {
-      const mockError = createPostgrestError('RPC timeout', 'TIMEOUT');
+      const mockError = new Error('RPC timeout');
 
-      vi.mocked(mockSupabase.rpc).mockResolvedValue({
-        data: null,
-        error: mockError,
-        count: null,
-        status: 500,
-        statusText: 'Internal Server Error',
-      });
+      vi.mocked(prismock.$queryRawUnsafe).mockRejectedValue(mockError);
 
-      await expect(contentService.getSitewideLlmsTxt()).rejects.toThrow();
+      await expect(contentService.getSitewideLlmsTxt()).rejects.toThrow('RPC timeout');
     });
   });
 
@@ -118,17 +101,19 @@ describe('ContentService', () => {
         entries: [],
       };
 
-      vi.mocked(mockSupabase.rpc).mockResolvedValue(createMockResponse(mockData));
+      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
 
       const result = await contentService.getChangelogLlmsTxt();
 
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('generate_changelog_llms_txt');
+      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
+        expect.stringContaining('generate_changelog_llms_txt')
+      );
       expect(result).toEqual(mockData);
     });
 
     it('should handle empty changelog data', async () => {
-      vi.mocked(mockSupabase.rpc).mockResolvedValue(
-        createMockResponse({ content: '', entries: [] })
+      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue(
+        [{ content: '', entries: [] }] as any
       );
 
       const result = await contentService.getChangelogLlmsTxt();
@@ -140,25 +125,20 @@ describe('ContentService', () => {
   describe('error handling', () => {
     it('should log errors with proper context', async () => {
       const { logRpcError } = await import('../utils/rpc-error-logging.ts');
-      const mockError = createPostgrestError('Test error', 'ERR');
+      const mockError = new Error('Test error');
 
-      vi.mocked(mockSupabase.rpc).mockResolvedValue({
-        data: null,
-        error: mockError,
-        count: null,
-        status: 500,
-        statusText: 'Internal Server Error',
-      });
+      vi.mocked(prismock.$queryRawUnsafe).mockRejectedValue(mockError);
 
       await expect(contentService.getSitewideReadme()).rejects.toThrow();
       expect(logRpcError).toHaveBeenCalledWith(mockError, {
         rpcName: 'generate_readme_data',
         operation: 'ContentService.getSitewideReadme',
+        args: {},
       });
     });
 
     it('should propagate database connection errors', async () => {
-      vi.mocked(mockSupabase.rpc).mockRejectedValue(new Error('Connection refused'));
+      vi.mocked(prismock.$queryRawUnsafe).mockRejectedValue(new Error('Connection refused'));
 
       await expect(contentService.getSitewideReadme()).rejects.toThrow('Connection refused');
     });

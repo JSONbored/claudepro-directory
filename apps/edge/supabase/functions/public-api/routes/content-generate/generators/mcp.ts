@@ -5,8 +5,8 @@
  * Uses shared storage and database utilities from data-api.
  */
 
-import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
-import { supabaseServiceRole } from '@heyclaude/edge-runtime/clients/supabase.ts';
+import type { Prisma } from '@heyclaude/database-types/prisma';
+// Supabase client no longer needed - using Prisma for database operations
 import { getStorageServiceClient } from '@heyclaude/edge-runtime/utils/storage/client.ts';
 import { uploadObject } from '@heyclaude/edge-runtime/utils/storage/upload.ts';
 import type { ContentRow, GenerateResult, PackageGenerator } from '../types.ts';
@@ -781,19 +781,18 @@ export class McpGenerator implements PackageGenerator {
       throw new Error(uploadResult['error'] || 'Failed to upload .mcpb package to storage');
     }
 
-    // 6. Update database with storage URL and build metadata
-    // Use updateTable helper to properly handle extended Database type
-    const updateData = {
-      mcpb_storage_url: uploadResult.publicUrl,
-      mcpb_build_hash: contentHash,
-      mcpb_last_built_at: new Date().toISOString(),
-    } satisfies DatabaseGenerated['public']['Tables']['content']['Update'];
-    const { error: updateError } = await supabaseServiceRole
-      .from('content')
-      .update(updateData)
-      .eq('id', mcp.id);
-
-    if (updateError) {
+    // 6. Update database with storage URL and build metadata using Prisma
+    import { prisma } from '@heyclaude/data-layer/prisma/client';
+    try {
+      await prisma.content.update({
+        where: { id: mcp.id },
+        data: {
+          mcpb_storage_url: uploadResult.publicUrl,
+          mcpb_build_hash: contentHash,
+          mcpb_last_built_at: new Date(),
+        },
+      });
+    } catch (updateError) {
       throw new Error(
         `Database update failed: ${updateError instanceof Error ? updateError.message : String(updateError)}`
       );

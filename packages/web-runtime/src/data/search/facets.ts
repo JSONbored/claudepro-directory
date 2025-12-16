@@ -1,11 +1,11 @@
 'use server';
 
 import { SearchService } from '@heyclaude/data-layer';
-import { type content_category } from '@heyclaude/data-layer/prisma';
+import type { content_category } from '@heyclaude/data-layer/prisma';
 import type {
   GetSearchFacetsReturns,
   GetTrendingSearchesReturns,
-} from '@heyclaude/database-types/postgres-types/functions';
+} from '@heyclaude/database-types/postgres-types';
 import { isValidContentCategory } from '../../utils/type-guards';
 import { cacheLife, cacheTag } from 'next/cache';
 
@@ -115,8 +115,8 @@ function extractAggregatedArrays(data: SearchFacetsRow[]): {
 export async function getSearchFacets(): Promise<SearchFacetAggregate> {
   'use cache';
 
-  // Configure cache - use 'hours' profile for search facets (changes hourly)
-  cacheLife('hours'); // 1hr stale, 15min revalidate, 1 day expire
+  // Configure cache - use 'stable' profile for optimal SEO (6hr stale, 1hr revalidate, 7 days expire)
+  cacheLife('stable'); // 6hr stale, 1hr revalidate, 7 days expire - optimized for SEO
   cacheTag('search');
   cacheTag('search-facets');
 
@@ -172,8 +172,8 @@ export async function getPopularSearches(
 ): Promise<GetTrendingSearchesReturns> {
   'use cache';
 
-  // Configure cache - use 'hours' profile for popular searches (changes hourly)
-  cacheLife('hours'); // 1hr stale, 15min revalidate, 1 day expire
+  // Configure cache - use 'stable' profile for optimal SEO (6hr stale, 1hr revalidate, 7 days expire)
+  cacheLife('stable'); // 6hr stale, 1hr revalidate, 7 days expire - optimized for SEO
   cacheTag('search');
   cacheTag('popular-searches');
   // Include limit in cache tag for proper cache key generation

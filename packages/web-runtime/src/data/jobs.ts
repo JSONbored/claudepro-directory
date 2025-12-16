@@ -1,7 +1,7 @@
 import 'server-only';
 
 import { JobsService, SearchService } from '@heyclaude/data-layer';
-import type { FilterJobsArgs, FilterJobsReturns } from '@heyclaude/database-types/postgres-types/functions';
+import type { FilterJobsArgs, FilterJobsReturns } from '@heyclaude/database-types/postgres-types';
 import { normalizeError } from '@heyclaude/shared-runtime';
 import { cacheLife, cacheTag } from 'next/cache';
 
@@ -101,8 +101,8 @@ async function getFilteredJobsDirect(options: JobsFilterOptions): Promise<JobsFi
 async function getJobsListCached(limit: number, offset: number): Promise<JobsFilterResult | null> {
   'use cache';
 
-  // Configure cache - use 'half' profile for jobs lists (changes every 30 minutes)
-  cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
+  // Configure cache - use 'static' profile for optimal SEO (1 day stale, 6hr revalidate, 30 days expire)
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
   cacheTag('jobs-list');
 
   const reqLogger = logger.child({
@@ -140,7 +140,7 @@ async function getJobsListCached(limit: number, offset: number): Promise<JobsFil
  * Get filtered jobs with search/filters (cached)
  * Uses 'use cache' to cache filtered jobs. This data is public and same for all users.
  * Filtered jobs change periodically, so we use the 'half' cacheLife profile.
- * @param {Database['public']['Functions']['filter_jobs']['Args']} rpcArguments
+ * @param {FilterJobsArgs} rpcArguments
  * @param {string} searchQuery
  * @param {string} category
  * @param {string} employment
@@ -164,8 +164,8 @@ async function getFilteredJobsCached(
 ): Promise<JobsFilterResult | null> {
   'use cache';
 
-  // Configure cache - use 'half' profile for filtered jobs (changes every 30 minutes)
-  cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
+  // Configure cache - use 'stable' profile for optimal SEO (6hr stale, 1hr revalidate, 7 days expire)
+  cacheLife('stable'); // 6hr stale, 1hr revalidate, 7 days expire - optimized for SEO
   cacheTag('jobs-search');
 
   const reqLogger = logger.child({
@@ -343,8 +343,8 @@ export async function getFilteredJobs(
 export async function getJobBySlug(slug: string) {
   'use cache';
 
-  // Configure cache - use 'half' profile for job details (changes every 30 minutes)
-  cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
+  // Configure cache - use 'detail' profile for optimal SEO (2hr stale, 30min revalidate, 1 day expire)
+  cacheLife('detail'); // 2hr stale, 30min revalidate, 1 day expire - optimized for SEO
   cacheTag(`job-${slug}`);
   cacheTag('jobs');
 
@@ -378,8 +378,8 @@ export async function getJobBySlug(slug: string) {
 export async function getFeaturedJobs(limit = 5) {
   'use cache';
 
-  // Configure cache - use 'half' profile for featured jobs (changes every 30 minutes)
-  cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
+  // Configure cache - use 'static' profile for optimal SEO (1 day stale, 6hr revalidate, 30 days expire)
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
   cacheTag('jobs-featured');
   cacheTag('jobs');
 

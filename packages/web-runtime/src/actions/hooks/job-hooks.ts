@@ -1,12 +1,9 @@
 import { JobsService } from '@heyclaude/data-layer';
-import type { Database } from '@heyclaude/database-types';
+import type { job_plan, job_tier } from '@heyclaude/data-layer/prisma';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
 import { normalizeError } from '../../errors';
 import { logger } from '../../logging/server.ts';
 import { getEnvVar } from '@heyclaude/shared-runtime';
-
-type JobPlan = Database['public']['Enums']['job_plan'];
-type JobTier = Database['public']['Enums']['job_tier'];
 
 /**
  * Post-creation hook for job listings
@@ -19,8 +16,8 @@ export async function onJobCreated(
 ) {
   const jobId = result.job_id;
   const requiresPayment = result.requires_payment;
-  const plan = (input.plan || 'one-time') as JobPlan;
-  const tier = (input.tier || 'standard') as JobTier;
+  const plan = (input.plan || 'one-time') as job_plan;
+  const tier = (input.tier || 'standard') as job_tier;
   const title = input.title || 'Job Listing';
   const company = input.company || undefined;
 

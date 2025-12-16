@@ -1,18 +1,31 @@
-import type { Database } from '@heyclaude/database-types';
+import type { contentModel } from '@heyclaude/database-types/prisma';
 
-export type SkillRow = Database['public']['Tables']['content']['Row'] & { category: 'skills' };
+export type SkillRow = contentModel & { category: 'skills' };
 
-interface SkillExample {
+// Define types for JSON fields based on PrismaJson namespace
+// These match the types defined in @heyclaude/database-types/prisma-json-types
+type SkillExample = {
   title: string;
   code: string;
   language: string;
   description?: string;
-}
+};
 
-interface TroubleshootingItem {
-  issue: string;
-  solution: string;
-}
+type ContentMetadata = {
+  dependencies?: string[];
+  troubleshooting?: Array<{
+    issue: string;
+    solution: string;
+  }>;
+  prerequisites?: string[];
+  has_breaking_changes?: boolean;
+  categoryLabel?: string;
+  showGitHubLink?: boolean;
+  githubPathPrefix?: string;
+  [key: string]: unknown;
+};
+
+type TroubleshootingItem = NonNullable<ContentMetadata['troubleshooting']>[number];
 
 export function transformSkillToMarkdown(skill: SkillRow): string {
   const frontmatter = generateYamlFrontmatter(skill);
@@ -30,12 +43,14 @@ description: ${escapedDescription}
 
 export function generateMarkdownBody(skill: SkillRow): string {
   const sections: string[] = [];
-  const metadata = (skill.metadata as Record<string, unknown>) || {};
+  // skill.metadata is typed as JsonValue, cast to ContentMetadata for type safety
+  const metadata = (skill.metadata || {}) as ContentMetadata;
 
   if (skill.content) sections.push(skill.content);
 
-  const dependencies = metadata['dependencies'] as string[] | null;
-  const prerequisites = generatePrerequisitesSection(dependencies);
+  // PrismaJson.ContentMetadata has dependencies as optional string[]
+  const dependencies = metadata.dependencies;
+  const prerequisites = generatePrerequisitesSection(dependencies || null);
   if (prerequisites) sections.push(prerequisites);
 
   const features = generateFeaturesSection(skill.features);
@@ -44,10 +59,12 @@ export function generateMarkdownBody(skill: SkillRow): string {
   const useCases = generateUseCasesSection(skill.use_cases as string[] | null);
   if (useCases) sections.push(useCases);
 
-  const examples = generateExamplesSection(skill.examples as SkillExample[] | null);
+  // skill.examples is typed as JsonValue, cast to SkillExample[] for type safety
+  const examples = generateExamplesSection((skill.examples as SkillExample[] | null) || null);
   if (examples) sections.push(examples);
 
-  const troubleshooting = metadata['troubleshooting'] as TroubleshootingItem[] | null;
+  // ContentMetadata has troubleshooting as optional array
+  const troubleshooting = metadata.troubleshooting || null;
   const troubleshootingSection = generateTroubleshootingSection(troubleshooting);
   if (troubleshootingSection) sections.push(troubleshootingSection);
 

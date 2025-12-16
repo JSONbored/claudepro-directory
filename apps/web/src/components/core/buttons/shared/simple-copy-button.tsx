@@ -4,7 +4,7 @@ import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { type ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
 import { toasts, Button } from '@heyclaude/web-runtime/ui';
-import { COLORS } from '@heyclaude/web-runtime/design-tokens';
+// COLORS removed - using direct Tailwind utilities
 import { Check, Copy } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useBoolean, useTimeout } from '@heyclaude/web-runtime/hooks';
@@ -140,7 +140,7 @@ export function SimpleCopyButton({
     >
       {showIcon ? (
         copied ? (
-          <Check className={iconClassName} style={{ color: COLORS.semantic.social.copy.dark.text }} aria-hidden="true" />
+          <Check className={`${iconClassName} text-color-social-copy-text-dark`} aria-hidden="true" />
         ) : (
           <Copy className={iconClassName} aria-hidden="true" />
         )

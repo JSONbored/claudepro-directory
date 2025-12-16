@@ -5551,60 +5551,6 @@ export default {
     },
 
 
-    'require-generated-types-for-database-queries': {
-      meta: {
-        type: 'problem',
-        docs: {
-          description: 'Require typed Supabase clients using Database types',
-          category: 'Best Practices',
-          recommended: true,
-        },
-        fixable: null,
-        schema: [],
-        messages: {
-          missingDatabaseType:
-            'Supabase client should be typed with Database from @heyclaude/database-types. Use: createClient<Database>(url, key)',
-        },
-      },
-      create(context) {
-        const sourceCode = context.getSourceCode();
-
-        let hasDatabaseImport = false;
-
-        return {
-          ImportDeclaration(node) {
-            if (node.source && node.source.type === 'Literal' && node.source.value === '@heyclaude/database-types') {
-              const hasDatabase = node.specifiers.some(
-                (spec) =>
-                  (spec.imported && spec.imported.name === 'Database') ||
-                  spec.local.name === 'Database'
-              );
-              if (hasDatabase) {
-                hasDatabaseImport = true;
-              }
-            }
-          },
-          CallExpression(node) {
-            // Check for createClient, createServerClient, createBrowserClient without type parameter
-            if (node.callee.type === 'Identifier') {
-              const name = node.callee.name;
-              if (
-                name === 'createClient' ||
-                name === 'createServerClient' ||
-                name === 'createBrowserClient'
-              ) {
-                if (!node.typeParameters && !hasDatabaseImport) {
-                  context.report({
-                    node,
-                    messageId: 'missingDatabaseType',
-                  });
-                }
-              }
-            }
-          },
-        };
-      },
-    },
 
     // ============================================================================
     // CACHE & PERFORMANCE RULES

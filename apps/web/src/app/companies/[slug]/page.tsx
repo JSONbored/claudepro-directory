@@ -4,7 +4,7 @@
  * Leverages get_company_profile() RPC + company_job_stats materialized view
  */
 
-import { type Database } from '@heyclaude/database-types';
+import type { experience_level, job_plan, workplace_type } from '@heyclaude/data-layer/prisma';
 import { getSafeWebsiteUrl } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getCompanyProfile } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
@@ -23,9 +23,9 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  UI_CLASSES,
   UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
+import { cluster, between, size, muted, link, grid, weight, transition, paddingX, paddingY, marginX, spaceY, marginTop, marginBottom } from '@heyclaude/web-runtime/design-system';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import Image from 'next/image';
@@ -115,9 +115,21 @@ export async function generateStaticParams() {
         slug: company.slug,
       }));
 
-    // Return valid companies for static pre-rendering
-    // If no companies found, return empty array - Suspense boundaries will handle dynamic rendering
-    return validCompanies.length > 0 ? validCompanies : [];
+    // Cache Components requires at least one result for build-time validation
+    // If no companies found, return a placeholder that will be handled gracefully by the page component
+    if (validCompanies.length === 0) {
+      reqLogger.warn(
+        {
+          section: 'data-fetch',
+        },
+        'CompanyPage: No companies found in generateStaticParams, returning placeholder'
+      );
+      // Return placeholder slug (valid format: lowercase, numbers, single hyphens)
+      // Page component will handle 404 gracefully for placeholder slug
+      return [{ slug: 'placeholder' }];
+    }
+
+    return validCompanies;
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load companies for generateStaticParams');
     reqLogger.error(
@@ -125,10 +137,11 @@ export async function generateStaticParams() {
         err: normalized,
         section: 'data-fetch',
       },
-      'generateStaticParams: failed to load companies'
+      'CompanyPage: getCompaniesList threw in generateStaticParams'
     );
-    // Return empty array on error - Suspense boundaries will handle dynamic rendering
-    return [];
+    // Cache Components requires at least one result - return placeholder on error
+    // Page component will handle 404 gracefully for placeholder slug
+    return [{ slug: 'placeholder' }];
   }
 }
 
@@ -177,6 +190,13 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
 
   const { slug } = await params;
 
+  // Handle placeholder slug from generateStaticParams (used when no companies found at build time)
+  // This satisfies Cache Components requirement for at least one static param
+  if (slug === 'placeholder') {
+    reqLogger.warn({ section: 'data-fetch' }, 'Placeholder slug detected, returning 404');
+    notFound();
+  }
+
   // Fetch profile once to ensure consistency across all components
   // This prevents multiple fetch waterfalls and cache inconsistency risks
   const profile = await getCompanyProfile(slug);
@@ -196,26 +216,26 @@ export default async function CompanyPage({ params }: CompanyPageProperties) {
   return (
     <>
       <StructuredData route={`/companies/${slug}`} />
-      <div className="bg-background min-h-screen">
+      <div className={`bg-background min-h-screen`}>
         {/* Company Header - streams in Suspense */}
-        <section className="border-border relative border-b">
+        <section className={`border-border relative border-b`}>
           <Suspense fallback={<CompanyHeaderSkeleton />}>
             <CompanyHeader profile={profile} />
           </Suspense>
         </section>
 
         {/* Content - streams in Suspense */}
-        <section className="container mx-auto px-4 py-12">
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px]">
+        <section className={`container ${marginX.auto} ${paddingX.default} ${paddingY.section}`}>
+          <div className={`grid ${grid.cols1} gap-8 lg:grid-cols-[1fr_320px]`}>
             {/* Main content - Active jobs */}
-            <div className="space-y-6">
+            <div className={`${spaceY.relaxed}`}>
               <Suspense fallback={<JobsListSkeleton />}>
                 <CompanyJobsList profile={profile} />
               </Suspense>
             </div>
 
             {/* Sidebar - Company stats */}
-            <aside className="space-y-6 lg:sticky lg:top-24 lg:h-fit">
+            <aside className={`${spaceY.relaxed} lg:sticky lg:top-24 lg:h-fit`}>
               <Suspense fallback={<StatsSkeleton />}>
                 <CompanyStats profile={profile} />
               </Suspense>
@@ -253,26 +273,26 @@ function CompanyHeader({
   }
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="flex items-start gap-6">
+    <div className={`container ${marginX.auto} ${paddingX.default} ${paddingY.section}`}>
+      <div className={`flex items-start gap-6`}>
         {company.logo ? (
           <Image
             priority
             alt={`${company.name} logo`}
-            className="border-background h-24 w-24 rounded-lg border-4 object-cover"
+            className={`border-background h-24 w-24 rounded-lg border-4 object-cover`}
             height={96}
             src={company.logo}
             width={96}
           />
         ) : (
-          <div className="border-background bg-accent flex h-24 w-24 items-center justify-center rounded-lg border-4 text-2xl font-bold">
+          <div className={`border-background bg-accent flex h-24 w-24 items-center justify-center rounded-lg border-4 text-2xl font-bold`}>
             <Building className="h-12 w-12" />
           </div>
         )}
 
-        <div className="flex-1">
-          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3}>
-            <h1 className="text-3xl font-bold">{company.name}</h1>
+        <div className={`flex-1`}>
+          <div className={cluster.default}>
+            <h1 className={`${size['3xl']} ${weight.bold}`}>{company.name}</h1>
             {company.featured ? (
               <UnifiedBadge style="default" variant="base">
                 Featured
@@ -281,12 +301,12 @@ function CompanyHeader({
           </div>
 
           {company.description ? (
-            <p className="text-muted-foreground mt-2 max-w-3xl">{company.description}</p>
+            <p className={`${muted.default} ${marginTop.compact} max-w-3xl`}>{company.description}</p>
           ) : null}
 
-          <div className="mt-4 flex flex-wrap items-center gap-4 text-sm">
+          <div className={`${marginTop.default} flex flex-wrap items-center gap-4 text-sm`}>
             <SafeWebsiteLink
-              className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} ${UI_CLASSES.LINK_ACCENT}`}
+              className={`${cluster.tight} ${link}`}
               url={company.website}
             >
               <Globe className="h-4 w-4" />
@@ -294,7 +314,7 @@ function CompanyHeader({
             </SafeWebsiteLink>
 
             {company.industry ? (
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+              <div className={cluster.tight}>
                 <TrendingUp className="h-4 w-4" />
                 {company.industry}
               </div>
@@ -302,14 +322,14 @@ function CompanyHeader({
 
             {/* eslint-disable-next-line unicorn/explicit-length-check -- company.size is an enum value, not a Set/Map */}
             {company.size ? (
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+              <div className={cluster.tight}>
                 <Users className="h-4 w-4" />
                 {company.size}
               </div>
             ) : null}
 
             {company.using_cursor_since ? (
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+              <div className={cluster.tight}>
                 <Calendar className="h-4 w-4" />
                 Using Claude since{' '}
                 {new Date(company.using_cursor_since).toLocaleDateString('en-US', {
@@ -352,15 +372,15 @@ function CompanyJobsList({
       ): job is typeof job & {
         click_count: number;
         company: string;
-        experience: Database['public']['Enums']['experience_level'];
+        experience: experience_level;
         expires_at: string;
         id: string;
-        plan: Database['public']['Enums']['job_plan'];
+        plan: job_plan;
         posted_at: string;
         slug: string;
         title: string;
         view_count: number;
-        workplace: Database['public']['Enums']['workplace_type'];
+        workplace: workplace_type;
       } =>
         Boolean(
           job.id &&
@@ -379,16 +399,16 @@ function CompanyJobsList({
 
   return (
     <>
-      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-        <h2 className="text-2xl font-bold">Active Positions ({filteredActiveJobs.length})</h2>
+      <div className={between.center}>
+        <h2 className={`${size['2xl']} ${weight.bold}`}>Active Positions ({filteredActiveJobs.length})</h2>
       </div>
 
       {filteredActiveJobs.length === 0 ? (
         <Card>
-          <CardContent className="flex flex-col items-center py-16">
-            <Briefcase className="text-muted-foreground mb-4 h-12 w-12" />
-            <h3 className="mb-2 text-xl font-semibold">No Active Positions</h3>
-            <p className="text-muted-foreground mb-6 max-w-md text-center">
+          <CardContent className={`flex flex-col items-center py-16`}>
+            <Briefcase className={`${muted.default} ${marginBottom.default} h-12 w-12`} />
+            <h3 className={`${marginBottom.compact} ${size.xl} ${weight.semibold}`}>No Active Positions</h3>
+            <p className={`${muted.default} ${marginBottom.comfortable} max-w-md text-center`}>
               This company doesn&apos;t have any job openings at the moment. Check back later!
             </p>
             <Link href={ROUTES.JOBS}>
@@ -399,7 +419,7 @@ function CompanyJobsList({
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <div className={`grid ${grid.cols1} gap-6 md:${grid.cols2}`}>
           {filteredActiveJobs.map((job) => (
             <JobCard
               job={{
@@ -465,40 +485,40 @@ function CompanyStats({
           <CardTitle>Company Stats</CardTitle>
           <CardDescription>Hiring activity and engagement</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-            <span className={UI_CLASSES.TEXT_SM_MUTED}>Total Jobs Posted</span>
-            <span className="font-semibold">{stats?.total_jobs ?? 0}</span>
+        <CardContent className={`${spaceY.comfortable}`}>
+          <div className={between.center}>
+            <span className={`${size.sm} ${muted.default}`}>Total Jobs Posted</span>
+            <span className={`${weight.semibold}`}>{stats?.total_jobs ?? 0}</span>
           </div>
 
-          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-            <span className={UI_CLASSES.TEXT_SM_MUTED}>Active Openings</span>
-            <span className="font-semibold text-green-600">{stats?.active_jobs ?? 0}</span>
+          <div className={between.center}>
+            <span className={`${size.sm} ${muted.default}`}>Active Openings</span>
+            <span className={`${weight.semibold} text-green-600`}>{stats?.active_jobs ?? 0}</span>
           </div>
 
           {stats && (stats.remote_jobs ?? 0) > 0 ? (
-            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-              <span className={UI_CLASSES.TEXT_SM_MUTED}>Remote Positions</span>
-              <span className="font-semibold">{stats.remote_jobs ?? 0}</span>
+            <div className={between.center}>
+              <span className={`${size.sm} ${muted.default}`}>Remote Positions</span>
+              <span className={`${weight.semibold}`}>{stats.remote_jobs ?? 0}</span>
             </div>
           ) : null}
 
           {stats?.avg_salary_min ? (
-            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-              <span className={UI_CLASSES.TEXT_SM_MUTED}>Avg. Salary</span>
-              <span className="font-semibold">${(stats.avg_salary_min / 1000).toFixed(0)}k+</span>
+            <div className={between.center}>
+              <span className={`${size.sm} ${muted.default}`}>Avg. Salary</span>
+              <span className={`${weight.semibold}`}>${(stats.avg_salary_min / 1000).toFixed(0)}k+</span>
             </div>
           ) : null}
 
-          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-            <span className={UI_CLASSES.TEXT_SM_MUTED}>Total Views</span>
-            <span className="font-semibold">{(stats?.total_views ?? 0).toLocaleString()}</span>
+          <div className={between.center}>
+            <span className={`${size.sm} ${muted.default}`}>Total Views</span>
+            <span className={`${weight.semibold}`}>{(stats?.total_views ?? 0).toLocaleString()}</span>
           </div>
 
           {stats?.latest_job_posted_at ? (
-            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-              <span className={UI_CLASSES.TEXT_SM_MUTED}>Latest Posting</span>
-              <span className="text-sm font-semibold">
+            <div className={between.center}>
+              <span className={`${size.sm} ${muted.default}`}>Latest Posting</span>
+              <span className={`${size.sm} ${weight.semibold}`}>
                 {new Date(stats.latest_job_posted_at).toLocaleDateString('en-US', {
                   day: 'numeric',
                   month: 'short',
@@ -513,7 +533,7 @@ function CompanyStats({
       {/* CTA Card */}
       <Card className="border-accent/30 bg-accent/5">
         <CardHeader>
-          <CardTitle className="text-lg">Interested in joining?</CardTitle>
+          <CardTitle className={`${size.lg}`}>Interested in joining?</CardTitle>
         </CardHeader>
         <CardContent>
           {(() => {
@@ -522,13 +542,13 @@ function CompanyStats({
 
             return (
               <>
-                <p className={`${UI_CLASSES.TEXT_SM_MUTED} mb-4`}>
+                <p className={`${size.sm} ${muted.default} ${marginBottom.default}`}>
                   {hasWebsite
                     ? 'Visit their website to learn more about the company and culture.'
                     : 'Check back regularly for new opportunities!'}
                 </p>
                 {hasWebsite ? (
-                  <SafeWebsiteLink className={UI_CLASSES.LINK_ACCENT} url={safeWebsiteUrl}>
+                  <SafeWebsiteLink className={`text-accent hover:text-accent-hover ${transition.colors} duration-200`} url={safeWebsiteUrl}>
                     Visit Website
                   </SafeWebsiteLink>
                 ) : null}
@@ -555,16 +575,16 @@ function CompanyStats({
  */
 function CompanyHeaderSkeleton() {
   return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="flex items-start gap-6">
-        <div className="bg-muted h-24 w-24 animate-pulse rounded-lg" />
-        <div className="flex-1 space-y-3">
-          <div className="bg-muted h-8 w-64 animate-pulse rounded" />
-          <div className="bg-muted h-4 w-full animate-pulse rounded" />
-          <div className="bg-muted h-4 w-3/4 animate-pulse rounded" />
-          <div className="mt-4 flex gap-4">
-            <div className="bg-muted h-4 w-20 animate-pulse rounded" />
-            <div className="bg-muted h-4 w-24 animate-pulse rounded" />
+    <div className={`container ${marginX.auto} ${paddingX.default} ${paddingY.section}`}>
+      <div className={`flex items-start gap-6`}>
+        <div className={`bg-muted h-24 w-24 animate-pulse rounded-lg`} />
+        <div className={`flex-1 ${spaceY.default}`}>
+          <div className={`bg-muted h-8 w-64 animate-pulse rounded`} />
+          <div className={`bg-muted h-4 w-full animate-pulse rounded`} />
+          <div className={`bg-muted h-4 w-3/4 animate-pulse rounded`} />
+          <div className={`${marginTop.default} flex gap-4`}>
+            <div className={`bg-muted h-4 w-20 animate-pulse rounded`} />
+            <div className={`bg-muted h-4 w-24 animate-pulse rounded`} />
           </div>
         </div>
       </div>
@@ -585,13 +605,13 @@ function CompanyHeaderSkeleton() {
  */
 function JobsListSkeleton() {
   return (
-    <div className="space-y-6">
-      <div className="bg-muted h-8 w-48 animate-pulse rounded" />
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+    <div className={`${spaceY.relaxed}`}>
+      <div className={`bg-muted h-8 w-48 animate-pulse rounded`} />
+      <div className={`grid ${grid.cols1} gap-6 md:${grid.cols2}`}>
         {[1, 2, 3, 4].map((i) => (
           <Card key={i}>
-            <CardContent className="py-12">
-              <div className="bg-muted h-48 animate-pulse rounded" />
+            <CardContent className={`${paddingY.section}`}>
+              <div className={`bg-muted h-48 animate-pulse rounded`} />
             </CardContent>
           </Card>
         ))}
@@ -613,14 +633,14 @@ function StatsSkeleton() {
   return (
     <Card>
       <CardHeader>
-        <div className="bg-muted h-6 w-32 animate-pulse rounded" />
-        <div className="bg-muted mt-2 h-4 w-48 animate-pulse rounded" />
+        <div className={`bg-muted h-6 w-32 animate-pulse rounded`} />
+        <div className={`bg-muted ${marginTop.compact} h-4 w-48 animate-pulse rounded`} />
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className={`${spaceY.comfortable}`}>
         {[1, 2, 3, 4, 5].map((i) => (
-          <div className="flex items-center justify-between" key={i}>
-            <div className="bg-muted h-4 w-24 animate-pulse rounded" />
-            <div className="bg-muted h-4 w-12 animate-pulse rounded" />
+          <div className={`flex items-center justify-between`} key={i}>
+            <div className={`bg-muted h-4 w-24 animate-pulse rounded`} />
+            <div className={`bg-muted h-4 w-12 animate-pulse rounded`} />
           </div>
         ))}
       </CardContent>

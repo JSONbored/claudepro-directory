@@ -2,7 +2,10 @@
  * UI Constants - Single Source of Truth for Design System
  *
  * This file contains all design system constants organized by category.
- * Import what you need: import { UI_CLASSES, DIMENSIONS, STATE_PATTERNS } from '@heyclaude/web-runtime/ui'
+ * Import what you need: import { DIMENSIONS, STATE_PATTERNS } from '@heyclaude/web-runtime/ui'
+ *
+ * All styling uses semantic design system utilities from @heyclaude/web-runtime/design-system.
+ * See .cursor/rules/design-system.mdc for usage guide.
  */
 
 import type { LucideIcon } from '../icons.tsx';
@@ -15,16 +18,13 @@ import {
   Terminal,
   Webhook,
 } from '../icons.tsx';
-import type { Database } from '@heyclaude/database-types';
+import type { changelog_category, content_category, job_status, submission_status } from '@heyclaude/data-layer/prisma';
 
 // ==========================================
-// SECTION 1: VISUAL STYLING (UI_CLASSES)
+// SECTION 1: DIMENSIONS (formerly SECTION 2)
 // ==========================================
 
-/**
- * UI_CLASSES - Centralized className patterns for consistent UI
- */
-export const UI_CLASSES = {
+export const DIMENSIONS = {
   // ----- Spacing Scale -----
   SPACE_MICRO: 'gap-0.5',
   SPACE_TIGHT: 'gap-1',
@@ -83,25 +83,13 @@ export const UI_CLASSES = {
   MARGIN_SECTION: 'mb-12',
   MARGIN_HERO: 'mb-16',
 
-  // ----- Layout Patterns -----
-  FLEX_COL_GAP_1: 'flex flex-col gap-1',
-  FLEX_COL_GAP_2: 'flex flex-col gap-2',
-  FLEX_COL_GAP_3: 'flex flex-col gap-3',
-  FLEX_COL_GAP_4: 'flex flex-col gap-4',
-  FLEX_COL_GAP_6: 'flex flex-col gap-6',
-  FLEX_COL_SPACE_Y_2: 'flex flex-col space-y-2',
-  FLEX_COL_SPACE_Y_4: 'flex flex-col space-y-4',
-  FLEX_COL_SPACE_Y_6: 'flex flex-col space-y-6',
-
-  FLEX_ITEMS_CENTER: 'flex items-center',
-  FLEX_ITEMS_CENTER_GAP_0_5: 'flex items-center gap-0.5',
-  FLEX_ITEMS_CENTER_GAP_1_5: 'flex items-center gap-1.5',
-  FLEX_ITEMS_CENTER_GAP_4: 'flex items-center gap-4',
-
-  FLEX_ITEMS_CENTER_JUSTIFY_CENTER: 'flex items-center justify-center',
-  FLEX_ITEMS_CENTER_JUSTIFY_CENTER_GAP_2: 'flex items-center justify-center gap-2',
-  FLEX_ITEMS_START_JUSTIFY_CENTER: 'flex items-start justify-center',
-  FLEX_JUSTIFY_CENTER: 'flex justify-center',
+  // REMOVED: Duplicate layout patterns
+  // These duplicate semantic utilities from @heyclaude/web-runtime/design-system:
+  // - FLEX_COL_GAP_* → Use stack.* utilities (stack.tight, stack.compact, etc.)
+  // - FLEX_ITEMS_CENTER* → Use cluster.* utilities (cluster.tight, cluster.compact, etc.)
+  // - FLEX_ITEMS_CENTER_JUSTIFY_CENTER → Use center utility
+  // - FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN → Use between.center utility
+  // See .cursor/rules/design-system.mdc for usage guide.
 
   FLEX_SHRINK_0: 'flex-shrink-0',
   FLEX_ITEMS_CENTER_FLEX_SHRINK_0: 'flex items-center flex-shrink-0',
@@ -260,11 +248,7 @@ export const UI_CLASSES = {
 
   CONTAINER_CARD_MUTED: 'text-center py-12 bg-card/50 rounded-xl border border-border/50',
   CONTAINER_OVERFLOW_BORDER: 'relative overflow-hidden border-b border-border/50 bg-card/30',
-  FLEX_ITEMS_CENTER_GAP_1: 'flex items-center gap-1',
-  FLEX_ITEMS_CENTER_GAP_2: 'flex items-center gap-2',
-  FLEX_ITEMS_CENTER_GAP_3: 'flex items-center gap-3',
-  FLEX_ITEMS_CENTER_GAP_6: 'flex items-center gap-6',
-  FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN: 'flex items-center justify-between',
+  // REMOVED: Duplicate layout patterns (see comment above)
   FLEX_ITEMS_START_GAP_2: 'flex items-start gap-2',
   FLEX_ITEMS_START_GAP_3: 'flex items-start gap-3',
   FLEX_ITEMS_START_JUSTIFY_BETWEEN: 'flex items-start justify-between',
@@ -346,77 +330,77 @@ export const UI_CLASSES = {
   CARD_HOVER_BG: 'transition-colors hover:bg-accent/5',
 
   FORM_SECTION_COLLAPSED:
-    'rounded-xl border border-white/10 bg-[oklch(26%_0.006_60)] p-4 cursor-pointer hover:bg-[oklch(28%_0.008_60)] transition-all',
+    'rounded-xl border border-white/10 bg-color-field-idle p-4 cursor-pointer hover:bg-color-field-hover transition-all',
   FORM_SECTION_EXPANDED:
-    'rounded-xl border border-[oklch(74%_0.2_35)]/20 bg-[oklch(28%_0.006_60)] p-6 shadow-[0_8px_32px_-4px_oklch(74%_0.2_35/0.15)]',
+    'rounded-xl border border-color-accent-primary/20 bg-card p-6 shadow-shadow-glow-soft',
   FORM_SECTION_ACTIVE:
-    'rounded-xl border border-[oklch(74%_0.2_35)]/30 bg-[oklch(30%_0.008_60)] p-6 shadow-[0_0_0_4px_oklch(74%_0.2_35/0.15)]',
+    'rounded-xl border border-color-accent-primary/30 bg-color-bg-tertiary p-6 shadow-shadow-glow-orange',
   FORM_SECTION_COMPLETE:
-    'rounded-xl border border-[oklch(72%_0.19_145)]/20 bg-[oklch(26%_0.006_60)] p-4 cursor-pointer hover:bg-[oklch(28%_0.008_60)] transition-all',
+    'rounded-xl border border-color-success/20 bg-color-field-idle p-4 cursor-pointer hover:bg-color-field-hover transition-all',
 
   FORM_FIELD_BASE:
-    'w-full rounded-lg border border-white/10 bg-[oklch(26%_0.006_60)] px-4 py-3 text-[16px] text-[oklch(94%_0.005_60)] placeholder:text-[oklch(57%_0.012_60)] transition-all',
+    'w-full rounded-lg border border-white/10 bg-color-field-idle px-4 py-3 text-[16px] text-foreground placeholder:text-color-text-disabled transition-all',
   FORM_FIELD_FOCUS:
-    'focus:border-[oklch(74%_0.2_35)]/40 focus:ring-4 focus:ring-[oklch(74%_0.2_35)]/15 focus:bg-[oklch(28%_0.008_60)] outline-none',
-  FORM_FIELD_ERROR: 'border-[oklch(70%_0.195_25)]/40 ring-4 ring-[oklch(70%_0.195_25)]/15',
-  FORM_FIELD_SUCCESS: 'border-[oklch(72%_0.19_145)]/40 ring-4 ring-[oklch(72%_0.19_145)]/15',
-  FORM_FIELD_FILLED: 'bg-[oklch(24%_0.008_60)] border-[oklch(72%_0.19_145)]/20',
-  FORM_FIELD_DISABLED: 'bg-[oklch(24%_0.005_60)] cursor-not-allowed opacity-50',
+    'focus:border-color-accent-primary/40 focus:ring-4 focus:ring-color-accent-glow focus:bg-color-field-focus outline-none',
+  FORM_FIELD_ERROR: 'border-color-error/40 ring-4 ring-color-error-glow',
+  FORM_FIELD_SUCCESS: 'border-color-success/40 ring-4 ring-color-success-glow',
+  FORM_FIELD_FILLED: 'bg-color-field-disabled border-color-success/20',
+  FORM_FIELD_DISABLED: 'bg-color-field-disabled cursor-not-allowed opacity-50',
 
-  FORM_LABEL: 'block text-sm font-medium text-[oklch(94%_0.005_60)] mb-2',
-  FORM_LABEL_REQUIRED: 'after:content-["*"] after:ml-0.5 after:text-[oklch(70%_0.195_25)]',
-  FORM_HELP_TEXT: 'mt-1.5 text-xs text-[oklch(72%_0.01_60)]',
-  FORM_ERROR_TEXT: 'mt-1.5 text-xs font-medium text-[oklch(70%_0.195_25)] flex items-center gap-1',
+  FORM_LABEL: 'block text-sm font-medium text-foreground mb-2',
+  FORM_LABEL_REQUIRED: 'after:content-["*"] after:ml-0.5 after:text-color-error',
+  FORM_HELP_TEXT: 'mt-1.5 text-xs text-color-text-tertiary',
+  FORM_ERROR_TEXT: 'mt-1.5 text-xs font-medium text-color-error flex items-center gap-1',
   FORM_SUCCESS_TEXT:
-    'mt-1.5 text-xs font-medium text-[oklch(72%_0.19_145)] flex items-center gap-1',
+    'mt-1.5 text-xs font-medium text-color-success flex items-center gap-1',
 
   FORM_BUTTON_PRIMARY:
-    'rounded-lg bg-[oklch(74%_0.2_35)] px-6 py-3 text-sm font-semibold text-[#1A1A1D] hover:bg-[oklch(78%_0.19_35)] active:bg-[oklch(70%_0.21_35)] transition-colors shadow-lg shadow-[oklch(74%_0.2_35)]/20 disabled:opacity-50 disabled:cursor-not-allowed',
+    'rounded-lg bg-color-accent-primary px-6 py-3 text-sm font-semibold text-color-form-button-text hover:bg-color-accent-hover active:bg-color-accent-active transition-colors shadow-lg shadow-color-accent-glow disabled:opacity-50 disabled:cursor-not-allowed',
   FORM_BUTTON_SECONDARY:
-    'rounded-lg border border-white/10 bg-[oklch(28%_0.006_60)] px-6 py-3 text-sm font-semibold text-[oklch(94%_0.005_60)] hover:bg-[oklch(30%_0.008_60)] hover:border-white/20 transition-all',
+    'rounded-lg border border-white/10 bg-card px-6 py-3 text-sm font-semibold text-foreground hover:bg-color-bg-tertiary hover:border-white/20 transition-all',
   FORM_BUTTON_GHOST:
-    'rounded-lg px-4 py-2 text-sm font-medium text-[oklch(78%_0.008_60)] hover:bg-white/5 hover:text-[oklch(94%_0.005_60)] transition-all',
+    'rounded-lg px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-white/5 hover:text-foreground transition-all',
 
   FORM_PROGRESS_BAR: 'h-1 rounded-full bg-white/5 overflow-hidden',
   FORM_PROGRESS_FILL:
-    'h-full bg-gradient-to-r from-[oklch(74%_0.2_35)] to-[oklch(82%_0.17_37)] transition-all duration-500 ease-out',
+    'h-full bg-gradient-to-r from-color-accent-primary to-color-accent-light transition-all duration-500 ease-out',
   FORM_PROGRESS_STEP_COMPLETE:
-    'flex h-8 w-8 items-center justify-center rounded-full bg-[oklch(72%_0.19_145)] text-[#1A1A1D] text-sm font-bold',
+    'flex h-8 w-8 items-center justify-center rounded-full bg-color-success text-color-form-button-text text-sm font-bold',
   FORM_PROGRESS_STEP_ACTIVE:
-    'flex h-8 w-8 items-center justify-center rounded-full bg-[oklch(74%_0.2_35)] text-[#1A1A1D] text-sm font-bold shadow-lg shadow-[oklch(74%_0.2_35)]/30',
+    'flex h-8 w-8 items-center justify-center rounded-full bg-color-accent-primary text-color-form-button-text text-sm font-bold shadow-lg shadow-color-accent-glow',
   FORM_PROGRESS_STEP_PENDING:
     'flex h-8 w-8 items-center justify-center rounded-full border-2 border-white/20 text-white/40 text-sm font-semibold',
 
   FORM_TYPE_CARD:
-    'group relative rounded-xl border border-white/10 bg-[oklch(26%_0.006_60)] p-6 cursor-pointer transition-all hover:border-white/20 hover:bg-[oklch(28%_0.008_60)] hover:shadow-md',
+    'group relative rounded-xl border border-white/10 bg-color-field-idle p-6 cursor-pointer transition-all hover:border-white/20 hover:bg-color-field-hover hover:shadow-md',
   FORM_TYPE_CARD_SELECTED:
-    'relative rounded-xl border-2 border-[oklch(74%_0.2_35)] bg-[oklch(28%_0.008_60)] p-6 shadow-lg shadow-[oklch(74%_0.2_35)]/20',
+    'relative rounded-xl border-2 border-color-accent-primary bg-card p-6 shadow-lg shadow-color-accent-glow',
   FORM_TYPE_CARD_ICON: 'flex h-12 w-12 items-center justify-center rounded-lg bg-white/5 mb-3',
 
   FORM_STAT_CARD: 'rounded-lg bg-white/5 p-4 text-center',
-  FORM_STAT_NUMBER: 'text-3xl font-bold text-[oklch(74%_0.2_35)]',
-  FORM_STAT_LABEL: 'text-xs text-[oklch(72%_0.01_60)] mt-1',
+  FORM_STAT_NUMBER: 'text-3xl font-bold text-color-accent-primary',
+  FORM_STAT_LABEL: 'text-xs text-color-text-tertiary mt-1',
 
-  FORM_QUALITY_LOW: 'text-[oklch(70%_0.195_25)]',
-  FORM_QUALITY_MEDIUM: 'text-[oklch(75%_0.155_65)]',
-  FORM_QUALITY_HIGH: 'text-[oklch(72%_0.19_145)]',
-  FORM_QUALITY_PERFECT: 'text-[oklch(74%_0.2_35)]',
+  FORM_QUALITY_LOW: 'text-color-error',
+  FORM_QUALITY_MEDIUM: 'text-color-warning',
+  FORM_QUALITY_HIGH: 'text-color-success',
+  FORM_QUALITY_PERFECT: 'text-color-accent-primary',
 
   FORM_TAG:
-    'inline-flex items-center rounded-full bg-white/5 border border-white/10 px-3 py-1 text-xs font-medium text-[oklch(94%_0.005_60)] hover:bg-white/10 transition-colors',
+    'inline-flex items-center rounded-full bg-white/5 border border-white/10 px-3 py-1 text-xs font-medium text-foreground hover:bg-white/10 transition-colors',
   FORM_TAG_REMOVABLE:
-    'inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 px-3 py-1 text-xs font-medium text-[oklch(94%_0.005_60)] hover:bg-white/10 transition-colors group',
+    'inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 px-3 py-1 text-xs font-medium text-foreground hover:bg-white/10 transition-colors group',
   FORM_TAG_REMOVE_ICON:
-    'h-3 w-3 text-[oklch(72%_0.01_60)] hover:text-[oklch(70%_0.195_25)] cursor-pointer transition-colors',
+    'h-3 w-3 text-color-text-tertiary hover:text-color-error cursor-pointer transition-colors',
 
   FORM_CODE_BLOCK:
-    'rounded-lg bg-[oklch(12%_0.003_60)] border border-white/10 p-4 font-mono text-sm overflow-x-auto',
-  FORM_CODE_TOOLBAR: 'flex items-center justify-between mb-2 text-xs text-[oklch(72%_0.01_60)]',
+    'rounded-lg bg-color-bg-code border border-white/10 p-4 font-mono text-sm overflow-x-auto',
+  FORM_CODE_TOOLBAR: 'flex items-center justify-between mb-2 text-xs text-color-text-tertiary',
 
   FORM_EMPTY_STATE:
     'flex flex-col items-center justify-center p-8 text-center rounded-xl border border-dashed border-white/10 bg-white/2',
   FORM_EMPTY_ICON: 'h-12 w-12 text-white/20 mb-3',
-  FORM_EMPTY_TEXT: 'text-sm text-[oklch(72%_0.01_60)]',
+  FORM_EMPTY_TEXT: 'text-sm text-color-text-tertiary',
 
   FORM_SOCIAL_PROOF_CARD:
     'rounded-lg border border-blue-500/20 bg-blue-500/5 p-4 flex items-start gap-3',
@@ -462,13 +446,8 @@ export const UI_CLASSES = {
   INPUT_HIDDEN: 'hidden',
   UPLOAD_ZONE:
     'flex h-32 w-full cursor-pointer items-center justify-center rounded-lg border-2 border-muted-foreground/25 border-dashed bg-muted/50 transition-colors hover:border-muted-foreground/50 hover:bg-muted',
-} as const;
 
-// ==========================================
-// SECTION 2: DIMENSIONS
-// ==========================================
-
-export const DIMENSIONS = {
+  // ----- Dimension Constants -----
   FULL_VIEWPORT: 'h-[100dvh]',
   FULL_SCREEN: 'h-screen',
 
@@ -714,86 +693,8 @@ export const VIEWPORT_PRESETS = {
 // SECTION 8: BADGE COLORS
 // ==========================================
 
-const CATEGORY_BADGE_COLORS = {
-  agents: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
-  mcp: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
-  commands: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-  rules: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  hooks: 'bg-green-500/10 text-green-400 border-green-500/20',
-  statuslines: 'bg-teal-500/10 text-teal-400 border-teal-500/20',
-  collections: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
-  skills: 'bg-pink-500/10 text-pink-400 border-pink-500/20',
-  guides: 'bg-violet-500/10 text-violet-400 border-violet-500/20',
-  jobs: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-  changelog: 'bg-slate-500/10 text-slate-400 border-slate-500/20',
-  default: 'bg-gray-500/10 text-gray-400 border-gray-500/20',
-} as const;
-
-export const BADGE_COLORS = {
-  jobType: {
-    'full-time': 'bg-green-500/10 text-green-400 border-green-500/20',
-    'part-time': 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-    contract: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-    freelance: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
-    internship: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
-    remote: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-  },
-
-  difficulty: {
-    beginner: 'bg-green-500/10 text-green-400 border-green-500/20',
-    intermediate: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
-    advanced: 'bg-red-500/10 text-red-400 border-red-500/20',
-  },
-
-  collectionType: {
-    'starter-kit': 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-    workflow: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
-    'advanced-system': 'bg-red-500/10 text-red-400 border-red-500/20',
-    'use-case': 'bg-green-500/10 text-green-400 border-green-500/20',
-  },
-
-  changelogCategory: {
-    Added: 'bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20',
-    Changed: 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20',
-    Deprecated: 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/20',
-    Removed: 'bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20',
-    Fixed: 'bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20',
-    Security: 'bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-500/20',
-  },
-
-  status: {
-    success: 'bg-green-500/10 text-green-400 border-green-500/20',
-    warning: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
-    error: 'bg-red-500/10 text-red-400 border-red-500/20',
-    info: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-  },
-
-  category: CATEGORY_BADGE_COLORS,
-
-  submissionStatus: {
-    pending: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
-    approved: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-    merged: 'bg-green-500/10 text-green-400 border-green-500/20',
-    rejected: 'bg-red-500/10 text-red-400 border-red-500/20',
-    spam: 'bg-gray-500/10 text-gray-400 border-gray-500/20',
-  },
-
-  memberType: {
-    owner: 'bg-purple-500/10 text-purple-400 border-purple-500/30',
-    contributor: 'bg-accent/10 text-accent border-accent/30',
-    member: 'text-muted-foreground border-muted-foreground/20',
-  },
-
-  jobStatus: {
-    draft: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
-    pending_payment: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-    pending_review: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-    active: 'bg-green-500/10 text-green-400 border-green-500/20',
-    expired: 'bg-red-500/10 text-red-400 border-red-500/20',
-    rejected: 'bg-red-500/10 text-red-400 border-red-500/20',
-    deleted: 'bg-gray-500/10 text-gray-400 border-gray-500/20',
-  },
-} as const;
+// BADGE_COLORS deleted - all values migrated to @theme block in globals.css
+// Components now use direct Tailwind utilities (e.g., bg-color-badge-jobtype-fulltime-bg)
 
 // ==========================================
 // SECTION 9: ICON MAPPING
@@ -814,7 +715,6 @@ export const ICON_NAME_MAP: Record<string, LucideIcon> = {
 // TYPE EXPORTS
 // ==========================================
 
-export type UIClassKey = keyof typeof UI_CLASSES;
 export type DimensionKey = keyof typeof DIMENSIONS;
 export type StatePatternKey = keyof typeof STATE_PATTERNS;
 export type ResponsivePatternKey = keyof typeof RESPONSIVE_PATTERNS;
@@ -822,20 +722,21 @@ export type PositionPatternKey = keyof typeof POSITION_PATTERNS;
 export type BreakpointKey = keyof typeof BREAKPOINTS;
 export type ContainerBreakpointKey = keyof typeof CONTAINER_BREAKPOINTS;
 export type ViewportPresetKey = keyof typeof VIEWPORT_PRESETS;
-export type JobType = keyof typeof BADGE_COLORS.jobType;
-export type DifficultyLevel = keyof typeof BADGE_COLORS.difficulty;
-export type CollectionType = keyof typeof BADGE_COLORS.collectionType;
+// Types - using Prisma enums directly (source of truth)
+import type { experience_level } from '@heyclaude/data-layer/prisma';
+export type JobType = 'full-time' | 'part-time' | 'contract' | 'freelance' | 'internship' | 'remote';
+export type DifficultyLevel = experience_level;
+export type CollectionType = 'starter-kit' | 'workflow' | 'advanced-system' | 'use-case';
 
-export type ChangelogCategory = Database['public']['Enums']['changelog_category'];
+export type ChangelogCategory = changelog_category;
 
 /**
  * Ordered list of changelog categories matching the database enum.
- * Used to ensure consistency across CATEGORY_ICONS, BADGE_COLORS.changelogCategory, and rendering logic.
+ * Used to ensure consistency across CATEGORY_ICONS and rendering logic.
  * Display order: Added, Changed, Fixed, Security, Deprecated, Removed (prioritizes positive changes)
  *
- * @see Database['public']['Enums']['changelog_category']
+ * @see changelog_category
  * @see CATEGORY_ICONS
- * @see BADGE_COLORS.changelogCategory
  */
 export const CHANGELOG_CATEGORIES = [
   'Added',
@@ -846,10 +747,10 @@ export const CHANGELOG_CATEGORIES = [
   'Removed',
 ] as const satisfies readonly ChangelogCategory[];
 
-export type JobStatus = Database['public']['Enums']['job_status'];
-export type StatusType = keyof typeof BADGE_COLORS.status;
-export type CategoryType = keyof typeof BADGE_COLORS.category;
-export type SubmissionStatusType = keyof typeof BADGE_COLORS.submissionStatus;
+export type JobStatus = job_status;
+export type StatusType = 'success' | 'warning' | 'error' | 'info';
+export type CategoryType = content_category;
+export type SubmissionStatusType = submission_status;
 
 // ==========================================
 // UTILITY FUNCTIONS

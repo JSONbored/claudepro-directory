@@ -1,4 +1,5 @@
-import { Constants, type Database } from '@heyclaude/database-types';
+import { SubmissionType, SubmissionStatus } from '@heyclaude/data-layer/prisma';
+import type { submission_type, submission_status, content_category } from '@heyclaude/data-layer/prisma';
 import type { GetUserDashboardReturns } from '@heyclaude/database-types/postgres-types';
 import { isValidCategory } from '@heyclaude/web-runtime/core';
 import {
@@ -11,14 +12,12 @@ import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { CheckCircle, Clock, GitPullRequest, Send, XCircle } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  BADGE_COLORS,
   Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  UI_CLASSES,
   UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
@@ -31,6 +30,7 @@ import { SignInButton } from '@/src/components/core/auth/sign-in-button';
 import { SubmissionCard } from '@/src/components/core/domain/submissions/submission-card';
 
 import Loading from './loading';
+import { between, iconSize, marginTop, size, weight, spaceY, marginBottom, paddingY, paddingTop, gap } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Produce metadata for the account submissions page while ensuring request-time evaluation.
@@ -89,7 +89,7 @@ const PR_NUMBER_REGEX = /^\d+$/;
 const PR_PATH_REGEX = /^\/([^/]+)\/([^/]+)\/pull\/(\d+)$/;
 
 /***
- * Formats a parseable date string to the en-US "MMM d, yyyy" style or returns "-" for missing/invalid input.
+ * Formats a parseable date string to the en-US "MM dd, yyyy" style or returns "-" for missing/invalid input.
  *
  * @param {string} dateString - The date string to format.
  * @returns The formatted date (e.g., "Jan 2, 2024"), or "-" if `dateString` is missing or invalid.
@@ -191,13 +191,11 @@ function buildSafePrUrl(owner: string, repo: string, prNumber: string): string {
 }
 
 // Allow-list of valid content types shown in URLs
-// Use Constants from database types to ensure sync with database enum
-const ALLOWED_TYPES = Constants.public.Enums.submission_type;
+// Use Prisma enum value object to ensure sync with database enum
+const ALLOWED_TYPES = SubmissionType;
 
 // Typed copy for use as submission_type array
-const ALLOWED_TYPES_ARRAY: Array<Database['public']['Enums']['submission_type']> = [
-  ...ALLOWED_TYPES,
-];
+const ALLOWED_TYPES_ARRAY: Array<submission_type> = Object.values(ALLOWED_TYPES) as submission_type[];
 
 /***
  * Validates that a content slug contains only lowercase letters, digits, hyphens, or underscores.
@@ -221,8 +219,8 @@ function isValidSlug(slug: string): boolean {
  *
  * @see ALLOWED_TYPES
  */
-function isSafeType(type: string): type is Database['public']['Enums']['submission_type'] {
-  return (ALLOWED_TYPES as readonly string[]).includes(type);
+function isSafeType(type: string): type is submission_type {
+  return (Object.values(ALLOWED_TYPES) as readonly submission_type[]).includes(type as submission_type);
 }
 
 /****
@@ -231,7 +229,7 @@ function isSafeType(type: string): type is Database['public']['Enums']['submissi
  * Validates that `type` is an allowed submission_type and `slug` matches the expected
  * pattern before constructing the path.
  *
- * @param {Database['public']['Enums']['submission_type']} type - The submission type to use in the URL (must be an allowed `submission_type`)
+ * @param {submission_type} type - The submission type to use in the URL (must be an allowed `submission_type`)
  * @param {string} slug - The content slug (must match `^[a-z0-9-_]+$`)
  * @returns The internal URL path in the form `/type/slug` if both inputs are valid, `null` otherwise.
  *
@@ -239,7 +237,7 @@ function isSafeType(type: string): type is Database['public']['Enums']['submissi
  * @see isValidSlug
  */
 function getSafeContentUrl(
-  type: Database['public']['Enums']['submission_type'],
+  type: submission_type,
   slug: string
 ): null | string {
   if (!isSafeType(type) || !isValidSlug(slug)) {
@@ -312,10 +310,10 @@ async function SubmissionsPageContent({
       'SubmissionsPage: unauthenticated access attempt'
     );
     return (
-      <div className="space-y-6">
+      <div className={`${spaceY.relaxed}`}>
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Sign in required</CardTitle>
+            <CardTitle className={`${size['2xl']}`}>Sign in required</CardTitle>
             <CardDescription>Please sign in to view and manage your submissions.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -368,10 +366,10 @@ async function SubmissionsPageContent({
 
   if (hasError) {
     return (
-      <div className="space-y-6">
+      <div className={`${spaceY.relaxed}`}>
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Unable to load submissions</CardTitle>
+            <CardTitle className={`${size['2xl']}`}>Unable to load submissions</CardTitle>
             <CardDescription>
               We couldn&apos;t load your submissions right now. Please refresh or try again later.
             </CardDescription>
@@ -386,8 +384,8 @@ async function SubmissionsPageContent({
     );
   }
 
-  // Valid enum values for validation - use Constants from database types
-  const VALID_SUBMISSION_STATUSES = Constants.public.Enums.submission_status;
+  // Valid enum values for validation - use Prisma enum value object
+  const VALID_SUBMISSION_STATUSES = SubmissionStatus;
 
   /***
    * Validate submission status against enum values
@@ -397,9 +395,9 @@ async function SubmissionsPageContent({
    */
   function isValidSubmissionStatus(
     status: unknown
-  ): status is Database['public']['Enums']['submission_status'] {
+  ): status is submission_status {
     if (typeof status !== 'string') return false;
-    return (VALID_SUBMISSION_STATUSES as readonly string[]).includes(status);
+    return (Object.values(VALID_SUBMISSION_STATUSES) as readonly submission_status[]).includes(status as submission_status);
   }
 
   /***
@@ -410,9 +408,9 @@ async function SubmissionsPageContent({
    */
   function isValidSubmissionType(
     type: unknown
-  ): type is Database['public']['Enums']['submission_type'] {
+  ): type is submission_type {
     if (typeof type !== 'string') return false;
-    return (ALLOWED_TYPES as readonly string[]).includes(type);
+    return (Object.values(ALLOWED_TYPES) as readonly submission_type[]).includes(type as submission_type);
   }
 
   // Use Constants for enum values in Record keys
@@ -425,29 +423,38 @@ async function SubmissionsPageContent({
     rejected: { icon: XCircle, label: 'Rejected' },
     spam: { icon: XCircle, label: 'Spam' },
   } satisfies Record<
-    Database['public']['Enums']['submission_status'],
+    submission_status,
     { icon: typeof Clock; label: string }
   >;
 
-  const getStatusBadge = (status: Database['public']['Enums']['submission_status']) => {
+  // Direct Tailwind utilities mapping
+  const submissionStatusBadgeMap: Record<submission_status, string> = {
+    pending: 'bg-color-badge-submissionstatus-pending-bg text-color-badge-submissionstatus-pending-text border-color-badge-submissionstatus-pending-border',
+    approved: 'bg-color-badge-submissionstatus-approved-bg text-color-badge-submissionstatus-approved-text border-color-badge-submissionstatus-approved-border',
+    merged: 'bg-color-badge-submissionstatus-merged-bg text-color-badge-submissionstatus-merged-text border-color-badge-submissionstatus-merged-border',
+    rejected: 'bg-color-badge-submissionstatus-rejected-bg text-color-badge-submissionstatus-rejected-text border-color-badge-submissionstatus-rejected-border',
+    spam: 'bg-color-badge-submissionstatus-spam-bg text-color-badge-submissionstatus-spam-text border-color-badge-submissionstatus-spam-border',
+  };
+
+  const getStatusBadge = (status: submission_status) => {
     const variant = SUBMISSION_STATUS_VARIANTS[status];
     const Icon = variant.icon;
-    const colorClass = BADGE_COLORS.submissionStatus[status];
+    const colorClass = submissionStatusBadgeMap[status];
 
     return (
       <UnifiedBadge className={colorClass} style="outline" variant="base">
-        <Icon className="mr-1 h-3 w-3" />
+        <Icon className={`mr-1 ${iconSize.xs}`} />
         {variant.label}
       </UnifiedBadge>
     );
   };
 
-  const getTypeLabel = (type: Database['public']['Enums']['submission_type']): string => {
+  const getTypeLabel = (type: submission_type): string => {
     // Map submission_type to content_category for config lookup
     // Use explicit enum string values instead of fragile numeric indexing
     const categoryMap: Record<
-      Database['public']['Enums']['submission_type'],
-      Database['public']['Enums']['content_category']
+      submission_type,
+      content_category
     > = {
       agents: 'agents',
       commands: 'commands',
@@ -466,7 +473,7 @@ async function SubmissionsPageContent({
 
     // Fallback to hardcoded labels if category mapping fails
     // Use explicit enum string values instead of fragile numeric indexing
-    const fallbackLabels: Record<Database['public']['Enums']['submission_type'], string> = {
+    const fallbackLabels: Record<submission_type, string> = {
       agents: 'Claude Agent',
       commands: 'Command',
       hooks: 'Hook',
@@ -506,18 +513,18 @@ async function SubmissionsPageContent({
   /*****
    * Return a safe internal content link when the submission is merged and inputs are valid.
    *
-   * @param {Database['public']['Enums']['submission_type']} type - The submission's type (one of Database.public.Enums.submission_type)
+   * @param {submission_type} type - The submission's type (one of Prisma submission_type enum values)
    * @param {string} slug - The content slug to link to; must match the internal slug pattern
-   * @param {Database['public']['Enums']['submission_status']} status - The submission's status (one of Database.public.Enums.submission_status)
+   * @param {submission_status} status - The submission's status (one of Prisma submission_status enum values)
    * @returns `{ href: string }` containing a safe `/type/slug` URL when `status` equals the merged status and `type`/`slug` validate; otherwise `null`
    *
    * @see getSafeContentUrl
-   * @see Constants.public.Enums.submission_status
+   * @see SubmissionStatus
    */
   function getContentLinkProperties(
-    type: Database['public']['Enums']['submission_type'],
+    type: submission_type,
     slug: string,
-    status: Database['public']['Enums']['submission_status']
+    status: submission_status
   ): null | { href: string } {
     const safeUrl = getSafeContentUrl(type, slug);
     return safeUrl && status === 'merged' ? { href: safeUrl } : null;
@@ -531,17 +538,17 @@ async function SubmissionsPageContent({
   }
 
   return (
-    <div className="space-y-6">
-      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+    <div className={`${spaceY.relaxed}`}>
+      <div className={between.center}>
         <div>
-          <h1 className="mb-2 text-3xl font-bold">My Submissions</h1>
+          <h1 className={`${marginBottom.compact} ${size['3xl']} ${weight.bold}`}>My Submissions</h1>
           <p className="text-muted-foreground">
             {submissions.length} {submissions.length === 1 ? 'submission' : 'submissions'}
           </p>
         </div>
         <Button asChild>
           <Link href={ROUTES.SUBMIT}>
-            <Send className={`mr-2 ${UI_CLASSES.ICON_SM}`} />
+            <Send className={`mr-2 ${iconSize.sm}`} />
             New Submission
           </Link>
         </Button>
@@ -549,23 +556,23 @@ async function SubmissionsPageContent({
 
       {submissions.length === 0 ? (
         <Card>
-          <CardContent className="flex flex-col items-center py-12">
-            <Send className={`mb-4 h-12 w-12 ${UI_CLASSES.ICON_NEUTRAL}`} />
-            <h3 className="mb-2 text-xl font-semibold">No submissions yet</h3>
-            <p className="text-muted-foreground mb-4 max-w-md text-center">
+          <CardContent className={`flex flex-col items-center ${paddingY.section}`}>
+            <Send className={`${marginBottom.default} ${iconSize['2xl']} text-muted-foreground`} />
+            <h3 className={`${marginBottom.compact} ${size.xl} ${weight.semibold}`}>No submissions yet</h3>
+            <p className={`text-muted-foreground ${marginBottom.default} max-w-md text-center`}>
               Share your Claude configurations with the community! Your contributions help everyone
               build better AI workflows.
             </p>
             <Button asChild>
               <Link href={ROUTES.SUBMIT}>
-                <Send className={`mr-2 ${UI_CLASSES.ICON_SM}`} />
+                <Send className={`mr-2 ${iconSize.sm}`} />
                 Submit Your First Configuration
               </Link>
             </Button>
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4">
+        <div className={`grid ${gap.default}`}>
           {submissions.map((submission, index) => (
             <SubmissionCard
               formatSubmissionDate={formatSubmissionDate}
@@ -578,7 +585,7 @@ async function SubmissionsPageContent({
               isValidSubmissionType={isValidSubmissionType}
               key={submission.id ?? `submission-${index}`}
               submission={submission}
-              VALID_SUBMISSION_STATUSES={[...VALID_SUBMISSION_STATUSES]}
+              VALID_SUBMISSION_STATUSES={Object.values(VALID_SUBMISSION_STATUSES) as submission_status[]}
               VALID_SUBMISSION_TYPES={ALLOWED_TYPES_ARRAY}
             />
           ))}
@@ -587,14 +594,14 @@ async function SubmissionsPageContent({
 
       {/* Info Card */}
       <Card className="border-blue-500/20 bg-blue-500/5">
-        <CardContent className="pt-6">
-          <div className="flex gap-3">
+        <CardContent className={`${paddingTop.comfortable}`}>
+          <div className={`flex ${gap.compact}`}>
             <GitPullRequest
-              className={`${UI_CLASSES.ICON_MD} ${UI_CLASSES.ICON_INFO} ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
+              className={`${iconSize.md} text-blue-500 dark:text-blue-400 flex-shrink-0 ${marginTop.micro}`}
             />
             <div className="flex-1">
-              <p className="text-sm font-medium text-blue-400">How it works</p>
-              <p className="text-muted-foreground mt-1 text-sm">
+              <p className={`${size.sm} ${weight.medium} text-blue-400`}>How it works</p>
+              <p className={`text-muted-foreground ${marginTop.tight} ${size.sm}`}>
                 When you submit a configuration, we automatically create a Pull Request on GitHub.
                 Our team reviews it for quality, security, and accuracy. Once approved and merged,
                 your contribution goes live for everyone to use!

@@ -15,8 +15,8 @@ import { fileURLToPath } from 'node:url';
 
 import { Project, SyntaxKind } from 'ts-morph';
 
-import { logger } from '../toolkit/logger.js';
-import { normalizeError } from '../toolkit/errors.js';
+import { logger } from '../toolkit/logger.ts';
+import { normalizeError } from '../toolkit/errors.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const SCRIPT_DIR = join(__filename, '..');

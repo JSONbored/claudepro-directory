@@ -34,86 +34,81 @@ export function HomepageSearchProvider({ children }: HomepageSearchProviderProps
   });
 
   // Handle search with analytics
+  // OPTIMIZATION: Reduced logging in production (only log errors, not all steps)
   const handleSearch = useCallback(
     async (query: string, filters: FilterState) => {
       const searchStart = Date.now();
+      const trimmedQuery = query.trim();
       
-      logClientInfo(
-        '[HomepageSearchProvider] handleSearch called',
-        'HomepageSearchProvider.handleSearch.start',
-        {
-          component: 'HomepageSearchProvider',
-          action: 'handle-search-start',
-          query: query.trim(),
-          queryLength: query.trim().length,
-          filters: JSON.stringify(filters),
-          timestamp: searchStart,
-        }
-      );
-      
-      try {
-        const functionCallStart = Date.now();
-        const results = await searchFunction(query, filters);
-        const functionCallDuration = Date.now() - functionCallStart;
-        
+      // OPTIMIZATION: Only log in development to reduce production overhead
+      if (process.env.NODE_ENV === 'development') {
         logClientInfo(
-          '[HomepageSearchProvider] searchFunction completed',
-          'HomepageSearchProvider.handleSearch.functionCompleted',
+          '[HomepageSearchProvider] handleSearch called',
+          'HomepageSearchProvider.handleSearch.start',
           {
             component: 'HomepageSearchProvider',
-            action: 'handle-search-function-completed',
-            query: query.trim(),
-            resultsCount: Array.isArray(results) ? results.length : 0,
-            isArray: Array.isArray(results),
-            functionDuration: functionCallDuration,
-            timestamp: Date.now(),
+            action: 'handle-search-start',
+            query: trimmedQuery,
+            queryLength: trimmedQuery.length,
+            filters: JSON.stringify(filters),
+            timestamp: searchStart,
           }
         );
+      }
+      
+      try {
+        const results = await searchFunction(query, filters);
 
-        // Track search analytics (fire and forget)
-        if (query.trim()) {
-          // Use 'agents' as default category for homepage search (no specific category)
+        // Track search analytics (fire and forget - non-blocking)
+        if (trimmedQuery) {
           pulse
             .search({
               category: 'agents',
               slug: '',
-              query: query.trim(),
+              query: trimmedQuery,
               metadata: {
                 filters,
-                resultCount: results.length,
+                resultCount: Array.isArray(results) ? results.length : 0,
               },
             })
             .catch((error) => {
-              const normalized = normalizeError(error, 'Analytics tracking failed');
-              logClientError(
-                '[HomepageSearchProvider] Analytics tracking error',
-                normalized,
-                'HomepageSearchProvider.handleSearch.analyticsError',
-                {
-                  component: 'HomepageSearchProvider',
-                  action: 'handle-search-analytics-error',
-                  query: query.trim(),
-                  timestamp: Date.now(),
-                }
-              );
+              // Only log analytics errors in development
+              if (process.env.NODE_ENV === 'development') {
+                const normalized = normalizeError(error, 'Analytics tracking failed');
+                logClientError(
+                  '[HomepageSearchProvider] Analytics tracking error',
+                  normalized,
+                  'HomepageSearchProvider.handleSearch.analyticsError',
+                  {
+                    component: 'HomepageSearchProvider',
+                    action: 'handle-search-analytics-error',
+                    query: trimmedQuery,
+                    timestamp: Date.now(),
+                  }
+                );
+              }
             });
         }
 
-        logClientInfo(
-          '[HomepageSearchProvider] handleSearch completed successfully',
-          'HomepageSearchProvider.handleSearch.success',
-          {
-            component: 'HomepageSearchProvider',
-            action: 'handle-search-success',
-            query: query.trim(),
-            resultsCount: Array.isArray(results) ? results.length : 0,
-            totalDuration: Date.now() - searchStart,
-            timestamp: Date.now(),
-          }
-        );
+        // OPTIMIZATION: Only log success in development
+        if (process.env.NODE_ENV === 'development') {
+          logClientInfo(
+            '[HomepageSearchProvider] handleSearch completed successfully',
+            'HomepageSearchProvider.handleSearch.success',
+            {
+              component: 'HomepageSearchProvider',
+              action: 'handle-search-success',
+              query: trimmedQuery,
+              resultsCount: Array.isArray(results) ? results.length : 0,
+              totalDuration: Date.now() - searchStart,
+              timestamp: Date.now(),
+            }
+          );
+        }
 
         return results;
       } catch (error) {
+        // Always log errors (even in production)
         const normalized = normalizeError(error, 'handleSearch failed');
         
         logClientError(
@@ -123,7 +118,7 @@ export function HomepageSearchProvider({ children }: HomepageSearchProviderProps
           {
             component: 'HomepageSearchProvider',
             action: 'handle-search-error',
-            query: query.trim(),
+            query: trimmedQuery,
             errorName: error instanceof Error ? error.name : 'Unknown',
             errorMessage: error instanceof Error ? error.message : String(error),
             duration: Date.now() - searchStart,

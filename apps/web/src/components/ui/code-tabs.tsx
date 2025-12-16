@@ -38,6 +38,7 @@ import { useTheme } from 'next-themes';
 import { Tabs, TabsContent, TabsList, TabsTrigger, cn } from '@heyclaude/web-runtime/ui';
 import { getThemeConfig } from '@heyclaude/shared-runtime';
 import { CopyButton } from './code-editor';
+import { paddingX, paddingY, padding } from "@heyclaude/web-runtime/design-system";
 
 type CodeTabsProps = {
   codes: Record<string, string>;
@@ -109,14 +110,14 @@ function CodeTabsContent({
     <>
       <TabsList
         data-slot="install-tabs-list"
-        className="w-full relative justify-between rounded-none h-10 bg-muted border-b border-border/75 dark:border-border/50 text-current py-0 px-4"
+        className={`w-full relative justify-between rounded-none h-10 bg-muted border-b border-border/75 dark:border-border/50 text-current ${paddingY.default} ${paddingX.default}`}
       >
         <div className="flex gap-x-3 h-full">
           {Object.keys(codes).map((code) => (
             <TabsTrigger
               key={code}
               value={code}
-              className="text-muted-foreground data-[state=active]:text-current px-0"
+              className={`text-muted-foreground data-[state=active]:text-current ${paddingX.default}`}
             >
               {code}
             </TabsTrigger>
@@ -137,10 +138,10 @@ function CodeTabsContent({
         <TabsContent
           data-slot="install-tabs-content"
           key={code}
-          className="w-full text-sm flex items-center p-4 overflow-auto"
+          className={`w-full text-sm flex items-center ${padding.default} overflow-auto`}
           value={code}
         >
-          <div className="w-full [&>pre]:m-0 [&>pre]:p-0 [&>pre]:bg-transparent! [&>pre]:border-none [&>pre]:text-[13px] [&>pre]:leading-relaxed [&_code]:text-[13px] [&_code]:leading-relaxed [&_code]:bg-transparent! [&_.shiki]:bg-transparent!">
+          <div className={`w-full [&>pre]:m-0 [&>pre]:${padding.default} [&>pre]:bg-transparent! [&>pre]:border-none [&>pre]:text-[13px] [&>pre]:leading-relaxed [&_code]:text-[13px] [&_code]:leading-relaxed [&_code]:bg-transparent! [&_.shiki]:bg-transparent!`}>
             {highlightedCodes[code] !== undefined && highlightedCodes[code] !== rawCode ? (
               <div dangerouslySetInnerHTML={{ __html: highlightedCodes[code]! }} />
             ) : (

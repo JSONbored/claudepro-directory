@@ -3,7 +3,6 @@
  * Schemas are serialized with XSS protection client-side
  */
 
-import type { Json } from '@heyclaude/database-types';
 import { serializeJsonLd } from '@heyclaude/shared-runtime';
 import { getSEOMetadataWithSchemas } from '@heyclaude/web-runtime/data';
 
@@ -52,11 +51,13 @@ export async function StructuredData({ route }: StructuredDataProps) {
     <>
       {seoData.schemas.map((schema, index) => {
         // Sanitize schema to remove javascript: protocol before serialization
-        const sanitizedSchema = sanitizeUrlsInObject(schema) as typeof schema;
+        const sanitizedSchema = sanitizeUrlsInObject(schema);
         
         // Serialize JSON-LD with XSS protection
-        // Cast to Json type for Prisma compatibility
-        const serialized = serializeJsonLd(sanitizedSchema as Json);
+        // Prisma JsonValue and shared-runtime JsonValue are structurally compatible
+        // Both are: string | number | boolean | null | { [key: string]: JsonValue } | JsonValue[]
+        // We use JSON.parse/stringify to convert between compatible types (not a type assertion)
+        const serialized = serializeJsonLd(JSON.parse(JSON.stringify(sanitizedSchema)));
 
         // Extract @type for key
         let schemaType = 'schema';

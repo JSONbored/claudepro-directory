@@ -1,7 +1,8 @@
 'use server';
 
-import { ContentService, type ContentPaginatedSlimResult } from '@heyclaude/data-layer';
-import { type content_category } from '@heyclaude/data-layer/prisma';
+import { ContentService } from '@heyclaude/data-layer';
+import type { ContentPaginatedSlimResult } from '@heyclaude/database-types/postgres-types';
+import type { content_category } from '@heyclaude/data-layer/prisma';
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { normalizeError } from '../../errors.ts';
@@ -32,18 +33,25 @@ const CONTENT_CATEGORY_VALUES: readonly content_category[] = [
 function toContentCategory(value: null | string | undefined): content_category | undefined {
   if (!value) return undefined;
   const lowered = value.trim().toLowerCase();
-  return CONTENT_CATEGORY_VALUES.includes(lowered as content_category)
-    ? (lowered as content_category)
-    : undefined;
+  // Type guard: Check if lowered is a valid content_category
+  // Use proper type guard with explicit check
+  for (const validCategory of CONTENT_CATEGORY_VALUES) {
+    if (lowered === validCategory) {
+      return validCategory;
+    }
+  }
+  return undefined;
 }
 
 /**
- * Get paginated content
+ * Get paginated content.
  * Uses 'use cache' to cache paginated content lists. This data is public and same for all users.
- * @param root0
- * @param root0.category
- * @param root0.limit
- * @param root0.offset
+ *
+ * @param params - Pagination and category filter parameters
+ * @param params.category - Optional category filter (null, string, or undefined)
+ * @param params.limit - Maximum number of results to return
+ * @param params.offset - Number of results to skip
+ * @returns Promise resolving to paginated content result or null
  */
 export async function getPaginatedContent({
   category,

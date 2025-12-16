@@ -1,5 +1,5 @@
-import type { EnrichedContentItem } from '@heyclaude/data-layer/types/composite-types';
-import type { Database } from '@heyclaude/database-types';
+import type { EnrichedContentItem } from '@heyclaude/database-types/postgres-types';
+import { prisma } from '@heyclaude/data-layer/prisma';
 
 export function ensureStringArray(value: unknown): string[] {
   if (Array.isArray(value)) {
@@ -11,8 +11,11 @@ export function ensureStringArray(value: unknown): string[] {
   return [];
 }
 
+// Type helper: Extract content type from Prisma query result
+type ContentType = Awaited<ReturnType<typeof prisma.content.findUnique>>;
+
 export function getMetadata(
-  item: EnrichedContentItem | Database['public']['Tables']['content']['Row']
+  item: EnrichedContentItem | NonNullable<ContentType>
 ): Record<string, unknown> {
   const metadata = 'metadata' in item ? item.metadata : null;
   if (metadata && typeof metadata === 'object' && !Array.isArray(metadata) && metadata !== null) {

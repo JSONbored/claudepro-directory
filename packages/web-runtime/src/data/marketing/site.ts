@@ -45,7 +45,7 @@ interface VercelAnalyticsResponse {
  * @returns {unknown} Description of return value*/
 async function getVisitorStats(): Promise<VisitorStats> {
   'use cache';
-  cacheLife('hours'); // 1hr stale, 15min revalidate, 1 day expire
+  cacheLife('stable'); // 6hr stale, 1hr revalidate, 7 days expire - optimized for SEO
   cacheTag('marketing-visitor-stats');
 
   // Create request-scoped child logger - do not mutate shared logger in cached function
@@ -107,8 +107,8 @@ export async function getContentDescriptionCopy(): Promise<string> {
 
   const { cacheLife, cacheTag } = await import('next/cache');
 
-  // Configure cache - use 'half' profile for content description (changes every 30 minutes)
-  cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
+  // Configure cache - use 'static' profile for optimal SEO (1 day stale, 6hr revalidate, 30 days expire)
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
   cacheTag('marketing');
   cacheTag('content-description');
 
@@ -148,8 +148,8 @@ export async function getPartnerHeroStats(): Promise<PartnerHeroStats> {
 
   const { cacheLife, cacheTag } = await import('next/cache');
 
-  // Configure cache - use 'half' profile for partner hero stats (changes every 30 minutes)
-  cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
+  // Configure cache - use 'stable' profile for optimal SEO (6hr stale, 1hr revalidate, 7 days expire)
+  cacheLife('stable'); // 6hr stale, 1hr revalidate, 7 days expire - optimized for SEO
   cacheTag('marketing');
   cacheTag('partner-hero-stats');
 

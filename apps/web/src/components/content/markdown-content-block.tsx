@@ -40,7 +40,7 @@
  * ```
  */
 
-import { DURATION } from '@heyclaude/web-runtime/design-system';
+import { marginY, paddingBottom, marginTop, spaceY, marginBottom, paddingLeft, paddingTop, gap, paddingY, marginLeft, padding, transition } from '@heyclaude/web-runtime/design-system';
 import { BookOpen, CheckCircle, Zap } from '@heyclaude/web-runtime/icons';
 import {
   type CaseStudyProps,
@@ -50,8 +50,8 @@ import {
   type QuickReferenceProps,
   type TLDRSummaryProps,
 } from '@heyclaude/web-runtime/types/component.types';
+import { optimizeAvatarUrl } from '@heyclaude/web-runtime/utils/optimize-avatar-url';
 import {
-  UI_CLASSES,
   UnifiedBadge,
   Avatar,
   AvatarFallback,
@@ -65,7 +65,9 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
+  cn,
 } from '@heyclaude/web-runtime/ui';
+import { iconSize, size, muted, cluster, stack } from '@heyclaude/web-runtime/design-system';
 
 // ============================================================================
 // TYPE DEFINITIONS - Discriminated Union
@@ -153,40 +155,40 @@ function CaseStudyVariant(props: CaseStudyProps) {
   const { company, industry, challenge, solution, results, metrics, testimonial, logo } = props;
 
   return (
-    <Card itemScope itemType="https://schema.org/Article" className="my-8 overflow-hidden">
-      <CardHeader className="pb-4">
+    <Card itemScope itemType="https://schema.org/Article" className={`${marginY.relaxed} overflow-hidden`}>
+      <CardHeader className={`${paddingBottom.default}`}>
         <div className="flex items-start justify-between">
           <div>
             <CardTitle className="text-2xl" itemProp="headline">
               {company} Case Study
             </CardTitle>
             {industry ? (
-              <UnifiedBadge variant="base" style="outline" className="mt-2">
+              <UnifiedBadge variant="base" style="outline" className={`${marginTop.compact}`}>
                 {industry}
               </UnifiedBadge>
             ) : null}
           </div>
           {logo ? (
             <div className="bg-muted flex h-16 w-16 items-center justify-center rounded-lg">
-              <BookOpen className={`${UI_CLASSES.ICON_XL} text-muted-foreground`} />
+              <BookOpen className={`${iconSize.xl} text-muted-foreground`} />
             </div>
           ) : null}
         </div>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className={`${spaceY.relaxed}`}>
         <div>
-          <h4 className="text-destructive mb-2 font-semibold">Challenge</h4>
+          <h4 className={`text-destructive ${marginBottom.compact} font-semibold`}>Challenge</h4>
           <p className="text-muted-foreground">{challenge}</p>
         </div>
 
         <div>
-          <h4 className="text-primary mb-2 font-semibold">Solution</h4>
+          <h4 className={`text-primary ${marginBottom.compact} font-semibold`}>Solution</h4>
           <p className="text-muted-foreground">{solution}</p>
         </div>
 
         <div>
-          <h4 className="mb-2 font-semibold text-green-600 dark:text-green-400">Results</h4>
-          <ul className="list-disc space-y-1 pl-5 text-muted-foreground">
+          <h4 className={`${marginBottom.compact} font-semibold text-green-600 dark:text-green-400`}>Results</h4>
+          <ul className={`list-disc ${spaceY.tight} ${paddingLeft.default} text-muted-foreground`}>
             {results.map((result) => (
               <li key={result}>{result}</li>
             ))}
@@ -194,10 +196,10 @@ function CaseStudyVariant(props: CaseStudyProps) {
         </div>
 
         {metrics && Array.isArray(metrics) && metrics.length > 0 ? (
-          <div className="grid grid-cols-2 gap-4 border-t pt-4 md:grid-cols-3">
+          <div className={`grid grid-cols-2 ${gap.default} border-t ${paddingTop.default} md:grid-cols-3`}>
             {metrics.map((metric) => (
               <div key={metric.label} className="text-center">
-                <p className="flex items-center justify-center gap-1 text-2xl font-bold">
+                <p className={`flex items-center justify-center ${gap.micro} text-2xl font-bold`}>
                   {metric.value}
                   {metric.trend ? (
                     <span
@@ -217,15 +219,15 @@ function CaseStudyVariant(props: CaseStudyProps) {
                     </span>
                   ) : null}
                 </p>
-                <p className={UI_CLASSES.TEXT_SM_MUTED}>{metric.label}</p>
+                <p className={`${size.sm} ${muted.default}`}>{metric.label}</p>
               </div>
             ))}
           </div>
         ) : null}
 
         {testimonial ? (
-          <blockquote className="border-primary bg-muted/30 rounded-r-lg border-l-4 py-2 pl-4">
-            <p className="text-muted-foreground mb-2 italic">"{testimonial.quote}"</p>
+          <blockquote className={`border-primary bg-muted/30 rounded-r-lg border-l-4 ${paddingY.tight} ${paddingLeft.default}`}>
+            <p className={`text-muted-foreground ${marginBottom.compact} italic`}>"{testimonial.quote}"</p>
             <footer className="text-sm">
               <cite className="font-semibold not-italic">{testimonial.author}</cite>
               {testimonial.role ? (
@@ -273,9 +275,9 @@ function FeatureGridVariant(props: FeatureGridProps) {
   }
 
   return (
-    <section itemScope itemType="https://schema.org/ItemList" className="my-8">
-      <div className="mb-6">
-        <h2 className="mb-2 text-2xl font-bold" itemProp="name">
+    <section itemScope itemType="https://schema.org/ItemList" className={`${marginY.relaxed}`}>
+      <div className={`${marginBottom.comfortable}`}>
+        <h2 className={`${marginBottom.compact} text-2xl font-bold`} itemProp="name">
           {title}
         </h2>
         {description ? (
@@ -291,14 +293,15 @@ function FeatureGridVariant(props: FeatureGridProps) {
             key={feature.title}
             itemScope
             itemType="https://schema.org/ListItem"
-            className="group border-border/50 from-card/30 via-card/50 to-card/30 hover:from-card/50 hover:via-card/70 hover:to-card/50 relative h-full overflow-hidden border bg-linear-to-br shadow-lg transition-all hover:-translate-y-1 hover:shadow-xl"
+            className={cn(
+              "group border-border/50 from-card/30 via-card/50 to-card/30 hover:from-card/50 hover:via-card/70 hover:to-card/50 relative h-full overflow-hidden border bg-linear-to-br shadow-lg hover:-translate-y-1 hover:shadow-xl animate-fade-in-up",
+              transition.default
+            )}
             style={{
               animationDelay: `${index * 50}ms`,
-              animation: 'fadeInUp 0.5s ease-out forwards',
-              transitionDuration: `${DURATION.default}s`,
             }}
           >
-            <div className="from-primary/5 to-primary/5 pointer-events-none absolute inset-0 bg-linear-to-br via-transparent opacity-0 transition-opacity group-hover:opacity-100" style={{ transitionDuration: `${DURATION.default}s` }} />
+            <div className={cn("from-primary/5 to-primary/5 pointer-events-none absolute inset-0 bg-linear-to-br via-transparent opacity-0 transition-opacity group-hover:opacity-100", transition.default)} />
 
             <CardHeader>
               <CardTitle className="relative z-10 flex items-start justify-between" itemProp="name">
@@ -309,7 +312,7 @@ function FeatureGridVariant(props: FeatureGridProps) {
                   <UnifiedBadge
                     variant="base"
                     style="secondary"
-                    className="border-primary/30 from-primary/20 to-primary/30 ml-2 bg-linear-to-r shadow-sm"
+                    className={`border-primary/30 from-primary/20 to-primary/30 ${marginLeft.tight} bg-linear-to-r shadow-sm`}
                   >
                     {feature.badge}
                   </UnifiedBadge>
@@ -352,26 +355,26 @@ function TLDRVariant(props: TLDRSummaryProps) {
     <Card
       itemScope
       itemType="https://schema.org/Article"
-      className="border-primary bg-primary/5 my-8 border-l-4"
+      className={`border-primary bg-primary/5 ${marginY.relaxed} border-l-4`}
     >
       <CardHeader>
-        <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-          <Zap className={`${UI_CLASSES.ICON_MD} text-primary`} />
+        <CardTitle className={cluster.compact}>
+          <Zap className={`${iconSize.md} text-primary`} />
           {title}
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <p itemProp="abstract" className="text-muted-foreground mb-4 leading-relaxed">
+        <p itemProp="abstract" className={`text-muted-foreground ${marginBottom.default} leading-relaxed`}>
           {content}
         </p>
 
         {keyPoints && keyPoints.length > 0 ? (
           <div>
-            <h4 className="mb-2 font-semibold">Key Takeaways:</h4>
-            <ul className="space-y-1">
+            <h4 className={`${marginBottom.compact} font-semibold`}>Key Takeaways:</h4>
+            <ul className={`${spaceY.tight}`}>
               {keyPoints.map((point) => (
-                <li key={point} className="flex items-start gap-2 text-sm">
-                  <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-green-500" />
+                <li key={point} className={`flex items-start ${gap.tight} text-sm`}>
+                  <CheckCircle className={`${marginTop.micro} h-4 w-4 shrink-0 text-green-500`} />
                   <span>{point}</span>
                 </li>
               ))}
@@ -405,15 +408,18 @@ function ExpertQuoteVariant(props: ExpertQuoteProps) {
     <blockquote
       itemScope
       itemType="https://schema.org/Quotation"
-      className="border-primary bg-muted/30 my-8 rounded-r-lg border-l-4 p-6"
+      className={`border-primary bg-muted/30 ${marginY.relaxed} rounded-r-lg border-l-4 ${padding.comfortable}`}
     >
-      <p itemProp="text" className="mb-4 text-lg leading-relaxed italic">
+      <p itemProp="text" className={`${marginBottom.default} text-lg leading-relaxed italic`}>
         "{quote}"
       </p>
-      <footer className="flex items-center gap-4">
+      <footer className={`flex items-center ${gap.default}`}>
         {imageUrl ? (
           <Avatar className="h-12 w-12">
-            <AvatarImage src={imageUrl} alt={author} />
+            <AvatarImage 
+              src={optimizeAvatarUrl(imageUrl, 48) ?? imageUrl} 
+              alt={author} 
+            />
             <AvatarFallback>{author.slice(0, 2).toUpperCase()}</AvatarFallback>
           </Avatar>
         ) : null}
@@ -469,11 +475,11 @@ function QuickReferenceVariant(props: QuickReferenceProps) {
     <Card
       itemScope
       itemType="https://schema.org/Table"
-      className="border-accent bg-accent/5 my-8 border-l-4"
+      className={`border-accent bg-accent/5 ${marginY.relaxed} border-l-4`}
     >
       <CardHeader>
-        <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-          <BookOpen className={`${UI_CLASSES.ICON_MD} text-accent-foreground`} />
+        <CardTitle className={cluster.compact}>
+          <BookOpen className={`${iconSize.md} text-accent-foreground`} />
           {title}
         </CardTitle>
         {description ? (
@@ -487,19 +493,19 @@ function QuickReferenceVariant(props: QuickReferenceProps) {
               key={`${item.label}-${index}`}
               itemScope
               itemType="https://schema.org/PropertyValue"
-              className={`${UI_CLASSES.FLEX_COL_GAP_2} bg-card/50 rounded-lg border p-3 sm:flex-row sm:items-start sm:gap-4`}
+              className={`${stack.compact} bg-card/50 rounded-lg border p-3 sm:flex-row sm:items-start sm:gap-4`}
             >
               <div className="sm:w-1/3">
-                <p itemProp="name" className={`font-medium ${UI_CLASSES.TEXT_SM_MUTED}`}>
+                <p itemProp="name" className={`font-medium ${size.sm} ${muted.default}`}>
                   {item.label}
                 </p>
               </div>
               <div className="sm:w-2/3">
-                <p itemProp="value" className="text-foreground mb-1 font-semibold">
+                <p itemProp="value" className={`text-foreground ${marginBottom.tight} font-semibold`}>
                   {item.value}
                 </p>
                 {item.description ? (
-                  <p className={UI_CLASSES.TEXT_SM_MUTED}>{item.description}</p>
+                  <p className={`${size.sm} ${muted.default}`}>{item.description}</p>
                 ) : null}
               </div>
             </div>
@@ -543,10 +549,10 @@ function ContentTabsVariant(props: ContentTabsProps) {
   const firstValue = defaultValue || validItems[0]?.value || '';
 
   return (
-    <section itemScope itemType="https://schema.org/ItemList" className="my-8">
+    <section itemScope itemType="https://schema.org/ItemList" className={`${marginY.relaxed}`}>
       {title ? (
-        <div className="mb-6">
-          <h3 className="mb-2 text-xl font-bold" itemProp="name">
+        <div className={`${marginBottom.comfortable}`}>
+          <h3 className={`${marginBottom.compact} text-xl font-bold`} itemProp="name">
             {title}
           </h3>
           {description ? (
@@ -558,7 +564,7 @@ function ContentTabsVariant(props: ContentTabsProps) {
       ) : null}
 
       <Tabs defaultValue={firstValue} className="w-full">
-        <TabsList className="grid h-auto w-full grid-cols-2 gap-1 p-1 lg:grid-cols-3 xl:grid-cols-4">
+        <TabsList className={`grid h-auto w-full grid-cols-2 ${gap.micro} ${padding.micro} lg:grid-cols-3 xl:grid-cols-4`}>
           {validItems.map((item) => (
             <TabsTrigger
               key={item.value}
@@ -574,7 +580,7 @@ function ContentTabsVariant(props: ContentTabsProps) {
           <TabsContent
             key={item.value}
             value={item.value}
-            className="mt-4"
+            className={`${marginTop.default}`}
             itemScope
             itemType="https://schema.org/ListItem"
           >

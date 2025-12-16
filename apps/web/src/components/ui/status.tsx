@@ -80,10 +80,10 @@ export const StatusLabel = ({
   <span className={cn('text-muted-foreground', className)} {...(props as any)}>
     {children ?? (
       <>
-        <span className="hidden group-[.online]:block">Online</span>
-        <span className="hidden group-[.offline]:block">Offline</span>
-        <span className="hidden group-[.maintenance]:block">Maintenance</span>
-        <span className="hidden group-[.degraded]:block">Degraded</span>
+        <span className={`hidden group-[.online]:block`}>Online</span>
+        <span className={`hidden group-[.offline]:block`}>Offline</span>
+        <span className={`hidden group-[.maintenance]:block`}>Maintenance</span>
+        <span className={`hidden group-[.degraded]:block`}>Degraded</span>
       </>
     )}
   </span>

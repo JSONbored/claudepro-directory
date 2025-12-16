@@ -4,12 +4,12 @@
 
 /// <reference types="@heyclaude/edge-runtime/deno-globals.d.ts" />
 
-import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
+import type { contentModel, content_embeddingsModel } from '@heyclaude/database-types/prisma';
 import { badRequestResponse, errorResponse, publicCorsHeaders, successResponse, unauthorizedResponse, webhookCorsHeaders } from '@heyclaude/edge-runtime/utils/http.ts';
 import { initRequestLogging, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime/utils/logger-helpers.ts';
 import { parseJsonBody } from '@heyclaude/edge-runtime/utils/parse-json-body.ts';
 import { pgmqDelete, pgmqRead, pgmqSend } from '@heyclaude/edge-runtime/utils/pgmq-client.ts';
-import { supabaseServiceRole } from '@heyclaude/edge-runtime/clients/supabase.ts';
+// Supabase client no longer needed - using Prisma for database operations
 import { buildSecurityHeaders } from '@heyclaude/shared-runtime/security-headers.ts';
 import { CIRCUIT_BREAKER_CONFIGS, withCircuitBreaker } from '@heyclaude/shared-runtime/circuit-breaker.ts';
 import { createUtilityContext, logError, logInfo, logWarn, logger } from '@heyclaude/shared-runtime/logging.ts';
@@ -17,9 +17,9 @@ import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
 import { TIMEOUT_PRESETS, withTimeout } from '@heyclaude/shared-runtime/timeout.ts';
 import { verifySupabaseDatabaseWebhook } from '@heyclaude/shared-runtime/webhook/crypto.ts';
 
-// Webhook payload structure from Supabase database webhooks
-// Use generated type for the record (content table row)
-type ContentRow = DatabaseGenerated['public']['Tables']['content']['Row'];
+// Webhook payload structure from Supabase webhooks
+// Use Prisma-generated type for the record (content table row)
+type ContentRow = contentModel;
 type ContentWebhookPayload = {
   type: 'INSERT' | 'UPDATE' | 'DELETE';
   table: string;
@@ -130,20 +130,30 @@ async function storeEmbedding(
   embedding: number[]
 ): Promise<void> {
   const storeEmbeddingInternal = async () => {
-    type ContentEmbeddingsInsert =
-      DatabaseGenerated['public']['Tables']['content_embeddings']['Insert'];
+    // Use Prisma to store embedding
     // Store embedding as JSON string for TEXT/JSONB column
     // Note: If this column is a pgvector type, it would require format '[1,2,3]' instead
     // The query_content_embeddings RPC function handles format conversion if needed
-    const insertData: ContentEmbeddingsInsert = {
-      content_id: contentId,
-      content_text: contentText,
-      embedding: JSON.stringify(embedding),
-      embedding_generated_at: new Date().toISOString(),
-    };
-    const { error } = await supabaseServiceRole.from('content_embeddings').upsert(insertData);
+    import { prisma } from '@heyclaude/data-layer/prisma/client.ts';
+    try {
+      await prisma.content_embeddings.upsert({
+        where: {
+          content_id: contentId,
+        },
+        create: {
+          content_id: contentId,
+          content_text: contentText,
+          embedding: JSON.stringify(embedding),
+          embedding_generated_at: new Date(),
+        },
+        update: {
+          content_text: contentText,
+          embedding: JSON.stringify(embedding),
+          embedding_generated_at: new Date(),
+        },
+      });
+    } catch (error) {
 
-    if (error) {
       // Use dbQuery serializer for consistent database query formatting
       const logContext = createUtilityContext('generate-embedding', 'store-embedding');
       await logError('Failed to store embedding', {
@@ -273,22 +283,27 @@ async function processEmbeddingGeneration(
   const { content_id } = message.message;
 
   try {
-    // Fetch content from database (with circuit breaker + timeout)
-    type ContentRow = DatabaseGenerated['public']['Tables']['content']['Row'];
-    const fetchResult = await withTimeout(
-      withCircuitBreaker(
-        'generate-embedding:fetch-content',
-        async () =>
-          await supabaseServiceRole.from('content').select('*').eq('id', content_id).single(),
-        CIRCUIT_BREAKER_CONFIGS.rpc
-      ),
-      TIMEOUT_PRESETS.rpc,
-      'Content fetch timed out'
-    );
-    const { data: content, error: fetchError } = fetchResult as {
-      data: ContentRow | null;
-      error: { message?: string } | null;
-    };
+    // Fetch content from database using Prisma (with circuit breaker + timeout)
+    import { prisma } from '@heyclaude/data-layer/prisma/client.ts';
+    let content: ContentRow | null = null;
+    let fetchError: Error | null = null;
+    
+    try {
+      const fetchResult = await withTimeout(
+        withCircuitBreaker(
+          'generate-embedding:fetch-content',
+          async () => await prisma.content.findUnique({
+            where: { id: content_id },
+          }),
+          CIRCUIT_BREAKER_CONFIGS.rpc
+        ),
+        TIMEOUT_PRESETS.rpc,
+        'Content fetch timed out'
+      );
+      content = fetchResult;
+    } catch (error) {
+      fetchError = error instanceof Error ? error : new Error(String(error));
+    }
 
     if (fetchError || !content) {
       // Use dbQuery serializer for consistent database query formatting
@@ -548,7 +563,7 @@ export async function handleEmbeddingGenerationQueue(_req: Request): Promise<Res
  * generates a normalized embedding, and upserts the embedding into storage. DELETE events and records that yield
  * empty searchable text are acknowledged and skipped.
  *
- * @param req - Incoming HTTP request containing the Supabase database webhook payload and signature headers
+ * @param req - Incoming HTTP request containing the Supabase webhook payload and signature headers
  * @returns An HTTP Response describing the outcome. On successful generation the response includes `content_id` and
  * `embedding_dim`; for skipped events the response includes a `reason` (for example, `delete_event` or `empty_text`);
  * on failure the response contains standardized error information and an appropriate status code.

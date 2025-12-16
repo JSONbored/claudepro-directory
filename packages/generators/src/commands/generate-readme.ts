@@ -1,14 +1,15 @@
 import { writeFileSync } from 'node:fs';
 import { isAbsolute, join, resolve } from 'node:path';
 
-import  { type Database as DatabaseGenerated } from '@heyclaude/database-types';
+// Prisma types
+import type { GenerateReadmeDataReturns } from '@heyclaude/database-types/postgres-types/functions/generate_readme_data';
 
-import { ensureEnvVars } from '../toolkit/env.js';
-import { normalizeError } from '../toolkit/errors.js';
-import { logger } from '../toolkit/logger.js';
-import { DEFAULT_SUPABASE_URL } from '../toolkit/supabase.js';
-import { resolveRepoPath } from '../utils/paths.js';
-import { buildReadmeMarkdown } from '../utils/readme-builder.js';
+import { ensureEnvVars } from '../toolkit/env.ts';
+import { normalizeError } from '../toolkit/errors.ts';
+import { logger } from '../toolkit/logger.ts';
+import { DEFAULT_SUPABASE_URL } from '../toolkit/supabase.ts';
+import { resolveRepoPath } from '../utils/paths.ts';
+import { buildReadmeMarkdown } from '../utils/readme-builder.ts';
 
 export interface GenerateReadmeOptions {
   outputPath?: string;
@@ -150,7 +151,7 @@ export async function runGenerateReadme(options: GenerateReadmeOptions = {}): Pr
       );
     }
 
-    const data = (await response.json()) as DatabaseGenerated['public']['Functions']['generate_readme_data']['Returns'];
+    const data = (await response.json()) as GenerateReadmeDataReturns;
 
     if (!data || typeof data !== 'object') {
       throw new Error('API returned null or invalid data');

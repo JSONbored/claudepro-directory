@@ -28,8 +28,9 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  cn,
 } from '@heyclaude/web-runtime/ui';
-import { SPRING } from '@heyclaude/web-runtime/design-system';
+import { SPRING, paddingY, gap, marginTop } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { useIsClient } from '@heyclaude/web-runtime/hooks';
 import { motion } from 'motion/react';
@@ -198,11 +199,10 @@ export function AuthModal({
           >
             <motion.div
               {...animationConfig}
-              style={{
-                perspective: shouldReduceMotion ? 'none' : 800,
-                transformStyle: 'preserve-3d',
-              }}
-              className="relative"
+              className={cn(
+                'relative',
+                shouldReduceMotion ? '' : 'perspective-[800px] [transform-style:preserve-3d]'
+              )}
             >
               <DialogHeader>
                 <DialogTitle>Sign in</DialogTitle>
@@ -210,7 +210,7 @@ export function AuthModal({
               </DialogHeader>
 
               {/* OAuth Provider Buttons */}
-              <div className="flex items-center justify-center gap-4 py-6">
+              <div className={`flex items-center justify-center ${gap.default} ${paddingY.comfortable}`}>
                 {VALID_PROVIDERS.map((provider) => (
                   <OAuthProviderButton
                     key={provider}
@@ -222,7 +222,7 @@ export function AuthModal({
               </div>
 
               {/* Newsletter Opt-In Tile */}
-              <div className="mt-4">
+              <div className={`${marginTop.default}`}>
                 <NewsletterOptInTile
                   checked={newsletterOptIn}
                   onChange={setNewsletterOptIn}

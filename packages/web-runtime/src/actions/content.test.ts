@@ -1,5 +1,4 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { Constants } from '@heyclaude/database-types';
 
 // Mock dependencies - simulate next-safe-action behavior
 vi.mock('./safe-action.ts', () => {
@@ -48,7 +47,9 @@ describe('Content Actions', () => {
   describe('getReviewsWithStats', () => {
     it('should validate content_type enum', async () => {
       // This test verifies that the Zod schema uses the correct enum values
-      const validCategories = Constants.public.Enums.content_category;
+      // Import the schema to get enum values
+      const { content_categorySchema } = await import('../prisma-zod-schemas.ts');
+      const validCategories = content_categorySchema._def.values;
       
       expect(validCategories).toContain('agents');
       expect(validCategories).toContain('skills');

@@ -203,8 +203,9 @@ export function toPascalCase(str: string): string {
  */
 export function toCamelCase(str: string): string {
   const parts = str.split('_');
+  if (parts.length === 0) return str;
   return (
-    parts[0].toLowerCase() +
+    parts[0]!.toLowerCase() +
     parts
       .slice(1)
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())

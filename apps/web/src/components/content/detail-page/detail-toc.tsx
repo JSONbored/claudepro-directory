@@ -7,6 +7,7 @@ import { cn, STATE_PATTERNS } from '@heyclaude/web-runtime/ui';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { normalizeHeadings, type NormalizedHeading } from './utils/normalize-headings';
+import { gap, marginTop, spaceY, size, weight, tracking, truncate, iconSize, iconSizeRect, between, muted, paddingX, paddingY } from "@heyclaude/web-runtime/design-system";
 
 interface DetailTocProps {
   className?: string;
@@ -77,28 +78,34 @@ export function DetailToc({ headings, className }: DetailTocProps) {
     threshold: [0, 0.25, 0.5, 0.75, 1],
   });
 
-  // Update active ID when intersection changes
+  // OPTIMIZATION: Defer intersection processing to avoid blocking main thread
+  // Use requestAnimationFrame to batch intersection updates
   useEffect(() => {
     if (entries.size === 0) return;
     
-    // Find most visible element (same logic as getMostVisibleId but computed here)
-    const visibleEntries = Array.from(entries.values())
-      .filter((entry) => entry.isIntersecting || entry.intersectionRatio > 0)
-      .sort(
-        (a, b) =>
-          b.intersectionRatio - a.intersectionRatio ||
-          a.boundingClientRect.top - b.boundingClientRect.top
-      );
+    // Defer processing to next animation frame to avoid blocking scroll
+    const rafId = requestAnimationFrame(() => {
+      // Find most visible element (same logic as getMostVisibleId but computed here)
+      const visibleEntries = Array.from(entries.values())
+        .filter((entry) => entry.isIntersecting || entry.intersectionRatio > 0)
+        .sort(
+          (a, b) =>
+            b.intersectionRatio - a.intersectionRatio ||
+            a.boundingClientRect.top - b.boundingClientRect.top
+        );
 
-    if (visibleEntries.length > 0) {
-      const firstEntry = visibleEntries[0];
-      if (firstEntry) {
-        const nextActiveId = firstEntry.target.id;
-        if (nextActiveId && nextActiveId !== activeIdRef.current) {
-          setActiveId(nextActiveId);
+      if (visibleEntries.length > 0) {
+        const firstEntry = visibleEntries[0];
+        if (firstEntry) {
+          const nextActiveId = firstEntry.target.id;
+          if (nextActiveId && nextActiveId !== activeIdRef.current) {
+            setActiveId(nextActiveId);
+          }
         }
       }
-    }
+    });
+
+    return () => cancelAnimationFrame(rafId);
   }, [entries]);
 
   // Observe all heading elements
@@ -120,19 +127,23 @@ export function DetailToc({ headings, className }: DetailTocProps) {
         return;
       }
 
-      // Use reduced motion from hook (already checked at component level)
-      const offset = 96;
-      const top = window.scrollY + element.getBoundingClientRect().top - offset;
+      // Batch DOM read with scroll operation to avoid forced reflow
+      // Use requestAnimationFrame to ensure layout is complete before reading
+      requestAnimationFrame(() => {
+        const offset = 96;
+        // Read layout properties in same frame as scroll
+        const top = window.scrollY + element.getBoundingClientRect().top - offset;
 
-      window.scrollTo({
-        top,
-        behavior: prefersReducedMotion ? 'auto' : 'smooth',
+        window.scrollTo({
+          top,
+          behavior: prefersReducedMotion ? 'auto' : 'smooth',
+        });
       });
 
       setActiveId(heading.id);
       updateHash(heading.id);
     },
-    [updateHash, isClient]
+    [updateHash, isClient, prefersReducedMotion]
   );
 
   if (normalizedHeadings.length < 3) {
@@ -148,17 +159,17 @@ export function DetailToc({ headings, className }: DetailTocProps) {
       )}
       aria-label="On this page"
     >
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <ListTree className="text-muted-foreground h-4 w-4" aria-hidden="true" />
-          <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+      <div className={cn(between.center, gap.compact)}>
+        <div className={`flex items-center ${gap.tight}`}>
+          <ListTree className={cn(muted.default, iconSize.sm)} aria-hidden="true" />
+          <p className={cn(muted.default, size.xs, weight.semibold, tracking.wide, 'uppercase')}>
             On this page
           </p>
         </div>
-        <span className="text-muted-foreground text-xs">{normalizedHeadings.length}</span>
+        <span className={cn(muted.default, size.xs)}>{normalizedHeadings.length}</span>
       </div>
 
-      <ul className="mt-4 space-y-1.5">
+      <ul className={cn(marginTop.default, spaceY['1.5'])}>
         {normalizedHeadings.map((heading) => {
           const depthOffset = Math.max(heading.level - baseLevel, 0);
 
@@ -169,7 +180,7 @@ export function DetailToc({ headings, className }: DetailTocProps) {
                 onClick={() => handleHeadingClick(heading)}
                 className={cn(
                   STATE_PATTERNS.FOCUS_RING,
-                  'w-full rounded-md px-2 py-1.5 text-left text-sm transition-colors',
+                  'w-full rounded-md', paddingX.compact, paddingY['1.5'], 'text-left text-sm transition-colors',
                   activeId === heading.id
                     ? 'bg-accent/15 text-foreground'
                     : 'text-muted-foreground hover:bg-accent/10 hover:text-foreground'
@@ -179,14 +190,14 @@ export function DetailToc({ headings, className }: DetailTocProps) {
                 }}
                 aria-current={activeId === heading.id ? 'true' : undefined}
               >
-                <span className="flex items-center gap-2">
+                <span className={`flex items-center ${gap.tight}`}>
                   <span
                     className={cn(
-                      'h-1.5 w-1.5 rounded-full',
+                      cn(iconSizeRect['1.5x1.5'], 'rounded-full'),
                       activeId === heading.id ? 'bg-primary' : 'bg-muted-foreground/50'
                     )}
                   />
-                  <span className="truncate">{heading.title}</span>
+                  <span className={`${truncate.single}`}>{heading.title}</span>
                 </span>
               </button>
             </li>

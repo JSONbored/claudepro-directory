@@ -5,8 +5,8 @@
  * Uses shared storage and database utilities from data-api.
  */
 
-import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
-import { supabaseServiceRole } from '@heyclaude/edge-runtime/clients/supabase.ts';
+import type { contentModel, Prisma } from '@heyclaude/data-layer/prisma';
+// Supabase client no longer needed - using Prisma for database operations
 import { getStorageServiceClient } from '@heyclaude/edge-runtime/utils/storage/client.ts';
 import { uploadObject } from '@heyclaude/edge-runtime/utils/storage/upload.ts';
 import type { ContentRow, GenerateResult, PackageGenerator } from '../types.ts';
@@ -420,17 +420,16 @@ export class SkillsGenerator implements PackageGenerator {
       throw new Error(uploadResult['error'] || 'Failed to upload skill package to storage');
     }
 
-    // 4. Update database with storage URL
-    // Use updateTable helper to properly handle Database type
-    const updateData = {
-      storage_url: uploadResult.publicUrl,
-    } satisfies DatabaseGenerated['public']['Tables']['content']['Update'];
-    const { error: updateError } = await supabaseServiceRole
-      .from('content')
-      .update(updateData)
-      .eq('id', content.id);
-
-    if (updateError) {
+    // 4. Update database with storage URL using Prisma
+    import { prisma } from '@heyclaude/data-layer/prisma/client.ts';
+    try {
+      await prisma.content.update({
+        where: { id: content.id },
+        data: {
+          storage_url: uploadResult.publicUrl,
+        },
+      });
+    } catch (updateError) {
       throw new Error(
         `Database update failed: ${updateError instanceof Error ? updateError.message : String(updateError)}`
       );

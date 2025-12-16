@@ -9,6 +9,7 @@
  * @module apps/web/src/components/content/content-list-search-client
  */
 
+import type { content_category } from '@heyclaude/data-layer/prisma';
 import {
   SearchProvider,
   SearchBar,
@@ -19,10 +20,10 @@ import {
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import type { FilterState } from '@heyclaude/web-runtime/types/component.types';
 import type { DisplayableContent } from '@heyclaude/web-runtime/types/component.types';
-import type { Database } from '@heyclaude/database-types';
 import { Suspense, useCallback } from 'react';
 import { useAuthModal } from '@/src/hooks/use-auth-modal';
 import { usePathname } from 'next/navigation';
+import { spaceY, padding } from "@heyclaude/web-runtime/design-system";
 
 export interface ContentListSearchClientProps<T extends DisplayableContent> {
   /** Initial items to display */
@@ -34,9 +35,9 @@ export interface ContentListSearchClientProps<T extends DisplayableContent> {
   /** Icon name */
   icon: string;
   /** Content type */
-  type: Database['public']['Enums']['content_category'];
+  type: content_category;
   /** Optional category filter */
-  category?: Database['public']['Enums']['content_category'];
+  category?: content_category;
 }
 
 /**
@@ -101,18 +102,18 @@ export function ContentListSearchClient<T extends DisplayableContent>({
       defaultQuery=""
       defaultFilters={category ? { category } : {}}
     >
-      <div className="space-y-6">
+      <div className={`${spaceY.relaxed}`}>
         <SearchBar
           placeholder={searchPlaceholder}
           variant="default"
           size="lg"
         />
 
-        <Suspense fallback={<div className="text-muted-foreground p-4 text-center">Loading filters...</div>}>
+        <Suspense fallback={<div className={`text-muted-foreground ${padding.default} text-center`}>Loading filters...</div>}>
           <SearchFilters />
         </Suspense>
 
-        <Suspense fallback={<div className="text-muted-foreground p-8 text-center">Loading search results...</div>}>
+        <Suspense fallback={<div className={`text-muted-foreground ${padding.relaxed} text-center`}>Loading search results...</div>}>
           <SearchResults
             showCategory
             showActions

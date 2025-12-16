@@ -2,8 +2,9 @@
  * Search Page - Database-First RPC via search_content_optimized()
  */
 
+import { ContentCategory } from '@heyclaude/data-layer/prisma';
 import type { content_category } from '@heyclaude/data-layer/prisma';
-import { Constants } from '@heyclaude/database-types';
+import type { SearchContentOptimizedArgs } from '@heyclaude/database-types/postgres-types';
 import { type DisplayableContent } from '@heyclaude/web-runtime';
 import { type SearchFilters } from '@heyclaude/web-runtime/core';
 import {
@@ -19,10 +20,9 @@ import { Suspense } from 'react';
 // Search is now handled by SearchPageClient (new unified search system)
 import { SearchPageClient } from '@/src/app/search/search-page-client';
 import { ContentSidebar } from '@/src/components/core/layout/content-sidebar';
+import { paddingX, paddingY, marginX, marginBottom, gap, spaceY } from "@heyclaude/web-runtime/design-system";
 
-type ContentCategory = content_category;
-const CONTENT_CATEGORY_VALUES = Constants.public.Enums
-  .content_category as readonly ContentCategory[];
+const CONTENT_CATEGORY_VALUES = Object.values(ContentCategory) as readonly content_category[];
 
 type SortType = 'alphabetical' | 'newest' | 'popularity' | 'relevance';
 
@@ -32,11 +32,11 @@ type SortType = 'alphabetical' | 'newest' | 'popularity' | 'relevance';
  * @param {string | undefined} value
  * @returns {ContentCategory | undefined} Return value description
  */
-function toContentCategory(value: string | undefined): ContentCategory | undefined {
+function toContentCategory(value: string | undefined): content_category | undefined {
   if (!value) return undefined;
   const lowered = value.trim().toLowerCase();
-  return CONTENT_CATEGORY_VALUES.includes(lowered as ContentCategory)
-    ? (lowered as ContentCategory)
+  return CONTENT_CATEGORY_VALUES.includes(lowered as content_category)
+    ? (lowered as content_category)
     : undefined;
 }
 
@@ -44,14 +44,14 @@ function toContentCategory(value: string | undefined): ContentCategory | undefin
  *
  * Convert string array to content_category enum array
  * @param {string[] | undefined} categories
- * @returns {ContentCategory[] | undefined} Return value description
+ * @returns {SearchContentOptimizedArgs['p_categories']} Return value description
  */
-function toContentCategoryArray(categories: string[] | undefined): ContentCategory[] | undefined {
+function toContentCategoryArray(categories: string[] | undefined): SearchContentOptimizedArgs['p_categories'] {
   if (!categories || categories.length === 0) return undefined;
   const valid = categories
     .map(toContentCategory)
-    .filter((cat): cat is ContentCategory => cat !== undefined);
-  return valid.length > 0 ? valid : undefined;
+    .filter((cat): cat is content_category => cat !== undefined);
+  return valid.length > 0 ? (valid as NonNullable<SearchContentOptimizedArgs['p_categories']>) : undefined;
 }
 
 /**
@@ -155,7 +155,7 @@ function SearchResultsSection({
 }: {
   facetOptions: {
     authors: string[];
-    categories: ContentCategory[];
+    categories: content_category[];
     tags: string[];
   };
   fallbackSuggestions: DisplayableContent[];
@@ -163,7 +163,7 @@ function SearchResultsSection({
   hasUserFilters: boolean;
   query: string;
   quickAuthors: string[];
-  quickCategories: ContentCategory[];
+    quickCategories: content_category[];
   quickTags: string[];
 }) {
   return (
@@ -203,9 +203,9 @@ export default function SearchPage({ searchParams }: SearchPageProperties) {
 
   // Static shell - renders immediately for PPR
   return (
-    <main className="container mx-auto px-4 py-8">
-      <h1 className="mb-8 text-4xl font-bold">Search Claude Code Directory</h1>
-      <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_18rem]">
+    <main className={`container ${marginX.auto} ${paddingX.default} ${paddingY.relaxed}`}>
+      <h1 className={`${marginBottom.relaxed} text-4xl font-bold`}>Search Claude Code Directory</h1>
+      <div className={`grid ${gap.relaxed} xl:grid-cols-[minmax(0,1fr)_18rem]`}>
         {/* Dynamic content streams in Suspense */}
         <Suspense fallback={<SearchResultsSkeleton />}>
           <SearchPageContent reqLogger={reqLogger} searchParams={searchParams} />
@@ -229,10 +229,10 @@ export default function SearchPage({ searchParams }: SearchPageProperties) {
  * @returns {unknown} Description of return value*/
 function SearchResultsSkeleton() {
   return (
-    <div className="space-y-6">
-      <div className="bg-muted h-14 w-full animate-pulse rounded-lg" />
-      <div className="bg-muted h-32 w-full animate-pulse rounded-lg" />
-      <div className="bg-muted h-64 w-full animate-pulse rounded-lg" />
+    <div className={`${spaceY.relaxed}`}>
+      <div className={`bg-muted h-14 w-full animate-pulse rounded-lg`} />
+      <div className={`bg-muted h-32 w-full animate-pulse rounded-lg`} />
+      <div className={`bg-muted h-64 w-full animate-pulse rounded-lg`} />
     </div>
   );
 }
@@ -274,7 +274,7 @@ async function SearchPageContent({
   const tags = resolvedParameters.tags?.split(',').filter(Boolean);
   const author = resolvedParameters.author;
 
-  // Convert URL params to generated database types
+  // Convert URL params to Prisma-generated enum types
   const validatedSort = isValidSort(resolvedParameters.sort) ? resolvedParameters.sort : undefined;
   const categoryEnums = toContentCategoryArray(categoryStrings); // Convert to enum array
 
@@ -337,15 +337,23 @@ async function SearchFacetsAndResults({
   query: string;
   reqLogger: ReturnType<typeof logger.child>;
 }) {
-  // Load facets (cached, but still needs to fetch)
+  // OPTIMIZATION: Load facets and zero-state suggestions in parallel when both are needed
+  // Both operations are independent and can run concurrently for better performance
+  const [facetResult, homepageResult] = await Promise.allSettled([
+    getSearchFacets(),
+    !hasQueryOrFilters ? getHomepageData(getHomepageCategoryIds) : Promise.resolve(null),
+  ]);
+
+  // Process facet results
   let facetAggregate: null | SearchFacetAggregate = null;
   let facetOptions = {
     authors: [] as string[],
-    categories: [] as ContentCategory[],
+    categories: [] as content_category[],
     tags: [] as string[],
   };
-  try {
-    facetAggregate = await getSearchFacets();
+  
+  if (facetResult.status === 'fulfilled') {
+    facetAggregate = facetResult.value;
     facetOptions = {
       authors: facetAggregate.authors,
       categories: facetAggregate.categories,
@@ -360,19 +368,19 @@ async function SearchFacetsAndResults({
       },
       'SearchPage: facets loaded'
     );
-  } catch (error) {
-    const normalized = normalizeError(error, 'Search facets fetch failed');
+  } else {
+    const normalized = normalizeError(facetResult.reason, 'Search facets fetch failed');
     reqLogger.error(
       { err: normalized, section: 'data-fetch' },
       'SearchPage: getSearchFacets invocation failed'
     );
   }
 
-  // Load zero-state suggestions after facets (if no query/filters)
+  // Process zero-state suggestions (if no query/filters)
   let zeroStateSuggestions: DisplayableContent[] = [];
   if (!hasQueryOrFilters) {
-    try {
-      const homepageData = await getHomepageData(getHomepageCategoryIds);
+    if (homepageResult.status === 'fulfilled' && homepageResult.value) {
+      const homepageData = homepageResult.value;
       const categoryData = (homepageData?.content as { categoryData?: Record<string, unknown[]> })
         .categoryData;
       zeroStateSuggestions = categoryData
@@ -382,9 +390,9 @@ async function SearchFacetsAndResults({
         { section: 'data-fetch', suggestionsCount: zeroStateSuggestions.length },
         'SearchPage: zero-state suggestions loaded'
       );
-    } catch (error) {
+    } else if (homepageResult.status === 'rejected') {
       const normalized = normalizeError(
-        error,
+        homepageResult.reason,
         'SearchPage: getHomepageData for suggestions failed'
       );
       reqLogger.error(
@@ -477,8 +485,8 @@ function rankFacetValues(
 function deriveQuickCategories(
   facets: SearchFacetSummary[] | undefined,
   limit: number,
-  fallback: ContentCategory[]
-): ContentCategory[] {
+  fallback: content_category[]
+): content_category[] {
   if (!facets || facets.length === 0) {
     return fallback.slice(0, limit);
   }

@@ -1,6 +1,6 @@
 'use client';
 
-import { type Database } from '@heyclaude/database-types';
+import type { newsletter_source } from '@heyclaude/data-layer/prisma';
 import { getAppSettings, getNewsletterConfig } from '@heyclaude/web-runtime/config/static-configs';
 import {
   ensureStringArray,
@@ -10,19 +10,20 @@ import {
 import { ensureNumber } from '@heyclaude/web-runtime/data/utils';
 import { useLoggedAsync, useTimeout, useLocalStorage } from '@heyclaude/web-runtime/hooks';
 import { Mail, X } from '@heyclaude/web-runtime/icons';
-import { DIMENSIONS, POSITION_PATTERNS, UI_CLASSES, Button } from '@heyclaude/web-runtime/ui';
+import { DIMENSIONS, POSITION_PATTERNS, Button, cn } from '@heyclaude/web-runtime/ui';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useBoolean } from '@heyclaude/web-runtime/hooks';
 
 import { NewsletterForm } from './newsletter-form';
+import { iconSize, stack, between, paddingX, paddingY, marginX, gap, size, weight } from "@heyclaude/web-runtime/design-system";
 
 export interface NewsletterFooterBarProps {
   ctaVariant?: 'aggressive' | 'social_proof' | 'value_focused';
   dismissible?: boolean;
   respectInlineCTA?: boolean;
   showAfterDelay?: number;
-  source: Database['public']['Enums']['newsletter_source'];
+  source: newsletter_source;
 }
 
 export function NewsletterFooterBar({
@@ -116,22 +117,22 @@ export function NewsletterFooterBar({
       <div
         className={`${POSITION_PATTERNS.ABSOLUTE_TOP_FULL} h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent`}
       />
-      <div className="container mx-auto px-4 py-6 md:py-4">
+      <div className={`container ${marginX.auto} ${paddingX.default} ${paddingY.comfortable} md:${paddingY.default}`}>
         {/* Desktop layout */}
-        <div className="mx-auto hidden max-w-5xl items-center justify-between gap-6 md:flex">
-          <div className="flex shrink-0 items-center gap-3">
-            <div className="border-accent/20 bg-accent/10 rounded-lg border p-2.5">
-              <Mail className={`${UI_CLASSES.ICON_MD} text-accent`} aria-hidden="true" />
+        <div className={`${marginX.auto} hidden max-w-5xl items-center justify-between ${gap.comfortable} md:flex`}>
+          <div className={`flex shrink-0 items-center ${gap.compact}`}>
+            <div className={cn('border-accent/20 bg-accent/10 rounded-lg border', 'p-2.5')}>
+              <Mail className={`${iconSize.md} text-accent`} aria-hidden="true" />
             </div>
             <div>
-              <p className="text-foreground text-base font-semibold">
+              <p className={`text-foreground ${size.base} ${weight.semibold}`}>
                 {ctaVariant === 'aggressive'
                   ? "⚡ Don't miss out!"
                   : ctaVariant === 'social_proof'
                     ? '✨ Join 12,000+ Claude builders'
                     : NEWSLETTER_CTA_CONFIG.headline}
               </p>
-              <p className="text-muted-foreground text-sm">
+              <p className={`text-muted-foreground ${size.sm}`}>
                 {ctaVariant === 'aggressive'
                   ? 'Get weekly AI updates before everyone else'
                   : ctaVariant === 'social_proof'
@@ -140,7 +141,7 @@ export function NewsletterFooterBar({
               </p>
             </div>
           </div>
-          <div className="flex shrink-0 items-center gap-3">
+          <div className={`flex shrink-0 items-center ${gap.compact}`}>
             <NewsletterForm source={source} className={DIMENSIONS.MIN_W_NEWSLETTER_FORM_LG} />
             {dismissible ? (
               <Button
@@ -150,18 +151,18 @@ export function NewsletterFooterBar({
                 aria-label="Dismiss newsletter signup"
                 className="shrink-0"
               >
-                <X className={UI_CLASSES.ICON_SM} aria-hidden="true" />
+                <X className={iconSize.sm} aria-hidden="true" />
               </Button>
             ) : null}
           </div>
         </div>
 
         {/* Mobile layout */}
-        <div className={`${UI_CLASSES.FLEX_COL_GAP_3} md:hidden`}>
-          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-            <div className="flex items-center gap-2">
-              <Mail className={`${UI_CLASSES.ICON_SM} shrink-0nt`} aria-hidden="true" />
-              <p className="text-foreground text-sm font-medium">
+        <div className={`${stack.default} md:hidden`}>
+          <div className={between.center}>
+            <div className={`flex items-center ${gap.tight}`}>
+              <Mail className={`${iconSize.sm} shrink-0nt`} aria-hidden="true" />
+              <p className={`text-foreground ${size.sm} ${weight.medium}`}>
                 {ctaVariant === 'aggressive'
                   ? "⚡ Don't miss out!"
                   : ctaVariant === 'social_proof'
@@ -176,7 +177,7 @@ export function NewsletterFooterBar({
                 onClick={handleDismiss}
                 aria-label="Dismiss newsletter signup"
               >
-                <X className={UI_CLASSES.ICON_SM} aria-hidden="true" />
+                <X className={iconSize.sm} aria-hidden="true" />
               </Button>
             ) : null}
           </div>

@@ -1,6 +1,6 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import type { Database } from '@heyclaude/database-types';
+import type { content_category } from '@heyclaude/data-layer/prisma';
 
 export const ACRONYMS = [
   'API',
@@ -252,7 +252,7 @@ function formatTitle(title: string): string {
 export function getDisplayTitle(item: {
   readonly title?: string | null;
   readonly slug?: string | null;
-  readonly category?: Database['public']['Enums']['content_category'] | null;
+  readonly category?: content_category | null;
 }): string {
   if (item.title) {
     return formatTitle(item.title);

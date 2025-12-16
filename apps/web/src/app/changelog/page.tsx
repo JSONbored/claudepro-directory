@@ -22,7 +22,7 @@
  * - Responsive design
  */
 
-import { type changelog } from '@heyclaude/data-layer/prisma';
+import { type changelogModel } from '@heyclaude/data-layer/prisma';
 import { generatePageMetadata, getChangelogOverview } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG, QUERY_LIMITS } from '@heyclaude/web-runtime/data/config/constants';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
@@ -33,6 +33,7 @@ import { Suspense } from 'react';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { ChangelogContentSkeleton } from '@/src/components/features/changelog/changelog-content-skeleton';
 import { ChangelogTimelineView } from '@/src/components/features/changelog/changelog-timeline-view';
+import { marginX, padding, spaceY, paddingX, paddingTop, size, weight, tracking } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Generate page metadata for the /changelog route, including RSS and Atom feed alternates.
@@ -121,9 +122,9 @@ export default async function ChangelogPage() {
       <div className="bg-background relative min-h-screen">
         {/* Header - EXACTLY matches Magic UI template */}
         <div className="border-border/50 border-b">
-          <div className="relative mx-auto max-w-5xl">
-            <div className="flex items-center justify-between p-3">
-              <h1 className="text-3xl font-semibold tracking-tight">Changelog</h1>
+          <div className={`relative ${marginX.auto} max-w-5xl`}>
+            <div className={`flex items-center justify-between ${padding.compact}`}>
+              <h1 className={`${size['3xl']} ${weight.semibold} ${tracking.tight}`}>Changelog</h1>
               {/* ThemeToggle would go here if we had it */}
             </div>
           </div>
@@ -156,7 +157,7 @@ async function ChangelogContentWithData({
   reqLogger: ReturnType<typeof logger.child>;
 }) {
   // Fetch data outside JSX construction - handle errors before rendering
-  let sortedEntries: changelog[] = [];
+    let sortedEntries: changelogModel[] = [];
   let hasError = false;
 
   try {
@@ -199,7 +200,7 @@ async function ChangelogContentWithData({
         source: null,
         twitter_card: null,
         updated_at: new Date(entry.updated_at ?? ''),
-      } as changelog;
+      } as changelogModel;
     });
 
     // Sort entries by date (newest first) - EXACTLY matches Magic UI template
@@ -229,9 +230,9 @@ async function ChangelogContentWithData({
   // Return JSX outside try/catch - errors are handled above
   if (hasError) {
     return (
-      <div className="border-border bg-card/50 overflow-hidden rounded-lg border p-4 shadow-sm backdrop-blur-sm sm:p-6">
-        <div className="space-y-4">
-          <h2 className="text-2xl font-bold tracking-tight">Changelog</h2>
+      <div className={`border-border bg-card/50 overflow-hidden rounded-lg border ${padding.default} shadow-sm backdrop-blur-sm sm:${padding.comfortable}`}>
+        <div className={`${spaceY.comfortable}`}>
+          <h2 className={`${size['2xl']} ${weight.bold} ${tracking.tight}`}>Changelog</h2>
           <p className="text-muted-foreground">
             Unable to load changelog entries. Please try again later.
           </p>
@@ -241,7 +242,7 @@ async function ChangelogContentWithData({
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-6 pt-10 lg:px-10">
+    <div className={`${marginX.auto} max-w-5xl ${paddingX.comfortable} ${paddingTop.default} lg:${paddingX.default}`}>
       <div className="relative">
         <ChangelogTimelineView entries={sortedEntries} />
       </div>

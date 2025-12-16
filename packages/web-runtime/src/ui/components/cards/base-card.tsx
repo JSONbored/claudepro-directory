@@ -41,7 +41,8 @@
  */
 
 import { getViewTransitionName } from '../../utils.ts';
-import { POSITION_PATTERNS, UI_CLASSES } from '../../constants.ts';
+import { POSITION_PATTERNS } from '../../constants.ts';
+import { marginBottom, gap, cluster, stack, size, weight, muted, padding, paddingBottom, wrap } from '../../../design-system/index.ts';
 import { UnifiedBadge } from '../badges/unified-badge.tsx';
 import { SwipeableCardWrapper } from './swipeable-card.tsx';
 import { motion } from 'motion/react';
@@ -49,8 +50,8 @@ import { MICROINTERACTIONS } from '../../../design-system/index.ts';
 import { useReducedMotion } from '../../../hooks/motion/index.ts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../card.tsx';
 import { type UseCardNavigationOptions, useCardNavigation } from '../../../hooks/use-card-navigation.ts';
-import { useTheme } from '../../../hooks/use-theme.ts';
-import { COLORS } from '../../../design-tokens/index.ts';
+// COLORS removed - border colors handled via className
+// useTheme removed - reserved for future use
 import { logger } from '../../../logger.ts';
 import { normalizeError } from '../../../errors.ts';
 import type { ReactNode, HTMLAttributes } from 'react';
@@ -287,8 +288,8 @@ export const BaseCard = memo(
     const CardTitleComponent = CardTitle;
     const CardDescriptionComponent = CardDescription;
 
-    // Detect current theme for semantic color tokens
-    const theme = useTheme();
+    // Detect current theme for semantic color tokens (currently unused, reserved for future use)
+    // const theme = useTheme();
     const shouldReduceMotion = useReducedMotion();
 
     try {
@@ -328,7 +329,7 @@ export const BaseCard = memo(
           )}
 
           <CardHeaderComponent
-            className={`${variant === 'review' ? `${UI_CLASSES.MARGIN_COMPACT} p-0` : 'pb-3'} ${compactMode ? UI_CLASSES.CARD_HEADER_TIGHT : ''}`}
+            className={`${variant === 'review' ? `${marginBottom.compact} p-0` : 'pb-3'} ${compactMode ? paddingBottom.tight : ''}`}
           >
             {/* Custom header slot (for review avatar/rating, changelog date) */}
             {renderHeader?.()}
@@ -339,14 +340,14 @@ export const BaseCard = memo(
                 <div className="flex-1 overflow-visible">
                   {/* Top badges slot (type, difficulty, sponsored, etc.) */}
                   {renderTopBadges && (
-                    <div className={`mb-1 flex items-center flex-wrap gap-1 ${UI_CLASSES.SPACE_COMPACT} overflow-visible`}>
+                    <div className={`mb-1 flex items-center flex-wrap gap-1 ${gap.compact} overflow-visible`}>
                       {renderTopBadges()}
                     </div>
                   )}
 
                   {/* Title */}
                   <CardTitleComponent
-                    className={`${UI_CLASSES.TEXT_CARD_TITLE} text-foreground ${disableNavigation ? '' : 'transition-colors-smooth'}`}
+                    className={`${size.lg} ${weight.semibold} text-foreground ${disableNavigation ? '' : 'transition-colors-smooth'}`}
                   >
                     {displayTitle}
                   </CardTitleComponent>
@@ -361,7 +362,7 @@ export const BaseCard = memo(
 
                 {/* Source badge (right side of header) */}
                 {source && (
-                  <div className={`ml-2 flex items-center ${UI_CLASSES.SPACE_TIGHT}`}>
+                  <div className={`ml-2 flex items-center ${gap.tight}`}>
                     <UnifiedBadge
                       variant="source"
                       source={
@@ -386,11 +387,11 @@ export const BaseCard = memo(
             className={`${variant === 'review' ? 'p-0' : 'pt-0'} ${compactMode ? 'pt-0' : ''}`}
           >
             {/* Custom content slot (for review expandable text) */}
-            {renderContent && <div className={UI_CLASSES.MARGIN_COMPACT}>{renderContent()}</div>}
+            {renderContent && <div className={marginBottom.compact}>{renderContent()}</div>}
 
             {/* Tags */}
             {tags && tags.length > 0 && (
-              <div className={UI_CLASSES.CARD_BADGE_CONTAINER}>
+              <div className={`${wrap} ${gap.compact} ${marginBottom.default}`}>
                 {visibleTags?.map((tag: string, index: number) => {
                   // Use highlighted tag if available, otherwise use original
                   const highlightedTag = highlightedTags?.[index];
@@ -413,7 +414,7 @@ export const BaseCard = memo(
                   <UnifiedBadge
                     variant="base"
                     style="outline"
-                    className={`${UI_CLASSES.BADGE_METADATA} ${UI_CLASSES.TEXT_BADGE}`}
+                    className={`border-muted-foreground/20 text-muted-foreground ${size.xs} ${weight.semibold}`}
                   >
                     +{overflowCount}
                   </UnifiedBadge>
@@ -422,10 +423,10 @@ export const BaseCard = memo(
             )}
 
             {/* Footer: Metadata and Actions */}
-            <div className={UI_CLASSES.CARD_FOOTER_RESPONSIVE}>
+            <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
               {/* Left side: Author and custom metadata */}
               {(showAuthor && author) || customMetadataText ? (
-                <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} ${UI_CLASSES.TEXT_METADATA}`}>
+                <div className={`${cluster.compact} ${size.xs} ${muted.default}`}>
                   {showAuthor && author && (() => {
                     // Only show profile link if authorProfileUrl is explicitly provided
                     // Don't fallback to default - if no profile URL exists, don't show a link
@@ -473,7 +474,7 @@ export const BaseCard = memo(
               )}
 
               {/* Right side: Metadata badges and actions */}
-              <div className={UI_CLASSES.CARD_METADATA_BADGES}>
+              <div className={`${cluster.compact} ${size.xs} flex-nowrap`}>
                 {/* Metadata badges slot (view count, item count, etc.) */}
                 {renderMetadataBadges?.()}
 
@@ -489,12 +490,12 @@ export const BaseCard = memo(
       // For non-navigation cards, use CardComponent. For interactive cards, use motion.div with Card styling
       // Motion.dev handles hover border color via whileHover - no CSS hover classes needed
       // Base classes: layout, border width, background, text - border color comes from CARD_INTERACTIVE for interactive cards
-      const cardBaseClasses = `${UI_CLASSES.FLEX_COL_GAP_6} rounded-xl border bg-card py-6 text-card-foreground shadow-sm`;
+      const cardBaseClasses = `${stack.relaxed} rounded-xl border bg-card py-6 text-card-foreground shadow-sm`;
       // For non-interactive cards, add border color explicitly
       // For interactive cards, CARD_INTERACTIVE provides border-border/50
       const cardBorderColor = disableNavigation ? 'border-border/50' : '';
-      const cardInteractiveClasses = disableNavigation ? '' : UI_CLASSES.CARD_INTERACTIVE;
-      const cardClassName = `${cardBaseClasses} ${cardBorderColor} ${cardInteractiveClasses} ${variant === 'detailed' ? UI_CLASSES.CARD_PADDING_DEFAULT : ''} ${variant === 'review' ? `rounded-lg border border-border/50 ${UI_CLASSES.CARD_PADDING_COMPACT}` : ''} ${compactMode ? UI_CLASSES.CARD_PADDING_COMPACT : ''} ${className || ''} relative`;
+      const cardInteractiveClasses = disableNavigation ? '' : 'card-gradient transition-smooth group cursor-pointer border-border/50';
+      const cardClassName = `${cardBaseClasses} ${cardBorderColor} ${cardInteractiveClasses} ${variant === 'detailed' ? padding.comfortable : ''} ${variant === 'review' ? `rounded-lg border border-border/50 ${padding.default}` : ''} ${compactMode ? padding.default : ''} ${className || ''} relative`;
       
       const cardElement = disableNavigation ? (
         <CardComponent
@@ -513,8 +514,7 @@ export const BaseCard = memo(
           className={cardClassName}
           style={{
             ...viewTransitionStyle,
-            // Use semantic design token for border color - theme-aware via useTheme hook
-            borderColor: COLORS.semantic.border[theme].default,
+            // Border color handled via className (NO inline styles)
             // 3D transform support for forward tilt animation
             perspective: '1000px',
             transformStyle: 'preserve-3d',
@@ -524,8 +524,7 @@ export const BaseCard = memo(
             ? {}
             : {
                 ...MICROINTERACTIONS.card.hover,
-                // Override borderColor with theme-aware semantic token
-                borderColor: COLORS.semantic.primary[theme].base,
+                // Border color on hover handled via className (NO inline styles)
               }}
           whileTap={shouldReduceMotion ? {} : MICROINTERACTIONS.card.tap}
           transition={MICROINTERACTIONS.card.transition}

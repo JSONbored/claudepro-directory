@@ -10,14 +10,15 @@
 
 'use client';
 
-import type { changelog } from '@heyclaude/data-layer/prisma';
+import type { changelogModel } from '@heyclaude/data-layer/prisma';
 import { useInfiniteScroll } from '@heyclaude/web-runtime/hooks';
 import { getChangelogPath } from '@heyclaude/web-runtime/utils/changelog';
 import Link from 'next/link';
 
 import { ChangelogContent } from './changelog-content';
+import { paddingBottom, marginBottom, paddingLeft, spaceY, gap, paddingX, marginTop } from "@heyclaude/web-runtime/design-system";
 
-type ChangelogEntry = changelog;
+type ChangelogEntry = changelogModel;
 
 
 interface ChangelogTimelineViewProps {
@@ -91,8 +92,8 @@ export function ChangelogTimelineView({ entries }: ChangelogTimelineViewProps) {
           <div key={entry.slug} className="relative">
             <div className="flex flex-col md:flex-row gap-y-6">
               <div className="md:w-48 flex-shrink-0">
-                <div className="md:sticky md:top-8 pb-10">
-                  <time className="text-sm font-medium text-muted-foreground block mb-3">
+                <div className={`md:sticky md:top-8 ${paddingBottom.default}`}>
+                  <time className={`text-sm font-medium text-muted-foreground block ${marginBottom.compact}`}>
                     {formattedDate}
                   </time>
 
@@ -105,15 +106,15 @@ export function ChangelogTimelineView({ entries }: ChangelogTimelineViewProps) {
               </div>
 
               {/* Right side - Content */}
-              <div className="flex-1 md:pl-8 relative pb-10">
+              <div className={`flex-1 md:${paddingLeft.relaxed} relative ${paddingBottom.default}`}>
                 {/* Vertical timeline line */}
                 <div className="hidden md:block absolute top-2 left-0 w-px h-full bg-border">
                   {/* Timeline dot */}
                   <div className="hidden md:block absolute -translate-x-1/2 size-3 bg-primary rounded-full z-10" />
                 </div>
 
-                <div className="space-y-6">
-                  <div className="relative z-10 flex flex-col gap-2">
+                <div className={`${spaceY.relaxed}`}>
+                  <div className={`relative z-10 flex flex-col ${gap.tight}`}>
                     <Link
                       href={getChangelogPath(entry.slug)}
                       className="block hover:text-primary transition-colors"
@@ -125,11 +126,11 @@ export function ChangelogTimelineView({ entries }: ChangelogTimelineViewProps) {
 
                     {/* Tags */}
                     {tags.length > 0 && (
-                      <div className="flex flex-wrap gap-2">
+                      <div className={`flex flex-wrap ${gap.tight}`}>
                         {tags.map((tag: string) => (
                           <span
                             key={tag}
-                            className="h-6 w-fit px-2 text-xs font-medium bg-muted text-muted-foreground rounded-full border flex items-center justify-center"
+                            className={`h-6 w-fit ${paddingX.tight} text-xs font-medium bg-muted text-muted-foreground rounded-full border flex items-center justify-center`}
                           >
                             {tag}
                           </span>
@@ -137,7 +138,7 @@ export function ChangelogTimelineView({ entries }: ChangelogTimelineViewProps) {
                       </div>
                     )}
                   </div>
-                  <div className="prose dark:prose-invert max-w-none prose-headings:scroll-mt-8 prose-headings:font-semibold prose-a:no-underline prose-headings:tracking-tight prose-headings:text-balance prose-p:tracking-tight prose-p:text-balance">
+                  <div className={`prose dark:prose-invert max-w-none prose-headings:scroll-${marginTop.relaxed} prose-headings:font-semibold prose-a:no-underline prose-headings:tracking-tight prose-headings:text-balance prose-p:tracking-tight prose-p:text-balance`}>
                     <ChangelogContent entry={entry} hideHeader={true} onHeaderRef={() => {}} />
                   </div>
                 </div>

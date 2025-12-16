@@ -12,14 +12,13 @@ import {
   SECONDARY_NAVIGATION,
 } from '@heyclaude/web-runtime/config/navigation';
 import { getContactChannels } from '@heyclaude/web-runtime/core';
-import { SPRING, MICROINTERACTIONS, STAGGER } from '@heyclaude/web-runtime/design-system';
+import { SPRING, MICROINTERACTIONS, STAGGER, iconSize, grid, paddingTop, paddingX, paddingBottom, spaceY, paddingY, marginRight, marginLeft, marginTop } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion, useDragControls } from '@heyclaude/web-runtime/hooks/motion';
 import { DiscordIcon, Github, Menu } from '@heyclaude/web-runtime/icons';
 import {
   ANIMATION_CONSTANTS,
   DIMENSIONS,
   POSITION_PATTERNS,
-  UI_CLASSES,
   UnifiedBadge,
   PrefetchLink,
   Button,
@@ -27,6 +26,7 @@ import {
   SheetContent,
   SheetTitle,
   SheetTrigger,
+  cn,
 } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import Link from 'next/link';
@@ -49,9 +49,10 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
   const linkProps = {
     href,
     prefetch: true,
-    className: `group relative px-2 py-1 text-xs font-medium ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} no-underline ${
-      active ? 'text-foreground' : 'text-foreground/80 hover:text-foreground'
-    } ${className}`,
+    className: cn('group relative', paddingX.compact, paddingY.tight, 'text-xs font-medium', ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT, 'no-underline',
+      active ? 'text-foreground' : 'text-foreground/80 hover:text-foreground',
+      className
+    ),
     ...(active && { 'aria-current': 'page' as const }),
     ...(onClick && { onClick }),
     style: {
@@ -95,7 +96,7 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
   if (!isMounted) {
     return (
       <Button variant="ghost" size="sm" className="md:hidden" aria-label="Open mobile menu" disabled>
-        <Menu className={UI_CLASSES.ICON_LG} />
+        <Menu className={iconSize.lg} />
       </Button>
     );
   }
@@ -104,7 +105,7 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetTrigger asChild>
         <Button variant="ghost" size="sm" className="md:hidden" aria-label="Open mobile menu">
-          <Menu className={UI_CLASSES.ICON_LG} />
+          <Menu className={iconSize.lg} />
         </Button>
       </SheetTrigger>
       <SheetContent
@@ -129,10 +130,10 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
         />
 
         <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-        <div className="flex h-full flex-col pt-8">
+        <div className={`flex h-full flex-col ${paddingTop.relaxed}`}>
           {/* Header with Motion.dev fade-in */}
           <motion.div
-            className="flex items-center px-1 pb-8"
+            className={`flex items-center ${paddingX.micro} ${paddingBottom.relaxed}`}
             initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -20 }}
             animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
             transition={{ delay: STAGGER.fast }}
@@ -142,7 +143,7 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
 
           {/* Main Navigation - Staggered animations */}
           <div className="flex-1 overflow-y-auto">
-            <nav className="space-y-3 px-3" aria-label="Primary navigation">
+            <nav className={`${spaceY.default} ${paddingX.compact}`} aria-label="Primary navigation">
               {/* Action Links (Submit Config) - Prominent position */}
               {ACTION_LINKS.map((link, index) => {
                 const ActionIcon = link.icon;
@@ -160,9 +161,9 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
                       <Link
                         href={link.href}
                         onClick={() => onOpenChange(false)}
-                        className={`border-accent bg-accent text-accent-foreground flex w-full items-center justify-center rounded-xl border-2 px-5 py-4 text-base font-semibold ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:bg-accent/90`}
+                        className={cn('border-accent bg-accent text-accent-foreground flex w-full items-center justify-center rounded-xl border-2', paddingX['5'], paddingY.default, 'text-base font-semibold', ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT, 'hover:bg-accent/90')}
                       >
-                      {ActionIcon ? <ActionIcon className="mr-2 h-5 w-5 shrink-0" /> : null}
+                      {ActionIcon ? <ActionIcon className={`${marginRight.tight} h-5 w-5 shrink-0`} /> : null}
                       <span>{link.label}</span>
                     </Link>
                     </motion.div>
@@ -189,15 +190,15 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
                         href={link.href}
                         isActive={isActive}
                         onClick={() => onOpenChange(false)}
-                        className={`border-border bg-card flex w-full items-center rounded-xl border px-5 py-4 text-base font-medium ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:border-accent/50 hover:bg-accent/10`}
+                        className={cn('border-border bg-card flex w-full items-center rounded-xl border', paddingX['5'], paddingY.default, 'text-base font-medium', ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT, 'hover:border-accent/50 hover:bg-accent/10')}
                       >
-                      {IconComponent ? <IconComponent className="mr-3 h-5 w-5 shrink-0" /> : null}
+                      {IconComponent ? <IconComponent className={`${marginRight.compact} h-5 w-5 shrink-0`} /> : null}
                       <span>{link.label}</span>
                       {link.isNew ? (
                         <UnifiedBadge
                           variant="new-indicator"
                           label={`New: ${link.label}`}
-                          className="ml-auto"
+                          className={`${marginLeft.auto}`}
                         />
                       ) : null}
                       </NavLink>
@@ -208,10 +209,10 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
 
               {/* Secondary Navigation */}
               <nav
-                className="border-border/30 mt-4 border-t pt-6"
+                className={`border-border/30 ${marginTop.default} border-t ${paddingTop.comfortable}`}
                 aria-label="Secondary navigation"
               >
-                <div className="space-y-3">
+                <div className={`${spaceY.default}`}>
                   {SECONDARY_NAVIGATION.flatMap((group) => group.links)
                     .filter((link) => link.label !== 'Pinboard') // Remove pinboard from mobile
                     .map((link, index) => {
@@ -233,10 +234,10 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
                               href={link.href}
                               isActive={isActive}
                               onClick={() => onOpenChange(false)}
-                              className={`border-border/40 bg-card/50 text-muted-foreground flex w-full items-center rounded-xl border px-5 py-4 text-sm font-medium ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:border-accent/30 hover:bg-accent/5 hover:text-foreground`}
+                              className={cn('border-border/40 bg-card/50 text-muted-foreground flex w-full items-center rounded-xl border', paddingX['5'], paddingY.default, 'text-sm font-medium', ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT, 'hover:border-accent/30 hover:bg-accent/5 hover:text-foreground')}
                             >
                               {IconComponent ? (
-                                <IconComponent className="mr-3 h-4 w-4 shrink-0" />
+                                <IconComponent className={`${marginRight.compact} h-4 w-4 shrink-0`} />
                               ) : null}
                               <span>{link.label}</span>
                             </NavLink>
@@ -251,12 +252,12 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
 
           {/* Footer with spring animation on tap */}
           <motion.div
-            className="border-border/30 border-t pt-6 pb-6"
+            className={`border-border/30 border-t ${paddingTop.comfortable} ${paddingBottom.comfortable}`}
             initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
             animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
             transition={{ delay: STAGGER.slow }}
           >
-            <div className={`${UI_CLASSES.GRID_COLS_3_GAP_4} px-4`}>
+            <div className={cn(grid.cols3, paddingX.default)}>
               {[
                 {
                   icon: DiscordIcon,
@@ -283,7 +284,7 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
                     onClick={item.onClick}
                     aria-label={item.label}
                   >
-                    <item.icon className={UI_CLASSES.ICON_XL} />
+                    <item.icon className={iconSize.xl} />
                   </Button>
                 </motion.div>
               ))}

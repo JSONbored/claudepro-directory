@@ -8,13 +8,13 @@ export {
   hasHashChanged,
   printCache,
   setHash,
-} from './toolkit/cache.js';
-export { callEdgeFunction } from './toolkit/edge.js';
-export { ensureEnvVars } from './toolkit/env.js';
-export { logger } from './toolkit/logger.js';
+} from './toolkit/cache.ts';
+export { callEdgeFunction } from './toolkit/edge.ts';
+export { ensureEnvVars } from './toolkit/env.ts';
+export { logger } from './toolkit/logger.ts';
 export {
   createServiceRoleClient,
   getServiceRoleConfig,
   getSupabaseUrl,
-} from './toolkit/supabase.js';
-export { buildReadmeMarkdown } from './utils/readme-builder.js';
+} from './toolkit/supabase.ts';
+export { buildReadmeMarkdown } from './utils/readme-builder.ts';

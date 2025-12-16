@@ -44,7 +44,6 @@ import { ChevronDown, ChevronUp, Code, Plus, Trash } from '@heyclaude/web-runtim
 import {
   cn,
   DIMENSIONS,
-  UI_CLASSES,
   Button,
   Card,
   CardContent,
@@ -61,6 +60,7 @@ import {
   Textarea,
 } from '@heyclaude/web-runtime/ui';
 import { useId, useState } from 'react';
+import { between, cluster, iconSize, spaceY, paddingY, paddingBottom, marginTop } from "@heyclaude/web-runtime/design-system";
 
 // Supported languages for syntax highlighting
 const SUPPORTED_LANGUAGES = [
@@ -204,7 +204,7 @@ export function ExamplesArrayInput({
   };
 
   // Update example field
-  const updateExample = (index: number, field: keyof UsageExample, value: string) => {
+  const updateExample = (index: number, field: keyof UsageExample, value: string | ExampleLanguage) => {
     setExamples(examples.map((ex, i) => (i === index ? { ...ex, [field]: value } : ex)));
   };
 
@@ -213,15 +213,15 @@ export function ExamplesArrayInput({
   const examplesJson = JSON.stringify(examplesForSubmission);
 
   return (
-    <div className="space-y-4">
+    <div className={`${spaceY.comfortable}`}>
       {/* Hidden input for form submission */}
       <input type="hidden" name={name} value={examplesJson} />
 
       {/* Header */}
-      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+      <div className={between.center}>
         <div>
           <Label className="text-base font-semibold">Usage Examples (optional)</Label>
-          <p className={cn('text-sm', 'text-muted-foreground', 'mt-1')}>
+          <p className={cn('text-sm', 'text-muted-foreground', marginTop.tight)}>
             Add code examples to help users understand how to use this configuration. Max{' '}
             {maxExamples} examples.
           </p>
@@ -232,20 +232,20 @@ export function ExamplesArrayInput({
           size="sm"
           onClick={addExample}
           disabled={examples.length >= maxExamples}
-          className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
+          className={cluster.compact}
         >
-          <Plus className={UI_CLASSES.ICON_SM} />
+          <Plus className={iconSize.sm} />
           Add Example
         </Button>
       </div>
 
       {/* Examples List */}
-      <div className="space-y-3">
+      <div className={`${spaceY.default}`}>
         {examples.length === 0 && (
           <Card className="border-dashed">
-            <CardContent className="py-8">
-              <div className="space-y-2 text-center">
-                <Code className="text-muted-foreground mx-auto h-8 w-8" />
+            <CardContent className={`${paddingY.relaxed}`}>
+              <div className={`${spaceY.compact} text-center`}>
+                <Code className={`text-muted-foreground mx-auto ${iconSize.xl}`} />
                 <p className={cn('text-sm', 'text-muted-foreground')}>
                   No examples added yet. Click "Add Example" to get started.
                 </p>
@@ -264,17 +264,17 @@ export function ExamplesArrayInput({
 
           return (
             <Card key={example.id} className={cn(!validation.valid && 'border-destructive')}>
-              <CardHeader className="pb-3">
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+              <CardHeader className={`${paddingBottom.compact}`}>
+                <div className={between.center}>
                   <button
                     type="button"
                     onClick={() => toggleExpanded(index)}
-                    className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} flex-1 text-left transition-opacity hover:opacity-70`}
+                    className={`${cluster.compact} flex-1 text-left transition-opacity hover:opacity-70`}
                   >
                     {isExpanded ? (
-                      <ChevronUp className={UI_CLASSES.ICON_SM} />
+                      <ChevronUp className={iconSize.sm} />
                     ) : (
-                      <ChevronDown className={UI_CLASSES.ICON_SM} />
+                      <ChevronDown className={iconSize.sm} />
                     )}
                     <CardTitle className="text-base">
                       {example.title || `Example ${index + 1}`}
@@ -285,10 +285,10 @@ export function ExamplesArrayInput({
                     variant="ghost"
                     size="sm"
                     onClick={() => removeExample(index)}
-                    className={`${UI_CLASSES.ICON_XL} p-0`}
+                    className={`${iconSize.xl} p-0`}
                     title="Remove example"
                   >
-                    <Trash className={UI_CLASSES.ICON_SM} />
+                    <Trash className={iconSize.sm} />
                   </Button>
                 </div>
                 {!validation.valid && (
@@ -297,9 +297,9 @@ export function ExamplesArrayInput({
               </CardHeader>
 
               {isExpanded ? (
-                <CardContent className="space-y-4">
+                <CardContent className={`${spaceY.comfortable}`}>
                   {/* Title */}
-                  <div className="space-y-2">
+                  <div className={`${spaceY.compact}`}>
                     <Label htmlFor={titleId}>
                       Example Title <span className="text-destructive">*</span>
                     </Label>
@@ -315,15 +315,19 @@ export function ExamplesArrayInput({
                   </div>
 
                   {/* Language */}
-                  <div className="space-y-2">
+                  <div className={`${spaceY.compact}`}>
                     <Label htmlFor={languageId}>
                       Language <span className="text-destructive">*</span>
                     </Label>
                     <Select
                       value={example.language}
-                      onValueChange={(value) =>
-                        updateExample(index, 'language', value as ExampleLanguage)
-                      }
+                      onValueChange={(value) => {
+                        // Type guard: validate value is ExampleLanguage
+                        const validLanguages: readonly ExampleLanguage[] = SUPPORTED_LANGUAGES.map((l) => l.value);
+                        if (validLanguages.includes(value as ExampleLanguage)) {
+                          updateExample(index, 'language', value as ExampleLanguage);
+                        }
+                      }}
                     >
                       <SelectTrigger id={languageId}>
                         <SelectValue placeholder="Select language" />
@@ -339,7 +343,7 @@ export function ExamplesArrayInput({
                   </div>
 
                   {/* Code */}
-                  <div className="space-y-2">
+                  <div className={`${spaceY.compact}`}>
                     <Label htmlFor={codeId}>
                       Code <span className="text-destructive">*</span>
                     </Label>
@@ -358,7 +362,7 @@ export function ExamplesArrayInput({
                   </div>
 
                   {/* Description */}
-                  <div className="space-y-2">
+                  <div className={`${spaceY.compact}`}>
                     <Label htmlFor={descriptionId}>Description (optional)</Label>
                     <Textarea
                       id={descriptionId}
@@ -386,9 +390,9 @@ export function ExamplesArrayInput({
           variant="outline"
           size="sm"
           onClick={addExample}
-          className="flex w-full items-center gap-2"
+          className={`flex w-full items-center gap-2`}
         >
-          <Plus className={UI_CLASSES.ICON_SM} />
+          <Plus className={iconSize.sm} />
           Add Another Example ({examples.length}/{maxExamples})
         </Button>
       )}

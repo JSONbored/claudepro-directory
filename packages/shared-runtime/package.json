@@ -92,10 +92,10 @@
   "dependencies": {
     "@heyclaude/database-types": "workspace:*",
     "@shikijs/transformers": "^3.20.0",
-    "@supabase/supabase-js": "^2.87.1",
+    "@supabase/supabase-js": "^2.87.3",
     "pino": "^10.1.0",
     "sanitize-html": "^2.17.0",
     "shiki": "^3.20.0",
-    "zod": "^4.1.13"
+    "zod": "^4.2.0"
   }
 }

@@ -12,8 +12,8 @@
  * - Illustration (right side, desktop only)
  */
 
-import { Skeleton } from '@heyclaude/web-runtime/ui';
-import { SPRING, STAGGER } from '@heyclaude/web-runtime/design-system';
+import { cn, Skeleton } from '@heyclaude/web-runtime/ui';
+import { SPRING, STAGGER, marginBottom, padding, gap, spaceY, iconSize } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 
@@ -25,14 +25,14 @@ export function SubmitPageHeroSkeleton() {
 
   return (
     <motion.div
-      className="border-border/50 bg-card relative overflow-hidden rounded-2xl border p-8 mb-8"
+      className={`border-border/50 bg-card relative overflow-hidden rounded-2xl border ${padding.relaxed} ${marginBottom.relaxed}`}
       initial={!prefersReducedMotion ? { opacity: 0, y: -20 } : false}
       animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
       transition={{ ...SPRING.smooth, delay: 0.1 }}
     >
-      <div className="relative z-10 grid gap-6 lg:grid-cols-[1fr_auto]">
+      <div className={`relative z-10 grid ${gap.comfortable} lg:grid-cols-[1fr_auto]`}>
         {/* Left: Content */}
-        <div className="space-y-4">
+        <div className={`${spaceY.comfortable}`}>
           {/* Badge */}
           <motion.div
             initial={!prefersReducedMotion ? { opacity: 0, scale: 0.8 } : false}
@@ -62,7 +62,7 @@ export function SubmitPageHeroSkeleton() {
 
           {/* Feature badges */}
           <motion.div
-            className="flex flex-wrap items-center gap-3"
+            className={`flex flex-wrap items-center ${gap.compact}`}
             initial={!prefersReducedMotion ? { opacity: 0 } : false}
             animate={!prefersReducedMotion ? { opacity: 1 } : {}}
             transition={{ ...SPRING.loading, delay: 0.35 }}
@@ -73,9 +73,9 @@ export function SubmitPageHeroSkeleton() {
                 initial={!prefersReducedMotion ? { opacity: 0, scale: 0.8 } : false}
                 animate={!prefersReducedMotion ? { opacity: 1, scale: 1 } : {}}
                 transition={{ ...SPRING.loading, delay: 0.4 + i * STAGGER.micro }}
-                className="flex items-center gap-1.5"
+                className={cn('flex items-center', gap['1.5'])}
               >
-                <Skeleton size="sm" width="xs" rounded="full" className="h-4 w-4" />
+                <Skeleton size="sm" width="xs" rounded="full" className={iconSize.sm} />
                 <Skeleton size="sm" width="xs" className="h-4" />
               </motion.div>
             ))}

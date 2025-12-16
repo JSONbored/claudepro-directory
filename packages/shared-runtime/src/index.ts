@@ -92,6 +92,7 @@ export * from './schemas/env.ts';
 export * from './object-utils.ts';
 export * from './privacy.ts';
 export * from './utils/serialize.ts';
+export * from './utils/form-data.ts';
 // Platform detection and environment utilities (platform-agnostic)
 export * from './platform/index.ts';
 

@@ -4,15 +4,18 @@ import {
   type ContentFilterOptions,
   ContentService,
   TrendingService,
-  type EnrichedContentItem,
 } from '@heyclaude/data-layer';
-import { type content_category } from '@heyclaude/data-layer/prisma';
+import type { 
+  EnrichedContentItem,
+  ContentPaginatedSlimItem,
+} from '@heyclaude/database-types/postgres-types';
+import type { content_category } from '@heyclaude/data-layer/prisma';
 import type {
   GetTrendingContentReturns,
   GetTrendingMetricsWithContentReturns,
   GetPopularContentReturns,
   GetRecentContentReturns,
-} from '@heyclaude/database-types/postgres-types/functions';
+} from '@heyclaude/database-types/postgres-types';
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { logger, toLogContextValue } from '../../logger.ts';
@@ -30,8 +33,8 @@ export async function getContentByCategory(
 ): Promise<EnrichedContentItem[]> {
   'use cache';
 
-  // Configure cache - use 'hours' profile for content lists
-  cacheLife('hours'); // 1hr stale, 15min revalidate, 1 day expire
+  // Configure cache - use 'static' profile for optimal SEO (1 day stale, 6hr revalidate, 30 days expire)
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
   const tags = generateContentTags(category);
   for (const tag of tags) {
     cacheTag(tag);
@@ -94,8 +97,8 @@ export async function getContentBySlug(
 ): Promise<EnrichedContentItem | null> {
   'use cache';
 
-  // Configure cache - use 'hours' profile for content details
-  cacheLife('hours'); // 1hr stale, 15min revalidate, 1 day expire
+  // Configure cache - use 'detail' profile for optimal SEO (2hr stale, 30min revalidate, 1 day expire)
+  cacheLife('detail'); // 2hr stale, 30min revalidate, 1 day expire - optimized for SEO
   const tags = generateContentTags(category, slug);
   for (const tag of tags) {
     cacheTag(tag);
@@ -137,13 +140,13 @@ export async function getContentBySlug(
  */
 export async function getAllContent(
   filters?: ContentFilterOptions
-): Promise<EnrichedContentItem[]> {
+): Promise<ContentPaginatedSlimItem[]> {
   'use cache';
 
   const category = filters?.categories?.[0];
 
-  // Configure cache - use 'half' profile for content lists (changes every 30 minutes)
-  cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
+  // Configure cache - use 'static' profile for optimal SEO (1 day stale, 6hr revalidate, 30 days expire)
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
   cacheTag('content-all');
   if (category) {
     const tags = generateContentTags(category);
@@ -171,8 +174,8 @@ export async function getAllContent(
     });
 
     // getContentPaginated returns ContentPaginatedSlimResult with items array
-    // Convert ContentPaginatedSlimItem[] to EnrichedContentItem[] (they're compatible)
-    const items = (result?.items ?? []) as unknown as EnrichedContentItem[];
+    // Filter out null items and return as ContentPaginatedSlimItem[]
+    const items = (result?.items ?? []).filter((item): item is NonNullable<typeof item> => item !== null);
 
     reqLogger.info(
       {
@@ -201,14 +204,14 @@ export async function getAllContent(
 /**
  * Get content count for a category
  * Uses 'use cache' to cache content counts. This data is public and same for all users.
- * Content counts change periodically, so we use the 'half' cacheLife profile.
+ * Uses optimized getContentPaginatedSlim with window function for better performance.
  * @param category
  */
 export async function getContentCount(category?: content_category): Promise<number> {
   'use cache';
 
-  // Configure cache - use 'half' profile for content counts (changes every 30 minutes)
-  cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
+  // Configure cache - use 'static' profile for optimal SEO (1 day stale, 6hr revalidate, 30 days expire)
+  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
   const tags = generateContentTags(category);
   for (const tag of tags) {
     cacheTag(tag);
@@ -221,7 +224,9 @@ export async function getContentCount(category?: content_category): Promise<numb
 
   try {
     const service = new ContentService();
-    const result = await service.getContentPaginated({
+    // OPTIMIZATION: Use getContentPaginatedSlim (optimized with window function) instead of getContentPaginated
+    // Limit 1 since we only need the count, not the items
+    const result = await service.getContentPaginatedSlim({
       ...(category ? { p_category: category } : {}),
       p_limit: 1,
       p_offset: 0,
@@ -256,8 +261,8 @@ export async function getTrendingContent(
 ): Promise<GetTrendingContentReturns> {
   'use cache';
 
-  // Configure cache - use 'half' profile for trending content (changes every 30 minutes)
-  cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
+  // Configure cache - use 'stable' profile for optimal SEO (6hr stale, 1hr revalidate, 7 days expire)
+  cacheLife('stable'); // 6hr stale, 1hr revalidate, 7 days expire - optimized for SEO
   cacheTag('trending');
   if (category) {
     cacheTag(`trending-${category}`);
@@ -331,8 +336,8 @@ export async function getTrendingPageData(
   const { category = null, limit = 12 } = parameters;
   const safeLimit = Math.min(Math.max(limit, 1), 100);
 
-  // Configure cache - use 'half' profile for trending page data (changes every 30 minutes)
-  cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
+  // Configure cache - use 'stable' profile for optimal SEO (6hr stale, 1hr revalidate, 7 days expire)
+  cacheLife('stable'); // 6hr stale, 1hr revalidate, 7 days expire - optimized for SEO
   cacheTag('trending');
   cacheTag('trending-page');
 

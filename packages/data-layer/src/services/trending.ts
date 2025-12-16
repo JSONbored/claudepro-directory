@@ -25,7 +25,7 @@ import type {
   GetTrendingMetricsFormattedReturns,
   GetTrendingMetricsWithContentArgs,
   GetTrendingMetricsWithContentReturns,
-} from '@heyclaude/database-types/postgres-types/functions';
+} from '@heyclaude/database-types/postgres-types';
 import { BasePrismaService } from './base-prisma-service.ts';
 
 /**

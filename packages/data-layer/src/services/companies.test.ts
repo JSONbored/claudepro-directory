@@ -1,22 +1,38 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { PrismockClient } from 'prismock';
 import { CompaniesService } from './companies.ts';
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '@heyclaude/database-types';
+
+// Mock the prisma singleton with Prismock
+vi.mock('../prisma/client.ts', () => {
+  const { setupPrismockMock } = require('../test-utils/prisma-mock.ts');
+  return {
+    prisma: setupPrismockMock(),
+  };
+});
 
 // Mock the RPC error logging utility
 vi.mock('../utils/rpc-error-logging.ts', () => ({
   logRpcError: vi.fn(),
 }));
 
+// Mock request cache
+vi.mock('../utils/request-cache.ts', () => ({
+  withSmartCache: vi.fn((_key, _method, fn) => fn()),
+}));
+
 describe('CompaniesService', () => {
   let service: CompaniesService;
-  let mockSupabase: SupabaseClient<Database>;
+  let prismock: PrismockClient;
 
-  beforeEach(() => {
-    mockSupabase = {
-      rpc: vi.fn(),
-    } as unknown as SupabaseClient<Database>;
-    service = new CompaniesService(mockSupabase);
+  beforeEach(async () => {
+    // Get the mocked prisma instance (Prismock)
+    const { prisma } = await import('../prisma/client.ts');
+    prismock = prisma as PrismockClient;
+    
+    // Reset Prismock data before each test
+    prismock.reset();
+    
+    service = new CompaniesService();
   });
 
   describe('getCompanyAdminProfile', () => {
@@ -31,41 +47,36 @@ describe('CompaniesService', () => {
         created_at: '2024-01-01T00:00:00Z',
       };
 
-      vi.mocked(mockSupabase.rpc).mockResolvedValue({
-        data: mockData,
-        error: null,
-      } as any);
+      // Mock $queryRawUnsafe for RPC call
+      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
 
       const result = await service.getCompanyAdminProfile({ company_id: 'company-1' });
 
       expect(result).toEqual(mockData);
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('get_company_admin_profile', {
-        company_id: 'company-1',
-      });
+      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
+        expect.stringContaining('get_company_admin_profile'),
+        'company-1'
+      );
     });
 
     it('throws error when RPC call fails', async () => {
-      const mockError = { message: 'Database error', code: 'PGRST116' };
+      const mockError = new Error('Database error');
 
-      vi.mocked(mockSupabase.rpc).mockResolvedValue({
-        data: null,
-        error: mockError,
-      } as any);
+      vi.mocked(prismock.$queryRawUnsafe).mockRejectedValue(mockError);
 
-      await expect(service.getCompanyAdminProfile({ company_id: 'company-1' })).rejects.toEqual(
-        mockError
+      await expect(service.getCompanyAdminProfile({ company_id: 'company-1' })).rejects.toThrow(
+        'Database error'
       );
     });
 
     it('handles null data gracefully', async () => {
-      vi.mocked(mockSupabase.rpc).mockResolvedValue({
-        data: null,
-        error: null,
-      } as any);
+      // RPC returns empty array when no data found
+      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([] as any);
 
       const result = await service.getCompanyAdminProfile({ company_id: 'nonexistent' });
 
-      expect(result).toBeNull();
+      // BasePrismaService unwraps single-element arrays, so empty array becomes undefined
+      expect(result).toBeUndefined();
     });
   });
 
@@ -81,29 +92,24 @@ describe('CompaniesService', () => {
         job_count: 5,
       };
 
-      vi.mocked(mockSupabase.rpc).mockResolvedValue({
-        data: mockData,
-        error: null,
-      } as any);
+      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
 
       const result = await service.getCompanyProfile({ company_slug: 'test-company' });
 
       expect(result).toEqual(mockData);
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('get_company_profile', {
-        company_slug: 'test-company',
-      });
+      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
+        expect.stringContaining('get_company_profile'),
+        'test-company'
+      );
     });
 
     it('throws error when company not found', async () => {
-      const mockError = { message: 'Company not found', code: 'PGRST116' };
+      const mockError = new Error('Company not found');
 
-      vi.mocked(mockSupabase.rpc).mockResolvedValue({
-        data: null,
-        error: mockError,
-      } as any);
+      vi.mocked(prismock.$queryRawUnsafe).mockRejectedValue(mockError);
 
-      await expect(service.getCompanyProfile({ company_slug: 'nonexistent' })).rejects.toEqual(
-        mockError
+      await expect(service.getCompanyProfile({ company_slug: 'nonexistent' })).rejects.toThrow(
+        'Company not found'
       );
     });
   });
@@ -115,25 +121,20 @@ describe('CompaniesService', () => {
         { id: 'company-2', slug: 'company-2', name: 'Company 2', job_count: 1 },
       ];
 
-      vi.mocked(mockSupabase.rpc).mockResolvedValue({
-        data: mockData,
-        error: null,
-      } as any);
+      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue(mockData as any);
 
       const result = await service.getCompaniesList({ limit_count: 10, offset_count: 0 });
 
       expect(result).toEqual(mockData);
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('get_companies_list', {
-        limit_count: 10,
-        offset_count: 0,
-      });
+      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
+        expect.stringContaining('get_companies_list'),
+        10,
+        0
+      );
     });
 
     it('returns empty array when no companies exist', async () => {
-      vi.mocked(mockSupabase.rpc).mockResolvedValue({
-        data: [],
-        error: null,
-      } as any);
+      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([] as any);
 
       const result = await service.getCompaniesList({ limit_count: 10, offset_count: 0 });
 
@@ -141,33 +142,28 @@ describe('CompaniesService', () => {
     });
 
     it('throws error on database failure', async () => {
-      const mockError = { message: 'Connection timeout', code: 'ETIMEDOUT' };
+      const mockError = new Error('Connection timeout');
 
-      vi.mocked(mockSupabase.rpc).mockResolvedValue({
-        data: null,
-        error: mockError,
-      } as any);
+      vi.mocked(prismock.$queryRawUnsafe).mockRejectedValue(mockError);
 
       await expect(
         service.getCompaniesList({ limit_count: 10, offset_count: 0 })
-      ).rejects.toEqual(mockError);
+      ).rejects.toThrow('Connection timeout');
     });
 
     it('handles pagination correctly', async () => {
       const mockData = [{ id: 'company-11', slug: 'company-11', name: 'Company 11' }];
 
-      vi.mocked(mockSupabase.rpc).mockResolvedValue({
-        data: mockData,
-        error: null,
-      } as any);
+      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue(mockData as any);
 
       const result = await service.getCompaniesList({ limit_count: 10, offset_count: 10 });
 
       expect(result).toEqual(mockData);
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('get_companies_list', {
-        limit_count: 10,
-        offset_count: 10,
-      });
+      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
+        expect.stringContaining('get_companies_list'),
+        10,
+        10
+      );
     });
   });
 });

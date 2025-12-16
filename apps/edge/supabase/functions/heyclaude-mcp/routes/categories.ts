@@ -5,8 +5,9 @@
  * Uses the get_category_configs_with_features RPC.
  */
 
-import type { Database } from '@heyclaude/database-types';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { CategoryConfigWithFeatures } from '@heyclaude/database-types/postgres-types';
+import { ContentService } from '@heyclaude/data-layer/services/content.ts';
+import { SearchService } from '@heyclaude/data-layer/services/search.ts';
 import { getCategoryUsageHints } from '../lib/usage-hints.ts';
 import { logError } from '@heyclaude/shared-runtime/logging.ts';
 import type { ListCategoriesInput } from '../lib/types.ts';
@@ -17,39 +18,34 @@ import type { ListCategoriesInput } from '../lib/types.ts';
  * If fetching content counts fails, categories are still returned and each category's `count` defaults to `0`.
  *
  * @returns An object with `content`: an array containing a single text block summarizing categories, and `_meta`: an object with `categories` (array of category objects with `name`, `slug`, `description`, `count`, and `icon`) and `total` (number of categories)
- * @throws Error if the `get_category_configs_with_features` RPC fails or returns no data
+ * @throws Error if the category configs fetch fails or returns no data
  */
 export async function handleListCategories(
-  supabase: SupabaseClient<Database>,
   _input: ListCategoriesInput
 ) {
-  // Call the RPC to get category configs with features
-  const { data, error } = await supabase.rpc('get_category_configs_with_features');
+  const contentService = new ContentService();
+  const searchService = new SearchService();
 
-  if (error) {
-    // Use dbQuery serializer for consistent database query formatting
-    await logError('RPC call failed in listCategories', {
-      dbQuery: {
-        rpcName: 'get_category_configs_with_features',
-      },
-    }, error);
-    throw new Error(`Failed to fetch categories: ${error.message}`);
+  // Get category configs with features
+  let data: CategoryConfigWithFeatures[];
+  try {
+    data = await contentService.getCategoryConfigs();
+  } catch (error) {
+    await logError('ContentService.getCategoryConfigs failed in listCategories', {}, error);
+    throw new Error(`Failed to fetch categories: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 
-  if (!data) {
+  if (!data || data.length === 0) {
     throw new Error('No category data returned');
   }
 
-  // Get content counts from get_search_facets
-  const { data: facetsData, error: facetsError } = await supabase.rpc('get_search_facets');
-  
-  if (facetsError) {
-    // Use dbQuery serializer for consistent database query formatting
-    await logError('RPC call failed in listCategories (get_search_facets)', {
-      dbQuery: {
-        rpcName: 'get_search_facets',
-      },
-    }, facetsError);
+  // Get content counts from search facets
+  let facetsData: Array<{ category: string; content_count: number }> = [];
+  try {
+    const facetsResult = await searchService.getSearchFacets();
+    facetsData = Array.isArray(facetsResult) ? facetsResult : [];
+  } catch (error) {
+    await logError('SearchService.getSearchFacets failed in listCategories', {}, error);
     // Continue without counts - not critical
   }
   const countsMap = new Map(
@@ -60,8 +56,7 @@ export async function handleListCategories(
   );
 
   // Format the response for MCP
-  type CategoryConfig = Database['public']['CompositeTypes']['category_config_with_features'];
-  const categories = data.map((cat: CategoryConfig) => ({
+  const categories = data.map((cat: CategoryConfigWithFeatures) => ({
     name: cat.title || cat.category || '',
     slug: cat.category || '',
     description: cat.description || '',

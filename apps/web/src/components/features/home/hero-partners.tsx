@@ -9,7 +9,7 @@
 
 import { Marquee, MarqueeContent, MarqueeFade, MarqueeItem } from '@/src/components/ui/marquee';
 import { getFeatureFlag } from '@heyclaude/web-runtime/config/static-configs';
-import { SPRING, STAGGER, VIEWPORT } from '@heyclaude/web-runtime/design-system';
+import { SPRING, STAGGER, VIEWPORT, gap, marginX, size, weight, tracking } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import Image from 'next/image';
@@ -54,7 +54,7 @@ export function HeroPartners() {
   const shouldReduceMotion = useReducedMotion();
   
   // Feature flag check - can be disabled via config
-  const isEnabled = getFeatureFlag('hero.partners_marquee.enabled') as boolean;
+  const isEnabled = Boolean(getFeatureFlag('hero.partners_marquee.enabled'));
 
   // Don't render if disabled or no partners
   if (!isEnabled || PARTNERS.length === 0) {
@@ -72,10 +72,10 @@ export function HeroPartners() {
         delay: STAGGER.comfortable,
       }}
     >
-      <div className="flex flex-col items-center gap-4">
+      <div className={`flex flex-col items-center ${gap.default}`}>
         {/* "Trusted by" Label */}
         <motion.p
-          className="text-muted-foreground text-sm font-medium tracking-wide uppercase"
+          className={`text-muted-foreground ${size.sm} ${weight.medium} ${tracking.wide} uppercase`}
           initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
           whileInView={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }}
           viewport={VIEWPORT.late}
@@ -98,7 +98,7 @@ export function HeroPartners() {
             {PARTNERS.map((partner, index) => (
               <MarqueeItem
                 key={`${partner.name}-${index}`}
-                className="mx-6 flex h-12 w-auto items-center justify-center opacity-60 transition-opacity hover:opacity-100"
+                className={`${marginX.comfortable} flex h-12 w-auto items-center justify-center opacity-60 transition-opacity hover:opacity-100`}
               >
                 {partner.href ? (
                   <a

@@ -6,12 +6,12 @@
 import { Star } from '@heyclaude/web-runtime/icons';
 import { type ReviewHistogramProps } from '@heyclaude/web-runtime/types/component.types';
 import {
-  UI_CLASSES,
   ChartContainer,
   HorizontalBarChart,
   StarDisplay,
   Card,
 } from '@heyclaude/web-runtime/ui';
+import { cluster, iconSize, size, weight, padding, marginBottom } from '@heyclaude/web-runtime/design-system';
 
 /**
  * Server component that renders an average rating and a horizontal bar chart showing the rating distribution.
@@ -56,36 +56,36 @@ export function ReviewRatingHistogram({
 
   if (totalReviews === 0) {
     return (
-      <Card className="bg-muted/50 p-6">
+      <Card className={`bg-muted/50 ${padding.comfortable}`}>
         <div className="text-center">
-          <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} mb-2 justify-center`}>
-            <Star className={`${UI_CLASSES.ICON_XL} text-muted-foreground/30`} aria-hidden="true" />
+          <div className={`${cluster.compact} ${marginBottom.compact} justify-center`}>
+            <Star className={`${iconSize.xl} text-muted-foreground/30`} aria-hidden="true" />
           </div>
-          <p className="text-muted-foreground text-sm">No reviews yet. Be the first to review!</p>
+          <p className={`text-muted-foreground ${size.sm}`}>No reviews yet. Be the first to review!</p>
         </div>
       </Card>
     );
   }
 
   return (
-    <Card className="p-6">
+    <Card className={`${padding.comfortable}`}>
       {/* Header: Average Rating */}
-      <div className="mb-6">
-        <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} mb-2`}>
-          <div className="text-4xl font-bold">{averageRating.toFixed(1)}</div>
-          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+      <div className={`${marginBottom.comfortable}`}>
+        <div className={`${cluster.default} ${marginBottom.compact}`}>
+          <div className={`${size['4xl']} ${weight.bold}`}>{averageRating.toFixed(1)}</div>
+          <div className={cluster.tight}>
             <StarDisplay rating={averageRating} size="md" />
           </div>
         </div>
-        <p className="text-muted-foreground text-sm">
+        <p className={`text-muted-foreground ${size.sm}`}>
           Based on {totalReviews} {totalReviews === 1 ? 'review' : 'reviews'}
         </p>
       </div>
 
       {/* Chart: Rating Distribution */}
       <div>
-        <h3 className="mb-3 text-sm font-semibold">Rating Distribution</h3>
-        <ChartContainer height="200px" className="w-full">
+        <h3 className={`${marginBottom.default} ${size.sm} ${weight.semibold}`}>Rating Distribution</h3>
+        <ChartContainer height="200px" className={`w-full`}>
           <HorizontalBarChart
             data={chartData}
             height={200}

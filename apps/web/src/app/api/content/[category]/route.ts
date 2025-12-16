@@ -19,8 +19,7 @@
 
 import 'server-only';
 import { ContentService } from '@heyclaude/data-layer';
-import { type content_category } from '@heyclaude/data-layer/prisma';
-import { type Database as DatabaseGenerated } from '@heyclaude/database-types';
+import { type content_category, ContentCategory } from '@heyclaude/data-layer/prisma';
 import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
 import {
   buildCacheHeaders,
@@ -35,20 +34,8 @@ import { cacheLife } from 'next/cache';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
-// Prisma enum values for validation
-const CONTENT_CATEGORY_VALUES: readonly content_category[] = [
-  'agents',
-  'mcp',
-  'rules',
-  'commands',
-  'hooks',
-  'statuslines',
-  'skills',
-  'collections',
-  'guides',
-  'jobs',
-  'changelog',
-] as const;
+// Use Prisma enum object for validation (ensures sync with database)
+const CONTENT_CATEGORY_VALUES = Object.values(ContentCategory) as readonly content_category[];
 
 /***
  * Cached helper function to fetch category content list.
@@ -68,11 +55,11 @@ async function getCachedCategoryContent(category: content_category) {
  * Cached helper function to fetch category LLMs.txt
  * Uses Cache Components to reduce function invocations
  *
- * @param {DatabaseGenerated['public']['Enums']['content_category']} category - Content category enum value
+ * @param {content_category} category - Content category enum value
  * @returns {Promise<string | null>} Category LLMs.txt content from the database
  */
 async function getCachedCategoryLlmsTxt(
-  category: DatabaseGenerated['public']['Enums']['content_category']
+  category: content_category
 ) {
   'use cache';
   cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
@@ -117,7 +104,7 @@ export const GET = createApiRoute({
     switch (format) {
       case 'json': {
         const data = await getCachedCategoryContent(
-          category as DatabaseGenerated['public']['Enums']['content_category']
+          category as content_category
         );
 
         if (!data || (Array.isArray(data) && data.length === 0)) {
@@ -141,7 +128,7 @@ export const GET = createApiRoute({
       }
       case 'llms-category': {
         const data = await getCachedCategoryLlmsTxt(
-          category as DatabaseGenerated['public']['Enums']['content_category']
+          category as content_category
         );
 
         if (!data) {

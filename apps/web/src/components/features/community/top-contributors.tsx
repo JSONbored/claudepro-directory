@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * TopContributors - Horizontal showcase of leading community members
+ * TopContributors - Horizontal showcase of new community members
  *
  * Architecture:
  * - Reuses ProfileCard component (composition over duplication)
@@ -13,13 +13,13 @@
  */
 
 import { Users } from '@heyclaude/web-runtime/icons';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { memo } from 'react';
 
 import {
   ProfileCard,
   type UserProfile,
 } from '@/src/components/core/domain/cards/user-profile-card';
+import { iconSize, paddingX, paddingY, marginX, marginBottom, gap, size, weight } from "@heyclaude/web-runtime/design-system";
 
 export interface TopContributorsProps {
   contributors: UserProfile[];
@@ -29,7 +29,7 @@ export interface TopContributorsProps {
 
 function TopContributorsComponent({
   contributors,
-  title = 'Top Contributors',
+  title = 'New Community Members',
   showCount = 6,
 }: TopContributorsProps) {
   const displayedContributors = contributors.slice(0, showCount);
@@ -39,13 +39,13 @@ function TopContributorsComponent({
   }
 
   return (
-    <section className="container mx-auto px-4 py-12">
-      <div className="mb-6 flex items-center gap-3">
-        <Users className={`${UI_CLASSES.ICON_LG} text-accent`} />
-        <h2 className="text-2xl font-bold">{title}</h2>
+    <section className={`container ${marginX.auto} ${paddingX.default} ${paddingY.section}`}>
+      <div className={`${marginBottom.comfortable} flex items-center ${gap.compact}`}>
+        <Users className={`${iconSize.lg} text-accent`} />
+        <h2 className={`${size['2xl']} ${weight.bold}`}>{title}</h2>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      <div className={`grid grid-cols-1 ${gap.default} sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6`}>
         {displayedContributors.map((contributor) => (
           <ProfileCard
             key={contributor.slug}

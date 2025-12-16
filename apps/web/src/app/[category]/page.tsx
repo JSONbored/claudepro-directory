@@ -33,7 +33,7 @@
  * @see {@link file://../../lib/content-loaders.ts} - Content loading with caching
  */
 
-import { type Database } from '@heyclaude/database-types';
+import type { content_category } from '@heyclaude/data-layer/prisma';
 import { isValidCategory, type UnifiedCategoryConfig } from '@heyclaude/web-runtime/core';
 import { getCategoryConfig } from '@heyclaude/web-runtime/data/config/category';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
@@ -46,12 +46,12 @@ import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import React, { Suspense } from 'react';
+import React from 'react';
 
 import { CategoryPageSearchClient } from '@/src/app/[category]/category-page-search-client';
-import { ContentSearchSkeleton } from '@/src/components/content/content-grid-list';
 import { ExploreDropdown } from '@/src/components/content/explore-dropdown';
 import { ContentSidebar } from '@/src/components/core/layout/content-sidebar';
+import { paddingX, paddingY, marginX, marginBottom, padding, gap, marginTop } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Dynamic Rendering Required
@@ -222,16 +222,12 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
         icon={iconName}
         title={config.pluralTitle}
       >
-        {/* Badges stream in Suspense */}
-        <Suspense fallback={<CategoryBadgesSkeleton />}>
-          <CategoryBadges config={config} items={items} />
-        </Suspense>
+        {/* CRITICAL: No Suspense above the fold - data is already fetched, prevents blank states from being cached */}
+        <CategoryBadges config={config} items={items} />
       </CategoryHeroShell>
 
-      {/* Content section - Outside hero, streams separately */}
-      <Suspense fallback={<ContentSearchSkeleton />}>
-        <CategoryPageContent category={typedCategory} config={config} items={items} />
-      </Suspense>
+      {/* CRITICAL: No Suspense above the fold - data is already fetched, prevents blank states from being cached */}
+      <CategoryPageContent category={typedCategory} config={config} items={items} />
     </div>
   );
 }
@@ -265,7 +261,7 @@ function CategoryHeroShell({
   icon,
   title,
 }: {
-  category: Database['public']['Enums']['content_category'];
+  category: content_category;
   children: React.ReactNode;
   description: string;
   icon: string;
@@ -276,18 +272,17 @@ function CategoryHeroShell({
   return (
     <section
       aria-labelledby="category-title"
-      className="border-border border-b backdrop-blur-sm"
-      style={{ backgroundColor: 'color-mix(in srgb, var(--code-bg) 30%, transparent)' }}
+      className="border-border border-b backdrop-blur-sm bg-color-bg-code/30"
     >
-      <div className="container mx-auto px-4 py-20">
-        <div className="mx-auto max-w-3xl text-center">
-          <div className="mb-6 flex justify-center">
-            <div aria-hidden="true" className="bg-accent/10 rounded-full p-3">
+      <div className={`container ${marginX.auto} ${paddingX.default} ${paddingY.default}`}>
+        <div className={`${marginX.auto} max-w-3xl text-center`}>
+          <div className={`${marginBottom.comfortable} flex justify-center`}>
+            <div aria-hidden="true" className={`bg-accent/10 rounded-full ${padding.compact}`}>
               <IconComponent className="text-primary h-12 w-12" />
             </div>
           </div>
 
-          <div className="flex items-center justify-center gap-4">
+          <div className={`flex items-center justify-center ${gap.default}`}>
             <h1
               className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl"
               id="category-title"
@@ -299,16 +294,16 @@ function CategoryHeroShell({
             </div>
           </div>
 
-          <p className="text-muted-foreground mt-4 text-lg sm:text-xl">{description}</p>
+          <p className={`text-muted-foreground ${marginTop.default} text-lg sm:text-xl`}>{description}</p>
 
           {/* Badges and content stream in via children */}
-          <div className="mb-8">{children}</div>
+          <div className={`${marginBottom.relaxed}`}>{children}</div>
 
-          <div className="flex items-center justify-center gap-2">
+          <div className={`flex items-center justify-center ${gap.tight}`}>
             <Button asChild size="sm" variant="outline">
               <Link
                 aria-label={`Submit a new ${title.slice(0, -1).toLowerCase()}`}
-                className="flex items-center gap-2"
+                className={`flex items-center ${gap.tight}`}
                 href={ROUTES.SUBMIT}
               >
                 <ExternalLink aria-hidden="true" className="h-4 w-4" />
@@ -331,19 +326,7 @@ function CategoryHeroShell({
  * Displays three pill-shaped pulsing placeholders sized to approximate typical badges.
  *
  * @see CategoryBadges
- 
- * @returns JSX.Element - A skeleton placeholder with three animated pill-shaped divs
  */
-function CategoryBadgesSkeleton() {
-  return (
-    <div className="flex list-none flex-wrap justify-center gap-2">
-      <div className="bg-muted h-8 w-24 animate-pulse rounded-full" />
-      <div className="bg-muted h-8 w-32 animate-pulse rounded-full" />
-      <div className="bg-muted h-8 w-28 animate-pulse rounded-full" />
-    </div>
-  );
-}
-
 /**
  * Renders the category badges shown in the hero area, computing dynamic counts from the category's items.
  *
@@ -365,7 +348,7 @@ function CategoryBadges({
   config,
   items,
 }: {
-  config: UnifiedCategoryConfig<Database['public']['Enums']['content_category']>;
+  config: UnifiedCategoryConfig<content_category>;
   items: Awaited<ReturnType<typeof getContentByCategory>>;
 }) {
   // OPTIMIZATION: Items are now passed as prop from parent (fetched once at page level)
@@ -395,7 +378,7 @@ function CategoryBadges({
         ];
 
   return (
-    <ul className="flex list-none flex-wrap justify-center gap-2">
+    <ul className={`flex list-none flex-wrap justify-center ${gap.tight}`}>
       {displayBadges.map((badge, idx) => (
         <li key={badge.text || `badge-${idx}`}>
           <UnifiedBadge style={idx === 0 ? 'secondary' : 'outline'} variant="base">
@@ -438,8 +421,8 @@ function CategoryPageContent({
   category,
   config,
 }: {
-  category: Database['public']['Enums']['content_category'];
-  config: UnifiedCategoryConfig<Database['public']['Enums']['content_category']>;
+  category: content_category;
+  config: UnifiedCategoryConfig<content_category>;
   items: Awaited<ReturnType<typeof getContentByCategory>>;
 }) {
   return (
@@ -447,9 +430,9 @@ function CategoryPageContent({
       {/* Content section - Full width like homepage, sidebar on the side */}
       <section
         aria-label={`${config.pluralTitle} content and search`}
-        className="container mx-auto px-4 py-12"
+        className={`container ${marginX.auto} ${paddingX.default} ${paddingY.section}`}
       >
-        <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_18rem]">
+        <div className={`grid ${gap.relaxed} xl:grid-cols-[minmax(0,1fr)_18rem]`}>
           {/* Main content area - Full width within grid column */}
           <div className="min-w-0">
             <CategoryPageSearchClient

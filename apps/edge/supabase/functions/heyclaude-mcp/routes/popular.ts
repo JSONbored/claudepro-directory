@@ -4,11 +4,10 @@
  */
 
 import { TrendingService } from '@heyclaude/data-layer/services/trending.ts';
-import type { Database } from '@heyclaude/database-types';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { GetPopularContentReturns } from '@heyclaude/database-types/postgres-types';
 import type { GetPopularInput } from '../lib/types.ts';
 
-type PopularContentItem = Database['public']['Functions']['get_popular_content']['Returns'][number];
+type PopularContentItem = GetPopularContentReturns[number];
 
 /**
  * Retrieve and format popular content, optionally filtered by category, into a textual summary and metadata.
@@ -18,11 +17,11 @@ type PopularContentItem = Database['public']['Functions']['get_popular_content']
  *   - `content`: a single text item containing a human-readable summary (or a "no popular content found" message when empty).
  *   - `_meta`: metadata including `items` (the formatted list with slug, title, category, truncated description, tags, author, dateAdded, and stats), `category` (the requested category or `'all'`), and `count` (number of items, present when results exist).
  */
-export async function handleGetPopular(supabase: SupabaseClient<Database>, input: GetPopularInput) {
+export async function handleGetPopular(input: GetPopularInput) {
   const { category, limit } = input;
 
-  // Use TrendingService for consistent behavior with web app
-  const trendingService = new TrendingService(supabase);
+  // Use TrendingService for consistent behavior with web app (Prisma-based, no Supabase client needed)
+  const trendingService = new TrendingService();
 
   const data = await trendingService.getPopularContent({
     ...(category ? { p_category: category } : {}),

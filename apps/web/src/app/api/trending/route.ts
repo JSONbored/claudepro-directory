@@ -38,6 +38,7 @@ import {
   jsonResponse,
   trendingQuerySchema,
 } from '@heyclaude/web-runtime/server';
+import type { RouteHandlerContext } from '@heyclaude/web-runtime/server';
 import { cacheLife } from 'next/cache';
 
 type ContentCategory = content_category;
@@ -185,18 +186,18 @@ export const GET = createApiRoute({
 
 /******
  * Handle page tabs (trending, popular, recent)
- * @param {ReturnType<typeof import('@heyclaude/web-runtime/logging/server').logger.child>} logger
+ * @param {ReturnType<typeof logger.child>} logger
  * @param {'popular' | 'recent' | 'trending'} tab
  * @param {ContentCategory | null} category
  * @param {number} limit
  */
 async function handlePageTabs(
-  logger: ReturnType<typeof import('@heyclaude/web-runtime/logging/server').logger.child>,
+  reqLogger: RouteHandlerContext['logger'],
   tab: 'popular' | 'recent' | 'trending',
   category: ContentCategory | null,
   limit: number
 ) {
-  logger.info({ category: category ?? 'all', limit, tab }, 'Processing trending page tabs');
+  reqLogger.info({ category: category ?? 'all', limit, tab }, 'Processing trending page tabs');
 
   if (tab === 'trending') {
     const trending = await getCachedTrendingMetricsFormatted(category, limit);
@@ -242,19 +243,19 @@ async function handlePageTabs(
 
 /*****
  * Handle sidebar mode
- * @param {ReturnType<typeof import('@heyclaude/web-runtime/logging/server').logger.child>} logger
+ * @param {ReturnType<typeof logger.child>} logger
  * @param {ContentCategory | null} category
  * @param {number} limit
  */
 async function handleSidebar(
-  logger: ReturnType<typeof import('@heyclaude/web-runtime/logging/server').logger.child>,
+  reqLogger: RouteHandlerContext['logger'],
   category: ContentCategory | null,
   limit: number
 ) {
   // Default to 'guides' if category is null for sidebar
   const sidebarCategory = category ?? 'guides';
 
-  logger.info({ category: sidebarCategory, limit }, 'Processing trending sidebar');
+  reqLogger.info({ category: sidebarCategory, limit }, 'Processing trending sidebar');
 
   // Fetch trending and recent content in parallel
   const [trending, recent] = await Promise.all([

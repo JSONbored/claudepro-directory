@@ -7,7 +7,6 @@ import { highlightCodeEdge } from '@heyclaude/web-runtime/data';
 import { Zap } from '@heyclaude/web-runtime/icons';
 import { type StepByStepGuideProps } from '@heyclaude/web-runtime/types/component.types';
 import {
-  UI_CLASSES,
   UnifiedBadge,
   Card,
   CardContent,
@@ -15,8 +14,15 @@ import {
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
 
-import { ProductionCodeBlock } from '@/src/components/content/interactive-code-block';
+import dynamic from 'next/dynamic';
+
+// Lazy load large code block component (889 lines) - only loads when code blocks are rendered
+const ProductionCodeBlock = dynamic(
+  () => import('@/src/components/content/interactive-code-block').then((mod) => ({ default: mod.ProductionCodeBlock })),
+  { ssr: true }
+);
 import { UnifiedContentBox } from '@/src/components/core/domain/content/featured-content-box';
+import { iconSize, marginY, marginBottom, gap, spaceY, marginLeft, paddingLeft, radius } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Render a server-side, step-by-step HowTo guide with optional code highlighting, timings, and tips.
@@ -49,70 +55,70 @@ export async function StepByStepGuide(props: StepByStepGuideProps) {
   );
 
   return (
-    <section itemScope itemType="https://schema.org/HowTo" className="my-8">
-      <div className="mb-6">
-        <h2 className="mb-2 text-2xl font-bold" itemProp="name">
+    <section itemScope itemType="https://schema.org/HowTo" className={`${marginY.relaxed}`}>
+      <div className={`${marginBottom.comfortable}`}>
+        <h2 className={`${marginBottom.compact} text-2xl font-bold`} itemProp="name">
           {title}
         </h2>
         {description ? (
-          <p className="text-muted-foreground mb-4" itemProp="description">
+          <p className={`text-muted-foreground ${marginBottom.default}`} itemProp="description">
             {description}
           </p>
         ) : null}
         {totalTime ? (
-          <div className="text-muted-foreground flex items-center gap-2 text-sm">
-            <Zap className={UI_CLASSES.ICON_SM} />
+          <div className={`text-muted-foreground flex items-center ${gap.tight} text-sm`}>
+            <Zap className={iconSize.sm} />
             <span itemProp="totalTime">Total time: {totalTime}</span>
           </div>
         ) : null}
       </div>
 
-      <div className="space-y-8">
+      <div className={`${spaceY.loose}`}>
         {highlightedSteps.map((step, index) => {
           const isLastStep = index === highlightedSteps.length - 1;
           return (
-            <div key={step.title} className="relative">
+            <div key={step.title} className={`relative`}>
               {/* Connecting line */}
               {!isLastStep && (
-                <div className="from-primary/50 to-primary/10 absolute top-14 bottom-0 left-5 w-0.5 bg-linear-to-b" />
+                <div className={`from-primary/50 to-primary/10 absolute top-14 bottom-0 left-5 w-0.5 bg-linear-to-b`} />
               )}
 
               <Card
                 itemScope
                 itemType="https://schema.org/HowToStep"
-                className="border-primary/20 from-card via-card/80 border-2 bg-linear-to-br to-transparent transition-all duration-300 hover:shadow-2xl"
+                className={`border-primary/20 from-card via-card/80 border-2 bg-linear-to-br to-transparent transition-all duration-300 hover:shadow-2xl`}
               >
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-4" itemProp="name">
-                    <div className="relative">
-                      <div className="from-primary to-primary/70 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br shadow-lg">
+                  <CardTitle className={`flex items-center ${gap.default}`} itemProp="name">
+                    <div className={`relative`}>
+                      <div className={`from-primary to-primary/70 flex ${iconSize['10']} shrink-0 items-center justify-center ${radius['full']} bg-linear-to-br shadow-lg`}>
                         <span className="text-primary-foreground text-base font-bold">
                           {index + 1}
                         </span>
                       </div>
-                      <div className="bg-primary absolute inset-0 animate-ping rounded-full opacity-20" />
+                      <div className={`bg-primary absolute inset-0 animate-ping ${radius['full']} opacity-20`} />
                     </div>
                     <span className="text-xl font-bold">{step.title}</span>
                     {step.time ? (
                       <UnifiedBadge
                         variant="base"
                         style="secondary"
-                        className="border-primary/30 bg-primary/10 text-primary ml-auto"
+                        className={`border-primary/30 bg-primary/10 text-primary ${marginLeft.auto}`}
                       >
                         ⏱ {step.time}
                       </UnifiedBadge>
                     ) : null}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="pl-14">
+                <CardContent className={`${paddingLeft.default}`}>
                   {step.content || step.description ? (
-                    <div itemProp="text" className="mb-6 text-base leading-relaxed">
+                    <div itemProp="text" className={`${marginBottom.comfortable} text-base leading-relaxed`}>
                       {step.content || step.description}
                     </div>
                   ) : null}
 
                   {step.highlightedHtml && step.code ? (
-                    <div className="mb-6">
+                    <div className={`${marginBottom.comfortable}`}>
                       <ProductionCodeBlock
                         html={step.highlightedHtml}
                         code={step.code}

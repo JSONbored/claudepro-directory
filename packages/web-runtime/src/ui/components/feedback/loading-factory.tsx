@@ -11,7 +11,7 @@
  * @module lib/components/loading-factory
  */
 
-import { UI_CLASSES } from '../../constants.ts';
+import { grid, spaceY, paddingX, paddingY, padding, marginBottom, gap, wrap } from '../../../design-system/index.ts';
 import { SPRING, STAGGER } from '../../../design-system/index.ts';
 import { getSkeletonKeys } from '../../../skeleton-keys.ts';
 import {
@@ -54,7 +54,7 @@ const SKELETON_CONFIGS: Record<string, SkeletonConfig> = {
   grid3: {
     cardsPerRow: 3,
     totalCards: 9,
-    gridClass: UI_CLASSES.GRID_RESPONSIVE_3_TIGHT,
+    gridClass: 'grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
   },
   // Wide 2-column grid (guides, jobs)
   grid2: {
@@ -66,7 +66,7 @@ const SKELETON_CONFIGS: Record<string, SkeletonConfig> = {
   list: {
     cardsPerRow: 1,
     totalCards: 8,
-    gridClass: UI_CLASSES.SPACE_Y_4,
+    gridClass: spaceY.comfortable,
   },
 } as const;
 
@@ -96,8 +96,7 @@ export function CategoryLoading({
     >
       {/* CategoryHeroShell - Hero section with icon, title, description, badges, submit button */}
       <motion.section
-        className="border-border border-b backdrop-blur-sm"
-        style={{ backgroundColor: 'color-mix(in srgb, var(--code-bg) 30%, transparent)' }}
+        className="border-border border-b backdrop-blur-sm bg-color-bg-code/30"
         initial={!prefersReducedMotion ? { opacity: 0, y: -20 } : false}
         animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
         transition={{ ...SPRING.smooth, delay: 0.1 }}
@@ -458,19 +457,19 @@ export function GuideDetailLoading() {
         animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
         transition={{ ...SPRING.smooth, delay: 0.1 }}
       >
-        <div className={`container mx-auto ${UI_CLASSES.PADDING_X_DEFAULT} py-8`}>
-          <Skeleton size="sm" width="sm" className={UI_CLASSES.MARGIN_COMFORTABLE} />
+        <div className={`container mx-auto ${paddingX.default} py-8`}>
+          <Skeleton size="sm" width="sm" className={marginBottom.comfortable} />
           <div className="max-w-4xl">
             <div
-              className={`${UI_CLASSES.MARGIN_COMFORTABLE} flex items-start ${UI_CLASSES.SPACE_COMFORTABLE}`}
+              className={`${marginBottom.comfortable} flex items-start ${gap.comfortable}`}
             >
               <Skeleton size="xl" width="xs" />
-              <div className={`flex-1 ${UI_CLASSES.SPACE_Y_4}`}>
+              <div className={`flex-1 ${spaceY.comfortable}`}>
                 <Skeleton size="xl" width="3/4" />
                 <Skeleton size="md" width="3xl" />
               </div>
             </div>
-            <div className={`flex flex-wrap ${UI_CLASSES.SPACE_COMPACT}`}>
+            <div className={`flex flex-wrap ${gap.compact}`}>
               {Array.from({ length: 5 }).map((_, i) => (
                 <motion.div
                   key={KEYS_5[i]}
@@ -487,15 +486,15 @@ export function GuideDetailLoading() {
       </motion.div>
 
       <motion.div
-        className={`container mx-auto ${UI_CLASSES.PADDING_X_DEFAULT} ${UI_CLASSES.PADDING_Y_SECTION}`}
+        className={`container mx-auto ${paddingX.default} ${paddingY.section}`}
         initial={!prefersReducedMotion ? { opacity: 0, y: 20 } : false}
         animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
         transition={{ ...SPRING.smooth, delay: 0.2 }}
       >
-        <div className={`grid grid-cols-1 ${UI_CLASSES.SPACE_LOOSE} lg:grid-cols-3`}>
-          <div className={`${UI_CLASSES.SPACE_Y_6} lg:col-span-2`}>
+        <div className={`grid grid-cols-1 ${gap.loose} lg:grid-cols-3`}>
+          <div className={`${spaceY.relaxed} lg:col-span-2`}>
             <div
-              className={`${UI_CLASSES.SPACE_Y_4} rounded-lg border ${UI_CLASSES.PADDING_COMFORTABLE}`}
+              className={`${spaceY.comfortable} rounded-lg border ${padding.comfortable}`}
             >
               {Array.from({ length: 12 }).map((_, i) => (
                 <motion.div
@@ -509,9 +508,9 @@ export function GuideDetailLoading() {
               ))}
             </div>
           </div>
-          <div className={UI_CLASSES.SPACE_Y_6}>
+          <div className={spaceY.relaxed}>
             <motion.div
-              className={`${UI_CLASSES.SPACE_Y_4} rounded-lg border ${UI_CLASSES.PADDING_COMFORTABLE}`}
+              className={`${spaceY.comfortable} rounded-lg border ${padding.comfortable}`}
               initial={!prefersReducedMotion ? { opacity: 0, x: 20 } : false}
               animate={!prefersReducedMotion ? { opacity: 1, x: 0 } : {}}
               transition={{ ...SPRING.loading, delay: 0.4 }}
@@ -547,7 +546,7 @@ export function SearchResultsLoading() {
 
   return (
     <motion.div
-      className={UI_CLASSES.SPACE_Y_6}
+      className={spaceY.relaxed}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={SPRING.smooth}
@@ -563,7 +562,7 @@ export function SearchResultsLoading() {
 
       {/* Results grid */}
       <motion.div
-        className={UI_CLASSES.GRID_RESPONSIVE_3_TIGHT}
+        className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
         initial={!prefersReducedMotion ? { opacity: 0, y: 20 } : false}
         animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
         transition={{ ...SPRING.smooth, delay: 0.2 }}
@@ -606,11 +605,11 @@ export function HomePageLoading() {
         animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
         transition={{ ...SPRING.smooth, delay: 0.1 }}
       >
-        <div className={`container mx-auto ${UI_CLASSES.PADDING_X_DEFAULT} py-16 text-center`}>
+        <div className={`container mx-auto ${paddingX.default} py-16 text-center`}>
           <Skeleton
             size="xl"
             width="3/4"
-            className={`mx-auto ${UI_CLASSES.MARGIN_COMFORTABLE} h-16`}
+            className={`mx-auto ${marginBottom.comfortable} h-16`}
           />
           <Skeleton size="md" width="2/3" className="mx-auto" />
         </div>
@@ -618,15 +617,15 @@ export function HomePageLoading() {
 
       {/* Search */}
       <motion.div
-        className={`container mx-auto ${UI_CLASSES.PADDING_X_DEFAULT} py-8`}
+        className={`container mx-auto ${paddingX.default} py-8`}
         initial={!prefersReducedMotion ? { opacity: 0, y: 20 } : false}
         animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
         transition={{ ...SPRING.smooth, delay: 0.2 }}
       >
         <div className="mx-auto max-w-4xl">
-          <Skeleton size="lg" width="3xl" className={`${UI_CLASSES.MARGIN_COMFORTABLE} h-14`} />
+          <Skeleton size="lg" width="3xl" className={`${marginBottom.comfortable} h-14`} />
           {/* Stats */}
-          <div className={`flex flex-wrap justify-center ${UI_CLASSES.SPACE_COMFORTABLE}`}>
+          <div className={`flex flex-wrap justify-center ${gap.comfortable}`}>
             {Array.from({ length: 7 }).map((_, i) => (
               <motion.div
                 key={KEYS_7[i]}
@@ -643,7 +642,7 @@ export function HomePageLoading() {
 
       {/* Content sections */}
       <motion.div
-        className={`container mx-auto ${UI_CLASSES.PADDING_X_DEFAULT} pb-16`}
+        className={`container mx-auto ${paddingX.default} pb-16`}
         initial={!prefersReducedMotion ? { opacity: 0, y: 20 } : false}
         animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
         transition={{ ...SPRING.smooth, delay: 0.4 }}
@@ -651,16 +650,16 @@ export function HomePageLoading() {
         {Array.from({ length: 3 }).map((_, sectionIndex) => (
           <motion.div
             key={KEYS_3[sectionIndex]}
-            className={UI_CLASSES.MARGIN_SECTION}
+            className={marginBottom.section}
             initial={!prefersReducedMotion ? { opacity: 0, y: 20 } : false}
             animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
             transition={{ ...SPRING.loading, delay: 0.5 + sectionIndex * STAGGER.fast }}
           >
-            <div className={`${UI_CLASSES.MARGIN_COMFORTABLE} flex items-center justify-between`}>
+            <div className={`${marginBottom.comfortable} flex items-center justify-between`}>
               <Skeleton size="lg" width="lg" />
               <Skeleton size="sm" width="sm" />
             </div>
-            <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
+            <div className={grid.responsive3}>
               {Array.from({ length: 6 }).map((_, i) => (
                 <motion.div
                   key={KEYS_6[i]}
@@ -759,7 +758,7 @@ export function ChangelogListLoading() {
                     <div className="flex flex-col gap-2">
                       <Skeleton size="lg" width="3/4" className="h-8" />
                       {/* Tags */}
-                      <div className={`${UI_CLASSES.FLEX_WRAP_GAP_2}`}>
+                      <div className={`${wrap} ${gap.compact}`}>
                         <Skeleton size="xs" width="xs" rounded="full" className="h-6" />
                         <Skeleton size="xs" width="xs" rounded="full" className="h-6" />
                         <Skeleton size="xs" width="xs" rounded="full" className="h-6" />
@@ -1188,20 +1187,20 @@ export function createCategoryLoading(config: CategoryLoadingConfig = {}) {
 
   function CustomCategoryLoading() {
     return (
-      <div className={`container mx-auto ${UI_CLASSES.PADDING_X_DEFAULT} py-8`}>
+      <div className={`container mx-auto ${paddingX.default} py-8`}>
         {/* Header */}
         <PageHeaderSkeleton />
 
         {/* Search bar (optional) */}
         {showSearch && (
-          <div className={UI_CLASSES.MARGIN_RELAXED}>
+          <div className={marginBottom.relaxed}>
             <Skeleton size="lg" width="3xl" className="h-12" />
           </div>
         )}
 
         {/* Filter bar (optional) */}
         {showFilters && (
-          <div className={`${UI_CLASSES.MARGIN_COMFORTABLE} flex flex-wrap gap-2`}>
+          <div className={`${marginBottom.comfortable} flex flex-wrap gap-2`}>
             <Skeleton size="sm" width="xs" rounded="full" />
             <Skeleton size="sm" width="sm" rounded="full" />
             <Skeleton size="sm" width="xs" rounded="full" />

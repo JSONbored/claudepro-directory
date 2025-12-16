@@ -6,8 +6,6 @@
  */
 
 import { ContentService } from '@heyclaude/data-layer/services/content.ts';
-import type { Database } from '@heyclaude/database-types';
-import type { SupabaseClient } from '@supabase/supabase-js';
 import { logError } from '@heyclaude/shared-runtime/logging.ts';
 import { sanitizeString } from '../lib/utils.ts';
 import type { GetCategoryConfigsInput } from '../lib/types.ts';
@@ -15,19 +13,17 @@ import type { GetCategoryConfigsInput } from '../lib/types.ts';
 /**
  * Fetches category configurations and features.
  *
- * @param supabase - Authenticated Supabase client
  * @param input - Tool input with optional category filter
  * @returns Category configurations with features and submission guidelines
- * @throws If RPC fails
+ * @throws If service call fails
  */
 export async function handleGetCategoryConfigs(
-  supabase: SupabaseClient<Database>,
   input: GetCategoryConfigsInput
 ) {
   const category = input.category ? sanitizeString(input.category) : undefined;
 
   try {
-    const contentService = new ContentService(supabase);
+    const contentService = new ContentService();
     const data = await contentService.getCategoryConfigs();
 
     if (!data || !Array.isArray(data)) {

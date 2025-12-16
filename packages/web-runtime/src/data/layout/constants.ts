@@ -1,10 +1,10 @@
-import { type announcements } from '@heyclaude/data-layer/prisma';
+import type { announcementsModel } from '@heyclaude/data-layer/prisma';
 
 /**
  * Layout data interface
  */
 export interface LayoutData {
-  announcement: announcements | null;
+  announcement: announcementsModel | null;
   /** Navigation data - kept for backward compatibility, always returns empty structure */
   navigationData: {
     actions: null;

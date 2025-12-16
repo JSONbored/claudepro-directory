@@ -10,8 +10,6 @@
  * - Drip campaign enrollment
  */
 
-import type { Database } from '@heyclaude/database-types';
-import type { SupabaseClient } from '@supabase/supabase-js';
 import { logError } from '@heyclaude/shared-runtime/logging.ts';
 import { McpErrorCode, createErrorResponse } from '../lib/errors.ts';
 import { sanitizeString } from '../lib/utils.ts';
@@ -100,13 +98,11 @@ async function sendInngestEvent(
 /**
  * Subscribes a user to the newsletter
  *
- * @param supabase - Authenticated Supabase client (not used but kept for consistency)
  * @param input - Tool input with email, source, and optional metadata
  * @returns Success message
  * @throws If email validation fails or Inngest event send fails
  */
 export async function handleSubscribeNewsletter(
-  supabase: SupabaseClient<Database>,
   input: SubscribeNewsletterInput
 ) {
   // Sanitize inputs

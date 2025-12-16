@@ -3,7 +3,7 @@
  * Single RPC call to filter_jobs() - all filtering in PostgreSQL
  */
 
-import { Constants } from '@heyclaude/database-types';
+import { JobType, ExperienceLevel } from '@heyclaude/data-layer/prisma';
 import { isValidCategory } from '@heyclaude/web-runtime/core';
 import { type JobsFilterResult } from '@heyclaude/web-runtime/data';
 import {
@@ -35,7 +35,6 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-  UI_CLASSES,
   UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
@@ -44,6 +43,7 @@ import { Suspense } from 'react';
 
 import { JobCard } from '@/src/components/core/domain/cards/job-card';
 import { ContentSidebar } from '@/src/components/core/layout/content-sidebar';
+import { grid, between, cluster, size, muted, marginBottom, leading, wrap, gap, weight, marginRight, padding, paddingX, paddingY, marginX, paddingBottom, spaceY, paddingLeft, marginTop, marginLeft } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Hybrid Rendering Strategy:
@@ -81,7 +81,7 @@ async function JobsCountBadge() {
   }
   return (
     <UnifiedBadge style="secondary" variant="base">
-      <Briefcase className="mr-1 h-3 w-3" />
+      <Briefcase className={`${marginRight.micro} h-3 w-3`} />
       {totalJobs} Jobs Available
     </UnifiedBadge>
   );
@@ -214,20 +214,20 @@ async function JobsListSection({
   if (total_count === 0) {
     return (
       <Card>
-        <CardContent className="flex flex-col items-center justify-center py-24">
-          <div className="bg-accent/10 mb-6 rounded-full p-4">
+        <CardContent className={`flex flex-col items-center justify-center py-24`}>
+          <div className={`bg-accent/10 ${marginBottom.comfortable} rounded-full ${padding.default}`}>
             <Briefcase className="text-muted-foreground h-12 w-12" />
           </div>
-          <h3 className="mb-4 text-2xl font-bold">No Jobs Available Yet</h3>
-          <p className="text-muted-foreground mb-8 max-w-md text-center leading-relaxed">
+          <h3 className={`${marginBottom.default} ${size['2xl']} ${weight.bold}`}>No Jobs Available Yet</h3>
+          <p className={`text-muted-foreground ${marginBottom.loose} max-w-md text-center ${leading.relaxed}`}>
             We&apos;re building our jobs board! Soon you&apos;ll find amazing opportunities with
             companies working on the future of AI. Be the first to know when new positions are
             posted.
           </p>
-          <div className="flex gap-4">
+          <div className={`flex gap-4`}>
             <Button asChild>
               <Link href={ROUTES.PARTNER}>
-                <Plus className="mr-2 h-4 w-4" />
+                <Plus className={`${marginRight.tight} h-4 w-4`} />
                 Post the First Job
               </Link>
             </Button>
@@ -243,10 +243,10 @@ async function JobsListSection({
   if (jobs.length === 0) {
     return (
       <Card>
-        <CardContent className="flex flex-col items-center justify-center py-16">
-          <Briefcase className="text-muted-foreground mb-4 h-16 w-16" />
-          <h3 className="mb-2 text-xl font-semibold">No Jobs Found</h3>
-          <p className="text-muted-foreground mb-6 max-w-md text-center">
+        <CardContent className={`flex flex-col items-center justify-center py-16`}>
+          <Briefcase className={`text-muted-foreground ${marginBottom.default} h-16 w-16`} />
+          <h3 className={`${marginBottom.compact} ${size.xl} ${weight.semibold}`}>No Jobs Found</h3>
+          <p className={`text-muted-foreground ${marginBottom.comfortable} max-w-md text-center`}>
             No jobs match your current filters. Try adjusting your search criteria.
           </p>
           <Button asChild variant="outline">
@@ -259,16 +259,16 @@ async function JobsListSection({
 
   return (
     <>
-      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+      <div className={between.center}>
         <div>
-          <h2 className="text-2xl font-bold">
+          <h2 className={`${size['2xl']} ${weight.bold}`}>
             {jobs.length} {jobs.length === 1 ? 'Job' : 'Jobs'} Found
           </h2>
           <p className="text-muted-foreground">Showing all available positions</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+      <div className={`grid ${grid.cols1} gap-6 md:${grid.cols2}`}>
         {jobs.map((job) => (
           <JobCard job={job} key={job.slug} />
         ))}
@@ -387,28 +387,28 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
 
   return (
     <div className="bg-background min-h-screen">
-      <section className={UI_CLASSES.CONTAINER_OVERFLOW_BORDER}>
-        <div className="container mx-auto px-4 py-20">
-          <div className="mx-auto max-w-3xl text-center">
-            <div className="mb-6 flex justify-center">
-              <div className="bg-accent/10 rounded-full p-3">
+      <section className="relative overflow-hidden border-b border-border/50 bg-card/30">
+        <div className={`container ${marginX.auto} ${paddingX.default} ${paddingY.default}`}>
+          <div className={`${marginX.auto} max-w-3xl text-center`}>
+            <div className={`${marginBottom.comfortable} flex justify-center`}>
+              <div className={`bg-accent/10 rounded-full ${padding.compact}`}>
                 <Briefcase className="text-primary h-8 w-8" />
               </div>
             </div>
 
-            <h1 className={UI_CLASSES.TEXT_HEADING_HERO}>AI Jobs Board</h1>
+            <h1 className={`${size['4xl']} lg:text-6xl ${weight.bold} ${marginBottom.comfortable} text-foreground`}>AI Jobs Board</h1>
 
-            <p className={UI_CLASSES.TEXT_HEADING_MEDIUM}>
+            <p className={`${size.lg} ${muted.default} ${marginBottom.relaxed} ${leading.relaxed}`}>
               Discover opportunities with companies building the future of artificial intelligence.
               From startups to industry giants, find your perfect role.
             </p>
 
-            <div className="mb-8 flex flex-wrap justify-center gap-2">
+            <div className={`${marginBottom.loose} flex flex-wrap justify-center gap-2`}>
               <Suspense
                 fallback={
                   <UnifiedBadge style="secondary" variant="base">
-                    <Briefcase className="mr-1 h-3 w-3" />
-                    <span className="bg-muted/40 inline-block h-4 w-16 animate-pulse rounded" />
+                    <Briefcase className={`${marginRight.micro} h-3 w-3`} />
+                    <span className={`bg-muted/40 inline-block h-4 w-16 animate-pulse rounded`} />
                   </UnifiedBadge>
                 }
               >
@@ -423,7 +423,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
             </div>
 
             <Button asChild size="sm" variant="outline">
-              <Link className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} href={ROUTES.PARTNER}>
+              <Link className={cluster.compact} href={ROUTES.PARTNER}>
                 <Plus className="h-3 w-3" />
                 Post a Job
               </Link>
@@ -433,17 +433,17 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
       </section>
 
       {/* OPTIMIZATION: Always show filter section for better UX */}
-      <section className="px-4 pb-8">
-        <div className="container mx-auto">
+      <section className={`${paddingX.default} ${paddingBottom.relaxed}`}>
+        <div className={`container ${marginX.auto}`}>
           <Card className="card-gradient glow-effect">
-            <CardContent className="space-y-4 p-6">
-              <form action="/jobs" className={UI_CLASSES.GRID_RESPONSIVE_4} method="GET">
+            <CardContent className={`${spaceY.comfortable} ${padding.comfortable}`}>
+              <form action="/jobs" className={`grid ${gap.comfortable} md:grid-cols-2 lg:grid-cols-4`} method="GET">
                 <div className="relative">
                   <Search
                     className={`${POSITION_PATTERNS.ABSOLUTE_TOP_HALF_LEFT} text-muted-foreground h-4 w-4 -translate-y-1/2 transform`}
                   />
                   <Input
-                    className="pl-10"
+                    className={`${paddingLeft.default}`}
                     defaultValue={searchQuery ?? ''}
                     id={searchInputId}
                     name="search"
@@ -453,7 +453,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
 
                 <Select defaultValue={category ?? 'all'} name="category">
                   <SelectTrigger aria-label="Filter jobs by category" id={categoryFilterId}>
-                    <Filter className="mr-2 h-4 w-4" />
+                    <Filter className={`${marginRight.tight} h-4 w-4`} />
                     <SelectValue placeholder="Category" />
                   </SelectTrigger>
                   <SelectContent>
@@ -479,24 +479,24 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                     aria-label="Filter jobs by employment type"
                     id={employmentFilterId}
                   >
-                    <Clock className="mr-2 h-4 w-4" />
+                    <Clock className={`${marginRight.tight} h-4 w-4`} />
                     <SelectValue placeholder="Employment Type" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="any">All Types</SelectItem>
-                    <SelectItem value={Constants.public.Enums.job_type[0]}>Full Time</SelectItem>
-                    <SelectItem value={Constants.public.Enums.job_type[1]}>Part Time</SelectItem>
-                    <SelectItem value={Constants.public.Enums.job_type[2]}>Contract</SelectItem>
-                    <SelectItem value={Constants.public.Enums.job_type[3]}>Freelance</SelectItem>
+                    <SelectItem value={JobType.full_time ?? ''}>Full Time</SelectItem>
+                    <SelectItem value={JobType.part_time ?? ''}>Part Time</SelectItem>
+                    <SelectItem value={JobType.contract ?? ''}>Contract</SelectItem>
+                    <SelectItem value={JobType.freelance ?? ''}>Freelance</SelectItem>
                   </SelectContent>
                 </Select>
 
-                <div className={UI_CLASSES.FLEX_GAP_2}>
+                <div className={`flex ${gap.tight}`}>
                   <Button
                     asChild
                     className={cn(
                       'flex-1',
-                      remote && 'text-background bg-[#F6F8F4] hover:bg-[#F6F8F4]/90'
+                      remote && 'text-background bg-color-newsletter-bg hover:bg-color-newsletter-bg-hover'
                     )}
                     type="button"
                     variant={remote ? 'default' : 'outline'}
@@ -506,12 +506,12 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                         remote: remote ? undefined : 'true',
                       })}
                     >
-                      <MapPin className="mr-2 h-4 w-4" />
+                      <MapPin className={`${marginRight.tight} h-4 w-4`} />
                       Remote
                     </Link>
                   </Button>
                   <Button
-                    className="text-background bg-[#F6F8F4] hover:bg-[#F6F8F4]/90"
+                    className="text-background bg-color-newsletter-bg hover:bg-color-newsletter-bg-hover"
                     size="sm"
                     type="submit"
                   >
@@ -524,18 +524,18 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                     aria-label="Filter jobs by experience level"
                     id={experienceFilterId}
                   >
-                    <SlidersHorizontal className="mr-2 h-4 w-4" />
+                    <SlidersHorizontal className={`${marginRight.tight} h-4 w-4`} />
                     <SelectValue placeholder="Experience Level" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="any">All Levels</SelectItem>
-                    <SelectItem value={Constants.public.Enums.experience_level[0]}>
+                    <SelectItem value={ExperienceLevel.beginner ?? ''}>
                       Entry level
                     </SelectItem>
-                    <SelectItem value={Constants.public.Enums.experience_level[1]}>
+                    <SelectItem value={ExperienceLevel.intermediate ?? ''}>
                       Mid level
                     </SelectItem>
-                    <SelectItem value={Constants.public.Enums.experience_level[2]}>
+                    <SelectItem value={ExperienceLevel.advanced ?? ''}>
                       Senior level
                     </SelectItem>
                   </SelectContent>
@@ -561,14 +561,14 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
               (experience !== undefined && experience !== 'any') ||
               sort !== 'newest' ||
               remote !== undefined ? (
-                <div className={`${UI_CLASSES.FLEX_WRAP_GAP_2} border-border mt-4 border-t pt-4`}>
-                  <span className={UI_CLASSES.TEXT_SM_MUTED}>Active filters:</span>
+                <div className={`${wrap} ${gap.compact} border-border ${marginTop.default} border-t pt-4`}>
+                  <span className={`${size.sm} ${muted.default}`}>Active filters:</span>
                   {searchQuery ? (
                     <UnifiedBadge style="secondary" variant="base">
                       Search: {searchQuery}
                       <Link
                         aria-label="Remove search filter"
-                        className="hover:text-destructive ml-1"
+                        className={`hover:text-destructive ${marginLeft.micro}`}
                         href={buildFilterUrl({ search: undefined })}
                       >
                         ×
@@ -582,7 +582,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                         : category}
                       <Link
                         aria-label="Remove category filter"
-                        className="hover:text-destructive ml-1"
+                        className={`hover:text-destructive ${marginLeft.micro}`}
                         href={buildFilterUrl({ category: undefined })}
                       >
                         ×
@@ -595,7 +595,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                         employment.slice(1).replace('time', ' Time')}
                       <Link
                         aria-label="Remove employment type filter"
-                        className="hover:text-destructive ml-1"
+                        className={`hover:text-destructive ${marginLeft.micro}`}
                         href={buildFilterUrl({ employment: undefined })}
                       >
                         ×
@@ -604,14 +604,14 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                   ) : null}
                   {experience && experience !== 'any' ? (
                     <UnifiedBadge style="secondary" variant="base">
-                      {experience === Constants.public.Enums.experience_level[0]
+                      {experience === ExperienceLevel.beginner
                         ? 'Entry level'
-                        : experience === Constants.public.Enums.experience_level[1]
+                        : experience === ExperienceLevel.intermediate
                           ? 'Mid level'
                           : 'Senior level'}
                       <Link
                         aria-label="Remove experience filter"
-                        className="hover:text-destructive ml-1"
+                        className={`hover:text-destructive ${marginLeft.micro}`}
                         href={buildFilterUrl({ experience: undefined })}
                       >
                         ×
@@ -623,7 +623,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                       Remote
                       <Link
                         aria-label="Remove remote filter"
-                        className="hover:text-destructive ml-1"
+                        className={`hover:text-destructive ${marginLeft.micro}`}
                         href={buildFilterUrl({ remote: undefined })}
                       >
                         ×
@@ -635,7 +635,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                       Sort: {sort === 'oldest' ? 'Oldest' : 'Highest Salary'}
                       <Link
                         aria-label="Reset sort"
-                        className="hover:text-destructive ml-1"
+                        className={`hover:text-destructive ${marginLeft.micro}`}
                         href={buildFilterUrl({ sort: undefined })}
                       >
                         ×
@@ -643,7 +643,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                     </UnifiedBadge>
                   )}
                   <Button asChild size="sm" variant="ghost">
-                    <Link className="text-xs" href={ROUTES.JOBS}>
+                    <Link className={`${size.xs}`} href={ROUTES.JOBS}>
                       Clear All
                     </Link>
                   </Button>
@@ -654,18 +654,18 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
         </div>
       </section>
 
-      <section className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px]">
-          <div className="space-y-8">
+      <section className={`container ${marginX.auto} ${paddingX.default} ${paddingY.section}`}>
+        <div className={`grid ${grid.cols1} gap-8 lg:grid-cols-[1fr_320px]`}>
+          <div className={`${spaceY.loose}`}>
             <Suspense
               fallback={
                 <Card>
-                  <CardContent className="flex flex-col items-center justify-center py-24">
-                    <div className="bg-accent/10 mb-6 rounded-full p-4">
+                  <CardContent className={`flex flex-col items-center justify-center py-24`}>
+                    <div className={`bg-accent/10 ${marginBottom.comfortable} rounded-full ${padding.default}`}>
                       <Briefcase className="text-muted-foreground h-12 w-12" />
                     </div>
-                    <h3 className="mb-4 text-2xl font-bold">Loading Jobs...</h3>
-                    <p className="text-muted-foreground mb-8 max-w-md text-center leading-relaxed">
+                    <h3 className={`${marginBottom.default} ${size['2xl']} ${weight.bold}`}>Loading Jobs...</h3>
+                    <p className={`text-muted-foreground ${marginBottom.loose} max-w-md text-center ${leading.relaxed}`}>
                       Fetching the latest job listings...
                     </p>
                   </CardContent>

@@ -29,7 +29,6 @@
  * @see /api/bookmarks/remove API route for removing bookmarks
  */
 
-import type { Database } from '@heyclaude/database-types';
 import { checkConfettiEnabled } from '../../../config/static-configs.ts';
 // Import directly from source files to avoid indirect imports through entries/core.ts
 // which exports from data.ts, potentially causing Turbopack module resolution issues
@@ -40,7 +39,7 @@ import { useAuthenticatedUser, useLoggedAsync, usePulse, useConfetti } from '../
 import { Bookmark, BookmarkCheck, Loader2 } from '../../../icons.tsx';
 import type { ButtonStyleProps } from '../../../types/component.types.ts';
 import { cn } from '../../../ui/utils.ts';
-import { UI_CLASSES } from '../../../ui/constants.ts';
+import { iconSize, size as textSize, weight } from '../../../design-system/index.ts';
 import { toasts } from '../../../client/toast.ts';
 import { useRouter, usePathname } from 'next/navigation';
 import { useState, useTransition } from 'react';
@@ -48,11 +47,12 @@ import { Button } from '../button.tsx';
 import { AnimatePresence, motion } from 'motion/react';
 import { MICROINTERACTIONS } from '../../../design-system/index.ts';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../tooltip.tsx';
+import type { content_category } from '@heyclaude/data-layer/prisma';
 
 /**
  * BookmarkButton Props
  *
- * @property {Database['public']['Enums']['content_category']} contentType - Content category (mcp, agents, hooks, etc.)
+ * @property {content_category} contentType - Content category (mcp, agents, hooks, etc.)
  * @property {string} contentSlug - Unique slug for the content item
  * @property {boolean} [initialBookmarked=false] - Initial bookmarked state (from server)
  * @property {boolean} [showLabel=false] - Show "Save"/"Saved" label next to icon
@@ -60,7 +60,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../too
  * @property {ButtonStyleProps} - Standard button styling props (variant, size, className, disabled)
  */
 export interface BookmarkButtonProps extends ButtonStyleProps {
-  contentType: Database['public']['Enums']['content_category'];
+  contentType: content_category;
   contentSlug: string;
   initialBookmarked?: boolean;
   showLabel?: boolean;
@@ -126,7 +126,7 @@ export function BookmarkButton({
     }
 
     // User is authenticated - proceed with bookmark action
-    const validatedCategory = contentType as Database['public']['Enums']['content_category'];
+    const validatedCategory = contentType as content_category;
 
     startTransition(async () => {
       try {
@@ -288,7 +288,7 @@ export function BookmarkButton({
           <Button
             variant={variant}
             size={size}
-            className={cn(UI_CLASSES.ICON_BUTTON_SM, className)}
+            className={cn('h-7 w-7 p-0', className)}
             onClick={handleToggle}
             disabled={disabled || isPending}
             aria-label={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}
@@ -302,7 +302,7 @@ export function BookmarkButton({
                   exit={{ scale: 0 }}
                   transition={MICROINTERACTIONS.iconTransition.transition}
                 >
-                  <Loader2 className={`${UI_CLASSES.ICON_XS} animate-spin`} aria-hidden="true" />
+                  <Loader2 className={`${iconSize.xs} animate-spin`} aria-hidden="true" />
                 </motion.div>
               ) : isBookmarked ? (
                 <motion.div
@@ -311,10 +311,10 @@ export function BookmarkButton({
                   animate={MICROINTERACTIONS.iconTransition.animate}
                   exit={MICROINTERACTIONS.iconTransition.exit}
                   transition={MICROINTERACTIONS.iconTransition.transition}
-                  style={{ color: 'var(--claude-orange)' }}
+                  className="text-color-accent-primary"
                 >
                   <BookmarkCheck
-                    className={`${UI_CLASSES.ICON_XS} fill-current`}
+                    className={`${iconSize.xs} fill-current`}
                     aria-hidden="true"
                   />
                 </motion.div>
@@ -326,12 +326,12 @@ export function BookmarkButton({
                   exit={MICROINTERACTIONS.iconTransition.exit}
                   transition={MICROINTERACTIONS.iconTransition.transition}
                 >
-                  <Bookmark className={UI_CLASSES.ICON_XS} aria-hidden="true" />
+                  <Bookmark className={iconSize.xs} aria-hidden="true" />
                 </motion.div>
               )}
             </AnimatePresence>
             {showLabel && !isPending && (
-              <span className={`ml-1 ${UI_CLASSES.TEXT_BADGE}`}>{isBookmarked ? 'Saved' : 'Save'}</span>
+              <span className={`ml-1 ${textSize.sm} ${weight.semibold}`}>{isBookmarked ? 'Saved' : 'Save'}</span>
             )}
           </Button>
         </TooltipTrigger>

@@ -18,7 +18,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
-import { SPRING, DURATION } from '@heyclaude/web-runtime/design-system';
+import { SPRING, DURATION, spaceY, paddingBottom, gap, paddingX, between } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { AnimatePresence, motion } from 'motion/react';
 import { useBoolean } from '@heyclaude/web-runtime/hooks';
@@ -58,8 +58,8 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
       transition={SPRING.smooth}
     >
       <Card className="overflow-hidden">
-        <CardHeader className="space-y-1 pb-3">
-          <div className="flex items-start justify-between gap-2">
+        <CardHeader className={`${spaceY.tight} ${paddingBottom.compact}`}>
+          <div className={`flex items-start justify-between ${gap.tight}`}>
             <CardTitle className="line-clamp-2 text-base">
               {formData.name || 'Untitled Submission'}
             </CardTitle>
@@ -68,7 +68,7 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
             </Badge>
           </div>
           {qualityScore > 0 && (
-            <div className="flex items-center gap-2">
+            <div className={`flex items-center ${gap.tight}`}>
               <div className="bg-muted h-1.5 flex-1 overflow-hidden rounded-full">
                 <motion.div
                   initial={{ width: 0 }}
@@ -88,7 +88,7 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
             </div>
           )}
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className={`${spaceY.default}`}>
           {formData.description ? (
             <p className="text-muted-foreground line-clamp-3 text-sm">{formData.description}</p>
           ) : (
@@ -96,7 +96,7 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
           )}
 
           {formData.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
+            <div className={cn('flex flex-wrap', gap['1.5'])}>
               {formData.tags.slice(0, 5).map((tag) => (
                 <Badge key={tag} variant="secondary" className="text-xs">
                   {tag}
@@ -111,7 +111,7 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
           )}
 
           {formData.examples.length > 0 && (
-            <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
+            <div className={cn('text-muted-foreground flex items-center', gap['1.5'], 'text-xs')}>
               <Sparkles className="h-3 w-3" />
               <span>
                 {formData.examples.length} example{formData.examples.length === 1 ? '' : 's'}
@@ -127,14 +127,14 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
     <>
       {/* Desktop Sidebar Preview */}
       <div className={cn('hidden lg:block', className)}>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
+        <div className={`${spaceY.default}`}>
+          <div className={between.center}>
             <h3 className="text-sm font-semibold">Live Preview</h3>
             <Button
               variant="ghost"
               size="sm"
               onClick={toggleIsVisible}
-              className="h-7 px-2"
+              className={`h-7 ${paddingX.tight}`}
             >
               {isVisible ? <Eye className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
             </Button>
@@ -175,7 +175,7 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
           onClick={setIsMobileModalOpenTrue}
           size="sm"
           variant="outline"
-          className="fixed right-4 bottom-4 z-50 gap-2 shadow-lg"
+          className={`fixed right-4 bottom-4 z-50 ${gap.tight} shadow-lg`}
         >
           <Eye className="h-4 w-4" />
           Preview
@@ -210,14 +210,14 @@ export function InlinePreview({ formData, qualityScore, className }: InlinePrevi
                 transition={SPRING.smooth}
                 className="fixed inset-x-4 top-1/2 z-50 -translate-y-1/2 sm:inset-x-auto sm:left-1/2 sm:w-full sm:max-w-md sm:-translate-x-1/2"
               >
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
+                <div className={`${spaceY.default}`}>
+                  <div className={between.center}>
                     <h3 className="text-sm font-semibold text-white">Live Preview</h3>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={setIsMobileModalOpenFalse}
-                      className="h-7 px-2 text-white hover:bg-white/10"
+                      className={`h-7 ${paddingX.tight} text-white hover:bg-white/10`}
                     >
                       <X className="h-4 w-4" />
                     </Button>

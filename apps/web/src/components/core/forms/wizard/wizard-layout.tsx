@@ -20,13 +20,14 @@ import { ArrowLeft, ArrowRight, Save, X } from '@heyclaude/web-runtime/icons';
 import { logClientError, logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { type SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
 import { cn, Button } from '@heyclaude/web-runtime/ui';
-import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/design-tokens';
+// TOKENS removed - using direct Tailwind utilities
 import { useAnimateScoped } from '@heyclaude/web-runtime/hooks/motion';
 import { useRouter } from 'next/navigation';
 import { type ReactNode, useCallback, useEffect, useRef } from 'react';
 import { useBoolean } from '@heyclaude/web-runtime/hooks';
 
 import { ProgressIndicator, type WizardStep } from './progress-indicator';
+import { paddingX, paddingY, marginX, gap, marginTop, between, iconSize, muted, size } from "@heyclaude/web-runtime/design-system";
 
 interface WizardLayoutProps {
   canGoNext?: boolean;
@@ -209,32 +210,23 @@ export function WizardLayout({
   }, [handleSave, handleExit]);
 
   return (
-    <div
-      className={cn('relative min-h-screen', className)}
-      style={{
-        backgroundColor: TOKENS.colors.background.primary,
-      }}
-    >
+    <div className={cn('relative min-h-screen bg-background', className)}>
       {/* Header */}
       <header
-        className="sticky top-0 z-30 border-b backdrop-blur-sm"
-        style={{
-          backgroundColor: `${TOKENS.colors.background.primary}e6`, // 90% opacity
-          borderColor: TOKENS.colors.border.light,
-        }}
+        className="sticky top-0 z-30 border-b backdrop-blur-sm bg-background/90 border-color-border-light"
       >
-        <div className="container mx-auto max-w-4xl px-4 py-4">
-          <div className="flex items-center justify-between">
+        <div className={`container ${marginX.auto} max-w-4xl ${paddingX.default} ${paddingY.default}`}>
+          <div className={between.center}>
             {/* Exit Button */}
-            <Button type="button" variant="ghost" size="sm" onClick={handleExit} className="gap-2">
-              <X className="h-4 w-4" />
+            <Button type="button" variant="ghost" size="sm" onClick={handleExit} className={`${gap.tight}`}>
+              <X className={iconSize.sm} />
               <span className="hidden sm:inline">Exit</span>
             </Button>
 
             {/* Title */}
             <div className="flex-1 text-center">
               <h1 className="text-lg font-semibold">Submit Configuration</h1>
-              <p className="text-muted-foreground text-sm">
+              <p className={cn(muted.default, size.sm)}>
                 {steps[currentStep - 1]?.label || 'Loading...'}
               </p>
             </div>
@@ -246,15 +238,15 @@ export function WizardLayout({
               size="sm"
               onClick={handleSave}
               disabled={isSaving || !onSave}
-              className="gap-2"
+              className={`${gap.tight}`}
             >
-              <Save className="h-4 w-4" />
+              <Save className={iconSize.sm} />
               <span className="hidden sm:inline">{isSaving ? 'Saving...' : saveLabel}</span>
             </Button>
           </div>
 
           {/* Progress Indicator */}
-          <div className="mt-4">
+          <div className={`${marginTop.default}`}>
             <ProgressIndicator
               steps={steps}
               currentStep={currentStep}
@@ -266,7 +258,7 @@ export function WizardLayout({
       </header>
 
       {/* Main Content with Step Transition */}
-      <main className="container mx-auto max-w-4xl px-4 py-8">
+      <main className={`container ${marginX.auto} max-w-4xl ${paddingX.default} ${paddingY.relaxed}`}>
         <div ref={contentRef} className="min-h-[60vh]">
           {children}
         </div>
@@ -274,23 +266,19 @@ export function WizardLayout({
 
       {/* Footer Navigation */}
       <footer
-        className="sticky bottom-0 z-30 border-t backdrop-blur-sm"
-        style={{
-          backgroundColor: `${TOKENS.colors.background.primary}e6`, // 90% opacity
-          borderColor: TOKENS.colors.border.light,
-        }}
+        className="sticky bottom-0 z-30 border-t backdrop-blur-sm bg-background/90 border-color-border-light"
       >
-        <div className="container mx-auto max-w-4xl px-4 py-4">
-          <div className="flex items-center justify-between gap-4">
+        <div className={`container ${marginX.auto} max-w-4xl ${paddingX.default} ${paddingY.default}`}>
+          <div className={cn(between.center, gap.default)}>
             {/* Previous Button */}
             <Button
               type="button"
               variant="outline"
               onClick={handlePrevious}
               disabled={!canGoPrevious || currentStep === 1}
-              className="gap-2"
+              className={`${gap.tight}`}
             >
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowLeft className={iconSize.sm} />
               {previousLabel}
             </Button>
 
@@ -304,7 +292,7 @@ export function WizardLayout({
               type="button"
               onClick={handleNext}
               disabled={!canGoNext || isNavigating}
-              className="gap-2"
+              className={`${gap.tight}`}
             >
               {isNavigating ? (
                 'Loading...'
@@ -313,30 +301,22 @@ export function WizardLayout({
               ) : (
                 <>
                   {nextLabel || 'Next'}
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className={iconSize.sm} />
                 </>
               )}
             </Button>
           </div>
 
           {/* Help Text */}
-          <div className="text-muted-foreground mt-3 text-center text-xs">
+          <div className={`text-muted-foreground ${marginTop.default} text-center text-xs`}>
             <kbd
-              className="rounded border px-1.5 py-0.5 font-mono text-xs"
-              style={{
-                borderColor: TOKENS.colors.border.default,
-                backgroundColor: TOKENS.colors.background.secondary,
-              }}
+              className={cn('rounded border', paddingX['1.5'], paddingY['1.5'], 'font-mono text-xs', 'border-border bg-card')}
             >
               ⌘S
             </kbd>{' '}
             to save draft •{' '}
             <kbd
-              className="rounded border px-1.5 py-0.5 font-mono text-xs"
-              style={{
-                borderColor: TOKENS.colors.border.default,
-                backgroundColor: TOKENS.colors.background.secondary,
-              }}
+              className={cn('rounded border', paddingX['1.5'], paddingY['1.5'], 'font-mono text-xs', 'border-border bg-card')}
             >
               ESC
             </kbd>{' '}

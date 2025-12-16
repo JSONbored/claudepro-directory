@@ -200,6 +200,7 @@ export * from './utils/category-validation.ts';
 export * from './utils/content-highlights.ts';
 export * from './utils/deserialize-postgres-tuple.ts';
 export * from './utils/placeholder-images.ts';
+export * from './utils/optimize-avatar-url.ts';
 
 // Unified Search System
 export * from './search/index.ts';

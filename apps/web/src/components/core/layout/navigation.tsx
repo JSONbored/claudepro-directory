@@ -9,10 +9,11 @@
  */
 
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { cluster, gap, between, paddingX, paddingY, marginX } from '@heyclaude/web-runtime/design-system';
 import {
   ANIMATION_CONSTANTS,
   POSITION_PATTERNS,
-  UI_CLASSES,
+  cn,
 } from '@heyclaude/web-runtime/ui';
 import { motion, useScroll, useMotionValueEvent } from 'motion/react';
 import { useTransform } from '@heyclaude/web-runtime/hooks/motion';
@@ -82,15 +83,15 @@ const NavigationComponent = () => {
         className={`${POSITION_PATTERNS.STICKY_TOP} z-50 w-full will-change-transform contain-layout`}
         style={{ opacity: navOpacity }}
       >
-        <div className="container mx-auto">
+        <div className={`container ${marginX.auto}`}>
           <motion.nav
             className={`bg-background/95 border-b border-border/50 backdrop-blur-xl ${ANIMATION_CONSTANTS.CSS_TRANSITION_SLOW}`}
             style={{ backdropFilter: backdropBlur }}
             aria-label="Main navigation container"
           >
-            <div className="px-4 py-3">
+            <div className={`${paddingX.default} ${paddingY.compact}`}>
               <div
-                className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} transition-[height] ${ANIMATION_CONSTANTS.CSS_TRANSITION_SLOW} will-change-auto ${
+                className={`${between.center} transition-[height] ${ANIMATION_CONSTANTS.CSS_TRANSITION_SLOW} will-change-auto ${
                   isScrolled ? 'h-11 md:h-12' : 'h-14 md:h-16'
                 }`}
               >
@@ -98,7 +99,7 @@ const NavigationComponent = () => {
                 <Link
                   href={ROUTES.HOME}
                   prefetch
-                  className={`${UI_CLASSES.FLEX_ITEMS_CENTER_FLEX_SHRINK_0} no-underline`}
+                  className={`flex items-center flex-shrink-0 no-underline`}
                   aria-label="heyclaude - Go to homepage"
                 >
                   <HeyClaudeLogo size="md" duration={0} />
@@ -108,13 +109,13 @@ const NavigationComponent = () => {
                 <NavigationTablet isActive={isActive} onMobileMenuOpen={setIsOpenTrue} />
 
                 {/* Right Side Actions - Desktop Navigation + User Menu */}
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5}>
+                <div className={cn(cluster.tight, gap['1.5'])}>
                   {/* Desktop Navigation - ONLY show at xl: (1280px+) */}
                   <NavigationDesktop
                     isActive={isActive}
                   />
 
-                  <UserMenu className="hidden md:flex" />
+                  <UserMenu className={`hidden md:flex`} />
 
                   {/* Mobile Menu - Show ONLY below md: (< 768px) */}
                   <NavigationMobile isActive={isActive} isOpen={isOpen} onOpenChange={setIsOpenValue} />

@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
-import { runGenerateServerActions } from '../commands/generate-server-actions.js';
-import { logger } from '../toolkit/logger.js';
+import { runGenerateServerActions } from '../commands/generate-server-actions.ts';
+import { logger } from '../toolkit/logger.ts';
 
 const args = process.argv.slice(2);
 const targetAction = args[0];

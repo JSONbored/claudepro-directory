@@ -14,18 +14,20 @@
  * @module components/domain/profile-card
  */
 
-import { type Database } from '@heyclaude/database-types';
+import type { user_tier } from '@heyclaude/data-layer/prisma';
+import type { public_usersModel } from '@heyclaude/data-layer/prisma';
 import { Award, Users } from '@heyclaude/web-runtime/icons';
 import {
-  BADGE_COLORS,
-  UI_CLASSES,
   UnifiedBadge,
   BaseCard,
   Avatar,
   AvatarFallback,
   AvatarImage,
   Button,
+  cn,
 } from '@heyclaude/web-runtime/ui';
+import { optimizeAvatarUrl } from '@heyclaude/web-runtime/utils/optimize-avatar-url';
+import { size, weight, iconSize, hoverBg, border, gap, wrap, marginTop, paddingX, center } from '@heyclaude/web-runtime/design-system';
 import { memo } from 'react';
 
 import { ExternalLinkButton } from './external-link-button';
@@ -49,7 +51,7 @@ export type UserProfile = {
   total_contributions?: number;
   website?: null | string;
 } & (
-  | Database['public']['Tables']['users']['Row']
+  | public_usersModel
   | {
       bio: null | string;
       created_at: string;
@@ -59,7 +61,7 @@ export type UserProfile = {
       name: string;
       slug: string;
       social_x_link?: null | string;
-      tier: Database['public']['Enums']['user_tier'];
+      tier: user_tier;
       website?: null | string;
       work: null | string;
     }
@@ -73,13 +75,14 @@ export interface ProfileCardProps {
 
 /**
  * Member type badge configuration based on user role/activity
+ * Uses direct Tailwind utilities - no wrapper needed
  */
 const getMemberBadge = (user: UserProfile) => {
   // Priority 1: Company owner (highest status)
   if (user.company) {
     return {
       label: 'Company Owner',
-      className: BADGE_COLORS.memberType.owner,
+      className: 'bg-color-badge-membertype-owner-bg text-color-badge-membertype-owner-text border-color-badge-membertype-owner-border',
     };
   }
 
@@ -88,14 +91,14 @@ const getMemberBadge = (user: UserProfile) => {
   if (contributionCount >= 10) {
     return {
       label: 'Contributor',
-      className: BADGE_COLORS.memberType.contributor,
+      className: 'bg-color-badge-membertype-contributor-bg text-color-badge-membertype-contributor-text border-color-badge-membertype-contributor-border',
     };
   }
 
   // Default: Member
   return {
     label: 'Member',
-    className: BADGE_COLORS.memberType.member,
+    className: 'text-color-badge-membertype-member-text border-color-badge-membertype-member-border',
   };
 };
 
@@ -139,11 +142,15 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
       showAuthor={false}
       compactMode={variant === 'compact'}
       renderHeader={() => (
-        <div className="flex flex-col items-center gap-3 text-center">
+        <div className={`flex flex-col items-center gap-3 text-center`}>
           {/* Avatar */}
-          <Avatar className="ring-accent/20 ring-offset-background h-16 w-16 ring-2 ring-offset-2">
+          <Avatar className={`ring-accent/20 ring-offset-background ${iconSize['3xl']} ring-2 ring-offset-2`}>
             {user.image ? (
-              <AvatarImage src={user.image} alt={`${username}'s avatar`} className="object-cover" />
+              <AvatarImage 
+                src={optimizeAvatarUrl(user.image, 64) ?? user.image} 
+                alt={`${username}'s avatar`} 
+                className="object-cover" 
+              />
             ) : null}
             <AvatarFallback className="bg-accent/10 text-accent text-lg font-semibold">
               {initials}
@@ -151,32 +158,32 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
           </Avatar>
 
           {/* Username */}
-          <div className="w-full min-w-0">
+          <div className={`w-full min-w-0`}>
             <h3 className="truncate text-base font-semibold">{username}</h3>
             {user.work ? (
-              <p className="text-muted-foreground mt-0.5 truncate text-sm">{user.work}</p>
+              <p className={`text-muted-foreground ${marginTop.micro} truncate text-sm`}>{user.work}</p>
             ) : null}
           </div>
         </div>
       )}
       renderTopBadges={() => (
-        <div className="flex flex-wrap items-center justify-center gap-1.5">
+        <div className={cn(wrap, center, gap['1.5'])}>
           {/* Member type badge */}
           <UnifiedBadge
             variant="base"
             style="outline"
-            className={`${UI_CLASSES.TEXT_BADGE} ${memberBadge.className}`}
+            className={`${size.xs} ${weight.semibold} ${memberBadge.className}`}
           >
             {memberBadge.label}
           </UnifiedBadge>
 
           {/* Top interests (max 2) */}
-          {user.interests?.slice(0, 2).map((interest) => (
+          {user.interests?.slice(0, 2).map((interest: string) => (
             <UnifiedBadge
               key={interest}
               variant="base"
               style="secondary"
-              className={`${UI_CLASSES.TEXT_BADGE} border-primary/20 text-primary`}
+              className={`${size.xs} ${weight.semibold} border-primary/20 text-primary`}
             >
               {interest}
             </UnifiedBadge>
@@ -190,10 +197,10 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
             <UnifiedBadge
               variant="base"
               style="secondary"
-              className="border-primary/20 bg-primary/10 text-primary h-7 gap-1.5 font-medium"
+              className={cn('border-primary/20 bg-primary/10 text-primary h-7 font-medium', gap['1.5'])}
             >
-              <Award className={UI_CLASSES.ICON_XS} aria-hidden="true" />
-              <span className={UI_CLASSES.TEXT_BADGE}>{user.total_contributions}</span>
+              <Award className={iconSize.xs} aria-hidden="true" />
+              <span className={`${size.xs} ${weight.semibold}`}>{user.total_contributions}</span>
             </UnifiedBadge>
           )}
 
@@ -202,10 +209,10 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
             <UnifiedBadge
               variant="base"
               style="secondary"
-              className="border-border bg-muted/50 text-foreground h-7 gap-1.5 font-medium"
+              className={cn(border.default, 'bg-muted/50 text-foreground h-7 font-medium', gap['1.5'])}
             >
-              <Users className={UI_CLASSES.ICON_XS} aria-hidden="true" />
-              <span className={UI_CLASSES.TEXT_BADGE}>{user.followers_count}</span>
+              <Users className={iconSize.xs} aria-hidden="true" />
+              <span className={`${size.xs} ${weight.semibold}`}>{user.followers_count}</span>
             </UnifiedBadge>
           )}
         </>
@@ -245,7 +252,7 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
               <Button
                 variant="ghost"
                 size="sm"
-                className={`${UI_CLASSES.BUTTON_ICON_TEXT_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
+                className={cn('h-7', paddingX.compact, 'text-xs', gap.tight, hoverBg.default, 'hover:text-accent')}
                 onClick={(e) => {
                   e.stopPropagation();
                   globalThis.location.href = safeProfileUrl;

@@ -71,8 +71,8 @@ export * from './ui/components/display/horizontal-bar-chart.tsx';
 export * from './ui/components/navigation/breadcrumbs.tsx';
 export * from './ui/components/theme/theme-toggle.tsx';
 export * from './ui/components/scroll/scroll-direction-detector.tsx';
-// Re-export SUBMISSION_FORM_TOKENS from new design-tokens system
-export { SUBMISSION_FORM_TOKENS } from './design-tokens/submission-form.ts';
+// SUBMISSION_FORM_TOKENS removed - all values migrated to globals.css @theme block
+// Components now use direct Tailwind utilities (e.g., bg-color-field-idle, text-color-category-agents-submission)
 // Motion components and providers
 export * from './ui/components/motion';
 export * from './ui/providers/lazy-motion-provider';

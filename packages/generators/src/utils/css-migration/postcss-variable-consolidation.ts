@@ -16,10 +16,8 @@
 
 import type { Plugin } from 'postcss';
 import type {
-  VariableMapping,
-  ConsolidationOpportunity,
   ConsolidationReport,
-} from './variable-consolidation.js';
+} from './variable-consolidation.ts';
 
 interface VariableConsolidationOptions {
   /** Consolidation report with mappings, duplicates, removable */
@@ -147,7 +145,7 @@ function variableConsolidationPlugin(
             type: 'map',
             original: `${prop}: ${value}`,
             transformed: `${newName}: ${value}`,
-            line: decl.source?.start?.line,
+            ...(decl.source?.start?.line !== undefined ? { line: decl.source.start.line } : {}),
           };
 
           transformations.push(transformation);
@@ -170,7 +168,7 @@ function variableConsolidationPlugin(
               type: plan.duplicatesToRemove.has(prop) ? 'deduplicate' : 'remove',
               original: `${prop}: ${value}`,
               transformed: '(removed)',
-              line: decl.source?.start?.line,
+              ...(decl.source?.start?.line !== undefined ? { line: decl.source.start.line } : {}),
             };
 
             transformations.push(transformation);
@@ -199,7 +197,7 @@ function variableConsolidationPlugin(
             type: 'reference',
             original: `${prop}: ${value}`,
             transformed: `${prop}: ${updatedValue}`,
-            line: decl.source?.start?.line,
+            ...(decl.source?.start?.line !== undefined ? { line: decl.source.start.line } : {}),
           };
 
           transformations.push(transformation);

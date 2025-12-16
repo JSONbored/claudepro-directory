@@ -7,14 +7,13 @@
  */
 
 import { motion } from 'motion/react';
-import { MICROINTERACTIONS, SPRING } from '@heyclaude/web-runtime/design-system';
+import { MICROINTERACTIONS, SPRING, cluster, size, weight, muted } from '@heyclaude/web-runtime/design-system';
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-  NumberTicker,
-  UI_CLASSES,
+  NumberTicker
 } from '@heyclaude/web-runtime/ui';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import {
@@ -91,20 +90,20 @@ export function CommunityStatsCard({
     >
       <Card>
         <CardHeader>
-          <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-            <Icon className="text-primary h-5 w-5" />
+          <CardTitle className={cluster.compact}>
+            <Icon className={`text-primary h-5 w-5`} />
             {title}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-bold">
+          <div className={`${size['3xl']} ${weight.bold}`}>
             <NumberTicker
               value={value}
               delay={isInView ? 200 : 0}
               decimalPlaces={0}
             />
           </div>
-          <p className="text-muted-foreground">{description}</p>
+          <p className={`${muted.default}`}>{description}</p>
         </CardContent>
       </Card>
     </motion.div>

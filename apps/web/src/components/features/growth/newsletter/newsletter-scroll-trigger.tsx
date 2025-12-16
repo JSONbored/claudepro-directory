@@ -5,11 +5,11 @@
  * Shows inline CTA when user reaches 60% scroll depth (indicates engagement)
  */
 
-import { type Database } from '@heyclaude/database-types';
+import type { newsletter_source } from '@heyclaude/data-layer/prisma';
 import { getNewsletterConfigValue } from '@heyclaude/web-runtime/config/static-configs';
 import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
 import { ensureNumber } from '@heyclaude/web-runtime/data/utils';
-import { SPRING } from '@heyclaude/web-runtime/design-system';
+import { SPRING, marginY } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { useLoggedAsync, useBoolean, useSessionStorage } from '@heyclaude/web-runtime/hooks';
 import { motion, useScroll } from 'motion/react';
@@ -24,7 +24,7 @@ export interface NewsletterScrollTriggerProps {
    * @default 500px (from Dynamic Config)
    */
   minScrollHeight?: number;
-  source: Database['public']['Enums']['newsletter_source'];
+  source: newsletter_source;
   /**
    * Scroll threshold (0-1) to trigger CTA
    * @default 0.6 (60% of page)
@@ -123,7 +123,7 @@ export function NewsletterScrollTrigger({
       initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
       animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
       transition={SPRING.smooth}
-      className="my-12"
+      className={`${marginY.default}`}
     >
       <NewsletterCTAVariant variant="inline" source={source} {...(category ? { category } : {})} />
     </motion.div>

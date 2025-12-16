@@ -15,13 +15,14 @@ import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-  UI_CLASSES,
   ANIMATION_CONSTANTS,
+  cn,
 } from '@heyclaude/web-runtime/ui';
 import { memo, useState, useEffect } from 'react';
 import { useBoolean } from '@heyclaude/web-runtime/hooks';
 
 import { SanitizedHTML } from './sanitized-html';
+import { marginTop, spaceY, between, paddingY, paddingX, size, leading, iconSize, marginBottom, padding, paddingLeft, marginY } from "@heyclaude/web-runtime/design-system";
 
 export interface AccordionSection {
   content: string;
@@ -86,7 +87,7 @@ export const ChangelogAccordionSections = memo(({ content }: ChangelogAccordionS
   if (sections.length === 0) return null;
 
   return (
-    <div className={`${UI_CLASSES.MARGIN_TOP_RELAXED} ${UI_CLASSES.FORM_SECTION_SPACING}`}>
+    <div className={`${marginTop.relaxed} ${spaceY.relaxed}`}>
       {sections.map((section, index) => (
         <AccordionSectionItem key={`${section.title}-${index}`} section={section} />
       ))}
@@ -164,21 +165,21 @@ function AccordionSectionItem({ section }: AccordionSectionItemProps) {
   }, [section.content]);
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="mb-4">
+    <Collapsible open={isOpen} onOpenChange={setIsOpen} className={`${marginBottom.default}`}>
       <CollapsibleTrigger
-        className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} w-full ${UI_CLASSES.PADDING_Y_COMPACT} ${UI_CLASSES.PADDING_X_DEFAULT} border-border bg-card hover:bg-accent/5 rounded-lg border ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} text-left`}
+        className={`${between.center} w-full ${paddingY.compact} ${paddingX.default} border-border bg-card hover:bg-accent/5 rounded-lg border ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} text-left`}
       >
-        <span className={`${UI_CLASSES.TEXT_BODY_DEFAULT} font-semibold`}>{section.title}</span>
+        <span className={`${size.base} ${leading.normal} font-semibold`}>{section.title}</span>
         {isOpen ? (
-          <ChevronUp className={`${UI_CLASSES.ICON_SM} text-muted-foreground`} />
+          <ChevronUp className={`${iconSize.sm} text-muted-foreground`} />
         ) : (
-          <ChevronDown className={`${UI_CLASSES.ICON_SM} text-muted-foreground`} />
+          <ChevronDown className={`${iconSize.sm} text-muted-foreground`} />
         )}
       </CollapsibleTrigger>
       <CollapsibleContent
-        className={`${UI_CLASSES.PADDING_X_DEFAULT} ${UI_CLASSES.PADDING_Y_DEFAULT}`}
+        className={`${paddingX.default} ${paddingY.default}`}
       >
-        <div className="prose prose-slate dark:prose-invert prose-sm prose-headings:font-semibold prose-headings:text-foreground prose-headings:mt-4 prose-headings:mb-3 prose-h1:text-lg prose-h2:text-base prose-h3:text-sm prose-p:text-foreground/90 prose-p:leading-relaxed prose-p:my-3 prose-ul:my-3 prose-ol:my-3 prose-li:my-1.5 prose-li:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:font-semibold prose-strong:text-foreground prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-pre:bg-muted prose-pre:text-foreground prose-pre:p-3 prose-pre:rounded prose-pre:overflow-x-auto prose-blockquote:border-l-2 prose-blockquote:border-primary prose-blockquote:pl-3 prose-blockquote:italic prose-blockquote:my-3 max-w-none">
+        <div className={cn('prose prose-slate dark:prose-invert prose-sm prose-headings:font-semibold prose-headings:text-foreground', `prose-headings:${marginTop.default}`, `prose-headings:${marginBottom.compact}`, 'prose-h1:text-lg prose-h2:text-base prose-h3:text-sm prose-p:text-foreground/90 prose-p:leading-relaxed', `prose-p:${marginY.compact}`, `prose-ul:${marginY.compact}`, `prose-ol:${marginY.compact}`, 'prose-li:my-0.5 prose-li:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:font-semibold prose-strong:text-foreground prose-code:text-foreground prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-pre:bg-muted prose-pre:text-foreground', `prose-pre:${padding.compact}`, 'prose-pre:rounded prose-pre:overflow-x-auto prose-blockquote:border-l-2 prose-blockquote:border-primary', `prose-blockquote:${paddingLeft.compact}`, 'prose-blockquote:italic', `prose-blockquote:${marginY.compact}`, 'max-w-none')}>
           <SanitizedHTML html={htmlContent} />
         </div>
       </CollapsibleContent>

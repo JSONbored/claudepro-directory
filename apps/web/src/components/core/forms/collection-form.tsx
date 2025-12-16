@@ -15,12 +15,11 @@
  * ```
  */
 
-import type { bookmarks, user_collections } from '@heyclaude/data-layer/prisma';
+import type { bookmarksModel, user_collectionsModel } from '@heyclaude/data-layer/prisma';
 import { createCollection, updateCollection } from '@heyclaude/web-runtime/actions';
 import { useAuthenticatedUser, useFormSubmit } from '@heyclaude/web-runtime/hooks';
 import {
   toasts,
-  UI_CLASSES,
   UnifiedBadge,
   FormField,
   Button,
@@ -31,9 +30,10 @@ import { usePathname } from 'next/navigation';
 import { useId, useState } from 'react';
 
 import { useAuthModal } from '@/src/hooks/use-auth-modal';
+import { spaceY, cluster, gap, padding, marginTop, paddingTop } from "@heyclaude/web-runtime/design-system";
 
-type Bookmark = bookmarks;
-type CollectionData = user_collections;
+type Bookmark = bookmarksModel;
+type CollectionData = user_collectionsModel;
 
 interface CollectionFormProps {
   /** User's existing bookmarks to optionally add to collection */
@@ -183,7 +183,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
   };
 
   return (
-    <form onSubmit={onSubmit} className={UI_CLASSES.FORM_SECTION_SPACING}>
+    <form onSubmit={onSubmit} className={spaceY.relaxed}>
       {/* Collection Name */}
       <FormField
         variant="input"
@@ -225,7 +225,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
       />
 
       {/* Public Toggle */}
-      <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} rounded-lg border p-4`}>
+      <div className={`${cluster.default} rounded-lg border p-4`}>
         <Checkbox
           id={isPublicId}
           checked={isPublic}
@@ -244,18 +244,18 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
 
       {/* Bookmarks Selection (only in create mode initially) */}
       {mode === 'create' && bookmarks.length > 0 && (
-        <div className={UI_CLASSES.FORM_GROUP_SPACING}>
+        <div className={spaceY.comfortable}>
           <div>
             <Label className="text-base">Add Bookmarks (Optional)</Label>
-            <p className="text-muted-foreground mt-1 text-sm">
+            <p className={`text-muted-foreground ${marginTop.tight} text-sm`}>
               Select bookmarks to add to this collection. You can add more later.
             </p>
           </div>
-          <div className="max-h-64 space-y-2 overflow-y-auto rounded-lg border p-4">
+          <div className={`max-h-64 ${spaceY.compact} overflow-y-auto rounded-lg border ${padding.default}`}>
             {bookmarks.map((bookmark) => (
               <div
                 key={bookmark.id}
-                className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_3} hover:bg-accent rounded-md p-2`}
+                className={`flex items-start ${gap.default} hover:bg-accent rounded-md p-2`}
               >
                 <Checkbox
                   id={bookmark.id}
@@ -270,12 +270,12 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
                     }
                   }}
                   disabled={isPending}
-                  className="mt-0.5"
+                  className={marginTop.micro}
                 />
                 <div className="flex-1">
                   <Label
                     htmlFor={bookmark.id}
-                    className={`cursor-pointer text-sm font-normal ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}`}
+                    className={`cursor-pointer text-sm font-normal ${cluster.compact}`}
                   >
                     <UnifiedBadge variant="base" style="outline" className="text-xs capitalize">
                       {bookmark.content_type}
@@ -297,7 +297,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
 
       {/* Empty bookmarks message */}
       {mode === 'create' && bookmarks.length === 0 && (
-        <div className="rounded-lg border border-dashed p-6 text-center">
+        <div className={`rounded-lg border border-dashed ${padding.comfortable} text-center`}>
           <p className="text-muted-foreground text-sm">
             You don't have any bookmarks yet. Create the collection first and add bookmarks later.
           </p>
@@ -305,7 +305,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
       )}
 
       {/* Actions */}
-      <div className="flex items-center gap-4 pt-4">
+      <div className={`flex items-center ${gap.default} ${paddingTop.default}`}>
         <Button type="submit" disabled={isPending} className="flex-1 sm:flex-initial">
           {isPending
             ? mode === 'create'

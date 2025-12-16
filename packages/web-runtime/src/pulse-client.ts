@@ -1,35 +1,20 @@
 'use client';
 
-import type { RecommendationItem } from '@heyclaude/data-layer/types/composite-types';
-import type { Database } from '@heyclaude/database-types';
+import type {
+  use_case_type,
+  experience_level,
+  integration_type,
+  focus_area_type,
+  interaction_type,
+  content_category,
+} from '@heyclaude/data-layer/prisma';
 import { getEnvVar } from '@heyclaude/shared-runtime';
 import { logger } from './logger.ts';
 
 // Lazy import server actions to avoid client/server boundary issues during HMR
 // These are server actions that can be called from client components
-// Type matches the server action return type
-type ConfigRecommendationsResponse = {
-  success: boolean;
-  recommendations: {
-    results: RecommendationItem[] | null;
-    total_matches: number | null;
-    algorithm: string | null;
-    summary: {
-      top_category: string | null;
-      avg_match_score: number | null;
-      diversity_score: number | null;
-    } | null;
-    answers: {
-      useCase: Database['public']['Enums']['use_case_type'];
-      experienceLevel: Database['public']['Enums']['experience_level'];
-      toolPreferences: string[];
-      integrations: Database['public']['Enums']['integration_type'][];
-      focusAreas: Database['public']['Enums']['focus_area_type'][];
-    };
-    id: string;
-    generatedAt: string;
-  };
-};
+// Import the type from the server action to ensure consistency
+import type { ConfigRecommendationsResponse } from './actions/pulse.ts';
 
 const SITE_URL = getEnvVar('NEXT_PUBLIC_SITE_URL') ?? 'https://claudepro.directory';
 
@@ -43,19 +28,31 @@ export type NewsletterEventType =
   | 'footer_cta_shown';
 
 export async function trackInteraction(params: {
-  interaction_type: Database['public']['Enums']['interaction_type'];
-  content_type: Database['public']['Enums']['content_category'] | null;
+  interaction_type: interaction_type;
+  content_type: content_category | null;
   content_slug: string | null;
   session_id?: string | null;
   metadata?: Record<string, unknown> | null;
 }): Promise<void> {
   // Lazy import to avoid HMR issues with server actions
   const { trackInteractionAction } = await import('./actions/pulse.ts');
+  
+  // Automatically populate session_id if not provided (for better analytics tracking)
+  let sessionId = params.session_id;
+  if (!sessionId && typeof window !== 'undefined') {
+    try {
+      const { getOrCreateSessionId } = await import('./logging/client.ts');
+      sessionId = getOrCreateSessionId();
+    } catch {
+      // Silently fail if session ID generation fails (non-critical)
+    }
+  }
+  
   const result = await trackInteractionAction({
     interaction_type: params.interaction_type,
     content_type: params.content_type ?? null,
     content_slug: params.content_slug ?? null,
-    session_id: params.session_id ?? null,
+    session_id: sessionId ?? null,
     metadata: params.metadata ?? null,
   });
 
@@ -65,7 +62,7 @@ export async function trackInteraction(params: {
 }
 
 export async function getSimilarConfigs(params: {
-  content_type: Database['public']['Enums']['content_category'];
+  content_type: content_category;
   content_slug: string;
   limit?: number;
 }) {
@@ -92,11 +89,11 @@ export async function getSimilarConfigs(params: {
 }
 
 export async function generateConfigRecommendations(answers: {
-  useCase: Database['public']['Enums']['use_case_type'];
-  experienceLevel: Database['public']['Enums']['experience_level'];
+  useCase: use_case_type;
+  experienceLevel: experience_level;
   toolPreferences: string[];
-  integrations?: Database['public']['Enums']['integration_type'][];
-  focusAreas?: Database['public']['Enums']['focus_area_type'][];
+  integrations?: integration_type[];
+  focusAreas?: focus_area_type[];
 }): Promise<ConfigRecommendationsResponse> {
   // Lazy import to avoid HMR issues with server actions
   const { generateConfigRecommendationsAction } = await import('./actions/pulse.ts');
@@ -147,7 +144,7 @@ export async function trackNewsletterEvent(
 }
 
 export async function trackUsage(params: {
-  content_type: Database['public']['Enums']['content_category'];
+  content_type: content_category;
   content_slug: string;
   action_type: 'copy' | 'download_zip' | 'download_markdown' | 'llmstxt' | 'download_mcpb' | 'download_code';
 }): Promise<void> {

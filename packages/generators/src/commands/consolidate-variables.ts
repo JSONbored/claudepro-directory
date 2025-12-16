@@ -12,16 +12,17 @@
 import { readFileSync, writeFileSync, readdirSync, statSync } from 'node:fs';
 import { join, extname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import * as postcss from 'postcss';
+// postcss imported but not used - keeping for potential future use
+// import * as postcss from 'postcss';
 
-import { logger } from '../toolkit/logger.js';
+import { logger } from '../toolkit/logger.ts';
 import {
   analyzeVariableConsolidation,
   findVariableMappings,
   findRemovableVariables,
   findConflicts,
   type ConsolidationReport,
-} from '../utils/css-migration/variable-consolidation.js';
+} from '../utils/css-migration/variable-consolidation.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const SCRIPT_DIR = join(__filename, '..');

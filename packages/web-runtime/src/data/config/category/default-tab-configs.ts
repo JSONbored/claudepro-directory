@@ -1,4 +1,4 @@
-import { type content_category } from '@heyclaude/data-layer/prisma';
+import type { content_category } from '@heyclaude/data-layer/prisma';
 
 import { type TabConfig } from '../../../types/category.ts';
 

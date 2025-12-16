@@ -40,7 +40,7 @@
  * @module web-runtime/hooks/use-unified-search
  */
 
-import type { Database } from '@heyclaude/database-types';
+import type { sort_option } from '@heyclaude/data-layer/prisma';
 import { useLocalStorage } from './use-local-storage.ts';
 import type { FilterState } from '../types/component.types.ts';
 import { useCallback, useState } from 'react';
@@ -86,7 +86,7 @@ export interface UseUnifiedSearchReturn {
  * @returns Object with search/filter state and handlers
  */
 export function useUnifiedSearch({
-  initialSort = 'trending' as Database['public']['Enums']['sort_option'],
+  initialSort = 'trending' as sort_option,
   onSearchChange,
   onFiltersChange,
 }: UseUnifiedSearchOptions = {}): UseUnifiedSearchReturn {
@@ -94,12 +94,10 @@ export function useUnifiedSearch({
   const { value: isFilterOpen, setValue: setIsFilterOpen } = useBoolean();
 
   // Persist sort preference in localStorage
-  const { value: savedSort, setValue: setSavedSort } = useLocalStorage<
-    Database['public']['Enums']['sort_option']
-  >('user-pref-sort', {
-    defaultValue:
-      (initialSort as Database['public']['Enums']['sort_option']) ||
-      ('trending' as Database['public']['Enums']['sort_option']),
+  const { value: savedSort, setValue: setSavedSort } = useLocalStorage<sort_option>(
+    'user-pref-sort',
+    {
+      defaultValue: (initialSort as sort_option) || ('trending' as sort_option),
     syncAcrossTabs: true,
   });
 
@@ -142,7 +140,7 @@ export function useUnifiedSearch({
       const newFilters = { ...filters, [key]: value };
       setFilters(newFilters);
       if (key === 'sort' && value) {
-        setSavedSort(value as Database['public']['Enums']['sort_option']);
+        setSavedSort(value as sort_option);
       }
       onFiltersChange?.(newFilters);
     },
@@ -169,7 +167,7 @@ export function useUnifiedSearch({
 
   const clearFilters = useCallback(() => {
     const clearedFilters: FilterState = {
-      sort: filters.sort || ('trending' as Database['public']['Enums']['sort_option']),
+      sort: filters.sort || ('trending' as sort_option),
     };
     setFilters(clearedFilters);
     onFiltersChange?.(clearedFilters);

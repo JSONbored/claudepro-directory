@@ -2,8 +2,8 @@
 
 import { normalizeError } from '@heyclaude/shared-runtime';
 
-import { runGenerateMcpbPackages } from '../commands/generate-mcpb-packages.js';
-import { logger } from '../toolkit/logger.js';
+import { runGenerateMcpbPackages } from '../commands/generate-mcpb-packages.ts';
+import { logger } from '../toolkit/logger.ts';
 
 runGenerateMcpbPackages().catch((error: unknown) => {
   logger.error(

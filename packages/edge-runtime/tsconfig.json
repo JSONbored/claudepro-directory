@@ -8,12 +8,6 @@
     "rootDir": "src",
     "outDir": "dist",
     "baseUrl": ".",
-    "paths": {
-      "@heyclaude/database-types": ["../database-types/src/index.ts"],
-      "@heyclaude/shared-runtime": ["../shared-runtime/src/index.ts"],
-      "@heyclaude/edge-runtime": ["./src/index.ts"],
-      "@heyclaude/edge-runtime/*": ["./src/*"]
-    },
     "typeRoots": ["src/types", "../../node_modules/@types"],
     "skipLibCheck": true
   },

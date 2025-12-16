@@ -62,7 +62,7 @@ async function generateOgImage(
       }}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-        <div style={{ alignItems: 'center', display: 'flex', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div
             style={{
               backgroundColor: '#f97316',
@@ -154,10 +154,10 @@ async function generateOgImage(
             >
               ClaudePro
             </div>
-            <div style={{ color: '#6b7280', fontSize: '28px' }}>Directory</div>
+            <div style={{ color: 'var(--muted-foreground)', fontSize: '28px' }}>Directory</div>
           </div>
 
-          <div style={{ color: '#6b7280', fontSize: '24px' }}>claudepro.directory</div>
+          <div style={{ color: 'var(--muted-foreground)', fontSize: '24px' }}>claudepro.directory</div>
         </div>
       </div>
     </div>

@@ -14,12 +14,12 @@
  * }
  */
 
-import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
-import { Constants } from '@heyclaude/database-types';
+import type { content_category, contentModel, Prisma } from '@heyclaude/data-layer/prisma';
+import { ContentCategory } from '@heyclaude/data-layer/prisma';
 import { badRequestResponse, errorResponse, postCorsHeaders, jsonResponse, methodNotAllowedResponse } from '@heyclaude/edge-runtime/utils/http.ts';
 import { initRequestLogging, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime/utils/logger-helpers.ts';
 import { parseJsonBody } from '@heyclaude/edge-runtime/utils/parse-json-body.ts';
-import { supabaseServiceRole } from '@heyclaude/edge-runtime/clients/supabase.ts';
+// Supabase client no longer needed - using Prisma for database operations
 import { getStorageServiceClient } from '@heyclaude/edge-runtime/utils/storage/client.ts';
 import { uploadObject } from '@heyclaude/edge-runtime/utils/storage/upload.ts';
 import { buildSecurityHeaders } from '@heyclaude/shared-runtime/security-headers.ts';
@@ -30,7 +30,7 @@ const CORS = postCorsHeaders;
 
 interface UploadPackageRequest {
   content_id: string;
-  category: DatabaseGenerated['public']['Enums']['content_category'];
+  category: content_category;
   mcpb_file: string; // base64 encoded
   content_hash: string;
 }
@@ -38,7 +38,7 @@ interface UploadPackageRequest {
 interface UploadPackageResponse {
   success: boolean;
   content_id: string;
-  category: DatabaseGenerated['public']['Enums']['content_category'];
+  category: content_category;
   slug: string;
   storage_url: string;
   message?: string;
@@ -151,19 +151,19 @@ export async function handleUploadPackage(
   /**
    * Checks whether a value is one of the known `content_category` enum values.
    *
-   * Narrows the type to `DatabaseGenerated['public']['Enums']['content_category']` when true.
+   * Narrows the type to `content_category` when true.
    *
    * @param value - The value to validate as a `content_category`
    * @returns `true` if `value` matches a `content_category` enum member, `false` otherwise.
    */
   function isValidContentCategory(
     value: unknown
-  ): value is DatabaseGenerated['public']['Enums']['content_category'] {
+  ): value is content_category {
     if (typeof value !== 'string') {
       return false;
     }
-    // Use enum values directly from @heyclaude/database-types Constants
-    const validValues = Constants.public.Enums.content_category;
+    // Use Prisma enum value object
+    const validValues = ContentCategory;
     for (const validValue of validValues) {
       if (value === validValue) {
         return true;
@@ -192,14 +192,19 @@ export async function handleUploadPackage(
   }
 
   try {
-    // Fetch content from database to get slug
-    const { data: contentData, error: fetchError } = await supabaseServiceRole
-      .from('content')
-      .select('id, slug, category')
-      .eq('id', content_id)
-      .single();
-
-    if (fetchError || !contentData) {
+    // Fetch content from database to get slug using Prisma
+    import { prisma } from '@heyclaude/data-layer/prisma/client.ts';
+    let contentData;
+    try {
+      contentData = await prisma.content.findUnique({
+        where: { id: content_id },
+        select: {
+          id: true,
+          slug: true,
+          category: true,
+        },
+      });
+    } catch (fetchError) {
       // Use dbQuery serializer for consistent database query formatting
       await logError('Content not found for upload', {
         ...finalLogContext,
@@ -231,7 +236,7 @@ export async function handleUploadPackage(
     }
 
     // Content is guaranteed to be non-null after the check above
-    type ContentRow = DatabaseGenerated['public']['Tables']['content']['Row'];
+    type ContentRow = contentModel;
     const content = contentData satisfies Pick<ContentRow, 'id' | 'slug' | 'category'>;
 
     // Validate category matches
@@ -297,19 +302,17 @@ export async function handleUploadPackage(
       );
     }
 
-    // Update database with storage URL and build metadata
-    const updateData = {
-      mcpb_storage_url: uploadResult.publicUrl,
-      mcpb_build_hash: content_hash,
-      mcpb_last_built_at: new Date().toISOString(),
-    } satisfies DatabaseGenerated['public']['Tables']['content']['Update'];
-
-    const { error: updateError } = await supabaseServiceRole
-      .from('content')
-      .update(updateData)
-      .eq('id', content_id);
-
-    if (updateError) {
+    // Update database with storage URL and build metadata using Prisma
+    try {
+      await prisma.content.update({
+        where: { id: content_id },
+        data: {
+          mcpb_storage_url: uploadResult.publicUrl,
+          mcpb_build_hash: content_hash,
+          mcpb_last_built_at: new Date(),
+        },
+      });
+    } catch (updateError) {
       // Use dbQuery serializer for consistent database query formatting
       await logError('Database update failed', {
         ...finalLogContext,

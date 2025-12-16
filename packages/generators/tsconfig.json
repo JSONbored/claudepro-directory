@@ -4,28 +4,39 @@
     "composite": true,
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": true,
+    "emitDeclarationOnly": true,
     "incremental": true,
     "tsBuildInfoFile": "./.tsbuildinfo",
     "rootDir": "src",
     "outDir": "dist",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "types": ["node"],
-    "allowImportingTsExtensions": false,
+    "allowImportingTsExtensions": true,
     "baseUrl": ".",
-    "paths": {
-      "@heyclaude/database-types": ["../database-types/dist/index"],
-      "@heyclaude/web-runtime": ["../web-runtime/dist/index"],
-      "@heyclaude/web-runtime/*": ["../web-runtime/dist/*"],
-      "@heyclaude/shared-runtime": ["../shared-runtime/dist/index"]
-    }
+    "skipLibCheck": true
   },
   "include": ["src/**/*"],
-  "exclude": ["dist", "node_modules", "**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"],
+  "exclude": [
+    "dist",
+    "node_modules",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "src/commands/migrate-ui-classes.ts",
+    "src/commands/migrate-inline-styles.ts",
+    "src/commands/analyze-css.ts",
+    "src/commands/comprehensive-css-analysis.ts",
+    "src/commands/analyze-inline-styles.ts",
+    "src/bin/migrate-ui-classes.ts",
+    "src/bin/migrate-inline-styles.ts",
+    "src/bin/analyze-css.ts",
+    "src/bin/comprehensive-css-analysis.ts",
+    "src/bin/analyze-inline-styles.ts"
+  ],
   "references": [
     { "path": "../database-types/tsconfig.json" },
-    { "path": "../web-runtime/tsconfig.json" },
     { "path": "../shared-runtime/tsconfig.json" }
   ]
 }

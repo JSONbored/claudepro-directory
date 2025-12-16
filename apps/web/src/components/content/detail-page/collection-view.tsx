@@ -22,14 +22,13 @@
  * @see src/components/features/content/config-card.tsx - Embedded item cards
  */
 
-import type { EnrichedContentItem } from '@heyclaude/data-layer/types/composite-types';
-import { type Database } from '@heyclaude/database-types';
+import type { EnrichedContentItem } from '@heyclaude/database-types/postgres-types';
+import type { contentModel } from '@heyclaude/data-layer/prisma';
 import { ensureStringArray, getMetadata, isValidCategory } from '@heyclaude/web-runtime/core';
 import { getCategoryConfigs, getContentBySlug } from '@heyclaude/web-runtime/data';
 import { AlertTriangle, CheckCircle } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  UI_CLASSES,
   ConfigCard,
   Skeleton,
   Card,
@@ -37,6 +36,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
+import { iconSize, cluster, gap, marginTop, spaceY, marginBottom } from '@heyclaude/web-runtime/design-system';
+import { cn } from '@heyclaude/web-runtime/ui';
 import { Suspense } from 'react';
 
 interface ItemWithData {
@@ -51,7 +52,7 @@ interface ItemWithData {
  */
 export interface CollectionDetailViewProps {
   /** Collection content with all metadata */
-  collection: Database['public']['Tables']['content']['Row'] & { category: 'collections' };
+  collection: contentModel & { category: 'collections' };
 }
 
 /**
@@ -71,8 +72,16 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
   const categoryConfigs = await getCategoryConfigs();
 
   const metadata = getMetadata(collection);
+  // Type guard for collection items
+  function isCollectionItem(value: unknown): value is { category: string; reason?: string; slug: string } {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+    // Type narrowing: value is object, check properties
+    const obj = value as Record<string, unknown>;
+    return typeof obj['category'] === 'string' && typeof obj['slug'] === 'string';
+  }
+
   const items = Array.isArray(metadata['items'])
-    ? (metadata['items'] as Array<{ category: string; reason?: string; slug: string }>)
+    ? metadata['items'].filter(isCollectionItem)
     : [];
 
   const itemsWithContent = await Promise.all(
@@ -135,7 +144,7 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
       acc[category].push(item);
       return acc;
     },
-    {} as Record<string, ItemWithData[]>
+    {} satisfies Record<string, ItemWithData[]>
   );
 
   logger.info(
@@ -150,11 +159,24 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
 
   const prerequisites = ensureStringArray(metadata['prerequisites']);
   const installationOrder = ensureStringArray(metadata['installation_order']);
-  const compatibility =
-    typeof metadata['compatibility'] === 'object' &&
-    metadata['compatibility'] !== null &&
-    !Array.isArray(metadata['compatibility'])
-      ? (metadata['compatibility'] as { claudeCode?: boolean; claudeDesktop?: boolean })
+  // Type narrowing: compatibility is object with optional boolean properties
+  const compatibilityRaw = metadata['compatibility'];
+  const compatibility: { claudeCode?: boolean; claudeDesktop?: boolean } | undefined =
+    typeof compatibilityRaw === 'object' &&
+    compatibilityRaw !== null &&
+    !Array.isArray(compatibilityRaw) &&
+    ('claudeCode' in compatibilityRaw || 'claudeDesktop' in compatibilityRaw)
+      ? (() => {
+          const result: { claudeCode?: boolean; claudeDesktop?: boolean } = {};
+          const rawObj = compatibilityRaw as Record<string, unknown>;
+          if (typeof rawObj['claudeCode'] === 'boolean') {
+            result.claudeCode = rawObj['claudeCode'];
+          }
+          if (typeof rawObj['claudeDesktop'] === 'boolean') {
+            result.claudeDesktop = rawObj['claudeDesktop'];
+          }
+          return Object.keys(result).length > 0 ? result : undefined;
+        })()
       : undefined;
 
   return (
@@ -163,20 +185,20 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
       {prerequisites && prerequisites.length > 0 ? (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-xl">
+            <CardTitle className={`flex items-center ${gap.tight} text-xl`}>
               <AlertTriangle
-                className={`${UI_CLASSES.ICON_MD} text-yellow-500`}
+                className={`${iconSize.md} text-yellow-500`}
                 aria-hidden="true"
               />
               Prerequisites
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ul className="space-y-2">
+            <ul className={`${spaceY.compact}`}>
               {prerequisites.map((prereq: string) => (
-                <li key={prereq} className={UI_CLASSES.FLEX_ITEMS_START_GAP_2}>
+                <li key={prereq} className={`flex items-start ${gap.compact}`}>
                   <CheckCircle
-                    className={`text-muted-foreground h-4 w-4 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
+                    className={`text-muted-foreground h-4 w-4 flex-shrink-0 ${marginTop.micro}`}
                     aria-hidden="true"
                   />
                   <span className="text-muted-foreground text-sm">{prereq}</span>
@@ -189,28 +211,30 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
 
       {/* What's Included Section - Embedded ConfigCards */}
       <div>
-        <h2 className="text-foreground mb-6 text-2xl font-bold">
+        <h2 className={`text-foreground ${marginBottom.comfortable} text-2xl font-bold`}>
           What's Included ({validItems.length} {validItems.length === 1 ? 'item' : 'items'})
         </h2>
 
         <Suspense
           fallback={
-            <output className="space-y-6" aria-busy="true" aria-label="Loading collection items">
+            <output className={`${spaceY.relaxed}`} aria-busy="true" aria-label="Loading collection items">
               <Skeleton size="xl" width="3xl" className="h-48" />
               <Skeleton size="xl" width="3xl" className="h-48" />
               <Skeleton size="xl" width="3xl" className="h-48" />
             </output>
           }
         >
-          <div className="space-y-8">
+          <div className={`${spaceY.loose}`}>
             {Object.entries(itemsByCategory).map(([category, items]) => (
               <div key={category}>
-                <h3 className="text-foreground mb-4 text-lg font-semibold">
-                  {categoryConfigs[category as keyof typeof categoryConfigs]?.pluralTitle ||
+                <h3 className={`text-foreground ${marginBottom.default} text-lg font-semibold`}>
+                  {(isValidCategory(category) && category in categoryConfigs
+                    ? categoryConfigs[category]?.pluralTitle
+                    : null) ||
                     category}{' '}
                   ({items.length})
                 </h3>
-                <div className="grid gap-4 sm:grid-cols-1">
+                <div className={`grid ${gap.default} sm:grid-cols-1`}>
                   {items.map((item: ItemWithData) =>
                     item?.data ? (
                       <ConfigCard
@@ -235,18 +259,18 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
             <CardTitle className="text-xl">Recommended Installation Order</CardTitle>
           </CardHeader>
           <CardContent>
-            <ol className="space-y-2">
+            <ol className={`${spaceY.compact}`}>
               {installationOrder.map((slug: string, index: number) => {
                 const item = validItems.find((i: ItemWithData) => i?.slug === slug);
                 return (
-                  <li key={slug} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
+                  <li key={slug} className={`flex items-start ${gap.default}`}>
                     <span
                       className="bg-primary/10 text-primary flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-sm font-semibold"
                       aria-hidden="true"
                     >
                       {index + 1}
                     </span>
-                    <span className="text-foreground mt-0.5 text-sm">
+                    <span className={cn('text-foreground', marginTop['4.5'], 'text-sm')}>
                       {item?.data?.title || slug}
                     </span>
                   </li>
@@ -264,16 +288,16 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
             <CardTitle className="text-xl">Compatibility</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 gap-4">
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+            <div className={`grid grid-cols-2 ${gap.default}`}>
+              <div className={cluster.compact}>
                 {compatibility.claudeDesktop ? (
                   <CheckCircle
-                    className={`${UI_CLASSES.ICON_SM} text-green-500`}
+                    className={`${iconSize.sm} text-green-500`}
                     aria-hidden="true"
                   />
                 ) : (
                   <AlertTriangle
-                    className={`${UI_CLASSES.ICON_SM} text-red-500`}
+                    className={`${iconSize.sm} text-red-500`}
                     aria-hidden="true"
                   />
                 )}
@@ -281,15 +305,15 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
                   Claude Desktop {compatibility.claudeDesktop ? '(Supported)' : '(Not Supported)'}
                 </span>
               </div>
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+              <div className={cluster.compact}>
                 {compatibility.claudeCode ? (
                   <CheckCircle
-                    className={`${UI_CLASSES.ICON_SM} text-green-500`}
+                    className={`${iconSize.sm} text-green-500`}
                     aria-hidden="true"
                   />
                 ) : (
                   <AlertTriangle
-                    className={`${UI_CLASSES.ICON_SM} text-red-500`}
+                    className={`${iconSize.sm} text-red-500`}
                     aria-hidden="true"
                   />
                 )}

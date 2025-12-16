@@ -26,9 +26,9 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  UI_CLASSES,
   UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
+import { cluster, gap, marginTop, paddingX, paddingY, marginX, marginBottom, marginRight, paddingBottom } from '@heyclaude/web-runtime/design-system';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 
@@ -86,40 +86,40 @@ export default async function ConfigRecommenderPage() {
   return (
     <div className="bg-background min-h-screen">
       {/* Hero Section */}
-      <section className="relative overflow-hidden px-4 py-16">
-        <div className="container mx-auto max-w-4xl text-center">
+      <section className={`relative overflow-hidden ${paddingX.default} ${paddingY.default}`}>
+        <div className={`container ${marginX.auto} max-w-4xl text-center`}>
           {/* Badge */}
           <UnifiedBadge
-            className="border-primary/20 bg-accent/5 text-primary mb-6"
+            className={`border-primary/20 bg-accent/5 text-primary ${marginBottom.comfortable}`}
             style="outline"
             variant="base"
           >
-            <Sparkles aria-hidden="true" className="mr-1 h-3 w-3" />
+            <Sparkles aria-hidden="true" className={`${marginRight.micro} h-3 w-3`} />
             AI-Powered Recommendations
           </UnifiedBadge>
 
           {/* Title */}
-          <h1 className="from-foreground to-foreground/70 mb-6 bg-gradient-to-r bg-clip-text text-4xl font-bold text-transparent md:text-5xl lg:text-6xl">
+          <h1 className={`from-foreground to-foreground/70 ${marginBottom.comfortable} bg-gradient-to-r bg-clip-text text-4xl font-bold text-transparent md:text-5xl lg:text-6xl`}>
             Find Your Perfect Claude Configuration
           </h1>
 
           {/* Description */}
-          <p className="text-muted-foreground mx-auto mb-8 max-w-3xl text-lg md:text-xl">
+          <p className={`text-muted-foreground ${marginX.auto} ${marginBottom.relaxed} max-w-3xl text-lg md:text-xl`}>
             Answer 7 quick questions and get personalized recommendations from our catalog of 147+
             configurations. Instant results, zero cost, tailored to your needs.
           </p>
 
           {/* Stats */}
-          <div className="flex flex-wrap justify-center gap-3">
+          <div className={`flex flex-wrap justify-center ${gap.compact}`}>
             <UnifiedBadge className="text-sm" style="secondary" variant="base">
-              <Clock aria-hidden="true" className="mr-1 h-3 w-3" />2 minutes
+              <Clock aria-hidden="true" className={`${marginRight.micro} h-3 w-3`} />2 minutes
             </UnifiedBadge>
             <UnifiedBadge className="text-sm" style="secondary" variant="base">
-              <Target aria-hidden="true" className="mr-1 h-3 w-3" />
+              <Target aria-hidden="true" className={`${marginRight.micro} h-3 w-3`} />
               147+ configs analyzed
             </UnifiedBadge>
             <UnifiedBadge className="text-sm" style="secondary" variant="base">
-              <Zap aria-hidden="true" className="mr-1 h-3 w-3" />
+              <Zap aria-hidden="true" className={`${marginRight.micro} h-3 w-3`} />
               Instant results
             </UnifiedBadge>
           </div>
@@ -127,21 +127,21 @@ export default async function ConfigRecommenderPage() {
       </section>
 
       {/* Quiz Section */}
-      <section className="container mx-auto px-4 pb-16">
-        <div className="mx-auto max-w-4xl">
+      <section className={`container ${marginX.auto} ${paddingX.default} ${paddingBottom.default}`}>
+        <div className={`${marginX.auto} max-w-4xl`}>
           <QuizForm />
         </div>
       </section>
 
       {/* Benefits Section */}
-      <section className="container mx-auto px-4 pb-16">
-        <div className="mx-auto max-w-4xl">
-          <h2 className="mb-8 text-center text-2xl font-bold">How It Works</h2>
+      <section className={`container ${marginX.auto} ${paddingX.default} ${paddingBottom.default}`}>
+        <div className={`${marginX.auto} max-w-4xl`}>
+          <h2 className={`${marginBottom.relaxed} text-center text-2xl font-bold`}>How It Works</h2>
 
-          <div className="grid gap-6 md:grid-cols-3">
+          <div className={`grid ${gap.comfortable} md:grid-cols-3`}>
             <Card>
               <CardHeader>
-                <CardTitle className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-lg`}>
+                <CardTitle className={`${cluster.compact} text-lg`}>
                   <span className="bg-primary text-primary-foreground flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold">
                     1
                   </span>
@@ -158,7 +158,7 @@ export default async function ConfigRecommenderPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-lg`}>
+                <CardTitle className={`${cluster.compact} text-lg`}>
                   <span className="bg-primary text-primary-foreground flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold">
                     2
                   </span>
@@ -175,7 +175,7 @@ export default async function ConfigRecommenderPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-lg`}>
+                <CardTitle className={`${cluster.compact} text-lg`}>
                   <span className="bg-primary text-primary-foreground flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold">
                     3
                   </span>
@@ -193,39 +193,39 @@ export default async function ConfigRecommenderPage() {
       </section>
 
       {/* Features Section */}
-      <section className="container mx-auto px-4 pb-16">
-        <div className="mx-auto max-w-4xl">
+      <section className={`container ${marginX.auto} ${paddingX.default} ${paddingBottom.default}`}>
+        <div className={`${marginX.auto} max-w-4xl`}>
           <Card className="border-accent/20 bg-accent/5">
             <CardHeader>
-              <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+              <CardTitle className={cluster.compact}>
                 <BarChart className="text-primary h-5 w-5" />
                 What You&apos;ll Get
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ul className="grid gap-3 sm:grid-cols-2">
-                <li className={UI_CLASSES.FLEX_ITEMS_START_GAP_2}>
-                  <Sparkles className={`text-primary h-5 w-5 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`} />
+              <ul className={`grid ${gap.compact} sm:grid-cols-2`}>
+                <li className={`flex items-start ${gap.compact}`}>
+                  <Sparkles className={`text-primary h-5 w-5 flex-shrink-0 ${marginTop.micro}`} />
                   <span className="text-sm">Personalized match scores for each configuration</span>
                 </li>
-                <li className={UI_CLASSES.FLEX_ITEMS_START_GAP_2}>
-                  <Sparkles className={`text-primary h-5 w-5 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`} />
+                <li className={`flex items-start ${gap.compact}`}>
+                  <Sparkles className={`text-primary h-5 w-5 flex-shrink-0 ${marginTop.micro}`} />
                   <span className="text-sm">Clear explanations of why each was recommended</span>
                 </li>
-                <li className={UI_CLASSES.FLEX_ITEMS_START_GAP_2}>
-                  <Sparkles className={`text-primary h-5 w-5 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`} />
+                <li className={`flex items-start ${gap.compact}`}>
+                  <Sparkles className={`text-primary h-5 w-5 flex-shrink-0 ${marginTop.micro}`} />
                   <span className="text-sm">Ranked results from best to good fit</span>
                 </li>
-                <li className={UI_CLASSES.FLEX_ITEMS_START_GAP_2}>
-                  <Sparkles className={`text-primary h-5 w-5 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`} />
+                <li className={`flex items-start ${gap.compact}`}>
+                  <Sparkles className={`text-primary h-5 w-5 flex-shrink-0 ${marginTop.micro}`} />
                   <span className="text-sm">Shareable results to discuss with your team</span>
                 </li>
-                <li className={UI_CLASSES.FLEX_ITEMS_START_GAP_2}>
-                  <Sparkles className={`text-primary h-5 w-5 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`} />
+                <li className={`flex items-start ${gap.compact}`}>
+                  <Sparkles className={`text-primary h-5 w-5 flex-shrink-0 ${marginTop.micro}`} />
                   <span className="text-sm">Direct links to setup guides and documentation</span>
                 </li>
-                <li className={UI_CLASSES.FLEX_ITEMS_START_GAP_2}>
-                  <Sparkles className={`text-primary h-5 w-5 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`} />
+                <li className={`flex items-start ${gap.compact}`}>
+                  <Sparkles className={`text-primary h-5 w-5 flex-shrink-0 ${marginTop.micro}`} />
                   <span className="text-sm">Filter results by category and use case</span>
                 </li>
               </ul>

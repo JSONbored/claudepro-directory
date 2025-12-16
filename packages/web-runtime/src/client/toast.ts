@@ -16,7 +16,7 @@
 import { toast } from 'sonner';
 import { normalizeError } from '../errors.ts';
 import { logClientInfo, logClientError } from '../logging/client.ts';
-import type { Database } from '@heyclaude/database-types';
+import type { content_category } from '@heyclaude/data-layer/prisma';
 
 type ToastRaw = ((...args: Parameters<typeof toast>) => void) & {
   success: (...args: Parameters<typeof toast.success>) => void;
@@ -126,7 +126,7 @@ export const successToasts = {
     });
     return toast.success(message);
   },
-  submissionCreated: (contentType: Database['public']['Enums']['content_category']) => {
+  submissionCreated: (contentType: content_category) => {
     const message = TOAST_MESSAGES.submission_created_title;
     const description = TOAST_MESSAGES.submission_created_description.replace(
       '{contentType}',

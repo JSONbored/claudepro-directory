@@ -220,6 +220,7 @@ export const getContent = actionClient
 
 - PostgreSQL enums → TypeScript union types
 - Referenced from Prisma-generated enums when available
+- **Enum Zod Schemas**: The generator also generates enum Zod schemas matching `prisma-zod-generator` format, but using actual database enum values (from introspection) instead of Prisma enum names. This properly handles `@map()` directives that map Prisma enum names to database values.
 
 ## Configuration Options
 

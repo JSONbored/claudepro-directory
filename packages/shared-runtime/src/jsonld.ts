@@ -1,4 +1,13 @@
-import  { type Json } from '@heyclaude/database-types';
+// Json type for JSON-LD serialization
+// Using a generic JSON value type compatible with Prisma's JsonValue
+// Note: shared-runtime is a pure utility package and shouldn't depend on data-layer
+type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: JsonValue }
+  | JsonValue[];
 
 function validateJsonLdSafe(data: unknown): unknown {
   const jsonString = JSON.stringify(data);
@@ -14,11 +23,10 @@ function validateJsonLdSafe(data: unknown): unknown {
   }
 }
 
-export function serializeJsonLd(data: Json): string {
+export function serializeJsonLd(data: JsonValue): string {
   const validated = validateJsonLdSafe(data);
   return JSON.stringify(validated).replaceAll('<', String.raw`\u003c`);
 }
 
-
-
-export {type Json} from '@heyclaude/database-types';
+// Re-export JsonValue as Json for backward compatibility
+export type Json = JsonValue;

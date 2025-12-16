@@ -14,9 +14,11 @@
 
 // Import zod-openapi for TypeScript type augmentation (enables .meta() OpenAPI support)
 import 'zod-openapi';
-
-import { Constants } from '@heyclaude/database-types';
-import { type Database } from '@heyclaude/database-types';
+import {
+  content_categorySchema,
+  experience_levelSchema,
+} from '../prisma-zod-schemas.ts';
+import { jobCategorySchema, jobTypeSchema } from '../prisma-zod-schemas.ts';
 import { z } from 'zod';
 
 // =============================================================================
@@ -74,16 +76,7 @@ export const categorySchema = z
     if (!val || val === 'all') return null;
     return val;
   })
-  .pipe(
-    z
-      .enum(
-        [...Constants.public.Enums.content_category] as [
-          Database['public']['Enums']['content_category'],
-          ...Database['public']['Enums']['content_category'][],
-        ]
-      )
-      .nullable()
-  )
+  .pipe(content_categorySchema.nullable())
   .describe('Content category filter (use "all" or omit for all categories)')
   .meta({
     description: 'Content category filter (use "all" or omit for all categories)',
@@ -93,41 +86,17 @@ export const categorySchema = z
 /**
  * Job category enum schema
  */
-export const jobCategorySchema = z
-  .enum(
-    [...Constants.public.Enums.job_category] as [
-      Database['public']['Enums']['job_category'],
-      ...Database['public']['Enums']['job_category'][],
-    ]
-  )
-  .optional()
-  .describe('Job category filter');
+export const jobCategorySchemaLocal = jobCategorySchema.optional().describe('Job category filter');
 
 /**
  * Job employment type enum schema
  */
-export const jobEmploymentSchema = z
-  .enum(
-    [...Constants.public.Enums.job_type] as [
-      Database['public']['Enums']['job_type'],
-      ...Database['public']['Enums']['job_type'][],
-    ]
-  )
-  .optional()
-  .describe('Job employment type filter');
+export const jobEmploymentSchema = jobTypeSchema.optional().describe('Job employment type filter');
 
 /**
  * Job experience level enum schema
  */
-export const jobExperienceSchema = z
-  .enum(
-    [...Constants.public.Enums.experience_level] as [
-      Database['public']['Enums']['experience_level'],
-      ...Database['public']['Enums']['experience_level'][],
-    ]
-  )
-  .optional()
-  .describe('Job experience level filter');
+export const jobExperienceSchema = experience_levelSchema.optional().describe('Job experience level filter');
 
 /**
  * Slug validation schema
@@ -417,7 +386,7 @@ export const searchQuerySchema = paginationSchema.extend({
       example: 'relevance',
     }),
   // Job filters
-  job_category: jobCategorySchema
+  job_category: jobCategorySchemaLocal
     .optional()
     .describe('Job category filter')
     .meta({

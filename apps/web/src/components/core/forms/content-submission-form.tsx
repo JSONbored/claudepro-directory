@@ -11,11 +11,14 @@
  * - Mobile: Single column, optimized spacing
  */
 
-import { Constants, type Database } from '@heyclaude/database-types';
+import { SubmissionType, SubmissionStatus } from '@heyclaude/data-layer/prisma';
+import { submission_statusSchema } from '@heyclaude/web-runtime/prisma-zod-schemas';
+import type { submission_status, content_category } from '@heyclaude/data-layer/prisma';
+import { isValidCategory } from '@heyclaude/web-runtime/core';
 import { submitContentForReview } from '@heyclaude/web-runtime/actions';
 import { checkConfettiEnabled } from '@heyclaude/web-runtime/config/static-configs';
 import { ParseStrategy, safeParse } from '@heyclaude/web-runtime/data/utils';
-import { SPRING, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
+import { SPRING, STAGGER, DURATION, responsive, marginTop, spaceY, iconSize, muted, size, between, marginRight, marginBottom, paddingTop, gap, paddingY, paddingLeft, paddingRight, padding } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { useLoggedAsync, useConfetti } from '@heyclaude/web-runtime/hooks';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
@@ -43,7 +46,6 @@ import {
 import {
   cn,
   toasts,
-  UI_CLASSES,
   Button,
   Card,
   CardContent,
@@ -96,7 +98,8 @@ const usageExampleSchema = z.object({
  */
 const examplesArraySchema = z.array(usageExampleSchema);
 
-const DEFAULT_CONTENT_TYPE: SubmissionContentType = Constants.public.Enums.submission_type[0]; // 'agents'
+// Use Prisma enum object directly (no type assertion needed - SubmissionType is the enum object)
+const DEFAULT_CONTENT_TYPE: SubmissionContentType = SubmissionType.agents;
 
 const EMPTY_SECTION: SubmissionFormSection = {
   nameField: null,
@@ -171,7 +174,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
   /** Submission result for success message display */
   const [submissionResult, setSubmissionResult] = useState<null | {
     message: string;
-    status: Database['public']['Enums']['submission_status'];
+    status: submission_status;
     submission_id: string;
   }>(null);
 
@@ -197,81 +200,101 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
   const handleTemplateSelect = (template: MergedTemplateItem) => {
     // Pre-fill form with template data using name attributes
     // NOTE: Cannot use querySelector('#id') because useId() generates dynamic IDs like ':r0:'
-    const form = document.querySelector('form') as HTMLFormElement;
-    if (!form) return;
+    // Type guard for form element
+    const formElement = document.querySelector('form');
+    if (!formElement || !(formElement instanceof HTMLFormElement)) {
+      return;
+    }
+    const form = formElement;
+
+    // Helper functions to safely query and type-check form elements
+    function getFormInput(name: string): HTMLInputElement | null {
+      const element = form.querySelector(`[name="${name}"]`);
+      return element instanceof HTMLInputElement ? element : null;
+    }
+
+    function getFormTextarea(name: string): HTMLTextAreaElement | null {
+      const element = form.querySelector(`[name="${name}"]`);
+      return element instanceof HTMLTextAreaElement ? element : null;
+    }
+
+    function getFormSelect(name: string): HTMLSelectElement | null {
+      const element = form.querySelector(`[name="${name}"]`);
+      return element instanceof HTMLSelectElement ? element : null;
+    }
 
     // Set common fields (present in all templates)
     const templateName = template['name'] ?? '';
     setName(templateName);
-    const nameInput = form.querySelector('[name="name"]') as HTMLInputElement;
+    const nameInput = getFormInput('name');
     if (nameInput) nameInput.value = templateName;
 
-    const descInput = form.querySelector('[name="description"]') as HTMLTextAreaElement;
+    const descInput = getFormTextarea('description');
     if (descInput) descInput.value = template['description'] || '';
 
-    const categoryInput = form.querySelector('[name="category"]') as HTMLInputElement;
+    const categoryInput = getFormInput('category');
     if (categoryInput && template['category']) categoryInput.value = template['category'];
 
-    const tagsInput = form.querySelector('[name="tags"]') as HTMLInputElement;
+    const tagsInput = getFormInput('tags');
     if (tagsInput && template['tags']) tagsInput.value = template['tags'] ?? '';
 
     if (template.type === 'agent') {
-      const promptInput = form.querySelector('[name="systemPrompt"]') as HTMLTextAreaElement;
+      const promptInput = getFormTextarea('systemPrompt');
       if (promptInput && typeof template['systemPrompt'] === 'string')
         promptInput.value = template['systemPrompt'] ?? '';
 
-      const tempInput = form.querySelector('[name="temperature"]') as HTMLInputElement;
+      const tempInput = getFormInput('temperature');
       if (tempInput && typeof template['temperature'] === 'number')
         tempInput.value = template['temperature'].toString();
 
-      const tokensInput = form.querySelector('[name="maxTokens"]') as HTMLInputElement;
+      const tokensInput = getFormInput('maxTokens');
       if (tokensInput && typeof template['maxTokens'] === 'number')
         tokensInput.value = template['maxTokens'].toString();
     }
 
     if (template.type === 'rules') {
-      const rulesInput = form.querySelector('[name="rulesContent"]') as HTMLTextAreaElement;
+      const rulesInput = getFormTextarea('rulesContent');
       if (rulesInput && typeof template['rulesContent'] === 'string')
         rulesInput.value = template['rulesContent'];
 
-      const tempInput = form.querySelector('[name="temperature"]') as HTMLInputElement;
+      const tempInput = getFormInput('temperature');
       if (tempInput && typeof template['temperature'] === 'number')
         tempInput.value = template['temperature'].toString();
 
-      const tokensInput = form.querySelector('[name="maxTokens"]') as HTMLInputElement;
+      const tokensInput = getFormInput('maxTokens');
       if (tokensInput && typeof template['maxTokens'] === 'number')
         tokensInput.value = template['maxTokens'].toString();
     }
 
     if (template.type === 'mcp') {
-      const npmInput = form.querySelector('[name="npmPackage"]') as HTMLInputElement;
+      const npmInput = getFormInput('npmPackage');
       if (npmInput && typeof template['npmPackage'] === 'string')
         npmInput.value = template['npmPackage'];
 
-      const typeInput = form.querySelector('[name="serverType"]') as HTMLSelectElement;
+      const typeInput = getFormSelect('serverType');
       if (typeInput && typeof template['serverType'] === 'string')
         typeInput.value = template['serverType'];
 
-      const installInput = form.querySelector('[name="installCommand"]') as HTMLInputElement;
+      const installInput = getFormInput('installCommand');
       if (installInput && typeof template['installCommand'] === 'string')
         installInput.value = template['installCommand'];
 
-      const configInput = form.querySelector('[name="configCommand"]') as HTMLInputElement;
+      const configInput = getFormInput('configCommand');
       if (configInput && typeof template['configCommand'] === 'string')
         configInput.value = template['configCommand'];
 
-      const toolsInput = form.querySelector('[name="toolsDescription"]') as HTMLTextAreaElement;
+      const toolsInput = getFormTextarea('toolsDescription');
       if (toolsInput && typeof template['toolsDescription'] === 'string')
         toolsInput.value = template['toolsDescription'];
 
       if (template['envVars'] && typeof template['envVars'] === 'string') {
-        const envInput = form.querySelector('[name="envVars"]') as HTMLTextAreaElement;
+        const envInput = getFormTextarea('envVars');
         if (envInput) envInput.value = template['envVars'];
       }
     }
 
     if (template.type === 'command') {
-      const cmdInput = form.querySelector('[name="commandContent"]') as HTMLTextAreaElement;
+      const cmdInput = getFormTextarea('commandContent');
       if (cmdInput && typeof template['commandContent'] === 'string') {
         cmdInput.value = template['commandContent'];
       }
@@ -318,7 +341,8 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
             for (const [key, value] of formData.entries()) {
               // Handle examples JSON parsing
               if (key === 'examples') {
-                const examplesJson = value as string;
+                // Type guard: value is string from FormData
+                const examplesJson = typeof value === 'string' ? value : '';
                 if (examplesJson && examplesJson !== '[]') {
                   try {
                     submissionData['examples'] = safeParse(examplesJson, examplesArraySchema, {
@@ -381,32 +405,48 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
               'tags',
             ] as const;
 
+            // Type guard for extractedFields
+            function isExtractedField(key: string): key is (typeof extractedFields)[number] {
+              // Type narrowing: extractedFields is readonly array, check if key is in it
+              return (extractedFields as readonly string[]).includes(key);
+            }
+
             // Filter out extracted fields from content_data to avoid duplicates
             const contentData: Record<string, unknown> = {};
             for (const [key, value] of Object.entries(submissionData)) {
-              if (!extractedFields.includes(key as (typeof extractedFields)[number])) {
+              if (!isExtractedField(key)) {
                 contentData[key] = value;
               }
             }
 
             // Server action call - database validates everything
-            const tags = submissionData['tags']
-              ? (submissionData['tags'] as string)
+            // Type guard: tags is string from FormData
+            const tagsValue = submissionData['tags'];
+            const tags = typeof tagsValue === 'string' && tagsValue.trim().length > 0
+              ? tagsValue
                   .split(',')
                   .map((tag) => tag.trim())
                   .filter((tag) => tag.length > 0)
               : undefined;
 
+            // Type guards for submission data
+            const name = typeof submissionData['name'] === 'string' ? submissionData['name'] : '';
+            const description = typeof submissionData['description'] === 'string' ? submissionData['description'] : '';
+            const categoryValue = typeof submissionData['category'] === 'string' && isValidCategory(submissionData['category'])
+              ? submissionData['category']
+              : 'agents' satisfies content_category; // Fallback to valid category
+            const author = typeof submissionData['author'] === 'string' ? submissionData['author'] : '';
+            const authorProfileUrl = typeof submissionData['author_profile_url'] === 'string' ? submissionData['author_profile_url'] : '';
+            const githubUrl = typeof submissionData['github_url'] === 'string' ? submissionData['github_url'] : '';
+
             const result = await submitContentForReview({
               submission_type: contentType,
-              name: submissionData['name'] as string,
-              description: submissionData['description'] as string,
-              category: submissionData[
-                'category'
-              ] as Database['public']['Enums']['content_category'],
-              author: submissionData['author'] as string,
-              author_profile_url: (submissionData['author_profile_url'] as string) || '',
-              github_url: (submissionData['github_url'] as string) || '',
+              name,
+              description,
+              category: categoryValue,
+              author,
+              author_profile_url: authorProfileUrl,
+              github_url: githubUrl,
               tags: tags || [],
               content_data: contentData,
             });
@@ -430,9 +470,11 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                 );
               }
 
+              // Use Prisma enum object directly (no type assertion needed)
+              const validatedStatus = submission_statusSchema.parse(SubmissionStatus.pending);
               setSubmissionResult({
-                submission_id: (result.data.submission_id as string) || 'unknown',
-                status: Constants.public.Enums.submission_status[0], // 'pending'
+                submission_id: (typeof result.data.submission_id === 'string' ? result.data.submission_id : 'unknown'),
+                status: validatedStatus,
                 message: 'Your submission has been received and is pending review!',
               });
 
@@ -504,16 +546,16 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
           animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
           transition={springSmooth}
         >
-          <Card className="mb-6 border-green-500/20 bg-green-500/5">
-            <CardContent className="pt-6">
-              <div className={UI_CLASSES.FLEX_COL_SM_ROW_ITEMS_START}>
+          <Card className={`${marginBottom.comfortable} border-green-500/20 bg-green-500/5`}>
+            <CardContent className={`${paddingTop.comfortable}`}>
+              <div className={responsive.colCenter}>
                 <motion.div
                   initial={shouldReduceMotion ? { opacity: 0 } : { scale: 0, rotate: -180 }}
                   animate={shouldReduceMotion ? { opacity: 1 } : { scale: 1, rotate: 0 }}
                   transition={{ ...springBouncy, delay: STAGGER.default }}
                 >
                   <CheckCircle
-                    className={`h-6 w-6 text-green-500 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
+                    className={`h-6 w-6 text-green-500 flex-shrink-0 ${marginTop.micro}`}
                   />
                 </motion.div>
                 <div className="min-w-0 flex-1">
@@ -526,7 +568,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                     Submission Successful! 🎉
                   </motion.p>
                   <motion.p
-                    className="text-muted-foreground mt-1 text-sm"
+                    className={`text-muted-foreground ${marginTop.tight} text-sm`}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: STAGGER.relaxed }}
@@ -534,7 +576,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                     {submissionResult.message}
                   </motion.p>
                   <motion.p
-                    className="text-muted-foreground mt-1 text-xs"
+                    className={`text-muted-foreground ${marginTop.tight} text-xs`}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: STAGGER.loose }}
@@ -550,7 +592,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
       ) : null}
 
       {/* Main Form - Sectioned with visual hierarchy */}
-      <form onSubmit={handleSubmit} className={UI_CLASSES.SPACE_Y_6}>
+      <form onSubmit={handleSubmit} className={spaceY.relaxed}>
         {/* Section 1: Content Type + Template */}
         <FormSectionCard
           step={1}
@@ -560,26 +602,30 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
           theme="primary"
           showBorderBeam={false}
         >
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className={UI_CLASSES.SPACE_Y_2}>
+          <div className={`grid ${gap.default} sm:grid-cols-2`}>
+            <div className={spaceY.compact}>
               <Label htmlFor={`${formId}-type`}>Content Type *</Label>
               <div className="relative">
                 <Layers
                   className={cn(
-                    UI_CLASSES.ICON_SM,
+                    iconSize.sm,
                     'pointer-events-none absolute top-1/2 left-3 -translate-y-1/2',
-                    UI_CLASSES.TEXT_MUTED
+                    muted.default
                   )}
                 />
                 <select
                   id={`${formId}-type`}
                   value={contentType}
                   onChange={(e) => {
-                    setContentType(e.target.value as SubmissionContentType);
+                    // Type guard: validate e.target.value is SubmissionContentType
+                    const value = e.target.value;
+                    if (value === 'agents' || value === 'rules' || value === 'mcp' || value === 'commands') {
+                      setContentType(value as SubmissionContentType);
+                    }
                     setName(''); // Reset name when type changes
                   }}
                   required
-                  className="border-input bg-background flex h-10 w-full rounded-md border py-2 pr-3 pl-10 text-sm"
+                  className={`border-input bg-background flex h-10 w-full rounded-md border ${paddingY.tight} ${paddingRight.compact} ${paddingLeft.default} text-sm`}
                 >
                   {SUBMISSION_CONTENT_TYPES.map((type) => (
                     <option key={type} value={type}>
@@ -590,7 +636,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
               </div>
             </div>
 
-            <div className={UI_CLASSES.SPACE_Y_2}>
+            <div className={spaceY.compact}>
               <Label>Quick Start</Label>
               <TemplateSelector templates={templates} onSelect={handleTemplateSelect} />
             </div>
@@ -606,12 +652,12 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
           theme="blue"
           showBorderBeam={false}
         >
-          <div className={UI_CLASSES.SPACE_Y_4}>
+          <div className={spaceY.comfortable}>
             {/* Name Field + Duplicate Warning */}
-            <div className={UI_CLASSES.SPACE_Y_2}>
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+            <div className={spaceY.compact}>
+              <div className={between.center}>
                 <Label htmlFor={`${formId}-name`}>{nameFieldConfig.label}</Label>
-                <span className={cn(UI_CLASSES.TEXT_XS_MUTED, 'font-medium')}>
+                <span className={cn(`${size.xs} ${muted.default}`, 'font-medium')}>
                   {name.length}/100
                 </span>
               </div>
@@ -624,7 +670,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                   placeholder={nameFieldConfig.placeholder}
                   required={nameFieldConfig.required ?? true}
                   maxLength={100}
-                  className="pr-10"
+                  className={`${paddingRight.default}`}
                 />
                 {name.length > 3 && (
                   <motion.div
@@ -633,18 +679,18 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                     animate={shouldReduceMotion ? { opacity: 1 } : { scale: 1 }}
                     transition={springBouncy}
                   >
-                    <CheckCircle className={cn(UI_CLASSES.ICON_SM, UI_CLASSES.ICON_SUCCESS)} />
+                    <CheckCircle className={cn(iconSize.sm, 'text-green-500 dark:text-green-400')} />
                   </motion.div>
                 )}
               </div>
-              <p className={UI_CLASSES.TEXT_XS_MUTED}>
+              <p className={`${size.xs} ${muted.default}`}>
                 {nameFieldConfig.helpText ?? 'A clear, descriptive name for your configuration'}
               </p>
               <DuplicateWarning contentType={contentType} name={name} />
             </div>
 
             {/* Description Field with Markdown Preview */}
-            <div className={UI_CLASSES.SPACE_Y_2}>
+            <div className={spaceY.compact}>
               <Label htmlFor={`${formId}-description`}>Description *</Label>
               <Tabs defaultValue="write" className="w-full">
                 <TabsList className="w-full">
@@ -655,7 +701,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                     Preview
                   </TabsTrigger>
                 </TabsList>
-                <TabsContent value="write" className="mt-2">
+                <TabsContent value="write" className={`${marginTop.compact}`}>
                   <Textarea
                     id={`${formId}-description`}
                     name="description"
@@ -666,11 +712,11 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                     rows={6}
                     className="resize-y font-sans"
                   />
-                  <p className={cn(UI_CLASSES.TEXT_XS_MUTED, UI_CLASSES.MARGIN_TOP_MICRO)}>
+                  <p className={cn(`${size.xs} ${muted.default}`, marginTop.micro)}>
                     Supports markdown formatting (bold, italic, lists, links, code blocks)
                   </p>
                 </TabsContent>
-                <TabsContent value="preview" className="mt-2">
+                <TabsContent value="preview" className={`${marginTop.compact}`}>
                   <div
                     className={cn(
                       'border-input bg-background min-h-[150px] rounded-md border p-4',
@@ -680,7 +726,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                     {description ? (
                       <p className="whitespace-pre-wrap">{description}</p>
                     ) : (
-                      <p className={UI_CLASSES.TEXT_MUTED}>
+                      <p className={muted.default}>
                         Nothing to preview yet. Write something in the Write tab!
                       </p>
                     )}
@@ -722,7 +768,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
           theme="purple"
           showBorderBeam={false}
         >
-          <div className={UI_CLASSES.SPACE_Y_4}>
+          <div className={spaceY.comfortable}>
             {/* Tags Field */}
             {tagFields.length > 0 && (
               <ContentTypeFieldRenderer config={{ fields: tagFields }} formId={formId} />
@@ -735,7 +781,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
 
         {/* Enhanced Submit Button */}
         <motion.div
-          className={`${UI_CLASSES.FLEX_COL_SM_ROW_GAP_3} pt-2 sm:pt-4`}
+          className={`flex flex-col sm:flex-row ${gap.compact} sm:${gap.default} ${paddingTop.tight} sm:${paddingTop.default}`}
           whileHover={shouldReduceMotion ? {} : { scale: 1.02 }}
           whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
         >
@@ -743,7 +789,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
             {isPending ? (
               <>
                 <motion.div
-                  className="mr-2"
+                  className={`${marginRight.tight}`}
                   animate={shouldReduceMotion ? { opacity: 1 } : { opacity: [1, 0.5, 1], rotate: [0, 360] }}
                   transition={
                     shouldReduceMotion
@@ -755,13 +801,13 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                         }
                   }
                 >
-                  <Github className={UI_CLASSES.ICON_SM} />
+                  <Github className={iconSize.sm} />
                 </motion.div>
                 Creating PR...
               </>
             ) : (
               <>
-                <Send className={UI_CLASSES.ICON_SM_LEADING} />
+                <Send className={`${iconSize.sm} ${marginRight.compact}`} />
                 Submit for Review
               </>
             )}
@@ -769,12 +815,12 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
         </motion.div>
 
         {/* Info Box */}
-        <div className="rounded-lg border border-blue-500/20 bg-blue-500/10 p-3 sm:p-4">
-          <div className={`${UI_CLASSES.FLEX_GAP_2} sm:gap-3`}>
-            <Github className={`h-5 w-5 text-blue-400 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`} />
+        <div className={`rounded-lg border border-blue-500/20 bg-blue-500/10 ${padding.compact} sm:${padding.default}`}>
+          <div className={`flex ${gap.tight} sm:${gap.compact}`}>
+            <Github className={`h-5 w-5 text-blue-400 flex-shrink-0 ${marginTop.micro}`} />
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-blue-400">How it works</p>
-              <p className="text-muted-foreground mt-1 text-sm">
+              <p className={`text-muted-foreground ${marginTop.tight} text-sm`}>
                 We'll automatically create a Pull Request with your submission. Our team reviews for
                 quality and accuracy, then merges it to make your contribution live!
               </p>

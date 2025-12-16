@@ -3,21 +3,10 @@
   "extends": "./config/tsconfig.base.json",
   "compilerOptions": {
     "baseUrl": ".",
+    "skipLibCheck": true,
     "paths": {
       "@/*": ["./apps/web/*"],
-      "@/src/*": ["./apps/web/src/*"],
-      "@heyclaude/database-types": ["./packages/database-types/dist/index"],
-      "@heyclaude/database-types/*": ["./packages/database-types/dist/*"],
-      "@heyclaude/shared-runtime": ["./packages/shared-runtime/src/index.ts"],
-      "@heyclaude/shared-runtime/*": ["./packages/shared-runtime/src/*"],
-      "@heyclaude/edge-runtime": ["./packages/edge-runtime/src/index.ts"],
-      "@heyclaude/edge-runtime/*": ["./packages/edge-runtime/src/*"],
-      "@heyclaude/edge-runtime/changelog/readme-builder": ["./packages/edge-runtime/src/changelog/readme-builder.ts"],
-      "@heyclaude/web-runtime": ["./packages/web-runtime/src/index.ts"],
-      "@heyclaude/data-layer": ["./packages/data-layer/dist/index"],
-      "@heyclaude/data-layer/*": ["./packages/data-layer/dist/*"],
-      "@heyclaude/generators": ["./packages/generators/src/index.ts"],
-      "@heyclaude/generators/*": ["./packages/generators/src/*"]
+      "@/src/*": ["./apps/web/src/*"]
     },
     "noEmit": true,
     "incremental": true,
@@ -45,6 +34,7 @@
     "packages/data-layer/src/**/*.ts",
     "packages/generators/src/**/*.ts",
     "packages/database-types/**/*.ts",
+    "packages/database-types/src/prisma-json-types.ts",
     "packages/edge-runtime/src/types/**/*.d.ts",
     "types/**/*.d.ts"
   ],

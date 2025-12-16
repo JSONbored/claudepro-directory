@@ -12,7 +12,7 @@
  */
 
 import { env } from '@heyclaude/shared-runtime/schemas/env';
-import type { Database } from '@heyclaude/database-types';
+import type { job_plan, job_tier } from '@heyclaude/data-layer/prisma';
 import { logger } from '../logger.ts';
 import { normalizeError } from '../errors.ts';
 
@@ -23,8 +23,8 @@ interface CreateCheckoutParams {
   customerEmail: string;
   customerName?: string;
   successUrl: string;
-  plan: Database['public']['Enums']['job_plan'];
-  tier: Database['public']['Enums']['job_tier'];
+  plan: job_plan;
+  tier: job_tier;
 }
 
 interface PolarCheckoutResponse {
@@ -114,8 +114,8 @@ export async function createPolarCheckout(
  * @returns Polar product price ID or null if not configured
  */
 export function getPolarProductPriceId(
-  plan: Database['public']['Enums']['job_plan'],
-  tier: Database['public']['Enums']['job_tier']
+  plan: job_plan,
+  tier: job_tier
 ): string | null {
   const productPriceIds = {
     // One-time payments

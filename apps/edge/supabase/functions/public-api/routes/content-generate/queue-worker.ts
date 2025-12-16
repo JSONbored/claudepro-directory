@@ -10,12 +10,13 @@
  * Route: POST /content/generate-package/process
  */
 
-import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
-import { Constants } from '@heyclaude/database-types';
+import type { content_category } from '@heyclaude/data-layer/prisma';
+import { ContentCategory } from '@heyclaude/data-layer/prisma';
 import { errorResponse, successResponse } from '@heyclaude/edge-runtime/utils/http.ts';
 import { initRequestLogging, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime/utils/logger-helpers.ts';
 import { pgmqDelete, pgmqRead } from '@heyclaude/edge-runtime/utils/pgmq-client.ts';
-import { supabaseServiceRole } from '@heyclaude/edge-runtime/clients/supabase.ts';
+import { prisma } from '@heyclaude/data-layer/prisma/client.ts';
+import type { content_category } from '@heyclaude/data-layer/prisma';
 import { createUtilityContext, logError, logInfo } from '@heyclaude/shared-runtime/logging.ts';
 import { normalizeError } from '@heyclaude/shared-runtime/error-handling.ts';
 import { TIMEOUT_PRESETS, withTimeout } from '@heyclaude/shared-runtime/timeout.ts';
@@ -48,7 +49,7 @@ const getStringProperty = (obj: unknown, key: string): string | undefined => {
  */
 function isValidQueueMessage(msg: unknown): msg is {
   content_id: string;
-  category: DatabaseGenerated['public']['Enums']['content_category'];
+  category: content_category;
   slug: string;
   created_at: string;
 } {
@@ -64,8 +65,8 @@ function isValidQueueMessage(msg: unknown): msg is {
     return false;
   }
 
-  // Validate category enum - use enum values directly from @heyclaude/database-types Constants
-  const validCategories = Constants.public.Enums.content_category;
+  // Validate category enum - use Prisma enum value object
+  const validCategories = ContentCategory;
   for (const validCategory of validCategories) {
     if (category === validCategory) {
       return true;
@@ -81,7 +82,7 @@ interface PackageGenerationQueueMessage {
   enqueued_at: string;
   message: {
     content_id: string;
-    category: DatabaseGenerated['public']['Enums']['content_category'];
+    category: content_category;
     slug: string;
     created_at: string;
   };
@@ -106,14 +107,13 @@ async function processPackageGeneration(
   const { content_id, category, slug } = message.message;
 
   try {
-    // Fetch content from database
-    const { data: content, error: fetchError } = await supabaseServiceRole
-      .from('content')
-      .select('*')
-      .eq('id', content_id)
-      .single();
-
-    if (fetchError || !content) {
+    // Fetch content from database using Prisma
+    let content;
+    try {
+      content = await prisma.content.findUnique({
+        where: { id: content_id },
+      });
+    } catch (fetchError) {
       // Use dbQuery serializer for consistent database query formatting
       if (logContext) {
         await logError('Failed to fetch content for package generation', {
@@ -128,7 +128,25 @@ async function processPackageGeneration(
           },
         }, fetchError);
       }
-      errors.push(`Failed to fetch content: ${fetchError?.message || 'Content not found'}`);
+      errors.push(`Failed to fetch content: ${fetchError instanceof Error ? fetchError.message : 'Content not found'}`);
+      return { success: false, errors };
+    }
+
+    if (!content) {
+      if (logContext) {
+        await logError('Content not found for package generation', {
+          ...logContext,
+          dbQuery: {
+            table: 'content',
+            operation: 'select',
+            schema: 'public',
+            args: {
+              id: content_id,
+            },
+          },
+        });
+      }
+      errors.push('Content not found');
       return { success: false, errors };
     }
 

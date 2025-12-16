@@ -5,12 +5,11 @@
  * Uses the get_content_templates RPC.
  */
 
-import type { Database } from '@heyclaude/database-types';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { ContentTemplatesItem, GetContentTemplatesReturns } from '@heyclaude/database-types/postgres-types';
+import { ContentService } from '@heyclaude/data-layer/services/content.ts';
 import { logError } from '@heyclaude/shared-runtime/logging.ts';
 import type { GetTemplatesInput } from '../lib/types.ts';
 
-type ContentTemplatesItem = Database['public']['CompositeTypes']['content_templates_item'];
 type TemplateField = { name: string; description?: string; type?: string };
 
 /**
@@ -24,32 +23,30 @@ type TemplateField = { name: string; description?: string; type?: string };
  *          If no templates are found, `content` contains a friendly "no templates configured" message, `_meta.templates` is an empty array, and `count` is 0.
  */
 export async function handleGetTemplates(
-  supabase: SupabaseClient<Database>,
   input: GetTemplatesInput
 ) {
   const { category } = input;
+  const contentService = new ContentService();
 
-  // Call the RPC to get content templates
+  // Get content templates using ContentService
   // Note: get_content_templates requires p_category, so we use a default if not provided
   const rpcArgs = {
     p_category: category || 'agents', // Default to 'agents' if not provided
   };
-  const { data, error } = await supabase.rpc('get_content_templates', rpcArgs);
-
-  if (error) {
-    // Use dbQuery serializer for consistent database query formatting
-    await logError('RPC call failed in getTemplates', {
-      dbQuery: {
-        rpcName: 'get_content_templates',
-        args: rpcArgs, // Will be redacted by Pino's redact config
-      },
+  
+  let data: GetContentTemplatesReturns;
+  try {
+    data = await contentService.getContentTemplates(rpcArgs);
+  } catch (error) {
+    await logError('ContentService.getContentTemplates failed in getTemplates', {
+      args: rpcArgs,
     }, error);
-    throw new Error(`Failed to fetch templates: ${error.message}`);
+    throw new Error(`Failed to fetch templates: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 
   // get_content_templates returns {templates: {...}} where templates is a JSON object
   // Extract the templates object
-  const templatesData = data?.templates || data || {};
+  const templatesData = (data as { templates?: unknown })?.templates || data || {};
 
   // Check if templates is an object or already an array
   let templatesArray: Array<ContentTemplatesItem | Record<string, unknown>> = [];

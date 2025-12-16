@@ -14,8 +14,8 @@ import { join, extname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as postcss from 'postcss';
 
-import { logger } from '../toolkit/logger.js';
-import themeMigrationPlugin, { transformations } from '../utils/css-migration/postcss-theme-migration.js';
+import { logger } from '../toolkit/logger.ts';
+import themeMigrationPlugin, { transformations } from '../utils/css-migration/postcss-theme-migration.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const SCRIPT_DIR = join(__filename, '..');

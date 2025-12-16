@@ -3,8 +3,8 @@
  * All stats/recent/contributors from data layer with edge caching.
  */
 
+import { ContentCategory, SubmissionType } from '@heyclaude/data-layer/prisma';
 import type { content_category, submission_type } from '@heyclaude/data-layer/prisma';
-import { Constants } from '@heyclaude/database-types';
 import {
   generatePageMetadata,
   getContentTemplates,
@@ -20,13 +20,17 @@ import {
   CardHeader,
   CardTitle,
   cn,
-  UI_CLASSES,
 } from '@heyclaude/web-runtime/ui';
+import { cluster, iconSize, gap, size, muted, paddingX, paddingY, marginX, spaceY, weight } from '@heyclaude/web-runtime/design-system';
 import { type Metadata } from 'next';
 import { connection } from 'next/server';
-import { Suspense } from 'react';
+import { Suspense, lazy } from 'react';
 
-import { SubmitFormClient } from '@/src/components/core/forms/content-submission-form';
+// OPTIMIZATION: Dynamic import for large form component (833 lines) - only loads when needed
+const SubmitFormClient = lazy(
+  () => import('@/src/components/core/forms/content-submission-form').then((mod) => ({ default: mod.SubmitFormClient }))
+);
+
 import { SidebarActivityCard } from '@/src/components/core/forms/sidebar-activity-card';
 import { SubmitPageHero } from '@/src/components/core/forms/submit-page-hero';
 import { SubmitPageHeroSkeleton as SubmitPageHeroSkeletonComponent } from '@/src/components/core/forms/submit-page-hero-skeleton';
@@ -44,8 +48,8 @@ import SubmitFormLoading from './loading-form';
  * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
  */
 
-// Use enum values from Constants
-const DEFAULT_CONTENT_CATEGORY = Constants.public.Enums.content_category[0]; // 'agents'
+// Use Prisma enum object directly (no type assertion needed)
+const DEFAULT_CONTENT_CATEGORY = ContentCategory.agents;
 
 const SUBMISSION_TIPS = [
   'Be specific in your descriptions - help users understand what your config does',
@@ -83,14 +87,12 @@ function formatTimeAgo(dateString: string): string {
  * @param {string} value - The string to validate as a content category
  * @returns `true` if `value` is a member of the `content_category` enum, `false` otherwise
  *
- * @see Constants.public.Enums.content_category
+ * @see ContentCategory enum object
  */
 function isValidContentCategory(
   value: string
 ): value is content_category {
-  return Constants.public.Enums.content_category.includes(
-    value as content_category
-  );
+  return (Object.values(ContentCategory) as readonly string[]).includes(value);
 }
 
 /***
@@ -212,13 +214,13 @@ export default async function SubmitPage() {
   });
 
   return (
-    <div className="container mx-auto max-w-7xl px-4 py-8 sm:py-12">
+    <div className={`container ${marginX.auto} max-w-7xl ${paddingX.default} ${paddingY.relaxed} sm:${paddingY.section}`}>
       {/* Hero Header - Dashboard stats streams in Suspense */}
       <Suspense fallback={<SubmitPageHeroSkeleton />}>
         <SubmitPageHeroWithStats reqLogger={reqLogger} />
       </Suspense>
 
-      <div className="grid items-start gap-6 lg:grid-cols-[2fr_1fr] lg:gap-8">
+      <div className={`grid items-start ${gap.comfortable} lg:grid-cols-[2fr_1fr] lg:${gap.relaxed}`}>
         <div className="w-full min-w-0">
           {/* Form Configuration and Templates in separate Suspense boundaries */}
           <Suspense fallback={<SubmitFormLoading />}>
@@ -226,7 +228,7 @@ export default async function SubmitPage() {
           </Suspense>
         </div>
 
-        <div className="w-full space-y-4 sm:space-y-6 lg:sticky lg:top-24 lg:h-fit">
+        <div className={`w-full ${spaceY.comfortable} sm:${spaceY.relaxed} lg:sticky lg:top-24 lg:h-fit`}>
           {/* Unified ContentSidebar with JobsPromo + RecentlyViewed */}
           <ContentSidebar />
 
@@ -300,30 +302,11 @@ async function SubmitPageHeroWithStats({
  * @see SubmitFormClient
  */
 async function SubmitFormWithConfig({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
-  // Section: Form Configuration
-  let formConfig: Awaited<ReturnType<typeof getSubmissionFormFields>> | null = null;
-  try {
-    formConfig = await getSubmissionFormFields();
-    reqLogger.info(
-      { hasConfig: Boolean(formConfig), section: 'data-fetch' },
-      'SubmitPage: form configuration loaded'
-    );
-  } catch (error) {
-    const normalized = normalizeError(error, 'Failed to load submission form config');
-    reqLogger.error(
-      { err: normalized, section: 'data-fetch' },
-      'SubmitPage: getSubmissionFormFields failed'
-    );
-    // Continue with null config - form will render with defaults
-    // This provides better UX than breaking the entire page
-    formConfig = null;
-  }
-
   // Fetch templates for all supported submission types
   // submission_type enum values are a subset of content_category enum values
   // Map each element and validate using type guard to ensure type safety
   const supportedCategories: Array<content_category> =
-    Constants.public.Enums.submission_type
+    (Object.values(SubmissionType) as readonly string[])
       .map((type): string => {
         // Runtime validation: all submission_type values are valid content_category values
         if (isValidContentCategory(type)) {
@@ -340,21 +323,47 @@ async function SubmitFormWithConfig({ reqLogger }: { reqLogger: ReturnType<typeo
         isValidContentCategory(category)
       );
 
-  // Section: Content Templates
-  let templates: Awaited<ReturnType<typeof getContentTemplates>> = [];
-  try {
-    const templatePromises = supportedCategories.map((category) =>
-      getContentTemplates(category).catch((error) => {
-        const normalized = normalizeError(error, `Failed to load templates for ${category}`);
-        reqLogger.error(
-          { category, err: normalized, section: 'data-fetch' },
-          'SubmitPage: getContentTemplates failed for category'
-        );
-        return []; // Return empty array on error for this category
-      })
+  // OPTIMIZATION: Load form configuration and templates in parallel
+  // Both operations are independent and can run concurrently for better performance
+  const [formConfigResult, templatesResult] = await Promise.allSettled([
+    getSubmissionFormFields(),
+    Promise.all(
+      supportedCategories.map((category) =>
+        getContentTemplates(category).catch((error) => {
+          const normalized = normalizeError(error, `Failed to load templates for ${category}`);
+          reqLogger.error(
+            { category, err: normalized, section: 'data-fetch' },
+            'SubmitPage: getContentTemplates failed for category'
+          );
+          return []; // Return empty array on error for this category
+        })
+      )
+    ),
+  ]);
+
+  // Process form configuration result
+  let formConfig: Awaited<ReturnType<typeof getSubmissionFormFields>> | null = null;
+  if (formConfigResult.status === 'fulfilled') {
+    formConfig = formConfigResult.value;
+    reqLogger.info(
+      { hasConfig: Boolean(formConfig), section: 'data-fetch' },
+      'SubmitPage: form configuration loaded'
     );
-    const templateResults = await Promise.all(templatePromises);
-    templates = templateResults.flat();
+  } else {
+    const normalized = normalizeError(formConfigResult.reason, 'Failed to load submission form config');
+    reqLogger.error(
+      { err: normalized, section: 'data-fetch' },
+      'SubmitPage: getSubmissionFormFields failed'
+    );
+    // Continue with null config - form will render with defaults
+    // This provides better UX than breaking the entire page
+    formConfig = null;
+  }
+
+  // Process templates result
+  let templates: Awaited<ReturnType<typeof getContentTemplates>> = [];
+  if (templatesResult.status === 'fulfilled') {
+    templates = templatesResult.value.flat();
     reqLogger.info(
       {
         categoriesCount: supportedCategories.length,
@@ -363,8 +372,8 @@ async function SubmitFormWithConfig({ reqLogger }: { reqLogger: ReturnType<typeo
       },
       'SubmitPage: content templates loaded'
     );
-  } catch (error) {
-    const normalized = normalizeError(error, 'Failed to load submission templates');
+  } else {
+    const normalized = normalizeError(templatesResult.reason, 'Failed to load submission templates');
     reqLogger.error(
       { err: normalized, section: 'data-fetch' },
       'SubmitPage: getContentTemplates failed'
@@ -478,28 +487,28 @@ async function SubmitPageSidebar({ reqLogger }: { reqLogger: ReturnType<typeof l
       {/* Stats Card - 3-column grid */}
       <Card>
         <CardHeader>
-          <CardTitle className={cn(UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2, 'text-sm font-medium')}>
-            <TrendingUp className={UI_CLASSES.ICON_SM} />
+          <CardTitle className={cn(cluster.compact, 'text-sm font-medium')}>
+            <TrendingUp className={iconSize.sm} />
             Community Stats
           </CardTitle>
         </CardHeader>
-        <CardContent className={UI_CLASSES.GRID_COLS_3_GAP_2}>
+        <CardContent className={`grid grid-cols-3 ${gap.compact}`}>
           {/* Total */}
           <div className={cn('rounded-lg p-3 text-center', 'bg-blue-500/10')}>
-            <div className="text-2xl font-bold text-blue-400">{stats.total}</div>
-            <div className={UI_CLASSES.TEXT_XS_MUTED}>Total</div>
+            <div className={`${size['2xl']} ${weight.bold} text-blue-400`}>{stats.total}</div>
+            <div className={`${size.xs} ${muted.default}`}>Total</div>
           </div>
 
           {/* Pending */}
           <div className={cn('rounded-lg p-3 text-center', 'bg-yellow-500/10')}>
-            <div className="text-2xl font-bold text-yellow-400">{stats.pending}</div>
-            <div className={UI_CLASSES.TEXT_XS_MUTED}>Pending</div>
+            <div className={`${size['2xl']} ${weight.bold} text-yellow-400`}>{stats.pending}</div>
+            <div className={`${size.xs} ${muted.default}`}>Pending</div>
           </div>
 
           {/* This Week */}
           <div className={cn('rounded-lg p-3 text-center', 'bg-green-500/10')}>
-            <div className="text-2xl font-bold text-green-400">{stats.merged_this_week}</div>
-            <div className={UI_CLASSES.TEXT_XS_MUTED}>This Week</div>
+            <div className={`${size['2xl']} ${weight.bold} text-green-400`}>{stats.merged_this_week}</div>
+            <div className={`${size.xs} ${muted.default}`}>This Week</div>
           </div>
         </CardContent>
       </Card>

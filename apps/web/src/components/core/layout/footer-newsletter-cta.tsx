@@ -7,12 +7,12 @@
  * Inspired by modern developer-focused footers
  */
 
-import { type Database } from '@heyclaude/database-types';
+import type { newsletter_source } from '@heyclaude/data-layer/prisma';
 import { useNewsletter } from '@heyclaude/web-runtime/hooks';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { ArrowRight, Loader2, Mail } from '@heyclaude/web-runtime/icons';
-import { cn, SimpleCopyButton, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { SPRING, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
+import { cn, SimpleCopyButton } from '@heyclaude/web-runtime/ui';
+import { SPRING, STAGGER, DURATION, size, muted, paddingX, paddingY, marginX, gap, spaceY, padding, marginBottom, marginTop } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useId, useMemo, useState } from 'react';
@@ -25,7 +25,7 @@ const isValidEmail = (email: string): boolean => {
 };
 
 interface FooterNewsletterCTAProps {
-  source: Database['public']['Enums']['newsletter_source'];
+  source: newsletter_source;
 }
 
 // MCP command to display
@@ -106,18 +106,18 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
 
   return (
     <div className="border-border/50 bg-background border-b">
-      <div className="container mx-auto px-4 py-12 md:py-16">
-        <div className="mx-auto max-w-6xl">
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12">
+      <div className={`container ${marginX.auto} ${paddingX.default} ${paddingY.section} md:${paddingY.default}`}>
+        <div className={`${marginX.auto} max-w-6xl`}>
+          <div className={`grid grid-cols-1 ${gap.relaxed} lg:grid-cols-2 lg:${gap.default}`}>
             {/* Left Column - MCP Command */}
             <motion.div
-              className="space-y-4"
+              className={`${spaceY.comfortable}`}
               initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -20 }}
               whileInView={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: DURATION.moderate }}
             >
-              <div className="space-y-2">
+              <div className={`${spaceY.compact}`}>
                 <h2 className="text-foreground text-2xl font-bold leading-tight md:text-3xl">
                   Create what's exciting. Maintain what's essential.
                 </h2>
@@ -128,8 +128,8 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
 
               {/* Code Block with Copy Button */}
               <div className="relative">
-                <div className="border-border/50 bg-card/50 rounded-lg border p-4">
-                  <div className="mb-3 flex items-center justify-between">
+                <div className={`border-border/50 bg-card/50 rounded-lg border ${padding.default}`}>
+                  <div className={`${marginBottom.compact} flex items-center justify-between`}>
                     <span className="text-muted-foreground text-sm font-medium">Get Claude Code</span>
                     <SimpleCopyButton
                       content={MCP_COMMAND}
@@ -137,7 +137,7 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
                       ariaLabel="Copy MCP command"
                       variant="ghost"
                       size="sm"
-                      className="h-8 w-8 p-0"
+                      className={`h-8 w-8 ${padding.default}`}
                       iconClassName="h-4 w-4"
                     />
                   </div>
@@ -148,7 +148,7 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
                     dangerouslySetInnerHTML={{ __html: sanitizedCode }}
                   />
                 </div>
-                <p className="text-muted-foreground mt-3 text-sm">
+                <p className={`text-muted-foreground ${marginTop.default} text-sm`}>
                   Or{' '}
                   <a
                     href="/docs"
@@ -162,7 +162,7 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
 
             {/* Right Column - Newsletter */}
             <motion.div
-              className="space-y-4"
+              className={`${spaceY.comfortable}`}
               initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: 20 }}
               whileInView={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
               viewport={{ once: true }}
@@ -176,7 +176,7 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
                 viewport={{ once: true }}
                 transition={SPRING.smooth}
               >
-                <div className="border-border/50 bg-card/50 rounded-xl border p-4">
+                <div className={`border-border/50 bg-card/50 rounded-xl border ${padding.default}`}>
                   <Mail className="text-foreground h-8 w-8 md:h-10 md:w-10" aria-hidden="true" />
                 </div>
               </motion.div>
@@ -193,8 +193,8 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
               </p>
 
               {/* Integrated Form */}
-              <form onSubmit={handleSubmit} className="space-y-3">
-                <div className="relative flex w-full items-center gap-2">
+              <form onSubmit={handleSubmit} className={`${spaceY.default}`}>
+                <div className={`relative flex w-full items-center ${gap.tight}`}>
                   {/* Email Input */}
                   <input
                     type="email"
@@ -210,7 +210,7 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
                       'h-14 w-full rounded-lg border px-4 pr-14 text-base',
                       'border-border bg-background',
                       'transition-all duration-200 ease-out',
-                      'focus:border-[#F6F8F4]/50 focus:ring-2 focus:ring-[#F6F8F4]/20 focus:outline-none',
+                      'focus:border-color-newsletter-border focus:ring-2 focus:ring-color-newsletter-ring focus:outline-none',
                       error && 'border-destructive focus:border-destructive focus:ring-destructive/20',
                       isSubmitting && 'cursor-not-allowed opacity-60'
                     )}
@@ -228,7 +228,7 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
                         disabled
                         className={cn(
                           'absolute right-2 flex h-10 w-10 items-center justify-center rounded-lg',
-                          'bg-[#F6F8F4] text-background',
+                          'bg-color-newsletter-bg text-background',
                           'cursor-not-allowed'
                         )}
                         initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.8 }}
@@ -245,10 +245,10 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
                         type="submit"
                         className={cn(
                           'absolute right-2 flex h-10 w-10 items-center justify-center rounded-lg',
-                          'bg-[#F6F8F4] text-background',
+                          'bg-color-newsletter-bg text-background',
                           'shadow-sm transition-all duration-200',
-                          'hover:bg-[#F6F8F4]/90 hover:shadow-md',
-                          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F6F8F4] focus-visible:ring-offset-2',
+                          'hover:bg-color-newsletter-bg-hover hover:shadow-md',
+                          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-color-newsletter-bg focus-visible:ring-offset-2',
                           'active:scale-95'
                         )}
                         initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -8, scale: 0.8 }}
@@ -289,7 +289,7 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
                 </AnimatePresence>
 
                 {/* Privacy text */}
-                <p className={cn(UI_CLASSES.TEXT_XS_MUTED, 'leading-snug')}>
+                <p className={cn(size.xs, muted.default, 'leading-snug')}>
                   Please provide your email address if you'd like to receive our monthly developer
                   newsletter. You can unsubscribe at any time.
                 </p>

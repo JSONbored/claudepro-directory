@@ -111,24 +111,32 @@ export function ReadProgress({
     }
 
     // Query the navigation element (inner nav, not outer header with padding)
+    // Batch DOM reads to avoid forced reflows
     const updateNavDimensions = () => {
-      const header = document.querySelector('header');
-      const nav = header?.querySelector('nav');
-      if (header && nav) {
-        const navRect = nav.getBoundingClientRect();
-        // Position at bottom of navbar
-        setNavHeight(navRect.bottom);
-        // Match navbar width and left position
-        setNavWidth(navRect.width);
-        setNavLeft(navRect.left);
-      }
+      // Use requestAnimationFrame to batch with browser's layout cycle
+      requestAnimationFrame(() => {
+        const header = document.querySelector('header');
+        const nav = header?.querySelector('nav');
+        if (header && nav) {
+          // Batch all DOM reads together
+          const navRect = nav.getBoundingClientRect();
+          // Position at bottom of navbar
+          setNavHeight(navRect.bottom);
+          // Match navbar width and left position
+          setNavWidth(navRect.width);
+          setNavLeft(navRect.left);
+        }
+      });
     };
 
-    // Initial measurement
-    updateNavDimensions();
+    // Initial measurement (defer to next frame to avoid blocking)
+    requestAnimationFrame(updateNavDimensions);
 
     // Update on resize (nav might change height at different breakpoints)
-    const resizeObserver = new ResizeObserver(updateNavDimensions);
+    // ResizeObserver already batches, but we wrap in requestAnimationFrame for consistency
+    const resizeObserver = new ResizeObserver(() => {
+      updateNavDimensions();
+    });
     const header = document.querySelector('header');
     if (header) {
       resizeObserver.observe(header);
@@ -190,13 +198,14 @@ export function ReadProgress({
 
   return (
     <motion.div
-      className={`${colorClass} pointer-events-none fixed origin-left`}
+      className={`${colorClass} pointer-events-none fixed origin-left rounded-[2.5px]`}
       style={{
         ...getPositionStyle(),
         height: `${height}px`,
         scaleX: shouldReduceMotion ? 1 : scaleX,
         zIndex,
-        borderRadius: '2.5px', // Pill shape (half of 5px height)
+        // GPU acceleration hint for smooth progress bar animation
+        willChange: shouldReduceMotion ? 'auto' : 'transform',
       }}
       role="progressbar"
       aria-label="Reading progress"

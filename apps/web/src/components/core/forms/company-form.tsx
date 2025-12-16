@@ -13,9 +13,9 @@
  * ```
  */
 
-import type { UserCompaniesCompany } from '@heyclaude/data-layer/types/composite-types';
-import { type Database } from '@heyclaude/database-types';
-import { normalizeError } from '@heyclaude/shared-runtime';
+import type { UserCompaniesCompany } from '@heyclaude/database-types/postgres-types';
+import type { company_size } from '@heyclaude/database-types/prisma';
+import { normalizeError, getFormDataString, getFormDataStringRequired, getFormDataEnum } from '@heyclaude/shared-runtime';
 import {
   createCompany,
   updateCompany,
@@ -28,7 +28,6 @@ import { FileText, X } from '@heyclaude/web-runtime/icons';
 import { logClientError } from '@heyclaude/web-runtime/logging/client';
 import {
   toasts,
-  UI_CLASSES,
   FormField,
   Button,
   Card,
@@ -38,6 +37,7 @@ import {
   CardTitle,
   SelectItem,
 } from '@heyclaude/web-runtime/ui';
+import { stack, size, muted, spaceY, marginLeft, gap, marginRight, padding, paddingX, paddingY } from '@heyclaude/web-runtime/design-system';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useId, useState } from 'react';
@@ -236,7 +236,9 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
           const fileBase64 = await fileToBase64(file);
           const result = await uploadLogo({
             fileName: file.name,
-            mimeType: file.type as AllowedImageMimeType,
+            mimeType: (file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/webp')
+              ? file.type
+              : 'image/png' satisfies AllowedImageMimeType,
             fileBase64,
             companyId: initialData?.id ?? undefined,
             oldLogoUrl: logoUrl ?? undefined,
@@ -313,16 +315,26 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
 
     const formData = new FormData(e.currentTarget);
 
-    const sizeValue = (formData.get('size') as string) || null;
+    // Type guard for company_size enum (using Prisma-generated enum values)
+    function isCompanySize(value: unknown): value is company_size {
+      if (typeof value !== 'string') return false;
+      // Use Prisma-generated enum values from @heyclaude/database-types/prisma
+      const validSizes: company_size[] = ['just_me', '2-10', '11-50', '51-200', '201-500', '500+'];
+      // Type narrowing: value is string, check against valid enum values
+      return validSizes.includes(value as company_size);
+    }
+
+    // OPTIMIZATION: Use type-safe FormData utilities instead of type assertions
+    const sizeValue = getFormDataString(formData, 'size');
     const data = {
-      name: formData.get('name') as string,
-      website: (formData.get('website') as string) || null,
+      name: getFormDataStringRequired(formData, 'name'),
+      website: getFormDataString(formData, 'website'),
       logo: logoUrl,
-      description: (formData.get('description') as string) || null,
-      size: sizeValue as Database['public']['Enums']['company_size'] | null,
-      industry: (formData.get('industry') as string) || null,
+      description: getFormDataString(formData, 'description'),
+      size: sizeValue ? getFormDataEnum(formData, 'size', isCompanySize) : null,
+      industry: getFormDataString(formData, 'industry'),
       using_cursor_since: useCursorDate
-        ? (formData.get('using_cursor_since') as string) || null
+        ? getFormDataString(formData, 'using_cursor_since')
         : null,
     };
 
@@ -357,13 +369,13 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
   }, [user, status, openAuthModal, pathname, mode, handleSubmit, logoUrl, useCursorDate, initialData?.id]);
 
   return (
-    <form onSubmit={onSubmit} className="space-y-6">
+    <form onSubmit={onSubmit} className={`${spaceY.relaxed}`}>
       <Card>
         <CardHeader>
           <CardTitle>Company Information</CardTitle>
           <CardDescription>Basic details about your company</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className={`${spaceY.comfortable}`}>
           <FormField
             variant="input"
             label="Company Name"
@@ -383,16 +395,16 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
             description="Your company's website URL"
           />
 
-          <div className="space-y-2">
+          <div className={`${spaceY.compact}`}>
             <label htmlFor={logoUploadId} className="text-sm font-medium">
               Company Logo
-              <span className="text-muted-foreground ml-1 text-xs font-normal">
+              <span className={`text-muted-foreground ${marginLeft.micro} text-xs font-normal`}>
                 (max 200KB, 512x512px, WebP/PNG/JPG)
               </span>
             </label>
 
             {logoPreview ? (
-              <div className="flex items-start gap-4">
+              <div className={`flex items-start ${gap.default}`}>
                 <div className="relative h-24 w-24 overflow-hidden rounded-lg border">
                   <Image
                     src={logoPreview}
@@ -401,7 +413,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
                     className="object-cover"
                   />
                 </div>
-                <div className="flex flex-col gap-2">
+                <div className={`flex flex-col ${gap.tight}`}>
                   <Button
                     type="button"
                     variant="outline"
@@ -412,7 +424,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
                     }}
                     disabled={isUploadingLogo}
                   >
-                    <X className="mr-1 h-3 w-3" />
+                    <X className={`${marginRight.micro} h-3 w-3`} />
                     Remove Logo
                   </Button>
                   <label htmlFor={logoUploadId}>
@@ -423,21 +435,21 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
                       disabled={isUploadingLogo}
                       onClick={() => document.getElementById(logoUploadId)?.click()}
                     >
-                      <FileText className="mr-1 h-3 w-3" />
+                      <FileText className={`${marginRight.micro} h-3 w-3`} />
                       Change Logo
                     </Button>
                   </label>
                 </div>
               </div>
             ) : (
-              <label htmlFor={logoUploadId} className={UI_CLASSES.UPLOAD_ZONE}>
-                <div className={`${UI_CLASSES.FLEX_COL_GAP_2} items-center text-center`}>
+              <label htmlFor={logoUploadId} className={`border-border bg-muted/50 hover:bg-muted/80 flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed ${padding.relaxed} transition-colors`}>
+                <div className={`${stack.compact} items-center text-center`}>
                   <FileText className="text-muted-foreground h-8 w-8" />
                   <div>
                     <p className="text-sm font-medium">
                       {isUploadingLogo ? 'Uploading...' : 'Click to upload logo'}
                     </p>
-                    <p className={UI_CLASSES.TEXT_SM_MUTED}>Max 200KB, 512x512px</p>
+                    <p className={`${size.sm} ${muted.default}`}>Max 200KB, 512x512px</p>
                   </div>
                 </div>
               </label>
@@ -447,7 +459,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
               id={logoUploadId}
               type="file"
               accept="image/jpeg,image/png,image/webp"
-              className={UI_CLASSES.INPUT_HIDDEN}
+              className="sr-only"
               disabled={isUploadingLogo}
               onChange={(e) => {
                 const file = e.target.files?.[0];
@@ -509,7 +521,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
           <CardTitle>Company Details</CardTitle>
           <CardDescription>Additional information about your organization</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className={`${spaceY.comfortable}`}>
           <FormField
             variant="select"
             label="Company Size"
@@ -534,8 +546,8 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
             description="Maximum 100 characters"
           />
 
-          <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-medium">
+          <div className={`${spaceY.compact}`}>
+            <label className={`flex items-center ${gap.tight} text-sm font-medium`}>
               <input
                 type="checkbox"
                 checked={useCursorDate}
@@ -549,14 +561,14 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
                 type="date"
                 name="using_cursor_since"
                 defaultValue={initialData?.using_cursor_since || ''}
-                className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                className={`border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border ${paddingX.compact} ${paddingY.tight} text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50`}
               />
             ) : null}
           </div>
         </CardContent>
       </Card>
 
-      <div className="flex gap-4">
+      <div className={`flex ${gap.default}`}>
         <Button type="submit" disabled={isPending}>
           {isPending ? 'Saving...' : mode === 'create' ? 'Create Company' : 'Save Changes'}
         </Button>

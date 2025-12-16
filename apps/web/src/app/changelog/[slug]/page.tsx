@@ -21,7 +21,7 @@
  * - Accessibility support
  * - Responsive design
  */
-import { Constants } from '@heyclaude/database-types';
+import type { content_category } from '@heyclaude/data-layer/prisma';
 import {
   generatePageMetadata,
   getAllChangelogEntries,
@@ -35,8 +35,8 @@ import {
   Breadcrumbs,
   NavLink,
   Separator,
-  UI_CLASSES,
 } from '@heyclaude/web-runtime/ui';
+import { spaceY, paddingY, size, muted, cluster, iconSize, marginBottom, marginY, weight, tracking, leading } from '@heyclaude/web-runtime/design-system';
 import { formatChangelogDate, getChangelogUrl } from '@heyclaude/web-runtime/utils/changelog';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
@@ -243,7 +243,7 @@ async function ChangelogEntryPageContent({
 
       {/* View Tracker - Track page views */}
       <Pulse
-        category={'changelog' as (typeof Constants.public.Enums.content_category)[number]}
+        category={'changelog' as content_category}
         slug={entry.slug}
         variant="view"
       />
@@ -252,26 +252,26 @@ async function ChangelogEntryPageContent({
       <StructuredData route={`/changelog/${entry.slug}`} />
 
       <article
-        className={`container max-w-6xl ${UI_CLASSES.FORM_SECTION_SPACING} ${UI_CLASSES.PADDING_Y_RELAXED}`}
+        className={`container max-w-6xl ${spaceY.relaxed} ${paddingY.relaxed}`}
       >
         {/* Breadcrumbs */}
         <Breadcrumbs categoryLabel="Changelog" currentTitle={entry.title} />
 
         {/* Navigation */}
         <NavLink
-          className={`${UI_CLASSES.TEXT_HELPER} ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} ${UI_CLASSES.TEXT_BODY_SM}`}
+          className={`${size.xs} ${muted.default} ${cluster.compact} ${size.sm} ${leading.normal}`}
           href={ROUTES.CHANGELOG}
         >
-          <ArrowLeft className={UI_CLASSES.ICON_SM} />
+          <ArrowLeft className={iconSize.sm} />
           <span>Back to Changelog</span>
         </NavLink>
 
         {/* Header */}
-        <header className={`${UI_CLASSES.FORM_GROUP_SPACING} ${UI_CLASSES.MARGIN_COMFORTABLE}`}>
+        <header className={`${spaceY.comfortable} ${marginBottom.comfortable}`}>
           <div
-            className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} ${UI_CLASSES.TEXT_HELPER} ${UI_CLASSES.TEXT_BODY_SM}`}
-          >
-            <Calendar className={UI_CLASSES.ICON_SM} />
+            className={`${cluster.default} ${size.xs} ${muted.default} ${size.sm} ${leading.normal}`}
+            >
+            <Calendar className={iconSize.sm} />
             <time
               dateTime={
                 entry.release_date instanceof Date
@@ -283,11 +283,11 @@ async function ChangelogEntryPageContent({
             </time>
           </div>
 
-          <h1 className={UI_CLASSES.HEADING_H1}>{entry.title}</h1>
+          <h1 className={`${size['4xl']} ${weight.bold} ${tracking.tight}`}>{entry.title}</h1>
 
           {/* Canonical URL */}
-          <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} ${UI_CLASSES.TEXT_BODY_SM}`}>
-            <span className={UI_CLASSES.TEXT_HELPER}>Permanent link:</span>
+          <div className={`${cluster.compact} ${size.sm} ${leading.normal}`}>
+            <span className={`${size.xs} ${muted.default}`}>Permanent link:</span>
             <a
               className={`text-primary hover:text-primary/80 truncate ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT}`}
               href={canonicalUrl}
@@ -297,7 +297,7 @@ async function ChangelogEntryPageContent({
           </div>
         </header>
 
-        <Separator className={UI_CLASSES.MARGIN_Y_RELAXED} />
+        <Separator className={marginY.relaxed} />
 
         {/* Content */}
         <ChangelogContent hideHeader entry={entry} />

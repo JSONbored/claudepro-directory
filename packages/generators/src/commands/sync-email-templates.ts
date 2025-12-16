@@ -14,8 +14,8 @@ import type {
 import { EMAIL_TEMPLATE_MANIFEST as EMAIL_TEMPLATE_MANIFEST_RAW } from '@heyclaude/edge-runtime/utils/email/templates/manifest';
 import { Resend } from 'resend';
 
-import { ensureEnvVars } from '../toolkit/env.js';
-import { logger } from '../toolkit/logger.js';
+import { ensureEnvVars } from '../toolkit/env.ts';
+import { logger } from '../toolkit/logger.ts';
 
 // Type assertion for the manifest
 const EMAIL_TEMPLATE_MANIFEST = EMAIL_TEMPLATE_MANIFEST_RAW as readonly EmailTemplateDefinition<Record<string, unknown>>[];

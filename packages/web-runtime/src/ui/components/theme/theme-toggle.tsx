@@ -36,7 +36,7 @@ import { useAnimate, useReducedMotion } from 'motion/react';
 import { SPRING } from '../../../design-system/index.ts';
 import { useTernaryDarkMode } from '../../../hooks/use-ternary-dark-mode.ts';
 import { Moon, Sun } from '../../../icons.tsx';
-import { UI_CLASSES } from '../../constants.ts';
+import { cluster, iconSize } from '../../../design-system/index.ts';
 import { ThemeToggleLayout } from './theme-toggle-layout.tsx';
 
 /**
@@ -122,8 +122,8 @@ export function ThemeToggle() {
     const newTheme = newIsDarkMode ? 'dark' : 'light';
 
     // Get theme background colors (matching your design system)
-    const darkBg = 'oklch(24% 0.008 60)'; // --dark-bg-primary
-    const lightBg = 'oklch(99% 0.003 90)'; // --light-bg-primary
+    const darkBg = 'oklch(24% 0.008 60)'; // matches --background in dark mode
+    const lightBg = 'oklch(99% 0.003 90)'; // matches --background in light mode
     const newBg = newTheme === 'dark' ? darkBg : lightBg;
 
     // Create overlay element if it doesn't exist
@@ -183,8 +183,8 @@ export function ThemeToggle() {
     : `Switch to ${ternaryDarkMode === 'light' ? 'dark' : 'light'} mode`;
 
   return (
-    <div ref={containerRef} className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-      <Sun className={`${UI_CLASSES.ICON_SM} text-muted-foreground`} aria-hidden="true" />
+    <div ref={containerRef} className={cluster.compact}>
+      <Sun className={`${iconSize.sm} text-muted-foreground`} aria-hidden="true" />
       <ThemeToggleLayout
         checked={toggleChecked}
         onCheckedChange={(_checked, event) => {
@@ -193,7 +193,7 @@ export function ThemeToggle() {
         }}
         aria-label={ariaLabel}
       />
-      <Moon className={`${UI_CLASSES.ICON_SM} text-muted-foreground`} aria-hidden="true" />
+      <Moon className={`${iconSize.sm} text-muted-foreground`} aria-hidden="true" />
     </div>
   );
 }

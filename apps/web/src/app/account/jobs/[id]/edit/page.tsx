@@ -3,8 +3,8 @@
  * Uses updateJob server action (calls update_job RPC)
  */
 
-import { type job_category, type job_type, type jobs } from '@heyclaude/data-layer/prisma';
-import { Constants } from '@heyclaude/database-types';
+import { JobType, JobCategory } from '@heyclaude/data-layer/prisma';
+import type { job_category, job_type, jobsModel } from '@heyclaude/data-layer/prisma';
 import { type CreateJobInput } from '@heyclaude/web-runtime/actions';
 import { updateJob } from '@heyclaude/web-runtime/actions';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
@@ -14,16 +14,19 @@ import {
   getPaymentPlanCatalog,
   getUserJobById,
 } from '@heyclaude/web-runtime/server';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import { notFound, redirect } from 'next/navigation';
 import { connection } from 'next/server';
-import { Suspense } from 'react';
+import { Suspense, lazy } from 'react';
 
-import { JobForm } from '@/src/components/core/forms/job-form';
+// OPTIMIZATION: Dynamic import for large form component (763 lines) - only loads when needed
+const JobForm = lazy(
+  () => import('@/src/components/core/forms/job-form').then((mod) => ({ default: mod.JobForm }))
+);
 
 import Loading from './loading';
+import { size, weight, tracking, muted, radius, marginBottom, spaceY, padding } from '@heyclaude/web-runtime/design-system';
 
 /**
  * Dynamic Rendering Required
@@ -144,7 +147,7 @@ async function EditJobPageContent({
   userLogger.info({ section: 'data-fetch' }, 'EditJobPage: authentication successful');
 
   // Section: Job Data Fetch
-  let job: jobs | null = null;
+  let job: jobsModel | null = null;
   try {
     job = await getUserJobById(user.id, id);
     userLogger.info({ hasJob: !!job, section: 'data-fetch' }, 'EditJobPage: job data loaded');
@@ -227,13 +230,13 @@ async function EditJobPageContent({
     return { success: false };
   };
 
-  // Type guards to safely check enum values - use Constants
+  // Type guards to safely check enum values - use Prisma enum value objects
   function isValidJobType(value: string): value is job_type {
-    return (Constants.public.Enums.job_type as readonly string[]).includes(value);
+    return (Object.values(JobType) as readonly string[]).includes(value);
   }
 
   function isValidJobCategory(value: string): value is job_category {
-    return (Constants.public.Enums.job_category as readonly string[]).includes(value);
+    return (Object.values(JobCategory) as readonly string[]).includes(value);
   }
 
   // Log warnings for invalid enum values to help track data integrity issues
@@ -253,42 +256,44 @@ async function EditJobPageContent({
   const hasInvalidData = !isValidJobType(job.type) || !isValidJobCategory(job.category);
 
   return (
-    <div className="space-y-6">
+    <div className={spaceY.relaxed}>
       <div>
-        <h1 className={`mb-2 ${UI_CLASSES.HEADING_H2}`}>Edit Job Listing</h1>
-        <p className="text-muted-foreground">Update your job posting details</p>
+        <h1 className={`${marginBottom.compact} ${size['3xl']} ${weight.semibold} ${tracking.tight}`}>Edit Job Listing</h1>
+        <p className={`${muted.default}`}>Update your job posting details</p>
       </div>
       {hasInvalidData ? (
-        <div className="rounded-md bg-yellow-50 p-4 dark:bg-yellow-900/20">
-          <p className="text-sm text-yellow-800 dark:text-yellow-200">
+        <div className={`${radius.md} bg-yellow-50 ${padding.default} dark:bg-yellow-900/20`}>
+          <p className={`${size.sm} text-yellow-800 dark:text-yellow-200`}>
             Some fields contain invalid data and couldn&apos;t be loaded. Please review and update.
           </p>
         </div>
       ) : null}
-      <JobForm
-        initialData={{
-          company: job.company,
-          company_id: job.company_id,
-          description: job.description,
-          location: job.location,
-          remote: job.remote ?? undefined,
-          salary: job.salary,
-          title: job.title,
-          ...(isValidJobType(job.type) && { type: job.type }),
-          experience: job.experience,
-          workplace: job.workplace,
-          ...(isValidJobCategory(job.category) && { category: job.category }),
-          benefits: job.benefits,
-          company_logo: job.company_logo,
-          contact_email: job.contact_email,
-          link: job.link,
-          requirements: job.requirements,
-          tags: job.tags,
-        }}
-        planCatalog={planCatalog}
-        submitLabel="Update Job Listing"
-        onSubmit={handleSubmit}
-      />
+      <Suspense fallback={<Loading />}>
+        <JobForm
+          initialData={{
+            company: job.company,
+            company_id: job.company_id,
+            description: job.description,
+            location: job.location,
+            remote: job.remote ?? undefined,
+            salary: job.salary,
+            title: job.title,
+            ...(isValidJobType(job.type) && { type: job.type }),
+            experience: job.experience,
+            workplace: job.workplace,
+            ...(isValidJobCategory(job.category) && { category: job.category }),
+            benefits: job.benefits,
+            company_logo: job.company_logo,
+            contact_email: job.contact_email,
+            link: job.link,
+            requirements: job.requirements,
+            tags: job.tags,
+          }}
+          planCatalog={planCatalog}
+          submitLabel="Update Job Listing"
+          onSubmit={handleSubmit}
+        />
+      </Suspense>
     </div>
   );
 }

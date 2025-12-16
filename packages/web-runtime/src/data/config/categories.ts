@@ -1,5 +1,5 @@
 import 'server-only';
-import { type content_category } from '@heyclaude/data-layer/prisma';
+import type { content_category } from '@heyclaude/data-layer/prisma';
 import { ContentCategory } from '@heyclaude/data-layer/prisma';
 
 import { isBuildTime } from '../../build-time.ts';

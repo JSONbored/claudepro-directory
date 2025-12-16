@@ -12,7 +12,6 @@ import { AlertTriangle, CheckCircle, Loader2, Shield, Trash } from '@heyclaude/w
 import {
   errorToasts,
   successToasts,
-  UI_CLASSES,
   UnifiedBadge,
   Button,
   Dialog,
@@ -22,6 +21,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@heyclaude/web-runtime/ui';
+import { iconSize, marginRight, paddingY, padding, spaceY, gap, marginTop } from '@heyclaude/web-runtime/design-system';
 import { useCallback, useEffect, useState } from 'react';
 
 interface MFAFactorsListProps {
@@ -150,15 +150,15 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-8">
-        <Loader2 className={`${UI_CLASSES.ICON_XL} text-muted-foreground animate-spin`} />
+      <div className={`flex items-center justify-center ${paddingY.relaxed}`}>
+        <Loader2 className={`${iconSize.xl} text-muted-foreground animate-spin`} />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="border-destructive/50 bg-destructive/10 text-destructive rounded-lg border p-4 text-sm">
+      <div className={`border-destructive/50 bg-destructive/10 text-destructive rounded-lg border ${padding.default} text-sm`}>
         {error}
       </div>
     );
@@ -166,7 +166,7 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
 
   if (factors.length === 0) {
     return (
-      <div className="bg-muted/30 text-muted-foreground rounded-lg border p-4 text-center text-sm">
+      <div className={`bg-muted/30 text-muted-foreground rounded-lg border ${padding.default} text-center text-sm`}>
         No MFA factors enrolled. Enable two-factor authentication to get started.
       </div>
     );
@@ -174,24 +174,24 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
 
   return (
     <>
-      <div className="space-y-3">
+      <div className={`${spaceY.default}`}>
         {factors.map((factor) => (
           <div
             key={factor.id}
-            className="hover:bg-accent/5 flex items-center justify-between rounded-lg border p-4 transition-colors"
+            className={`hover:bg-accent/5 flex items-center justify-between rounded-lg border ${padding.default} transition-colors`}
           >
-            <div className="flex items-center gap-4">
-              <div className="bg-accent/5 rounded-full border p-3">
-                <Shield className={UI_CLASSES.ICON_LG} />
+            <div className={`flex items-center ${gap.default}`}>
+              <div className={`bg-accent/5 rounded-full border ${padding.compact}`}>
+                <Shield className={iconSize.lg} />
               </div>
               <div>
-                <div className="flex items-center gap-2">
+                <div className={`flex items-center ${gap.tight}`}>
                   <h3 className="font-medium">
                     {factor.friendly_name || `${factor.factor_type.toUpperCase()} Factor`}
                   </h3>
                   {factor.status === 'verified' ? (
-                    <UnifiedBadge variant="base" style="default" className="gap-1">
-                      <CheckCircle className={UI_CLASSES.ICON_XS} />
+                    <UnifiedBadge variant="base" style="default" className={`${gap.micro}`}>
+                      <CheckCircle className={iconSize.xs} />
                       Active
                     </UnifiedBadge>
                   ) : (
@@ -200,7 +200,7 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
                     </UnifiedBadge>
                   )}
                 </div>
-                <div className="text-muted-foreground mt-1 text-sm">
+                <div className={`text-muted-foreground ${marginTop.tight} text-sm`}>
                   <p>Type: {factor.factor_type.toUpperCase()}</p>
                   {factor.factor_type === 'phone' && factor.phone ? (
                     <p>Phone: {factor.phone}</p>
@@ -222,7 +222,7 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
                 }}
                 className="text-destructive hover:bg-destructive/10"
               >
-                <Trash className={UI_CLASSES.ICON_SM_LEADING} />
+                <Trash className={`${iconSize.sm} ${marginRight.compact}`} />
                 Remove
               </Button>
             )}
@@ -233,7 +233,7 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
       <Dialog open={unenrollDialogOpen} onOpenChange={setUnenrollDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className={`flex items-center ${gap.tight}`}>
               <AlertTriangle className="text-destructive" />
               Remove MFA Factor?
             </DialogTitle>
@@ -261,7 +261,7 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
             <Button variant="destructive" onClick={handleUnenroll} disabled={unenrolling}>
               {unenrolling ? (
                 <>
-                  <Loader2 className={`${UI_CLASSES.ICON_SM_LEADING} animate-spin`} />
+                  <Loader2 className={`${iconSize.sm} ${marginRight.compact} animate-spin`} />
                   Removing...
                 </>
               ) : (

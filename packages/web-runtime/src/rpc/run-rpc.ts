@@ -1,4 +1,4 @@
-import type { Database } from '@heyclaude/database-types';
+// Note: RPC function types come from postgres-types generator - RPC names are just strings
 import { logActionFailure } from '../errors.ts';
 import { toLogContextValue } from '../logger.ts';
 import { BasePrismaService } from '@heyclaude/data-layer';
@@ -71,11 +71,11 @@ const rpcService = new PrismaRpcService();
  * Create a runRpc function for server actions
  *
  * Modernized for Prisma - all RPCs go through BasePrismaService.
- * No longer uses Supabase client.
+ * Uses Prisma client for database operations.
  */
 export function createRunRpc<TExtraRpc extends string = never>() {
   return async function runRpc<ResultType>(
-    rpcName: keyof Database['public']['Functions'] | TExtraRpc,
+    rpcName: string | TExtraRpc,
     args: Record<string, unknown>,
     context: RunRpcContext
   ): Promise<ResultType> {

@@ -1,4 +1,4 @@
-import { type Database } from '@heyclaude/database-types';
+import type { content_category } from '@heyclaude/data-layer/prisma';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ExternalLink, HelpCircle } from '@heyclaude/web-runtime/icons';
 import {
@@ -7,11 +7,11 @@ import {
 } from '@heyclaude/web-runtime/types/component.types';
 import {
   ICON_NAME_MAP,
-  UI_CLASSES,
   UnifiedBadge,
   Skeleton,
   Button,
 } from '@heyclaude/web-runtime/ui';
+import { iconSize, size, muted, marginBottom, leading, cluster, marginRight, paddingX, paddingY, marginX, padding, gap, spaceY } from '@heyclaude/web-runtime/design-system';
 import Link from 'next/link';
 import { Suspense, useId } from 'react';
 
@@ -52,25 +52,25 @@ function ContentHeroSection<T extends DisplayableContent>({
         ];
 
   return (
-    <section className={UI_CLASSES.CONTAINER_OVERFLOW_BORDER} aria-labelledby={pageTitleId}>
-      <div className="container mx-auto px-4 py-20">
-        <div className="mx-auto max-w-3xl text-center">
-          <div className="mb-6 flex justify-center">
-            <div className="bg-accent/10 rounded-full p-3" aria-hidden="true">
+    <section className="relative overflow-hidden border-b border-border/50 bg-card/30" aria-labelledby={pageTitleId}>
+      <div className={`container ${marginX.auto} ${paddingX.default} ${paddingY.default}`}>
+        <div className={`${marginX.auto} max-w-3xl text-center`}>
+          <div className={`${marginBottom.comfortable} flex justify-center`}>
+            <div className={`bg-accent/10 rounded-full ${padding.compact}`} aria-hidden="true">
               {(() => {
                 const IconComponent = ICON_NAME_MAP[icon] || HelpCircle;
-                return <IconComponent className={`${UI_CLASSES.ICON_XL} text-primary`} />;
+                return <IconComponent className={`${iconSize.xl} text-primary`} />;
               })()}
             </div>
           </div>
 
-          <h1 id={pageTitleId} className={UI_CLASSES.TEXT_HEADING_HERO}>
+          <h1 id={pageTitleId} className={`text-4xl lg:text-6xl font-bold ${marginBottom.comfortable} text-foreground`}>
             {title}
           </h1>
 
-          <p className={UI_CLASSES.TEXT_HEADING_MEDIUM}>{description}</p>
+          <p className={`${size.lg} ${muted.default} ${marginBottom.relaxed} ${leading.relaxed}`}>{description}</p>
 
-          <ul className="mb-8 flex list-none flex-wrap justify-center gap-2">
+          <ul className={`${marginBottom.relaxed} flex list-none flex-wrap justify-center ${gap.tight}`}>
             {displayBadges.map((badge, idx) => (
               <li key={badge.text || `badge-${idx}`}>
                 <UnifiedBadge variant="base" style={idx === 0 ? 'secondary' : 'outline'}>
@@ -80,7 +80,7 @@ function ContentHeroSection<T extends DisplayableContent>({
                           const BadgeIconComponent = ICON_NAME_MAP[badge.icon] || HelpCircle;
                           return (
                             <BadgeIconComponent
-                              className={UI_CLASSES.ICON_XS_LEADING}
+                              className={`${iconSize.xs} ${marginRight.compact}`}
                               aria-hidden="true"
                             />
                           );
@@ -97,10 +97,10 @@ function ContentHeroSection<T extends DisplayableContent>({
           <Button variant="outline" size="sm" asChild>
             <Link
               href={ROUTES.SUBMIT}
-              className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
+              className={cluster.compact}
               aria-label={`Submit a new ${title.slice(0, -1).toLowerCase()}`}
             >
-              <ExternalLink className={UI_CLASSES.ICON_XS} aria-hidden="true" />
+              <ExternalLink className={iconSize.xs} aria-hidden="true" />
               Submit {title.slice(0, -1)}
             </Link>
           </Button>
@@ -122,9 +122,9 @@ function ContentHeroSection<T extends DisplayableContent>({
  */
 export function ContentSearchSkeleton() {
   return (
-    <div className="w-full space-y-4">
+    <div className={`w-full ${spaceY.comfortable}`}>
       <Skeleton size="xl" width="3xl" />
-      <div className="flex justify-end gap-2">
+      <div className={`flex justify-end ${gap.tight}`}>
         <Skeleton size="lg" width="sm" />
         <Skeleton size="lg" width="xs" />
       </div>
@@ -176,13 +176,13 @@ export function ContentListServer<T extends DisplayableContent>({
         />
       )}
 
-      <section className="container mx-auto px-4 py-12" aria-label={`${title} content and search`}>
-        <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_18rem]">
+      <section className={`container ${marginX.auto} ${paddingX.default} ${paddingY.section}`} aria-label={`${title} content and search`}>
+        <div className={`grid ${gap.relaxed} xl:grid-cols-[minmax(0,1fr)_18rem]`}>
           <div>
             <Suspense fallback={<ContentSearchSkeleton />}>
               <ContentListSearchClient
                 items={items}
-                type={type as Database['public']['Enums']['content_category']}
+                type={type as content_category}
                 {...(category && { category })}
                 searchPlaceholder={searchPlaceholder}
                 title={title}

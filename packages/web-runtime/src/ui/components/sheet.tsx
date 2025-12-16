@@ -14,7 +14,8 @@
 
 import { SPRING } from '../../design-system/index.ts';
 import { X } from '../../icons.tsx';
-import { POSITION_PATTERNS, UI_CLASSES } from '../constants.ts';
+import { POSITION_PATTERNS } from '../constants.ts';
+import { iconSize, stack, spaceY } from '../../design-system/index.ts';
 import { cn } from '../utils.ts';
 import { useScrollLock } from '../../hooks/use-scroll-lock.ts';
 import * as SheetPrimitive from '@radix-ui/react-dialog';
@@ -221,7 +222,7 @@ const SheetContent = ({
             data-radix-sheet-close={true}
             className={`${POSITION_PATTERNS.ABSOLUTE_TOP_RIGHT_OFFSET_XL} rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary`}
           >
-            <X className={UI_CLASSES.ICON_SM} />
+            <X className={iconSize.sm} />
             <span className="sr-only">Close</span>
           </SheetPrimitive.Close>
         </motion.div>
@@ -233,7 +234,7 @@ SheetContent.displayName = SheetPrimitive.Content.displayName;
 
 const SheetHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={cn(UI_CLASSES.FLEX_COL_SPACE_Y_2, 'text-center sm:text-left', className)}
+    className={cn(`${stack.none} ${spaceY.compact}`, 'text-center sm:text-left', className)}
     {...props}
   />
 );

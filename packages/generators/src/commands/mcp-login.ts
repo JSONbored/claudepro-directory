@@ -14,12 +14,11 @@ import path from 'node:path';
 import * as readline from 'node:readline';
 import { URL } from 'node:url';
 
-import { type Database } from '@heyclaude/database-types';
 import { createClient } from '@supabase/supabase-js';
 import escapeHtml from 'escape-html';
 
-import { logger } from '../toolkit/logger.js';
-import { getTokenFilePath, loadToken, type TokenData } from '../toolkit/mcp-token.js';
+import { logger } from '../toolkit/logger.ts';
+import { getTokenFilePath, loadToken, type TokenData } from '../toolkit/mcp-token.ts';
 
 const CONFIG_DIR = path.join(homedir(), '.heyclaude-mcp');
 const TOKEN_FILE = getTokenFilePath();
@@ -122,7 +121,7 @@ function prompt(question: string): Promise<string> {
  * Email/password login (interactive)
  */
 async function loginWithPassword(): Promise<void> {
-  const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   logger.log('🔐 Email/Password Login');
   logger.log('─'.repeat(60));
@@ -169,7 +168,7 @@ async function loginWithPassword(): Promise<void> {
  * OAuth browser login flow
  */
 async function loginWithOAuth(): Promise<void> {
-  const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     auth: {
       flowType: 'pkce',
       autoRefreshToken: true,

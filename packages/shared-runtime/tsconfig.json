@@ -8,15 +8,12 @@
     "tsBuildInfoFile": "./.tsbuildinfo",
     "rootDir": "src",
     "outDir": "dist",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "baseUrl": ".",
     "skipLibCheck": true,
     "allowImportingTsExtensions": true,
-    "emitDeclarationOnly": true,
-    "paths": {
-      "@heyclaude/database-types": ["../database-types/src/index.ts"]
-    }
+    "emitDeclarationOnly": true
   },
   "include": ["src/**/*"],
   "exclude": ["dist", "node_modules", "**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"],

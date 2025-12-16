@@ -6,9 +6,9 @@ import { ParseStrategy, safeParse } from '@heyclaude/web-runtime/data/utils';
 import { VALID_CATEGORIES } from '@heyclaude/web-runtime/data/config/category';
 import { z } from 'zod';
 
-import { computeHash, hasHashChanged, setHash } from '../toolkit/cache.js';
-import { logger } from '../toolkit/logger.js';
-import { resolvePackagePath, resolveRepoPath } from '../utils/paths.js';
+import { computeHash, hasHashChanged, setHash } from '../toolkit/cache.ts';
+import { logger } from '../toolkit/logger.ts';
+import { resolvePackagePath, resolveRepoPath } from '../utils/paths.ts';
 
 const TEMPLATE_PATH = resolvePackagePath('templates', 'service-worker.template.js');
 const ROOT_DIR = resolveRepoPath();

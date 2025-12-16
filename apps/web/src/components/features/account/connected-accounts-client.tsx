@@ -5,7 +5,8 @@
  * Database-first: displays data from get_user_identities() RPC
  */
 
-import { type Database } from '@heyclaude/database-types';
+import type { oauth_provider } from '@heyclaude/data-layer/prisma';
+import type { GetUserIdentitiesReturns } from '@heyclaude/database-types/postgres-types';
 import { unlinkOAuthProvider } from '@heyclaude/web-runtime/actions';
 import {
   AlertTriangle,
@@ -17,7 +18,6 @@ import {
 import {
   errorToasts,
   successToasts,
-  UI_CLASSES,
   UnifiedBadge,
   Button,
   Dialog,
@@ -29,17 +29,16 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import { useBoolean } from '@heyclaude/web-runtime/hooks';
 import { type ComponentType, useState, useTransition } from 'react';
+import { iconSize, spaceY, padding, gap, marginTop, marginBottom } from "@heyclaude/web-runtime/design-system";
 
-type Identity = NonNullable<
-  Database['public']['Functions']['get_user_identities']['Returns']['identities']
->[number];
+type Identity = NonNullable<GetUserIdentitiesReturns['identities']>[number];
 
 interface ConnectedAccountsClientProps {
   identities: Identity[];
 }
 
 const PROVIDER_CONFIG: Record<
-  Database['public']['Enums']['oauth_provider'],
+  oauth_provider,
   {
     icon: ComponentType<{ className?: string }>;
     label: string;
@@ -85,9 +84,7 @@ const PROVIDER_CONFIG: Record<
 export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientProps) {
   const [isPending, startTransition] = useTransition();
   const { value: unlinkDialogOpen, setTrue: setUnlinkDialogOpenTrue, setFalse: setUnlinkDialogOpenFalse } = useBoolean();
-  const [providerToUnlink, setProviderToUnlink] = useState<
-    Database['public']['Enums']['oauth_provider'] | null
-  >(null);
+  const [providerToUnlink, setProviderToUnlink] = useState<oauth_provider | null>(null);
 
   // Normalize provider values to lowercase for consistent comparison
   // Database returns provider as text, enum values are lowercase strings
@@ -99,17 +96,17 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
       .map((i) => i.provider.toLowerCase().trim())
   );
   const availableProviders = Object.entries(PROVIDER_CONFIG) as [
-    Database['public']['Enums']['oauth_provider'],
-    (typeof PROVIDER_CONFIG)[Database['public']['Enums']['oauth_provider']],
+    oauth_provider,
+    (typeof PROVIDER_CONFIG)[oauth_provider],
   ][];
 
-  const handleLinkProvider = (provider: Database['public']['Enums']['oauth_provider']) => {
+  const handleLinkProvider = (provider: oauth_provider) => {
     const config = PROVIDER_CONFIG[provider];
     if (!config) return;
     globalThis.location.href = config.linkUrl;
   };
 
-  const openUnlinkDialog = (provider: Database['public']['Enums']['oauth_provider']) => {
+  const openUnlinkDialog = (provider: oauth_provider) => {
     if (connectedProviders.size <= 1) {
       errorToasts.actionFailed(
         'unlink provider',
@@ -142,7 +139,7 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
   };
 
   return (
-    <div className="space-y-4">
+    <div className={`${spaceY.comfortable}`}>
       {availableProviders.map(([provider, config]) => {
         // Normalize provider for comparison (database returns text, enum is lowercase)
         // Use same normalization as connectedProviders (toLowerCase().trim())
@@ -159,24 +156,24 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
         return (
           <div
             key={provider}
-            className="hover:bg-accent/5 flex items-center justify-between rounded-lg border p-4 transition-colors"
+            className={`hover:bg-accent/5 flex items-center justify-between rounded-lg border ${padding.default} transition-colors`}
           >
-            <div className="flex items-center gap-4">
-              <div className="bg-accent/5 rounded-full border p-3">
-                <IconComponent className={UI_CLASSES.ICON_LG} />
+            <div className={`flex items-center ${gap.default}`}>
+              <div className={`bg-accent/5 rounded-full border ${padding.compact}`}>
+                <IconComponent className={iconSize.lg} />
               </div>
               <div>
-                <div className="flex items-center gap-2">
+                <div className={`flex items-center ${gap.tight}`}>
                   <h3 className="font-medium">{config.label}</h3>
                   {isConnected ? (
-                    <UnifiedBadge variant="base" style="default" className="gap-1">
-                      <CheckCircle className={UI_CLASSES.ICON_XS} />
+                    <UnifiedBadge variant="base" style="default" className={`${gap.micro}`}>
+                      <CheckCircle className={iconSize.xs} />
                       Connected
                     </UnifiedBadge>
                   ) : null}
                 </div>
                 {identity ? (
-                  <div className="text-muted-foreground mt-1 text-sm">
+                  <div className={`text-muted-foreground ${marginTop.tight} text-sm`}>
                     <p>{identity.email ?? 'No email'}</p>
                     <p className="text-xs">
                       {identity.last_sign_in_at
@@ -215,9 +212,9 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
         );
       })}
 
-      <div className="bg-muted/30 mt-6 rounded-lg border p-4">
-        <h4 className="mb-2 text-sm font-medium">How it works</h4>
-        <ul className="text-muted-foreground space-y-1 text-sm">
+      <div className={`bg-muted/30 ${marginTop.comfortable} rounded-lg border ${padding.default}`}>
+        <h4 className={`${marginBottom.compact} text-sm font-medium`}>How it works</h4>
+        <ul className={`text-muted-foreground ${spaceY.tight} text-sm`}>
           <li>• Link multiple OAuth providers to your account</li>
           <li>• Sign in with any connected provider to access the same account</li>
           <li>• Your data stays unified across all login methods</li>
@@ -229,7 +226,7 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
       <Dialog open={unlinkDialogOpen} onOpenChange={(open) => open ? setUnlinkDialogOpenTrue() : setUnlinkDialogOpenFalse()}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className={`flex items-center ${gap.tight}`}>
               <AlertTriangle className="text-destructive" />
               Unlink {providerToUnlink ? PROVIDER_CONFIG[providerToUnlink]?.label : null} Account?
             </DialogTitle>

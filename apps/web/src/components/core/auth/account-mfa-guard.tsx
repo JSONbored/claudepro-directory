@@ -13,6 +13,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
 import { MFAChallengeDialog } from '@/src/components/features/account/mfa/mfa-challenge-dialog';
+import { marginBottom, paddingX, paddingY } from "@heyclaude/web-runtime/design-system";
 
 interface AccountMFAGuardProps {
   children: React.ReactNode;
@@ -106,7 +107,7 @@ export function AccountMFAGuard({ children }: AccountMFAGuardProps) {
   if (checking) {
     // Show loading state while checking
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className={`flex min-h-screen items-center justify-center`}>
         <div className="text-muted-foreground text-center">
           <p>Checking authentication...</p>
         </div>
@@ -117,10 +118,10 @@ export function AccountMFAGuard({ children }: AccountMFAGuardProps) {
   // Show error state instead of silently failing open
   if (checkError) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className={`flex min-h-screen items-center justify-center`}>
         <div className="text-center">
-          <h2 className="text-destructive mb-2 text-xl font-semibold">Authentication Error</h2>
-          <p className="text-muted-foreground mb-4">
+          <h2 className={`text-destructive ${marginBottom.compact} text-xl font-semibold`}>Authentication Error</h2>
+          <p className={`text-muted-foreground ${marginBottom.default}`}>
             Unable to verify authentication requirements. Please refresh the page or contact support
             if the issue persists.
           </p>
@@ -133,7 +134,7 @@ export function AccountMFAGuard({ children }: AccountMFAGuardProps) {
                 // Error already handled in checkMFARequirement
               });
             }}
-            className="bg-primary text-primary-foreground rounded-md px-4 py-2"
+            className={`bg-primary text-primary-foreground rounded-md ${paddingX.default} ${paddingY.tight}`}
           >
             Retry
           </button>

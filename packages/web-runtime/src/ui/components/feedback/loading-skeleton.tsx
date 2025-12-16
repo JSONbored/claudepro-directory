@@ -28,7 +28,8 @@
  * ```
  */
 
-import { POSITION_PATTERNS, UI_CLASSES } from '../../constants.ts';
+import { POSITION_PATTERNS } from '../../constants.ts';
+import { stack, gap, grid, between, wrap, cluster } from '../../../design-system/index.ts';
 import { SPRING, STAGGER, DURATION } from '../../../design-system/index.ts';
 import { useReducedMotion } from '../../../hooks/motion/index.ts';
 import { cn } from '../../utils.ts';
@@ -133,7 +134,7 @@ export function Skeleton({
 function LoadingSkeleton() {
   return (
     <div className={'flex min-h-screen items-center justify-center'}>
-      <div className={UI_CLASSES.FLEX_COL_ITEMS_CENTER_GAP_4}>
+      <div className={`${stack.comfortable} items-center`}>
         <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         <p className="text-muted-foreground">Loading...</p>
       </div>
@@ -156,7 +157,7 @@ function ConfigCardSkeleton({ className, ...props }: React.HTMLAttributes<HTMLDi
       <Skeleton size="md" width="3/4" className="mb-3" />
       <Skeleton size="sm" width="3xl" className="mb-2" />
       <Skeleton size="sm" width="5/6" className="mb-4" />
-      <div className={UI_CLASSES.FLEX_GAP_2}>
+      <div className={`flex ${gap.compact}`}>
         <Skeleton size="sm" width="xs" rounded="full" />
         <Skeleton size="sm" width="xs" rounded="full" />
       </div>
@@ -178,7 +179,7 @@ function ConfigGridSkeleton({
   return (
     <div className={cn('container mx-auto px-4 py-8', className)} {...props}>
       <PageHeaderSkeleton />
-      <div className={UI_CLASSES.GRID_RESPONSIVE_3_TIGHT}>
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {[...Array(count)].map((_, i) => {
 
           return (
@@ -243,7 +244,7 @@ function ContentListSkeleton({
             </div>
             <Skeleton size="sm" width="xs" rounded="full" />
           </div>
-          <div className={UI_CLASSES.FLEX_GAP_2}>
+          <div className={`flex ${gap.compact}`}>
             <Skeleton size="xs" width="xs" rounded="full" />
             <Skeleton size="xs" width="xs" rounded="full" />
             <Skeleton size="xs" width="xs" rounded="full" />
@@ -278,7 +279,7 @@ function FilterBarSkeleton({
       className={cn('space-y-6 rounded-lg border border-border/50 bg-card/30 p-6', className)}
       {...props}
     >
-      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+      <div className={between.center}>
         <Skeleton size="md" width="lg" />
         <Skeleton size="sm" width="sm" />
       </div>
@@ -307,7 +308,7 @@ function FilterBarSkeleton({
           );
         })}
       </div>
-      <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
+      <div className={`${wrap} ${gap.compact}`}>
         {[...Array(8)].map((_, i) => {
 
           return (
@@ -421,12 +422,12 @@ function FeaturedSectionSkeleton({
   return (
     <div className={cn('space-y-8', className)} {...props}>
       {/* Section Header */}
-      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+      <div className={between.center}>
         <Skeleton size="lg" width="lg" />
         <Skeleton size="sm" width="sm" />
       </div>
       {/* Card Grid with Stagger */}
-      <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
+      <div className={grid.responsive3}>
         {[...Array(count)].map((_, i) => {
 
           return (
@@ -472,7 +473,7 @@ function HomepageStatsSkeleton({
         return (
           <motion.div
             key={`stat-skeleton-${i + 1}`}
-            className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
+            className={cluster.compact}
             initial={stagger && !prefersReducedMotion ? { opacity: 0, scale: 0.9 } : false}
             animate={stagger && !prefersReducedMotion ? { opacity: 1, scale: 1 } : {}}
             transition={

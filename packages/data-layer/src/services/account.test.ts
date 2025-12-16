@@ -1,44 +1,38 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { PrismockClient } from 'prismock';
 import { AccountService } from './account.ts';
-import type { Database } from '@heyclaude/database-types';
-import type { SupabaseClient, PostgrestError } from '@supabase/supabase-js';
 
+// Mock the prisma singleton with Prismock
+vi.mock('../prisma/client.ts', () => {
+  const { setupPrismockMock } = require('../test-utils/prisma-mock.ts');
+  return {
+    prisma: setupPrismockMock(),
+  };
+});
+
+// Mock the RPC error logging utility
 vi.mock('../utils/rpc-error-logging.ts', () => ({
   logRpcError: vi.fn(),
 }));
 
-// Helper to create proper PostgrestError objects
-function createPostgrestError(message: string, code: string): PostgrestError {
-  return {
-    message,
-    code,
-    details: '',
-    hint: null,
-    name: 'PostgrestError',
-  };
-}
-
-// Helper to create proper mock responses
-function createMockResponse<T>(data: T | null) {
-  return {
-    data,
-    error: null,
-    count: null,
-    status: 200,
-    statusText: 'OK' as const,
-  };
-}
+// Mock request cache
+vi.mock('../utils/request-cache.ts', () => ({
+  withSmartCache: vi.fn((_key, _method, fn) => fn()),
+}));
 
 describe('AccountService', () => {
-  let mockSupabase: SupabaseClient<Database>;
   let accountService: AccountService;
+  let prismock: PrismockClient;
 
-  beforeEach(() => {
-    mockSupabase = {
-      rpc: vi.fn(),
-    } as unknown as SupabaseClient<Database>;
-
-    accountService = new AccountService(mockSupabase);
+  beforeEach(async () => {
+    // Get the mocked prisma instance (Prismock)
+    const { prisma } = await import('../prisma/client.ts');
+    prismock = prisma as PrismockClient;
+    
+    // Reset Prismock data before each test
+    prismock.reset();
+    
+    accountService = new AccountService();
   });
 
   describe('getAccountDashboard', () => {
@@ -52,43 +46,34 @@ describe('AccountService', () => {
       };
 
       const args = { p_user_id: 'user123' };
-      vi.mocked(mockSupabase.rpc).mockResolvedValue(createMockResponse(mockData));
+      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
 
       const result = await accountService.getAccountDashboard(args);
 
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('get_account_dashboard', args);
+      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
+        expect.stringContaining('get_account_dashboard'),
+        'user123'
+      );
       expect(result).toEqual(mockData);
     });
 
     it('should throw error when user not found', async () => {
-      const mockError = createPostgrestError('User not found', 'PGRST116');
+      const mockError = new Error('User not found');
 
-      vi.mocked(mockSupabase.rpc).mockResolvedValue({
-        data: null,
-        error: mockError,
-        count: null,
-        status: 400,
-        statusText: 'Bad Request',
-      });
+      vi.mocked(prismock.$queryRawUnsafe).mockRejectedValue(mockError);
 
       await expect(
         accountService.getAccountDashboard({ p_user_id: 'nonexistent' })
-      ).rejects.toThrow();
+      ).rejects.toThrow('User not found');
     });
 
     it('should handle database errors', async () => {
-      const mockError = createPostgrestError('Database connection failed', 'PGRST301');
-      vi.mocked(mockSupabase.rpc).mockResolvedValue({
-        data: null,
-        error: mockError,
-        count: null,
-        status: 500,
-        statusText: 'Internal Server Error',
-      });
+      const mockError = new Error('Database connection failed');
+      vi.mocked(prismock.$queryRawUnsafe).mockRejectedValue(mockError);
 
       await expect(
         accountService.getAccountDashboard({ p_user_id: 'user123' })
-      ).rejects.toThrow();
+      ).rejects.toThrow('Database connection failed');
     });
   });
 
@@ -102,11 +87,14 @@ describe('AccountService', () => {
       };
 
       const args = { p_user_id: 'user123' };
-      vi.mocked(mockSupabase.rpc).mockResolvedValue(createMockResponse(mockData));
+      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
 
       const result = await accountService.getUserLibrary(args);
 
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('get_user_library', args);
+      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
+        expect.stringContaining('get_user_library'),
+        'user123'
+      );
       expect(result).toEqual(mockData);
       expect(result.collections).toHaveLength(2);
     });
@@ -114,7 +102,7 @@ describe('AccountService', () => {
     it('should return empty library for new user', async () => {
       const mockData = { collections: [] };
 
-      vi.mocked(mockSupabase.rpc).mockResolvedValue(createMockResponse(mockData));
+      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
 
       const result = await accountService.getUserLibrary({ p_user_id: 'newuser' });
       expect(result.collections).toEqual([]);
@@ -130,11 +118,14 @@ describe('AccountService', () => {
       };
 
       const args = { p_user_id: 'user123' };
-      vi.mocked(mockSupabase.rpc).mockResolvedValue(createMockResponse(mockData));
+      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
 
       const result = await accountService.getUserDashboard(args);
 
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('get_user_dashboard', args);
+      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
+        expect.stringContaining('get_user_dashboard'),
+        'user123'
+      );
       expect(result).toEqual(mockData);
     });
 
@@ -145,7 +136,7 @@ describe('AccountService', () => {
         jobs: {},
       };
 
-      vi.mocked(mockSupabase.rpc).mockResolvedValue(createMockResponse(mockData));
+      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
 
       const result = await accountService.getUserDashboard({ p_user_id: 'user123' });
       expect(result).toEqual(mockData);
@@ -155,16 +146,10 @@ describe('AccountService', () => {
   describe('error logging', () => {
     it('should log errors with proper context', async () => {
       const { logRpcError } = await import('../utils/rpc-error-logging.ts');
-      const mockError = createPostgrestError('Permission denied', 'PGRST301');
+      const mockError = new Error('Permission denied');
       const args = { p_user_id: 'user123' };
 
-      vi.mocked(mockSupabase.rpc).mockResolvedValue({
-        data: null,
-        error: mockError,
-        count: null,
-        status: 403,
-        statusText: 'Forbidden',
-      });
+      vi.mocked(prismock.$queryRawUnsafe).mockRejectedValue(mockError);
 
       await expect(accountService.getAccountDashboard(args)).rejects.toThrow();
 
@@ -178,10 +163,10 @@ describe('AccountService', () => {
 
   describe('edge cases', () => {
     it('should handle empty args object', async () => {
-      vi.mocked(mockSupabase.rpc).mockResolvedValue(createMockResponse(null));
+      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([] as any);
 
       const result = await accountService.getUserDashboard({ p_user_id: '' });
-      expect(result).toBeNull();
+      expect(result).toBeUndefined();
     });
 
     it('should handle special characters in user IDs', async () => {
@@ -190,7 +175,7 @@ describe('AccountService', () => {
         companies: {},
         jobs: {},
       };
-      vi.mocked(mockSupabase.rpc).mockResolvedValue(createMockResponse(mockData));
+      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
 
       const result = await accountService.getUserDashboard({ p_user_id: 'uuid-with-dashes' });
       expect(result).toEqual(mockData);

@@ -15,7 +15,7 @@
 
 import type { content_category } from '@heyclaude/data-layer/prisma';
 import type { GetContentTemplatesReturns } from '@heyclaude/database-types/postgres-types';
-import { DURATION } from '@heyclaude/web-runtime/design-system';
+import { gap, padding, marginBottom, marginX, paddingBottom, spaceY, paddingTop, paddingX, marginTop, cluster, size, between, muted, iconSize, wrap, transition } from '@heyclaude/web-runtime/design-system';
 import {
   ArrowRight,
   CheckCircle,
@@ -37,7 +37,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
-import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/design-tokens';
+// TOKENS removed - using direct Tailwind utilities
 import { SPRING, STAGGER } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { AnimatePresence, motion } from 'motion/react';
@@ -111,11 +111,11 @@ export function TemplateGallery({
       initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
       animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
       transition={SPRING.smooth}
-      className={cn('space-y-6', className)}
+      className={cn(spaceY.relaxed, className)}
     >
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className={between.center}>
+        <div className={`flex items-center ${gap.compact}`}>
           <motion.div
             initial={shouldReduceMotion ? { opacity: 0 } : { scale: 0, rotate: -180 }}
             animate={shouldReduceMotion ? { opacity: 1 } : { scale: 1, rotate: 0 }}
@@ -126,18 +126,18 @@ export function TemplateGallery({
               'border border-amber-500/30'
             )}
           >
-            <Sparkles className={cn('h-5 w-5', TOKENS.colors.accent)} />
+            <Sparkles className={cn(iconSize.md, 'text-color-accent-primary')} />
           </motion.div>
           <div>
             <h3 className="text-lg font-semibold">Popular Templates</h3>
-            <p className="text-muted-foreground text-sm">
+            <p className={cn(muted.default, size.sm)}>
               Start with proven examples from the community
             </p>
           </div>
         </div>
 
         {/* Template count badge */}
-        <Badge variant="secondary" className="gap-1.5">
+        <Badge variant="secondary" className={gap['1.5']}>
           <TrendingUp className="h-3.5 w-3.5" />
           {filteredTemplates.length} available
         </Badge>
@@ -145,7 +145,7 @@ export function TemplateGallery({
 
       {/* Category tabs (if multiple categories exist) */}
       {categories.length > 1 && (
-        <div className="flex flex-wrap gap-2">
+        <div className={`flex flex-wrap ${gap.tight}`}>
           <Button
             variant={selectedCategory === null ? 'default' : 'outline'}
             size="sm"
@@ -172,7 +172,7 @@ export function TemplateGallery({
       <AnimatePresence mode="popLayout">
         <motion.div
           layout
-          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+          className={`grid ${gap.default} sm:grid-cols-2 lg:grid-cols-3`}
           variants={{
             hidden: { opacity: 0 },
             visible: {
@@ -189,7 +189,8 @@ export function TemplateGallery({
           {filteredTemplates.map((template) => (
             <TemplateCard
               key={template.id}
-              template={template as TemplateWithStats}
+              // Type narrowing: template is MergedTemplateItem, TemplateWithStats extends it
+              template={template satisfies TemplateWithStats}
               onApply={() => onApplyTemplate(template)}
             />
           ))}
@@ -201,10 +202,10 @@ export function TemplateGallery({
         <motion.div
           initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
           animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }}
-          className="rounded-xl border border-dashed p-12 text-center"
+          className={`rounded-xl border border-dashed ${padding.section} text-center`}
         >
-          <Sparkles className="text-muted-foreground/50 mx-auto mb-3 h-12 w-12" />
-          <p className="text-muted-foreground">No templates found for this category.</p>
+          <Sparkles className={cn('text-muted-foreground/50', marginX.auto, marginBottom.compact, iconSize['2xl'])} />
+          <p className={muted.default}>No templates found for this category.</p>
         </motion.div>
       )}
     </motion.div>
@@ -227,9 +228,10 @@ function TemplateCard({ template, onApply }: TemplateCardProps) {
   const stats = useMemo(() => {
     try {
       const templateData = template.templateData;
+      // Type narrowing: templateData is object, validate it's Record<string, unknown>
       const data =
         typeof templateData === 'object' && templateData !== null && !Array.isArray(templateData)
-          ? (templateData as Record<string, unknown>)
+          ? (templateData satisfies Record<string, unknown>)
           : {};
       const usageCount = typeof data['usage_count'] === 'number' ? data['usage_count'] : 0;
       return {
@@ -288,16 +290,16 @@ function TemplateCard({ template, onApply }: TemplateCardProps) {
     >
       <Card
         className={cn(
-          'group relative overflow-hidden transition-all',
+          'group relative overflow-hidden',
+          transition.default,
           'hover:shadow-lg hover:shadow-amber-500/10',
           'hover:border-amber-500/50',
           'cursor-pointer'
         )}
-        style={{ transitionDuration: `${DURATION.default}s` }}
         onClick={onApply}
       >
         {/* Badges overlay */}
-        <div className="absolute top-3 right-3 z-10 flex flex-col gap-1.5">
+        <div className={cn('absolute top-3 right-3 z-10 flex flex-col', gap['1.5'])}>
           {stats.featured ? (
             <Badge
               variant="secondary"
@@ -318,7 +320,7 @@ function TemplateCard({ template, onApply }: TemplateCardProps) {
                 'text-purple-300 shadow-sm'
               )}
             >
-              <Sparkles className="h-3 w-3" />
+              <Sparkles className={iconSize.xs} />
               Popular
             </Badge>
           ) : null}
@@ -330,14 +332,14 @@ function TemplateCard({ template, onApply }: TemplateCardProps) {
                 'text-green-300 shadow-sm'
               )}
             >
-              <TrendingUp className="h-3 w-3" />
+              <TrendingUp className={iconSize.xs} />
               Trending
             </Badge>
           ) : null}
         </div>
 
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-start justify-between gap-2 text-base">
+        <CardHeader className={`${paddingBottom.compact}`}>
+          <CardTitle className={`flex items-start justify-between ${gap.tight} text-base`}>
             <span className="line-clamp-2">{template.name}</span>
             <motion.div
               animate={
@@ -350,20 +352,20 @@ function TemplateCard({ template, onApply }: TemplateCardProps) {
               }
               transition={SPRING.snappy}
             >
-              <ArrowRight className="h-4 w-4 shrink-0 text-amber-500" />
+              <ArrowRight className={cn(iconSize.sm, 'shrink-0 text-amber-500')} />
             </motion.div>
           </CardTitle>
         </CardHeader>
 
-        <CardContent className="space-y-4">
+        <CardContent className={`${spaceY.comfortable}`}>
           {/* Description */}
           {template.description ? (
-            <p className="text-muted-foreground line-clamp-2 text-sm">{template.description}</p>
+            <p className={cn(muted.default, 'line-clamp-2', size.sm)}>{template.description}</p>
           ) : null}
 
           {/* Tags */}
           {tags.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
+            <div className={cn(wrap, gap['1.5'])}>
               {tags.slice(0, 3).map((tag: string) => (
                 <Badge key={tag} variant="outline" className="h-6 text-xs">
                   {tag}
@@ -378,10 +380,10 @@ function TemplateCard({ template, onApply }: TemplateCardProps) {
           )}
 
           {/* Stats bar */}
-          <div className="flex items-center justify-between border-t pt-3">
+          <div className={`flex items-center justify-between border-t ${paddingTop.compact}`}>
             {/* Usage count and rating */}
-            <div className="flex items-center gap-3">
-              <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
+            <div className={`flex items-center ${gap.compact}`}>
+              <div className={cn(muted.default, cluster.tight, gap['1.5'], size.xs)}>
                 <Users className="h-3.5 w-3.5" />
                 <span>
                   {stats.usageCount > 0
@@ -392,8 +394,8 @@ function TemplateCard({ template, onApply }: TemplateCardProps) {
                 </span>
               </div>
               {stats.averageRating && stats.averageRating > 0 ? (
-                <div className="flex items-center gap-1 text-xs text-amber-400">
-                  <Star className="h-3 w-3 fill-current" />
+                <div className={`flex items-center ${gap.micro} text-xs text-amber-400`}>
+                  <Star className={cn(iconSize.xs, 'fill-current')} />
                   <span>{stats.averageRating.toFixed(1)}</span>
                 </div>
               ) : null}
@@ -404,7 +406,7 @@ function TemplateCard({ template, onApply }: TemplateCardProps) {
               size="sm"
               variant="ghost"
               className={cn(
-                'h-7 gap-1.5 px-2 text-xs',
+                'h-7', gap['1.5'], paddingX.compact, size.xs,
                 'text-amber-500 hover:bg-amber-500/10 hover:text-amber-400'
               )}
               onClick={(e) => {
@@ -504,7 +506,7 @@ export function TemplateQuickSelect({
       initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 10 }}
       animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
       transition={SPRING.smooth}
-      className={cn('space-y-3', className)}
+      className={cn(spaceY.default, className)}
     >
       {/* Onboarding Tooltip */}
       {showOnboarding ? (
@@ -527,8 +529,8 @@ export function TemplateQuickSelect({
           transition={SPRING.bouncy}
         >
           <Alert className="border-amber-500/50 bg-amber-500/10">
-            <Info className="h-4 w-4 text-amber-500" />
-            <AlertDescription className="flex items-start justify-between gap-3">
+            <Info className={cn(iconSize.sm, 'text-amber-500')} />
+            <AlertDescription className={`flex items-start justify-between ${gap.compact}`}>
               <span className="text-sm">
                 <strong className="font-semibold">💡 Pro tip:</strong> Save time by starting with a
                 proven template. Click any template below to auto-fill your form with best
@@ -538,7 +540,7 @@ export function TemplateQuickSelect({
                 variant="ghost"
                 size="sm"
                 onClick={handleDismissOnboarding}
-                className="h-6 px-2 text-xs hover:bg-amber-500/20"
+                className={`h-6 ${paddingX.tight} text-xs hover:bg-amber-500/20`}
               >
                 Got it
               </Button>
@@ -546,9 +548,9 @@ export function TemplateQuickSelect({
           </Alert>
         </motion.div>
       ) : null}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Sparkles className={cn('h-4 w-4', TOKENS.colors.accent)} />
+      <div className={between.center}>
+        <div className={`flex items-center ${gap.tight}`}>
+          <Sparkles className={cn(iconSize.sm, 'text-color-accent-primary')} />
           <span className="text-sm font-medium">Quick Start Templates</span>
         </div>
         {hasMore ? (
@@ -563,7 +565,7 @@ export function TemplateQuickSelect({
         ) : null}
       </div>
 
-      <div className="space-y-2">
+      <div className={`${spaceY.compact}`}>
         <AnimatePresence mode="popLayout">
           {displayTemplates.map((template, index) => (
             <motion.button
@@ -579,30 +581,30 @@ export function TemplateQuickSelect({
               onClick={() => onApplyTemplate(template)}
               className={cn(
                 'flex w-full items-start gap-3 rounded-lg border p-3',
-                'text-left transition-all',
+                'text-left',
+                transition.quick,
                 'hover:bg-accent/50 hover:border-amber-500/50',
                 'group'
               )}
-              style={{ transitionDuration: `${DURATION.quick}s` }}
             >
               <CheckCircle
                 className={cn(
-                  'mt-0.5 h-4 w-4 shrink-0',
+                  cn(marginTop.micro, iconSize.sm, 'shrink-0'),
                   'text-muted-foreground transition-colors',
                   'group-hover:text-amber-500'
                 )}
               />
-              <div className="min-w-0 flex-1 space-y-1">
+              <div className={`min-w-0 flex-1 ${spaceY.tight}`}>
                 <div className="line-clamp-1 text-sm font-medium">{template.name}</div>
                 {template.description ? (
-                  <div className="text-muted-foreground line-clamp-1 text-xs">
+                  <div className={cn(muted.default, 'line-clamp-1', size.xs)}>
                     {template.description}
                   </div>
                 ) : null}
               </div>
               <ArrowRight
                 className={cn(
-                  'mt-0.5 h-4 w-4 shrink-0 opacity-0',
+                  `${marginTop.micro} h-4 w-4 shrink-0 opacity-0`,
                   'text-amber-500 transition-all',
                   'group-hover:translate-x-1 group-hover:opacity-100'
                 )}
@@ -620,16 +622,16 @@ export function TemplateQuickSelect({
  */
 export function TemplateQuickSelectSkeleton({ className }: { className?: string }) {
   return (
-    <div className={cn('space-y-3', className)}>
-      <div className="flex items-center gap-2">
+    <div className={cn(spaceY.default, className)}>
+      <div className={`flex items-center ${gap.tight}`}>
         <div className="bg-muted h-4 w-4 animate-pulse rounded" />
         <div className="bg-muted h-4 w-32 animate-pulse rounded" />
       </div>
-      <div className="space-y-2">
+      <div className={`${spaceY.compact}`}>
         {[1, 2, 3].map((i) => (
-          <div key={i} className="flex items-start gap-3 rounded-lg border p-3">
-            <div className="bg-muted mt-0.5 h-4 w-4 animate-pulse rounded-full" />
-            <div className="flex-1 space-y-2">
+          <div key={i} className={`flex items-start ${gap.compact} rounded-lg border ${padding.compact}`}>
+            <div className={cn('bg-muted animate-pulse rounded-full', marginTop.micro, iconSize.sm)} />
+            <div className={`flex-1 ${spaceY.compact}`}>
               <div className="bg-muted h-4 w-3/4 animate-pulse rounded" />
               <div className="bg-muted h-3 w-full animate-pulse rounded" />
             </div>

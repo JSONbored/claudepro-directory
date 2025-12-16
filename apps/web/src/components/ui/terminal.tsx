@@ -35,6 +35,7 @@ import { cn } from '@heyclaude/web-runtime/ui';
 import { useBoolean, useTimeout, useInterval } from '@heyclaude/web-runtime/hooks';
 import { motion, type MotionProps } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
+import { padding, stack, gap, radius } from "@heyclaude/web-runtime/design-system";
 
 interface AnimatedSpanProps extends MotionProps {
   children: React.ReactNode;
@@ -141,19 +142,19 @@ export const Terminal = ({ children, className, wrapInPreCode = true }: Terminal
         className,
       )}
     >
-      <div className="flex flex-col gap-y-2 border-b border-border p-4">
-        <div className="flex flex-row gap-x-2">
-          <div className="h-2 w-2 rounded-full bg-red-500"></div>
-          <div className="h-2 w-2 rounded-full bg-yellow-500"></div>
-          <div className="h-2 w-2 rounded-full bg-green-500"></div>
+      <div className={cn(stack.compact, "border-b border-border", padding.default)}>
+        <div className={cn("flex flex-row", gap.compact)}>
+          <div className={`h-2 w-2 ${radius['full']} bg-red-500`}></div>
+          <div className={`h-2 w-2 ${radius['full']} bg-yellow-500`}></div>
+          <div className={`h-2 w-2 ${radius['full']} bg-green-500`}></div>
         </div>
       </div>
       {wrapInPreCode ? (
-        <pre className="p-4">
-          <code className="grid gap-y-1 overflow-auto">{children}</code>
+        <pre className={padding.default}>
+          <code className={cn("grid overflow-auto", gap.tight)}>{children}</code>
         </pre>
       ) : (
-        <div className="p-4">{children}</div>
+        <div className={padding.default}>{children}</div>
       )}
     </div>
   );

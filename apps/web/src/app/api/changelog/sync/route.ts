@@ -66,6 +66,7 @@ import { ChangelogService } from '@heyclaude/data-layer';
 import type { SyncChangelogEntryArgs } from '@heyclaude/database-types/postgres-types';
 import { requireEnvVar } from '@heyclaude/shared-runtime';
 import { normalizeError } from '@heyclaude/web-runtime/logging/server';
+import type { RouteHandlerContext } from '@heyclaude/web-runtime/server';
 import {
   createApiOptionsHandler,
   createApiRoute,
@@ -100,10 +101,10 @@ const changelogSyncRequestSchema = z.object({
 function validateToken(
   authHeader: null | string,
   expectedToken: string,
-  logger: ReturnType<typeof import('@heyclaude/web-runtime/logging/server').logger.child>
+  reqLogger: RouteHandlerContext['logger']
 ): boolean {
   if (!expectedToken) {
-    logger.warn({ route: '/api/changelog/sync' }, 'CHANGELOG_SYNC_TOKEN not configured');
+    reqLogger.warn({ route: '/api/changelog/sync' }, 'CHANGELOG_SYNC_TOKEN not configured');
     return false;
   }
 

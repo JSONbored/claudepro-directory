@@ -13,6 +13,7 @@ import { cn, Tabs, TabsContent, TabsList, TabsTrigger, LayoutGroup } from '@heyc
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { TabSectionRenderer } from './tab-section-renderer';
+import { paddingX, marginX, padding, paddingY, marginTop, spaceY } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Render a tabbed detail layout that keeps all tab contents in the DOM for SEO, synchronizes the active tab with the URL hash, supports mobile swipe navigation, and records tab-switch analytics.
@@ -142,9 +143,9 @@ export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDe
     <LayoutGroup>
       <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
         {/* Sticky tab bar */}
-        <div className="bg-background/95 supports-backdrop-filter:bg-background/60 sticky top-16 z-10 -mx-4 border-b px-4 backdrop-blur">
-        <div className="container mx-auto">
-          <TabsList className="h-auto w-full justify-start rounded-none border-0 bg-transparent p-0">
+        <div className={`bg-background/95 supports-backdrop-filter:bg-background/60 sticky top-16 z-10 -${marginX.default} border-b ${paddingX.default} backdrop-blur`}>
+        <div className={`container ${marginX.auto}`}>
+          <TabsList className={`h-auto w-full justify-start rounded-none border-0 bg-transparent ${padding.default}`}>
             {tabs.map((tab) => {
               return (
                 <TabsTrigger
@@ -176,7 +177,7 @@ export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDe
 
       {/* Tab content - all rendered in DOM for SEO, with swipe gesture support */}
       <div
-        className="container mx-auto px-4 py-8"
+        className={`container ${marginX.auto} ${paddingX.default} ${paddingY.relaxed}`}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -185,7 +186,7 @@ export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDe
           <TabsContent
             key={tab.id}
             value={tab.id}
-            className="mt-0 space-y-8"
+            className={`${marginTop.default} ${spaceY.loose}`}
             // Keep in DOM but hide when not active (SEO)
             forceMount
             hidden={activeTab !== tab.id}

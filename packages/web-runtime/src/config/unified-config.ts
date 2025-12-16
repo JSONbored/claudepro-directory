@@ -18,8 +18,6 @@
  * @module web-runtime/config/unified-config
  */
 
-import { Constants } from '@heyclaude/database-types';
-
 // =============================================================================
 // APP METADATA
 // =============================================================================
@@ -437,27 +435,29 @@ export const SEARCH_CONFIG = {
 // =============================================================================
 
 /** Homepage configuration */
+import { ContentCategory } from '@heyclaude/data-layer/prisma';
+
 export const HOMEPAGE_CONFIG = {
   featured_categories: [
-    Constants.public.Enums.content_category[0], // 'agents'
-    Constants.public.Enums.content_category[1], // 'mcp'
-    Constants.public.Enums.content_category[3], // 'commands'
-    Constants.public.Enums.content_category[2], // 'rules'
-    Constants.public.Enums.content_category[6], // 'skills'
-    Constants.public.Enums.content_category[8], // 'collections'
-    Constants.public.Enums.content_category[4], // 'hooks'
-    Constants.public.Enums.content_category[5], // 'statuslines'
+    ContentCategory.agents,
+    ContentCategory.mcp,
+    ContentCategory.commands,
+    ContentCategory.rules,
+    ContentCategory.skills,
+    ContentCategory.collections,
+    ContentCategory.hooks,
+    ContentCategory.statuslines,
   ],
   tab_categories: [
     'all',
-    Constants.public.Enums.content_category[0], // 'agents'
-    Constants.public.Enums.content_category[1], // 'mcp'
-    Constants.public.Enums.content_category[3], // 'commands'
-    Constants.public.Enums.content_category[2], // 'rules'
-    Constants.public.Enums.content_category[4], // 'hooks'
-    Constants.public.Enums.content_category[5], // 'statuslines'
-    Constants.public.Enums.content_category[8], // 'collections'
-    Constants.public.Enums.content_category[7], // 'guides'
+    ContentCategory.agents,
+    ContentCategory.mcp,
+    ContentCategory.commands,
+    ContentCategory.rules,
+    ContentCategory.hooks,
+    ContentCategory.statuslines,
+    ContentCategory.collections,
+    ContentCategory.guides,
     'community',
   ],
 } as const;

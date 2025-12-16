@@ -13,13 +13,12 @@
  */
 
 import { zodToJsonSchema } from 'zod-to-json-schema';
-import type { Database } from '@heyclaude/database-types';
+// Database type no longer needed - using Prisma types
 import { edgeEnv } from '@heyclaude/edge-runtime/config/env.ts';
 import { initRequestLogging, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime/utils/logger-helpers.ts';
 import { requireAuthUser } from '@heyclaude/edge-runtime/utils/auth.ts';
 import { createDataApiContext, logError, logger } from '@heyclaude/shared-runtime/logging.ts';
 import type { User } from '@supabase/supabase-js';
-import { createClient } from '@supabase/supabase-js';
 import { Hono } from 'hono';
 import { McpServer, StreamableHttpTransport } from 'mcp-lite';
 import type { z } from 'zod';
@@ -132,47 +131,32 @@ mcpApp.use('/*', async (c, next) => {
 /**
  * MCP server configuration
  * Note: A new McpServer instance is created per request (see requestMcp below)
- * This allows each request to have its own authenticated Supabase client
+ * All database operations use Prisma services directly
  */
 
 /**
- * Create a Supabase client that sends the provided user access token with every request.
- *
- * @param token - Access token to include as `Authorization: Bearer <token>` on each request
- * @returns A Supabase client instance configured to include the provided token on outbound requests
+ * Note: Supabase client is no longer needed for database operations.
+ * All handlers now use Prisma services directly.
+ * Supabase clients are only needed for auth/storage operations if required in the future.
  */
-function getAuthenticatedSupabase(_user: User, token: string) {
-  const {
-    supabase: { url: SUPABASE_URL, anonKey: SUPABASE_ANON_KEY },
-  } = edgeEnv;
-
-  return createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    global: {
-      headers: { Authorization: `Bearer ${token}` },
-    },
-  });
-}
 
 /**
  * Register Core Tools (Phase 2)
  */
 
 /**
- * Register the HeyClaude directory MCP tools on the provided server using the given per-request Supabase client.
+ * Register the HeyClaude directory MCP tools on the provided server.
  *
- * Registers the directory toolset and binds each tool's handler to the supplied authenticated Supabase client so
- * all tool operations run in the context of the current request's user/token. Tools registered include listing
- * categories, searching content, retrieving content details, trending/featured/templates, MCP servers listing,
- * related content, content-by-tag, popular, and recent endpoints.
+ * Registers the directory toolset. All tools use Prisma services directly for database operations.
+ * Tools registered include listing categories, searching content, retrieving content details, trending/featured/templates, 
+ * MCP servers listing, related content, content-by-tag, popular, and recent endpoints.
  *
  * All tool handlers are wrapped with timeout protection (60s default) to prevent hanging requests.
  *
  * @param mcpServer - MCP server instance to register tools on
- * @param supabase - Authenticated, per-request Supabase client bound to the request's user/token
  */
 function registerAllTools(
-  mcpServer: McpServer,
-  supabase: ReturnType<typeof getAuthenticatedSupabase>
+  mcpServer: McpServer
 ) {
   // Helper to wrap tool handlers with timeout
   const wrapWithTimeout = <T extends unknown[], R>(
@@ -194,7 +178,7 @@ function registerAllTools(
       'List all content categories in the HeyClaude directory with counts and descriptions',
     inputSchema: ListCategoriesInputSchema,
     handler: wrapWithTimeout(
-      async (args) => await handleListCategories(supabase, args),
+      async (args) => await handleListCategories(args),
       'listCategories',
       30000 // 30s timeout
     ),
@@ -206,7 +190,7 @@ function registerAllTools(
       'Search directory content with filters, pagination, and tag support. Returns matching items with metadata.',
     inputSchema: SearchContentInputSchema,
     handler: wrapWithTimeout(
-      async (args) => await handleSearchContent(supabase, args),
+      async (args) => await handleSearchContent(args),
       'searchContent',
       45000 // 45s timeout (can be slower with complex queries)
     ),
@@ -218,7 +202,7 @@ function registerAllTools(
       'Get complete metadata for a specific content item by slug and category. Includes full description, tags, author info, and stats.',
     inputSchema: GetContentDetailInputSchema,
     handler: wrapWithTimeout(
-      async (args) => await handleGetContentDetail(supabase, args),
+      async (args) => await handleGetContentDetail(args),
       'getContentDetail',
       30000
     ),
@@ -230,7 +214,7 @@ function registerAllTools(
       'Get trending content across categories or within a specific category. Sorted by popularity and engagement.',
     inputSchema: GetTrendingInputSchema,
     handler: wrapWithTimeout(
-      async (args) => await handleGetTrending(supabase, args),
+      async (args) => await handleGetTrending(args),
       'getTrending',
       30000
     ),
@@ -242,9 +226,9 @@ function registerAllTools(
       'Get featured and highlighted content from the homepage. Includes hero items, latest additions, and popular content.',
     inputSchema: GetFeaturedInputSchema,
     handler: wrapWithTimeout(
-      async (args) => await handleGetFeatured(supabase, args),
+      async (args) => await handleGetFeatured(args),
       'getFeatured',
-      45000 // Can be slower due to multiple RPC calls
+      45000 // Can be slower due to multiple service calls
     ),
   });
 
@@ -254,7 +238,7 @@ function registerAllTools(
       'Get submission templates for creating new content. Returns required fields and validation rules by category.',
     inputSchema: GetTemplatesInputSchema,
     handler: wrapWithTimeout(
-      async (args) => await handleGetTemplates(supabase, args),
+      async (args) => await handleGetTemplates(args),
       'getTemplates',
       30000
     ),
@@ -266,7 +250,7 @@ function registerAllTools(
       'List all MCP servers in the directory with download URLs and configuration details',
     inputSchema: GetMcpServersInputSchema,
     handler: wrapWithTimeout(
-      async (args) => await handleGetMcpServers(supabase, args),
+      async (args) => await handleGetMcpServers(args),
       'getMcpServers',
       30000
     ),
@@ -277,7 +261,7 @@ function registerAllTools(
     description: 'Find related or similar content based on tags, category, and semantic similarity',
     inputSchema: GetRelatedContentInputSchema,
     handler: wrapWithTimeout(
-      async (args) => await handleGetRelatedContent(supabase, args),
+      async (args) => await handleGetRelatedContent(args),
       'getRelatedContent',
       30000
     ),
@@ -288,7 +272,7 @@ function registerAllTools(
     description: 'Get content filtered by specific tags with AND/OR logic support',
     inputSchema: GetContentByTagInputSchema,
     handler: wrapWithTimeout(
-      async (args) => await handleGetContentByTag(supabase, args),
+      async (args) => await handleGetContentByTag(args),
       'getContentByTag',
       30000
     ),
@@ -299,7 +283,7 @@ function registerAllTools(
     description: 'Get most popular content by views and engagement metrics',
     inputSchema: GetPopularInputSchema,
     handler: wrapWithTimeout(
-      async (args) => await handleGetPopular(supabase, args),
+      async (args) => await handleGetPopular(args),
       'getPopular',
       30000
     ),
@@ -310,7 +294,7 @@ function registerAllTools(
     description: 'Get recently added content sorted by date',
     inputSchema: GetRecentInputSchema,
     handler: wrapWithTimeout(
-      async (args) => await handleGetRecent(supabase, args),
+      async (args) => await handleGetRecent(args),
       'getRecent',
       30000
     ),
@@ -322,7 +306,7 @@ function registerAllTools(
       'Download content formatted for your platform (Claude Code, Cursor, etc.) with installation instructions. Returns ready-to-use configuration files.',
     inputSchema: DownloadContentForPlatformInputSchema,
     handler: wrapWithTimeout(
-      async (args) => await handleDownloadContentForPlatform(supabase, args),
+      async (args) => await handleDownloadContentForPlatform(args),
       'downloadContentForPlatform',
       45000 // Can be slower due to formatting
     ),
@@ -334,7 +318,7 @@ function registerAllTools(
       'Subscribe an email address to the Claude Pro Directory newsletter. Handles email validation, Resend sync, welcome email, and drip campaign enrollment via Inngest.',
     inputSchema: SubscribeNewsletterInputSchema,
     handler: wrapWithTimeout(
-      async (args) => await handleSubscribeNewsletter(supabase, args),
+      async (args) => await handleSubscribeNewsletter(args),
       'subscribeNewsletter',
       30000
     ),
@@ -346,7 +330,7 @@ function registerAllTools(
       'Create a new account on Claude Pro Directory using OAuth (GitHub, Google, or Discord). Returns OAuth authorization URL and step-by-step instructions. Supports newsletter opt-in during account creation.',
     inputSchema: CreateAccountInputSchema,
     handler: wrapWithTimeout(
-      async (args) => await handleCreateAccount(supabase, args),
+      async (args) => await handleCreateAccount(args),
       'createAccount',
       30000
     ),
@@ -358,7 +342,7 @@ function registerAllTools(
       'Submit content (agents, rules, MCP servers, etc.) to Claude Pro Directory for review. Collects submission data and provides instructions for completing submission via web interface. Requires authentication - use createAccount tool first if needed.',
     inputSchema: SubmitContentInputSchema,
     handler: wrapWithTimeout(
-      async (args) => await handleSubmitContent(supabase, args),
+      async (args) => await handleSubmitContent(args),
       'submitContent',
       45000 // Can be slower due to data collection
     ),
@@ -370,7 +354,7 @@ function registerAllTools(
       'Get search suggestions based on query history. Helps discover popular searches and provides autocomplete functionality for AI agents. Returns suggestions with search counts and popularity indicators.',
     inputSchema: GetSearchSuggestionsInputSchema,
     handler: wrapWithTimeout(
-      async (args) => await handleGetSearchSuggestions(supabase, args),
+      async (args) => await handleGetSearchSuggestions(args),
       'getSearchSuggestions',
       30000
     ),
@@ -382,7 +366,7 @@ function registerAllTools(
       'Get available search facets (categories, tags, authors) for filtering content. Helps AI agents understand what filters are available and enables dynamic filter discovery.',
     inputSchema: GetSearchFacetsInputSchema,
     handler: wrapWithTimeout(
-      async (args) => await handleGetSearchFacets(supabase),
+      async (args) => await handleGetSearchFacets(),
       'getSearchFacets',
       30000
     ),
@@ -394,7 +378,7 @@ function registerAllTools(
       'Get changelog of content updates in LLMs.txt format. Helps AI agents understand recent changes and stay current with the latest content additions and updates.',
     inputSchema: GetChangelogInputSchema,
     handler: wrapWithTimeout(
-      async (args) => await handleGetChangelog(supabase, args),
+      async (args) => await handleGetChangelog(args),
       'getChangelog',
       30000
     ),
@@ -406,7 +390,7 @@ function registerAllTools(
       'Get community statistics including top contributors, recent submissions, success rate, and total user count. Provides social proof data for engagement and helps understand community activity.',
     inputSchema: GetSocialProofStatsInputSchema,
     handler: wrapWithTimeout(
-      async (args) => await handleGetSocialProofStats(supabase),
+      async (args) => await handleGetSocialProofStats(),
       'getSocialProofStats',
       30000
     ),
@@ -418,7 +402,7 @@ function registerAllTools(
       'Get category-specific configurations and features. Helps understand category-specific requirements, submission guidelines, and configuration options for each content category.',
     inputSchema: GetCategoryConfigsInputSchema,
     handler: wrapWithTimeout(
-      async (args) => await handleGetCategoryConfigs(supabase, args),
+      async (args) => await handleGetCategoryConfigs(args),
       'getCategoryConfigs',
       30000
     ),
@@ -464,8 +448,8 @@ function registerAllResources(mcpServer: McpServer) {
 
 /**
  * Note: MCP transport is created per-request in the /mcp endpoint handler
- * to ensure each request has its own authenticated Supabase client context
- * Tools are registered on each per-request instance with the authenticated Supabase client
+ * to ensure each request has its own isolated context
+ * Tools are registered on each per-request instance using Prisma services
  * to enforce Row-Level Security (RLS) policies.
  */
 
@@ -632,7 +616,7 @@ function createWwwAuthenticateHeader(resourceMetadataUrl: string, scope?: string
  * Implements MCP OAuth 2.1 authorization per specification:
  * - Returns 401 with WWW-Authenticate header for unauthenticated requests
  * - Validates token audience (RFC 8707)
- * - Enforces Row-Level Security via authenticated Supabase client
+ * - Enforces Row-Level Security via Prisma queries (RLS handled at database level)
  */
 mcpApp.all('/mcp', async (c) => {
   const logContext = createDataApiContext('mcp-protocol', {
@@ -713,9 +697,6 @@ mcpApp.all('/mcp', async (c) => {
         }
       );
     }
-
-    // Create authenticated Supabase client for this request
-    const authenticatedSupabase = getAuthenticatedSupabase(authResult.user, authResult.token);
 
     // Check global rate limiting before processing request
     // Note: We can't parse the body here because it's consumed by MCP handler

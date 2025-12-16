@@ -3,7 +3,8 @@
  * Server component uses getTrendingPageData (cached RPC). Data API exposes the same payload for external consumers.
  */
 
-import { Constants, type Database } from '@heyclaude/database-types';
+import type { content_category } from '@heyclaude/data-layer/prisma';
+import { ContentCategory } from '@heyclaude/data-layer/prisma';
 import type {
   GetPopularContentReturns,
   GetRecentContentReturns,
@@ -23,14 +24,15 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-  UI_CLASSES,
   UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
+import { size, muted, marginBottom, leading, paddingX, paddingY, marginX, marginRight } from '@heyclaude/web-runtime/design-system';
 import { type Metadata } from 'next';
 import { Suspense } from 'react';
 
 import { LazySection } from '@/src/components/core/infra/scroll-animated-section';
 import { TrendingContent } from '@/src/components/core/shared/trending-content';
+import { wrap, gap } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Trending page uses connection() deferral with Suspense streaming to run non-deterministic operations at request time.
@@ -46,7 +48,6 @@ import { TrendingContent } from '@/src/components/core/shared/trending-content';
  * @returns Metadata for the "/trending" route.
  * @see generatePageMetadata
  */
-
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/trending');
 }
@@ -62,8 +63,6 @@ export async function generateMetadata(): Promise<Metadata> {
  *
  * @param props.searchParams - Search parameters from the request; supports `category` (string or single-element array)
  *   and `limit` (number, defaults to 12, clamped to 100).
- * @param root0
- * @param root0.searchParams
  * @returns The React element for the Trending page containing header, content sections, and newsletter CTA.
  *
  * @see getTrendingPageData
@@ -87,7 +86,7 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
 
   return (
     <Suspense
-      fallback={<div className="container mx-auto px-4 py-8">Loading trending content...</div>}
+      fallback={<div className={`container ${marginX.auto} ${paddingX.default} ${paddingY.relaxed}`}>Loading trending content...</div>}
     >
       <TrendingPageContent
         reqLogger={reqLogger}
@@ -104,11 +103,8 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
  * This component resolves and validates `searchParams` on the server, fetches data via the
  * trending data API, and renders `TrendingContent` with mapped display items.
  *
- * @param root0
- * @param root0.reqLogger
- * @param props.searchParams - Promise that resolves to the route's search parameters (may include `category` and `limit`).
  * @param props.reqLogger - A request-scoped logger used for structured warnings and info about parameter validation and data fetching.
- * @param root0.searchParams
+ * @param props.searchParams - Promise that resolves to the route's search parameters (may include `category` and `limit`).
  * @returns A React element that displays the trending configurations page (header, badges, and content sections).
  *
  * @see getTrendingPageData
@@ -173,35 +169,35 @@ async function TrendingPageContent({
 
   return (
     <div className="bg-background min-h-screen">
-      <section aria-labelledby={pageTitleId} className="relative overflow-hidden px-4 py-24">
-        <div className="container mx-auto text-center">
-          <div className="mx-auto max-w-3xl">
+      <section aria-labelledby={pageTitleId} className={`relative overflow-hidden ${paddingX.default} ${paddingY.default}`}>
+        <div className={`container ${marginX.auto} text-center`}>
+          <div className={`${marginX.auto} max-w-3xl`}>
             <UnifiedBadge
-              className="border-accent/20 bg-accent/5 text-accent mb-6"
+              className={`border-accent/20 bg-accent/5 text-accent ${marginBottom.comfortable}`}
               style="outline"
               variant="base"
             >
-              <TrendingUp aria-hidden="true" className="text-accent mr-1 h-3 w-3" />
+              <TrendingUp aria-hidden="true" className={`text-accent ${marginRight.micro} h-3 w-3`} />
               Trending
             </UnifiedBadge>
 
-            <h1 className="mb-6 text-4xl font-bold md:text-6xl" id={pageTitleId}>
+            <h1 className={`${marginBottom.comfortable} text-4xl font-bold md:text-6xl`} id={pageTitleId}>
               Trending Configurations
             </h1>
 
-            <p className={UI_CLASSES.TEXT_HEADING_LARGE}>
+            <p className={`${size.xl} ${muted.default} ${marginBottom.relaxed} ${leading.relaxed}`}>
               Discover the most popular and trending Claude configurations in our community. Stay up
               to date with what developers are using and loving.
             </p>
 
-            <ul className={`${UI_CLASSES.FLEX_WRAP_GAP_2} list-none justify-center`}>
+            <ul className={`flex ${wrap} ${gap.compact} list-none justify-center`}>
               <li>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div>
                         <UnifiedBadge style="secondary" variant="base">
-                          <Clock aria-hidden="true" className="mr-1 h-3 w-3" />
+                          <Clock aria-hidden="true" className={`${marginRight.micro} h-3 w-3`} />
                           Real-time updates
                         </UnifiedBadge>
                       </div>
@@ -221,7 +217,7 @@ async function TrendingPageContent({
                     <TooltipTrigger asChild>
                       <div>
                         <UnifiedBadge style="secondary" variant="base">
-                          <Star aria-hidden="true" className="mr-1 h-3 w-3" />
+                          <Star aria-hidden="true" className={`${marginRight.micro} h-3 w-3`} />
                           Based on views
                         </UnifiedBadge>
                       </div>
@@ -241,7 +237,7 @@ async function TrendingPageContent({
                     <TooltipTrigger asChild>
                       <div>
                         <UnifiedBadge style="secondary" variant="base">
-                          <Users aria-hidden="true" className="mr-1 h-3 w-3" />
+                          <Users aria-hidden="true" className={`${marginRight.micro} h-3 w-3`} />
                           {trendingDisplay.length} total configs
                         </UnifiedBadge>
                       </div>
@@ -262,7 +258,7 @@ async function TrendingPageContent({
 
       <section
         aria-label="Trending configurations content"
-        className="container mx-auto px-4 py-16"
+        className={`container ${marginX.auto} ${paddingX.default} ${paddingY.default}`}
       >
         <Suspense fallback={null}>
           <LazySection delay={0.1} variant="slide-up">
@@ -278,12 +274,18 @@ async function TrendingPageContent({
   );
 }
 
-const DEFAULT_CATEGORY: Database['public']['Enums']['content_category'] =
-  Constants.public.Enums.content_category[0]; // 'agents'
+const DEFAULT_CATEGORY: content_category = ContentCategory.agents;
 
+/**
+ * Maps trending metrics data to displayable content items.
+ *
+ * @param rows - Array of trending metrics with content data.
+ * @param category - Optional category filter (null for all categories).
+ * @returns Array of displayable content items.
+ */
 function mapTrendingMetrics(
   rows: GetTrendingMetricsWithContentReturns,
-  category: Database['public']['Enums']['content_category'] | null
+  category: content_category | null
 ): DisplayableContent[] {
   if (rows.length === 0) return [];
   return rows.map((row, index) => {
@@ -305,9 +307,16 @@ function mapTrendingMetrics(
   });
 }
 
+/**
+ * Maps popular content data to displayable content items.
+ *
+ * @param rows - Array of popular content data.
+ * @param category - Optional category filter (null for all categories).
+ * @returns Array of displayable content items.
+ */
 function mapPopularContent(
   rows: GetPopularContentReturns,
-  category: Database['public']['Enums']['content_category'] | null
+  category: content_category | null
 ): DisplayableContent[] {
   if (rows.length === 0) return [];
   return rows.map((row, index) => {
@@ -328,9 +337,16 @@ function mapPopularContent(
   });
 }
 
+/**
+ * Maps recent content data to displayable content items.
+ *
+ * @param rows - Array of recent content data.
+ * @param category - Optional category filter (null for all categories).
+ * @returns Array of displayable content items.
+ */
 function mapRecentContent(
   rows: GetRecentContentReturns,
-  category: Database['public']['Enums']['content_category'] | null
+  category: content_category | null
 ): DisplayableContent[] {
   if (rows.length === 0) return [];
   return rows.map((row, index) => {
@@ -350,1221 +366,25 @@ function mapRecentContent(
   });
 }
 
-/****************
- * Normalize a raw content record into a HomepageContentItem suitable for display.
+/**
+ * Normalizes a raw content record into a HomepageContentItem suitable for display.
  *
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input - Raw content fields; optional properties are normalized and given sensible defaults:
- *                `title` defaults to `slug`, `description` defaults to an empty string,
- *                `author` defaults to `"Community"`, `tags` defaults to `[]`, `source` defaults to `"community"`,
- *                `created_at`/`date_added` default to the current ISO timestamp when both are missing,
- *                `viewCount`/`copyCount` default to `0`. The `featured` flag is set when `featuredScore` is provided.
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input.author
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input.category
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input.copyCount
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input.created_at
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input.date_added
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input.description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input.featuredRank
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input.featuredScore
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input.slug
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input.source
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input.tags
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input.title
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input.viewCount
- * @returns The normalized HomepageContentItem with canonical field names (`view_count`, `copy_count`, `created_at`, `date_added`, etc.) and defaults applied.
+ * Optional properties are normalized with sensible defaults:
+ * - `title` defaults to `slug`
+ * - `description` defaults to empty string
+ * - `author` defaults to `"Community"`
+ * - `tags` defaults to `[]`
+ * - `source` defaults to `"community"`
+ * - `created_at`/`date_added` default to current ISO timestamp when both are missing
+ * - `viewCount`/`copyCount` default to `0`
+ * - `featured` flag is set when `featuredScore` is provided
  *
- * @see mapTrendingMetrics
- * @see mapPopularContent
-  * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
- * @param {{
-  author?: null | string;
-  category: Database['public']['Enums']['content_category'];
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}} input Parameter description
-*/
+ * @param input - Raw content fields with optional properties.
+ * @returns The normalized HomepageContentItem with canonical field names and defaults applied.
+ */
 function toHomepageContentItem(input: {
   author?: null | string;
-  category: Database['public']['Enums']['content_category'];
+  category: content_category;
   copyCount?: null | number;
   created_at?: null | string;
   date_added?: null | string;

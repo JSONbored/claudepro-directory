@@ -1,7 +1,8 @@
 'use client';
 
-import type { ReviewAggregateRating } from '@heyclaude/data-layer/types/composite-types';
-import { type Database } from '@heyclaude/database-types';
+import type { ReviewAggregateRating } from '@heyclaude/database-types/postgres-types';
+import type { content_category } from '@heyclaude/data-layer/prisma';
+import type { GetReviewsWithStatsReturns } from '@heyclaude/database-types/postgres-types';
 import {
   deleteReview,
   getReviewsWithStats,
@@ -15,15 +16,16 @@ import { Edit, Star, ThumbsUp, Trash } from '@heyclaude/web-runtime/icons';
 import { type ReviewSectionProps } from '@heyclaude/web-runtime/types/component.types';
 import {
   toasts,
-  UI_CLASSES,
   BaseCard,
   Button,
   Card,
   Label,
   StarDisplay,
+  cn,
 } from '@heyclaude/web-runtime/ui';
+import { between, cluster, hoverBg, size, weight, spaceY, paddingX, paddingY, padding, marginBottom, marginX, paddingTop, marginLeft, marginTop, marginRight } from '@heyclaude/web-runtime/design-system';
 import { usePathname, useRouter } from 'next/navigation';
-import { useCallback, useEffect, useId, useState } from 'react';
+import { useCallback, useEffect, useId, useState, memo } from 'react';
 
 import { useAuthModal } from '@/src/hooks/use-auth-modal';
 import { ReviewForm } from '@/src/components/core/forms/review-form';
@@ -48,7 +50,7 @@ export function ReviewListSection({
 }: Omit<ReviewSectionProps, 'variant'>) {
   const sortSelectId = useId(); // Generate unique ID for sort select
   const [reviews, setReviews] = useState<
-    NonNullable<Database['public']['Functions']['get_reviews_with_stats']['Returns']>['reviews']
+    NonNullable<GetReviewsWithStatsReturns>['reviews']
   >([]);
   const { value: isLoading, setTrue: setIsLoadingTrue, setFalse: setIsLoadingFalse } = useBoolean(true);
   const [sortBy, setSortBy] = useState<'helpful' | 'rating_high' | 'rating_low' | 'recent'>(
@@ -328,7 +330,7 @@ export function ReviewListSection({
   }, [user, status, openAuthModal, pathname, page, sortBy, contentType, contentSlug, loadReviewsWithStats, isMounted]);
 
   return (
-    <div className="space-y-6">
+    <div className={`${spaceY.relaxed}`}>
       {/* Aggregate Rating + Histogram */}
       {aggregateRating?.count && aggregateRating.count > 0 && aggregateRating.distribution ? (
         <ReviewRatingHistogram
@@ -345,17 +347,17 @@ export function ReviewListSection({
       ) : null}
 
       {/* Sort Controls */}
-      <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}`}>
-        <h3 className="text-lg font-semibold">Reviews ({aggregateRating?.count ?? 0})</h3>
-        <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-          <Label htmlFor={sortSelectId} className="text-muted-foreground text-sm">
+      <div className={between.center}>
+        <h3 className={`${size.lg} ${weight.semibold}`}>Reviews ({aggregateRating?.count ?? 0})</h3>
+        <div className={cluster.compact}>
+          <Label htmlFor={sortSelectId} className={`text-muted-foreground ${size.sm}`}>
             Sort by:
           </Label>
           <select
             id={sortSelectId}
             value={sortBy}
             onChange={(e) => handleSortChange(e.target.value as typeof sortBy)}
-            className="rounded border px-2 py-1 text-sm"
+            className={cn('rounded border', paddingX.compact, paddingY.tight, size.sm)}
           >
             <option value="recent">Most Recent</option>
             <option value="helpful">Most Helpful</option>
@@ -367,16 +369,16 @@ export function ReviewListSection({
 
       {/* Reviews List */}
       {isLoading && page === 1 ? (
-        <div className="py-8 text-center">
+        <div className={`${paddingY.relaxed} text-center`}>
           <p className="text-muted-foreground">Loading reviews...</p>
         </div>
       ) : (reviews ?? []).length === 0 ? (
-        <Card className="bg-muted/50 p-8 text-center">
-          <Star className="text-muted-foreground/30 mx-auto mb-3 h-12 w-12" aria-hidden="true" />
+        <Card className={`bg-muted/50 ${padding.relaxed} text-center`}>
+          <Star className={`text-muted-foreground/30 ${marginX.auto} ${marginBottom.compact} h-12 w-12`} aria-hidden="true" />
           <p className="text-muted-foreground">No reviews yet. Be the first to review!</p>
         </Card>
       ) : (
-        <div className="space-y-4">
+        <div className={`${spaceY.comfortable}`}>
           {(reviews ?? []).map((review) => (
             <ReviewCardItem
               key={review.id ?? ''}
@@ -405,7 +407,7 @@ export function ReviewListSection({
 
       {/* Load More */}
       {hasMore && !isLoading ? (
-        <div className="pt-4 text-center">
+        <div className={`${paddingTop.default} text-center`}>
           <Button variant="outline" onClick={handleLoadMore}>
             Load More Reviews
           </Button>
@@ -437,7 +439,13 @@ export function ReviewListSection({
  * @see ReviewListSection
  * @see BaseCard
  */
-function ReviewCardItem({
+/**
+ * ReviewCardItem - Memoized review card component
+ * 
+ * PERFORMANCE: Memoized to prevent re-renders when parent state changes.
+ * Only re-renders when review data, editing state, or callbacks change.
+ */
+const ReviewCardItemComponent = function ReviewCardItem({
   review,
   currentUserId,
   contentType,
@@ -449,14 +457,14 @@ function ReviewCardItem({
   onMarkHelpful,
 }: {
   contentSlug: string;
-  contentType: Database['public']['Enums']['content_category'];
+  contentType: content_category;
   currentUserId?: string;
   isEditing?: boolean;
   onCancelEdit?: () => void;
   onDelete?: () => void;
   onEdit?: () => void;
   onMarkHelpful: (reviewId: string) => void;
-  review: import('@heyclaude/data-layer/types/composite-types').ReviewWithStatsItem;
+  review: import('@heyclaude/database-types/postgres-types').ReviewWithStatsItem;
 }) {
   const { value: showFullText, toggle: toggleShowFullText } = useBoolean();
   if (!(review.user && review.id && review.rating)) return null;
@@ -469,7 +477,7 @@ function ReviewCardItem({
 
   if (isEditing && isOwnReview) {
     return (
-      <Card className="p-6">
+      <Card className={`${padding.comfortable}`}>
         <ReviewForm
           contentType={contentType}
           contentSlug={contentSlug}
@@ -494,17 +502,17 @@ function ReviewCardItem({
       disableNavigation
       ariaLabel={`Review by ${review.user.name ?? 'Anonymous'}`}
       renderContent={() => (
-        <div className="space-y-3">
+        <div className={`${spaceY.default}`}>
           {/* Rating + Date */}
-          <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}`}>
-            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+          <div className={between.center}>
+            <div className={cluster.tight}>
               <StarDisplay rating={review.rating ?? 0} size="sm" />
-              <span className="text-muted-foreground ml-1 text-xs">
+              <span className={cn('text-muted-foreground', marginLeft.tight, size.xs)}>
                 {(review.rating ?? 0).toFixed(1)}
               </span>
             </div>
             {review.created_at ? (
-              <time className="text-muted-foreground text-xs" dateTime={review.created_at}>
+              <time className={`text-muted-foreground ${size.xs}`} dateTime={review.created_at}>
                 {formatDistanceToNow(new Date(review.created_at))} ago
               </time>
             ) : null}
@@ -513,12 +521,12 @@ function ReviewCardItem({
           {/* Review Text */}
           {reviewText ? (
             <div>
-              <p className="text-foreground text-sm whitespace-pre-wrap">{displayText}</p>
+              <p className={`text-foreground ${size.sm} whitespace-pre-wrap`}>{displayText}</p>
               {needsTruncation ? (
                 <button
                   type="button"
                   onClick={toggleShowFullText}
-                  className="text-primary mt-1 text-xs hover:underline"
+                  className={cn('text-primary', marginTop.tight, size.xs, 'hover:underline')}
                 >
                   {showFullText ? 'Show less' : 'Read more'}
                 </button>
@@ -527,7 +535,7 @@ function ReviewCardItem({
           ) : null}
 
           {/* Actions */}
-          <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} pt-2`}>
+          <div className={cn(cluster.compact, paddingTop.compact)}>
             {/* Helpful Button */}
             {!isOwnReview && (
               <Button
@@ -539,9 +547,9 @@ function ReviewCardItem({
                     onMarkHelpful(review.id);
                   }
                 }}
-                className={UI_CLASSES.BUTTON_GHOST_ICON}
+                className={`${hoverBg.default} hover:text-accent`}
               >
-                <ThumbsUp className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
+                <ThumbsUp className={`${marginRight.micro} h-3.5 w-3.5`} aria-hidden="true" />
                 Helpful ({review.helpful_count ?? 0})
               </Button>
             )}
@@ -553,18 +561,18 @@ function ReviewCardItem({
                   variant="ghost"
                   size="sm"
                   onClick={onEdit}
-                  className={UI_CLASSES.BUTTON_GHOST_ICON}
+                  className={`${hoverBg.default} hover:text-accent`}
                 >
-                  <Edit className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
+                  <Edit className={`${marginRight.micro} h-3.5 w-3.5`} aria-hidden="true" />
                   Edit
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={onDelete}
-                  className={`${UI_CLASSES.BUTTON_GHOST_ICON} text-destructive hover:text-destructive`}
+                  className={`${hoverBg.default} hover:text-accent text-destructive hover:text-destructive`}
                 >
-                  <Trash className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
+                  <Trash className={`${marginRight.micro} h-3.5 w-3.5`} aria-hidden="true" />
                   Delete
                 </Button>
               </>
@@ -574,4 +582,45 @@ function ReviewCardItem({
       )}
     />
   );
-}
+};
+
+// Memoize ReviewCardItem to prevent unnecessary re-renders
+// Only re-renders when review data, editing state, or callbacks change
+const ReviewCardItem = memo(ReviewCardItemComponent, (prevProps, nextProps) => {
+  // Compare review ID (most likely to change)
+  if (prevProps.review.id !== nextProps.review.id) {
+    return false;
+  }
+
+  // Compare editing state
+  if (prevProps.isEditing !== nextProps.isEditing) {
+    return false;
+  }
+
+  // Compare review data (rating, text, helpful count)
+  if (
+    prevProps.review.rating !== nextProps.review.rating ||
+    prevProps.review.review_text !== nextProps.review.review_text ||
+    prevProps.review.helpful_count !== nextProps.review.helpful_count
+  ) {
+    return false;
+  }
+
+  // Compare callback references (if they change, we need to re-render)
+  if (
+    prevProps.onEdit !== nextProps.onEdit ||
+    prevProps.onDelete !== nextProps.onDelete ||
+    prevProps.onCancelEdit !== nextProps.onCancelEdit ||
+    prevProps.onMarkHelpful !== nextProps.onMarkHelpful
+  ) {
+    return false;
+  }
+
+  // Compare currentUserId (affects edit/delete visibility)
+  if (prevProps.currentUserId !== nextProps.currentUserId) {
+    return false;
+  }
+
+  // Props are equal, skip re-render
+  return true;
+});

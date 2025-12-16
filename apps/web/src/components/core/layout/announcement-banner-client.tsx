@@ -14,11 +14,12 @@ import {
 import {
   ANIMATION_CONSTANTS,
   DIMENSIONS,
-  UI_CLASSES,
   Announcement,
   AnnouncementTag,
   AnnouncementTitle,
+  cn,
 } from '@heyclaude/web-runtime/ui';
+import { responsive, cluster, iconSize, gap, paddingX, paddingTop, paddingBottom, marginX, paddingY } from '@heyclaude/web-runtime/design-system';
 import Link from 'next/link';
 import { type ComponentType, useEffect } from 'react';
 import { useBoolean } from '@heyclaude/web-runtime/hooks';
@@ -37,10 +38,10 @@ const ICON_MAP: Record<AnnouncementIcon, ComponentType<{ className?: string }>> 
   Sparkles,
 };
 
-import type { announcements } from '@heyclaude/data-layer/prisma';
+import type { announcementsModel } from '@heyclaude/data-layer/prisma';
 
 interface AnnouncementBannerClientProps {
-  announcement: announcements;
+  announcement: announcementsModel;
 }
 
 /**
@@ -115,15 +116,15 @@ export function AnnouncementBannerClient({ announcement }: AnnouncementBannerCli
       aria-label="Site announcement"
       aria-live="polite"
       aria-atomic="true"
-      className="relative z-60 hidden w-full px-3 pt-2 pb-2 md:block"
+      className={`relative z-60 hidden w-full ${paddingX.compact} ${paddingTop.tight} ${paddingBottom.tight} md:block`}
     >
       {/* Rounded pill container */}
-      <div className="container mx-auto">
+      <div className={`container ${marginX.auto}`}>
         <div
           className={`border-accent/20 bg-accent/10 rounded-full border shadow-sm backdrop-blur-sm ${ANIMATION_CONSTANTS.CSS_TRANSITION_SLOW} hover:border-accent/30 hover:shadow-md motion-reduce:transition-none`}
         >
-          <div className="px-4 py-2 md:px-6 md:py-2.5">
-            <div className={UI_CLASSES.FLEX_COL_SM_ROW_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+          <div className={`${paddingX.default} ${paddingY.tight} md:${paddingX.comfortable} md:${paddingY.tight}.5`}>
+              <div className={responsive.colCenter}>
               {/* Announcement Content */}
               <Announcement
                 variant={announcement.variant}
@@ -139,7 +140,7 @@ export function AnnouncementBannerClient({ announcement }: AnnouncementBannerCli
                   {announcement.href ? (
                     <Link
                       href={announcement.href}
-                      className={`hover:underline ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5} ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT}`}
+                      className={cn('hover:underline', cluster.compact, gap['1.5'], ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT)}
                     >
                       <span className="line-clamp-2 sm:line-clamp-1">{announcement.title}</span>
                       {IconComponent ? (
@@ -150,7 +151,7 @@ export function AnnouncementBannerClient({ announcement }: AnnouncementBannerCli
                       ) : null}
                     </Link>
                   ) : (
-                    <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5}>
+                    <span className={cn(cluster.compact, gap['1.5'])}>
                       <span className="line-clamp-2 sm:line-clamp-1">{announcement.title}</span>
                       {IconComponent ? (
                         <IconComponent
@@ -172,7 +173,7 @@ export function AnnouncementBannerClient({ announcement }: AnnouncementBannerCli
                   className={`flex ${DIMENSIONS.MIN_H_ICON_BUTTON_SM} ${DIMENSIONS.MIN_W_ICON_BUTTON_SM} shrink-0 items-center justify-center rounded-full ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:bg-accent/20 focus-visible:ring-accent focus-visible:ring-2 focus-visible:ring-offset-2 sm:${DIMENSIONS.MIN_H_ICON_BUTTON_MD} sm:${DIMENSIONS.MIN_W_ICON_BUTTON_MD}`}
                 >
                   <X
-                    className={`${UI_CLASSES.ICON_XS} text-foreground sm:h-4 sm:w-4`}
+                    className={`${iconSize.xs} text-foreground sm:h-4 sm:w-4`}
                     aria-hidden="true"
                   />
                 </button>

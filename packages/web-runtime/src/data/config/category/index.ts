@@ -1,5 +1,4 @@
-import { type content_category } from '@heyclaude/data-layer/prisma';
-import { type Database } from '@heyclaude/database-types';
+import type { content_category } from '@heyclaude/data-layer/prisma';
 
 import { type CategoryStatsConfig, type UnifiedCategoryConfig } from '../../../types/category.ts';
 
@@ -7,13 +6,13 @@ import { CATEGORY_CONFIGS } from './category-config.ts';
 import { getTabConfigForCategory } from './default-tab-configs.ts';
 
 export const getCategoryConfigs = (): Record<
-  Database['public']['Enums']['content_category'],
-  UnifiedCategoryConfig<Database['public']['Enums']['content_category']>
+  content_category,
+  UnifiedCategoryConfig<content_category>
 > => CATEGORY_CONFIGS;
 
 export const getCategoryConfig = (
-  slug: Database['public']['Enums']['content_category']
-): null | UnifiedCategoryConfig<Database['public']['Enums']['content_category']> => {
+  slug: content_category
+): null | UnifiedCategoryConfig<content_category> => {
   const baseConfig = CATEGORY_CONFIGS[slug];
 
   const tabs = getTabConfigForCategory(slug);

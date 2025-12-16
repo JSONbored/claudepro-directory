@@ -22,8 +22,8 @@ import {
   Rss,
   Sparkles,
 } from '@heyclaude/web-runtime/icons';
-import { UnifiedBadge, ThemeToggle } from '@heyclaude/web-runtime/ui';
-import { STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
+import { cn, UnifiedBadge, ThemeToggle } from '@heyclaude/web-runtime/ui';
+import { STAGGER, DURATION, paddingX, paddingY, marginX, gap, spaceY, marginBottom, marginTop, paddingTop } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import Link from 'next/link';
@@ -36,27 +36,7 @@ import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';
 import { NewsletterCTAVariant } from '@/src/components/features/growth/newsletter/newsletter-cta-variants';
 import { LazySection } from '@/src/components/core/infra/scroll-animated-section';
 
-/**
- * Root package.json - Contains the application version for display in footer.
- *
- * The version is read from the root package.json (not apps/web/package.json) as this
- * represents the overall application version. The footer displays this version and links
- * to the changelog page where users can see all release entries.
- *
- * **Path Resolution:**
- * From `apps/web/src/components/core/layout/footer.tsx`:
- * - `../../../../../../` = 7 levels up to repository root
- * - Resolves to root `package.json` (version: 1.1.0)
- *
- * **Version Management:**
- * - Bump version: `pnpm bump:patch/minor/major`
- * - Creates git tag: `git tag vX.Y.Z`
- * - GitHub Actions auto-creates release when tag is pushed
- *
- * @see {@link ../../../../../../packages/generators/src/commands/bump-version.ts | Version Bump Script}
- * @see {@link ../../../../../../.github/workflows/release.yml | GitHub Release Workflow}
- */
-import packageJson from '../../../../../../package.json';
+import { APP_VERSION } from '@heyclaude/web-runtime/data/config/version';
 
 // Type for resource links with optional icon
 interface ResourceLink {
@@ -159,13 +139,13 @@ function FooterComponent() {
         <NewsletterCTAVariant variant="hero" source="footer" />
       </LazySection>
 
-      <div className="container mx-auto px-4 py-10 lg:py-12">
+      <div className={`container ${marginX.auto} ${paddingX.default} ${paddingY.default} lg:${paddingY.section}`}>
         {/* Main footer content - Two section layout */}
-        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1.5fr_2.5fr] lg:gap-16">
+        <div className={`grid grid-cols-1 ${gap.default} lg:grid-cols-[1.5fr_2.5fr] lg:${gap.default}`}>
           {/* Left section - Brand & Social */}
           {mounted ? (
             <motion.div
-              className="space-y-6"
+              className={`${spaceY.relaxed}`}
               initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
               whileInView={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -182,7 +162,7 @@ function FooterComponent() {
               </p>
 
               {/* Social links */}
-              <div className="flex items-center gap-4">
+              <div className={`flex items-center ${gap.default}`}>
                 {[
                   { href: CONTACT_CHANNELS.github, icon: Github, label: 'GitHub' },
                   { href: CONTACT_CHANNELS.discord, icon: DiscordIcon, label: 'Discord' },
@@ -207,12 +187,12 @@ function FooterComponent() {
                 style="outline"
                 className="border-accent/20 bg-accent/5 text-accent"
               >
-                <ExternalLink className="mr-1.5 h-3 w-3" />
+                <ExternalLink className={cn('mr-0.5', 'h-3 w-3')} />
                 Open Source
               </UnifiedBadge>
             </motion.div>
           ) : (
-            <div className="space-y-6">
+            <div className={`${spaceY.relaxed}`}>
               {/* Logo */}
               <div>
                 <HeyClaudeLogo size="md" inView duration={1.5} />
@@ -224,7 +204,7 @@ function FooterComponent() {
               </p>
 
               {/* Social links */}
-              <div className="flex items-center gap-4">
+              <div className={`flex items-center ${gap.default}`}>
                 {[
                   { href: CONTACT_CHANNELS.github, icon: Github, label: 'GitHub' },
                   { href: CONTACT_CHANNELS.discord, icon: DiscordIcon, label: 'Discord' },
@@ -249,7 +229,7 @@ function FooterComponent() {
                 style="outline"
                 className="border-accent/20 bg-accent/5 text-accent"
               >
-                <ExternalLink className="mr-1.5 h-3 w-3" />
+                <ExternalLink className={cn('mr-0.5', 'h-3 w-3')} />
                 Open Source
               </UnifiedBadge>
             </div>
@@ -258,7 +238,7 @@ function FooterComponent() {
           {/* Right section - Navigation grid */}
           {mounted ? (
             <motion.div
-              className="grid grid-cols-2 gap-8 sm:grid-cols-4"
+              className={`grid grid-cols-2 ${gap.relaxed} sm:grid-cols-4`}
               initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
               whileInView={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -266,8 +246,8 @@ function FooterComponent() {
             >
               {/* Browse column */}
               <div>
-                <h3 className="text-foreground mb-4 text-sm font-semibold">Browse</h3>
-                <ul className="space-y-2.5">
+                <h3 className={`text-foreground ${marginBottom.default} text-sm font-semibold`}>Browse</h3>
+                <ul className={spaceY['1.5']}>
                   {browseLinks.map((link) => (
                     <li key={`browse-${link.label}`}>
                       <Link
@@ -283,15 +263,15 @@ function FooterComponent() {
 
               {/* Resources column */}
               <div>
-                <h3 className="text-foreground mb-4 text-sm font-semibold">Resources</h3>
-                <ul className="space-y-2.5">
+                <h3 className={`text-foreground ${marginBottom.default} text-sm font-semibold`}>Resources</h3>
+                <ul className={spaceY['1.5']}>
                   {resourceLinks.map((link) => {
                     const isExternal = link.href.startsWith('http');
                     return (
                       <li key={`resources-${link.label}`}>
                         <Link
                           href={link.href}
-                          className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition-colors"
+                          className={cn('text-muted-foreground hover:text-foreground inline-flex items-center', gap['1.5'], 'text-sm transition-colors')}
                           {...(isExternal && {
                             target: '_blank',
                             rel: 'noopener noreferrer',
@@ -308,8 +288,8 @@ function FooterComponent() {
 
               {/* Support column */}
               <div>
-                <h3 className="text-foreground mb-4 text-sm font-semibold">Support</h3>
-                <ul className="space-y-2.5">
+                <h3 className={`text-foreground ${marginBottom.default} text-sm font-semibold`}>Support</h3>
+                <ul className={spaceY['1.5']}>
                   {supportLinks.map((link) => (
                     <li key={`support-${link.label}`}>
                       <Link
@@ -325,8 +305,8 @@ function FooterComponent() {
 
               {/* Legal column */}
               <div>
-                <h3 className="text-foreground mb-4 text-sm font-semibold">Legal</h3>
-                <ul className="space-y-2.5">
+                <h3 className={`text-foreground ${marginBottom.default} text-sm font-semibold`}>Legal</h3>
+                <ul className={spaceY['1.5']}>
                   {legalLinks.map((link) => (
                     <li key={`legal-${link.label}`}>
                       <Link
@@ -341,11 +321,11 @@ function FooterComponent() {
               </div>
             </motion.div>
           ) : (
-            <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
+            <div className={`grid grid-cols-2 ${gap.relaxed} sm:grid-cols-4`}>
               {/* Browse column */}
               <div>
-                <h3 className="text-foreground mb-4 text-sm font-semibold">Browse</h3>
-                <ul className="space-y-2.5">
+                <h3 className={`text-foreground ${marginBottom.default} text-sm font-semibold`}>Browse</h3>
+                <ul className={spaceY['1.5']}>
                   {browseLinks.map((link) => (
                     <li key={`browse-${link.label}`}>
                       <Link
@@ -361,15 +341,15 @@ function FooterComponent() {
 
               {/* Resources column */}
               <div>
-                <h3 className="text-foreground mb-4 text-sm font-semibold">Resources</h3>
-                <ul className="space-y-2.5">
+                <h3 className={`text-foreground ${marginBottom.default} text-sm font-semibold`}>Resources</h3>
+                <ul className={spaceY['1.5']}>
                   {resourceLinks.map((link) => {
                     const isExternal = link.href.startsWith('http');
                     return (
                       <li key={`resources-${link.label}`}>
                         <Link
                           href={link.href}
-                          className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition-colors"
+                          className={cn('text-muted-foreground hover:text-foreground inline-flex items-center', gap['1.5'], 'text-sm transition-colors')}
                           {...(isExternal && {
                             target: '_blank',
                             rel: 'noopener noreferrer',
@@ -386,8 +366,8 @@ function FooterComponent() {
 
               {/* Support column */}
               <div>
-                <h3 className="text-foreground mb-4 text-sm font-semibold">Support</h3>
-                <ul className="space-y-2.5">
+                <h3 className={`text-foreground ${marginBottom.default} text-sm font-semibold`}>Support</h3>
+                <ul className={spaceY['1.5']}>
                   {supportLinks.map((link) => (
                     <li key={`support-${link.label}`}>
                       <Link
@@ -403,8 +383,8 @@ function FooterComponent() {
 
               {/* Legal column */}
               <div>
-                <h3 className="text-foreground mb-4 text-sm font-semibold">Legal</h3>
-                <ul className="space-y-2.5">
+                <h3 className={`text-foreground ${marginBottom.default} text-sm font-semibold`}>Legal</h3>
+                <ul className={spaceY['1.5']}>
                   {legalLinks.map((link) => (
                     <li key={`legal-${link.label}`}>
                       <Link
@@ -424,15 +404,15 @@ function FooterComponent() {
         {/* Bottom bar - Modern divider and layout */}
         {mounted ? (
           <motion.div
-            className="border-border/30 mt-12 border-t pt-8"
+            className={`border-border/30 ${marginTop.default} border-t ${paddingTop.relaxed}`}
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ delay: STAGGER.slow }}
           >
-            <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
+            <div className={`flex flex-col items-center justify-between ${gap.default} md:flex-row`}>
               {/* Left - Copyright with heart and version */}
-              <div className="text-muted-foreground flex items-center gap-1.5 text-sm">
+              <div className={cn('text-muted-foreground flex items-center', gap['1.5'], 'text-sm')}>
                 <span>© {currentYear}</span>
                 <span className="text-border">•</span>
                 <span>Made with</span>
@@ -469,37 +449,32 @@ function FooterComponent() {
                 <Link
                   href="/changelog"
                   className="font-mono text-xs hover:text-foreground transition-colors"
-                  title={`Version ${packageJson.version} - View changelog and release history`}
+                  title={`Version ${APP_VERSION} - View changelog and release history`}
                 >
-                  v{packageJson.version}
+                  v{APP_VERSION}
                 </Link>
               </div>
 
               {/* Right - Status badge */}
-              <div className="flex items-center gap-4">
+              <div className={`flex items-center ${gap.default}`}>
                 {mounted ? (
                   <iframe
                     src={`${EXTERNAL_SERVICES.betterstack.status}/badge?theme=${resolvedTheme === 'light' ? 'light' : 'dark'}`}
                     width="250"
                     height="30"
                     title="System Status"
-                    className="rounded-md"
+                    className={cn("rounded-md [color-scheme:normal] border-0 overflow-hidden")}
                     loading="lazy"
-                    style={{
-                      colorScheme: 'normal',
-                      border: 0,
-                      overflow: 'hidden',
-                    }}
                   />
                 ) : null}
               </div>
             </div>
           </motion.div>
         ) : (
-          <div className="border-border/30 mt-12 border-t pt-8">
-            <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
+          <div className={`border-border/30 ${marginTop.default} border-t ${paddingTop.relaxed}`}>
+            <div className={`flex flex-col items-center justify-between ${gap.default} md:flex-row`}>
               {/* Left - Copyright with heart and version */}
-              <div className="text-muted-foreground flex items-center gap-1.5 text-sm">
+              <div className={cn('text-muted-foreground flex items-center', gap['1.5'], 'text-sm')}>
                 <span>© {currentYear}</span>
                 <span className="text-border">•</span>
                 <span>Made with</span>
@@ -536,14 +511,14 @@ function FooterComponent() {
                 <Link
                   href="/changelog"
                   className="font-mono text-xs hover:text-foreground transition-colors"
-                  title={`Version ${packageJson.version} - View changelog and release history`}
+                  title={`Version ${APP_VERSION} - View changelog and release history`}
                 >
-                  v{packageJson.version}
+                  v{APP_VERSION}
                 </Link>
               </div>
 
               {/* Right - Status badge */}
-              <div className="flex items-center gap-4">
+              <div className={`flex items-center ${gap.default}`}>
                 {/* Status badge only renders after mount */}
               </div>
             </div>

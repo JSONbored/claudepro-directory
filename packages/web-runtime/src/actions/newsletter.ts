@@ -1,12 +1,10 @@
 'use server';
 
 import { z } from 'zod';
-import type { Database } from '@heyclaude/database-types';
+import type { newsletter_source } from '@heyclaude/data-layer/prisma';
 import { rateLimitedAction } from './safe-action.ts';
 import { logger, createWebAppContextWithId } from '../logging/server.ts';
-
-// Newsletter source enum from database types
-type NewsletterSource = Database['public']['Enums']['newsletter_source'];
+import { newsletter_sourceSchema } from '../prisma-zod-schemas.ts';
 
 // Email validation schema (reusable)
 const emailSchema = z.string().email({ message: 'Invalid email address' });
@@ -16,7 +14,7 @@ const getNewsletterCountSchema = z.object({});
 
 const subscribeSchema = z.object({
   email: emailSchema,
-  source: z.string() as z.ZodType<NewsletterSource>,
+  source: newsletter_sourceSchema,
   metadata: z
     .object({
       referrer: z.string().optional(),
@@ -121,7 +119,7 @@ export const subscribeViaOAuthAction = rateLimitedAction
         name: 'email/subscribe',
         data: {
           email: normalizedEmail,
-          source: 'oauth_signup' as NewsletterSource,
+          source: 'oauth_signup' as newsletter_source,
           referrer: parsedInput.metadata?.referrer,
           metadata: {
             trigger_source: parsedInput.metadata?.trigger_source,

@@ -3,7 +3,7 @@
  *
  * Fully modernized for Prisma ORM - no backward compatibility.
  * All table types use Prisma types.
- * RPC function types remain using Database type (Prisma doesn't generate RPC types).
+ * RPC function types use postgres-types generator (Prisma doesn't generate RPC types).
  */
 
 import type {
@@ -13,10 +13,13 @@ import type {
   GetNewsletterSubscriptionByIdArgs,
   GetNewsletterSubscriptionByIdReturns,
 } from '@heyclaude/database-types/postgres-types';
-import type { Prisma } from '@heyclaude/data-layer/prisma';
 import { prisma } from '../prisma/client.ts';
 import { BasePrismaService } from './base-prisma-service.ts';
 import { logRpcError } from '../utils/rpc-error-logging.ts';
+
+// Type helpers: Extract model types from Prisma query results
+type NewsletterSubscription = Awaited<ReturnType<typeof prisma.newsletter_subscriptions.findUnique>>;
+type NewsletterSubscriptionUpdateInput = Parameters<typeof prisma.newsletter_subscriptions.update>[0]['data'];
 
 export type SubscriberResult = SubscribeNewsletterReturns;
 export type SubscriberArgs = SubscribeNewsletterArgs;
@@ -70,7 +73,7 @@ export class NewsletterService extends BasePrismaService {
   }
 
   async getSubscriptionStatusByEmail(email: string): Promise<{
-    status: Prisma.newsletter_subscriptionsGetPayload<{}>['status'];
+    status: NonNullable<NewsletterSubscription>['status'];
   } | null> {
     const subscription = await prisma.newsletter_subscriptions.findUnique({
       where: { email },
@@ -80,7 +83,7 @@ export class NewsletterService extends BasePrismaService {
   }
 
   async getSubscriptionEngagementScore(email: string): Promise<{
-    engagement_score: Prisma.newsletter_subscriptionsGetPayload<{}>['engagement_score'];
+    engagement_score: NonNullable<NewsletterSubscription>['engagement_score'];
   } | null> {
     const subscription = await prisma.newsletter_subscriptions.findUnique({
       where: { email },
@@ -127,7 +130,7 @@ export class NewsletterService extends BasePrismaService {
 
   async updateSubscriptionStatus(
     email: string,
-    status: Prisma.newsletter_subscriptionsUpdateInput['status']
+    status: NewsletterSubscriptionUpdateInput['status']
   ): Promise<void> {
     try {
       await prisma.newsletter_subscriptions.update({

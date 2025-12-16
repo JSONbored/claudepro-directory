@@ -5,7 +5,7 @@ import { createSupabaseBrowserClient } from '../supabase/browser.ts';
 import { normalizeError } from '../errors.ts';
 import { logger } from '../logger.ts';
 import { logClientWarn } from '../utils/client-logger.ts';
-import type { User } from '@supabase/supabase-js';
+import type { User, Session } from '@supabase/supabase-js';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 type AuthStatus = 'loading' | 'authenticated' | 'unauthenticated';
@@ -125,7 +125,7 @@ export function useAuthenticatedUser(
     let subscription: { unsubscribe: () => void } | undefined;
     if (subscribe) {
       try {
-        const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+        const { data } = supabase.auth.onAuthStateChange((_event: string, session: Session | null) => {
           if (!active) return;
           setUser(session?.user ?? null);
           setStatus(session?.user ? 'authenticated' : 'unauthenticated');

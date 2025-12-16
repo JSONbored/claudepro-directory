@@ -1,8 +1,8 @@
 #!/usr/bin/env tsx
 import { normalizeError } from '@heyclaude/shared-runtime';
 
-import { runGenerateChangelog } from '../commands/changelog.js';
-import { logger } from '../toolkit/logger.js';
+import { runGenerateChangelog } from '../commands/changelog.ts';
+import { logger } from '../toolkit/logger.ts';
 
 runGenerateChangelog().catch((error) => {
   logger.error(

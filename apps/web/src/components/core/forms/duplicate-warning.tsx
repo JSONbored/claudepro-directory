@@ -1,16 +1,17 @@
 'use client';
 
-import { type Database } from '@heyclaude/database-types';
+import type { content_category } from '@heyclaude/data-layer/prisma';
 import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
 import { AlertTriangle } from '@heyclaude/web-runtime/icons';
-import { UI_CLASSES, Alert, AlertDescription, AlertTitle } from '@heyclaude/web-runtime/ui';
+import { Alert, AlertDescription, AlertTitle } from '@heyclaude/web-runtime/ui';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { useDebounceValue, useBoolean } from '@heyclaude/web-runtime/hooks';
 import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
+import { iconSize, size } from "@heyclaude/web-runtime/design-system";
 
 interface DuplicateWarningProps {
-  contentType: Database['public']['Enums']['content_category'];
+  contentType: content_category;
   name: string;
 }
 
@@ -83,7 +84,7 @@ export function DuplicateWarning({ contentType: _contentType, name }: DuplicateW
   if (checking) {
     return (
       <motion.div
-        className="text-muted-foreground text-sm"
+        className={`text-muted-foreground ${size.sm}`}
         animate={shouldReduceMotion ? { opacity: 1 } : { opacity: [1, 0.5, 1] }}
         transition={shouldReduceMotion ? {} : { duration: 1, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
       >
@@ -98,10 +99,10 @@ export function DuplicateWarning({ contentType: _contentType, name }: DuplicateW
 
   return (
     <Alert className="border-yellow-500/20 bg-yellow-500/5">
-      <AlertTriangle className={`${UI_CLASSES.ICON_SM} text-yellow-400`} />
+      <AlertTriangle className={`${iconSize.sm} text-yellow-400`} />
       <AlertTitle className="text-yellow-400">Suggestion</AlertTitle>
       <AlertDescription>
-        <p className="text-muted-foreground text-sm">{warning}</p>
+        <p className={`text-muted-foreground ${size.sm}`}>{warning}</p>
       </AlertDescription>
     </Alert>
   );

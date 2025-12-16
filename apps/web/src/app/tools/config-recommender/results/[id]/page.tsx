@@ -3,7 +3,13 @@
  * Personalized results from PostgreSQL RPC, shareable via URL-encoded answers.
  */
 
-import type { RecommendationItem } from '@heyclaude/data-layer/types/composite-types';
+import type { RecommendationItem } from '@heyclaude/database-types/postgres-types';
+import {
+  UseCaseType,
+  ExperienceLevel,
+  IntegrationType,
+  FocusAreaType,
+} from '@heyclaude/data-layer/prisma';
 import type {
   content_category,
   experience_level,
@@ -11,7 +17,6 @@ import type {
   integration_type,
   use_case_type,
 } from '@heyclaude/data-layer/prisma';
-import { Constants } from '@heyclaude/database-types';
 import type { GetRecommendationsReturns } from '@heyclaude/database-types/postgres-types';
 import { generatePageMetadata, getConfigRecommendations } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
@@ -24,6 +29,7 @@ import { Suspense } from 'react';
 import { ResultsDisplay } from '@/src/components/features/tools/recommender/results-display';
 
 import ResultsLoading from './loading';
+import { paddingX, paddingY, marginX } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Dynamic Rendering Required
@@ -102,14 +108,14 @@ function decodeQuizAnswers(
 
     // Validate enum values
     if (
-      !Constants.public.Enums.use_case_type.includes(
+      !(Object.values(UseCaseType) as readonly string[]).includes(
         data['useCase'] as use_case_type
       )
     ) {
       throw new Error(`Invalid useCase value: ${data['useCase']}`);
     }
     if (
-      !Constants.public.Enums.experience_level.includes(
+      !(Object.values(ExperienceLevel) as readonly string[]).includes(
         data['experienceLevel'] as experience_level
       )
     ) {
@@ -129,7 +135,7 @@ function decodeQuizAnswers(
       for (const integration of data['p_integrations'] as unknown[]) {
         if (
           typeof integration !== 'string' ||
-          !Constants.public.Enums.integration_type.includes(
+          !(Object.values(IntegrationType) as readonly string[]).includes(
             integration as integration_type
           )
         ) {
@@ -141,7 +147,7 @@ function decodeQuizAnswers(
       for (const focusArea of data['p_focus_areas'] as unknown[]) {
         if (
           typeof focusArea !== 'string' ||
-          !Constants.public.Enums.focus_area_type.includes(
+          !(Object.values(FocusAreaType) as readonly string[]).includes(
             focusArea as focus_area_type
           )
         ) {
@@ -455,8 +461,8 @@ async function ResultsPageContent({
   );
 
   return (
-    <div className="bg-background min-h-screen">
-      <section className="container mx-auto px-4 py-12">
+    <div className={`bg-background min-h-screen`}>
+      <section className={`container ${marginX.auto} ${paddingX.default} ${paddingY.section}`}>
         <ResultsDisplay recommendations={recommendations} shareUrl={shareUrl} />
       </section>
     </div>

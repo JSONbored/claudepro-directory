@@ -10,7 +10,6 @@
  */
 
 import * as postcss from 'postcss';
-import { readFileSync } from 'node:fs';
 
 export interface VariableMapping {
   oldName: string;
@@ -92,7 +91,7 @@ const VARIABLE_MAPPINGS: Array<{
  */
 export function analyzeVariableConsolidation(
   css: string,
-  file: string
+  _file: string
 ): {
   variables: Map<string, { value: string; line?: number }>;
   duplicates: Map<string, Array<{ name: string; line?: number }>>;
@@ -109,7 +108,7 @@ export function analyzeVariableConsolidation(
         
         variables.set(name, {
           value,
-          line: decl.source?.start?.line,
+          ...(decl.source?.start?.line !== undefined ? { line: decl.source.start.line } : {}),
         });
 
         // Group by value to find duplicates
@@ -118,7 +117,7 @@ export function analyzeVariableConsolidation(
         }
         valueToVars.get(value)!.push({
           name,
-          line: decl.source?.start?.line,
+          ...(decl.source?.start?.line !== undefined ? { line: decl.source.start.line } : {}),
         });
       }
     });

@@ -1,7 +1,7 @@
 'use server';
 
 import { MiscService } from '@heyclaude/data-layer';
-import { type announcements } from '@heyclaude/data-layer/prisma';
+import type { announcementsModel } from '@heyclaude/data-layer/prisma';
 import { cacheLife, cacheTag } from 'next/cache';
 
 /**
@@ -10,11 +10,11 @@ import { cacheLife, cacheTag } from 'next/cache';
  * Uses 'use cache' to cache announcement data. This data is public and same for all users.
  * Announcements change periodically, so we use the 'half' cacheLife profile.
  */
-export async function getActiveAnnouncement(): Promise<announcements | null> {
+export async function getActiveAnnouncement(): Promise<announcementsModel | null> {
   'use cache';
 
-  // Configure cache - use 'half' profile for announcements (changes every 30 minutes)
-  cacheLife('half'); // 30min stale, 10min revalidate, 3 hours expire
+  // Configure cache - use 'stable' profile for optimal SEO (6hr stale, 1hr revalidate, 7 days expire)
+  cacheLife('stable'); // 6hr stale, 1hr revalidate, 7 days expire - optimized for SEO
   cacheTag('announcements');
 
   const service = new MiscService();
@@ -34,5 +34,5 @@ export async function getActiveAnnouncement(): Promise<announcements | null> {
     end_date: result.end_date ? new Date(result.end_date) : null,
     start_date: result.start_date ? new Date(result.start_date) : null,
     updated_at: new Date(result.updated_at),
-  } as announcements;
+  } as announcementsModel;
 }

@@ -9,10 +9,10 @@ import { createHmac, timingSafeEqual } from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 
 import { MiscService } from '@heyclaude/data-layer';
-import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
+import type { content_category } from '@heyclaude/data-layer/prisma';
 import { normalizeError, verifySvixSignature } from '@heyclaude/shared-runtime';
 
-type ContentCategory = DatabaseGenerated['public']['Enums']['content_category'];
+type ContentCategory = content_category;
 
 import { logger, createWebAppContextWithId } from '../../logging/server';
 import { createErrorResponse } from '../../utils/error-handler';
@@ -30,8 +30,10 @@ const WEBHOOK_CORS_HEADERS = {
 const MAX_WEBHOOK_BODY_SIZE = 262144;
 
 // Valid webhook sources from database enum
-type WebhookSource = DatabaseGenerated['public']['Enums']['webhook_source'];
-type WebhookEventType = DatabaseGenerated['public']['Enums']['webhook_event_type'];
+import type { webhook_source, webhook_event_type } from '@heyclaude/data-layer/prisma';
+
+type WebhookSource = webhook_source;
+type WebhookEventType = webhook_event_type;
 
 interface WebhookIngestResult {
   source: WebhookSource;
@@ -218,7 +220,7 @@ async function detectAndVerifyWebhookSource(headers: Headers, body: string): Pro
     return 'vercel';
   }
 
-  // Check for Supabase database webhook
+  // Check for Supabase webhook (auth/storage events)
   const supabaseSignature = headers.get('x-supabase-signature') || 
                            headers.get('x-webhook-signature') ||
                            headers.get('x-signature');
@@ -226,7 +228,7 @@ async function detectAndVerifyWebhookSource(headers: Headers, body: string): Pro
                             headers.get('x-timestamp');
   
   if (supabaseSignature) {
-    // Verify Supabase database webhook signature
+    // Verify Supabase webhook signature
     const webhookSecret = process.env['INTERNAL_API_SECRET'];
     if (!webhookSecret) {
       logger.warn({}, 'INTERNAL_API_SECRET not configured, cannot verify Supabase webhook');
@@ -243,7 +245,7 @@ async function detectAndVerifyWebhookSource(headers: Headers, body: string): Pro
     });
 
     if (!isValid) {
-      logger.warn({}, 'Supabase database webhook signature verification failed');
+      logger.warn({}, 'Supabase webhook signature verification failed');
       return null;
     }
     return 'supabase_db';
@@ -261,7 +263,7 @@ function mapEventType(source: WebhookSource, eventType: string | undefined): Web
     return 'deployment.succeeded';
   }
 
-  // Map Supabase database webhook events
+  // Map Supabase webhook events
   if (source === 'supabase_db') {
     if (eventType === 'INSERT') {
       return 'content_announcement_create' as WebhookEventType;
@@ -318,7 +320,7 @@ async function ingestWebhookEvent(
       eventTypeRaw = payload['type'] as string | undefined;
       break;
     case 'supabase_db':
-      // Supabase database webhooks use record.id as unique identifier
+      // Supabase webhooks use record.id as unique identifier
       svixId = (payload['record'] as Record<string, unknown>)?.['id'] as string | null ||
                headers.get('x-request-id') || 
                null;
@@ -588,7 +590,7 @@ async function processResendWebhook(
 }
 
 /**
- * Process Supabase database webhook events
+ * Process Supabase webhook events
  * 
  * Forwards content change events to Inngest for durable processing.
  * This enables:
@@ -604,7 +606,7 @@ async function processSupabaseWebhook(
 
   logger.info({ ...logContext,
     eventType,
-    webhookId, }, 'Processing Supabase database webhook');
+    webhookId, }, 'Processing Supabase webhook');
 
   // Validate webhookId (required for idempotency)
   if (!webhookId) {
@@ -614,7 +616,7 @@ async function processSupabaseWebhook(
     return { forwarded: false, error: 'Missing webhookId' };
   }
 
-  // Validate payload structure (Supabase database webhook format)
+  // Validate payload structure (Supabase webhook format)
   const record = payload['record'] as Record<string, unknown> | undefined;
   const oldRecord = payload['old_record'] as Record<string, unknown> | null | undefined;
   const table = payload['table'] as string | undefined;
