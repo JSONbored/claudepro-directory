@@ -1,0 +1,30 @@
+-- Migration: Remove get_active_announcement RPC function
+-- Version: 20251216120000
+-- Applied via: Supabase MCP (or manual application)
+-- Date: 2025-12-16
+--
+-- Description: Remove get_active_announcement RPC function - converted to Prisma direct query
+--
+-- This function was a simple SELECT with date range filtering:
+--   SELECT * FROM announcements WHERE active = true 
+--     AND (start_date IS NULL OR start_date <= p_now) 
+--     AND (end_date IS NULL OR end_date >= p_now) 
+--     ORDER BY priority DESC, start_date DESC NULLS LAST
+--
+-- The service now uses Prisma directly in MiscService.getActiveAnnouncement():
+--   prisma.announcements.findFirst({
+--     where: {
+--       active: true,
+--       AND: [
+--         { OR: [{ start_date: null }, { start_date: { lte: p_now } }] },
+--         { OR: [{ end_date: null }, { end_date: { gte: p_now } }] }
+--       ]
+--     },
+--     orderBy: [{ priority: 'desc' }, { start_date: 'desc' }]
+--   })
+--
+-- Related Changes:
+-- - packages/data-layer/src/services/misc.ts: Converted getActiveAnnouncement() to use Prisma
+-- - packages/web-runtime/src/data/announcements.ts: Updated to use Prisma model types
+
+DROP FUNCTION IF EXISTS public.get_active_announcement(timestamptz);

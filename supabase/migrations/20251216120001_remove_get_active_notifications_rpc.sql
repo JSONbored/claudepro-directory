@@ -1,0 +1,30 @@
+-- Migration: Remove get_active_notifications RPC function
+-- Version: 20251216120001
+-- Applied via: Supabase MCP (or manual application)
+-- Date: 2025-12-16
+--
+-- Description: Remove get_active_notifications RPC function - converted to Prisma direct query
+--
+-- This function was a simple SELECT with WHERE filters:
+--   SELECT * FROM notifications 
+--   WHERE active = true 
+--     AND id <> ALL(p_dismissed_ids) 
+--     AND (expires_at IS NULL OR expires_at > NOW()) 
+--   ORDER BY created_at DESC
+--
+-- The service now uses Prisma directly in MiscService.getActiveNotifications():
+--   prisma.notifications.findMany({
+--     where: {
+--       active: true,
+--       AND: [
+--         { id: { notIn: p_dismissed_ids } },
+--         { OR: [{ expires_at: null }, { expires_at: { gt: now } }] }
+--       ]
+--     },
+--     orderBy: { created_at: 'desc' }
+--   })
+--
+-- Related Changes:
+-- - packages/data-layer/src/services/misc.ts: Converted getActiveNotifications() to use Prisma
+
+DROP FUNCTION IF EXISTS public.get_active_notifications(text[]);

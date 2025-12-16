@@ -1,0 +1,21 @@
+-- Migration: Remove get_jobs_by_category RPC function
+-- Version: 20251216120005
+-- Applied via: Supabase MCP
+-- Date: 2025-12-16
+--
+-- Description: Remove get_jobs_by_category RPC function - converted to Prisma direct query
+--
+-- This function was a simple SELECT with WHERE/ORDER BY:
+--   SELECT * FROM jobs WHERE category = p_category AND status = 'active' AND active = true
+--   ORDER BY featured DESC NULLS LAST, order DESC NULLS LAST, posted_at DESC NULLS LAST
+--
+-- The service now uses Prisma directly in JobsService.getJobsByCategory():
+--   prisma.jobs.findMany({
+--     where: { status: 'active', active: true, category: args.p_category },
+--     orderBy: [{ featured: 'desc' }, { order: 'desc' }, { posted_at: 'desc' }]
+--   })
+--
+-- Related Changes:
+-- - packages/data-layer/src/services/jobs.ts: Converted getJobsByCategory() to use Prisma
+
+DROP FUNCTION IF EXISTS public.get_jobs_by_category(public.job_category);

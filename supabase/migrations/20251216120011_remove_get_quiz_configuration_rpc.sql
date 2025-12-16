@@ -1,0 +1,37 @@
+-- Migration: Remove get_quiz_configuration RPC function
+-- Version: 20251216120011
+-- Applied via: Supabase MCP (or manual application)
+-- Date: 2025-12-16
+--
+-- Description: Remove get_quiz_configuration RPC function - converted to Prisma direct query
+--
+-- This function was using nested ARRAY_AGG for question options:
+--   SELECT 
+--     q.question_id::text as id,
+--     q.question_text as question,
+--     q.description,
+--     COALESCE(q.required, false) as required,
+--     q.display_order,
+--     ARRAY_AGG(...) as options
+--   FROM quiz_questions q
+--   LEFT JOIN quiz_options o ON o.question_id = q.question_id
+--   GROUP BY q.question_id, q.question_text, ...
+--   ORDER BY q.display_order
+--
+-- The service now uses Prisma directly in QuizService.getQuizConfiguration():
+--   prisma.quiz_questions.findMany({
+--     include: {
+--       quiz_options: {
+--         orderBy: { display_order: 'asc' }
+--       }
+--     },
+--     orderBy: { display_order: 'asc' }
+--   })
+--   Then transforms to match RPC return structure in TypeScript
+--
+-- Related Changes:
+-- - packages/data-layer/src/services/quiz.ts: Converted getQuizConfiguration() to use Prisma
+-- - Uses Prisma include for nested options (better than ARRAY_AGG)
+-- - Return type: Promise<GetQuizConfigurationReturns> (local type matching RPC structure)
+
+DROP FUNCTION IF EXISTS public.get_quiz_configuration();

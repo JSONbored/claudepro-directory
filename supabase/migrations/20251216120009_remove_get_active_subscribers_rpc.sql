@@ -1,0 +1,31 @@
+-- Migration: Remove get_active_subscribers RPC function
+-- Version: 20251216120009
+-- Applied via: Supabase MCP (or manual application)
+-- Date: 2025-12-16
+--
+-- Description: Remove get_active_subscribers RPC function - converted to Prisma direct query
+--
+-- This function was using ARRAY_AGG to return an array of emails:
+--   SELECT ARRAY_AGG(email ORDER BY subscribed_at DESC)
+--   FROM newsletter_subscriptions
+--   WHERE status = 'active'
+--     AND confirmed = true
+--     AND unsubscribed_at IS NULL
+--
+-- The service now uses Prisma directly in NewsletterService.getActiveSubscribers():
+--   prisma.newsletter_subscriptions.findMany({
+--     where: {
+--       status: 'active',
+--       confirmed: true,
+--       unsubscribed_at: null,
+--     },
+--     select: { email: true },
+--     orderBy: { subscribed_at: 'desc' },
+--   })
+--   Then maps to array of emails in TypeScript: subscribers.map(s => s.email)
+--
+-- Related Changes:
+-- - packages/data-layer/src/services/newsletter.ts: Converted getActiveSubscribers() to use Prisma
+-- - Return type: Promise<string[]> (array of emails)
+
+DROP FUNCTION IF EXISTS public.get_active_subscribers();

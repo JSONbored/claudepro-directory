@@ -1,0 +1,17 @@
+-- Migration: Remove get_jobs_count RPC function
+-- Version: 20251216120003
+-- Applied via: Supabase MCP
+-- Date: 2025-12-16
+--
+-- Description: Remove get_jobs_count RPC function - converted to Prisma direct query
+--
+-- This function was a simple COUNT query:
+--   SELECT COUNT(*)::INTEGER FROM jobs WHERE status = 'active' AND active = true
+--
+-- The service now uses Prisma directly in JobsService.getJobsCount():
+--   prisma.jobs.count({ where: { status: 'active', active: true } })
+--
+-- Related Changes:
+-- - packages/data-layer/src/services/jobs.ts: Converted getJobsCount() to use Prisma
+
+DROP FUNCTION IF EXISTS public.get_jobs_count();

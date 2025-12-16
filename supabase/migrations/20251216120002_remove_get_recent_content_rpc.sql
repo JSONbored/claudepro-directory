@@ -1,0 +1,29 @@
+-- Migration: Remove get_recent_content RPC function
+-- Version: 20251216120002
+-- Applied via: Supabase MCP (or manual application)
+-- Date: 2025-12-16
+--
+-- Description: Remove get_recent_content RPC function - converted to Prisma direct query
+--
+-- This function was a simple SELECT with WHERE/ORDER BY/LIMIT:
+--   SELECT * FROM content 
+--   WHERE (p_category IS NULL OR category::text = p_category) 
+--     AND (p_days IS NULL OR date_added >= (NOW() - MAKE_INTERVAL(days => COALESCE(p_days, 180)))) 
+--   ORDER BY date_added DESC NULLS LAST, created_at DESC NULLS LAST 
+--   LIMIT LEAST(GREATEST(COALESCE(p_limit, 20), 1), 100)
+--
+-- The service now uses Prisma directly in TrendingService.getRecentContent():
+--   prisma.content.findMany({
+--     where: {
+--       ...(p_category ? { category } : {}),
+--       ...(daysAgo ? { date_added: { gte: daysAgo } } : {})
+--     },
+--     orderBy: [{ date_added: 'desc' }, { created_at: 'desc' }],
+--     take: limit
+--   })
+--
+-- Related Changes:
+-- - packages/data-layer/src/services/trending.ts: Converted getRecentContent() to use Prisma
+-- - packages/web-runtime/src/data/content/index.ts: Updated to use Prisma model types
+
+DROP FUNCTION IF EXISTS public.get_recent_content(text, integer, integer);

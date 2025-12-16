@@ -1,0 +1,25 @@
+-- Migration: Remove get_contact_commands RPC function
+-- Version: 20251216120010
+-- Applied via: Supabase MCP (or manual application)
+-- Date: 2025-12-16
+--
+-- Description: Remove get_contact_commands RPC function - converted to Prisma direct query
+--
+-- This function was returning a nested array structure:
+--   SELECT ARRAY_AGG(ROW(...)::contact_command_result) FROM contact_commands ORDER BY display_order
+--   Returns: ContactCommandResult[][] (array of arrays)
+--
+-- The service now uses Prisma directly in MiscService.getContactCommands():
+--   prisma.contact_commands.findMany({
+--     where: { is_active: true },
+--     orderBy: { display_order: 'asc' }
+--   })
+--   Returns: contact_commandsModel[] (simple array, flattened)
+--
+-- Related Changes:
+-- - packages/data-layer/src/services/misc.ts: Converted getContactCommands() to use Prisma
+-- - packages/web-runtime/src/actions/contact.ts: Updated to use direct array (not nested)
+-- - packages/web-runtime/src/data/contact.ts: Updated to use direct array (not nested)
+-- - Return type: Promise<contact_commandsModel[]>
+
+DROP FUNCTION IF EXISTS public.get_contact_commands();

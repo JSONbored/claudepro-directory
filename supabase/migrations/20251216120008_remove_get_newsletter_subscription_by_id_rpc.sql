@@ -1,0 +1,20 @@
+-- Migration: Remove get_newsletter_subscription_by_id RPC function
+-- Version: 20251216120008
+-- Applied via: Supabase MCP (or manual application)
+-- Date: 2025-12-16
+--
+-- Description: Remove get_newsletter_subscription_by_id RPC function - converted to Prisma direct query
+--
+-- This function was a simple SELECT by ID:
+--   SELECT * FROM newsletter_subscriptions WHERE id = p_id LIMIT 1
+--
+-- The service now uses Prisma directly in NewsletterService.getSubscriptionById():
+--   prisma.newsletter_subscriptions.findUnique({
+--     where: { id }
+--   })
+--
+-- Related Changes:
+-- - packages/data-layer/src/services/newsletter.ts: Converted getSubscriptionById() to use Prisma
+-- - Return type: Promise<newsletter_subscriptionsModel | null>
+
+DROP FUNCTION IF EXISTS public.get_newsletter_subscription_by_id(uuid);

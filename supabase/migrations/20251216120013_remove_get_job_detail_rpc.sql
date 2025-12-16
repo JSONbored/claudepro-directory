@@ -1,0 +1,27 @@
+-- Migration: Remove get_job_detail RPC function
+-- Version: 20251216120013
+-- Applied via: Supabase MCP (or manual application)
+-- Date: 2025-12-16
+--
+-- Description: Remove get_job_detail RPC function - converted to Prisma direct query
+--
+-- This function was returning a composite type (job_detail_result):
+--   SELECT ... FROM jobs WHERE slug = p_slug
+--   Returns: JobDetailResult (composite type)
+--
+-- The service now uses Prisma directly in JobsService.getJobBySlug():
+--   prisma.jobs.findUnique({
+--     where: { slug: args.p_slug },
+--     include: {
+--       companies: {
+--         select: { name: true },
+--       },
+--     },
+--   })
+--   Then transforms to match RPC composite type structure in TypeScript
+--
+-- Related Changes:
+-- - packages/data-layer/src/services/jobs.ts: Converted getJobBySlug() to use Prisma
+-- - packages/web-runtime/src/data/jobs.ts: Updated to handle null return (service now returns GetJobDetailReturns | null)
+-- - Return type: Promise<GetJobDetailReturns | null> (local type matching RPC composite structure)
+DROP FUNCTION IF EXISTS public.get_job_detail(text);

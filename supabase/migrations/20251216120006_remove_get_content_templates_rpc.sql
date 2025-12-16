@@ -1,0 +1,29 @@
+-- Migration: Remove get_content_templates RPC function
+-- Version: 20251216120006
+-- Applied via: Supabase MCP (or manual application)
+-- Date: 2025-12-16
+--
+-- Description: Remove get_content_templates RPC function - converted to Prisma direct query
+--
+-- This function was a simple SELECT with category filtering and JSON extraction:
+--   SELECT id, category as type, name, description, 
+--          template_data->>'category' as category,
+--          template_data->>'tags' as tags,
+--          template_data
+--   FROM content_templates
+--   WHERE category = p_category AND active = true
+--   ORDER BY display_order ASC, name ASC
+--
+-- The service now uses Prisma directly in ContentService.getContentTemplates():
+--   prisma.content_templates.findMany({
+--     where: { category: p_category, active: true },
+--     select: { id, category, name, description, template_data },
+--     orderBy: [{ display_order: 'asc' }, { name: 'asc' }]
+--   })
+--   Then transforms in TypeScript to match RPC return structure
+--
+-- Related Changes:
+-- - packages/data-layer/src/services/content.ts: Converted getContentTemplates() to use Prisma
+-- - Types defined locally in service file (ContentTemplatesItem, ContentTemplatesResult)
+
+DROP FUNCTION IF EXISTS public.get_content_templates(public.content_category);

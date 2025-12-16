@@ -1,0 +1,23 @@
+-- Migration: Remove get_payment_plan_catalog RPC function
+-- Version: 20251216120012
+-- Applied via: Supabase MCP (or manual application)
+-- Date: 2025-12-16
+--
+-- Description: Remove get_payment_plan_catalog RPC function - converted to Prisma direct query
+--
+-- This function was doing a simple SELECT from payment_plan_catalog:
+--   SELECT * FROM payment_plan_catalog ORDER BY plan, tier
+--
+-- The service now uses Prisma directly in JobsService.getPaymentPlanCatalog():
+--   prisma.payment_plan_catalog.findMany({
+--     orderBy: [
+--       { plan: 'asc' },
+--       { tier: 'asc' },
+--     ],
+--   })
+--   Then transforms to match RPC return structure in TypeScript
+--
+-- Related Changes:
+-- - packages/data-layer/src/services/jobs.ts: Converted getPaymentPlanCatalog() to use Prisma
+-- - Return type: Promise<GetPaymentPlanCatalogReturns> (local type matching RPC structure)
+DROP FUNCTION IF EXISTS public.get_payment_plan_catalog();
