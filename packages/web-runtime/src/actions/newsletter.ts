@@ -3,13 +3,12 @@
 import { z } from 'zod';
 import type { newsletter_source } from '@heyclaude/data-layer/prisma';
 import { rateLimitedAction } from './safe-action.ts';
-import { logger, createWebAppContextWithId } from '../logging/server.ts';
 import { newsletter_sourceSchema } from '../prisma-zod-schemas.ts';
 
 // Email validation schema (reusable)
 const emailSchema = z.string().email({ message: 'Invalid email address' });
 
-// Schema definitions (defined outside action chain for Next.js compatibility)
+// Schema definitions
 const getNewsletterCountSchema = z.object({});
 
 const subscribeSchema = z.object({
@@ -47,6 +46,27 @@ export const getNewsletterCountAction = rateLimitedAction
   });
 
 /**
+ * Shared helper for newsletter subscription via Inngest
+ */
+async function subscribeToNewsletter(
+  email: string,
+  source: newsletter_source,
+  metadata?: Record<string, unknown>
+) {
+  const { inngest } = await import('../inngest/client.ts');
+  
+      await inngest.send({
+        name: 'email/subscribe',
+        data: {
+          email: email.toLowerCase().trim(),
+          source,
+          referrer: metadata?.['referrer'] as string | undefined,
+          metadata,
+        },
+      });
+}
+
+/**
  * Subscribe to newsletter via Inngest
  * 
  * This action sends an event to Inngest which handles:
@@ -59,42 +79,16 @@ export const subscribeNewsletterAction = rateLimitedAction
   .inputSchema(subscribeSchema)
   .metadata({ actionName: 'newsletter.subscribe', category: 'form' })
   .action(async ({ parsedInput }) => {
-    const logContext = createWebAppContextWithId('action', 'subscribeNewsletterAction');
-    
-    const normalizedEmail = parsedInput.email.toLowerCase().trim();
-    
-    logger.info({ ...logContext,
-      source: parsedInput.source, }, 'Newsletter subscription requested');
+    await subscribeToNewsletter(
+      parsedInput.email,
+      parsedInput.source,
+      parsedInput.metadata
+    );
 
-    try {
-      // Send event to Inngest for durable processing
-      const { inngest } = await import('../inngest/client.ts');
-      
-      await inngest.send({
-        name: 'email/subscribe',
-        data: {
-          email: normalizedEmail,
-          source: parsedInput.source,
-          referrer: parsedInput.metadata?.referrer,
-          metadata: parsedInput.metadata,
-        },
-      });
-
-      logger.info({ ...logContext,
-        source: parsedInput.source, }, 'Newsletter subscription event sent to Inngest');
-
-      return { 
-        success: true,
-        message: 'Subscription request received',
-      };
-    } catch (error) {
-      const { normalizeError } = await import('../errors.ts');
-      const normalized = normalizeError(error, 'Newsletter subscription failed');
-      
-      logger.error({ err: normalized, ...logContext }, 'Newsletter subscription failed');
-      
-      throw new Error('Failed to process subscription. Please try again.');
-    }
+    return { 
+      success: true,
+      message: 'Subscription request received',
+    };
   });
 
 /**
@@ -105,37 +99,14 @@ export const subscribeViaOAuthAction = rateLimitedAction
   .inputSchema(subscribeViaOAuthSchema)
   .metadata({ actionName: 'newsletter.subscribeViaOAuth', category: 'form' })
   .action(async ({ parsedInput }) => {
-    const logContext = createWebAppContextWithId('action', 'subscribeViaOAuthAction');
-    
-    const normalizedEmail = parsedInput.email.toLowerCase().trim();
+    await subscribeToNewsletter(
+      parsedInput.email,
+      'oauth_signup',
+      {
+        trigger_source: parsedInput.metadata?.trigger_source,
+        referrer: parsedInput.metadata?.referrer,
+      }
+    );
 
-    logger.info({ ...logContext,
-      triggerSource: parsedInput.metadata?.trigger_source, }, 'OAuth newsletter subscription requested');
-
-    try {
-      const { inngest } = await import('../inngest/client.ts');
-      
-      await inngest.send({
-        name: 'email/subscribe',
-        data: {
-          email: normalizedEmail,
-          source: 'oauth_signup' as newsletter_source,
-          referrer: parsedInput.metadata?.referrer,
-          metadata: {
-            trigger_source: parsedInput.metadata?.trigger_source,
-          },
-        },
-      });
-
-      logger.info(logContext, 'OAuth subscription event sent to Inngest');
-
-      return { success: true };
-    } catch (error) {
-      const { normalizeError } = await import('../errors.ts');
-      const normalized = normalizeError(error, 'OAuth subscription failed');
-      
-      logger.error({ err: normalized, ...logContext }, 'OAuth subscription failed');
-      
-      throw new Error('Failed to process subscription. Please try again.');
-    }
+    return { success: true };
   });

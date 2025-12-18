@@ -1,41 +1,33 @@
 'use server';
 
-import { AccountService } from '@heyclaude/data-layer';
-import type {
-  bookmarksModel,
-  content_category,
-  jobsModel,
-  user_tier,
+import { type IsBookmarkedBatchReturns, type IsFollowingBatchReturns } from '@heyclaude/data-layer';
+import {
+  type bookmarksModel,
+  type content_category,
+  type jobsModel,
+  type user_tier,
 } from '@heyclaude/data-layer/prisma';
-import type {
-  GetAccountDashboardReturns,
-  GetUserLibraryReturns,
-  GetUserDashboardReturns,
-  GetUserCompleteDataArgs,
-  GetUserCompleteDataReturns,
-  GetCollectionDetailWithItemsReturns,
-  GetUserSettingsReturns,
-  GetSponsorshipAnalyticsReturns,
-  GetUserCompaniesReturns,
-  GetUserSponsorshipsReturns,
-  GetSubmissionDashboardReturns,
-  GetUserActivitySummaryReturns,
-  GetUserActivityTimelineReturns,
-  GetUserIdentitiesReturns,
-  IsBookmarkedBatchReturns,
-  IsFollowingBatchReturns,
+import { UserTier } from '@heyclaude/data-layer/prisma';
+import {
+  type GetAccountDashboardReturns,
+  type GetCollectionDetailWithItemsReturns,
+  type GetSponsorshipAnalyticsReturns,
+  type GetSubmissionDashboardReturns,
+  type GetUserCompleteDataArgs,
+  type GetUserCompleteDataReturns,
+  type GetUserIdentitiesReturns,
+  type GetUserLibraryReturns,
+  type UserCompaniesCompany,
 } from '@heyclaude/database-types/postgres-types';
-import type {
-  UserCompaniesCompany,
-} from '@heyclaude/database-types/postgres-types';
-import { cacheLife, cacheTag } from 'next/cache';
 import { z } from 'zod';
 
 import { getAuthenticatedUserFromClient } from '../auth/get-authenticated-user.ts';
 import { normalizeError } from '../errors.ts';
 import { logger } from '../index.ts';
 import { createSupabaseServerClient } from '../supabase/server.ts';
-import { UserTier } from '@heyclaude/data-layer/prisma';
+
+import { createCachedDataFunction } from './cached-data-factory.ts';
+import { getService } from './service-factory.ts';
 
 const USER_TIER_VALUES = Object.values(UserTier) as readonly user_tier[];
 
@@ -54,121 +46,6 @@ const accountDashboardSchema = z.object({
   }),
 });
 
-/**
- * Get account dashboard
- *
- * Uses 'use cache: private' to enable cross-request caching for user-specific data.
- * This allows cookies() to be used inside the cache scope while still providing
- * per-user caching with TTL and cache invalidation support.
- *
- * NOTE: This function now uses the consolidated getUserCompleteData internally
- * for better performance and to avoid "role 'user' does not exist" errors.
- *
- * Cache behavior:
- * - Minimum 30 seconds stale time (required for runtime prefetch)
- * - Per-user cache keys (userId in cache tag)
- * - Not prerendered (runs at request time)
- * @param userId
- */
-export async function getAccountDashboard(
-  userId: string
-): Promise<GetAccountDashboardReturns | null> {
-  'use cache: private';
-  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
-  cacheTag(`user-dashboard-${userId}`);
-  // Also tag with complete data cache to share cache entry
-  cacheTag(`user-complete-data-${userId}`);
-
-  const reqLogger = logger.child({
-    module: 'data/account',
-    operation: 'getAccountDashboard',
-  });
-
-  try {
-    // Use consolidated function internally - single optimized database call
-    const completeData = await getUserCompleteData(userId);
-
-    if (!completeData?.account_dashboard) {
-      reqLogger.warn(
-        { hasCompleteData: Boolean(completeData), userId },
-        'getAccountDashboard: account_dashboard missing from complete data'
-      );
-      return null;
-    }
-
-    const result = accountDashboardSchema.parse(completeData.account_dashboard);
-
-    reqLogger.info(
-      { hasResult: Boolean(result), userId },
-      'getAccountDashboard: fetched successfully'
-    );
-
-    return result;
-  } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error({ err: errorForLogging, userId }, 'getAccountDashboard: unexpected error');
-    return null;
-  }
-}
-
-/**
- * Get user library (bookmarks)
- *
- * Uses 'use cache: private' to enable cross-request caching for user-specific data.
- * This allows cookies() to be used inside the cache scope while still providing
- * per-user caching with TTL and cache invalidation support.
- *
- * NOTE: This function now uses the consolidated getUserCompleteData internally
- * for better performance and to avoid "role 'user' does not exist" errors.
- *
- * Cache behavior:
- * - Minimum 30 seconds stale time (required for runtime prefetch)
- * - Per-user cache keys (userId in cache tag)
- * - Not prerendered (runs at request time)
- * @param userId
- */
-export async function getUserLibrary(
-  userId: string
-): Promise<GetUserLibraryReturns | null> {
-  'use cache: private';
-  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
-  cacheTag(`user-library-${userId}`);
-  // Also tag with complete data cache to share cache entry
-  cacheTag(`user-complete-data-${userId}`);
-
-  const reqLogger = logger.child({
-    module: 'data/account',
-    operation: 'getUserLibrary',
-  });
-
-  try {
-    // Use consolidated function internally - single optimized database call
-    const completeData = await getUserCompleteData(userId);
-
-    if (!completeData?.user_library) {
-      reqLogger.warn(
-        { hasCompleteData: Boolean(completeData), userId },
-        'getUserLibrary: user_library missing from complete data'
-      );
-      return null;
-    }
-
-    reqLogger.info(
-      { hasResult: Boolean(completeData.user_library), userId },
-      'getUserLibrary: fetched successfully'
-    );
-
-    // Type assertion: RPC returns postgres-types, using custom composite types for consistency
-    // TODO: Remove assertion when fully migrated to Prisma queries
-    return completeData.user_library as GetUserLibraryReturns;
-  } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error({ err: errorForLogging, userId }, 'getUserLibrary: unexpected error');
-    return null;
-  }
-}
 
 /**
  * Get user bookmarks for collections
@@ -183,8 +60,9 @@ export async function getUserLibrary(
  * @returns Array of bookmarks in Prisma format (with Date objects for timestamps)
  */
 export async function getUserBookmarksForCollections(userId: string): Promise<bookmarksModel[]> {
-  const data = await getUserLibrary(userId);
-  const bookmarksArray = data?.bookmarks ?? [];
+  // OPTIMIZATION: Use getUserCompleteData directly instead of wrapper
+  const completeData = await getUserCompleteData(userId);
+  const bookmarksArray = completeData?.user_library?.bookmarks ?? [];
   return bookmarksArray
     .filter(
       (
@@ -215,68 +93,15 @@ export async function getUserBookmarksForCollections(userId: string): Promise<bo
     }));
 }
 
+
 /**
- * Get user dashboard (jobs)
- *
- * Uses 'use cache: private' to enable cross-request caching for user-specific data.
- * This allows cookies() to be used inside the cache scope while still providing
- * per-user caching with TTL and cache invalidation support.
- *
- * NOTE: This function now uses the consolidated getUserCompleteData internally
- * for better performance and to avoid "role 'user' does not exist" errors.
- *
- * Cache behavior:
- * - Minimum 30 seconds stale time (required for runtime prefetch)
- * - Per-user cache keys (userId in cache tag)
- * - Not prerendered (runs at request time)
- * @param userId
+ * Get user job by ID
+ * Simplified: Extracts job from getUserCompleteData result
  */
-export async function getUserDashboard(
-  userId: string
-): Promise<GetUserDashboardReturns | null> {
-  'use cache: private';
-  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
-  cacheTag(`user-dashboard-${userId}`);
-  // Also tag with complete data cache to share cache entry
-  cacheTag(`user-complete-data-${userId}`);
-
-  const reqLogger = logger.child({
-    module: 'data/account',
-    operation: 'getUserDashboard',
-  });
-
-  try {
-    // Use consolidated function internally - single optimized database call
-    const completeData = await getUserCompleteData(userId);
-
-    if (!completeData?.user_dashboard) {
-      reqLogger.warn(
-        { hasCompleteData: Boolean(completeData), userId },
-        'getUserDashboard: user_dashboard missing from complete data'
-      );
-      return null;
-    }
-
-    reqLogger.info(
-      { hasResult: Boolean(completeData.user_dashboard), userId },
-      'getUserDashboard: fetched successfully'
-    );
-
-    // Type assertion: RPC returns postgres-types, using custom composite types for consistency
-    // TODO: Remove assertion when fully migrated to Prisma queries
-    return completeData.user_dashboard as GetUserDashboardReturns;
-  } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error({ err: errorForLogging, userId }, 'getUserDashboard: unexpected error');
-    return null;
-  }
-}
-
 export async function getUserJobById(userId: string, jobId: string): Promise<jobsModel | null> {
-  const data = await getUserDashboard(userId);
-  const jobsArray = (data?.jobs as jobsModel[] | undefined) ?? [];
-  return jobsArray.find((job) => job.id === jobId) ?? null;
+  const completeData = await getUserCompleteData(userId);
+  const jobs = (completeData?.user_dashboard?.jobs as jobsModel[] | undefined) ?? [];
+  return jobs.find((job) => job.id === jobId) ?? null;
 }
 
 /**
@@ -317,7 +142,8 @@ export async function getUserCompleteData(
   }
 ): Promise<GetUserCompleteDataReturns | null> {
   'use cache: private';
-  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
+  const { cacheLife, cacheTag } = await import('next/cache');
+  cacheLife('userProfile'); // 1min stale, 5min revalidate, 30min expire - User-specific data
   cacheTag(`user-complete-data-${userId}`);
 
   const reqLogger = logger.child({
@@ -328,61 +154,31 @@ export async function getUserCompleteData(
   try {
     const client = await createSupabaseServerClient();
 
-    // Verify session is valid before making RPC call
-    // This ensures PostgREST receives a valid auth token
-    // Use getAuthenticatedUserFromClient instead of direct auth.getUser() for proper error handling
+    // Single authentication check - getAuthenticatedUserFromClient validates session via getUser()
+    // No need to call getSession() separately as getUser() already validates the session
     const authResult = await getAuthenticatedUserFromClient(client, {
       context: 'getUserCompleteData',
       requireUser: true,
     });
 
-    if (!authResult.isAuthenticated || !authResult.user) {
+    // Verify authentication and userId match in single check
+    if (!authResult.isAuthenticated || authResult.user?.id !== userId) {
       reqLogger.warn(
         {
+          authenticatedUserId: authResult.user?.id,
           error: authResult.error?.message,
           hasUser: Boolean(authResult.user),
           isAuthenticated: authResult.isAuthenticated,
-          userId,
+          requestedUserId: userId,
         },
-        'getUserCompleteData: authentication failed'
-      );
-      return null;
-    }
-
-    // Verify the authenticated user matches the requested userId (security check)
-    if (authResult.user.id !== userId) {
-      reqLogger.warn(
-        { authenticatedUserId: authResult.user.id, requestedUserId: userId },
-        'getUserCompleteData: userId mismatch'
-      );
-      return null;
-    }
-
-    // Get the session after getUser() to ensure we have the latest token
-    const {
-      data: { session },
-      error: sessionError,
-    } = await client.auth.getSession();
-
-    if (sessionError || !session) {
-      reqLogger.warn(
-        { hasSession: Boolean(session), sessionError: sessionError?.message, userId },
-        'getUserCompleteData: no valid session after getUser'
-      );
-      return null;
-    }
-
-    // Verify the authenticated user matches the requested userId (security check)
-    if (session.user.id !== userId) {
-      reqLogger.warn(
-        { authenticatedUserId: session.user.id, requestedUserId: userId },
-        'getUserCompleteData: userId mismatch'
+        'getUserCompleteData: authentication failed or userId mismatch'
       );
       return null;
     }
 
     // Use AccountService for proper architectural flow through data layer
-    const service = new AccountService();
+    // OPTIMIZATION: Use singleton instance (services are stateless)
+    const service = await getService('account');
 
     // Build RPC parameters - only include p_activity_type if it's provided (not null/undefined)
     const rpcParams: GetUserCompleteDataArgs = {
@@ -402,7 +198,7 @@ export async function getUserCompleteData(
     // Type assertion: RPC returns postgres-types, using custom composite types for consistency
     // The structure matches, but nullability differs slightly between Database types and our custom types
     // TODO: Remove assertion when fully migrated to Prisma queries
-    return result as GetUserCompleteDataReturns;
+    return result;
   } catch (error) {
     // Normalize error properly - handle both Error instances and Supabase error objects
     const normalizedError = normalizeError(error, 'getUserCompleteData: unexpected error occurred');
@@ -442,42 +238,35 @@ export async function getUserCompleteData(
  * @param userId
  * @param slug
  */
+/**
+ * Get collection detail
+ *
+ * Uses 'use cache: private' to enable cross-request caching for user-specific data.
+ */
 export async function getCollectionDetail(
   userId: string,
   slug: string
 ): Promise<GetCollectionDetailWithItemsReturns | null> {
-  'use cache: private';
-  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
-  cacheTag(`user-collection-${userId}-${slug}`);
-
-  const reqLogger = logger.child({
+  const cachedFn = createCachedDataFunction<
+    { userId: string; slug: string },
+    GetCollectionDetailWithItemsReturns | null
+  >({
+    serviceKey: 'account',
+    methodName: 'getCollectionDetailWithItems',
+    cacheMode: 'private',
+    cacheLife: 'userProfile', // 1min stale, 5min revalidate, 30min expire - User-specific data
+    cacheTags: (args) => [`user-collection-${args.userId}-${args.slug}`],
     module: 'data/account',
     operation: 'getCollectionDetail',
+    transformArgs: (args) => ({
+      p_slug: args.slug,
+      p_user_id: args.userId,
+    }),
+    onError: () => null,
+    logContext: (args) => ({ slug: args.slug, userId: args.userId }),
   });
 
-  try {
-    const service = new AccountService();
-
-    const result = await service.getCollectionDetailWithItems({
-      p_slug: slug,
-      p_user_id: userId,
-    });
-
-    reqLogger.info(
-      { hasResult: Boolean(result), slug, userId },
-      'getCollectionDetail: fetched successfully'
-    );
-
-    return result;
-  } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error(
-      { err: errorForLogging, slug, userId },
-      'getCollectionDetail: unexpected error'
-    );
-    return null;
-  }
+  return await cachedFn({ userId, slug });
 }
 
 /**
@@ -495,61 +284,6 @@ export async function getCollectionDetail(
  * - Per-user cache keys (userId in cache tag)
  * - Not prerendered (runs at request time)
  */
-/**
- * Get user settings
- *
- * Uses 'use cache: private' to enable cross-request caching for user-specific data.
- * This allows cookies() to be used inside the cache scope while still providing
- * per-user caching with TTL and cache invalidation support.
- *
- * NOTE: This function now uses the consolidated getUserCompleteData internally
- * for better performance and to avoid "role 'user' does not exist" errors.
- *
- * Cache behavior:
- * - Minimum 30 seconds stale time (required for runtime prefetch)
- * - Per-user cache keys (userId in cache tag)
- * - Not prerendered (runs at request time)
- * @param userId
- */
-export async function getUserSettings(
-  userId: string
-): Promise<GetUserSettingsReturns | null> {
-  'use cache: private';
-  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
-  cacheTag(`user-settings-${userId}`);
-  // Also tag with complete data cache to share cache entry
-  cacheTag(`user-complete-data-${userId}`);
-
-  const reqLogger = logger.child({
-    module: 'data/account',
-    operation: 'getUserSettings',
-  });
-
-  try {
-    // Use consolidated function internally - single optimized database call
-    const completeData = await getUserCompleteData(userId);
-
-    if (!completeData?.user_settings) {
-      reqLogger.warn(
-        { hasCompleteData: Boolean(completeData), userId },
-        'getUserSettings: user_settings missing from complete data'
-      );
-      return null;
-    }
-
-    reqLogger.info(
-      { hasResult: Boolean(completeData.user_settings), userId },
-      'getUserSettings: fetched successfully'
-    );
-
-    return completeData.user_settings;
-  } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error({ err: errorForLogging, userId }, 'getUserSettings: unexpected error');
-    return null;
-  }
-}
 
 /**
  * Get sponsorship analytics
@@ -565,238 +299,93 @@ export async function getUserSettings(
  * @param userId
  * @param sponsorshipId
  */
+/**
+ * Get sponsorship analytics
+ *
+ * Uses 'use cache: private' to enable cross-request caching for user-specific data.
+ */
+/**
+ * Get sponsorship analytics
+ *
+ * Uses 'use cache: private' to enable cross-request caching for user-specific data.
+ */
 export async function getSponsorshipAnalytics(
   userId: string,
   sponsorshipId: string
 ): Promise<GetSponsorshipAnalyticsReturns | null> {
-  'use cache: private';
-  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
-  cacheTag(`user-sponsorship-analytics-${userId}-${sponsorshipId}`);
-
-  const reqLogger = logger.child({
+  const cachedFn = createCachedDataFunction<
+    { userId: string; sponsorshipId: string },
+    GetSponsorshipAnalyticsReturns | null
+  >({
+    serviceKey: 'account',
+    methodName: 'getSponsorshipAnalytics',
+    cacheMode: 'private',
+    cacheLife: 'userProfile', // 1min stale, 5min revalidate, 30min expire - User-specific data
+    cacheTags: (args) => [`user-sponsorship-analytics-${args.userId}-${args.sponsorshipId}`],
     module: 'data/account',
     operation: 'getSponsorshipAnalytics',
+    transformArgs: (args) => ({
+      p_sponsorship_id: args.sponsorshipId,
+      p_user_id: args.userId,
+    }),
+    onError: () => null,
+    logContext: (args) => ({ sponsorshipId: args.sponsorshipId, userId: args.userId }),
   });
 
-  try {
-    const service = new AccountService();
-
-    const result = await service.getSponsorshipAnalytics({
-      p_sponsorship_id: sponsorshipId,
-      p_user_id: userId,
-    });
-
-    reqLogger.info(
-      { hasResult: Boolean(result), sponsorshipId, userId },
-      'getSponsorshipAnalytics: fetched successfully'
-    );
-
-    return result;
-  } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error(
-      { err: errorForLogging, sponsorshipId, userId },
-      'getSponsorshipAnalytics: unexpected error'
-    );
-    return null;
-  }
+  return await cachedFn({ userId, sponsorshipId });
 }
+
+// All call sites have been updated to use getUserCompleteData().sponsorships
 
 /**
- * Get user companies
- *
- * Uses 'use cache: private' to enable cross-request caching for user-specific data.
- * This allows cookies() to be used inside the cache scope while still providing
- * per-user caching with TTL and cache invalidation support.
- *
- * NOTE: This function now uses the consolidated getUserCompleteData internally
- * and extracts companies from user_dashboard.companies (JSONB).
- *
- * Cache behavior:
- * - Minimum 30 seconds stale time (required for runtime prefetch)
- * - Per-user cache keys (userId in cache tag)
- * - Not prerendered (runs at request time)
- * @param userId
+ * Get user company by ID
+ * Simplified: Extracts company from getUserCompleteData result
  */
-export async function getUserCompanies(
-  userId: string
-): Promise<GetUserCompaniesReturns | null> {
-  'use cache: private';
-  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
-  cacheTag(`user-companies-${userId}`);
-  // Also tag with complete data cache to share cache entry
-  cacheTag(`user-complete-data-${userId}`);
-
-  const reqLogger = logger.child({
-    module: 'data/account',
-    operation: 'getUserCompanies',
-  });
-
-  try {
-    // Use consolidated function internally - single optimized database call
-    const completeData = await getUserCompleteData(userId);
-
-    if (!completeData?.user_dashboard?.companies) {
-      reqLogger.warn(
-        {
-          hasCompleteData: completeData != null,
-          hasUserDashboard: completeData?.user_dashboard != null,
-          userId,
-        },
-        'getUserCompanies: companies missing from complete data'
-      );
-      return { companies: [] };
-    }
-
-    // Extract companies from JSONB and convert to expected structure
-    // user_dashboard.companies is JSONB array, we need to convert to user_companies_company[]
-    const companiesJson = completeData.user_dashboard.companies;
-    const companiesArray = Array.isArray(companiesJson) ? companiesJson : [];
-
-    reqLogger.info(
-      {
-        count: companiesArray.length,
-        hasResult: Boolean(completeData.user_dashboard.companies),
-        userId,
-      },
-      'getUserCompanies: fetched successfully'
-    );
-
-    return {
-      companies: companiesArray as unknown as Array<UserCompaniesCompany>,
-    };
-  } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error({ err: errorForLogging, userId }, 'getUserCompanies: unexpected error');
-    return { companies: [] };
-  }
-}
-
-/**
- * Get user sponsorships
- *
- * Uses 'use cache: private' to enable cross-request caching for user-specific data.
- * This allows cookies() to be used inside the cache scope while still providing
- * per-user caching with TTL and cache invalidation support.
- *
- * NOTE: This function now uses the consolidated getUserCompleteData internally
- * for better performance and to avoid "role 'user' does not exist" errors.
- *
- * Cache behavior:
- * - Minimum 30 seconds stale time (required for runtime prefetch)
- * - Per-user cache keys (userId in cache tag)
- * - Not prerendered (runs at request time)
- * @param userId
- */
-export async function getUserSponsorships(
-  userId: string
-): Promise<GetUserSponsorshipsReturns> {
-  'use cache: private';
-  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
-  cacheTag(`user-sponsorships-${userId}`);
-  // Also tag with complete data cache to share cache entry
-  cacheTag(`user-complete-data-${userId}`);
-
-  const reqLogger = logger.child({
-    module: 'data/account',
-    operation: 'getUserSponsorships',
-  });
-
-  try {
-    // Use consolidated function internally - single optimized database call
-    const completeData = await getUserCompleteData(userId);
-
-    if (!completeData?.sponsorships) {
-      reqLogger.warn(
-        { hasCompleteData: Boolean(completeData), userId },
-        'getUserSponsorships: sponsorships missing from complete data'
-      );
-      return [];
-    }
-
-    reqLogger.info(
-      {
-        count: completeData.sponsorships?.length ?? 0,
-        hasResult: Boolean(completeData.sponsorships),
-        userId,
-      },
-      'getUserSponsorships: fetched successfully'
-    );
-
-    // Type assertion: RPC returns postgres-types, using custom composite types for consistency
-    // TODO: Remove assertion when fully migrated to Prisma queries
-    return (completeData.sponsorships ?? []) as GetUserSponsorshipsReturns;
-  } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error({ err: errorForLogging, userId }, 'getUserSponsorships: unexpected error');
-    return [];
-  }
-}
-
 export async function getUserCompanyById(
   userId: string,
   companyId: string
-): Promise<UserCompaniesCompany | null> {
-  const data = await getUserCompanies(userId);
-  const company = data?.companies?.find(
-    (c) => c?.id === companyId
-  ) as UserCompaniesCompany | undefined;
-  return company ?? null;
+): Promise<null | UserCompaniesCompany> {
+  const completeData = await getUserCompleteData(userId);
+  const companies = Array.isArray(completeData?.user_dashboard?.companies)
+    ? (completeData.user_dashboard.companies as UserCompaniesCompany[])
+    : [];
+  return companies.find((c) => c?.id === companyId) ?? null;
 }
 
 /**
  * Get submission dashboard
  *
  * Uses 'use cache: private' to enable cross-request caching for user-specific data.
- * This allows cookies() to be used inside the cache scope while still providing
- * per-user caching with TTL and cache invalidation support.
- *
- * Cache behavior:
- * - Minimum 30 seconds stale time (required for runtime prefetch)
- * - Cache keys include limits for different cache entries
- * - Not prerendered (runs at request time)
- * @param recentLimit
- * @param contributorsLimit
  */
 export async function getSubmissionDashboard(
   recentLimit = 5,
   contributorsLimit = 5
 ): Promise<GetSubmissionDashboardReturns | null> {
-  'use cache: private';
-  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
-  cacheTag(`submission-dashboard-${recentLimit}-${contributorsLimit}`);
-
-  const reqLogger = logger.child({
+  const cachedFn = createCachedDataFunction<
+    { recentLimit: number; contributorsLimit: number },
+    GetSubmissionDashboardReturns | null
+  >({
+    serviceKey: 'account',
+    methodName: 'getSubmissionDashboard',
+    cacheMode: 'private',
+    cacheLife: 'userProfile', // 1min stale, 5min revalidate, 30min expire - User-specific data
+    cacheTags: (args) => [
+      `submission-dashboard-${args.recentLimit}-${args.contributorsLimit}`,
+    ],
     module: 'data/account',
     operation: 'getSubmissionDashboard',
+    transformArgs: (args) => ({
+      p_contributors_limit: args.contributorsLimit,
+      p_recent_limit: args.recentLimit,
+    }),
+    onError: () => null,
+    logContext: (args) => ({
+      contributorsLimit: args.contributorsLimit,
+      recentLimit: args.recentLimit,
+    }),
   });
 
-  try {
-    const service = new AccountService();
-
-    const result = await service.getSubmissionDashboard({
-      p_contributors_limit: contributorsLimit,
-      p_recent_limit: recentLimit,
-    });
-
-    reqLogger.info(
-      { contributorsLimit, hasResult: Boolean(result), recentLimit },
-      'getSubmissionDashboard: fetched successfully'
-    );
-
-    return result;
-  } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error(
-      { contributorsLimit, err: errorForLogging, recentLimit },
-      'getSubmissionDashboard: unexpected error'
-    );
-    return null;
-  }
+  return await cachedFn({ recentLimit, contributorsLimit });
 }
 
 /**
@@ -811,169 +400,13 @@ export async function getSubmissionDashboard(
  * @returns Bundle containing dashboard, library, and homepage data
  */
 export interface AccountDashboardBundle {
-  dashboard: Awaited<ReturnType<typeof getAccountDashboard>>;
+  dashboard: GetAccountDashboardReturns | null;
   homepage: Awaited<ReturnType<typeof import('./content/homepage.ts').getHomepageData>>;
-  library: Awaited<ReturnType<typeof getUserLibrary>>;
+  library: GetUserLibraryReturns | null;
 }
 
-/**
- * Get user activity summary
- *
- * Uses 'use cache: private' to enable cross-request caching for user-specific data.
- * This allows cookies() to be used inside the cache scope while still providing
- * per-user caching with TTL and cache invalidation support.
- *
- * NOTE: This function now uses the consolidated getUserCompleteData internally
- * for better performance and to avoid "role 'user' does not exist" errors.
- *
- * Cache behavior:
- * - Minimum 30 seconds stale time (required for runtime prefetch)
- * - Per-user cache keys (userId in cache tag)
- * - Not prerendered (runs at request time)
- * @param userId
- */
-export async function getUserActivitySummary(
-  userId: string
-): Promise<GetUserActivitySummaryReturns | null> {
-  'use cache: private';
-  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
-  cacheTag(`user-activity-summary-${userId}`);
-  // Also tag with complete data cache to share cache entry
-  cacheTag(`user-complete-data-${userId}`);
-
-  const reqLogger = logger.child({
-    module: 'data/account',
-    operation: 'getUserActivitySummary',
-  });
-
-  try {
-    // Use consolidated function internally - single optimized database call
-    const completeData = await getUserCompleteData(userId);
-
-    if (!completeData?.activity_summary) {
-      reqLogger.warn(
-        { hasCompleteData: Boolean(completeData), userId },
-        'getUserActivitySummary: activity_summary missing from complete data'
-      );
-      return {
-        merged_submissions: 0,
-        total_activity: 0,
-        total_comments: 0,
-        total_posts: 0,
-        total_submissions: 0,
-        total_votes: 0,
-      };
-    }
-
-    reqLogger.info(
-      { hasResult: Boolean(completeData.activity_summary), userId },
-      'getUserActivitySummary: fetched successfully'
-    );
-
-    return completeData.activity_summary;
-  } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error({ err: errorForLogging, userId }, 'getUserActivitySummary: unexpected error');
-    return {
-      merged_submissions: 0,
-      total_activity: 0,
-      total_comments: 0,
-      total_posts: 0,
-      total_submissions: 0,
-      total_votes: 0,
-    };
-  }
-}
-
-/**
- * Get user activity timeline
- *
- * Uses 'use cache: private' to enable cross-request caching for user-specific data.
- * This allows cookies() to be used inside the cache scope while still providing
- * per-user caching with TTL and cache invalidation support.
- *
- * NOTE: This function now uses the consolidated getUserCompleteData internally
- * for better performance and to avoid "role 'user' does not exist" errors.
- * However, if custom pagination parameters are provided, it will make a separate
- * call to get the correctly paginated timeline.
- *
- * Cache behavior:
- * - Minimum 30 seconds stale time (required for runtime prefetch)
- * - Per-user cache keys (userId, type, limit, offset in cache tag)
- * - Not prerendered (runs at request time)
- * @param input
- * @param input.limit
- * @param input.offset
- * @param input.type
- * @param input.userId
- */
-export async function getUserActivityTimeline(input: {
-  limit?: number | undefined;
-  offset?: number | undefined;
-  type?: string | undefined;
-  userId: string;
-}): Promise<GetUserActivityTimelineReturns | null> {
-  'use cache: private';
-  const { limit = 20, offset = 0, type, userId } = input;
-  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
-  cacheTag(`user-activity-timeline-${userId}-${type ?? 'all'}-${limit}-${offset}`);
-  // Also tag with complete data cache to share cache entry (if using default params)
-  if (limit === 20 && offset === 0 && !type) {
-    cacheTag(`user-complete-data-${userId}`);
-  }
-
-  const reqLogger = logger.child({
-    module: 'data/account',
-    operation: 'getUserActivityTimeline',
-  });
-
-  try {
-    // Always use consolidated function - it supports custom pagination via options
-    const completeData = await getUserCompleteData(userId, {
-      activityLimit: limit,
-      activityOffset: offset,
-      activityType: type ?? null,
-    });
-
-    if (!completeData?.activity_timeline) {
-      reqLogger.warn(
-        { hasCompleteData: Boolean(completeData), userId },
-        'getUserActivityTimeline: activity_timeline missing from complete data'
-      );
-      return {
-        activities: [],
-        has_more: false,
-        total: 0,
-      };
-    }
-
-    reqLogger.info(
-      {
-        hasResult: Boolean(completeData.activity_timeline),
-        limit,
-        offset,
-        type: type ?? 'all',
-        userId,
-      },
-      'getUserActivityTimeline: fetched successfully from complete data'
-    );
-
-    return completeData.activity_timeline;
-  } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error(
-      { err: errorForLogging, limit, offset, type: type ?? 'all', userId },
-      'getUserActivityTimeline: unexpected error'
-    );
-    return {
-      activities: [],
-      has_more: false,
-      total: 0,
-    };
-  }
-}
+// All call sites have been updated to use getUserCompleteData(userId, { activityLimit, activityOffset, activityType }).activity_timeline
+// Note: For custom pagination, call getUserCompleteData with options directly
 
 /**
  * Get user identities
@@ -991,142 +424,114 @@ export async function getUserActivityTimeline(input: {
  * - Not prerendered (runs at request time)
  * @param userId
  */
+/**
+ * Get user identities
+ * Simplified: Extracts identities from getUserCompleteData result
+ * Uses same cache tags as getUserCompleteData for cache sharing
+ */
 export async function getUserIdentitiesData(
   userId: string
 ): Promise<GetUserIdentitiesReturns | null> {
-  'use cache: private';
-  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
-  cacheTag(`user-identities-${userId}`);
-  // Also tag with complete data cache to share cache entry
-  cacheTag(`user-complete-data-${userId}`);
-
-  const reqLogger = logger.child({
-    module: 'data/account',
-    operation: 'getUserIdentitiesData',
-  });
-
-  try {
-    // Use consolidated function internally - single optimized database call
-    const completeData = await getUserCompleteData(userId);
-
-    if (!completeData?.user_identities) {
-      reqLogger.warn(
-        { hasCompleteData: Boolean(completeData), userId },
-        'getUserIdentitiesData: user_identities missing from complete data'
-      );
-      return { identities: [] };
-    }
-
-    reqLogger.info(
-      { hasResult: Boolean(completeData.user_identities), userId },
-      'getUserIdentitiesData: fetched successfully'
-    );
-
-    return completeData.user_identities;
-  } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error({ err: errorForLogging, userId }, 'getUserIdentitiesData: unexpected error');
-    return { identities: [] };
-  }
+  const completeData = await getUserCompleteData(userId);
+  return completeData?.user_identities ?? { identities: [] };
 }
 
 /**
  * Check if content is bookmarked by user
  *
  * Uses 'use cache: private' to enable cross-request caching for user-specific data.
- * @param input
- * @param input.content_slug
- * @param input.content_type
- * @param input.userId
+ */
+/**
+ * Check if content is bookmarked by user
+ *
+ * Uses 'use cache: private' to enable cross-request caching for user-specific data.
  */
 export async function isBookmarked(input: {
   content_slug: string;
   content_type: content_category;
   userId: string;
 }): Promise<boolean> {
-  'use cache: private';
-  const { content_slug, content_type, userId } = input;
-
-  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
-  cacheTag('user-bookmarks');
-  cacheTag(`user-${userId}`);
-  cacheTag(`content-${content_slug}`);
-
-  const reqLogger = logger.child({
+  const cachedFn = createCachedDataFunction<
+    { content_slug: string; content_type: content_category; userId: string },
+    boolean
+  >({
+    serviceKey: 'account',
+    methodName: 'isBookmarked',
+    cacheMode: 'private',
+    cacheLife: 'userProfile', // 1min stale, 5min revalidate, 30min expire - User-specific data
+    cacheTags: (input) => [
+      'user-bookmarks',
+      `user-${input.userId}`,
+      `content-${input.content_slug}`,
+    ],
     module: 'data/account',
     operation: 'isBookmarked',
+    transformArgs: (input) => ({
+      p_content_slug: input.content_slug,
+      p_content_type: input.content_type,
+      p_user_id: input.userId,
+    }),
+    transformResult: (result) => Boolean(result), // Generated type is unknown, but function returns boolean
+    onError: () => false,
+    logContext: (input) => ({
+      content_slug: input.content_slug,
+      content_type: input.content_type,
+      userId: input.userId,
+    }),
   });
 
-  try {
-    const service = new AccountService();
-    const result = await service.isBookmarked({
-      p_content_slug: content_slug,
-      p_content_type: content_type,
-      p_user_id: userId,
-    });
-    // Generated type is unknown, but function returns boolean
-    return Boolean(result);
-  } catch (error) {
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error(
-      { content_slug, content_type, err: errorForLogging, userId },
-      'isBookmarked: unexpected error'
-    );
-    return false;
-  }
+  return (await cachedFn(input)) ?? false;
 }
 
 /**
  * Check if user is following another user
  *
  * Uses 'use cache: private' to enable cross-request caching for user-specific data.
- * @param input
- * @param input.followerId
- * @param input.followingId
+ */
+/**
+ * Check if user is following another user
+ *
+ * Uses 'use cache: private' to enable cross-request caching for user-specific data.
  */
 export async function isFollowing(input: {
   followerId: string;
   followingId: string;
 }): Promise<boolean> {
-  'use cache: private';
-  const { followerId, followingId } = input;
-
-  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
-  cacheTag('users');
-  cacheTag(`user-${followerId}`);
-  cacheTag(`user-${followingId}`);
-
-  const reqLogger = logger.child({
+  const cachedFn = createCachedDataFunction<
+    { followerId: string; followingId: string },
+    boolean
+  >({
+    serviceKey: 'account',
+    methodName: 'isFollowing',
+    cacheMode: 'private',
+    cacheLife: 'userProfile', // 1min stale, 5min revalidate, 30min expire - User-specific data
+    cacheTags: (input) => ['users', `user-${input.followerId}`, `user-${input.followingId}`],
     module: 'data/account',
     operation: 'isFollowing',
+    transformArgs: (input) => ({
+      follower_id: input.followerId,
+      following_id: input.followingId,
+    }),
+    transformResult: (result) => Boolean(result), // Generated type is unknown, but function returns boolean
+    onError: () => false,
+    logContext: (input) => ({
+      followerId: input.followerId,
+      followingId: input.followingId,
+    }),
   });
 
-  try {
-    const service = new AccountService();
-    const result = await service.isFollowing({
-      follower_id: followerId,
-      following_id: followingId,
-    });
-    // Generated type is unknown, but function returns boolean
-    return Boolean(result);
-  } catch (error) {
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error(
-      { err: errorForLogging, followerId, followingId },
-      'isFollowing: unexpected error'
-    );
-    return false;
-  }
+  return (await cachedFn(input)) ?? false;
 }
 
 /**
  * Batch check bookmark status for multiple items
  *
  * Uses 'use cache: private' to enable cross-request caching for user-specific data.
- * @param input
- * @param input.items
- * @param input.userId
+ */
+/**
+ * Batch check bookmark status for multiple items
+ *
+ * Uses 'use cache: private' to enable cross-request caching for user-specific data.
  */
 export async function isBookmarkedBatch(input: {
   items: Array<{
@@ -1135,83 +540,89 @@ export async function isBookmarkedBatch(input: {
   }>;
   userId: string;
 }): Promise<IsBookmarkedBatchReturns> {
-  'use cache: private';
-  const { items, userId } = input;
-
-  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
-  cacheTag('user-bookmarks');
-  cacheTag(`user-${userId}`);
-  // Include sorted item keys in cache tag for proper cache key generation
-  const itemKey = items
-    .map((i) => `${i.content_type}:${i.content_slug}`)
-    .toSorted()
-    .join(',');
-  cacheTag(`bookmark-batch-${itemKey}`);
-
-  const reqLogger = logger.child({
+  const cachedFn = createCachedDataFunction<
+    {
+      items: Array<{
+        content_slug: string;
+        content_type: content_category;
+      }>;
+      userId: string;
+    },
+    IsBookmarkedBatchReturns
+  >({
+    serviceKey: 'account',
+    methodName: 'isBookmarkedBatch',
+    cacheMode: 'private',
+    cacheLife: 'userProfile', // 1min stale, 5min revalidate, 30min expire - User-specific data
+    cacheTags: (input) => {
+      const tags = ['user-bookmarks', `user-${input.userId}`];
+      // Include sorted item keys in cache tag for proper cache key generation
+      const itemKey = input.items
+        .map((i) => `${i.content_type}:${i.content_slug}`)
+        .toSorted()
+        .join(',');
+      tags.push(`bookmark-batch-${itemKey}`);
+      return tags;
+    },
     module: 'data/account',
     operation: 'isBookmarkedBatch',
+    transformArgs: (input) => ({
+      p_items: input.items, // Array is valid - service handles both array and JSONB
+      p_user_id: input.userId,
+    }),
+    onError: () => [],
+    logContext: (input) => ({
+      itemCount: input.items.length,
+      userId: input.userId,
+    }),
   });
 
-  try {
-    const service = new AccountService();
-    // p_items expects Record<string, unknown> (JSONB), but we pass array
-    // Cast to match the generated type signature
-    return await service.isBookmarkedBatch({
-      p_items: items as unknown as Record<string, unknown>,
-      p_user_id: userId,
-    });
-  } catch (error) {
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error(
-      { err: errorForLogging, itemCount: items.length, userId },
-      'isBookmarkedBatch: unexpected error'
-    );
-    return [];
-  }
+  return (await cachedFn(input)) ?? [];
 }
 
 /**
  * Batch check follow status for multiple users
  *
  * Uses 'use cache: private' to enable cross-request caching for user-specific data.
- * @param input
- * @param input.followedUserIds
- * @param input.followerId
+ */
+/**
+ * Batch check follow status for multiple users
+ *
+ * Uses 'use cache: private' to enable cross-request caching for user-specific data.
  */
 export async function isFollowingBatch(input: {
   followedUserIds: string[];
   followerId: string;
 }): Promise<IsFollowingBatchReturns> {
-  'use cache: private';
-  const { followedUserIds, followerId } = input;
-
-  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
-  cacheTag('users');
-  cacheTag(`user-${followerId}`);
-  // Include sorted user IDs in cache tag for proper cache key generation
-  const userIdsKey = [...followedUserIds].toSorted().join(',');
-  cacheTag(`follow-batch-${userIdsKey}`);
-
-  const reqLogger = logger.child({
+  const cachedFn = createCachedDataFunction<
+    { followedUserIds: string[]; followerId: string },
+    IsFollowingBatchReturns
+  >({
+    serviceKey: 'account',
+    methodName: 'isFollowingBatch',
+    cacheMode: 'private',
+    cacheLife: 'userProfile', // 1min stale, 5min revalidate, 30min expire - User-specific data
+    cacheTags: (input) => {
+      const tags = ['users', `user-${input.followerId}`];
+      // Include sorted user IDs in cache tag for proper cache key generation
+      const userIdsKey = [...input.followedUserIds].toSorted().join(',');
+      tags.push(`follow-batch-${userIdsKey}`);
+      return tags;
+    },
     module: 'data/account',
     operation: 'isFollowingBatch',
+    transformArgs: (input) => ({
+      p_followed_user_ids: input.followedUserIds,
+      p_follower_id: input.followerId,
+    }),
+    onError: () => [],
+    logContext: (input) => ({
+      followedUserCount: input.followedUserIds.length,
+      followerId: input.followerId,
+    }),
   });
 
-  try {
-    const service = new AccountService();
-    return await service.isFollowingBatch({
-      p_followed_user_ids: followedUserIds,
-      p_follower_id: followerId,
-    });
-  } catch (error) {
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error(
-      { err: errorForLogging, followedUserCount: followedUserIds.length, followerId },
-      'isFollowingBatch: unexpected error'
-    );
-    return [];
-  }
+  return (await cachedFn(input)) ?? [];
 }
 
 /**
@@ -1233,7 +644,8 @@ export async function getAccountDashboardBundle(
   categoryIds?: readonly string[]
 ): Promise<AccountDashboardBundle> {
   'use cache: private';
-  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
+  const { cacheLife, cacheTag } = await import('next/cache');
+  cacheLife('userProfile'); // 1min stale, 5min revalidate, 30min expire - User-specific data
   cacheTag(`user-dashboard-bundle-${userId}`);
   if (categoryIds) {
     cacheTag(`dashboard-bundle-categories-${categoryIds.join(',')}`);
@@ -1245,12 +657,17 @@ export async function getAccountDashboardBundle(
 
   const finalCategoryIds = categoryIds ?? getHomepageCategoryIds;
 
-  // Fetch all three data sources in parallel
-  const [dashboard, library, homepage] = await Promise.all([
-    getAccountDashboard(userId),
-    getUserLibrary(userId),
+  // OPTIMIZATION: Use getUserCompleteData directly - single database call instead of two
+  const [completeData, homepage] = await Promise.all([
+    getUserCompleteData(userId),
     getHomepageData(finalCategoryIds),
   ]);
+
+  // Extract dashboard and library from complete data
+  const dashboard = completeData?.account_dashboard
+    ? accountDashboardSchema.parse(completeData.account_dashboard)
+    : null;
+  const library = completeData?.user_library ?? null;
 
   return {
     dashboard,

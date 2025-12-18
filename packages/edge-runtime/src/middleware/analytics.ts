@@ -13,7 +13,7 @@ export function analytics(
 ): Middleware<StandardContext> {
   return async (ctx, next) => {
     const startedAt = performance.now();
-    const appLabel = options?.app ?? 'data-api';
+    const appLabel = options?.app ?? 'edge-function';
     
     // Extract resource from path if available (convention: /route/:resource)
     // This logic mimics existing respondWithAnalytics but is more generic

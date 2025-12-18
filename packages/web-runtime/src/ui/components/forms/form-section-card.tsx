@@ -39,7 +39,6 @@
 import { SPRING } from '../../../design-system/index.ts';
 import type { LucideIcon } from '../../../icons.tsx';
 import { cn } from '../../utils.ts';
-import { paddingBottom, cluster, padding, iconSize, size, weight, muted, marginTop } from '../../../design-system/index.ts';
 import { motion } from 'motion/react';
 import type { ReactNode } from 'react';
 import { BorderBeam } from '../animation/border-beam.tsx';
@@ -150,29 +149,29 @@ export function FormSectionCard({
           />
         )}
 
-        <CardHeader className={paddingBottom.default}>
-          <div className={cluster.default}>
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-3">
             {/* Icon with step number */}
             <div
               className={cn(
                 'rounded-lg',
-                padding.tight,
+                'p-1',
                 themeConfig.iconBg,
                 'flex-shrink-0'
               )}
             >
-              <Icon className={cn(iconSize.md, themeConfig.iconText)} />
+              <Icon className={cn('h-5 w-5', themeConfig.iconText)} />
             </div>
 
             {/* Title and description */}
             <div className="flex-1">
               <CardTitle
-                className={cn(cluster.compact, `${size.lg} ${weight.semibold}`)}
+                className={cn('flex items-center gap-2 text-lg font-semibold')}
               >
                 <span className={cn('font-semibold', themeConfig.iconText)}>{step}.</span>
                 {title}
               </CardTitle>
-              <p className={cn(`${size.sm} ${muted.default}`, marginTop.micro)}>
+              <p className={cn('text-sm text-muted-foreground', 'mt-0.5')}>
                 {description}
               </p>
             </div>

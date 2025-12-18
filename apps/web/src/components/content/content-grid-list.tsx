@@ -11,7 +11,6 @@ import {
   Skeleton,
   Button,
 } from '@heyclaude/web-runtime/ui';
-import { iconSize, size, muted, marginBottom, leading, cluster, marginRight, paddingX, paddingY, marginX, padding, gap, spaceY } from '@heyclaude/web-runtime/design-system';
 import Link from 'next/link';
 import { Suspense, useId } from 'react';
 
@@ -53,24 +52,24 @@ function ContentHeroSection<T extends DisplayableContent>({
 
   return (
     <section className="relative overflow-hidden border-b border-border/50 bg-card/30" aria-labelledby={pageTitleId}>
-      <div className={`container ${marginX.auto} ${paddingX.default} ${paddingY.default}`}>
-        <div className={`${marginX.auto} max-w-3xl text-center`}>
-          <div className={`${marginBottom.comfortable} flex justify-center`}>
-            <div className={`bg-accent/10 rounded-full ${padding.compact}`} aria-hidden="true">
+      <div className="container mx-auto px-4 py-4">
+        <div className="mx-auto max-w-3xl text-center">
+          <div className="mb-6 flex justify-center">
+            <div className="bg-accent/10 rounded-full p-3" aria-hidden="true">
               {(() => {
                 const IconComponent = ICON_NAME_MAP[icon] || HelpCircle;
-                return <IconComponent className={`${iconSize.xl} text-primary`} />;
+                return <IconComponent className="h-8 w-8 text-primary" />;
               })()}
             </div>
           </div>
 
-          <h1 id={pageTitleId} className={`text-4xl lg:text-6xl font-bold ${marginBottom.comfortable} text-foreground`}>
+          <h1 id={pageTitleId} className="text-4xl lg:text-6xl font-bold mb-6 text-foreground">
             {title}
           </h1>
 
-          <p className={`${size.lg} ${muted.default} ${marginBottom.relaxed} ${leading.relaxed}`}>{description}</p>
+          <p className="text-lg text-muted-foreground mb-8 leading-relaxed">{description}</p>
 
-          <ul className={`${marginBottom.relaxed} flex list-none flex-wrap justify-center ${gap.tight}`}>
+          <ul className="mb-8 flex list-none flex-wrap justify-center gap-1">
             {displayBadges.map((badge, idx) => (
               <li key={badge.text || `badge-${idx}`}>
                 <UnifiedBadge variant="base" style={idx === 0 ? 'secondary' : 'outline'}>
@@ -80,7 +79,7 @@ function ContentHeroSection<T extends DisplayableContent>({
                           const BadgeIconComponent = ICON_NAME_MAP[badge.icon] || HelpCircle;
                           return (
                             <BadgeIconComponent
-                              className={`${iconSize.xs} ${marginRight.compact}`}
+                              className="h-3 w-3 mr-2"
                               aria-hidden="true"
                             />
                           );
@@ -97,10 +96,10 @@ function ContentHeroSection<T extends DisplayableContent>({
           <Button variant="outline" size="sm" asChild>
             <Link
               href={ROUTES.SUBMIT}
-              className={cluster.compact}
+              className="flex items-center gap-2"
               aria-label={`Submit a new ${title.slice(0, -1).toLowerCase()}`}
             >
-              <ExternalLink className={iconSize.xs} aria-hidden="true" />
+              <ExternalLink className="h-3 w-3" aria-hidden="true" />
               Submit {title.slice(0, -1)}
             </Link>
           </Button>
@@ -122,9 +121,9 @@ function ContentHeroSection<T extends DisplayableContent>({
  */
 export function ContentSearchSkeleton() {
   return (
-    <div className={`w-full ${spaceY.comfortable}`}>
+    <div className="w-full space-y-4">
       <Skeleton size="xl" width="3xl" />
-      <div className={`flex justify-end ${gap.tight}`}>
+      <div className="flex justify-end gap-1">
         <Skeleton size="lg" width="sm" />
         <Skeleton size="lg" width="xs" />
       </div>
@@ -176,8 +175,8 @@ export function ContentListServer<T extends DisplayableContent>({
         />
       )}
 
-      <section className={`container ${marginX.auto} ${paddingX.default} ${paddingY.section}`} aria-label={`${title} content and search`}>
-        <div className={`grid ${gap.relaxed} xl:grid-cols-[minmax(0,1fr)_18rem]`}>
+      <section className="container mx-auto px-4 py-12" aria-label={`${title} content and search`}>
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_18rem]">
           <div>
             <Suspense fallback={<ContentSearchSkeleton />}>
               <ContentListSearchClient

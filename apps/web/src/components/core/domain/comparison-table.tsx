@@ -12,7 +12,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
-import { iconSize, marginY, padding, muted } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Renders a responsive feature comparison table for two or three columns with an optional title and description.
@@ -42,21 +41,21 @@ export function ComparisonTable(props: ComparisonTableProps) {
   }
 
   return (
-    <Card className={`${marginY.relaxed}`}>
+    <Card className="my-8">
       {title || description ? (
         <CardHeader>
           {title ? <CardTitle>{title}</CardTitle> : null}
           {description ? <CardDescription>{description}</CardDescription> : null}
         </CardHeader>
       ) : null}
-      <CardContent className={`${padding.default}`}>
+      <CardContent className="p-4">
         <div className="overflow-x-auto">
-          <table className={`w-full`}>
+          <table className="w-full">
             <thead className="border-b">
               <tr>
-                <th className={`${padding.default} text-left font-medium`}>Feature</th>
+                <th className="p-4 text-left font-medium">Feature</th>
                 {validHeaders.map((header) => (
-                  <th key={header} className={`${padding.default} text-left font-medium`}>
+                  <th key={header} className="p-4 text-left font-medium">
                     {header}
                   </th>
                 ))}
@@ -65,36 +64,36 @@ export function ComparisonTable(props: ComparisonTableProps) {
             <tbody>
               {validItems.map((item) => (
                 <tr key={item.feature} className="border-b last:border-0">
-                  <td className={`${padding.default} font-medium`}>{item.feature}</td>
-                  <td className={`${padding.default}`}>
+                  <td className="p-4 font-medium">{item.feature}</td>
+                  <td className="p-4">
                     {typeof item.option1 === 'boolean' ? (
                       item.option1 ? (
-                        <CheckCircle className={`${iconSize.md} text-green-500`} />
+                        <CheckCircle className="h-5 w-5 text-green-500" />
                       ) : (
-                        <span className={`${muted.default}`}>—</span>
+                        <span className="text-muted-foreground">—</span>
                       )
                     ) : (
                       item.option1
                     )}
                   </td>
-                  <td className={`${padding.default}`}>
+                  <td className="p-4">
                     {typeof item.option2 === 'boolean' ? (
                       item.option2 ? (
-                        <CheckCircle className={`${iconSize.md} text-green-500`} />
+                        <CheckCircle className="h-5 w-5 text-green-500" />
                       ) : (
-                        <span className={`${muted.default}`}>—</span>
+                        <span className="text-muted-foreground">—</span>
                       )
                     ) : (
                       item.option2
                     )}
                   </td>
                   {item.option3 !== undefined && (
-                    <td className={`${padding.default}`}>
+                    <td className="p-4">
                       {typeof item.option3 === 'boolean' ? (
                         item.option3 ? (
-                          <CheckCircle className={`${iconSize.md} text-green-500`} />
+                          <CheckCircle className="h-5 w-5 text-green-500" />
                         ) : (
-                          <span className={`${muted.default}`}>—</span>
+                          <span className="text-muted-foreground">—</span>
                         )
                       ) : (
                         item.option3

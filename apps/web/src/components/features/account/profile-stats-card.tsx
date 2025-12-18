@@ -7,7 +7,7 @@
  */
 
 import { motion } from 'motion/react';
-import { MICROINTERACTIONS, SPRING, spaceY, size, between, muted } from '@heyclaude/web-runtime/design-system';
+import { MICROINTERACTIONS, SPRING } from '@heyclaude/web-runtime/design-system';
 import {
   Card,
   CardContent,
@@ -63,12 +63,12 @@ export function ProfileStatsCard({ title, stats }: ProfileStatsCardProps) {
     >
       <Card>
         <CardHeader>
-          <CardTitle className={`${size.sm}`}>{title}</CardTitle>
+          <CardTitle className="text-sm">{title}</CardTitle>
         </CardHeader>
-        <CardContent className={`${spaceY.default}`}>
+        <CardContent className="space-y-3">
           {stats.map((stat, index) => (
-            <div key={stat.label} className={between.center}>
-              <span className={`${size.sm} ${muted.default}`}>{stat.label}</span>
+            <div key={stat.label} className="flex items-center justify-between">
+              <span className="text-muted-foreground text-sm">{stat.label}</span>
               {typeof stat.value === 'number' && stat.animated !== false ? (
                 <UnifiedBadge variant="base" style="secondary">
                   <NumberTicker

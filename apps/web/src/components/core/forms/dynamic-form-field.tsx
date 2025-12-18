@@ -26,13 +26,10 @@ import {
   type GridColumn,
 } from '@heyclaude/web-runtime/types/component.types';
 import {
-  getResponsiveGridClass,
-  POSITION_PATTERNS,
   Input,
   Label,
   Textarea,
 } from '@heyclaude/web-runtime/ui';
-import { spaceY, iconSize, paddingX, paddingY } from "@heyclaude/web-runtime/design-system";
 
 // ============================================================================
 // GRID LAYOUT SYSTEM
@@ -77,15 +74,15 @@ function TextFieldRenderer({ field, formId }: FieldRendererProps) {
   const iconPosition = field.iconPosition || 'left';
 
   return (
-    <div className={`${spaceY.compact} ${gridClass}`}>
+    <div className={`space-y-2 ${gridClass}`}>
       <Label htmlFor={fieldId}>{field.label}</Label>
       {Icon ? (
         <div className="relative">
           {iconPosition === 'left' && (
             <div
-              className={`${POSITION_PATTERNS.ABSOLUTE_TOP_HALF_LEFT} text-muted-foreground -translate-y-1/2`}
+              className="absolute top-1/2 left-3 text-muted-foreground -translate-y-1/2"
             >
-              <Icon className={iconSize.sm} />
+              <Icon className="h-4 w-4" />
             </div>
           )}
           <Input
@@ -98,9 +95,9 @@ function TextFieldRenderer({ field, formId }: FieldRendererProps) {
           />
           {iconPosition === 'right' && (
             <div
-              className={`${POSITION_PATTERNS.ABSOLUTE_TOP_HALF_RIGHT} text-muted-foreground -translate-y-1/2`}
+              className="absolute top-1/2 right-3 text-muted-foreground -translate-y-1/2"
             >
-              <Icon className={iconSize.sm} />
+              <Icon className="h-4 w-4" />
             </div>
           )}
         </div>
@@ -142,7 +139,7 @@ function TextareaFieldRenderer({ field, formId }: FieldRendererProps) {
   const monoClass = field.monospace ? 'font-mono text-sm' : '';
 
   return (
-    <div className={`${spaceY.compact} ${gridClass}`}>
+    <div className={`space-y-2 ${gridClass}`}>
       <Label htmlFor={fieldId}>{field.label}</Label>
       <Textarea
         id={fieldId}
@@ -175,7 +172,7 @@ function NumberFieldRenderer({ field, formId }: FieldRendererProps) {
   const gridClass = GRID_COLUMN_CLASSES[field.gridColumn || 'full'];
 
   return (
-    <div className={`${spaceY.compact} ${gridClass}`}>
+    <div className={`space-y-2 ${gridClass}`}>
       <Label htmlFor={fieldId}>{field.label}</Label>
       <Input
         id={fieldId}
@@ -210,14 +207,14 @@ function SelectFieldRenderer({ field, formId }: FieldRendererProps) {
   const gridClass = GRID_COLUMN_CLASSES[field.gridColumn || 'full'];
 
   return (
-    <div className={`${spaceY.compact} ${gridClass}`}>
+    <div className={`space-y-2 ${gridClass}`}>
       <Label htmlFor={fieldId}>{field.label}</Label>
       <select
         id={fieldId}
         name={field.name}
         required={field.required}
         defaultValue={field.defaultValue}
-        className={`border-input bg-background flex h-10 w-full rounded-md border ${paddingX.compact} ${paddingY.tight} text-sm`}
+        className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
       >
         {field.options.map((option) => (
           <option key={option.value} value={option.value}>
@@ -321,7 +318,9 @@ export function ContentTypeFieldRenderer({ config, formId }: ContentTypeFieldRen
 
         // Determine grid class based on field types
         const gridClass = hasMultipleFields
-          ? getResponsiveGridClass(gridType === 'third' ? 3 : 2)
+          ? gridType === 'third'
+            ? 'grid grid-cols-1 sm:grid-cols-3 gap-4'
+            : 'grid grid-cols-1 sm:grid-cols-2 gap-4'
           : '';
 
         return (

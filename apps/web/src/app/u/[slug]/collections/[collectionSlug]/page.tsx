@@ -33,7 +33,6 @@ import { Suspense } from 'react';
 import { Pulse } from '@/src/components/core/infra/pulse';
 
 import Loading from './loading';
-import { cluster, between, grid, size, weight, iconSize, paddingX, paddingY, marginX, spaceY, marginBottom, marginTop, marginY, paddingBottom } from "@heyclaude/web-runtime/design-system";
 
 // Whitelisted content types for outgoing links - use Prisma enum object
 const ALLOWED_CONTENT_TYPES = Object.values(ContentCategory) as readonly string[];
@@ -47,7 +46,7 @@ const ALLOWED_CONTENT_TYPES = Object.values(ContentCategory) as readonly string[
  * @see ALLOWED_CONTENT_TYPES
  */
 function isValidContentType(type: string): boolean {
-  return (ALLOWED_CONTENT_TYPES as readonly string[]).includes(type);
+  return ALLOWED_CONTENT_TYPES.includes(type);
 }
 
 /***
@@ -74,6 +73,21 @@ function isValidSlug(slug: string): boolean {
  *
  * @see isValidContentType
  * @see isValidSlug
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
+ * @param {{ content_slug: string; content_type: string }} item Parameter description
  * @param {{ content_slug: string; content_type: string }} item Parameter description
  * @param {{ content_slug: string; content_type: string }} item Parameter description
  * @param {{ content_slug: string; content_type: string }} item Parameter description
@@ -180,7 +194,7 @@ export async function generateMetadata({
  */
 export default async function PublicCollectionPage({ params }: PublicCollectionPageProperties) {
   'use cache';
-  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
+  cacheLife('long'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
   // Params is runtime data - cache key includes params, so different collections create different cache entries
   const { collectionSlug, slug } = await params;
@@ -281,7 +295,7 @@ async function PublicCollectionPageContent({
   const { collection, is_owner, items, user: profileUser } = collectionData;
 
   return (
-    <div className={`bg-background min-h-screen`}>
+    <div className="bg-background min-h-screen">
       {/* Track view - non-blocking */}
       <Pulse
         category="collections"
@@ -292,21 +306,21 @@ async function PublicCollectionPageContent({
         slug={collectionSlug}
         variant="view"
       />
-      <div className={`container ${marginX.auto} ${paddingX.default} ${paddingY.section}`}>
-        <div className={`${spaceY.relaxed}`}>
+      <div className="container mx-auto px-4 py-12">
+        <div className="space-y-6">
           {/* Navigation */}
           <Link href={`/u/${slug}`}>
-            <Button className={cluster.compact} variant="ghost">
-              <ArrowLeft className={`${iconSize.sm}`} />
+            <Button className="flex items-center gap-2" variant="ghost">
+              <ArrowLeft className="h-4 w-4" />
               Back to {profileUser?.name ?? slug}&apos;s Profile
             </Button>
           </Link>
 
           {/* Header */}
           <div>
-            <div className={`${between.center} ${marginBottom.compact}`}>
-              <div className={cluster.compact}>
-                <h1 className={`${size['3xl']} ${weight.bold}`}>{collection?.name ?? 'Untitled Collection'}</h1>
+            <div className="mb-2 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <h1 className="text-3xl font-bold">{collection?.name ?? 'Untitled Collection'}</h1>
                 <UnifiedBadge style="outline" variant="base">
                   Public
                 </UnifiedBadge>
@@ -324,7 +338,7 @@ async function PublicCollectionPageContent({
               <p className="text-muted-foreground max-w-3xl">{collection.description}</p>
             ) : null}
 
-            <div className={`text-muted-foreground ${marginTop.compact} ${size.sm}`}>
+            <div className="text-muted-foreground mt-2 text-sm">
               Created by <NavLink href={`/u/${slug}`}>{profileUser?.name ?? slug}</NavLink> •{' '}
               {collection?.item_count ?? 0} {(collection?.item_count ?? 0) === 1 ? 'item' : 'items'}{' '}
               • {collection?.view_count ?? 0} views
@@ -333,16 +347,16 @@ async function PublicCollectionPageContent({
 
           {/* Collection Items */}
           <div>
-            <h2 className={`${marginBottom.default} ${size.xl} ${weight.semibold}`}>Items in this Collection</h2>
+            <h2 className="mb-4 text-xl font-semibold">Items in this Collection</h2>
 
             {!items || items.length === 0 ? (
               <Card>
-                <CardContent className={`flex flex-col items-center py-12`}>
+                <CardContent className="flex flex-col items-center py-12">
                   <p className="text-muted-foreground">This collection is empty</p>
                 </CardContent>
               </Card>
             ) : (
-              <div className={`grid gap-4`}>
+              <div className="grid gap-4">
                 {items
                   .filter(
                     (
@@ -357,19 +371,19 @@ async function PublicCollectionPageContent({
                   .map((item, index) => (
                     <Card key={item.id}>
                       <CardHeader>
-                        <div className={`flex items-start gap-4`}>
-                          <div className={`text-muted-foreground/50 w-8 ${size['2xl']} ${weight.bold}`}>
+                        <div className="flex items-start gap-4">
+                          <div className="text-muted-foreground/50 w-8 text-2xl font-bold">
                             {index + 1}
                           </div>
-                          <div className={`flex-1`}>
-                            <div className={cluster.compact}>
-                              <UnifiedBadge className={`capitalize`} style="outline" variant="base">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <UnifiedBadge className="capitalize" style="outline" variant="base">
                                 {item.content_type}
                               </UnifiedBadge>
-                              <CardTitle className={`${size.lg}`}>{item.content_slug}</CardTitle>
+                              <CardTitle className="text-lg">{item.content_slug}</CardTitle>
                             </div>
                             {item.notes ? (
-                              <CardDescription className={`${marginTop.compact}`}>{item.notes}</CardDescription>
+                              <CardDescription className="mt-2">{item.notes}</CardDescription>
                             ) : null}
                           </div>
                           {(() => {
@@ -380,22 +394,22 @@ async function PublicCollectionPageContent({
                             return safeLink ? (
                               <Link href={safeLink}>
                                 <Button
-                                  className={cluster.compact}
+                                  className="flex items-center gap-2"
                                   size="sm"
                                   variant="ghost"
                                 >
-                                  <ExternalLink className={`${iconSize.sm}`} />
+                                  <ExternalLink className="h-4 w-4" />
                                   View
                                 </Button>
                               </Link>
                             ) : (
                               <Button
                                 disabled
-                                className={cluster.compact}
+                                className="flex items-center gap-2"
                                 size="sm"
                                 variant="ghost"
                               >
-                                <ExternalLink className={`${iconSize.sm}`} />
+                                <ExternalLink className="h-4 w-4" />
                                 View
                               </Button>
                             );
@@ -409,30 +423,30 @@ async function PublicCollectionPageContent({
           </div>
 
           {/* Stats */}
-          <Separator className={`${marginY.comfortable}`} />
-          <div className={`grid gap-4 sm:${grid.cols3}`}>
+          <Separator className="my-6" />
+          <div className="grid gap-4 sm:grid-cols-3">
             <Card>
-              <CardHeader className={`${paddingBottom.compact}`}>
-                <CardTitle className={`${size.sm} ${weight.medium}`}>Total Items</CardTitle>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm-medium">Total Items</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className={`${size['2xl']} ${weight.bold}`}>{collection?.item_count ?? 0}</div>
+                <div className="text-2xl font-bold">{collection?.item_count ?? 0}</div>
               </CardContent>
             </Card>
             <Card>
-              <CardHeader className={`${paddingBottom.compact}`}>
-                <CardTitle className={`${size.sm} ${weight.medium}`}>Views</CardTitle>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm-medium">Views</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className={`${size['2xl']} ${weight.bold}`}>{collection?.view_count ?? 0}</div>
+                <div className="text-2xl font-bold">{collection?.view_count ?? 0}</div>
               </CardContent>
             </Card>
             <Card>
-              <CardHeader className={`${paddingBottom.compact}`}>
-                <CardTitle className={`${size.sm} ${weight.medium}`}>Created</CardTitle>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm-medium">Created</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className={`${size.base} ${weight.medium}`}>
+                <div className="text-base font-medium">
                   {collection?.created_at
                     ? (() => {
                         // Use UTC-based formatting for deterministic output (prevents hydration mismatches)

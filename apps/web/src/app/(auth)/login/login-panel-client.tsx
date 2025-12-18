@@ -1,6 +1,6 @@
 'use client';
 
-import { VALID_PROVIDERS } from '@heyclaude/web-runtime';
+import { VALID_PROVIDERS } from '@heyclaude/web-runtime/auth/oauth-providers';
 import { ensureString } from '@heyclaude/web-runtime/data/utils';
 import { useBoolean } from '@heyclaude/web-runtime/hooks';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';

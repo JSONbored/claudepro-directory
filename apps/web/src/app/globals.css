@@ -33,10 +33,22 @@
   /* Container Configuration */
   --breakpoint-2xl: 1400px;
 
-  /* Animation Keyframes */
+  /* Animation Keyframes - Auto-generates animate-* utilities */
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
   --animate-border-beam: border-beam linear infinite;
+  
+  /* Custom Animations - Auto-generates animate-* utilities */
+  /* Note: Duration and easing variables are defined in :root, accessible here */
+  --animate-fade-in: fadeIn var(--duration-quick) var(--ease-out) both;
+  --animate-slide-up: slideUp var(--duration-default) var(--ease-out) both;
+  --animate-scale-in: scale-in var(--duration-quick) var(--ease-out) both;
+  --animate-pulse: pulse-accent var(--duration-very-long) var(--ease-in-out) infinite;
+  --animate-shimmer: shimmer var(--duration-maximum) linear infinite;
+  --animate-gridMove: gridMove var(--duration-morphing) linear infinite;
+  --animate-textRoll: textRoll 600ms ease-in-out;
+  --animate-fade-in-up: fadeInUp 0.5s ease-out forwards;
+  --animate-fadeIn: fadeIn var(--duration-default) ease-out forwards;
 
   /* Performance Optimizations - GPU Acceleration & Paint Isolation */
   /* will-change utilities for GPU acceleration */
@@ -189,11 +201,77 @@
   --color-category-default-border: oklch(60% 0.005 60 / 0.3);
 
   /* ========================================
-     MICRO TYPOGRAPHY
+     TYPOGRAPHY SCALE - Auto-generates text-*, font-*, leading-*, tracking-* utilities
      ======================================== */
 
-  --font-size-3xs: 0.6875rem; /* 11px */
+  /* Font Sizes - Auto-generates text-* utilities */
   --font-size-2xs: 0.625rem; /* 10px */
+  --font-size-3xs: 0.6875rem; /* 11px */
+  --font-size-xs: 0.75rem; /* 12px */
+  --font-size-sm: 0.875rem; /* 14px */
+  --font-size-base: 1rem; /* 16px */
+  --font-size-lg: 1.125rem; /* 18px */
+  --font-size-xl: 1.25rem; /* 20px */
+  --font-size-2xl: 1.5rem; /* 24px */
+  --font-size-3xl: 1.875rem; /* 30px */
+  --font-size-4xl: 2.25rem; /* 36px */
+  --font-size-5xl: 3rem; /* 48px */
+
+  /* Font Weights - Auto-generates font-* utilities */
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Line Heights - Auto-generates leading-* utilities */
+  --leading-tight: 1.25;
+  --leading-snug: 1.375;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+  --leading-loose: 2;
+
+  /* Letter Spacing - Auto-generates tracking-* utilities */
+  --tracking-tighter: -0.05em;
+  --tracking-tight: -0.025em;
+  --tracking-wide: 0.025em;
+  --tracking-wider: 0.05em;
+  --tracking-widest: 0.1em;
+
+  /* ========================================
+     SPACING SCALE - Auto-generates p-*, m-*, gap-*, space-* utilities
+     ======================================== */
+
+  --spacing-0: 0;
+  --spacing-px: 1px;
+  --spacing-0_5: 0.125rem;
+  --spacing-1: 0.25rem;
+  --spacing-1_5: 0.375rem;
+  --spacing-2: 0.5rem;
+  --spacing-2_5: 0.625rem;
+  --spacing-3: 0.75rem;
+  --spacing-3_5: 0.875rem;
+  --spacing-4: 1rem;
+  --spacing-5: 1.25rem;
+  --spacing-6: 1.5rem;
+  --spacing-7: 1.75rem;
+  --spacing-8: 2rem;
+  --spacing-9: 2.25rem;
+  --spacing-10: 2.5rem;
+  --spacing-11: 2.75rem;
+  --spacing-12: 3rem;
+  --spacing-14: 3.5rem;
+  --spacing-16: 4rem;
+  --spacing-20: 5rem;
+  --spacing-24: 6rem;
+  --spacing-28: 7rem;
+  --spacing-32: 8rem;
+
+  /* ========================================
+     Z-INDEX HIERARCHY - Auto-generates z-* utilities
+     ======================================== */
+
+  --z-60: 60; /* Announcement banner (above navigation, below skip link) */
 
   /* ========================================
      DEFAULT THEME (Dark)
@@ -634,42 +712,12 @@
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--foreground);
 
-  /* REMOVED: Duplicate typography variables
-   * These duplicate the @theme block definitions above.
-   * Use --font-sans and --font-mono from @theme block instead.
+  /* REMOVED: Typography and spacing variables
+   * These have been migrated to the @theme block above (lines 203-260).
+   * Tailwind v4 now auto-generates utilities from @theme definitions.
+   * Use Tailwind utilities (text-*, font-*, leading-*, tracking-*, p-*, m-*, gap-*, etc.)
+   * instead of CSS variables directly.
    */
-
-  /* Font Sizes */
-  --font-size-xs: 0.75rem;
-  --font-size-sm: 0.875rem;
-  --font-size-base: 1rem;
-  --font-size-lg: 1.125rem;
-  --font-size-xl: 1.25rem;
-  --font-size-2xl: 1.5rem;
-  --font-size-3xl: 1.875rem;
-  --font-size-4xl: 2.25rem;
-  --font-size-5xl: 3rem;
-
-  /* Font Weights */
-  --font-weight-light: 300;
-  --font-weight-normal: 400;
-  --font-weight-medium: 500;
-  --font-weight-semibold: 600;
-  --font-weight-bold: 700;
-
-  /* Line Heights */
-  --leading-tight: 1.25;
-  --leading-snug: 1.375;
-  --leading-normal: 1.5;
-  --leading-relaxed: 1.625;
-  --leading-loose: 2;
-
-  /* Letter Spacing */
-  --tracking-tighter: -0.05em;
-  --tracking-tight: -0.025em;
-  --tracking-wide: 0.025em;
-  --tracking-wider: 0.05em;
-  --tracking-widest: 0.1em;
 
   /* REMOVED: Duplicate border radius definitions
    * These duplicate the @theme block definitions above (lines 28-31).
@@ -677,32 +725,6 @@
    * Additional radius values (--radius-xs, --radius-xl, etc.) are defined in @theme block
    * and auto-generate Tailwind utilities.
    */
-
-  /* Spacing */
-  --spacing-0: 0;
-  --spacing-px: 1px;
-  --spacing-0_5: 0.125rem;
-  --spacing-1: 0.25rem;
-  --spacing-1_5: 0.375rem;
-  --spacing-2: 0.5rem;
-  --spacing-2_5: 0.625rem;
-  --spacing-3: 0.75rem;
-  --spacing-3_5: 0.875rem;
-  --spacing-4: 1rem;
-  --spacing-5: 1.25rem;
-  --spacing-6: 1.5rem;
-  --spacing-7: 1.75rem;
-  --spacing-8: 2rem;
-  --spacing-9: 2.25rem;
-  --spacing-10: 2.5rem;
-  --spacing-11: 2.75rem;
-  --spacing-12: 3rem;
-  --spacing-14: 3.5rem;
-  --spacing-16: 4rem;
-  --spacing-20: 5rem;
-  --spacing-24: 6rem;
-  --spacing-28: 7rem;
-  --spacing-32: 8rem;
 
   /* Animation Durations - Semantic design tokens from DURATION presets */
   --duration-micro: 100ms;        /* 0.1s - Very quick animations */
@@ -1012,69 +1034,18 @@
 
 /* Component Classes */
 @layer components {
-  /* Typography/Prose Styles - Basic prose utility classes for markdown content */
-  .prose {
-    color: var(--foreground);
-    max-width: 65ch;
-  }
-
-  .prose-invert {
-    color: var(--foreground);
-  }
-
-  .prose-slate {
-    color: var(--foreground);
-  }
-
-  .prose-neutral {
-    color: var(--foreground);
-  }
-
-  /* REMOVED: Duplicate .prose-sm and .not-prose
-   * These are defined in @utility below, which is the modern Tailwind v4 approach.
-   * The @utility versions are used via className.
+  /* REMOVED: Duplicate prose classes (.prose, .prose-invert, .prose-slate, .prose-neutral)
+   * These are now defined as @utility below, which is the modern Tailwind v4 approach.
+   * Use the @utility versions: prose, prose-invert, prose-slate, prose-neutral
+   * Dark mode variants are handled via Tailwind's dark: modifier with the @utility versions.
    */
 
-  /* Dark mode prose invert variant */
-  @media (prefers-color-scheme: dark) {
-    .dark\:prose-invert {
-      color: var(--foreground);
-    }
-  }
-
-  .dark .dark\:prose-invert {
-    color: var(--foreground);
-  }
-
-  /* Hero Section with Claude Orange Gradient */
-  .hero-gradient {
-    background: var(--gradient-hero);
-  }
-
-  /* Card styling with warm charcoal background */
-  .card-gradient {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    transition: var(--transition-normal);
-  }
-
-  /* Removed .card-gradient:hover border-color to prevent conflicts with motion.dev whileHover */
-  /* Motion.dev handles hover border color via inline styles for better control */
-  .card-gradient:hover {
-    background: var(--color-bg-tertiary);
-    /* border-color removed - handled by motion.dev whileHover */
-    box-shadow: var(--shadow-sm);
-  }
-
-  /* Claude orange glow effects */
-  .glow-effect {
-    box-shadow: var(--shadow-glow);
-  }
-
-  .orange-glow {
-    box-shadow: var(--shadow-orange);
-  }
+  /* REMOVED: Gradient and glow classes (.hero-gradient, .card-gradient, .glow-effect, .orange-glow)
+   * These are now defined as @utility below with hover support.
+   * Use the @utility versions: hero-gradient, card-gradient, glow-effect, orange-glow
+   * Hover states are handled via Tailwind's hover: modifier with the @utility versions.
+   * Note: card-gradient hover state is defined in @utility card-gradient:hover
+   */
 
   /* REMOVED: Unused .claude-* component classes
    * These classes were defined but never used in the codebase.
@@ -1241,79 +1212,22 @@
     color: var(--color-syntax-number);
   }
 
-  /* Category Badge Utilities */
-  /* Premium Category Badges - Border and text only, no background */
-  .badge-category-agents {
-    background-color: transparent;
-    color: var(--color-category-agents);
-    border-color: var(--color-category-agents-border);
-    font-weight: 600;
-  }
-  .badge-category-mcp {
-    background-color: transparent;
-    color: var(--color-category-mcp);
-    border-color: var(--color-category-mcp-border);
-    font-weight: 600;
-  }
-  .badge-category-rules {
-    background-color: transparent;
-    color: var(--color-category-rules);
-    border-color: var(--color-category-rules-border);
-    font-weight: 600;
-  }
-  .badge-category-commands {
-    background-color: transparent;
-    color: var(--color-category-commands);
-    border-color: var(--color-category-commands-border);
-    font-weight: 600;
-  }
-  .badge-category-hooks {
-    background-color: transparent;
-    color: var(--color-category-hooks);
-    border-color: var(--color-category-hooks-border);
-    font-weight: 600;
-  }
-  .badge-category-statuslines {
-    background-color: transparent;
-    color: var(--color-category-statuslines);
-    border-color: var(--color-category-statuslines-border);
-    font-weight: 600;
-  }
-  .badge-category-collections {
-    background-color: transparent;
-    color: var(--color-category-collections);
-    border-color: var(--color-category-collections-border);
-    font-weight: 600;
-  }
-  .badge-category-guides {
-    background-color: transparent;
-    color: var(--color-category-guides);
-    border-color: var(--color-category-guides-border);
-    font-weight: 600;
-  }
-  .badge-category-skills {
-    background-color: transparent;
-    color: var(--color-category-skills);
-    border-color: var(--color-category-skills-border);
-    font-weight: 600;
-  }
+  /* REMOVED: Category Badge Utilities
+   * Badge classes removed - now using Direct Tailwind utilities generated from @theme
+   * Use: bg-transparent text-category-* border-category-*-border font-semibold
+   * Example: className="bg-transparent text-category-agents border-category-agents-border font-semibold"
+   */
 
-  /* Micro Font Sizes */
-  .text-3xs {
-    font-size: var(--font-size-3xs);
-  }
-  .text-2xs {
-    font-size: var(--font-size-2xs);
-  }
+  /* REMOVED: Duplicate micro font sizes (.text-3xs, .text-2xs)
+   * These should use direct Tailwind utilities or design system size utilities.
+   * If font sizes are defined in @theme, Tailwind auto-generates text-3xs and text-2xs utilities.
+   * Otherwise, use design system size['3xs'] and size['2xs'] utilities.
+   */
 
-  /* Animations */
-  .animate-fade-in {
-    animation: fadeIn var(--duration-moderate) cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .animate-slide-up {
-    animation: slideUp var(--duration-extended) cubic-bezier(0.4, 0, 0.2, 1);
-  }
+  /* REMOVED: Animation Utilities
+   * Animation classes removed - now using Direct Tailwind utilities auto-generated from @theme
+   * Use: animate-fade-in, animate-slide-up, etc. (auto-generated from --animate-* in @theme)
+   */
 
   /* Navigation styling */
   .nav-backdrop {
@@ -1510,10 +1424,114 @@
   max-width: none;
 }
 
-/* REMOVED: Duplicate @utility card-gradient and glow-effect
- * These are defined in @layer components above, which include hover states.
- * The @layer components versions are the source of truth since they have hover states.
+/* Gradient and glow utilities - migrated from @layer components for better consolidation */
+@utility hero-gradient {
+  background: var(--gradient-hero);
+}
+
+@utility card-gradient {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: var(--transition-normal);
+  
+  &:hover {
+    background: var(--color-bg-tertiary);
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+@utility glow-effect {
+  box-shadow: var(--shadow-glow);
+}
+
+@utility orange-glow {
+  box-shadow: var(--shadow-orange);
+}
+
+/* REMOVED: flex-between utility - Replaced with standard Tailwind
+ * flex-between → flex items-center justify-between
+ * This custom utility duplicated Tailwind functionality and has been replaced throughout the codebase.
  */
+
+/* Card base styling - standardizes card appearance */
+@utility card-base {
+  @apply rounded-lg border;
+}
+
+/* REMOVED: Typography utilities - Replaced with standard Tailwind utilities
+ * - text-muted-sm → text-muted-foreground text-sm
+ * - text-muted-xs → text-muted-foreground text-xs
+ * These custom utilities duplicated Tailwind functionality and have been replaced throughout the codebase.
+ */
+
+@utility text-xs-medium {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+@utility text-sm-medium {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+@utility text-center-sm {
+  text-align: center;
+  font-size: var(--font-size-sm);
+}
+
+@utility text-base-semibold {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+}
+
+@utility text-lg-bold {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+}
+
+/* REMOVED: Flex + Gap utilities - Replaced with standard Tailwind utilities
+ * - flex-center-gap-* → flex items-center gap-*
+ * - flex-start-gap-* → flex items-start gap-*
+ * These custom utilities duplicated Tailwind functionality and have been replaced throughout the codebase.
+ */
+
+/* REMOVED: Rounded + Border utilities - Replaced with standard Tailwind utilities
+ * - card-border-md → rounded-lg border
+ * - card-border-lg → rounded-xl border
+ * - card-border → rounded-lg border
+ * These custom utilities duplicated Tailwind functionality and have been replaced throughout the codebase.
+ */
+
+/* Layout utilities - frequently repeated patterns */
+@utility flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Interactive state utilities - frequently repeated patterns */
+@utility focus-ring {
+  outline: none;
+  outline-offset: 2px;
+  outline-width: 2px;
+  outline-style: solid;
+  outline-color: var(--ring);
+}
+
+@utility disabled-state {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+@utility hover-accent-subtle {
+  transition: background-color var(--duration-quick) var(--ease-in-out);
+  
+  &:hover {
+    background-color: var(--accent) / 0.05;
+  }
+}
 
 /* ========================================
    KEYFRAME ANIMATIONS
@@ -1671,37 +1689,11 @@
   }
 }
 
-/* Animation Utilities */
-.animate-fade-in {
-  animation: fadeIn var(--duration-quick) var(--ease-out) both;
-}
-
-.animate-slide-up {
-  animation: slideUp var(--duration-default) var(--ease-out) both;
-}
-
-.animate-scale-in {
-  animation: scale-in var(--duration-quick) var(--ease-out) both; /* Uses scale-in from view-transitions.css */
-}
-
-.animate-pulse {
-  animation: pulse-accent var(--duration-very-long) var(--ease-in-out) infinite;
-}
-
-.animate-shimmer {
-  animation: shimmer var(--duration-maximum) linear infinite;
-  /* Note: background-position is not GPU-accelerated, but shimmer is subtle and acceptable */
-  will-change: background-position;
-}
-
-.animate-gridMove {
-  animation: gridMove var(--duration-morphing) linear infinite;
-}
-
-.animate-border-beam {
-  animation: border-beam linear infinite;
-  animation-duration: var(--duration);
-}
+/* REMOVED: Animation Utilities
+ * Animation classes removed - now using Direct Tailwind utilities auto-generated from @theme
+ * Use: animate-fade-in, animate-slide-up, animate-scale-in, animate-pulse, animate-shimmer, animate-gridMove, animate-border-beam
+ * These are auto-generated from --animate-* definitions in @theme block
+ */
 
 /* Text Roll Animation - Apple Hello Effect */
 @keyframes textRoll {
@@ -1723,9 +1715,7 @@
   }
 }
 
-.animate-textRoll {
-  animation: textRoll 600ms ease-in-out;
-}
+/* REMOVED: .animate-textRoll - Use Direct Tailwind utility animate-textRoll (auto-generated from @theme) */
 
 /* Additional animations for enhanced components */
 @keyframes fadeInUp {
@@ -1739,9 +1729,7 @@
   }
 }
 
-.animate-fade-in-up {
-  animation: fadeInUp 0.5s ease-out forwards;
-}
+/* REMOVED: .animate-fade-in-up - Use Direct Tailwind utility animate-fade-in-up (auto-generated from @theme) */
 
 @keyframes slideInFromLeft {
   0% {
@@ -1764,9 +1752,7 @@
   }
 }
 
-.animate-fadeIn {
-  animation: fadeIn var(--duration-default) ease-out forwards;
-}
+/* REMOVED: .animate-fadeIn - Use Direct Tailwind utility animate-fadeIn (auto-generated from @theme) */
 
 /* ========================================
    FONT OPTIMIZATION - Next.js Font System

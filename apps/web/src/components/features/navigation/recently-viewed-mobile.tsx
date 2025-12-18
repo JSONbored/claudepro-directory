@@ -14,7 +14,6 @@ import {
 import { useBoolean } from '@heyclaude/web-runtime/hooks';
 import Link from 'next/link';
 import { useEffect } from 'react';
-import { between, paddingX, paddingY, gap, spaceY, paddingBottom, padding, marginTop } from "@heyclaude/web-runtime/design-system";
 
 const DISMISS_KEY = 'heyclaude_recently_viewed_mobile_dismissed';
 
@@ -67,7 +66,7 @@ export function RecentlyViewedMobileTray() {
     <>
       <button
         type="button"
-        className={`border-border/60 bg-card/90 fixed bottom-20 left-1/2 z-40 flex -translate-x-1/2 items-center ${gap.tight} rounded-full border ${paddingX.default} ${paddingY.tight} text-sm shadow-lg backdrop-blur md:hidden`}
+        className="fixed bottom-20 left-1/2 z-40 flex -translate-x-1/2 items-center gap-1 rounded-full border border-border/60 bg-card/90 px-4 py-2 text-sm shadow-lg backdrop-blur md:hidden"
         onClick={setOpenTrue}
       >
         <Clock className="h-4 w-4" aria-hidden="true" />
@@ -75,29 +74,29 @@ export function RecentlyViewedMobileTray() {
       </button>
 
       <Sheet open={open} onOpenChange={(open) => open ? setOpenTrue() : setOpenFalse()}>
-        <SheetContent side="bottom" className={`h-[80vh] overflow-y-auto ${paddingX.default} md:hidden`}>
-          <SheetHeader className={`${paddingX.comfortable}`}>
+        <SheetContent side="bottom" className="h-[80vh] overflow-y-auto px-4 md:hidden">
+          <SheetHeader className="px-6">
             <SheetTitle>Recently Viewed</SheetTitle>
             <SheetDescription>Your locally saved browsing history.</SheetDescription>
           </SheetHeader>
-          <div className={`${spaceY.comfortable} ${paddingX.comfortable} ${paddingBottom.comfortable}`}>
-            <div className={`text-muted-foreground flex items-center ${gap.tight} text-sm`}>
-              <Button variant="ghost" size="sm" onClick={clearAll} className={`${gap.tight}`}>
+          <div className="space-y-6 px-6 pb-6">
+            <div className="flex items-center gap-1 text-muted-foreground text-sm">
+              <Button variant="ghost" size="sm" onClick={clearAll} className="gap-1">
                 <Trash className="h-4 w-4" aria-hidden="true" />
                 Clear all
               </Button>
-              <Button variant="ghost" size="sm" onClick={handleDismissForever} className={`${gap.tight}`}>
+              <Button variant="ghost" size="sm" onClick={handleDismissForever} className="gap-1">
                 <X className="h-4 w-4" aria-hidden="true" />
                 Don't show again
               </Button>
             </div>
-            <ul className={`${spaceY.default}`}>
+            <ul className="space-y-3">
               {sortedItems.map((item) => (
                 <li
                   key={`${item.category}-${item.slug}`}
-                  className={`border-border/50 rounded-xl border ${padding.default}`}
+                  className="rounded-xl border border-border/50 p-4"
                 >
-                  <div className={between.center}>
+                  <div className="flex items-center justify-between">
                     <div>
                       <p className="text-muted-foreground text-xs uppercase">{item.category}</p>
                       <Link
@@ -118,14 +117,14 @@ export function RecentlyViewedMobileTray() {
                     </button>
                   </div>
                   {item.description ? (
-                    <p className={`text-muted-foreground ${marginTop.compact} line-clamp-3 text-sm`}>
+                    <p className="mt-2 line-clamp-3 text-muted-foreground text-sm">
                       {item.description}
                     </p>
                   ) : null}
                   {item.tags && item.tags.length > 0 ? (
-                    <div className={`text-muted-foreground ${marginTop.default} flex flex-wrap ${gap.tight} text-xs`}>
+                    <div className="mt-4 flex flex-wrap gap-1 text-muted-foreground text-xs">
                       {item.tags.slice(0, 3).map((tag) => (
-                        <span key={tag} className={cn('bg-muted rounded-full', paddingX.tight, paddingY['1.5'])}>
+                        <span key={tag} className={cn('rounded-full bg-muted', 'px-1 py-[6px]')}>
                           #{tag}
                         </span>
                       ))}

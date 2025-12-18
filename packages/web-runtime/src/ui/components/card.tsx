@@ -5,7 +5,6 @@
  */
 
 import { cn } from '../../ui/utils.ts';
-import { stack } from '../../design-system/index.ts';
 import type * as React from 'react';
 import { memo } from 'react';
 
@@ -14,7 +13,7 @@ const Card = memo(function Card({ className, ...props }: React.ComponentProps<'d
     <div
       data-slot="card"
       className={cn(
-        stack.relaxed,
+        'flex flex-col gap-6',
         'rounded-xl border bg-card py-6 text-card-foreground shadow-sm',
         className
       )}

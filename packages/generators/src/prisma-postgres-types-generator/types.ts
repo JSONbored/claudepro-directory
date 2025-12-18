@@ -15,6 +15,8 @@ export interface GeneratorConfig {
   includeFunctions?: string[];
   /** Exclude functions matching these patterns (optional) */
   excludeFunctions?: string[];
+  /** Exclude composite types matching these patterns (optional) */
+  excludeCompositeTypes?: string[];
 }
 
 export interface GeneratedFile {

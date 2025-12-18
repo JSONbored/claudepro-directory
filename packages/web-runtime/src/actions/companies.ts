@@ -9,7 +9,6 @@
  */
 
 import { createSupabaseAdminClient } from '../supabase/admin.ts';
-import { logActionFailure } from '../errors.ts';
 import { authedAction, rateLimitedAction } from './safe-action.ts';
 // Storage imports are lazy-loaded to prevent client bundling of iceberg-js
 // import {
@@ -59,23 +58,13 @@ export const searchCompaniesAction = authedAction
   .metadata({ actionName: 'searchCompanies', category: 'content' })
   .inputSchema(companySearchSchema)
   .action(async ({ parsedInput }) => {
-    try {
-      const { searchCompanies } = await import('../data/companies.ts');
-      const limit = parsedInput.limit ?? 10;
-      const companies = await searchCompanies(parsedInput.query, limit);
-      
-      // Lazy import feature flags to avoid module-level server-only code execution
-      // Get timeout config from static defaults
-      const { getTimeoutConfig } = await import('../config/static-configs.ts');
-      const config = getTimeoutConfig();
-      const debounceMs = config['timeout.ui.form_debounce_ms'] ?? 300;
-
-      return { companies, debounceMs };
-    } catch (error) {
-      throw logActionFailure('companies.searchCompanies', error, {
-        query: parsedInput.query,
-      });
-    }
+    const { searchCompanies } = await import('../data/companies.ts');
+    const { getTimeoutConfig } = await import('../config/static-configs.ts');
+    const limit = parsedInput.limit ?? 10;
+    const companies = await searchCompanies(parsedInput.query, limit);
+    const config = getTimeoutConfig();
+    const debounceMs = config['timeout.ui.form_debounce_ms'] ?? 300;
+    return { companies, debounceMs };
   });
 
 /**
@@ -88,26 +77,20 @@ export const getCompanyByIdAction = rateLimitedAction
   )
   .metadata({ actionName: 'companies.getCompanyById', category: 'content' })
   .action(async ({ parsedInput }) => {
-    try {
-      const { getCompanyAdminProfile } = await import('../data/companies.ts');
-      const profile = await getCompanyAdminProfile(parsedInput.companyId);
-      if (!profile) {
-        // Return null instead of throwing - safe-action middleware handles logging
-        return null;
-      }
-
-      return {
-        id: profile.id ?? '',
-        name: profile.name ?? '',
-        slug: profile.slug ?? '',
-        logo: profile.logo ?? null,
-        website: profile.website ?? null,
-        description: profile.description ?? null,
-      };
-    } catch {
-      // Fallback to null on error (safe-action middleware handles logging)
+    const { getCompanyAdminProfile } = await import('../data/companies.ts');
+    const profile = await getCompanyAdminProfile(parsedInput.companyId);
+    if (!profile) {
       return null;
     }
+
+    return {
+      id: profile.id ?? '',
+      name: profile.name ?? '',
+      slug: profile.slug ?? '',
+      logo: profile.logo ?? null,
+      website: profile.website ?? null,
+      description: profile.description ?? null,
+    };
   });
 
 export const uploadCompanyLogoAction = authedAction
@@ -165,6 +148,7 @@ export const uploadCompanyLogoAction = authedAction
         path: uploadResult.path,
       };
     } catch (error) {
+      const { logActionFailure } = await import('../errors.ts');
       throw logActionFailure('companies.uploadCompanyLogo', error, {
         userId: ctx.userId,
         companyId: companyId ?? 'unassigned',

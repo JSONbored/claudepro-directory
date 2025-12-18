@@ -10,7 +10,7 @@
  */
 
 import { Skeleton, cn } from '@heyclaude/web-runtime/ui';
-import { SPRING, STAGGER, between, paddingX, paddingY, marginX, gap, spaceY, padding, size, iconSize } from '@heyclaude/web-runtime/design-system';
+import { SPRING, STAGGER } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
@@ -22,14 +22,14 @@ const KEYS_6 = Array.from({ length: 6 }, (_, i) => `skeleton-${i + 1}`);
  */
 function CompanyHeaderSkeleton() {
   return (
-    <div className={`container ${marginX.auto} ${paddingX.default} ${paddingY.section}`}>
-      <div className={`flex items-start ${gap.comfortable}`}>
+    <div className="container mx-auto px-4 py-12">
+      <div className="flex items-start gap-6">
         {/* Logo */}
-        <Skeleton size="xl" width="xl" rounded="lg" className={cn(iconSize['24'], 'shrink-0')} />
+        <Skeleton size="xl" width="xl" rounded="lg" className={cn('h-24 w-24 shrink-0')} />
         
         {/* Content */}
-        <div className={`flex-1 ${spaceY.comfortable}`}>
-          <div className={`flex items-center ${gap.compact}`}>
+        <div className="flex flex-col gap-6 flex-1">
+          <div className="flex items-center gap-2">
             <Skeleton size="xl" width="lg" className="h-9" />
             <Skeleton size="sm" width="xs" rounded="full" />
           </div>
@@ -37,17 +37,17 @@ function CompanyHeaderSkeleton() {
           <Skeleton size="md" width="2xl" className="h-5" />
           
           {/* Metadata links */}
-          <div className={`flex flex-wrap items-center ${gap.default}`}>
-            <div className={`flex items-center ${gap.micro}`}>
-              <Skeleton size="sm" width="xs" rounded="full" className={iconSize.sm} />
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-0.5">
+              <Skeleton size="sm" width="xs" rounded="full" className="h-4 w-4" />
               <Skeleton size="sm" width="xs" />
             </div>
-            <div className={`flex items-center ${gap.micro}`}>
-              <Skeleton size="sm" width="xs" rounded="full" className={iconSize.sm} />
+            <div className="flex items-center gap-0.5">
+              <Skeleton size="sm" width="xs" rounded="full" className="h-4 w-4" />
               <Skeleton size="sm" width="xs" />
             </div>
-            <div className={`flex items-center ${gap.micro}`}>
-              <Skeleton size="sm" width="xs" rounded="full" className={iconSize.sm} />
+            <div className="flex items-center gap-0.5">
+              <Skeleton size="sm" width="xs" rounded="full" className="h-4 w-4" />
               <Skeleton size="sm" width="xs" />
             </div>
           </div>
@@ -63,19 +63,19 @@ function CompanyHeaderSkeleton() {
 function JobCardSkeleton() {
   return (
     <Card>
-      <CardContent className={`${padding.comfortable}`}>
-        <div className={`${spaceY.comfortable}`}>
+      <CardContent className="p-6">
+        <div className="space-y-6">
           {/* Header with logo and title */}
-          <div className={`flex items-start ${gap.default}`}>
-            <Skeleton size="md" width="md" rounded="md" className={cn(iconSize['2xl'], 'shrink-0')} />
-            <div className={`flex-1 ${spaceY.compact}`}>
+          <div className="flex items-start gap-3">
+            <Skeleton size="md" width="md" rounded="md" className={cn('h-8 w-8 shrink-0')} />
+            <div className="flex flex-col gap-2 flex-1">
               <Skeleton size="md" width="3/4" />
               <Skeleton size="sm" width="2xl" />
             </div>
           </div>
           
           {/* Metadata row */}
-          <div className={`flex flex-wrap items-center ${gap.compact}`}>
+          <div className="flex flex-wrap items-center gap-2">
             <Skeleton size="xs" width="xs" rounded="full" />
             <Skeleton size="xs" width="xs" rounded="full" />
             <Skeleton size="xs" width="xs" rounded="full" />
@@ -83,21 +83,21 @@ function JobCardSkeleton() {
           </div>
           
           {/* Description */}
-          <div className={`${spaceY.compact}`}>
+          <div className="space-y-2">
             <Skeleton size="sm" width="3xl" />
             <Skeleton size="sm" width="3xl" />
             <Skeleton size="sm" width="2/3" />
           </div>
           
           {/* Tags */}
-          <div className={`flex flex-wrap ${gap.tight}`}>
+          <div className="flex flex-wrap gap-1">
             <Skeleton size="xs" width="xs" rounded="full" />
             <Skeleton size="xs" width="xs" rounded="full" />
             <Skeleton size="xs" width="xs" rounded="full" />
           </div>
           
           {/* Actions */}
-          <div className={`flex ${gap.tight}`}>
+          <div className="flex gap-1">
             <Skeleton size="md" width="lg" rounded="md" className="h-10" />
             <Skeleton size="md" width="lg" rounded="md" className="h-10" />
           </div>
@@ -112,16 +112,16 @@ function JobCardSkeleton() {
  */
 function CompanyStatsSkeleton() {
   return (
-    <div className={`${spaceY.relaxed}`}>
+    <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className={`${size.sm}`}>
+          <CardTitle className="text-sm">
             <Skeleton size="sm" width="sm" />
           </CardTitle>
         </CardHeader>
-        <CardContent className={`${spaceY.comfortable}`}>
+        <CardContent className="space-y-6">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className={between.center}>
+            <div key={i} className="flex items-center justify-between">
               <Skeleton size="sm" width="xs" />
               <Skeleton size="sm" width="xs" rounded="full" />
             </div>
@@ -156,22 +156,22 @@ export function CompanyProfileSkeleton() {
       </section>
 
       {/* Content Section */}
-      <section className={`container ${marginX.auto} ${paddingX.default} ${paddingY.section}`}>
-        <div className={`grid grid-cols-1 ${gap.relaxed} lg:grid-cols-[1fr_320px]`}>
+      <section className="container mx-auto px-4 py-12">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
           {/* Main Content - Active Jobs */}
           <motion.div
-            className={`${spaceY.relaxed}`}
+            className="space-y-6"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ ...SPRING.smooth, delay: 0.2 }}
           >
             {/* Section Header */}
-            <div className={between.center}>
+            <div className="flex items-center justify-between">
               <Skeleton size="lg" width="lg" className="h-8" />
             </div>
             
             {/* Jobs Grid */}
-            <div className={`${spaceY.comfortable}`}>
+            <div className="space-y-6">
               {KEYS_6.map((key, i) => {
                 return (
                   <motion.div
@@ -193,7 +193,7 @@ export function CompanyProfileSkeleton() {
 
           {/* Sidebar - Company Stats */}
           <motion.aside
-            className={`${spaceY.relaxed} lg:sticky lg:top-24 lg:h-fit`}
+            className="space-y-6 lg:sticky lg:top-24 lg:h-fit"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ ...SPRING.smooth, delay: 0.4 }}

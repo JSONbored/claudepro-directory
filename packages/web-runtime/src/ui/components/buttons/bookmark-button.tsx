@@ -39,7 +39,6 @@ import { useAuthenticatedUser, useLoggedAsync, usePulse, useConfetti } from '../
 import { Bookmark, BookmarkCheck, Loader2 } from '../../../icons.tsx';
 import type { ButtonStyleProps } from '../../../types/component.types.ts';
 import { cn } from '../../../ui/utils.ts';
-import { iconSize, size as textSize, weight } from '../../../design-system/index.ts';
 import { toasts } from '../../../client/toast.ts';
 import { useRouter, usePathname } from 'next/navigation';
 import { useState, useTransition } from 'react';
@@ -302,7 +301,7 @@ export function BookmarkButton({
                   exit={{ scale: 0 }}
                   transition={MICROINTERACTIONS.iconTransition.transition}
                 >
-                  <Loader2 className={`${iconSize.xs} animate-spin`} aria-hidden="true" />
+                  <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
                 </motion.div>
               ) : isBookmarked ? (
                 <motion.div
@@ -314,7 +313,7 @@ export function BookmarkButton({
                   className="text-color-accent-primary"
                 >
                   <BookmarkCheck
-                    className={`${iconSize.xs} fill-current`}
+                    className="h-3 w-3 fill-current"
                     aria-hidden="true"
                   />
                 </motion.div>
@@ -326,12 +325,12 @@ export function BookmarkButton({
                   exit={MICROINTERACTIONS.iconTransition.exit}
                   transition={MICROINTERACTIONS.iconTransition.transition}
                 >
-                  <Bookmark className={iconSize.xs} aria-hidden="true" />
+                  <Bookmark className="h-3 w-3" aria-hidden="true" />
                 </motion.div>
               )}
             </AnimatePresence>
             {showLabel && !isPending && (
-              <span className={`ml-1 ${textSize.sm} ${weight.semibold}`}>{isBookmarked ? 'Saved' : 'Save'}</span>
+              <span className="ml-1 text-sm font-semibold">{isBookmarked ? 'Saved' : 'Save'}</span>
             )}
           </Button>
         </TooltipTrigger>

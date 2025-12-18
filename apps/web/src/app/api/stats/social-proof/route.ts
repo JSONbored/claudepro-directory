@@ -28,57 +28,9 @@
 
 import 'server-only';
 
-import { MiscService } from '@heyclaude/data-layer';
-import type { GetSocialProofStatsReturnRow } from '@heyclaude/database-types/postgres-types';
-import { createApiOptionsHandler, createApiRoute } from '@heyclaude/web-runtime/server';
-import { cacheLife } from 'next/cache';
-import { connection, NextResponse } from 'next/server';
-
-/**
- *
- * Cached helper function to fetch social proof stats.
- * Uses database RPC function to do all aggregations in the database.
- * @returns {Promise<unknown>} Return value description
- */
-async function getCachedSocialProofData(): Promise<{
-  contributors: { count: number; names: string[] };
-  submissions: number;
-  successRate: null | number;
-  totalUsers: null | number;
-}> {
-  'use cache';
-  cacheLife('quarter'); // 15min stale, 5min revalidate, 2hr expire
-
-  const service = new MiscService();
-  const data = await service.getSocialProofStats();
-
-  // Extract the return row type (function returns array of rows)
-  type SocialProofStatsRow = GetSocialProofStatsReturnRow;
-
-  const result = data ?? [];
-  const row =
-    Array.isArray(result) && result.length > 0 ? (result[0] as SocialProofStatsRow) : null;
-
-  if (!row) {
-    return {
-      contributors: { count: 0, names: [] },
-      submissions: 0,
-      successRate: null,
-      totalUsers: null,
-    };
-  }
-
-  return {
-    contributors: {
-      count: row.contributor_count ?? 0,
-      names: Array.isArray(row.contributor_names) ? row.contributor_names : [],
-    },
-    submissions: row.submission_count ?? 0,
-    successRate:
-      row.success_rate !== null && row.success_rate !== undefined ? Number(row.success_rate) : null,
-    totalUsers: row.total_users ?? null,
-  };
-}
+import { type GetSocialProofStatsReturnRow } from '@heyclaude/database-types/postgres-types';
+import { createApiOptionsHandler, createCachedApiRoute, getVersionedRoute, jsonResponse, type RouteHandlerContext } from '@heyclaude/web-runtime/server';
+import { connection } from 'next/server';
 
 /**
  * GET /api/stats/social-proof - Get social proof statistics
@@ -86,49 +38,59 @@ async function getCachedSocialProofData(): Promise<{
  * Returns aggregated social proof metrics: top contributors this week (up to 5 usernames),
  * submissions count in the past 7 days, success rate percentage over the past 30 days,
  * and total user count. Includes ETag and Last-Modified headers for conditional requests.
+ * 
+ * OPTIMIZATION: Uses createCachedApiRoute to eliminate cached helper function boilerplate.
  */
-export const GET = createApiRoute({
+const responseHandler = async (result: unknown, _query: unknown, _body: unknown, ctx: RouteHandlerContext<unknown, unknown>) => {
+  const { logger } = ctx;
+  
+  // Explicitly defer to request time before using non-deterministic operations (Date.now())
+  await connection();
+
+  const stats = result as {
+    contributors: { count: number; names: string[] };
+    submissions: number;
+    successRate: null | number;
+    totalUsers: null | number;
+  };
+  const timestamp = new Date().toISOString();
+
+  logger.info(
+    {
+      cacheTags: ['stats', 'social-proof'],
+      stats: {
+        contributorCount: stats.contributors.count,
+        submissionCount: stats.submissions,
+        successRate: stats.successRate,
+        totalUsers: stats.totalUsers,
+      },
+    },
+    'Social proof stats retrieved'
+  );
+
+  // Generate ETag from timestamp and stats hash for conditional requests
+  const statsHash = `${stats.contributors.count}-${stats.submissions}-${stats.successRate}-${stats.totalUsers}`;
+  const etag = `"${timestamp}-${statsHash}"`;
+
+  return jsonResponse(
+    {
+      stats,
+      success: true,
+      timestamp,
+    },
+    200,
+    {},
+    {
+      ETag: etag,
+      'Last-Modified': new Date(timestamp).toUTCString(),
+    }
+  );
+};
+
+export const GET = createCachedApiRoute({
+  cacheLife: 'short', // 15min stale, 5min revalidate, 2hr expire
+  cacheTags: ['stats', 'social-proof'],
   cors: 'anon',
-  handler: async ({ logger }) => {
-    // Explicitly defer to request time before using non-deterministic operations (Date.now())
-    await connection();
-
-    const stats = await getCachedSocialProofData();
-    const timestamp = new Date().toISOString();
-
-    logger.info(
-      {
-        cacheTags: ['stats', 'social-proof'],
-        stats: {
-          contributorCount: stats.contributors.count,
-          submissionCount: stats.submissions,
-          successRate: stats.successRate,
-          totalUsers: stats.totalUsers,
-        },
-      },
-      'Social proof stats retrieved'
-    );
-
-    // Generate ETag from timestamp and stats hash for conditional requests
-    const statsHash = `${stats.contributors.count}-${stats.submissions}-${stats.successRate}-${stats.totalUsers}`;
-    const etag = `"${timestamp}-${statsHash}"`;
-
-    return NextResponse.json(
-      {
-        stats,
-        success: true,
-        timestamp,
-      },
-      {
-        headers: {
-          'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
-          ETag: etag,
-          'Last-Modified': new Date(timestamp).toUTCString(),
-        },
-        status: 200,
-      }
-    );
-  },
   method: 'GET',
   openapi: {
     description:
@@ -143,8 +105,42 @@ export const GET = createApiRoute({
     tags: ['stats', 'social-proof'],
   },
   operation: 'SocialProofStatsAPI',
-  route: '/api/stats/social-proof',
-});
+  route: getVersionedRoute('stats/social-proof'),
+  service: {
+    methodArgs: () => [],
+    methodName: 'getSocialProofStats',
+    serviceKey: 'misc',
+  },
+  transformResult: (result: unknown) => {
+    // Extract the return row type (function returns array of rows)
+    type SocialProofStatsRow = GetSocialProofStatsReturnRow;
+
+    const data = result ?? [];
+    const row =
+      Array.isArray(data) && data.length > 0 ? (data[0] as SocialProofStatsRow) : null;
+
+    if (!row) {
+      return {
+        contributors: { count: 0, names: [] },
+        submissions: 0,
+        successRate: null,
+        totalUsers: null,
+      };
+    }
+
+    return {
+      contributors: {
+        count: row.contributor_count ?? 0,
+        names: Array.isArray(row.contributor_names) ? row.contributor_names : [],
+      },
+      submissions: row.submission_count ?? 0,
+      successRate:
+        row.success_rate !== null && row.success_rate !== undefined ? Number(row.success_rate) : null,
+      totalUsers: row.total_users ?? null,
+    };
+  },
+  responseHandler,
+} as unknown as Parameters<typeof createCachedApiRoute>[0]);
 
 /**
  * OPTIONS handler for CORS preflight requests

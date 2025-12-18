@@ -12,7 +12,7 @@ import { useAuthenticatedUser, useLoggedAsync } from '@heyclaude/web-runtime/hoo
 import {
   extractFirstFieldFromTuple,
   isPostgresTupleString,
-} from '@heyclaude/web-runtime';
+} from '@heyclaude/web-runtime/utils/deserialize-postgres-tuple';
 import { toasts, FormField, ToggleField, Button, cn } from '@heyclaude/web-runtime/ui';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { usePathname } from 'next/navigation';
@@ -23,7 +23,6 @@ import { z } from 'zod';
 
 import { useAuthModal } from '@/src/hooks/use-auth-modal';
 import { ListItemManager } from '@/src/components/core/forms/list-items-editor';
-import { spaceY, paddingTop, gap } from "@heyclaude/web-runtime/design-system";
 
 // Profile data consolidated into users table - use generated types
 type ProfileData = Pick<
@@ -218,7 +217,7 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
   }, [user, status, openAuthModal, pathname, runLoggedAsync, reset]);
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className={spaceY.relaxed}>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <FormField
         variant="input"
         label="Name"
@@ -306,7 +305,7 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
         description="Press Enter or click Add"
       />
 
-      <div className={cn(spaceY.comfortable, paddingTop.compact)}>
+      <div className={cn('space-y-4', 'pt-3')}>
         <ToggleField
           label="Public profile"
           description="Allow others to view your profile"
@@ -324,7 +323,7 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
         />
       </div>
 
-      <div className={cn('flex', gap.compact, paddingTop.default)}>
+      <div className={cn('flex', 'gap-2', 'pt-4')}>
         <Button type="submit" disabled={isPending || !isDirty}>
           {isPending ? 'Saving...' : 'Save Changes'}
         </Button>

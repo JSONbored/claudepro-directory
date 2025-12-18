@@ -9,12 +9,11 @@
 
 import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
 import { useBoolean, useLoggedAsync } from '@heyclaude/web-runtime/hooks';
-import { cn, Button, UnifiedBadge } from '@heyclaude/web-runtime/ui';
+import { Button, cn, UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import { AlertCircle, CheckCircle2, ExternalLink, Shield, XCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { padding, gap, marginX, marginBottom, marginTop, marginRight } from "@heyclaude/web-runtime/design-system";
 
 interface OAuthConsentClientProps {
   authDetails: {
@@ -70,9 +69,9 @@ export function OAuthConsentClient({ authDetails, authorizationId }: OAuthConsen
           const errorMessage =
             approveError instanceof Error
               ? approveError.message
-              : typeof approveError === 'string'
+              : (typeof approveError === 'string'
                 ? approveError
-                : 'Failed to approve authorization';
+                : 'Failed to approve authorization');
           setError(errorMessage);
           setIsProcessingFalse();
           return;
@@ -118,9 +117,9 @@ export function OAuthConsentClient({ authDetails, authorizationId }: OAuthConsen
           const errorMessage =
             denyError instanceof Error
               ? denyError.message
-              : typeof denyError === 'string'
+              : (typeof denyError === 'string'
                 ? denyError
-                : 'Failed to deny authorization';
+                : 'Failed to deny authorization');
           setError(errorMessage);
           setIsProcessingFalse();
           return;
@@ -167,9 +166,9 @@ export function OAuthConsentClient({ authDetails, authorizationId }: OAuthConsen
   };
 
   return (
-    <div className={`${marginX.auto} flex min-h-[400px] max-w-2xl flex-col ${gap.comfortable} ${padding.comfortable}`}>
-      <div className={`flex flex-col ${gap.compact} text-center`}>
-        <div className="flex items-center justify-center">
+    <div className="mx-auto flex min-h-[400px] max-w-2xl flex-col gap-4 p-6">
+      <div className="flex flex-col gap-2 text-center">
+        <div className="flex-center">
           <Shield aria-hidden="true" className="text-accent h-12 w-12" />
         </div>
         <h1 className="text-3xl font-bold">Authorize Application</h1>
@@ -178,11 +177,11 @@ export function OAuthConsentClient({ authDetails, authorizationId }: OAuthConsen
         </p>
       </div>
 
-      <div className={`border-border bg-card flex flex-col ${gap.comfortable} rounded-lg border ${padding.comfortable}`}>
+      <div className="border-border bg-card card-base flex flex-col gap-4 p-6">
         {/* Client Information */}
-        <div className={`flex flex-col ${gap.compact}`}>
-          <div className={`${marginBottom.compact} flex items-center justify-between`}>
-            <h2 className={`flex items-center ${gap.tight} text-xl font-semibold`}>
+        <div className="flex flex-col gap-2">
+          <div className="mb-2 flex items-center justify-between">
+            <h2 className="flex items-center gap-1 text-xl font-semibold">
               <span>{authDetails.client.name}</span>
             </h2>
             <UnifiedBadge className="text-xs" style="secondary" variant="base">
@@ -190,13 +189,13 @@ export function OAuthConsentClient({ authDetails, authorizationId }: OAuthConsen
             </UnifiedBadge>
           </div>
 
-          <div className={`text-muted-foreground flex flex-col ${gap.tight} text-sm`}>
-            <div className={`flex items-center ${gap.tight}`}>
+          <div className="text-muted-foreground flex flex-col gap-1 text-sm">
+            <div className="flex items-center gap-1">
               <ExternalLink aria-hidden="true" className="h-3.5 w-3.5" />
               <span className="font-medium">Redirect URI:</span>
               <span className="font-mono text-xs break-all">{authDetails.redirect_uri}</span>
             </div>
-            <div className={`flex items-center ${gap.tight}`}>
+            <div className="flex items-center gap-1">
               <span className="font-medium">Client ID:</span>
               <span className="font-mono text-xs break-all">{authDetails.client.client_id}</span>
             </div>
@@ -205,21 +204,21 @@ export function OAuthConsentClient({ authDetails, authorizationId }: OAuthConsen
 
         {/* Requested Permissions */}
         {hasScopes ? (
-          <div className={`border-border bg-muted/30 flex flex-col ${gap.compact} rounded-md border ${padding.default}`}>
-            <h3 className={`flex items-center ${gap.tight} text-lg font-semibold`}>
+          <div className="border-border bg-muted/30 flex flex-col gap-2 rounded-lg border p-4">
+            <h3 className="flex items-center gap-1 text-lg font-semibold">
               <span>Requested Permissions</span>
             </h3>
-            <ul className={`flex list-none flex-col ${gap.micro}`}>
+            <ul className="flex list-none flex-col gap-0.5">
               {scopes.map((scope) => (
-                <li className={`flex items-start ${gap.tight}`} key={scope}>
+                <li className="flex items-start gap-1" key={scope}>
                   <CheckCircle2
                     aria-hidden="true"
-                    className={cn('text-accent', marginTop['4.5'], 'h-4 w-4 flex-shrink-0')}
+                    className={cn('text-accent mt-[18px] h-4 w-4 flex-shrink-0')}
                   />
                   <span className="flex-1 text-sm">
                     <span className="font-semibold">{scope}</span>
                     {scopeDescriptions[scope] ? (
-                      <span className={`text-muted-foreground ${marginTop.tight} block`}>
+                      <span className="text-muted-foreground mt-1 block">
                         {scopeDescriptions[scope]}
                       </span>
                     ) : null}
@@ -232,12 +231,12 @@ export function OAuthConsentClient({ authDetails, authorizationId }: OAuthConsen
 
         {/* Error Message */}
         {error ? (
-          <div className={`border-destructive/20 bg-destructive/10 flex items-start ${gap.tight} rounded-md border ${padding.default}`}>
+          <div className="border-destructive/20 bg-destructive/10 flex items-start gap-2 rounded-lg border p-4">
             <AlertCircle
               aria-hidden="true"
-              className={cn('text-destructive', marginTop['4.5'], 'h-5 w-5 flex-shrink-0')}
+              className={cn('text-destructive mt-[18px] h-5 w-5 flex-shrink-0')}
             />
-            <div className={`flex flex-1 flex-col ${gap.micro}`}>
+            <div className="flex flex-1 flex-col gap-0.5">
               <p className="text-destructive text-sm font-semibold">Error</p>
               <p className="text-muted-foreground text-sm">{error}</p>
             </div>
@@ -245,38 +244,38 @@ export function OAuthConsentClient({ authDetails, authorizationId }: OAuthConsen
         ) : null}
 
         {/* Action Buttons */}
-        <div className={`${marginTop.comfortable} flex items-center ${gap.compact}`}>
+        <div className="mt-6 flex items-center gap-2">
           <Button
             className="flex-1 transition-colors"
             disabled={isProcessing}
+            size="lg"
+            variant="outline"
             onClick={() => {
               void handleDeny();
             }}
-            size="lg"
-            variant="outline"
           >
-            <XCircle aria-hidden="true" className={`${marginRight.tight} h-4 w-4`} />
+            <XCircle aria-hidden="true" className="mr-2 h-4 w-4" />
             Deny
           </Button>
           <Button
             className="hover:bg-accent/20 flex-1 transition-colors"
             disabled={isProcessing}
+            size="lg"
+            variant="default"
             onClick={() => {
               void handleApprove();
             }}
-            size="lg"
-            variant="default"
           >
-            <CheckCircle2 aria-hidden="true" className={`${marginRight.tight} h-4 w-4`} />
+            <CheckCircle2 aria-hidden="true" className="mr-2 h-4 w-4" />
             {isProcessing ? 'Processing...' : 'Approve'}
           </Button>
         </div>
 
         {/* Security Notice */}
-        <div className={`bg-muted/20 ${marginTop.default} flex items-start ${gap.tight} rounded-md ${padding.compact}`}>
+        <div className="bg-muted/20 mt-4 flex items-start gap-2 rounded-md p-3">
           <Shield
             aria-hidden="true"
-            className={cn('text-muted-foreground', marginTop['4.5'], 'h-4 w-4 flex-shrink-0')}
+            className={cn('text-muted-foreground mt-[18px] h-4 w-4 flex-shrink-0')}
           />
           <p className="text-muted-foreground text-xs">
             You can revoke access to this application at any time from your{' '}

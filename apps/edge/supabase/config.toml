@@ -5,12 +5,6 @@
 # Unified Architecture (ARCH-003)
 # =============================================================================
 
-# 1. PUBLIC API MONOLITH
-# Read-only, high-traffic, synchronous endpoints.
-[functions.public-api]
-verify_jwt = false
-import_map = "./functions/public-api/deno.json"
-
 [functions.heyclaude-mcp]
 verify_jwt = true
 import_map = "./functions/heyclaude-mcp/deno.json"

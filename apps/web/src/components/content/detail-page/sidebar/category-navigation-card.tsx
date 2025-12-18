@@ -60,14 +60,12 @@
 import { nonEmptyString } from '@heyclaude/shared-runtime';
 import { type LucideIcon } from '@heyclaude/web-runtime/icons';
 import {
-  DIMENSIONS,
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
   cn,
 } from '@heyclaude/web-runtime/ui';
-import { paddingX, between, iconSize, marginTop, transition } from '@heyclaude/web-runtime/design-system';
 import Link from 'next/link';
 import { z } from 'zod';
 
@@ -117,7 +115,7 @@ export function CategoryNavigationCard({
   // Database CHECK constraint validates structure - no runtime validation needed
   return (
     <TooltipProvider delayDuration={300}>
-      <div className={cn(between.center, paddingX.micro)}>
+      <div className={cn('flex items-center justify-between', 'px-1')}>
         {Object.entries(categories).map(([key, info]) => {
           const Icon = info.icon;
           const isActive = currentCategory === key;
@@ -127,18 +125,18 @@ export function CategoryNavigationCard({
               <TooltipTrigger asChild>
                 <Link
                   href={`${basePath}/${key}`}
-                  className={`rounded-lg p-2 ${transition.quick} ${
+                  className={`rounded-lg p-2 transition-all duration-150 ease-out ${
                     isActive
                       ? info.activeColor || 'bg-primary/10 text-primary'
                       : `text-muted-foreground ${info.color || 'hover:bg-muted/50 hover:text-primary'}`
                   }`}
                 >
-                  <Icon className={iconSize.sm} />
+                  <Icon className="h-4 w-4" />
                 </Link>
               </TooltipTrigger>
-              <TooltipContent side="bottom" className={`${DIMENSIONS.TOOLTIP_MAX} text-xs`}>
+              <TooltipContent side="bottom" className="max-w-[200px] text-xs">
                 <div className="font-semibold">{info['label']}</div>
-                <div className={`text-muted-foreground ${marginTop.default}.5`}>{info['description']}</div>
+                <div className="text-muted-foreground mt-0.5">{info['description']}</div>
               </TooltipContent>
             </Tooltip>
           );

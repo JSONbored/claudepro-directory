@@ -29,7 +29,6 @@ import {
   TooltipTrigger,
   UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
-import { spaceY, marginBottom, paddingX, marginX, paddingBottom, size, gap } from '@heyclaude/web-runtime/design-system';
 import { cn } from '@heyclaude/web-runtime/ui';
 
 export interface AllContentSectionProps {
@@ -62,7 +61,7 @@ export function AllContentSection({ weekStart }: AllContentSectionProps) {
       setIsLoadingAllConfigsTrue();
 
       try {
-        const { fetchPaginatedContent } = await import('@heyclaude/web-runtime/actions');
+        const { fetchPaginatedContent } = await import('@heyclaude/web-runtime/actions/content');
 
         const result = await fetchPaginatedContent({
           offset,
@@ -199,7 +198,7 @@ export function AllContentSection({ weekStart }: AllContentSectionProps) {
         <div className="relative h-full">
           {showNew || showTrending ? (
             <TooltipProvider delayDuration={300}>
-              <div className={`absolute top-3 left-3 z-10 flex flex-col ${gap.tight}`}>
+              <div className="absolute top-3 left-3 z-10 flex flex-col gap-1">
                 {showNew ? (
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -207,7 +206,7 @@ export function AllContentSection({ weekStart }: AllContentSectionProps) {
                         <UnifiedBadge
                           variant="base"
                           style="secondary"
-                          className={cn(size['2xs'], 'uppercase pointer-events-auto')}
+                          className={cn('text-[10px] uppercase pointer-events-auto')}
                         >
                           New this week
                         </UnifiedBadge>
@@ -225,7 +224,7 @@ export function AllContentSection({ weekStart }: AllContentSectionProps) {
                         <UnifiedBadge
                           variant="base"
                           style="outline"
-                          className={cn(size['2xs'], 'uppercase pointer-events-auto')}
+                          className={cn('text-[10px] uppercase pointer-events-auto')}
                         >
                           Trending
                         </UnifiedBadge>
@@ -256,11 +255,11 @@ export function AllContentSection({ weekStart }: AllContentSectionProps) {
     <section
       ref={sectionRef}
       aria-label="All configurations"
-      className={`container ${marginX.auto} ${paddingX.default} ${paddingBottom.default} ${spaceY.loose}`}
+      className="container mx-auto space-y-12 px-4 pb-4"
     >
-      <div className={marginBottom.relaxed}>
+      <div className="mb-8">
         <h2 className="text-3xl font-bold">All Configurations</h2>
-        <p className="text-muted-foreground mt-2">
+        <p className="mt-2 text-muted-foreground">
           Browse all configurations across all categories
         </p>
       </div>

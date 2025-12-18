@@ -65,7 +65,6 @@ import {
   type RefObject,
 } from 'react';
 import { cn } from '@heyclaude/web-runtime/ui';
-import { paddingX, paddingY, spaceY, spaceX, paddingTop } from '@heyclaude/web-runtime/design-system';
 import { useOnClickOutside, useScrollLock } from '@heyclaude/web-runtime/hooks';
 
 type DialogStackContextType = {
@@ -200,7 +199,7 @@ export const DialogStackTrigger = ({
         'ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2',
         'focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
         'bg-primary text-primary-foreground hover:bg-primary/90',
-        cn('h-10', paddingX.default, paddingY.compact),
+        'h-10 px-4 py-2',
         className
       )}
       onClick={handleClick}
@@ -355,7 +354,7 @@ export const DialogStackContent = ({
     // biome-ignore lint/a11y/useKeyWithClickEvents: "This is a clickable dialog"
     <div
       className={cn(
-        'h-auto w-full rounded-lg border bg-background p-6 shadow-lg transition-all duration-300',
+        'h-auto w-full card-base bg-background p-6 shadow-lg transition-all duration-300',
         className
       )}
       onClick={handleClick}
@@ -424,7 +423,7 @@ export const DialogStackHeader = ({
 }: DialogStackHeaderProps) => (
   <div
     className={cn(
-      cn('flex flex-col', spaceY['1.5'], 'text-center sm:text-left'),
+      'flex flex-col gap-[6px] text-center sm:text-left',
       className
     )}
     {...(props as any)}
@@ -439,7 +438,7 @@ export const DialogStackFooter = ({
   ...props
 }: DialogStackFooterProps) => (
   <div
-    className={cn('flex items-center justify-end', spaceX.compact, paddingTop.default, className)}
+    className={cn('flex items-center justify-end gap-2 pt-4', className)}
     {...(props as any)}
   >
     {children}

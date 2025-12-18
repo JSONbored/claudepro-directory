@@ -13,7 +13,6 @@ import {
 import { type ReactElement } from 'react';
 
 import { ContentLinkButton, PrLinkButton } from './submission-link-buttons';
-import { between, cluster, marginTop, marginBottom, gap, padding } from "@heyclaude/web-runtime/design-system";
 
 type UserSubmission = UserDashboardSubmission;
 
@@ -125,9 +124,9 @@ export function SubmissionCard({
   return (
     <Card key={submission.id ?? `submission-${index}`}>
       <CardHeader>
-        <div className={between.start}>
+        <div className="flex items-start justify-between">
           <div className="flex-1">
-            <div className={cluster.compact}>
+            <div className="flex items-center gap-2">
               {status ? (
                 getStatusBadge(status)
               ) : (
@@ -153,8 +152,8 @@ export function SubmissionCard({
                 </UnifiedBadge>
               )}
             </div>
-            <CardTitle className={`${marginTop.compact}`}>{submission.content_name ?? 'Untitled'}</CardTitle>
-            <CardDescription className={`${marginTop.tight}`}>
+            <CardTitle className="mt-2">{submission.content_name ?? 'Untitled'}</CardTitle>
+            <CardDescription className="mt-1">
               Slug: <code className="text-xs">{submission.content_slug ?? 'N/A'}</code>
             </CardDescription>
           </div>
@@ -162,7 +161,7 @@ export function SubmissionCard({
       </CardHeader>
 
       <CardContent>
-        <div className={`text-muted-foreground ${marginBottom.default} flex flex-wrap ${gap.default} text-sm`}>
+        <div className="text-muted-foreground text-sm mb-4 flex flex-wrap gap-3">
           <div>
             Submitted {submission.created_at ? formatSubmissionDate(submission.created_at) : 'N/A'}
           </div>
@@ -181,21 +180,21 @@ export function SubmissionCard({
         </div>
 
         {status === SubmissionStatus.rejected && submission.rejection_reason ? (
-          <div className={`${marginBottom.default} rounded border border-red-500/20 bg-red-500/10 ${padding.compact}`}>
-            <p className={`${marginBottom.tight} text-sm font-medium text-red-400`}>Rejection Reason:</p>
+          <div className="mb-4 rounded-lg border border-red-500/20 bg-red-500/10 p-3">
+            <p className="mb-1 text-sm-medium text-red-400">Rejection Reason:</p>
             <p className="text-muted-foreground text-sm">{submission.rejection_reason}</p>
           </div>
         ) : null}
 
         {status === SubmissionStatus.merged && ( // 'merged'
-          <div className={`${marginBottom.default} rounded border border-green-500/20 bg-green-500/10 ${padding.compact}`}>
-            <p className="text-sm font-medium text-green-400">
+          <div className="mb-4 rounded-lg border border-green-500/20 bg-green-500/10 p-3">
+            <p className="text-sm-medium text-green-400">
               🎉 Your contribution is now live on ClaudePro Directory!
             </p>
           </div>
         )}
 
-        <div className={`flex ${gap.tight}`}>
+        <div className="flex gap-1">
           {prLinkProps ? <PrLinkButton href={prLinkProps.href} /> : null}
           {contentLinkProps ? <ContentLinkButton href={contentLinkProps.href} /> : null}
         </div>

@@ -22,7 +22,6 @@ import {
   ProfileCard,
   type UserProfile,
 } from '@/src/components/core/domain/cards/user-profile-card';
-import { paddingY, gap, muted } from "@heyclaude/web-runtime/design-system";
 
 export interface ProfileSearchClientProps {
   users: UserProfile[];
@@ -31,14 +30,14 @@ export interface ProfileSearchClientProps {
 function ProfileSearchClientComponent({ users }: ProfileSearchClientProps) {
   if (!users || users.length === 0) {
     return (
-      <div className={`${paddingY.section} text-center`}>
-        <p className={`${muted.default}`}>No community members found</p>
+      <div className="py-12 text-center">
+        <p className="text-muted-foreground">No community members found</p>
       </div>
     );
   }
 
   return (
-    <div className={`grid grid-cols-1 ${gap.default} sm:grid-cols-2 lg:grid-cols-3`}>
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
       {users.map((user, index) => (
         <ProfileCard key={user.slug || user.name || `user-${index}`} user={user} />
       ))}

@@ -6,14 +6,13 @@ import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { Mail } from '@heyclaude/web-runtime/icons';
 import {
   cn,
-  DIMENSIONS,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
-import { SPRING, STAGGER, cluster, iconSize, size, weight, leading, tracking, truncate, iconSizeRect, muted, marginX, marginBottom, spaceY, padding, marginTop, gap, paddingBottom } from '@heyclaude/web-runtime/design-system';
+import { SPRING, STAGGER } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
@@ -152,20 +151,20 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
       >
         {/* Icon */}
         <motion.div
-          className={`${marginBottom['5']} inline-flex`}
+          className="mb-5 inline-flex"
           initial={shouldReduceMotion ? { opacity: 0 } : { scale: 0.9, opacity: 0 }}
           whileInView={shouldReduceMotion ? { opacity: 1 } : { scale: 1, opacity: 1 }}
           viewport={{ once: true }}
           transition={SPRING.smooth}
         >
-          <div className={`border-border bg-background rounded-xl border ${padding.compact}`}>
+          <div className="border-border bg-background rounded-xl border p-3">
             <Mail className="text-foreground h-6 w-6 md:h-7 md:w-7" aria-hidden="true" />
           </div>
         </motion.div>
 
         {/* Headline */}
         <motion.h2
-          className={`text-foreground mx-auto ${marginBottom.default} max-w-md ${size.xl} ${leading.tight} ${weight.semibold} ${tracking.tight} md:${size['2xl']}`}
+          className="text-foreground mx-auto mb-4 max-w-md text-xl leading-tight font-semibold tracking-tight md:text-2xl"
           initial={shouldReduceMotion ? { opacity: 0 } : { y: 10, opacity: 0 }}
           whileInView={shouldReduceMotion ? { opacity: 1 } : { y: 0, opacity: 1 }}
           viewport={{ once: true }}
@@ -176,7 +175,7 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
 
         {/* Description */}
         <motion.p
-          className={cn(muted.default, marginX.auto, marginBottom.comfortable, 'max-w-lg', size.sm, leading.relaxed, 'md:' + size.base)}
+          className={cn('text-muted-foreground text-sm mx-auto mb-6 max-w-lg leading-relaxed md:text-base')}
           initial={shouldReduceMotion ? { opacity: 0 } : { y: 10, opacity: 0 }}
           whileInView={shouldReduceMotion ? { opacity: 1 } : { y: 0, opacity: 1 }}
           viewport={{ once: true }}
@@ -187,7 +186,7 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
 
         {/* Form */}
         <motion.div
-          className={`${marginX.auto} max-w-sm`}
+          className="mx-auto max-w-sm"
           initial={shouldReduceMotion ? { opacity: 0 } : { y: 10, opacity: 0 }}
           whileInView={shouldReduceMotion ? { opacity: 1 } : { y: 0, opacity: 1 }}
           viewport={{ once: true }}
@@ -198,23 +197,23 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
 
         {/* Footer info */}
         <motion.div
-          className={`${marginTop['5']} flex flex-col items-center ${gap.tight}`}
+          className="mt-5 flex flex-col items-center gap-1"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ delay: STAGGER.comfortable }}
         >
-          <div className={cn(cluster.compact, gap.compact)}>
-            <span className={cn('inline-flex', iconSizeRect['1.5x1.5'], 'rounded-full bg-green-500')} />
+          <div className={cn('flex items-center gap-2')}>
+            <span className={cn('inline-flex', 'h-6 w-6', 'rounded-full bg-green-500')} />
             {isLoading ? (
-              <span className={cn(muted.default, size.xs)}>
+              <span className={cn('text-muted-foreground', 'text-xs')}>
                 <span className="bg-muted/50 inline-block h-3 w-14 animate-pulse rounded" />
               </span>
             ) : (
-              <span className={cn(muted.default, size.xs)}>{subscriberCount} subscribers</span>
+              <span className={cn('text-muted-foreground', 'text-xs')}>{subscriberCount} subscribers</span>
             )}
           </div>
-          <p className={cn('text-muted-foreground/60', size.xs)}>{NEWSLETTER_CTA_CONFIG.footerText}</p>
+          <p className={cn('text-muted-foreground/60', 'text-xs')}>{NEWSLETTER_CTA_CONFIG.footerText}</p>
         </motion.div>
       </div>
     );
@@ -229,20 +228,20 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
           className
         )}
       >
-        <CardHeader className={`${paddingBottom.default}`}>
-          <div className={`${cluster.default} ${marginBottom.default}`}>
-            <div className={`border-primary/20 bg-primary/10 rounded-lg border ${padding.tight}.5`}>
-              <Mail className={`${iconSize.md} text-primary`} aria-hidden="true" />
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="border-primary/20 bg-primary/10 card-base p-2.5">
+              <Mail className="h-5 w-5 text-primary" aria-hidden="true" />
             </div>
-            <CardTitle className={`${size.xl} ${weight.bold}`}>{finalHeadline}</CardTitle>
+            <CardTitle className="text-lg font-bold">{finalHeadline}</CardTitle>
           </div>
-          <CardDescription className={`${size.base} ${leading.relaxed}`}>
+          <CardDescription className="text-base leading-relaxed">
             {finalDescription}
           </CardDescription>
         </CardHeader>
-        <CardContent className={spaceY.comfortable}>
+        <CardContent className="space-y-4">
           <NewsletterForm source={source} />
-          <div className={cn(muted.default, 'text-center', size.xs)}>
+          <div className={cn('text-muted-foreground', 'text-center', 'text-xs')}>
             <span>{NEWSLETTER_CTA_CONFIG.footerText}</span>
           </div>
         </CardContent>
@@ -255,20 +254,20 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
       <div
         className={cn(
           'flex flex-col items-stretch justify-between gap-4 p-4 sm:flex-row sm:items-center sm:p-5',
-          'border-border/50 bg-accent/5 rounded-lg border',
+          'border-border/50 bg-accent/5 card-base',
           className
         )}
       >
-        <div className={`${cluster.default} min-w-0 flex-1`}>
-          <Mail className={`${iconSize.md} text-primary shrink-0`} aria-hidden="true" />
+        <div className="flex items-center gap-3 min-w-0 flex-1">
+          <Mail className="h-5 w-5 text-primary shrink-0" aria-hidden="true" />
           <div className="min-w-0 flex-1">
-            <p className={`${truncate.single} ${size.sm} ${weight.medium}`}>{finalHeadline}</p>
-            <p className={cn(muted.default, truncate.single, size.xs)}>{finalDescription}</p>
+            <p className="truncate text-sm-medium">{finalHeadline}</p>
+            <p className={cn('text-muted-foreground', 'truncate', 'text-xs')}>{finalDescription}</p>
           </div>
         </div>
         <NewsletterForm
           source={source}
-          className={`w-full sm:w-auto sm:${DIMENSIONS.MIN_W_NEWSLETTER_FORM} sm:${DIMENSIONS.NEWSLETTER_FORM_MAX}`}
+          className="w-full sm:w-auto sm:min-w-[320px] sm:max-w-[400px]"
         />
       </div>
     );
@@ -284,18 +283,18 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
         )}
       >
         <CardHeader className="flex-1">
-          <div className={`${marginBottom.default}`}>
-            <div className={`border-primary/20 bg-primary/10 inline-flex rounded-lg border ${padding.compact}`}>
-              <Mail className={`${iconSize.lg} text-primary`} aria-hidden="true" />
+          <div className="mb-4">
+            <div className="border-primary/20 bg-primary/10 inline-flex card-base p-3">
+              <Mail className="h-6 w-6 text-primary" aria-hidden="true" />
             </div>
           </div>
-          <CardTitle className={`${marginBottom.default} ${size.xl} ${weight.bold}`}>{finalHeadline}</CardTitle>
-          <CardDescription className={`${size.sm} ${leading.relaxed}`}>{finalDescription}</CardDescription>
+          <CardTitle className="mb-4 text-lg font-bold">{finalHeadline}</CardTitle>
+          <CardDescription className="text-sm leading-relaxed">{finalDescription}</CardDescription>
         </CardHeader>
-        <CardContent className={spaceY.comfortable}>
+        <CardContent className="space-y-4">
           <NewsletterForm source={source} />
           <div className="text-center">
-            <p className={cn(muted.default, size.xs)}>{NEWSLETTER_CTA_CONFIG.footerText}</p>
+            <p className={cn('text-muted-foreground', 'text-xs')}>{NEWSLETTER_CTA_CONFIG.footerText}</p>
           </div>
         </CardContent>
       </Card>

@@ -17,7 +17,6 @@ import {
   CardTitle,
   UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
-import { size, muted, marginBottom, leading, paddingX, paddingY, marginX, marginRight, spaceY, paddingTop, gap } from '@heyclaude/web-runtime/design-system';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import Link from 'next/link';
@@ -68,7 +67,7 @@ export async function generateMetadata(): Promise<Metadata> {
  */
 export default async function CommunityPage() {
   'use cache';
-  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
+  cacheLife('long'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
   // Create request-scoped child logger to avoid race conditions
   const reqLogger = logger.child({
@@ -185,30 +184,30 @@ async function CommunityPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
   return (
     <div className="bg-background min-h-screen">
       {/* Hero Section */}
-      <section className={`relative overflow-hidden ${paddingX.default} ${paddingY.default}`}>
-        <div className={`container ${marginX.auto} text-center`}>
-          <div className={`${marginX.auto} max-w-3xl`}>
+      <section className="relative overflow-hidden px-4 py-4">
+        <div className="container mx-auto text-center">
+          <div className="mx-auto max-w-3xl">
             <UnifiedBadge
-              className={`border-accent/20 bg-accent/5 text-accent ${marginBottom.comfortable}`}
+              className="border-accent/20 bg-accent/5 text-accent mb-6"
               style="outline"
               variant="base"
             >
-              <Users className={`text-accent ${marginRight.micro} h-3 w-3`} />
+              <Users className="text-accent mr-0.5 h-3 w-3" />
               Community
             </UnifiedBadge>
 
-            <h1 className={`${marginBottom.comfortable} text-4xl font-bold md:text-6xl`}>Join the Claude Community</h1>
+            <h1 className="mb-6 text-4xl font-bold md:text-6xl">Join the Claude Community</h1>
 
-            <p className={`${size.xl} ${muted.default} ${marginBottom.relaxed} ${leading.relaxed}`}>
+            <p className="text-muted-foreground mb-8 text-xl leading-relaxed">
               Connect with developers and AI enthusiasts building with Claude. Share your
               configurations, learn from the community, and contribute to our open-source directory.
             </p>
 
-            <div className={`flex flex-wrap justify-center ${gap.default}`}>
+            <div className="flex flex-wrap justify-center gap-3">
               {channels.github ? (
                 <Button asChild size="lg">
                   <a href={channels.github} rel="noopener noreferrer" target="_blank">
-                    <Github className={`${marginRight.tight} h-5 w-5`} />
+                    <Github className="mr-2 h-5 w-5" />
                     GitHub
                   </a>
                 </Button>
@@ -216,7 +215,7 @@ async function CommunityPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
               {channels.discord ? (
                 <Button asChild size="lg" variant="outline">
                   <a href={channels.discord} rel="noopener noreferrer" target="_blank">
-                    <MessageSquare className={`${marginRight.tight} h-5 w-5`} />
+                    <MessageSquare className="mr-2 h-5 w-5" />
                     Discord
                   </a>
                 </Button>
@@ -224,7 +223,7 @@ async function CommunityPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
               {channels.twitter ? (
                 <Button asChild size="lg" variant="outline">
                   <a href={channels.twitter} rel="noopener noreferrer" target="_blank">
-                    <Twitter className={`${marginRight.tight} h-5 w-5`} />X (Twitter)
+                    <Twitter className="mr-2 h-5 w-5" />X (Twitter)
                   </a>
                 </Button>
               ) : null}
@@ -234,9 +233,9 @@ async function CommunityPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
       </section>
 
       {/* Community Stats */}
-      <section className={`${paddingX.default} ${paddingY.default}`}>
-        <div className={`container ${marginX.auto}`}>
-          <div className={`grid ${gap.comfortable} grid-cols-1 md:grid-cols-2 lg:grid-cols-3`}>
+      <section className="px-4 py-4">
+        <div className="container mx-auto">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {statCards.map(({ description, iconId, title, value }) => (
               <CommunityStatsCard
                 description={description}
@@ -251,33 +250,33 @@ async function CommunityPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
       </section>
 
       {/* Contributing Section */}
-      <section className={`${paddingX.default} ${paddingY.default}`}>
-        <div className={`container ${marginX.auto}`}>
+      <section className="px-4 py-4">
+        <div className="container mx-auto">
           <Card>
             <CardHeader>
               <CardTitle className="text-2xl">How to Contribute</CardTitle>
             </CardHeader>
-            <CardContent className={`${spaceY.comfortable}`}>
+            <CardContent className="space-y-4">
               <div>
-                <h3 className={`${marginBottom.compact} font-semibold`}>1. Fork the Repository</h3>
+                <h3 className="mb-2 font-semibold">1. Fork the Repository</h3>
                 <p className="text-muted-foreground">
                   Start by forking our GitHub repository and cloning it to your local machine.
                 </p>
               </div>
               <div>
-                <h3 className={`${marginBottom.compact} font-semibold`}>2. Add Your Configuration</h3>
+                <h3 className="mb-2 font-semibold">2. Add Your Configuration</h3>
                 <p className="text-muted-foreground">
                   Create a new JSON file with your Claude configuration in the appropriate content
                   directory.
                 </p>
               </div>
               <div>
-                <h3 className={`${marginBottom.compact} font-semibold`}>3. Submit a Pull Request</h3>
+                <h3 className="mb-2 font-semibold">3. Submit a Pull Request</h3>
                 <p className="text-muted-foreground">
                   Submit a pull request with your contribution. Our team will review it promptly.
                 </p>
               </div>
-              <div className={`${paddingTop.default}`}>
+              <div className="pt-4">
                 <Button asChild>
                   <Link href={ROUTES.SUBMIT}>Submit Your Configuration</Link>
                 </Button>

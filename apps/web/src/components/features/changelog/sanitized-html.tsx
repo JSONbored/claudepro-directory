@@ -25,9 +25,9 @@ export const SanitizedHTML = memo(({ html, className, id }: SanitizedHTMLProps) 
 
   useEffect(() => {
     if (globalThis.window !== undefined && html && typeof html === 'string') {
-      import('dompurify')
-        .then((DOMPurify) => {
-          const sanitized = DOMPurify.default.sanitize(html, {
+      import('@heyclaude/web-runtime/utils/dompurify')
+        .then(async ({ sanitizeHtml }) => {
+          const sanitized = await sanitizeHtml(html, {
             ALLOWED_TAGS: [
               'p',
               'br',

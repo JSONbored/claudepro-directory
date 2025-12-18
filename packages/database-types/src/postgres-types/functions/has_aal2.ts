@@ -27,12 +27,12 @@ export type HasAal2ArgsFromZod = z.infer<typeof hasAal2ArgsSchema>;
 /**
  * Return type for PostgreSQL function: has_aal2
  */
-export type HasAal2Returns = boolean;
+export type HasAal2Returns = unknown;
 
 /**
  * Zod schema for has_aal2 function return type
  */
-export const hasAal2ReturnsSchema = z.boolean();
+export const hasAal2ReturnsSchema = z.any();
 
 /**
  * Type inference from Zod schema (should match type above)

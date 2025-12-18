@@ -3,7 +3,11 @@ import {
   trackValidationFailure,
 } from '@heyclaude/web-runtime/core';
 import { normalizeError, serializeForClient } from '@heyclaude/shared-runtime';
-import type { Jobs, GetHomepageOptimizedReturns } from '@heyclaude/database-types/postgres-types';
+import type { GetHomepageOptimizedReturns } from '@heyclaude/database-types/postgres-types';
+import type { jobsModel } from '@heyclaude/database-types/prisma/models';
+
+// Use Prisma model type instead of excluded composite type
+type Jobs = jobsModel;
 
 import { HomePageClient } from '@/src/components/features/home/home-sections';
 

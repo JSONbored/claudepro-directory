@@ -27,7 +27,7 @@ import { isDevelopment } from '@heyclaude/shared-runtime/schemas/env';
 import { logClientErrorBoundary, logClientWarn } from '../../utils/client-logger.ts';
 import { usePulse } from '../../hooks/use-pulse.ts';
 import { useCopyToClipboard } from '../../hooks/index.ts';
-import { responsive } from '../../design-system/index.ts';
+// Removed deprecated responsive utility - using direct Tailwind classes
 import { Copy, Check, AlertCircle, RefreshCw } from '../../icons.tsx';
 import { Button } from './button.tsx';
 import {
@@ -179,7 +179,7 @@ function SegmentErrorFallbackUI({
           </CardHeader>
           <CardContent className="space-y-4">
             <motion.div
-              className={responsive.col}
+              className="flex flex-col gap-2"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ ...SPRING.smooth, delay: 0.3 }}
@@ -197,7 +197,7 @@ function SegmentErrorFallbackUI({
 
             {links.length > 0 && (
               <motion.div
-                className={responsive.col}
+                className="flex flex-col gap-2"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ ...SPRING.smooth, delay: 0.35 }}

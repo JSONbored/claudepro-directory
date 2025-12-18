@@ -20,7 +20,7 @@ import type {
   experience_level,
 } from '@heyclaude/data-layer/prisma';
 import { normalizeError, getFormDataString, getFormDataStringRequired, getFormDataEnum, getFormDataBoolean } from '@heyclaude/shared-runtime';
-import { type CreateJobInput } from '@heyclaude/web-runtime/actions';
+import { type CreateJobInput } from '@heyclaude/web-runtime/actions/jobs-crud';
 import { type PaymentPlanCatalogEntry } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { useAuthenticatedUser, useLoggedAsync } from '@heyclaude/web-runtime/hooks';
@@ -43,7 +43,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@heyclaude/web-runtime/ui';
-import { size, muted, between, iconSize, grid, weight, spaceY, marginTop, padding, paddingLeft } from '@heyclaude/web-runtime/design-system';
 import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useId, useMemo, useState, useTransition } from 'react';
 
@@ -418,13 +417,13 @@ export function JobForm({
   }, [user, status, openAuthModal, pathname, onSubmit, runLoggedAsync]);
 
   return (
-    <form onSubmit={handleSubmit} className={`${spaceY.relaxed}`}>
+    <form onSubmit={handleSubmit} className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle>Job Details</CardTitle>
           <CardDescription>Basic information about the position</CardDescription>
         </CardHeader>
-        <CardContent className={`${spaceY.comfortable}`}>
+        <CardContent className="space-y-4">
           <FormField
             variant="input"
             label="Job Title"
@@ -443,7 +442,7 @@ export function JobForm({
             defaultCompanyName={initialData?.company || undefined}
           />
 
-          <div className={`grid ${grid.cols2} gap-4`}>
+          <div className="grid grid-cols-2 gap-4">
             <FormField
               variant="select"
               label="Employment Type"
@@ -478,7 +477,7 @@ export function JobForm({
             </FormField>
           </div>
 
-          <div className={`grid ${grid.cols2} gap-4`}>
+          <div className="grid grid-cols-2 gap-4">
             <FormField
               variant="input"
               label="Location"
@@ -507,7 +506,7 @@ export function JobForm({
             </FormField>
           </div>
 
-          <div className={`grid ${grid.cols2} gap-4`}>
+          <div className="grid grid-cols-2 gap-4">
             <FormField
               variant="select"
               label="Category"
@@ -613,7 +612,7 @@ export function JobForm({
           <CardTitle>Application Details</CardTitle>
           <CardDescription>How candidates can apply</CardDescription>
         </CardHeader>
-        <CardContent className={`${spaceY.comfortable}`}>
+        <CardContent className="space-y-4">
           <FormField
             variant="input"
             label="Application URL"
@@ -666,13 +665,13 @@ export function JobForm({
               {planOptions.map((option) => (
                 <SelectItem key={option.plan} value={option.plan}>
                   <div>
-                    <div className={`${weight.medium}`}>
+                    <div className="font-medium">
                       {PLAN_LABELS[option.plan]}
                       {option.standardPriceCents !== null && (
                         <> - {formatPlanPrice(option.standardPriceCents, option.isSubscription)}</>
                       )}
                     </div>
-                    <div className={`${size.xs} ${muted.default}`}>
+                    <div className="text-muted-foreground text-xs">
                       {option.description ?? PLAN_DESCRIPTION_FALLBACK[option.plan]}
                     </div>
                   </div>
@@ -681,17 +680,17 @@ export function JobForm({
             </SelectContent>
           </Select>
           {selectedPlanOption ? (
-            <div className={`border-border/50 bg-muted/20 ${marginTop.default} rounded-lg border p-4 ${size.sm}`}>
-              <div className={between.start}>
+            <div className="border-border/50 bg-muted/20 mt-4 card-base p-4 text-sm">
+              <div className="flex items-start justify-between">
                 <div>
-                  <div className={`${weight.semibold}`}>{PLAN_LABELS[selectedPlanOption.plan]}</div>
-                  <p className={`${size.xs} ${muted.default} ${marginTop.tight}`}>
+                  <div className="font-semibold">{PLAN_LABELS[selectedPlanOption.plan]}</div>
+                  <p className="text-muted-foreground text-xs mt-1">
                     {selectedPlanOption.description ??
                       PLAN_DESCRIPTION_FALLBACK[selectedPlanOption.plan]}
                   </p>
                 </div>
                 {selectedPlanOption.standardPriceCents !== null && (
-                  <span className={`${size.base} ${weight.semibold}`}>
+                  <span className="text-base font-semibold">
                     {formatPlanPrice(
                       selectedPlanOption.standardPriceCents,
                       selectedPlanOption.isSubscription
@@ -700,10 +699,10 @@ export function JobForm({
                 )}
               </div>
               {planInfoSubtitle ? (
-                <p className={`${size.xs} ${muted.default} ${marginTop.compact}`}>{planInfoSubtitle}</p>
+                <p className="text-muted-foreground text-xs mt-2">{planInfoSubtitle}</p>
               ) : null}
               {selectedPlanOption.benefits ? (
-                <ul className={cn('text-muted-foreground', marginTop.default, 'list-disc', spaceY.tight, paddingLeft.default, size.xs)}>
+                <ul className={cn('text-muted-foreground', 'mt-4', 'list-disc', 'space-y-1', 'pl-4', 'text-xs')}>
                   {selectedPlanOption.benefits.map((benefit) => (
                     <li key={benefit}>{benefit}</li>
                   ))}
@@ -711,29 +710,29 @@ export function JobForm({
               ) : null}
             </div>
           ) : null}
-          <p className={`${size.xs} ${muted.default} ${marginTop.compact}`}>
+          <p className="text-muted-foreground text-xs mt-2">
             Payment via Polar.sh after submission. Job goes live immediately after payment
             confirmation.
           </p>
 
-          <div className={`${marginTop.default} rounded-lg border border-orange-500/30 bg-orange-500/5 ${padding.default}`}>
-            <div className={`flex items-start gap-3`}>
+          <div className="mt-4 card-base border-orange-500/30 bg-orange-500/5 p-4">
+            <div className="flex items-start gap-3">
               <Checkbox
                 id={featuredCheckboxId}
                 checked={isFeatured}
                 onCheckedChange={(checked) => setIsFeatured(Boolean(checked))}
               />
-              <div className={`flex-1`}>
+              <div className="flex-1">
                 <Label
                   htmlFor={featuredCheckboxId}
-                  className={`flex cursor-pointer items-center gap-2 text-sm font-semibold`}
+                  className="flex cursor-pointer items-center gap-2 text-sm font-semibold"
                 >
-                  <Star className={`${iconSize.sm} text-orange-500`} />
+                  <Star className="h-4 w-4 text-orange-500" />
                   Make this a Featured Listing
                 </Label>
-                <p className={`${size.xs} ${muted.default} ${marginTop.tight}`}>{featuredUpsellDescription}</p>
+                <p className="text-muted-foreground text-xs mt-1">{featuredUpsellDescription}</p>
                 {featuredUpgradeLabel ? (
-                  <p className={`${marginTop.compact} ${size.sm} ${weight.medium} text-orange-600 dark:text-orange-400`}>
+                  <p className="mt-2 text-sm-medium text-orange-600 dark:text-orange-400">
                     {featuredUpgradeLabel}
                   </p>
                 ) : null}

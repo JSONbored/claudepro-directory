@@ -6,7 +6,6 @@
  *
  * ## Active Edge Functions
  * - heyclaude-mcp: MCP protocol implementation, OAuth2
- * - public-api: OG images, transforms, embedding/image queues, content generation
  *
  * ## What Belongs Here
  * - Deno-specific utilities and type definitions

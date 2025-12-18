@@ -33,7 +33,6 @@ import {
 } from '@heyclaude/web-runtime/icons';
 import { type ContentItem, type CopyType } from '@heyclaude/web-runtime/types/component.types';
 import {
-  STATE_PATTERNS,
   toasts,
   UnifiedBadge,
   Button,
@@ -44,19 +43,6 @@ import {
   DropdownMenuTrigger,
   cn,
 } from '@heyclaude/web-runtime/ui';
-import {
-  iconSize,
-  size,
-  weight,
-  grid,
-  cluster,
-  radius,
-  border,
-  marginBottom,
-  marginRight,
-  padding,
-  stack,
-} from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { useRef, useCallback, memo } from 'react';
@@ -571,7 +557,7 @@ const DetailHeaderActionsComponent = function DetailHeaderActions({
   }, [item, hasMcpbDownload, hasStorageDownload, category, pulse, handleDownload]);
 
   return (
-    <div className={stack.comfortable}>
+    <div className="flex flex-col gap-4">
       {/* Back Navigation */}
       <TooltipProvider>
         <Tooltip>
@@ -580,15 +566,15 @@ const DetailHeaderActionsComponent = function DetailHeaderActions({
               whileHover={shouldReduceMotion ? {} : MICROINTERACTIONS.button.hover}
               whileTap={shouldReduceMotion ? {} : MICROINTERACTIONS.button.tap}
               transition={MICROINTERACTIONS.button.transition}
-              className={marginBottom.default}
+              className="mb-4"
             >
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => router.back()}
-                className={cn('text-muted-foreground', STATE_PATTERNS.HOVER_TEXT_FOREGROUND, '-ml-2')}
+                className={cn('text-muted-foreground', 'hover:text-foreground', '-ml-2')}
               >
-                <ArrowLeft className={cn(iconSize.sm, marginRight.compact)} />
+                <ArrowLeft className={cn('h-4 w-4', 'mr-2')} />
                 Back
               </Button>
             </motion.div>
@@ -600,22 +586,22 @@ const DetailHeaderActionsComponent = function DetailHeaderActions({
       </TooltipProvider>
 
       {/* Main Content Grid */}
-      <div className={cn(grid.cols1, 'lg:grid-cols-[1fr_320px] lg:gap-12')}>
+      <div className={cn('grid-cols-1', 'lg:grid-cols-[1fr_320px] lg:gap-12')}>
         {/* Left Column - Content Info */}
-        <div className={stack.comfortable}>
+        <div className="flex flex-col gap-4">
           {/* Badges */}
-          <div className={cluster.compact}>
+          <div className="flex items-center gap-2">
             <UnifiedBadge
               variant="base"
               style="secondary"
-              className={cn(size.sm, weight.medium, 'text-foreground font-medium')}
+              className={cn('text-sm', 'font-medium', 'text-foreground font-medium')}
             >
               {typeName}
             </UnifiedBadge>
             <UnifiedBadge
               variant="base"
               style="outline"
-              className={cn(size.sm, weight.medium, 'text-foreground')}
+              className={cn('text-sm', 'font-medium', 'text-foreground')}
             >
               {isValidCategory(category) ? getCategoryConfig(category)?.typeName ?? category : category}
             </UnifiedBadge>
@@ -639,10 +625,10 @@ const DetailHeaderActionsComponent = function DetailHeaderActions({
         {/* Right Column - Actions Sidebar */}
         <aside
           className={cn(
-            stack.default,
-            border.default,
-            radius.lg,
-            padding.default,
+            'flex flex-col gap-3',
+            'border',
+            'rounded-lg',
+            'p-4',
             'bg-card/50 backdrop-blur-sm',
             'lg:sticky lg:top-24 lg:self-start'
           )}
@@ -668,7 +654,7 @@ const DetailHeaderActionsComponent = function DetailHeaderActions({
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>{primaryAction.label}</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-muted-foreground text-xs">
                     {primaryAction.type === 'copy_command' || primaryAction.type === 'copy_script'
                       ? 'Copy content to clipboard'
                       : primaryAction.type === 'download'
@@ -695,14 +681,14 @@ const DetailHeaderActionsComponent = function DetailHeaderActions({
                       variant="outline"
                       className="w-full"
                     >
-                      <Download className={cn(iconSize.sm, marginRight.compact)} />
+                      <Download className={cn('h-4 w-4', 'mr-2')} />
                       {category === ContentCategory.mcp ? 'Download .mcpb' : 'Download'}
                     </Button>
                   </motion.div>
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>Download configuration</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-muted-foreground text-xs">
                     {category === ContentCategory.mcp
                       ? 'Download as .mcpb file for Claude Desktop'
                       : 'Download as ZIP archive'}
@@ -713,7 +699,7 @@ const DetailHeaderActionsComponent = function DetailHeaderActions({
           ) : null}
 
           {/* Quick Actions Row */}
-          <div className={cluster.compact}>
+          <div className="flex items-center gap-2">
             {/* Pin Button */}
             <TooltipProvider>
               <Tooltip>
@@ -731,12 +717,12 @@ const DetailHeaderActionsComponent = function DetailHeaderActions({
                     >
                       {pinned ? (
                         <>
-                          <Bookmark className={cn(iconSize.sm, marginRight.compact)} />
+                          <Bookmark className={cn('h-4 w-4', 'mr-2')} />
                           Unpin
                         </>
                       ) : (
                         <>
-                          <BookmarkPlus className={cn(iconSize.sm, marginRight.compact)} />
+                          <BookmarkPlus className={cn('h-4 w-4', 'mr-2')} />
                           Pin
                         </>
                       )}
@@ -764,7 +750,7 @@ const DetailHeaderActionsComponent = function DetailHeaderActions({
                       onClick={handleCopyLink}
                       className="flex-1"
                     >
-                      <Copy className={cn(iconSize.sm, marginRight.compact)} />
+                      <Copy className={cn('h-4 w-4', 'mr-2')} />
                       Share
                     </Button>
                   </motion.div>
@@ -786,7 +772,7 @@ const DetailHeaderActionsComponent = function DetailHeaderActions({
                         transition={MICROINTERACTIONS.button.transition}
                       >
                         <Button variant="outline" size="sm">
-                          <Menu className={iconSize.sm} />
+                          <Menu className="h-4 w-4" />
                         </Button>
                       </motion.div>
                     </DropdownMenuTrigger>
@@ -799,15 +785,15 @@ const DetailHeaderActionsComponent = function DetailHeaderActions({
               <DropdownMenuContent align="end" className="w-56">
                 {/* Share Options */}
                 <DropdownMenuItem onClick={handleShareTwitter}>
-                  <Twitter className={cn(iconSize.sm, marginRight.compact)} />
+                  <Twitter className={cn('h-4 w-4', 'mr-2')} />
                   Share on X
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleShareLinkedIn}>
-                  <Linkedin className={cn(iconSize.sm, marginRight.compact)} />
+                  <Linkedin className={cn('h-4 w-4', 'mr-2')} />
                   Share on LinkedIn
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleCopyLink}>
-                  <Copy className={cn(iconSize.sm, marginRight.compact)} />
+                  <Copy className={cn('h-4 w-4', 'mr-2')} />
                   Copy Link
                 </DropdownMenuItem>
 
@@ -816,15 +802,15 @@ const DetailHeaderActionsComponent = function DetailHeaderActions({
                   <>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleCopyContent}>
-                      <Copy className={cn(iconSize.sm, marginRight.compact)} />
+                      <Copy className={cn('h-4 w-4', 'mr-2')} />
                       Copy Content
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={handleCopyForAI}>
-                      <Sparkles className={cn(iconSize.sm, marginRight.compact)} />
+                      <Sparkles className={cn('h-4 w-4', 'mr-2')} />
                       Copy for AI
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={handleCopyMarkdown}>
-                      <FileText className={cn(iconSize.sm, marginRight.compact)} />
+                      <FileText className={cn('h-4 w-4', 'mr-2')} />
                       Copy Markdown
                     </DropdownMenuItem>
                   </>
@@ -835,11 +821,11 @@ const DetailHeaderActionsComponent = function DetailHeaderActions({
                   <>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleDownloadClick}>
-                      <Download className={cn(iconSize.sm, marginRight.compact)} />
+                      <Download className={cn('h-4 w-4', 'mr-2')} />
                       {category === ContentCategory.mcp ? 'Download .mcpb' : 'Download'}
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={handleDownloadMarkdown}>
-                      <Download className={cn(iconSize.sm, marginRight.compact)} />
+                      <Download className={cn('h-4 w-4', 'mr-2')} />
                       Download Markdown
                     </DropdownMenuItem>
                   </>
@@ -862,15 +848,15 @@ const DetailHeaderActionsComponent = function DetailHeaderActions({
             className={cn('text-muted-foreground w-full justify-start')}
             onClick={openPinboardDrawer}
           >
-            <Bookmark className={cn(iconSize.sm, marginRight.compact)} />
+            <Bookmark className={cn('h-4 w-4', 'mr-2')} />
             View pinboard ({Array.isArray(pinnedItems) ? pinnedItems.length : 0})
           </Button>
 
           {/* Secondary Actions */}
           {secondaryActions && secondaryActions.length > 0 && (
             <>
-              <div className={cn(border.default, 'border-t')} />
-              <div className={cluster.compact}>
+              <div className={cn('border', 'border-t')} />
+              <div className="flex items-center gap-2">
                 {secondaryActions.map((action) => (
                   <Button
                     key={action.label}

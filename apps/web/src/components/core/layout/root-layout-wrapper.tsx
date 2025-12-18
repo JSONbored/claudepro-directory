@@ -12,7 +12,7 @@ import {
   logClientError,
   normalizeError,
 } from '@heyclaude/web-runtime/logging/client';
-import { DIMENSIONS, toasts, ErrorBoundary } from '@heyclaude/web-runtime/ui';
+import { toasts, ErrorBoundary } from '@heyclaude/web-runtime/ui';
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
 import { useEffect, useCallback } from 'react';
@@ -102,7 +102,6 @@ async function clearNewsletterOptInCookie() {
 }
 
 import type { announcementsModel } from '@heyclaude/data-layer/prisma';
-import { paddingX, paddingY } from "@heyclaude/web-runtime/design-system";
 
 interface LayoutContentProps {
   announcement: announcementsModel | null;
@@ -179,7 +178,7 @@ export function LayoutContent({ children, announcement }: LayoutContentProps) {
   // Auth routes: minimal wrapper with no height constraints for true fullscreen experience
   if (isAuthRoute) {
     return (
-      <main id="main-content" className={`${DIMENSIONS.FULL_VIEWPORT} w-full overflow-hidden`}>
+      <main id="main-content" className="h-[100dvh] w-full overflow-hidden">
         {children}
       </main>
     );
@@ -190,7 +189,7 @@ export function LayoutContent({ children, announcement }: LayoutContentProps) {
     <>
       <a
         href="#main-content"
-        className={`focus:bg-primary focus:text-primary-foreground sr-only rounded-md focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:${paddingX.default} focus:${paddingY.tight}`}
+        className="focus:bg-primary focus:text-primary-foreground sr-only rounded-md focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2"
       >
         Skip to main content
       </a>

@@ -12,14 +12,11 @@ import {
   X,
 } from '@heyclaude/web-runtime/icons';
 import {
-  ANIMATION_CONSTANTS,
-  DIMENSIONS,
   Announcement,
   AnnouncementTag,
   AnnouncementTitle,
   cn,
 } from '@heyclaude/web-runtime/ui';
-import { responsive, cluster, iconSize, gap, paddingX, paddingTop, paddingBottom, marginX, paddingY } from '@heyclaude/web-runtime/design-system';
 import Link from 'next/link';
 import { type ComponentType, useEffect } from 'react';
 import { useBoolean } from '@heyclaude/web-runtime/hooks';
@@ -116,15 +113,15 @@ export function AnnouncementBannerClient({ announcement }: AnnouncementBannerCli
       aria-label="Site announcement"
       aria-live="polite"
       aria-atomic="true"
-      className={`relative z-60 hidden w-full ${paddingX.compact} ${paddingTop.tight} ${paddingBottom.tight} md:block`}
+      className="relative z-60 hidden w-full px-3 pt-2 pb-2 md:block"
     >
       {/* Rounded pill container */}
-      <div className={`container ${marginX.auto}`}>
+      <div className="container mx-auto">
         <div
-          className={`border-accent/20 bg-accent/10 rounded-full border shadow-sm backdrop-blur-sm ${ANIMATION_CONSTANTS.CSS_TRANSITION_SLOW} hover:border-accent/30 hover:shadow-md motion-reduce:transition-none`}
+          className="border-accent/20 bg-accent/10 rounded-full border shadow-sm backdrop-blur-sm transition-all duration-300 ease-out hover:border-accent/30 hover:shadow-md motion-reduce:transition-none"
         >
-          <div className={`${paddingX.default} ${paddingY.tight} md:${paddingX.comfortable} md:${paddingY.tight}.5`}>
-              <div className={responsive.colCenter}>
+          <div className="px-4 py-2 md:px-6 md:py-2.5">
+              <div className="flex flex-col items-center md:flex-row md:items-center">
               {/* Announcement Content */}
               <Announcement
                 variant={announcement.variant}
@@ -140,7 +137,7 @@ export function AnnouncementBannerClient({ announcement }: AnnouncementBannerCli
                   {announcement.href ? (
                     <Link
                       href={announcement.href}
-                      className={cn('hover:underline', cluster.compact, gap['1.5'], ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT)}
+                      className={cn('hover:underline', 'flex items-center gap-2', 'gap-1.5', 'transition-all duration-200 ease-out')}
                     >
                       <span className="line-clamp-2 sm:line-clamp-1">{announcement.title}</span>
                       {IconComponent ? (
@@ -151,7 +148,7 @@ export function AnnouncementBannerClient({ announcement }: AnnouncementBannerCli
                       ) : null}
                     </Link>
                   ) : (
-                    <span className={cn(cluster.compact, gap['1.5'])}>
+                    <span className={cn('flex items-center gap-2', 'gap-1.5')}>
                       <span className="line-clamp-2 sm:line-clamp-1">{announcement.title}</span>
                       {IconComponent ? (
                         <IconComponent
@@ -170,10 +167,10 @@ export function AnnouncementBannerClient({ announcement }: AnnouncementBannerCli
                   type="button"
                   onClick={dismiss}
                   aria-label="Dismiss announcement"
-                  className={`flex ${DIMENSIONS.MIN_H_ICON_BUTTON_SM} ${DIMENSIONS.MIN_W_ICON_BUTTON_SM} shrink-0 items-center justify-center rounded-full ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:bg-accent/20 focus-visible:ring-accent focus-visible:ring-2 focus-visible:ring-offset-2 sm:${DIMENSIONS.MIN_H_ICON_BUTTON_MD} sm:${DIMENSIONS.MIN_W_ICON_BUTTON_MD}`}
+                  className="flex min-h-[36px] min-w-[36px] shrink-0 items-center justify-center rounded-full transition-all duration-200 ease-out hover:bg-accent/20 focus-visible:ring-accent focus-visible:ring-2 focus-visible:ring-offset-2 sm:min-h-[40px] sm:min-w-[40px]"
                 >
                   <X
-                    className={`${iconSize.xs} text-foreground sm:h-4 sm:w-4`}
+                    className="h-3 w-3 text-foreground sm:h-4 sm:w-4"
                     aria-hidden="true"
                   />
                 </button>

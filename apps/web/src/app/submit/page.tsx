@@ -4,7 +4,7 @@
  */
 
 import { ContentCategory, SubmissionType } from '@heyclaude/data-layer/prisma';
-import type { content_category, submission_type } from '@heyclaude/data-layer/prisma';
+import { type content_category, type submission_type } from '@heyclaude/data-layer/prisma';
 import {
   generatePageMetadata,
   getContentTemplates,
@@ -14,22 +14,10 @@ import {
 import { TrendingUp } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { type SubmissionFormConfig } from '@heyclaude/web-runtime/types/component.types';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  cn,
-} from '@heyclaude/web-runtime/ui';
-import { cluster, iconSize, gap, size, muted, paddingX, paddingY, marginX, spaceY, weight } from '@heyclaude/web-runtime/design-system';
+import { Card, CardContent, CardHeader, CardTitle, cn } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { connection } from 'next/server';
-import { Suspense, lazy } from 'react';
-
-// OPTIMIZATION: Dynamic import for large form component (833 lines) - only loads when needed
-const SubmitFormClient = lazy(
-  () => import('@/src/components/core/forms/content-submission-form').then((mod) => ({ default: mod.SubmitFormClient }))
-);
+import { lazy, Suspense } from 'react';
 
 import { SidebarActivityCard } from '@/src/components/core/forms/sidebar-activity-card';
 import { SubmitPageHero } from '@/src/components/core/forms/submit-page-hero';
@@ -38,6 +26,13 @@ import { SubmitPageSidebarSkeleton as SubmitPageSidebarSkeletonComponent } from 
 import { ContentSidebar } from '@/src/components/core/layout/content-sidebar';
 
 import SubmitFormLoading from './loading-form';
+
+// OPTIMIZATION: Dynamic import for large form component (833 lines) - only loads when needed
+const SubmitFormClient = lazy(() =>
+  import('@/src/components/core/forms/content-submission-form').then((mod) => ({
+    default: mod.SubmitFormClient,
+  }))
+);
 
 /**
  * Dynamic Rendering
@@ -89,9 +84,7 @@ function formatTimeAgo(dateString: string): string {
  *
  * @see ContentCategory enum object
  */
-function isValidContentCategory(
-  value: string
-): value is content_category {
+function isValidContentCategory(value: string): value is content_category {
   return (Object.values(ContentCategory) as readonly string[]).includes(value);
 }
 
@@ -108,7 +101,7 @@ function isValidContentCategory(
  * @see DEFAULT_CONTENT_CATEGORY
  */
 function mapSubmissionTypeToContentCategory(
-  submissionType: submission_type | null
+  submissionType: null | submission_type
 ): content_category {
   if (submissionType === null) {
     return DEFAULT_CONTENT_CATEGORY; // Safe default
@@ -214,13 +207,13 @@ export default async function SubmitPage() {
   });
 
   return (
-    <div className={`container ${marginX.auto} max-w-7xl ${paddingX.default} ${paddingY.relaxed} sm:${paddingY.section}`}>
+    <div className="container mx-auto max-w-7xl px-4 py-8 sm:py-12">
       {/* Hero Header - Dashboard stats streams in Suspense */}
       <Suspense fallback={<SubmitPageHeroSkeleton />}>
         <SubmitPageHeroWithStats reqLogger={reqLogger} />
       </Suspense>
 
-      <div className={`grid items-start ${gap.comfortable} lg:grid-cols-[2fr_1fr] lg:${gap.relaxed}`}>
+      <div className="grid items-start gap-4 lg:grid-cols-[2fr_1fr] lg:gap-6">
         <div className="w-full min-w-0">
           {/* Form Configuration and Templates in separate Suspense boundaries */}
           <Suspense fallback={<SubmitFormLoading />}>
@@ -228,7 +221,7 @@ export default async function SubmitPage() {
           </Suspense>
         </div>
 
-        <div className={`w-full ${spaceY.comfortable} sm:${spaceY.relaxed} lg:sticky lg:top-24 lg:h-fit`}>
+        <div className="w-full space-y-4 sm:space-y-6 lg:sticky lg:top-24 lg:h-fit">
           {/* Unified ContentSidebar with JobsPromo + RecentlyViewed */}
           <ContentSidebar />
 
@@ -305,23 +298,19 @@ async function SubmitFormWithConfig({ reqLogger }: { reqLogger: ReturnType<typeo
   // Fetch templates for all supported submission types
   // submission_type enum values are a subset of content_category enum values
   // Map each element and validate using type guard to ensure type safety
-  const supportedCategories: Array<content_category> =
-    (Object.values(SubmissionType) as readonly string[])
-      .map((type): string => {
-        // Runtime validation: all submission_type values are valid content_category values
-        if (isValidContentCategory(type)) {
-          return type;
-        }
-        // This should never happen, but TypeScript requires handling the case
-        reqLogger.warn(
-          { section: 'data-fetch', type },
-          'SubmitPage: invalid submission_type found'
-        );
-        return DEFAULT_CONTENT_CATEGORY;
-      })
-      .filter((category): category is content_category =>
-        isValidContentCategory(category)
-      );
+  const supportedCategories: content_category[] = (
+    Object.values(SubmissionType) as readonly string[]
+  )
+    .map((type): string => {
+      // Runtime validation: all submission_type values are valid content_category values
+      if (isValidContentCategory(type)) {
+        return type;
+      }
+      // This should never happen, but TypeScript requires handling the case
+      reqLogger.warn({ section: 'data-fetch', type }, 'SubmitPage: invalid submission_type found');
+      return DEFAULT_CONTENT_CATEGORY;
+    })
+    .filter((category): category is content_category => isValidContentCategory(category));
 
   // OPTIMIZATION: Load form configuration and templates in parallel
   // Both operations are independent and can run concurrently for better performance
@@ -350,7 +339,10 @@ async function SubmitFormWithConfig({ reqLogger }: { reqLogger: ReturnType<typeo
       'SubmitPage: form configuration loaded'
     );
   } else {
-    const normalized = normalizeError(formConfigResult.reason, 'Failed to load submission form config');
+    const normalized = normalizeError(
+      formConfigResult.reason,
+      'Failed to load submission form config'
+    );
     reqLogger.error(
       { err: normalized, section: 'data-fetch' },
       'SubmitPage: getSubmissionFormFields failed'
@@ -362,8 +354,8 @@ async function SubmitFormWithConfig({ reqLogger }: { reqLogger: ReturnType<typeo
 
   // Process templates result
   let templates: Awaited<ReturnType<typeof getContentTemplates>> = [];
-  if (templatesResult.status === 'fulfilled') {
-    templates = templatesResult.value.flat();
+  if (templatesResult.status === 'fulfilled' && templatesResult.value) {
+    templates = templatesResult.value.flat().filter((t): t is NonNullable<typeof t> => t !== null);
     reqLogger.info(
       {
         categoriesCount: supportedCategories.length,
@@ -372,8 +364,11 @@ async function SubmitFormWithConfig({ reqLogger }: { reqLogger: ReturnType<typeo
       },
       'SubmitPage: content templates loaded'
     );
-  } else {
-    const normalized = normalizeError(templatesResult.reason, 'Failed to load submission templates');
+  } else if (templatesResult.status === 'rejected') {
+    const normalized = normalizeError(
+      templatesResult.reason,
+      'Failed to load submission templates'
+    );
     reqLogger.error(
       { err: normalized, section: 'data-fetch' },
       'SubmitPage: getContentTemplates failed'
@@ -381,7 +376,7 @@ async function SubmitFormWithConfig({ reqLogger }: { reqLogger: ReturnType<typeo
     // Continue with empty templates array - page will render without templates
   }
 
-  if (templates.length === 0) {
+  if (!templates || templates.length === 0) {
     reqLogger.warn(
       {
         categories: supportedCategories,
@@ -393,7 +388,7 @@ async function SubmitFormWithConfig({ reqLogger }: { reqLogger: ReturnType<typeo
   }
 
   // Serialize for Client Component compatibility - JSON round-trip ensures plain objects
-  const serializedTemplates = structuredClone(templates);
+  const serializedTemplates = structuredClone(templates ?? []);
 
   if (!formConfig) {
     reqLogger.error(
@@ -487,28 +482,28 @@ async function SubmitPageSidebar({ reqLogger }: { reqLogger: ReturnType<typeof l
       {/* Stats Card - 3-column grid */}
       <Card>
         <CardHeader>
-          <CardTitle className={cn(cluster.compact, 'text-sm font-medium')}>
-            <TrendingUp className={iconSize.sm} />
+          <CardTitle className={cn('flex items-center gap-2', 'text-sm-medium')}>
+            <TrendingUp className="h-4 w-4" />
             Community Stats
           </CardTitle>
         </CardHeader>
-        <CardContent className={`grid grid-cols-3 ${gap.compact}`}>
+        <CardContent className="grid grid-cols-3 gap-2">
           {/* Total */}
           <div className={cn('rounded-lg p-3 text-center', 'bg-blue-500/10')}>
-            <div className={`${size['2xl']} ${weight.bold} text-blue-400`}>{stats.total}</div>
-            <div className={`${size.xs} ${muted.default}`}>Total</div>
+            <div className="text-2xl font-bold text-blue-400">{stats.total}</div>
+            <div className="text-muted-foreground text-xs">Total</div>
           </div>
 
           {/* Pending */}
           <div className={cn('rounded-lg p-3 text-center', 'bg-yellow-500/10')}>
-            <div className={`${size['2xl']} ${weight.bold} text-yellow-400`}>{stats.pending}</div>
-            <div className={`${size.xs} ${muted.default}`}>Pending</div>
+            <div className="text-2xl font-bold text-yellow-400">{stats.pending}</div>
+            <div className="text-muted-foreground text-xs">Pending</div>
           </div>
 
           {/* This Week */}
           <div className={cn('rounded-lg p-3 text-center', 'bg-green-500/10')}>
-            <div className={`${size['2xl']} ${weight.bold} text-green-400`}>{stats.merged_this_week}</div>
-            <div className={`${size.xs} ${muted.default}`}>This Week</div>
+            <div className="text-2xl font-bold text-green-400">{stats.merged_this_week}</div>
+            <div className="text-muted-foreground text-xs">This Week</div>
           </div>
         </CardContent>
       </Card>
@@ -519,9 +514,7 @@ async function SubmitPageSidebar({ reqLogger }: { reqLogger: ReturnType<typeof l
         tips={SUBMISSION_TIPS}
         typeLabels={Object.fromEntries(
           Object.entries(TYPE_LABELS).map(([key, value]) => [
-            mapSubmissionTypeToContentCategory(
-              key as submission_type
-            ),
+            mapSubmissionTypeToContentCategory(key as submission_type),
             value,
           ])
         )}

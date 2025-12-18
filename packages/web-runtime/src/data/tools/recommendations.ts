@@ -1,17 +1,14 @@
 'use server';
 
-import { QuizService } from '@heyclaude/data-layer';
-import type {
-  experience_level,
-  focus_area_type,
-  integration_type,
-  use_case_type,
+import {
+  type experience_level,
+  type focus_area_type,
+  type integration_type,
+  type use_case_type,
 } from '@heyclaude/data-layer/prisma';
-import type { GetRecommendationsReturns } from '@heyclaude/database-types/postgres-types';
-import { cacheLife, cacheTag } from 'next/cache';
+import { type GetRecommendationsReturns } from '@heyclaude/database-types/postgres-types';
 
-import { normalizeError } from '../../errors.ts';
-import { logger } from '../../index.ts';
+import { createCachedDataFunction } from '../cached-data-factory.ts';
 
 export interface RecommendationInput {
   experienceLevel: experience_level;
@@ -27,72 +24,38 @@ export interface RecommendationInput {
  * Get configuration recommendations
  *
  * Uses 'use cache: private' to enable cross-request caching for user-specific data.
- * This allows cookies() to be used inside the cache scope when viewerId is provided,
- * while still providing per-user caching with TTL and cache invalidation support.
- *
- * Cache behavior:
- * - Minimum 30 seconds stale time (required for runtime prefetch)
- * - Cache keys include all input parameters
- * - Not prerendered (runs at request time)
- * @param input
  */
-export async function getConfigRecommendations(
-  input: RecommendationInput
-): Promise<GetRecommendationsReturns | null> {
-  'use cache: private';
-
-  const {
-    experienceLevel,
-    focusAreas = [],
-    integrations = [],
-    limit = 20,
-    toolPreferences,
-    useCase,
-    viewerId,
-  } = input;
-
-  // Configure cache
-  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
-  cacheTag(`recommendations-${useCase}-${experienceLevel}`);
-  if (viewerId) {
-    cacheTag(`recommendations-viewer-${viewerId}`);
-  }
-
-  const reqLogger = logger.child({
-    module: 'data/tools/recommendations',
-    operation: 'getConfigRecommendations',
-  });
-
-  try {
-    const service = new QuizService();
-
-    const result = await service.getRecommendations({
-      p_experience_level: experienceLevel,
-      p_focus_areas: focusAreas,
-      p_integrations: integrations,
-      p_limit: limit,
-      p_tool_preferences: toolPreferences,
-      p_use_case: useCase,
-      ...(viewerId ? { p_viewer_id: viewerId } : {}),
-    });
-
-    reqLogger.info(
-      {
-        experienceLevel,
-        hasViewer: Boolean(viewerId),
-        resultCount: result.results?.length ?? 0,
-        useCase,
-      },
-      'getConfigRecommendations: fetched successfully'
-    );
-
-    return result;
-  } catch (error) {
-    const normalized = normalizeError(error, 'getConfigRecommendations failed');
-    reqLogger.error(
-      { err: normalized, experienceLevel, hasViewer: Boolean(viewerId), useCase },
-      'getConfigRecommendations: unexpected error'
-    );
-    return null;
-  }
-}
+export const getConfigRecommendations = createCachedDataFunction<
+  RecommendationInput,
+  GetRecommendationsReturns | null
+>({
+  serviceKey: 'misc', // Consolidated: QuizService methods moved to MiscService
+  methodName: 'getRecommendations',
+  cacheMode: 'private',
+  cacheLife: 'userProfile', // 1min stale, 5min revalidate, 30min expire - User-specific data
+  cacheTags: (input) => {
+    const tags = [`recommendations-${input.useCase}-${input.experienceLevel}`];
+    if (input.viewerId) {
+      tags.push(`recommendations-viewer-${input.viewerId}`);
+    }
+    return tags;
+  },
+  module: 'data/tools/recommendations',
+  operation: 'getConfigRecommendations',
+  transformArgs: (input) => ({
+    p_experience_level: input.experienceLevel,
+    p_focus_areas: input.focusAreas ?? [],
+    p_integrations: input.integrations ?? [],
+    p_limit: input.limit ?? 20,
+    p_tool_preferences: input.toolPreferences,
+    p_use_case: input.useCase,
+    ...(input.viewerId ? { p_viewer_id: input.viewerId } : {}),
+  }),
+  onError: () => null,
+  logContext: (input, result) => ({
+    experienceLevel: input.experienceLevel,
+    hasViewer: Boolean(input.viewerId),
+    resultCount: (result as GetRecommendationsReturns | null)?.results?.length ?? 0,
+    useCase: input.useCase,
+  }),
+});

@@ -15,11 +15,10 @@
 
 import { type ContentHeadingMetadata } from '@heyclaude/web-runtime/types/component.types';
 import { useIsClient, useMultipleIntersectionObserver, useReducedMotion } from '@heyclaude/web-runtime/hooks';
-import { cn, STATE_PATTERNS } from '@heyclaude/web-runtime/ui';
+import { cn } from '@heyclaude/web-runtime/ui';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { normalizeHeadings, type NormalizedHeading } from './utils/normalize-headings';
-import { marginBottom, spaceY } from "@heyclaude/web-runtime/design-system";
 
 interface SidebarTocProps {
   className?: string;
@@ -39,7 +38,6 @@ interface SidebarTocProps {
  * @returns The rendered navigation element containing the table of contents, or `null` when not rendered.
  *
  * @see normalizeHeadings
- * @see STATE_PATTERNS
  * @see cn
  */
 export function SidebarToc({ headings, className, minHeadings = 2 }: SidebarTocProps) {
@@ -172,12 +170,12 @@ export function SidebarToc({ headings, className, minHeadings = 2 }: SidebarTocP
   return (
     <nav className={cn('py-2', className)} aria-label="On this page">
       {/* Header - Supabase style uppercase */}
-      <p className={`text-muted-foreground ${marginBottom.compact} text-xs font-medium tracking-wider uppercase`}>
+      <p className="text-muted-foreground mb-2 text-xs-medium tracking-wider uppercase">
         On this page
       </p>
 
       {/* Heading list with left border indicator */}
-      <ul className={spaceY['1.5']}>
+      <ul className="space-y-1.5">
         {normalizedHeadings.map((heading: NormalizedHeading) => {
           const depthOffset = Math.max(heading.level - baseLevel, 0);
           const isActive = activeId === heading.id;
@@ -188,7 +186,7 @@ export function SidebarToc({ headings, className, minHeadings = 2 }: SidebarTocP
                 type="button"
                 onClick={() => handleHeadingClick(heading)}
                 className={cn(
-                  STATE_PATTERNS.FOCUS_RING,
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                   'group relative w-full py-1.5 text-left text-[13px] leading-snug transition-colors',
                   'hover:text-foreground',
                   isActive ? 'text-foreground' : 'text-muted-foreground'

@@ -16,16 +16,16 @@
  */
 
 import 'server-only';
-import { ContentService } from '@heyclaude/data-layer';
-import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
 import {
-  buildCacheHeaders,
   changelogEntryFormatSchema,
   createApiOptionsHandler,
-  createApiRoute,
+  createCachedApiRoute,
   getOnlyCorsHeaders,
+  getVersionedRoute,
+  notFoundResponse,
+  textResponse,
+  type RouteHandlerContext,
 } from '@heyclaude/web-runtime/server';
-import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
 /**
@@ -33,66 +33,16 @@ import { z } from 'zod';
  *
  * Returns a changelog entry as an LLMs-compliant plain-text file for the given slug.
  * Validates the format query parameter (must be 'llms-entry').
+ * 
+ * OPTIMIZATION: Uses createCachedApiRoute to eliminate cached helper function boilerplate.
  */
-export const GET = createApiRoute({
-  cors: 'anon',
-  handler: async ({ logger, nextContext, query }) => {
-    // Extract path parameter from Next.js route context
-    interface RouteContext {
-      params: Promise<{ slug: string }>;
-    }
-    const context = nextContext as RouteContext;
-    if (!context?.params) {
-      logger.error({}, 'Missing route context for changelog entry handler');
-      throw new Error('Missing route context');
-    }
-
-    const { slug } = await context.params;
-
-    // Zod schema ensures proper types
-    const { format } = query;
-
-    logger.info({ format, slug }, 'Changelog entry request received');
-
-    const service = new ContentService();
-    const data = await service.getChangelogEntryLlmsTxt({ p_slug: slug });
-
-    if (!data) {
-      logger.warn({ slug }, 'Changelog entry LLMs.txt not found');
-      return NextResponse.json(
-        { error: 'Changelog entry LLMs.txt not found' },
-        {
-          headers: {
-            'Content-Type': 'application/json; charset=utf-8',
-            ...buildSecurityHeaders(),
-            ...getOnlyCorsHeaders,
-          },
-          status: 404,
-        }
-      );
-    }
-
-    const formatted = data.replaceAll(String.raw`\n`, '\n');
-
-    logger.info(
-      {
-        bytes: formatted.length,
-        slug,
-      },
-      'Changelog entry LLMs.txt generated'
-    );
-
-    return new NextResponse(formatted, {
-      headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-        'X-Generated-By': 'prisma.rpc.generate_changelog_entry_llms_txt',
-        ...buildSecurityHeaders(),
-        ...getOnlyCorsHeaders,
-        ...buildCacheHeaders('content_export'),
-      },
-      status: 200,
-    });
+export const GET = createCachedApiRoute({
+  cacheLife: { expire: 2_592_000, revalidate: 21_600, stale: 86_400 }, // 1 day stale, 6hr revalidate, 30 days expire
+  cacheTags: (_query: unknown, _body: unknown, routeParams?: Record<string, string>) => {
+    const slug = routeParams?.['slug'] ?? '';
+    return ['changelog', 'changelog-entry', `changelog-entry-${slug}`];
   },
+  cors: 'anon',
   method: 'GET',
   openapi: {
     description:
@@ -116,7 +66,43 @@ export const GET = createApiRoute({
   querySchema: z.object({
     format: changelogEntryFormatSchema,
   }),
-  route: '/api/content/changelog/[slug]',
+  responseHandler: (result: unknown, _query: unknown, _body: unknown, ctx: RouteHandlerContext<unknown, unknown>) => {
+    const { logger } = ctx;
+    const data = result as null | string;
+
+    if (!data) {
+      logger.warn({}, 'Changelog entry LLMs.txt not found');
+      return notFoundResponse('Changelog entry LLMs.txt not found', 'ChangelogEntry');
+    }
+
+    const formatted = data.replaceAll(String.raw`\n`, '\n');
+    logger.info({ bytes: formatted.length }, 'Changelog entry LLMs.txt generated');
+    return textResponse(formatted, 200, getOnlyCorsHeaders, {
+      'X-Generated-By': 'prisma.rpc.generate_changelog_entry_llms_txt',
+    });
+  },
+  route: getVersionedRoute('content/changelog/[slug]'),
+  service: {
+    getRouteParams: async (nextContext: unknown) => {
+      interface RouteContext {
+        params: Promise<{ slug: string }>;
+      }
+      const context = nextContext as RouteContext;
+      if (!context?.params) {
+        throw new Error('Missing route context');
+      }
+      return await context.params;
+    },
+    methodArgs: (_query: { format: 'llms-entry' }, _body: unknown, routeParams?: Record<string, string>) => {
+      const slug = routeParams?.['slug'];
+      if (!slug) {
+        throw new Error('Missing slug in route params');
+      }
+      return [{ p_slug: slug }];
+    },
+    methodName: 'getChangelogEntryLlmsTxt',
+    serviceKey: 'content',
+  } as Parameters<typeof createCachedApiRoute<{ format: 'llms-entry' }, unknown>>[0]['service'],
 });
 
 /**

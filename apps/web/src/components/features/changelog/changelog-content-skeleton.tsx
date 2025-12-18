@@ -10,7 +10,7 @@
  */
 
 import { Skeleton } from '@heyclaude/web-runtime/ui';
-import { SPRING, STAGGER, wrap, gap, spaceY, paddingBottom, marginBottom, paddingLeft } from '@heyclaude/web-runtime/design-system';
+import { SPRING, STAGGER } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 
@@ -32,7 +32,7 @@ export function ChangelogContentSkeleton() {
   
   return (
     <motion.div
-      className={`${spaceY.default}`}
+      className="space-y-3"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={SPRING.smooth}
@@ -42,7 +42,7 @@ export function ChangelogContentSkeleton() {
         return (
           <motion.div
             key={key}
-            className={`relative ${paddingBottom.default} last:${paddingBottom.default}`}
+            className="relative pb-4 last:pb-4"
             initial={!prefersReducedMotion ? { opacity: 0, y: 20 } : false}
             animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
             transition={{
@@ -54,29 +54,29 @@ export function ChangelogContentSkeleton() {
             <div className="flex flex-col gap-y-6 md:flex-row">
               {/* Left: Timeline markers (sticky) */}
               <div className="flex-shrink-0 md:w-48">
-                <div className={`${paddingBottom.default} md:sticky md:top-8`}>
+                <div className="pb-4 md:sticky md:top-8">
                   {/* Date */}
-                  <Skeleton size="sm" width="xs" className={`${marginBottom.compact}`} />
+                  <Skeleton size="sm" width="xs" className="mb-2" />
                   {/* Version badge */}
                   <Skeleton size="md" width="md" rounded="lg" className="h-10 w-10" />
                 </div>
               </div>
 
               {/* Right: Content */}
-              <div className={`relative flex-1 ${paddingBottom.default} ${paddingLeft.default} md:${paddingLeft.relaxed}`}>
+              <div className="relative flex-1 pb-4 pl-4 md:pl-8">
                 {/* Vertical timeline line */}
-                <div className="hidden md:block absolute top-2 left-0 w-px h-full bg-border">
+                <div className="absolute left-0 top-2 hidden h-full w-px bg-border md:block">
                   {/* Timeline dot */}
-                  <div className={`hidden md:block absolute -translate-x-1/2 size-3 bg-primary rounded-full z-10`} />
+                  <div className="absolute z-10 size-3 -translate-x-1/2 rounded-full bg-primary md:block" />
                 </div>
 
-                <div className={`relative z-10 ${spaceY.relaxed}`}>
+                <div className="relative z-10 space-y-6">
                   {/* Title */}
-                  <div className={`flex flex-col ${gap.tight}`}>
+                  <div className="flex flex-col gap-1">
                     <Skeleton size="lg" width="3/4" className="h-8" />
                     
                     {/* Tags */}
-                    <div className={`${wrap} ${gap.compact}`}>
+                    <div className="flex flex-wrap gap-2">
                       <Skeleton size="xs" width="xs" rounded="full" className="h-6" />
                       <Skeleton size="xs" width="xs" rounded="full" className="h-6" />
                       <Skeleton size="xs" width="xs" rounded="full" className="h-6" />
@@ -84,7 +84,7 @@ export function ChangelogContentSkeleton() {
                   </div>
 
                   {/* Content prose */}
-                  <div className={`${spaceY.default}`}>
+                  <div className="space-y-3">
                     <Skeleton size="md" width="3xl" />
                     <Skeleton size="sm" width="3xl" />
                     <Skeleton size="sm" width="3xl" />

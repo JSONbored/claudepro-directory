@@ -86,12 +86,30 @@ functions_agg AS (
           LIMIT 1
         ),
         -- Fallback to information_schema (simpler, more reliable)
-        CASE 
-          WHEN r.data_type = 'USER-DEFINED' THEN COALESCE(r.type_udt_name, 'void')
-          WHEN r.data_type = 'SETOF' THEN '_' || COALESCE(r.type_udt_name, 'record')
-          WHEN r.type_udt_name IS NULL THEN 'void'
-          ELSE r.type_udt_name
-        END
+        -- FIX: Also check pg_proc.proretset directly as fallback for SETOF detection
+        COALESCE(
+          (
+            SELECT 
+              CASE 
+                WHEN p.prorettype = 'pg_catalog.void'::regtype THEN 'void'
+                WHEN p.proretset THEN '_' || format_type(p.prorettype, NULL)
+                ELSE format_type(p.prorettype, NULL)
+              END
+            FROM pg_proc p
+            JOIN pg_namespace n ON p.pronamespace = n.oid
+            WHERE n.nspname = $1
+              AND p.proname = r.routine_name
+            ORDER BY p.oid
+            LIMIT 1
+          ),
+          -- Final fallback to information_schema
+          CASE 
+            WHEN r.data_type = 'USER-DEFINED' THEN COALESCE(r.type_udt_name, 'void')
+            WHEN r.data_type = 'SETOF' THEN '_' || COALESCE(r.type_udt_name, 'record')
+            WHEN r.type_udt_name IS NULL THEN 'void'
+            ELSE r.type_udt_name
+          END
+        )
       ),
       'args', COALESCE(
         (

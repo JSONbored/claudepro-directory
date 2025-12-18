@@ -5,7 +5,7 @@ import { logClientWarn } from '@heyclaude/web-runtime/logging/client';
 import { useLoggedAsync, useButtonSuccess } from '@heyclaude/web-runtime/hooks';
 import { type ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
 import { toasts, Button } from '@heyclaude/web-runtime/ui';
-import { DURATION, iconSize } from '@heyclaude/web-runtime/design-system';
+import { DURATION } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { Check, type LucideIcon } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -179,7 +179,7 @@ export function ContentActionButton({
           animate={isSuccess && !shouldReduceMotion ? { scale: [1, 1.2, 1] } : {}}
           transition={{ duration: DURATION.default }}
         >
-          <DisplayIcon className={`${iconSize.sm}`} />
+          <DisplayIcon className="h-4 w-4" />
         </motion.div>
       ) : null}
       {label}

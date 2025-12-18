@@ -54,7 +54,8 @@ function buildErrorEmbed(payload: ErrorWebhookPayload): Record<string, unknown> 
 
 /**
  * Process discord_errors queue
- * Runs every 5 minutes to send error notifications to Discord
+ * Runs every 30 minutes to send error notifications to Discord.
+ * Optimized: Increased from 15 minutes (errors don't need immediate alerts).
  */
 export const processDiscordErrorsQueue = inngest.createFunction(
   {
@@ -62,7 +63,7 @@ export const processDiscordErrorsQueue = inngest.createFunction(
     name: 'Process Discord Errors Queue',
     retries: 3,
   },
-  { cron: '*/15 * * * *' }, // Every 15 minutes (errors need faster alerts)
+  { cron: '*/30 * * * *' }, // Every 30 minutes (optimized from 15 minutes)
   async ({ step }) => {
     const logContext = createWebAppContextWithId(
       '/inngest/discord-errors',

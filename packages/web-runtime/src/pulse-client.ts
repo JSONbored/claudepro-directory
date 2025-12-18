@@ -8,15 +8,13 @@ import type {
   interaction_type,
   content_category,
 } from '@heyclaude/data-layer/prisma';
-import { getEnvVar } from '@heyclaude/shared-runtime';
 import { logger } from './logger.ts';
 
 // Lazy import server actions to avoid client/server boundary issues during HMR
 // These are server actions that can be called from client components
-// Import the type from the server action to ensure consistency
-import type { ConfigRecommendationsResponse } from './actions/pulse.ts';
-
-const SITE_URL = getEnvVar('NEXT_PUBLIC_SITE_URL') ?? 'https://claudepro.directory';
+// Import the type from the types file to avoid Next.js serialization issues
+// This prevents Next.js from analyzing pulse.ts when only types are needed
+import type { ConfigRecommendationsResponse } from './actions/pulse-types.ts';
 
 export type NewsletterEventType =
   | 'modal_shown'
@@ -61,32 +59,8 @@ export async function trackInteraction(params: {
   }
 }
 
-export async function getSimilarConfigs(params: {
-  content_type: content_category;
-  content_slug: string;
-  limit?: number;
-}) {
-  // Lazy import to avoid HMR issues with server actions
-  const { getSimilarConfigsAction } = await import('./actions/pulse.ts');
-  const result = await getSimilarConfigsAction(params);
-  const data = result?.data;
-
-  if (!data) {
-    return {
-      similar_items: [],
-      source_item: { slug: params.content_slug, category: params.content_type },
-      algorithm_version: 'unknown',
-    };
-  }
-
-  return {
-    ...data,
-    similar_items: (data.similar_items || []).map((item) => ({
-      ...item,
-      url: `${SITE_URL}/${item.category ?? 'agents'}/${item.slug ?? ''}`,
-    })),
-  };
-}
+// getSimilarConfigs removed - embedding generation system has been deleted
+// This function was never called in the UI
 
 export async function generateConfigRecommendations(answers: {
   useCase: use_case_type;

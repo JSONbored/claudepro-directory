@@ -19,7 +19,6 @@ import {
   CardTitle,
   UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
-import { size, muted, marginBottom, leading, paddingX, paddingY, marginX, padding, marginRight, gap, between } from '@heyclaude/web-runtime/design-system';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import Image from 'next/image';
@@ -61,7 +60,7 @@ export async function generateMetadata(): Promise<Metadata> {
  */
 export default async function CompaniesPage() {
   'use cache';
-  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
+  cacheLife('long'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
   // Create request-scoped child logger
   const reqLogger = logger.child({
@@ -135,24 +134,26 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
   return (
     <div className="bg-background min-h-screen">
       {/* Hero */}
-      <section className="relative overflow-hidden border-b border-border/50 bg-card/30">
-        <div className={`container ${marginX.auto} ${paddingX.default} ${paddingY.default}`}>
-          <div className={`${marginX.auto} max-w-3xl text-center`}>
-            <div className={`${marginBottom.comfortable} flex justify-center`}>
-              <div className={`bg-accent/10 rounded-full ${padding.compact}`}>
+      <section className="border-border/50 bg-card/30 relative overflow-hidden border-b">
+        <div className="container mx-auto px-4 py-4">
+          <div className="mx-auto max-w-3xl text-center">
+            <div className="mb-6 flex justify-center">
+              <div className="bg-accent/10 rounded-full p-3">
                 <Building className="text-primary h-8 w-8" />
               </div>
             </div>
 
-            <h1 className={`text-4xl lg:text-6xl font-bold ${marginBottom.comfortable} text-foreground`}>Companies Directory</h1>
+            <h1 className="text-foreground mb-6 text-4xl font-bold lg:text-6xl">
+              Companies Directory
+            </h1>
 
-            <p className={`${size.lg} ${muted.default} ${marginBottom.relaxed} ${leading.relaxed}`}>
+            <p className="text-muted-foreground mb-8 text-lg leading-relaxed">
               Discover companies building the future with Claude and Cursor
             </p>
 
-            <div className={`${marginBottom.relaxed} flex justify-center ${gap.tight}`}>
+            <div className="mb-8 flex justify-center gap-1">
               <UnifiedBadge style="secondary" variant="base">
-                <Building className={`${marginRight.micro} h-3 w-3`} />
+                <Building className="mr-0.5 h-3 w-3" />
                 {companies.length} Companies
               </UnifiedBadge>
               <UnifiedBadge style="outline" variant="base">
@@ -162,7 +163,7 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
 
             <Button asChild variant="outline">
               <Link href={ROUTES.ACCOUNT_COMPANIES}>
-                <Plus className={`${marginRight.tight} h-4 w-4`} />
+                <Plus className="mr-2 h-4 w-4" />
                 Add Your Company
               </Link>
             </Button>
@@ -171,38 +172,38 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
       </section>
 
       {/* Companies Grid */}
-      <section className={`container ${marginX.auto} ${paddingX.default} ${paddingY.section}`}>
+      <section className="container mx-auto px-4 py-12">
         {companies.length === 0 ? (
           <Card>
-            <CardContent className={`flex flex-col items-center ${paddingY.section}`}>
-              <Building className={`text-muted-foreground ${marginBottom.default} h-12 w-12`} />
-              <h3 className={`${marginBottom.compact} text-xl font-semibold`}>No companies yet</h3>
-              <p className={`text-muted-foreground ${marginBottom.default} max-w-md text-center`}>
+            <CardContent className="flex flex-col items-center py-12">
+              <Building className="text-muted-foreground mb-4 h-12 w-12" />
+              <h3 className="mb-2 text-xl font-semibold">No companies yet</h3>
+              <p className="text-muted-foreground mb-4 max-w-md text-center">
                 Be the first company to join the directory!
               </p>
               <Button asChild>
                 <Link href={ROUTES.ACCOUNT_COMPANIES}>
-                  <Plus className={`${marginRight.tight} h-4 w-4`} />
+                  <Plus className="mr-2 h-4 w-4" />
                   Add Your Company
                 </Link>
               </Button>
             </CardContent>
           </Card>
         ) : (
-          <div className={`grid ${gap.comfortable} grid-cols-1 md:grid-cols-2 lg:grid-cols-3`}>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {companies.map((company, index) => (
               <Card className="card-gradient transition-smooth group" key={company.id}>
                 {company.featured ? (
                   <div className="absolute -top-2 -right-2 z-10">
                     <UnifiedBadge className="bg-accent text-accent-foreground" variant="base">
-                      <Star className={`${marginRight.micro} h-3 w-3`} />
+                      <Star className="mr-0.5 h-3 w-3" />
                       Featured
                     </UnifiedBadge>
                   </div>
                 ) : null}
 
                 <CardHeader>
-                  <div className={`flex items-start ${gap.default}`}>
+                  <div className="flex items-start gap-3">
                     {company.logo ? (
                       <Image
                         alt={`${company.name} logo`}
@@ -231,23 +232,23 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
 
                 <CardContent>
                   {company.description ? (
-                    <p className={`text-muted-foreground ${marginBottom.default} line-clamp-2 text-sm`}>
+                    <p className="text-muted-foreground mb-4 line-clamp-2 text-sm">
                       {company.description}
                     </p>
                   ) : null}
 
                   {/* Job Statistics from RPC/data layer (getCompanyProfile RPC) */}
                   {company.stats && (company.stats.active_jobs ?? 0) > 0 ? (
-                    <div className={`${marginBottom.default} flex flex-wrap ${gap.tight}`}>
+                    <div className="mb-4 flex flex-wrap gap-1">
                       <UnifiedBadge className="text-xs" style="secondary" variant="base">
-                        <Briefcase className={`${marginRight.micro} h-3 w-3`} />
+                        <Briefcase className="mr-0.5 h-3 w-3" />
                         {company.stats.active_jobs ?? 0} Active{' '}
                         {(company.stats.active_jobs ?? 0) === 1 ? 'Job' : 'Jobs'}
                       </UnifiedBadge>
 
                       {(company.stats.total_views ?? 0) > 0 && (
                         <UnifiedBadge className="text-xs" style="outline" variant="base">
-                          <TrendingUp className={`${marginRight.micro} h-3 w-3`} />
+                          <TrendingUp className="mr-0.5 h-3 w-3" />
                           {(company.stats.total_views ?? 0).toLocaleString()} views
                         </UnifiedBadge>
                       )}
@@ -260,7 +261,7 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
                     </div>
                   ) : null}
 
-                  <div className={between.center}>
+                  <div className="flex items-center justify-between">
                     {/* eslint-disable-next-line unicorn/explicit-length-check -- company.size is an enum value, not a Set/Map */}
                     {company.size ? (
                       <UnifiedBadge className="text-xs" style="outline" variant="base">

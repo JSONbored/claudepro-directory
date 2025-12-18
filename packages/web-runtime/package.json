@@ -24,13 +24,73 @@
       "types": "./src/entries/actions.ts",
       "default": "./src/entries/actions.ts"
     },
-    "./actions/add-bookmark": {
-      "types": "./src/actions/add-bookmark.generated.ts",
-      "default": "./src/actions/add-bookmark.generated.ts"
+    "./actions/bookmarks": {
+      "types": "./src/actions/bookmarks.ts",
+      "default": "./src/actions/bookmarks.ts"
     },
-    "./actions/remove-bookmark": {
-      "types": "./src/actions/remove-bookmark.generated.ts",
-      "default": "./src/actions/remove-bookmark.generated.ts"
+    "./actions/jobs-crud": {
+      "types": "./src/actions/jobs-crud.ts",
+      "default": "./src/actions/jobs-crud.ts"
+    },
+    "./actions/companies-crud": {
+      "types": "./src/actions/companies-crud.ts",
+      "default": "./src/actions/companies-crud.ts"
+    },
+    "./actions/collections-crud": {
+      "types": "./src/actions/collections-crud.ts",
+      "default": "./src/actions/collections-crud.ts"
+    },
+    "./actions/reviews-crud": {
+      "types": "./src/actions/reviews-crud.ts",
+      "default": "./src/actions/reviews-crud.ts"
+    },
+    "./actions/collection-items": {
+      "types": "./src/actions/collection-items.ts",
+      "default": "./src/actions/collection-items.ts"
+    },
+    "./actions/mark-review-helpful": {
+      "types": "./src/actions/mark-review-helpful.ts",
+      "default": "./src/actions/mark-review-helpful.ts"
+    },
+    "./actions/submit-content-for-review": {
+      "types": "./src/actions/submit-content-for-review.ts",
+      "default": "./src/actions/submit-content-for-review.ts"
+    },
+    "./actions/submit-contact-form": {
+      "types": "./src/actions/submit-contact-form.ts",
+      "default": "./src/actions/submit-contact-form.ts"
+    },
+    "./actions/unlink-oauth-provider": {
+      "types": "./src/actions/unlink-oauth-provider.ts",
+      "default": "./src/actions/unlink-oauth-provider.ts"
+    },
+    "./actions/toggle-job-status": {
+      "types": "./src/actions/toggle-job-status.ts",
+      "default": "./src/actions/toggle-job-status.ts"
+    },
+    "./actions/pulse": {
+      "types": "./src/actions/pulse.ts",
+      "default": "./src/actions/pulse.ts"
+    },
+    "./actions/newsletter": {
+      "types": "./src/actions/newsletter.ts",
+      "default": "./src/actions/newsletter.ts"
+    },
+    "./actions/companies": {
+      "types": "./src/actions/companies.ts",
+      "default": "./src/actions/companies.ts"
+    },
+    "./actions/contact": {
+      "types": "./src/actions/contact.ts",
+      "default": "./src/actions/contact.ts"
+    },
+    "./actions/quiz": {
+      "types": "./src/actions/quiz.ts",
+      "default": "./src/actions/quiz.ts"
+    },
+    "./actions/content": {
+      "types": "./src/actions/content.ts",
+      "default": "./src/actions/content.ts"
     },
     "./ui": {
       "types": "./src/entries/ui.ts",
@@ -77,13 +137,13 @@
       "types": "./src/utils/url-safety.ts",
       "default": "./src/utils/url-safety.ts"
     },
+    "./utils/category-validation": {
+      "types": "./src/utils/category-validation.ts",
+      "default": "./src/utils/category-validation.ts"
+    },
     "./utils/optimize-avatar-url": {
       "types": "./src/utils/optimize-avatar-url.ts",
       "default": "./src/utils/optimize-avatar-url.ts"
-    },
-    "./config/actions": {
-      "types": "./src/config/actions.config.ts",
-      "default": "./src/config/actions.config.ts"
     },
     "./data/drafts/draft-manager": {
       "types": "./src/data/drafts/draft-manager.ts",
@@ -108,6 +168,30 @@
     "./utils/request-context": {
       "types": "./src/utils/request-context.ts",
       "default": "./src/utils/request-context.ts"
+    },
+    "./utils/dompurify": {
+      "types": "./src/utils/dompurify.ts",
+      "default": "./src/utils/dompurify.ts"
+    },
+    "./utils/deserialize-postgres-tuple": {
+      "types": "./src/utils/deserialize-postgres-tuple.ts",
+      "default": "./src/utils/deserialize-postgres-tuple.ts"
+    },
+    "./utils/markdown-code-extractor": {
+      "types": "./src/utils/markdown-code-extractor.ts",
+      "default": "./src/utils/markdown-code-extractor.ts"
+    },
+    "./utils/navigation-helpers": {
+      "types": "./src/utils/navigation-helpers.ts",
+      "default": "./src/utils/navigation-helpers.ts"
+    },
+    "./auth/oauth-providers": {
+      "types": "./src/auth/oauth-providers.ts",
+      "default": "./src/auth/oauth-providers.ts"
+    },
+    "./auth/mfa": {
+      "types": "./src/auth/mfa.ts",
+      "default": "./src/auth/mfa.ts"
     },
     "./logging/client": {
       "types": "./src/logging/client.ts",
@@ -140,6 +224,11 @@
     "./data/content": {
       "types": "./src/data/content/index.ts",
       "default": "./src/data/content/index.ts"
+    },
+    "./data/content/detail": {
+      "types": "./src/data/content/detail.ts",
+      "react-server": "./src/data/content/detail.ts",
+      "default": "./src/data/content/detail.ts"
     },
     "./seo": {
       "types": "./src/seo/generator.ts",

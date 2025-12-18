@@ -9,8 +9,15 @@ import {
   type UnifiedCategoryConfig,
 } from '@heyclaude/web-runtime/types/component.types';
 
-import { DetailHeaderActions, type SerializableAction, type SerializableActionType } from './detail-header-actions';
-import { paddingX, paddingY, marginX } from "@heyclaude/web-runtime/design-system";
+import dynamic from 'next/dynamic';
+import { Suspense } from 'react';
+import type { SerializableAction, SerializableActionType } from './detail-header-actions';
+
+// Dynamic import for DetailHeaderActions (917 lines) - lazy load for code splitting
+const DetailHeaderActions = dynamic(
+  () => import('./detail-header-actions').then((mod) => ({ default: mod.DetailHeaderActions })),
+  { ssr: true }
+);
 
 export interface DetailHeaderProps {
   config: UnifiedCategoryConfig;
@@ -76,18 +83,20 @@ export function DetailHeader({ displayTitle, item, config, onCopyContent }: Deta
 
   return (
     <div className={`border-border bg-code/50 border-b backdrop-blur-sm`}>
-      <div className={`container ${marginX.auto} ${paddingX.default} ${paddingY.relaxed}`}>
-        {/* Client component for back button and actions */}
-        <DetailHeaderActions
-          item={item}
-          typeName={config.typeName}
-          category={isValidCategory(item.category) ? item.category : 'agents'}
-          hasContent={hasContent}
-          onCopyContent={onCopyContent}
-          displayTitle={displayTitle}
-          primaryAction={primaryAction}
-          {...(secondaryActions && { secondaryActions })}
-        />
+      <div className="container mx-auto px-4 py-8">
+        {/* Client component for back button and actions - lazy loaded */}
+        <Suspense fallback={<div className="h-16" />}>
+          <DetailHeaderActions
+            item={item}
+            typeName={config.typeName}
+            category={isValidCategory(item.category) ? item.category : 'agents'}
+            hasContent={hasContent}
+            onCopyContent={onCopyContent}
+            displayTitle={displayTitle}
+            primaryAction={primaryAction}
+            {...(secondaryActions && { secondaryActions })}
+          />
+        </Suspense>
       </div>
     </div>
   );

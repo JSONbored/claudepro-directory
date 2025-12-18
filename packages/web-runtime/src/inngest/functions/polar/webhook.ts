@@ -22,9 +22,9 @@
 import type { Json } from '@heyclaude/data-layer/prisma';
 import { normalizeError } from '@heyclaude/shared-runtime';
 
-import { MiscService } from '@heyclaude/data-layer';
 import { inngest } from '../../client';
 import { logger, createWebAppContextWithId } from '../../../logging/server';
+import { getService } from '../../../data/service-factory';
 import { CONCURRENCY_LIMITS, RETRY_CONFIGS, ACCOUNT_CONCURRENCY_KEYS } from '../../config';
 import { sendCriticalFailureHeartbeat } from '../../utils/monitoring';
 
@@ -205,7 +205,7 @@ export const handlePolarWebhook = inngest.createFunction(
       try {
         // Use MiscService to call the Polar webhook RPC function
         // The RPC functions handle their own idempotency via the webhook_id
-        const service = new MiscService();
+        const service = await getService('misc');
         await service.handlePolarWebhookRpc(
           classification.rpcName!,
           {
@@ -237,7 +237,7 @@ export const handlePolarWebhook = inngest.createFunction(
     if (rpcResult.success) {
       await step.run('update-webhook-status', async () => {
         try {
-          const service = new MiscService();
+          const service = await getService('misc');
           await service.updateWebhookEventStatus(webhookId);
 
           logger.info({ ...logContext,

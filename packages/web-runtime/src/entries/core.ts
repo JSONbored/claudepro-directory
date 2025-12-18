@@ -39,6 +39,7 @@ export * from '../logger.ts';
 export * from '../errors.ts';
 export * from '../build-time.ts';
 export { ensureStringArray, getMetadata } from '../utils/content-helpers.ts';
+export { getCategoryFromHref, getIconBackgroundClass } from '../utils/navigation-helpers.ts';
 export { logUnhandledPromise } from '../errors.ts';
 export * from '../trace.ts';
 export * from '../error-utils.ts';

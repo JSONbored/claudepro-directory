@@ -51,7 +51,6 @@ Essential utilities and configuration.
 
 ### 🚀 Edge (`@heyclaude/web-runtime/edge`)
 Utilities for Edge Runtimes (Middleware / Edge Functions).
--   `callEdgeFunction`: Invoke Supabase Edge Functions.
 -   `processContentEdge`: Server-side content processing helpers.
 
 ### 📦 Cache (`@heyclaude/web-runtime/cache`)

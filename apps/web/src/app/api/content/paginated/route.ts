@@ -7,7 +7,7 @@
  * @example
  * ```ts
  * // Request
- * GET /api/content/paginated?offset=0&limit=30&category=skills
+ * GET /api/v1/content/paginated?offset=0&limit=30&category=skills
  *
  * // Response (200)
  * [
@@ -18,138 +18,45 @@
  */
 
 import 'server-only';
-import { ContentService } from '@heyclaude/data-layer';
-import type { content_category } from '@heyclaude/data-layer/prisma';
-import type { GetContentPaginatedSlimArgs, ContentPaginatedSlimResult } from '@heyclaude/database-types/postgres-types';
-import { normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { type content_category, type contentModel } from '@heyclaude/data-layer/prisma';
+import { type GetContentPaginatedSlimArgs } from '@heyclaude/database-types/postgres-types';
 import {
-  buildCacheHeaders,
-  categorySchema,
   createApiOptionsHandler,
-  createApiRoute,
+  createCachedApiRoute,
   getOnlyCorsHeaders,
+  getVersionedRoute,
   jsonResponse,
-  paginationSchema,
+  type RouteHandlerContext,
 } from '@heyclaude/web-runtime/server';
-import { cacheLife } from 'next/cache';
+import { categorySchema, paginationSchema } from '@heyclaude/web-runtime/server';
 
-/**
- * Cached helper function to fetch paginated content.
- * All parameters become part of the cache key, so different queries have different cache entries.
- *
- * @param params - Pagination and category filter parameters
- * @param params.category - Optional content category filter
- * @param params.limit - Maximum number of results to return
- * @param params.offset - Number of results to skip
- * @returns Promise resolving to data and error object
- */
-async function getCachedPaginatedContent(params: {
-  category?: content_category | undefined;
-  limit: number;
-  offset: number;
-}): Promise<{
-  data: ContentPaginatedSlimResult | null;
-  error: null | { code?: string; message: string };
-}> {
-  'use cache';
-  cacheLife({ expire: 2_592_000, revalidate: 21_600, stale: 86_400 }); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
-
-  const service = new ContentService();
-  const rpcArgs: GetContentPaginatedSlimArgs = {
-    ...(params.category === undefined ? {} : { p_category: params.category }),
-    p_limit: params.limit,
-    p_offset: params.offset,
+// Local type for migrated RPC (RPC removed, using Prisma directly)
+type ContentPaginatedSlimItem = contentModel;
+interface ContentPaginatedSlimResult {
+  items: ContentPaginatedSlimItem[];
+  pagination: {
+    current_page: number;
+    has_more: boolean;
+    limit: number;
+    offset: number;
+    total_count: number;
+    total_pages: number;
   };
-
-  try {
-    const data = await service.getContentPaginatedSlim(rpcArgs);
-    return {
-      data,
-      error: null,
-    };
-  } catch (error) {
-    // Service method already logs the error, just return it in the expected format
-    const normalized = normalizeError(error, 'Content paginated RPC error');
-    // Extract code from original error if it's a Supabase error
-    const code =
-      error && typeof error === 'object' && 'code' in error ? String(error.code) : undefined;
-    return {
-      data: null,
-      error: {
-        message: normalized.message,
-        ...(code !== undefined && { code }),
-      },
-    };
-  }
 }
 
 /**
- * GET /api/content/paginated - Get paginated content
+ * GET /api/v1/content/paginated - Get paginated content
  *
  * Returns paginated content with optional category filtering.
  * Supports offset/limit pagination and category filtering.
  */
-export const GET = createApiRoute({
-  cors: 'anon',
-  handler: async ({ logger, query }) => {
-    // Zod schema ensures proper types - category is already transformed to null if 'all'
-    const { category, limit, offset } = query;
-
-    logger.info(
-      {
-        category: category ?? 'all',
-        limit,
-        offset,
-      },
-      'Paginated content request received'
-    );
-
-    const { data, error } = await getCachedPaginatedContent({
-      category: category ?? undefined, // Convert null to undefined for RPC
-      limit,
-      offset,
-    });
-
-    if (error) {
-      const normalizedError = normalizeError(error, 'Content paginated RPC error');
-      logger.error(
-        {
-          category: category ?? 'all',
-          err: normalizedError,
-          limit,
-          offset,
-          rpcName: 'get_content_paginated_slim',
-        },
-        'Content paginated RPC error'
-      );
-      throw normalizedError; // Factory will handle error response
-    }
-
-    const itemsValue = (data as null | { items?: unknown })?.items;
-    if (!Array.isArray(itemsValue)) {
-      logger.warn({}, 'Content paginated returned invalid data structure');
-      return jsonResponse([], 200, getOnlyCorsHeaders, {
-        'X-Generated-By': 'prisma.rpc.get_content_paginated_slim',
-        ...buildCacheHeaders('content_paginated'),
-      });
-    }
-
-    const items = itemsValue;
-
-    logger.info(
-      {
-        itemCount: items.length,
-        limit,
-        offset,
-      },
-      'Paginated content retrieved'
-    );
-
-    return jsonResponse(items, 200, getOnlyCorsHeaders, {
-      'X-Generated-By': 'supabase.rpc.get_content_paginated_slim',
-      ...buildCacheHeaders('content_paginated'),
-    });
+export const GET = createCachedApiRoute({
+  cacheLife: { expire: 2_592_000, revalidate: 21_600, stale: 86_400 }, // 1 day stale, 6hr revalidate, 30 days expire
+  cacheTags: (query) => {
+    const category = query.category as content_category | null;
+    return category ? ['content-paginated', `content-paginated-${category}`] : ['content-paginated'];
   },
+  cors: 'anon',
   method: 'GET',
   openapi: {
     description:
@@ -170,7 +77,46 @@ export const GET = createApiRoute({
   querySchema: paginationSchema.extend({
     category: categorySchema,
   }),
-  route: '/api/content/paginated',
+  responseHandler: (result: unknown, query: { category: content_category | null; limit: number; offset: number }, _body: unknown, ctx: RouteHandlerContext<{ category: content_category | null; limit: number; offset: number }, unknown>) => {
+    const { logger } = ctx;
+    const { limit, offset } = query;
+
+    const serviceResult = result as ContentPaginatedSlimResult | null | undefined;
+
+    if (!serviceResult || !Array.isArray(serviceResult.items)) {
+      logger.warn({}, 'Content paginated returned invalid data structure');
+      return jsonResponse([], 200, getOnlyCorsHeaders, {
+        'X-Generated-By': 'prisma.rpc.get_content_paginated_slim',
+      });
+    }
+
+    logger.info(
+      {
+        itemCount: serviceResult.items.length,
+        limit,
+        offset,
+      },
+      'Paginated content retrieved'
+    );
+
+    return jsonResponse(serviceResult.items, 200, getOnlyCorsHeaders, {
+      'X-Generated-By': 'supabase.rpc.get_content_paginated_slim',
+    });
+  },
+  route: getVersionedRoute('content/paginated'),
+  service: {
+    methodArgs: (query) => {
+      const category = query.category as content_category | null;
+      const rpcArgs: GetContentPaginatedSlimArgs = {
+        ...(category === null || category === undefined ? {} : { p_category: category }),
+        p_limit: query.limit,
+        p_offset: query.offset,
+      };
+      return [rpcArgs];
+    },
+    methodName: 'getContentPaginatedSlim',
+    serviceKey: 'content',
+  },
 });
 
 /**

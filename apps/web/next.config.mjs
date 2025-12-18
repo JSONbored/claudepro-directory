@@ -48,58 +48,50 @@ const nextConfig = {
   /**
    * Cache Life Profiles
    *
-   * Named cache profiles for Next.js Cache Components. Use these profiles with `cacheLife('profile-name')`
+   * Simplified cache profiles for Next.js Cache Components. Use these profiles with `cacheLife('profile-name')`
    * in data functions to ensure consistent caching behavior across the application.
    *
    * @see https://nextjs.org/docs/app/api-reference/functions/cache-life
    *
    * Profile Definitions:
-   * - `minutes`: 5min stale, 1min revalidate, 1hr expire - Very frequently changing data (real-time stats)
-   * - `quarter`: 15min stale, 5min revalidate, 2hr expire - Frequently changing data (newsletter counts, search)
-   * - `half`: 30min stale, 10min revalidate, 3hr expire - Moderately changing data (jobs, companies, content lists)
-   * - `hours`: 1hr stale, 15min revalidate, 1 day expire - Hourly updates (content detail, search facets, changelog)
-   * - `metadata`: 12hr stale, 24hr revalidate, 48hr expire - SEO metadata (homepage metadata, page metadata)
-   * - `stable`: 6hr stale, 1hr revalidate, 7 days expire - Stable data (navigation menus, site config)
-   * - `static`: 1 day stale, 6hr revalidate, 30 days expire - Rarely changing data (paginated content)
-   * - `userProfile`: 1min stale, 5min revalidate, 30min expire - User-specific data (account pages, user profiles)
+   * - `short`: Frequently changing data (5-15 min) - Replaces `minutes`, `quarter`
+   * - `medium`: Moderately changing data (1-6 hours) - Replaces `half`, `hours`, `detail`
+   * - `long`: Rarely changing data (1+ days) - Replaces `metadata`, `stable`, `static`
+   * - `userProfile`: User-specific data (1min stale, 5min revalidate, 30min expire) - For personalized content
+   *
+   * Migration Guide:
+   * - `minutes`, `quarter` → `short`
+   * - `half`, `hours`, `detail` → `medium`
+   * - `metadata`, `stable`, `static` → `long`
+   * - `userProfile` → unchanged
    *
    * Usage in data functions:
    * ```ts
    * export async function getData() {
    *   'use cache';
-   *   cacheLife('hours'); // Use named profile
+   *   cacheLife('medium'); // Use named profile
    *   cacheTag('data');
    *   return data;
    * }
    * ```
    *
-   * For user-specific data, use custom values instead:
+   * For user-specific data, use `userProfile`:
    * ```ts
    * export async function getUserData(userId: string) {
    *   'use cache: private';
-   *   cacheLife({ stale: 60, revalidate: 300, expire: 1800 }); // 1min stale, 5min revalidate, 30min expire
+   *   cacheLife('userProfile'); // 1min stale, 5min revalidate, 30min expire
    *   cacheTag(`user-${userId}`);
    *   return data;
    * }
    * ```
    */
   cacheLife: {
-    /** Very frequently changing data (real-time stats, live counters) - 5min stale, 1min revalidate, 1hr expire */
-    minutes: { stale: 300, revalidate: 60, expire: 3600 },
-    /** Frequently changing data (newsletter counts, search results) - 15min stale, 5min revalidate, 2hr expire */
-    quarter: { stale: 900, revalidate: 300, expire: 7200 },
-    /** Moderately changing data (jobs, companies, content lists) - 30min stale, 10min revalidate, 3hr expire */
-    half: { stale: 1800, revalidate: 600, expire: 10800 },
-    /** Hourly updates (content detail, search facets, changelog) - 1hr stale, 15min revalidate, 1 day expire */
-    hours: { stale: 3600, revalidate: 900, expire: 86400 },
-    /** Content detail pages - 2hr stale, 30min revalidate, 1 day expire - Detail pages change less frequently than list pages */
-    detail: { stale: 7200, revalidate: 1800, expire: 86400 },
-    /** SEO metadata (homepage metadata, page metadata) - 12hr stale, 24hr revalidate, 48hr expire */
-    metadata: { stale: 43200, revalidate: 86400, expire: 172800 },
-    /** Stable data (navigation menus, site config) - 6hr stale, 1hr revalidate, 7 days expire */
-    stable: { stale: 21600, revalidate: 3600, expire: 604800 },
-    /** Rarely changing data (SEO metadata, paginated content) - 1 day stale, 6hr revalidate, 30 days expire */
-    static: { stale: 86400, revalidate: 21600, expire: 2592000 },
+    /** Frequently changing data (5-15 min) - Replaces minutes, quarter - Use for real-time stats, search results, newsletter counts */
+    short: { stale: 900, revalidate: 300, expire: 7200 }, // 15min stale, 5min revalidate, 2hr expire
+    /** Moderately changing data (1-6 hours) - Replaces half, hours, detail - Use for content detail, jobs, companies, content lists */
+    medium: { stale: 3600, revalidate: 900, expire: 86400 }, // 1hr stale, 15min revalidate, 1 day expire
+    /** Rarely changing data (1+ days) - Replaces metadata, stable, static - Use for SEO metadata, navigation, paginated content */
+    long: { stale: 86400, revalidate: 21600, expire: 2592000 }, // 1 day stale, 6hr revalidate, 30 days expire
     /** User-specific data (account pages, user profiles) - 1min stale, 5min revalidate, 30min expire - For personalized content that changes per user */
     userProfile: { stale: 60, revalidate: 300, expire: 1800 },
   },
@@ -536,35 +528,8 @@ const nextConfig = {
         source: '/_next/static/(.*)',
         headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
       },
-      {
-        // Content detail pages - all categories
-        // Matches ISR revalidate time (7200s/2hr) with 24hr stale-while-revalidate
-        source: '/(agents|mcp|rules|commands|hooks|guides|skills|statuslines|collections)/:slug',
-        headers: [
-          { key: 'Cache-Control', value: 'public, s-maxage=7200, stale-while-revalidate=86400' },
-          { key: 'Vary', value: 'Accept-Encoding' },
-        ],
-      },
-      {
-        // Content category listing pages
-        source: '/(agents|mcp|rules|commands|hooks|guides|skills|statuslines|collections)',
-        headers: [
-          { key: 'Cache-Control', value: 'public, s-maxage=3600, stale-while-revalidate=86400' },
-          { key: 'Vary', value: 'Accept-Encoding' },
-        ],
-      },
-      {
-        source: '/search',
-        headers: [
-          { key: 'Cache-Control', value: 'public, max-age=1800, stale-while-revalidate=3600' },
-        ],
-      },
-      {
-        source: '/trending',
-        headers: [
-          { key: 'Cache-Control', value: 'public, max-age=300, stale-while-revalidate=1800' },
-        ],
-      },
+      // Note: Route-specific cache headers removed - Next.js Cache Components handle HTTP headers automatically
+      // Routes using 'use cache' + cacheLife() will have appropriate Cache-Control headers set by Next.js
       {
         source: '/robots.txt',
         headers: [

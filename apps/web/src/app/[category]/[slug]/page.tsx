@@ -5,8 +5,8 @@
  *
  * ISR: 2 hours (7200s) - Detail pages change less frequently than list pages
  */
-import type { EnrichedContentItem } from '@heyclaude/database-types/postgres-types';
-import type { contentModel, content_category } from '@heyclaude/data-layer/prisma';
+import { type content_category, type contentModel } from '@heyclaude/data-layer/prisma';
+import { type EnrichedContentItem } from '@heyclaude/database-types/postgres-types';
 import { getDeploymentEnv } from '@heyclaude/shared-runtime/platform';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
 import { ensureStringArray, isValidCategory } from '@heyclaude/web-runtime/core';
@@ -15,23 +15,32 @@ import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   generatePageMetadata,
   getCategoryConfig,
-  getContentAnalytics,
-  getContentDetailCore,
   getRelatedContent,
 } from '@heyclaude/web-runtime/server';
+import {
+  getContentAnalytics,
+  getContentDetailCore,
+  type GetContentAnalyticsReturns,
+} from '@heyclaude/web-runtime/data/content/detail';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import { notFound } from 'next/navigation';
-import { Suspense } from 'react';
+import { lazy, Suspense } from 'react';
 
 import { CollectionDetailView } from '@/src/components/content/detail-page/collection-view';
-import { UnifiedDetailPage } from '@/src/components/content/detail-page/content-detail-view';
 import { ReadProgress } from '@/src/components/content/read-progress';
 import { Pulse } from '@/src/components/core/infra/pulse';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { RecentlyViewedTracker } from '@/src/components/features/navigation/recently-viewed-tracker';
 
 import Loading from './loading';
+
+// OPTIMIZATION: Dynamic import for large component (1510 lines) - only loads when needed
+const UnifiedDetailPage = lazy(() =>
+  import('@/src/components/content/detail-page/content-detail-view').then((mod) => ({
+    default: mod.UnifiedDetailPage,
+  }))
+);
 
 /**
  * Produce static route parameters ({ category, slug }) for a subset of homepage categories to pre-render at build time.
@@ -65,23 +74,26 @@ export async function generateStaticParams() {
     categories.map(async (category: string) => {
       try {
         // Type assertion: categories from getHomepageCategoryIds are valid category enum values
-        const items = await getContentByCategory(
-          category as content_category
-        );
+        const items = await getContentByCategory(category as content_category);
+        if (!items) return null;
         const topItems = items.slice(0, MAX_ITEMS_PER_CATEGORY);
 
         // Return all items with slugs - no validation needed
         // dynamicParams=true will handle invalid slugs on-demand
         const categoryParameters = topItems
           .filter(
-            (item: EnrichedContentItem): item is EnrichedContentItem & {
+            (
+              item: EnrichedContentItem
+            ): item is EnrichedContentItem & {
               slug: string;
             } => Boolean(item.slug)
           )
           .map(
-            (item: EnrichedContentItem & {
-              slug: string;
-            }) => ({ category, slug: item.slug })
+            (
+              item: EnrichedContentItem & {
+                slug: string;
+              }
+            ) => ({ category, slug: item.slug })
           );
 
         return { category, params: categoryParameters };
@@ -111,7 +123,7 @@ export async function generateStaticParams() {
 
   // Collect all parameters from all categories
   for (const result of categoryResults) {
-    if (result.status === 'fulfilled') {
+    if (result.status === 'fulfilled' && result.value) {
       parameters.push(...result.value.params);
     }
   }
@@ -211,8 +223,28 @@ export async function generateStaticParams() {
     );
   }
 
-  // Return empty array if no parameters found - Suspense boundaries will handle dynamic rendering
-  // This follows Next.js best practices by avoiding placeholder patterns
+  // Cache Components requires at least one result for build-time validation
+  // If no parameters found, return a placeholder that will be handled gracefully by the page component
+  if (parameters.length === 0) {
+    const operation = 'generateStaticParams';
+    const route = '/[category]/[slug]';
+    const modulePath = 'apps/web/src/app/[category]/[slug]/page';
+    const reqLogger = logger.child({
+      module: modulePath,
+      operation,
+      route,
+    });
+    reqLogger.warn(
+      {
+        section: 'data-fetch',
+      },
+      'generateStaticParams: No parameters found, returning placeholder'
+    );
+    // Return placeholder (valid format: lowercase, numbers, single hyphens)
+    // Page component will handle 404 gracefully for placeholder
+    return [{ category: 'agents', slug: 'placeholder' }];
+  }
+
   return parameters;
 }
 
@@ -305,7 +337,7 @@ export default async function DetailPage({
   params: Promise<{ category: string; slug: string }>;
 }) {
   'use cache';
-  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
+  cacheLife('long'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
   // Params is runtime data - cache key includes params, so different content items create different cache entries
   const { category, slug } = await params;
@@ -451,14 +483,14 @@ async function DetailPageContent({
   // 2. Fetch Analytics & Related (Non-blocking promise - for Suspense)
   const analyticsPromise = getContentAnalytics({ category, slug });
 
-  const viewCountPromise = analyticsPromise.then((data) => data?.view_count ?? 0);
-  const copyCountPromise = analyticsPromise.then((data) => data?.copy_count ?? 0);
+  const viewCountPromise = analyticsPromise.then((data: GetContentAnalyticsReturns | null) => data?.view_count ?? 0);
+  const copyCountPromise = analyticsPromise.then((data: GetContentAnalyticsReturns | null) => data?.copy_count ?? 0);
 
   const relatedItemsPromise = getRelatedContent({
     currentCategory: category,
     currentPath: `/${category}/${slug}`,
     currentTags: 'tags' in fullItem ? ensureStringArray(fullItem.tags) : [],
-  }).then((result) => result.items);
+  }).then((result) => result?.items ?? []);
 
   // Content detail tabs - currently hardcoded to true
   const tabsEnabled = true;
@@ -520,24 +552,26 @@ async function DetailPageContent({
         );
       })()}
 
-      <UnifiedDetailPage
-        collectionSections={
-          category === COLLECTION_CATEGORY && fullItem.category === COLLECTION_CATEGORY ? (
-            <CollectionDetailView
-              collection={
-                fullItem as contentModel & {
-                  category: 'collections';
+      <Suspense fallback={<Loading />}>
+        <UnifiedDetailPage
+          collectionSections={
+            category === COLLECTION_CATEGORY && fullItem.category === COLLECTION_CATEGORY ? (
+              <CollectionDetailView
+                collection={
+                  fullItem as contentModel & {
+                    category: 'collections';
+                  }
                 }
-              }
-            />
-          ) : undefined
-        }
-        copyCountPromise={copyCountPromise}
-        item={fullItem}
-        relatedItemsPromise={relatedItemsPromise}
-        tabsEnabled={tabsEnabled}
-        viewCountPromise={viewCountPromise}
-      />
+              />
+            ) : undefined
+          }
+          copyCountPromise={copyCountPromise}
+          item={fullItem}
+          relatedItemsPromise={relatedItemsPromise}
+          tabsEnabled={tabsEnabled}
+          viewCountPromise={viewCountPromise}
+        />
+      </Suspense>
     </>
   );
 }

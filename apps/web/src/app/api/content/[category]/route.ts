@@ -1,5 +1,5 @@
 /**
- * Category Content API Route
+ * Category Content API Route (v1)
  *
  * Returns category content in multiple formats (LLMs.txt or JSON).
  * Supports filtering by content category with optimized caching.
@@ -7,7 +7,7 @@
  * @example
  * ```ts
  * // Request
- * GET /api/content/agents?format=json
+ * GET /api/v1/content/agents?format=json
  *
  * // Response (200) - application/json
  * [
@@ -18,148 +18,114 @@
  */
 
 import 'server-only';
-import { ContentService } from '@heyclaude/data-layer';
-import { type content_category, ContentCategory } from '@heyclaude/data-layer/prisma';
-import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
+import { type content_category } from '@heyclaude/data-layer/prisma';
+import { isValidCategory, VALID_CATEGORIES } from '@heyclaude/web-runtime/core';
 import {
-  buildCacheHeaders,
   categoryContentFormatSchema,
   createApiOptionsHandler,
-  createApiRoute,
+  createFormatHandlerRoute,
   getOnlyCorsHeaders,
+  getVersionedRoute,
   jsonResponse,
   notFoundResponse,
+  textResponse,
+  type FormatHandlerConfig,
+  type RouteHandlerContext,
 } from '@heyclaude/web-runtime/server';
-import { cacheLife } from 'next/cache';
-import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
-// Use Prisma enum object for validation (ensures sync with database)
-const CONTENT_CATEGORY_VALUES = Object.values(ContentCategory) as readonly content_category[];
+type CategoryFormat = 'json' | 'llms-category';
 
-/***
- * Cached helper function to fetch category content list.
- * Uses Cache Components to reduce function invocations.
- * The category parameter becomes part of the cache key, so different categories have different cache entries.
- * @param {content_category} category
- */
-async function getCachedCategoryContent(category: content_category) {
-  'use cache';
-  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire (defined in next.config.mjs)
+// Shared route params extractor
+async function getCategoryRouteParams(nextContext: unknown): Promise<{ category: string }> {
+  interface RouteContext {
+    params: Promise<{ category: string }>;
+  }
+  const context = nextContext as RouteContext;
+  if (!context?.params) throw new Error('Missing route context');
+  const params = await context.params;
+  if (!isValidCategory(params.category)) {
+    throw new Error(`Invalid category '${params.category}'. Valid categories: ${VALID_CATEGORIES.join(', ')}`);
+  }
+  return params;
+}
 
-  const service = new ContentService();
-  return await service.getCategoryContentList({ p_category: category });
+// Shared method args builder
+function buildCategoryMethodArgs(_format: CategoryFormat, _query: { format: CategoryFormat }, _body: unknown, routeParams?: Record<string, string>) {
+  const category = routeParams?.['category'];
+  if (!category || !isValidCategory(category)) throw new Error('Invalid category in route params');
+  return [{ p_category: category as content_category }];
 }
 
 /**
- * Cached helper function to fetch category LLMs.txt
- * Uses Cache Components to reduce function invocations
- *
- * @param {content_category} category - Content category enum value
- * @returns {Promise<string | null>} Category LLMs.txt content from the database
- */
-async function getCachedCategoryLlmsTxt(
-  category: content_category
-) {
-  'use cache';
-  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
-
-  const service = new ContentService();
-  return await service.getCategoryLlmsTxt({ p_category: category });
-}
-
-/**
- * GET /api/content/[category] - Get category content
+ * GET /api/v1/content/[category] - Get category content
  *
  * Returns category content in multiple formats (LLMs.txt or JSON).
  * Supports filtering by content category with optimized caching.
+ * Uses format handler factory to eliminate switch/if statements.
  */
-export const GET = createApiRoute({
+export const GET = createFormatHandlerRoute<CategoryFormat, { format: CategoryFormat }, unknown>({
+  route: getVersionedRoute('content/[category]'),
+  operation: 'ContentCategoryAPI',
+  method: 'GET',
   cors: 'anon',
-  handler: async ({ logger, nextContext, query }) => {
-    // Extract path parameter from Next.js route context
-    interface RouteContext {
-      params: Promise<{ category: string }>;
-    }
-    const context = nextContext as RouteContext;
-    if (!context?.params) {
-      logger.error({}, 'Missing route context for category content handler');
-      throw new Error('Missing route context');
-    }
-
-    const { category } = await context.params;
-
-    // Validate category from path parameter
-    if (!CONTENT_CATEGORY_VALUES.includes(category as content_category)) {
-      throw new Error(
-        `Invalid category '${category}'. Valid categories: ${CONTENT_CATEGORY_VALUES.join(', ')}`
-      );
-    }
-
-    // Zod schema ensures proper types
-    const { format } = query;
-
-    logger.info({ category, format }, 'Category content request received');
-
-    switch (format) {
-      case 'json': {
-        const data = await getCachedCategoryContent(
-          category as content_category
-        );
-
+  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire
+  cacheTags: (format, _query, _body, routeParams) => {
+    const category = routeParams?.['category'] ?? '';
+    return ['content', 'category', `category-${category}`, `category-${category}-${format}`];
+  },
+  querySchema: z.object({
+    format: categoryContentFormatSchema,
+  }),
+  formats: {
+    json: {
+      serviceKey: 'content',
+      methodName: 'getCategoryContentList',
+      getRouteParams: getCategoryRouteParams,
+      methodArgs: buildCategoryMethodArgs,
+      responseHandler: (result: unknown, _format: 'json', _query: { format: CategoryFormat }, _body: unknown, ctx: RouteHandlerContext<{ format: CategoryFormat }, unknown>) => {
+        const { logger } = ctx;
+        const data = result as unknown[] | null | undefined;
         if (!data || (Array.isArray(data) && data.length === 0)) {
-          logger.warn({ category }, 'Category content not found');
+          logger.warn({}, 'Category content not found');
           return notFoundResponse('Category content not found', 'CategoryContent');
         }
-
-        logger.info(
-          { category, itemCount: Array.isArray(data) ? data.length : 1 },
-          'Category content retrieved'
-        );
-
+        logger.info({ itemCount: Array.isArray(data) ? data.length : 1 }, 'Category content retrieved');
         return jsonResponse(data, 200, getOnlyCorsHeaders, {
           'X-Generated-By': 'prisma.rpc.get_category_content_list',
-          ...buildSecurityHeaders(),
-          ...buildCacheHeaders('content_export', {
-            stale: 60 * 60 * 24 * 30, // 30 days stale-while-revalidate
-            ttl: 60 * 60 * 24 * 7, // 7 days
-          }),
         });
-      }
-      case 'llms-category': {
-        const data = await getCachedCategoryLlmsTxt(
-          category as content_category
-        );
-
+      },
+    },
+    'llms-category': {
+      serviceKey: 'content',
+      methodName: 'getCategoryLlmsTxt',
+      getRouteParams: getCategoryRouteParams,
+      methodArgs: buildCategoryMethodArgs,
+      responseHandler: (result: unknown, _format: 'llms-category', _query: { format: CategoryFormat }, _body: unknown, ctx: RouteHandlerContext<{ format: CategoryFormat }, unknown>) => {
+        const { logger } = ctx;
+        const data = result as string | null;
         if (!data) {
-          logger.warn({ category }, 'Category LLMs.txt not found');
+          logger.warn({}, 'Category LLMs.txt not found');
           return notFoundResponse('Category LLMs.txt not found', 'CategoryContent');
         }
-
         const formatted = data.replaceAll(String.raw`\n`, '\n');
-
-        logger.info({ bytes: formatted.length, category }, 'Category LLMs.txt generated');
-
-        return new NextResponse(formatted, {
-          headers: {
-            'Content-Type': 'text/plain; charset=utf-8',
+        logger.info({ bytes: formatted.length }, 'Category LLMs.txt generated');
+        return textResponse(
+          formatted,
+          200,
+          getOnlyCorsHeaders,
+          {
             'X-Generated-By': 'prisma.rpc.generate_category_llms_txt',
-            ...buildSecurityHeaders(),
-            ...getOnlyCorsHeaders,
-            ...buildCacheHeaders('content_export'),
-          },
-          status: 200,
-        });
-      }
-      default: {
-        throw new Error(`Invalid format '${format}'. Valid formats: llms-category, json`);
-      }
-    }
-  },
-  method: 'GET',
+          }
+        );
+      },
+    },
+  } as Record<CategoryFormat, FormatHandlerConfig<CategoryFormat, { format: CategoryFormat }, unknown>>,
   openapi: {
+    summary: 'Get category content',
     description:
       'Returns category content in multiple formats (LLMs.txt or JSON). Supports filtering by content category with optimized caching.',
+    tags: ['content', 'categories', 'export'],
     operationId: 'getCategoryContent',
     responses: {
       200: {
@@ -172,14 +138,7 @@ export const GET = createApiRoute({
         description: 'Category content not found',
       },
     },
-    summary: 'Get category content',
-    tags: ['content', 'categories', 'export'],
   },
-  operation: 'ContentCategoryAPI',
-  querySchema: z.object({
-    format: categoryContentFormatSchema,
-  }),
-  route: '/api/content/[category]',
 });
 
 /**

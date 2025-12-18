@@ -9,11 +9,11 @@
  * @see https://www.inngest.com/docs/features/inngest-functions/steps-workflows/wait-for-event
  */
 
-import { JobsService, NewsletterService } from '@heyclaude/data-layer';
 import { inngest } from '../../client';
 import { sendEmail } from '../../../integrations/resend';
 import { logger, createWebAppContextWithId } from '../../../logging/server';
 import { getEnvVar, escapeHtml } from '@heyclaude/shared-runtime';
+import { getService } from '../../../data/service-factory';
 
 const BASE_URL = getEnvVar('NEXT_PUBLIC_SITE_URL') || 'https://claudepro.directory';
 const FROM_EMAIL = getEnvVar('RESEND_FROM_EMAIL') || 'Claude Pro Directory <hello@claudepro.directory>';
@@ -128,7 +128,7 @@ export const newsletterDripCampaign = inngest.createFunction(
     await step.sleep('wait-for-digest', '4 days');
 
     const stillSubscribed = await step.run('check-subscription', async () => {
-      const newsletterService = new NewsletterService();
+      const newsletterService = await getService('newsletter');
       const subscription = await newsletterService.getSubscriptionStatusByEmail(email);
 
       // Check if status is a valid active status
@@ -232,7 +232,7 @@ export const jobPostingDripCampaign = inngest.createFunction(
     await step.sleep('wait-for-report', '5 days'); // 2 + 5 = 7 days
 
     const jobStats = await step.run('get-job-stats', async () => {
-      const jobsService = new JobsService();
+      const jobsService = await getService('jobs');
       return await jobsService.getJobStatsById(jobId);
     });
 
@@ -259,7 +259,7 @@ export const jobPostingDripCampaign = inngest.createFunction(
 
       // Check if job is still active
       const stillActive = await step.run('check-job-status', async () => {
-        const jobsService = new JobsService();
+        const jobsService = await getService('jobs');
         const data = await jobsService.getJobStatusById(jobId);
 
         return data?.status === 'active';

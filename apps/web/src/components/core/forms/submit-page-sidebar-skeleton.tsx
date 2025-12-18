@@ -10,7 +10,7 @@
  */
 
 import { Skeleton } from '@heyclaude/web-runtime/ui';
-import { SPRING, STAGGER, paddingBottom, padding, gap, spaceY } from '@heyclaude/web-runtime/design-system';
+import { SPRING, STAGGER } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import { Card, CardContent, CardHeader } from '@heyclaude/web-runtime/ui';
@@ -31,25 +31,25 @@ export function SubmitPageSidebarSkeleton() {
     >
       <Card>
         {/* Tabs */}
-        <CardHeader className={`${paddingBottom.compact}`}>
-          <div className={`grid w-full grid-cols-2 ${gap.tight} rounded-lg border ${padding.micro}`}>
+        <CardHeader className="pb-2">
+          <div className="grid w-full grid-cols-2 gap-1 card-base p-0.5">
             <Skeleton size="sm" width="3xl" rounded="md" className="h-9" />
             <Skeleton size="sm" width="3xl" rounded="md" className="h-9" />
           </div>
         </CardHeader>
 
-        <CardContent className={`${spaceY.default}`}>
+        <CardContent className="space-y-3">
           {/* Recent submissions list */}
           {KEYS_5.map((key, i) => (
             <motion.div
               key={key}
-              className={`flex items-start ${gap.compact}`}
+              className="flex items-start gap-2"
               initial={!prefersReducedMotion ? { opacity: 0, y: 10 } : false}
               animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
               transition={{ ...SPRING.loading, delay: 0.3 + i * STAGGER.micro }}
             >
               <Skeleton size="sm" width="xs" rounded="full" className="h-6" />
-              <div className={`flex-1 ${spaceY.tight}`}>
+              <div className="flex flex-col gap-1 flex-1">
                 <Skeleton size="sm" width="2/3" className="h-4" />
                 <Skeleton size="xs" width="xs" className="h-3" />
               </div>

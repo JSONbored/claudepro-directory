@@ -16,7 +16,6 @@ import { getChangelogPath } from '@heyclaude/web-runtime/utils/changelog';
 import Link from 'next/link';
 
 import { ChangelogContent } from './changelog-content';
-import { paddingBottom, marginBottom, paddingLeft, spaceY, gap, paddingX, marginTop } from "@heyclaude/web-runtime/design-system";
 
 type ChangelogEntry = changelogModel;
 
@@ -92,13 +91,13 @@ export function ChangelogTimelineView({ entries }: ChangelogTimelineViewProps) {
           <div key={entry.slug} className="relative">
             <div className="flex flex-col md:flex-row gap-y-6">
               <div className="md:w-48 flex-shrink-0">
-                <div className={`md:sticky md:top-8 ${paddingBottom.default}`}>
-                  <time className={`text-sm font-medium text-muted-foreground block ${marginBottom.compact}`}>
+                <div className="md:sticky md:top-8 pb-4">
+                  <time className="mb-2 block text-muted-foreground text-sm font-medium">
                     {formattedDate}
                   </time>
 
                   {version && (
-                    <div className="inline-flex relative z-10 items-center justify-center w-10 h-10 text-foreground border border-border rounded-lg text-sm font-bold">
+                    <div className="relative z-10 inline-flex h-10 w-10 items-center justify-center card-base border-border text-sm font-bold text-foreground">
                       {version}
                     </div>
                   )}
@@ -106,31 +105,31 @@ export function ChangelogTimelineView({ entries }: ChangelogTimelineViewProps) {
               </div>
 
               {/* Right side - Content */}
-              <div className={`flex-1 md:${paddingLeft.relaxed} relative ${paddingBottom.default}`}>
+              <div className="relative flex-1 pb-4 md:pl-8">
                 {/* Vertical timeline line */}
-                <div className="hidden md:block absolute top-2 left-0 w-px h-full bg-border">
+                <div className="absolute left-0 top-2 hidden h-full w-px bg-border md:block">
                   {/* Timeline dot */}
-                  <div className="hidden md:block absolute -translate-x-1/2 size-3 bg-primary rounded-full z-10" />
+                  <div className="absolute z-10 size-3 -translate-x-1/2 rounded-full bg-primary md:block" />
                 </div>
 
-                <div className={`${spaceY.relaxed}`}>
-                  <div className={`relative z-10 flex flex-col ${gap.tight}`}>
+                <div className="space-y-6">
+                  <div className="relative z-10 flex flex-col gap-1">
                     <Link
                       href={getChangelogPath(entry.slug)}
-                      className="block hover:text-primary transition-colors"
+                      className="block transition-colors hover:text-primary"
                     >
-                      <h2 className="text-2xl font-semibold tracking-tight text-balance">
+                      <h2 className="text-balance text-2xl font-semibold tracking-tight">
                         {entry.title}
                       </h2>
                     </Link>
 
                     {/* Tags */}
                     {tags.length > 0 && (
-                      <div className={`flex flex-wrap ${gap.tight}`}>
+                      <div className="flex flex-wrap gap-1">
                         {tags.map((tag: string) => (
                           <span
                             key={tag}
-                            className={`h-6 w-fit ${paddingX.tight} text-xs font-medium bg-muted text-muted-foreground rounded-full border flex items-center justify-center`}
+                            className="flex h-6 w-fit items-center justify-center rounded-full border bg-muted px-1 text-xs-medium text-muted-foreground"
                           >
                             {tag}
                           </span>
@@ -138,7 +137,7 @@ export function ChangelogTimelineView({ entries }: ChangelogTimelineViewProps) {
                       </div>
                     )}
                   </div>
-                  <div className={`prose dark:prose-invert max-w-none prose-headings:scroll-${marginTop.relaxed} prose-headings:font-semibold prose-a:no-underline prose-headings:tracking-tight prose-headings:text-balance prose-p:tracking-tight prose-p:text-balance`}>
+                  <div className="prose max-w-none prose-headings:scroll-mt-8 prose-headings:font-semibold prose-headings:tracking-tight prose-headings:text-balance prose-p:tracking-tight prose-p:text-balance prose-a:no-underline dark:prose-invert">
                     <ChangelogContent entry={entry} hideHeader={true} onHeaderRef={() => {}} />
                   </div>
                 </div>

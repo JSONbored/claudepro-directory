@@ -9,7 +9,6 @@ import type { contentModel, JsonValue } from '@heyclaude/database-types/prisma';
 type Json = JsonValue;
 
 import { computeHash, hasHashChanged, setHash } from '../toolkit/cache.ts';
-import { callEdgeFunction } from '../toolkit/edge.ts';
 import { ensureEnvVars } from '../toolkit/env.ts';
 import { logger } from '../toolkit/logger.ts';
 import { createServiceRoleClient, DEFAULT_SUPABASE_URL } from '../toolkit/supabase.ts';
@@ -104,7 +103,7 @@ export async function runGenerateMcpbPackages(): Promise<void> {
 
   for (let i = 0; i < mcpsToRebuild.length; i += CONCURRENCY) {
     const batch = mcpsToRebuild.slice(i, i + CONCURRENCY);
-    const batchResults = await processBatch(batch);
+    const batchResults = await processBatch(batch, supabase);
 
     allResults.push(...batchResults);
 
@@ -638,58 +637,61 @@ function needsRebuild(mcp: McpRow, packageContent: string): boolean {
   return hasHashChanged(`mcpb:${mcp.slug}`, contentHash);
 }
 
+/**
+ * Uploads a generated .mcpb package to Supabase Storage.
+ * 
+ * Uses direct Supabase Storage API (same pattern as skills packages).
+ * 
+ * @param supabase - Supabase service role client
+ * @param mcp - The MCP content row
+ * @param mcpbFilePath - Path to the generated .mcpb file
+ * @param contentHash - Pre-computed hash of the package content
+ * @returns The public URL of the uploaded package
+ */
 async function uploadToStorage(
+  supabase: ReturnType<typeof createServiceRoleClient>,
   mcp: McpRow,
   mcpbFilePath: string,
   contentHash: string
 ): Promise<string> {
   const { readFile } = await import('node:fs/promises');
   const mcpbBuffer = await readFile(mcpbFilePath);
-  const base64File = mcpbBuffer.toString('base64');
+  const fileName = `packages/${mcp.slug}.mcpb`;
 
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 10_000);
+  const { error: uploadError } = await supabase.storage.from('mcpb-packages').upload(fileName, mcpbBuffer, {
+    contentType: 'application/zip',
+    cacheControl: '3600',
+    upsert: true,
+  });
 
-  try {
-    const result = await callEdgeFunction<{
-      error?: string;
-      message?: string;
-      storage_url: string;
-      success: boolean;
-    }>('/data-api/content/generate-package/upload', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        content_id: mcp.id,
-        category: 'mcp',
-        mcpb_file: base64File,
-        content_hash: contentHash,
-      }),
-      signal: controller.signal,
-    });
-
-    clearTimeout(timeoutId);
-
-    if (!(result.success && result.storage_url)) {
-      throw new Error(
-        result.error || result.message || 'Edge function upload returned unsuccessful response'
-      );
-    }
-
-    return result.storage_url;
-  } catch (error) {
-    clearTimeout(timeoutId);
-    if (error instanceof Error && error.name === 'AbortError') {
-      throw new Error('Upload timed out after 10s');
-    }
-    throw error;
+  if (uploadError) {
+    throw new Error(`Storage upload failed: ${uploadError.message}`);
   }
+
+  const {
+    data: { publicUrl },
+  } = supabase.storage.from('mcpb-packages').getPublicUrl(fileName);
+
+  // Update database with storage URL and build hash
+  const { error: updateError } = await supabase
+    .from('content')
+    .update({
+      mcpb_storage_url: publicUrl,
+      mcpb_build_hash: contentHash,
+      mcpb_last_built_at: new Date().toISOString(),
+    })
+    .eq('id', mcp.id);
+
+  if (updateError) {
+    throw new Error(`Database update failed: ${updateError.message}`);
+  }
+
+  return publicUrl;
 }
 
 async function processBatch(
-  mcps: Array<{ hash: string; mcp: McpRow; packageContent: string; }>
+  mcps: Array<{ hash: string; mcp: McpRow; packageContent: string; }>,
+  supabase: ReturnType<typeof createServiceRoleClient>
 ): Promise<Array<{ message: string; slug: string; status: 'error' | 'success'; }>> {
   const results = await Promise.allSettled(
     mcps.map(async ({ mcp, packageContent: _packageContent, hash }) => {
@@ -705,7 +707,7 @@ async function processBatch(
         const mcpbBuffer = await readFile(outputPath);
         const fileSizeKB = (mcpbBuffer.length / 1024).toFixed(2);
 
-        await uploadToStorage(mcp, outputPath, hash);
+        await uploadToStorage(supabase, mcp, outputPath, hash);
 
         await rm(tempDir, { recursive: true, force: true });
 

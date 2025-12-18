@@ -1,311 +1,226 @@
 import 'server-only';
 
+import { type content_category, type contentModel } from '@heyclaude/data-layer/prisma';
 import {
-  type ContentFilterOptions,
-  ContentService,
-  TrendingService,
-} from '@heyclaude/data-layer';
-import type { 
-  EnrichedContentItem,
-  ContentPaginatedSlimItem,
-} from '@heyclaude/database-types/postgres-types';
-import type { content_category } from '@heyclaude/data-layer/prisma';
-import type {
-  GetTrendingContentReturns,
-  GetTrendingMetricsWithContentReturns,
-  GetPopularContentReturns,
-  GetRecentContentReturns,
+  type EnrichedContentItem,
+  type GetPopularContentReturns,
+  type GetTrendingContentReturns,
+  type GetTrendingMetricsWithContentReturns,
 } from '@heyclaude/database-types/postgres-types';
 import { cacheLife, cacheTag } from 'next/cache';
 
-import { logger, toLogContextValue } from '../../logger.ts';
+import { normalizeError } from '@heyclaude/shared-runtime';
+import { logger } from '../../logger.ts';
 import { QUERY_LIMITS } from '../config/constants.ts';
-import { generateContentTags } from '../content-helpers.ts';
+import { createCachedDataFunction, generateContentTags, generateResourceTags } from '../cached-data-factory.ts';
+import { getService } from '../service-factory.ts';
 
 /**
  * Get content by category
  * Uses 'use cache' to cache content lists. This data is public and same for all users.
- * Content lists change periodically, so we use the 'hours' cacheLife profile.
- * @param category
+ * Content lists change periodically, so we use the 'long' cacheLife profile.
  */
-export async function getContentByCategory(
-  category: content_category
-): Promise<EnrichedContentItem[]> {
-  'use cache';
-
-  // Configure cache - use 'static' profile for optimal SEO (1 day stale, 6hr revalidate, 30 days expire)
-  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
-  const tags = generateContentTags(category);
-  for (const tag of tags) {
-    cacheTag(tag);
-  }
-
-  const reqLogger = logger.child({
-    module: 'data/content/index',
-    operation: 'getContentByCategory',
-  });
-
-  // Log cache miss - function execution means cache miss (Next.js Cache Components skip execution on cache hit)
-  // If you don't see this log, it means cache hit (function didn't execute)
-  reqLogger.info(
-    {
-      cacheStatus: 'miss',
-      cacheType: 'nextjs-cache-components',
-      category,
-      note: 'Function execution = cache miss. No logs = cache hit (function skipped by Next.js)',
-    },
-    'getContentByCategory: cache miss - executing database call'
-  );
-
-  try {
-    const service = new ContentService();
-    const result = await service.getEnrichedContentList({
-      p_category: category,
-      p_limit: QUERY_LIMITS.content.default,
-      p_offset: 0,
-    });
-
-    reqLogger.info(
-      {
-        cacheStatus: 'miss',
-        cacheType: 'nextjs-cache-components',
-        category,
-        count: result.length,
-        dbCall: true,
-      },
-      'getContentByCategory: fetched successfully (cache miss - database call made)'
-    );
-
-    return result;
-  } catch (error) {
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error({ category, err: errorForLogging }, 'getContentByCategory: failed');
-    return [];
-  }
-}
+export const getContentByCategory = createCachedDataFunction<content_category, EnrichedContentItem[]>({
+  serviceKey: 'content',
+  methodName: 'getEnrichedContentList',
+  cacheMode: 'public',
+  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
+  cacheTags: (category) => generateContentTags(category),
+  module: 'data/content/index',
+  operation: 'getContentByCategory',
+  transformArgs: (category) => ({
+    p_category: category,
+    p_limit: QUERY_LIMITS.content.default,
+    p_offset: 0,
+  }),
+  onError: () => [], // Return empty array on error
+  logContext: (category, result) => ({
+    cacheStatus: 'miss',
+    cacheType: 'nextjs-cache-components',
+    category,
+    count: Array.isArray(result) ? result.length : 0,
+    dbCall: true,
+    note: 'Function execution = cache miss. No logs = cache hit (function skipped by Next.js)',
+  }),
+});
 
 /**
  * Get content by slug
  * Uses 'use cache' to cache content details. This data is public and same for all users.
- * Content details change periodically, so we use the 'hours' cacheLife profile.
- * @param category
- * @param slug
+ * Content details change periodically, so we use the 'medium' cacheLife profile.
  */
-export async function getContentBySlug(
-  category: content_category,
-  slug: string
-): Promise<EnrichedContentItem | null> {
-  'use cache';
+export const getContentBySlug = createCachedDataFunction<
+  { category: content_category; slug: string },
+  EnrichedContentItem | null
+>({
+  serviceKey: 'content',
+  methodName: 'getEnrichedContentList',
+  cacheMode: 'public',
+  cacheLife: 'medium', // 1hr stale, 15min revalidate, 1 day expire - optimized for SEO
+  cacheTags: (args) => generateContentTags(args.category, args.slug),
+  module: 'data/content/index',
+  operation: 'getContentBySlug',
+  transformArgs: (args) => ({
+    p_category: args.category,
+    p_limit: 1,
+    p_offset: 0,
+    p_slugs: [args.slug],
+  }),
+  transformResult: (result) => {
+    const data = result as EnrichedContentItem[];
+    return data[0] ?? null;
+  },
+  logContext: (args) => ({
+    category: args.category,
+    slug: args.slug,
+  }),
+});
 
-  // Configure cache - use 'detail' profile for optimal SEO (2hr stale, 30min revalidate, 1 day expire)
-  cacheLife('detail'); // 2hr stale, 30min revalidate, 1 day expire - optimized for SEO
-  const tags = generateContentTags(category, slug);
-  for (const tag of tags) {
-    cacheTag(tag);
+/**
+ * Group items by category for efficient batch fetching
+ */
+function groupItemsByCategory(
+  items: Array<{ category: content_category; slug: string }>
+): Map<content_category, string[]> {
+  const itemsByCategory = new Map<content_category, string[]>();
+  for (const item of items) {
+    const slugs = itemsByCategory.get(item.category) ?? [];
+    slugs.push(item.slug);
+    itemsByCategory.set(item.category, slugs);
   }
-
-  const reqLogger = logger.child({
-    module: 'data/content/index',
-    operation: 'getContentBySlug',
-  });
-
-  try {
-    const service = new ContentService();
-    const data = await service.getEnrichedContentList({
-      p_category: category,
-      p_limit: 1,
-      p_offset: 0,
-      p_slugs: [slug],
-    });
-
-    const result = data[0] ?? null;
-    reqLogger.info(
-      { category, found: Boolean(result), slug },
-      'getContentBySlug: fetched successfully'
-    );
-
-    return result;
-  } catch (error) {
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error({ category, err: errorForLogging, slug }, 'getContentBySlug: failed');
-    return null;
-  }
+  return itemsByCategory;
 }
 
 /**
- * Get all content with optional filters
- * Uses 'use cache' to cache filtered content lists. This data is public and same for all users.
- * Content lists change periodically, so we use the 'half' cacheLife profile.
- * @param filters
+ * Batch fetch content items by slugs (optimized for collections)
+ * Uses 'use cache' to cache content details. This data is public and same for all users.
+ * OPTIMIZATION: Fetches multiple items in a single RPC call instead of N+1 queries.
  */
-export async function getAllContent(
-  filters?: ContentFilterOptions
-): Promise<ContentPaginatedSlimItem[]> {
+export async function getContentBatchBySlugs(
+  items: Array<{ category: content_category; slug: string }>
+): Promise<Map<string, EnrichedContentItem>> {
   'use cache';
 
-  const category = filters?.categories?.[0];
+  if (items.length === 0) {
+    return new Map();
+  }
 
-  // Configure cache - use 'static' profile for optimal SEO (1 day stale, 6hr revalidate, 30 days expire)
-  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
-  cacheTag('content-all');
-  if (category) {
-    const tags = generateContentTags(category);
-    for (const tag of tags) {
+  const itemsByCategory = groupItemsByCategory(items);
+
+  // Configure cache
+  cacheLife('medium'); // 1hr stale, 15min revalidate, 1 day expire - optimized for SEO
+
+  // Apply cache tags for all categories and slugs
+  for (const [category, slugs] of itemsByCategory.entries()) {
+    for (const tag of generateContentTags(category)) {
       cacheTag(tag);
+    }
+    for (const slug of slugs) {
+      for (const tag of generateContentTags(category, slug)) {
+        cacheTag(tag);
+      }
     }
   }
 
-  const reqLogger = logger.child({
-    module: 'data/content/index',
-    operation: 'getAllContent',
-  });
-
   try {
-    const service = new ContentService();
-    const result = await service.getContentPaginated({
-      ...(category ? { p_category: category } : {}),
-      ...(filters?.tags ? { p_tags: filters.tags } : {}),
-      ...(filters?.search ? { p_search: filters.search } : {}),
-      ...(filters?.author ? { p_author: filters.author } : {}),
-      p_limit: filters?.limit ?? QUERY_LIMITS.content.default,
-      p_offset: 0,
-      p_order_by: filters?.orderBy ?? 'created_at',
-      p_order_direction: filters?.orderDirection ?? 'desc',
-    });
+    const service = await getService('content');
 
-    // getContentPaginated returns ContentPaginatedSlimResult with items array
-    // Filter out null items and return as ContentPaginatedSlimItem[]
-    const items = (result?.items ?? []).filter((item): item is NonNullable<typeof item> => item !== null);
-
-    reqLogger.info(
-      {
-        category: category ?? 'all',
-        count: items.length,
-        ...(filters ? { filters: toLogContextValue(filters as Record<string, unknown>) } : {}),
-      },
-      'getAllContent: fetched successfully'
+    // Fetch all categories in parallel
+    const categoryResults = await Promise.all(
+      [...itemsByCategory.entries()].map(async ([category, slugs]) => {
+        const data = await service.getEnrichedContentList({
+          p_category: category,
+          p_limit: slugs.length,
+          p_offset: 0,
+          p_slugs: slugs,
+        });
+        return data;
+      })
     );
 
-    return items;
+    // Build result map
+    const resultMap = new Map<string, EnrichedContentItem>();
+    for (const data of categoryResults) {
+      for (const item of data) {
+        if (item.slug) {
+          resultMap.set(item.slug, item);
+        }
+      }
+    }
+
+    return resultMap;
   } catch (error) {
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error(
-      {
-        category: category ?? 'all',
-        err: errorForLogging,
-        ...(filters ? { filters: toLogContextValue(filters as Record<string, unknown>) } : {}),
-      },
-      'getAllContent: failed'
-    );
-    return [];
+    const normalized = normalizeError(error, 'getContentBatchBySlugs failed');
+    logger.error({ err: normalized, itemCount: items.length }, 'getContentBatchBySlugs: failed');
+    return new Map(); // Return empty map on error
   }
 }
+
+// If needed, use getPaginatedContent() or getContentByCategory() instead
 
 /**
  * Get content count for a category
  * Uses 'use cache' to cache content counts. This data is public and same for all users.
  * Uses optimized getContentPaginatedSlim with window function for better performance.
- * @param category
  */
-export async function getContentCount(category?: content_category): Promise<number> {
-  'use cache';
+export const getContentCount = createCachedDataFunction<content_category | undefined, number>({
+  serviceKey: 'content',
+  methodName: 'getContentPaginatedSlim',
+  cacheMode: 'public',
+  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
+  cacheTags: (category) => generateContentTags(category),
+  module: 'data/content/index',
+  operation: 'getContentCount',
+  transformArgs: (category) => ({
+    ...(category ? { p_category: category } : {}),
+    p_limit: 1,
+    p_offset: 0,
+    p_order_by: 'created_at',
+    p_order_direction: 'desc',
+  }),
+  transformResult: (result) => {
+    const paginatedResult = result as { pagination?: { total_count?: number } };
+    return paginatedResult.pagination?.total_count ?? 0;
+  },
+  onError: () => 0, // Return 0 on error
+  logContext: (category) => ({ category: category ?? 'all' }),
+});
 
-  // Configure cache - use 'static' profile for optimal SEO (1 day stale, 6hr revalidate, 30 days expire)
-  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
-  const tags = generateContentTags(category);
-  for (const tag of tags) {
-    cacheTag(tag);
-  }
-
-  const reqLogger = logger.child({
-    module: 'data/content/index',
-    operation: 'getContentCount',
-  });
-
-  try {
-    const service = new ContentService();
-    // OPTIMIZATION: Use getContentPaginatedSlim (optimized with window function) instead of getContentPaginated
-    // Limit 1 since we only need the count, not the items
-    const result = await service.getContentPaginatedSlim({
-      ...(category ? { p_category: category } : {}),
-      p_limit: 1,
-      p_offset: 0,
-      p_order_by: 'created_at',
-      p_order_direction: 'desc',
-    });
-
-    const count = result.pagination?.total_count ?? 0;
-    reqLogger.info({ category: category ?? 'all', count }, 'getContentCount: fetched successfully');
-
-    return count;
-  } catch (error) {
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error(
-      { category: category ?? 'all', err: errorForLogging },
-      'getContentCount: failed'
-    );
-    return 0;
-  }
+/**
+ * Get configuration count (alias for getContentCount with 'configurations' category)
+ * Uses 'use cache' to cache configuration counts. This data is public and same for all users.
+ */
+export async function getConfigurationCount(): Promise<number> {
+  return (await getContentCount('configurations' as content_category)) ?? 0;
 }
 
 /**
  * Get trending content
  * Uses 'use cache' to cache trending content. This data is public and same for all users.
- * Trending content changes periodically, so we use the 'half' cacheLife profile.
- * @param category
- * @param limit
+ * Trending content changes periodically, so we use the 'long' cacheLife profile.
  */
-export async function getTrendingContent(
-  category?: content_category,
-  limit = 20
-): Promise<GetTrendingContentReturns> {
-  'use cache';
+export const getTrendingContent = createCachedDataFunction<
+  { category?: content_category; limit?: number },
+  GetTrendingContentReturns
+>({
+  serviceKey: 'trending',
+  methodName: 'getTrendingContent',
+  cacheMode: 'public',
+  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
+  cacheTags: (args) => generateContentTags(args.category, undefined, ['trending']),
+  module: 'data/content/index',
+  operation: 'getTrendingContent',
+  transformArgs: (args) => ({
+    ...(args.category ? { p_category: args.category } : {}),
+    p_limit: args.limit ?? 20,
+  }),
+  onError: () => [], // Return empty array on error
+  logContext: (args) => ({
+    category: args.category ?? 'all',
+    limit: args.limit ?? 20,
+  }),
+});
 
-  // Configure cache - use 'stable' profile for optimal SEO (6hr stale, 1hr revalidate, 7 days expire)
-  cacheLife('stable'); // 6hr stale, 1hr revalidate, 7 days expire - optimized for SEO
-  cacheTag('trending');
-  if (category) {
-    cacheTag(`trending-${category}`);
-  } else {
-    cacheTag('trending-all');
-  }
-
-  const reqLogger = logger.child({
-    module: 'data/content/index',
-    operation: 'getTrendingContent',
-  });
-
-  try {
-    const service = new TrendingService();
-    const result = await service.getTrendingContent({
-      ...(category ? { p_category: category } : {}),
-      p_limit: limit,
-    });
-
-    reqLogger.info(
-      { category: category ?? 'all', count: result.length, limit },
-      'getTrendingContent: fetched successfully'
-    );
-
-    return result;
-  } catch (error) {
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error(
-      { category: category ?? 'all', err: errorForLogging, limit },
-      'getTrendingContent: failed'
-    );
-    return [];
-  }
-}
-
-/**
- * Get configuration count (alias for getContentCount with no category)
- * Uses 'use cache' to cache configuration counts. This data is public and same for all users.
- */
-export async function getConfigurationCount(): Promise<number> {
-  'use cache';
-  return getContentCount();
-}
 
 interface TrendingPageParameters {
   category?: content_category | null;
@@ -314,7 +229,8 @@ interface TrendingPageParameters {
 
 type TrendingMetricsRows = GetTrendingMetricsWithContentReturns;
 type PopularContentRows = GetPopularContentReturns;
-type RecentContentRows = GetRecentContentReturns;
+// Use Prisma model type instead of postgres-types composite type
+type RecentContentRows = contentModel[];
 
 interface TrendingPageDataResult {
   popular: PopularContentRows;
@@ -337,17 +253,14 @@ export async function getTrendingPageData(
   const safeLimit = Math.min(Math.max(limit, 1), 100);
 
   // Configure cache - use 'stable' profile for optimal SEO (6hr stale, 1hr revalidate, 7 days expire)
-  cacheLife('stable'); // 6hr stale, 1hr revalidate, 7 days expire - optimized for SEO
-  cacheTag('trending');
-  cacheTag('trending-page');
-
-  const reqLogger = logger.child({
-    module: 'data/content/index',
-    operation: 'getTrendingPageData',
-  });
+  cacheLife('long'); // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
+  const tags = generateResourceTags('trending', undefined, ['trending-page']);
+  for (const tag of tags) {
+    cacheTag(tag);
+  }
 
   try {
-    const trendingService = new TrendingService();
+    const trendingService = await getService('trending');
 
     const [trending, popular, recent] = await Promise.all([
       trendingService.getTrendingMetrics({
@@ -365,17 +278,6 @@ export async function getTrendingPageData(
       }),
     ]);
 
-    reqLogger.info(
-      {
-        category: category ?? 'all',
-        limit: safeLimit,
-        popularCount: popular.length,
-        recentCount: recent.length,
-        trendingCount: trending.length,
-      },
-      'getTrendingPageData: fetched successfully'
-    );
-
     return {
       popular,
       recent,
@@ -383,9 +285,9 @@ export async function getTrendingPageData(
       trending,
     };
   } catch (error) {
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error(
-      { category: category ?? 'all', err: errorForLogging, limit: safeLimit },
+    const normalized = normalizeError(error, 'getTrendingPageData failed');
+    logger.error(
+      { err: normalized, category: category ?? 'all', limit: safeLimit },
       'getTrendingPageData: failed'
     );
     return {

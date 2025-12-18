@@ -1,6 +1,5 @@
 'use client';
 
-import { ANIMATION_CONSTANTS, STATE_PATTERNS } from '../constants.ts';
 import { DURATION } from '../../design-system/index.ts';
 import { cn } from '../utils.ts';
 import { motion } from 'motion/react';
@@ -32,7 +31,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         <input
           type={type}
           className={cn(
-            `relative flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} file:border-0 file:bg-transparent file:font-medium file:text-foreground file:text-sm placeholder:text-muted-foreground ${STATE_PATTERNS.FOCUS_RING} ${STATE_PATTERNS.DISABLED_CURSOR} md:text-sm`,
+            'relative flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background transition-all duration-200 ease-out file:border-0 file:bg-transparent file:font-medium file:text-foreground file:text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed md:text-sm',
             // Beautiful orange focus border and ring
             isFocused && !error && 'border-accent/60 focus-visible:ring-accent/30 focus-visible:ring-2',
             error && 'border-destructive focus-visible:ring-destructive',

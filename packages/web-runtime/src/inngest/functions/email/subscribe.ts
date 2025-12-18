@@ -26,7 +26,7 @@ import {
   copy_type as CopyTypeEnum,
 } from '@heyclaude/database-types/prisma';
 import type { SubscribeNewsletterArgs } from '@heyclaude/database-types/postgres-types';
-import { NewsletterService } from '@heyclaude/data-layer';
+// NewsletterService methods accessed via getService('newsletter')
 import { validateEmail, normalizeError } from '@heyclaude/shared-runtime';
 import { revalidateTag } from 'next/cache';
 
@@ -130,7 +130,8 @@ export const subscribeNewsletter = inngest.createFunction(
       subscriptionId: string;
       wasResubscribed: boolean;
     }> => {
-      const newsletterService = new NewsletterService();
+      const { getService } = await import('../../../data/service-factory');
+      const newsletterService = await getService('newsletter');
 
       const newsletterSourceValues = Object.values(NewsletterSource) as readonly newsletter_source[];
       const copyTypeValues = Object.values(CopyTypeEnum) as readonly copy_type[];

@@ -5,8 +5,7 @@
  * - Layout structure (top bar, grid) renders immediately after authentication
  * - Sidebar streams in Suspense boundary (non-blocking)
  * - Sidebar data functions use 'use cache: private' for per-user caching:
- *   - getUserSettings() - cached with user-settings-{userId} tag
- *   - getUserSponsorships() - cached with user-sponsorships-{userId} tag
+ *   - getUserCompleteData() - cached with user-complete-data-{userId} tag (returns user_settings and sponsorships)
  * - Main content area streams independently via children prop
  *
  * Note: Authentication is required, so layout cannot be fully static.
@@ -23,7 +22,6 @@ import { AccountMFAGuard } from '@/src/components/core/auth/account-mfa-guard';
 import { AuthSignOutButton } from '@/src/components/core/buttons/auth/auth-signout-button';
 import { AccountSidebar } from '@/src/components/features/account/account-sidebar';
 import { AccountSidebarSkeleton } from '@/src/components/features/account/account-sidebar-skeleton';
-import { cluster, paddingX, paddingY, marginX, gap, transition } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Authenticates the current user, ensures a valid session, prepares per-user sidebar metadata, and renders the account layout.
@@ -106,22 +104,22 @@ async function AccountAuthWrapper({ children }: { children: React.ReactNode }) {
   const userImageMetadata = avatarUrl ?? picture ?? null;
 
   return (
-    <div className={`bg-background min-h-screen`}>
-      <div className={`border-b ${paddingX.default} ${paddingY.default}`}>
-        <div className={`container ${marginX.auto} flex items-center justify-between`}>
-          <div className={`${cluster.compact} group`}>
-            <Link className={`${transition.colors}-smooth group-hover:text-accent`} href="/">
+    <div className="bg-background min-h-screen">
+      <div className="border-b px-4 py-4">
+        <div className="container mx-auto flex items-center justify-between">
+          <div className="group flex items-center gap-2">
+            <Link className="group-hover:text-accent transition-colors" href="/">
               ← Back to Directory
             </Link>
           </div>
-          <div className={`flex items-center ${gap.default}`}>
+          <div className="flex items-center gap-3">
             <AuthSignOutButton />
           </div>
         </div>
       </div>
 
-      <div className={`container ${marginX.auto} ${paddingX.default} ${paddingY.relaxed}`}>
-        <div className={`grid grid-cols-1 ${gap.comfortable} md:grid-cols-4`}>
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
           {/* Sidebar wrapped in its own Suspense boundary to properly isolate async operations */}
           {/* This prevents "async info not on parent boundary" errors by ensuring each async component */}
           {/* has its own clearly defined Suspense boundary */}
@@ -172,24 +170,24 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
   return (
     <Suspense
       fallback={
-        <div className={`bg-background min-h-screen`}>
-          <div className={`border-b ${paddingX.default} ${paddingY.default}`}>
-            <div className={`container ${marginX.auto} flex items-center justify-between`}>
-              <div className={`${cluster.compact} group`}>
-                <Link className={`${transition.colors}-smooth group-hover:text-accent`} href="/">
+        <div className="bg-background min-h-screen">
+          <div className="border-b px-4 py-4">
+            <div className="container mx-auto flex items-center justify-between">
+              <div className="group flex items-center gap-2">
+                <Link className="group-hover:text-accent transition-colors" href="/">
                   ← Back to Directory
                 </Link>
               </div>
-              <div className={`flex items-center ${gap.default}`}>
+              <div className="flex items-center gap-3">
                 <AuthSignOutButton />
               </div>
             </div>
           </div>
-          <div className={`container ${marginX.auto} ${paddingX.default} ${paddingY.relaxed}`}>
-            <div className={`grid grid-cols-1 ${gap.comfortable} md:grid-cols-4`}>
+          <div className="container mx-auto px-4 py-8">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
               <AccountSidebarSkeleton />
               <div className="md:col-span-3">
-                <div className={`bg-muted h-96 animate-pulse rounded-lg`} />
+                <div className="bg-muted h-96 animate-pulse rounded-lg" />
               </div>
             </div>
           </div>

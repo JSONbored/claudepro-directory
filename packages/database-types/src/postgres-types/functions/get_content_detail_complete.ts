@@ -7,9 +7,6 @@
 
 import { z } from 'zod';
 
-import type { ContentDetailCompleteResult } from '../composites/content_detail_complete_result';
-import { contentDetailCompleteResultSchema } from '../composites/content_detail_complete_result';
-
 /**
  * Arguments for PostgreSQL function: get_content_detail_complete
  */
@@ -42,12 +39,12 @@ export type GetContentDetailCompleteArgsFromZod = z.infer<typeof getContentDetai
 /**
  * Return type for PostgreSQL function: get_content_detail_complete
  */
-export type GetContentDetailCompleteReturns = ContentDetailCompleteResult;
+export type GetContentDetailCompleteReturns = unknown;
 
 /**
  * Zod schema for get_content_detail_complete function return type
  */
-export const getContentDetailCompleteReturnsSchema = contentDetailCompleteResultSchema;
+export const getContentDetailCompleteReturnsSchema = z.unknown();
 
 /**
  * Type inference from Zod schema (should match type above)

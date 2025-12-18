@@ -4,12 +4,14 @@
  * Optimizes static images in public/ directory by converting to WebP and AVIF formats.
  * Reduces image sizes by 50-70% as identified by PageSpeed Insights.
  * 
+ * Optimized: Now runs automatically during build process to ensure images are always optimized.
+ * 
  * Usage:
  * ```bash
  * pnpm optimize:images
  * ```
  * 
- * This script should be run periodically to optimize static images.
+ * This script runs automatically during `pnpm build` to ensure images are optimized before deployment.
  */
 
 import { readdir, stat, readFile, writeFile } from 'fs/promises';

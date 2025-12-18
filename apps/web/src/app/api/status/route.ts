@@ -35,61 +35,48 @@
 
 import 'server-only';
 
-import { MiscService } from '@heyclaude/data-layer';
-import { createErrorResponse, normalizeError } from '@heyclaude/web-runtime/logging/server';
+// OPTIMIZATION: Removed unused imports - factory handles errors automatically
 import {
-  buildCacheHeaders,
   createApiOptionsHandler,
-  createApiRoute,
+  createCachedApiRoute,
   getOnlyCorsHeaders,
+  getVersionedRoute,
   jsonResponse,
+  type RouteHandlerContext,
 } from '@heyclaude/web-runtime/server';
-import { cacheLife } from 'next/cache';
-
-/**
- * Cached helper function to fetch API health status
- * Uses Cache Components to reduce function invocations
- */
-async function getCachedApiHealthFormatted() {
-  'use cache';
-  cacheLife('quarter'); // 15min stale, 5min revalidate, 2hr expire - Health status changes infrequently
-
-  const service = new MiscService();
-  return await service.getApiHealthFormatted();
-}
 
 /**
  * GET /api/status - Health check endpoint
  *
  * Queries the database via Prisma and returns a normalized health report.
  * HTTP status is 200 for `healthy` or `degraded`, and 503 for any other status.
+ * 
+ * OPTIMIZATION: Uses createCachedApiRoute to eliminate cached helper function boilerplate.
  */
-export const GET = createApiRoute({
+export const GET = createCachedApiRoute({
+  cacheLife: 'short', // 15min stale, 5min revalidate, 2hr expire - Health status changes infrequently
+  cacheTags: ['status', 'health'],
   cors: 'anon',
-  handler: async ({ logger }) => {
-    logger.info({}, 'Status/health check request received');
-
-    let data: Awaited<ReturnType<typeof getCachedApiHealthFormatted>> | null = null;
-    try {
-      data = await getCachedApiHealthFormatted();
-    } catch (error) {
-      const normalized = normalizeError(error, 'Health check RPC error');
-      logger.error(
-        {
-          err: normalized,
-          rpcName: 'get_api_health_formatted',
-        },
-        'Health check RPC error'
-      );
-      return createErrorResponse(normalized, {
-        logContext: {
-          rpcName: 'get_api_health_formatted',
-        },
-        method: 'GET',
-        operation: 'StatusAPI',
-        route: '/api/status',
-      });
-    }
+  method: 'GET',
+  openapi: {
+    description:
+      'Returns the current health status of the API and database connections. Used for monitoring, uptime checks, and health dashboards.',
+    operationId: 'getApiStatus',
+    responses: {
+      200: {
+        description: 'API is healthy or degraded',
+      },
+      503: {
+        description: 'API is unhealthy',
+      },
+    },
+    summary: 'Get API health status',
+    tags: ['health', 'monitoring'],
+  },
+  operation: 'StatusAPI',
+  responseHandler: (result: unknown, _query: unknown, _body: unknown, ctx: RouteHandlerContext<unknown, unknown>) => {
+    const { logger } = ctx;
+    const data = result as { status?: string; [key: string]: unknown } | null | undefined;
 
     // Determine HTTP status code based on health status
     // Handle case where status might be a composite type string (from database function)
@@ -132,27 +119,14 @@ export const GET = createApiRoute({
 
     return jsonResponse(responseData, statusCode, getOnlyCorsHeaders, {
       'X-Generated-By': 'prisma.rpc.get_api_health_formatted',
-      ...buildCacheHeaders('status'),
     });
   },
-  method: 'GET',
-  openapi: {
-    description:
-      'Returns the current health status of the API and database connections. Used for monitoring, uptime checks, and health dashboards.',
-    operationId: 'getApiStatus',
-    responses: {
-      200: {
-        description: 'API is healthy or degraded',
-      },
-      503: {
-        description: 'API is unhealthy',
-      },
-    },
-    summary: 'Get API health status',
-    tags: ['health', 'monitoring'],
+  route: getVersionedRoute('status'),
+  service: {
+    methodArgs: () => [],
+    methodName: 'getApiHealthFormatted',
+    serviceKey: 'misc',
   },
-  operation: 'StatusAPI',
-  route: '/api/status',
 });
 
 /**

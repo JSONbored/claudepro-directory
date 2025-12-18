@@ -30,7 +30,6 @@
 
 import type { ComponentProps, HTMLAttributes } from 'react';
 import { Badge, cn } from '@heyclaude/web-runtime/ui';
-import { paddingX, paddingY } from '@heyclaude/web-runtime/design-system';
 
 export type AnnouncementProps = ComponentProps<typeof Badge> & {
   themed?: boolean;
@@ -44,7 +43,7 @@ export const Announcement = ({
 }: AnnouncementProps) => (
   <Badge
     className={cn(
-      cn('group max-w-full gap-2 rounded-full bg-background', paddingX.default, paddingY.micro, 'font-medium shadow-sm transition-all'),
+      'group max-w-full gap-2 rounded-full bg-background px-4 py-0.5 font-medium shadow-sm transition-all',
       'hover:shadow-md',
       themed && 'announcement-themed border-foreground/5',
       className
@@ -62,7 +61,7 @@ export const AnnouncementTag = ({
 }: AnnouncementTagProps) => (
   <div
     className={cn(
-      cn('-ml-2.5 shrink-0 truncate rounded-full bg-foreground/5', paddingX['2.5'], paddingY.tight, 'text-xs'),
+      '-ml-2.5 shrink-0 truncate rounded-full bg-foreground/5 px-2.5 py-1 text-xs',
       'group-[.announcement-themed]:bg-background/60',
       className
     )}
@@ -77,7 +76,7 @@ export const AnnouncementTitle = ({
   ...props
 }: AnnouncementTitleProps) => (
   <div
-    className={cn('flex items-center gap-1 truncate', paddingY.tight, className)}
+    className={cn('flex items-center gap-1 truncate py-1', className)}
     {...(props as any)}
   />
 );

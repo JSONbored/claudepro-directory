@@ -3,6 +3,7 @@ generator client {
   output   = "../packages/database-types/src/prisma"
   engineType = "client"
   moduleFormat = "esm"
+  previewFeatures = ["relationJoins"]
 }
 
 generator zod {
@@ -23,6 +24,9 @@ generator postgres-types {
   schema   = "public"
   generateTypes = true
   generateZod = true
+  // Exclude composite types that conflict with Prisma model types
+  // These composite types have string dates, while Prisma models have Date objects
+  excludeCompositeTypes = ["announcements", "content", "jobs", "notifications"]
 }
 
 generator openapi {
@@ -795,7 +799,6 @@ model content {
   keywords             String[]
   author_user_id       String?               @db.Uuid
   users                public_users?         @relation(fields: [author_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  content_embeddings   content_embeddings?
   content_time_metrics content_time_metrics?
   content_votes        content_votes[]
 
@@ -820,24 +823,7 @@ model content {
   @@schema("public")
 }
 
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model content_embeddings {
-  id                     BigInt                @id @default(autoincrement())
-  content_id             String                @unique @db.Uuid
-  content_text           String
-  embedding              Unsupported("vector")
-  created_at             DateTime              @default(now()) @db.Timestamptz(6)
-  updated_at             DateTime              @default(now()) @db.Timestamptz(6)
-  embedding_generated_at DateTime              @default(now()) @db.Timestamptz(6)
-  content                content               @relation(fields: [content_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@index([content_id])
-  @@index([embedding])
-  @@index([embedding], map: "content_embeddings_embedding_l2")
-  @@index([embedding_generated_at(sort: Desc)], map: "content_embeddings_generated_at_idx")
-  @@schema("public")
-}
+// content_embeddings model removed - embedding generation system has been deleted
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
@@ -2020,10 +2006,10 @@ enum category_icon {
 enum changelog_category {
   Added
   Changed
-  Deprecated
-  Removed
   Fixed
   Security
+  Deprecated
+  Removed
 
   @@schema("public")
 }

@@ -8,10 +8,8 @@
 'use client';
 
 import type { changelogModel } from '@heyclaude/data-layer/prisma';
-import { ANIMATION_CONSTANTS } from '@heyclaude/web-runtime/ui';
 import { formatChangelogDateShort } from '@heyclaude/web-runtime/utils/changelog';
 import Link from 'next/link';
-import { marginBottom } from "@heyclaude/web-runtime/design-system";
 
 interface TimelineMarkerProps {
   entry: changelogModel;
@@ -61,14 +59,14 @@ export function TimelineMarker({ entry, isActive, targetPath, onClick }: Timelin
       <Link
         href={targetPath}
         {...(onClick && { onClick })}
-        className={`group block ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} ${
+        className={`group block transition-all duration-200 ease-out ${
           isActive ? 'opacity-100' : 'opacity-60 hover:opacity-100'
         }`}
       >
         {/* Title and date - Matches entry header structure exactly (h2 + date with mb-3 spacing) */}
         <div className="flex min-w-0 flex-col">
           <h3
-            className={`text-base leading-tight ${marginBottom.default} ${isActive ? 'text-foreground font-semibold' : 'text-muted-foreground font-normal'} group-hover:text-foreground ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} line-clamp-2`}
+            className={`text-base leading-tight mb-4 ${isActive ? 'text-foreground font-semibold' : 'text-muted-foreground font-normal'} group-hover:text-foreground transition-all duration-200 ease-out line-clamp-2`}
           >
             {entry.title}
           </h3>

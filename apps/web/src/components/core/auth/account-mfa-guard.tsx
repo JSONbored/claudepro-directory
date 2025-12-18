@@ -5,7 +5,7 @@
 
 'use client';
 
-import { requiresMFAChallenge } from '@heyclaude/web-runtime';
+import { requiresMFAChallenge } from '@heyclaude/web-runtime/auth/mfa';
 import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
 import { logClientError, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { useBoolean } from '@heyclaude/web-runtime/hooks';
@@ -13,7 +13,6 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
 import { MFAChallengeDialog } from '@/src/components/features/account/mfa/mfa-challenge-dialog';
-import { marginBottom, paddingX, paddingY } from "@heyclaude/web-runtime/design-system";
 
 interface AccountMFAGuardProps {
   children: React.ReactNode;
@@ -118,10 +117,10 @@ export function AccountMFAGuard({ children }: AccountMFAGuardProps) {
   // Show error state instead of silently failing open
   if (checkError) {
     return (
-      <div className={`flex min-h-screen items-center justify-center`}>
+      <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <h2 className={`text-destructive ${marginBottom.compact} text-xl font-semibold`}>Authentication Error</h2>
-          <p className={`text-muted-foreground ${marginBottom.default}`}>
+          <h2 className="mb-2 text-xl font-semibold text-destructive">Authentication Error</h2>
+          <p className="mb-4 text-muted-foreground">
             Unable to verify authentication requirements. Please refresh the page or contact support
             if the issue persists.
           </p>
@@ -134,7 +133,7 @@ export function AccountMFAGuard({ children }: AccountMFAGuardProps) {
                 // Error already handled in checkMFARequirement
               });
             }}
-            className={`bg-primary text-primary-foreground rounded-md ${paddingX.default} ${paddingY.tight}`}
+            className="rounded-md bg-primary px-4 py-2 text-primary-foreground"
           >
             Retry
           </button>

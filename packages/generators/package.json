@@ -8,6 +8,7 @@
     "heyclaude-generate-skills": "./src/bin/generate-skills.ts",
     "heyclaude-generate-mcpb": "./src/bin/generate-mcpb.ts",
     "heyclaude-generate-readme": "./src/bin/generate-readme.ts",
+    "heyclaude-generate-openapi": "./src/bin/generate-openapi.ts",
     "heyclaude-cache": "./src/bin/cache.ts",
     "heyclaude-sync-db": "./src/bin/sync-db.ts",
     "heyclaude-lint-unused": "./src/bin/lint-unused.ts",
@@ -16,7 +17,6 @@
     "heyclaude-analyze-dependencies": "./src/bin/analyze-dependencies.ts",
     "heyclaude-deploy-edge": "./src/bin/deploy-functions.ts",
     "heyclaude-sync-email": "./src/bin/sync-email-templates.ts",
-    "heyclaude-generate-actions": "./src/bin/generate-server-actions.ts",
     "heyclaude-mcp-login": "./src/bin/mcp-login.ts",
     "heyclaude-bump-version": "./src/bin/bump-version.ts",
     "heyclaude-analyze-commits": "./src/bin/analyze-commits.ts",
@@ -29,7 +29,8 @@
     "heyclaude-comprehensive-css-analysis": "./src/bin/comprehensive-css-analysis.ts",
     "heyclaude-exhaustive-css-token-comparison": "./src/bin/exhaustive-css-token-comparison.ts",
     "heyclaude-migrate-inline-styles": "./src/bin/migrate-inline-styles.ts",
-    "heyclaude-migrate-ui-classes": "./src/bin/migrate-ui-classes.ts"
+    "heyclaude-migrate-ui-classes": "./src/bin/migrate-ui-classes.ts",
+    "heyclaude-knip-design-system": "./src/bin/knip-design-system.ts"
   },
   "exports": {
     ".": {

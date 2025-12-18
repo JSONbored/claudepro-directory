@@ -11,7 +11,7 @@
  */
 
 import { Skeleton } from '@heyclaude/web-runtime/ui';
-import { SPRING, STAGGER, gap, marginTop, padding, spaceY, marginBottom, paddingBottom, size } from '@heyclaude/web-runtime/design-system';
+import { SPRING, STAGGER } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
@@ -26,16 +26,16 @@ function StatsCardSkeleton() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className={`${size.sm}`}>
+        <CardTitle className="text-sm">
           <Skeleton size="sm" width="sm" />
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className={`flex items-center ${gap.tight}`}>
+        <div className="flex items-center gap-1">
           <Skeleton size="md" width="md" rounded="md" className="h-5 w-5" />
           <Skeleton size="xl" width="md" className="h-8" />
         </div>
-        <Skeleton size="xs" width="xs" className={`${marginTop.compact}`} />
+        <Skeleton size="xs" width="xs" className="mt-2" />
       </CardContent>
     </Card>
   );
@@ -46,8 +46,8 @@ function StatsCardSkeleton() {
  */
 function QuickActionRowSkeleton() {
   return (
-    <div className={`flex items-center justify-between rounded-lg border ${padding.compact}`}>
-      <div className={`flex-1 ${spaceY.tight}`}>
+    <div className="flex items-center justify-between card-base p-2">
+      <div className="flex flex-col gap-1 flex-1">
         <Skeleton size="sm" width="2/3" />
         <Skeleton size="xs" width="xs" />
       </div>
@@ -64,7 +64,7 @@ export function AccountDashboardSkeleton() {
   
   return (
     <motion.div
-      className={`${spaceY.relaxed}`}
+      className="space-y-6"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={SPRING.smooth}
@@ -75,13 +75,13 @@ export function AccountDashboardSkeleton() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ ...SPRING.smooth, delay: 0.1 }}
       >
-        <Skeleton size="xl" width="lg" className={`${marginBottom.compact} h-9`} />
+        <Skeleton size="xl" width="lg" className="mb-2 h-9" />
         <Skeleton size="md" width="md" className="h-6" />
       </motion.div>
 
       {/* Stats cards - 3 in grid */}
       <motion.div
-        className={`grid grid-cols-1 ${gap.default} md:grid-cols-3`}
+        className="grid grid-cols-1 gap-3 md:grid-cols-3"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ ...SPRING.smooth, delay: 0.2 }}
@@ -115,7 +115,7 @@ export function AccountDashboardSkeleton() {
             <CardTitle>Quick Actions</CardTitle>
             <CardDescription>Common tasks and features</CardDescription>
           </CardHeader>
-          <CardContent className={`${spaceY.default}`}>
+          <CardContent className="space-y-3">
             {KEYS_3.map((key, i) => (
               <motion.div
                 key={key}
@@ -143,14 +143,14 @@ export function AccountDashboardSkeleton() {
         <Card>
           <CardHeader>
             {/* Tabs */}
-            <div className={`flex ${gap.tight} border-b ${paddingBottom.tight}`}>
+            <div className="flex gap-1 border-b pb-1">
               <Skeleton size="md" width="lg" rounded="md" className="h-10" />
               <Skeleton size="md" width="xl" rounded="md" className="h-10" />
             </div>
           </CardHeader>
-          <CardContent className={`${marginTop.comfortable}`}>
+          <CardContent className="mt-6">
             {/* Content grid */}
-            <div className={`grid grid-cols-1 ${gap.default} sm:grid-cols-2 lg:grid-cols-3`}>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {KEYS_6.map((key, i) => {
                 return (
                   <motion.div
@@ -164,16 +164,16 @@ export function AccountDashboardSkeleton() {
                     }}
                   >
                     <Card>
-                      <CardContent className={`${padding.comfortable}`}>
-                        <div className={`${spaceY.default}`}>
-                          <div className={`flex items-start ${gap.compact}`}>
+                      <CardContent className="p-6">
+                        <div className="space-y-3">
+                          <div className="flex items-start gap-2">
                             <Skeleton size="md" width="md" rounded="md" className="h-12 w-12 shrink-0" />
-                            <div className={`flex-1 ${spaceY.compact}`}>
+                            <div className="flex flex-col gap-2 flex-1">
                               <Skeleton size="md" width="3/4" />
                               <Skeleton size="sm" width="3xl" />
                             </div>
                           </div>
-                          <div className={`flex flex-wrap ${gap.tight}`}>
+                          <div className="flex flex-wrap gap-1">
                             <Skeleton size="xs" width="xs" rounded="full" />
                             <Skeleton size="xs" width="xs" rounded="full" />
                           </div>

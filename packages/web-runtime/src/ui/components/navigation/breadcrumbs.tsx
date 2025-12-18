@@ -46,7 +46,6 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useMemo } from 'react';
 import { cn } from '../../utils.ts';
-import { STATE_PATTERNS } from '../../constants.ts';
 
 /** Single breadcrumb item */
 export interface BreadcrumbItem {
@@ -200,7 +199,7 @@ export function Breadcrumbs({
                 <Link
                   href={item.href}
                   className={cn(
-                    STATE_PATTERNS.FOCUS_RING,
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                     'rounded-sm text-muted-foreground/50 transition-colors hover:text-foreground/80'
                   )}
                 >

@@ -1,9 +1,9 @@
-import { JobsService } from '@heyclaude/data-layer';
 import type { job_plan, job_tier } from '@heyclaude/data-layer/prisma';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
 import { normalizeError } from '../../errors';
 import { logger } from '../../logging/server.ts';
 import { getEnvVar } from '@heyclaude/shared-runtime';
+import { getService } from '../../data/service-factory';
 
 /**
  * Post-creation hook for job listings
@@ -132,7 +132,7 @@ export async function onJobUpdated(
       if (!jobTitle) {
         // Fetch the actual title from the database using JobsService
         try {
-          const jobsService = new JobsService();
+          const jobsService = await getService('jobs');
           const title = await jobsService.getJobTitleById({
             p_job_id: result.job_id,
           });

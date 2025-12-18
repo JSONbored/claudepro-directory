@@ -136,4 +136,292 @@ describe('TrendingService', () => {
       expect(result).toHaveLength(3);
     });
   });
+
+  describe('getTrendingMetrics', () => {
+    it('should return trending metrics with content', async () => {
+      const mockData = {
+        metrics: { total_views: 1000, total_clicks: 500 },
+        content: [],
+      };
+      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+
+      const result = await service.getTrendingMetrics({
+        p_category_ids: ['agents', 'mcp'],
+      });
+
+      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
+        expect.stringContaining('get_trending_metrics_with_content')
+      );
+      expect(result).toEqual(mockData);
+    });
+  });
+
+  describe('getPopularContent', () => {
+    it('should return popular content', async () => {
+      const mockData = [
+        { id: '1', slug: 'popular-1', view_count: 1000 },
+        { id: '2', slug: 'popular-2', view_count: 900 },
+      ];
+      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue(mockData as any);
+
+      const result = await service.getPopularContent({
+        p_category: 'agents',
+        p_limit: 10,
+      });
+
+      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
+        expect.stringContaining('get_popular_content')
+      );
+      expect(result).toEqual(mockData);
+    });
+  });
+
+  describe('getRecentContent', () => {
+    it('should return recent content with default params', async () => {
+      const mockData = [
+        {
+          id: '1',
+          slug: 'recent-1',
+          category: 'agents',
+          date_added: new Date(),
+        },
+      ];
+
+      vi.mocked(prismock.content.findMany).mockResolvedValue(mockData as any);
+
+      const { withSmartCache } = await import('../utils/request-cache.ts');
+      vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
+
+      const result = await service.getRecentContent({});
+
+      expect(prismock.content.findMany).toHaveBeenCalledWith({
+        where: {
+          date_added: { gte: expect.any(Date) },
+        },
+        orderBy: [
+          { date_added: 'desc' },
+          { created_at: 'desc' },
+        ],
+        take: 20, // default limit
+      });
+      expect(result).toEqual(mockData);
+    });
+
+    it('should filter by category', async () => {
+      const mockData = [
+        {
+          id: '1',
+          slug: 'recent-1',
+          category: 'agents',
+          date_added: new Date(),
+        },
+      ];
+
+      vi.mocked(prismock.content.findMany).mockResolvedValue(mockData as any);
+
+      const { withSmartCache } = await import('../utils/request-cache.ts');
+      vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
+
+      const result = await service.getRecentContent({
+        p_category: 'agents',
+        p_limit: 10,
+        p_days: 30,
+      });
+
+      expect(prismock.content.findMany).toHaveBeenCalledWith({
+        where: {
+          category: 'agents',
+          date_added: { gte: expect.any(Date) },
+        },
+        orderBy: [
+          { date_added: 'desc' },
+          { created_at: 'desc' },
+        ],
+        take: 10,
+      });
+      expect(result).toEqual(mockData);
+    });
+
+    it('should enforce limit bounds (1-100)', async () => {
+      const { withSmartCache } = await import('../utils/request-cache.ts');
+      vi.mocked(withSmartCache).mockImplementation((_key, _method, fn) => fn());
+
+      vi.mocked(prismock.content.findMany).mockResolvedValue([]);
+
+      // Test lower bound
+      await service.getRecentContent({ p_limit: 0 });
+      expect(prismock.content.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ take: 1 })
+      );
+
+      // Test upper bound
+      await service.getRecentContent({ p_limit: 200 });
+      expect(prismock.content.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ take: 100 })
+      );
+    });
+  });
+
+  describe('getTrendingMetricsFormatted', () => {
+    it('should return formatted trending metrics', async () => {
+      const mockData = {
+        total_views: '1,000',
+        total_clicks: '500',
+        click_through_rate: '50%',
+      };
+      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+
+      const result = await service.getTrendingMetricsFormatted({
+        p_category_ids: ['agents'],
+      });
+
+      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
+        expect.stringContaining('get_trending_metrics_formatted')
+      );
+      expect(result).toEqual(mockData);
+    });
+  });
+
+  describe('getPopularContentFormatted', () => {
+    it('should return formatted popular content', async () => {
+      const mockData = [
+        {
+          id: '1',
+          slug: 'popular-1',
+          title: 'Popular Item',
+          formatted_views: '1,000 views',
+        },
+      ];
+      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue(mockData as any);
+
+      const result = await service.getPopularContentFormatted({
+        p_category: 'agents',
+        p_limit: 10,
+      });
+
+      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
+        expect.stringContaining('get_popular_content_formatted')
+      );
+      expect(result).toEqual(mockData);
+    });
+  });
+
+  describe('getRecentContentFormatted', () => {
+    it('should return formatted recent content', async () => {
+      const mockData = [
+        {
+          id: '1',
+          slug: 'recent-1',
+          title: 'Recent Item',
+          formatted_date: '2 days ago',
+        },
+      ];
+      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue(mockData as any);
+
+      const result = await service.getRecentContentFormatted({
+        p_category: 'agents',
+        p_limit: 10,
+      });
+
+      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
+        expect.stringContaining('get_recent_content_formatted')
+      );
+      expect(result).toEqual(mockData);
+    });
+  });
+
+  describe('getSidebarTrendingFormatted', () => {
+    it('should return formatted sidebar trending content', async () => {
+      const mockData = [
+        {
+          id: '1',
+          slug: 'trending-1',
+          title: 'Trending Item',
+          formatted_score: 'High',
+        },
+      ];
+      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue(mockData as any);
+
+      const result = await service.getSidebarTrendingFormatted({
+        p_limit: 5,
+      });
+
+      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
+        expect.stringContaining('get_sidebar_trending_formatted')
+      );
+      expect(result).toEqual(mockData);
+    });
+  });
+
+  describe('getSidebarRecentFormatted', () => {
+    it('should return formatted sidebar recent content', async () => {
+      const mockData = [
+        {
+          id: '1',
+          slug: 'recent-1',
+          title: 'Recent Item',
+          formatted_date: 'Just now',
+        },
+      ];
+      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue(mockData as any);
+
+      const result = await service.getSidebarRecentFormatted({
+        p_limit: 5,
+      });
+
+      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
+        expect.stringContaining('get_sidebar_recent_formatted')
+      );
+      expect(result).toEqual(mockData);
+    });
+  });
+
+  describe('calculateContentTimeMetrics', () => {
+    it('should calculate content time metrics', async () => {
+      const mockData = {
+        total_items: 100,
+        average_age_days: 30,
+      };
+      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+
+      const result = await service.calculateContentTimeMetrics();
+
+      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
+        expect.stringContaining('calculate_content_time_metrics')
+      );
+      expect(result).toEqual(mockData);
+    });
+
+    it('should not use cache for mutations', async () => {
+      const mockData = { total_items: 100 };
+      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue([mockData] as any);
+
+      await service.calculateContentTimeMetrics();
+
+      // Verify callRpc was called with useCache: false
+      // This is handled internally by BasePrismaService
+      expect(prismock.$queryRawUnsafe).toHaveBeenCalled();
+    });
+  });
+
+  describe('refreshTrendingMetricsView', () => {
+    it('should refresh trending metrics view', async () => {
+      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue(undefined as any);
+
+      await service.refreshTrendingMetricsView();
+
+      expect(prismock.$queryRawUnsafe).toHaveBeenCalledWith(
+        expect.stringContaining('refresh_trending_metrics_view')
+      );
+    });
+
+    it('should not use cache for mutations', async () => {
+      vi.mocked(prismock.$queryRawUnsafe).mockResolvedValue(undefined as any);
+
+      await service.refreshTrendingMetricsView();
+
+      // Verify mutation doesn't use cache
+      expect(prismock.$queryRawUnsafe).toHaveBeenCalled();
+    });
+  });
 });

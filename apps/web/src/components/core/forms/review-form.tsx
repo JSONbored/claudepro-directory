@@ -1,6 +1,6 @@
 'use client';
 
-import { createReview, updateReview } from '@heyclaude/web-runtime/actions';
+import { createReview, updateReview } from '@heyclaude/web-runtime/actions/reviews-crud';
 import { useAuthenticatedUser, useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import {
   MAX_REVIEW_LENGTH,
@@ -13,7 +13,6 @@ import { useCallback, useId, useState, useTransition } from 'react';
 
 import { useAuthModal } from '@/src/hooks/use-auth-modal';
 import { ReviewRatingInteractive } from '@/src/components/core/domain/reviews/review-rating-interactive';
-import { between, cluster, muted, spaceY, marginTop, marginBottom } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Renders a form for creating a new review or editing an existing review.
@@ -164,13 +163,13 @@ export function ReviewForm({
   );
 
   return (
-    <form onSubmit={handleSubmit} className={`${spaceY.comfortable}`}>
+    <form onSubmit={handleSubmit} className="space-y-4">
       {/* Star Rating Input */}
       <div>
-        <Label htmlFor="rating" className={`${marginBottom.compact} block`}>
-          Your Rating <span className={`text-destructive`}>*</span>
+        <Label htmlFor="rating" className="mb-2 block">
+          Your Rating <span className="text-destructive">*</span>
         </Label>
-        <div className={`${marginTop.compact}`}>
+        <div className="mt-2">
           <ReviewRatingInteractive
             value={rating}
             onChange={setRating}
@@ -181,10 +180,10 @@ export function ReviewForm({
           />
         </div>
         {rating === 0 && !showRatingError && (
-          <p className={`${muted.default} ${marginTop.tight} text-xs`}>Click a star to rate</p>
+          <p className="text-muted-foreground mt-1 text-xs">Click a star to rate</p>
         )}
         {showRatingError ? (
-          <p id={ratingErrorId} className={`text-destructive ${marginTop.tight} text-sm`} role="alert">
+          <p id={ratingErrorId} className="text-destructive mt-1 text-sm" role="alert">
             Please select a star rating before submitting
           </p>
         ) : null}
@@ -192,8 +191,8 @@ export function ReviewForm({
 
       {/* Review Text */}
       <div>
-        <Label htmlFor={textareaId} className={`${marginBottom.compact} block`}>
-          Your Review <span className={`${muted.default} text-xs font-normal`}>(optional)</span>
+        <Label htmlFor={textareaId} className="mb-2 block">
+          Your Review <span className="text-muted-foreground text-xs font-normal">(optional)</span>
         </Label>
         <Textarea
           id={textareaId}
@@ -207,12 +206,12 @@ export function ReviewForm({
           {...(hasTextError ? { errorId: textareaErrorId } : {})}
         />
         {hasTextError ? (
-          <p id={textareaErrorId} className={`text-destructive ${marginTop.tight} text-sm`} role="alert">
+          <p id={textareaErrorId} className="text-destructive mt-1 text-sm" role="alert">
             Review text cannot exceed {MAX_REVIEW_LENGTH} characters
           </p>
         ) : null}
-        <div className={`${between.center} ${marginTop.tight}`}>
-          <p className={`${muted.default} text-xs`}>
+        <div className="flex items-center justify-between mt-1">
+          <p className="text-muted-foreground text-xs">
             Help others by sharing details about your experience
           </p>
           <p
@@ -224,7 +223,7 @@ export function ReviewForm({
       </div>
 
       {/* Submit Buttons */}
-      <div className={`${cluster.compact} pt-2`}>
+      <div className="flex items-center gap-2 pt-2">
         <Button type="submit" disabled={!isValid || isPending}>
           {isPending ? 'Submitting...' : isEditing ? 'Update Review' : 'Submit Review'}
         </Button>

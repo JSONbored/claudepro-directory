@@ -7,11 +7,11 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 
-import { NewsletterService } from '@heyclaude/data-layer';
 import { normalizeError } from '@heyclaude/shared-runtime';
 
 import { logger, createWebAppContextWithId } from '../../logging/server';
 import { createErrorResponse } from '../../utils/error-handler';
+import { getService } from '../../data/service-factory';
 import { cacheLife } from 'next/cache';
 
 /**
@@ -21,9 +21,9 @@ import { cacheLife } from 'next/cache';
  */
 async function getCachedNewsletterCount(): Promise<number> {
   'use cache';
-  cacheLife('quarter'); // 15min stale, 5min revalidate, 2hr expire - Newsletter count changes frequently
+  cacheLife('short'); // 15min stale, 5min revalidate, 2hr expire - Newsletter count changes frequently
 
-  const service = new NewsletterService();
+  const service = await getService('newsletter');
   return await service.getNewsletterSubscriberCount();
 }
 

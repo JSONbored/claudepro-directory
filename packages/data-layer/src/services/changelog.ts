@@ -17,7 +17,9 @@ import type {
   SyncChangelogEntryArgs,
   SyncChangelogEntryReturns,
 } from '@heyclaude/database-types/postgres-types';
+import { prisma } from '../prisma/client.ts';
 import { BasePrismaService } from './base-prisma-service.ts';
+import { withSmartCache } from '../utils/request-cache.ts';
 
 /**
  * Changelog Service using Prisma Client
@@ -80,5 +82,37 @@ export class ChangelogService extends BasePrismaService {
       { methodName: 'syncChangelogEntry', useCache: false }
     );
     return Array.isArray(result) && result.length > 0 ? (result[0] ?? null) : null;
+  }
+
+  /**
+   * Get published changelog slugs for static generation
+   * 
+   * OPTIMIZATION: Uses Prisma directly instead of RPC for better performance.
+   * Only fetches slugs needed for generateStaticParams, avoiding unnecessary data processing.
+   * 
+   * @param limit - Maximum number of slugs to return
+   * @returns Array of changelog slugs
+   */
+  async getPublishedChangelogSlugs(limit: number): Promise<string[]> {
+    return withSmartCache(
+      'getPublishedChangelogSlugs',
+      'getPublishedChangelogSlugs',
+      async () => {
+        const entries = await prisma.changelog.findMany({
+          where: {
+            published: true,
+          },
+          select: {
+            slug: true,
+          },
+          orderBy: {
+            release_date: 'desc',
+          },
+          take: limit,
+        });
+        return entries.map((entry) => entry.slug);
+      },
+      { limit }
+    );
   }
 }

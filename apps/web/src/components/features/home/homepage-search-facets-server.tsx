@@ -27,7 +27,12 @@ export async function HomepageSearchFacetsServer(): Promise<SearchFilterOptions>
       authors: [],
       categories: [],
     };
-  });
+  }) ?? {
+    facets: [],
+    tags: [],
+    authors: [],
+    categories: [],
+  };
 
   const searchFilters: SearchFilterOptions = {
     tags: facetData.tags,

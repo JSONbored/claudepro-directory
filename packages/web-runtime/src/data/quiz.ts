@@ -1,11 +1,8 @@
 'use server';
 
-import { QuizService } from '@heyclaude/data-layer';
-import type { GetQuizConfigurationReturns } from '@heyclaude/database-types/postgres-types';
-import { cacheLife, cacheTag } from 'next/cache';
+import { type GetQuizConfigurationReturns } from '@heyclaude/database-types/postgres-types';
 
-import { normalizeError } from '../errors.ts';
-import { logger } from '../index.ts';
+import { createCachedDataFunction, generateResourceTags } from './cached-data-factory.ts';
 
 export type QuizConfigurationResult = GetQuizConfigurationReturns;
 
@@ -19,30 +16,13 @@ export type QuizConfigurationResult = GetQuizConfigurationReturns;
  * Cache behavior:
  * - Minimum 30 seconds stale time (required for runtime prefetch)
  * - Not prerendered (runs at request time)
- * @returns Quiz configuration result or null if error occurs
  */
-export async function getQuizConfiguration(): Promise<null | QuizConfigurationResult> {
-  'use cache: private';
-
-  // Configure cache
-  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
-  cacheTag('quiz-configuration');
-
-  const reqLogger = logger.child({
-    module: 'data/quiz',
-    operation: 'getQuizConfiguration',
-  });
-
-  try {
-    const service = new QuizService();
-    const result = await service.getQuizConfiguration();
-
-    reqLogger.info({ hasResult: Boolean(result) }, 'getQuizConfiguration: fetched successfully');
-
-    return result;
-  } catch (error) {
-    const normalized = normalizeError(error, 'getQuizConfiguration failed');
-    reqLogger.error({ err: normalized }, 'getQuizConfiguration: unexpected error');
-    return null;
-  }
-}
+export const getQuizConfiguration = createCachedDataFunction<void, QuizConfigurationResult | null>({
+  serviceKey: 'misc', // Consolidated: QuizService methods moved to MiscService
+  methodName: 'getQuizConfiguration',
+  cacheMode: 'private',
+  cacheLife: 'userProfile', // 1min stale, 5min revalidate, 30min expire - User-specific data
+  cacheTags: () => generateResourceTags('quiz-configuration'),
+  module: 'data/quiz',
+  operation: 'getQuizConfiguration',
+});

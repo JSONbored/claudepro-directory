@@ -8,7 +8,8 @@
 import type { announcementsModel } from '@heyclaude/data-layer/prisma';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { getActiveAnnouncement as fetchActiveAnnouncement } from '@heyclaude/web-runtime/server';
-import { cacheLife, cacheTag } from 'next/cache';
+import { cacheLife } from 'next/cache';
+import { applyAnnouncementsCacheTags } from '@heyclaude/web-runtime/data';
 
 /**
  * Get active announcement from database
@@ -22,8 +23,8 @@ import { cacheLife, cacheTag } from 'next/cache';
 export async function getActiveAnnouncement(): Promise<announcementsModel | null> {
   'use cache';
   // Use 'hours' profile: 1hr stale, 15min revalidate, 1 day expire
-  cacheLife('hours');
-  cacheTag('announcements');
+  cacheLife('medium');
+  applyAnnouncementsCacheTags();
 
   try {
     return await fetchActiveAnnouncement();

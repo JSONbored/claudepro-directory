@@ -33,7 +33,7 @@
  * @see {@link file://../../lib/content-loaders.ts} - Content loading with caching
  */
 
-import type { content_category } from '@heyclaude/data-layer/prisma';
+import { type content_category } from '@heyclaude/data-layer/prisma';
 import { isValidCategory, type UnifiedCategoryConfig } from '@heyclaude/web-runtime/core';
 import { getCategoryConfig } from '@heyclaude/web-runtime/data/config/category';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
@@ -51,7 +51,6 @@ import React from 'react';
 import { CategoryPageSearchClient } from '@/src/app/[category]/category-page-search-client';
 import { ExploreDropdown } from '@/src/components/content/explore-dropdown';
 import { ContentSidebar } from '@/src/components/core/layout/content-sidebar';
-import { paddingX, paddingY, marginX, marginBottom, padding, gap, marginTop } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Dynamic Rendering Required
@@ -61,16 +60,19 @@ import { paddingX, paddingY, marginX, marginBottom, padding, gap, marginTop } fr
  * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
  */
 
+// OPTIMIZATION: Create reverse map at module level for O(1) lookup instead of O(n) on every render
+const ICON_COMPONENT_TO_NAME_MAP = new Map<React.ComponentType, string>(
+  Object.entries(ICON_NAME_MAP).map(([name, component]) => [component, name])
+);
+
 /***
  * Get icon name from component by reverse lookup in ICON_NAME_MAP
+ * OPTIMIZATION: Uses pre-built reverse map for O(1) lookup instead of O(n) search
  * @param {React.ComponentType} icon - Icon component to look up
  * @returns Icon name string or 'sparkles' as fallback
  */
 function getIconNameFromComponent(icon: React.ComponentType): string {
-  const iconEntry = Object.entries(ICON_NAME_MAP).find(
-    ([, IconComponent]) => IconComponent === icon
-  );
-  return iconEntry?.[0] ?? 'sparkles';
+  return ICON_COMPONENT_TO_NAME_MAP.get(icon) ?? 'sparkles';
 }
 
 /**
@@ -134,7 +136,7 @@ export async function generateMetadata({
 export default async function CategoryPage({ params }: { params: Promise<{ category: string }> }) {
   'use cache';
   // Use 'static' preset: 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
-  cacheLife('static');
+  cacheLife('long');
 
   // Params is runtime data - cache key includes params, so different categories create different cache entries
   const { category } = await params;
@@ -186,7 +188,8 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
   let items: Awaited<ReturnType<typeof getContentByCategory>> = [];
   let hadError = false;
   try {
-    items = await getContentByCategory(typedCategory);
+    const fetchedItems = await getContentByCategory(typedCategory);
+    items = fetchedItems ?? [];
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load category content');
     reqLogger.error(
@@ -227,7 +230,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
       </CategoryHeroShell>
 
       {/* CRITICAL: No Suspense above the fold - data is already fetched, prevents blank states from being cached */}
-      <CategoryPageContent category={typedCategory} config={config} items={items} />
+      <CategoryPageContent category={typedCategory} config={config} />
     </div>
   );
 }
@@ -272,17 +275,17 @@ function CategoryHeroShell({
   return (
     <section
       aria-labelledby="category-title"
-      className="border-border border-b backdrop-blur-sm bg-color-bg-code/30"
+      className="border-border bg-color-bg-code/30 border-b backdrop-blur-sm"
     >
-      <div className={`container ${marginX.auto} ${paddingX.default} ${paddingY.default}`}>
-        <div className={`${marginX.auto} max-w-3xl text-center`}>
-          <div className={`${marginBottom.comfortable} flex justify-center`}>
-            <div aria-hidden="true" className={`bg-accent/10 rounded-full ${padding.compact}`}>
+      <div className="container mx-auto px-4 py-4">
+        <div className="mx-auto max-w-3xl text-center">
+          <div className="mb-6 flex justify-center">
+            <div aria-hidden="true" className="bg-accent/10 rounded-full p-3">
               <IconComponent className="text-primary h-12 w-12" />
             </div>
           </div>
 
-          <div className={`flex items-center justify-center ${gap.default}`}>
+          <div className="flex-center gap-3">
             <h1
               className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl"
               id="category-title"
@@ -294,16 +297,16 @@ function CategoryHeroShell({
             </div>
           </div>
 
-          <p className={`text-muted-foreground ${marginTop.default} text-lg sm:text-xl`}>{description}</p>
+          <p className="text-muted-foreground mt-4 text-lg sm:text-xl">{description}</p>
 
           {/* Badges and content stream in via children */}
-          <div className={`${marginBottom.relaxed}`}>{children}</div>
+          <div className="mb-8">{children}</div>
 
-          <div className={`flex items-center justify-center ${gap.tight}`}>
+          <div className="flex-center gap-1">
             <Button asChild size="sm" variant="outline">
               <Link
                 aria-label={`Submit a new ${title.slice(0, -1).toLowerCase()}`}
-                className={`flex items-center ${gap.tight}`}
+                className="flex items-center gap-1"
                 href={ROUTES.SUBMIT}
               >
                 <ExternalLink aria-hidden="true" className="h-4 w-4" />
@@ -356,8 +359,9 @@ function CategoryBadges({
 
   // Process badges (handle dynamic count badges)
   const badges = config.listPage.badges.map((badge) => {
+    const itemsLength = items?.length ?? 0;
     const processed: { icon?: string; text: string } = {
-      text: typeof badge.text === 'function' ? badge.text(items.length) : badge.text,
+      text: typeof badge.text === 'function' ? badge.text(itemsLength) : badge.text,
     };
 
     if ('icon' in badge && badge.icon) {
@@ -372,13 +376,13 @@ function CategoryBadges({
     badges.length > 0
       ? badges
       : [
-          { icon: 'sparkles', text: `${items.length} ${config.pluralTitle} Available` },
+          { icon: 'sparkles', text: `${items?.length ?? 0} ${config.pluralTitle} Available` },
           { text: 'Community Driven' },
           { text: 'Production Ready' },
         ];
 
   return (
-    <ul className={`flex list-none flex-wrap justify-center ${gap.tight}`}>
+    <ul className="flex list-none flex-wrap justify-center gap-1">
       {displayBadges.map((badge, idx) => (
         <li key={badge.text || `badge-${idx}`}>
           <UnifiedBadge style={idx === 0 ? 'secondary' : 'outline'} variant="base">
@@ -423,16 +427,16 @@ function CategoryPageContent({
 }: {
   category: content_category;
   config: UnifiedCategoryConfig<content_category>;
-  items: Awaited<ReturnType<typeof getContentByCategory>>;
+  // Note: items prop removed - CategoryPageSearchClient uses search API, not direct items
 }) {
   return (
     <>
       {/* Content section - Full width like homepage, sidebar on the side */}
       <section
         aria-label={`${config.pluralTitle} content and search`}
-        className={`container ${marginX.auto} ${paddingX.default} ${paddingY.section}`}
+        className="container mx-auto px-4 py-12"
       >
-        <div className={`grid ${gap.relaxed} xl:grid-cols-[minmax(0,1fr)_18rem]`}>
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_18rem]">
           {/* Main content area - Full width within grid column */}
           <div className="min-w-0">
             <CategoryPageSearchClient

@@ -2,13 +2,14 @@
  * Settings Page - User profile and account management.
  */
 
-import type { GetUserSettingsReturns } from '@heyclaude/database-types/postgres-types';
+// GetUserSettingsReturns type is now derived from getUserCompleteData return type
+import { type GetUserCompleteDataReturns } from '@heyclaude/database-types/postgres-types';
 import { extractFirstFieldFromTuple, isPostgresTupleString } from '@heyclaude/web-runtime';
-import { ensureUserRecord } from '@heyclaude/web-runtime/actions';
+import { ensureUserRecord } from '@heyclaude/web-runtime/actions/user';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
-  getUserSettings,
+  getUserCompleteData,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
@@ -20,7 +21,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
-import { between, spaceY, marginBottom, muted, radius, iconSize, gap } from '@heyclaude/web-runtime/design-system';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import Image from 'next/image';
@@ -55,7 +55,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * or an error/fallback card when user settings or profile cannot be loaded.
  *
  * @see getAuthenticatedUser
- * @see getUserSettings
+ * @see getUserCompleteData
  * @see ensureUserRecord
  * @see ProfileEditForm
  * @see RefreshProfileButton
@@ -82,7 +82,7 @@ export default async function SettingsPage() {
       'SettingsPage: unauthenticated access attempt'
     );
     return (
-      <div className={`${spaceY.relaxed}`}>
+      <div className="space-y-6">
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl">Sign in required</CardTitle>
@@ -108,11 +108,15 @@ export default async function SettingsPage() {
   });
 
   // Section: Settings Data Fetch
-  let settingsData: GetUserSettingsReturns | null = null;
+  let settingsData: GetUserCompleteDataReturns['user_settings'] | null = null;
   try {
-    settingsData = await getUserSettings(user.id);
+    const completeData = await getUserCompleteData(user.id);
+    settingsData = completeData?.user_settings ?? null;
     if (!settingsData) {
-      userLogger.warn({ section: 'data-fetch' }, 'SettingsPage: getUserSettings returned null');
+      userLogger.warn(
+        { section: 'data-fetch' },
+        'SettingsPage: getUserCompleteData returned null or missing user_settings'
+      );
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user settings');
@@ -121,13 +125,13 @@ export default async function SettingsPage() {
         err: normalized,
         section: 'data-fetch',
       },
-      'SettingsPage: getUserSettings threw'
+      'SettingsPage: getUserCompleteData threw'
     );
   }
 
   if (!settingsData) {
     return (
-      <div className={`${spaceY.relaxed}`}>
+      <div className="space-y-6">
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl">Settings</CardTitle>
@@ -169,9 +173,9 @@ export default async function SettingsPage() {
     );
     // Profile data is corrupted - cannot proceed
     return (
-      <div className={`${spaceY.relaxed}`}>
+      <div className="space-y-6">
         <h1 className="text-3xl font-bold">Settings</h1>
-        <p className={`text-destructive`}>
+        <p className="text-destructive">
           Profile data format error. Please contact support if this persists.
         </p>
       </div>
@@ -248,14 +252,15 @@ export default async function SettingsPage() {
         image: avatarUrl ?? picture ?? null,
         name: fullName ?? name ?? null,
       });
-      const refreshed = await getUserSettings(user.id);
+      const refreshedCompleteData = await getUserCompleteData(user.id);
+      const refreshed = refreshedCompleteData?.user_settings ?? null;
       if (refreshed) {
         userData = refreshed.user_data;
         profile = refreshed.profile;
       } else {
         userLogger.warn(
           { section: 'data-fetch' },
-          'SettingsPage: getUserSettings returned null after ensureUserRecord'
+          'SettingsPage: getUserCompleteData returned null or missing user_settings after ensureUserRecord'
         );
       }
     } catch (error) {
@@ -278,27 +283,27 @@ export default async function SettingsPage() {
         err: new Error('Profile missing from response'),
         section: 'data-fetch',
       },
-      'SettingsPage: profile missing from getUserSettings response'
+      'SettingsPage: profile missing from getUserCompleteData.user_settings response'
     );
     return (
-      <div className={`${spaceY.relaxed}`}>
+      <div className="space-y-6">
         <h1 className="text-3xl font-bold">Settings</h1>
-        <p className={`text-destructive`}>Unable to load profile. Please try again later.</p>
+        <p className="text-destructive">Unable to load profile. Please try again later.</p>
       </div>
     );
   }
 
   return (
-    <div className={`${spaceY.relaxed}`}>
+    <div className="space-y-6">
       <div>
-        <h1 className={`${marginBottom.compact} text-3xl font-bold`}>Settings</h1>
-        <p className={`${muted.default}`}>Manage your account settings and preferences</p>
+        <h1 className="mb-2 text-3xl font-bold">Settings</h1>
+        <p className="text-muted-foreground">Manage your account settings and preferences</p>
       </div>
 
       {/* Profile Information */}
       <Card>
         <CardHeader>
-          <div className={between.center}>
+          <div className="flex items-center justify-between">
             <div>
               <CardTitle>Profile Information</CardTitle>
               <CardDescription>Update your public profile details</CardDescription>
@@ -311,17 +316,19 @@ export default async function SettingsPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <ProfileEditForm profile={{
-            bio: profile.bio,
-            display_name: profile.display_name,
-            follow_email: profile.follow_email,
-            interests: profile.interests ?? [],
-            profile_public: profile.profile_public,
-            social_x_link: profile.social_x_link,
-            website: profile.website,
-            work: profile.work,
-            username: username ?? null,
-          }} />
+          <ProfileEditForm
+            profile={{
+              bio: profile.bio,
+              display_name: profile.display_name,
+              follow_email: profile.follow_email,
+              interests: profile.interests ?? [],
+              profile_public: profile.profile_public,
+              social_x_link: profile.social_x_link,
+              username: username ?? null,
+              website: profile.website,
+              work: profile.work,
+            }}
+          />
         </CardContent>
       </Card>
 
@@ -331,15 +338,15 @@ export default async function SettingsPage() {
           <CardTitle>Account Details</CardTitle>
           <CardDescription>Your account information</CardDescription>
         </CardHeader>
-        <CardContent className={`${spaceY.comfortable}`}>
-          <div className={`grid grid-cols-1 ${gap.default} md:grid-cols-2`}>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <div>
-              <p className="text-sm font-medium">Email</p>
-              <p className={`${muted.default}`}>{user.email}</p>
+              <p className="text-sm-medium">Email</p>
+              <p className="text-muted-foreground">{user.email}</p>
             </div>
             <div>
-              <p className="text-sm font-medium">Member Since</p>
-              <p className={`${muted.default}`}>
+              <p className="text-sm-medium">Member Since</p>
+              <p className="text-muted-foreground">
                 {profile.created_at
                   ? new Date(profile.created_at).toLocaleDateString('en-US', {
                       day: 'numeric',
@@ -360,12 +367,12 @@ export default async function SettingsPage() {
             Synced from {user.app_metadata.provider === 'github' ? 'GitHub' : 'Google'}
           </CardDescription>
         </CardHeader>
-        <CardContent className={`${spaceY.comfortable}`}>
+        <CardContent className="space-y-4">
           {userData?.image && typeof userData.image === 'string' ? (
-            <div className={`flex items-center ${gap.default}`}>
+            <div className="flex items-center gap-3">
               <Image
                 alt={`${userData.name ?? 'User'}'s avatar`}
-                className={`${iconSize['3xl']} ${radius['full']} object-cover`}
+                className="h-16 w-16 rounded-full object-cover"
                 height={64}
                 src={userData.image}
                 width={64}

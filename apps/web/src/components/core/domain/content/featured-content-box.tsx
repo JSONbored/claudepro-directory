@@ -24,7 +24,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
-import { between, iconSize, gap, cluster, marginY, marginBottom, spaceY, marginLeft, paddingTop, marginTop, paddingLeft, padding, muted } from '@heyclaude/web-runtime/design-system';
 // COLORS removed - using direct Tailwind utilities
 import { useCallback, useState } from 'react';
 
@@ -125,15 +124,15 @@ function AccordionBox(props: AccordionVariant) {
   );
 
   return (
-    <section className={`${marginY.relaxed}`} aria-label={title || 'Accordion section'}>
+    <section className="my-8" aria-label={title || 'Accordion section'}>
       {title ? (
-        <div className={`${marginBottom.comfortable}`}>
-          <h3 className={`${marginBottom.compact} text-xl font-bold`}>{title}</h3>
-          {description ? <p className={muted.default}>{description}</p> : null}
+        <div className="mb-6">
+          <h3 className="mb-2 text-xl font-bold">{title}</h3>
+          {description ? <p className="text-muted-foreground">{description}</p> : null}
         </div>
       ) : null}
 
-      <div className={`${spaceY.compact}`}>
+      <div className="space-y-2">
         {validItems.map((item, index) => (
           <Card
             key={`accordion-item-${index}-${item.title}`}
@@ -148,17 +147,17 @@ function AccordionBox(props: AccordionVariant) {
               aria-expanded={openItems.has(index)}
             >
               <CardHeader className="hover:bg-muted/30 transition-colors">
-                <CardTitle className={between.center} itemProp="name">
+                <CardTitle className="flex items-center justify-between" itemProp="name">
                   <span>{item.title}</span>
-                  <div className={`${marginLeft.default} shrink-0`}>
+                  <div className="ml-4 shrink-0">
                     {openItems.has(index) ? (
                       <ChevronUp
-                        className={cn(iconSize.sm, muted.default, 'transition-transform')}
+                        className={cn('h-4 w-4', 'text-muted-foreground', 'transition-transform')}
                         aria-hidden="true"
                       />
                     ) : (
                       <ChevronDown
-                        className={cn(iconSize.sm, muted.default, 'transition-transform')}
+                        className={cn('h-4 w-4', 'text-muted-foreground', 'transition-transform')}
                         aria-hidden="true"
                       />
                     )}
@@ -168,7 +167,7 @@ function AccordionBox(props: AccordionVariant) {
             </button>
 
             {openItems.has(index) && (
-              <CardContent className={`${paddingTop.default}`} itemScope itemType="https://schema.org/Answer">
+              <CardContent className="pt-4" itemScope itemType="https://schema.org/Answer">
                 <div itemProp="text">{item.content}</div>
               </CardContent>
             )}
@@ -204,26 +203,26 @@ function FAQBox(props: FAQVariant) {
   }
 
   return (
-    <section className={`${marginY.relaxed} ${spaceY.relaxed}`}>
-      <div className={`${marginBottom.comfortable}`}>
-        <h2 className={`${marginBottom.compact} text-2xl font-bold`}>{title}</h2>
-        {description ? <p className={muted.default}>{description}</p> : null}
+    <section className="my-8 space-y-6">
+      <div className="mb-6">
+        <h2 className="mb-2 text-2xl font-bold">{title}</h2>
+        {description ? <p className="text-muted-foreground">{description}</p> : null}
       </div>
 
-      <div className={`${spaceY.comfortable}`}>
+      <div className="space-y-4">
         {validQuestions.map((faq) => (
           <Card key={faq.question} className="border-border bg-code/50 border backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className={`flex items-start ${gap.compact} text-lg font-semibold`}>
-                <div className={cn('bg-primary/10', marginTop['4.5'], 'flex h-6 w-6 shrink-0 items-center justify-center rounded-full')}>
+              <CardTitle className="flex items-start gap-2 text-lg font-semibold">
+                <div className={cn('bg-primary/10', 'mt-[18px]', 'flex h-6 w-6 shrink-0 items-center justify-center rounded-full')}>
                   <span className="text-primary text-sm font-bold">Q</span>
                 </div>
                 {faq.question}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className={`${paddingLeft.default}`}>
-                <div className={cn(muted.default, 'leading-relaxed')}>{faq.answer}</div>
+              <div className="pl-4">
+                <div className={cn('text-muted-foreground', 'leading-relaxed')}>{faq.answer}</div>
               </div>
             </CardContent>
           </Card>
@@ -276,10 +275,10 @@ function InfoBoxComponent(props: InfoBoxVariant) {
   const classes = variantClasses[currentVariant];
 
   const iconMap: Record<'error' | 'info' | 'success' | 'warning', React.ReactElement> = {
-    info: <Info className={cn(iconSize.md, variantClasses.info.iconClass)} />,
-    warning: <AlertTriangle className={cn(iconSize.md, variantClasses.warning.iconClass)} />,
-    success: <CheckCircle className={cn(iconSize.md, variantClasses.success.iconClass)} />,
-    error: <AlertTriangle className={cn(iconSize.md, variantClasses.error.iconClass)} />,
+    info: <Info className={cn('h-5 w-5', variantClasses.info.iconClass)} />,
+    warning: <AlertTriangle className={cn('h-5 w-5', variantClasses.warning.iconClass)} />,
+    success: <CheckCircle className={cn('h-5 w-5', variantClasses.success.iconClass)} />,
+    error: <AlertTriangle className={cn('h-5 w-5', variantClasses.error.iconClass)} />,
   };
 
   return (
@@ -287,22 +286,22 @@ function InfoBoxComponent(props: InfoBoxVariant) {
       itemScope
       itemType="https://schema.org/Note"
       className={cn(
-        marginY.comfortable,
+        'my-6',
         'rounded-r-lg border-l-4',
-        padding.comfortable,
+        'p-6',
         classes.borderClass,
         classes.bgClass
       )}
     >
       {title ? (
-        <div className={cn(cluster.compact, marginBottom.compact)}>
+        <div className={cn('flex items-center gap-2', 'mb-2')}>
           {iconMap[currentVariant]}
           <h4 className="text-foreground font-semibold" itemProp="name">
             {title}
           </h4>
         </div>
       ) : null}
-      <div itemProp="text" className={cn(muted.default, 'leading-relaxed')}>
+      <div itemProp="text" className={cn('text-muted-foreground', 'leading-relaxed')}>
         {children}
       </div>
     </div>
@@ -327,16 +326,16 @@ function CalloutComponent(props: CalloutVariant) {
   const { type, title, children } = props;
 
   return (
-    <Alert className={`${marginY.comfortable}`}>
-      <div className={`flex items-start ${gap.default}`}>
-        {type === 'info' && <Info className={iconSize.sm} />}
-        {type === 'warning' && <AlertTriangle className={iconSize.sm} />}
-        {type === 'error' && <AlertTriangle className={iconSize.sm} />}
-        {type === 'success' && <CheckCircle className={iconSize.sm} />}
-        {type === 'tip' && <Zap className={iconSize.sm} />}
+    <Alert className="my-6">
+      <div className="flex items-start gap-3">
+        {type === 'info' && <Info className="h-4 w-4" />}
+        {type === 'warning' && <AlertTriangle className="h-4 w-4" />}
+        {type === 'error' && <AlertTriangle className="h-4 w-4" />}
+        {type === 'success' && <CheckCircle className="h-4 w-4" />}
+        {type === 'tip' && <Zap className="h-4 w-4" />}
         <div className="flex-1">
           {title ? <AlertTitle>{title}</AlertTitle> : null}
-          <AlertDescription className={`${marginTop.compact}`}>{children}</AlertDescription>
+          <AlertDescription className="mt-2">{children}</AlertDescription>
         </div>
       </div>
     </Alert>

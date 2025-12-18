@@ -1,9 +1,11 @@
 import 'server-only';
 
-import { JobsService, SearchService } from '@heyclaude/data-layer';
-import type { FilterJobsArgs, FilterJobsReturns } from '@heyclaude/database-types/postgres-types';
+import {
+  type FilterJobsArgs,
+  type FilterJobsReturns,
+} from '@heyclaude/database-types/postgres-types';
+import { type jobsModel } from '@heyclaude/database-types/prisma/models';
 import { normalizeError } from '@heyclaude/shared-runtime';
-import { cacheLife, cacheTag } from 'next/cache';
 
 import { logger } from '../logger.ts';
 import { pulseJobSearch } from '../pulse.ts';
@@ -12,6 +14,9 @@ import {
   isValidJobCategory,
   isValidJobType,
 } from '../utils/type-guards.ts';
+
+import { createCachedDataFunction, generateResourceTags } from './cached-data-factory.ts';
+import { getService } from './service-factory.ts';
 
 export type JobsFilterResult = FilterJobsReturns;
 
@@ -26,192 +31,99 @@ export interface JobsFilterOptions {
   sort?: 'newest' | 'oldest' | 'salary';
 }
 
-/***
- * Fetches jobs matching the provided filter options directly from the data source without using cache.
- *
- * @param {JobsFilterOptions} options - Filtering options (searchQuery, category, employment, experience, remote, limit, offset, sort)
- * @returns The filtered jobs result, or `null` if an error occurs
+/**
+ * Build RPC arguments from filter options
+ * Extracted to eliminate duplication
  */
-async function getFilteredJobsDirect(options: JobsFilterOptions): Promise<JobsFilterResult | null> {
-  const reqLogger = logger.child({
-    module: 'data/jobs',
-    operation: 'getFilteredJobsDirect',
-  });
+function buildFilterJobsArgs(options: JobsFilterOptions): FilterJobsArgs {
+  const { category, employment, experience, limit, offset, remote, searchQuery } = options;
+  const rpcArguments: FilterJobsArgs = {};
 
-  const { category, employment, experience, limit, offset, remote, searchQuery, sort } = options;
-
-  const filtersLog: Record<string, boolean | null | number | string> = {
-    category: category ?? null,
-    employment: employment ?? null,
-    experience: experience ?? null,
-    limit: limit ?? null,
-    offset: offset ?? null,
-    remote: remote ?? null,
-    searchQuery: searchQuery ?? null,
-    sort: sort ?? null,
-  };
-
-  try {
-    // Build RPC args with proper type narrowing using type guards
-    const rpcArguments: FilterJobsArgs = {};
-
-    if (searchQuery) {
-      rpcArguments.p_search_query = searchQuery;
-    }
-    if (category && category !== 'all' && isValidJobCategory(category)) {
-      rpcArguments.p_category = category;
-    }
-    if (employment && employment !== 'any' && isValidJobType(employment)) {
-      rpcArguments.p_employment_type = employment;
-    }
-    if (experience && experience !== 'any' && isValidExperienceLevel(experience)) {
-      rpcArguments.p_experience_level = experience;
-    }
-    if (remote !== undefined) {
-      rpcArguments.p_remote_only = remote;
-    }
-    if (limit !== undefined) {
-      rpcArguments.p_limit = limit;
-    }
-    if (offset !== undefined) {
-      rpcArguments.p_offset = offset;
-    }
-
-    const service = new SearchService();
-    return await service.filterJobs(rpcArguments);
-  } catch (error) {
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.warn(
-      { err: errorForLogging, ...filtersLog, fallbackStrategy: 'null' },
-      'Job filtering failed, returning null'
-    );
-    return null;
+  if (searchQuery) {
+    rpcArguments.p_search_query = searchQuery;
   }
+  if (category && category !== 'all' && isValidJobCategory(category)) {
+    rpcArguments.p_category = category;
+  }
+  if (employment && employment !== 'any' && isValidJobType(employment)) {
+    rpcArguments.p_employment_type = employment;
+  }
+  if (experience && experience !== 'any' && isValidExperienceLevel(experience)) {
+    rpcArguments.p_experience_level = experience;
+  }
+  if (remote !== undefined) {
+    rpcArguments.p_remote_only = remote;
+  }
+  if (limit !== undefined) {
+    rpcArguments.p_limit = limit;
+  }
+  if (offset !== undefined) {
+    rpcArguments.p_offset = offset;
+  }
+
+  return rpcArguments;
 }
 
-/****
- *
+/**
+ * Pulse job search analytics (fire and forget)
+ * Extracted to eliminate duplication
+ */
+function pulseJobSearchAsync(searchQuery: string): void {
+  void pulseJobSearch(searchQuery, {}, 0).catch((error: unknown) => {
+    const normalized = normalizeError(error, 'Failed to pulse job search');
+    logger.error(
+      { err: normalized, module: 'data/jobs', operation: 'pulseJobSearch', searchQuery },
+      'Failed to pulse job search'
+    );
+  });
+}
+
+/**
  * Get jobs list without filters (cached)
  * Uses 'use cache' to cache jobs lists. This data is public and same for all users.
- * Jobs lists change periodically, so we use the 'half' cacheLife profile.
- * @param {number} limit
- * @param {number} offset
- * @returns {Promise<unknown>} Return value description
  */
-async function getJobsListCached(limit: number, offset: number): Promise<JobsFilterResult | null> {
-  'use cache';
+const getJobsListCached = createCachedDataFunction<
+  { limit: number; offset: number },
+  JobsFilterResult | null
+>({
+  serviceKey: 'search',
+  methodName: 'filterJobs',
+  cacheMode: 'public',
+  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
+  cacheTags: () => generateResourceTags('jobs', undefined, ['jobs-list']),
+  module: 'data/jobs',
+  operation: 'getJobsListCached',
+  transformArgs: (args) => ({
+    p_limit: args.limit,
+    p_offset: args.offset,
+  } as FilterJobsArgs),
+  onError: () => null,
+  logContext: (args) => ({ limit: args.limit, offset: args.offset }),
+});
 
-  // Configure cache - use 'static' profile for optimal SEO (1 day stale, 6hr revalidate, 30 days expire)
-  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
-  cacheTag('jobs-list');
-
-  const reqLogger = logger.child({
-    module: 'data/jobs',
-    operation: 'getJobsListCached',
-  });
-
-  try {
-    const rpcArgs: FilterJobsArgs = {};
-    if (limit !== undefined) {
-      rpcArgs.p_limit = limit;
-    }
-    if (offset !== undefined) {
-      rpcArgs.p_offset = offset;
-    }
-
-    const service = new SearchService();
-    const result = await service.filterJobs(rpcArgs);
-
-    reqLogger.info(
-      { hasResult: Boolean(result), limit, offset },
-      'getJobsListCached: fetched successfully'
-    );
-
-    return result;
-  } catch (error) {
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error({ err: errorForLogging, limit, offset }, 'getJobsListCached: failed');
-    return null;
-  }
-}
-
-/**********
-*
+/**
  * Get filtered jobs with search/filters (cached)
  * Uses 'use cache' to cache filtered jobs. This data is public and same for all users.
- * Filtered jobs change periodically, so we use the 'half' cacheLife profile.
- * @param {FilterJobsArgs} rpcArguments
- * @param {string} searchQuery
- * @param {string} category
- * @param {string} employment
- * @param {string} experience
- * @param {boolean} remote
- * @param {number} limit
- * @param {number} offset
- * @param sort
- * @returns {Promise<unknown>} Return value description
  */
-async function getFilteredJobsCached(
-  rpcArguments: FilterJobsArgs,
-  searchQuery: string,
-  category: string,
-  employment: string,
-  experience: string,
-  remote: boolean,
-  limit: number,
-  offset: number,
-  sort: string
-): Promise<JobsFilterResult | null> {
-  'use cache';
-
-  // Configure cache - use 'stable' profile for optimal SEO (6hr stale, 1hr revalidate, 7 days expire)
-  cacheLife('stable'); // 6hr stale, 1hr revalidate, 7 days expire - optimized for SEO
-  cacheTag('jobs-search');
-
-  const reqLogger = logger.child({
-    module: 'data/jobs',
-    operation: 'getFilteredJobsCached',
-  });
-
-  try {
-    const service = new SearchService();
-    const result = await service.filterJobs(rpcArguments);
-
-    reqLogger.info(
-      {
-        category,
-        employment,
-        experience,
-        hasResult: Boolean(result),
-        limit,
-        offset,
-        remote,
-        searchQuery,
-        sort,
-      },
-      'getFilteredJobsCached: fetched successfully'
-    );
-
-    return result;
-  } catch (error) {
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error(
-      {
-        category,
-        employment,
-        err: errorForLogging,
-        experience,
-        limit,
-        offset,
-        remote,
-        searchQuery,
-        sort,
-      },
-      'getFilteredJobsCached: failed'
-    );
-    return null;
-  }
-}
+const getFilteredJobsCached = createCachedDataFunction<FilterJobsArgs, JobsFilterResult | null>({
+  serviceKey: 'search',
+  methodName: 'filterJobs',
+  cacheMode: 'public',
+  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
+  cacheTags: () => generateResourceTags('jobs', undefined, ['jobs-search']),
+  module: 'data/jobs',
+  operation: 'getFilteredJobsCached',
+  onError: () => null,
+  logContext: (args) => ({
+    category: args.p_category ?? null,
+    employment: args.p_employment_type ?? null,
+    experience: args.p_experience_level ?? null,
+    limit: args.p_limit ?? null,
+    offset: args.p_offset ?? null,
+    remote: args.p_remote_only ?? null,
+    searchQuery: args.p_search_query ?? null,
+  }),
+});
 
 /**
  * Retrieve jobs using the provided filter options, optionally bypassing the cache.
@@ -229,7 +141,7 @@ export async function getFilteredJobs(
     operation: 'getFilteredJobs',
   });
 
-  const { category, employment, experience, limit, offset, remote, searchQuery, sort } = options;
+  const { category, employment, experience, limit, offset, remote, searchQuery } = options;
   const hasFilters = Boolean(
     (searchQuery ?? '') !== '' ||
     (category !== undefined && category !== 'all') ||
@@ -238,175 +150,101 @@ export async function getFilteredJobs(
     remote !== undefined
   );
 
-  const filtersLog: Record<string, boolean | null | number | string> = {
-    category: category ?? null,
-    employment: employment ?? null,
-    experience: experience ?? null,
-    limit: limit ?? null,
-    offset: offset ?? null,
-    remote: remote ?? null,
-    searchQuery: searchQuery ?? null,
-    sort: sort ?? null,
-  };
-
   // If no filters, use standard list (cached)
   if (!hasFilters) {
     try {
-      return await getJobsListCached(limit ?? 0, offset ?? 0);
+      return await getJobsListCached({ limit: limit ?? 0, offset: offset ?? 0 });
     } catch (error) {
-      const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-      reqLogger.error(
-        { err: errorForLogging, ...filtersLog },
-        'getFilteredJobs: failed to fetch jobs list'
-      );
+      const normalized = normalizeError(error, 'Failed to fetch jobs list');
+      reqLogger.error({ err: normalized }, 'getFilteredJobs: failed to fetch jobs list');
       return null;
     }
   }
 
-  // If filters present and noCache=true, bypass cache (uncached SSR)
-  if (noCache) {
-    // Pulse the search for analytics (fire and forget)
-    if (searchQuery) {
-      void pulseJobSearch(searchQuery, {}, 0).catch((error: unknown) => {
-        const normalized = normalizeError(error, 'Failed to pulse job search');
-        logger.error(
-          { err: normalized, module: 'data/jobs', operation: 'pulseJobSearch', searchQuery },
-          'Failed to pulse job search'
-        );
-      });
-    }
-    return getFilteredJobsDirect(options);
+  // Pulse analytics for search queries (fire and forget)
+  if (searchQuery) {
+    pulseJobSearchAsync(searchQuery);
   }
 
-  // If filters present, use search (cached with query key)
+  // If noCache=true, bypass cache (uncached SSR) - call service directly
+  if (noCache) {
+    try {
+      const service = await getService('search');
+      const rpcArgs = buildFilterJobsArgs(options);
+      return await service.filterJobs(rpcArgs);
+    } catch (error) {
+      const normalized = normalizeError(error, 'Job filtering failed');
+      reqLogger.warn({ err: normalized }, 'Job filtering failed, returning null');
+      return null;
+    }
+  }
+
+  // If filters present, use cached search
   try {
-    // Pulse the search for analytics (fire and forget)
-    if (searchQuery) {
-      void pulseJobSearch(searchQuery, {}, 0).catch((error: unknown) => {
-        const normalized = normalizeError(error, 'Failed to pulse job search');
-        logger.error(
-          { err: normalized, module: 'data/jobs', operation: 'pulseJobSearch', searchQuery },
-          'Failed to pulse job search'
-        );
-      });
-    }
-
-    // Build RPC args with proper type narrowing using type guards
-    const rpcArguments: FilterJobsArgs = {};
-
-    if (searchQuery) {
-      rpcArguments.p_search_query = searchQuery;
-    }
-    if (category && category !== 'all' && isValidJobCategory(category)) {
-      rpcArguments.p_category = category;
-    }
-    if (employment && employment !== 'any' && isValidJobType(employment)) {
-      rpcArguments.p_employment_type = employment;
-    }
-    if (experience && experience !== 'any' && isValidExperienceLevel(experience)) {
-      rpcArguments.p_experience_level = experience;
-    }
-    if (remote !== undefined) {
-      rpcArguments.p_remote_only = remote;
-    }
-    if (limit !== undefined) {
-      rpcArguments.p_limit = limit;
-    }
-    if (offset !== undefined) {
-      rpcArguments.p_offset = offset;
-    }
-
-    return await getFilteredJobsCached(
-      rpcArguments,
-      searchQuery ?? '',
-      category ?? 'all',
-      employment ?? 'any',
-      experience ?? 'any',
-      remote ?? false,
-      limit ?? 0,
-      offset ?? 0,
-      sort ?? 'newest'
-    );
+    const rpcArgs = buildFilterJobsArgs(options);
+    return await getFilteredJobsCached(rpcArgs);
   } catch (error) {
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error({ err: errorForLogging, ...filtersLog }, 'Failed to fetch filtered jobs');
+    const normalized = normalizeError(error, 'Failed to fetch filtered jobs');
+    reqLogger.error({ err: normalized }, 'Failed to fetch filtered jobs');
     return null;
   }
 }
+
+/**
+ * Get active job slugs for static generation
+ *
+ * OPTIMIZATION: Uses Prisma directly instead of RPC for better performance.
+ * Only fetches slugs needed for generateStaticParams, avoiding unnecessary data processing.
+ */
+export const getActiveJobSlugs = createCachedDataFunction<number, string[]>({
+  serviceKey: 'jobs',
+  methodName: 'getActiveJobSlugs',
+  cacheMode: 'public',
+  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire
+  cacheTags: () => generateResourceTags('jobs', undefined, ['jobs-slugs']),
+  module: 'data/jobs',
+  operation: 'getActiveJobSlugs',
+  onError: () => [], // Return empty array on error
+  logContext: (limit) => ({ limit }),
+});
 
 /**
  * Gets a single job by slug
  * Uses 'use cache' to cache job details. This data is public and same for all users.
- * Job details change periodically, so we use the 'half' cacheLife profile.
- * @param slug
+ * Job details change periodically, so we use the 'medium' cacheLife profile.
  */
-export async function getJobBySlug(slug: string) {
-  'use cache';
-
-  // Configure cache - use 'detail' profile for optimal SEO (2hr stale, 30min revalidate, 1 day expire)
-  cacheLife('detail'); // 2hr stale, 30min revalidate, 1 day expire - optimized for SEO
-  cacheTag(`job-${slug}`);
-  cacheTag('jobs');
-
-  const reqLogger = logger.child({
-    module: 'data/jobs',
-    operation: 'getJobBySlug',
-  });
-
-  try {
-    const service = new JobsService();
-    const result = await service.getJobBySlug({ p_slug: slug });
-
-    reqLogger.info({ hasResult: Boolean(result), slug }, 'getJobBySlug: fetched successfully');
-
-    return result;
-  } catch (error) {
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error({ err: errorForLogging, slug }, 'getJobBySlug: unexpected error');
-    return null;
-  }
-}
+export const getJobBySlug = createCachedDataFunction<string, unknown>({
+  serviceKey: 'jobs',
+  methodName: 'getJobBySlug',
+  cacheMode: 'public',
+  cacheLife: 'medium', // 1hr stale, 15min revalidate, 1 day expire - optimized for SEO
+  cacheTags: (slug) => generateResourceTags('jobs', slug),
+  module: 'data/jobs',
+  operation: 'getJobBySlug',
+  transformArgs: (slug) => ({ p_slug: slug }),
+});
 
 /**
  * Retrieve a list of featured jobs for display.
  * Uses 'use cache' to cache featured jobs. This data is public and same for all users.
- * Featured jobs change periodically, so we use the 'half' cacheLife profile.
- *
- * @param limit - Maximum number of featured jobs to return (default 5)
- * @returns An array of featured job records; returns an empty array if none are available or if an error occurs
+ * Featured jobs change periodically, so we use the 'long' cacheLife profile.
  */
-export async function getFeaturedJobs(limit = 5) {
-  'use cache';
-
-  // Configure cache - use 'static' profile for optimal SEO (1 day stale, 6hr revalidate, 30 days expire)
-  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
-  cacheTag('jobs-featured');
-  cacheTag('jobs');
-
-  const reqLogger = logger.child({
+export async function getFeaturedJobs(limit = 5): Promise<jobsModel[]> {
+  const cachedFn = createCachedDataFunction<void, jobsModel[]>({
+    serviceKey: 'jobs',
+    methodName: 'getFeaturedJobs',
+    cacheMode: 'public',
+    cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
+    cacheTags: () => generateResourceTags('jobs', undefined, ['jobs-featured']),
     module: 'data/jobs',
     operation: 'getFeaturedJobs',
+    transformResult: (result) => {
+      const jobs = result as jobsModel[];
+      return jobs.slice(0, limit);
+    },
+    onError: () => [], // Return empty array on error
+    logContext: () => ({ limit }),
   });
 
-  try {
-    const service = new JobsService();
-    const result = await service.getFeaturedJobs();
-
-    // GetFeaturedJobsReturns is Jobs (single object), not an array
-    // Convert to array for consistency with other job functions
-    reqLogger.info(
-      { hasResult: result !== null && result !== undefined, limit },
-      'getFeaturedJobs: fetched successfully'
-    );
-
-    if (result === null || result === undefined) {
-      return [];
-    }
-    // Return as array for consistency
-    return [result];
-  } catch (error) {
-    const errorForLogging: Error | string = error instanceof Error ? error : String(error);
-    reqLogger.error({ err: errorForLogging, limit }, 'getFeaturedJobs: unexpected error');
-    return [];
-  }
+  return (await cachedFn(undefined as void)) ?? [];
 }

@@ -30,8 +30,11 @@ import type {
 } from '@heyclaude/database-types/postgres-types';
 import type {
   GetContentDetailCompleteReturns,
-  Jobs,
 } from '@heyclaude/database-types/postgres-types';
+import type { jobsModel } from '@heyclaude/database-types/prisma/models';
+
+// Use Prisma model type instead of excluded composite type
+type Jobs = jobsModel;
 
 // Use new composite types from @heyclaude/data-layer
 type SearchResult = SearchContentOptimizedRow;

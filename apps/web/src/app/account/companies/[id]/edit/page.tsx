@@ -2,7 +2,7 @@
  * Edit Company Page - Update existing company via edge function
  */
 
-import type { UserCompaniesCompany } from '@heyclaude/database-types/postgres-types';
+import { type UserCompaniesCompany } from '@heyclaude/database-types/postgres-types';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
@@ -23,12 +23,16 @@ import { cacheLife } from 'next/cache';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { connection } from 'next/server';
-import { Suspense } from 'react';
-
-import { CompanyForm } from '@/src/components/core/forms/company-form';
+import { lazy, Suspense } from 'react';
 
 import Loading from './loading';
-import { spaceY, marginBottom, muted } from "@heyclaude/web-runtime/design-system";
+
+// OPTIMIZATION: Dynamic import for large form component (580 lines) - only loads when needed
+const CompanyForm = lazy(() =>
+  import('@/src/components/core/forms/company-form').then((mod) => ({
+    default: mod.CompanyForm,
+  }))
+);
 
 /**
  * Provide metadata for the edit-company route and ensure a server-side connection before performing non-deterministic operations.
@@ -145,7 +149,7 @@ async function EditCompanyPageContent({
   );
 
   // Section: Company Data Fetch
-  let company: UserCompaniesCompany | null = null;
+  let company: null | UserCompaniesCompany = null;
   let hasError = false;
   try {
     company = await getUserCompanyById(user.id, id);
@@ -169,7 +173,7 @@ async function EditCompanyPageContent({
 
   if (hasError) {
     return (
-      <div className={`${spaceY.relaxed}`}>
+      <div className="space-y-6">
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl">Company unavailable</CardTitle>
@@ -199,13 +203,15 @@ async function EditCompanyPageContent({
   );
 
   return (
-    <div className={`${spaceY.relaxed}`}>
+    <div className="space-y-6">
       <div>
-        <h1 className={`${marginBottom.compact} text-3xl font-bold`}>Edit Company</h1>
-        <p className={`${muted.default}`}>Update your company profile information</p>
+        <h1 className="mb-2 text-3xl font-bold">Edit Company</h1>
+        <p className="text-muted-foreground">Update your company profile information</p>
       </div>
 
-      <CompanyForm initialData={company} mode="edit" />
+      <Suspense fallback={<Loading />}>
+        <CompanyForm initialData={company} mode="edit" />
+      </Suspense>
     </div>
   );
 }

@@ -45,7 +45,7 @@ import {
   cn,
 } from '@heyclaude/web-runtime/ui';
 import { optimizeAvatarUrl } from '@heyclaude/web-runtime/utils/optimize-avatar-url';
-import { MICROINTERACTIONS, iconSize, padding, marginBottom, paddingBottom, gap, paddingX, paddingY, spaceY, marginTop, paddingTop, weight, size, truncate, muted, tracking, cluster } from '@heyclaude/web-runtime/design-system';
+import { MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import Link from 'next/link';
@@ -109,7 +109,7 @@ export function UserMenu({ className }: UserMenuProps) {
   if (loading) {
     return (
       <div className={`flex items-center ${className}`}>
-        <Skeleton size="lg" width="lg" rounded="full" className={iconSize.xl} />
+        <Skeleton size="lg" width="lg" rounded="full" className="h-8 w-8" />
       </div>
     );
   }
@@ -123,7 +123,7 @@ export function UserMenu({ className }: UserMenuProps) {
             asChild
             variant="default"
             size="sm"
-            className={`${weight.semibold} shadow-sm bg-color-newsletter-bg text-color-newsletter-text`}
+            className="font-semibold shadow-sm bg-color-newsletter-bg text-color-newsletter-text"
           >
             <Link href="/login" aria-label="Get started - Sign in with GitHub">
               <span>Get Started</span>
@@ -158,17 +158,17 @@ export function UserMenu({ className }: UserMenuProps) {
           >
             <Button
               variant="ghost"
-              className={`hover:ring-accent/30 relative h-8 w-8 rounded-full ${padding.default} hover:ring-2`}
+              className="hover:ring-accent/30 relative h-8 w-8 rounded-full p-4 hover:ring-2"
               aria-label={`User menu for ${displayName}`}
             >
-              <Avatar className={iconSize.xl}>
+              <Avatar className="h-8 w-8">
                 {avatarUrl ? (
                   <AvatarImage 
                     src={optimizeAvatarUrl(avatarUrl, 32) ?? avatarUrl} 
                     alt={displayName || 'User avatar'} 
                   />
                 ) : null}
-                <AvatarFallback className={`bg-accent/20 text-accent ${size.sm} ${weight.semibold}`}>
+                <AvatarFallback className="bg-accent/20 text-accent text-sm font-semibold">
                   {initials}
                 </AvatarFallback>
               </Avatar>
@@ -176,9 +176,9 @@ export function UserMenu({ className }: UserMenuProps) {
           </motion.div>
         </NavigationHoverCardTrigger>
 
-        <NavigationHoverCardContent align="end" className={`w-72 ${padding.default}`} sideOffset={8}>
+        <NavigationHoverCardContent align="end" className="w-72 p-4" sideOffset={8}>
           {/* User Header with Avatar */}
-          <div className={cn(cluster.compact, marginBottom.default, paddingBottom.default, 'border-b border-border')}>
+          <div className={cn('flex items-center gap-2', 'mb-4', 'pb-4', 'border-b border-border')}>
             <Avatar className="h-12 w-12">
               {avatarUrl ? (
                 <AvatarImage 
@@ -186,13 +186,13 @@ export function UserMenu({ className }: UserMenuProps) {
                   alt={displayName || 'User avatar'} 
                 />
               ) : null}
-              <AvatarFallback className={`bg-accent/20 text-accent ${size.base} ${weight.semibold}`}>
+              <AvatarFallback className="bg-accent/20 text-accent text-base font-semibold">
                 {initials}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <p className={`${size.sm} ${weight.semibold} ${truncate.single}`}>{displayName}</p>
-              <p className={`${size.xs} text-muted-foreground ${truncate.single}`}>{user.email}</p>
+              <p className="text-sm font-semibold truncate">{displayName}</p>
+              <p className="text-muted-foreground text-xs truncate">{user.email}</p>
             </div>
           </div>
 
@@ -200,35 +200,35 @@ export function UserMenu({ className }: UserMenuProps) {
           <motion.div
             whileHover={shouldReduceMotion ? {} : { backgroundColor: 'rgba(249, 115, 22, 0.05)' }}
             transition={MICROINTERACTIONS.colorTransition.default}
-            className={`${marginBottom.compact}`}
+            className="mb-2"
           >
             <Link
               href="/account"
-              className={cn(cluster.compact, paddingX.compact, paddingY.tight, 'rounded-md group/item')}
+              className={cn('flex items-center gap-2', 'px-3', 'py-2', 'rounded-md group/item')}
             >
               <User className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors" />
-              <span className={`flex-1 ${size.sm} ${weight.medium}`}>Dashboard</span>
+              <span className="flex-1 text-sm font-medium">Dashboard</span>
             </Link>
           </motion.div>
 
           {/* My Content Section */}
-          <div className={marginBottom.compact}>
-            <div className={cn(paddingX.compact, 'py-1.5', marginBottom.tight)}>
-              <p className={cn(size['2xs'], weight.semibold, muted.default, 'opacity-70 uppercase', tracking.wide)}>
+          <div className="mb-2">
+            <div className={cn('px-3', 'py-1.5', 'mb-1')}>
+              <p className={cn('text-[10px]', 'font-semibold', 'text-muted-foreground', 'opacity-70 uppercase', 'tracking-wide')}>
                 My Content
               </p>
             </div>
-            <div className={`${spaceY.default}.5`}>
+            <div className="space-y-3.5">
               <motion.div
                 whileHover={{ backgroundColor: 'rgba(249, 115, 22, 0.05)' }}
                 transition={MICROINTERACTIONS.colorTransition.default}
               >
                 <Link
                   href="/account/library"
-                  className={cn(cluster.compact, paddingX.compact, paddingY.tight, 'rounded-md group/item')}
+                  className={cn('flex items-center gap-2', 'px-3', 'py-2', 'rounded-md group/item')}
                 >
                   <BookOpen className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors" />
-                  <span className={`flex-1 ${size.sm}`}>Library</span>
+                  <span className="flex-1 text-sm">Library</span>
                 </Link>
               </motion.div>
               <motion.div
@@ -237,10 +237,10 @@ export function UserMenu({ className }: UserMenuProps) {
               >
                 <Link
                   href="/account/bookmarks"
-                  className={cn(cluster.compact, paddingX.compact, paddingY.tight, 'rounded-md group/item')}
+                  className={cn('flex items-center gap-2', 'px-3', 'py-2', 'rounded-md group/item')}
                 >
                   <Bookmark className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors" />
-                  <span className={`flex-1 ${size.sm}`}>Bookmarks</span>
+                  <span className="flex-1 text-sm">Bookmarks</span>
                 </Link>
               </motion.div>
               <motion.div
@@ -249,10 +249,10 @@ export function UserMenu({ className }: UserMenuProps) {
               >
                 <Link
                   href="/account/submissions"
-                  className={cn(cluster.compact, paddingX.compact, paddingY.tight, 'rounded-md group/item')}
+                  className={cn('flex items-center gap-2', 'px-3', 'py-2', 'rounded-md group/item')}
                 >
                   <Rocket className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors" />
-                  <span className={`flex-1 ${size.sm}`}>Submissions</span>
+                  <span className="flex-1 text-sm">Submissions</span>
                 </Link>
               </motion.div>
               <motion.div
@@ -261,33 +261,33 @@ export function UserMenu({ className }: UserMenuProps) {
               >
                 <Link
                   href="/account/activity"
-                  className={cn(cluster.compact, paddingX.compact, paddingY.tight, 'rounded-md group/item')}
+                  className={cn('flex items-center gap-2', 'px-3', 'py-2', 'rounded-md group/item')}
                 >
                   <Activity className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors" />
-                  <span className={`flex-1 ${size.sm}`}>Activity</span>
+                  <span className="flex-1 text-sm">Activity</span>
                 </Link>
               </motion.div>
             </div>
           </div>
 
           {/* Manage Section */}
-          <div className={marginBottom.compact}>
-            <div className={cn(paddingX.compact, 'py-1.5', marginBottom.tight)}>
-              <p className={cn(size['2xs'], weight.semibold, muted.default, 'opacity-70 uppercase', tracking.wide)}>
+          <div className="mb-2">
+            <div className={cn('px-3', 'py-1.5', 'mb-1')}>
+              <p className={cn('text-[10px]', 'font-semibold', 'text-muted-foreground', 'opacity-70 uppercase', 'tracking-wide')}>
                 Manage
               </p>
             </div>
-            <div className={`${spaceY.default}.5`}>
+            <div className="space-y-3.5">
               <motion.div
                 whileHover={{ backgroundColor: 'rgba(249, 115, 22, 0.05)' }}
                 transition={MICROINTERACTIONS.colorTransition.default}
               >
                 <Link
                   href="/account/companies"
-                  className={cn(cluster.compact, paddingX.compact, paddingY.tight, 'rounded-md group/item')}
+                  className={cn('flex items-center gap-2', 'px-3', 'py-2', 'rounded-md group/item')}
                 >
                   <Building className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors" />
-                  <span className={`flex-1 ${size.sm}`}>Companies</span>
+                  <span className="flex-1 text-sm">Companies</span>
                 </Link>
               </motion.div>
               <motion.div
@@ -296,27 +296,27 @@ export function UserMenu({ className }: UserMenuProps) {
               >
                 <Link
                   href="/account/jobs"
-                  className={cn(cluster.compact, paddingX.compact, paddingY.tight, 'rounded-md group/item')}
+                  className={cn('flex items-center gap-2', 'px-3', 'py-2', 'rounded-md group/item')}
                 >
                   <Briefcase className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors" />
-                  <span className={`flex-1 ${size.sm}`}>Jobs</span>
+                  <span className="flex-1 text-sm">Jobs</span>
                 </Link>
               </motion.div>
             </div>
           </div>
 
-          <div className={`${marginTop.compact} ${paddingTop.tight} border-t border-border`}>
+          <div className="mt-2 pt-2 border-t border-border">
             <motion.div
               whileHover={{ backgroundColor: 'rgba(249, 115, 22, 0.05)' }}
               transition={MICROINTERACTIONS.colorTransition.default}
-              className={`${marginBottom.compact}`}
+              className="mb-2"
             >
               <Link
                 href="/account/settings"
-                className={cn(cluster.compact, paddingX.compact, paddingY.tight, 'rounded-md group/item')}
+                className={cn('flex items-center gap-2', 'px-3', 'py-2', 'rounded-md group/item')}
               >
                 <Settings className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors" />
-                <span className={`flex-1 ${size.sm}`}>Settings</span>
+                <span className="flex-1 text-sm">Settings</span>
               </Link>
             </motion.div>
 
@@ -329,10 +329,10 @@ export function UserMenu({ className }: UserMenuProps) {
                     whileHover: { backgroundColor: 'rgba(239, 68, 68, 0.1)' },
                   })}
               transition={MICROINTERACTIONS.colorTransition.default}
-              className={`flex items-center ${gap.compact} ${paddingX.compact} ${paddingY.tight} rounded-md group/item w-full text-left text-destructive`}
+              className="flex items-center gap-2 px-3 py-2 rounded-md group/item w-full text-left text-destructive"
             >
               <LogOut className="h-4 w-4 group-hover/item:text-destructive transition-colors" />
-              <span className={`flex-1 ${size.sm}`}>{signingOut ? 'Signing out...' : 'Sign out'}</span>
+              <span className="flex-1 text-sm">{signingOut ? 'Signing out...' : 'Sign out'}</span>
             </motion.button>
           </div>
         </NavigationHoverCardContent>

@@ -1,12 +1,9 @@
 import 'server-only';
 
-import { SeoService } from '@heyclaude/data-layer';
-import type { GenerateMetadataCompleteReturns } from '@heyclaude/database-types/postgres-types';
+import { type GenerateMetadataCompleteReturns } from '@heyclaude/database-types/postgres-types';
 import { env } from '@heyclaude/shared-runtime/schemas/env';
-import { cacheLife, cacheTag } from 'next/cache';
 
-import { normalizeError } from '../../errors.ts';
-import { logger } from '../../logger.ts';
+import { createCachedDataFunction, generateResourceTags } from '../cached-data-factory.ts';
 
 /**
  * Determines if RPC calls should be skipped due to missing environment variables
@@ -39,6 +36,53 @@ interface SEOMetadataBase {
   title: string;
   twitterCard: 'summary_large_image';
 }
+
+// Internal cached function - declared before overloads
+const getSEOMetadataInternal = createCachedDataFunction<
+  { route: string; includeSchemas: boolean },
+  SEOMetadataBase | { metadata: SEOMetadataBase; schemas: GenerateMetadataCompleteReturns['schemas'] } | null
+>({
+  serviceKey: 'misc', // Consolidated: SeoService methods moved to MiscService
+  methodName: 'generateMetadata',
+  cacheMode: 'public',
+  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire
+  cacheTags: (args) => {
+    const tags = generateResourceTags('seo', args.route);
+    if (args.includeSchemas) {
+      tags.push('structured-data');
+    }
+    return tags;
+  },
+  module: 'data/seo/client',
+  operation: 'getSEOMetadata',
+  transformArgs: (args) => ({
+    p_include: args.includeSchemas ? 'metadata,schemas' : 'metadata',
+    p_route: args.route,
+  }),
+  transformResult: (result, args) => {
+    const rpcResult = result as GenerateMetadataCompleteReturns;
+    if (!rpcResult.metadata) {
+      return null;
+    }
+
+    const baseMetadata = buildBaseMetadata(rpcResult.metadata);
+
+    // Return wrapped structure if schemas requested, flat structure otherwise
+    if (args?.includeSchemas) {
+      return {
+        metadata: baseMetadata,
+        schemas: rpcResult.schemas ?? [],
+      };
+    }
+
+    return baseMetadata;
+  },
+  onError: () => null,
+  logContext: (args) => ({
+    includeSchemas: args.includeSchemas,
+    route: args.route,
+  }),
+});
 
 /**
  * Get SEO metadata for a route (without schemas)
@@ -87,66 +131,12 @@ export async function getSEOMetadata(
       schemas: GenerateMetadataCompleteReturns['schemas'];
     }
 > {
-  'use cache';
-
-  const includeSchemas = options?.includeSchemas ?? false;
-
   if (shouldSkipRpcCall()) {
     return null;
   }
 
-  // Configure cache - use 'static' profile for SEO metadata (changes daily)
-  // Route is automatically part of cache key
-  cacheLife('static'); // 1 day stale, 6 hours revalidate, 30 days expire
-  cacheTag('seo');
-  cacheTag(`seo-${route}`);
-  if (includeSchemas) {
-    cacheTag('structured-data');
-  }
-
-  const reqLogger = logger.child({
-    module: 'data/seo/client',
-    operation: includeSchemas ? 'getSEOMetadataWithSchemas' : 'getSEOMetadata',
-  });
-
-  try {
-    const service = new SeoService();
-    const result = await service.generateMetadata({
-      p_include: includeSchemas ? 'metadata,schemas' : 'metadata',
-      p_route: route,
-    });
-
-    if (!result.metadata) {
-      reqLogger.debug({ includeSchemas, route }, 'getSEOMetadata: no metadata returned');
-      return null;
-    }
-
-    const baseMetadata = buildBaseMetadata(result.metadata);
-
-    reqLogger.info(
-      {
-        hasMetadata: Boolean(result.metadata),
-        hasSchemas: includeSchemas && Boolean(result.schemas),
-        route,
-      },
-      `getSEOMetadata: fetched successfully${includeSchemas ? ' with schemas' : ''}`
-    );
-
-    // Return wrapped structure if schemas requested, flat structure otherwise
-    if (includeSchemas) {
-      return {
-        metadata: baseMetadata,
-        // Cast schemas to Record<string, unknown>[] to match generated type
-        schemas: (result.schemas ?? []) as Record<string, unknown>[],
-      };
-    }
-
-    return baseMetadata;
-  } catch (error) {
-    const normalized = normalizeError(error, 'getSEOMetadata failed');
-    reqLogger.error({ err: normalized, includeSchemas, route }, 'getSEOMetadata failed');
-    return null;
-  }
+  const includeSchemas = options?.includeSchemas ?? false;
+  return await getSEOMetadataInternal({ route, includeSchemas });
 }
 
 /***

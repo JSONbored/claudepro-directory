@@ -19,6 +19,7 @@
  */
 
 import type { changelogModel, changelog_category, contentModel } from '@heyclaude/data-layer/prisma';
+import { ChangelogCategory } from '@heyclaude/data-layer/prisma';
 import { parseChangelogChanges } from '@heyclaude/web-runtime/data';
 import {
   Plus,
@@ -28,16 +29,17 @@ import {
   AlertTriangle,
   Shield,
 } from '@heyclaude/web-runtime/icons';
-import {
-  UnifiedBadge,
-  STATE_PATTERNS,
-  ANIMATION_CONSTANTS,
-  CHANGELOG_CATEGORIES,
-} from '@heyclaude/web-runtime/ui';
-import { marginBottom, paddingY, cluster, iconSize, size, weight, leading, spaceY, paddingX, wrap, gap, marginTop, muted } from '@heyclaude/web-runtime/design-system';
+import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import { memo } from 'react';
 
-import { JSONSectionRenderer } from '@/src/components/content/json-to-sections';
+import dynamic from 'next/dynamic';
+import { Suspense } from 'react';
+
+// Dynamic import for JSONSectionRenderer (822 lines) - lazy load for code splitting
+const JSONSectionRenderer = dynamic(
+  () => import('@/src/components/content/json-to-sections').then((mod) => ({ default: mod.JSONSectionRenderer })),
+  { ssr: true }
+);
 import { markdownToHtml } from '@/src/lib/utils/markdown-to-html';
 
 import { ChangelogAccordionSections } from './changelog-accordion-sections';
@@ -72,6 +74,9 @@ function TrustedHTML({ html, className, id }: { className?: string; html: string
     />
   );
 }
+
+// Ordered array of changelog categories from Prisma enum (matches UI display order)
+const CHANGELOG_CATEGORIES = Object.values(ChangelogCategory) as readonly changelog_category[];
 
 /**
  * Category Icon Map - Icons for each changelog category
@@ -130,36 +135,36 @@ function CategorySection({
 
   return (
     <section
-      className={`${marginBottom.comfortable} ${paddingY.default} border-border/50 border-b last:border-b-0`}
+      className="mb-6 py-4 border-border/50 border-b last:border-b-0"
     >
       {/* Category Header */}
-      <div className={`${cluster.compact} ${marginBottom.default}`}>
-        <Icon className={iconSize.md} />
-        <h2 className={`${size.xl} ${weight.semibold}`}>{category}</h2>
+      <div className="flex items-center gap-2 mb-4">
+        <Icon className="h-5 w-5" />
+        <h2 className="text-xl font-semibold">{category}</h2>
         <UnifiedBadge
           variant="base"
           style="outline"
-          className={`${badgeColor} ${size.xs} ${weight.medium}`}
+          className={`${badgeColor} text-xs-medium`}
         >
           {items.length} {items.length === 1 ? 'item' : 'items'}
         </UnifiedBadge>
       </div>
 
       {/* Change Items List */}
-      <ul className={`${spaceY.compact} list-none pl-0`}>
+      <ul className="space-y-2 list-none pl-0">
         {items.map((item, index) => (
           <li
             key={index}
-            className={`flex items-start ${gap.default} ${paddingY.tight} ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} ${STATE_PATTERNS.HOVER_BG_SUBTLE} rounded-md ${paddingX.compact}`}
+            className="flex items-start gap-3 py-2 transition-all duration-200 ease-out hover:bg-accent/5 rounded-md px-3"
           >
             <span
-              className={`${badgeColor} ${marginTop.micro} flex flex-shrink-0 items-center justify-center rounded-full p-1`}
+              className={`${badgeColor} mt-0.5 flex flex-shrink-0 items-center justify-center rounded-full p-1`}
               aria-hidden="true"
             >
-              <Icon className={iconSize.sm} />
+              <Icon className="h-4 w-4" />
             </span>
-            <div className={`${size.base} ${leading.normal} flex-1`}>
-              <div className={`prose prose-slate dark:prose-invert prose-sm prose-headings:${weight.semibold} prose-headings:text-foreground prose-headings:mt-4 prose-headings:mb-3 prose-h1:${size.lg} prose-h2:${size.base} prose-h3:${size.sm} prose-p:text-foreground/90 prose-p:${leading.relaxed} prose-p:my-3 prose-ul:my-3 prose-ol:my-3 prose-li:my-1.5 prose-li:${leading.relaxed} prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:${weight.semibold} prose-strong:text-foreground prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:${size.xs} prose-pre:bg-muted prose-pre:text-foreground prose-pre:p-3 prose-pre:rounded prose-pre:overflow-x-auto prose-blockquote:border-l-2 prose-blockquote:border-primary prose-blockquote:pl-3 prose-blockquote:italic prose-blockquote:my-3 max-w-none`}>
+            <div className="text-base leading-normal flex-1">
+              <div className="prose prose-slate dark:prose-invert prose-sm prose-headings:font-semibold prose-headings:text-foreground prose-headings:mt-4 prose-headings:mb-3 prose-h1:text-lg prose-h2:text-base prose-h3:text-sm prose-p:text-foreground/90 prose-p:leading-relaxed prose-p:my-3 prose-ul:my-3 prose-ol:my-3 prose-li:my-1.5 prose-li:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:font-semibold prose-strong:text-foreground prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-pre:bg-muted prose-pre:text-foreground prose-pre:p-3 prose-pre:rounded prose-pre:overflow-x-auto prose-blockquote:border-l-2 prose-blockquote:border-primary prose-blockquote:pl-3 prose-blockquote:italic prose-blockquote:my-3 max-w-none">
                 <TrustedHTML html={markdownToHtml(item.content)} />
               </div>
             </div>
@@ -216,14 +221,16 @@ function renderAdditionalContent(
     <>
       {hasStructuredChanges && (hasMetadataSections || hasAdditionalContent) ? (
         <div
-          className={`${marginTop.relaxed} ${paddingY.relaxed} border-border/50 border-t`}
+          className="mt-8 py-8 border-border/50 border-t"
         >
           {hasMetadataSections ? (
             <div className="prose prose-slate dark:prose-invert max-w-none">
-              <JSONSectionRenderer sections={metadataSections} />
+              <Suspense fallback={<div className="h-32" />}>
+                <JSONSectionRenderer sections={metadataSections} />
+              </Suspense>
             </div>
           ) : hasAdditionalContent ? (
-            <div className={`prose prose-slate dark:prose-invert prose-sm md:prose-base prose-headings:${weight.semibold} prose-headings:text-foreground prose-headings:mt-6 prose-headings:mb-4 prose-h1:${size['2xl']} prose-h2:${size.xl} prose-h3:${size.lg} prose-p:text-foreground/90 prose-p:${leading.relaxed} prose-p:my-4 prose-ul:my-4 prose-ol:my-4 prose-li:my-2 prose-li:${leading.relaxed} prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-strong:${weight.semibold} prose-code:text-foreground prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:${size.sm} prose-pre:bg-muted prose-pre:text-foreground prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:my-4 prose-hr:my-8 max-w-none`}>
+            <div className="prose prose-slate dark:prose-invert prose-sm md:prose-base prose-headings:font-semibold prose-headings:text-foreground prose-headings:mt-6 prose-headings:mb-4 prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-p:text-foreground/90 prose-p:leading-relaxed prose-p:my-4 prose-ul:my-4 prose-ol:my-4 prose-li:my-2 prose-li:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-strong:font-semibold prose-code:text-foreground prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-pre:bg-muted prose-pre:text-foreground prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:my-4 prose-hr:my-8 max-w-none">
               <TrustedHTML html={displayContent} />
             </div>
           ) : null}
@@ -231,11 +238,13 @@ function renderAdditionalContent(
       ) : null}
       {!hasStructuredChanges && hasMetadataSections ? (
         <div className="prose prose-slate dark:prose-invert max-w-none">
-          <JSONSectionRenderer sections={metadataSections} />
+          <Suspense fallback={<div className="h-32" />}>
+            <JSONSectionRenderer sections={metadataSections} />
+          </Suspense>
         </div>
       ) : null}
       {!hasStructuredChanges && !hasMetadataSections && hasAdditionalContent ? (
-        <div className={`prose prose-slate dark:prose-invert prose-sm md:prose-base prose-headings:${weight.semibold} prose-headings:text-foreground prose-headings:mt-6 prose-headings:mb-4 prose-h1:${size['2xl']} prose-h2:${size.xl} prose-h3:${size.lg} prose-p:text-foreground/90 prose-p:${leading.relaxed} prose-p:my-4 prose-ul:my-4 prose-ol:my-4 prose-li:my-2 prose-li:${leading.relaxed} prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-strong:${weight.semibold} prose-code:text-foreground prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:${size.sm} prose-pre:bg-muted prose-pre:text-foreground prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:my-4 prose-hr:my-8 max-w-none`}>
+        <div className="prose prose-slate dark:prose-invert prose-sm md:prose-base prose-headings:font-semibold prose-headings:text-foreground prose-headings:mt-6 prose-headings:mb-4 prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-p:text-foreground/90 prose-p:leading-relaxed prose-p:my-4 prose-ul:my-4 prose-ol:my-4 prose-li:my-2 prose-li:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-strong:font-semibold prose-code:text-foreground prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-pre:bg-muted prose-pre:text-foreground prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:my-4 prose-hr:my-8 max-w-none">
           <TrustedHTML html={displayContent} />
         </div>
       ) : null}
@@ -293,17 +302,17 @@ export const ChangelogContent = memo(
     );
 
     return (
-      <article className={`max-w-none ${spaceY.relaxed}`}>
+      <article className="max-w-none space-y-6">
         {/* Entry Header - Title and Date (always rendered for timeline alignment, visually hidden if hideHeader=true) */}
         <header
           ref={onHeaderRef}
-          className={`border-border/30 ${marginBottom.comfortable} border-b pb-4 scroll-mt-24 ${hideHeader ? 'sr-only' : ''}`}
+          className={`border-border/30 mb-6 border-b pb-4 scroll-mt-24 ${hideHeader ? 'sr-only' : ''}`}
           id={`changelog-entry-header-${entry.slug}`}
         >
-          <h2 className={`${size['2xl']} ${weight.bold} ${marginBottom.default}`}>{entry.title}</h2>
+          <h2 className="text-2xl font-bold mb-4">{entry.title}</h2>
           <time
             dateTime={entry.release_date instanceof Date ? entry.release_date.toISOString() : entry.release_date}
-            className={`${size.sm} ${leading.relaxed} ${muted.default}`}
+            className="text-muted-foreground text-sm leading-relaxed"
           >
             {(entry.release_date instanceof Date ? entry.release_date : new Date(entry.release_date)).toLocaleDateString('en-US', {
               year: 'numeric',
@@ -315,13 +324,13 @@ export const ChangelogContent = memo(
 
         {/* Category Badges - Subtle, below header */}
         {nonEmptyCategories.length > 0 && (
-          <div className={`${wrap} ${gap.compact} ${paddingY.compact} ${marginBottom.comfortable}`}>
+          <div className="flex flex-wrap gap-2 py-3 mb-6">
             {nonEmptyCategories.map((category) => (
               <UnifiedBadge
                 key={category}
                 variant="base"
                 style="outline"
-                className={`${BADGE_COLOR_MAP[category]} ${size.sm} ${weight.medium} text-foreground`}
+                className={`${BADGE_COLOR_MAP[category]} text-sm-medium text-foreground`}
               >
                 {category}
               </UnifiedBadge>
@@ -331,7 +340,7 @@ export const ChangelogContent = memo(
 
         {/* Structured Changes Display - Beautiful categorized sections */}
         {hasStructuredChanges ? (
-          <div className={`${marginBottom.comfortable}`}>
+          <div className="mb-6">
             {CHANGELOG_CATEGORIES.map((category) => {
               const items = changes[category];
               if (!items || items.length === 0) return null;

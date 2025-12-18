@@ -13,7 +13,7 @@ import {
   generateHookFilename,
   extractMarkdownHeadings,
 } from '@heyclaude/shared-runtime';
-import { extractCodeBlocksFromMarkdown, type ExtractedCodeBlock } from '@heyclaude/web-runtime';
+import { extractCodeBlocksFromMarkdown, type ExtractedCodeBlock } from '@heyclaude/web-runtime/utils/markdown-code-extractor';
 import {
   ensureStringArray,
   getMetadata,
@@ -44,17 +44,24 @@ const UnifiedSection = dynamic(
   () => import('@/src/components/content/sections/unified-section'),
   { ssr: true }
 );
-import { ReviewListSection } from '@/src/components/core/domain/reviews/review-list-section';
+// Dynamic import for ReviewListSection (624 lines) - lazy load for code splitting
+const ReviewListSection = dynamic(
+  () => import('@/src/components/core/domain/reviews/review-list-section').then((mod) => ({ default: mod.ReviewListSection })),
+  { ssr: true }
+);
 import { NewsletterScrollTrigger } from '@/src/components/features/growth/newsletter/newsletter-scroll-trigger';
 import { RecentlyViewedSidebar } from '@/src/components/features/navigation/recently-viewed-sidebar';
 
 import { DetailHeader } from './detail-header';
 import { DetailMetadata } from './detail-metadata';
 import { DetailQuickActionsBar } from './detail-quick-actions-bar';
-import { DetailSidebar } from './sidebar/navigation-sidebar';
+// Dynamic import for DetailSidebar (557 lines) - lazy load for code splitting
+const DetailSidebar = dynamic(
+  () => import('./sidebar/navigation-sidebar').then((mod) => ({ default: mod.DetailSidebar })),
+  { ssr: true }
+);
 import { SidebarToc } from './sidebar-toc';
 import { ScrollAwareToc } from './scroll-aware-toc';
-import { paddingX, paddingY, marginX, marginBottom, gap, spaceY, paddingBottom, paddingTop, marginTop } from "@heyclaude/web-runtime/design-system";
 
 /**
  * UnifiedDetailPage is only used for content detail pages, never for jobs.
@@ -213,7 +220,11 @@ async function SidebarWithRelated({
   >;
 }) {
   const relatedItems = await relatedItemsPromise;
-  return <DetailSidebar item={item} relatedItems={relatedItems} config={config} />;
+  return (
+    <Suspense fallback={<div className="h-64" />}>
+      <DetailSidebar item={item} relatedItems={relatedItems} config={config} />
+    </Suspense>
+  );
 }
 
 /**
@@ -255,45 +266,23 @@ export async function UnifiedDetailPage({
   // Type narrowing: Both union members are compatible, no assertion needed
   // TypeScript can infer the correct type from property access
 
-  const installation = (() => {
-    const inst =
-      ('installation' in item && item['installation']) || metadata['installation'];
-    // Type guard: Check if inst matches InstallationSteps structure
-    if (inst && typeof inst === 'object' && !Array.isArray(inst)) {
-      // Type narrowing: inst is object, InstallationSteps is a component type (not database type)
-      // This is acceptable as it's a UI component interface, not a database schema
-      return inst satisfies InstallationSteps;
-    }
-    return undefined;
-  })();
+  // Helper: Extract field from item or metadata with type safety
+  const getField = <T,>(field: string, transform: (val: unknown) => T): T => {
+    const value = (field in item && item[field as keyof typeof item]) || metadata[field];
+    return transform(value);
+  };
 
-  const useCases = (() => {
-    const cases = ('use_cases' in item && item['use_cases']) || metadata['use_cases'];
-    return ensureStringArray(cases);
-  })();
-
-  const features = (() => {
-    const feats = ('features' in item && item['features']) || metadata['features'];
-    return ensureStringArray(feats);
-  })();
-
-  const troubleshooting = (() => {
-    const trouble =
-      ('troubleshooting' in item && item['troubleshooting']) ||
-      metadata['troubleshooting'];
-    return Array.isArray(trouble) && trouble.length > 0 ? trouble : [];
-  })();
-
-  const requirements = (() => {
-    const reqs =
-      ('requirements' in item && item['requirements']) || metadata['requirements'];
-    return ensureStringArray(reqs);
-  })();
-
-  const securityItems = (() => {
-    const sec = ('security' in item && item['security']) || metadata['security'];
-    return ensureStringArray(sec);
-  })();
+  // Extract all data fields efficiently (replaces 6 IIFEs with cleaner helper)
+  const installation = getField<InstallationSteps | undefined>('installation', (val) => 
+    val && typeof val === 'object' && !Array.isArray(val) ? val as InstallationSteps : undefined
+  );
+  const useCases = getField<string[]>('use_cases', ensureStringArray);
+  const features = getField<string[]>('features', ensureStringArray);
+  const troubleshooting = getField<Array<string | { answer: string; question: string } | { issue: string; solution: string }>>('troubleshooting', (val) => 
+    Array.isArray(val) && val.length > 0 ? val as Array<string | { answer: string; question: string } | { issue: string; solution: string }> : []
+  );
+  const requirements = getField<string[]>('requirements', ensureStringArray);
+  const securityItems = getField<string[]>('security', ensureStringArray);
 
   const quickActionsPackageName =
     typeof metadata['package'] === 'string' ? metadata['package'] : null;
@@ -423,7 +412,7 @@ export async function UnifiedDetailPage({
           markdownAfter?: string;
           markdownBefore?: string;
         };
-        const typedBlocks: ProcessedBlock[] = validBlocks.map((block) => {
+        const typedBlocks: ProcessedBlock[] = validBlocks.map((block: NonNullable<(typeof processedBlocks)[0]>) => {
           const result: ProcessedBlock = {
             code: block.code,
             filename: block.filename,
@@ -1031,10 +1020,10 @@ export async function UnifiedDetailPage({
   if (!config) {
     return (
       <div className="bg-background min-h-screen">
-        <div className={`container ${marginX.auto} ${paddingX.default} ${paddingY.relaxed}`}>
+        <div className="container mx-auto px-4 py-8">
           <div className="text-center">
-            <h1 className={`${marginBottom.default} text-2xl font-bold`}>Configuration Not Found</h1>
-            <p className={`text-muted-foreground ${marginBottom.comfortable}`}>
+            <h1 className="mb-4 text-2xl font-bold">Configuration Not Found</h1>
+            <p className="text-muted-foreground mb-6">
               No configuration found for content type: {item.category}
             </p>
           </div>
@@ -1095,10 +1084,10 @@ export async function UnifiedDetailPage({
 
         {/* Main content with sidebar */}
         <div
-          className={`container ${marginX.auto} ${paddingX.default} ${paddingY.relaxed}`}
+          className="container mx-auto px-4 py-8"
           style={{ viewTransitionName: getViewTransitionName('card', item.slug) }}
         >
-          <div id="detail-main-content" className={`grid grid-cols-1 ${gap.relaxed} lg:grid-cols-3`}>
+          <div id="detail-main-content" className="grid grid-cols-1 gap-6 lg:grid-cols-3">
             {/* Primary content */}
             <div className="lg:col-span-2">
               <TabbedDetailLayout
@@ -1112,7 +1101,7 @@ export async function UnifiedDetailPage({
             </div>
 
           {/* Sidebars - TOC + Related content + Recently Viewed */}
-          <aside className={`${spaceY.relaxed} lg:self-start`}>
+          <aside className="space-y-6 lg:self-start">
             {/* On This Page - Scroll-aware TOC (hides on scroll down, shows on scroll up) */}
             {headingMetadata && headingMetadata.length >= 2 ? (
               <ScrollAwareToc>
@@ -1144,14 +1133,16 @@ export async function UnifiedDetailPage({
                   />
                 </Suspense>
               ) : config ? (
-                <DetailSidebar
-                  item={item}
-                  relatedItems={relatedItems}
-                  config={{
-                    typeName: config.typeName,
-                    metadata: config.metadata,
-                  }}
-                />
+                <Suspense fallback={<div className="h-64" />}>
+                  <DetailSidebar
+                    item={item}
+                    relatedItems={relatedItems}
+                    config={{
+                      typeName: config.typeName,
+                      metadata: config.metadata,
+                    }}
+                  />
+                </Suspense>
               ) : null}
 
               {/* Recently Viewed Sidebar */}
@@ -1160,7 +1151,7 @@ export async function UnifiedDetailPage({
           </div>
         </div>
 
-        <div className={`container ${marginX.auto} ${paddingX.default} ${paddingBottom.relaxed}`}>
+        <div className="container mx-auto px-4 pb-8">
           <NewsletterScrollTrigger
             source="content_page"
             {...(item.category ? { category: item.category } : {})}
@@ -1197,7 +1188,7 @@ export async function UnifiedDetailPage({
       )}
 
       {shouldRenderQuickActionsBar ? (
-        <div className={`container ${marginX.auto} ${paddingX.default} ${paddingTop.default}`}>
+        <div className="container mx-auto px-4 pt-4">
           <DetailQuickActionsBar
             item={item}
             metadata={metadata}
@@ -1210,12 +1201,12 @@ export async function UnifiedDetailPage({
 
       {/* Main content */}
       <div
-        className={`container ${marginX.auto} ${paddingX.default} ${paddingY.relaxed}`}
+        className="container mx-auto px-4 py-8"
         style={{ viewTransitionName: getViewTransitionName('card', item.slug) }}
       >
-        <div id="detail-main-content" className={`grid grid-cols-1 ${gap.relaxed} lg:grid-cols-3`}>
+        <div id="detail-main-content" className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {/* Primary content */}
-          <div className={`${spaceY.loose} lg:col-span-2`}>
+          <div className="space-y-8 lg:col-span-2">
             {/* COLLECTIONS: Render collection-specific sections */}
             {collectionSections}
 
@@ -1278,7 +1269,7 @@ export async function UnifiedDetailPage({
 
                     // Render grouped sections
                     return groupedSections.map((section, sectionIndex) => (
-                      <div key={`content-section-${sectionIndex}`} className={`${spaceY.comfortable}`}>
+                      <div key={`content-section-${sectionIndex}`} className="space-y-4">
                         {/* Render markdown context before the section */}
                         {section.markdownBefore ? (
                           <div className="prose prose-sm dark:prose-invert text-muted-foreground max-w-none">
@@ -1428,16 +1419,7 @@ export async function UnifiedDetailPage({
                 variant="enhanced-list"
                 title="Troubleshooting"
                 description="Common issues and solutions"
-                items={
-                  // Type narrowing: troubleshooting is already validated array
-                  (Array.isArray(troubleshooting) 
-                    ? troubleshooting 
-                    : []) satisfies Array<
-                    | string
-                    | { answer: string; question: string }
-                    | { issue: string; solution: string }
-                  >
-                }
+                items={troubleshooting}
                 dotColor="bg-red-500"
               />
             ) : null}
@@ -1449,8 +1431,10 @@ export async function UnifiedDetailPage({
 
             {/* Reviews & Ratings Section */}
             {isValidCategory(item.category) && item.category && item.slug ? (
-              <div className={`${marginTop.default} border-t ${paddingTop.default}`}>
-                <ReviewListSection contentType={item.category} contentSlug={item.slug} />
+              <div className="mt-4 border-t pt-4">
+                <Suspense fallback={<div className="h-32" />}>
+                  <ReviewListSection contentType={item.category} contentSlug={item.slug} />
+                </Suspense>
               </div>
             ) : null}
 
@@ -1462,7 +1446,7 @@ export async function UnifiedDetailPage({
           </div>
 
           {/* Sidebars - TOC + Related content + Recently Viewed */}
-          <aside className={`${spaceY.relaxed} lg:sticky lg:top-24 lg:self-start`}>
+          <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
             {/* On This Page - Supabase-style minimal TOC */}
             {shouldRenderDetailToc && headingMetadata && headingMetadata.length >= 2 ? (
               <SidebarToc headings={headingMetadata} />

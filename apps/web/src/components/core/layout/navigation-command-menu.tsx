@@ -16,7 +16,6 @@ import {
 import { useRouter } from 'next/navigation';
 import { useMemo, useEffect, useLayoutEffect, useId, useState, useCallback, useRef } from 'react';
 import { useBoolean, useDebounceCallback } from '@heyclaude/web-runtime/hooks';
-import { cluster, iconSize, gap, truncate, size } from "@heyclaude/web-runtime/design-system";
 
 type NavigationMenuItem = {
   path: string;
@@ -183,16 +182,16 @@ export function NavigationCommandMenu({
         onSelect={() => handleSelect(href)}
         className="group cursor-pointer"
       >
-        <span className={cluster.compact}>
+        <span className="flex items-center gap-2">
           {getIcon('FileText')}
-          <div className="flex flex-col items-start flex-1 min-w-0">
-            <span className={`${truncate.single} w-full`}>{result.title}</span>
+          <div className="min-w-0 flex-1 flex flex-col items-start">
+            <span className="w-full truncate">{result.title}</span>
             {result.description ? (
-              <span className={`text-muted-foreground ${size.xs} transition-colors group-hover:text-accent line-clamp-1`}>
+              <span className="line-clamp-1 text-muted-foreground text-xs transition-colors group-hover:text-accent">
                 {result.description}
               </span>
             ) : null}
-            <span className={`text-muted-foreground ${size.xs} capitalize`}>{result.category}</span>
+            <span className="text-xs capitalize text-muted-foreground">{result.category}</span>
           </div>
         </span>
       </CommandItem>
@@ -208,7 +207,7 @@ export function NavigationCommandMenu({
     // Type guard: check if it's a valid React component
     if (typeof Icon === 'function') {
       const IconComponent = Icon as React.ComponentType<{ className?: string }>;
-      return <IconComponent className={`${iconSize.sm} text-muted-foreground shrink-0`} />;
+      return <IconComponent className="h-4 w-4 shrink-0 text-muted-foreground" />;
     }
     return null;
   };
@@ -221,13 +220,13 @@ export function NavigationCommandMenu({
     const uniqueKey = `${groupName}-${path}-${item.title}-${index}`;
     return (
       <CommandItem key={uniqueKey} onSelect={() => handleSelect(path)} className="group cursor-pointer">
-        <span className={cluster.compact}>
+        <span className="flex items-center gap-2">
           {getIcon(item.icon_name)}
           <div className="flex flex-col items-start">
             <span>{item.title}</span>
             {item.description ? (
               <span
-                className={`text-muted-foreground ${size.xs} transition-colors group-hover:text-accent`}
+                className="text-muted-foreground text-xs transition-colors group-hover:text-accent"
               >
                 {item.description}
               </span>
@@ -274,7 +273,7 @@ export function NavigationCommandMenu({
         <CommandList>
           {hasSearchQuery && isSearching && (
             <CommandEmpty className="text-muted-foreground">
-              <span className={`inline-flex items-center ${gap.tight}`}>
+              <span className="inline-flex items-center gap-1">
                 <span className="h-4 w-4 animate-spin rounded-full border-2 border-accent border-t-transparent" />
                 Searching...
               </span>

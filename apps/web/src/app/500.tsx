@@ -13,7 +13,6 @@ import { logClientError, normalizeError } from '@heyclaude/web-runtime/logging/c
 import { Button, Card } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { useEffect } from 'react';
-import { paddingX, padding, marginBottom, gap, marginRight } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Display a client-side 500 Server Error page and log a structured client-side error on mount.
@@ -44,29 +43,29 @@ export default function ServerError() {
   }, []);
 
   return (
-    <div className={`bg-background flex min-h-screen items-center justify-center ${paddingX.default}`}>
-      <Card className={`w-full max-w-lg ${padding.relaxed} text-center`}>
-        <div className={`${marginBottom.comfortable}`}>
-          <div className={`${marginBottom.default} flex justify-center`}>
-            <div className={`bg-destructive/10 rounded-full ${padding.compact}`}>
+    <div className="bg-background flex min-h-screen items-center justify-center px-4">
+      <Card className="w-full max-w-lg p-8 text-center">
+        <div className="mb-6">
+          <div className="mb-4 flex justify-center">
+            <div className="bg-destructive/10 rounded-full p-3">
               <AlertCircle aria-hidden="true" className="text-destructive h-12 w-12" />
             </div>
           </div>
-          <h1 className={`${marginBottom.compact} text-2xl font-bold`}>Server Error</h1>
+          <h1 className="mb-2 text-2xl font-bold">Server Error</h1>
           <p className="text-muted-foreground">
             We encountered an error while processing your request. Our team has been notified and is
             working on a fix.
           </p>
         </div>
 
-        <div className={`flex flex-col sm:flex-row ${gap.compact} sm:${gap.default}`}>
+        <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
           <Button size="lg" onClick={() => globalThis.location.reload()}>
-            <RefreshCw className={`${marginRight.tight} h-4 w-4`} />
+            <RefreshCw className="mr-2 h-4 w-4" />
             Reload Page
           </Button>
           <Button asChild size="lg" variant="outline">
             <Link href={ROUTES.HOME}>
-              <Home className={`${marginRight.tight} h-4 w-4`} />
+              <Home className="mr-2 h-4 w-4" />
               Back to Home
             </Link>
           </Button>

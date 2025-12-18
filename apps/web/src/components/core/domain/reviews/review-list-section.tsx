@@ -3,11 +3,9 @@
 import type { ReviewAggregateRating } from '@heyclaude/database-types/postgres-types';
 import type { content_category } from '@heyclaude/data-layer/prisma';
 import type { GetReviewsWithStatsReturns } from '@heyclaude/database-types/postgres-types';
-import {
-  deleteReview,
-  getReviewsWithStats,
-  markReviewHelpful,
-} from '@heyclaude/web-runtime/actions';
+import { deleteReview } from '@heyclaude/web-runtime/actions/reviews-crud';
+import { getReviewsWithStats } from '@heyclaude/web-runtime/actions/content';
+import { markReviewHelpful } from '@heyclaude/web-runtime/actions/mark-review-helpful';
 import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
 import { formatDistanceToNow } from '@heyclaude/web-runtime/data/utils';
 import { useAuthenticatedUser, useIsMounted, useBoolean } from '@heyclaude/web-runtime/hooks';
@@ -23,7 +21,6 @@ import {
   StarDisplay,
   cn,
 } from '@heyclaude/web-runtime/ui';
-import { between, cluster, hoverBg, size, weight, spaceY, paddingX, paddingY, padding, marginBottom, marginX, paddingTop, marginLeft, marginTop, marginRight } from '@heyclaude/web-runtime/design-system';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useId, useState, memo } from 'react';
 
@@ -330,7 +327,7 @@ export function ReviewListSection({
   }, [user, status, openAuthModal, pathname, page, sortBy, contentType, contentSlug, loadReviewsWithStats, isMounted]);
 
   return (
-    <div className={`${spaceY.relaxed}`}>
+    <div className="space-y-6">
       {/* Aggregate Rating + Histogram */}
       {aggregateRating?.count && aggregateRating.count > 0 && aggregateRating.distribution ? (
         <ReviewRatingHistogram
@@ -347,17 +344,17 @@ export function ReviewListSection({
       ) : null}
 
       {/* Sort Controls */}
-      <div className={between.center}>
-        <h3 className={`${size.lg} ${weight.semibold}`}>Reviews ({aggregateRating?.count ?? 0})</h3>
-        <div className={cluster.compact}>
-          <Label htmlFor={sortSelectId} className={`text-muted-foreground ${size.sm}`}>
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold">Reviews ({aggregateRating?.count ?? 0})</h3>
+        <div className="flex items-center gap-2">
+          <Label htmlFor={sortSelectId} className="text-muted-foreground text-sm">
             Sort by:
           </Label>
           <select
             id={sortSelectId}
             value={sortBy}
             onChange={(e) => handleSortChange(e.target.value as typeof sortBy)}
-            className={cn('rounded border', paddingX.compact, paddingY.tight, size.sm)}
+            className={cn('rounded-lg border', 'px-3', 'py-2', 'text-sm')}
           >
             <option value="recent">Most Recent</option>
             <option value="helpful">Most Helpful</option>
@@ -369,16 +366,16 @@ export function ReviewListSection({
 
       {/* Reviews List */}
       {isLoading && page === 1 ? (
-        <div className={`${paddingY.relaxed} text-center`}>
+        <div className="py-8 text-center">
           <p className="text-muted-foreground">Loading reviews...</p>
         </div>
       ) : (reviews ?? []).length === 0 ? (
-        <Card className={`bg-muted/50 ${padding.relaxed} text-center`}>
-          <Star className={`text-muted-foreground/30 ${marginX.auto} ${marginBottom.compact} h-12 w-12`} aria-hidden="true" />
+        <Card className="bg-muted/50 p-8 text-center">
+          <Star className="text-muted-foreground/30 mx-auto mb-2 h-12 w-12" aria-hidden="true" />
           <p className="text-muted-foreground">No reviews yet. Be the first to review!</p>
         </Card>
       ) : (
-        <div className={`${spaceY.comfortable}`}>
+        <div className="space-y-4">
           {(reviews ?? []).map((review) => (
             <ReviewCardItem
               key={review.id ?? ''}
@@ -407,7 +404,7 @@ export function ReviewListSection({
 
       {/* Load More */}
       {hasMore && !isLoading ? (
-        <div className={`${paddingTop.default} text-center`}>
+        <div className="pt-4 text-center">
           <Button variant="outline" onClick={handleLoadMore}>
             Load More Reviews
           </Button>
@@ -477,7 +474,7 @@ const ReviewCardItemComponent = function ReviewCardItem({
 
   if (isEditing && isOwnReview) {
     return (
-      <Card className={`${padding.comfortable}`}>
+      <Card className="p-6">
         <ReviewForm
           contentType={contentType}
           contentSlug={contentSlug}
@@ -502,17 +499,17 @@ const ReviewCardItemComponent = function ReviewCardItem({
       disableNavigation
       ariaLabel={`Review by ${review.user.name ?? 'Anonymous'}`}
       renderContent={() => (
-        <div className={`${spaceY.default}`}>
+        <div className="space-y-3">
           {/* Rating + Date */}
-          <div className={between.center}>
-            <div className={cluster.tight}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1">
               <StarDisplay rating={review.rating ?? 0} size="sm" />
-              <span className={cn('text-muted-foreground', marginLeft.tight, size.xs)}>
+              <span className={cn('text-muted-foreground', 'ml-1', 'text-xs')}>
                 {(review.rating ?? 0).toFixed(1)}
               </span>
             </div>
             {review.created_at ? (
-              <time className={`text-muted-foreground ${size.xs}`} dateTime={review.created_at}>
+              <time className="text-muted-foreground text-xs" dateTime={review.created_at}>
                 {formatDistanceToNow(new Date(review.created_at))} ago
               </time>
             ) : null}
@@ -521,12 +518,12 @@ const ReviewCardItemComponent = function ReviewCardItem({
           {/* Review Text */}
           {reviewText ? (
             <div>
-              <p className={`text-foreground ${size.sm} whitespace-pre-wrap`}>{displayText}</p>
+              <p className="text-foreground text-sm whitespace-pre-wrap">{displayText}</p>
               {needsTruncation ? (
                 <button
                   type="button"
                   onClick={toggleShowFullText}
-                  className={cn('text-primary', marginTop.tight, size.xs, 'hover:underline')}
+                  className={cn('text-primary', 'mt-1', 'text-xs', 'hover:underline')}
                 >
                   {showFullText ? 'Show less' : 'Read more'}
                 </button>
@@ -535,7 +532,7 @@ const ReviewCardItemComponent = function ReviewCardItem({
           ) : null}
 
           {/* Actions */}
-          <div className={cn(cluster.compact, paddingTop.compact)}>
+          <div className={cn('flex items-center gap-2', 'pt-2')}>
             {/* Helpful Button */}
             {!isOwnReview && (
               <Button
@@ -547,9 +544,9 @@ const ReviewCardItemComponent = function ReviewCardItem({
                     onMarkHelpful(review.id);
                   }
                 }}
-                className={`${hoverBg.default} hover:text-accent`}
+                className="hover:bg-accent/10 hover:text-accent"
               >
-                <ThumbsUp className={`${marginRight.micro} h-3.5 w-3.5`} aria-hidden="true" />
+                <ThumbsUp className="mr-0.5 h-3.5 w-3.5" aria-hidden="true" />
                 Helpful ({review.helpful_count ?? 0})
               </Button>
             )}
@@ -561,18 +558,18 @@ const ReviewCardItemComponent = function ReviewCardItem({
                   variant="ghost"
                   size="sm"
                   onClick={onEdit}
-                  className={`${hoverBg.default} hover:text-accent`}
+                  className="hover:bg-accent/10 hover:text-accent"
                 >
-                  <Edit className={`${marginRight.micro} h-3.5 w-3.5`} aria-hidden="true" />
+                  <Edit className="mr-0.5 h-3.5 w-3.5" aria-hidden="true" />
                   Edit
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={onDelete}
-                  className={`${hoverBg.default} hover:text-accent text-destructive hover:text-destructive`}
+                  className="hover:bg-accent/10 hover:text-accent text-destructive hover:text-destructive"
                 >
-                  <Trash className={`${marginRight.micro} h-3.5 w-3.5`} aria-hidden="true" />
+                  <Trash className="mr-0.5 h-3.5 w-3.5" aria-hidden="true" />
                   Delete
                 </Button>
               </>

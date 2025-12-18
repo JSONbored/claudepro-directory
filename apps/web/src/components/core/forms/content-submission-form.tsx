@@ -15,12 +15,12 @@ import { SubmissionType, SubmissionStatus } from '@heyclaude/data-layer/prisma';
 import { submission_statusSchema } from '@heyclaude/web-runtime/prisma-zod-schemas';
 import type { submission_status, content_category } from '@heyclaude/data-layer/prisma';
 import { isValidCategory } from '@heyclaude/web-runtime/core';
-import { submitContentForReview } from '@heyclaude/web-runtime/actions';
+import { submitContentForReview } from '@heyclaude/web-runtime/actions/submit-content-for-review';
 import { checkConfettiEnabled } from '@heyclaude/web-runtime/config/static-configs';
 import { ParseStrategy, safeParse } from '@heyclaude/web-runtime/data/utils';
-import { SPRING, STAGGER, DURATION, responsive, marginTop, spaceY, iconSize, muted, size, between, marginRight, marginBottom, paddingTop, gap, paddingY, paddingLeft, paddingRight, padding } from '@heyclaude/web-runtime/design-system';
+import { SPRING, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
-import { useLoggedAsync, useConfetti } from '@heyclaude/web-runtime/hooks';
+import { useSafeAction, useConfetti } from '@heyclaude/web-runtime/hooks';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
 import { usePathname } from 'next/navigation';
 import { useCallback } from 'react';
@@ -59,7 +59,7 @@ import {
   FormSectionCard,
 } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
-import { useId, useState, useTransition } from 'react';
+import { useId, useState } from 'react';
 import { z } from 'zod';
 
 import { DuplicateWarning } from './duplicate-warning';
@@ -161,13 +161,50 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
   /** Description for markdown preview */
   const [description, setDescription] = useState('');
 
-  /** Form submission loading state */
-  const [isPending, startTransition] = useTransition();
+  // Use useSafeAction hook - this properly infers types from next-safe-action
+  const { executeAsync: executeSubmit, isPending } = useSafeAction(submitContentForReview, {
+    onSuccess: ({ data }: { data?: { success: boolean | null; submission_id: string | null } }) => {
+      if (data?.success) {
+        if (!data.submission_id) {
+          logClientWarn(
+            '[Form] Success response missing submission ID',
+            undefined,
+            'SubmitFormClient.handleSubmit',
+            {
+              component: 'SubmitFormClient',
+              action: 'handle-submit',
+              category: 'form',
+              contentType,
+            }
+          );
+        }
 
-  const runLoggedAsync = useLoggedAsync({
-    scope: 'SubmitFormClient',
-    defaultMessage: 'Content submission failed',
-    defaultRethrow: false,
+        // Use Prisma enum object directly (no type assertion needed)
+        const validatedStatus = submission_statusSchema.parse(SubmissionStatus.pending);
+        setSubmissionResult({
+          submission_id: (typeof data.submission_id === 'string' ? data.submission_id : 'unknown'),
+          status: validatedStatus,
+          message: 'Your submission has been received and is pending review!',
+        });
+
+        toasts.success.submissionCreated(contentType);
+
+        // Fire confetti celebration for successful submission
+        const confettiEnabled = checkConfettiEnabled();
+        if (confettiEnabled) {
+          celebrateSubmission();
+        }
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    },
+    onError: ({ error }: { error: { serverError?: string; validationErrors?: unknown } }) => {
+      if (error.serverError || error.validationErrors) {
+        toasts.error.submissionFailed(error.serverError || 'Validation failed');
+      } else {
+        toasts.error.submissionFailed('Submission failed: unexpected response format');
+      }
+    },
   });
   const { celebrateSubmission } = useConfetti();
 
@@ -323,12 +360,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
       }
 
       // User is authenticated - proceed with submission
-      startTransition(async () => {
-        try {
-
-        await runLoggedAsync(
-          async () => {
-            const formData = new FormData(event.currentTarget);
+      const formData = new FormData(event.currentTarget);
 
             /**
              * DATABASE-FIRST SUBMISSION
@@ -439,7 +471,8 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
             const authorProfileUrl = typeof submissionData['author_profile_url'] === 'string' ? submissionData['author_profile_url'] : '';
             const githubUrl = typeof submissionData['github_url'] === 'string' ? submissionData['github_url'] : '';
 
-            const result = await submitContentForReview({
+            // Execute the action using useSafeAction's executeAsync
+            executeSubmit({
               submission_type: contentType,
               name,
               description,
@@ -450,77 +483,8 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
               tags: tags || [],
               content_data: contentData,
             });
-
-            if (result?.serverError || result?.validationErrors) {
-              throw new Error(result.serverError || 'Validation failed');
-            }
-
-            if (result?.data?.success) {
-              if (!result.data.submission_id) {
-                logClientWarn(
-                  '[Form] Success response missing submission ID',
-                  undefined,
-                  'SubmitFormClient.handleSubmit',
-                  {
-                    component: 'SubmitFormClient',
-                    action: 'handle-submit',
-                    category: 'form',
-                    contentType,
-                  }
-                );
-              }
-
-              // Use Prisma enum object directly (no type assertion needed)
-              const validatedStatus = submission_statusSchema.parse(SubmissionStatus.pending);
-              setSubmissionResult({
-                submission_id: (typeof result.data.submission_id === 'string' ? result.data.submission_id : 'unknown'),
-                status: validatedStatus,
-                message: 'Your submission has been received and is pending review!',
-              });
-
-              toasts.success.submissionCreated(contentType);
-
-              // Fire confetti celebration for successful submission
-              const confettiEnabled = checkConfettiEnabled();
-              if (confettiEnabled) {
-                celebrateSubmission();
-              }
-
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            } else {
-              throw new Error('Submission failed: unexpected response format');
-            }
-          },
-          {
-            message: 'Content submission failed',
-            context: {
-              contentType,
-              hasName: !!name,
-              hasDescription: !!description,
-            },
-          }
-        );
-        } catch (error) {
-          // Error already logged by useLoggedAsync
-          const normalized = normalizeError(error, 'Failed to submit content');
-          const errorMessage = normalized.message;
-          
-          // Check if error is auth-related and show modal if so
-          if (errorMessage.includes('signed in') || errorMessage.includes('auth') || errorMessage.includes('unauthorized')) {
-            openAuthModal({
-              valueProposition: 'Sign in to submit content',
-              redirectTo: pathname ?? undefined,
-            });
-          } else {
-            // Non-auth errors - show toast with retry option
-            // Note: Can't retry directly as handleSubmit needs form event
-            // User will need to click submit button again
-            toasts.error.submissionFailed(normalizeError(error, 'Failed to submit content').message);
-          }
-        }
-      });
     },
-    [user, status, openAuthModal, pathname, contentType, name, description, runLoggedAsync, celebrateSubmission, setSubmissionResult]
+    [user, status, openAuthModal, pathname, contentType, executeSubmit, celebrateSubmission, setSubmissionResult]
   );
 
   const getSection = (type: SubmissionContentType): SubmissionFormSection => {
@@ -546,16 +510,16 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
           animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
           transition={springSmooth}
         >
-          <Card className={`${marginBottom.comfortable} border-green-500/20 bg-green-500/5`}>
-            <CardContent className={`${paddingTop.comfortable}`}>
-              <div className={responsive.colCenter}>
+          <Card className="mb-6 border-green-500/20 bg-green-500/5">
+            <CardContent className="pt-6">
+              <div className="flex flex-col items-center">
                 <motion.div
                   initial={shouldReduceMotion ? { opacity: 0 } : { scale: 0, rotate: -180 }}
                   animate={shouldReduceMotion ? { opacity: 1 } : { scale: 1, rotate: 0 }}
                   transition={{ ...springBouncy, delay: STAGGER.default }}
                 >
                   <CheckCircle
-                    className={`h-6 w-6 text-green-500 flex-shrink-0 ${marginTop.micro}`}
+                    className="h-6 w-6 text-green-500 flex-shrink-0 mt-0.5"
                   />
                 </motion.div>
                 <div className="min-w-0 flex-1">
@@ -568,7 +532,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                     Submission Successful! 🎉
                   </motion.p>
                   <motion.p
-                    className={`text-muted-foreground ${marginTop.tight} text-sm`}
+                    className="text-muted-foreground text-sm mt-1"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: STAGGER.relaxed }}
@@ -576,7 +540,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                     {submissionResult.message}
                   </motion.p>
                   <motion.p
-                    className={`text-muted-foreground ${marginTop.tight} text-xs`}
+                    className="text-muted-foreground mt-1 text-xs"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: STAGGER.loose }}
@@ -592,7 +556,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
       ) : null}
 
       {/* Main Form - Sectioned with visual hierarchy */}
-      <form onSubmit={handleSubmit} className={spaceY.relaxed}>
+      <form onSubmit={handleSubmit} className="space-y-6">
         {/* Section 1: Content Type + Template */}
         <FormSectionCard
           step={1}
@@ -602,15 +566,15 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
           theme="primary"
           showBorderBeam={false}
         >
-          <div className={`grid ${gap.default} sm:grid-cols-2`}>
-            <div className={spaceY.compact}>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-2">
               <Label htmlFor={`${formId}-type`}>Content Type *</Label>
               <div className="relative">
                 <Layers
                   className={cn(
-                    iconSize.sm,
+                    'h-4 w-4',
                     'pointer-events-none absolute top-1/2 left-3 -translate-y-1/2',
-                    muted.default
+                    'text-muted-foreground'
                   )}
                 />
                 <select
@@ -625,7 +589,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                     setName(''); // Reset name when type changes
                   }}
                   required
-                  className={`border-input bg-background flex h-10 w-full rounded-md border ${paddingY.tight} ${paddingRight.compact} ${paddingLeft.default} text-sm`}
+                  className="flex h-10 w-full rounded-lg border border-input bg-background py-1 pl-4 pr-3 text-sm"
                 >
                   {SUBMISSION_CONTENT_TYPES.map((type) => (
                     <option key={type} value={type}>
@@ -636,7 +600,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
               </div>
             </div>
 
-            <div className={spaceY.compact}>
+            <div className="space-y-2">
               <Label>Quick Start</Label>
               <TemplateSelector templates={templates} onSelect={handleTemplateSelect} />
             </div>
@@ -652,12 +616,12 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
           theme="blue"
           showBorderBeam={false}
         >
-          <div className={spaceY.comfortable}>
+          <div className="space-y-4">
             {/* Name Field + Duplicate Warning */}
-            <div className={spaceY.compact}>
-              <div className={between.center}>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
                 <Label htmlFor={`${formId}-name`}>{nameFieldConfig.label}</Label>
-                <span className={cn(`${size.xs} ${muted.default}`, 'font-medium')}>
+                <span className={cn('text-xs', 'text-muted-foreground', 'font-medium')}>
                   {name.length}/100
                 </span>
               </div>
@@ -670,7 +634,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                   placeholder={nameFieldConfig.placeholder}
                   required={nameFieldConfig.required ?? true}
                   maxLength={100}
-                  className={`${paddingRight.default}`}
+                  className="pr-4"
                 />
                 {name.length > 3 && (
                   <motion.div
@@ -679,18 +643,18 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                     animate={shouldReduceMotion ? { opacity: 1 } : { scale: 1 }}
                     transition={springBouncy}
                   >
-                    <CheckCircle className={cn(iconSize.sm, 'text-green-500 dark:text-green-400')} />
+                    <CheckCircle className={cn('h-4 w-4', 'text-green-500 dark:text-green-400')} />
                   </motion.div>
                 )}
               </div>
-              <p className={`${size.xs} ${muted.default}`}>
+              <p className="text-muted-foreground text-xs">
                 {nameFieldConfig.helpText ?? 'A clear, descriptive name for your configuration'}
               </p>
               <DuplicateWarning contentType={contentType} name={name} />
             </div>
 
             {/* Description Field with Markdown Preview */}
-            <div className={spaceY.compact}>
+            <div className="space-y-2">
               <Label htmlFor={`${formId}-description`}>Description *</Label>
               <Tabs defaultValue="write" className="w-full">
                 <TabsList className="w-full">
@@ -701,7 +665,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                     Preview
                   </TabsTrigger>
                 </TabsList>
-                <TabsContent value="write" className={`${marginTop.compact}`}>
+                <TabsContent value="write" className="mt-2">
                   <Textarea
                     id={`${formId}-description`}
                     name="description"
@@ -712,21 +676,21 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                     rows={6}
                     className="resize-y font-sans"
                   />
-                  <p className={cn(`${size.xs} ${muted.default}`, marginTop.micro)}>
+                  <p className={cn('text-xs', 'text-muted-foreground', 'mt-0.5')}>
                     Supports markdown formatting (bold, italic, lists, links, code blocks)
                   </p>
                 </TabsContent>
-                <TabsContent value="preview" className={`${marginTop.compact}`}>
+                <TabsContent value="preview" className="mt-2">
                   <div
                     className={cn(
-                      'border-input bg-background min-h-[150px] rounded-md border p-4',
+                      'min-h-[150px] rounded-lg border border-input bg-background p-4',
                       'prose prose-sm dark:prose-invert max-w-none'
                     )}
                   >
                     {description ? (
                       <p className="whitespace-pre-wrap">{description}</p>
                     ) : (
-                      <p className={muted.default}>
+                      <p className="text-muted-foreground">
                         Nothing to preview yet. Write something in the Write tab!
                       </p>
                     )}
@@ -768,7 +732,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
           theme="purple"
           showBorderBeam={false}
         >
-          <div className={spaceY.comfortable}>
+          <div className="space-y-4">
             {/* Tags Field */}
             {tagFields.length > 0 && (
               <ContentTypeFieldRenderer config={{ fields: tagFields }} formId={formId} />
@@ -781,7 +745,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
 
         {/* Enhanced Submit Button */}
         <motion.div
-          className={`flex flex-col sm:flex-row ${gap.compact} sm:${gap.default} ${paddingTop.tight} sm:${paddingTop.default}`}
+          className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-1 sm:pt-4"
           whileHover={shouldReduceMotion ? {} : { scale: 1.02 }}
           whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
         >
@@ -789,7 +753,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
             {isPending ? (
               <>
                 <motion.div
-                  className={`${marginRight.tight}`}
+                  className="mr-1"
                   animate={shouldReduceMotion ? { opacity: 1 } : { opacity: [1, 0.5, 1], rotate: [0, 360] }}
                   transition={
                     shouldReduceMotion
@@ -801,13 +765,13 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                         }
                   }
                 >
-                  <Github className={iconSize.sm} />
+                  <Github className="h-4 w-4" />
                 </motion.div>
                 Creating PR...
               </>
             ) : (
               <>
-                <Send className={`${iconSize.sm} ${marginRight.compact}`} />
+                <Send className="h-4 w-4 mr-2" />
                 Submit for Review
               </>
             )}
@@ -815,12 +779,12 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
         </motion.div>
 
         {/* Info Box */}
-        <div className={`rounded-lg border border-blue-500/20 bg-blue-500/10 ${padding.compact} sm:${padding.default}`}>
-          <div className={`flex ${gap.tight} sm:${gap.compact}`}>
-            <Github className={`h-5 w-5 text-blue-400 flex-shrink-0 ${marginTop.micro}`} />
+        <div className="card-base border-blue-500/20 bg-blue-500/10 p-3 sm:p-4">
+          <div className="flex gap-1 sm:gap-2">
+            <Github className="h-5 w-5 text-blue-400 flex-shrink-0 mt-0.5" />
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-blue-400">How it works</p>
-              <p className={`text-muted-foreground ${marginTop.tight} text-sm`}>
+              <p className="text-sm-medium text-blue-400">How it works</p>
+              <p className="text-muted-foreground text-sm mt-1">
                 We'll automatically create a Pull Request with your submission. Our team reviews for
                 quality and accuracy, then merges it to make your contribution live!
               </p>

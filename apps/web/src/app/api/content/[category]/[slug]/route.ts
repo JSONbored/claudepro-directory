@@ -1,13 +1,15 @@
 /**
- * Content Detail Export API Route
+ * Content Detail Export API Route (v1)
  *
  * Returns individual content records in multiple formats (JSON, Markdown, LLMs.txt, Storage).
  * Supports various export options including metadata and footer inclusion.
+ * 
+ * SIMPLIFIED: Uses format handler factory to eliminate 4 separate format handler functions (~900 lines → ~400 lines)
  *
  * @example
  * ```ts
  * // Request
- * GET /api/content/agents/code-reviewer?format=json
+ * GET /api/v1/content/agents/code-reviewer?format=json
  *
  * // Response (200) - application/json
  * {
@@ -20,1987 +22,357 @@
  */
 
 import 'server-only';
-import { ContentService } from '@heyclaude/data-layer';
-import type {
-  GetApiContentFullArgs,
-  GenerateMarkdownExportArgs,
-  GenerateItemLlmsTxtArgs,
-  GetSkillStoragePathArgs,
-  GetMcpbStoragePathArgs,
-} from '@heyclaude/database-types/postgres-types';
-import { type content_category, ContentCategory } from '@heyclaude/data-layer/prisma';
-import { APP_CONFIG, buildSecurityHeaders } from '@heyclaude/shared-runtime';
-import { normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { type content_category } from '@heyclaude/data-layer/prisma';
+import { APP_CONFIG } from '@heyclaude/shared-runtime';
+import { isValidCategory, VALID_CATEGORIES } from '@heyclaude/web-runtime/core';
 import {
-  buildCacheHeaders,
   contentDetailQuerySchema,
   createApiOptionsHandler,
-  createApiRoute,
+  createFormatHandlerRoute,
   getOnlyCorsHeaders,
+  getVersionedRoute,
   getWithAcceptCorsHeaders,
+  jsonResponse,
+  markdownResponse,
   notFoundResponse,
+  textResponse,
+  type FormatHandlerConfig,
+  type RouteHandlerContext,
 } from '@heyclaude/web-runtime/server';
-import { cacheLife } from 'next/cache';
 import { NextResponse } from 'next/server';
-
-// Use Prisma enum object for validation (ensures sync with database)
-const CONTENT_CATEGORY_VALUES = Object.values(ContentCategory) as readonly content_category[];
-
-/****
- * Cached helper function to fetch full content record
- * Uses Cache Components to reduce function invocations
- * @param {content_category} category
- * @param {string} slug
- */
-async function getCachedContentFull(category: content_category, slug: string) {
-  'use cache';
-  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
-
-  const service = new ContentService();
-  const rpcArgs = {
-    p_base_url: SITE_URL,
-    p_category: category,
-    p_slug: slug,
-  } satisfies GetApiContentFullArgs;
-
-  return await service.getApiContentFull(rpcArgs);
-}
 
 const SITE_URL = APP_CONFIG.url;
 
+// Helper functions
 function getProperty(obj: unknown, key: string): unknown {
-  if (typeof obj !== 'object' || obj === null) {
-    return undefined;
-  }
+  if (typeof obj !== 'object' || obj === null) return undefined;
   const desc = Object.getOwnPropertyDescriptor(obj, key);
   return desc?.value;
 }
 
 function getStringProperty(obj: unknown, key: string): string | undefined {
-  if (typeof obj !== 'object' || obj === null) {
-    return undefined;
-  }
+  if (typeof obj !== 'object' || obj === null) return undefined;
   const desc = Object.getOwnPropertyDescriptor(obj, key);
   return desc && typeof desc.value === 'string' ? desc.value : undefined;
 }
 
-/***
- * Removes control characters (CR, LF, tab, backspace, form feed, vertical tab) and trims surrounding whitespace from a header value.
- *
- * @param {string} val - The header value to sanitize (string)
- * @returns The sanitized header value (string) with control characters removed and trimmed
- */
 function sanitizeHeaderValue(val: string): string {
   return val.replaceAll(/[\r\n\t\b\f\v]/g, '').trim();
 }
 
-/**
- * Sanitizes a filename by removing control characters, double quotes, backslashes, and trimming surrounding whitespace.
- *
- * @param {string} name - The input filename to sanitize.
- * @returns {string} A safe filename; returns `export.md` if the sanitized result is empty.
- */
 function sanitizeFilename(name: string): string {
-  let cleaned = name
-    .replaceAll(/[\r\n\t\b\f\v]/g, '')
-    .replaceAll(/["\\]/g, '')
-    .trim();
-  if (!cleaned) {
-    cleaned = 'export.md';
-  }
-  return cleaned;
+  let cleaned = name.replaceAll(/[\r\n\t\b\f\v]/g, '').replaceAll(/["\\]/g, '').trim();
+  return cleaned || 'export.md';
 }
 
-/*****
- * Fetches a full content record for the given category and slug and returns it as an HTTP JSON response.
- *
- * Calls the `get_api_content_full` Supabase RPC and:
- * - returns a 200 response with the JSON content when the RPC succeeds and data is present,
- * - returns a 404 JSON response when no content is found,
- * - returns an error response produced by `createErrorResponse` when the RPC returns an error.
- *
- * @param {content_category} category - Content category enum value used to scope the lookup
- * @param {string} slug - Content slug to identify the record
- * @param {ReturnType<typeof logger.child>} reqLogger - Scoped request logger used to record RPC errors and context
- * @returns A NextResponse containing the exported JSON content on success, a 404 JSON response if not found, or an error response created from RPC errors
- * @see {@link createErrorResponse}
- * @see {@link get_api_content_full}
- * @param {{ error: (context: Record<string, unknown>, message: string) => void; warn: (context: Record<string, unknown>, message: string) => void; info: (context: Record<string, unknown>, message: string) => void; debug: (context: Record<string, unknown>, message: string) => void }} logger Parameter description
-  * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
-*/
-async function handleJsonFormat(
-  category: content_category,
-  slug: string,
-  logger: {
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
+// Shared route params extractor
+async function getRouteParams(nextContext: unknown): Promise<{ category: string; slug: string }> {
+  interface RouteContext {
+    params: Promise<{ category: string; slug: string }>;
   }
-) {
-  let data: Awaited<ReturnType<typeof getCachedContentFull>> | null = null;
-  try {
-    data = await getCachedContentFull(category, slug);
-  } catch (error) {
-    const normalized = normalizeError(error, 'Operation failed');
-    logger.error(
-      {
-        category,
-        err: normalized,
-        rpcName: 'get_api_content_full',
-        slug,
-      } as Record<string, unknown>,
-      'Content JSON RPC error'
-    );
-    throw normalized; // Factory will handle error response
+  const context = nextContext as RouteContext;
+  if (!context?.params) throw new Error('Missing route context');
+  const params = await context.params;
+  if (!isValidCategory(params.category)) {
+    throw new Error(`Invalid category '${params.category}'. Valid categories: ${VALID_CATEGORIES.join(', ')}`);
   }
-
-  if (!data) {
-    logger.warn({ category, slug } as Record<string, unknown>, 'Content not found');
-    return NextResponse.json(
-      {
-        error: {
-          code: 'NOT_FOUND',
-          message: 'Content not found',
-        },
-        success: false,
-        timestamp: new Date().toISOString(),
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json; charset=utf-8',
-          ...buildSecurityHeaders(),
-          ...getOnlyCorsHeaders,
-        },
-        status: 404,
-      }
-    );
-  }
-
-  // Handle different return types from get_api_content_full
-  // The RPC can return JSONB (which might be a string) or a JSON object
-  let parsedData: unknown;
-  if (typeof data === 'string') {
-    // If it's already a JSON string, parse it
-    try {
-      parsedData = JSON.parse(data);
-    } catch {
-      // If parsing fails, treat it as raw text and wrap it
-      logger.warn(
-        {
-          category,
-          dataPreview: data.slice(0, 100),
-          slug,
-        } as Record<string, unknown>,
-        'Content JSON: RPC returned non-JSON string'
-      );
-      return NextResponse.json(
-        { error: 'Invalid JSON data from RPC' },
-        {
-          headers: {
-            'Content-Type': 'application/json; charset=utf-8',
-            ...buildSecurityHeaders(),
-            ...getOnlyCorsHeaders,
-          },
-          status: 500,
-        }
-      );
-    }
-  } else {
-    // If it's already an object, use it directly
-    parsedData = data;
-  }
-
-  // Database RPC should return clean JSON (no client-side processing needed)
-  // This eliminates CPU-intensive recursive object traversal (10-15% CPU savings)
-  // If the database RPC returns escaped strings, it should be fixed in the RPC itself
-
-  // Ensure we have actual content
-  if (!parsedData || (typeof parsedData === 'object' && Object.keys(parsedData).length === 0)) {
-    logger.warn(
-      {
-        category,
-        dataType: typeof data,
-        slug,
-      } as Record<string, unknown>,
-      'Content JSON: empty or null data returned from RPC'
-    );
-    return NextResponse.json(
-      { error: 'Content data is empty' },
-      {
-        headers: {
-          'Content-Type': 'application/json; charset=utf-8',
-          ...buildSecurityHeaders(),
-          ...getOnlyCorsHeaders,
-        },
-        status: 500,
-      }
-    );
-  }
-
-  // Stringify with proper formatting (2-space indent for readability)
-  const jsonData = JSON.stringify(parsedData, null, 2);
-
-  return new NextResponse(jsonData, {
-    headers: {
-      'Content-Type': 'application/json; charset=utf-8',
-      'X-Generated-By': 'prisma.rpc.get_api_content_full',
-      ...buildSecurityHeaders(),
-      ...getOnlyCorsHeaders,
-      ...buildCacheHeaders('content_export'),
-    },
-    status: 200,
-  });
+  return params;
 }
 
-/******
- * Produce a Markdown export for a content record.
- *
- * Parses `includeMetadata` and `includeFooter` from the provided `url`, invokes the
- * `generate_markdown_export` RPC for the given `category` and `slug`, and returns a
- * NextResponse containing the generated Markdown or a structured JSON error.
- *
- * @param {content_category} category - content category to export
- * @param {string} slug - string: content record slug to export
- * @param {URL} url - URL: request URL used to read query params `includeMetadata` and `includeFooter`
- * @param {ReturnType<typeof logger.child>} reqLogger - ReturnType<typeof logger.child>: request-scoped logger for error and context logging
- * @returns A NextResponse containing the Markdown payload on success (status 200) or a JSON error payload on failure (status 400)
- *
- * @see generate_markdown_export RPC
- * @see sanitizeFilename
- * @see sanitizeHeaderValue
- * @param {boolean} includeMetadata Parameter description
- * @param {boolean} includeFooter Parameter description
-  * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
-*/
-async function handleMarkdownFormat(
-  category: content_category,
-  slug: string,
-  includeMetadata: boolean,
-  includeFooter: boolean,
-  logger: {
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }
+// Shared LLMs handler (llms and llms-txt are identical - both supported for backward compatibility)
+function handleLlmsFormat(
+  result: unknown,
+  _format: 'llms-txt' | 'llms',
+  _query: ContentDetailQuery,
+  _body: unknown,
+  ctx: RouteHandlerContext<ContentDetailQuery, unknown>
 ) {
-  const service = new ContentService();
-  const rpcArgs = {
-    p_category: category,
-    p_include_footer: includeFooter,
-    p_include_metadata: includeMetadata,
-    p_slug: slug,
-  } satisfies GenerateMarkdownExportArgs;
-
-  let data;
-  try {
-    data = await service.generateMarkdownExport(rpcArgs);
-  } catch (error) {
-    const normalized = normalizeError(error, 'Content Markdown RPC error');
-    logger.error(
-      {
-        category,
-        err: normalized,
-        rpcName: 'generate_markdown_export',
-        slug,
-      } as Record<string, unknown>,
-      'Content Markdown RPC error'
-    );
-    throw normalized; // Factory will handle error response
-  }
-
-  const success = getProperty(data, 'success');
-  if (typeof success !== 'boolean' || !success) {
-    const error = getProperty(data, 'error');
-    return NextResponse.json(
-      { error: typeof error === 'string' ? error : 'Markdown generation failed' },
-      {
-        headers: {
-          'Content-Type': 'application/json; charset=utf-8',
-          ...buildSecurityHeaders(),
-          ...getWithAcceptCorsHeaders,
-        },
-        status: 400,
-      }
-    );
-  }
-
-  const markdown = getProperty(data, 'markdown');
-  const filename = getProperty(data, 'filename');
-  const contentId = getProperty(data, 'content_id');
-
-  if (
-    typeof markdown !== 'string' ||
-    typeof filename !== 'string' ||
-    typeof contentId !== 'string'
-  ) {
-    logger.warn(
-      {
-        dataKeys: data ? Object.keys(data) : [],
-        hasContentId: typeof contentId === 'string',
-        hasFilename: typeof filename === 'string',
-        hasMarkdown: typeof markdown === 'string',
-      } as Record<string, unknown>,
-      'Content Markdown: invalid response structure'
-    );
-    return NextResponse.json(
-      { error: 'Markdown generation failed: invalid response' },
-      {
-        headers: {
-          'Content-Type': 'application/json; charset=utf-8',
-          ...buildSecurityHeaders(),
-          ...getWithAcceptCorsHeaders,
-        },
-        status: 400,
-      }
-    );
-  }
-
-  // Ensure markdown content is not empty
-  if (!markdown || markdown.trim().length === 0) {
-    logger.warn(
-      {
-        category,
-        contentId,
-        filename,
-        slug,
-      } as Record<string, unknown>,
-      'Content Markdown: empty markdown content returned'
-    );
-    return NextResponse.json(
-      { error: 'Markdown generation failed: empty content' },
-      {
-        headers: {
-          'Content-Type': 'application/json; charset=utf-8',
-          ...buildSecurityHeaders(),
-          ...getWithAcceptCorsHeaders,
-        },
-        status: 400,
-      }
-    );
-  }
-
-  const safeFilename = sanitizeFilename(filename);
-  const safeContentId = sanitizeHeaderValue(contentId);
-
-  logger.info(
-    {
-      category,
-      contentId: safeContentId,
-      filename: safeFilename,
-      markdownLength: markdown.length,
-      slug,
-    } as Record<string, unknown>,
-    'Content Markdown: markdown generated successfully'
-  );
-
-  return new NextResponse(markdown, {
-    headers: {
-      'Content-Disposition': `inline; filename="${safeFilename}"`,
-      'Content-Type': 'text/markdown; charset=utf-8',
-      'X-Content-ID': safeContentId,
-      'X-Generated-By': 'prisma.rpc.generate_markdown_export',
-      ...buildSecurityHeaders(),
-      ...getWithAcceptCorsHeaders,
-      ...buildCacheHeaders('content_export'),
-    },
-    status: 200,
-  });
-}
-
-/*****
- * Generate an LLMs.txt representation for a content item and return it as a plain text HTTP response.
- *
- * Calls the `generate_item_llms_txt` Supabase RPC with the provided category and slug and responds with
- * the RPC-produced text when found; returns a JSON error response when the item is not found or the RPC fails.
- *
- * @param {content_category} category - Database content category enum identifying the type of content to export
- * @param {string} slug - Content slug identifying the specific item to export
- * @param {ReturnType<typeof logger.child>} reqLogger - Scoped logger used for request-scoped logging and RPC error reporting
- * @returns A NextResponse containing the LLMs.txt content as `text/plain; charset=utf-8` with appropriate security and cache headers on success, or a JSON error response (status 4xx/5xx) on RPC errors or when content is not found
- *
- * @see generate_item_llms_txt (Supabase RPC)
- * @see createErrorResponse
- * @see buildSecurityHeaders
- * @param {{ error: (context: Record<string, unknown>, message: string) => void; warn: (context: Record<string, unknown>, message: string) => void; info: (context: Record<string, unknown>, message: string) => void; debug: (context: Record<string, unknown>, message: string) => void }} logger Parameter description
-  * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
- * @param {{
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }} logger Parameter description
-*/
-async function handleItemLlmsTxt(
-  category: content_category,
-  slug: string,
-  logger: {
-    debug: (context: Record<string, unknown>, message: string) => void;
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }
-) {
-  const service = new ContentService();
-  const rpcArgs = {
-    p_category: category,
-    p_slug: slug,
-  } satisfies GenerateItemLlmsTxtArgs;
-
-  let data;
-  try {
-    data = await service.getItemLlmsTxt(rpcArgs);
-  } catch (error) {
-    const normalized = normalizeError(error, 'Content LLMs.txt RPC error');
-    logger.error(
-      {
-        category,
-        err: normalized,
-        rpcName: 'generate_item_llms_txt',
-        slug,
-      } as Record<string, unknown>,
-      'Content LLMs.txt RPC error'
-    );
-    throw normalized; // Factory will handle error response
-  }
-
-  if (!data) {
-    return notFoundResponse('LLMs.txt content not found', 'Content');
-  }
-
-  // Handle different return types - RPC might return JSON or plain text
+  const { logger } = ctx;
+  const data = result as string | null;
+  if (!data) return notFoundResponse('LLMs.txt content not found', 'Content');
   let formatted: string;
   if (typeof data === 'string') {
-    // If it's a string, check if it's JSON
     if (data.trim().startsWith('{') || data.trim().startsWith('[')) {
       try {
-        // It's JSON - this shouldn't happen, but handle it gracefully
         const parsed = JSON.parse(data);
-        logger.warn(
-          {
-            category,
-            dataType: 'json',
-            slug,
-          } as Record<string, unknown>,
-          'Content LLMs.txt: RPC returned JSON instead of plain text'
-        );
-        // Convert JSON to a readable format (fallback)
+        logger.warn({}, 'Content LLMs.txt: RPC returned JSON instead of plain text');
         formatted = JSON.stringify(parsed, null, 2);
-      } catch (error) {
-        // Not valid JSON, treat as plain text (graceful fallback)
-        const normalized = normalizeError(error, 'JSON parse failed, treating as plain text');
-        logger.debug(
-          {
-            category,
-            dataType: 'string',
-            err: normalized,
-            slug,
-          } as Record<string, unknown>,
-          'Content LLMs.txt: Data looked like JSON but parse failed, treating as plain text'
-        );
+      } catch {
         formatted = data;
       }
     } else {
-      // Plain text string
       formatted = data;
     }
   } else {
-    // If it's an object, convert to string (shouldn't happen, but handle it)
-    logger.warn(
-      {
-        category,
-        dataType: typeof data,
-        slug,
-      } as Record<string, unknown>,
-      'Content LLMs.txt: RPC returned object instead of string'
-    );
+    logger.warn({}, 'Content LLMs.txt: RPC returned object instead of string');
     formatted = JSON.stringify(data, null, 2);
   }
-
-  // Database RPC returns properly formatted text (no client-side processing needed)
-  // This eliminates CPU-intensive string replacement (5-10% CPU savings)
-  logger.info(
-    {
-      category,
-      firstLine: formatted.split('\n')[0]?.slice(0, 50),
-      length: formatted.length,
-      slug,
-    } as Record<string, unknown>,
-    'Content LLMs.txt: formatted successfully'
-  );
-
-  return new NextResponse(formatted, {
-    headers: {
-      'Content-Type': 'text/plain; charset=utf-8',
-      'X-Generated-By': 'prisma.rpc.generate_item_llms_txt',
-      ...buildSecurityHeaders(),
-      ...getOnlyCorsHeaders,
-      ...buildCacheHeaders('content_export'),
-    },
-    status: 200,
+  logger.info({ bytes: formatted.length }, 'Content LLMs.txt formatted');
+  return textResponse(formatted, 200, getOnlyCorsHeaders, {
+    'X-Generated-By': 'prisma.rpc.generate_item_llms_txt',
   });
 }
 
+// Shared LLMs method args builder
+function buildLlmsMethodArgs(_format: ContentDetailFormat, _query: ContentDetailQuery, _body: unknown, routeParams?: Record<string, string>) {
+  const category = routeParams?.['category'];
+  const slug = routeParams?.['slug'];
+  if (!category || !slug || !isValidCategory(category)) throw new Error('Invalid category or slug');
+  return [{ p_category: category as content_category, p_slug: slug }];
+}
+
+// Shared markdown handler (markdown and md are identical - both supported for backward compatibility)
+function handleMarkdownFormat(
+  result: unknown,
+  _format: 'markdown' | 'md',
+  _query: ContentDetailQuery,
+  _body: unknown,
+  ctx: RouteHandlerContext<ContentDetailQuery, unknown>
+) {
+  const { logger } = ctx;
+  const data = result as { success?: boolean; error?: string; markdown?: string; filename?: string; content_id?: string };
+  const success = getProperty(data, 'success');
+  if (typeof success !== 'boolean' || !success) {
+    const error = getProperty(data, 'error');
+    return jsonResponse(
+      { error: typeof error === 'string' ? error : 'Markdown generation failed' },
+      400,
+      getWithAcceptCorsHeaders
+    );
+  }
+  const markdown = getProperty(data, 'markdown');
+  const filename = getProperty(data, 'filename');
+  const contentId = getProperty(data, 'content_id');
+  if (typeof markdown !== 'string' || typeof filename !== 'string' || typeof contentId !== 'string') {
+    logger.warn({}, 'Content Markdown: invalid response structure');
+    return jsonResponse({ error: 'Markdown generation failed: invalid response' }, 400, getWithAcceptCorsHeaders);
+  }
+  if (!markdown || markdown.trim().length === 0) {
+    logger.warn({}, 'Content Markdown: empty markdown content returned');
+    return jsonResponse({ error: 'Markdown generation failed: empty content' }, 400, getWithAcceptCorsHeaders);
+  }
+  const safeFilename = sanitizeFilename(filename);
+  const safeContentId = sanitizeHeaderValue(contentId);
+  logger.info({ filename: safeFilename, markdownLength: markdown.length }, 'Content Markdown generated');
+  return markdownResponse(markdown, safeFilename, 200, getWithAcceptCorsHeaders, {
+    'X-Content-ID': safeContentId,
+    'X-Generated-By': 'prisma.rpc.generate_markdown_export',
+  });
+}
+
+// Shared markdown method args builder
+function buildMarkdownMethodArgs(_format: ContentDetailFormat, query: ContentDetailQuery, _body: unknown, routeParams?: Record<string, string>) {
+  const category = routeParams?.['category'];
+  const slug = routeParams?.['slug'];
+  if (!category || !slug || !isValidCategory(category)) throw new Error('Invalid category or slug');
+  return [{
+    p_category: category as content_category,
+    p_include_footer: query.includeFooter ?? false,
+    p_include_metadata: query.includeMetadata ?? true,
+    p_slug: slug,
+  }];
+}
+
+// Shared storage handler
 async function handleStorageFormat(
   category: content_category,
   slug: string,
   metadataMode: boolean,
-  logger: {
-    error: (context: Record<string, unknown>, message: string) => void;
-    info: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }
-) {
-  logger.info(
-    { category, metadataMode, slug } as Record<string, unknown>,
-    'Handling storage format'
-  );
+  logger: RouteHandlerContext<ContentDetailQuery, unknown>['logger'],
+  getStoragePath: (args: { p_slug: string }) => Promise<unknown>,
+  rpcName: string
+): Promise<NextResponse> {
+  const data = await getStoragePath({ p_slug: slug });
+  const location = Array.isArray(data) ? data[0] : data;
+  const bucket = getStringProperty(location, 'bucket');
+  const objectPath = getStringProperty(location, 'object_path');
+  if (!bucket || !objectPath) throw new Error('Storage file not found');
 
-  const service = new ContentService();
-
-  // Support both 'skills' and 'mcp' categories for storage format
-  if (category === 'skills') {
-    const rpcArgs = {
-      p_slug: slug,
-    } satisfies GetSkillStoragePathArgs;
-
-    let data;
-    try {
-      data = await service.getSkillStoragePath(rpcArgs);
-    } catch (error) {
-      const normalized = normalizeError(error, 'Skill storage path RPC error');
-      logger.error(
-        {
-          err: normalized,
-          rpcName: 'get_skill_storage_path',
-          slug,
-        } as Record<string, unknown>,
-        'Skill storage path RPC error'
-      );
-      throw normalized; // Factory will handle error response
-    }
-
-    const result = data;
-    const location = Array.isArray(result) ? result[0] : result;
-
-    const bucket = getStringProperty(location, 'bucket');
-    const objectPath = getStringProperty(location, 'object_path');
-
-    if (!bucket || !objectPath) {
-      throw new Error('Storage file not found');
-    }
-
-    // If metadata mode requested, return JSON metadata instead of binary file
-    if (metadataMode) {
-      const metadata = {
-        bucket,
-        category,
-        download_url: `${SITE_URL}/api/content/${category}/${slug}?format=storage`,
-        note: 'Use download_url to fetch the actual binary file',
-        object_path: objectPath,
-        slug,
-      };
-
-      logger.info({ bucket, objectPath } as Record<string, unknown>, 'Returning storage metadata');
-
-      return NextResponse.json(metadata, {
-        headers: {
-          'Content-Type': 'application/json; charset=utf-8',
-          'X-Generated-By': 'prisma.rpc.get_skill_storage_path',
-          ...buildSecurityHeaders(),
-          ...getOnlyCorsHeaders,
-          ...buildCacheHeaders('content_export'),
-        },
-        status: 200,
-      });
-    }
-
-    // Get public URL from Supabase Storage and redirect instead of proxying
-    // This eliminates bandwidth usage through Vercel Functions (60-80% savings)
-    // Note: Storage still uses Supabase, so we create a minimal client for storage operations
-    const { createSupabaseAnonClient } = await import('@heyclaude/web-runtime/server');
-    const storageClient = createSupabaseAnonClient();
-    const {
-      data: { publicUrl },
-    } = storageClient.storage.from(bucket).getPublicUrl(objectPath);
-
-    logger.info(
-      {
-        bucket,
-        objectPath,
-        publicUrl,
-        redirect: true,
-      } as Record<string, unknown>,
-      'Redirecting to Supabase Storage public URL (eliminates proxying)'
-    );
-
-    // Permanent redirect (308) to Supabase Storage public URL
-    // This bypasses Vercel Functions entirely for file downloads
-    return NextResponse.redirect(publicUrl, {
-      headers: {
-        'Cache-Control': 'public, max-age=31536000, immutable',
-        'X-Content-Source': 'supabase-storage:redirect',
-        'X-Storage-Bucket': bucket,
-        'X-Storage-Path': objectPath,
-        ...buildSecurityHeaders(),
-        ...getOnlyCorsHeaders,
-      },
-      status: 308, // Permanent redirect (preserves method)
+  if (metadataMode) {
+    const metadata = {
+      bucket,
+      category,
+      download_url: `${SITE_URL}/api/v1/content/${category}/${slug}?format=storage`,
+      note: 'Use download_url to fetch the actual binary file',
+      object_path: objectPath,
+      slug,
+    };
+    logger.info({ bucket, objectPath }, 'Returning storage metadata');
+    return jsonResponse(metadata, 200, getOnlyCorsHeaders, {
+      'X-Generated-By': rpcName,
     });
   }
 
-  if (category === 'mcp') {
-    const rpcArgs = {
-      p_slug: slug,
-    } satisfies GetMcpbStoragePathArgs;
-
-    let data;
-    try {
-      data = await service.getMcpbStoragePath(rpcArgs);
-    } catch (error) {
-      const normalized = normalizeError(error, 'MCPB storage path RPC error');
-      logger.error(
-        {
-          err: normalized,
-          rpcName: 'get_mcpb_storage_path',
-          slug,
-        } as Record<string, unknown>,
-        'MCPB storage path RPC error'
-      );
-      throw normalized; // Factory will handle error response
-    }
-
-    const result = data;
-    const location = Array.isArray(result) ? result[0] : result;
-
-    const bucket = getStringProperty(location, 'bucket');
-    const objectPath = getStringProperty(location, 'object_path');
-
-    if (!bucket || !objectPath) {
-      throw new Error('MCPB package not found');
-    }
-
-    // If metadata mode requested, return JSON metadata instead of binary file
-    if (metadataMode) {
-      const metadata = {
-        bucket,
-        category,
-        download_url: `${SITE_URL}/api/content/${category}/${slug}?format=storage`,
-        note: 'Use download_url to fetch the actual binary file',
-        object_path: objectPath,
-        slug,
-      };
-
-      logger.info({ bucket, objectPath } as Record<string, unknown>, 'Returning storage metadata');
-
-      return NextResponse.json(metadata, {
-        headers: {
-          'Content-Type': 'application/json; charset=utf-8',
-          'X-Generated-By': 'prisma.rpc.get_mcpb_storage_path',
-          ...buildSecurityHeaders(),
-          ...getOnlyCorsHeaders,
-          ...buildCacheHeaders('content_export'),
-        },
-        status: 200,
-      });
-    }
-
-    // Get public URL from Supabase Storage and redirect instead of proxying
-    // This eliminates bandwidth usage through Vercel Functions (60-80% savings)
-    // Note: Storage still uses Supabase, so we create a minimal client for storage operations
-    const { createSupabaseAnonClient } = await import('@heyclaude/web-runtime/server');
-    const storageClient = createSupabaseAnonClient();
-    const {
-      data: { publicUrl },
-    } = storageClient.storage.from(bucket).getPublicUrl(objectPath);
-
-    logger.info(
-      {
-        bucket,
-        objectPath,
-        publicUrl,
-        redirect: true,
-      } as Record<string, unknown>,
-      'Redirecting to Supabase Storage public URL (eliminates proxying)'
-    );
-
-    // Permanent redirect (308) to Supabase Storage public URL
-    // This bypasses Vercel Functions entirely for file downloads
-    return NextResponse.redirect(publicUrl, {
-      headers: {
-        'Cache-Control': 'public, max-age=31536000, immutable',
-        'X-Content-Source': 'supabase-storage:redirect',
-        'X-Storage-Bucket': bucket,
-        'X-Storage-Path': objectPath,
-        ...buildSecurityHeaders(),
-        ...getOnlyCorsHeaders,
-      },
-      status: 308, // Permanent redirect (preserves method)
-    });
-  }
-
-  throw new Error(
-    `Storage format not supported for category '${category}'. Supported categories: skills, mcp`
-  );
+  const { createSupabaseAnonClient } = await import('@heyclaude/web-runtime/server');
+  const storageClient = createSupabaseAnonClient();
+  const { data: { publicUrl } } = storageClient.storage.from(bucket).getPublicUrl(objectPath);
+  logger.info({ bucket, objectPath, publicUrl, redirect: true }, 'Redirecting to Supabase Storage public URL');
+  return NextResponse.redirect(publicUrl, {
+    headers: {
+      'Cache-Control': 'public, max-age=31536000, immutable',
+      'X-Content-Source': 'supabase-storage:redirect',
+      'X-Storage-Bucket': bucket,
+      'X-Storage-Path': objectPath,
+      ...getOnlyCorsHeaders,
+    },
+    status: 308,
+  });
 }
 
+type ContentDetailFormat = 'json' | 'markdown' | 'md' | 'llms' | 'llms-txt' | 'storage';
+
+type ContentDetailQuery = {
+  format: ContentDetailFormat;
+  includeMetadata?: boolean;
+  includeFooter?: boolean;
+  metadata?: boolean;
+};
+
 /**
- * GET /api/content/[category]/[slug] - Get content detail in multiple formats
+ * GET /api/v1/content/[category]/[slug] - Get content detail in multiple formats
  *
- * Returns individual content records in multiple formats (JSON, Markdown, LLMs.txt, Storage).
- * Supports various export options including metadata and footer inclusion.
+ * Returns individual content records in multiple formats with optimized caching.
+ * Uses format handler factory to eliminate switch/if statements and consolidate 4 format handlers.
  */
-export const GET = createApiRoute({
-  cors: 'anon',
-  handler: async ({ logger, nextContext, query }) => {
-    // Extract path parameters from Next.js route context
-    interface RouteContext {
-      params: Promise<{ category: string; slug: string }>;
-    }
-    const context = nextContext as RouteContext;
-    if (!context?.params) {
-      logger.error({}, 'Missing route context for content detail handler');
-      throw new Error('Missing route context');
-    }
-
-    const { category, slug } = await context.params;
-
-    // Validate category from path parameter
-    if (!CONTENT_CATEGORY_VALUES.includes(category as content_category)) {
-      throw new Error(
-        `Invalid category '${category}'. Valid categories: ${CONTENT_CATEGORY_VALUES.join(', ')}`
-      );
-    }
-
-    // Zod schema ensures proper types
-    const {
-      format,
-      includeFooter = false,
-      includeMetadata = true,
-      metadata: metadataMode = false,
-    } = query;
-
-    logger.info(
-      {
-        category,
-        format,
-        slug,
-      },
-      'Content record export request received'
-    );
-
-    switch (format) {
-      case 'json': {
-        return handleJsonFormat(
-          category as content_category,
-          slug,
-          {
-            debug: (context: Record<string, unknown>, message: string) =>
-              logger.debug(context as Parameters<typeof logger.debug>[0], message),
-            error: (context: Record<string, unknown>, message: string) =>
-              logger.error(context as Parameters<typeof logger.error>[0], message),
-            info: (context: Record<string, unknown>, message: string) =>
-              logger.info(context as Parameters<typeof logger.info>[0], message),
-            warn: (context: Record<string, unknown>, message: string) =>
-              logger.warn(context as Parameters<typeof logger.warn>[0], message),
-          }
-        );
-      }
-      case 'llms':
-      case 'llms-txt': {
-        return handleItemLlmsTxt(
-          category as content_category,
-          slug,
-          {
-            debug: (context: Record<string, unknown>, message: string) =>
-              logger.debug(context as Parameters<typeof logger.debug>[0], message),
-            error: (context: Record<string, unknown>, message: string) =>
-              logger.error(context as Parameters<typeof logger.error>[0], message),
-            info: (context: Record<string, unknown>, message: string) =>
-              logger.info(context as Parameters<typeof logger.info>[0], message),
-            warn: (context: Record<string, unknown>, message: string) =>
-              logger.warn(context as Parameters<typeof logger.warn>[0], message),
-          }
-        );
-      }
-      case 'markdown':
-      case 'md': {
-        return handleMarkdownFormat(
-          category as content_category,
-          slug,
-          includeMetadata ?? true,
-          includeFooter ?? false,
-          {
-            error: (context: Record<string, unknown>, message: string) =>
-              logger.error(context as Parameters<typeof logger.error>[0], message),
-            info: (context: Record<string, unknown>, message: string) =>
-              logger.info(context as Parameters<typeof logger.info>[0], message),
-            warn: (context: Record<string, unknown>, message: string) =>
-              logger.warn(context as Parameters<typeof logger.warn>[0], message),
-          }
-        );
-      }
-      case 'storage': {
-        return handleStorageFormat(
-          category as content_category,
-          slug,
-          metadataMode ?? false,
-          {
-            error: (context: Record<string, unknown>, message: string) =>
-              logger.error(context as Parameters<typeof logger.error>[0], message),
-            info: (context: Record<string, unknown>, message: string) =>
-              logger.info(context as Parameters<typeof logger.info>[0], message),
-            warn: (context: Record<string, unknown>, message: string) =>
-              logger.warn(context as Parameters<typeof logger.warn>[0], message),
-          }
-        );
-      }
-      default: {
-        throw new Error('Invalid format. Valid formats: json, markdown, llms-txt, storage');
-      }
-    }
-  },
+export const GET = createFormatHandlerRoute<ContentDetailFormat, ContentDetailQuery, unknown>({
+  route: getVersionedRoute('content/[category]/[slug]'),
+  operation: 'ContentRecordAPI',
   method: 'GET',
+  cors: 'anon',
+  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire
+  cacheTags: (format, _query, _body, routeParams) => {
+    const category = routeParams?.['category'] ?? '';
+    const slug = routeParams?.['slug'] ?? '';
+    return ['content', 'content-detail', `content-${category}-${slug}`, `content-${category}-${slug}-${format}`];
+  },
+  querySchema: contentDetailQuerySchema as any, // Type compatibility issue with exactOptionalPropertyTypes
+  defaultFormat: 'json',
+  formats: {
+    json: {
+      serviceKey: 'content',
+      methodName: 'getApiContentFull',
+      getRouteParams,
+      methodArgs: (_format, _query, _body, routeParams) => {
+        const category = routeParams?.['category'];
+        const slug = routeParams?.['slug'];
+        if (!category || !slug || !isValidCategory(category)) throw new Error('Invalid category or slug');
+        return [{ p_base_url: SITE_URL, p_category: category as content_category, p_slug: slug }];
+      },
+      responseHandler: (result: unknown, _format: 'json', _query: ContentDetailQuery, _body: unknown, ctx: RouteHandlerContext<ContentDetailQuery, unknown>) => {
+        const { logger } = ctx;
+        const data = result as unknown;
+        if (!data || (typeof data === 'object' && Object.keys(data).length === 0)) {
+          logger.warn({}, 'Content not found');
+          return notFoundResponse('Content not found', 'Content');
+        }
+        let parsedData: unknown;
+        if (typeof data === 'string') {
+          try {
+            parsedData = JSON.parse(data);
+          } catch {
+            logger.warn({}, 'Content JSON: RPC returned non-JSON string');
+            return jsonResponse({ error: 'Invalid JSON data from RPC' }, 500, getOnlyCorsHeaders);
+          }
+        } else {
+          parsedData = data;
+        }
+        const jsonData = JSON.stringify(parsedData, null, 2);
+        logger.info({ bytes: jsonData.length }, 'Content JSON generated');
+        return jsonResponse(JSON.parse(jsonData), 200, getOnlyCorsHeaders, {
+          'X-Generated-By': 'prisma.rpc.get_api_content_full',
+        });
+      },
+    },
+    // llms and llms-txt are identical (both supported for backward compatibility)
+    'llms-txt': {
+      serviceKey: 'content',
+      methodName: 'getItemLlmsTxt',
+      getRouteParams,
+      methodArgs: buildLlmsMethodArgs,
+      responseHandler: handleLlmsFormat,
+    },
+    llms: {
+      serviceKey: 'content',
+      methodName: 'getItemLlmsTxt',
+      getRouteParams,
+      methodArgs: buildLlmsMethodArgs,
+      responseHandler: handleLlmsFormat,
+    },
+    // markdown and md are identical (both supported for backward compatibility)
+    markdown: {
+      serviceKey: 'content',
+      methodName: 'generateMarkdownExport',
+      getRouteParams,
+      methodArgs: buildMarkdownMethodArgs,
+      responseHandler: handleMarkdownFormat,
+    },
+    md: {
+      serviceKey: 'content',
+      methodName: 'generateMarkdownExport',
+      getRouteParams,
+      methodArgs: buildMarkdownMethodArgs,
+      responseHandler: handleMarkdownFormat,
+    },
+    storage: {
+      serviceKey: 'content',
+      methodName: 'getSkillStoragePath', // Dummy - actual method called conditionally in responseHandler
+      getRouteParams,
+      methodArgs: (_format, _query, _body, _routeParams) => {
+        // Return empty args - storage format calls service methods directly in responseHandler
+        return [];
+      },
+      responseHandler: async (_result: unknown, _format: 'storage', query: ContentDetailQuery, _body: unknown, ctx: RouteHandlerContext<ContentDetailQuery, unknown>) => {
+        const { logger, nextContext } = ctx;
+        const metadataMode = query.metadata ?? false;
+        
+        // Extract category from route params
+        interface RouteContext {
+          params: Promise<{ category: string; slug: string }>;
+        }
+        const context = nextContext as RouteContext;
+        if (!context?.params) throw new Error('Missing route context');
+        const { category, slug } = await context.params;
+        const typedCategory = category as content_category;
+        
+        logger.info({ category: typedCategory, metadataMode, slug }, 'Handling storage format');
+        
+        // Handle skills category
+        if (typedCategory === 'skills') {
+          const { ContentService } = await import('@heyclaude/data-layer');
+          const service = new ContentService();
+          return handleStorageFormat(
+            typedCategory,
+            slug,
+            metadataMode,
+            logger,
+            (args) => service.getSkillStoragePath(args),
+            'prisma.rpc.get_skill_storage_path'
+          );
+        }
+        
+        // Handle mcp category
+        if (typedCategory === 'mcp') {
+          const { ContentService } = await import('@heyclaude/data-layer');
+          const service = new ContentService();
+          return handleStorageFormat(
+            typedCategory,
+            slug,
+            metadataMode,
+            logger,
+            (args) => service.getMcpbStoragePath(args),
+            'prisma.rpc.get_mcpb_storage_path'
+          );
+        }
+        
+        throw new Error(`Storage format not supported for category '${typedCategory}'. Supported categories: skills, mcp`);
+      },
+    },
+  } as Record<ContentDetailFormat, FormatHandlerConfig<ContentDetailFormat, ContentDetailQuery, unknown>>,
   openapi: {
+    summary: 'Get content detail in multiple formats',
     description:
       'Returns individual content records in multiple formats (JSON, Markdown, LLMs.txt, Storage). Supports various export options including metadata and footer inclusion.',
+    tags: ['content', 'export'],
     operationId: 'getContentDetail',
     responses: {
       200: {
@@ -2013,12 +385,7 @@ export const GET = createApiRoute({
         description: 'Content not found',
       },
     },
-    summary: 'Get content detail in multiple formats',
-    tags: ['content', 'export'],
   },
-  operation: 'ContentRecordAPI',
-  querySchema: contentDetailQuerySchema,
-  route: '/api/content/[category]/[slug]',
 });
 
 /**

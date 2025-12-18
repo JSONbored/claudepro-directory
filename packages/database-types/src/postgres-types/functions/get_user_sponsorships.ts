@@ -7,9 +7,6 @@
 
 import { z } from 'zod';
 
-import type { SponsoredContent } from '../composites/sponsored_content';
-import { sponsoredContentSchema } from '../composites/sponsored_content';
-
 /**
  * Arguments for PostgreSQL function: get_user_sponsorships
  */
@@ -34,12 +31,12 @@ export type GetUserSponsorshipsArgsFromZod = z.infer<typeof getUserSponsorshipsA
 /**
  * Return type for PostgreSQL function: get_user_sponsorships
  */
-export type GetUserSponsorshipsReturns = SponsoredContent[];
+export type GetUserSponsorshipsReturns = unknown[];
 
 /**
  * Zod schema for get_user_sponsorships function return type
  */
-export const getUserSponsorshipsReturnsSchema = z.array(sponsoredContentSchema);
+export const getUserSponsorshipsReturnsSchema = z.array(z.unknown());
 
 /**
  * Type inference from Zod schema (should match type above)

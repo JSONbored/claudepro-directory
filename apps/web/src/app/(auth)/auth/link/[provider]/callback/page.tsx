@@ -6,7 +6,7 @@
  */
 
 import { normalizeError } from '@heyclaude/shared-runtime';
-import { isValidProvider, validateNextParameter } from '@heyclaude/web-runtime';
+import { isValidProvider } from '@heyclaude/web-runtime/auth/oauth-providers';
 import { useAuthenticatedUser, useBoolean, useTimeout } from '@heyclaude/web-runtime/hooks';
 import { AlertCircle, Loader2 } from '@heyclaude/web-runtime/icons';
 import { logClientError, logClientWarn } from '@heyclaude/web-runtime/logging/client';
@@ -16,11 +16,11 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle
+  CardTitle,
 } from '@heyclaude/web-runtime/ui';
+import { validateNextParameter } from '@heyclaude/web-runtime/utils/auth-redirect';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { use, useEffect, useRef, useState } from 'react';
-import { iconSize, stack, padding, paddingY, marginBottom, marginX } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Note: This is a client component ('use client'), so segment config exports are not allowed.
@@ -231,7 +231,7 @@ export default function OAuthLinkCallbackPage({
 
   if (status === 'loading') {
     return (
-      <div className={`flex min-h-screen items-center justify-center ${padding.default}`}>
+      <div className="flex min-h-screen items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <CardTitle>Linking Account</CardTitle>
@@ -239,8 +239,8 @@ export default function OAuthLinkCallbackPage({
               Please wait while we redirect you to {provider ?? 'the provider'}...
             </CardDescription>
           </CardHeader>
-          <CardContent className={`flex items-center justify-center ${paddingY.relaxed}`}>
-            <Loader2 className={`${iconSize.xl} text-muted-foreground animate-spin`} />
+          <CardContent className="flex-center py-8">
+            <Loader2 className="text-muted-foreground h-8 w-8 animate-spin" />
           </CardContent>
         </Card>
       </div>
@@ -249,18 +249,18 @@ export default function OAuthLinkCallbackPage({
 
   // status can only be 'error' at this point (TypeScript narrows the type)
   return (
-    <div className={`flex min-h-screen items-center justify-center ${padding.default}`}>
+    <div className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className={`bg-destructive/10 ${marginX.auto} ${marginBottom.default} flex h-12 w-12 items-center justify-center rounded-full`}>
-            <AlertCircle className={`${iconSize.lg} text-destructive`} />
+          <div className="bg-destructive/10 mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full">
+            <AlertCircle className="text-destructive h-6 w-6" />
           </div>
           <CardTitle>Account Linking Failed</CardTitle>
           <CardDescription>
             {errorMessage ?? 'An error occurred while linking your account.'}
           </CardDescription>
         </CardHeader>
-        <CardContent className={stack.compact}>
+        <CardContent className="flex flex-col gap-2">
           <Button onClick={() => router.push('/account/connected-accounts')} type="button">
             Return to Connected Accounts
           </Button>

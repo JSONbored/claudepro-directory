@@ -9,7 +9,7 @@ import { AlertCircle, RefreshCw } from '@heyclaude/web-runtime/icons';
 import { logClientErrorBoundary } from '@heyclaude/web-runtime/logging/client';
 import { Button } from '@heyclaude/web-runtime/ui';
 import { Terminal } from '@/src/components/ui/terminal';
-import { SPRING, size, weight, spaceY, padding, marginX, marginTop } from '@heyclaude/web-runtime/design-system';
+import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 import { Component, type ReactNode } from 'react';
 
@@ -59,25 +59,25 @@ export class ContactTerminalErrorBoundary extends Component<Props, State> {
             transition={SPRING.smooth}
           >
             <motion.div
-              className={`max-w-md ${spaceY.comfortable} text-center`}
+              className="max-w-md space-y-6 text-center"
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={SPRING.smooth}
             >
               <motion.div
-                className={`bg-destructive/10 rounded-full ${padding.compact} ${marginX.auto} w-fit`}
+                className="bg-destructive/10 mx-auto w-fit rounded-full p-3"
                 initial={{ scale: 0, rotate: -180 }}
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ ...SPRING.bouncy, delay: 0.1 }}
               >
                 <AlertCircle className="text-destructive h-12 w-12" />
               </motion.div>
-              <div className={`${spaceY.compact}`}>
-                <h3 className={`${size.lg} ${weight.semibold}`}>Terminal Error</h3>
-                <p className={`text-muted-foreground ${size.sm}`}>
+              <div className="space-y-2">
+                <h3 className="text-lg font-semibold">Terminal Error</h3>
+                <p className="text-muted-foreground text-sm">
                   Something went wrong with the interactive terminal.
                   {this.state.error?.message ? (
-                    <span className={`text-destructive ${marginTop.compact} block max-w-full break-all font-mono text-xs`}>
+                    <span className="mt-2 block max-w-full break-all font-mono text-xs text-destructive">
                       {this.state.error.message}
                     </span>
                   ) : null}
@@ -105,7 +105,7 @@ export class ContactTerminalErrorBoundary extends Component<Props, State> {
                 </Button>
               </motion.div>
               <motion.p
-                className={`text-muted-foreground ${size.xs}`}
+                className="text-muted-foreground text-xs"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ ...SPRING.smooth, delay: 0.3 }}

@@ -20,91 +20,30 @@
  */
 
 import 'server-only';
-import { CompaniesService } from '@heyclaude/data-layer';
-import type {
-  GetCompanyProfileArgs,
-  GetCompanyProfileReturns,
-} from '@heyclaude/database-types/postgres-types';
-import { normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  buildCacheHeaders,
   createApiOptionsHandler,
-  createApiRoute,
+  createCachedApiRoute,
   getOnlyCorsHeaders,
+  getVersionedRoute,
   jsonResponse,
   notFoundResponse,
   slugSchema,
+  type RouteHandlerContext,
 } from '@heyclaude/web-runtime/server';
-import { cacheLife } from 'next/cache';
 import { z } from 'zod';
-
-/**
- * Cached helper function to fetch company profile by slug.
- * The slug parameter becomes part of the cache key, so different companies have different cache entries.
- *
- * @param {string} slug - Company slug identifier
- * @returns Promise resolving to an object with the company profile data
- */
-async function getCachedCompanyProfile(slug: string): Promise<{
-  data: GetCompanyProfileReturns;
-}> {
-  'use cache';
-  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
-
-  // CompaniesService now uses Prisma (no constructor needed)
-  const service = new CompaniesService();
-  const rpcArgs: GetCompanyProfileArgs = {
-    p_slug: slug,
-  };
-
-  const data = await service.getCompanyProfile(rpcArgs);
-  return { data };
-}
 
 /**
  * GET /api/company - Get company profile by slug
  *
  * Returns company profile data by slug identifier.
  * Validates slug parameter and returns company profile with cache headers.
+ * 
+ * OPTIMIZATION: Uses createCachedApiRoute to eliminate cached helper function boilerplate.
  */
-export const GET = createApiRoute({
+export const GET = createCachedApiRoute({
+  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
+  cacheTags: (query) => ['companies', `company-${query.slug}`],
   cors: 'anon',
-  handler: async ({ logger, query }) => {
-    // Zod schema ensures proper types
-    const { slug } = query;
-
-    logger.info({ slug }, 'Company request received');
-
-    let profile;
-    try {
-      const result = await getCachedCompanyProfile(slug);
-      profile = result.data;
-    } catch (error) {
-      const normalizedError = normalizeError(error, 'Company profile RPC error');
-      logger.error(
-        {
-          err: normalizedError,
-          rpcName: 'get_company_profile',
-          slug,
-        },
-        'Company profile RPC error'
-      );
-      throw normalizedError; // Factory will handle error response
-    }
-
-    // Check if profile exists
-    if (!profile || (typeof profile === 'object' && Object.keys(profile).length === 0)) {
-      logger.warn({ slug }, 'Company profile not found');
-      return notFoundResponse('Company not found', 'Company');
-    }
-
-    logger.info({ slug }, 'Company profile retrieved');
-
-    return jsonResponse(profile, 200, getOnlyCorsHeaders, {
-      'X-Generated-By': 'prisma.rpc.get_company_profile',
-      ...buildCacheHeaders('company_profile'),
-    });
-  },
   method: 'GET',
   openapi: {
     description:
@@ -128,7 +67,28 @@ export const GET = createApiRoute({
   querySchema: z.object({
     slug: slugSchema.describe('Company slug identifier'),
   }),
-  route: '/api/company',
+  responseHandler: (result: unknown, query: { slug: string }, _body: unknown, ctx: RouteHandlerContext<{ slug: string }, unknown>) => {
+    const { logger } = ctx;
+    const profile = result as { p_slug: string; [key: string]: unknown } | null | undefined;
+
+    // Check if profile exists
+    if (!profile || (typeof profile === 'object' && Object.keys(profile).length === 0)) {
+      logger.warn({ slug: query.slug }, 'Company profile not found');
+      return notFoundResponse('Company not found', 'Company');
+    }
+
+    logger.info({ slug: query.slug }, 'Company profile retrieved');
+
+    return jsonResponse(profile, 200, getOnlyCorsHeaders, {
+      'X-Generated-By': 'prisma.rpc.get_company_profile',
+    });
+  },
+  route: getVersionedRoute('company'),
+  service: {
+    methodArgs: (query) => [{ p_slug: query.slug }],
+    methodName: 'getCompanyProfile',
+    serviceKey: 'companies',
+  },
 });
 
 /**

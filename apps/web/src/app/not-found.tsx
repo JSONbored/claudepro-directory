@@ -2,7 +2,6 @@ import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { type Metadata } from 'next';
 
 import { NotFoundEmpty } from '@/src/components/primitives/feedback/empty-state';
-import { paddingX } from "@heyclaude/web-runtime/design-system";
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/404');
@@ -22,7 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
  */
 export default function NotFound() {
   return (
-    <div className={`bg-background flex min-h-screen items-center justify-center ${paddingX.default}`}>
+    <div className="bg-background flex min-h-screen items-center justify-center px-4">
       <NotFoundEmpty />
     </div>
   );

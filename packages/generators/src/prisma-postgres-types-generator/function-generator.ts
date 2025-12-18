@@ -240,11 +240,40 @@ function generateFunctionFile(
   }
 
   // Import composite types and schemas if needed
+  // Map excluded composite types to Prisma model types and their Zod schemas
+  const excludedCompositeToPrismaModel: Record<string, { type: string; schema: string }> = {
+    'announcements': { type: 'announcementsModel', schema: 'announcementsModelSchema' },
+    'content': { type: 'contentModel', schema: 'contentModelSchema' },
+    'jobs': { type: 'jobsModel', schema: 'jobsModelSchema' },
+    'notifications': { type: 'notificationsModel', schema: 'notificationsModelSchema' },
+  };
+  
   if (dependencies.imports.size > 0) {
     const typeImports: string[] = [];
     const schemaImports: string[] = [];
+    const prismaModelImports = new Set<string>();
+    const prismaSchemaImports = new Set<string>();
     
     for (const depName of Array.from(dependencies.imports).sort()) {
+      // Check if this composite type is excluded
+      const isExcluded = config.excludeCompositeTypes?.some((pattern) =>
+        new RegExp(pattern.replace(/\*/g, '.*')).test(depName)
+      );
+      
+      if (isExcluded) {
+        // Use Prisma model type and schema instead
+        const prismaMapping = excludedCompositeToPrismaModel[depName];
+        if (prismaMapping) {
+          if (config.generateTypes) {
+            prismaModelImports.add(prismaMapping.type);
+          }
+          if (config.generateZod) {
+            prismaSchemaImports.add(prismaMapping.schema);
+          }
+        }
+        continue;
+      }
+      
       const depSafeName = toSafeIdentifier(depName);
       const depTypeName = toPascalCase(depSafeName);
       const depSchemaName = `${toCamelCase(depSafeName)}Schema`;
@@ -262,6 +291,22 @@ function generateFunctionFile(
           `import { ${depSchemaName} } from '../composites/${depSafeName}';`
         );
       }
+    }
+    
+    // Add Prisma model type imports if needed
+    if (prismaModelImports.size > 0) {
+      const prismaModels = Array.from(prismaModelImports).sort();
+      typeImports.push(
+        `import type { ${prismaModels.join(', ')} } from '@heyclaude/database-types/prisma/models';`
+      );
+    }
+    
+    // Add Prisma Zod schema imports if needed
+    if (prismaSchemaImports.size > 0) {
+      const prismaSchemas = Array.from(prismaSchemaImports).sort();
+      schemaImports.push(
+        `import { ${prismaSchemas.join(', ')} } from '@heyclaude/database-types/prisma/zod/schemas/variants/pure';`
+      );
     }
     
     // Add imports (types first, then schemas)
@@ -399,23 +444,60 @@ function generateFunctionFile(
       // Use introspected structure
       lines.push(`export type ${returnsTypeName} = ${functionSpecificReturnType}[];`);
     } else {
-      let returnType = mapReturnType(
-        functionMeta.returnType,
-        context,
-        compositeTypes
-      );
-      
-      // If return type is still unknown/Record and we found a composite type in pre-check, use it
-      // BUT: Only if it's not a _record type (heuristic should not apply to actual record types)
+      // Check if return type references an excluded composite type BEFORE mapping
+      // This allows us to map excluded types to Prisma models even though they're filtered out
       const baseReturnType = functionMeta.returnType.startsWith('_') 
         ? stripSchemaPrefix(functionMeta.returnType.slice(1))
         : stripSchemaPrefix(functionMeta.returnType);
-      const isActualRecordType = baseReturnType === 'record' || baseReturnType.toLowerCase() === 'pg_catalog.record';
       
-      if (matchedCompositeType && 
-          !isActualRecordType && // Don't use heuristic for actual record types
-          (returnType.includes('Record<string, unknown>') || returnType.includes('unknown[]') || returnType === 'unknown[]')) {
-        returnType = `${toPascalCase(toSafeIdentifier(matchedCompositeType))}[]`;
+      const excludedCompositeToPrismaModel: Record<string, string> = {
+        'announcements': 'announcementsModel',
+        'content': 'contentModel',
+        'jobs': 'jobsModel',
+        'notifications': 'notificationsModel',
+      };
+      
+      // Check if the base return type is an excluded composite type
+      const isExcludedComposite = config.excludeCompositeTypes?.some((pattern) =>
+        new RegExp(pattern.replace(/\*/g, '.*')).test(baseReturnType)
+      ) && excludedCompositeToPrismaModel[baseReturnType];
+      
+      let returnType: string;
+      if (isExcludedComposite) {
+        // Directly use Prisma model type for excluded composite types
+        const prismaModel = excludedCompositeToPrismaModel[baseReturnType];
+        if (!prismaModel) {
+          // Fallback to normal mapping if mapping not found
+          returnType = mapReturnType(
+            functionMeta.returnType,
+            context,
+            compositeTypes
+          );
+        } else {
+          // Check if it's an array type
+          if (functionMeta.returnType.startsWith('_') || functionMeta.returnType.toUpperCase().includes('SETOF')) {
+            returnType = `${prismaModel}[]`;
+          } else {
+            returnType = prismaModel;
+          }
+        }
+      } else {
+        // Use normal mapping for non-excluded types
+        returnType = mapReturnType(
+          functionMeta.returnType,
+          context,
+          compositeTypes
+        );
+        
+        // If return type is still unknown/Record and we found a composite type in pre-check, use it
+        // BUT: Only if it's not a _record type (heuristic should not apply to actual record types)
+        const isActualRecordType = baseReturnType === 'record' || baseReturnType.toLowerCase() === 'pg_catalog.record';
+        
+        if (matchedCompositeType && 
+            !isActualRecordType && // Don't use heuristic for actual record types
+            (returnType.includes('Record<string, unknown>') || returnType.includes('unknown[]') || returnType === 'unknown[]')) {
+          returnType = `${toPascalCase(toSafeIdentifier(matchedCompositeType))}[]`;
+        }
       }
       
       lines.push(`export type ${returnsTypeName} = ${returnType};`);
@@ -439,7 +521,8 @@ function generateFunctionFile(
       zodReturnType = generateZodSchemaForReturnType(
         functionMeta.returnType,
         compositeTypes,
-        enums
+        enums,
+        config // Pass config to handle excluded composite types
       );
       
       // If we matched a composite type in the heuristic above, use its schema
@@ -450,11 +533,37 @@ function generateFunctionFile(
       const isActualRecordType = baseReturnType === 'record' || baseReturnType.toLowerCase() === 'pg_catalog.record';
       
       if (matchedCompositeType && !isActualRecordType) {
-        const compositeSchemaName = `${toCamelCase(toSafeIdentifier(matchedCompositeType))}Schema`;
-        zodReturnType = `z.array(${compositeSchemaName})`;
-        // Ensure the schema is imported
-        if (dependencies.imports) {
-          dependencies.imports.add(matchedCompositeType);
+        // Check if this composite type is excluded (use Prisma model instead)
+        const isExcluded = config.excludeCompositeTypes?.some((pattern) =>
+          new RegExp(pattern.replace(/\*/g, '.*')).test(matchedCompositeType)
+        );
+        
+        if (isExcluded) {
+          // Use Prisma Zod schema for excluded composite types
+          const excludedCompositeToPrismaSchema: Record<string, string> = {
+            'announcements': 'announcementsModelSchema',
+            'content': 'contentModelSchema',
+            'jobs': 'jobsModelSchema',
+            'notifications': 'notificationsModelSchema',
+          };
+          const prismaSchemaName = excludedCompositeToPrismaSchema[matchedCompositeType];
+          if (prismaSchemaName) {
+            zodReturnType = `z.array(${prismaSchemaName})`;
+            // Ensure the schema is imported (handled in import generation above)
+            if (dependencies.imports) {
+              dependencies.imports.add(matchedCompositeType);
+            }
+          } else {
+            // Fallback if mapping not found
+            zodReturnType = 'z.array(z.unknown())';
+          }
+        } else {
+          const compositeSchemaName = `${toCamelCase(toSafeIdentifier(matchedCompositeType))}Schema`;
+          zodReturnType = `z.array(${compositeSchemaName})`;
+          // Ensure the schema is imported
+          if (dependencies.imports) {
+            dependencies.imports.add(matchedCompositeType);
+          }
         }
       }
     }
@@ -490,11 +599,15 @@ function generateFunctionFile(
 /**
  * Generate Zod schema for a function return type
  * Handles nested arrays, SETOF, and composite types recursively
+ * 
+ * ARCHITECTURAL FIX: This function now accepts config to handle excluded composite types
+ * and map them to Prisma model Zod schemas instead of generating composite schemas.
  */
 function generateZodSchemaForReturnType(
   returnType: string,
   compositeTypes: Record<string, CompositeTypeAttribute[]>,
-  enums: Record<string, string[]>
+  enums: Record<string, string[]>,
+  config?: GeneratorConfig
 ): string {
   // Handle SETOF (returns set of rows) - treat as array
   if (returnType.toUpperCase().includes('SETOF')) {
@@ -502,7 +615,7 @@ function generateZodSchemaForReturnType(
     if (baseTypeMatch?.[1]) {
       const baseType = stripSchemaPrefix(baseTypeMatch[1]);
       // Recursively generate schema for base type
-      const baseSchema = generateZodSchemaForReturnType(baseType, compositeTypes, enums);
+      const baseSchema = generateZodSchemaForReturnType(baseType, compositeTypes, enums, config);
       return `z.array(${baseSchema})`;
     }
     // Fallback for SETOF without clear base type
@@ -513,7 +626,7 @@ function generateZodSchemaForReturnType(
   if (returnType.startsWith('_')) {
     const baseType = stripSchemaPrefix(returnType.slice(1));
     // Recursively generate schema for base type (handles nested arrays)
-    const baseSchema = generateZodSchemaForReturnType(baseType, compositeTypes, enums);
+    const baseSchema = generateZodSchemaForReturnType(baseType, compositeTypes, enums, config);
     return `z.array(${baseSchema})`;
   }
 
@@ -521,12 +634,33 @@ function generateZodSchemaForReturnType(
   if (returnType.includes('[]')) {
     const baseType = stripSchemaPrefix(returnType.replace(/\[\]/g, ''));
     // Recursively generate schema for base type (handles nested arrays)
-    const baseSchema = generateZodSchemaForReturnType(baseType, compositeTypes, enums);
+    const baseSchema = generateZodSchemaForReturnType(baseType, compositeTypes, enums, config);
     return `z.array(${baseSchema})`;
   }
 
   // Strip schema prefix before checking composite types
   const normalizedType = stripSchemaPrefix(returnType);
+
+  // ARCHITECTURAL FIX: Check if this composite type is excluded (should use Prisma model instead)
+  const isExcluded = config?.excludeCompositeTypes?.some((pattern) =>
+    new RegExp(pattern.replace(/\*/g, '.*')).test(normalizedType)
+  );
+
+  if (isExcluded) {
+    // Map excluded composite types to Prisma model Zod schemas
+    const excludedCompositeToPrismaSchema: Record<string, string> = {
+      'announcements': 'announcementsModelSchema',
+      'content': 'contentModelSchema',
+      'jobs': 'jobsModelSchema',
+      'notifications': 'notificationsModelSchema',
+    };
+    const prismaSchemaName = excludedCompositeToPrismaSchema[normalizedType];
+    if (prismaSchemaName) {
+      return prismaSchemaName;
+    }
+    // Fallback if mapping not found
+    return 'z.unknown()';
+  }
 
   // Check if return type is a composite - reference the generated schema
   if (compositeTypes[normalizedType]) {

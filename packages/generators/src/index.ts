@@ -9,7 +9,6 @@ export {
   printCache,
   setHash,
 } from './toolkit/cache.ts';
-export { callEdgeFunction } from './toolkit/edge.ts';
 export { ensureEnvVars } from './toolkit/env.ts';
 export { logger } from './toolkit/logger.ts';
 export {

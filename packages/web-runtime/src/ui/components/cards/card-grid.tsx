@@ -57,7 +57,6 @@ import { SPRING, STAGGER } from '../../../design-system/index.ts';
 import { useReducedMotion } from '../../../hooks/motion/index.ts';
 import { useInfiniteScroll } from '../../../hooks/use-infinite-scroll.ts';
 import type { DisplayableContent } from '../../../types/component.types.ts';
-import { grid } from '../../../design-system/index.ts';
 import { ErrorBoundary } from '../error-boundary.tsx';
 import { ConfigCard } from './config-card.tsx';
 import { motion, stagger } from 'motion/react';
@@ -123,9 +122,9 @@ type CardRenderingProps =
 export type UnifiedCardGridProps = BaseGridProps & CardRenderingProps;
 
 const GRID_VARIANTS: Record<GridVariant, string> = {
-  normal: grid.responsive3,
+  normal: 'grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3',
   tight: 'grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
-  wide: grid.responsive4,
+  wide: 'grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4',
   list: 'grid gap-6 md:grid-cols-2 lg:grid-cols-3 list-none',
 };
 

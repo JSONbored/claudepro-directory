@@ -8,7 +8,7 @@
 
 'use client';
 
-import { SPRING, STAGGER, paddingX, padding } from '@heyclaude/web-runtime/design-system';
+import { SPRING, STAGGER } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import { type ReactNode } from 'react';
@@ -49,7 +49,7 @@ export function SplitAuthLayout({ brandPanel, authPanel, mobileHeader }: SplitAu
       <div className="hidden min-h-dvh min-h-screen lg:grid lg:grid-cols-2">
         {/* Left: Brand content - centered */}
         <motion.div
-          className={`flex min-h-dvh min-h-screen items-center justify-center ${paddingX.default} xl:${paddingX.default}`}
+          className="flex min-h-dvh min-h-screen items-center justify-center px-4 xl:px-4"
           initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -30 }}
           animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
           transition={SPRING.smooth}
@@ -58,9 +58,9 @@ export function SplitAuthLayout({ brandPanel, authPanel, mobileHeader }: SplitAu
         </motion.div>
 
         {/* Right: Auth card - centered with Claude orange accent */}
-        <div className={`flex min-h-dvh min-h-screen items-center justify-center ${paddingX.relaxed}`}>
+        <div className="flex min-h-dvh min-h-screen items-center justify-center px-8">
           <motion.div
-            className={`bg-card w-full max-w-md rounded-2xl ${padding.default} shadow-2xl xl:${padding.section}`}
+            className="w-full max-w-md rounded-2xl bg-card p-4 shadow-2xl xl:p-12"
             style={cardBorderStyle}
             initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
             animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
@@ -74,8 +74,8 @@ export function SplitAuthLayout({ brandPanel, authPanel, mobileHeader }: SplitAu
       {/* Mobile: Stacked layout */}
       <div className="flex min-h-dvh min-h-screen flex-col lg:hidden">
         {mobileHeader}
-        <div className={`flex flex-1 items-center justify-center ${padding.comfortable}`}>
-          <div className={`bg-card w-full max-w-md rounded-2xl ${padding.relaxed}`} style={cardBorderStyle}>
+        <div className="flex flex-1 items-center justify-center p-6">
+          <div className="w-full max-w-md rounded-2xl bg-card p-8" style={cardBorderStyle}>
             {authPanel}
           </div>
         </div>

@@ -1,12 +1,19 @@
-import { SubmissionType, SubmissionStatus } from '@heyclaude/data-layer/prisma';
-import type { submission_type, submission_status, content_category } from '@heyclaude/data-layer/prisma';
-import type { GetUserDashboardReturns } from '@heyclaude/database-types/postgres-types';
+import { SubmissionStatus, SubmissionType } from '@heyclaude/data-layer/prisma';
+import {
+  type content_category,
+  type submission_status,
+  type submission_type,
+} from '@heyclaude/data-layer/prisma';
+import {
+  type GetUserCompleteDataReturns,
+  type UserDashboardSubmission,
+} from '@heyclaude/database-types/postgres-types';
 import { isValidCategory } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
   getCategoryConfig,
-  getUserDashboard,
+  getUserCompleteData,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { CheckCircle, Clock, GitPullRequest, Send, XCircle } from '@heyclaude/web-runtime/icons';
@@ -30,7 +37,6 @@ import { SignInButton } from '@/src/components/core/auth/sign-in-button';
 import { SubmissionCard } from '@/src/components/core/domain/submissions/submission-card';
 
 import Loading from './loading';
-import { between, iconSize, marginTop, size, weight, spaceY, marginBottom, paddingY, paddingTop, gap } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Produce metadata for the account submissions page while ensuring request-time evaluation.
@@ -195,7 +201,7 @@ function buildSafePrUrl(owner: string, repo: string, prNumber: string): string {
 const ALLOWED_TYPES = SubmissionType;
 
 // Typed copy for use as submission_type array
-const ALLOWED_TYPES_ARRAY: Array<submission_type> = Object.values(ALLOWED_TYPES) as submission_type[];
+const ALLOWED_TYPES_ARRAY: submission_type[] = Object.values(ALLOWED_TYPES) as submission_type[];
 
 /***
  * Validates that a content slug contains only lowercase letters, digits, hyphens, or underscores.
@@ -220,7 +226,9 @@ function isValidSlug(slug: string): boolean {
  * @see ALLOWED_TYPES
  */
 function isSafeType(type: string): type is submission_type {
-  return (Object.values(ALLOWED_TYPES) as readonly submission_type[]).includes(type as submission_type);
+  return (Object.values(ALLOWED_TYPES) as readonly submission_type[]).includes(
+    type as submission_type
+  );
 }
 
 /****
@@ -236,10 +244,7 @@ function isSafeType(type: string): type is submission_type {
  * @see isSafeType
  * @see isValidSlug
  */
-function getSafeContentUrl(
-  type: submission_type,
-  slug: string
-): null | string {
+function getSafeContentUrl(type: submission_type, slug: string): null | string {
   if (!isSafeType(type) || !isValidSlug(slug)) {
     return null;
   }
@@ -256,7 +261,7 @@ function getSafeContentUrl(
  * @returns A React Server Component subtree representing the submissions page.
  *
  * @see SubmissionCard
- * @see getUserDashboard
+ * @see getUserCompleteData
  * @see getAuthenticatedUser
  * @see getSafeContentUrl
  * @see extractPrComponents
@@ -287,7 +292,7 @@ export default async function SubmissionsPage() {
  * @returns A React element containing the submissions UI: sign-in prompt when unauthenticated, an error message on fetch failure, an empty-state call-to-action when no submissions exist, or a grid of submission cards when submissions are available.
  *
  * @see getAuthenticatedUser
- * @see getUserDashboard
+ * @see getUserCompleteData
  * @see SubmissionCard
  * @see extractPrComponents
  * @see buildSafePrUrl
@@ -310,10 +315,10 @@ async function SubmissionsPageContent({
       'SubmissionsPage: unauthenticated access attempt'
     );
     return (
-      <div className={`${spaceY.relaxed}`}>
+      <div className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle className={`${size['2xl']}`}>Sign in required</CardTitle>
+            <CardTitle className="text-2xl">Sign in required</CardTitle>
             <CardDescription>Please sign in to view and manage your submissions.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -336,19 +341,19 @@ async function SubmissionsPageContent({
   });
 
   // Section: Submissions Data Fetch
-  let submissions: NonNullable<GetUserDashboardReturns['submissions']> = [];
+  let submissions: NonNullable<GetUserCompleteDataReturns['user_dashboard']>['submissions'] = [];
   let hasError = false;
   try {
-    const data = await getUserDashboard(user.id);
-    if (data?.submissions) {
-      submissions = data.submissions;
+    const completeData = await getUserCompleteData(user.id);
+    if (completeData?.user_dashboard?.submissions) {
+      submissions = completeData.user_dashboard.submissions;
     } else {
       userLogger.error(
         {
-          err: new Error('getUserDashboard returned null'),
+          err: new Error('getUserCompleteData returned null or missing user_dashboard'),
           section: 'data-fetch',
         },
-        'SubmissionsPage: getUserDashboard returned null'
+        'SubmissionsPage: getUserCompleteData returned null or missing user_dashboard'
       );
       hasError = true;
     }
@@ -359,17 +364,17 @@ async function SubmissionsPageContent({
         err: normalized,
         section: 'data-fetch',
       },
-      'SubmissionsPage: getUserDashboard threw'
+      'SubmissionsPage: getUserCompleteData threw'
     );
     hasError = true;
   }
 
   if (hasError) {
     return (
-      <div className={`${spaceY.relaxed}`}>
+      <div className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle className={`${size['2xl']}`}>Unable to load submissions</CardTitle>
+            <CardTitle className="text-2xl">Unable to load submissions</CardTitle>
             <CardDescription>
               We couldn&apos;t load your submissions right now. Please refresh or try again later.
             </CardDescription>
@@ -393,11 +398,11 @@ async function SubmissionsPageContent({
    * @param {unknown} status - The status value to validate
    * @returns True if status is a valid submission_status enum value, false otherwise
    */
-  function isValidSubmissionStatus(
-    status: unknown
-  ): status is submission_status {
+  function isValidSubmissionStatus(status: unknown): status is submission_status {
     if (typeof status !== 'string') return false;
-    return (Object.values(VALID_SUBMISSION_STATUSES) as readonly submission_status[]).includes(status as submission_status);
+    return (Object.values(VALID_SUBMISSION_STATUSES) as readonly submission_status[]).includes(
+      status as submission_status
+    );
   }
 
   /***
@@ -406,11 +411,11 @@ async function SubmissionsPageContent({
    * @param {unknown} type - The type value to validate
    * @returns True if type is a valid submission_type enum value, false otherwise
    */
-  function isValidSubmissionType(
-    type: unknown
-  ): type is submission_type {
+  function isValidSubmissionType(type: unknown): type is submission_type {
     if (typeof type !== 'string') return false;
-    return (Object.values(ALLOWED_TYPES) as readonly submission_type[]).includes(type as submission_type);
+    return (Object.values(ALLOWED_TYPES) as readonly submission_type[]).includes(
+      type as submission_type
+    );
   }
 
   // Use Constants for enum values in Record keys
@@ -422,17 +427,18 @@ async function SubmissionsPageContent({
     pending: { icon: Clock, label: 'Pending Review' },
     rejected: { icon: XCircle, label: 'Rejected' },
     spam: { icon: XCircle, label: 'Spam' },
-  } satisfies Record<
-    submission_status,
-    { icon: typeof Clock; label: string }
-  >;
+  } satisfies Record<submission_status, { icon: typeof Clock; label: string }>;
 
   // Direct Tailwind utilities mapping
   const submissionStatusBadgeMap: Record<submission_status, string> = {
-    pending: 'bg-color-badge-submissionstatus-pending-bg text-color-badge-submissionstatus-pending-text border-color-badge-submissionstatus-pending-border',
-    approved: 'bg-color-badge-submissionstatus-approved-bg text-color-badge-submissionstatus-approved-text border-color-badge-submissionstatus-approved-border',
-    merged: 'bg-color-badge-submissionstatus-merged-bg text-color-badge-submissionstatus-merged-text border-color-badge-submissionstatus-merged-border',
-    rejected: 'bg-color-badge-submissionstatus-rejected-bg text-color-badge-submissionstatus-rejected-text border-color-badge-submissionstatus-rejected-border',
+    approved:
+      'bg-color-badge-submissionstatus-approved-bg text-color-badge-submissionstatus-approved-text border-color-badge-submissionstatus-approved-border',
+    merged:
+      'bg-color-badge-submissionstatus-merged-bg text-color-badge-submissionstatus-merged-text border-color-badge-submissionstatus-merged-border',
+    pending:
+      'bg-color-badge-submissionstatus-pending-bg text-color-badge-submissionstatus-pending-text border-color-badge-submissionstatus-pending-border',
+    rejected:
+      'bg-color-badge-submissionstatus-rejected-bg text-color-badge-submissionstatus-rejected-text border-color-badge-submissionstatus-rejected-border',
     spam: 'bg-color-badge-submissionstatus-spam-bg text-color-badge-submissionstatus-spam-text border-color-badge-submissionstatus-spam-border',
   };
 
@@ -443,7 +449,7 @@ async function SubmissionsPageContent({
 
     return (
       <UnifiedBadge className={colorClass} style="outline" variant="base">
-        <Icon className={`mr-1 ${iconSize.xs}`} />
+        <Icon className="mr-1 h-3 w-3" />
         {variant.label}
       </UnifiedBadge>
     );
@@ -452,10 +458,7 @@ async function SubmissionsPageContent({
   const getTypeLabel = (type: submission_type): string => {
     // Map submission_type to content_category for config lookup
     // Use explicit enum string values instead of fragile numeric indexing
-    const categoryMap: Record<
-      submission_type,
-      content_category
-    > = {
+    const categoryMap: Record<submission_type, content_category> = {
       agents: 'agents',
       commands: 'commands',
       hooks: 'hooks',
@@ -496,7 +499,7 @@ async function SubmissionsPageContent({
    * @see extractPrComponents
    * @see buildSafePrUrl
    */
-  function getPrLinkProperties(submission: (typeof submissions)[number]) {
+  function getPrLinkProperties(submission: UserDashboardSubmission) {
     const components = submission.pr_url ? extractPrComponents(submission.pr_url) : null;
 
     // Bail early if components are invalid
@@ -538,17 +541,17 @@ async function SubmissionsPageContent({
   }
 
   return (
-    <div className={`${spaceY.relaxed}`}>
-      <div className={between.center}>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className={`${marginBottom.compact} ${size['3xl']} ${weight.bold}`}>My Submissions</h1>
+          <h1 className="mb-2 text-3xl font-bold">My Submissions</h1>
           <p className="text-muted-foreground">
             {submissions.length} {submissions.length === 1 ? 'submission' : 'submissions'}
           </p>
         </div>
         <Button asChild>
           <Link href={ROUTES.SUBMIT}>
-            <Send className={`mr-2 ${iconSize.sm}`} />
+            <Send className="mr-2 h-4 w-4" />
             New Submission
           </Link>
         </Button>
@@ -556,24 +559,24 @@ async function SubmissionsPageContent({
 
       {submissions.length === 0 ? (
         <Card>
-          <CardContent className={`flex flex-col items-center ${paddingY.section}`}>
-            <Send className={`${marginBottom.default} ${iconSize['2xl']} text-muted-foreground`} />
-            <h3 className={`${marginBottom.compact} ${size.xl} ${weight.semibold}`}>No submissions yet</h3>
-            <p className={`text-muted-foreground ${marginBottom.default} max-w-md text-center`}>
+          <CardContent className="flex flex-col items-center py-12">
+            <Send className="text-muted-foreground mb-4 h-12 w-12" />
+            <h3 className="mb-2 text-xl font-semibold">No submissions yet</h3>
+            <p className="text-muted-foreground mb-4 max-w-md text-center">
               Share your Claude configurations with the community! Your contributions help everyone
               build better AI workflows.
             </p>
             <Button asChild>
               <Link href={ROUTES.SUBMIT}>
-                <Send className={`mr-2 ${iconSize.sm}`} />
+                <Send className="mr-2 h-4 w-4" />
                 Submit Your First Configuration
               </Link>
             </Button>
           </CardContent>
         </Card>
       ) : (
-        <div className={`grid ${gap.default}`}>
-          {submissions.map((submission, index) => (
+        <div className="grid gap-3">
+          {submissions.map((submission: UserDashboardSubmission, index: number) => (
             <SubmissionCard
               formatSubmissionDate={formatSubmissionDate}
               getContentLinkProps={getContentLinkProperties}
@@ -585,7 +588,9 @@ async function SubmissionsPageContent({
               isValidSubmissionType={isValidSubmissionType}
               key={submission.id ?? `submission-${index}`}
               submission={submission}
-              VALID_SUBMISSION_STATUSES={Object.values(VALID_SUBMISSION_STATUSES) as submission_status[]}
+              VALID_SUBMISSION_STATUSES={
+                Object.values(VALID_SUBMISSION_STATUSES) as submission_status[]
+              }
               VALID_SUBMISSION_TYPES={ALLOWED_TYPES_ARRAY}
             />
           ))}
@@ -594,14 +599,12 @@ async function SubmissionsPageContent({
 
       {/* Info Card */}
       <Card className="border-blue-500/20 bg-blue-500/5">
-        <CardContent className={`${paddingTop.comfortable}`}>
-          <div className={`flex ${gap.compact}`}>
-            <GitPullRequest
-              className={`${iconSize.md} text-blue-500 dark:text-blue-400 flex-shrink-0 ${marginTop.micro}`}
-            />
+        <CardContent className="pt-6">
+          <div className="flex gap-2">
+            <GitPullRequest className="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-500 dark:text-blue-400" />
             <div className="flex-1">
-              <p className={`${size.sm} ${weight.medium} text-blue-400`}>How it works</p>
-              <p className={`text-muted-foreground ${marginTop.tight} ${size.sm}`}>
+              <p className="text-sm-medium text-blue-400">How it works</p>
+              <p className="text-muted-foreground mt-1 text-sm">
                 When you submit a configuration, we automatically create a Pull Request on GitHub.
                 Our team reviews it for quality, security, and accuracy. Once approved and merged,
                 your contribution goes live for everyone to use!

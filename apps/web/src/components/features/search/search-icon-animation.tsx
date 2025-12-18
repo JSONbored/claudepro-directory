@@ -6,7 +6,7 @@
  * Animated search icon with typing pulse effect and focus glow.
  */
 
-import { SPRING, STAGGER, DURATION, radius } from '@heyclaude/web-runtime/design-system';
+import { SPRING, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search } from '@heyclaude/web-runtime/icons';
@@ -72,7 +72,7 @@ export function SearchIconAnimation({
       <AnimatePresence>
         {isFocused && (
           <motion.div
-            className={`absolute inset-0 ${radius['full']} bg-accent/20 blur-md`}
+            className="absolute inset-0 rounded-full bg-accent/20 blur-md"
             initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.8 }}
             animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1.2 }}
             exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.8 }}
@@ -91,7 +91,7 @@ export function SearchIconAnimation({
             {[...Array(3)].map((_, i) => (
               <motion.div
                 key={i}
-                className={`absolute inset-0 ${radius['full']} bg-accent/30`}
+                className="absolute inset-0 rounded-full bg-accent/30"
                 initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0, x: 0, y: 0 }}
                 animate={
                   shouldReduceMotion

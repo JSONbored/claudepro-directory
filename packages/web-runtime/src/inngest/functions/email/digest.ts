@@ -8,7 +8,6 @@
  * Runs on a cron schedule (Mondays at 9am UTC)
  */
 
-import { ContentService, MiscService, NewsletterService } from '@heyclaude/data-layer';
 import type { GetWeeklyDigestReturns } from '@heyclaude/database-types/postgres-types';
 import { normalizeError } from '@heyclaude/shared-runtime';
 
@@ -16,6 +15,7 @@ import { inngest } from '../../client';
 import { getResendClient } from '../../../integrations/resend';
 import { HELLO_FROM } from '../../../email/config/email-config';
 import { logger, createWebAppContextWithId } from '../../../logging/server';
+import { getService } from '../../../data/service-factory';
 import { sendCronSuccessHeartbeat } from '../../utils/monitoring';
 
 // Types for digest data
@@ -48,7 +48,7 @@ export const sendWeeklyDigest = inngest.createFunction(
       hoursSinceLastRun?: number;
       nextAllowedAt?: string;
     }> => {
-      const service = new MiscService();
+      const service = await getService('misc');
       const lastRunData = await service.getAppSetting('last_digest_email_timestamp');
 
       if (lastRunData?.setting_value) {
@@ -85,7 +85,7 @@ export const sendWeeklyDigest = inngest.createFunction(
       const previousWeekStart = getPreviousWeekStart();
       
       try {
-        const contentService = new ContentService();
+        const contentService = await getService('content');
         const digest = await contentService.getWeeklyDigest({
           p_week_start: previousWeekStart,
         });
@@ -112,7 +112,7 @@ export const sendWeeklyDigest = inngest.createFunction(
 
     // Step 3: Fetch subscribers
     const subscribers = await step.run('fetch-subscribers', async (): Promise<string[]> => {
-      const newsletterService = new NewsletterService();
+      const newsletterService = await getService('newsletter');
 
       try {
         const data = await newsletterService.getActiveSubscribers();
@@ -144,7 +144,7 @@ export const sendWeeklyDigest = inngest.createFunction(
 
     // Step 5: Update last run timestamp
     await step.run('update-timestamp', async () => {
-      const service = new MiscService();
+      const service = await getService('misc');
       const currentTimestamp = new Date().toISOString();
       
       try {

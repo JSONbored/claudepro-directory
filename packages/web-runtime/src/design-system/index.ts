@@ -51,7 +51,11 @@ export { LAYOUT_ANIMATIONS } from './layout/index.ts';
 export * from './text/index.ts';
 export { TEXT_ANIMATIONS } from './text/index.ts';
 
-// Style Utilities (Semantic Tailwind utilities)
+// Style Utilities (Direct Tailwind class strings)
+// NOTE: Semantic utility wrappers (spacing, layout, typography, etc.) have been removed.
+// Components now use Direct Tailwind classes directly.
+// Remaining exports: gradients.ts (heroTexture only - complex Tailwind arbitrary value)
+// REMOVED: animations.ts and badges.ts (not used - components use Tailwind classes directly)
 export * from './styles/index.ts';
 
 // Design Tokens (V2 - Colors, Typography, Spacing, Shadows, States, Accessibility, Responsive)

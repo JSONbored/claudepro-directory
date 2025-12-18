@@ -1,11 +1,11 @@
-import type { GetUserDashboardReturns } from '@heyclaude/database-types/postgres-types';
-import type { jobsModel, job_plan, job_tier } from '@heyclaude/data-layer/prisma';
+import { type job_plan, type job_tier, type jobsModel } from '@heyclaude/data-layer/prisma';
+import { type GetUserCompleteDataReturns } from '@heyclaude/database-types/postgres-types';
 import { type JobBillingSummaryEntry } from '@heyclaude/web-runtime/data';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
   getJobBillingSummaries,
-  getUserDashboard,
+  getUserCompleteData,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { formatRelativeDate } from '@heyclaude/web-runtime/data/utils';
@@ -44,7 +44,6 @@ import { JobToggleButton } from '@/src/components/core/buttons/jobs/job-toggle-b
 
 import Loading from './loading';
 import JobsListLoading from './loading-list';
-import { between, cluster, spaceY, marginBottom, marginRight, paddingY, gap, marginTop, padding } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Dynamic Rendering Required
@@ -146,13 +145,20 @@ function resolveTierLabel(tier?: job_tier | null): string {
  * Direct Tailwind utilities - no wrapper needed
  */
 const jobStatusBadgeMap: Record<JobStatus, string> = {
-  draft: 'bg-color-badge-jobstatus-draft-bg text-color-badge-jobstatus-draft-text border-color-badge-jobstatus-draft-border',
-  pending_payment: 'bg-color-badge-jobstatus-pending-payment-bg text-color-badge-jobstatus-pending-payment-text border-color-badge-jobstatus-pending-payment-border',
-  pending_review: 'bg-color-badge-jobstatus-pending-review-bg text-color-badge-jobstatus-pending-review-text border-color-badge-jobstatus-pending-review-border',
-  active: 'bg-color-badge-jobstatus-active-bg text-color-badge-jobstatus-active-text border-color-badge-jobstatus-active-border',
-  expired: 'bg-color-badge-jobstatus-expired-bg text-color-badge-jobstatus-expired-text border-color-badge-jobstatus-expired-border',
-  rejected: 'bg-color-badge-jobstatus-rejected-bg text-color-badge-jobstatus-rejected-text border-color-badge-jobstatus-rejected-border',
-  deleted: 'bg-color-badge-jobstatus-deleted-bg text-color-badge-jobstatus-deleted-text border-color-badge-jobstatus-deleted-border',
+  active:
+    'bg-color-badge-jobstatus-active-bg text-color-badge-jobstatus-active-text border-color-badge-jobstatus-active-border',
+  deleted:
+    'bg-color-badge-jobstatus-deleted-bg text-color-badge-jobstatus-deleted-text border-color-badge-jobstatus-deleted-border',
+  draft:
+    'bg-color-badge-jobstatus-draft-bg text-color-badge-jobstatus-draft-text border-color-badge-jobstatus-draft-border',
+  expired:
+    'bg-color-badge-jobstatus-expired-bg text-color-badge-jobstatus-expired-text border-color-badge-jobstatus-expired-border',
+  pending_payment:
+    'bg-color-badge-jobstatus-pending-payment-bg text-color-badge-jobstatus-pending-payment-text border-color-badge-jobstatus-pending-payment-border',
+  pending_review:
+    'bg-color-badge-jobstatus-pending-review-bg text-color-badge-jobstatus-pending-review-text border-color-badge-jobstatus-pending-review-border',
+  rejected:
+    'bg-color-badge-jobstatus-rejected-bg text-color-badge-jobstatus-rejected-text border-color-badge-jobstatus-rejected-border',
 };
 
 function getStatusColor(status: JobStatus): string {
@@ -197,7 +203,7 @@ interface MyJobsPageProperties {
  * @param root0.searchParams
  * @returns The page React element for the user's job listings.
  *
- * @see getUserDashboard
+ * @see getUserCompleteData
  * @see getJobBillingSummaries
  * @see resolvePlanLabel
  * @see resolveTierLabel
@@ -229,7 +235,7 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
       'MyJobsPage: unauthenticated access attempt detected'
     );
     return (
-      <div className={`${spaceY.relaxed}`}>
+      <div className="space-y-6">
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl">Sign in required</CardTitle>
@@ -257,7 +263,7 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
   userLogger.info({ section: 'data-fetch' }, 'MyJobsPage: authentication successful');
 
   return (
-    <div className={`${spaceY.relaxed}`}>
+    <div className="space-y-6">
       {/* Payment success alert - rendered immediately if paymentStatus is present */}
       {paymentStatus === 'success' && paymentJobId ? (
         <Suspense fallback={null}>
@@ -292,7 +298,7 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProperties)
  * @param props.userLogger - A request-scoped logger (child) used to record fetch or normalization errors
  *
  * @param root0.userLogger
- * @see getUserDashboard
+ * @see getUserCompleteData
  * @see getJobBillingSummaries
  * @see resolvePlanLabel
  * @see resolveTierLabel
@@ -308,25 +314,25 @@ async function PaymentSuccessAlert({
   userId: string;
   userLogger: ReturnType<typeof logger.child>;
 }) {
-  // Fetch dashboard to get the job
-  let data: GetUserDashboardReturns | null = null;
+  // OPTIMIZATION: Use getUserCompleteData directly instead of wrapper
+  let completeData: Awaited<ReturnType<typeof getUserCompleteData>> | null = null;
   try {
-    data = await getUserDashboard(userId);
+    completeData = await getUserCompleteData(userId);
   } catch (error) {
-    const normalized = normalizeError(error, 'Failed to load user dashboard for payment alert');
+    const normalized = normalizeError(error, 'Failed to load user data for payment alert');
     userLogger.error(
       {
         err: normalized,
         section: 'data-fetch',
       },
-      'MyJobsPage: getUserDashboard failed for payment alert'
+      'MyJobsPage: getUserCompleteData failed for payment alert'
     );
     return null;
   }
 
-  // Extract jobs from dashboard
-  const jobs: Array<jobsModel> = (() => {
-    const jobsData = data?.jobs;
+  // Extract jobs from user_dashboard
+  const jobs: jobsModel[] = (() => {
+    const jobsData = completeData?.user_dashboard?.jobs;
     if (jobsData === undefined || jobsData === null || !Array.isArray(jobsData)) {
       return [];
     }
@@ -389,7 +395,7 @@ async function PaymentSuccessAlert({
     <Alert className="border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-200/30 dark:bg-emerald-950/40 dark:text-emerald-100">
       <CheckCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-300" />
       <AlertTitle>Payment confirmed</AlertTitle>
-      <AlertDescription className={`${spaceY.tight} text-sm`}>
+      <AlertDescription className="space-y-1 text-sm">
         <p>
           {paymentJob?.title ? `${paymentJob.title} is now live.` : 'Your job listing is now live.'}
         </p>
@@ -409,7 +415,7 @@ async function PaymentSuccessAlert({
  * Suspense boundary).
  *
  * Fetch behavior:
- * - Calls getUserDashboard(userId) on the server and logs fetch results via the provided logger.
+ * - Calls getUserCompleteData(userId) on the server and logs fetch results via the provided logger.
  * - If the dashboard fetch fails or returns no data, renders a "Job listings unavailable" card.
  * - Validates runtime shape of returned `jobs` JSON before rendering.
  *
@@ -422,7 +428,7 @@ async function PaymentSuccessAlert({
  *
  * @see JobsListWithBilling
  * @see PaymentSuccessAlert
- * @see getUserDashboard
+ * @see getUserCompleteData
  */
 async function JobsListWithHeader({
   userId,
@@ -432,10 +438,11 @@ async function JobsListWithHeader({
   userLogger: ReturnType<typeof logger.child>;
 }) {
   // Section: Dashboard Data Fetch
-  let data: GetUserDashboardReturns | null = null;
+  let data: GetUserCompleteDataReturns['user_dashboard'] | null = null;
   let fetchError = false;
   try {
-    data = await getUserDashboard(userId);
+    const completeData = await getUserCompleteData(userId);
+    data = completeData?.user_dashboard ?? null;
     userLogger.info(
       { hasData: !!data, section: 'data-fetch' },
       'MyJobsPage: dashboard data loaded'
@@ -447,13 +454,16 @@ async function JobsListWithHeader({
         err: normalized,
         section: 'data-fetch',
       },
-      'MyJobsPage: getUserDashboard threw'
+      'MyJobsPage: getUserCompleteData threw'
     );
     fetchError = true;
   }
 
   if (!data) {
-    userLogger.warn({ section: 'data-fetch' }, 'MyJobsPage: getUserDashboard returned no data');
+    userLogger.warn(
+      { section: 'data-fetch' },
+      'MyJobsPage: getUserCompleteData returned no user_dashboard'
+    );
     fetchError = true;
   }
 
@@ -477,7 +487,7 @@ async function JobsListWithHeader({
 
   // Validate and convert jobs from Json to jobs table rows
   // The RPC returns jobs as Json | null, so we need runtime validation
-  const jobs: Array<jobsModel> = (() => {
+  const jobs: jobsModel[] = (() => {
     const jobsData = data?.jobs;
     if (jobsData === undefined || jobsData === null || !Array.isArray(jobsData)) {
       return [];
@@ -520,16 +530,16 @@ async function JobsListWithHeader({
 
   return (
     <>
-      <div className={between.center}>
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className={`${marginBottom.compact} text-3xl font-bold`}>My Job Listings</h1>
+          <h1 className="mb-2 text-3xl font-bold">My Job Listings</h1>
           <p className="text-muted-foreground">
             {jobs.length} {jobs.length === 1 ? 'listing' : 'listings'}
           </p>
         </div>
         <Button asChild>
           <Link href={ROUTES.ACCOUNT_JOBS_NEW}>
-            <Plus className={`${marginRight.tight} h-4 w-4`} />
+            <Plus className="mr-1 h-4 w-4" />
             Post a Job
           </Link>
         </Button>
@@ -537,15 +547,15 @@ async function JobsListWithHeader({
 
       {jobs.length === 0 ? (
         <Card>
-          <CardContent className={`flex flex-col items-center ${paddingY.section}`}>
-            <Briefcase className={`text-muted-foreground ${marginBottom.default} h-12 w-12`} />
-            <h3 className={`${marginBottom.compact} text-xl font-semibold`}>No job listings yet</h3>
-            <p className={`text-muted-foreground ${marginBottom.default} max-w-md text-center`}>
+          <CardContent className="flex flex-col items-center py-12">
+            <Briefcase className="text-muted-foreground mb-4 h-12 w-12" />
+            <h3 className="mb-2 text-xl font-semibold">No job listings yet</h3>
+            <p className="text-muted-foreground mb-4 max-w-md text-center">
               Post your first job listing to reach talented developers in the Claude community
             </p>
             <Button asChild>
               <Link href={ROUTES.ACCOUNT_JOBS_NEW}>
-                <Plus className={`${marginRight.tight} h-4 w-4`} />
+                <Plus className="mr-1 h-4 w-4" />
                 Post Your First Job
               </Link>
             </Button>
@@ -586,7 +596,7 @@ async function JobsListWithBilling({
   userLogger,
 }: {
   jobIds: string[];
-  jobs: Array<jobsModel>;
+  jobs: jobsModel[];
   userLogger: ReturnType<typeof logger.child>;
 }) {
   let billingSummaries: JobBillingSummaryEntry[] = [];
@@ -611,20 +621,20 @@ async function JobsListWithBilling({
     }
   }
 
-  const getPlanBadge = (
-    plan: job_plan | null | undefined,
-    tier?: job_tier | null
-  ) => {
+  const getPlanBadge = (plan: job_plan | null | undefined, tier?: job_tier | null) => {
     if (tier === 'featured') {
       return (
-        <UnifiedBadge className="bg-blue-500/10 text-blue-400 border-blue-500/20" variant="base">
+        <UnifiedBadge className="border-blue-500/20 bg-blue-500/10 text-blue-400" variant="base">
           Featured
         </UnifiedBadge>
       );
     }
     if (plan === 'subscription') {
       return (
-        <UnifiedBadge className="bg-purple-500/10 text-purple-400 border-purple-500/20" variant="base">
+        <UnifiedBadge
+          className="border-purple-500/20 bg-purple-500/10 text-purple-400"
+          variant="base"
+        >
           Subscription
         </UnifiedBadge>
       );
@@ -633,7 +643,7 @@ async function JobsListWithBilling({
   };
 
   return (
-    <div className={`grid ${gap.default}`}>
+    <div className="grid gap-3">
       {jobs.map((job) => {
         const summary = billingSummaryMap.get(job.id);
         const planLabel = resolvePlanLabel(summary?.plan ?? job.plan);
@@ -653,26 +663,26 @@ async function JobsListWithBilling({
             ]
               .filter(Boolean)
               .join(' • ')
-          : job.expires_at
+          : (job.expires_at
             ? `Active until ${formatRelativeDate(job.expires_at)}`
-            : null;
+            : null);
         const paymentCopy =
           summary?.last_payment_at && summary.last_payment_amount !== null
             ? `${formatPriceLabel(summary.last_payment_amount, false)} • Received ${formatRelativeDate(
                 summary.last_payment_at
               )}`
-            : summary?.last_payment_at
+            : (summary?.last_payment_at
               ? `Last payment ${formatRelativeDate(summary.last_payment_at)}`
-              : null;
+              : null);
         const showBillingCard =
           Boolean(planPriceLabel ?? renewalCopy ?? paymentCopy) || Boolean(summary);
 
         return (
           <Card key={job.id}>
             <CardHeader>
-              <div className={between.start}>
+              <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <div className={cluster.compact}>
+                  <div className="flex items-center gap-2">
                     <UnifiedBadge
                       className={getStatusColor(job.status)}
                       style="outline"
@@ -682,7 +692,7 @@ async function JobsListWithBilling({
                     </UnifiedBadge>
                     {getPlanBadge(job.plan, job.tier)}
                   </div>
-                  <CardTitle className={`${marginTop.compact}`}>{job.title}</CardTitle>
+                  <CardTitle className="mt-2">{job.title}</CardTitle>
                   <CardDescription>
                     {job.company} • {job.location ?? 'Remote'} • {job.type}
                   </CardDescription>
@@ -691,8 +701,8 @@ async function JobsListWithBilling({
             </CardHeader>
 
             <CardContent>
-              <div className={`text-muted-foreground ${marginBottom.default} flex flex-wrap ${gap.default} text-sm`}>
-                <div className={cluster.tight}>
+              <div className="text-muted-foreground mb-4 flex flex-wrap gap-3 text-sm">
+                <div className="flex items-center gap-1">
                   <Eye className="h-4 w-4" />
                   {job.view_count ?? 0} views
                 </div>
@@ -700,14 +710,14 @@ async function JobsListWithBilling({
                 {job.expires_at ? <div>Expires {formatRelativeDate(job.expires_at)}</div> : null}
               </div>
               {showBillingCard ? (
-                <div className={`border-muted bg-muted/20 ${marginBottom.default} rounded-lg border border-dashed ${padding.compact} text-xs sm:text-sm`}>
-                  <div className={between.center}>
+                <div className="border-muted bg-muted/20 card-base mb-4 border-dashed p-3 text-xs sm:text-sm">
+                  <div className="flex items-center justify-between">
                     <span className="text-foreground font-semibold">Billing</span>
                     <UnifiedBadge className="capitalize" style="outline" variant="base">
                       {planLabel} • {tierLabel}
                     </UnifiedBadge>
                   </div>
-                  <div className={`text-muted-foreground ${marginTop.compact} ${spaceY.tight}`}>
+                  <div className="text-muted-foreground mt-2 space-y-1">
                     {planPriceLabel ? <p>Price: {planPriceLabel}</p> : null}
                     {renewalCopy ? <p>{renewalCopy}</p> : null}
                     {paymentCopy ? <p>{paymentCopy}</p> : null}
@@ -715,17 +725,17 @@ async function JobsListWithBilling({
                 </div>
               ) : null}
 
-              <div className={`flex ${gap.tight}`}>
+              <div className="flex gap-1">
                 <Button asChild size="sm" variant="outline">
                   <Link href={`/account/jobs/${job.id}/edit`}>
-                    <Edit className={`${marginRight.micro} h-3 w-3`} />
+                    <Edit className="mr-0.5 h-3 w-3" />
                     Edit
                   </Link>
                 </Button>
 
                 <Button asChild size="sm" variant="outline">
                   <Link href={`/account/jobs/${job.id}/analytics`}>
-                    <BarChart className={`${marginRight.micro} h-3 w-3`} />
+                    <BarChart className="mr-0.5 h-3 w-3" />
                     Analytics
                   </Link>
                 </Button>
@@ -733,7 +743,7 @@ async function JobsListWithBilling({
                 {job.slug ? (
                   <Button asChild size="sm" variant="ghost">
                     <Link href={`/jobs/${job.slug}`}>
-                      <ExternalLink className={`${marginRight.micro} h-3 w-3`} />
+                      <ExternalLink className="mr-0.5 h-3 w-3" />
                       View
                     </Link>
                   </Button>

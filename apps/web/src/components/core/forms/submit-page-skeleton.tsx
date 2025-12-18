@@ -9,7 +9,7 @@
  * - Sidebar: ContentSidebar + SubmitPageSidebar
  */
 
-import { SPRING, paddingX, paddingY, marginX, gap, spaceY } from '@heyclaude/web-runtime/design-system';
+import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import { SubmitPageHeroSkeleton } from './submit-page-hero-skeleton';
@@ -25,7 +25,7 @@ export function SubmitPageSkeleton() {
 
   return (
     <motion.div
-      className={`container ${marginX.auto} max-w-7xl ${paddingX.default} ${paddingY.relaxed} sm:${paddingY.section}`}
+      className="container mx-auto max-w-7xl px-4 py-8 sm:py-12"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={SPRING.smooth}
@@ -41,14 +41,14 @@ export function SubmitPageSkeleton() {
 
       {/* Two-column layout: Form + Sidebar */}
       <motion.div
-        className={`grid items-start ${gap.comfortable} lg:grid-cols-[2fr_1fr] lg:${gap.relaxed}`}
+        className="grid items-start gap-6 lg:grid-cols-[2fr_1fr] lg:gap-6"
         initial={!prefersReducedMotion ? { opacity: 0, y: 20 } : false}
         animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
         transition={{ ...SPRING.smooth, delay: 0.2 }}
       >
         {/* Form Section (Left) */}
         <motion.div
-          className="w-full min-w-0"
+          className="min-w-0 w-full"
           initial={!prefersReducedMotion ? { opacity: 0, x: -20 } : false}
           animate={!prefersReducedMotion ? { opacity: 1, x: 0 } : {}}
           transition={{ ...SPRING.smooth, delay: 0.3 }}
@@ -58,7 +58,7 @@ export function SubmitPageSkeleton() {
 
         {/* Sidebar (Right) */}
         <motion.div
-          className={`w-full ${spaceY.comfortable} sm:${spaceY.relaxed} lg:sticky lg:top-24 lg:h-fit`}
+          className="w-full space-y-6 sm:space-y-6 lg:sticky lg:top-24 lg:h-fit"
           initial={!prefersReducedMotion ? { opacity: 0, x: 20 } : false}
           animate={!prefersReducedMotion ? { opacity: 1, x: 0 } : {}}
           transition={{ ...SPRING.smooth, delay: 0.4 }}

@@ -20,6 +20,9 @@ export * from './auth/get-authenticated-user.ts';
 export {
   buildCacheHeaders,
   jsonResponse,
+  textResponse,
+  xmlResponse,
+  markdownResponse,
   badRequestResponse,
   unauthorizedResponse,
   methodNotAllowedResponse,
@@ -37,13 +40,21 @@ export * from './server/fetch-helpers.ts';
 // API Route Factory (re-exports with different names to avoid conflicts)
 export {
   createApiRoute,
+  createCachedApiRoute,
+  createFormatHandlerRoute,
   createOptionsHandler as createApiOptionsHandler,
   type ApiRouteConfig,
+  type CachedApiRouteConfig,
+  type FormatHandlerRouteConfig,
+  type FormatHandlerConfig,
   type RouteHandler,
   type RouteHandlerContext,
   type CorsConfig,
 } from './api/route-factory';
 export * from './api/schemas';
+export * from './api/versioning';
+// Explicitly export versioning functions for better TypeScript resolution
+export { getVersionedRoute, API_VERSION, API_VERSION_PREFIX, API_BASE_PATH, OPENAPI_SERVER } from './api/versioning';
 // Explicitly export commonly used schemas for convenience
 export {
   searchAutocompleteQuerySchema,
@@ -59,10 +70,28 @@ export {
   ogImageQuerySchema,
   sitemapFormatSchema,
 } from './api/schemas';
+// Query parameter helpers
+export {
+  parseCategoryParam,
+  parseLimitParam,
+  parseOffsetParam,
+  parseBooleanParam,
+  parseStringArrayParam,
+} from './api/query-helpers';
+// Cached helper factory
+export { createCachedHelper } from './api/cached-helper-factory';
+// Content transformation utilities
+export {
+  mapTrendingMetrics,
+  mapPopularContent,
+  mapRecentContent,
+  toHomepageContentItem,
+} from './utils/content-transforms';
 export * from './rpc/run-rpc.ts';
 export * from './seo/generator.ts';
 export * from './data/seo/client.ts';
-export * from './data/content/detail.ts'; // 'use server' but often used in server contexts directly
+// Removed: export * from './data/content/detail.ts' - Use direct import to avoid client/server boundary issues
+// Import directly: import { getContentDetailCore } from '@heyclaude/web-runtime/data/content/detail'
 export * from './cache-tags.ts';
 export * from './proxy/next.ts';
 // Export edge-safe error normalization for proxy/middleware files
@@ -70,7 +99,8 @@ export { normalizeErrorEdge } from './errors-edge.ts';
 
 // Data Loaders (Server-Side)
 export * from './data/content-helpers.ts';
-export * from './data/content/similar.ts';
+export * from './utils/content-transforms.ts';
+// export * from './data/content/similar.ts'; // Removed - similar content feature was removed
 export * from './data/tools/recommendations.ts';
 export * from './data/newsletter.ts';
 export * from './data/quiz.ts';

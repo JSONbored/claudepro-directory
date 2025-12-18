@@ -1,0 +1,27 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "ClaudePro Directory API",
+    "version": "1.1.0",
+    "description": "API documentation for ClaudePro Directory - A community-driven directory of Claude configurations"
+  },
+  "servers": [
+    {
+      "url": "https://claudepro.com/api/v1",
+      "description": "Production"
+    },
+    {
+      "url": "http://localhost:3000/api/v1",
+      "description": "Development"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

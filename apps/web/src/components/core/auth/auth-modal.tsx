@@ -19,7 +19,7 @@
  * @module apps/web/src/components/core/auth/auth-modal
  */
 
-import { VALID_PROVIDERS } from '@heyclaude/web-runtime';
+import { VALID_PROVIDERS } from '@heyclaude/web-runtime/auth/oauth-providers';
 import { ensureString } from '@heyclaude/web-runtime/data/utils';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import {
@@ -30,7 +30,7 @@ import {
   DialogTitle,
   cn,
 } from '@heyclaude/web-runtime/ui';
-import { SPRING, paddingY, gap, marginTop } from '@heyclaude/web-runtime/design-system';
+import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { useIsClient } from '@heyclaude/web-runtime/hooks';
 import { motion } from 'motion/react';
@@ -210,8 +210,8 @@ export function AuthModal({
               </DialogHeader>
 
               {/* OAuth Provider Buttons */}
-              <div className={`flex items-center justify-center ${gap.default} ${paddingY.comfortable}`}>
-                {VALID_PROVIDERS.map((provider) => (
+              <div className="flex-center gap-3 py-6">
+                {VALID_PROVIDERS.map((provider: 'discord' | 'github' | 'google') => (
                   <OAuthProviderButton
                     key={provider}
                     provider={provider}
@@ -222,7 +222,7 @@ export function AuthModal({
               </div>
 
               {/* Newsletter Opt-In Tile */}
-              <div className={`${marginTop.default}`}>
+              <div className="mt-4">
                 <NewsletterOptInTile
                   checked={newsletterOptIn}
                   onChange={setNewsletterOptIn}

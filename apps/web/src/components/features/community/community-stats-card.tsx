@@ -7,7 +7,7 @@
  */
 
 import { motion } from 'motion/react';
-import { MICROINTERACTIONS, SPRING, cluster, size, weight, muted } from '@heyclaude/web-runtime/design-system';
+import { MICROINTERACTIONS, SPRING } from '@heyclaude/web-runtime/design-system';
 import {
   Card,
   CardContent,
@@ -90,20 +90,20 @@ export function CommunityStatsCard({
     >
       <Card>
         <CardHeader>
-          <CardTitle className={cluster.compact}>
-            <Icon className={`text-primary h-5 w-5`} />
+          <CardTitle className="flex items-center gap-2">
+            <Icon className="h-5 w-5 text-primary" />
             {title}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className={`${size['3xl']} ${weight.bold}`}>
+          <div className="text-3xl font-bold">
             <NumberTicker
               value={value}
               delay={isInView ? 200 : 0}
               decimalPlaces={0}
             />
           </div>
-          <p className={`${muted.default}`}>{description}</p>
+          <p className="text-muted-foreground">{description}</p>
         </CardContent>
       </Card>
     </motion.div>

@@ -38,7 +38,7 @@ import {
   UnifiedBadge,
   Button,
 } from '@heyclaude/web-runtime/ui';
-import { MICROINTERACTIONS, STAGGER, DURATION, between, cluster, paddingX, paddingY, gap, marginTop, marginRight, padding, paddingRight, spaceY, paddingTop, size, muted } from '@heyclaude/web-runtime/design-system';
+import { MICROINTERACTIONS, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
@@ -111,11 +111,11 @@ const RecentlyViewedItemComponent = memo(function RecentlyViewedItemComponent({
       >
         <Link
           href={href}
-          className={cn('border-border/50 bg-card flex flex-col', gap['1.5'], 'rounded-lg border', paddingX.compact, paddingY['1.5'])}
+          className={cn('flex flex-col gap-[6px] card-base border-border/50 bg-card', 'px-3 py-[6px]')}
         >
         {/* Header: Badge + Time */}
-        <div className={between.center}>
-          <UnifiedBadge variant="base" style="outline" className={size['2xs']}>
+        <div className="flex items-center justify-between">
+          <UnifiedBadge variant="base" style="outline" className="text-[10px]">
             {(() => {
               // Convert RecentlyViewedCategory (singular) to content_category (plural) for config lookup
               const routeCategory = getCategoryRoute(item.category);
@@ -126,20 +126,20 @@ const RecentlyViewedItemComponent = memo(function RecentlyViewedItemComponent({
               return routeCategory;
             })()}
           </UnifiedBadge>
-          <span className={cn(muted.default, size['2xs'])}>{timeAgo}</span>
+          <span className={cn('text-[10px] text-muted-foreground')}>{timeAgo}</span>
         </div>
 
         {/* Title */}
-        <h4 className="text-foreground line-clamp-1 text-sm font-medium">{item.title}</h4>
+        <h4 className="text-foreground line-clamp-1 text-sm-medium">{item.title}</h4>
 
         {/* Description */}
-        <p className={cn(muted.default, 'line-clamp-2', size['3xs'], 'leading-tight')}>
+        <p className={cn('line-clamp-2 leading-tight text-[9px] text-muted-foreground')}>
           {item.description}
         </p>
 
         {/* Tags (if present) */}
         {item.tags && item.tags.length > 0 ? (
-          <div className={`${marginTop.tight} flex flex-wrap ${gap.micro}`}>
+          <div className="mt-1 flex flex-wrap gap-0.5">
             {item.tags.slice(0, 2).map((tag) => (
               <UnifiedBadge key={tag} variant="base" style="outline" className="text-[9px]">
                 {tag}
@@ -167,7 +167,7 @@ const RecentlyViewedItemComponent = memo(function RecentlyViewedItemComponent({
               e.stopPropagation();
               onRemove(item.category, item.slug);
             }}
-            className="border-border/50 bg-background/95 hover:border-destructive hover:bg-destructive/10 hover:text-destructive absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-md border backdrop-blur-sm"
+            className="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-lg border border-border/50 bg-background/95 backdrop-blur-sm hover:border-destructive hover:bg-destructive/10 hover:text-destructive"
             aria-label={`Remove ${item.title} from recently viewed`}
           >
             <X className="h-3 w-3" />
@@ -200,21 +200,21 @@ export const RecentlyViewedSidebar = memo(function RecentlyViewedSidebar() {
       )}
     >
       {/* Header */}
-      <div className={between.center}>
-        <div className={cluster.compact}>
-          <Clock className="text-muted-foreground h-4 w-4" />
-          <h3 className="text-foreground text-sm font-semibold">Recently Viewed</h3>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Clock className="h-4 w-4 text-muted-foreground" />
+          <h3 className="text-sm font-semibold text-foreground">Recently Viewed</h3>
         </div>
-        <div className={cluster.tight}>
+        <div className="flex items-center gap-1">
           {/* Clear all button */}
           <Button
             variant="ghost"
             size="sm"
             onClick={clearAll}
-            className={`h-7 ${paddingX.tight} text-xs`}
+            className="h-7 px-1 text-xs"
             aria-label="Clear all recently viewed"
           >
-            <Trash className={`${marginRight.micro} h-3 w-3`} />
+            <Trash className="mr-0.5 h-3 w-3" />
             Clear
           </Button>
 
@@ -223,7 +223,7 @@ export const RecentlyViewedSidebar = memo(function RecentlyViewedSidebar() {
             variant="ghost"
             size="sm"
             onClick={toggleIsCollapsed}
-            className={`h-7 w-7 ${padding.default} xl:hidden`}
+            className="h-7 w-7 p-4 xl:hidden"
             aria-label={isCollapsed ? 'Expand recently viewed' : 'Collapse recently viewed'}
           >
             {isCollapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
@@ -239,11 +239,11 @@ export const RecentlyViewedSidebar = memo(function RecentlyViewedSidebar() {
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: DURATION.quick }}
-            className={`flex flex-col ${gap.tight} overflow-y-auto ${paddingRight.micro}`}
+            className="flex flex-col gap-1 overflow-y-auto pr-0.5"
           >
             {!isLoaded ? (
               // Loading state
-              <div className={`text-muted-foreground ${paddingY.relaxed} text-center text-sm`}>
+              <div className="py-8 text-center text-muted-foreground text-sm">
                 Loading...
               </div>
             ) : recentlyViewed.length === 0 ? (
@@ -252,11 +252,11 @@ export const RecentlyViewedSidebar = memo(function RecentlyViewedSidebar() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: DURATION.default }}
-                className={`border-border/30 text-muted-foreground flex flex-col items-center ${gap.compact} rounded-lg border border-dashed ${padding.comfortable} text-center`}
+                className="flex flex-col items-center gap-2 card-base border-dashed border-border/30 p-6 text-center text-muted-foreground"
               >
                 <Clock className="h-8 w-8 opacity-50" />
-                <div className={`${spaceY.tight}`}>
-                  <p className="text-foreground text-sm font-medium">No recent views</p>
+                <div className="space-y-1">
+                  <p className="text-sm-medium text-foreground">No recent views</p>
                   <p className="text-xs">
                     Start browsing content to see your recently viewed items here
                   </p>
@@ -285,7 +285,7 @@ export const RecentlyViewedSidebar = memo(function RecentlyViewedSidebar() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: STAGGER.slow }}
-          className={cn('border-border/30', muted.default, 'border-t', paddingTop.compact, 'text-center', size['2xs'])}
+          className={cn('border-t border-border/30 pt-2 text-center text-[10px] text-muted-foreground')}
         >
           Showing {recentlyViewed.length} of 10 max
         </motion.p>

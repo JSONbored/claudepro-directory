@@ -27,7 +27,6 @@ import { SplitAuthLayout } from '@/src/components/core/auth/auth-layout';
 import { AuthMobileHeader } from '@/src/components/core/auth/auth-mobile-header';
 
 import { OAuthConsentClient } from './oauth-consent-client';
-import { padding, marginBottom, muted } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Dynamic Rendering Required
@@ -87,9 +86,9 @@ export default async function OAuthConsentPage({
       return (
         <SplitAuthLayout
           authPanel={
-            <div className={`flex min-h-[400px] flex-col items-center justify-center ${padding.comfortable}`}>
-              <h1 className={`${marginBottom.default} text-2xl font-semibold`}>Invalid Authorization Request</h1>
-              <p className={`${muted.default} text-center`}>
+            <div className="flex min-h-[400px] flex-col items-center justify-center p-6">
+              <h1 className="mb-4 text-2xl font-semibold">Invalid Authorization Request</h1>
+              <p className="text-muted-foreground text-center">
                 Missing authorization ID. Please try again from the application requesting access.
               </p>
             </div>
@@ -142,9 +141,9 @@ export default async function OAuthConsentPage({
       return (
         <SplitAuthLayout
           authPanel={
-            <div className={`flex min-h-[400px] flex-col items-center justify-center ${padding.comfortable}`}>
-              <h1 className={`${marginBottom.default} text-2xl font-semibold`}>Authorization Error</h1>
-              <p className={`${muted.default} text-center`}>
+            <div className="flex min-h-[400px] flex-col items-center justify-center p-6">
+              <h1 className="mb-4 text-2xl font-semibold">Authorization Error</h1>
+              <p className="text-muted-foreground text-center">
                 {authError instanceof Error
                   ? authError.message
                   : 'Invalid authorization request. Please try again.'}
@@ -171,9 +170,9 @@ export default async function OAuthConsentPage({
       return (
         <SplitAuthLayout
           authPanel={
-            <div className={`flex min-h-[400px] flex-col items-center justify-center ${padding.comfortable}`}>
-              <h1 className={`${marginBottom.default} text-2xl font-semibold`}>Authorization Error</h1>
-              <p className={`${muted.default} text-center`}>
+            <div className="flex min-h-[400px] flex-col items-center justify-center p-6">
+              <h1 className="mb-4 text-2xl font-semibold">Authorization Error</h1>
+              <p className="text-muted-foreground text-center">
                 Invalid authorization request. Please try again.
               </p>
             </div>
@@ -235,9 +234,9 @@ export default async function OAuthConsentPage({
     return (
       <SplitAuthLayout
         authPanel={
-          <div className={`flex min-h-[400px] flex-col items-center justify-center ${padding.comfortable}`}>
-            <h1 className={`${marginBottom.default} text-2xl font-semibold`}>Error</h1>
-            <p className={`${muted.default} text-center`}>
+          <div className="flex min-h-[400px] flex-col items-center justify-center p-6">
+            <h1 className="mb-4 text-2xl font-semibold">Error</h1>
+            <p className="text-muted-foreground text-center">
               An error occurred while processing your authorization request. Please try again.
             </p>
           </div>

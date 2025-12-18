@@ -41,8 +41,6 @@
  */
 
 import { getViewTransitionName } from '../../utils.ts';
-import { POSITION_PATTERNS } from '../../constants.ts';
-import { marginBottom, gap, cluster, stack, size, weight, muted, padding, paddingBottom, wrap } from '../../../design-system/index.ts';
 import { UnifiedBadge } from '../badges/unified-badge.tsx';
 import { SwipeableCardWrapper } from './swipeable-card.tsx';
 import { motion } from 'motion/react';
@@ -324,12 +322,12 @@ export const BaseCard = memo(
           {/* Top accent border for related content */}
           {topAccent && (
             <div
-              className={`${POSITION_PATTERNS.ABSOLUTE_TOP_FULL} h-px bg-border opacity-70 transition-opacity group-hover:opacity-100`}
+              className="absolute top-0 right-0 left-0 h-px bg-border opacity-70 transition-opacity group-hover:opacity-100"
             />
           )}
 
           <CardHeaderComponent
-            className={`${variant === 'review' ? `${marginBottom.compact} p-0` : 'pb-3'} ${compactMode ? paddingBottom.tight : ''}`}
+            className={`${variant === 'review' ? 'mb-2 p-0' : 'pb-3'} ${compactMode ? 'pb-1' : ''}`}
           >
             {/* Custom header slot (for review avatar/rating, changelog date) */}
             {renderHeader?.()}
@@ -340,14 +338,14 @@ export const BaseCard = memo(
                 <div className="flex-1 overflow-visible">
                   {/* Top badges slot (type, difficulty, sponsored, etc.) */}
                   {renderTopBadges && (
-                    <div className={`mb-1 flex items-center flex-wrap gap-1 ${gap.compact} overflow-visible`}>
+                    <div className="mb-1 flex items-center flex-wrap gap-2 overflow-visible">
                       {renderTopBadges()}
                     </div>
                   )}
 
                   {/* Title */}
                   <CardTitleComponent
-                    className={`${size.lg} ${weight.semibold} text-foreground ${disableNavigation ? '' : 'transition-colors-smooth'}`}
+                    className={`text-lg font-semibold text-foreground ${disableNavigation ? '' : 'transition-colors-smooth'}`}
                   >
                     {displayTitle}
                   </CardTitleComponent>
@@ -362,7 +360,7 @@ export const BaseCard = memo(
 
                 {/* Source badge (right side of header) */}
                 {source && (
-                  <div className={`ml-2 flex items-center ${gap.tight}`}>
+                  <div className="ml-2 flex items-center gap-1">
                     <UnifiedBadge
                       variant="source"
                       source={
@@ -387,11 +385,11 @@ export const BaseCard = memo(
             className={`${variant === 'review' ? 'p-0' : 'pt-0'} ${compactMode ? 'pt-0' : ''}`}
           >
             {/* Custom content slot (for review expandable text) */}
-            {renderContent && <div className={marginBottom.compact}>{renderContent()}</div>}
+            {renderContent && <div className="mb-2">{renderContent()}</div>}
 
             {/* Tags */}
             {tags && tags.length > 0 && (
-              <div className={`${wrap} ${gap.compact} ${marginBottom.default}`}>
+              <div className="mb-4 flex flex-wrap gap-2">
                 {visibleTags?.map((tag: string, index: number) => {
                   // Use highlighted tag if available, otherwise use original
                   const highlightedTag = highlightedTags?.[index];
@@ -414,7 +412,7 @@ export const BaseCard = memo(
                   <UnifiedBadge
                     variant="base"
                     style="outline"
-                    className={`border-muted-foreground/20 text-muted-foreground ${size.xs} ${weight.semibold}`}
+                    className="border-muted-foreground/20 text-xs font-semibold text-muted-foreground"
                   >
                     +{overflowCount}
                   </UnifiedBadge>
@@ -426,7 +424,7 @@ export const BaseCard = memo(
             <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
               {/* Left side: Author and custom metadata */}
               {(showAuthor && author) || customMetadataText ? (
-                <div className={`${cluster.compact} ${size.xs} ${muted.default}`}>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   {showAuthor && author && (() => {
                     // Only show profile link if authorProfileUrl is explicitly provided
                     // Don't fallback to default - if no profile URL exists, don't show a link
@@ -474,7 +472,7 @@ export const BaseCard = memo(
               )}
 
               {/* Right side: Metadata badges and actions */}
-              <div className={`${cluster.compact} ${size.xs} flex-nowrap`}>
+              <div className="flex items-center gap-2 text-xs flex-nowrap">
                 {/* Metadata badges slot (view count, item count, etc.) */}
                 {renderMetadataBadges?.()}
 
@@ -490,12 +488,12 @@ export const BaseCard = memo(
       // For non-navigation cards, use CardComponent. For interactive cards, use motion.div with Card styling
       // Motion.dev handles hover border color via whileHover - no CSS hover classes needed
       // Base classes: layout, border width, background, text - border color comes from CARD_INTERACTIVE for interactive cards
-      const cardBaseClasses = `${stack.relaxed} rounded-xl border bg-card py-6 text-card-foreground shadow-sm`;
+      const cardBaseClasses = 'flex flex-col gap-6 rounded-xl border bg-card py-6 text-card-foreground shadow-sm';
       // For non-interactive cards, add border color explicitly
       // For interactive cards, CARD_INTERACTIVE provides border-border/50
       const cardBorderColor = disableNavigation ? 'border-border/50' : '';
       const cardInteractiveClasses = disableNavigation ? '' : 'card-gradient transition-smooth group cursor-pointer border-border/50';
-      const cardClassName = `${cardBaseClasses} ${cardBorderColor} ${cardInteractiveClasses} ${variant === 'detailed' ? padding.comfortable : ''} ${variant === 'review' ? `rounded-lg border border-border/50 ${padding.default}` : ''} ${compactMode ? padding.default : ''} ${className || ''} relative`;
+      const cardClassName = `${cardBaseClasses} ${cardBorderColor} ${cardInteractiveClasses} ${variant === 'detailed' ? 'p-6' : ''} ${variant === 'review' ? 'rounded-lg border border-border/50 p-4' : ''} ${compactMode ? 'p-4' : ''} ${className || ''} relative`;
       
       const cardElement = disableNavigation ? (
         <CardComponent

@@ -9,7 +9,7 @@
 
 import { Marquee, MarqueeContent, MarqueeFade, MarqueeItem } from '@/src/components/ui/marquee';
 import { getFeatureFlag } from '@heyclaude/web-runtime/config/static-configs';
-import { SPRING, STAGGER, VIEWPORT, gap, marginX, size, weight, tracking } from '@heyclaude/web-runtime/design-system';
+import { SPRING, STAGGER, VIEWPORT } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import Image from 'next/image';
@@ -72,10 +72,10 @@ export function HeroPartners() {
         delay: STAGGER.comfortable,
       }}
     >
-      <div className={`flex flex-col items-center ${gap.default}`}>
+      <div className="flex flex-col items-center gap-3">
         {/* "Trusted by" Label */}
         <motion.p
-          className={`text-muted-foreground ${size.sm} ${weight.medium} ${tracking.wide} uppercase`}
+          className="text-muted-foreground text-sm font-medium tracking-wide uppercase"
           initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
           whileInView={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }}
           viewport={VIEWPORT.late}
@@ -98,14 +98,14 @@ export function HeroPartners() {
             {PARTNERS.map((partner, index) => (
               <MarqueeItem
                 key={`${partner.name}-${index}`}
-                className={`${marginX.comfortable} flex h-12 w-auto items-center justify-center opacity-60 transition-opacity hover:opacity-100`}
+                className="mx-6 flex-center h-12 w-auto opacity-60 transition-opacity hover:opacity-100"
               >
                 {partner.href ? (
                   <a
                     href={partner.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center"
+                    className="flex-center"
                     aria-label={`Visit ${partner.name}`}
                   >
                     <Image

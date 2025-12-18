@@ -9,7 +9,7 @@ import {
   cn,
   Input,
 } from '@heyclaude/web-runtime/ui';
-import { SPRING, DURATION, stack, size, iconSize } from '@heyclaude/web-runtime/design-system';
+import { SPRING, DURATION } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { AnimatePresence, motion } from 'motion/react';
 import { useId, useMemo } from 'react';
@@ -54,7 +54,7 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className={cn('w-full', className)}>
-      <div className={stack.default}>
+      <div className="flex flex-col gap-3">
         {/* Integrated input with submit button inside */}
         <div className={`relative w-full`}>
           <Input
@@ -97,7 +97,7 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
                 transition={{ duration: DURATION.quick }}
                 aria-label="Subscribing..."
               >
-                <Loader2 className={`${iconSize.sm} animate-spin`} aria-hidden="true" />
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
               </motion.button>
             ) : showSubmitButton ? (
               <motion.button
@@ -125,7 +125,7 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
                   whileHover={shouldReduceMotion ? {} : { rotate: 15 }}
                   transition={SPRING.bouncy}
                 >
-                  <ArrowRight className={`${iconSize.md}`} aria-hidden="true" />
+                  <ArrowRight className="h-5 w-5" aria-hidden="true" />
                 </motion.div>
               </motion.button>
             ) : null}
@@ -136,7 +136,7 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
         {error ? (
           <motion.p
             id={errorId}
-            className={`text-destructive ${size.sm}`}
+            className="text-destructive text-sm"
             role="alert"
             initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -4 }}
             animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}

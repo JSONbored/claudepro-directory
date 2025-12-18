@@ -13,7 +13,10 @@
  * @module generators/toolkit/logger
  */
 
-import { createPinoConfig, normalizeError } from '@heyclaude/shared-runtime';
+// Use relative imports for tsx compatibility in monorepo
+// This avoids module resolution issues with workspace packages
+import { createPinoConfig } from '../../../shared-runtime/src/logger/config.ts';
+import { normalizeError } from '../../../shared-runtime/src/error-handling.ts';
 import pino from 'pino';
 
 // Create Pino logger instance with centralized configuration

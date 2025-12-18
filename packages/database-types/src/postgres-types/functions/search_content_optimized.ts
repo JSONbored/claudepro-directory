@@ -7,9 +7,6 @@
 
 import { z } from 'zod';
 
-import type { SearchContentOptimizedResult } from '../composites/search_content_optimized_result';
-import { searchContentOptimizedResultSchema } from '../composites/search_content_optimized_result';
-
 /**
  * Arguments for PostgreSQL function: search_content_optimized
  */
@@ -62,12 +59,12 @@ export type SearchContentOptimizedArgsFromZod = z.infer<typeof searchContentOpti
 /**
  * Return type for PostgreSQL function: search_content_optimized
  */
-export type SearchContentOptimizedReturns = SearchContentOptimizedResult;
+export type SearchContentOptimizedReturns = unknown;
 
 /**
  * Zod schema for search_content_optimized function return type
  */
-export const searchContentOptimizedReturnsSchema = searchContentOptimizedResultSchema;
+export const searchContentOptimizedReturnsSchema = z.unknown();
 
 /**
  * Type inference from Zod schema (should match type above)

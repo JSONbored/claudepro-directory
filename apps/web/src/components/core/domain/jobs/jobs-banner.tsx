@@ -18,7 +18,6 @@ import {
   CardContent,
   Input,
 } from '@heyclaude/web-runtime/ui';
-import { spaceY, padding, marginBottom, size, muted, between, cluster, iconSize, gap, marginTop, weight } from '@heyclaude/web-runtime/design-system';
 import { SPRING, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { AnimatePresence, motion } from 'motion/react';
@@ -101,17 +100,17 @@ export function JobsPromo() {
           aria-hidden="true"
         />
 
-        <CardContent className={cn(spaceY.comfortable, padding.comfortable, 'relative')}>
+        <CardContent className={cn('space-y-4', 'p-6', 'relative')}>
           {/* Header Section - Job Posting Promotion */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: STAGGER.slow }}
           >
-            <h3 className={cn(marginBottom.tight, 'text-xl leading-tight font-bold')}>
+            <h3 className={cn('mb-1', 'text-xl leading-tight font-bold')}>
               Hire Claude Developers
             </h3>
-            <p className={`${size.sm} ${muted.default}`}>
+            <p className="text-muted-foreground text-sm">
               Growing community of AI engineers actively building with Claude
             </p>
           </motion.div>
@@ -119,18 +118,18 @@ export function JobsPromo() {
           {/* Growth Metrics */}
           <motion.div
             className={cn(
-              spaceY.compact,
-              'bg-card/50 rounded-lg border border-border/50',
-              padding.compact
+              'space-y-2',
+              'bg-card/50 card-base border-border/50',
+              'p-3'
             )}
             initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
             animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }}
             transition={{ delay: STAGGER.relaxed, ...SPRING.smooth }}
           >
-            <div className={cn(between.center, size.sm)}>
-              <span className={muted.default}>Active community</span>
+            <div className={cn('flex items-center justify-between', 'text-sm')}>
+              <span className="text-muted-foreground">Active community</span>
               <motion.span
-                className={`${weight.semibold}`}
+                className="font-semibold"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: STAGGER.loose }}
@@ -138,11 +137,11 @@ export function JobsPromo() {
                 1,700/month
               </motion.span>
             </div>
-            <div className={cn(between.center, size.sm)}>
-              <span className={muted.default}>Growth rate</span>
+            <div className={cn('flex items-center justify-between', 'text-sm')}>
+              <span className="text-muted-foreground">Growth rate</span>
               <motion.span
                 className={cn(
-                  cluster.tight,
+                  'flex items-center gap-1',
                   'font-semibold',
                   'text-green-500 dark:text-green-400'
                 )}
@@ -150,14 +149,14 @@ export function JobsPromo() {
                 animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
                 transition={{ delay: STAGGER.extended }}
               >
-                <TrendingUp className={iconSize.xs} />
+                <TrendingUp className="h-3 w-3" />
                 Month 2
               </motion.span>
             </div>
           </motion.div>
 
           {/* Value Props */}
-          <div className={spaceY.compact}>
+          <div className="space-y-2">
             {[
               'Specialized AI talent pool',
               '30-day featured visibility',
@@ -165,15 +164,15 @@ export function JobsPromo() {
             ].map((text, i) => (
               <motion.div
                 key={text}
-                className={`flex items-start ${gap.compact}`}
+                className="flex items-start gap-2"
                 initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -10 }}
                 animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
                 transition={{ delay: STAGGER.loose + i * STAGGER.fast }}
               >
                 <Check
-                  className={cn(`flex-shrink-0 ${marginTop.micro}`, iconSize.sm, 'text-accent')}
+                  className={cn('flex-shrink-0', 'mt-0.5', 'h-4 w-4', 'text-accent')}
                 />
-                <span className={size.sm}>{text}</span>
+                <span className="text-sm">{text}</span>
               </motion.div>
             ))}
           </div>
@@ -190,17 +189,16 @@ export function JobsPromo() {
                   ...SPRING.gentle,
                   mass: 0.8,
                 }}
-                style={{ overflow: 'hidden' }}
-                className={`border-border/50 ${spaceY.default} rounded-lg border bg-card/30 ${padding.default}`}
+                className="border-border/50 space-y-3 card-base bg-card/30 p-4 overflow-hidden"
               >
-                <div className={`${spaceY.tight}`}>
-                  <h4 className={`${size.sm} ${weight.semibold}`}>Get job alerts</h4>
-                  <p className={`text-muted-foreground ${size.xs}`}>
+                <div className="space-y-1">
+                  <h4 className="text-sm font-semibold">Get job alerts</h4>
+                  <p className="text-muted-foreground text-xs">
                     Get email updates when new AI roles are posted.
                   </p>
                 </div>
 
-                <form onSubmit={handleNewsletterSubmit} className={`${spaceY.compact}`}>
+                <form onSubmit={handleNewsletterSubmit} className="space-y-2">
                   {/* Email Input with integrated submit button (same as NewsletterForm) */}
                   <div className="relative w-full">
                     <Input
@@ -282,7 +280,7 @@ export function JobsPromo() {
                   {error ? (
                     <motion.p
                       id={errorId}
-                      className={`text-destructive ${size.sm}`}
+                      className="text-destructive text-sm"
                       role="alert"
                       initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -4 }}
                       animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
@@ -293,7 +291,7 @@ export function JobsPromo() {
                     </motion.p>
                   ) : null}
 
-                  <p className={cn(`${size.xs} ${muted.default}`, 'leading-snug')}>
+                  <p className={cn('text-xs', 'text-muted-foreground', 'leading-snug')}>
                     We only send relevant AI roles. Unsubscribe anytime.
                   </p>
                 </form>
@@ -302,7 +300,7 @@ export function JobsPromo() {
           </AnimatePresence>
 
           {/* Action Buttons */}
-          <div className={cn(spaceY.compact)}>
+          <div className={cn('space-y-2')}>
             {/* Post Job CTA */}
             <motion.div
               initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 10 }}
@@ -325,9 +323,9 @@ export function JobsPromo() {
               onClick={toggleShowNewsletterForm}
               className={cn(
                 'w-full',
-                'flex items-center justify-center gap-2',
+                'flex-center gap-2',
                 'text-muted-foreground hover:text-foreground',
-                'text-sm font-medium',
+                'text-sm-medium',
                 'transition-colors duration-200',
                 'hover:bg-accent/5 rounded-md py-1.5'
               )}
@@ -347,7 +345,7 @@ export function JobsPromo() {
 
           {/* Trust Signal */}
           <motion.p
-            className={cn('text-center', `${size.xs} ${muted.default}`)}
+            className={cn('text-center', 'text-xs', 'text-muted-foreground')}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: STAGGER.ultimate }}

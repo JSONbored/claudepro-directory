@@ -6,14 +6,7 @@
  */
 
 import type { JsonValue } from '@heyclaude/data-layer/prisma';
-import type { GetRecommendationsReturns } from '@heyclaude/database-types/postgres-types';
 import type { user_interactionsCreateInput } from '@heyclaude/database-types/prisma';
-import type {
-  experience_level,
-  focus_area_type,
-  integration_type,
-  use_case_type,
-} from '@heyclaude/data-layer/prisma';
 // Enum value objects not needed - using Zod schemas directly
 // Keep imports minimal - only import what's actually used
 // Import Zod schemas from re-export helper (works around TypeScript rootDir restrictions)
@@ -31,12 +24,7 @@ import {
 import { z } from 'zod';
 import { logger } from '../logger.ts';
 import { normalizeError } from '../errors.ts';
-// Lazy loaded to avoid server-only side effects
-// import { createSupabaseServerClient } from '../supabase/server.ts';
 import { optionalAuthAction, rateLimitedAction } from './safe-action.ts';
-// import { getSimilarContent } from '../data/content/similar.ts';
-// import { getConfigRecommendations } from '../data/tools/recommendations.ts';
-// import { enqueuePulseEventServer } from '../pulse.ts';
 
 // Note: Enum values are no longer needed - we use Prisma-generated Zod schemas directly
 // The enum value objects (ContentCategory, etc.) are still available if needed for runtime checks
@@ -50,25 +38,10 @@ export type TrackInteractionParams = Omit<
   'id' | 'created_at' | 'user_id'
 >;
 
-type RecommendationItem = NonNullable<
-  NonNullable<GetRecommendationsReturns>['results']
->[number];
-type RecommendationsPayload = NonNullable<GetRecommendationsReturns>;
-
-export interface ConfigRecommendationsResponse {
-  success: boolean;
-  recommendations: RecommendationsPayload & {
-    id: string;
-    generatedAt: string;
-    answers: {
-      useCase: use_case_type;
-      experienceLevel: experience_level;
-      toolPreferences: string[];
-      integrations: integration_type[];
-      focusAreas: focus_area_type[];
-    };
-  };
-}
+// Types moved to pulse-types.ts to avoid Next.js serialization issues
+// Import for internal use, re-export for backward compatibility
+import type { RecommendationItem, RecommendationsPayload } from './pulse-types.ts';
+export type { ConfigRecommendationsResponse, RecommendationsPayload } from './pulse-types.ts';
 
 // ============================================
 // ZOD SCHEMAS
@@ -118,11 +91,7 @@ const trackUsageSchema = z.object({
   action_type: z.enum(['copy', 'download_zip', 'download_markdown', 'llmstxt', 'download_mcpb', 'download_code']),
 });
 
-const getSimilarConfigsSchema = z.object({
-  content_type: content_categorySchema,
-  content_slug: z.string(),
-  limit: z.number().int().min(1).max(50).optional(),
-});
+// getSimilarConfigsSchema removed - embedding generation system has been deleted
 
 const generateConfigRecommendationsSchema = z.object({
   useCase: useCaseTypeSchema,
@@ -136,20 +105,23 @@ const generateConfigRecommendationsSchema = z.object({
 // USER INTERACTION TRACKING
 // ============================================
 
+/**
+ * Helper to create pulse tracking actions
+ * All tracking actions follow the same pattern - call enqueuePulseEventServer
+ */
+// Factory function moved to action-factory.ts to avoid Next.js serialization issues
+// Import it from there
+// Factory removed - using direct chains so Next.js recognizes them as server actions
+
 export const trackInteractionAction = optionalAuthAction
   .inputSchema(trackInteractionSchema)
   .metadata({ actionName: 'pulse.trackInteraction', category: 'analytics' })
   .action(async ({ parsedInput, ctx }) => {
-    const contentType = parsedInput.content_type ?? null;
-    const contentSlug = parsedInput.content_slug ?? null;
-    const userId = ctx.userId ?? null;
-
     const { enqueuePulseEventServer } = await import('../pulse.ts');
-
     await enqueuePulseEventServer({
-      user_id: userId,
-      content_type: contentType,
-      content_slug: contentSlug,
+      user_id: ctx.userId ?? null,
+      content_type: parsedInput.content_type ?? null,
+      content_slug: parsedInput.content_slug ?? null,
       interaction_type: parsedInput.interaction_type,
       session_id: parsedInput.session_id ?? null,
       metadata: parsedInput.metadata ? (parsedInput.metadata as JsonValue) : null,
@@ -160,22 +132,17 @@ export const trackNewsletterEventAction = optionalAuthAction
   .inputSchema(trackNewsletterEventSchema)
   .metadata({ actionName: 'pulse.trackNewsletterEvent', category: 'analytics' })
   .action(async ({ parsedInput, ctx }) => {
-    const metadataPayload: Record<string, unknown> = {
-      event_type: parsedInput.eventType,
-      ...(parsedInput.metadata ?? {}),
-    };
-
-    const userId = ctx.userId ?? null;
-
     const { enqueuePulseEventServer } = await import('../pulse.ts');
-
     await enqueuePulseEventServer({
-      user_id: userId,
+      user_id: ctx.userId ?? null,
       content_type: null,
       content_slug: 'newsletter_cta',
       interaction_type: 'click',
       session_id: null,
-      metadata: metadataPayload as JsonValue,
+      metadata: {
+        event_type: parsedInput.eventType,
+        ...(parsedInput.metadata ?? {}),
+      } as JsonValue,
     });
   });
 
@@ -183,12 +150,9 @@ export const trackTerminalCommandAction = optionalAuthAction
   .inputSchema(trackTerminalCommandSchema)
   .metadata({ actionName: 'pulse.trackTerminalCommand', category: 'analytics' })
   .action(async ({ parsedInput, ctx }) => {
-    const userId = ctx.userId ?? null;
-
     const { enqueuePulseEventServer } = await import('../pulse.ts');
-
     await enqueuePulseEventServer({
-      user_id: userId,
+      user_id: ctx.userId ?? null,
       content_type: null,
       content_slug: 'contact-terminal',
       interaction_type: 'contact_interact',
@@ -198,9 +162,7 @@ export const trackTerminalCommandAction = optionalAuthAction
         action_type: parsedInput.action_type,
         success: parsedInput.success,
         ...(parsedInput.error_reason && { error_reason: parsedInput.error_reason }),
-        ...(parsedInput.execution_time_ms && {
-          execution_time_ms: parsedInput.execution_time_ms,
-        }),
+        ...(parsedInput.execution_time_ms && { execution_time_ms: parsedInput.execution_time_ms }),
       } as JsonValue,
     });
   });
@@ -209,12 +171,9 @@ export const trackTerminalFormSubmissionAction = optionalAuthAction
   .inputSchema(trackTerminalFormSubmissionSchema)
   .metadata({ actionName: 'pulse.trackTerminalFormSubmission', category: 'analytics' })
   .action(async ({ parsedInput, ctx }) => {
-    const userId = ctx.userId ?? null;
-
     const { enqueuePulseEventServer } = await import('../pulse.ts');
-
     await enqueuePulseEventServer({
-      user_id: userId,
+      user_id: ctx.userId ?? null,
       content_type: null,
       content_slug: 'contact-form',
       interaction_type: 'contact_submit',
@@ -231,16 +190,13 @@ export const trackUsageAction = optionalAuthAction
   .inputSchema(trackUsageSchema)
   .metadata({ actionName: 'pulse.trackUsage', category: 'analytics' })
   .action(async ({ parsedInput, ctx }) => {
-    const userId = ctx.userId ?? null;
-    const interactionType = parsedInput.action_type === 'copy' ? 'copy' : 'download';
-
     const { enqueuePulseEventServer } = await import('../pulse.ts');
-
     await enqueuePulseEventServer({
-      user_id: userId,
+      user_id: ctx.userId ?? null,
       content_type: parsedInput.content_type,
       content_slug: parsedInput.content_slug,
-      interaction_type: interactionType,
+      interaction_type: parsedInput.action_type === 'copy' ? 'copy' : 'download',
+      session_id: null,
       metadata: {
         action_type: parsedInput.action_type,
       } as JsonValue,
@@ -256,30 +212,8 @@ export const trackUsageAction = optionalAuthAction
 // CONTENT RECOMMENDATIONS
 // ============================================
 
-export const getSimilarConfigsAction = rateLimitedAction
-  .inputSchema(getSimilarConfigsSchema)
-  .metadata({ actionName: 'pulse.getSimilarConfigs', category: 'analytics' })
-  .action(async ({ parsedInput }) => {
-    try {
-      const { getSimilarContent } = await import('../data/content/similar.ts');
-      return await getSimilarContent({
-        contentType: parsedInput.content_type,
-        contentSlug: parsedInput.content_slug,
-        ...(parsedInput.limit ? { limit: parsedInput.limit } : {}),
-      });
-    } catch (error) {
-      const normalized = normalizeError(error, 'Failed to get similar configs');
-      const logContext: Record<string, string | number | boolean> = {
-        contentType: parsedInput.content_type,
-        contentSlug: parsedInput.content_slug,
-      };
-      if (parsedInput['limit'] !== undefined) {
-        logContext['limit'] = parsedInput['limit'];
-      }
-      logger.error({ err: normalized, ...logContext }, 'getSimilarConfigsAction: getSimilarContent threw');
-      return null;
-    }
-  });
+// getSimilarConfigsAction removed - embedding generation system has been deleted
+// This action was never used in the UI (getSimilarConfigs function exists but is never called)
 
 export const generateConfigRecommendationsAction = rateLimitedAction
   .inputSchema(generateConfigRecommendationsSchema)
@@ -296,7 +230,7 @@ export const generateConfigRecommendationsAction = rateLimitedAction
       });
 
       const responseId = `rec_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
-      const fallback: NonNullable<GetRecommendationsReturns> = {
+      const fallback: RecommendationsPayload = {
         results: [],
         total_matches: 0,
         algorithm: 'unknown',

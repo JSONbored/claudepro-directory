@@ -10,8 +10,16 @@
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { ErrorBoundary } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
+import { lazy, Suspense } from 'react';
 
-import { ConsultingClient } from '@/src/components/features/consulting/consulting-page-content';
+import Loading from './loading';
+
+// OPTIMIZATION: Dynamic import for large component (789 lines) - only loads when needed
+const ConsultingClient = lazy(() =>
+  import('@/src/components/features/consulting/consulting-page-content').then((mod) => ({
+    default: mod.ConsultingClient,
+  }))
+);
 
 /**
  * Produce page metadata for the /consulting marketing page used by Next.js during static generation.
@@ -44,7 +52,9 @@ export async function generateMetadata(): Promise<Metadata> {
 export default function ConsultingPage() {
   return (
     <ErrorBoundary>
-      <ConsultingClient />
+      <Suspense fallback={<Loading />}>
+        <ConsultingClient />
+      </Suspense>
     </ErrorBoundary>
   );
 }

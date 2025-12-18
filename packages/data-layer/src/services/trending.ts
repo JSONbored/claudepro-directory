@@ -11,8 +11,6 @@ import type {
   GetPopularContentReturns,
   GetPopularContentFormattedArgs,
   GetPopularContentFormattedReturns,
-  GetRecentContentArgs,
-  GetRecentContentReturns,
   GetRecentContentFormattedArgs,
   GetRecentContentFormattedReturns,
   GetSidebarRecentFormattedArgs,
@@ -26,7 +24,18 @@ import type {
   GetTrendingMetricsWithContentArgs,
   GetTrendingMetricsWithContentReturns,
 } from '@heyclaude/database-types/postgres-types';
+import type { contentModel } from '@heyclaude/database-types/prisma/models';
+import type { content_category } from '@heyclaude/data-layer/prisma';
+import { prisma } from '../prisma/client.ts';
 import { BasePrismaService } from './base-prisma-service.ts';
+import { withSmartCache } from '../utils/request-cache.ts';
+
+// Local types for converted RPCs (RPC removed, using Prisma directly)
+type GetRecentContentArgs = {
+  p_category?: string | null;
+  p_limit?: number | null;
+  p_days?: number | null;
+};
 
 /**
  * Trending Service using Prisma Client
@@ -57,13 +66,60 @@ export class TrendingService extends BasePrismaService {
     );
   }
 
+  /**
+   * Get recent content
+   *
+   * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
+   * The RPC was doing a simple SELECT with WHERE/ORDER BY/LIMIT, which Prisma handles perfectly.
+   *
+   * @param args - Arguments with optional p_category, p_limit, p_days
+   * @returns Array of recent content items
+   */
   async getRecentContent(
-    args: GetRecentContentArgs
-  ): Promise<GetRecentContentReturns> {
-    return this.callRpc<GetRecentContentReturns>(
-      'get_recent_content',
-      args,
-      { methodName: 'getRecentContent' }
+    args: GetRecentContentArgs = {}
+  ): Promise<contentModel[]> {
+    const { p_category = null, p_limit = 20, p_days = 180 } = args;
+
+    return withSmartCache<contentModel[]>(
+      'getRecentContent',
+      'getRecentContent',
+      async () => {
+        // Calculate date threshold (p_days ago)
+        const daysAgo = p_days ? new Date(Date.now() - p_days * 24 * 60 * 60 * 1000) : null;
+        
+        // Build where clause
+        const where: {
+          category?: content_category;
+          date_added?: { gte: Date };
+        } = {};
+        
+        // Category filter (if provided)
+        if (p_category) {
+          where.category = p_category as content_category;
+        }
+        
+        // Date filter (if p_days provided)
+        if (daysAgo) {
+          where.date_added = { gte: daysAgo };
+        }
+
+        // Calculate limit with bounds (1-100, default 20)
+        const limit = Math.min(Math.max(p_limit ?? 20, 1), 100);
+
+        // Prisma doesn't support nulls: 'last' directly, so we use simple desc
+        // The database will handle null ordering based on its default behavior
+        const content = await prisma.content.findMany({
+          where,
+          orderBy: [
+            { date_added: 'desc' },
+            { created_at: 'desc' },
+          ],
+          take: limit,
+        });
+
+        return content;
+      },
+      args
     );
   }
 

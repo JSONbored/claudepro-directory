@@ -4,13 +4,14 @@
  * Cron job that calculates time-windowed metrics and updates trending scores.
  * Aggregates user_interactions data and refreshes the materialized view for fast queries.
  *
- * Runs every 30 minutes to keep trending rankings fresh.
+ * Runs every hour to keep trending rankings fresh.
+ * Optimized: Increased from 30 minutes (trending doesn't need to be that fresh).
  */
 
-import { TrendingService } from '@heyclaude/data-layer';
 import { inngest } from '../../client';
 import { logger, createWebAppContextWithId } from '../../../logging/server';
 import { normalizeError } from '@heyclaude/shared-runtime';
+import { getService } from '../../../data/service-factory';
 import { sendCronSuccessHeartbeat } from '../../utils/monitoring';
 
 /**
@@ -22,7 +23,7 @@ export const calculateTrendingMetrics = inngest.createFunction(
     name: 'Calculate Trending Metrics',
     retries: 2,
   },
-  { cron: '*/30 * * * *' }, // Every 30 minutes
+  { cron: '0 * * * *' }, // Every hour (optimized from 30 minutes)
   async ({ step }) => {
     const startTime = Date.now();
     const logContext = createWebAppContextWithId(
@@ -32,7 +33,7 @@ export const calculateTrendingMetrics = inngest.createFunction(
 
     logger.info(logContext, 'Trending metrics calculation started');
 
-    const trendingService = new TrendingService();
+    const trendingService = await getService('trending');
 
     // Step 1: Calculate time-windowed metrics from user_interactions
     const metricsResult = await step.run('calculate-time-metrics', async (): Promise<{

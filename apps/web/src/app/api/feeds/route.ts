@@ -1,19 +1,21 @@
 /**
- * Feeds API Route (RSS/Atom)
+ * Feeds API Route (v1) - RSS/Atom
  *
  * Generates RSS or Atom feeds for content or changelog entries.
  * Supports category filtering and changelog-specific feeds.
+ * 
+ * SIMPLIFIED: Uses format handler factory to eliminate conditional logic (~237 lines → ~150 lines)
  *
  * @example
  * ```ts
  * // Request - RSS feed for all content
- * GET /api/feeds?type=rss
+ * GET /api/v1/feeds?type=rss
  *
  * // Request - Atom feed for skills category
- * GET /api/feeds?type=atom&category=skills
+ * GET /api/v1/feeds?type=atom&category=skills
  *
  * // Request - RSS feed for changelog
- * GET /api/feeds?type=rss&category=changelog
+ * GET /api/v1/feeds?type=rss&category=changelog
  *
  * // Response (200) - application/rss+xml or application/atom+xml
  * <?xml version="1.0" encoding="UTF-8"?>
@@ -22,249 +24,137 @@
  */
 
 import 'server-only';
-import { ContentService } from '@heyclaude/data-layer';
-import type {
-  GenerateChangelogAtomFeedArgs,
-  GenerateChangelogRssFeedArgs,
-  GenerateContentAtomFeedArgs,
-  GenerateContentRssFeedArgs,
-} from '@heyclaude/database-types/postgres-types';
-import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
-import { normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { type content_category } from '@heyclaude/data-layer/prisma';
+import { isValidCategory } from '@heyclaude/web-runtime/core';
 import {
-  buildCacheHeaders,
   createApiOptionsHandler,
-  createApiRoute,
+  createFormatHandlerRoute,
   feedQuerySchema,
   getOnlyCorsHeaders,
+  getVersionedRoute,
+  xmlResponse,
+  type FormatHandlerConfig,
+  type RouteHandlerContext,
 } from '@heyclaude/web-runtime/server';
-import { cacheLife } from 'next/cache';
-import { NextResponse } from 'next/server';
-import { ContentCategory } from '@heyclaude/data-layer/prisma';
-import type { content_category } from '@heyclaude/data-layer/prisma';
 
-const CONTENT_CATEGORY_VALUES = Object.values(ContentCategory) as readonly content_category[];
 const FEED_LIMIT = 50;
 
-type ContentCategory = content_category;
 type FeedType = 'atom' | 'rss';
 
-/***
- * Convert a raw string to a validated ContentCategory or return null.
- *
- * Accepts a string or null and returns the matching ContentCategory when the
- * input matches one of the known CONTENT_CATEGORY_VALUES; returns `null` for
- * falsy or unrecognized inputs.
- *
- * @param {null | string} value - The raw category value to validate (may be `null`)
- * @returns `ContentCategory` if `value` is a known category, `null` otherwise
- */
-function toContentCategory(value: null | string): ContentCategory | null {
+function toContentCategory(value: null | string): content_category | null {
   if (!value) return null;
-  return CONTENT_CATEGORY_VALUES.includes(value as ContentCategory)
-    ? (value as ContentCategory)
-    : null;
+  const normalized = value.trim().toLowerCase();
+  return isValidCategory(normalized) ? normalized : null;
 }
 
-/**
- * Cached helper function to generate feed payload.
- * All parameters become part of the cache key, so different feed types/categories have different cache entries.
- *
- * @param {FeedType} type - Feed format to generate: 'rss' or 'atom'
- * @param {string | null} category - Content category name, 'changelog' for changelog feeds, null for all content
- * @returns Promise resolving to an object with contentType (HTTP Content-Type header), source (feed origin label), and xml (feed XML string)
- */
-async function getCachedFeedPayload(
-  type: FeedType,
-  category: null | string
-): Promise<{ contentType: string; source: string; xml: string }> {
-  'use cache';
-  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
-
-  // Use module-level logger since this runs in cached context
-  // Import logger for cached context (dynamic import to avoid circular deps)
-  const { logger: cachedLogger } = await import('@heyclaude/web-runtime/logging/server');
-  const loggerInstance = cachedLogger.child({ operation: 'getCachedFeedPayload' });
-  // Wrap logger to match expected type signature
-  const wrappedLogger: Logger = {
-    error: (context: Record<string, unknown>, message: string) =>
-      loggerInstance.error(context as Parameters<typeof loggerInstance.error>[0], message),
-    info: (context: Record<string, unknown>, message: string) =>
-      loggerInstance.info(context as Parameters<typeof loggerInstance.info>[0], message),
-    warn: (context: Record<string, unknown>, message: string) =>
-      loggerInstance.warn(context as Parameters<typeof loggerInstance.warn>[0], message),
-  };
-  return generateFeedPayload(type, category, wrappedLogger);
-}
-
-/******
- * Generate an XML feed payload and accompanying metadata for the requested feed type and category.
- *
- * Uses ContentService RPC wrappers to produce either a changelog feed or a content feed in
- * RSS or Atom format, and returns the XML body together with the correct Content-Type and a
- * human-readable source label.
- *
- * @param {FeedType} type - Feed format to generate: 'rss' or 'atom'
- * @param {null | string} category - Content category name, `'changelog'` for changelog feeds, `null` for all content
- * @param {Logger} reqLogger - Optional request-scoped logger used for RPC call logging and error context
- * @returns An object containing `xml` (the feed XML string), `contentType` (HTTP Content-Type header value), and `source` (a short label describing the feed origin)
- * @see ContentService
- * @see toContentCategory
- */
-interface Logger {
-  error: (context: Record<string, unknown>, message: string) => void;
-  info?: (context: Record<string, unknown>, message: string) => void;
-  warn?: (context: Record<string, unknown>, message: string) => void;
-}
-
-async function generateFeedPayload(
-  type: FeedType,
-  category: null | string,
-  reqLogger?: Logger
-): Promise<{ contentType: string; source: string; xml: string }> {
-  const service = new ContentService();
-
-  if (category === 'changelog') {
-    if (type === 'rss') {
-      const rpcArgs = {
-        p_limit: FEED_LIMIT,
-      } satisfies GenerateChangelogRssFeedArgs;
-      try {
-        const feedData = await service.generateChangelogRssFeed(rpcArgs);
-        return {
-          contentType: 'application/rss+xml; charset=utf-8',
-          source: 'PostgreSQL changelog (rss)',
-          xml: feedData,
-        };
-      } catch (error) {
-        const normalized = normalizeError(error, 'generate_changelog_rss_feed failed');
-        reqLogger?.error(
-          { err: normalized, rpcName: 'generate_changelog_rss_feed' },
-          'RPC call failed'
-        );
-        throw normalized;
-      }
-    }
-    const rpcArgs2 = {
-      p_limit: FEED_LIMIT,
-    } satisfies GenerateChangelogAtomFeedArgs;
-    try {
-      const feedData = await service.generateChangelogAtomFeed(rpcArgs2);
-      return {
-        contentType: 'application/atom+xml; charset=utf-8',
-        source: 'PostgreSQL changelog (atom)',
-        xml: feedData,
-      };
-    } catch (error) {
-      const normalized = normalizeError(error, 'generate_changelog_atom_feed failed');
-      reqLogger?.error(
-        { err: normalized, rpcName: 'generate_changelog_atom_feed' },
-        'RPC call failed'
-      );
-      throw normalized;
-    }
-  }
-
+// Shared method args builder
+function buildFeedMethodArgs(category: string | null | undefined) {
+  if (category === 'changelog') return [];
   const typedCategory = category && category !== 'changelog' ? toContentCategory(category) : null;
+  return [{ ...(typedCategory ? { p_category: typedCategory } : {}), p_limit: FEED_LIMIT }];
+}
 
-  if (type === 'rss') {
-    const rpcArgs3 = {
-      ...(typedCategory ? { p_category: typedCategory } : {}),
-      p_limit: FEED_LIMIT,
-    } satisfies GenerateContentRssFeedArgs;
-    try {
-      const feedData = await service.generateContentRssFeed(rpcArgs3);
-      return {
-        contentType: 'application/rss+xml; charset=utf-8',
-        source: category
-          ? `PostgreSQL content (${category})`
-          : 'PostgreSQL content (all categories)',
-        xml: feedData,
-      };
-    } catch (error) {
-      const normalized = normalizeError(error, 'generate_content_rss_feed failed');
-      reqLogger?.error(
-        { err: normalized, rpcName: 'generate_content_rss_feed' },
-        'RPC call failed'
-      );
-      throw normalized;
+// Shared feed response handler
+async function handleFeedResponse(
+  result: unknown,
+  format: FeedType,
+  category: string | null | undefined,
+  logger: RouteHandlerContext<{ type: FeedType; category?: string | null }, unknown>['logger'],
+  changelogMethod: 'generateChangelogRssFeed' | 'generateChangelogAtomFeed',
+  contentMethod: 'generateContentRssFeed' | 'generateContentAtomFeed'
+): Promise<ReturnType<typeof xmlResponse>> {
+  const contentType = format === 'rss' ? 'application/rss+xml; charset=utf-8' : 'application/atom+xml; charset=utf-8';
+  
+  // Handle changelog feeds
+  if (category === 'changelog') {
+    const { ContentService } = await import('@heyclaude/data-layer');
+    const service = new ContentService();
+    const feedData = await service[changelogMethod]({ p_limit: FEED_LIMIT });
+    logger.info({ category: 'changelog', type: format }, `Changelog ${format.toUpperCase()} feed generated`);
+    return xmlResponse(
+      feedData,
+      contentType,
+      200,
+      getOnlyCorsHeaders,
+      {
+        'X-Content-Source': `PostgreSQL changelog (${format})`,
+        'X-Generated-By': `prisma.rpc.${changelogMethod}`,
+        'X-Robots-Tag': 'index, follow',
+      }
+    );
+  }
+  
+  // Handle content feeds
+  const feedData = result as string;
+  const source = category ? `PostgreSQL content (${category})` : 'PostgreSQL content (all categories)';
+  logger.info({ category: category ?? 'all', type: format }, `Content ${format.toUpperCase()} feed generated`);
+  return xmlResponse(
+    feedData,
+    contentType,
+    200,
+    getOnlyCorsHeaders,
+    {
+      'X-Content-Source': source,
+      'X-Generated-By': `prisma.rpc.${contentMethod}`,
+      'X-Robots-Tag': 'index, follow',
     }
-  }
-
-  const rpcArgs4 = {
-    ...(typedCategory ? { p_category: typedCategory } : {}),
-    p_limit: FEED_LIMIT,
-  } satisfies GenerateContentAtomFeedArgs;
-  try {
-    const feedData = await service.generateContentAtomFeed(rpcArgs4);
-    return {
-      contentType: 'application/atom+xml; charset=utf-8',
-      source: category ? `PostgreSQL content (${category})` : 'PostgreSQL content (all categories)',
-      xml: feedData,
-    };
-  } catch (error) {
-    const normalized = normalizeError(error, 'generate_content_atom_feed failed');
-    reqLogger?.error({ err: normalized, rpcName: 'generate_content_atom_feed' }, 'RPC call failed');
-    throw normalized;
-  }
+  );
 }
 
 /**
- * GET /api/feeds - Generate RSS or Atom feeds
+ * GET /api/v1/feeds - Generate RSS or Atom feeds
  *
  * Generates RSS or Atom feeds for content or changelog entries.
- * Supports category filtering and changelog-specific feeds.
+ * Uses format handler factory to eliminate conditional logic.
  */
-export const GET = createApiRoute({
-  cors: 'anon',
-  handler: async ({ logger, query }) => {
-    // Zod schema ensures type is 'rss' | 'atom' and category is string | null
-    const { category, type } = query;
-
-    // Additional validation: category must be valid content category or 'changelog'
-    if (category && category !== 'changelog' && !toContentCategory(category)) {
-      throw new Error(
-        `Invalid category parameter. Valid categories: changelog, ${CONTENT_CATEGORY_VALUES.join(', ')}, or omit/use 'all' for site-wide feed`
-      );
-    }
-
-    logger.info(
-      {
-        category: category ?? 'all',
-        type,
-      },
-      'Feeds request received'
-    );
-
-    const payload = await getCachedFeedPayload(type as FeedType, category);
-
-    logger.info(
-      {
-        category: category ?? 'all',
-        contentType: payload.contentType,
-        source: payload.source,
-        type,
-      },
-      'Feed delivery'
-    );
-
-    return new NextResponse(payload.xml, {
-      headers: {
-        'Content-Type': payload.contentType,
-        'X-Content-Source': payload.source,
-        'X-Generated-By': 'prisma.functions.feeds',
-        'X-Robots-Tag': 'index, follow',
-        ...buildSecurityHeaders(),
-        ...getOnlyCorsHeaders,
-        ...buildCacheHeaders('feeds'),
-      },
-      status: 200,
-    });
-  },
+export const GET = createFormatHandlerRoute<FeedType, { type: FeedType; category?: string | null }, unknown>({
+  route: getVersionedRoute('feeds'),
+  operation: 'FeedsAPI',
   method: 'GET',
+  cors: 'anon',
+  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire
+  cacheTags: (format, query, _body) => {
+    const category = query.category;
+    return ['feeds', `feeds-${format}`, category ? `feeds-${format}-${category}` : `feeds-${format}-all`];
+  },
+  querySchema: feedQuerySchema as any, // Type compatibility with exactOptionalPropertyTypes
+  defaultFormat: 'rss',
+  formatParamName: 'type', // Use 'type' instead of 'format' for feed type
+  formats: {
+    rss: {
+      serviceKey: 'content',
+      methodName: 'generateContentRssFeed',
+      methodArgs: (_format, query) => buildFeedMethodArgs(query.category),
+      responseHandler: async (result, _format, query, _body, ctx) =>
+        handleFeedResponse(
+          result,
+          'rss',
+          query.category,
+          ctx.logger,
+          'generateChangelogRssFeed',
+          'generateContentRssFeed'
+        ),
+    },
+    atom: {
+      serviceKey: 'content',
+      methodName: 'generateContentAtomFeed',
+      methodArgs: (_format, query) => buildFeedMethodArgs(query.category),
+      responseHandler: async (result, _format, query, _body, ctx) =>
+        handleFeedResponse(
+          result,
+          'atom',
+          query.category,
+          ctx.logger,
+          'generateChangelogAtomFeed',
+          'generateContentAtomFeed'
+        ),
+    },
+  } as Record<FeedType, FormatHandlerConfig<FeedType, { type: FeedType; category?: string | null }, unknown>>,
   openapi: {
+    summary: 'Generate RSS or Atom feeds',
     description:
       'Generates RSS or Atom feeds for content or changelog entries. Supports category filtering and changelog-specific feeds.',
+    tags: ['feeds', 'rss', 'atom'],
     operationId: 'getFeeds',
     responses: {
       200: {
@@ -274,12 +164,7 @@ export const GET = createApiRoute({
         description: 'Invalid type or category parameter',
       },
     },
-    summary: 'Generate RSS or Atom feeds',
-    tags: ['feeds', 'rss', 'atom'],
   },
-  operation: 'FeedsAPI',
-  querySchema: feedQuerySchema,
-  route: '/api/feeds',
 });
 
 /**

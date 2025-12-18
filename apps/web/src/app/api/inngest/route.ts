@@ -9,39 +9,38 @@
 
 import 'server-only';
 
+import { NextRequest } from 'next/server';
 import {
   GET as inngestGET,
   POST as inngestPOST,
   PUT as inngestPUT,
 } from '@heyclaude/web-runtime/inngest';
-import { createApiOptionsHandler, createApiRoute } from '@heyclaude/web-runtime/server';
+import { createApiOptionsHandler, createApiRoute, getVersionedRoute } from '@heyclaude/web-runtime/server';
 import { connection } from 'next/server';
+
+// Shared Inngest handler (all methods follow same pattern)
+async function handleInngestRequest(
+  method: 'GET' | 'POST' | 'PUT',
+  handler: typeof inngestGET | typeof inngestPOST | typeof inngestPUT,
+  logger: ReturnType<typeof import('@heyclaude/web-runtime/logging/server').logger.child>,
+  request: NextRequest,
+  nextContext: unknown
+) {
+  await connection();
+  logger.debug({ method, url: request.url }, `Inngest ${method} request`);
+  return await handler(request, nextContext);
+}
 
 /**
  * GET /api/inngest - Inngest introspection endpoint
  *
  * Handles GET requests from Inngest for function introspection.
  * Delegates to Inngest's GET handler.
- *
- * @example
- * ```ts
- * // Request - Inngest introspection
- * GET /api/inngest
- *
- * // Response (200) - Function definitions
- * { functions: [...] }
- * ```
  */
 export const GET = createApiRoute({
   cors: 'anon',
-  handler: async ({ logger, nextContext, request }) => {
-    // Defer to request time for non-deterministic operations (required for Cache Components)
-    await connection();
-
-    logger.debug({ url: request.url }, 'Inngest GET request (introspection)');
-    // Delegate to Inngest handler with original request and context
-    return await inngestGET(request, nextContext);
-  },
+  handler: async ({ logger, nextContext, request }) =>
+    handleInngestRequest('GET', inngestGET, logger, request, nextContext),
   method: 'GET',
   openapi: {
     description:
@@ -56,7 +55,7 @@ export const GET = createApiRoute({
     tags: ['inngest', 'webhooks'],
   },
   operation: 'InngestAPI',
-  route: '/api/inngest',
+  route: getVersionedRoute('inngest'),
 });
 
 /**
@@ -64,27 +63,11 @@ export const GET = createApiRoute({
  *
  * Handles POST requests from Inngest to invoke functions.
  * Delegates to Inngest's POST handler.
- *
- * @example
- * ```ts
- * // Request - Inngest function invocation
- * POST /api/inngest
- * Body: { event: {...}, function_id: "..." }
- *
- * // Response (200) - Function execution result
- * { result: {...} }
- * ```
  */
 export const POST = createApiRoute({
   cors: 'anon',
-  handler: async ({ logger, nextContext, request }) => {
-    // Defer to request time for non-deterministic operations (required for Cache Components)
-    await connection();
-
-    logger.debug({ url: request.url }, 'Inngest POST request (function invocation)');
-    // Delegate to Inngest handler with original request and context
-    return await inngestPOST(request, nextContext);
-  },
+  handler: async ({ logger, nextContext, request }) =>
+    handleInngestRequest('POST', inngestPOST, logger, request, nextContext),
   method: 'POST',
   openapi: {
     description:
@@ -99,7 +82,7 @@ export const POST = createApiRoute({
     tags: ['inngest', 'webhooks'],
   },
   operation: 'InngestAPI',
-  route: '/api/inngest',
+  route: getVersionedRoute('inngest'),
 });
 
 /**
@@ -107,26 +90,11 @@ export const POST = createApiRoute({
  *
  * Handles PUT requests from Inngest for function synchronization.
  * Delegates to Inngest's PUT handler.
- *
- * @example
- * ```ts
- * // Request - Inngest sync
- * PUT /api/inngest
- *
- * // Response (200) - Sync completed
- * { synced: true }
- * ```
  */
 export const PUT = createApiRoute({
   cors: 'anon',
-  handler: async ({ logger, nextContext, request }) => {
-    // Defer to request time for non-deterministic operations (required for Cache Components)
-    await connection();
-
-    logger.debug({ url: request.url }, 'Inngest PUT request (sync)');
-    // Delegate to Inngest handler with original request and context
-    return await inngestPUT(request, nextContext);
-  },
+  handler: async ({ logger, nextContext, request }) =>
+    handleInngestRequest('PUT', inngestPUT, logger, request, nextContext),
   method: 'PUT',
   openapi: {
     description:
@@ -141,7 +109,7 @@ export const PUT = createApiRoute({
     tags: ['inngest', 'webhooks'],
   },
   operation: 'InngestAPI',
-  route: '/api/inngest',
+  route: getVersionedRoute('inngest'),
 });
 
 /**

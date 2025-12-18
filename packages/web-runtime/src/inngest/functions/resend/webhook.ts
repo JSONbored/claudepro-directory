@@ -18,12 +18,12 @@
  * @see https://resend.com/docs/webhooks
  */
 
-import { MiscService, NewsletterService } from '@heyclaude/data-layer';
 import type { email_engagement_summaryCreateInput } from '@heyclaude/database-types/prisma';
 import { normalizeError } from '@heyclaude/shared-runtime';
 
 import { inngest, type ResendEmailEventData } from '../../client';
 import { logger, createWebAppContextWithId } from '../../../logging/server';
+import { getService } from '../../../data/service-factory';
 import { CONCURRENCY_LIMITS, RETRY_CONFIGS } from '../../config';
 
 type EmailEngagementInsert = email_engagement_summaryCreateInput;
@@ -60,7 +60,7 @@ async function incrementEngagementCounter(
   timestampField: 'last_sent_at' | 'last_delivered_at' | 'last_opened_at' | 'last_clicked_at',
   healthStatus?: string
 ): Promise<void> {
-  const service = new MiscService();
+  const service = await getService('misc');
   const existing = await service.getEmailEngagementSummary(email);
 
   const now = new Date().toISOString();
@@ -149,7 +149,7 @@ export const handleResendWebhook = inngest.createFunction(
           });
 
           await step.run(`update-subscription-delivered-${email}`, async () => {
-            const newsletterService = new NewsletterService();
+            const newsletterService = await getService('newsletter');
             await newsletterService.updateLastEmailSentAt(email);
           });
         }
@@ -163,7 +163,7 @@ export const handleResendWebhook = inngest.createFunction(
           });
 
           await step.run(`update-engagement-opened-${email}`, async () => {
-            const newsletterService = new NewsletterService();
+            const newsletterService = await getService('newsletter');
             const subscription = await newsletterService.getSubscriptionEngagementScore(email);
 
             const currentScore = subscription?.engagement_score ?? 0;
@@ -183,7 +183,7 @@ export const handleResendWebhook = inngest.createFunction(
           });
 
           await step.run(`update-engagement-clicked-${email}`, async () => {
-            const newsletterService = new NewsletterService();
+            const newsletterService = await getService('newsletter');
             const subscription = await newsletterService.getSubscriptionEngagementScore(email);
 
             const currentScore = subscription?.engagement_score ?? 0;
@@ -201,7 +201,7 @@ export const handleResendWebhook = inngest.createFunction(
 
         for (const email of emails) {
           await step.run(`blocklist-bounce-${email}`, async () => {
-            const service = new MiscService();
+            const service = await getService('misc');
             try {
               await service.upsertEmailBlocklist({
                 email,
@@ -216,12 +216,12 @@ export const handleResendWebhook = inngest.createFunction(
           });
 
           await step.run(`update-subscription-bounced-${email}`, async () => {
-            const newsletterService = new NewsletterService();
+            const newsletterService = await getService('newsletter');
             await newsletterService.updateSubscriptionStatus(email, 'bounced');
           });
 
           await step.run(`update-engagement-bounced-${email}`, async () => {
-            const service = new MiscService();
+            const service = await getService('misc');
             await service.upsertEmailEngagementSummary({
               email,
               emails_bounced: 1,
@@ -241,7 +241,7 @@ export const handleResendWebhook = inngest.createFunction(
 
         for (const email of emails) {
           await step.run(`blocklist-complaint-${email}`, async () => {
-            const service = new MiscService();
+            const service = await getService('misc');
             try {
               await service.upsertEmailBlocklist({
                 email,
@@ -256,12 +256,12 @@ export const handleResendWebhook = inngest.createFunction(
           });
 
           await step.run(`unsubscribe-complaint-${email}`, async () => {
-            const newsletterService = new NewsletterService();
+            const newsletterService = await getService('newsletter');
             await newsletterService.unsubscribeWithTimestamp(email);
           });
 
           await step.run(`update-engagement-complaint-${email}`, async () => {
-            const service = new MiscService();
+            const service = await getService('misc');
             await service.upsertEmailEngagementSummary({
               email,
               emails_complained: 1,

@@ -9,7 +9,6 @@
 
 import { Star } from '../../../icons.tsx';
 import type { ReviewRatingCompactProps } from '../../../types/component.types.ts';
-import { cluster } from '../../../design-system/index.ts';
 
 export function ReviewRatingCompact({
   average,
@@ -17,7 +16,7 @@ export function ReviewRatingCompact({
   size = 'sm',
 }: Omit<ReviewRatingCompactProps, 'variant'>) {
   return (
-    <div className={cluster.tight}>
+    <div className="flex items-center gap-1">
       <Star
         className={`${size === 'sm' ? 'h-3.5 w-3.5' : 'h-4 w-4'} fill-amber-400 text-amber-400`}
         aria-hidden="true"

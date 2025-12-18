@@ -97,9 +97,8 @@
  * - `/consulting` → `createContactPageLoading` (4 cards, 2 columns, prose sections)
  * - `/tools/config-recommender` → `createContactPageLoading` (3 cards, 3 columns, no prose)
  *
- * ### Submit Pages (2 routes)
+ * ### Submit Pages (1 route)
  * - `/submit` → `SubmitPageLoading` (custom: hero + form + sidebar)
- * - `/submit/wizard` → `createFormPageLoading` (1 card, 8 fields)
  *
  * ### Company Pages (2 routes)
  * - `/companies` → `CategoryLoading` (custom: category list preset)
@@ -777,22 +776,6 @@ export const LOADING_CONFIGS: Record<string, LoadingConfig> = {
   '/submit': {
     factory: 'custom',
     customComponent: 'SubmitPageLoading',
-  },
-  /**
-   * Submit Wizard Page
-   * @route /submit/wizard
-   * @factory createFormPageLoading
-   * @config 1 card, 8 fields, actions, max-width 6xl
-   */
-  '/submit/wizard': {
-    factory: 'form',
-    config: {
-      title: 'Submit Content',
-      cardCount: 1,
-      fieldsPerCard: [8],
-      showActions: true,
-      maxWidth: '6xl',
-    },
   },
 
   // ============================================================================

@@ -15,7 +15,6 @@
 import { sanitizeSlug } from '@heyclaude/web-runtime/core';
 import { Award, Medal, TrendingUp } from '@heyclaude/web-runtime/icons';
 import {
-  POSITION_PATTERNS,
   UnifiedBadge,
   Card,
   CardContent,
@@ -28,7 +27,6 @@ import Link from 'next/link';
 import { memo } from 'react';
 
 import { type UserProfile } from '@/src/components/core/domain/cards/user-profile-card';
-import { iconSize, between, cluster, spaceY, padding } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Validate slug is safe for use in URLs
@@ -124,16 +122,16 @@ export interface ContributorsSidebarProps {
 
 function ContributorsSidebarComponent({ topContributors, newMembers }: ContributorsSidebarProps) {
   return (
-    <aside className={`${POSITION_PATTERNS.STICKY_TOP_4} ${spaceY.comfortable}`}>
+    <aside className="sticky top-4 space-y-4">
       {/* Trending Contributors */}
       <Card>
         <CardHeader>
-          <div className={`${cluster.compact}`}>
-            <TrendingUp className={`${iconSize.sm} text-accent`} />
+          <div className="flex items-center gap-2">
+            <TrendingUp className="h-4 w-4 text-accent" />
             <CardTitle className="text-sm">Trending Contributors</CardTitle>
           </div>
         </CardHeader>
-        <CardContent className={`${spaceY.default}`}>
+        <CardContent className="space-y-3">
           {topContributors.slice(0, 5).map((contributor, index) => {
             const slug = contributor.slug || 'unknown';
             const safeUrl = getSafeUserProfileUrl(slug);
@@ -152,7 +150,7 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
               <Link
                 key={slug}
                 href={validatedUrl}
-                className={`hover:bg-muted/50 ${cluster.default} rounded-lg p-2 transition-colors`}
+                className="hover:bg-muted/50 flex items-center gap-3 rounded-lg p-2 transition-colors"
               >
                 <div className="relative shrink-0">
                   {contributor.image ? (
@@ -164,12 +162,12 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
                       className="h-10 w-10 rounded-full object-cover"
                     />
                   ) : (
-                    <div className={`bg-accent flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold`}>
+                    <div className="bg-accent flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold">
                       {displayName.charAt(0).toUpperCase()}
                     </div>
                   )}
                   {index < 3 && (
-                    <div className={`bg-background absolute -right-1 -bottom-1 rounded-full ${padding.micro}`}>
+                    <div className="bg-background absolute -right-1 -bottom-1 rounded-full p-1">
                       <Medal
                         className={`h-3 w-3 ${
                           index === 0
@@ -182,11 +180,11 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
                     </div>
                   )}
                 </div>
-                <div className={`min-w-0 flex-1`}>
-                  <p className="truncate text-sm font-medium">{displayName}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm-medium">{displayName}</p>
                   {contributor.total_contributions !== undefined && (
-                    <div className={`text-muted-foreground ${cluster.tight} text-xs`}>
-                      <Award className={iconSize.xs} />
+                    <div className="text-muted-foreground flex items-center gap-1 text-xs">
+                      <Award className="h-3 w-3" />
                       <span>{contributor.total_contributions} contributions</span>
                     </div>
                   )}
@@ -203,7 +201,7 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
           <CardHeader>
             <CardTitle className="text-sm">New Members</CardTitle>
           </CardHeader>
-          <CardContent className={`${spaceY.default}`}>
+          <CardContent className="space-y-3">
             {newMembers.slice(0, 5).map((member) => {
               const slug = member.slug || 'unknown';
               const safeUrl = getSafeUserProfileUrl(slug);
@@ -222,7 +220,7 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
                 <Link
                   key={slug}
                   href={validatedUrl}
-                  className={`hover:bg-muted/50 ${cluster.default} rounded-lg p-2 transition-colors`}
+                  className="hover:bg-muted/50 flex items-center gap-3 rounded-lg p-2 transition-colors"
                 >
                   {member.image ? (
                     <Image
@@ -230,15 +228,15 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
                       alt={displayName}
                       width={32}
                       height={32}
-                      className={`${iconSize.xl} shrink-0 rounded-full object-cover`}
+                      className="h-8 w-8 shrink-0 rounded-full object-cover"
                     />
                   ) : (
-                    <div className={`bg-accent flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold`}>
+                    <div className="bg-accent flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold">
                       {displayName.charAt(0).toUpperCase()}
                     </div>
                   )}
-                  <div className={`min-w-0 flex-1`}>
-                    <p className="truncate text-sm font-medium">{displayName}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm-medium">{displayName}</p>
                     {member.work ? (
                       <p className="text-muted-foreground truncate text-xs">{member.work}</p>
                     ) : null}
@@ -255,8 +253,8 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
         <CardHeader>
           <CardTitle className="text-sm">Community Stats</CardTitle>
         </CardHeader>
-        <CardContent className={`${spaceY.compact}`}>
-          <div className={between.center}>
+        <CardContent className="space-y-2">
+          <div className="flex items-center justify-between">
             <span className="text-muted-foreground text-xs">Total Members</span>
             <UnifiedBadge variant="base" style="secondary" className="text-xs">
               {topContributors.length + newMembers.length}

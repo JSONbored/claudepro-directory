@@ -33,6 +33,7 @@ import { Toaster } from '@/src/components/primitives/feedback/sonner';
 // Self-hosted fonts - no external requests, faster FCP, GDPR compliant
 // OPTIMIZATION: Use 'swap' instead of 'optional' for faster text rendering (reduces LCP)
 // 'swap' shows fallback immediately, then swaps to custom font when loaded
+// OPTIMIZATION: Subset font weights to only used ones (400, 500, 600, 700) to reduce file size
 const inter = localFont({
   display: 'swap', // Changed from 'optional' - shows text immediately with fallback, then swaps
   fallback: [
@@ -47,25 +48,28 @@ const inter = localFont({
   preload: true,
   src: '../fonts/Inter-Variable.woff2',
   variable: '--font-inter',
-  weight: '100 900',
+  weight: '400 700', // Optimized: Only load weights 400, 500, 600, 700 (was 100-900)
 });
 
+// OPTIMIZATION: Lazy load Geist fonts (don't preload) - they're used less frequently
+// Geist is used for headings, so it can load after initial render
 const geist = localFont({
-  display: 'swap', // Changed from 'optional' - shows text immediately with fallback, then swaps
+  display: 'swap',
   fallback: ['system-ui', '-apple-system', 'sans-serif'],
-  preload: true,
+  preload: false, // Optimized: Lazy load (was true) - Geist is secondary font
   src: '../fonts/GeistVF.woff2',
   variable: '--font-geist',
-  weight: '100 900',
+  weight: '400 700', // Optimized: Only load weights 400, 500, 600, 700 (was 100-900)
 });
 
+// OPTIMIZATION: Lazy load Geist Mono (don't preload) - only used for code blocks
 const geistMono = localFont({
-  display: 'swap', // Changed from 'optional' - shows text immediately with fallback, then swaps
+  display: 'swap',
   fallback: ['Menlo', 'Monaco', 'Courier New', 'monospace'],
-  preload: true,
+  preload: false, // Optimized: Lazy load (was true) - Geist Mono is only for code
   src: '../fonts/GeistMonoVF.woff2',
   variable: '--font-geist-mono',
-  weight: '100 900',
+  weight: '400 700', // Optimized: Only load weights 400, 500, 600, 700 (was 100-900)
 });
 
 /**
@@ -83,7 +87,7 @@ const geistMono = localFont({
 async function getCachedHomeMetadata(): Promise<Metadata> {
   'use cache';
   // Use named 'metadata' profile: 12hr stale, 24hr revalidate, 48hr expire
-  cacheLife('metadata');
+  cacheLife('long');
   cacheTag('homepage-metadata');
 
   return generatePageMetadata('/');
@@ -195,8 +199,8 @@ export async function generateMetadata(): Promise<Metadata> {
  */
 function LayoutFallback({ children }: { children: React.ReactNode }) {
   return (
-    <div className={`bg-background flex min-h-screen flex-col`}>
-      <main className={`flex-1`} id="main-content">
+    <div className="bg-background flex min-h-screen flex-col">
+      <main className="flex-1" id="main-content">
         {children}
       </main>
     </div>
@@ -273,9 +277,9 @@ export default function RootLayout({
 
   return (
     <html
-      suppressHydrationWarning
       className={`${inter.variable} ${geist.variable} ${geistMono.variable} font-sans`}
       lang="en"
+      suppressHydrationWarning
     >
       <head>
         {/* Viewport for responsive design */}
@@ -308,11 +312,11 @@ export default function RootLayout({
         </Suspense>
         <ComponentConfigContextProvider value={componentCardConfig}>
           <ThemeProvider
-            enableSystem
             attribute="class"
             defaultTheme="dark"
             disableTransitionOnChange={false}
             enableColorScheme={false}
+            enableSystem
             storageKey="claudepro-theme"
           >
             <LazyMotionProvider>

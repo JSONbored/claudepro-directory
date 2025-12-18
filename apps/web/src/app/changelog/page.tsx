@@ -33,7 +33,6 @@ import { Suspense } from 'react';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { ChangelogContentSkeleton } from '@/src/components/features/changelog/changelog-content-skeleton';
 import { ChangelogTimelineView } from '@/src/components/features/changelog/changelog-timeline-view';
-import { marginX, padding, spaceY, paddingX, paddingTop, size, weight, tracking } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Generate page metadata for the /changelog route, including RSS and Atom feed alternates.
@@ -106,7 +105,7 @@ export async function generateMetadata(): Promise<Metadata> {
  */
 export default async function ChangelogPage() {
   'use cache';
-  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
+  cacheLife('long'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
   // Create request-scoped child logger
   const reqLogger = logger.child({
@@ -122,9 +121,9 @@ export default async function ChangelogPage() {
       <div className="bg-background relative min-h-screen">
         {/* Header - EXACTLY matches Magic UI template */}
         <div className="border-border/50 border-b">
-          <div className={`relative ${marginX.auto} max-w-5xl`}>
-            <div className={`flex items-center justify-between ${padding.compact}`}>
-              <h1 className={`${size['3xl']} ${weight.semibold} ${tracking.tight}`}>Changelog</h1>
+          <div className="relative mx-auto max-w-5xl">
+            <div className="flex items-center justify-between p-3">
+              <h1 className="text-3xl font-semibold tracking-tight">Changelog</h1>
               {/* ThemeToggle would go here if we had it */}
             </div>
           </div>
@@ -157,7 +156,7 @@ async function ChangelogContentWithData({
   reqLogger: ReturnType<typeof logger.child>;
 }) {
   // Fetch data outside JSX construction - handle errors before rendering
-    let sortedEntries: changelogModel[] = [];
+  let sortedEntries: changelogModel[] = [];
   let hasError = false;
 
   try {
@@ -169,11 +168,15 @@ async function ChangelogContentWithData({
       publishedOnly: true, // Only get published entries
     });
 
+    // Database returns nullable array - ensure it's always an array
+    // filter_jobs_result.jobs is jobs[] (nullable), changelog_overview_result.entries is changelog_overview_entry[] (nullable)
+    const entriesArray = overview && Array.isArray(overview.entries) ? overview.entries : [];
+
     // Convert RPC return data (string dates) to Prisma types (Date objects)
     // RPC returns CompositeType (changelog_overview_entry) with string dates
     // Prisma expects Date objects for timestamps
     // changelog_overview_entry has keywords but not contributors, so we default contributors to []
-    const publishedEntries = (overview.entries ?? []).map((entry) => {
+    const publishedEntries = entriesArray.map((entry) => {
       // keywords is already text[] in database (may be null in overview)
       // contributors is not in changelog_overview_entry, so default to []
       const keywords = Array.isArray(entry.keywords) ? entry.keywords : [];
@@ -230,9 +233,9 @@ async function ChangelogContentWithData({
   // Return JSX outside try/catch - errors are handled above
   if (hasError) {
     return (
-      <div className={`border-border bg-card/50 overflow-hidden rounded-lg border ${padding.default} shadow-sm backdrop-blur-sm sm:${padding.comfortable}`}>
-        <div className={`${spaceY.comfortable}`}>
-          <h2 className={`${size['2xl']} ${weight.bold} ${tracking.tight}`}>Changelog</h2>
+      <div className="border-border bg-card/50 card-base overflow-hidden p-4 shadow-sm backdrop-blur-sm sm:p-6">
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold tracking-tight">Changelog</h2>
           <p className="text-muted-foreground">
             Unable to load changelog entries. Please try again later.
           </p>
@@ -242,7 +245,7 @@ async function ChangelogContentWithData({
   }
 
   return (
-    <div className={`${marginX.auto} max-w-5xl ${paddingX.comfortable} ${paddingTop.default} lg:${paddingX.default}`}>
+    <div className="mx-auto max-w-5xl px-6 pt-6 lg:px-4">
       <div className="relative">
         <ChangelogTimelineView entries={sortedEntries} />
       </div>

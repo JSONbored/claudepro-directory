@@ -7,9 +7,6 @@
 
 import { z } from 'zod';
 
-import type { JobsListItem } from '../composites/jobs_list_item';
-import { jobsListItemSchema } from '../composites/jobs_list_item';
-
 /**
  * Arguments for PostgreSQL function: get_jobs_list
  */
@@ -30,12 +27,12 @@ export type GetJobsListArgsFromZod = z.infer<typeof getJobsListArgsSchema>;
 /**
  * Return type for PostgreSQL function: get_jobs_list
  */
-export type GetJobsListReturns = JobsListItem;
+export type GetJobsListReturns = unknown[];
 
 /**
  * Zod schema for get_jobs_list function return type
  */
-export const getJobsListReturnsSchema = jobsListItemSchema;
+export const getJobsListReturnsSchema = z.array(z.unknown());
 
 /**
  * Type inference from Zod schema (should match type above)

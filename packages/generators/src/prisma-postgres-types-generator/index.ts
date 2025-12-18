@@ -12,7 +12,7 @@
 // CommonJS/ESM compatibility for @prisma/generator-helper
 import pkg from '@prisma/generator-helper';
 const { generatorHandler } = pkg;
-import { mkdir, writeFile, readFile } from 'node:fs/promises';
+import { mkdir, writeFile, readFile, readdir, unlink } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { generateCompositeTypes } from './composite-generator.ts';
@@ -20,6 +20,7 @@ import { generateEnumSchemas } from './enum-generator.ts';
 import { generateFunctionTypes } from './function-generator.ts';
 import { introspectDatabase } from './introspect.ts';
 import type { GeneratorConfig } from './types.ts';
+import type { CompositeTypeAttribute } from '../toolkit/introspection.ts';
 
 generatorHandler({
   onManifest() {
@@ -43,6 +44,7 @@ generatorHandler({
         generateZod: (generator.config?.['generateZod'] as boolean | undefined) !== false,
         ...(generator.config?.['includeFunctions'] ? { includeFunctions: generator.config['includeFunctions'] as string[] } : {}),
         ...(generator.config?.['excludeFunctions'] ? { excludeFunctions: generator.config['excludeFunctions'] as string[] } : {}),
+        ...(generator.config?.['excludeCompositeTypes'] ? { excludeCompositeTypes: generator.config['excludeCompositeTypes'] as string[] } : {}),
       };
 
       // Get database connection string from datasource
@@ -113,19 +115,157 @@ generatorHandler({
       );
     }
 
+    // Filter composite types if exclude patterns are specified
+    // This ensures excluded composite types are not available for function generation
+    let filteredCompositeTypes = metadata.compositeTypes;
+    if (config.excludeCompositeTypes) {
+      filteredCompositeTypes = Object.fromEntries(
+        Object.entries(metadata.compositeTypes).filter(([name]) => {
+          const matches = config.excludeCompositeTypes!.some((pattern) =>
+            new RegExp(pattern.replace(/\*/g, '.*')).test(name)
+          );
+          return !matches; // Exclude if matches pattern
+        })
+      );
+    }
+
     // Generate types and schemas
     const functionOutput = config.generateTypes || config.generateZod
       ? await generateFunctionTypes(
           functions, 
-          metadata.compositeTypes, 
+          filteredCompositeTypes, // Use filtered composite types
           metadata.enums, 
           metadata.functionReturnStructures,
           config
         )
       : { files: {}, exports: [] };
 
+    // ROOT CAUSE FIX: Only generate composite types that are actually used by functions
+    // This prevents generating types for unused composite types (e.g., from deleted functions)
+    // Helper function to extract composite type from a type string (similar to function-generator.ts)
+    function stripSchemaPrefix(typeName: string): string {
+      if (!typeName) return typeName;
+      let cleaned = typeName.replace(/["']/g, '');
+      const schemaMatch = cleaned.match(/^[a-z_][a-z0-9_]*\.([a-z_][a-z0-9_]*)$/i);
+      return schemaMatch && schemaMatch[1] ? schemaMatch[1] : cleaned;
+    }
+    
+    function extractBaseCompositeTypeFromString(
+      typeString: string,
+      compositeTypes: Record<string, CompositeTypeAttribute[]>
+    ): string | null {
+      if (!typeString) return null;
+
+      // Handle SETOF (returns set of rows)
+      if (typeString.toUpperCase().includes('SETOF')) {
+        const baseTypeMatch = typeString.match(/SETOF\s+([\w.]+)/i);
+        if (baseTypeMatch?.[1]) {
+          const baseType = stripSchemaPrefix(baseTypeMatch[1]);
+          if (compositeTypes[baseType]) {
+            return baseType;
+          }
+          if (baseType.startsWith('_')) {
+            return extractBaseCompositeTypeFromString(baseType, compositeTypes);
+          }
+        }
+        return null;
+      }
+
+      // Handle array types (prefixed with _)
+      if (typeString.startsWith('_')) {
+        const baseType = stripSchemaPrefix(typeString.slice(1));
+        if (compositeTypes[baseType]) {
+          return baseType;
+        }
+        if (baseType.startsWith('_')) {
+          return extractBaseCompositeTypeFromString(baseType, compositeTypes);
+        }
+        if (baseType.includes('[]')) {
+          return extractBaseCompositeTypeFromString(baseType.replace('[]', ''), compositeTypes);
+        }
+      }
+
+      // Handle explicit array notation
+      if (typeString.includes('[]')) {
+        const baseType = stripSchemaPrefix(typeString.replace(/\[\]/g, ''));
+        if (compositeTypes[baseType]) {
+          return baseType;
+        }
+        return extractBaseCompositeTypeFromString(baseType, compositeTypes);
+      }
+
+      // Strip schema prefix before checking
+      const normalizedType = stripSchemaPrefix(typeString);
+
+      // Direct composite type
+      if (compositeTypes[normalizedType]) {
+        return normalizedType;
+      }
+
+      return null;
+    }
+    
+    const usedCompositeTypes = new Set<string>();
+    
+    // Collect all composite types used by functions
+    for (const [functionName, functionMeta] of Object.entries(functions)) {
+      // Check function arguments
+      for (const arg of functionMeta.args || []) {
+        const baseType = extractBaseCompositeTypeFromString(arg.udtName || '', filteredCompositeTypes);
+        if (baseType) {
+          usedCompositeTypes.add(baseType);
+        }
+      }
+      
+      // Check return type
+      if (functionMeta.returnType) {
+        const baseType = extractBaseCompositeTypeFromString(functionMeta.returnType, filteredCompositeTypes);
+        if (baseType) {
+          usedCompositeTypes.add(baseType);
+        }
+      }
+      
+      // Check function return structures (for SETOF record functions)
+      if (metadata.functionReturnStructures[functionName]) {
+        for (const attr of metadata.functionReturnStructures[functionName]) {
+          const baseType = extractBaseCompositeTypeFromString(attr.udtName || '', filteredCompositeTypes);
+          if (baseType) {
+            usedCompositeTypes.add(baseType);
+          }
+        }
+      }
+    }
+    
+    // Also include composite types that are nested within other used composite types
+    // (recursively collect all dependencies)
+    const allUsedCompositeTypes = new Set(usedCompositeTypes);
+    function collectNestedComposites(compositeName: string) {
+      const attrs = filteredCompositeTypes[compositeName];
+      if (!attrs) return;
+      
+      for (const attr of attrs) {
+        const baseType = extractBaseCompositeTypeFromString(attr.udtName || '', filteredCompositeTypes);
+        if (baseType && !allUsedCompositeTypes.has(baseType)) {
+          allUsedCompositeTypes.add(baseType);
+          collectNestedComposites(baseType); // Recursively collect nested composites
+        }
+      }
+    }
+    
+    // Recursively collect all nested composite types
+    for (const compositeName of usedCompositeTypes) {
+      collectNestedComposites(compositeName);
+    }
+    
+    // Filter composite types to only those that are used
+    const usedCompositeTypesRecord = Object.fromEntries(
+      Object.entries(filteredCompositeTypes).filter(([name]) => 
+        allUsedCompositeTypes.has(name)
+      )
+    );
+
     const compositeOutput = config.generateTypes || config.generateZod
-      ? await generateCompositeTypes(metadata.compositeTypes, metadata.enums, config)
+      ? await generateCompositeTypes(usedCompositeTypesRecord, metadata.enums, config)
       : { files: {}, exports: [] };
 
     // Generate enum schemas (matching prisma-zod-generator format but with correct database values)
@@ -134,12 +274,145 @@ generatorHandler({
       ? generateEnumSchemas(metadata.enums, config)
       : { files: {}, exports: [] };
 
+    // ARCHITECTURAL FIX: Clear TypeScript build caches before generating
+    // This prevents TypeScript from resolving stale type information from previous generations
+    // This is critical when composite types are excluded or RPCs are removed
+    try {
+      const { unlink } = await import('node:fs/promises');
+      const { existsSync } = await import('node:fs');
+      
+      // Clear TypeScript build info files that might contain cached type information
+      const buildInfoPaths = [
+        join(process.cwd(), 'packages/database-types/.tsbuildinfo'),
+        join(process.cwd(), 'packages/web-runtime/.tsbuildinfo'),
+        join(process.cwd(), 'apps/web/.tsbuildinfo'),
+      ];
+      
+      for (const buildInfoPath of buildInfoPaths) {
+        if (existsSync(buildInfoPath)) {
+          try {
+            await unlink(buildInfoPath);
+          } catch (error) {
+            // Ignore errors - file might be locked or already deleted
+          }
+        }
+      }
+    } catch (error) {
+      // Non-critical - continue even if cache clearing fails
+      // This is a best-effort cleanup to prevent stale type resolution
+    }
+
     // Ensure output directories exist
     const outputDir = config.output;
     const functionsDir = join(outputDir, 'functions');
     const compositesDir = join(outputDir, 'composites');
     await mkdir(functionsDir, { recursive: true });
     await mkdir(compositesDir, { recursive: true });
+    
+    // Clean up old function files that no longer exist in the database
+    // This ensures removed RPCs don't leave stale type files
+    try {
+      const existingFunctionFiles = await readdir(functionsDir);
+      const generatedFunctionNames = new Set(
+        Object.keys(functionOutput.files).map(name => `${name}.ts`)
+      );
+      
+      // Also include .d.ts and .d.ts.map files for cleanup
+      for (const file of existingFunctionFiles) {
+        if (file === 'index.ts' || file === 'index.d.ts' || file === 'index.d.ts.map') {
+          continue; // Don't delete index files
+        }
+        
+        const baseName = file.replace(/\.(ts|d\.ts|d\.ts\.map)$/, '');
+        const shouldExist = generatedFunctionNames.has(`${baseName}.ts`);
+        
+        if (!shouldExist) {
+          // Delete old function file and its .d.ts/.d.ts.map files
+          const filesToDelete = [
+            join(functionsDir, `${baseName}.ts`),
+            join(functionsDir, `${baseName}.d.ts`),
+            join(functionsDir, `${baseName}.d.ts.map`),
+          ];
+          
+          for (const filePath of filesToDelete) {
+            try {
+              await unlink(filePath);
+            } catch (error) {
+              // File might not exist, ignore error
+            }
+          }
+        }
+      }
+    } catch (error) {
+      // If directory doesn't exist yet, that's fine - it will be created
+      if ((error as { code?: string }).code !== 'ENOENT') {
+        throw error;
+      }
+    }
+    
+    // Clean up old composite type files that no longer exist in the database
+    // ARCHITECTURAL FIX: Also delete excluded composite types from both src and dist
+    try {
+      const existingCompositeFiles = await readdir(compositesDir);
+      const generatedCompositeNames = new Set(
+        Object.keys(compositeOutput.files).map(name => `${name}.ts`)
+      );
+      
+      // Also track excluded composite types that should be deleted
+      const excludedCompositeNames = new Set(
+        config.excludeCompositeTypes || []
+      );
+      
+      for (const file of existingCompositeFiles) {
+        if (file === 'index.ts' || file === 'index.d.ts' || file === 'index.d.ts.map') {
+          continue; // Don't delete index files
+        }
+        
+        const baseName = file.replace(/\.(ts|d\.ts|d\.ts\.map)$/, '');
+        const shouldExist = generatedCompositeNames.has(`${baseName}.ts`);
+        const isExcluded = excludedCompositeNames.has(baseName);
+        
+        if (!shouldExist || isExcluded) {
+          // Delete old composite file and its .d.ts/.d.ts.map files from src
+          const filesToDelete = [
+            join(compositesDir, `${baseName}.ts`),
+            join(compositesDir, `${baseName}.d.ts`),
+            join(compositesDir, `${baseName}.d.ts.map`),
+          ];
+          
+          for (const filePath of filesToDelete) {
+            try {
+              await unlink(filePath);
+            } catch (error) {
+              // File might not exist, ignore error
+            }
+          }
+          
+          // ARCHITECTURAL FIX: Also delete from dist directory
+          // This is critical - TypeScript resolves types from dist, not src
+          const distCompositesDir = join(process.cwd(), 'packages/database-types/dist/postgres-types/composites');
+          const distFilesToDelete = [
+            join(distCompositesDir, `${baseName}.d.ts`),
+            join(distCompositesDir, `${baseName}.d.ts.map`),
+            join(distCompositesDir, `${baseName}.js`),
+            join(distCompositesDir, `${baseName}.js.map`),
+          ];
+          
+          for (const filePath of distFilesToDelete) {
+            try {
+              await unlink(filePath);
+            } catch (error) {
+              // File might not exist, ignore error
+            }
+          }
+        }
+      }
+    } catch (error) {
+      // If directory doesn't exist yet, that's fine - it will be created
+      if ((error as { code?: string }).code !== 'ENOENT') {
+        throw error;
+      }
+    }
     
     // Write enum schema files to prisma-zod-generator's enum schemas location
     // This replaces the official package's incorrect enum schemas with correct ones
@@ -175,6 +448,27 @@ generatorHandler({
 
     const compositesIndex = generateIndexFile(compositeOutput.exports, 'composites');
     await writeFile(join(compositesDir, 'index.ts'), compositesIndex, 'utf-8');
+
+    // ARCHITECTURAL FIX: Also update dist index to remove excluded composite exports
+    // TypeScript resolves types from dist, so we must keep dist in sync with src
+    try {
+      const distCompositesIndexPath = join(process.cwd(), 'packages/database-types/dist/postgres-types/composites/index.d.ts');
+      const { existsSync } = await import('node:fs');
+      if (existsSync(distCompositesIndexPath)) {
+        const distIndexContent = await readFile(distCompositesIndexPath, 'utf-8');
+        // Remove exports for excluded composite types
+        const excludedPatterns = config.excludeCompositeTypes || [];
+        let updatedContent = distIndexContent;
+        for (const pattern of excludedPatterns) {
+          const regex = new RegExp(`export \\* from ['"]\\./${pattern.replace(/\*/g, '.*')}['"];?\\n?`, 'g');
+          updatedContent = updatedContent.replace(regex, '');
+        }
+        await writeFile(distCompositesIndexPath, updatedContent, 'utf-8');
+      }
+    } catch (error) {
+      // Non-critical - dist index might not exist yet or might be locked
+      // The build process will regenerate it
+    }
 
     // Write main index file
     const mainIndex = generateMainIndexFile(functionOutput.exports, compositeOutput.exports);

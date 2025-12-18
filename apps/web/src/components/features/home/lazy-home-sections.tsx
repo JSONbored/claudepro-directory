@@ -1,6 +1,5 @@
 import { FeaturedSectionSkeleton, Skeleton } from '@heyclaude/web-runtime/ui';
 import dynamic from 'next/dynamic';
-import { marginBottom, spaceY } from "@heyclaude/web-runtime/design-system";
 
 // Re-export section prop types so consumers can name the inferred component types without TS4023 issues.
 export type { FeaturedSectionsProps } from '@/src/components/features/home/featured-sections';
@@ -19,7 +18,7 @@ export const LazyFeaturedSections = dynamic(
     })),
   {
     loading: () => (
-      <div className={`${marginBottom.hero} ${spaceY.default}`}>
+      <div className="mb-16 space-y-3">
         {/* 5 featured categories + 1 jobs section */}
         {Array.from({ length: 6 }).map((_, i) => (
           <FeaturedSectionSkeleton key={`featured-loading-${i + 1}`} />
@@ -42,10 +41,10 @@ export const LazyAllContentSection = dynamic(
     })),
   {
     loading: () => (
-      <div className={`${spaceY.loose}`}>
+      <div className="space-y-12">
         {/* Section header skeleton */}
-        <div className={`${marginBottom.relaxed}`}>
-          <Skeleton size="lg" width="3xl" className="h-8 w-64 mb-2" />
+        <div className="mb-8">
+          <Skeleton size="lg" width="3xl" className="mb-2 h-8 w-64" />
           <Skeleton size="md" width="2xl" className="h-4 w-96" />
         </div>
         {/* Content skeleton */}

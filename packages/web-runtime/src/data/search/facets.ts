@@ -1,30 +1,14 @@
 'use server';
 
-import { SearchService } from '@heyclaude/data-layer';
-import type { content_category } from '@heyclaude/data-layer/prisma';
-import type {
-  GetSearchFacetsReturns,
-  GetTrendingSearchesReturns,
+import { type content_category } from '@heyclaude/data-layer/prisma';
+import {
+  type GetSearchFacetsReturns,
+  type GetTrendingSearchesReturns,
 } from '@heyclaude/database-types/postgres-types';
-import { isValidContentCategory } from '../../utils/type-guards';
-import { cacheLife, cacheTag } from 'next/cache';
 
-import { logger } from '../../index.ts';
+import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 
-/***
- * Normalizes error to Error | string for logging
- * @param {unknown} error - Error to normalize
- * @returns Error instance or string representation
- */
-function normalizeErrorForLogging(error: unknown): Error | string {
-  if (error instanceof Error) {
-    return error;
-  }
-  if (typeof error === 'string') {
-    return error;
-  }
-  return String(error);
-}
+import { createCachedDataFunction, generateResourceTags } from '../cached-data-factory.ts';
 
 // Use generated type from Prisma generator
 type SearchFacetsRow = GetSearchFacetsReturns[number];
@@ -45,13 +29,11 @@ export interface SearchFacetAggregate {
 
 function normalizeFacetRow(row: SearchFacetsRow): SearchFacetSummary {
   // Validate category and ensure it's a valid content_category
-  const category = row.category && isValidContentCategory(row.category) 
-    ? row.category 
-    : 'agents'; // Default fallback
-  
+  const category = row.category && isValidCategory(row.category) ? row.category : 'agents'; // Default fallback
+
   // Ensure content_count is a number (handle null)
   const contentCount = row.content_count ?? 0;
-  
+
   return {
     authors: Array.isArray(row.authors)
       ? row.authors.filter((author): author is string => typeof author === 'string')
@@ -68,8 +50,6 @@ function normalizeFacetRow(row: SearchFacetsRow): SearchFacetSummary {
  * Extracts aggregated arrays from RPC result
  * The RPC now returns pre-aggregated arrays in each row (same values)
  * We use the first row's aggregated values for efficiency
- * @param {SearchFacetsRow[]} data - Array of facet rows from RPC (each row contains aggregated arrays)
- * @returns Pre-aggregated arrays from database (already sorted and deduplicated)
  */
 function extractAggregatedArrays(data: SearchFacetsRow[]): {
   authors: string[];
@@ -89,7 +69,6 @@ function extractAggregatedArrays(data: SearchFacetsRow[]): {
   }
 
   // Extract pre-aggregated arrays from RPC (already sorted and deduplicated in database)
-  // The generated type now includes all_*_aggregated fields from introspection
   return {
     authors: Array.isArray(firstRow.all_authors_aggregated)
       ? firstRow.all_authors_aggregated.filter(
@@ -97,8 +76,8 @@ function extractAggregatedArrays(data: SearchFacetsRow[]): {
         )
       : [],
     categories: Array.isArray(firstRow.all_categories_aggregated)
-      ? (firstRow.all_categories_aggregated.filter((cat) => 
-          cat != null && isValidContentCategory(cat)
+      ? (firstRow.all_categories_aggregated.filter(
+          (cat) => cat != null && isValidCategory(cat)
         ) as content_category[])
       : [],
     tags: Array.isArray(firstRow.all_tags_aggregated)
@@ -112,54 +91,36 @@ function extractAggregatedArrays(data: SearchFacetsRow[]): {
  * Uses 'use cache' to cache search facets. This data is public and same for all users.
  * @returns Aggregated search facets with authors, categories, tags, and facet summaries
  */
-export async function getSearchFacets(): Promise<SearchFacetAggregate> {
-  'use cache';
-
-  // Configure cache - use 'stable' profile for optimal SEO (6hr stale, 1hr revalidate, 7 days expire)
-  cacheLife('stable'); // 6hr stale, 1hr revalidate, 7 days expire - optimized for SEO
-  cacheTag('search');
-  cacheTag('search-facets');
-
-  // Create request-scoped child logger to avoid race conditions
-  const requestLogger = logger.child({
-    module: 'data/search/facets',
-    operation: 'getSearchFacets',
-  });
-
-  try {
-    const service = new SearchService();
-    const data = await service.getSearchFacets();
-
+export const getSearchFacets = createCachedDataFunction<void, SearchFacetAggregate>({
+  serviceKey: 'search',
+  methodName: 'getSearchFacets',
+  cacheMode: 'public',
+  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
+  cacheTags: () => generateResourceTags('search', undefined, ['search-facets']),
+  module: 'data/search/facets',
+  operation: 'getSearchFacets',
+  transformResult: (result) => {
+    const data = result as GetSearchFacetsReturns;
     const facets = data.map((row) => normalizeFacetRow(row));
-
-    // Use pre-aggregated arrays from database (already sorted and deduplicated)
-    // This eliminates client-side Set operations and sorting
     const { authors, categories, tags } = extractAggregatedArrays(data);
-
-    requestLogger.info(
-      {
-        authorCount: authors.length,
-        categoryCount: categories.length,
-        facetCount: facets.length,
-        tagCount: tags.length,
-      },
-      'getSearchFacets: fetched successfully'
-    );
-
     return {
       authors,
       categories,
       facets,
-      // Arrays are already sorted and deduplicated by database
       tags,
     };
-  } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging = normalizeErrorForLogging(error);
-    requestLogger.error({ err: errorForLogging }, 'getSearchFacets: failed');
-    throw error;
-  }
-}
+  },
+  throwOnError: true,
+  logContext: (_, result) => {
+    const aggregate = result as SearchFacetAggregate | undefined;
+    return {
+      authorCount: aggregate?.authors.length ?? 0,
+      categoryCount: aggregate?.categories.length ?? 0,
+      facetCount: aggregate?.facets.length ?? 0,
+      tagCount: aggregate?.tags.length ?? 0,
+    };
+  },
+});
 
 /**
  * Get popular searches
@@ -167,41 +128,15 @@ export async function getSearchFacets(): Promise<SearchFacetAggregate> {
  * @param limit - Maximum number of popular searches to return (default: 100)
  * @returns Array of trending search terms
  */
-export async function getPopularSearches(
-  limit = 100
-): Promise<GetTrendingSearchesReturns> {
-  'use cache';
-
-  // Configure cache - use 'stable' profile for optimal SEO (6hr stale, 1hr revalidate, 7 days expire)
-  cacheLife('stable'); // 6hr stale, 1hr revalidate, 7 days expire - optimized for SEO
-  cacheTag('search');
-  cacheTag('popular-searches');
-  // Include limit in cache tag for proper cache key generation
-  cacheTag(`popular-searches-${limit}`);
-
-  const requestLogger = logger.child({
-    module: 'data/search/facets',
-    operation: 'getPopularSearches',
-  });
-
-  try {
-    const service = new SearchService();
-    const data = await service.getTrendingSearches({
-      limit_count: limit,
-    });
-
-    requestLogger.info(
-      {
-        limit,
-        resultCount: data.length,
-      },
-      'getPopularSearches: fetched successfully'
-    );
-
-    return data;
-  } catch (error) {
-    const errorForLogging = normalizeErrorForLogging(error);
-    requestLogger.error({ err: errorForLogging, limit }, 'getPopularSearches: failed');
-    return [];
-  }
-}
+export const getPopularSearches = createCachedDataFunction<number, GetTrendingSearchesReturns>({
+  serviceKey: 'search',
+  methodName: 'getTrendingSearches',
+  cacheMode: 'public',
+  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
+  cacheTags: (limit) => generateResourceTags('search', undefined, ['popular-searches', `popular-searches-${limit}`]),
+  module: 'data/search/facets',
+  operation: 'getPopularSearches',
+  transformArgs: (limit) => ({ limit_count: limit }),
+  onError: () => [], // Return empty array on error
+  logContext: (limit) => ({ limit }),
+});

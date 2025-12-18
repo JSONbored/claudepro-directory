@@ -17,7 +17,6 @@ import {
   SelectValue,
 } from '@heyclaude/web-runtime/ui';
 import { useState } from 'react';
-import { size, cluster, muted, spaceY, border } from "@heyclaude/web-runtime/design-system";
 
 // Use Prisma enum values
 const EXPERIENCE_OPTIONS = [
@@ -97,17 +96,17 @@ export function JobAlertsCard({
   };
 
   return (
-    <Card className={`border-${border.default}/60`}>
+    <Card className="border border-border/60">
       <CardHeader>
-        <CardTitle className={`${size.xl}`}>Job alerts</CardTitle>
-        <p className={`text-muted-foreground ${size.sm}`}>
+        <CardTitle className="text-lg">Job alerts</CardTitle>
+        <p className="text-muted-foreground text-sm">
           Get email updates when new AI roles match your preferences.
         </p>
       </CardHeader>
       <CardContent>
-        <form className={`${spaceY.comfortable}`} onSubmit={handleSubmit}>
-          <div className={`${spaceY.compact}`}>
-            <label className={size.sm} htmlFor="job-alert-email">
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          <div className="space-y-2">
+            <label className="text-sm" htmlFor="job-alert-email">
               Email
             </label>
             <Input
@@ -122,8 +121,8 @@ export function JobAlertsCard({
           </div>
 
           <div className={cn('grid gap-3', 'sm:grid-cols-2')}>
-            <div className={`${spaceY.compact}`}>
-              <label className={size.sm} htmlFor="job-alert-category">
+            <div className="space-y-2">
+              <label className="text-sm" htmlFor="job-alert-category">
                 Category preference
               </label>
               <Select value={category} onValueChange={setCategory} name="preferred_category">
@@ -140,8 +139,8 @@ export function JobAlertsCard({
               </Select>
             </div>
 
-            <div className={`${spaceY.compact}`}>
-              <label className={size.sm} htmlFor="job-alert-experience">
+            <div className="space-y-2">
+              <label className="text-sm" htmlFor="job-alert-experience">
                 Experience level
               </label>
               <Select value={experience} onValueChange={setExperience} name="preferred_experience">
@@ -159,8 +158,8 @@ export function JobAlertsCard({
             </div>
           </div>
 
-          <div className={`${spaceY.compact}`}>
-            <label className={size.sm} htmlFor="job-alert-remote">
+          <div className="space-y-2">
+            <label className="text-sm" htmlFor="job-alert-remote">
               Location preference
             </label>
             <Select
@@ -182,13 +181,13 @@ export function JobAlertsCard({
           </div>
 
           {error ? (
-            <p id="job-alert-error" className={`text-destructive ${size.sm}`}>
+            <p id="job-alert-error" className="text-destructive text-sm">
               {error}
             </p>
           ) : null}
 
-          <div className={cluster.compact}>
-            <Button type="submit" disabled={isSubmitting} className={`flex-1`}>
+          <div className="flex items-center gap-2">
+            <Button type="submit" disabled={isSubmitting} className="flex-1">
               {isSubmitting ? 'Subscribing…' : 'Create alert'}
             </Button>
             <Button type="button" variant="ghost" disabled={isSubmitting} onClick={reset}>
@@ -196,7 +195,7 @@ export function JobAlertsCard({
             </Button>
           </div>
 
-          <p className={cn(size.xs, muted.default, 'leading-snug')}>
+          <p className={cn('text-xs', 'text-muted-foreground', 'leading-snug')}>
             We only send relevant AI roles. Unsubscribe anytime.
           </p>
         </form>

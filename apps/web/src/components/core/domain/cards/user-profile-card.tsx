@@ -27,7 +27,6 @@ import {
   cn,
 } from '@heyclaude/web-runtime/ui';
 import { optimizeAvatarUrl } from '@heyclaude/web-runtime/utils/optimize-avatar-url';
-import { size, weight, iconSize, hoverBg, border, gap, wrap, marginTop, paddingX, center } from '@heyclaude/web-runtime/design-system';
 import { memo } from 'react';
 
 import { ExternalLinkButton } from './external-link-button';
@@ -144,7 +143,7 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
       renderHeader={() => (
         <div className={`flex flex-col items-center gap-3 text-center`}>
           {/* Avatar */}
-          <Avatar className={`ring-accent/20 ring-offset-background ${iconSize['3xl']} ring-2 ring-offset-2`}>
+          <Avatar className="ring-accent/20 ring-offset-background h-16 w-16 ring-2 ring-offset-2">
             {user.image ? (
               <AvatarImage 
                 src={optimizeAvatarUrl(user.image, 64) ?? user.image} 
@@ -158,21 +157,21 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
           </Avatar>
 
           {/* Username */}
-          <div className={`w-full min-w-0`}>
+          <div className="w-full min-w-0">
             <h3 className="truncate text-base font-semibold">{username}</h3>
             {user.work ? (
-              <p className={`text-muted-foreground ${marginTop.micro} truncate text-sm`}>{user.work}</p>
+              <p className="text-muted-foreground text-sm mt-1 truncate">{user.work}</p>
             ) : null}
           </div>
         </div>
       )}
       renderTopBadges={() => (
-        <div className={cn(wrap, center, gap['1.5'])}>
+        <div className={cn('flex flex-wrap items-center justify-center', 'gap-1.5')}>
           {/* Member type badge */}
           <UnifiedBadge
             variant="base"
             style="outline"
-            className={`${size.xs} ${weight.semibold} ${memberBadge.className}`}
+            className={`text-xs font-semibold ${memberBadge.className}`}
           >
             {memberBadge.label}
           </UnifiedBadge>
@@ -183,7 +182,7 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
               key={interest}
               variant="base"
               style="secondary"
-              className={`${size.xs} ${weight.semibold} border-primary/20 text-primary`}
+              className="text-xs font-semibold border-primary/20 text-primary"
             >
               {interest}
             </UnifiedBadge>
@@ -197,10 +196,10 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
             <UnifiedBadge
               variant="base"
               style="secondary"
-              className={cn('border-primary/20 bg-primary/10 text-primary h-7 font-medium', gap['1.5'])}
+              className={cn('border-primary/20 bg-primary/10 text-primary h-7 font-medium', 'gap-1.5')}
             >
-              <Award className={iconSize.xs} aria-hidden="true" />
-              <span className={`${size.xs} ${weight.semibold}`}>{user.total_contributions}</span>
+              <Award className="h-3 w-3" aria-hidden="true" />
+              <span className="text-xs font-semibold">{user.total_contributions}</span>
             </UnifiedBadge>
           )}
 
@@ -209,10 +208,10 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
             <UnifiedBadge
               variant="base"
               style="secondary"
-              className={cn(border.default, 'bg-muted/50 text-foreground h-7 font-medium', gap['1.5'])}
+              className={cn('border', 'bg-muted/50 text-foreground h-7 font-medium', 'gap-1.5')}
             >
-              <Users className={iconSize.xs} aria-hidden="true" />
-              <span className={`${size.xs} ${weight.semibold}`}>{user.followers_count}</span>
+              <Users className="h-3 w-3" aria-hidden="true" />
+              <span className="text-xs font-semibold">{user.followers_count}</span>
             </UnifiedBadge>
           )}
         </>
@@ -252,7 +251,7 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
               <Button
                 variant="ghost"
                 size="sm"
-                className={cn('h-7', paddingX.compact, 'text-xs', gap.tight, hoverBg.default, 'hover:text-accent')}
+                className={cn('h-7', 'px-3', 'text-xs', 'gap-1', 'hover:bg-accent/10', 'hover:text-accent')}
                 onClick={(e) => {
                   e.stopPropagation();
                   globalThis.location.href = safeProfileUrl;

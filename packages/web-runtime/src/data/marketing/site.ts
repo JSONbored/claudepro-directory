@@ -1,10 +1,10 @@
 'use server';
 
 import { env } from '@heyclaude/shared-runtime/schemas/env';
-import { cacheLife, cacheTag } from 'next/cache';
 
 import { logger } from '../../logger.ts';
 import { getContentCount } from '../content/index.ts';
+import { generateResourceTags } from '../cached-data-factory.ts';
 
 const DESCRIPTION_FALLBACK =
   'Open-source directory of Claude AI configurations. Community-driven collection of MCP servers, automation hooks, custom commands, agents, and rules.';
@@ -45,8 +45,12 @@ interface VercelAnalyticsResponse {
  * @returns {unknown} Description of return value*/
 async function getVisitorStats(): Promise<VisitorStats> {
   'use cache';
-  cacheLife('stable'); // 6hr stale, 1hr revalidate, 7 days expire - optimized for SEO
-  cacheTag('marketing-visitor-stats');
+  const { cacheLife, cacheTag } = await import('next/cache');
+  cacheLife('long'); // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
+  const tags = generateResourceTags('marketing', undefined, ['visitor-stats']);
+  for (const tag of tags) {
+    cacheTag(tag);
+  }
 
   // Create request-scoped child logger - do not mutate shared logger in cached function
   const requestLogger = logger.child({
@@ -105,12 +109,15 @@ async function getVisitorStats(): Promise<VisitorStats> {
 export async function getContentDescriptionCopy(): Promise<string> {
   'use cache';
 
-  const { cacheLife, cacheTag } = await import('next/cache');
+  const { cacheLife } = await import('next/cache');
 
   // Configure cache - use 'static' profile for optimal SEO (1 day stale, 6hr revalidate, 30 days expire)
-  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
-  cacheTag('marketing');
-  cacheTag('content-description');
+  const { cacheTag } = await import('next/cache');
+  cacheLife('long'); // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
+  const tags = generateResourceTags('marketing', undefined, ['content-description']);
+  for (const tag of tags) {
+    cacheTag(tag);
+  }
 
   // Create request-scoped child logger to avoid race conditions
   const requestLogger = logger.child({
@@ -119,7 +126,7 @@ export async function getContentDescriptionCopy(): Promise<string> {
   });
 
   try {
-    const count = await getContentCount();
+    const count = await getContentCount(undefined);
     return `Open-source directory of ${count}+ Claude AI configurations. Community-driven collection of MCP servers, automation hooks, custom commands, agents, and rules.`;
   } catch (error) {
     // logger.error() normalizes errors internally, so pass raw error
@@ -146,12 +153,15 @@ export interface PartnerHeroStats {
 export async function getPartnerHeroStats(): Promise<PartnerHeroStats> {
   'use cache';
 
-  const { cacheLife, cacheTag } = await import('next/cache');
+  const { cacheLife } = await import('next/cache');
 
   // Configure cache - use 'stable' profile for optimal SEO (6hr stale, 1hr revalidate, 7 days expire)
-  cacheLife('stable'); // 6hr stale, 1hr revalidate, 7 days expire - optimized for SEO
-  cacheTag('marketing');
-  cacheTag('partner-hero-stats');
+  const { cacheTag } = await import('next/cache');
+  cacheLife('long'); // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
+  const tags = generateResourceTags('marketing', undefined, ['partner-hero-stats']);
+  for (const tag of tags) {
+    cacheTag(tag);
+  }
 
   // Create request-scoped child logger to avoid race conditions
   const requestLogger = logger.child({
@@ -160,7 +170,7 @@ export async function getPartnerHeroStats(): Promise<PartnerHeroStats> {
   });
 
   try {
-    const configurationCount = await getContentCount();
+    const configurationCount = (await getContentCount(undefined)) ?? 0;
     const visitorStats = await getVisitorStats();
     return {
       configurationCount,

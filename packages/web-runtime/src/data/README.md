@@ -24,7 +24,7 @@ All data functions use Next.js Cache Components with `cacheLife()` profiles:
 ```ts
 export async function getData() {
   'use cache'; // or 'use cache: private' for user-specific data
-  cacheLife('hours'); // Use named profile from next.config.mjs
+  cacheLife('medium'); // Use named profile from next.config.mjs
   cacheTag('data');
   cacheTag(`data-${id}`); // Include dynamic identifiers in tags
   
@@ -39,49 +39,49 @@ Available `cacheLife` profiles (configured in `next.config.mjs`):
 
 | Profile | Stale | Revalidate | Expire | Use Cases |
 |---------|-------|------------|--------|-----------|
-| `'minutes'` | 5min (300s) | 1min (60s) | 1hr (3600s) | Very frequently changing data (real-time stats, live counters) |
-| `'quarter'` | 15min (900s) | 5min (300s) | 2hr (7200s) | Frequently changing data (newsletter counts, search results, company search) |
-| `'half'` | 30min (1800s) | 10min (600s) | 3hr (10800s) | Moderately changing data (jobs, companies, content lists, announcements) |
-| `'hours'` | 1hr (3600s) | 15min (900s) | 1 day (86400s) | Hourly updates (content detail, search facets, changelog, templates, related content) |
-| `'stable'` | 6hr (21600s) | 1hr (3600s) | 7 days (604800s) | Stable data that changes infrequently (navigation menus, site config) |
-| `'static'` | 1 day (86400s) | 6hr (21600s) | 30 days (2592000s) | Rarely changing data (SEO metadata, paginated content) |
+| `'short'` | 15min (900s) | 5min (300s) | 2hr (7200s) | Frequently changing data (search results, newsletter counts, health status) |
+| `'medium'` | 1hr (3600s) | 15min (900s) | 1 day (86400s) | Moderately changing data (content detail, jobs, companies, content lists, templates) |
+| `'long'` | 1 day (86400s) | 6hr (21600s) | 30 days (2592000s) | Rarely changing data (SEO metadata, paginated content, navigation, site config) |
+| `'userProfile'` | 1min (60s) | 5min (300s) | 30min (1800s) | User-specific data (account pages, user profiles, personalized content) |
 
 ### When to Use Each Profile
 
-**`'minutes'`** - Use for data that changes very frequently (every few minutes):
-- Real-time analytics
-- Live counters or metrics
-- Currently not used in codebase (consider for future real-time features)
-
-**`'quarter'`** - Use for data that changes every 5-15 minutes:
+**`'short'`** - Use for data that changes frequently (every 5-15 minutes):
+- Search results (`getSearchResults`, `getSearchAutocomplete`)
 - Newsletter subscriber counts (`getNewsletterCount`)
-- Company search results (`searchCompanies`)
+- Health status (`getApiHealthFormatted`)
+- Social proof stats (`getSocialProofStats`)
 - Any data that needs near-real-time freshness
 
-**`'half'`** - Use for data that changes every 30 minutes to a few hours:
+**`'medium'`** - Use for data that changes moderately (every 1-6 hours):
+- Content detail pages (`getContentDetail`, `getContentDetailCore`, `getContentAnalytics`)
+- Content templates (`getContentTemplates`)
 - Job listings (`getJobs`, `getJobBySlug`, `getFeaturedJobs`)
 - Company profiles (`getCompanyProfile`, `getCompaniesList`)
 - Content category lists (`getContentByCategory`)
-- Announcements (`getActiveAnnouncement`)
-- Community directory (`getCommunityDirectory`)
-- Marketing stats (`getContentDescription`, `getPartnerHeroStats`)
-
-**`'hours'`** - Use for data that changes hourly or every few hours:
-- Content detail pages (`getContentDetail`, `getContentDetailCore`, `getContentAnalytics`)
-- Search facets (`getSearchFacets`, `getPopularSearches`)
+- Related content (`getRelatedContent`)
+- Search facets (`getSearchFacets`)
 - Changelog entries (`getChangelogOverview`, `getChangelogEntryBySlug`)
 - Form field templates (`getSubmissionFormFields`)
-- Related/similar content (`getRelatedContent`, `getSimilarContent`)
-- Content templates (`getContentTemplates`)
 - Contact commands (`getContactCommands`)
-- Marketing visitor stats (`getVisitorStats`)
 
-**`'stable'`** - Use for data that changes infrequently (daily or weekly):
-- Navigation menus (now uses static config from `@heyclaude/web-runtime/config/navigation`)
+**`'long'`** - Use for data that rarely changes (daily or weekly):
+- SEO metadata (`generatePageMetadata`)
+- Paginated content (`getContentPaginated`)
+- Navigation menus (`getLayoutData`)
 - Site-wide configuration
-- Data that's expensive to compute but rarely changes
+- Homepage data (`getHomepageData`)
+- Marketing stats (`getContentDescription`, `getPartnerHeroStats`)
+- Announcements (`getActiveAnnouncement`)
+- Community directory (`getCommunityDirectory`)
+- Changelog index (`getChangelogLlmsTxt`)
+- Content exports (LLMs.txt, JSON, Markdown)
+- Sitemap data
+- Category configs
+- Company profiles (low traffic)
+- Static pages (terms, privacy, help, etc.)
 
-**`'static'`** - Use for data that rarely changes (weekly or monthly):
+**`'userProfile'`** - Use for user-specific data:
 - SEO metadata (`getPageMetadata`, `getPageMetadataWithSchemas`)
 - Paginated content (`getPaginatedContent`)
 - Data that can be cached for extended periods
@@ -97,11 +97,11 @@ cacheTag(`user-${userId}`);
 ```
 
 This pattern is used for:
-- Account dashboard data (`getAccountDashboard`, `getUserDashboard`)
-- User library/bookmarks (`getUserLibrary`, `getUserBookmarksForCollections`)
-- User settings (`getUserSettings`, `getUserSponsorships`)
-- User activity (`getUserActivitySummary`, `getUserActivityTimeline`)
-- User companies (`getUserCompanies`, `getUserCompanyById`)
+- Account dashboard data (`getUserCompleteData` - returns `account_dashboard` and `user_dashboard`)
+- User library/bookmarks (`getUserCompleteData` - returns `user_library`, `getUserBookmarksForCollections`)
+- User settings (`getUserCompleteData` - returns `user_settings`)
+- User activity (`getUserCompleteData` - returns `activity_summary` and `activity_timeline`)
+- User companies (`getUserCompleteData` - returns `user_dashboard.companies`, `getUserCompanyById`)
 - User jobs (`getUserJobById`)
 - User profiles (`getPublicUserProfile`)
 - Collections (`getCollectionDetail`)
@@ -109,6 +109,112 @@ This pattern is used for:
 - Bookmark/follow status checks (`isBookmarked`, `isFollowing`, `isBookmarkedBatch`, `isFollowingBatch`)
 
 **Why custom values?** User-specific data needs shorter cache times (1min stale, 5min revalidate, 30min expire) to ensure users see their own updates quickly while still benefiting from cross-request caching.
+
+**Note:** For user-specific data, you can also use the `userProfile` profile:
+```ts
+'use cache: private';
+cacheLife('userProfile'); // 1min stale, 5min revalidate, 30min expire
+cacheTag(`user-${userId}`);
+```
+
+## Factory Pattern
+
+All data fetching functions now use a unified factory pattern for consistency, reduced boilerplate, and automatic error handling.
+
+### `createCachedDataFunction` Factory
+
+The `createCachedDataFunction` factory eliminates repetitive caching, logging, error handling, and validation logic:
+
+```ts
+import { createCachedDataFunction, generateContentTags } from '../cached-data-factory.ts';
+
+export const getContentByCategory = createCachedDataFunction<content_category, EnrichedContentItem[]>({
+  serviceKey: 'content',
+  methodName: 'getEnrichedContentList',
+  cacheMode: 'public',
+  cacheLife: 'long',
+  cacheTags: (category) => generateContentTags(category),
+  module: 'data/content/index',
+  operation: 'getContentByCategory',
+  transformArgs: (category) => ({
+    p_category: category,
+    p_limit: QUERY_LIMITS.content.default,
+    p_offset: 0,
+  }),
+  onError: () => [], // Return empty array on error
+  logContext: (category, result) => ({
+    category,
+    count: Array.isArray(result) ? result.length : 0,
+  }),
+});
+```
+
+**Benefits:**
+- ✅ Automatic caching with `'use cache'` or `'use cache: private'`
+- ✅ Automatic `cacheLife()` and `cacheTag()` configuration
+- ✅ Automatic error handling and logging
+- ✅ Type-safe service method calls
+- ✅ Consistent cache tag generation
+- ✅ Request-scoped logging with proper context
+
+**When to Use:**
+- ✅ For all new data fetching functions
+- ✅ When migrating existing functions
+- ✅ For simple RPC/service method calls
+- ✅ When you need consistent caching and error handling
+
+**When NOT to Use:**
+- ❌ For complex aggregation functions (e.g., `getTrendingPageData`, `getContentBatchBySlugs`)
+- ❌ For functions that read from local config files (e.g., `getPartnerPricing`)
+- ❌ For functions with complex conditional logic that doesn't fit the factory pattern
+
+### Service Factory (`getService`)
+
+All service instantiation now uses the `getService()` factory instead of direct `new Service()` calls:
+
+```ts
+import { getService } from '../service-factory.ts';
+
+// ✅ CORRECT: Use service factory
+const service = await getService('content');
+const result = await service.getEnrichedContentList({ p_category: 'agents' });
+
+// ❌ WRONG: Direct instantiation
+const { ContentService } = await import('@heyclaude/data-layer');
+const service = new ContentService();
+```
+
+**Benefits:**
+- ✅ Singleton pattern (services are stateless, so singletons are safe)
+- ✅ Lazy loading (services only loaded when needed)
+- ✅ Type-safe service keys
+- ✅ Consistent service access pattern
+- ✅ Automatic service registry
+
+**Available Services:**
+- `'account'` - AccountService
+- `'changelog'` - ChangelogService
+- `'companies'` - CompaniesService
+- `'content'` - ContentService
+- `'jobs'` - JobsService
+- `'misc'` - MiscService (consolidated: SEO, Community, Quiz, Email methods)
+- `'newsletter'` - NewsletterService
+- `'search'` - SearchService
+- `'trending'` - TrendingService
+
+### Cache Tag Helpers
+
+Use centralized cache tag helpers for consistency:
+
+```ts
+import { generateContentTags, generateResourceTags } from '../cached-data-factory.ts';
+
+// For content
+const tags = generateContentTags(category, slug, ['additional', 'tags']);
+
+// For other resources
+const tags = generateResourceTags('jobs', slug, ['additional', 'tags']);
+```
 
 ## Migration Summary
 

@@ -14,10 +14,9 @@ import {
   CardHeader,
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Status, StatusIndicator, StatusLabel } from '@/src/components/ui/status';
-import { spaceY, gap, size, iconSizeRect } from "@heyclaude/web-runtime/design-system";
 
 interface ApiHealthData {
   checks?: Record<string, unknown>;
@@ -46,6 +45,12 @@ function mapApiStatusToComponentStatus(
   }
 }
 
+// Optimized polling interval: 90 seconds (reduced from 30s)
+// Status doesn't change frequently, so longer interval is acceptable
+const POLL_INTERVAL_MS = 90_000; // 90 seconds
+const INITIAL_POLL_INTERVAL_MS = 30_000; // 30 seconds for first poll after errors
+const MAX_POLL_INTERVAL_MS = 300_000; // 5 minutes max (exponential backoff cap)
+
 export function StatusPageContent() {
   const [healthData, setHealthData] = useState<ApiHealthData | null>(null);
   const {
@@ -54,40 +59,76 @@ export function StatusPageContent() {
     value: isLoading,
   } = useBoolean(true);
   const [error, setError] = useState<null | string>(null);
+  const [isTabVisible, setIsTabVisible] = useState(true);
+  const [currentPollInterval, setCurrentPollInterval] = useState(POLL_INTERVAL_MS);
+  const consecutiveErrorsRef = useRef(0);
 
-  const fetchStatus = async () => {
+  const fetchStatus = useCallback(async () => {
     try {
       setIsLoadingTrue();
       const response = await fetch('/api/status');
       const data = await response.json();
       setHealthData(data);
       setError(null);
+      // Reset poll interval and error count on success
+      consecutiveErrorsRef.current = 0;
+      setCurrentPollInterval(POLL_INTERVAL_MS);
     } catch (error_) {
-      setError(error_ instanceof Error ? error_.message : 'Failed to fetch status');
+      const errorMessage = error_ instanceof Error ? error_.message : 'Failed to fetch status';
+      setError(errorMessage);
       setHealthData({ status: 'unhealthy' });
+
+      // Exponential backoff on errors
+      consecutiveErrorsRef.current += 1;
+      const backoffInterval = Math.min(
+        INITIAL_POLL_INTERVAL_MS * Math.pow(2, consecutiveErrorsRef.current - 1),
+        MAX_POLL_INTERVAL_MS
+      );
+      setCurrentPollInterval(backoffInterval);
     } finally {
       setIsLoadingFalse();
     }
-  };
-
-  useEffect(() => {
-    fetchStatus();
   }, [setIsLoadingTrue, setIsLoadingFalse]);
 
-  // Refresh every 30 seconds
-  useInterval(() => {
+  // Initial fetch
+  useEffect(() => {
     fetchStatus();
-  }, 30_000);
+  }, [fetchStatus]);
+
+  // Visibility API: Pause polling when tab is hidden
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      const isVisible = !document.hidden;
+      setIsTabVisible(isVisible);
+      // Fetch immediately when tab becomes visible
+      if (isVisible) {
+        fetchStatus();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [fetchStatus]);
+
+  // Optimized polling: 90 seconds (was 30s), pauses when tab is hidden
+  useInterval(
+    () => {
+      fetchStatus();
+    },
+    isTabVisible ? currentPollInterval : null
+  );
 
   if (isLoading) {
     return (
-      <div className={`${spaceY.comfortable}`}>
+      <div className="space-y-4">
         <Card>
           <CardHeader>
-            <div className={`bg-muted ${iconSizeRect['6x32']} animate-pulse rounded`} />
+            <div className="bg-muted h-6 w-32 animate-pulse rounded" />
           </CardHeader>
           <CardContent>
-            <div className={`bg-muted ${iconSizeRect['4x48']} animate-pulse rounded`} />
+            <div className="bg-muted h-4 w-48 animate-pulse rounded" />
           </CardContent>
         </Card>
       </div>
@@ -97,7 +138,7 @@ export function StatusPageContent() {
   const status = healthData?.status ? mapApiStatusToComponentStatus(healthData.status) : 'offline';
 
   return (
-    <div className={`${spaceY.relaxed}`}>
+    <div className="space-y-6">
       {/* Main Status Card */}
       <Card>
         <CardHeader>
@@ -105,7 +146,7 @@ export function StatusPageContent() {
           <CardDescription>Current health status of the API</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className={`flex items-center ${gap.default}`}>
+          <div className="flex items-center gap-3">
             <Status status={status}>
               <StatusIndicator />
               <StatusLabel>
@@ -114,21 +155,21 @@ export function StatusPageContent() {
                   : 'Unknown'}
               </StatusLabel>
             </Status>
-            {error ? <p className={`text-destructive ${size.sm}`}>{error}</p> : null}
+            {error ? <p className="text-destructive text-sm">{error}</p> : null}
           </div>
         </CardContent>
       </Card>
 
       {/* Additional Information */}
       {healthData ? (
-        <div className={`grid ${gap.default} md:grid-cols-2`}>
+        <div className="grid gap-3 md:grid-cols-2">
           {healthData.database ? (
             <Card>
               <CardHeader>
-                <CardTitle className={`${size.lg}`}>Database</CardTitle>
+                <CardTitle className="text-lg">Database</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className={`text-muted-foreground ${size.sm} capitalize`}>{healthData.database}</p>
+                <p className="text-muted-foreground text-sm capitalize">{healthData.database}</p>
               </CardContent>
             </Card>
           ) : null}
@@ -136,10 +177,10 @@ export function StatusPageContent() {
           {healthData.version ? (
             <Card>
               <CardHeader>
-                <CardTitle className={`${size.lg}`}>Version</CardTitle>
+                <CardTitle className="text-lg">Version</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className={`text-muted-foreground font-mono ${size.sm}`}>{healthData.version}</p>
+                <p className="text-muted-foreground font-mono text-sm">{healthData.version}</p>
               </CardContent>
             </Card>
           ) : null}
@@ -147,10 +188,10 @@ export function StatusPageContent() {
           {healthData.timestamp ? (
             <Card>
               <CardHeader>
-                <CardTitle className={`${size.lg}`}>Last Updated</CardTitle>
+                <CardTitle className="text-lg">Last Updated</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className={`text-muted-foreground ${size.sm}`}>
+                <p className="text-muted-foreground text-sm">
                   {new Date(healthData.timestamp).toLocaleString()}
                 </p>
               </CardContent>

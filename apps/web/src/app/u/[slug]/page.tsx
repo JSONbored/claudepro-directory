@@ -4,8 +4,8 @@
  */
 
 import { ContentCategory } from '@heyclaude/data-layer/prisma';
-import type { content_category } from '@heyclaude/data-layer/prisma';
-import type { GetUserProfileReturns } from '@heyclaude/database-types/postgres-types';
+import { type content_category } from '@heyclaude/data-layer/prisma';
+import { type GetUserProfileReturns } from '@heyclaude/database-types/postgres-types';
 import { sanitizeSlug } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
@@ -29,17 +29,13 @@ import { ProfileStatsCard } from '@/src/components/features/account/profile-stat
 import { ProfileTabs } from '@/src/components/features/account/profile-tabs';
 
 import Loading from './loading';
-import { cluster, paddingX, marginX, paddingTop, marginTop, paddingY, spaceY, marginBottom, iconSize, gap } from "@heyclaude/web-runtime/design-system";
 
 // Use enum values directly from Prisma enum objects
 const CONTENT_CATEGORY_VALUES = Object.values(ContentCategory) as readonly content_category[];
 
-function isContentCategory(
-  value: unknown
-): value is content_category {
+function isContentCategory(value: unknown): value is content_category {
   return (
-    typeof value === 'string' &&
-    (CONTENT_CATEGORY_VALUES as readonly string[]).includes(value)
+    typeof value === 'string' && (CONTENT_CATEGORY_VALUES as readonly string[]).includes(value)
   );
 }
 
@@ -182,7 +178,7 @@ export async function generateMetadata({ params }: UserProfilePageProperties): P
  */
 export default async function UserProfilePage({ params }: UserProfilePageProperties) {
   'use cache';
-  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
+  cacheLife('long'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
   // Create request-scoped child logger
   const reqLogger = logger.child({
@@ -284,35 +280,35 @@ async function UserProfilePageContent({
   const { follower_count, following_count } = stats ?? {};
 
   return (
-    <div className={`bg-background min-h-screen`}>
+    <div className="bg-background min-h-screen">
       {/* Hero/Profile Header */}
-      <section className={`relative`}>
-        <div className={`container ${marginX.auto} ${paddingX.default}`}>
-          <div className={`flex items-start justify-between ${paddingTop.default}`}>
-            <div className={`flex items-start ${gap.default}`}>
+      <section className="relative">
+        <div className="container mx-auto px-4">
+          <div className="flex items-start justify-between pt-4">
+            <div className="flex items-start gap-3">
               {profile?.image ? (
                 <Image
                   alt={`${sanitizeDisplayText(profile.name ?? slug, slug)}'s profile picture`}
-                  className={`border-background h-24 w-24 rounded-full border-4 object-cover`}
+                  className="border-background h-24 w-24 rounded-full border-4 object-cover"
                   height={96}
                   priority
                   src={profile.image}
                   width={96}
                 />
               ) : (
-                <div className={`border-background bg-accent flex h-24 w-24 items-center justify-center rounded-full border-4 text-2xl font-bold`}>
+                <div className="border-background bg-accent flex h-24 w-24 items-center justify-center rounded-full border-4 text-2xl font-bold">
                   {(profile?.name ?? slug).charAt(0).toUpperCase()}
                 </div>
               )}
 
-              <div className={`${marginTop.default}`}>
+              <div className="mt-4">
                 <h1 className="text-3xl font-bold">
                   {sanitizeDisplayText(profile?.name ?? slug, slug)}
                 </h1>
                 {(() => {
                   const sanitizedBio = profile?.bio ? sanitizeDisplayText(profile.bio, '') : '';
                   return sanitizedBio ? (
-                    <p className={`${marginTop.compact} max-w-2xl text-sm`}>{sanitizedBio}</p>
+                    <p className="mt-2 max-w-2xl text-sm">{sanitizedBio}</p>
                   ) : null;
                 })()}
 
@@ -321,14 +317,10 @@ async function UserProfilePageContent({
                   followingCount={following_count ?? 0}
                 />
                 {profile?.website ? (
-                  <div className={`${marginTop.compact} flex items-center ${gap.default} text-sm`}>
+                  <div className="mt-2 flex items-center gap-3 text-sm">
                     <span>•</span>
-                    <NavLink
-                      className={cluster.tight}
-                      external
-                      href={profile.website}
-                    >
-                      <Globe className={`${iconSize.sm}`} />
+                    <NavLink external className="flex items-center gap-1" href={profile.website}>
+                      <Globe className="h-4 w-4" />
                       Website
                     </NavLink>
                   </div>
@@ -352,10 +344,10 @@ async function UserProfilePageContent({
       </section>
 
       {/* Content */}
-      <section className={`container ${marginX.auto} ${paddingX.default} ${paddingY.section}`}>
-        <div className={`grid grid-cols-1 ${gap.comfortable} md:grid-cols-3`}>
+      <section className="container mx-auto px-4 py-12">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {/* Stats sidebar */}
-          <div className={`${spaceY.comfortable}`}>
+          <div className="space-y-4">
             {/* Quick Stats Card */}
             <ProfileStatsCard
               stats={[
@@ -406,7 +398,7 @@ async function UserProfilePageContent({
             <ProfileTabs
               collections={
                 <div>
-                  <h2 className={`${marginBottom.default} text-2xl font-bold`}>Public Collections</h2>
+                  <h2 className="mb-4 text-2xl font-bold">Public Collections</h2>
                   <ProfileCollectionsSection
                     collections={collections}
                     getSafeCollectionUrl={getSafeCollectionUrl}
@@ -416,7 +408,7 @@ async function UserProfilePageContent({
               }
               contributions={
                 <div>
-                  <h2 className={`${marginBottom.default} text-2xl font-bold`}>Contributions</h2>
+                  <h2 className="mb-4 text-2xl font-bold">Contributions</h2>
                   <ProfileContributionsSection
                     contributions={contributions}
                     getSafeContentUrl={getSafeContentUrl}
@@ -424,9 +416,9 @@ async function UserProfilePageContent({
                 </div>
               }
               overview={
-                <div className={`${spaceY.relaxed}`}>
+                <div className="space-y-6">
                   <div>
-                    <h2 className={`${marginBottom.default} text-2xl font-bold`}>Public Collections</h2>
+                    <h2 className="mb-4 text-2xl font-bold">Public Collections</h2>
                     <ProfileCollectionsSection
                       collections={collections}
                       getSafeCollectionUrl={getSafeCollectionUrl}
@@ -435,7 +427,7 @@ async function UserProfilePageContent({
                   </div>
                   {contributions && contributions.length > 0 ? (
                     <div>
-                      <h2 className={`${marginBottom.default} text-2xl font-bold`}>Contributions</h2>
+                      <h2 className="mb-4 text-2xl font-bold">Contributions</h2>
                       <ProfileContributionsSection
                         contributions={contributions}
                         getSafeContentUrl={getSafeContentUrl}

@@ -3,22 +3,17 @@
  * Server component uses getTrendingPageData (cached RPC). Data API exposes the same payload for external consumers.
  */
 
-import type { content_category } from '@heyclaude/data-layer/prisma';
+import { type content_category } from '@heyclaude/data-layer/prisma';
 import { ContentCategory } from '@heyclaude/data-layer/prisma';
-import type {
-  GetPopularContentReturns,
-  GetRecentContentReturns,
-  GetTrendingMetricsWithContentReturns,
-} from '@heyclaude/database-types/postgres-types';
-import { isValidCategory } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getTrendingPageData } from '@heyclaude/web-runtime/data';
 import { Clock, Star, TrendingUp, Users } from '@heyclaude/web-runtime/icons';
 import { logger } from '@heyclaude/web-runtime/logging/server';
-import { type PagePropsWithSearchParams } from '@heyclaude/web-runtime/types/app.schema';
 import {
-  type DisplayableContent,
-  type HomepageContentItem,
-} from '@heyclaude/web-runtime/types/component.types';
+  mapPopularContent,
+  mapRecentContent,
+  mapTrendingMetrics,
+} from '@heyclaude/web-runtime/server';
+import { type PagePropsWithSearchParams } from '@heyclaude/web-runtime/types/app.schema';
 import {
   Tooltip,
   TooltipContent,
@@ -26,13 +21,11 @@ import {
   TooltipTrigger,
   UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
-import { size, muted, marginBottom, leading, paddingX, paddingY, marginX, marginRight } from '@heyclaude/web-runtime/design-system';
 import { type Metadata } from 'next';
 import { Suspense } from 'react';
 
 import { LazySection } from '@/src/components/core/infra/scroll-animated-section';
 import { TrendingContent } from '@/src/components/core/shared/trending-content';
-import { wrap, gap } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Trending page uses connection() deferral with Suspense streaming to run non-deterministic operations at request time.
@@ -63,6 +56,8 @@ export async function generateMetadata(): Promise<Metadata> {
  *
  * @param props.searchParams - Search parameters from the request; supports `category` (string or single-element array)
  *   and `limit` (number, defaults to 12, clamped to 100).
+ * @param root0
+ * @param root0.searchParams
  * @returns The React element for the Trending page containing header, content sections, and newsletter CTA.
  *
  * @see getTrendingPageData
@@ -86,7 +81,7 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
 
   return (
     <Suspense
-      fallback={<div className={`container ${marginX.auto} ${paddingX.default} ${paddingY.relaxed}`}>Loading trending content...</div>}
+      fallback={<div className="container mx-auto px-4 py-8">Loading trending content...</div>}
     >
       <TrendingPageContent
         reqLogger={reqLogger}
@@ -104,7 +99,10 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
  * trending data API, and renders `TrendingContent` with mapped display items.
  *
  * @param props.reqLogger - A request-scoped logger used for structured warnings and info about parameter validation and data fetching.
+ * @param root0
+ * @param root0.reqLogger
  * @param props.searchParams - Promise that resolves to the route's search parameters (may include `category` and `limit`).
+ * @param root0.searchParams
  * @returns A React element that displays the trending configurations page (header, badges, and content sections).
  *
  * @see getTrendingPageData
@@ -121,20 +119,17 @@ async function TrendingPageContent({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const rawParameters = await searchParams;
-  const categoryParameter = (() => {
-    const category = rawParameters['category'];
-    if (Array.isArray(category)) {
-      return category.length > 0 ? category[0] : undefined;
-    }
-    return category;
-  })();
-  // Parse and validate limit parameter - guard against negative/invalid values
-  const rawLimit = Number(rawParameters['limit']);
-  const limit = Number.isFinite(rawLimit) && rawLimit >= 1 ? Math.min(rawLimit, 100) : 12;
-  const normalizedCategory =
-    categoryParameter !== undefined && isValidCategory(categoryParameter)
-      ? categoryParameter
-      : null;
+
+  // Use shared query parameter helpers for consistency
+  const { parseCategoryParam, parseLimitParam } = await import('@heyclaude/web-runtime/server');
+  const categoryParameter = rawParameters['category'];
+  const normalizedCategory = parseCategoryParam(categoryParameter);
+  const limit = parseLimitParam(
+    typeof rawParameters['limit'] === 'string' ? rawParameters['limit'] : undefined,
+    1,
+    100,
+    12
+  );
 
   // Section: Category Validation
   if (categoryParameter && !normalizedCategory) {
@@ -161,43 +156,49 @@ async function TrendingPageContent({
     'Trending page accessed'
   );
 
-  const trendingDisplay = mapTrendingMetrics(pageData.trending, normalizedCategory);
-  const popularDisplay = mapPopularContent(pageData.popular, normalizedCategory);
-  const recentDisplay = mapRecentContent(pageData.recent, normalizedCategory);
+  const trendingDisplay = mapTrendingMetrics(
+    pageData.trending,
+    normalizedCategory ?? DEFAULT_CATEGORY
+  );
+  const popularDisplay = mapPopularContent(
+    pageData.popular,
+    normalizedCategory ?? DEFAULT_CATEGORY
+  );
+  const recentDisplay = mapRecentContent(pageData.recent, normalizedCategory ?? DEFAULT_CATEGORY);
 
   const pageTitleId = 'trending-page-title';
 
   return (
     <div className="bg-background min-h-screen">
-      <section aria-labelledby={pageTitleId} className={`relative overflow-hidden ${paddingX.default} ${paddingY.default}`}>
-        <div className={`container ${marginX.auto} text-center`}>
-          <div className={`${marginX.auto} max-w-3xl`}>
+      <section aria-labelledby={pageTitleId} className="relative overflow-hidden px-4 py-4">
+        <div className="container mx-auto text-center">
+          <div className="mx-auto max-w-3xl">
             <UnifiedBadge
-              className={`border-accent/20 bg-accent/5 text-accent ${marginBottom.comfortable}`}
+              className="border-accent/20 bg-accent/5 text-accent mb-6"
               style="outline"
               variant="base"
             >
-              <TrendingUp aria-hidden="true" className={`text-accent ${marginRight.micro} h-3 w-3`} />
+              <TrendingUp aria-hidden="true" className="text-accent mr-0.5 h-3 w-3" />
               Trending
             </UnifiedBadge>
 
-            <h1 className={`${marginBottom.comfortable} text-4xl font-bold md:text-6xl`} id={pageTitleId}>
+            <h1 className="mb-6 text-4xl font-bold md:text-6xl" id={pageTitleId}>
               Trending Configurations
             </h1>
 
-            <p className={`${size.xl} ${muted.default} ${marginBottom.relaxed} ${leading.relaxed}`}>
+            <p className="text-muted-foreground mb-8 text-xl leading-relaxed">
               Discover the most popular and trending Claude configurations in our community. Stay up
               to date with what developers are using and loving.
             </p>
 
-            <ul className={`flex ${wrap} ${gap.compact} list-none justify-center`}>
+            <ul className="flex list-none flex-wrap justify-center gap-2">
               <li>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div>
                         <UnifiedBadge style="secondary" variant="base">
-                          <Clock aria-hidden="true" className={`${marginRight.micro} h-3 w-3`} />
+                          <Clock aria-hidden="true" className="mr-0.5 h-3 w-3" />
                           Real-time updates
                         </UnifiedBadge>
                       </div>
@@ -217,7 +218,7 @@ async function TrendingPageContent({
                     <TooltipTrigger asChild>
                       <div>
                         <UnifiedBadge style="secondary" variant="base">
-                          <Star aria-hidden="true" className={`${marginRight.micro} h-3 w-3`} />
+                          <Star aria-hidden="true" className="mr-0.5 h-3 w-3" />
                           Based on views
                         </UnifiedBadge>
                       </div>
@@ -237,7 +238,7 @@ async function TrendingPageContent({
                     <TooltipTrigger asChild>
                       <div>
                         <UnifiedBadge style="secondary" variant="base">
-                          <Users aria-hidden="true" className={`${marginRight.micro} h-3 w-3`} />
+                          <Users aria-hidden="true" className="mr-0.5 h-3 w-3" />
                           {trendingDisplay.length} total configs
                         </UnifiedBadge>
                       </div>
@@ -256,10 +257,7 @@ async function TrendingPageContent({
         </div>
       </section>
 
-      <section
-        aria-label="Trending configurations content"
-        className={`container ${marginX.auto} ${paddingX.default} ${paddingY.default}`}
-      >
+      <section aria-label="Trending configurations content" className="container mx-auto px-4 py-4">
         <Suspense fallback={null}>
           <LazySection delay={0.1} variant="slide-up">
             <TrendingContent
@@ -274,143 +272,7 @@ async function TrendingPageContent({
   );
 }
 
+// OPTIMIZATION: Use shared content transformation utilities from @heyclaude/web-runtime/server
+// Local implementations removed - using mapTrendingMetrics, mapPopularContent, mapRecentContent, toHomepageContentItem
+
 const DEFAULT_CATEGORY: content_category = ContentCategory.agents;
-
-/**
- * Maps trending metrics data to displayable content items.
- *
- * @param rows - Array of trending metrics with content data.
- * @param category - Optional category filter (null for all categories).
- * @returns Array of displayable content items.
- */
-function mapTrendingMetrics(
-  rows: GetTrendingMetricsWithContentReturns,
-  category: content_category | null
-): DisplayableContent[] {
-  if (rows.length === 0) return [];
-  return rows.map((row, index) => {
-    const resolvedCategory = category ?? row.category;
-    const validCategory = isValidCategory(resolvedCategory) ? resolvedCategory : DEFAULT_CATEGORY;
-    return toHomepageContentItem({
-      author: row.author ?? 'Community',
-      category: validCategory,
-      copyCount: row.copies_total ?? 0,
-      description: row.description ?? '',
-      featuredRank: index + 1,
-      featuredScore: row.trending_score ?? null,
-      slug: row.slug ?? '',
-      source: row.source ?? null,
-      tags: row.tags ?? [],
-      title: row.title ?? null,
-      viewCount: row.views_total ?? 0,
-    });
-  });
-}
-
-/**
- * Maps popular content data to displayable content items.
- *
- * @param rows - Array of popular content data.
- * @param category - Optional category filter (null for all categories).
- * @returns Array of displayable content items.
- */
-function mapPopularContent(
-  rows: GetPopularContentReturns,
-  category: content_category | null
-): DisplayableContent[] {
-  if (rows.length === 0) return [];
-  return rows.map((row, index) => {
-    const resolvedCategory = category ?? row.category;
-    const validCategory = isValidCategory(resolvedCategory) ? resolvedCategory : DEFAULT_CATEGORY;
-    return toHomepageContentItem({
-      author: row.author ?? 'Community',
-      category: validCategory,
-      copyCount: row.copy_count ?? 0,
-      description: row.description ?? '',
-      featuredRank: index + 1,
-      featuredScore: row.popularity_score ?? null,
-      slug: row.slug ?? '',
-      tags: row.tags ?? [],
-      title: row.title ?? null,
-      viewCount: row.view_count ?? 0,
-    });
-  });
-}
-
-/**
- * Maps recent content data to displayable content items.
- *
- * @param rows - Array of recent content data.
- * @param category - Optional category filter (null for all categories).
- * @returns Array of displayable content items.
- */
-function mapRecentContent(
-  rows: GetRecentContentReturns,
-  category: content_category | null
-): DisplayableContent[] {
-  if (rows.length === 0) return [];
-  return rows.map((row, index) => {
-    const resolvedCategory = category ?? row.category;
-    const validCategory = isValidCategory(resolvedCategory) ? resolvedCategory : DEFAULT_CATEGORY;
-    return toHomepageContentItem({
-      author: row.author ?? 'Community',
-      category: validCategory,
-      created_at: row.created_at ?? new Date().toISOString(),
-      date_added: row.created_at ?? new Date().toISOString(),
-      description: row.description ?? '',
-      featuredRank: index + 1,
-      slug: row.slug ?? '',
-      tags: row.tags ?? [],
-      title: row.title ?? null,
-    });
-  });
-}
-
-/**
- * Normalizes a raw content record into a HomepageContentItem suitable for display.
- *
- * Optional properties are normalized with sensible defaults:
- * - `title` defaults to `slug`
- * - `description` defaults to empty string
- * - `author` defaults to `"Community"`
- * - `tags` defaults to `[]`
- * - `source` defaults to `"community"`
- * - `created_at`/`date_added` default to current ISO timestamp when both are missing
- * - `viewCount`/`copyCount` default to `0`
- * - `featured` flag is set when `featuredScore` is provided
- *
- * @param input - Raw content fields with optional properties.
- * @returns The normalized HomepageContentItem with canonical field names and defaults applied.
- */
-function toHomepageContentItem(input: {
-  author?: null | string;
-  category: content_category;
-  copyCount?: null | number;
-  created_at?: null | string;
-  date_added?: null | string;
-  description?: null | string;
-  featuredRank?: null | number;
-  featuredScore?: null | number;
-  slug: string;
-  source?: null | string;
-  tags?: null | string[];
-  title?: null | string;
-  viewCount?: null | number;
-}): HomepageContentItem {
-  const timestamp = input.created_at ?? input.date_added ?? new Date().toISOString();
-
-  return {
-    author: input.author ?? 'Community',
-    category: input.category,
-    copy_count: input.copyCount ?? 0,
-    created_at: input.created_at ?? timestamp,
-    date_added: input.date_added ?? timestamp,
-    description: input.description ?? '',
-    featured: input.featuredScore != null && typeof input.featuredScore === 'number',
-    slug: input.slug,
-    source: input.source ?? 'community',
-    tags: Array.isArray(input.tags) ? input.tags : [],
-    title: input.title ?? input.slug,
-    view_count: input.viewCount ?? 0,
-  };
-}

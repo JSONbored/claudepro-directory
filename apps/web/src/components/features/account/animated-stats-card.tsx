@@ -10,7 +10,7 @@
  */
 
 import { motion } from 'motion/react';
-import { MICROINTERACTIONS, SPRING, cluster, marginTop, iconSize, muted, size } from '@heyclaude/web-runtime/design-system';
+import { MICROINTERACTIONS, SPRING } from '@heyclaude/web-runtime/design-system';
 import {
   Card,
   CardContent,
@@ -95,10 +95,10 @@ export function AnimatedStatsCard({
         </CardHeader>
         <CardContent>
           {customContent ? (
-            <div className={`${marginTop.compact}`}>{customContent}</div>
+            <div className="mt-2">{customContent}</div>
           ) : (
-            <div className={cluster.compact}>
-              {Icon && <Icon className={`text-primary ${iconSize.md}`} />}
+            <div className="flex items-center gap-2">
+              {Icon && <Icon className="h-5 w-5 text-primary" />}
               <span className="text-3xl font-bold">
                 <NumberTicker
                   value={value}
@@ -109,7 +109,7 @@ export function AnimatedStatsCard({
               </span>
             </div>
           )}
-          <p className={cn(muted.default, marginTop.compact, size.xs)}>{description}</p>
+          <p className={cn('mt-2 text-muted-foreground text-xs')}>{description}</p>
         </CardContent>
       </Card>
     </motion.div>

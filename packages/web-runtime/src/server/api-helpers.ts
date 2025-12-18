@@ -5,12 +5,8 @@
  * Do not add 'use server' directive - these are used in route handlers.
  */
 
-import { normalizeError } from '@heyclaude/shared-runtime';
 import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
-import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-
-import { logger, toLogContextValue, type LogContext } from '../logging/server.ts';
 
 export const publicCorsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -64,6 +60,11 @@ export type CachePresetKey = keyof typeof DEFAULT_CACHE_PRESETS;
 /**
  * Build cache headers for API responses with preset configurations.
  *
+ * @deprecated This function is no longer needed for API routes using Next.js Cache Components.
+ * Next.js Cache Components automatically set HTTP cache headers based on `cacheLife()` profiles.
+ * This function is kept for edge cases or non-Cache Component routes, but should not be used
+ * in API routes that use `'use cache'` + `cacheLife()`.
+ *
  * In development mode, adds `X-Cache-Debug` header showing the applied
  * cache configuration for easier debugging.
  *
@@ -73,11 +74,12 @@ export type CachePresetKey = keyof typeof DEFAULT_CACHE_PRESETS;
  *
  * @example
  * ```ts
- * // Use preset
- * const headers = buildCacheHeaders('search');
- *
- * // With overrides
- * const headers = buildCacheHeaders('search', { ttl: 60 });
+ * // DEPRECATED: Don't use in API routes with Cache Components
+ * // const headers = buildCacheHeaders('search');
+ * 
+ * // Instead, use Cache Components:
+ * // 'use cache';
+ * // cacheLife('short');
  * ```
  */
 export function buildCacheHeaders(
@@ -222,145 +224,91 @@ export function unauthorizedResponse(
   );
 }
 
+/**
+ * Creates a standardized text/plain response (for LLMs.txt, Markdown, etc.)
+ * 
+ * @param content - Text content to return
+ * @param status - HTTP status code (default: 200)
+ * @param corsHeaders - CORS headers to include
+ * @param additionalHeaders - Additional headers (e.g., X-Generated-By)
+ * @returns NextResponse with text/plain content type
+ */
+export function textResponse(
+  content: string,
+  status: number = 200,
+  corsHeaders: Record<string, string> = getOnlyCorsHeaders,
+  additionalHeaders?: Record<string, string>
+): NextResponse {
+  return new NextResponse(content, {
+    status,
+    headers: {
+      'Content-Type': 'text/plain; charset=utf-8',
+      ...buildSecurityHeaders(),
+      ...corsHeaders,
+      ...additionalHeaders,
+    },
+  });
+}
+
+/**
+ * Creates a standardized XML response (for RSS, Atom, Sitemap, etc.)
+ * 
+ * @param xml - XML content to return
+ * @param contentType - Content type (e.g., 'application/rss+xml; charset=utf-8')
+ * @param status - HTTP status code (default: 200)
+ * @param corsHeaders - CORS headers to include
+ * @param additionalHeaders - Additional headers (e.g., X-Generated-By)
+ * @returns NextResponse with XML content type
+ */
+export function xmlResponse(
+  xml: string,
+  contentType: string = 'application/xml; charset=utf-8',
+  status: number = 200,
+  corsHeaders: Record<string, string> = getOnlyCorsHeaders,
+  additionalHeaders?: Record<string, string>
+): NextResponse {
+  return new NextResponse(xml, {
+    status,
+    headers: {
+      'Content-Type': contentType,
+      ...buildSecurityHeaders(),
+      ...corsHeaders,
+      ...additionalHeaders,
+    },
+  });
+}
+
+/**
+ * Creates a standardized Markdown response with download headers
+ * 
+ * @param markdown - Markdown content to return
+ * @param filename - Filename for download (e.g., 'content.md')
+ * @param status - HTTP status code (default: 200)
+ * @param corsHeaders - CORS headers to include
+ * @param additionalHeaders - Additional headers
+ * @returns NextResponse with text/markdown content type and download headers
+ */
+export function markdownResponse(
+  markdown: string,
+  filename: string,
+  status: number = 200,
+  corsHeaders: Record<string, string> = getWithAcceptCorsHeaders,
+  additionalHeaders?: Record<string, string>
+): NextResponse {
+  return new NextResponse(markdown, {
+    status,
+    headers: {
+      'Content-Type': 'text/markdown; charset=utf-8',
+      'Content-Disposition': `attachment; filename="${filename}"`,
+      ...buildSecurityHeaders(),
+      ...corsHeaders,
+      ...additionalHeaders,
+    },
+  });
+}
+
 // =============================================================================
 // API Route Handler Factory
 // =============================================================================
-
-/**
- * Context object provided to API route handlers
- */
-export interface ApiRouteContext {
-  /** Scoped logger with request context */
-  logger: ReturnType<typeof logger.child>;
-  /** The original Next.js request */
-  request: NextRequest;
-  /** URL parsed from the request */
-  url: URL;
-  /** HTTP method (GET, POST, etc.) */
-  method: string;
-  /** Create an error response with proper logging */
-  errorResponse: (error: unknown, additionalContext?: Record<string, unknown>) => NextResponse;
-}
-
-/**
- * Configuration for creating an API route handler
- */
-export interface ApiRouteConfig {
-  /** Operation name for logging (e.g., 'SearchAPI', 'FacetsAPI') */
-  operation: string;
-  /** Route path for logging (e.g., '/api/search') */
-  route: string;
-  /** CORS headers to use (default: getOnlyCorsHeaders) */
-  cors?: Record<string, string>;
-}
-
-/**
- * Handler function signature for API routes
- */
-export type ApiRouteHandler = (ctx: ApiRouteContext) => Promise<NextResponse>;
-
-/**
- * Creates a standardized API route handler with automatic:
- * - Scoped logging
- * - Error handling and response formatting
- * - CORS headers
- *
- * This factory eliminates ~15-20 lines of boilerplate per route handler.
- *
- * @param config - Route configuration
- * @param handler - The route handler function
- * @returns A Next.js route handler function
- *
- * @example
- * ```ts
- * // Before (verbose)
- * export async function GET(request: NextRequest) {
- *   const reqLogger = logger.child({
- *     operation: 'SearchAPI',
- *     route: '/api/search',
- *     method: 'GET',
- *   });
- *   try {
- *     // ... handler logic ...
- *   } catch (error) {
- *     return createErrorResponse(error, { ... });
- *   }
- * }
- *
- * // After (concise)
- * export const GET = createApiHandler(
- *   { operation: 'SearchAPI', route: '/api/search' },
- *   async (ctx) => {
- *     ctx.logger.info('Search request received');
- *     // ... handler logic ...
- *     return jsonResponse(data, 200, ctx.cors);
- *   }
- * );
- * ```
- */
-export function createApiHandler(
-  config: ApiRouteConfig,
-  handler: ApiRouteHandler
-): (request: NextRequest) => Promise<NextResponse> {
-  const { operation, route } = config;
-
-  return async (request: NextRequest): Promise<NextResponse> => {
-    const method = request.method;
-    
-    const reqLogger = logger.child({
-      operation,
-      route,
-      method,
-    });
-
-    const errorResponse = (
-      error: unknown,
-      additionalContext?: Record<string, unknown>
-    ): NextResponse => {
-      const normalized = normalizeError(error, `${operation} failed`);
-      // Convert additionalContext to LogContext format (toLogContextValue ensures type safety)
-      const logContext: LogContext = {};
-      if (additionalContext) {
-        for (const [key, value] of Object.entries(additionalContext)) {
-          logContext[key] = toLogContextValue(value);
-        }
-      }
-      reqLogger.error({ err: normalized, ...logContext }, `${operation} failed`);
-      return NextResponse.json(
-        { error: normalized.message },
-        { status: 500, headers: buildSecurityHeaders() }
-      );
-    };
-
-    const ctx: ApiRouteContext = {
-      logger: reqLogger,
-      request,
-      url: request.nextUrl,
-      method,
-      errorResponse,
-    };
-
-    try {
-      return await handler(ctx);
-    } catch (error) {
-      return errorResponse(error);
-    }
-  };
-}
-
-/**
- * Creates a standardized OPTIONS handler for CORS preflight requests
- *
- * @param cors - CORS headers to use
- * @returns A Next.js OPTIONS handler
- *
- * @example
- * ```ts
- * export const OPTIONS = createOptionsHandler(getWithAuthCorsHeaders);
- * ```
- */
-export function createOptionsHandler(
-  cors: Record<string, string> = getOnlyCorsHeaders
-): () => NextResponse {
-  return () => handleOptionsRequest(cors);
-}
+// NOTE: createApiHandler was removed - all routes use createApiRoute from route-factory.ts
+// This provides better features: Zod validation, OpenAPI support, auth handling, etc.

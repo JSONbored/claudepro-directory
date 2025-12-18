@@ -1,0 +1,877 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "ClaudePro Directory API",
+    "version": "1.1.0",
+    "description": "API documentation for ClaudePro Directory - A community-driven directory of Claude configurations"
+  },
+  "servers": [
+    {
+      "url": "https://claudepro.com/api/v1",
+      "description": "Production"
+    },
+    {
+      "url": "http://localhost:3000/api/v1",
+      "description": "Development"
+    }
+  ],
+  "paths": {
+    "/api/v1/trending": {
+      "get": {
+        "summary": "Get trending, popular, or recent content",
+        "description": "Returns trending, popular, or recent content based on tab selection. Supports both page and sidebar modes with category filtering.",
+        "tags": [
+          "content",
+          "trending"
+        ],
+        "operationId": "getTrending",
+        "responses": {
+          "200": {
+            "description": "Trending content retrieved successfully"
+          },
+          "400": {
+            "description": "Invalid tab or category parameter"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/templates": {
+      "get": {
+        "summary": "Get content templates by category",
+        "description": "Fetches content templates by category for client-side consumption. Used by the wizard to load templates dynamically.",
+        "tags": [
+          "content",
+          "templates"
+        ],
+        "operationId": "getTemplates",
+        "responses": {
+          "200": {
+            "description": "Templates retrieved successfully"
+          },
+          "400": {
+            "description": "Invalid or missing category parameter"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/status": {
+      "get": {
+        "summary": "Get API health status",
+        "description": "Returns the current health status of the API and database connections. Used for monitoring, uptime checks, and health dashboards.",
+        "tags": [
+          "health",
+          "monitoring"
+        ],
+        "operationId": "getApiStatus",
+        "responses": {
+          "200": {
+            "description": "API is healthy or degraded"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "description": "API is unhealthy"
+          }
+        }
+      }
+    },
+    "/api/v1/sitemap": {
+      "get": {
+        "summary": "Get sitemap in XML or JSON format",
+        "description": "Generates XML or JSON sitemaps for search engines. Supports both XML (default) and JSON formats.",
+        "tags": [
+          "sitemap",
+          "seo"
+        ],
+        "operationId": "getSitemap",
+        "responses": {
+          "200": {
+            "description": "Sitemap generated successfully"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Sitemap generation failed"
+          }
+        }
+      },
+      "post": {
+        "summary": "Submit URLs to IndexNow",
+        "description": "Submits site URLs to IndexNow for search engine indexing. Requires authentication via x-indexnow-trigger-key header.",
+        "tags": [
+          "sitemap",
+          "seo",
+          "indexnow"
+        ],
+        "operationId": "submitIndexNow",
+        "responses": {
+          "200": {
+            "description": "IndexNow submission enqueued successfully"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized - invalid trigger key"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "description": "Service unavailable - IndexNow keys not configured"
+          }
+        }
+      }
+    },
+    "/api/v1/revalidate": {
+      "post": {
+        "summary": "Trigger on-demand ISR revalidation",
+        "description": "Trigger on-demand ISR revalidation and cache tag invalidation for specified targets. Called by edge function via Supabase Realtime (logical replication).",
+        "tags": [
+          "cache",
+          "revalidation",
+          "webhook"
+        ],
+        "operationId": "revalidate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "category": {
+                    "description": "Content category to revalidate",
+                    "type": "string"
+                  },
+                  "secret": {
+                    "description": "Revalidation secret token",
+                    "type": "string"
+                  },
+                  "slug": {
+                    "description": "Content slug to revalidate",
+                    "type": "string"
+                  },
+                  "tags": {
+                    "description": "Cache tags to invalidate",
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Revalidation completed successfully"
+          },
+          "400": {
+            "description": "Invalid request payload or missing category/tags"
+          },
+          "401": {
+            "description": "Unauthorized - invalid secret"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/search": {
+      "get": {
+        "summary": "Unified search across content, jobs, companies, and users",
+        "description": "Provides comprehensive search with filtering, sorting, pagination, and job-specific filters. Supports content, jobs, companies, and users in a single unified search.",
+        "tags": [
+          "search",
+          "content",
+          "jobs"
+        ],
+        "operationId": "search",
+        "responses": {
+          "200": {
+            "description": "Search results retrieved successfully"
+          },
+          "400": {
+            "description": "Invalid query parameters"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/inngest": {
+      "get": {
+        "summary": "Inngest introspection endpoint",
+        "description": "Handles GET requests from Inngest for function introspection. Delegates to Inngest runtime.",
+        "tags": [
+          "inngest",
+          "webhooks"
+        ],
+        "operationId": "inngestIntrospection",
+        "responses": {
+          "200": {
+            "description": "Function definitions returned successfully"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "post": {
+        "summary": "Inngest function invocation endpoint",
+        "description": "Handles POST requests from Inngest to invoke functions. Delegates to Inngest runtime.",
+        "tags": [
+          "inngest",
+          "webhooks"
+        ],
+        "operationId": "inngestInvoke",
+        "responses": {
+          "200": {
+            "description": "Function executed successfully"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "put": {
+        "summary": "Inngest sync endpoint",
+        "description": "Handles PUT requests from Inngest for function synchronization. Delegates to Inngest runtime.",
+        "tags": [
+          "inngest",
+          "webhooks"
+        ],
+        "operationId": "inngestSync",
+        "responses": {
+          "200": {
+            "description": "Sync completed successfully"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/feeds": {
+      "get": {
+        "summary": "Generate RSS or Atom feeds",
+        "description": "Generates RSS or Atom feeds for content or changelog entries. Supports category filtering and changelog-specific feeds.",
+        "tags": [
+          "feeds",
+          "rss",
+          "atom"
+        ],
+        "operationId": "getFeeds",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "description": "Feed format (RSS or Atom)",
+              "example": "rss",
+              "enum": [
+                "rss",
+                "atom"
+              ],
+              "default": "rss",
+              "type": "string"
+            },
+            "description": "Feed format (RSS or Atom)"
+          },
+          {
+            "in": "query",
+            "name": "category",
+            "schema": {
+              "description": "Content category filter (use \"changelog\" for changelog feeds, omit or \"all\" for all content)",
+              "example": "skills",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "description": "Content category filter (use \"changelog\" for changelog feeds, omit or \"all\" for all content)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Feed generated successfully (RSS or Atom XML)"
+          },
+          "400": {
+            "description": "Invalid type or category parameter"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/company": {
+      "get": {
+        "summary": "Get company profile by slug",
+        "description": "Returns company profile data by slug identifier. Used to display company information on company profile pages.",
+        "tags": [
+          "company",
+          "profiles"
+        ],
+        "operationId": "getCompanyProfile",
+        "responses": {
+          "200": {
+            "description": "Company profile retrieved successfully"
+          },
+          "400": {
+            "description": "Missing or invalid slug parameter"
+          },
+          "404": {
+            "description": "Company not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/search/facets": {
+      "get": {
+        "summary": "Get search facets",
+        "description": "Returns available search facets (categories, tags, authors) for filtering search results. Used by the search interface to populate filter dropdowns and facet counts.",
+        "tags": [
+          "search",
+          "facets"
+        ],
+        "operationId": "getSearchFacets",
+        "responses": {
+          "200": {
+            "description": "Search facets retrieved successfully"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/search/autocomplete": {
+      "get": {
+        "summary": "Get search autocomplete suggestions",
+        "description": "Returns search autocomplete suggestions based on a query string. Used by the search interface to provide real-time search suggestions as users type.",
+        "tags": [
+          "search",
+          "autocomplete"
+        ],
+        "operationId": "getSearchAutocomplete",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "description": "Search query string (minimum 2 characters)",
+              "example": "react",
+              "minLength": 2,
+              "type": "string"
+            },
+            "required": true,
+            "description": "Search query string (minimum 2 characters)"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "description": "Maximum number of suggestions to return (1-20)",
+              "example": 10,
+              "minimum": 1,
+              "maximum": 20,
+              "default": 10,
+              "type": "integer"
+            },
+            "description": "Maximum number of suggestions to return (1-20)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Autocomplete suggestions retrieved successfully"
+          },
+          "400": {
+            "description": "Invalid query parameters (query must be at least 2 characters)"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/logs/client": {
+      "post": {
+        "summary": "Forward browser logs to Axiom",
+        "description": "Receives browser logs from Pino transmit and forwards them to Axiom with server-side context. Used internally by Pino browser transmit.",
+        "tags": [
+          "logs",
+          "internal"
+        ],
+        "operationId": "forwardClientLogs",
+        "responses": {
+          "200": {
+            "description": "Log forwarded successfully"
+          },
+          "400": {
+            "description": "Invalid log event format"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/flux/[...path]": {
+      "get": {
+        "summary": "Flux catch-all GET handler",
+        "description": "Routes GET requests to appropriate Flux handlers based on path segments (e.g., /api/flux/email/count).",
+        "tags": [
+          "flux",
+          "internal"
+        ],
+        "operationId": "fluxGet",
+        "responses": {
+          "200": {
+            "description": "Request routed successfully"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Route not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "post": {
+        "summary": "Flux catch-all POST handler",
+        "description": "Routes POST requests to appropriate Flux handlers based on path segments (e.g., /api/flux/discord/direct).",
+        "tags": [
+          "flux",
+          "internal"
+        ],
+        "operationId": "fluxPost",
+        "responses": {
+          "200": {
+            "description": "Request routed successfully"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Route not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/content/sitewide": {
+      "get": {
+        "summary": "Get sitewide content in various formats",
+        "description": "Serves sitewide content in multiple export formats: LLMs text format (default), README JSON data, or complete JSON array. Used for exporting the entire directory content.",
+        "tags": [
+          "content",
+          "export",
+          "sitewide"
+        ],
+        "operationId": "getSitewideContent",
+        "responses": {
+          "200": {
+            "description": "Sitewide content retrieved successfully in requested format"
+          },
+          "400": {
+            "description": "Invalid format parameter"
+          },
+          "500": {
+            "description": "Failed to generate sitewide export"
+          }
+        }
+      }
+    },
+    "/api/v1/content/paginated": {
+      "get": {
+        "summary": "Get paginated content",
+        "description": "Returns paginated content with optional category filtering. Supports offset/limit pagination and category filtering.",
+        "tags": [
+          "content",
+          "pagination"
+        ],
+        "operationId": "getPaginatedContent",
+        "responses": {
+          "200": {
+            "description": "Paginated content retrieved successfully"
+          },
+          "400": {
+            "description": "Invalid pagination or category parameters"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/content/changelog": {
+      "get": {
+        "summary": "Get changelog in LLMs.txt format",
+        "description": "Returns the changelog in LLMs.txt format for AI/LLM consumption. Used for exporting changelog data in a standardized text format.",
+        "tags": [
+          "content",
+          "changelog",
+          "export"
+        ],
+        "operationId": "getChangelogIndex",
+        "responses": {
+          "200": {
+            "description": "Changelog LLMs.txt content retrieved successfully"
+          },
+          "400": {
+            "description": "Invalid format parameter"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/content/category-configs": {
+      "get": {
+        "summary": "Get category configurations",
+        "description": "Returns category configuration data including features, metadata, and display settings. Used by the frontend to render category-specific UI and determine available features.",
+        "tags": [
+          "content",
+          "categories",
+          "config"
+        ],
+        "operationId": "getCategoryConfigs",
+        "responses": {
+          "200": {
+            "description": "Category configurations retrieved successfully"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/content/[category]": {
+      "get": {
+        "summary": "Get category content",
+        "description": "Returns category content in multiple formats (LLMs.txt or JSON). Supports filtering by content category with optimized caching.",
+        "tags": [
+          "content",
+          "categories",
+          "export"
+        ],
+        "operationId": "getCategoryContent",
+        "responses": {
+          "200": {
+            "description": "Category content retrieved successfully"
+          },
+          "400": {
+            "description": "Invalid category or format parameter"
+          },
+          "404": {
+            "description": "Category content not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/changelog/sync": {
+      "post": {
+        "summary": "Sync changelog entry",
+        "description": "Syncs changelog entry from CHANGELOG.md to database and enqueues notification. Called by GitHub Actions after generating changelog and creating tag. Requires Bearer token authentication.",
+        "tags": [
+          "changelog",
+          "sync",
+          "webhook"
+        ],
+        "operationId": "syncChangelog",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "content": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "date": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "rawContent": {
+                    "type": "string"
+                  },
+                  "sections": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "tldr": {
+                    "type": "string"
+                  },
+                  "version": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "whatChanged": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "content",
+                  "date",
+                  "version"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Changelog entry synced successfully"
+          },
+          "400": {
+            "description": "Invalid request body"
+          },
+          "401": {
+            "description": "Unauthorized - invalid or missing Bearer token"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/bookmarks/add": {
+      "post": {
+        "summary": "Add bookmark",
+        "description": "Adds a bookmark for the authenticated user. Requires authentication.",
+        "tags": [
+          "bookmarks",
+          "user"
+        ],
+        "operationId": "addBookmark",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bookmark added successfully"
+          },
+          "400": {
+            "description": "Invalid request body"
+          },
+          "401": {
+            "description": "Unauthorized - user not authenticated"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/bookmarks/remove": {
+      "post": {
+        "summary": "Remove bookmark",
+        "description": "Removes a bookmark for the authenticated user. Requires authentication.",
+        "tags": [
+          "bookmarks",
+          "user"
+        ],
+        "operationId": "removeBookmark",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bookmark removed successfully"
+          },
+          "400": {
+            "description": "Invalid request body"
+          },
+          "401": {
+            "description": "Unauthorized - user not authenticated"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/content/changelog/[slug]": {
+      "get": {
+        "summary": "Get changelog entry in LLMs.txt format",
+        "description": "Returns a changelog entry as an LLMs-compliant plain-text file for the given slug. Validates the format query parameter (must be 'llms-entry').",
+        "tags": [
+          "content",
+          "changelog",
+          "export"
+        ],
+        "operationId": "getChangelogEntry",
+        "responses": {
+          "200": {
+            "description": "Changelog entry LLMs.txt content retrieved successfully"
+          },
+          "400": {
+            "description": "Invalid format parameter"
+          },
+          "404": {
+            "description": "Changelog entry not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/content/[category]/[slug]": {
+      "get": {
+        "summary": "Get content detail in multiple formats",
+        "description": "Returns individual content records in multiple formats (JSON, Markdown, LLMs.txt, Storage). Supports various export options including metadata and footer inclusion.",
+        "tags": [
+          "content",
+          "export"
+        ],
+        "operationId": "getContentDetail",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "description": "Export format for content",
+              "example": "json",
+              "enum": [
+                "json",
+                "markdown",
+                "md",
+                "llms",
+                "llms-txt",
+                "storage"
+              ],
+              "default": "json",
+              "type": "string"
+            },
+            "description": "Export format for content"
+          },
+          {
+            "in": "query",
+            "name": "includeMetadata",
+            "schema": {
+              "description": "Include metadata in markdown export (default: true)",
+              "example": true,
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            },
+            "description": "Include metadata in markdown export (default: true)"
+          },
+          {
+            "in": "query",
+            "name": "includeFooter",
+            "schema": {
+              "description": "Include footer in markdown export (default: false)",
+              "example": false,
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            },
+            "description": "Include footer in markdown export (default: false)"
+          },
+          {
+            "in": "query",
+            "name": "metadata",
+            "schema": {
+              "description": "Return metadata only for storage format (default: false)",
+              "example": false,
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            },
+            "description": "Return metadata only for storage format (default: false)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Content detail retrieved successfully"
+          },
+          "400": {
+            "description": "Invalid category, format, or query parameters"
+          },
+          "404": {
+            "description": "Content not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

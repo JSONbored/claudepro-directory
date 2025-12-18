@@ -9,7 +9,6 @@ import {
 import Image from 'next/image';
 import Link from 'next/link';
 import { cn } from '@heyclaude/web-runtime/ui';
-import { paddingLeft, gap, marginBottom, padding } from "@heyclaude/web-runtime/design-system";
 import type { changelog_category } from '@heyclaude/data-layer/prisma';
 
 interface ChangelogStickyEntryProps {
@@ -33,10 +32,10 @@ export function ChangelogStickyEntry({ entry, targetPath }: ChangelogStickyEntry
   const nonEmptyCategories = getNonEmptyCategories(entry.changes);
 
   return (
-    <div className={`group border-muted relative grid ${gap.relaxed} border-l-2 ${paddingLeft.relaxed} md:grid-cols-[240px_1fr] md:border-l-0 md:${paddingLeft.default}`}>
+    <div className="group border-muted relative grid gap-6 border-l-2 pl-8 md:grid-cols-[240px_1fr] md:border-l-0 md:pl-4">
       {/* Mobile Date/Title (visible only on small screens) */}
       <div className="md:hidden">
-        <div className={`text-muted-foreground ${marginBottom.compact} flex items-center ${gap.tight} text-sm`}>
+        <div className="text-muted-foreground text-sm mb-2 flex items-center gap-1">
           <Calendar className="h-4 w-4" />
           <time dateTime={releaseDateString}>{formatChangelogDateShort(releaseDateString)}</time>
         </div>
@@ -47,11 +46,11 @@ export function ChangelogStickyEntry({ entry, targetPath }: ChangelogStickyEntry
 
       {/* Sticky Sidebar (Desktop) */}
       <div className="hidden md:block">
-        <div className={`sticky top-24 flex flex-col ${gap.comfortable}`}>
-          <div className={cn('flex flex-col', gap['1.5'])}>
-            <div className={`text-muted-foreground flex items-center ${gap.tight}`}>
+        <div className="sticky top-24 flex flex-col gap-4">
+          <div className={cn('flex flex-col', 'gap-1.5')}>
+            <div className="text-muted-foreground flex items-center gap-1">
               <Calendar className="h-4 w-4" />
-              <time dateTime={releaseDateString} className="text-sm font-medium">
+              <time dateTime={releaseDateString} className="text-sm-medium">
                 {formatChangelogDateShort(releaseDateString)}
               </time>
             </div>
@@ -67,7 +66,7 @@ export function ChangelogStickyEntry({ entry, targetPath }: ChangelogStickyEntry
 
           {/* Categories in Sidebar for Desktop */}
           {nonEmptyCategories.length > 0 && (
-            <div className={`flex flex-wrap ${gap.tight}`}>
+            <div className="flex flex-wrap gap-1">
               {nonEmptyCategories.slice(0, 3).map((category) => (
                 <UnifiedBadge
                   key={category}
@@ -84,7 +83,7 @@ export function ChangelogStickyEntry({ entry, targetPath }: ChangelogStickyEntry
       </div>
 
       {/* Content Card (Right Side) */}
-      <div className={`relative flex flex-col ${gap.default}`}>
+      <div className="relative flex flex-col gap-3">
         <Link href={targetPath} className="group/card block h-full">
           <div className="border-border/40 bg-card hover:border-primary/20 h-full overflow-hidden rounded-xl border transition-all hover:shadow-lg">
             {/* Hero Image */}
@@ -100,10 +99,10 @@ export function ChangelogStickyEntry({ entry, targetPath }: ChangelogStickyEntry
               </div>
             ) : null}
 
-            <div className={`${padding.comfortable} md:${padding.relaxed}`}>
+            <div className="p-6 md:p-8">
               {/* Mobile Categories (hidden on desktop since they are in sidebar) */}
               {nonEmptyCategories.length > 0 && (
-                <div className={`${marginBottom.default} flex flex-wrap ${gap.tight} md:hidden`}>
+                <div className="mb-4 flex flex-wrap gap-1 md:hidden">
                   {nonEmptyCategories.slice(0, 4).map((category) => (
                     <UnifiedBadge
                       key={category}
@@ -119,11 +118,11 @@ export function ChangelogStickyEntry({ entry, targetPath }: ChangelogStickyEntry
 
               {/* TLDR / Description */}
               {entry.tldr ? (
-                <p className={`text-muted-foreground ${marginBottom.comfortable} text-base leading-relaxed`}>{entry.tldr}</p>
+                <p className="text-muted-foreground mb-6 text-base leading-relaxed">{entry.tldr}</p>
               ) : null}
 
               {/* Read More Link */}
-              <div className={`text-primary group-hover/card:text-accent flex items-center ${gap.tight} text-sm font-medium transition-colors`}>
+              <div className="text-primary group-hover/card:text-accent flex items-center gap-1 text-sm-medium transition-colors">
                 <span>Read full changelog</span>
                 <ArrowRight className="h-4 w-4" />
               </div>

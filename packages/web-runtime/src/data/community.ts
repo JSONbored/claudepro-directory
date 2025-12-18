@@ -1,106 +1,82 @@
 'use server';
-
-import { CommunityService, SearchService } from '@heyclaude/data-layer';
-import type { CommunityDirectoryUser } from '@heyclaude/database-types/postgres-types';
-import type {
-  SearchUnifiedArgs,
-  GetCommunityDirectoryReturns,
-  GetUserProfileReturns,
-  GetUserCollectionDetailReturns,
+import {
+  type CommunityDirectoryUser,
+  type GetCommunityDirectoryReturns,
+  type GetUserCollectionDetailReturns,
+  type GetUserProfileReturns,
+  type SearchUnifiedArgs,
 } from '@heyclaude/database-types/postgres-types';
-import { cacheLife, cacheTag } from 'next/cache';
 
 import { normalizeError } from '../errors.ts';
 import { logger, pulseUserSearch } from '../index.ts';
 
+import { createCachedDataFunction, generateResourceTags } from './cached-data-factory.ts';
+
 const DEFAULT_DIRECTORY_LIMIT = 100;
 
-/****
- *
+/**
  * Search users using unified search (cached)
  * Uses 'use cache' to cache search results. Query and limit become part of the cache key.
  * Follows architectural strategy: data layer -> database RPC -> DB
- * @param {string} query
- * @param {number} limit
- * @returns {Promise<unknown>} Return value description
  */
-async function searchUsersUnified(
-  query: string,
-  limit: number
-): Promise<Array<CommunityDirectoryUser>> {
-  'use cache';
-
-  // Configure cache - use 'stable' profile for optimal SEO (6hr stale, 1hr revalidate, 7 days expire)
-  cacheLife('stable'); // 6hr stale, 1hr revalidate, 7 days expire - optimized for SEO
-  cacheTag('user-search');
-  cacheTag('community');
-
-  const searchService = new SearchService();
-
-  const unifiedArgs: SearchUnifiedArgs = {
-    p_entities: ['user'],
-    p_highlight_query: query,
-    p_limit: limit,
-    p_offset: 0,
-    p_query: query,
-  };
-
-  const searchResponse = await searchService.searchUnified(unifiedArgs);
-  const results = searchResponse.data || [];
-
-  return results.map((result) => ({
-    bio: result.description || null,
-    created_at: result.created_at as string,
-    id: result.id as string,
-    image: null,
-    name: result.title || result.slug || '',
-    slug: result.slug as string,
-    tier: 'free',
-    work: null,
-  }));
-}
+const searchUsersUnified = createCachedDataFunction<
+  { query: string; limit: number },
+  CommunityDirectoryUser[]
+>({
+  serviceKey: 'search',
+  methodName: 'searchUnified',
+  cacheMode: 'public',
+  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
+  cacheTags: () => generateResourceTags('community', undefined, ['user-search']),
+  module: 'data/community',
+  operation: 'searchUsersUnified',
+  transformArgs: (args) =>
+    ({
+      p_entities: ['user'],
+      p_highlight_query: args.query,
+      p_limit: args.limit,
+      p_offset: 0,
+      p_query: args.query,
+    }) as SearchUnifiedArgs,
+  transformResult: (result) => {
+    const searchResponse = result as { data?: Array<{ description?: string; created_at?: string; id?: string; title?: string; slug?: string }> };
+    const results = searchResponse.data || [];
+    return results.map((result) => ({
+      bio: result.description || null,
+      created_at: result.created_at || '',
+      id: result.id || '',
+      image: null,
+      name: result.title || result.slug || '',
+      slug: result.slug || '',
+      tier: 'free',
+      work: null,
+    }));
+  },
+  onError: () => [], // Return empty array on error
+});
 
 export type CollectionDetailData = GetUserCollectionDetailReturns;
 
-/***
- *
+/**
  * Get community directory via RPC (cached)
  * Uses 'use cache' to cache directory listings. This data is public and same for all users.
- * Community directory changes periodically, so we use the 'half' cacheLife profile.
- * @param {number} limit
- * @returns {Promise<unknown>} Return value description
+ * Community directory changes periodically, so we use the 'long' cacheLife profile.
  */
-async function getCommunityDirectoryRpc(
-  limit: number
-): Promise<GetCommunityDirectoryReturns | null> {
-  'use cache';
-
-  // Configure cache - use 'static' profile for optimal SEO (1 day stale, 6hr revalidate, 30 days expire)
-  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
-  cacheTag('community');
-  cacheTag('users');
-
-  const reqLogger = logger.child({
-    module: 'data/community',
-    operation: 'getCommunityDirectoryRpc',
-  });
-
-  try {
-    const service = new CommunityService();
-    const result = await service.getCommunityDirectory({ p_limit: limit });
-
-    reqLogger.info(
-      { hasResult: Boolean(result), limit },
-      'getCommunityDirectoryRpc: fetched successfully'
-    );
-
-    return result;
-  } catch (error) {
-    const normalized = normalizeError(error, 'getCommunityDirectoryRpc failed');
-    reqLogger.error({ err: normalized, limit }, 'getCommunityDirectoryRpc failed');
-    throw error;
-  }
-}
+const getCommunityDirectoryRpc = createCachedDataFunction<
+  number,
+  GetCommunityDirectoryReturns | null
+>({
+  serviceKey: 'misc', // Consolidated: CommunityService methods moved to MiscService
+  methodName: 'getCommunityDirectory',
+  cacheMode: 'public',
+  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
+  cacheTags: () => generateResourceTags('community', undefined, ['users']),
+  module: 'data/community',
+  operation: 'getCommunityDirectoryRpc',
+  transformArgs: (limit) => ({ p_limit: limit }),
+  throwOnError: true,
+  logContext: (limit) => ({ limit }),
+});
 
 export async function getCommunityDirectory(options: {
   limit?: number;
@@ -116,28 +92,30 @@ export async function getCommunityDirectory(options: {
     try {
       // Use SearchService directly (same as API route)
       // Follows architectural strategy: data layer -> database RPC -> DB
-      const allUsers = await searchUsersUnified(searchQuery.trim(), limit);
+      const allUsers = await searchUsersUnified({ query: searchQuery.trim(), limit });
 
       // Fire-and-forget: Pulse user search
-      pulseUserSearch(searchQuery.trim(), allUsers.length).catch((error) => {
-        const normalized = normalizeError(error, 'Failed to pulse user search');
-        // Use child logger for callback to maintain isolation
-        const callbackLogger = logger.child({
-          module: 'data/community',
-          operation: 'pulseUserSearch',
+      if (allUsers) {
+        pulseUserSearch(searchQuery.trim(), allUsers.length).catch((error) => {
+          const normalized = normalizeError(error, 'Failed to pulse user search');
+          // Use child logger for callback to maintain isolation
+          const callbackLogger = logger.child({
+            module: 'data/community',
+            operation: 'pulseUserSearch',
+          });
+          callbackLogger.warn(
+            {
+              err: normalized,
+              resultCount: allUsers.length,
+              searchQuery: searchQuery.trim(),
+            },
+            'Failed to pulse user search'
+          );
         });
-        callbackLogger.warn(
-          {
-            err: normalized,
-            resultCount: allUsers.length,
-            searchQuery: searchQuery.trim(),
-          },
-          'Failed to pulse user search'
-        );
-      });
+      }
 
       return {
-        all_users: allUsers,
+        all_users: allUsers ?? [],
         new_members: [],
         top_contributors: [],
       };
@@ -167,57 +145,34 @@ export async function getCommunityDirectory(options: {
  * - Minimum 30 seconds stale time (required for runtime prefetch)
  * - Per-user cache keys (slug and viewerId in cache tag)
  * - Not prerendered (runs at request time)
- * @param input
- * @param input.slug
- * @param input.viewerId
  */
-export async function getPublicUserProfile(input: {
-  slug: string;
-  viewerId?: string;
-}): Promise<GetUserProfileReturns | null> {
-  'use cache: private';
-
-  const { slug, viewerId } = input;
-
-  // Configure cache
-  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
-  cacheTag(`user-profile-${slug}`);
-  if (viewerId) {
-    cacheTag(`user-profile-viewer-${viewerId}`);
-  }
-
-  const reqLogger = logger.child({
-    module: 'data/community',
-    operation: 'getPublicUserProfile',
-  });
-
-  try {
-    const service = new CommunityService();
-
-    const result = await service.getUserProfile({
-      p_user_slug: slug,
-      ...(viewerId ? { p_viewer_id: viewerId } : {}),
-    });
-
-    reqLogger.info(
-      { hasProfile: Boolean(result), hasViewer: Boolean(viewerId), slug },
-      'getPublicUserProfile: fetched successfully'
-    );
-
-    return result;
-  } catch (error) {
-    const normalized = normalizeError(error, 'getPublicUserProfile failed');
-    reqLogger.error(
-      {
-        err: normalized,
-        slug,
-        ...(viewerId ? { viewerId } : {}),
-      },
-      'getPublicUserProfile failed'
-    );
-    throw error;
-  }
-}
+export const getPublicUserProfile = createCachedDataFunction<
+  { slug: string; viewerId?: string },
+  GetUserProfileReturns | null
+>({
+  serviceKey: 'misc', // Consolidated: CommunityService methods moved to MiscService
+  methodName: 'getUserProfile',
+  cacheMode: 'private',
+  cacheLife: 'userProfile', // 1min stale, 5min revalidate, 30min expire - User-specific data
+  cacheTags: (input) => {
+    const tags = [`user-profile-${input.slug}`];
+    if (input.viewerId) {
+      tags.push(`user-profile-viewer-${input.viewerId}`);
+    }
+    return tags;
+  },
+  module: 'data/community',
+  operation: 'getPublicUserProfile',
+  transformArgs: (input) => ({
+    p_user_slug: input.slug,
+    ...(input.viewerId ? { p_viewer_id: input.viewerId } : {}),
+  }),
+  throwOnError: true,
+  logContext: (input) => ({
+    hasViewer: Boolean(input.viewerId),
+    slug: input.slug,
+  }),
+});
 
 /**
  * Get public collection detail
@@ -230,58 +185,33 @@ export async function getPublicUserProfile(input: {
  * - Minimum 30 seconds stale time (required for runtime prefetch)
  * - Per-user cache keys (userSlug, collectionSlug, and viewerId in cache tag)
  * - Not prerendered (runs at request time)
- * @param input
- * @param input.collectionSlug
- * @param input.userSlug
- * @param input.viewerId
  */
-export async function getPublicCollectionDetail(input: {
-  collectionSlug: string;
-  userSlug: string;
-  viewerId?: string;
-}): Promise<CollectionDetailData | null> {
-  'use cache: private';
-
-  const { collectionSlug, userSlug, viewerId } = input;
-
-  // Configure cache
-  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
-  cacheTag(`user-collection-${userSlug}-${collectionSlug}`);
-  if (viewerId) {
-    cacheTag(`user-collection-viewer-${viewerId}`);
-  }
-
-  const reqLogger = logger.child({
-    module: 'data/community',
-    operation: 'getPublicCollectionDetail',
-  });
-
-  try {
-    const service = new CommunityService();
-
-    const data = await service.getUserCollectionDetail({
-      p_collection_slug: collectionSlug,
-      p_user_slug: userSlug,
-      ...(viewerId ? { p_viewer_id: viewerId } : {}),
-    });
-
-    reqLogger.info(
-      { collectionSlug, hasData: Boolean(data), hasViewer: Boolean(viewerId), slug: userSlug },
-      'getPublicCollectionDetail: fetched successfully'
-    );
-
-    return data;
-  } catch (error) {
-    const normalized = normalizeError(error, 'getPublicCollectionDetail failed');
-    reqLogger.error(
-      {
-        collectionSlug,
-        err: normalized,
-        slug: userSlug,
-        ...(viewerId ? { viewerId } : {}),
-      },
-      'getPublicCollectionDetail failed'
-    );
-    throw error;
-  }
-}
+export const getPublicCollectionDetail = createCachedDataFunction<
+  { collectionSlug: string; userSlug: string; viewerId?: string },
+  CollectionDetailData | null
+>({
+  serviceKey: 'misc', // Consolidated: CommunityService methods moved to MiscService
+  methodName: 'getUserCollectionDetail',
+  cacheMode: 'private',
+  cacheLife: 'userProfile', // 1min stale, 5min revalidate, 30min expire - User-specific data
+  cacheTags: (input) => {
+    const tags = [`user-collection-${input.userSlug}-${input.collectionSlug}`];
+    if (input.viewerId) {
+      tags.push(`user-collection-viewer-${input.viewerId}`);
+    }
+    return tags;
+  },
+  module: 'data/community',
+  operation: 'getPublicCollectionDetail',
+  transformArgs: (input) => ({
+    p_collection_slug: input.collectionSlug,
+    p_user_slug: input.userSlug,
+    ...(input.viewerId ? { p_viewer_id: input.viewerId } : {}),
+  }),
+  throwOnError: true,
+  logContext: (input) => ({
+    collectionSlug: input.collectionSlug,
+    hasViewer: Boolean(input.viewerId),
+    slug: input.userSlug,
+  }),
+});

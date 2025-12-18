@@ -1,11 +1,25 @@
 'use server';
 
-import { JobsService } from '@heyclaude/data-layer';
-import type { payment_plan_catalogModel } from '@heyclaude/data-layer/prisma';
-import type { JobBillingSummary } from '@heyclaude/database-types/postgres-types';
-import { cacheLife, cacheTag } from 'next/cache';
+import { type payment_plan_catalogModel } from '@heyclaude/data-layer/prisma';
 
-import { logger } from '../index.ts';
+import { createCachedDataFunction, generateResourceTags } from './cached-data-factory.ts';
+
+// Type for job billing summary (matches job_billing_summary view structure)
+// This type represents a single row from the view
+interface JobBillingSummary {
+  billing_cycle_days: null | number;
+  is_subscription: boolean | null;
+  job_expiry_days: null | number;
+  job_id: string;
+  last_payment_amount: null | number;
+  last_payment_at: null | string;
+  last_payment_status: 'completed' | 'failed' | 'pending' | 'refunded' | null;
+  plan: 'one-time' | 'subscription' | null;
+  price_cents: null | number;
+  subscription_renews_at: null | string;
+  subscription_status: 'active' | 'cancelled' | 'past_due' | 'paused' | 'revoked' | null;
+  tier: 'featured' | 'standard' | null;
+}
 
 type PaymentPlanRow = payment_plan_catalogModel;
 type JobBillingSummaryRow = JobBillingSummary;
@@ -54,39 +68,18 @@ function sanitizeBenefits(benefits: PaymentPlanRow['benefits']): null | string[]
 /**
  * Get payment plan catalog
  * Uses 'use cache' to cache payment plan catalog. This data is public and same for all users.
- *
- * Note: Uses anon client instead of server client to avoid cookies() inside cache scope.
- * This is safe because payment plan catalog is public data that doesn't require authentication.
  */
-export async function getPaymentPlanCatalog(): Promise<PaymentPlanCatalogEntry[]> {
-  'use cache';
-
-  // Configure cache
-  cacheLife({ expire: 7200, revalidate: 3600, stale: 300 }); // 5min stale, 1hr revalidate, 2hr expire
-  cacheTag('payment-plans');
-
-  // Create request-scoped child logger to avoid race conditions
-  const reqLogger = logger.child({
-    module: 'data/payments',
-    operation: 'getPaymentPlanCatalog',
-  });
-
-  try {
-    // Use JobsService for proper data layer architecture
-    const jobsService = new JobsService();
-    const data = await jobsService.getPaymentPlanCatalog();
-
-    // Type guard: Validate that data is an array and has expected structure
-    if (!Array.isArray(data)) {
-      reqLogger.warn(
-        { dataType: typeof data },
-        'getPaymentPlanCatalog: Expected array but got non-array data'
-      );
-      return [];
-    }
-
+export const getPaymentPlanCatalog = createCachedDataFunction<void, PaymentPlanCatalogEntry[]>({
+  serviceKey: 'jobs',
+  methodName: 'getPaymentPlanCatalog',
+  cacheMode: 'public',
+  cacheLife: { expire: 7200, revalidate: 3600, stale: 300 }, // 5min stale, 1hr revalidate, 2hr expire
+  cacheTags: () => generateResourceTags('payments', undefined, ['payment-plans']),
+  module: 'data/payments',
+  operation: 'getPaymentPlanCatalog',
+  transformResult: (result) => {
+    const data = result as PaymentPlanRow[];
     // Type guard: Validate each entry has required fields
-    // RPC returns data with string dates, convert to Prisma types (Date objects)
     const rows: PaymentPlanRow[] = [];
     for (const entry of data) {
       if (
@@ -99,7 +92,7 @@ export async function getPaymentPlanCatalog(): Promise<PaymentPlanCatalogEntry[]
       }
     }
 
-    const result: PaymentPlanCatalogEntry[] = rows.map((entry) =>
+    return rows.map((entry) =>
       // Extract subset fields (PaymentPlanCatalogEntry omits created_at/updated_at)
       ({
         benefits: sanitizeBenefits(entry.benefits),
@@ -113,84 +106,57 @@ export async function getPaymentPlanCatalog(): Promise<PaymentPlanCatalogEntry[]
         tier: entry.tier,
       })
     );
-
-    reqLogger.info({ count: result.length }, 'getPaymentPlanCatalog: fetched successfully');
-
-    return result;
-  } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : (typeof error === 'string' ? error : String(error));
-    reqLogger.error({ err: errorForLogging }, 'getPaymentPlanCatalog failed');
-    throw error;
-  }
-}
+  },
+  throwOnError: true,
+  logContext: (_, result) => ({
+    count: Array.isArray(result) ? result.length : 0,
+  }),
+});
 
 /**
  * Get job billing summaries for a list of job IDs
  *
  * Uses 'use cache: private' to enable cross-request caching for user-specific billing data.
- * This allows cookies() to be used inside the cache scope (via createSupabaseServerClient)
- * while still providing per-user caching with TTL and cache invalidation support.
- *
- * Cache behavior:
- * - Minimum 30 seconds stale time (required for runtime prefetch)
- * - Per-user cache keys (jobIds in cache tag)
- * - Not prerendered (runs at request time)
- * @param jobIds
  */
 export async function getJobBillingSummaries(jobIds: string[]): Promise<JobBillingSummaryEntry[]> {
-  'use cache: private';
-
   if (jobIds.length === 0) {
     return [];
   }
 
-  // Configure cache
-  cacheLife({ expire: 1800, revalidate: 300, stale: 60 }); // 1min stale, 5min revalidate, 30min expire
-  // Create cache tag from sorted jobIds for stable cache key
-  const sortedJobIds = [...jobIds].sort().join('-');
-  cacheTag(`job-billing-${sortedJobIds}`);
-
-  // Create request-scoped child logger to avoid race conditions
-  const reqLogger = logger.child({
+  const cachedFn = createCachedDataFunction<string[], JobBillingSummaryEntry[]>({
+    serviceKey: 'jobs',
+    methodName: 'getJobBillingSummaries',
+    cacheMode: 'private',
+    cacheLife: 'userProfile', // 1min stale, 5min revalidate, 30min expire - User-specific data
+    cacheTags: (jobIds) => {
+      // Create cache tag from sorted jobIds for stable cache key
+      const sortedJobIds = [...jobIds].sort().join('-');
+      return [`job-billing-${sortedJobIds}`];
+    },
     module: 'data/payments',
     operation: 'getJobBillingSummaries',
+    transformArgs: (jobIds) => ({ p_job_ids: jobIds }),
+    transformResult: (result) => {
+      const data = result as unknown[];
+      // Type guard: Validate each entry has required fields
+      const entries: JobBillingSummaryEntry[] = [];
+      for (const entry of data) {
+        if (
+          typeof entry === 'object' &&
+          entry !== null &&
+          'job_id' in entry &&
+          'plan' in entry &&
+          'tier' in entry
+        ) {
+          entries.push(entry as JobBillingSummaryEntry);
+        }
+      }
+      return entries;
+    },
+    throwOnError: true,
+    logContext: (jobIds) => ({ jobCount: jobIds.length }),
   });
 
-  try {
-    // Use JobsService for proper data layer architecture
-    const jobsService = new JobsService();
-    const data = await jobsService.getJobBillingSummaries({
-      p_job_ids: jobIds,
-    });
-
-    // Type guard: Validate that data is an array
-    if (!Array.isArray(data)) {
-      reqLogger.warn(
-        { dataType: typeof data, jobCount: jobIds.length },
-        'getJobBillingSummaries: Expected array but got non-array data'
-      );
-      return [];
-    }
-
-    // Type guard: Validate each entry has required fields
-    const entries: JobBillingSummaryEntry[] = [];
-    for (const entry of data) {
-      if (typeof entry === 'object' && 'job_id' in entry && 'plan' in entry && 'tier' in entry) {
-        entries.push(entry as JobBillingSummaryEntry);
-      }
-    }
-
-    return entries;
-  } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
-    const errorForLogging: Error | string =
-      error instanceof Error ? error : (typeof error === 'string' ? error : String(error));
-    reqLogger.error(
-      { err: errorForLogging, jobCount: jobIds.length },
-      'getJobBillingSummaries failed'
-    );
-    throw error;
-  }
+  const result = await cachedFn(jobIds);
+  return result ?? [];
 }

@@ -17,7 +17,6 @@ import { Suspense } from 'react';
 import { CollectionForm } from '@/src/components/core/forms/collection-form';
 
 import Loading from './loading';
-import { spaceY, marginBottom, muted, iconSize, gap } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Dynamic Rendering Required
@@ -125,16 +124,16 @@ async function NewCollectionPageContent({
   userLogger.info({ section: 'data-fetch' }, 'NewCollectionPage: page render completed');
 
   return (
-    <div className={`${spaceY.relaxed}`}>
+    <div className="space-y-6">
       <div>
         <Link href={ROUTES.ACCOUNT_LIBRARY}>
-          <Button className={`${marginBottom.default} flex items-center ${gap.tight}`} variant="ghost">
-            <ArrowLeft className={`${iconSize.sm}`} />
+          <Button className="mb-4 flex items-center gap-1" variant="ghost">
+            <ArrowLeft className="h-4 w-4" />
             Back to Library
           </Button>
         </Link>
-        <h1 className={`${marginBottom.compact} text-3xl font-bold`}>Create Collection</h1>
-        <p className={`${muted.default}`}>Organize your bookmarks into a custom collection</p>
+        <h1 className="mb-2 text-3xl font-bold">Create Collection</h1>
+        <p className="text-muted-foreground">Organize your bookmarks into a custom collection</p>
       </div>
 
       <Card>

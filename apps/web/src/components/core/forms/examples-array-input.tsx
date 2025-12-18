@@ -43,7 +43,6 @@
 import { ChevronDown, ChevronUp, Code, Plus, Trash } from '@heyclaude/web-runtime/icons';
 import {
   cn,
-  DIMENSIONS,
   Button,
   Card,
   CardContent,
@@ -60,7 +59,6 @@ import {
   Textarea,
 } from '@heyclaude/web-runtime/ui';
 import { useId, useState } from 'react';
-import { between, cluster, iconSize, spaceY, paddingY, paddingBottom, marginTop } from "@heyclaude/web-runtime/design-system";
 
 // Supported languages for syntax highlighting
 const SUPPORTED_LANGUAGES = [
@@ -213,15 +211,15 @@ export function ExamplesArrayInput({
   const examplesJson = JSON.stringify(examplesForSubmission);
 
   return (
-    <div className={`${spaceY.comfortable}`}>
+    <div className="space-y-4">
       {/* Hidden input for form submission */}
       <input type="hidden" name={name} value={examplesJson} />
 
       {/* Header */}
-      <div className={between.center}>
+      <div className="flex items-center justify-between">
         <div>
           <Label className="text-base font-semibold">Usage Examples (optional)</Label>
-          <p className={cn('text-sm', 'text-muted-foreground', marginTop.tight)}>
+          <p className={cn('text-muted-foreground text-sm', 'mt-1')}>
             Add code examples to help users understand how to use this configuration. Max{' '}
             {maxExamples} examples.
           </p>
@@ -232,21 +230,21 @@ export function ExamplesArrayInput({
           size="sm"
           onClick={addExample}
           disabled={examples.length >= maxExamples}
-          className={cluster.compact}
+          className="flex items-center gap-2"
         >
-          <Plus className={iconSize.sm} />
+          <Plus className="h-4 w-4" />
           Add Example
         </Button>
       </div>
 
       {/* Examples List */}
-      <div className={`${spaceY.default}`}>
+      <div className="space-y-3">
         {examples.length === 0 && (
           <Card className="border-dashed">
-            <CardContent className={`${paddingY.relaxed}`}>
-              <div className={`${spaceY.compact} text-center`}>
-                <Code className={`text-muted-foreground mx-auto ${iconSize.xl}`} />
-                <p className={cn('text-sm', 'text-muted-foreground')}>
+            <CardContent className="py-8">
+              <div className="space-y-2 text-center">
+                <Code className="text-muted-foreground mx-auto h-8 w-8" />
+                <p className={cn('text-muted-foreground text-sm')}>
                   No examples added yet. Click "Add Example" to get started.
                 </p>
               </div>
@@ -264,17 +262,17 @@ export function ExamplesArrayInput({
 
           return (
             <Card key={example.id} className={cn(!validation.valid && 'border-destructive')}>
-              <CardHeader className={`${paddingBottom.compact}`}>
-                <div className={between.center}>
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
                   <button
                     type="button"
                     onClick={() => toggleExpanded(index)}
-                    className={`${cluster.compact} flex-1 text-left transition-opacity hover:opacity-70`}
+                    className="flex items-center gap-2 flex-1 text-left transition-opacity hover:opacity-70"
                   >
                     {isExpanded ? (
-                      <ChevronUp className={iconSize.sm} />
+                      <ChevronUp className="h-4 w-4" />
                     ) : (
-                      <ChevronDown className={iconSize.sm} />
+                      <ChevronDown className="h-4 w-4" />
                     )}
                     <CardTitle className="text-base">
                       {example.title || `Example ${index + 1}`}
@@ -285,10 +283,10 @@ export function ExamplesArrayInput({
                     variant="ghost"
                     size="sm"
                     onClick={() => removeExample(index)}
-                    className={`${iconSize.xl} p-0`}
+                    className="h-8 w-8 p-0"
                     title="Remove example"
                   >
-                    <Trash className={iconSize.sm} />
+                    <Trash className="h-4 w-4" />
                   </Button>
                 </div>
                 {!validation.valid && (
@@ -297,9 +295,9 @@ export function ExamplesArrayInput({
               </CardHeader>
 
               {isExpanded ? (
-                <CardContent className={`${spaceY.comfortable}`}>
+                <CardContent className="space-y-4">
                   {/* Title */}
-                  <div className={`${spaceY.compact}`}>
+                  <div className="space-y-2">
                     <Label htmlFor={titleId}>
                       Example Title <span className="text-destructive">*</span>
                     </Label>
@@ -315,7 +313,7 @@ export function ExamplesArrayInput({
                   </div>
 
                   {/* Language */}
-                  <div className={`${spaceY.compact}`}>
+                  <div className="space-y-2">
                     <Label htmlFor={languageId}>
                       Language <span className="text-destructive">*</span>
                     </Label>
@@ -343,7 +341,7 @@ export function ExamplesArrayInput({
                   </div>
 
                   {/* Code */}
-                  <div className={`${spaceY.compact}`}>
+                  <div className="space-y-2">
                     <Label htmlFor={codeId}>
                       Code <span className="text-destructive">*</span>
                     </Label>
@@ -352,7 +350,7 @@ export function ExamplesArrayInput({
                       value={example.code}
                       onChange={(e) => updateExample(index, 'code', e.target.value)}
                       placeholder="export default { ... }"
-                      className={`${DIMENSIONS.INPUT_LG} font-mono text-sm`}
+                      className="min-h-[150px] font-mono text-sm"
                       maxLength={10_000}
                       required
                     />
@@ -362,14 +360,14 @@ export function ExamplesArrayInput({
                   </div>
 
                   {/* Description */}
-                  <div className={`${spaceY.compact}`}>
+                  <div className="space-y-2">
                     <Label htmlFor={descriptionId}>Description (optional)</Label>
                     <Textarea
                       id={descriptionId}
                       value={example.description || ''}
                       onChange={(e) => updateExample(index, 'description', e.target.value)}
                       placeholder="Explain what this example demonstrates..."
-                      className={DIMENSIONS.INPUT_SM}
+                      className="min-h-[80px]"
                       maxLength={500}
                     />
                     <p className={cn('text-xs', 'text-muted-foreground')}>
@@ -390,9 +388,9 @@ export function ExamplesArrayInput({
           variant="outline"
           size="sm"
           onClick={addExample}
-          className={`flex w-full items-center gap-2`}
+          className="flex w-full items-center gap-2"
         >
-          <Plus className={iconSize.sm} />
+          <Plus className="h-4 w-4" />
           Add Another Example ({examples.length}/{maxExamples})
         </Button>
       )}

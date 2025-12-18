@@ -3,14 +3,13 @@
 // REMOVED: export * from '../actions/feature-flags.ts'; - Server-only, use lazy imports or import from @heyclaude/web-runtime/actions
 // REMOVED: export * from '../storage/image-storage.ts'; - Server-only, use @heyclaude/web-runtime/server or @heyclaude/web-runtime/data-server
 export * from '../storage/image-utils.ts';
-export * from '../edge/call-edge-function.ts';
 export * from '../edge/transform.ts';
 // Removed search-client.ts export - all search functions migrated to /api/search route
 export * from '../seo/og.ts';
 
 // Data Services
 export * from '../data/content-helpers.ts';
-export * from '../data/content/similar.ts';
+// export * from '../data/content/similar.ts'; // Removed - similar content feature was removed
 export * from '../data/tools/recommendations.ts';
 export * from '../data/newsletter.ts';
 export * from '../data/quiz.ts';

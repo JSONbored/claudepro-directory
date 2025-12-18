@@ -1,24 +1,14 @@
 #!/usr/bin/env tsx
 
-import { normalizeError } from '@heyclaude/shared-runtime';
-
+// Import generateOpenAPI directly to avoid dependency on built packages
 import { generateOpenAPI } from '../commands/generate-openapi.ts';
-import { logger } from '../toolkit/logger.ts';
 
 generateOpenAPI()
   .then(() => {
-    logger.info('✅ OpenAPI spec generation complete', {
-      script: 'generate-openapi',
-    });
+    console.log('✅ OpenAPI spec generation complete');
     process.exit(0);
   })
   .catch((error) => {
-    logger.error(
-      '💥 OpenAPI generation failed',
-      normalizeError(error, 'OpenAPI generation failed'),
-      {
-        script: 'generate-openapi',
-      }
-    );
+    console.error('💥 OpenAPI generation failed:', error);
     process.exit(1);
   });

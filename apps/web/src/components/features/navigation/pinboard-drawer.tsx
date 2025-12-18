@@ -23,7 +23,6 @@ import {
   SheetTitle,
   cn,
 } from '@heyclaude/web-runtime/ui';
-import { iconSize, marginRight, cluster, gap, marginBottom, between, muted, size, marginTop, spaceY, paddingBottom, paddingX } from '@heyclaude/web-runtime/design-system';
 import { SPRING, STAGGER, MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
 import { motion, AnimatePresence } from 'motion/react';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
@@ -94,23 +93,21 @@ export function PinboardDrawer({ open, onOpenChange }: PinboardDrawerProps) {
           'bg-background/98 backdrop-blur-xl', // Enhanced glass morphism
           'shadow-2xl', // Premium shadow
           'p-6', // Generous padding for premium feel
+          'shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25),0_0_0_1px_rgba(0,0,0,0.05)]',
         )}
-        style={{ 
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05)',
-        }}
       >
-        <SheetHeader className={cn(marginBottom.comfortable, paddingBottom.default, 'border-b border-border/50')}>
+        <SheetHeader className={cn('mb-6', 'pb-4', 'border-b border-border/50')}>
           <SheetTitle className={cn('flex items-center gap-2 text-left text-lg font-semibold')}>
-            <BookmarkPlus className={`${iconSize.sm} ${marginRight.compact}`} />
+            <BookmarkPlus className="h-4 w-4 mr-2" />
             Pinned
           </SheetTitle>
-          <SheetDescription className={cn('text-left text-sm text-muted-foreground', marginTop.tight)}>
+          <SheetDescription className={cn('text-left text-muted-foreground text-sm', 'mt-1')}>
             Your saved items for quick access
           </SheetDescription>
         </SheetHeader>
 
         {/* Compact header with count and clear action */}
-        <div className={cn(between.center, marginBottom.default, size.xs, muted.default)}>
+        <div className={cn('flex items-center justify-between', 'mb-4', 'text-xs', 'text-muted-foreground')}>
           <span className={cn('font-medium')}>
             {hasPins ? `${pinnedItems.length} item${pinnedItems.length !== 1 ? 's' : ''}` : 'Empty'}
           </span>
@@ -119,7 +116,7 @@ export function PinboardDrawer({ open, onOpenChange }: PinboardDrawerProps) {
               variant="ghost" 
               size="sm" 
               onClick={clearAll}
-              className={cn('text-xs h-7', paddingX.compact, 'hover:text-destructive')}
+              className={cn('text-xs h-7', 'px-3', 'hover:text-destructive')}
             >
               Clear all
             </Button>
@@ -127,13 +124,13 @@ export function PinboardDrawer({ open, onOpenChange }: PinboardDrawerProps) {
         </div>
 
         {/* Content area with compact spacing - Beautiful, modern design with staggered animations */}
-        <div className={cn(spaceY.default)}>
+        <div className={cn('space-y-3')}>
           {!isLoaded && (
             <motion.div
               initial={shouldReduceMotion ? {} : { opacity: 0, y: 10 }}
               animate={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
               transition={SPRING.smooth}
-              className={cn('rounded-md border border-dashed border-border/60 p-3', spaceY.compact)}
+              className={cn('rounded-lg border border-dashed border-border/60 p-3', 'space-y-2')}
             >
               <div className={cn('h-3 w-2/3 animate-pulse rounded bg-muted/60')} />
               <div className={cn('h-2.5 w-5/6 animate-pulse rounded bg-muted/40')} />
@@ -143,7 +140,7 @@ export function PinboardDrawer({ open, onOpenChange }: PinboardDrawerProps) {
 
           {isLoaded && hasPins ? (
             <motion.ul 
-              className={cn(spaceY.compact, 'perspective-[1000px]')}
+              className={cn('space-y-2', 'perspective-[1000px]')}
             >
               <AnimatePresence mode="popLayout">
                 {pinnedItems.map((item, index) => (
@@ -176,8 +173,8 @@ export function PinboardDrawer({ open, onOpenChange }: PinboardDrawerProps) {
                   >
                     <div className={cn('flex items-start justify-between gap-3')}>
                       <div className={cn('flex-1 min-w-0')}>
-                        <div className={cn(cluster.compact, gap['1.5'], marginBottom.tight)}>
-                          <p className={cn('text-xs text-muted-foreground uppercase tracking-wide truncate')}>
+                        <div className={cn('flex items-center gap-1.5', 'mb-1')}>
+                          <p className={cn('text-muted-foreground text-xs uppercase tracking-wide truncate')}>
                             {item.category}
                             {item.typeName ? ` • ${item.typeName}` : ''}
                           </p>
@@ -188,14 +185,14 @@ export function PinboardDrawer({ open, onOpenChange }: PinboardDrawerProps) {
                             'block font-medium text-sm',
                             'hover:text-accent transition-colors duration-200',
                             'truncate',
-                            marginBottom.tight
+                            'mb-1'
                           )}
                           onClick={() => onOpenChange(false)}
                         >
                           {item.title}
                         </Link>
                         {item.description ? (
-                          <p className={cn('text-muted-foreground text-xs line-clamp-1', marginBottom.tight)}>
+                          <p className={cn('text-muted-foreground text-xs line-clamp-1', 'mb-1')}>
                             {item.description}
                           </p>
                         ) : null}
@@ -230,9 +227,9 @@ export function PinboardDrawer({ open, onOpenChange }: PinboardDrawerProps) {
               initial={shouldReduceMotion ? {} : { opacity: 0, scale: 0.95 }}
               animate={shouldReduceMotion ? {} : { opacity: 1, scale: 1 }}
               transition={SPRING.smooth}
-              className={cn('rounded-md border border-dashed border-border/60 p-6 text-center')}
+              className={cn('rounded-lg border border-dashed border-border/60 p-6 text-center')}
             >
-              <p className={cn('font-medium', marginBottom.compact)}>Nothing pinned yet</p>
+              <p className={cn('font-medium', 'mb-2')}>Nothing pinned yet</p>
               <p className={cn('text-muted-foreground text-sm')}>
                 Pin items from detail pages to build your shortlist.
               </p>

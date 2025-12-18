@@ -157,7 +157,6 @@ import {
 import { Button, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, cn } from '@heyclaude/web-runtime/ui';
 import { useBoolean, useTimeout } from '@heyclaude/web-runtime/hooks';
 import { getThemeConfig } from '@heyclaude/shared-runtime';
-import { paddingX, paddingY, gap, iconSize, cluster, muted, size, marginTop } from "@heyclaude/web-runtime/design-system";
 
 export type BundledLanguage = string;
 
@@ -300,8 +299,7 @@ const wordHighlightClassNames = cn(
 );
 
 const codeBlockClassName = cn(
-  marginTop.zero,
-  'bg-background text-sm',
+  'mt-0 bg-background text-sm',
   '[&_pre]:py-4', // Shiki-specific: pre padding (4 = 1rem = 16px)
   '[&_.shiki]:!bg-[var(--shiki-bg)]',
   '[&_code]:w-full',
@@ -356,7 +354,7 @@ export const CodeBlock = ({
   return (
     <CodeBlockContext.Provider value={{ value, onValueChange, data }}>
       <div
-        className={cn('size-full overflow-hidden rounded-md border', className)}
+        className={cn('size-full overflow-hidden rounded-lg border', className)}
         {...(props as any)}
       />
     </CodeBlockContext.Provider>
@@ -429,10 +427,10 @@ export const CodeBlockFilename = ({
 
   return (
     <div
-      className={cn(cluster.tight, gap.tight, 'bg-secondary', paddingX.default, paddingY.micro, muted.default, size.xs)}
+      className={cn('flex items-center gap-1 bg-secondary px-4 py-0.5 text-muted-foreground text-xs')}
       {...(props as any)}
     >
-      {Icon && <Icon className={`${iconSize.sm} shrink-0`} />}
+      {Icon && <Icon className="h-4 w-4 shrink-0" />}
       <span className="flex-1 truncate">{children}</span>
     </div>
   );
@@ -453,7 +451,7 @@ export const CodeBlockSelectTrigger = ({
   ...props
 }: CodeBlockSelectTriggerProps) => (
   <SelectTrigger
-    className={cn('w-fit border-none shadow-none', muted.default, size.xs, className)}
+    className={cn('w-fit border-none shadow-none text-muted-foreground text-xs', className)}
     {...(props as any)}
   />
 );
@@ -547,7 +545,7 @@ export const CodeBlockCopyButton = ({
       variant="ghost"
       {...(props as any)}
     >
-      {children ?? <Icon className={muted.default} size={14} />}
+      {children ?? <Icon className="text-muted-foreground" size={14} />}
     </Button>
   );
 };

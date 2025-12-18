@@ -22,55 +22,27 @@
  */
 
 import 'server-only';
-import { ContentService } from '@heyclaude/data-layer';
 import {
-  buildCacheHeaders,
   createApiOptionsHandler,
-  createApiRoute,
+  createCachedApiRoute,
   getOnlyCorsHeaders,
+  getVersionedRoute,
   jsonResponse,
+  type RouteHandlerContext,
 } from '@heyclaude/web-runtime/server';
-import { cacheLife } from 'next/cache';
-
-/**
- * Cached helper function to fetch category configs.
- * Uses Cache Components to reduce function invocations.
- *
- * @returns {Promise<unknown>} Category configs with features from the database RPC
- */
-async function getCachedCategoryConfigs() {
-  'use cache';
-  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
-
-  const service = new ContentService();
-  return service.getCategoryConfigs();
-}
 
 /**
  * GET /api/content/category-configs - Get category configurations
  *
  * Returns category configuration data including features, metadata, and display settings.
  * Used by the frontend to render category-specific UI and determine available features.
+ * 
+ * OPTIMIZATION: Uses createCachedApiRoute to eliminate cached helper function boilerplate.
  */
-export const GET = createApiRoute({
+export const GET = createCachedApiRoute({
+  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
+  cacheTags: ['category-configs'],
   cors: 'anon',
-  handler: async ({ logger }) => {
-    logger.info({}, 'Category configs request received');
-
-    const data = await getCachedCategoryConfigs();
-
-    logger.info(
-      {
-        count: Array.isArray(data) ? data.length : 'unknown',
-      },
-      'Category configs retrieved'
-    );
-
-    return jsonResponse(data, 200, getOnlyCorsHeaders, {
-      'X-Generated-By': 'prisma.rpc.get_category_configs_with_features',
-      ...buildCacheHeaders('config'),
-    });
-  },
   method: 'GET',
   openapi: {
     description:
@@ -85,7 +57,27 @@ export const GET = createApiRoute({
     tags: ['content', 'categories', 'config'],
   },
   operation: 'CategoryConfigsAPI',
-  route: '/api/content/category-configs',
+  responseHandler: (result: unknown, _query: unknown, _body: unknown, ctx: RouteHandlerContext<unknown, unknown>) => {
+    const { logger } = ctx;
+    const data = result as unknown[] | null | undefined;
+
+    logger.info(
+      {
+        count: Array.isArray(data) ? data.length : 'unknown',
+      },
+      'Category configs retrieved'
+    );
+
+    return jsonResponse(data, 200, getOnlyCorsHeaders, {
+      'X-Generated-By': 'prisma.category_configs.findMany', // Migrated from RPC to Prisma
+    });
+  },
+  route: getVersionedRoute('content/category-configs'),
+  service: {
+    methodArgs: () => [],
+    methodName: 'getCategoryConfigs',
+    serviceKey: 'content',
+  },
 });
 
 /**

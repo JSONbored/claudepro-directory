@@ -25,66 +25,27 @@
 
 import 'server-only';
 
-import { SearchService } from '@heyclaude/data-layer';
-import { createErrorResponse, normalizeError } from '@heyclaude/web-runtime/logging/server';
+// OPTIMIZATION: Removed unused imports - factory handles errors automatically
 import {
-  buildCacheHeaders,
   createApiOptionsHandler,
-  createApiRoute,
+  createCachedApiRoute,
+  getVersionedRoute,
   getWithAuthCorsHeaders,
   jsonResponse,
+  type RouteHandlerContext,
 } from '@heyclaude/web-runtime/server';
-import { cacheLife } from 'next/cache';
-
-/**
- * Cached helper function to fetch search facets.
- * Uses Cache Components to reduce function invocations.
- */
-async function getCachedSearchFacetsFormatted() {
-  'use cache';
-  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
-
-  const service = new SearchService();
-  return await service.getSearchFacetsFormatted();
-}
 
 /**
  * GET /api/search/facets - Get search facets
  *
  * Returns available search facets (categories, tags, authors) for filtering.
+ * 
+ * OPTIMIZATION: Uses createCachedApiRoute to eliminate cached helper function boilerplate.
  */
-export const GET = createApiRoute({
+export const GET = createCachedApiRoute({
+  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire
+  cacheTags: ['search-facets'],
   cors: 'auth',
-  handler: async ({ logger }) => {
-    logger.info({}, 'Facets request received');
-
-    let data: Awaited<ReturnType<typeof getCachedSearchFacetsFormatted>> | null = null;
-    try {
-      data = await getCachedSearchFacetsFormatted();
-    } catch (error) {
-      const normalized = normalizeError(error, 'Facets RPC failed');
-      logger.error({ err: normalized }, 'Facets RPC failed');
-      return createErrorResponse(normalized, {
-        logContext: { facetType: 'all' },
-        method: 'GET',
-        operation: 'SearchFacetsAPI',
-        route: '/api/search/facets',
-      });
-    }
-
-    const facets = Array.isArray(data) ? data : [];
-
-    return jsonResponse(
-      {
-        facets,
-      },
-      200,
-      {
-        ...getWithAuthCorsHeaders,
-        ...buildCacheHeaders('search_facets'),
-      }
-    );
-  },
   method: 'GET',
   openapi: {
     description:
@@ -99,7 +60,16 @@ export const GET = createApiRoute({
     tags: ['search', 'facets'],
   },
   operation: 'SearchFacetsAPI',
-  route: '/api/search/facets',
+  responseHandler: (result: unknown, _query: unknown, _body: unknown, _ctx: RouteHandlerContext<unknown, unknown>) => {
+    const facets = Array.isArray(result) ? result : [];
+    return jsonResponse({ facets }, 200, getWithAuthCorsHeaders);
+  },
+  route: getVersionedRoute('search/facets'),
+  service: {
+    methodArgs: () => [],
+    methodName: 'getSearchFacetsFormatted',
+    serviceKey: 'search',
+  },
 });
 
 /**

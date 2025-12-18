@@ -17,11 +17,19 @@ import {
   type SectionId,
 } from '@heyclaude/web-runtime/types/component.types';
 import dynamic from 'next/dynamic';
+import { Suspense } from 'react';
 
-import { JSONSectionRenderer } from '@/src/components/content/json-to-sections';
-import { ReviewListSection } from '@/src/components/core/domain/reviews/review-list-section';
+// Dynamic import for JSONSectionRenderer (822 lines) - lazy load for code splitting
+const JSONSectionRenderer = dynamic(
+  () => import('@/src/components/content/json-to-sections').then((mod) => ({ default: mod.JSONSectionRenderer })),
+  { ssr: true }
+);
+// Dynamic import for ReviewListSection (624 lines) - lazy load for code splitting
+const ReviewListSection = dynamic(
+  () => import('@/src/components/core/domain/reviews/review-list-section').then((mod) => ({ default: mod.ReviewListSection })),
+  { ssr: true }
+);
 import { markdownToHtml } from '@/src/lib/utils/markdown-to-html';
-import { paddingTop } from "@heyclaude/web-runtime/design-system";
 
 // Dynamic import for unified section component (code splitting)
 const UnifiedSection = dynamic(() => import('@/src/components/content/sections/unified-section'));
@@ -262,8 +270,10 @@ export function TabSectionRenderer({
       const validSlug = item.slug ?? '';
       if (!validSlug) return null;
       return (
-        <div className={`border-t ${paddingTop.relaxed}`}>
-          <ReviewListSection contentType={validCategory} contentSlug={validSlug} />
+        <div className="border-t pt-8">
+          <Suspense fallback={<div className="h-32" />}>
+            <ReviewListSection contentType={validCategory} contentSlug={validSlug} />
+          </Suspense>
         </div>
       );
     }
@@ -300,7 +310,11 @@ export function TabSectionRenderer({
       }
       // guideSections is already a processed array of sections with html
       // JSONSectionRenderer accepts arrays (checks Array.isArray internally)
-      return <JSONSectionRenderer sections={guideSections} />;
+      return (
+        <Suspense fallback={<div className="h-32" />}>
+          <JSONSectionRenderer sections={guideSections} />
+        </Suspense>
+      );
     }
 
     default: {

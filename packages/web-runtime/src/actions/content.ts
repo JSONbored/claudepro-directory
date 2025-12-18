@@ -6,13 +6,8 @@
  */
 
 import { optionalAuthAction, rateLimitedAction } from './safe-action.ts';
-// Lazy loaded to avoid server-only side effects
-// import { getPaginatedContent as getPaginatedContentData } from '../data/content/paginated.ts';
-// import { getReviewsWithStatsData } from '../data/content/reviews.ts';
 import { z } from 'zod';
 import type { DisplayableContent } from '../types/component.types.ts';
-import { logger, createWebAppContextWithId } from '../logging/server.ts';
-import { normalizeError } from '../errors.ts';
 import { content_categorySchema } from '../prisma-zod-schemas.ts';
 
 const getReviewsSchema = z.object({
@@ -38,47 +33,22 @@ export const getReviewsWithStats = optionalAuthAction
   })
   .inputSchema(getReviewsSchema)
   .action(async ({ parsedInput, ctx }) => {
-    const { content_type, content_slug, sort_by, limit, offset } = parsedInput;
+    const { getReviewsWithStatsData } = await import('../data/content/reviews.ts');
 
-    const logContext = createWebAppContextWithId('action', 'getReviewsWithStats', {
-      contentType: content_type,
-      contentSlug: content_slug,
-      sortBy: sort_by,
-      limit,
-      offset,
-      hasUser: Boolean(ctx.userId),
+    const data = await getReviewsWithStatsData({
+      contentType: parsedInput.content_type,
+      contentSlug: parsedInput.content_slug,
+      sortBy: parsedInput.sort_by,
+      limit: parsedInput.limit,
+      offset: parsedInput.offset,
+      ...(ctx.userId ? { userId: ctx.userId } : {}),
     });
 
-    try {
-      const { getReviewsWithStatsData } = await import('../data/content/reviews.ts');
-
-      const data = await getReviewsWithStatsData({
-        contentType: content_type,
-        contentSlug: content_slug,
-        sortBy: sort_by,
-        limit,
-        offset,
-        ...(ctx.userId ? { userId: ctx.userId } : {}),
-      });
-
-      if (!data) {
-        // Error is already logged by getReviewsWithStatsData, but log here too for action context
-        const normalized = normalizeError(
-          new Error('getReviewsWithStatsData returned null'),
-          'Failed to fetch reviews'
-        );
-        logger.error({ err: normalized, ...logContext }, 'getReviewsWithStats: data fetch returned null');
-        throw new Error('Failed to fetch reviews. Please try again.');
-      }
-
-      return data;
-    } catch (error) {
-      // If error is already normalized/logged by getReviewsWithStatsData, still log with action context
-      const normalized = normalizeError(error, 'Failed to fetch reviews');
-      logger.error({ err: normalized, ...logContext }, 'getReviewsWithStats: action failed');
-      // Re-throw normalized error to let safe-action wrapper handle it
-      throw normalized;
+    if (!data) {
+      throw new Error('Failed to fetch reviews. Please try again.');
     }
+
+    return data;
   });
 
 // ============================================
@@ -101,56 +71,22 @@ export const fetchPaginatedContent = rateLimitedAction
   .inputSchema(fetchPaginatedContentSchema)
   .metadata({ actionName: 'content.fetchPaginatedContent', category: 'content' })
   .action(async ({ parsedInput }) => {
-    const logContext = createWebAppContextWithId('/api/actions', 'fetchPaginatedContent');
+    const { getPaginatedContent: getPaginatedContentData } = await import('../data/content/paginated.ts');
 
-    try {
-      logger.info({ ...logContext,
-        category: parsedInput.category,
-        limit: parsedInput.limit,
-        offset: parsedInput.offset, }, 'fetchPaginatedContent: action started');
+    const data = await getPaginatedContentData({
+      category: parsedInput.category,
+      limit: parsedInput.limit,
+      offset: parsedInput.offset,
+    });
 
-      const { getPaginatedContent: getPaginatedContentData } = await import('../data/content/paginated.ts');
-
-      logger.info({ ...logContext,
-        category: parsedInput.category,
-        limit: parsedInput.limit,
-        offset: parsedInput.offset, }, 'fetchPaginatedContent: calling getPaginatedContentData');
-
-      const data = await getPaginatedContentData({
-        category: parsedInput.category,
-        limit: parsedInput.limit,
-        offset: parsedInput.offset,
-      });
-
-      logger.info({ ...logContext,
-        hasData: Boolean(data),
-        hasItems: Boolean(data?.items),
-        itemsLength: Array.isArray(data?.items) ? data.items.length : 0,
-        hasPagination: Boolean(data?.pagination),
-        paginationTotal: data?.pagination?.total_count ?? null, }, 'fetchPaginatedContent: getPaginatedContentData result received');
-
-      // get_content_paginated_slim returns content_paginated_slim_result composite type
-      if (!data?.items) {
-        logger.warn({ ...logContext,
-          hasData: Boolean(data),
-          dataKeys: data ? Object.keys(data) : [], }, 'fetchPaginatedContent: no items in result, returning empty array');
-        return [];
-      }
-      // Return items directly - convert ContentPaginatedSlimItem[] to DisplayableContent[]
-      // They're compatible types, just need explicit conversion
-      const items = (data.items ?? []) as unknown as DisplayableContent[];
-      logger.info({ ...logContext,
-        itemsCount: items.length, }, 'fetchPaginatedContent: returning items');
-      return items;
-    } catch (error) {
-      const normalized = normalizeError(error, 'fetchPaginatedContent failed');
-      logger.error({ err: normalized, ...logContext,
-        category: parsedInput.category,
-        limit: parsedInput.limit,
-        offset: parsedInput.offset, }, 'fetchPaginatedContent: action failed');
-      // Fallback to empty array on error (safe-action middleware handles logging)
+    // get_content_paginated_slim returns content_paginated_slim_result composite type
+    if (!data?.items) {
       return [];
     }
+    
+    // Return items directly - convert ContentPaginatedSlimItem[] to DisplayableContent[]
+    // They're compatible types, just need explicit conversion
+    return (data.items ?? []) as unknown as DisplayableContent[];
   });
 
 // Removed all collection and review actions - migrated to generated actions

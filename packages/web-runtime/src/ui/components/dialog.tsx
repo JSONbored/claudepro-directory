@@ -14,8 +14,6 @@
  */
 
 import { X } from '../../icons.tsx';
-import { POSITION_PATTERNS, STATE_PATTERNS } from '../constants.ts';
-import { iconSize, size, weight, size as textSize, leading } from '../../design-system/index.ts';
 import { cn } from '../utils.ts';
 import { useScrollLock } from '../../hooks/use-scroll-lock.ts';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
@@ -40,7 +38,7 @@ const DialogOverlay = ({
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      `${POSITION_PATTERNS.FIXED_INSET} z-[60]`,
+      'fixed inset-0 z-[60]',
       // Vercel's minimal backdrop
       'bg-black/50 backdrop-blur-sm', // Subtle blur
       'data-[state=closed]:animate-out data-[state=open]:animate-in',
@@ -231,14 +229,14 @@ const DialogContent = ({
         {children}
         <DialogPrimitive.Close
           className={cn(
-            POSITION_PATTERNS.ABSOLUTE_TOP_RIGHT_OFFSET_XL,
+            'absolute top-4 right-4',
             'rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100',
-            STATE_PATTERNS.FOCUS_RING_OFFSET,
-            STATE_PATTERNS.DISABLED_STANDARD,
+            'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+            'disabled:opacity-50 disabled:pointer-events-none',
             'data-[state=open]:bg-accent data-[state=open]:text-muted-foreground'
           )}
         >
-          <X className={iconSize.sm} />
+          <X className="h-4 w-4" />
           <span className="sr-only">Close</span>
         </DialogPrimitive.Close>
       </DialogPrimitive.Content>
@@ -269,7 +267,7 @@ const DialogTitle = ({
 }) => (
   <DialogPrimitive.Title
     ref={ref}
-    className={cn(`${size.lg} ${weight.semibold}`, 'leading-none tracking-tight', className)}
+    className={cn('text-lg font-semibold leading-none tracking-tight', className)}
     {...props}
   />
 );
@@ -284,7 +282,7 @@ const DialogDescription = ({
 }) => (
   <DialogPrimitive.Description
     ref={ref}
-    className={cn(`${textSize.sm} ${leading.normal}`, 'text-muted-foreground', className)}
+    className={cn('text-sm leading-normal text-muted-foreground', className)}
     {...props}
   />
 );

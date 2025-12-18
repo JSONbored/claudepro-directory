@@ -42,9 +42,8 @@
  */
 
 import type { content_category, sponsorship_tier } from '@heyclaude/data-layer/prisma';
-import { SPRING, DURATION, iconSize, marginRight, size, weight, tracking } from '../../../design-system/index.ts';
+import { SPRING, DURATION } from '../../../design-system/index.ts';
 import { Star, TrendingUp, Zap } from '../../../icons.tsx';
-import { ANIMATION_CONSTANTS } from '../../constants.ts';
 import { cn } from '../../utils.ts';
 // COLORS removed - using direct Tailwind utilities
 import { cva } from 'class-variance-authority';
@@ -129,16 +128,17 @@ const baseBadgeVariants = cva(
 
 // Category badge styles - only for categories that have badge styles defined
 // Note: 'changelog' and 'jobs' are ContentCategory but don't have badge styles
+// Uses Direct Tailwind utilities generated from @theme color variables
 const categoryBadgeStyles = {
-  rules: 'badge-category-rules',
-  mcp: 'badge-category-mcp',
-  agents: 'badge-category-agents',
-  commands: 'badge-category-commands',
-  hooks: 'badge-category-hooks',
-  statuslines: 'badge-category-statuslines',
-  collections: 'badge-category-collections',
-  guides: 'badge-category-guides',
-  skills: 'badge-category-skills',
+  rules: 'bg-transparent text-category-rules border-category-rules-border font-semibold',
+  mcp: 'bg-transparent text-category-mcp border-category-mcp-border font-semibold',
+  agents: 'bg-transparent text-category-agents border-category-agents-border font-semibold',
+  commands: 'bg-transparent text-category-commands border-category-commands-border font-semibold',
+  hooks: 'bg-transparent text-category-hooks border-category-hooks-border font-semibold',
+  statuslines: 'bg-transparent text-category-statuslines border-category-statuslines-border font-semibold',
+  collections: 'bg-transparent text-category-collections border-category-collections-border font-semibold',
+  guides: 'bg-transparent text-category-guides border-category-guides-border font-semibold',
+  skills: 'bg-transparent text-category-skills border-category-skills-border font-semibold',
 } as const satisfies Partial<Record<content_category, string>>;
 
 const sourceBadgeStyles = {
@@ -439,9 +439,9 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
         case 'featured':
           return <Star className="mr-1 h-3 w-3 fill-current" aria-hidden="true" />;
         case 'promoted':
-          return <TrendingUp className={`${iconSize.xs} ${marginRight.tight}`} aria-hidden="true" />;
+          return <TrendingUp className="mr-1 h-3 w-3" aria-hidden="true" />;
         case 'spotlight':
-          return <Zap className={`${iconSize.xs} ${marginRight.tight}`} aria-hidden="true" />;
+          return <Zap className="mr-1 h-3 w-3" aria-hidden="true" />;
         default:
           return null;
       }
@@ -483,7 +483,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
         <button
           type="button"
           className={cn(
-            `inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold text-xs ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT}`,
+            'inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold text-xs transition-all duration-200 ease-out',
             'cursor-pointer bg-accent text-accent-foreground shadow-lg shadow-primary/25',
             props.className
           )}
@@ -597,7 +597,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
         className={cn(
           'inline-flex items-center justify-center',
           'px-2.5 py-0.5',
-          cn(weight.semibold, size['2xs'], 'uppercase', tracking.wide),
+          'font-semibold text-[10px] uppercase tracking-wide',
           'rounded-full border',
           variantStyles[badgeVariant],
           props.className
@@ -640,7 +640,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
       <span
         className={cn(
           '-top-1 -right-1 absolute',
-          cn(weight.semibold, size['2xs'], 'tabular-nums leading-none'),
+          'font-semibold text-[10px] tabular-nums leading-none',
           'pointer-events-none',
           colorClasses[type],
           props.className

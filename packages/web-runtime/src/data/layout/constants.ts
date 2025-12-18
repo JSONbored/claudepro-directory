@@ -1,4 +1,4 @@
-import type { announcementsModel } from '@heyclaude/data-layer/prisma';
+import { type announcementsModel } from '@heyclaude/data-layer/prisma';
 
 /**
  * Layout data interface

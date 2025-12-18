@@ -1,15 +1,14 @@
 /** Homepage consuming homepageConfigs for runtime-tunable categories */
 
-import type { user_tier, content_category } from '@heyclaude/data-layer/prisma';
-import { trackRPCFailure } from '@heyclaude/web-runtime/core';
+import { type content_category, type user_tier } from '@heyclaude/data-layer/prisma';
+import { isValidCategory, trackRPCFailure } from '@heyclaude/web-runtime/core';
+import { isBookmarkedBatch } from '@heyclaude/web-runtime/data';
 import {
   generatePageMetadata,
+  getAuthenticatedUser,
   getHomepageCategoryIds,
   getHomepageData,
 } from '@heyclaude/web-runtime/server';
-import { getAuthenticatedUser } from '@heyclaude/web-runtime/server';
-import { isBookmarkedBatch } from '@heyclaude/web-runtime/data';
-import { isValidCategory } from '@heyclaude/web-runtime/core';
 import { type Metadata } from 'next';
 // Suspense removed - not needed since data is fetched at page level
 // Suspense above the fold can cause blank states to be cached
@@ -47,10 +46,10 @@ interface HomePageProperties {
 
 /**
  * REMOVED: TopContributorsServer component
- * 
+ *
  * This component previously fetched homepage data separately, causing duplicate function calls.
  * Data is now fetched once at the page level and passed as props to TopContributors (New Community Members).
- * 
+ *
  * @see HomePage - Now handles data fetching and passes new community members as props
  */
 
@@ -90,11 +89,15 @@ export default async function HomePage({ searchParams: _searchParams }: HomePage
 
   // Extract data for hero section
   const memberCount = homepageResult?.member_count ?? 0;
-  
+
   // OPTIMIZATION: Early return pattern for stats extraction
   let stats: Record<string, number | { featured: number; total: number }> = {};
-  if (homepageResult?.content && typeof homepageResult.content === 'object' && !Array.isArray(homepageResult.content)) {
-    const content = homepageResult.content as Record<string, unknown>;
+  if (
+    homepageResult?.content &&
+    typeof homepageResult.content === 'object' &&
+    !Array.isArray(homepageResult.content)
+  ) {
+    const content = homepageResult.content;
     if ('stats' in content && typeof content['stats'] === 'object' && content['stats'] !== null) {
       stats = content['stats'] as Record<string, number | { featured: number; total: number }>;
     }
@@ -108,7 +111,7 @@ export default async function HomePage({ searchParams: _searchParams }: HomePage
     image: null | string;
     name: string;
     slug: string;
-    tier: user_tier | null;
+    tier: null | user_tier;
     work: null | string;
   }
 
@@ -123,7 +126,11 @@ export default async function HomePage({ searchParams: _searchParams }: HomePage
         'id' in c &&
         'slug' in c &&
         'name' in c &&
-        Boolean((c as Record<string, unknown>)['id'] && (c as Record<string, unknown>)['slug'] && (c as Record<string, unknown>)['name'])
+        Boolean(
+          (c as Record<string, unknown>)['id'] &&
+          (c as Record<string, unknown>)['slug'] &&
+          (c as Record<string, unknown>)['name']
+        )
     )
     .map((contributor: TopContributor) => {
       // OPTIMIZATION: Simplified created_at conversion (reduces object checks)
@@ -158,28 +165,37 @@ export default async function HomePage({ searchParams: _searchParams }: HomePage
   if (authResult.isAuthenticated && authResult.user) {
     try {
       // OPTIMIZATION: Collect all items efficiently with early returns
-      const allItems: Array<{ content_type: content_category; content_slug: string }> = [];
-      
-      if (homepageResult?.content && typeof homepageResult.content === 'object' && !Array.isArray(homepageResult.content)) {
-        const content = homepageResult.content as Record<string, unknown>;
+      const allItems: Array<{ content_slug: string; content_type: content_category }> = [];
+
+      if (
+        homepageResult?.content &&
+        typeof homepageResult.content === 'object' &&
+        !Array.isArray(homepageResult.content)
+      ) {
+        const content = homepageResult.content;
         const categoryData = content['categoryData'];
-        
-        if (categoryData && typeof categoryData === 'object' && categoryData !== null && !Array.isArray(categoryData)) {
+
+        if (
+          categoryData &&
+          typeof categoryData === 'object' &&
+          categoryData !== null &&
+          !Array.isArray(categoryData)
+        ) {
           // OPTIMIZATION: Use Object.entries with early validation
           for (const [categoryKey, items] of Object.entries(categoryData)) {
             if (!Array.isArray(items) || !isValidCategory(categoryKey)) continue;
-            
+
             // Validate using isValidCategory (which uses Prisma enum), then narrow type
             if (!isValidCategory(categoryKey)) continue;
-            const category = categoryKey as content_category; // isValidCategory ensures type safety
-            
+            const category = categoryKey; // isValidCategory ensures type safety
+
             // OPTIMIZATION: Use for...of with early continue for better performance
             for (const item of items) {
               if (!item || typeof item !== 'object' || !('slug' in item)) continue;
-              
+
               const slug = item.slug;
               if (typeof slug === 'string' && slug) {
-                allItems.push({ content_type: category, content_slug: slug });
+                allItems.push({ content_slug: slug, content_type: category });
               }
             }
           }
@@ -189,8 +205,8 @@ export default async function HomePage({ searchParams: _searchParams }: HomePage
       // Only call batch check if we have items to check
       if (allItems.length > 0) {
         const batchResults = await isBookmarkedBatch({
-          userId: authResult.user.id,
           items: allItems,
+          userId: authResult.user.id,
         });
 
         // Convert results array to Map for O(1) lookup
@@ -206,7 +222,8 @@ export default async function HomePage({ searchParams: _searchParams }: HomePage
       }
     } catch (error) {
       // Log error but don't fail page render - bookmark status is non-critical
-      const { createLogger, normalizeError } = await import('@heyclaude/shared-runtime/logger/index');
+      const { createLogger, normalizeError } =
+        await import('@heyclaude/shared-runtime/logger/index');
       const logger = createLogger({ timestamp: false });
       const normalized = normalizeError(error, 'Bookmark status batch check failed');
       logger.warn({
@@ -222,18 +239,18 @@ export default async function HomePage({ searchParams: _searchParams }: HomePage
   return (
     <HeroSearchConnectionProvider>
       <HomepageSearchProvider>
-        <div className={`bg-background min-h-screen`}>
-          <div className={`relative overflow-hidden`}>
+        <div className="bg-background min-h-screen">
+          <div className="relative overflow-hidden">
             {/* Hero section - now receives data as props instead of fetching */}
             <HomepageHeroServer memberCount={memberCount} stats={stats} />
 
             {/* Homepage content - now receives data as props instead of fetching */}
             {/* CRITICAL: No Suspense above the fold - data is already fetched, prevents blank states from being cached */}
-            <div className={`relative`}>
-              <HomepageContentServer 
-                homepageResult={homepageResult} 
-                categoryIds={categoryIds}
+            <div className="relative">
+              <HomepageContentServer
                 bookmarkStatusMap={bookmarkStatusMap}
+                categoryIds={categoryIds}
+                homepageResult={homepageResult}
               />
             </div>
 
@@ -253,10 +270,10 @@ export default async function HomePage({ searchParams: _searchParams }: HomePage
 
 /**
  * REMOVED: HomepageHeroWithMemberCount component
- * 
+ *
  * This component previously fetched homepage data separately, causing duplicate function calls.
  * Data is now fetched once at the page level and passed as props to HomepageHeroServer.
- * 
+ *
  * @see HomePage - Now handles data fetching and passes memberCount/stats as props
  */
 

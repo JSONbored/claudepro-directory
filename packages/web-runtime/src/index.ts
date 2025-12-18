@@ -72,7 +72,6 @@ export * from './auth/mfa.ts';
 export * from './auth/aal.ts';
 export * from './auth/oauth-providers.ts';
 export * from './storage/image-utils.ts';
-export * from './edge/call-edge-function.ts';
 export * from './edge/transform.ts';
 export * from './utils/markdown-code-extractor.ts';
 export * from './seo/og.ts';

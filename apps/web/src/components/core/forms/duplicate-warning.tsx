@@ -8,7 +8,6 @@ import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { useDebounceValue, useBoolean } from '@heyclaude/web-runtime/hooks';
 import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
-import { iconSize, size } from "@heyclaude/web-runtime/design-system";
 
 interface DuplicateWarningProps {
   contentType: content_category;
@@ -84,7 +83,7 @@ export function DuplicateWarning({ contentType: _contentType, name }: DuplicateW
   if (checking) {
     return (
       <motion.div
-        className={`text-muted-foreground ${size.sm}`}
+        className="text-muted-foreground text-sm"
         animate={shouldReduceMotion ? { opacity: 1 } : { opacity: [1, 0.5, 1] }}
         transition={shouldReduceMotion ? {} : { duration: 1, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
       >
@@ -99,10 +98,10 @@ export function DuplicateWarning({ contentType: _contentType, name }: DuplicateW
 
   return (
     <Alert className="border-yellow-500/20 bg-yellow-500/5">
-      <AlertTriangle className={`${iconSize.sm} text-yellow-400`} />
+      <AlertTriangle className="h-4 w-4 text-yellow-400" />
       <AlertTitle className="text-yellow-400">Suggestion</AlertTitle>
       <AlertDescription>
-        <p className={`text-muted-foreground ${size.sm}`}>{warning}</p>
+        <p className="text-muted-foreground text-sm">{warning}</p>
       </AlertDescription>
     </Alert>
   );

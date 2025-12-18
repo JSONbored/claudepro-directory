@@ -3,11 +3,12 @@
  * Manages user's companies with CRUD operations via companies-handler
  */
 
-import type { GetUserCompaniesReturns } from '@heyclaude/database-types/postgres-types';
+// GetUserCompaniesReturns type is now derived from getUserCompleteData return type
+import { type UserCompaniesCompany } from '@heyclaude/database-types/postgres-types';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
-  getUserCompanies,
+  getUserCompleteData,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { formatRelativeDate } from '@heyclaude/web-runtime/data/utils';
@@ -40,7 +41,6 @@ import { Suspense } from 'react';
 import { SignInButton } from '@/src/components/core/auth/sign-in-button';
 
 import Loading from './loading';
-import { between, cluster, spaceY, marginBottom, marginRight, paddingY, gap, marginTop } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Dynamic Rendering Required
@@ -88,7 +88,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * @returns The React element for the companies management page (sign-in prompt, error state, empty state, or companies list).
  *
  * @see getAuthenticatedUser
- * @see getUserCompanies
+ * @see getUserCompleteData
  * @see isAllowedHttpUrl
  * @see logger
  */
@@ -128,7 +128,7 @@ export default async function CompaniesPage() {
  * @returns A JSX element representing the companies page content.
  *
  * @see getAuthenticatedUser
- * @see getUserCompanies
+ * @see getUserCompleteData
  * @see isAllowedHttpUrl
  */
 async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
@@ -141,7 +141,7 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
       'CompaniesPage: unauthenticated access attempt detected'
     );
     return (
-      <div className={`${spaceY.relaxed}`}>
+      <div className="space-y-6">
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl">Sign in required</CardTitle>
@@ -169,21 +169,36 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
   userLogger.info({ section: 'data-fetch' }, 'CompaniesPage: authentication successful');
 
   // Section: Companies Data Fetch
-  let companies: NonNullable<GetUserCompaniesReturns>['companies'] = [];
+  // companies is Record<string, unknown> | null from user_dashboard, but we need to parse it as an array
+  let companies: UserCompaniesCompany[] = [];
   let hasError = false;
 
   // User-scoped edge-cached RPC via centralized data layer
   try {
-    const data = await getUserCompanies(user.id);
+    const completeData = await getUserCompleteData(user.id);
 
-    if (data) {
-      companies = data.companies ?? [];
+    if (completeData?.user_dashboard?.companies) {
+      const companiesJson = completeData.user_dashboard.companies;
+      // Parse JSONB companies - could be array or object, handle both
+      if (Array.isArray(companiesJson)) {
+        companies = companiesJson as UserCompaniesCompany[];
+      } else if (companiesJson && typeof companiesJson === 'object') {
+        // If it's an object, try to extract array from it
+        const companiesArray =
+          'items' in companiesJson && Array.isArray((companiesJson as { items?: unknown }).items)
+            ? (companiesJson as { items: UserCompaniesCompany[] }).items
+            : [];
+        companies = companiesArray;
+      }
       userLogger.info(
         { companiesCount: companies.length, section: 'data-fetch' },
         'CompaniesPage: companies data loaded'
       );
     } else {
-      userLogger.warn({ section: 'data-fetch' }, 'CompaniesPage: getUserCompanies returned null');
+      userLogger.warn(
+        { section: 'data-fetch' },
+        'CompaniesPage: getUserCompleteData returned null or missing companies'
+      );
       hasError = true;
     }
   } catch (error) {
@@ -193,14 +208,14 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
         err: normalized,
         section: 'data-fetch',
       },
-      'CompaniesPage: getUserCompanies threw'
+      'CompaniesPage: getUserCompleteData threw'
     );
     hasError = true;
   }
 
   if (hasError) {
     return (
-      <div className={`${spaceY.relaxed}`}>
+      <div className="space-y-6">
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl">Companies unavailable</CardTitle>
@@ -229,17 +244,17 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
   );
 
   return (
-    <div className={`${spaceY.relaxed}`}>
-      <div className={between.center}>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className={`${marginBottom.compact} text-3xl font-bold`}>My Companies</h1>
+          <h1 className="mb-2 text-3xl font-bold">My Companies</h1>
           <p className="text-muted-foreground">
             {companies.length} {companies.length === 1 ? 'company' : 'companies'}
           </p>
         </div>
         <Button asChild>
           <Link href={`${ROUTES.ACCOUNT_COMPANIES}/new`}>
-            <Plus className={`${marginRight.tight} h-4 w-4`} />
+            <Plus className="mr-2 h-4 w-4" />
             Add Company
           </Link>
         </Button>
@@ -247,22 +262,22 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
 
       {companies.length === 0 ? (
         <Card>
-          <CardContent className={`flex flex-col items-center ${paddingY.section}`}>
-            <Building2 className={`text-muted-foreground ${marginBottom.default} h-12 w-12`} />
-            <h3 className={`${marginBottom.compact} text-xl font-semibold`}>No companies yet</h3>
-            <p className={`text-muted-foreground ${marginBottom.default} max-w-md text-center`}>
+          <CardContent className="flex flex-col items-center py-12">
+            <Building2 className="text-muted-foreground mb-4 h-12 w-12" />
+            <h3 className="mb-2 text-xl font-semibold">No companies yet</h3>
+            <p className="text-muted-foreground mb-4 max-w-md text-center">
               Create a company profile to showcase your organization and post job listings
             </p>
             <Button asChild>
               <Link href={`${ROUTES.ACCOUNT_COMPANIES}/new`}>
-                <Plus className={`${marginRight.tight} h-4 w-4`} />
+                <Plus className="mr-2 h-4 w-4" />
                 Create Your First Company
               </Link>
             </Button>
           </CardContent>
         </Card>
       ) : (
-        <div className={`grid ${gap.default}`}>
+        <div className="grid gap-3">
           {companies
             .filter(
               (
@@ -273,26 +288,27 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
                 slug: string;
               } => company.id !== null && company.name !== null && company.slug !== null
             )
-            .map((company, index) => (
+            .map((company: UserCompaniesCompany, index: number) => (
               <Card key={company.id}>
                 <CardHeader>
-                  <div className={between.start}>
-                    <div className={`flex flex-1 items-start ${gap.default}`}>
+                  <div className="flex items-start justify-between">
+                    <div className="flex flex-1 items-start gap-3">
                       {(() => {
                         // Validate logo URL is safe (should be from Supabase storage or trusted domain)
-                        if (!company.logo) {
+                        const logo = company['logo'] as null | string | undefined;
+                        if (!logo) {
                           return (
-                            <div className="bg-accent flex h-16 w-16 items-center justify-center rounded-lg border">
+                            <div className="bg-accent card-base flex h-16 w-16 items-center justify-center">
                               <Building2 className="text-muted-foreground h-8 w-8" />
                             </div>
                           );
                         }
                         try {
-                          const parsed = new URL(company.logo);
+                          const parsed = new URL(logo);
                           // Only allow HTTPS
                           if (parsed.protocol !== 'https:') {
                             return (
-                              <div className="bg-accent flex h-16 w-16 items-center justify-center rounded-lg border">
+                              <div className="bg-accent card-base flex h-16 w-16 items-center justify-center">
                                 <Building2 className="text-muted-foreground h-8 w-8" />
                               </div>
                             );
@@ -312,7 +328,7 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
                             isAwsS3;
                           if (!isTrustedSource) {
                             return (
-                              <div className="bg-accent flex h-16 w-16 items-center justify-center rounded-lg border">
+                              <div className="bg-accent card-base flex h-16 w-16 items-center justify-center">
                                 <Building2 className="text-muted-foreground h-8 w-8" />
                               </div>
                             );
@@ -320,23 +336,23 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
                           return (
                             <Image
                               alt={`${company.name} logo`}
-                              className="h-16 w-16 rounded-lg border object-cover"
+                              className="card-base h-16 w-16 object-cover"
                               height={64}
                               priority={index === 0}
-                              src={company.logo}
+                              src={logo}
                               width={64}
                             />
                           );
                         } catch {
                           return (
-                            <div className="bg-accent flex h-16 w-16 items-center justify-center rounded-lg border">
+                            <div className="bg-accent card-base flex h-16 w-16 items-center justify-center">
                               <Building2 className="text-muted-foreground h-8 w-8" />
                             </div>
                           );
                         }
                       })()}
                       <div className="flex-1">
-                        <div className={cluster.compact}>
+                        <div className="flex items-center gap-2">
                           <CardTitle>{company.name}</CardTitle>
                           {company.featured ? (
                             <UnifiedBadge style="default" variant="base">
@@ -344,7 +360,7 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
                             </UnifiedBadge>
                           ) : null}
                         </div>
-                        <CardDescription className={`${marginTop.tight}`}>
+                        <CardDescription className="mt-1">
                           {company.description ?? 'No description provided'}
                         </CardDescription>
                         {(() => {
@@ -390,7 +406,7 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
                           const validatedUrl: string = safeHref;
                           return (
                             <a
-                              className={`${marginTop.compact} inline-flex items-center ${gap.micro} text-sm text-accent hover:text-accent-hover transition-colors duration-200`}
+                              className="text-accent hover:text-accent-hover mt-2 inline-flex items-center gap-0.5 text-sm transition-colors duration-200"
                               href={validatedUrl}
                               rel="noopener noreferrer"
                               target="_blank"
@@ -406,35 +422,35 @@ async function CompaniesPageContent({ reqLogger }: { reqLogger: ReturnType<typeo
                 </CardHeader>
 
                 <CardContent>
-                  <div className={`text-muted-foreground ${marginBottom.default} flex flex-wrap ${gap.default} text-sm`}>
-                    <div className={cluster.tight}>
+                  <div className="text-muted-foreground mb-4 flex flex-wrap gap-3 text-sm">
+                    <div className="flex items-center gap-1">
                       <Briefcase className="h-4 w-4" />
                       {company.stats?.active_jobs ?? 0} active job
                       {(company.stats?.active_jobs ?? 0) === 1 ? '' : 's'}
                     </div>
-                    <div className={cluster.tight}>
+                    <div className="flex items-center gap-1">
                       <Eye className="h-4 w-4" />
                       {(company.stats?.total_views ?? 0).toLocaleString()} views
                     </div>
                     {company.stats?.latest_job_posted_at ? (
-                      <div className={cluster.tight}>
+                      <div className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
                         Last job posted {formatRelativeDate(company.stats.latest_job_posted_at)}
                       </div>
                     ) : null}
                   </div>
 
-                  <div className={`flex ${gap.tight}`}>
+                  <div className="flex gap-1">
                     <Button asChild size="sm" variant="outline">
                       <Link href={`${ROUTES.ACCOUNT_COMPANIES}/${company.id}/edit`}>
-                        <Edit className={`${marginRight.micro} h-3 w-3`} />
+                        <Edit className="mr-0.5 h-3 w-3" />
                         Edit
                       </Link>
                     </Button>
 
                     <Button asChild size="sm" variant="ghost">
                       <Link href={`/companies/${company.slug}`}>
-                        <ExternalLink className={`${marginRight.micro} h-3 w-3`} />
+                        <ExternalLink className="mr-0.5 h-3 w-3" />
                         View Profile
                       </Link>
                     </Button>

@@ -14,7 +14,7 @@
  * - Cached DOMPurify instance
  */
 
-import { normalizeError, logger } from '@heyclaude/web-runtime';
+import { normalizeError } from '@heyclaude/shared-runtime';
 import DOMPurify from 'isomorphic-dompurify';
 import { marked } from 'marked';
 
@@ -54,18 +54,20 @@ export function markdownToHtml(markdown: null | string | undefined): string {
     // Sanitize HTML server-side for defense-in-depth
     return DOMPurify.sanitize(html);
   } catch (error) {
-    // Log error but return empty string to prevent crashes
-    // Use universal logger (works in both server and client contexts)
+    // Normalize error for consistent error handling
+    // Note: Logging removed to support both server and client contexts
+    // Errors are handled gracefully by returning empty string
     const normalized = normalizeError(error, 'Failed to parse markdown');
-    logger.error(
-      {
-        err: normalized,
-        operation: 'markdownToHtml',
-        module: 'lib/utils/markdown-to-html',
+    
+    // Only log in development to avoid exposing errors in production
+    // Use console.error as fallback since this utility is used in both contexts
+    if (process.env.NODE_ENV === 'development') {
+      console.error('[markdownToHtml] Failed to parse markdown', {
+        error: normalized,
         markdownLength: markdown.length,
-      },
-      '[markdownToHtml] Failed to parse markdown'
-    );
+      });
+    }
+    
     return '';
   }
 }

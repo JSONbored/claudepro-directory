@@ -17,7 +17,6 @@ import {
   DialogTitle,
   Input,
 } from '@heyclaude/web-runtime/ui';
-import { cluster, iconSize, spaceY, gap } from "@heyclaude/web-runtime/design-system";
 
 interface ShareResultsProps {
   onClose: () => void;
@@ -41,8 +40,8 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className={cluster.compact}>
-            <Share2 className={iconSize.md} />
+          <DialogTitle className="flex items-center gap-2">
+            <Share2 className="h-5 w-5" />
             Share Your Results
           </DialogTitle>
           <DialogDescription>
@@ -50,9 +49,9 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
           </DialogDescription>
         </DialogHeader>
 
-        <div className={`${spaceY.comfortable}`}>
+        <div className="space-y-6">
           {/* Copy link */}
-          <div className={cluster.compact}>
+          <div className="flex items-center gap-2">
             <Input
               readOnly
               value={shareUrl}
@@ -66,7 +65,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
               variant="outline"
               size="icon"
               className="shrink-0"
-              iconClassName={iconSize.sm}
+              iconClassName="h-4 w-4"
               ariaLabel="Copy share link"
               onCopySuccess={() => {
                 logClientInfo(
@@ -83,8 +82,8 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
           </div>
 
           {/* Social share buttons */}
-          <div className={`grid grid-cols-2 ${gap.compact}`}>
-            <Button variant="outline" size="sm" asChild className={`${gap.tight}`}>
+          <div className="grid grid-cols-2 gap-2">
+            <Button variant="outline" size="sm" asChild className="gap-1">
               <a
                 href={shareLinks.twitter}
                 target="_blank"
@@ -101,12 +100,12 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
                   );
                 }}
               >
-                <Twitter className={iconSize.sm} />
+                <Twitter className="h-4 w-4" />
                 Twitter
               </a>
             </Button>
 
-            <Button variant="outline" size="sm" asChild className={`${gap.tight}`}>
+            <Button variant="outline" size="sm" asChild className="gap-1">
               <a
                 href={shareLinks.linkedin}
                 target="_blank"
@@ -123,12 +122,12 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
                   );
                 }}
               >
-                <Linkedin className={iconSize.sm} />
+                <Linkedin className="h-4 w-4" />
                 LinkedIn
               </a>
             </Button>
 
-            <Button variant="outline" size="sm" asChild className={`${gap.tight}`}>
+            <Button variant="outline" size="sm" asChild className="gap-1">
               <a
                 href={shareLinks.facebook}
                 target="_blank"
@@ -145,12 +144,12 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
                   );
                 }}
               >
-                <Facebook className={iconSize.sm} />
+                <Facebook className="h-4 w-4" />
                 Facebook
               </a>
             </Button>
 
-            <Button variant="outline" size="sm" asChild className={`${gap.tight}`}>
+            <Button variant="outline" size="sm" asChild className="gap-1">
               <a
                 href={shareLinks.email}
                 onClick={() => {
@@ -165,7 +164,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
                   );
                 }}
               >
-                <Mail className={iconSize.sm} />
+                <Mail className="h-4 w-4" />
                 Email
               </a>
             </Button>

@@ -12,12 +12,11 @@
  * @module components/features/social/follow-button
  */
 
-import { normalizeError } from '@heyclaude/shared-runtime';
-import { toggleFollow } from '@heyclaude/web-runtime/actions';
-import { useAuthenticatedUser, useLoggedAsync } from '@heyclaude/web-runtime/hooks';
+import { toggleFollow } from '@heyclaude/web-runtime/actions/user';
+import { useAuthenticatedUser, useSafeAction } from '@heyclaude/web-runtime/hooks';
 import { Button, toasts } from '@heyclaude/web-runtime/ui';
 import { usePathname } from 'next/navigation';
-import { useCallback, useOptimistic, useTransition } from 'react';
+import { useCallback, useOptimistic } from 'react';
 import { toast } from 'sonner';
 
 import { useAuthModal } from '@/src/hooks/use-auth-modal';
@@ -56,7 +55,6 @@ export function FollowButton({
   size = 'sm',
   className,
 }: FollowButtonProps) {
-  const [isPending, startTransition] = useTransition();
   const [optimisticIsFollowing, setOptimisticIsFollowing] = useOptimistic(
     initialIsFollowing,
     (_, newState: boolean) => newState
@@ -64,10 +62,38 @@ export function FollowButton({
   const { user, status } = useAuthenticatedUser({ context: 'FollowButton' });
   const { openAuthModal } = useAuthModal();
   const pathname = usePathname();
-  const runLoggedAsync = useLoggedAsync({
-    scope: 'FollowButton',
-    defaultMessage: 'Follow operation failed',
-    defaultRethrow: true, // Re-throw so outer catch can handle rollback
+  
+  // Use useSafeAction hook - this properly infers types from next-safe-action
+  const { executeAsync, isPending } = useSafeAction(toggleFollow, {
+    onSuccess: ({ data }: { data?: { success: boolean | null } }) => {
+      if (data?.success) {
+        toast.success(optimisticIsFollowing ? 'Unfollowed user' : 'Following user');
+      }
+    },
+    onError: ({ error }: { error: { serverError?: string; validationErrors?: unknown } }) => {
+      // Rollback optimistic update on error
+      setOptimisticIsFollowing(initialIsFollowing);
+      
+      const errorMessage = error.serverError || 'Failed to update follow status';
+      
+      // Check if error is auth-related and show modal if so
+      if (errorMessage.includes('signed in') || errorMessage.includes('auth') || errorMessage.includes('unauthorized')) {
+        openAuthModal({
+          valueProposition: 'Sign in to follow users',
+          redirectTo: pathname ?? undefined,
+        });
+      } else {
+        // Non-auth errors - show toast with retry option
+        toasts.raw.error(errorMessage, {
+          action: {
+            label: 'Retry',
+            onClick: () => {
+              handleToggleFollow();
+            },
+          },
+        });
+      }
+    },
   });
 
   const handleToggleFollow = useCallback(() => {
@@ -87,64 +113,17 @@ export function FollowButton({
     }
 
     // User is authenticated - proceed with follow action
-    startTransition(async () => {
-      // Optimistic update (only after auth check passes)
-      const newState = !optimisticIsFollowing;
-      setOptimisticIsFollowing(newState);
+    // Optimistic update (only after auth check passes)
+    const newState = !optimisticIsFollowing;
+    setOptimisticIsFollowing(newState);
 
-      try {
-        await runLoggedAsync(
-          async () => {
-            // Server action
-            const result = await toggleFollow({
-              user_id: userId,
-              slug: userSlug,
-              action: newState ? 'follow' : 'unfollow',
-            });
-
-            if (result?.data?.success) {
-              toast.success(newState ? 'Following user' : 'Unfollowed user');
-            } else if (result?.serverError) {
-              // Rollback on server error
-              setOptimisticIsFollowing(!newState);
-              toast.error(result.serverError);
-              throw new Error(result.serverError);
-            } else {
-              // Fallback error
-              setOptimisticIsFollowing(!newState);
-              throw new Error('Failed to update follow status');
-            }
-          },
-          {
-            message: `Failed to ${newState ? 'follow' : 'unfollow'} user`,
-            context: { userId, userSlug, action: newState ? 'follow' : 'unfollow' },
-          }
-        );
-      } catch (error) {
-        // Error already logged by useLoggedAsync, rollback already done in error paths above
-        const normalized = normalizeError(error, 'An unexpected error occurred');
-        const errorMessage = normalized.message;
-
-        // Check if error is auth-related and show modal if so
-        if (errorMessage.includes('signed in') || errorMessage.includes('auth') || errorMessage.includes('unauthorized')) {
-          openAuthModal({
-            valueProposition: 'Sign in to follow users',
-            redirectTo: pathname ?? undefined,
-          });
-        } else {
-          // Non-auth errors - show toast with retry option
-          toasts.raw.error('Failed to update follow status', {
-            action: {
-              label: 'Retry',
-              onClick: () => {
-                handleToggleFollow();
-              },
-            },
-          });
-        }
-      }
+    // Execute the action using useSafeAction's executeAsync
+    executeAsync({
+      user_id: userId,
+      slug: userSlug,
+      action: newState ? 'follow' : 'unfollow',
     });
-  }, [user, status, openAuthModal, pathname, optimisticIsFollowing, setOptimisticIsFollowing, userId, userSlug, runLoggedAsync]);
+  }, [user, status, openAuthModal, pathname, optimisticIsFollowing, setOptimisticIsFollowing, userId, userSlug, executeAsync]);
 
   return (
     <Button

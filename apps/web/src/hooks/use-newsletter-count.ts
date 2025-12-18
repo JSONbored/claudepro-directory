@@ -21,8 +21,10 @@ const CACHE_KEY = 'newsletter_count';
 const CACHE_TIMESTAMP_KEY = 'newsletter_count_ts';
 
 // Client-side localStorage cache TTL (not related to server-side Cache Components)
-const LOCAL_STORAGE_CACHE_TTL_MS = 300_000; // 5 minutes (300 seconds)
-const DEFAULT_POLL_INTERVAL_MS = 300_000; // 5 minutes
+// Optimized: Extended to 20 minutes (newsletter count changes infrequently)
+const LOCAL_STORAGE_CACHE_TTL_MS = 1_200_000; // 20 minutes (1200 seconds)
+// Optimized: Increased polling interval to 20 minutes (was 5 minutes)
+const DEFAULT_POLL_INTERVAL_MS = 1_200_000; // 20 minutes
 
 /**
  * Hook to fetch and poll newsletter subscriber count

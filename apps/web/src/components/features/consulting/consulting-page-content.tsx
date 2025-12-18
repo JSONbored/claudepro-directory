@@ -22,7 +22,7 @@
 import Cal, { getCalApi } from '@calcom/embed-react';
 import {
   SPRING,
-  MICROINTERACTIONS, size, weight, tracking, leading, cluster, gap, muted, iconSize, marginBottom, marginTop, spaceY, paddingX, paddingY, marginX, marginRight, paddingTop, padding, animations } from '@heyclaude/web-runtime/design-system';
+  MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
 import {
   Card,
   CardContent,
@@ -93,23 +93,23 @@ export function ConsultingClient() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950">
+      <section className="relative min-h-screen flex-center overflow-hidden bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950">
         {/* Animated Background Gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-purple-500/5 to-orange-500/10 animate-pulse" />
         
         {/* Particles Effect (simplified with CSS) */}
         <div className="absolute inset-0 opacity-30">
-          <div className={cn('absolute top-1/4 left-1/4 w-2 h-2 bg-orange-500 rounded-full', animations.ping, animations.duration['3s'], animations.delay.zero)} />
-          <div className={cn('absolute top-1/3 right-1/4 w-1.5 h-1.5 bg-purple-500 rounded-full', animations.ping, animations.duration['4s'], animations.delay['1s'])} />
-          <div className={cn('absolute bottom-1/4 left-1/3 w-1 h-1 bg-orange-400 rounded-full', animations.ping, animations.duration['5s'], animations.delay['2s'])} />
+          <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-orange-500 rounded-full animate-ping [animation-duration:3s] [animation-delay:0s]" />
+          <div className="absolute top-1/3 right-1/4 w-1.5 h-1.5 bg-purple-500 rounded-full animate-ping [animation-duration:4s] [animation-delay:1s]" />
+          <div className="absolute bottom-1/4 left-1/3 w-1 h-1 bg-orange-400 rounded-full animate-ping [animation-duration:5s] [animation-delay:2s]" />
         </div>
 
-        <div className={`container relative z-10 ${marginX.auto} ${paddingX.default} ${paddingY.default} sm:${paddingX.comfortable} sm:${paddingY.default}`}>
+        <div className="container relative z-10 mx-auto px-4 py-4 sm:px-6 sm:py-4">
           <motion.div
             initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 30 }}
             animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
             transition={SPRING.smooth}
-            className={`text-center ${spaceY.relaxed} max-w-4xl mx-auto`}
+            className="text-center space-y-6 max-w-4xl mx-auto"
           >
             {/* Badge */}
             <motion.div
@@ -119,7 +119,7 @@ export function ConsultingClient() {
               className="inline-flex"
             >
               <UnifiedBadge variant="base" className="border-orange-500/30 bg-orange-500/10 text-orange-400">
-                <Sparkles className={`h-3 w-3 ${marginRight.micro}`} />
+                <Sparkles className="h-3 w-3 mr-0.5" />
                 Available for New Projects
               </UnifiedBadge>
             </motion.div>
@@ -129,9 +129,9 @@ export function ConsultingClient() {
               initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
               animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
               transition={{ ...SPRING.smooth, delay: 0.2 }}
-              className={`${size['4xl']} sm:text-5xl md:text-6xl lg:text-7xl ${weight.bold} ${tracking.tight}`}
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight"
             >
-              <span className={`block ${marginBottom.compact}`}>Let's Build</span>
+              <span className="block mb-2">Let's Build</span>
               <AnimatedGradientText className="block">
                 Something Together
               </AnimatedGradientText>
@@ -142,7 +142,7 @@ export function ConsultingClient() {
               initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
               animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
               transition={{ ...SPRING.smooth, delay: 0.3 }}
-              className={cn(size.lg, 'sm:' + size.xl, muted.default, 'max-w-2xl mx-auto', leading.relaxed)}
+              className={cn('text-lg sm:text-xl', 'text-muted-foreground', 'max-w-2xl mx-auto', 'leading-relaxed')}
             >
               I'm <strong className="text-foreground">ghost (JSONbored)</strong> — a
               multi-disciplined engineer who's spent years building infrastructure, applications,
@@ -154,12 +154,12 @@ export function ConsultingClient() {
               initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
               animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
               transition={{ ...SPRING.smooth, delay: 0.4 }}
-              className={`flex flex-col sm:flex-row ${gap.default} justify-center items-center`}
+              className="flex flex-col sm:flex-row gap-3 justify-center items-center"
             >
               <MagneticButton>
                 <Button
                   size="lg"
-                  className={`${size.base} ${paddingX.relaxed} ${paddingY.comfortable}`}
+                  className="text-base px-8 py-6"
                   onClick={() => {
                     document.getElementById('calendar-section')?.scrollIntoView({ behavior: 'smooth' });
                   }}
@@ -170,7 +170,7 @@ export function ConsultingClient() {
               <Button
                 variant="outline"
                 size="lg"
-                className={`${size.base} ${paddingX.relaxed} ${paddingY.comfortable}`}
+                className="text-base px-8 py-6"
                 asChild
               >
                 <Link href="#experience">
@@ -200,7 +200,7 @@ export function ConsultingClient() {
               }
               initial="hidden"
               animate="show"
-              className={`grid grid-cols-1 sm:grid-cols-3 ${gap.relaxed} ${marginTop.default} ${paddingTop.default} border-t border-border/50`}
+              className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-4 pt-4 border-t border-border/50"
             >
               {[
                 { label: 'Years Experience', value: 3, suffix: '+' },
@@ -222,10 +222,10 @@ export function ConsultingClient() {
                   }
                   className="text-center"
                 >
-                  <div className={`${size['3xl']} sm:${size['4xl']} ${weight.bold} ${marginBottom.compact}`}>
+                  <div className="text-3xl sm:text-4xl font-bold mb-2">
                     <NumberTicker value={stat.value} delay={index * 100} suffix={stat.suffix} />
                   </div>
-                  <div className={cn(size.sm, muted.default)}>{stat.label}</div>
+                  <div className={cn('text-muted-foreground text-sm')}>{stat.label}</div>
                 </motion.div>
               ))}
             </motion.div>
@@ -234,23 +234,23 @@ export function ConsultingClient() {
       </section>
 
       {/* About Section */}
-      <LazySection variant="slide-up" className={`${paddingY.default} bg-background`}>
-        <div className={`container ${marginX.auto} ${paddingX.default} sm:${paddingX.comfortable}`}>
-          <div className={`max-w-4xl ${marginX.auto}`}>
+      <LazySection variant="slide-up" className="py-4 bg-background">
+        <div className="container mx-auto px-4 sm:px-6">
+          <div className="max-w-4xl mx-auto">
             <motion.div
               initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
               whileInView={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-100px' }}
               transition={SPRING.smooth}
-              className={`text-center ${marginBottom.loose}`}
+              className="text-center mb-16"
             >
-              <h2 className={`${size['3xl']} sm:${size['4xl']} ${weight.bold} ${marginBottom.default}`}>About Me</h2>
-              <p className={cn(muted.default, size.lg, 'max-w-2xl mx-auto')}>
+              <h2 className="text-3xl sm:text-4xl font-bold mb-4">About Me</h2>
+              <p className={cn('text-muted-foreground', 'text-lg', 'max-w-2xl mx-auto')}>
                 A jack-of-all-trades engineer who ships production systems, not demos.
               </p>
             </motion.div>
 
-            <div className={`grid grid-cols-1 md:grid-cols-2 ${gap.relaxed} items-center`}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
               {/* Profile Image Placeholder */}
               <motion.div
                 initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -30 }}
@@ -259,7 +259,7 @@ export function ConsultingClient() {
                 transition={SPRING.smooth}
                 className="relative"
               >
-                <div className="aspect-square rounded-2xl bg-gradient-to-br from-orange-500/20 to-purple-500/20 border border-border/50 flex items-center justify-center">
+                <div className="aspect-square rounded-2xl bg-gradient-to-br from-orange-500/20 to-purple-500/20 border border-border/50 flex-center">
                   <div className="text-6xl">👨‍💻</div>
                 </div>
               </motion.div>
@@ -270,9 +270,9 @@ export function ConsultingClient() {
                 whileInView={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={SPRING.smooth}
-                className={spaceY.comfortable}
+                className="space-y-4"
               >
-                <div className={cn(spaceY.default, muted.default)}>
+                <div className={cn('space-y-3', 'text-muted-foreground')}>
                   <p>
                     <strong className="text-foreground">What I do:</strong> Full-stack development,
                     blockchain infrastructure, network engineering, systems administration, DevOps, AI/LLM
@@ -310,10 +310,10 @@ export function ConsultingClient() {
                 </div>
 
                 {/* Contact Links */}
-                <div className={`flex flex-wrap items-center ${gap.default} ${paddingTop.default}`}>
+                <div className="flex flex-wrap items-center gap-3 pt-4">
                   <Button variant="outline" size="sm" asChild>
-                    <a href="mailto:ghost@zeronode.sh" className={cn('inline-flex', cluster.compact, gap.compact)}>
-                      <Mail className={iconSize.sm} />
+                    <a href="mailto:ghost@zeronode.sh" className={cn('inline-flex', 'flex items-center', 'gap-2')}>
+                      <Mail className="h-4 w-4" />
                       ghost@zeronode.sh
                     </a>
                   </Button>
@@ -322,15 +322,15 @@ export function ConsultingClient() {
                       href="https://github.com/jsonbored"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={cn('inline-flex', cluster.compact, gap.compact)}
+                      className={cn('inline-flex', 'flex items-center', 'gap-2')}
                     >
-                      <Github className={iconSize.sm} />
+                      <Github className="h-4 w-4" />
                       GitHub
                     </a>
                   </Button>
                   <Button variant="outline" size="sm" asChild>
-                    <Link href="/" className={cn('inline-flex', cluster.compact, gap.compact)}>
-                      <Sparkles className={iconSize.sm} />
+                    <Link href="/" className={cn('inline-flex', 'flex items-center', 'gap-2')}>
+                      <Sparkles className="h-4 w-4" />
                       Claude Pro Directory
                     </Link>
                   </Button>
@@ -342,17 +342,17 @@ export function ConsultingClient() {
       </LazySection>
 
       {/* Services Section */}
-      <LazySection variant="slide-up" className={`${paddingY.default} bg-muted/30`}>
-        <div className={`container ${marginX.auto} ${paddingX.default} sm:${paddingX.comfortable}`}>
+      <LazySection variant="slide-up" className="py-4 bg-muted/30">
+        <div className="container mx-auto px-4 sm:px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-100px' }}
             transition={SPRING.smooth}
-            className={`text-center ${marginBottom.loose}`}
+            className="text-center mb-16"
           >
-            <h2 className={`${size['3xl']} sm:${size['4xl']} ${weight.bold} ${marginBottom.default}`}>What I Do</h2>
-            <p className={`text-muted-foreground ${size.lg} max-w-2xl mx-auto`}>
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4">What I Do</h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
               Comprehensive engineering services for modern applications
             </p>
           </motion.div>
@@ -371,7 +371,7 @@ export function ConsultingClient() {
             initial="hidden"
             whileInView="show"
             viewport={{ once: true, margin: '-100px' }}
-            className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 ${gap.comfortable} max-w-6xl ${marginX.auto}`}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto"
           >
             {[
               {
@@ -445,15 +445,15 @@ export function ConsultingClient() {
                 >
                   <Card className={`h-full border-2 ${service.borderColor} bg-gradient-to-br ${service.color} backdrop-blur-sm hover:shadow-xl transition-shadow`}>
                     <CardHeader>
-                      <div className={marginBottom.default}>
+                      <div className="mb-4">
                         <div className={`inline-flex p-3 rounded-lg bg-gradient-to-br ${service.color} border ${service.borderColor}`}>
                           <Icon className="h-6 w-6 text-foreground" />
                         </div>
                       </div>
-                      <CardTitle className={`${size.xl}`}>{service.title}</CardTitle>
+                      <CardTitle className="text-lg">{service.title}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <CardDescription className={`${size.base} ${leading.relaxed}`}>
+                      <CardDescription className="text-base leading-relaxed">
                         {service.description}
                       </CardDescription>
                     </CardContent>
@@ -467,22 +467,22 @@ export function ConsultingClient() {
 
       {/* Experience Section */}
       <div id="experience">
-        <LazySection variant="slide-up" className={`${paddingY.default} bg-background`}>
-        <div className={`container ${marginX.auto} ${paddingX.default} sm:${paddingX.comfortable}`}>
+        <LazySection variant="slide-up" className="py-4 bg-background">
+        <div className="container mx-auto px-4 sm:px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-100px' }}
             transition={SPRING.smooth}
-            className={`text-center ${marginBottom.loose}`}
+            className="text-center mb-16"
           >
-            <h2 className={`${size['3xl']} sm:${size['4xl']} ${weight.bold} ${marginBottom.default}`}>Experience & Projects</h2>
-            <p className={`text-muted-foreground ${size.lg} max-w-2xl mx-auto`}>
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4">Experience & Projects</h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
               Real projects, real results, real systems in production
             </p>
           </motion.div>
 
-          <div className={`grid grid-cols-1 md:grid-cols-2 ${gap.relaxed} max-w-4xl ${marginX.auto}`}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {/* Claude Pro Directory */}
             <motion.div
               initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 30 }}
@@ -492,34 +492,34 @@ export function ConsultingClient() {
             >
               <Card className="h-full border-2 border-orange-500/30 bg-gradient-to-br from-orange-500/10 to-purple-500/10 backdrop-blur-sm">
                 <CardHeader>
-                  <div className={`flex items-start justify-between ${marginBottom.default}`}>
-                    <div className={`flex items-center ${gap.compact}`}>
-                      <div className={`${padding.tight} rounded-lg bg-orange-500/20 border border-orange-500/30`}>
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <div className="p-2 rounded-lg bg-orange-500/20 border border-orange-500/30">
                         <Sparkles className="h-5 w-5 text-orange-400" />
                       </div>
-                      <CardTitle className={`${size.xl}`}>Claude Pro Directory</CardTitle>
+                      <CardTitle className="text-lg">Claude Pro Directory</CardTitle>
                     </div>
                     <UnifiedBadge variant="base" className="border-orange-500/30">
                       Active
                     </UnifiedBadge>
                   </div>
-                  <CardDescription className={`${size.base}`}>
+                  <CardDescription className="text-base">
                     Open-source directory for Claude AI templates and workflows
                   </CardDescription>
                 </CardHeader>
-                <CardContent className={spaceY.default}>
-                  <div className={cn(cluster.compact, gap.compact, size.sm, muted.default)}>
-                    <Users className={iconSize.sm} />
+                <CardContent className="space-y-3">
+                  <div className={cn('flex items-center', 'gap-2', 'text-muted-foreground text-sm')}>
+                    <Users className="h-4 w-4" />
                     <span>Thousands of monthly visitors</span>
                   </div>
-                  <div className={cn(cluster.compact, gap.compact, size.sm, muted.default)}>
-                    <Award className={iconSize.sm} />
+                  <div className={cn('flex items-center', 'gap-2', 'text-muted-foreground text-sm')}>
+                    <Award className="h-4 w-4" />
                     <span>Open source & community-driven</span>
                   </div>
                   <Button variant="outline" size="sm" asChild className="w-full">
-                    <Link href="/" className={`inline-flex items-center justify-center ${gap.tight}`}>
+                    <Link href="/" className="inline-flex items-center justify-center gap-1">
                       View Project
-                      <ExternalLink className={iconSize.sm} />
+                      <ExternalLink className="h-4 w-4" />
                     </Link>
                   </Button>
                 </CardContent>
@@ -535,28 +535,28 @@ export function ConsultingClient() {
             >
               <Card className="h-full border-2 border-purple-500/30 bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-sm">
                 <CardHeader>
-                  <div className={`flex items-start justify-between ${marginBottom.default}`}>
-                    <div className={`flex items-center ${gap.compact}`}>
-                      <div className={`${padding.tight} rounded-lg bg-purple-500/20 border border-purple-500/30`}>
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <div className="p-2 rounded-lg bg-purple-500/20 border border-purple-500/30">
                         <Network className="h-5 w-5 text-purple-400" />
                       </div>
-                      <CardTitle className={`${size.xl}`}>Blockchain Validators</CardTitle>
+                      <CardTitle className="text-lg">Blockchain Validators</CardTitle>
                     </div>
                     <UnifiedBadge variant="base" className="border-purple-500/30">
                       3+ Years
                     </UnifiedBadge>
                   </div>
-                  <CardDescription className={`${size.base}`}>
+                  <CardDescription className="text-base">
                     Cosmos blockchain validator operations and network security
                   </CardDescription>
                 </CardHeader>
-                <CardContent className={spaceY.default}>
-                  <div className={cn(cluster.compact, gap.compact, size.sm, muted.default)}>
-                    <TrendingUp className={iconSize.sm} />
+                <CardContent className="space-y-3">
+                  <div className={cn('flex items-center', 'gap-2', 'text-muted-foreground text-sm')}>
+                    <TrendingUp className="h-4 w-4" />
                     <span>$100MM+ in network assets secured</span>
                   </div>
-                  <div className={cn(cluster.compact, gap.compact, size.sm, muted.default)}>
-                    <Award className={iconSize.sm} />
+                  <div className={cn('flex items-center', 'gap-2', 'text-muted-foreground text-sm')}>
+                    <Award className="h-4 w-4" />
                     <span>Production infrastructure expertise</span>
                   </div>
                 </CardContent>
@@ -568,17 +568,17 @@ export function ConsultingClient() {
       </div>
 
       {/* Trust Signals Section */}
-      <LazySection variant="slide-up" className={`${paddingY.default} bg-muted/30`}>
-        <div className={`container ${marginX.auto} ${paddingX.default} sm:${paddingX.comfortable}`}>
+      <LazySection variant="slide-up" className="py-4 bg-muted/30">
+        <div className="container mx-auto px-4 sm:px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-100px' }}
             transition={SPRING.smooth}
-            className={`text-center ${marginBottom.loose}`}
+            className="text-center mb-16"
           >
-            <h2 className={`${size['3xl']} sm:${size['4xl']} ${weight.bold} ${marginBottom.default}`}>Why Work With Me</h2>
-            <p className={`text-muted-foreground ${size.lg} max-w-2xl mx-auto`}>
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4">Why Work With Me</h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
               Proven track record of shipping production systems that scale
             </p>
           </motion.div>
@@ -604,7 +604,7 @@ export function ConsultingClient() {
             initial="hidden"
             whileInView="show"
             viewport={{ once: true, margin: '-100px' }}
-            className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 ${gap.comfortable} max-w-5xl ${marginX.auto}`}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto"
           >
             {[
               { icon: Award, label: 'Production Systems', value: '100%', description: 'No demos, only real systems' },
@@ -629,12 +629,12 @@ export function ConsultingClient() {
                   }
                   whileHover={shouldReduceMotion ? {} : { scale: 1.05, y: -4 }}
                   transition={SPRING.smooth}
-                  className={`text-center ${padding.comfortable} rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm`}
+                  className="text-center py-6 rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm"
                 >
-                  <div className={`inline-flex p-3 rounded-lg bg-orange-500/10 border border-orange-500/30 ${marginBottom.default}`}>
+                  <div className="inline-flex p-3 rounded-lg bg-orange-500/10 border border-orange-500/30 mb-4">
                     <Icon className="h-6 w-6 text-orange-400" />
                   </div>
-                  <div className={`${size['3xl']} ${weight.bold} ${marginBottom.compact}`}>
+                  <div className="text-3xl font-bold mb-2">
                     {stat.value.includes('%') ? (
                       <>
                         <NumberTicker value={parseFloat(stat.value)} delay={statIndex * 150} decimalPlaces={0} />
@@ -649,8 +649,8 @@ export function ConsultingClient() {
                       />
                     )}
                   </div>
-                  <div className={`${size.sm} ${weight.semibold} ${marginBottom.tight}`}>{stat.label}</div>
-                  <div className={`${size.xs} text-muted-foreground`}>{stat.description}</div>
+                  <div className="text-sm font-semibold mb-1">{stat.label}</div>
+                  <div className="text-muted-foreground text-xs">{stat.description}</div>
                 </motion.div>
               );
             })}
@@ -659,29 +659,29 @@ export function ConsultingClient() {
       </LazySection>
 
       {/* CTA Section */}
-      <LazySection variant="slide-up" className={`${paddingY.default} bg-background`}>
-        <div className={`container ${marginX.auto} ${paddingX.default} sm:${paddingX.comfortable}`}>
+      <LazySection variant="slide-up" className="py-4 bg-background">
+        <div className="container mx-auto px-4 sm:px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-100px' }}
             transition={SPRING.smooth}
-            className={`max-w-3xl mx-auto text-center ${spaceY.relaxed}`}
+            className="max-w-3xl mx-auto text-center space-y-6"
           >
-            <div className={spaceY.default}>
-              <h2 className={`${size['3xl']} sm:${size['4xl']} ${weight.bold}`}>
+            <div className="space-y-3">
+              <h2 className="text-3xl sm:text-4xl font-bold">
                 Ready to Build Something Together?
               </h2>
-              <p className={`${size.lg} text-muted-foreground max-w-2xl mx-auto`}>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
                 I'm accepting new projects now. Book a free 15-minute discovery call below — I'll tell you honestly if I'm a good fit or not.
               </p>
             </div>
 
-            <div className={`flex flex-col sm:flex-row ${gap.default} justify-center`}>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <MagneticButton>
                 <Button
                   size="lg"
-                  className={`${size.base} ${paddingX.relaxed} ${paddingY.comfortable}`}
+                  className="text-base px-8 py-6"
                   onClick={() => {
                     document.getElementById('calendar-section')?.scrollIntoView({ behavior: 'smooth' });
                   }}
@@ -692,17 +692,17 @@ export function ConsultingClient() {
               <Button
                 variant="outline"
                 size="lg"
-                className={cn(size.base, paddingX.relaxed, paddingY.comfortable)}
+                className={cn('text-base', 'px-8', 'py-6')}
                 asChild
               >
-                <a href="mailto:ghost@zeronode.sh" className={`inline-flex items-center ${gap.tight}`}>
-                  <Mail className={iconSize.sm} />
+                <a href="mailto:ghost@zeronode.sh" className="inline-flex items-center gap-1">
+                  <Mail className="h-4 w-4" />
                   Email Me Instead
                 </a>
               </Button>
             </div>
 
-            <div className={cn(paddingTop.relaxed, spaceY.compact, size.sm, 'text-muted-foreground')}>
+            <div className={cn('pt-8', 'space-y-2', 'text-muted-foreground text-sm')}>
               <p>✓ 15-minute discovery call (free)</p>
               <p>✓ Honest assessment of fit</p>
               <p>✓ No pressure, no commitment</p>
@@ -713,20 +713,20 @@ export function ConsultingClient() {
 
       {/* Calendar Section */}
       <div id="calendar-section">
-        <LazySection variant="slide-up" className={`${paddingY.default} bg-muted/30`}>
-        <div className={`container ${marginX.auto} ${paddingX.default} sm:${paddingX.comfortable}`}>
+        <LazySection variant="slide-up" className="py-4 bg-muted/30">
+        <div className="container mx-auto px-4 sm:px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-100px' }}
             transition={SPRING.smooth}
-            className={`max-w-4xl ${marginX.auto}`}
+            className="max-w-4xl mx-auto"
           >
-            <div className={`text-center ${marginBottom.relaxed}`}>
-              <h2 className={`${size['3xl']} sm:${size['4xl']} ${weight.bold} ${marginBottom.default}`}>
+            <div className="text-center mb-8">
+              <h2 className="text-3xl sm:text-4xl font-bold mb-4">
                 Book Your Free Discovery Call
               </h2>
-              <p className={`text-muted-foreground ${size.lg}`}>
+              <p className="text-muted-foreground text-lg">
                 Choose a time that works for you. I'll send a calendar invite with a video call link.
               </p>
             </div>
@@ -740,7 +740,7 @@ export function ConsultingClient() {
               className="relative"
             >
               <Card className="border-2 border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden">
-                <CardContent className={`${padding.default}`}>
+                <CardContent className="p-6">
                   <div className="relative min-h-[600px] max-h-[800px]">
                     {calReady ? (
                       <Cal
@@ -752,9 +752,9 @@ export function ConsultingClient() {
                         className="w-full h-full min-h-[600px] max-h-[800px] overflow-hidden"
                       />
                     ) : (
-                      <div className="flex items-center justify-center h-[600px]">
-                        <div className={`text-center ${spaceY.default}`}>
-                          <div className={`animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 ${marginX.auto}`} />
+                      <div className="flex-center h-[600px]">
+                        <div className="text-center space-y-3">
+                          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto" />
                           <p className="text-muted-foreground">Loading calendar...</p>
                         </div>
                       </div>
@@ -770,7 +770,7 @@ export function ConsultingClient() {
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
               transition={{ ...SPRING.smooth, delay: 0.3 }}
-              className={`text-center ${marginTop.relaxed} ${size.sm} text-muted-foreground`}
+              className="text-center mt-8 text-muted-foreground text-sm"
             >
               <p>
                 Prefer email?{' '}

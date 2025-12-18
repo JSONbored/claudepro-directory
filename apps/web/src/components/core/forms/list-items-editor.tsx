@@ -29,7 +29,6 @@ import {
   Label,
 } from '@heyclaude/web-runtime/ui';
 import { useState } from 'react';
-import { wrap, gap, iconSize, between, size, marginTop, paddingRight, marginLeft, spaceY } from "@heyclaude/web-runtime/design-system";
 
 // =============================================================================
 // TYPES
@@ -209,12 +208,12 @@ export function ListItemManager(props: ListItemManagerProps) {
   const showMinError = minItems && items.length < minItems && items.length > 0;
 
   return (
-    <div className={cn(spaceY.compact, className)}>
+    <div className={cn('space-y-2', className)}>
       {/* Label */}
       <Label>{label}</Label>
 
       {/* Input + Button */}
-      <div className={`flex gap-2`}>
+      <div className="flex gap-2">
         <Input
           value={currentInput}
           onChange={(e) => setCurrentInput(e.target.value)}
@@ -234,11 +233,11 @@ export function ListItemManager(props: ListItemManagerProps) {
       </div>
 
       {/* Description */}
-      {description ? <p className={`text-muted-foreground ${size.xs}`}>{description}</p> : null}
+      {description ? <p className="text-muted-foreground text-xs">{description}</p> : null}
 
       {/* Counter */}
       {showCounter && maxItems ? (
-        <p className={`text-muted-foreground ${size.xs}`}>
+        <p className="text-muted-foreground text-xs">
           {items.length}/{maxItems} {label.toLowerCase()} {items.length === 1 ? 'item' : 'items'}
         </p>
       ) : null}
@@ -248,23 +247,23 @@ export function ListItemManager(props: ListItemManagerProps) {
         <>
           {/* Badge variant */}
           {props.variant === 'badge' && (
-            <div className={`${wrap} ${gap.compact} ${marginTop.default}`}>
+            <div className="mt-4 flex flex-wrap gap-2">
               {items.map((item, index) => (
                 <UnifiedBadge
                   key={item}
                   variant="base"
                   style={props.badgeStyle || 'secondary'}
-                  className={`${gap.micro} ${paddingRight.micro}`}
+                  className="gap-0.5 pr-0.5"
                 >
                   {item}
                   <button
                     type="button"
                     onClick={() => handleRemove(index)}
-                    className={`hover:text-destructive ${marginLeft.micro}`}
+                    className="ml-0.5 hover:text-destructive"
                     aria-label={`Remove ${item}`}
                     disabled={disabled}
                   >
-                    <X className={iconSize.xs} />
+                    <X className="h-3 w-3" />
                   </button>
                 </UnifiedBadge>
               ))}
@@ -273,16 +272,16 @@ export function ListItemManager(props: ListItemManagerProps) {
 
           {/* List variant */}
           {props.variant === 'list' && (
-            <div className={`${spaceY.compact}`}>
+            <div className="space-y-2">
               {items.map((item, index) => {
                 // Generate stable key from item content hash
                 const itemKey = `item-${item.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)}-${item.length}`;
                 return (
                   <div
                     key={itemKey}
-                    className={`${between.center} rounded border p-2`}
+                    className="flex items-center justify-between rounded-lg border p-2"
                   >
-                    <span className={`${size.sm}`}>{item}</span>
+                    <span className="text-sm">{item}</span>
                     <Button
                       type="button"
                       variant="ghost"
@@ -301,7 +300,7 @@ export function ListItemManager(props: ListItemManagerProps) {
 
           {/* Custom variant */}
           {props.variant === 'custom' && (
-            <div className={`${spaceY.compact}`}>
+            <div className="space-y-2">
               {items.map((item, index) => props.renderItem(item, index, () => handleRemove(index)))}
             </div>
           )}
@@ -310,21 +309,21 @@ export function ListItemManager(props: ListItemManagerProps) {
 
       {/* Min items error */}
       {showMinError ? (
-        <p className={`text-destructive ${size.xs}`}>
+        <p className="text-xs text-destructive">
           At least {minItems} {label.toLowerCase()} {minItems === 1 ? 'is' : 'are'} required
         </p>
       ) : null}
 
       {/* Custom error message */}
       {errorMessage ? (
-        <p className={`text-destructive ${size.xs}`} role="alert">
+        <p className="text-xs text-destructive" role="alert">
           {errorMessage}
         </p>
       ) : null}
 
       {/* Empty state message for required fields */}
       {minItems && items.length === 0 ? (
-        <p className={`text-destructive ${size.xs}`}>
+        <p className="text-xs text-destructive">
           At least {minItems} {label.toLowerCase()} {minItems === 1 ? 'is' : 'are'} required
         </p>
       ) : null}

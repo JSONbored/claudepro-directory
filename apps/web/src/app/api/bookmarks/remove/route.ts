@@ -17,17 +17,22 @@
 
 import 'server-only';
 
-import { removeBookmark } from '@heyclaude/web-runtime/actions';
+import { removeBookmark } from '@heyclaude/web-runtime/actions/bookmarks';
 import { content_categorySchema } from '@heyclaude/web-runtime/prisma-zod-schemas';
 import {
   createApiOptionsHandler,
   createApiRoute,
+  getVersionedRoute,
   jsonResponse,
 } from '@heyclaude/web-runtime/server';
 import { connection } from 'next/server';
 import { z } from 'zod';
 
-const removeBookmarkSchema = z.object({
+/**
+ * Schema for removing a bookmark
+ * Exported for OpenAPI generation
+ */
+export const removeBookmarkSchema = z.object({
   content_slug: z.string(),
   content_type: content_categorySchema,
 });
@@ -36,14 +41,11 @@ export const POST = createApiRoute({
   bodySchema: removeBookmarkSchema,
   cors: 'auth',
   handler: async ({ body, cors, logger, user }) => {
-    // Defer to request time for non-deterministic operations (required for Cache Components)
     await connection();
-
+    // user is guaranteed (requireAuth: true)
     if (!user) {
-      logger.warn({}, 'Unauthorized bookmark remove attempt');
-      return jsonResponse({ error: 'Unauthorized - authentication required' }, 401, cors);
+      throw new Error('User not authenticated');
     }
-
     const { content_slug, content_type } = body;
 
     logger.info(
@@ -83,7 +85,7 @@ export const POST = createApiRoute({
   },
   operation: 'BookmarkAPI',
   requireAuth: true,
-  route: '/api/bookmarks/remove',
+  route: getVersionedRoute('bookmarks/remove'),
 });
 
 export const OPTIONS = createApiOptionsHandler('auth');

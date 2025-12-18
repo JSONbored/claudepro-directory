@@ -7,9 +7,6 @@
 
 import { z } from 'zod';
 
-import type { Content } from '../composites/content';
-import { contentSchema } from '../composites/content';
-
 /**
  * Arguments for PostgreSQL function: get_trending_content
  */
@@ -38,12 +35,12 @@ export type GetTrendingContentArgsFromZod = z.infer<typeof getTrendingContentArg
 /**
  * Return type for PostgreSQL function: get_trending_content
  */
-export type GetTrendingContentReturns = Content[];
+export type GetTrendingContentReturns = contentModel[];
 
 /**
  * Zod schema for get_trending_content function return type
  */
-export const getTrendingContentReturnsSchema = z.array(contentSchema);
+export const getTrendingContentReturnsSchema = z.array(contentModelSchema);
 
 /**
  * Type inference from Zod schema (should match type above)

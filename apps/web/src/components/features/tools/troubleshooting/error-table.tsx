@@ -15,7 +15,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
-import { iconSize, cluster, marginY, padding } from '@heyclaude/web-runtime/design-system';
 
 export function ErrorTable(props: ErrorTableProps) {
   // Database CHECK constraint validates structure - no runtime validation needed
@@ -29,26 +28,26 @@ export function ErrorTable(props: ErrorTableProps) {
   };
 
   const severityIcons = {
-    critical: <AlertTriangle className={iconSize.sm} />,
-    warning: <Info className={iconSize.sm} />,
-    info: <Info className={iconSize.sm} />,
+    critical: <AlertTriangle className="h-4 w-4" />,
+    warning: <Info className="h-4 w-4" />,
+    info: <Info className="h-4 w-4" />,
   };
 
   return (
-    <Card className={`${marginY.relaxed}`}>
+    <Card className="my-8">
       <CardHeader>
         <CardTitle>{title}</CardTitle>
         {description ? <CardDescription>{description}</CardDescription> : null}
       </CardHeader>
-      <CardContent className={`${padding.default}`}>
+      <CardContent className="p-4">
         <div className="overflow-x-auto">
-          <table className={`w-full`}>
-            <thead className="bg-muted/30 border-b">
+          <table className="w-full">
+            <thead className="border-b bg-muted/30">
               <tr>
-                <th className={`${padding.default} text-left font-medium`}>Error Code</th>
-                <th className={`${padding.default} text-left font-medium`}>Severity</th>
-                <th className={`${padding.default} text-left font-medium`}>Message</th>
-                <th className={`${padding.default} text-left font-medium`}>Solution</th>
+                <th className="p-4 text-left font-medium">Error Code</th>
+                <th className="p-4 text-left font-medium">Severity</th>
+                <th className="p-4 text-left font-medium">Message</th>
+                <th className="p-4 text-left font-medium">Solution</th>
               </tr>
             </thead>
             <tbody>
@@ -57,21 +56,21 @@ export function ErrorTable(props: ErrorTableProps) {
                   key={error.code}
                   className={`border-b last:border-0 ${index % 2 === 0 ? 'bg-muted/10' : ''}`}
                 >
-                  <td className={`${padding.default} font-mono text-sm`}>{error.code}</td>
-                  <td className={`${padding.default}`}>
+                  <td className="p-4 font-mono text-sm">{error.code}</td>
+                  <td className="p-4">
                     <UnifiedBadge
                       variant="base"
                       style="secondary"
                       className={severityColors[error.severity || 'info']}
                     >
-                      <span className={cluster.tight}>
+                      <span className="flex items-center gap-1">
                         {severityIcons[error.severity || 'info']}
                         {error.severity}
                       </span>
                     </UnifiedBadge>
                   </td>
-                  <td className={`${padding.default} text-sm`}>{error.message}</td>
-                  <td className={`text-muted-foreground ${padding.default} text-sm`}>{error.solution}</td>
+                  <td className="p-4 text-sm">{error.message}</td>
+                  <td className="p-4 text-muted-foreground text-sm">{error.solution}</td>
                 </tr>
               ))}
             </tbody>

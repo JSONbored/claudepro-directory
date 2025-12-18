@@ -21,7 +21,6 @@ import { GitHubStarsButton } from '@/src/components/core/buttons/external/github
 import { ExploreDropdown } from '@/src/components/content/explore-dropdown';
 import { usePinboardDrawer } from '@/src/components/features/navigation/pinboard-drawer-provider';
 import { useCommandPalette } from '@/src/components/features/navigation/command-palette-provider';
-import { paddingX, marginX, marginBottom, gap, border, iconSize } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Determines if sub-menu bar should be shown based on pathname
@@ -132,20 +131,20 @@ export function SubMenuBar() {
   }
   
   return (
-    <div className={`border-${border.default}/30 bg-background/95 border-b backdrop-blur-sm`}>
-      <div className={`container ${marginX.auto} ${paddingX.default}`}>
-        <div className="flex items-center justify-between h-10">
+    <div className="border-border/30 bg-background/95 border-b backdrop-blur-sm">
+      <div className="container mx-auto px-4">
+        <div className="flex h-10 items-center justify-between">
           {/* Breadcrumbs on the left - hidden on homepage */}
           {!isHomepage ? (
-            <div className={`flex-1 min-w-0`}>
-              <Breadcrumbs className={`${marginBottom.default}`} />
+            <div className="min-w-0 flex-1">
+              <Breadcrumbs className="mb-4" />
             </div>
           ) : (
             <div className="flex-1" /> // Spacer to push right content to the right
           )}
           
           {/* Right side: Search + Pinboard + GitHub Stars icons + Explore here dropdown */}
-          <div className={`flex items-center ${gap.tight} flex-shrink-0`}>
+          <div className="flex shrink-0 items-center gap-1">
             <Button
               variant="ghost"
               size="sm"
@@ -157,7 +156,7 @@ export function SubMenuBar() {
               aria-label={isCommandMenuOpen ? "Close command menu" : "Open command menu"}
               title="Search navigation (⌘K)"
             >
-              <Search className={cn(iconSize.sm, isCommandMenuOpen && "fill-current")} />
+              <Search className={cn("h-4 w-4", isCommandMenuOpen && "fill-current")} />
             </Button>
             <Button
               variant="ghost"
@@ -169,7 +168,7 @@ export function SubMenuBar() {
               )}
               aria-label={isPinboardOpen ? "Close pinboard" : "Open pinboard"}
             >
-              <Bookmark className={cn(iconSize.sm, isPinboardOpen && "fill-current")} />
+              <Bookmark className={cn("h-4 w-4", isPinboardOpen && "fill-current")} />
             </Button>
             <GitHubStarsButton size="sm" variant="ghost" />
             <ExploreDropdown

@@ -6,9 +6,9 @@
  * 
  * This module exports TypeScript types and Zod schemas for:
  * - PostgreSQL functions (RPCs)
- *   (322 functions)
+ *   (220 functions)
  * - PostgreSQL composite types
- *   (270 composite types)
+ *   (148 composite types)
  */
 
 /**

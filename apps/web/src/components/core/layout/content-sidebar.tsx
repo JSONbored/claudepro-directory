@@ -29,11 +29,10 @@ import { Suspense } from 'react';
 
 import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-banner';
 import { RecentlyViewedSidebar } from '@/src/components/features/navigation/recently-viewed-sidebar';
-import { spaceY, padding } from "@heyclaude/web-runtime/design-system";
 
 export function ContentSidebar() {
   return (
-    <aside className={`w-full ${spaceY.relaxed} lg:sticky lg:top-24 lg:h-fit`}>
+    <aside className="w-full space-y-6 lg:sticky lg:top-24 lg:h-fit">
       {/* JobsPromo - Always at top (now includes job alerts form) */}
       <JobsPromo />
 
@@ -50,6 +49,6 @@ export function ContentSidebar() {
  */
 function RecentlyViewedSidebarSkeleton() {
   return (
-    <div className={`border-border/50 bg-card/50 hidden h-64 w-72 animate-pulse rounded-xl border ${padding.default} xl:block`} />
+    <div className="hidden h-64 w-72 animate-pulse rounded-xl border border-border/50 bg-card/50 p-4 xl:block" />
   );
 }

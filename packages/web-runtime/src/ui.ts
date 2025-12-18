@@ -1,4 +1,3 @@
-export * from './ui/constants.ts';
 export * from './ui/utils.ts';
 export * from './ui/components/highlighted-text.tsx';
 export * from './ui/components/navigation/nav-link.tsx';
@@ -77,3 +76,5 @@ export * from './ui/components/scroll/scroll-direction-detector.tsx';
 export * from './ui/components/motion';
 export * from './ui/providers/lazy-motion-provider';
 export * from './ui/providers/motion-config-provider';
+// UI constants (icon mappings, type exports)
+export * from './ui/constants.ts';

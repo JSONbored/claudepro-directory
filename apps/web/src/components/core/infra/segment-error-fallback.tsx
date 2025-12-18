@@ -10,7 +10,7 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import { useCopyToClipboard } from '@heyclaude/web-runtime/hooks';
 import { Copy, Check, AlertCircle, RefreshCw } from '@heyclaude/web-runtime/icons';
-import { SPRING, size, weight, padding, spaceY, marginBottom, marginTop } from '@heyclaude/web-runtime/design-system';
+import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { useBoolean } from '@heyclaude/web-runtime/hooks';
@@ -47,13 +47,13 @@ function ErrorCodeBlock({ content }: { content: string }) {
 
   return (
     <div className="relative">
-      <pre className={`text-destructive ${size.xs} max-w-full break-all whitespace-pre-wrap bg-background/50 rounded border border-border p-3 pr-10`}>
+      <pre className="max-w-full break-all whitespace-pre-wrap rounded-lg border border-border bg-background/50 p-3 pr-10 text-xs text-destructive">
         {content}
       </pre>
       <Button
         variant="ghost"
         size="sm"
-        className={`absolute top-2 right-2 h-6 w-6 ${padding.default}`}
+        className="absolute right-2 top-2 h-6 w-6 p-4"
         onClick={() => copy(content)}
         aria-label={copied ? 'Copied!' : 'Copy error message'}
       >
@@ -96,9 +96,9 @@ export function SegmentErrorFallback({
       >
         <Card className="w-full max-w-lg text-center">
           <CardHeader>
-            <div className={`${marginBottom.default} flex justify-center`}>
+            <div className="mb-4 flex justify-center">
               <motion.div
-                className={`bg-destructive/10 rounded-full ${padding.compact}`}
+                className="rounded-full bg-destructive/10 p-3"
                 initial={{ scale: 0, rotate: -180 }}
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ ...SPRING.bouncy, delay: 0.1 }}
@@ -106,10 +106,10 @@ export function SegmentErrorFallback({
                 <AlertCircle className="text-destructive h-12 w-12" aria-hidden="true" />
               </motion.div>
             </div>
-            <CardTitle className={`${size['2xl']}`}>{title}</CardTitle>
+            <CardTitle className="text-2xl">{title}</CardTitle>
             <CardDescription>{description}</CardDescription>
           </CardHeader>
-          <CardContent className={`${spaceY.comfortable}`}>
+          <CardContent className="space-y-6">
             {onReset ? (
               <motion.div
                 className={`flex flex-col sm:flex-row gap-3 sm:gap-4`}
@@ -156,23 +156,23 @@ export function SegmentErrorFallback({
             )}
             {isDevelopment && error ? (
               <motion.div
-                className={`border-muted-foreground/30 bg-muted/30 rounded-lg border border-dashed ${padding.default}`}
+                className="card-base border-dashed border-muted-foreground/30 bg-muted/30 p-4"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ ...SPRING.smooth, delay: 0.4 }}
               >
-                <p className={`text-muted-foreground ${marginBottom.compact} ${size.sm} ${weight.semibold}`}>Error details</p>
+                <p className="mb-2 text-muted-foreground text-sm font-semibold">Error details</p>
                 <ErrorCodeBlock content={error.message} />
                 {error.stack ? (
-                  <details className={`${marginTop.compact} ${size.xs}`}>
-                    <summary className={`cursor-pointer ${weight.semibold}`}>► Stack Trace</summary>
-                    <div className={`${marginTop.compact}`}>
+                  <details className="mt-2 text-xs">
+                    <summary className="cursor-pointer font-semibold">► Stack Trace</summary>
+                    <div className="mt-2">
                       <ErrorCodeBlock content={error.stack} />
                     </div>
                   </details>
                 ) : null}
                 {error.digest ? (
-                  <p className={`text-muted-foreground ${marginTop.compact} font-mono ${size.xs} break-words`}>
+                  <p className="mt-2 break-words font-mono text-muted-foreground text-xs">
                     Digest: {error.digest}
                   </p>
                 ) : null}

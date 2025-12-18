@@ -1,0 +1,24 @@
+-- Migration: Remove get_job_billing_summaries RPC function
+-- Version: 20251217001000
+-- Applied via: Supabase MCP (or manual application)
+-- Date: 2025-12-17
+--
+-- Description: Remove get_job_billing_summaries RPC function - converted to Prisma direct query
+--
+-- This function was querying the job_billing_summary view:
+--   SELECT * FROM job_billing_summary WHERE job_id = ANY(p_job_ids)
+--   Returns: TABLE with billing summary columns
+--
+-- The service now uses Prisma $queryRaw to query the view directly in JobsService.getJobBillingSummaries():
+--   prisma.$queryRaw`
+--     SELECT ... FROM public.job_billing_summary
+--     WHERE job_id = ANY(${args.p_job_ids}::uuid[])
+--   `
+--   Returns: JobBillingSummary[] (typed from postgres-types)
+--
+-- Related Changes:
+-- - packages/data-layer/src/services/jobs.ts: Converted getJobBillingSummaries() to use Prisma $queryRaw
+-- - packages/web-runtime/src/data/payments.ts: Uses JobBillingSummary type from postgres-types
+-- - Return type: Promise<GetJobBillingSummariesReturns> (JobBillingSummary[])
+
+DROP FUNCTION IF EXISTS public.get_job_billing_summaries(uuid[]);

@@ -9,13 +9,12 @@
 import type {
   SubscribeNewsletterArgs,
   SubscribeNewsletterReturns,
-  GetActiveSubscribersReturns,
-  GetNewsletterSubscriptionByIdArgs,
-  GetNewsletterSubscriptionByIdReturns,
 } from '@heyclaude/database-types/postgres-types';
+import type { newsletter_subscriptionsModel } from '@heyclaude/database-types/prisma/models';
 import { prisma } from '../prisma/client.ts';
 import { BasePrismaService } from './base-prisma-service.ts';
 import { logRpcError } from '../utils/rpc-error-logging.ts';
+import { withSmartCache } from '../utils/request-cache.ts';
 
 // Type helpers: Extract model types from Prisma query results
 type NewsletterSubscription = Awaited<ReturnType<typeof prisma.newsletter_subscriptions.findUnique>>;
@@ -43,33 +42,81 @@ export class NewsletterService extends BasePrismaService {
     );
   }
 
+  /**
+   * Get newsletter subscriber count
+   * 
+   * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
+   * The RPC was doing a simple COUNT, which Prisma handles perfectly.
+   * 
+   * @returns Number of active subscribers
+   */
   async getNewsletterSubscriberCount(): Promise<number> {
-    const result = await this.callRpc<GetActiveSubscribersReturns>(
-      'get_active_subscribers',
-      {},
-      { methodName: 'getNewsletterSubscriberCount' }
+    return withSmartCache(
+      'getNewsletterSubscriberCount',
+      'getNewsletterSubscriberCount',
+      async () => {
+        return prisma.newsletter_subscriptions.count({
+          where: {
+            status: 'active',
+            confirmed: true,
+            unsubscribed_at: null,
+          },
+        });
+      },
+      {}
     );
-    return Array.isArray(result) ? result.length : 0;
   }
 
-  async getActiveSubscribers(): Promise<GetActiveSubscribersReturns> {
-    const result = await this.callRpc<GetActiveSubscribersReturns>(
-      'get_active_subscribers',
-      {},
-      { methodName: 'getActiveSubscribers' }
+  /**
+   * Get active subscribers
+   * 
+   * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
+   * The RPC was using ARRAY_AGG(email), which we can do in TypeScript with better type safety.
+   * 
+   * @returns Array of active subscriber emails
+   */
+  async getActiveSubscribers(): Promise<string[]> {
+    return withSmartCache(
+      'getActiveSubscribers',
+      'getActiveSubscribers',
+      async () => {
+        const subscribers = await prisma.newsletter_subscriptions.findMany({
+          where: {
+            status: 'active',
+            confirmed: true,
+            unsubscribed_at: null,
+          },
+          select: { email: true },
+          orderBy: { subscribed_at: 'desc' },
+        });
+        return subscribers.map(s => s.email);
+      },
+      {}
     );
-    return result ?? [];
   }
 
+  /**
+   * Get subscription by ID
+   * 
+   * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
+   * The RPC was doing a simple SELECT by ID, which Prisma handles perfectly.
+   * 
+   * @param id - Subscription ID
+   * @returns Newsletter subscription or null if not found
+   */
   async getSubscriptionById(
     id: string
-  ): Promise<GetNewsletterSubscriptionByIdReturns[0] | null> {
-    const result = await this.callRpc<GetNewsletterSubscriptionByIdReturns>(
-      'get_newsletter_subscription_by_id',
-      { p_id: id } as GetNewsletterSubscriptionByIdArgs,
-      { methodName: 'getSubscriptionById' }
+  ): Promise<newsletter_subscriptionsModel | null> {
+    return withSmartCache(
+      'getSubscriptionById',
+      'getSubscriptionById',
+      async () => {
+        return prisma.newsletter_subscriptions.findUnique({
+          where: { id },
+        });
+      },
+      { id }
     );
-    return Array.isArray(result) && result.length > 0 ? (result[0] ?? null) : null;
   }
 
   async getSubscriptionStatusByEmail(email: string): Promise<{
@@ -168,6 +215,12 @@ export class NewsletterService extends BasePrismaService {
     }
   }
 
+  /**
+   * Unsubscribe with timestamp
+   * 
+   * OPTIMIZATION: Combined both updates into a single update operation instead of two separate calls.
+   * This reduces database round-trips from 2 queries to 1 query.
+   */
   async unsubscribeWithTimestamp(email: string): Promise<void> {
     try {
       await prisma.newsletter_subscriptions.update({
@@ -175,10 +228,9 @@ export class NewsletterService extends BasePrismaService {
         data: {
           unsubscribed_at: new Date(),
           updated_at: new Date(),
+          status: 'unsubscribed', // Combined: update status in same query
         },
       });
-      // Also update status to unsubscribed
-      await this.updateSubscriptionStatus(email, 'unsubscribed');
     } catch (error) {
       logRpcError(error, {
         rpcName: 'newsletter_subscriptions.update',

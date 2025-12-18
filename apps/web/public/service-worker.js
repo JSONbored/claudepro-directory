@@ -131,6 +131,11 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
       longTermCacheStrategy(request, STATIC_CACHE, 7 * 24 * 60 * 60 * 1000),
     ); // 7 days
+  } else if (
+    url.pathname.match(/\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|webp|avif|ttf|otf)$/)
+  ) {
+    // Static assets: Cache first with longer TTL (optimized: extended from immediate to 1 day)
+    event.respondWith(cacheFirstStrategy(request, STATIC_CACHE));
   } else if (url.pathname.startsWith("/api/")) {
     // API requests: Skip service worker in development mode to avoid 503 errors
     // In production, use network-first strategy with cache fallback
@@ -139,15 +144,8 @@ self.addEventListener("fetch", (event) => {
       // This prevents service worker from returning 503 when network is available
       return;
     }
-    // API requests: Network first, cache as fallback
+    // API requests: Network first, cache as fallback (optimized: 30min cache TTL)
     event.respondWith(networkFirstStrategy(request, API_CACHE));
-  } else if (
-    url.pathname.match(
-      /\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|webp|avif)$/,
-    )
-  ) {
-    // Static assets: Cache first
-    event.respondWith(cacheFirstStrategy(request, STATIC_CACHE));
   } else if (
     CONTENT_ROUTES.some((route) => url.pathname.startsWith(route)) ||
     url.pathname.match(CATEGORY_PATTERN)
@@ -224,13 +222,41 @@ async function cacheFirstStrategy(request, cacheName) {
 }
 
 // Network-first strategy for API requests
+// Optimized: Extended cache TTL from 5 minutes to 30 minutes for better performance
 async function networkFirstStrategy(request, cacheName) {
   const cache = await caches.open(cacheName);
+  const url = new URL(request.url);
+
+  // Check cache first for GET requests (more aggressive caching)
+  const cached = await cache.match(request);
+  if (cached) {
+    const timestamp = cached.headers.get("sw-cache-timestamp");
+    if (timestamp) {
+      const cacheAge = Date.now() - Number.parseInt(timestamp, 10);
+      // Use cached response if less than 30 minutes old (optimized from 5 minutes)
+      const maxAge = 30 * 60 * 1000; // 30 minutes
+      if (cacheAge < maxAge) {
+        // Start background refresh for stale-while-revalidate
+        fetch(request)
+          .then((response) => {
+            if (response.ok) {
+              const responseToCache = response.clone();
+              responseToCache.headers.set("sw-cache-timestamp", Date.now().toString());
+              cache.put(request, responseToCache);
+            }
+          })
+          .catch(() => {
+            // Ignore background refresh errors
+          });
+        return cached;
+      }
+    }
+  }
 
   try {
     const response = await fetch(request);
     if (response.ok) {
-      // Cache API responses for 5 minutes
+      // Cache API responses for 30 minutes (optimized from 5 minutes)
       const responseToCache = response.clone();
       responseToCache.headers.set("sw-cache-timestamp", Date.now().toString());
       cache.put(request, responseToCache);
@@ -238,13 +264,9 @@ async function networkFirstStrategy(request, cacheName) {
     return response;
   } catch (error) {
     log("Network request failed, trying cache:", error);
-    const cached = await cache.match(request);
+    // Return cached response even if stale (better than 503)
     if (cached) {
-      // Check if cached response is less than 5 minutes old
-      const timestamp = cached.headers.get("sw-cache-timestamp");
-      if (timestamp && Date.now() - Number.parseInt(timestamp, 10) < 5 * 60 * 1000) {
-        return cached;
-      }
+      return cached;
     }
     return new Response("API unavailable offline", { status: 503 });
   }

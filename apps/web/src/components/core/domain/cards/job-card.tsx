@@ -22,7 +22,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
-import { size, muted, weight, paddingBottom, cluster, iconSize, wrap, gap, marginRight, spaceY, marginBottom, paddingTop, marginLeft } from '@heyclaude/web-runtime/design-system';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useMemo } from 'react';
@@ -103,7 +102,7 @@ export function JobCard({ job }: JobCardProps) {
         <HighlightedText
           html={job.description_highlighted}
           fallback={job.description}
-          className={`${size.sm} ${muted.default}`}
+          className="text-muted-foreground text-sm"
         />
       );
     }
@@ -121,16 +120,16 @@ export function JobCard({ job }: JobCardProps) {
       {isFeatured ? (
         <div className="absolute -top-2 -right-2 z-10">
           <UnifiedBadge variant="base" style="default" className="bg-orange-500 text-white border-orange-500">
-            <Star className={`${iconSize.xs} ${marginRight.tight}`} />
+            <Star className="h-3 w-3 mr-1" />
             Featured
           </UnifiedBadge>
         </div>
       ) : null}
 
-      <CardHeader className={paddingBottom.default}>
+      <CardHeader className="pb-4">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <div className={`${cluster.default} ${marginBottom.compact}`}>
+            <div className="flex items-center gap-3 mb-2">
               {job.company_logo ? (
                 <Image
                   src={job.company_logo}
@@ -143,40 +142,40 @@ export function JobCard({ job }: JobCardProps) {
               ) : null}
               <div>
                 <CardTitle
-                  className={`${size.lg} ${weight.semibold} transition-colors-smooth group-hover:text-accent text-xl`}
+                  className="text-lg font-semibold transition-colors-smooth group-hover:text-accent text-xl"
                 >
                   <Link href={`/jobs/${job.slug}`}>{highlightedTitle}</Link>
                 </CardTitle>
                 <div
-                  className={`${cluster.compact} ${size.xs} ${muted.default}`}
+                  className="flex items-center gap-2 text-muted-foreground text-xs"
                 >
-                  <Building className={iconSize.sm} />
+                  <Building className="h-4 w-4" />
                   <span className="font-medium">{job.company}</span>
                 </div>
               </div>
             </div>
 
-            <div className={`${wrap} ${gap.default} text-muted-foreground text-sm`}>
-              <div className={cluster.tight}>
-                <MapPin className={iconSize.sm} />
+            <div className="flex flex-wrap gap-3 text-muted-foreground text-sm">
+              <div className="flex items-center gap-1">
+                <MapPin className="h-4 w-4" />
                 {job.location}
               </div>
               {job.posted_at ? (
-                <div className={cluster.tight}>
-                  <Clock className={iconSize.sm} />
+                <div className="flex items-center gap-1">
+                  <Clock className="h-4 w-4" />
                   {formatRelativeDate(job.posted_at)}
                 </div>
               ) : null}
               {job.salary ? (
-                <div className={cluster.tight}>
-                  <DollarSign className={iconSize.sm} />
+                <div className="flex items-center gap-1">
+                  <DollarSign className="h-4 w-4" />
                   {job.salary}
                 </div>
               ) : null}
             </div>
           </div>
 
-          <div className={`flex flex-col items-end ${spaceY.tight}`}>
+          <div className="flex flex-col items-end gap-1">
             {job.type ? (
               <UnifiedBadge
                 variant="base"
@@ -203,30 +202,30 @@ export function JobCard({ job }: JobCardProps) {
         </div>
       </CardHeader>
 
-      <CardContent className={`${paddingTop.default}`}>
-        <p className={`${marginBottom.default} line-clamp-2`}>{highlightedDescription}</p>
+      <CardContent className="pt-4">
+        <p className="mb-4 line-clamp-2">{highlightedDescription}</p>
 
-        <div className={marginBottom.default}>
-          <div className={`${wrap} ${gap.compact}`}>
+        <div className="mb-4">
+          <div className="flex flex-wrap gap-2">
             {(job.tags || []).slice(0, 4).map((tag: string) => (
               <UnifiedBadge
                 key={tag}
                 variant="base"
                 style="outline"
-                className={`${size.xs} ${weight.semibold}`}
+                className="text-xs font-semibold"
               >
                 {tag}
               </UnifiedBadge>
             ))}
             {Array.isArray(job.tags) && job.tags.length > 4 && (
-              <UnifiedBadge variant="base" style="outline" className={`${size.xs} ${weight.semibold} text-foreground`}>
+              <UnifiedBadge variant="base" style="outline" className="text-xs font-semibold text-foreground">
                 +{job.tags.length - 4} more
               </UnifiedBadge>
             )}
           </div>
         </div>
 
-        <div className={`flex ${gap.default}`}>
+        <div className="flex gap-3">
           <Button
             asChild
             className="flex-1"
@@ -257,7 +256,7 @@ export function JobCard({ job }: JobCardProps) {
               return (
                 <a href={validatedUrl} target="_blank" rel="noopener noreferrer">
                   Apply Now
-                  <ExternalLink className={cn(marginLeft.compact, iconSize.sm)} />
+                  <ExternalLink className={cn('ml-2', 'h-4 w-4')} />
                 </a>
               );
             })()}

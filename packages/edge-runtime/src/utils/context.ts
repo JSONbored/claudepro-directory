@@ -8,7 +8,7 @@ export interface StandardContext extends RouterContext {
 }
 
 export interface ContextOptions {
-  prefix?: string; // e.g. '/functions/v1/data-api' or just '/data-api'
+  prefix?: string; // e.g. '/functions/v1/heyclaude-mcp' or custom prefix
 }
 
 function isValidHttpMethod(value: string): value is HttpMethod {

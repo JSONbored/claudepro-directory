@@ -3,9 +3,8 @@
  */
 
 import { ContentCategory } from '@heyclaude/data-layer/prisma';
-import type { content_category } from '@heyclaude/data-layer/prisma';
-import type { SearchContentOptimizedArgs } from '@heyclaude/database-types/postgres-types';
-import { type DisplayableContent } from '@heyclaude/web-runtime';
+import { type content_category } from '@heyclaude/data-layer/prisma';
+import { type SearchContentOptimizedArgs } from '@heyclaude/database-types/postgres-types';
 import { type SearchFilters } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
@@ -14,13 +13,13 @@ import {
   getSearchFacets,
 } from '@heyclaude/web-runtime/data';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { type DisplayableContent } from '@heyclaude/web-runtime/types/component.types';
 import { type Metadata } from 'next';
 import { Suspense } from 'react';
 
 // Search is now handled by SearchPageClient (new unified search system)
 import { SearchPageClient } from '@/src/app/search/search-page-client';
 import { ContentSidebar } from '@/src/components/core/layout/content-sidebar';
-import { paddingX, paddingY, marginX, marginBottom, gap, spaceY } from "@heyclaude/web-runtime/design-system";
 
 const CONTENT_CATEGORY_VALUES = Object.values(ContentCategory) as readonly content_category[];
 
@@ -46,12 +45,16 @@ function toContentCategory(value: string | undefined): content_category | undefi
  * @param {string[] | undefined} categories
  * @returns {SearchContentOptimizedArgs['p_categories']} Return value description
  */
-function toContentCategoryArray(categories: string[] | undefined): SearchContentOptimizedArgs['p_categories'] {
+function toContentCategoryArray(
+  categories: string[] | undefined
+): SearchContentOptimizedArgs['p_categories'] {
   if (!categories || categories.length === 0) return undefined;
   const valid = categories
     .map(toContentCategory)
     .filter((cat): cat is content_category => cat !== undefined);
-  return valid.length > 0 ? (valid as NonNullable<SearchContentOptimizedArgs['p_categories']>) : undefined;
+  return valid.length > 0
+    ? (valid as NonNullable<SearchContentOptimizedArgs['p_categories']>)
+    : undefined;
 }
 
 /**
@@ -69,8 +72,9 @@ const QUICK_AUTHOR_LIMIT = 6;
 const QUICK_CATEGORY_LIMIT = 6;
 const FALLBACK_SUGGESTION_LIMIT = 18;
 
+// Import types directly from the facets module
 type SearchFacetAggregate = Awaited<ReturnType<typeof getSearchFacets>>;
-type SearchFacetSummary = SearchFacetAggregate['facets'][number];
+type SearchFacetSummary = NonNullable<SearchFacetAggregate>['facets'][number];
 
 /***
  * Type guard that checks whether a string corresponds to one of the allowed sort options.
@@ -163,7 +167,7 @@ function SearchResultsSection({
   hasUserFilters: boolean;
   query: string;
   quickAuthors: string[];
-    quickCategories: content_category[];
+  quickCategories: content_category[];
   quickTags: string[];
 }) {
   return (
@@ -203,9 +207,9 @@ export default function SearchPage({ searchParams }: SearchPageProperties) {
 
   // Static shell - renders immediately for PPR
   return (
-    <main className={`container ${marginX.auto} ${paddingX.default} ${paddingY.relaxed}`}>
-      <h1 className={`${marginBottom.relaxed} text-4xl font-bold`}>Search Claude Code Directory</h1>
-      <div className={`grid ${gap.relaxed} xl:grid-cols-[minmax(0,1fr)_18rem]`}>
+    <main className="container mx-auto px-4 py-8">
+      <h1 className="mb-8 text-4xl font-bold">Search Claude Code Directory</h1>
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_18rem]">
         {/* Dynamic content streams in Suspense */}
         <Suspense fallback={<SearchResultsSkeleton />}>
           <SearchPageContent reqLogger={reqLogger} searchParams={searchParams} />
@@ -229,10 +233,10 @@ export default function SearchPage({ searchParams }: SearchPageProperties) {
  * @returns {unknown} Description of return value*/
 function SearchResultsSkeleton() {
   return (
-    <div className={`${spaceY.relaxed}`}>
-      <div className={`bg-muted h-14 w-full animate-pulse rounded-lg`} />
-      <div className={`bg-muted h-32 w-full animate-pulse rounded-lg`} />
-      <div className={`bg-muted h-64 w-full animate-pulse rounded-lg`} />
+    <div className="space-y-6">
+      <div className="bg-muted h-14 w-full animate-pulse rounded-lg" />
+      <div className="bg-muted h-32 w-full animate-pulse rounded-lg" />
+      <div className="bg-muted h-64 w-full animate-pulse rounded-lg" />
     </div>
   );
 }
@@ -341,7 +345,7 @@ async function SearchFacetsAndResults({
   // Both operations are independent and can run concurrently for better performance
   const [facetResult, homepageResult] = await Promise.allSettled([
     getSearchFacets(),
-    !hasQueryOrFilters ? getHomepageData(getHomepageCategoryIds) : Promise.resolve(null),
+    hasQueryOrFilters ? Promise.resolve(null) : getHomepageData(getHomepageCategoryIds),
   ]);
 
   // Process facet results
@@ -351,8 +355,8 @@ async function SearchFacetsAndResults({
     categories: [] as content_category[],
     tags: [] as string[],
   };
-  
-  if (facetResult.status === 'fulfilled') {
+
+  if (facetResult.status === 'fulfilled' && facetResult.value) {
     facetAggregate = facetResult.value;
     facetOptions = {
       authors: facetAggregate.authors,
@@ -368,7 +372,7 @@ async function SearchFacetsAndResults({
       },
       'SearchPage: facets loaded'
     );
-  } else {
+  } else if (facetResult.status === 'rejected') {
     const normalized = normalizeError(facetResult.reason, 'Search facets fetch failed');
     reqLogger.error(
       { err: normalized, section: 'data-fetch' },

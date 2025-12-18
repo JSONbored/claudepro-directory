@@ -4,7 +4,8 @@
  * Cron job that processes pulse queue events in batches.
  * Handles user interactions, search events, and Resend engagement tracking.
  *
- * Runs every 5 minutes to process batched analytics events.
+ * Runs every hour to process batched analytics events.
+ * Optimized: Increased from 30 minutes (analytics can be slightly delayed).
  */
 
 import type { JsonValue } from '@heyclaude/data-layer/prisma';
@@ -16,10 +17,10 @@ import type { content_category, interaction_type } from '@heyclaude/data-layer/p
 import { ContentCategory, InteractionType } from '@heyclaude/data-layer/prisma';
 import { normalizeError } from '@heyclaude/shared-runtime';
 
-import { AccountService, SearchService } from '@heyclaude/data-layer';
 import { inngest } from '../../client';
 import { pgmqRead, pgmqDelete, type PgmqMessage } from '../../../supabase/pgmq-client';
 import { logger, createWebAppContextWithId } from '../../../logging/server';
+import { getService } from '../../../data/service-factory';
 import { sendCronSuccessHeartbeat } from '../../utils/monitoring';
 
 const PULSE_BATCH_SIZE = 100;
@@ -69,7 +70,7 @@ export const processPulseQueue = inngest.createFunction(
     name: 'Analytics Pulse Processor',
     retries: 1,
   },
-  { cron: '*/30 * * * *' }, // Every 30 minutes (batches queue events)
+  { cron: '0 * * * *' }, // Every hour (optimized from 30 minutes)
   async ({ step }) => {
     const startTime = Date.now();
     const logContext = createWebAppContextWithId('/inngest/analytics/pulse', 'processPulseQueue');
@@ -164,7 +165,7 @@ export const processPulseQueue = inngest.createFunction(
             session_id: q.session_id,
           }));
 
-          const service = new SearchService();
+          const service = await getService('search');
           const result = await service.batchInsertSearchQueries({
             p_queries: searchQueryInputs,
           });
@@ -239,7 +240,7 @@ export const processPulseQueue = inngest.createFunction(
           }
 
           // Use AccountService for proper data layer architecture
-          const accountService = new AccountService();
+          const accountService = await getService('account');
           const result = await accountService.batchInsertUserInteractions({
             p_interactions: interactions,
           });
@@ -266,16 +267,34 @@ export const processPulseQueue = inngest.createFunction(
     }
 
     // Step 5: Delete processed messages
+    // OPTIMIZATION: Parallel batch deletion for better performance
     if (processedMsgIds.length > 0) {
       await step.run('delete-processed-messages', async () => {
-        for (const msgId of processedMsgIds) {
-          try {
-            await pgmqDelete('pulse', msgId);
-          } catch (error) {
-            logger.warn({ ...logContext,
-              msgId: msgId.toString(), }, 'Failed to delete pulse message');
-          }
+        // Process in parallel batches to avoid overwhelming database
+        const BATCH_SIZE = 10;
+        const batches: bigint[][] = [];
+        
+        // Create batches
+        for (let i = 0; i < processedMsgIds.length; i += BATCH_SIZE) {
+          batches.push(processedMsgIds.slice(i, i + BATCH_SIZE));
         }
+
+        // Execute batches in parallel
+        await Promise.allSettled(
+          batches.map(async (batch) => {
+            await Promise.allSettled(
+              batch.map((msgId) =>
+                pgmqDelete('pulse', msgId).catch((error) => {
+                  const normalized = normalizeError(error, 'Failed to delete pulse message');
+                  logger.warn(
+                    { ...logContext, err: normalized, msgId: msgId.toString() },
+                    'Failed to delete pulse message'
+                  );
+                })
+              )
+            );
+          })
+        );
       });
     }
 
@@ -290,16 +309,33 @@ export const processPulseQueue = inngest.createFunction(
 
     if (failedMessages.length > 0) {
       await step.run('cleanup-failed-messages', async () => {
-        for (const msg of failedMessages) {
-          try {
-            await pgmqDelete('pulse', msg.msg_id);
-            logger.warn({ ...logContext,
-              msgId: String(msg.msg_id),
-              readCount: msg.read_ct, }, 'Pulse event exceeded max retries, removed from queue');
-          } catch {
-            // Silent fail
-          }
+        // OPTIMIZATION: Parallel batch deletion for better performance
+        const BATCH_SIZE = 10;
+        const batches = [];
+        
+        // Create batches
+        for (let i = 0; i < failedMessages.length; i += BATCH_SIZE) {
+          batches.push(failedMessages.slice(i, i + BATCH_SIZE));
         }
+
+        // Execute batches in parallel
+        await Promise.allSettled(
+          batches.map(async (batch) => {
+            await Promise.allSettled(
+              batch.map(async (msg) => {
+                try {
+                  await pgmqDelete('pulse', msg.msg_id);
+                  logger.warn(
+                    { ...logContext, msgId: String(msg.msg_id), readCount: msg.read_ct },
+                    'Pulse event exceeded max retries, removed from queue'
+                  );
+                } catch {
+                  // Silent fail
+                }
+              })
+            );
+          })
+        );
       });
     }
 

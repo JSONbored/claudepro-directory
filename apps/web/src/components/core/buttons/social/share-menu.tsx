@@ -25,7 +25,6 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
-import { gap } from "@heyclaude/web-runtime/design-system";
 
 interface ShareMenuProps {
   /** Optional description for email/social */
@@ -161,7 +160,7 @@ export function ShareMenu({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <motion.div whileTap={shouldReduceMotion ? {} : { scale: 0.97 }}>
-          <Button variant={variant} className={`min-w-0 ${gap.tight}`}>
+          <Button variant={variant} className="min-w-0 gap-1">
             <Share2 className="h-4 w-4" />
             <span>{label}</span>
             {showChevron ? <ChevronDown className="h-3 w-3 opacity-50" /> : null}
@@ -170,15 +169,15 @@ export function ShareMenu({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
         {/* Social platforms */}
-        <DropdownMenuItem onClick={shareToTwitter} className={`${gap.tight}`}>
+        <DropdownMenuItem onClick={shareToTwitter} className="gap-1">
           <Twitter className="h-4 w-4" />
           <span>Share on X</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={shareToLinkedIn} className={`${gap.tight}`}>
+        <DropdownMenuItem onClick={shareToLinkedIn} className="gap-1">
           <Linkedin className="h-4 w-4" />
           <span>Share on LinkedIn</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={shareViaEmail} className={`${gap.tight}`}>
+        <DropdownMenuItem onClick={shareViaEmail} className="gap-1">
           <Mail className="h-4 w-4" />
           <span>Share via Email</span>
         </DropdownMenuItem>
@@ -186,7 +185,7 @@ export function ShareMenu({
         <DropdownMenuSeparator />
 
         {/* Copy link */}
-        <DropdownMenuItem onClick={copyLink} className={`${gap.tight}`}>
+        <DropdownMenuItem onClick={copyLink} className="gap-1">
           <Copy className="h-4 w-4" />
           <span>Copy Link</span>
         </DropdownMenuItem>
@@ -195,7 +194,7 @@ export function ShareMenu({
         {hasNativeShare ? (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleNativeShare} className={`${gap.tight}`}>
+            <DropdownMenuItem onClick={handleNativeShare} className="gap-1">
               <Share2 className="h-4 w-4" />
               <span>More options...</span>
             </DropdownMenuItem>

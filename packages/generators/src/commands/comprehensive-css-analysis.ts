@@ -19,6 +19,7 @@ import { join, extname, dirname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as postcss from 'postcss';
 import valueParser from 'postcss-value-parser';
+import * as csstree from 'css-tree';
 
 import { logger } from '../toolkit/logger.ts';
 
@@ -104,6 +105,12 @@ interface ComprehensiveReport {
     cssVariable?: string;
     tokenPath?: string;
   }>;
+  // CSS Tree enhanced analysis
+  cssTreeAnalysis: {
+    unusedVariables: CSSVariableUsage[];
+    variableDependencyGraph: Map<string, { dependencies: string[]; dependents: string[] }>;
+    duplicateRules: CSSRuleDuplicate[];
+  };
 }
 
 // Find all CSS files
@@ -208,7 +215,255 @@ function extractCSSVariables(css: string, file: string): CSSVariable[] {
   return variables;
 }
 
-// Load design tokens from actual files
+/**
+ * Enhanced CSS Variable Analysis using CSS Tree (AST-level)
+ * 
+ * Uses CSS Tree to:
+ * - Find unused CSS variables
+ * - Analyze CSS variable dependencies
+ * - Generate dependency graphs
+ * - Find duplicate CSS rules
+ */
+interface CSSVariableUsage {
+  variable: CSSVariable;
+  used: boolean;
+  usedIn: string[];
+  dependencies: string[]; // Other CSS variables this variable depends on
+  dependents: string[]; // Other CSS variables that depend on this variable
+}
+
+interface CSSRuleDuplicate {
+  selector: string;
+  properties: Map<string, string>;
+  occurrences: Array<{ file: string; line?: number }>;
+}
+
+/**
+ * Analyze CSS variable usage with CSS Tree AST
+ */
+function analyzeCSSVariableUsageWithCSSTree(
+  css: string,
+  file: string,
+  allVariables: CSSVariable[]
+): CSSVariableUsage[] {
+  const usages: CSSVariableUsage[] = [];
+  
+  try {
+    const ast = csstree.parse(css, {
+      parseValue: true,
+      parseCustomProperty: true,
+    });
+
+    // Track variable definitions and usages
+    const variableDefinitions = new Map<string, CSSVariable>();
+    const variableUsages = new Map<string, Set<string>>(); // variable -> Set<files where used>
+    const variableDependencies = new Map<string, Set<string>>(); // variable -> Set<variables it depends on>
+    const variableDependents = new Map<string, Set<string>>(); // variable -> Set<variables that depend on it>
+
+    // Walk AST to find variable definitions and usages
+    csstree.walk(ast, {
+      visit: 'Declaration',
+      enter(node) {
+        if (node.property && node.property.startsWith('--')) {
+          const varName = node.property;
+          const varValue = csstree.generate(node.value);
+          
+          // Find matching variable definition
+          const variable = allVariables.find(v => v.name === varName && v.file === file);
+          if (variable) {
+            variableDefinitions.set(varName, variable);
+            
+            // Parse value to find dependencies (other CSS variables used in this value)
+            csstree.walk(node.value, {
+              visit: 'Function',
+              enter(funcNode) {
+                if (funcNode.name === 'var') {
+                  const args = funcNode.children;
+                  if (args && args.head) {
+                    const depVarName = csstree.generate(args.head.data);
+                    if (depVarName.startsWith('--')) {
+                      if (!variableDependencies.has(varName)) {
+                        variableDependencies.set(varName, new Set());
+                      }
+                      variableDependencies.get(varName)!.add(depVarName);
+                      
+                      if (!variableDependents.has(depVarName)) {
+                        variableDependents.set(depVarName, new Set());
+                      }
+                      variableDependents.get(depVarName)!.add(varName);
+                    }
+                  }
+                }
+              },
+            });
+          }
+        }
+      },
+    });
+
+    // Walk AST to find variable usages (var(--variable-name))
+    csstree.walk(ast, {
+      visit: 'Function',
+      enter(node) {
+        if (node.name === 'var') {
+          const args = node.children;
+          if (args && args.head) {
+            const varName = csstree.generate(args.head.data);
+            if (varName.startsWith('--')) {
+              if (!variableUsages.has(varName)) {
+                variableUsages.set(varName, new Set());
+              }
+              variableUsages.get(varName)!.add(file);
+            }
+          }
+        }
+      },
+    });
+
+    // Build usage report
+    for (const variable of allVariables.filter(v => v.file === file)) {
+      const used = variableUsages.has(variable.name);
+      const usedIn = used ? Array.from(variableUsages.get(variable.name)!) : [];
+      const dependencies = Array.from(variableDependencies.get(variable.name) || []);
+      const dependents = Array.from(variableDependents.get(variable.name) || []);
+
+      usages.push({
+        variable,
+        used,
+        usedIn,
+        dependencies,
+        dependents,
+      });
+    }
+  } catch (error) {
+    logger.warn(`Failed to parse CSS with CSS Tree for ${file}`, { error });
+  }
+
+  return usages;
+}
+
+/**
+ * Find duplicate CSS rules using CSS Tree
+ */
+function findDuplicateCSSRules(cssFiles: string[]): CSSRuleDuplicate[] {
+  const ruleMap = new Map<string, CSSRuleDuplicate>();
+  
+  for (const file of cssFiles) {
+    try {
+      const css = readFileSync(file, 'utf-8');
+      const ast = csstree.parse(css);
+
+      csstree.walk(ast, {
+        visit: 'Rule',
+        enter(node) {
+          if (node.prelude && node.block) {
+            const selector = csstree.generate(node.prelude);
+            const properties = new Map<string, string>();
+
+            csstree.walk(node.block, {
+              visit: 'Declaration',
+              enter(decl) {
+                if (decl.property) {
+                  properties.set(decl.property, csstree.generate(decl.value));
+                }
+              },
+            });
+
+            // Create a key from selector + sorted properties
+            const propString = Array.from(properties.entries())
+              .sort(([a], [b]) => a.localeCompare(b))
+              .map(([key, value]) => `${key}:${value}`)
+              .join(';');
+            const ruleKey = `${selector}|${propString}`;
+
+            if (!ruleMap.has(ruleKey)) {
+              ruleMap.set(ruleKey, {
+                selector,
+                properties,
+                occurrences: [],
+              });
+            }
+
+            ruleMap.get(ruleKey)!.occurrences.push({
+              file: relative(PROJECT_ROOT, file),
+              line: node.loc?.start?.line,
+            });
+          }
+        },
+      });
+    } catch (error) {
+      logger.warn(`Failed to parse CSS file ${file}`, { error });
+    }
+  }
+
+  // Return only duplicates (more than one occurrence)
+  return Array.from(ruleMap.values()).filter(rule => rule.occurrences.length > 1);
+}
+
+/**
+ * Generate CSS variable dependency graph
+ */
+function generateCSSVariableDependencyGraph(
+  allVariables: CSSVariable[],
+  cssFiles: string[]
+): Map<string, { dependencies: string[]; dependents: string[] }> {
+  const graph = new Map<string, { dependencies: string[]; dependents: string[] }>();
+
+  // Initialize graph
+  for (const variable of allVariables) {
+    graph.set(variable.name, { dependencies: [], dependents: [] });
+  }
+
+  // Build dependency graph by parsing all CSS files
+  for (const file of cssFiles) {
+    try {
+      const css = readFileSync(file, 'utf-8');
+      const ast = csstree.parse(css, {
+        parseValue: true,
+        parseCustomProperty: true,
+      });
+
+      csstree.walk(ast, {
+        visit: 'Declaration',
+        enter(node) {
+          if (node.property && node.property.startsWith('--')) {
+            const varName = node.property;
+            
+            // Find dependencies in the value
+            csstree.walk(node.value, {
+              visit: 'Function',
+              enter(funcNode) {
+                if (funcNode.name === 'var') {
+                  const args = funcNode.children;
+                  if (args && args.head) {
+                    const depVarName = csstree.generate(args.head.data);
+                    if (depVarName.startsWith('--') && graph.has(varName) && graph.has(depVarName)) {
+                      const varNode = graph.get(varName)!;
+                      const depNode = graph.get(depVarName)!;
+                      
+                      if (!varNode.dependencies.includes(depVarName)) {
+                        varNode.dependencies.push(depVarName);
+                      }
+                      if (!depNode.dependents.includes(varName)) {
+                        depNode.dependents.push(varName);
+                      }
+                    }
+                  }
+                }
+              },
+            });
+          }
+        },
+      });
+    } catch (error) {
+      logger.warn(`Failed to parse CSS file ${file} for dependency graph`, { error });
+    }
+  }
+
+  return graph;
+}
+
+// Load design tokens from actual design system files
 async function loadDesignTokens(): Promise<{
   spacing: DesignToken[];
   colors: DesignToken[];
@@ -225,124 +480,141 @@ async function loadDesignTokens(): Promise<{
   };
 
   try {
-    // Load spacing tokens
-    const spacingScalePath = join(PROJECT_ROOT, 'packages/web-runtime/src/design-tokens/spacing/scale.ts');
-    const spacingScaleContent = readFileSync(spacingScalePath, 'utf-8');
-    
-    // Extract SPACING_SCALE values
-    const spacingScaleMatch = spacingScaleContent.match(/export const SPACING_SCALE = \{([^}]+)\}/s);
-    if (spacingScaleMatch) {
-      const scaleContent = spacingScaleMatch[1];
-      const scaleEntries = scaleContent.matchAll(/(\w+):\s*['"]([^'"]+)['"]/g);
-      for (const match of scaleEntries) {
-        tokens.spacing.push({
-          category: 'spacing-scale',
-          path: `SPACING.scale.${match[1]}`,
-          value: match[2],
-          type: 'spacing',
-        });
-      }
-    }
-
-    // Load semantic spacing
-    const semanticSpacingPath = join(PROJECT_ROOT, 'packages/web-runtime/src/design-tokens/spacing/semantic.ts');
-    const semanticSpacingContent = readFileSync(semanticSpacingPath, 'utf-8');
-    
-    // Extract marginBottom, marginTop, etc.
-    const marginBottomMatch = semanticSpacingContent.match(/marginBottom:\s*\{([^}]+)\}/s);
-    if (marginBottomMatch) {
-      const mbContent = marginBottomMatch[1];
-      const mbEntries = mbContent.matchAll(/(\w+):\s*SPACING_SCALE\.(\w+)/g);
-      for (const match of mbEntries) {
-        // Find the actual value from SPACING_SCALE
-        const scaleValue = tokens.spacing.find(t => t.path.includes(`.${match[2]}`));
-        if (scaleValue) {
+    // Load spacing tokens from design system
+    const spacingPath = join(PROJECT_ROOT, 'packages/web-runtime/src/design-system/styles/spacing.ts');
+    if (statSync(spacingPath).isFile()) {
+      const spacingContent = readFileSync(spacingPath, 'utf-8');
+      
+      // Extract marginBottom values (e.g., 'mb-4', 'mb-6')
+      const marginBottomMatch = spacingContent.match(/export const marginBottom = \{([^}]+)\}/s);
+      if (marginBottomMatch) {
+        const mbContent = marginBottomMatch[1];
+        const mbEntries = mbContent.matchAll(/(\w+(?:\.\d+)?):\s*['"]([^'"]+)['"]/g);
+        for (const match of mbEntries) {
           tokens.spacing.push({
             category: 'margin-bottom',
-            path: `SPACING.marginBottom.${match[1]}`,
-            value: scaleValue.value,
+            path: `marginBottom.${match[1]}`,
+            value: match[2],
+            type: 'spacing',
+          });
+        }
+      }
+
+      // Extract marginTop values
+      const marginTopMatch = spacingContent.match(/export const marginTop = \{([^}]+)\}/s);
+      if (marginTopMatch) {
+        const mtContent = marginTopMatch[1];
+        const mtEntries = mtContent.matchAll(/(\w+(?:\.\d+)?):\s*['"]([^'"]+)['"]/g);
+        for (const match of mtEntries) {
+          tokens.spacing.push({
+            category: 'margin-top',
+            path: `marginTop.${match[1]}`,
+            value: match[2],
+            type: 'spacing',
+          });
+        }
+      }
+
+      // Extract spaceY values
+      const spaceYMatch = spacingContent.match(/export const spaceY = \{([^}]+)\}/s);
+      if (spaceYMatch) {
+        const syContent = spaceYMatch[1];
+        const syEntries = syContent.matchAll(/(\w+(?:\.\d+)?):\s*['"]([^'"]+)['"]/g);
+        for (const match of syEntries) {
+          tokens.spacing.push({
+            category: 'space-y',
+            path: `spaceY.${match[1]}`,
+            value: match[2],
             type: 'spacing',
           });
         }
       }
     }
 
-    // Load typography tokens
-    const typographyPath = join(PROJECT_ROOT, 'packages/web-runtime/src/design-tokens/typography/font-sizes.ts');
-    const typographyContent = readFileSync(typographyPath, 'utf-8');
-    
-    // Extract font sizes
-    const fontSizeMatch = typographyContent.match(/export const FONT_SIZES = \{([^}]+)\}/s);
-    if (fontSizeMatch) {
-      const fontSizeContent = fontSizeMatch[1];
-      const fontSizeEntries = fontSizeContent.matchAll(/(\w+):\s*['"]([^'"]+)['"]/g);
-      for (const match of fontSizeEntries) {
-        tokens.typography.push({
-          category: 'font-size',
-          path: `TYPOGRAPHY.fontSizes.${match[1]}`,
-          value: match[2],
-          type: 'typography',
-        });
-      }
-    }
-
-    // Load shadow tokens - extract actual values
-    const shadowsElevationPath = join(PROJECT_ROOT, 'packages/web-runtime/src/design-tokens/shadows/elevation.ts');
-    const shadowsElevationContent = readFileSync(shadowsElevationPath, 'utf-8');
-    
-    // Extract dark shadows
-    const darkShadowsMatch = shadowsElevationContent.match(/dark:\s*\{([^}]+)\}/s);
-    if (darkShadowsMatch) {
-      const darkContent = darkShadowsMatch[1];
-      const darkShadowEntries = darkContent.matchAll(/(\w+):\s*['"]([^'"]+)['"]/g);
-      for (const match of darkShadowEntries) {
-        tokens.shadows.push({
-          category: 'shadow-elevation-dark',
-          path: `SHADOWS.elevation.dark.${match[1]}`,
-          value: match[2],
-          type: 'shadow',
-        });
-      }
-    }
-
-    // Extract light shadows
-    const lightShadowsMatch = shadowsElevationContent.match(/light:\s*\{([^}]+)\}/s);
-    if (lightShadowsMatch) {
-      const lightContent = lightShadowsMatch[1];
-      const lightShadowEntries = lightContent.matchAll(/(\w+):\s*['"]([^'"]+)['"]/g);
-      for (const match of lightShadowEntries) {
-        tokens.shadows.push({
-          category: 'shadow-elevation-light',
-          path: `SHADOWS.elevation.light.${match[1]}`,
-          value: match[2],
-          type: 'shadow',
-        });
-      }
-    }
-
-    // Load color tokens - extract actual OKLCH values from palette
-    const colorsPalettePath = join(PROJECT_ROOT, 'packages/web-runtime/src/design-tokens/colors/palette.ts');
-    if (statSync(colorsPalettePath).isFile()) {
-      const colorsPaletteContent = readFileSync(colorsPalettePath, 'utf-8');
+    // Load typography tokens from design system
+    const typographyPath = join(PROJECT_ROOT, 'packages/web-runtime/src/design-system/styles/typography.ts');
+    if (statSync(typographyPath).isFile()) {
+      const typographyContent = readFileSync(typographyPath, 'utf-8');
       
-      // Extract BRAND_COLORS
-      const brandColorsMatch = colorsPaletteContent.match(/export const BRAND_COLORS = \{([^}]+)\}/s);
-      if (brandColorsMatch) {
-        const brandContent = brandColorsMatch[1];
-        const brandEntries = brandContent.matchAll(/(\w+):\s*['"]([^'"]+)['"]/g);
-        for (const match of brandEntries) {
-          tokens.colors.push({
-            category: 'brand-color',
-            path: `COLORS.palette.brand.${match[1]}`,
+      // Extract size values (e.g., 'text-sm', 'text-base')
+      const sizeMatch = typographyContent.match(/export const size = \{([^}]+)\}/s);
+      if (sizeMatch) {
+        const sizeContent = sizeMatch[1];
+        const sizeEntries = sizeContent.matchAll(/(\w+(?:\.\d+)?|'[^']+'):\s*['"]([^'"]+)['"]/g);
+        for (const match of sizeEntries) {
+          const key = match[1].replace(/['"]/g, '');
+          tokens.typography.push({
+            category: 'font-size',
+            path: `size.${key}`,
             value: match[2],
-            type: 'color',
+            type: 'typography',
+          });
+        }
+      }
+
+      // Extract muted values
+      const mutedMatch = typographyContent.match(/export const muted = \{([^}]+)\}/s);
+      if (mutedMatch) {
+        const mutedContent = mutedMatch[1];
+        const mutedEntries = mutedContent.matchAll(/(\w+):\s*['"]([^'"]+)['"]/g);
+        for (const match of mutedEntries) {
+          tokens.typography.push({
+            category: 'muted-text',
+            path: `muted.${match[1]}`,
+            value: match[2],
+            type: 'typography',
+          });
+        }
+      }
+    }
+
+    // Load icon size tokens from design system
+    const iconsPath = join(PROJECT_ROOT, 'packages/web-runtime/src/design-system/styles/icons.ts');
+    if (statSync(iconsPath).isFile()) {
+      const iconsContent = readFileSync(iconsPath, 'utf-8');
+      
+      // Extract iconSize values (e.g., 'h-4 w-4', 'h-5 w-5')
+      const iconSizeMatch = iconsContent.match(/export const iconSize = \{([^}]+)\}/s);
+      if (iconSizeMatch) {
+        const iconSizeContent = iconSizeMatch[1];
+        const iconSizeEntries = iconSizeContent.matchAll(/(\w+(?:\.\d+)?|'[^']+'):\s*['"]([^'"]+)['"]/g);
+        for (const match of iconSizeEntries) {
+          const key = match[1].replace(/['"]/g, '');
+          tokens.other.push({
+            category: 'icon-size',
+            path: `iconSize.${key}`,
+            value: match[2],
+            type: 'other',
+          });
+        }
+      }
+    }
+
+    // Load border/radius tokens from design system
+    const bordersPath = join(PROJECT_ROOT, 'packages/web-runtime/src/design-system/styles/borders.ts');
+    if (statSync(bordersPath).isFile()) {
+      const bordersContent = readFileSync(bordersPath, 'utf-8');
+      
+      // Extract radius values (e.g., 'rounded-lg', 'rounded-md')
+      const radiusMatch = bordersContent.match(/export const radius = \{([^}]+)\}/s);
+      if (radiusMatch) {
+        const radiusContent = radiusMatch[1];
+        const radiusEntries = radiusContent.matchAll(/(\w+(?:\.\d+)?|'[^']+'):\s*['"]([^'"]+)['"]/g);
+        for (const match of radiusEntries) {
+          const key = match[1].replace(/['"]/g, '');
+          tokens.other.push({
+            category: 'border-radius',
+            path: `radius.${key}`,
+            value: match[2],
+            type: 'other',
           });
         }
       }
     }
 
   } catch (error) {
-    logger.warn('Error loading design tokens', { error });
+    // Design tokens loading is optional - continue if files don't exist
+    logger.warn('Error loading design tokens (this is optional)', { error: error instanceof Error ? error.message : String(error) });
   }
 
   return tokens;
@@ -630,6 +902,25 @@ async function generateComprehensiveReport(): Promise<ComprehensiveReport> {
     }
   }
 
+  // CSS Tree enhanced analysis
+  logger.info('Running CSS Tree AST analysis...');
+  const cssTreeUsages: CSSVariableUsage[] = [];
+  for (const file of cssFiles) {
+    try {
+      const content = readFileSync(file, 'utf-8');
+      const usages = analyzeCSSVariableUsageWithCSSTree(content, file, allVariables);
+      cssTreeUsages.push(...usages);
+    } catch (error) {
+      logger.warn(`Failed to analyze ${file} with CSS Tree`, { error });
+    }
+  }
+
+  const unusedVariables = cssTreeUsages.filter(u => !u.used);
+  const dependencyGraph = generateCSSVariableDependencyGraph(allVariables, cssFiles);
+  const duplicateRules = findDuplicateCSSRules(cssFiles);
+
+  logger.info(`CSS Tree analysis complete: ${unusedVariables.length} unused variables, ${duplicateRules.length} duplicate rules`);
+
   return {
     cssVariables: {
       total: allVariables.length,
@@ -646,6 +937,11 @@ async function generateComprehensiveReport(): Promise<ComprehensiveReport> {
     conflicts,
     spacingComparison,
     colorComparison,
+    cssTreeAnalysis: {
+      unusedVariables,
+      variableDependencyGraph: dependencyGraph,
+      duplicateRules,
+    },
   };
 }
 
@@ -783,6 +1079,58 @@ function generateMarkdownReport(report: ComprehensiveReport): string {
     const newCount = vars.filter(v => v.context === 'new').length;
     const bothCount = vars.filter(v => v.context === 'both').length;
     md += `- Old: ${oldCount}, New: ${newCount}, Both: ${bothCount}\n\n`;
+  }
+
+  // CSS Tree Analysis Section
+  md += `\n## CSS Tree AST Analysis (Enhanced)\n\n`;
+  
+  md += `### Unused CSS Variables (${report.cssTreeAnalysis.unusedVariables.length})\n\n`;
+  if (report.cssTreeAnalysis.unusedVariables.length > 0) {
+    md += `| Variable | File | Line | Dependencies | Dependents |\n`;
+    md += `|----------|------|------|--------------|------------|\n`;
+    for (const usage of report.cssTreeAnalysis.unusedVariables.slice(0, 30)) {
+      const deps = usage.dependencies.length > 0 ? usage.dependencies.join(', ') : 'none';
+      const dependents = usage.dependents.length > 0 ? usage.dependents.join(', ') : 'none';
+      md += `| \`${usage.variable.name}\` | \`${usage.variable.file}\` | ${usage.variable.line || 'N/A'} | ${deps} | ${dependents} |\n`;
+    }
+    if (report.cssTreeAnalysis.unusedVariables.length > 30) {
+      md += `\n... and ${report.cssTreeAnalysis.unusedVariables.length - 30} more unused variables\n`;
+    }
+  } else {
+    md += `✅ No unused CSS variables found!\n\n`;
+  }
+
+  md += `\n### CSS Variable Dependency Graph\n\n`;
+  md += `Variables with dependencies (top 20):\n\n`;
+  const varsWithDeps = Array.from(report.cssTreeAnalysis.variableDependencyGraph.entries())
+    .filter(([, deps]) => deps.dependencies.length > 0)
+    .slice(0, 20);
+  for (const [varName, deps] of varsWithDeps) {
+    md += `- \`${varName}\` depends on: ${deps.dependencies.map(d => `\`${d}\``).join(', ')}\n`;
+    if (deps.dependents.length > 0) {
+      md += `  - Used by: ${deps.dependents.map(d => `\`${d}\``).join(', ')}\n`;
+    }
+  }
+
+  md += `\n### Duplicate CSS Rules (${report.cssTreeAnalysis.duplicateRules.length})\n\n`;
+  if (report.cssTreeAnalysis.duplicateRules.length > 0) {
+    for (const rule of report.cssTreeAnalysis.duplicateRules.slice(0, 10)) {
+      md += `#### \`${rule.selector}\` (${rule.occurrences.length} occurrences)\n\n`;
+      md += `**Properties:**\n`;
+      for (const [prop, value] of rule.properties.entries()) {
+        md += `- \`${prop}\`: \`${value}\`\n`;
+      }
+      md += `\n**Occurrences:**\n`;
+      for (const occ of rule.occurrences) {
+        md += `- \`${occ.file}\`${occ.line ? ` (line ${occ.line})` : ''}\n`;
+      }
+      md += `\n`;
+    }
+    if (report.cssTreeAnalysis.duplicateRules.length > 10) {
+      md += `\n... and ${report.cssTreeAnalysis.duplicateRules.length - 10} more duplicate rules\n`;
+    }
+  } else {
+    md += `✅ No duplicate CSS rules found!\n\n`;
   }
 
   return md;

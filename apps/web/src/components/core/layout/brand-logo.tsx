@@ -9,7 +9,7 @@
 
 'use client';
 
-import { cn, RESPONSIVE_PATTERNS, HighlightText } from '@heyclaude/web-runtime/ui';
+import { cn, HighlightText } from '@heyclaude/web-runtime/ui';
 
 interface HeyClaudeLogoProps {
   /**
@@ -54,10 +54,10 @@ export function HeyClaudeLogo({
   duration = 1.5,
 }: HeyClaudeLogoProps) {
   const sizeClasses = {
-    sm: RESPONSIVE_PATTERNS.TEXT_RESPONSIVE_MD,
-    md: RESPONSIVE_PATTERNS.TEXT_RESPONSIVE_LG,
-    lg: RESPONSIVE_PATTERNS.TEXT_RESPONSIVE_XL,
-    xl: RESPONSIVE_PATTERNS.TEXT_RESPONSIVE_2XL,
+    sm: 'text-base sm:text-base md:text-lg',
+    md: 'text-lg sm:text-lg md:text-xl lg:text-2xl',
+    lg: 'text-xl sm:text-xl md:text-2xl lg:text-3xl',
+    xl: 'text-2xl sm:text-2xl md:text-3xl lg:text-4xl',
   };
 
   return (

@@ -15,14 +15,12 @@ import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-  ANIMATION_CONSTANTS,
   cn,
 } from '@heyclaude/web-runtime/ui';
 import { memo, useState, useEffect } from 'react';
 import { useBoolean } from '@heyclaude/web-runtime/hooks';
 
 import { SanitizedHTML } from './sanitized-html';
-import { marginTop, spaceY, between, paddingY, paddingX, size, leading, iconSize, marginBottom, padding, paddingLeft, marginY } from "@heyclaude/web-runtime/design-system";
 
 export interface AccordionSection {
   content: string;
@@ -87,7 +85,7 @@ export const ChangelogAccordionSections = memo(({ content }: ChangelogAccordionS
   if (sections.length === 0) return null;
 
   return (
-    <div className={`${marginTop.relaxed} ${spaceY.relaxed}`}>
+    <div className="mt-8 space-y-6">
       {sections.map((section, index) => (
         <AccordionSectionItem key={`${section.title}-${index}`} section={section} />
       ))}
@@ -165,21 +163,21 @@ function AccordionSectionItem({ section }: AccordionSectionItemProps) {
   }, [section.content]);
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen} className={`${marginBottom.default}`}>
+    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="mb-4">
       <CollapsibleTrigger
-        className={`${between.center} w-full ${paddingY.compact} ${paddingX.default} border-border bg-card hover:bg-accent/5 rounded-lg border ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} text-left`}
+        className="flex items-center justify-between w-full py-3 px-4 border-border bg-card hover:bg-accent/5 card-base transition-all duration-200 ease-out text-left"
       >
-        <span className={`${size.base} ${leading.normal} font-semibold`}>{section.title}</span>
+        <span className="text-base leading-normal font-semibold">{section.title}</span>
         {isOpen ? (
-          <ChevronUp className={`${iconSize.sm} text-muted-foreground`} />
+          <ChevronUp className="h-4 w-4 text-muted-foreground" />
         ) : (
-          <ChevronDown className={`${iconSize.sm} text-muted-foreground`} />
+          <ChevronDown className="h-4 w-4 text-muted-foreground" />
         )}
       </CollapsibleTrigger>
       <CollapsibleContent
-        className={`${paddingX.default} ${paddingY.default}`}
+        className="px-4 py-4"
       >
-        <div className={cn('prose prose-slate dark:prose-invert prose-sm prose-headings:font-semibold prose-headings:text-foreground', `prose-headings:${marginTop.default}`, `prose-headings:${marginBottom.compact}`, 'prose-h1:text-lg prose-h2:text-base prose-h3:text-sm prose-p:text-foreground/90 prose-p:leading-relaxed', `prose-p:${marginY.compact}`, `prose-ul:${marginY.compact}`, `prose-ol:${marginY.compact}`, 'prose-li:my-0.5 prose-li:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:font-semibold prose-strong:text-foreground prose-code:text-foreground prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-pre:bg-muted prose-pre:text-foreground', `prose-pre:${padding.compact}`, 'prose-pre:rounded prose-pre:overflow-x-auto prose-blockquote:border-l-2 prose-blockquote:border-primary', `prose-blockquote:${paddingLeft.compact}`, 'prose-blockquote:italic', `prose-blockquote:${marginY.compact}`, 'max-w-none')}>
+        <div className={cn('prose prose-slate dark:prose-invert prose-sm prose-headings:font-semibold prose-headings:text-foreground', 'prose-headings:mt-4', 'prose-headings:mb-2', 'prose-h1:text-lg prose-h2:text-base prose-h3:text-sm prose-p:text-foreground/90 prose-p:leading-relaxed', 'prose-p:my-2', 'prose-ul:my-2', 'prose-ol:my-2', 'prose-li:my-0.5 prose-li:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:font-semibold prose-strong:text-foreground prose-code:text-foreground prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-pre:bg-muted prose-pre:text-foreground', 'prose-pre:p-3', 'prose-pre:rounded prose-pre:overflow-x-auto prose-blockquote:border-l-2 prose-blockquote:border-primary', 'prose-blockquote:pl-2', 'prose-blockquote:italic', 'prose-blockquote:my-2', 'max-w-none')}>
           <SanitizedHTML html={htmlContent} />
         </div>
       </CollapsibleContent>

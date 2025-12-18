@@ -7,7 +7,6 @@ import type { UserActivityTimelineItem } from '@heyclaude/database-types/postgre
 import { GitPullRequest } from '@heyclaude/web-runtime/icons';
 import { logger } from '@heyclaude/web-runtime/logging/server';
 import { Card, CardContent } from '@heyclaude/web-runtime/ui';
-import { paddingY, spaceY, padding, gap, marginTop } from "@heyclaude/web-runtime/design-system";
 
 type Activity = UserActivityTimelineItem;
 
@@ -26,7 +25,7 @@ export function ActivityTimeline({ activities, limit }: ActivityTimelineProps) {
   if (!displayActivities || displayActivities.length === 0) {
     return (
       <Card>
-        <CardContent className={`text-muted-foreground ${paddingY.section} text-center`}>
+        <CardContent className="text-muted-foreground py-12 text-center">
           No activity yet
         </CardContent>
       </Card>
@@ -34,7 +33,7 @@ export function ActivityTimeline({ activities, limit }: ActivityTimelineProps) {
   }
 
   return (
-    <div className={`${spaceY.default}`}>
+    <div className="space-y-3">
       {displayActivities
         .filter(
           (
@@ -73,14 +72,14 @@ export function ActivityTimeline({ activities, limit }: ActivityTimelineProps) {
 
           return (
             <Card key={activity.id} className="hover:bg-accent/5 transition-colors">
-              <CardContent className={`flex items-start ${gap.compact} ${padding.default}`}>
-                <Icon className={`text-muted-foreground ${marginTop.tight} h-5 w-5 shrink-0`} />
+              <CardContent className="flex items-start gap-2 p-4">
+                <Icon className="text-muted-foreground mt-1 h-5 w-5 shrink-0" />
                 <div className="min-w-0 flex-1">
                   <p className="text-sm">
                     <span className="text-muted-foreground">{config.label}</span>{' '}
                     <span className="font-medium">{title}</span>
                   </p>
-                  <p className={`text-muted-foreground ${marginTop.tight} text-xs`}>
+                  <p className="text-muted-foreground mt-1 text-xs">
                     {new Date(activity.created_at).toLocaleDateString('en-US', {
                       month: 'short',
                       day: 'numeric',

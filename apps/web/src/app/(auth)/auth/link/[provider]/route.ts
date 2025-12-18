@@ -3,9 +3,10 @@
  * Initiates OAuth flow to link a provider to an existing authenticated account
  */
 
-import { isValidProvider, validateNextParameter } from '@heyclaude/web-runtime';
+import { isValidProvider } from '@heyclaude/web-runtime/auth/oauth-providers';
 import { logger } from '@heyclaude/web-runtime/logging/server';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/server';
+import { validateNextParameter } from '@heyclaude/web-runtime/utils/auth-redirect';
 import { type NextRequest, NextResponse } from 'next/server';
 
 /**

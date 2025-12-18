@@ -7,11 +7,6 @@
 
 import { z } from 'zod';
 
-import type { WeeklyDigestNewContent } from './weekly_digest_new_content';
-import { weeklyDigestNewContentSchema } from './weekly_digest_new_content';
-import type { WeeklyDigestTrendingContent } from './weekly_digest_trending_content';
-import { weeklyDigestTrendingContentSchema } from './weekly_digest_trending_content';
-
 /**
  * PostgreSQL composite type: weekly_digest_result
  */
@@ -23,9 +18,9 @@ export type WeeklyDigestResult = {
   /** Attribute: week_end (date, nullable) */
   week_end: string | null;
   /** Attribute: new_content (_weekly_digest_new_content, nullable) */
-  new_content: WeeklyDigestNewContent[] | null;
+  new_content: unknown[] | null;
   /** Attribute: trending_content (_weekly_digest_trending_content, nullable) */
-  trending_content: WeeklyDigestTrendingContent[] | null;
+  trending_content: unknown[] | null;
 };
 
 /**
@@ -39,9 +34,9 @@ export const weeklyDigestResultSchema = z.object({
   /** Attribute: week_end */
   week_end: z.string().nullable(),
   /** Attribute: new_content */
-  new_content: z.array(weeklyDigestNewContentSchema).nullable(),
+  new_content: z.array(z.any()).nullable(),
   /** Attribute: trending_content */
-  trending_content: z.array(weeklyDigestTrendingContentSchema).nullable(),
+  trending_content: z.array(z.any()).nullable(),
 });
 
 /**

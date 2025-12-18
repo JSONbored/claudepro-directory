@@ -1,43 +1,41 @@
 'use server';
 
-import { MiscService } from '@heyclaude/data-layer';
-import type { ContactCommandResult } from '@heyclaude/database-types/postgres-types';
-import { cacheLife, cacheTag } from 'next/cache';
+import { createCachedDataFunction, generateResourceTags } from './cached-data-factory.ts';
 
-import { normalizeError } from '../errors.ts';
-import { logger } from '../logger.ts';
+// Service returns transformed array matching RPC structure
+interface ContactCommandResult {
+  action_type: null | string;
+  action_value: null | string;
+  aliases: null | string[];
+  category: null | string;
+  confetti_variant: null | string;
+  description: null | string;
+  icon_name: null | string;
+  id: null | string;
+  requires_auth: boolean | null;
+  text: null | string;
+}
 
-type ContactCommandsRow = ContactCommandResult;
+export type ContactCommandsRow = ContactCommandResult | null;
 
 /**
  * Fetch contact commands
  * Uses 'use cache' to cache contact commands. This data is public and same for all users.
- * Contact commands change periodically, so we use the 'hours' cacheLife profile.
+ * Contact commands change periodically, so we use the 'long' cacheLife profile.
  */
-export async function fetchContactCommands(): Promise<ContactCommandsRow | null> {
-  'use cache';
-
-  // Configure cache - use 'static' profile for optimal SEO (1 day stale, 6hr revalidate, 30 days expire)
-  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
-  cacheTag('contact');
-
-  const reqLogger = logger.child({
-    module: 'data/contact',
-    operation: 'fetchContactCommands',
-  });
-
-  try {
-    const service = new MiscService();
-    const result = await service.getContactCommands();
-
-    // GetContactCommandsReturns is ContactCommandResult[][] (array of arrays)
-    // Return the first array's first element, or null
-    reqLogger.info({ count: result?.[0]?.length ?? 0 }, 'fetchContactCommands: fetched successfully');
-
-    return result?.[0]?.[0] ?? null;
-  } catch (error) {
-    const normalized = normalizeError(error, 'fetchContactCommands failed');
-    reqLogger.error({ err: normalized }, 'fetchContactCommands: failed');
-    return null;
-  }
-}
+export const fetchContactCommands = createCachedDataFunction<void, ContactCommandsRow>({
+  serviceKey: 'misc',
+  methodName: 'getContactCommands',
+  cacheMode: 'public',
+  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
+  cacheTags: () => generateResourceTags('contact'),
+  module: 'data/contact',
+  operation: 'fetchContactCommands',
+  normalizeResult: (result) => {
+    const commands = result as ContactCommandResult[] | undefined;
+    if (!commands || !Array.isArray(commands) || commands.length === 0) {
+      return null;
+    }
+    return commands[0] ?? null;
+  },
+});

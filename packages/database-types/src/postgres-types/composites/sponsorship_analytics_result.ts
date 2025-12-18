@@ -7,8 +7,6 @@
 
 import { z } from 'zod';
 
-import type { SponsoredContent } from './sponsored_content';
-import { sponsoredContentSchema } from './sponsored_content';
 import type { SponsorshipAnalyticsComputedMetrics } from './sponsorship_analytics_computed_metrics';
 import { sponsorshipAnalyticsComputedMetricsSchema } from './sponsorship_analytics_computed_metrics';
 import type { SponsorshipAnalyticsDailyStat } from './sponsorship_analytics_daily_stat';
@@ -19,7 +17,7 @@ import { sponsorshipAnalyticsDailyStatSchema } from './sponsorship_analytics_dai
  */
 export type SponsorshipAnalyticsResult = {
   /** Attribute: sponsorship (sponsored_content, nullable) */
-  sponsorship: SponsoredContent | null;
+  sponsorship: unknown | null;
   /** Attribute: daily_stats (_sponsorship_analytics_daily_stat, nullable) */
   daily_stats: SponsorshipAnalyticsDailyStat[] | null;
   /** Attribute: computed_metrics (sponsorship_analytics_computed_metrics, nullable) */
@@ -31,7 +29,7 @@ export type SponsorshipAnalyticsResult = {
  */
 export const sponsorshipAnalyticsResultSchema = z.object({
   /** Attribute: sponsorship */
-  sponsorship: sponsoredContentSchema.nullable(),
+  sponsorship: z.any().nullable(),
   /** Attribute: daily_stats */
   daily_stats: z.array(sponsorshipAnalyticsDailyStatSchema).nullable(),
   /** Attribute: computed_metrics */

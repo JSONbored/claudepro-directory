@@ -10,12 +10,8 @@ export const getQuizConfigurationAction = rateLimitedAction
   .inputSchema(z.object({}))
   .metadata({ actionName: 'quiz.getQuizConfiguration', category: 'content' })
   .action(async () => {
-    try {
-      const { getQuizConfiguration: fetchQuizConfig } = await import('../data/quiz.ts');
-      const data = await fetchQuizConfig();
-      // GetQuizConfigurationReturns is QuizConfigurationQuestion (single object), not array
-      return data;
-    } catch {
-      return null;
-    }
+    const { getQuizConfiguration: fetchQuizConfig } = await import('../data/quiz.ts');
+    const data = await fetchQuizConfig();
+    // GetQuizConfigurationReturns is QuizConfigurationQuestion (single object), not array
+    return data;
   });

@@ -22,10 +22,12 @@ import type {
 import { ContactActionType } from '@heyclaude/data-layer/prisma';
 import {
   getContactCommands,
-  submitContactForm,
+} from '@heyclaude/web-runtime/actions/contact';
+import { submitContactForm } from '@heyclaude/web-runtime/actions/submit-contact-form';
+import {
   trackTerminalCommandAction,
   trackTerminalFormSubmissionAction,
-} from '@heyclaude/web-runtime/actions';
+} from '@heyclaude/web-runtime/actions/pulse';
 import { contact_action_typeSchema } from '@heyclaude/web-runtime/prisma-zod-schemas';
 import { checkConfettiEnabled } from '@heyclaude/web-runtime/config/static-configs';
 import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
@@ -50,7 +52,7 @@ import {
   Textarea,
 } from '@heyclaude/web-runtime/ui';
 import { Terminal, AnimatedSpan, TypingAnimation } from '@/src/components/ui/terminal';
-import { STAGGER, DURATION, spaceY, marginX, marginBottom, marginTop, gap, marginLeft, paddingTop } from '@heyclaude/web-runtime/design-system';
+import { STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { AnimatePresence, motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
@@ -126,18 +128,32 @@ export function ContactTerminal() {
         async () => {
           const result = await getContactCommands({});
           if (result?.data?.commands && Array.isArray(result.data.commands)) {
-            // RPC returns commands with snake_case fields - use directly
-            const transformedCommands: ContactCommand[] = result.data.commands.map((cmd) => ({
+            // Service returns commands array directly (migrated from RPC)
+            // Type assertion needed because safe-action infers generic types
+            // Convert through unknown first to avoid type overlap issues
+            const commandsArray = (result.data.commands as unknown) as Array<{
+              id: string | null;
+              text: string | null;
+              description: string | null;
+              category: string | null;
+              icon_name: string | null;
+              action_type: string | null;
+              action_value: string | null;
+              confetti_variant: string | null;
+              requires_auth: boolean | null;
+              aliases: string[] | null;
+            }>;
+            const transformedCommands: ContactCommand[] = commandsArray.map((cmd) => ({
               id: cmd.id ?? '',
               text: cmd.text ?? '',
-              description: cmd.description,
+              description: cmd.description ?? null,
               category: cmd.category ?? '',
-              icon_name: cmd.icon_name,
+              icon_name: (cmd.icon_name as contact_command_icon) ?? null,
               action_type:
-                cmd.action_type ??
+                (cmd.action_type as contact_action_type) ??
                 ContactActionType.internal,
-              action_value: cmd.action_value,
-              confetti_variant: cmd.confetti_variant,
+              action_value: cmd.action_value ?? null,
+              confetti_variant: (cmd.confetti_variant as confetti_variant) ?? null,
               requires_auth: cmd.requires_auth ?? false,
               aliases: cmd.aliases ?? [],
             }));
@@ -394,7 +410,8 @@ export function ContactTerminal() {
             metadata: { source: 'terminal' } as Record<string, unknown>,
           });
 
-          if (result?.data?.success) {
+          // submitContactForm returns InsertContactSubmissionReturns (array), check if result exists
+          if (result?.data && Array.isArray(result.data) && result.data.length > 0) {
             addOutput(
               'success',
               "✓ Message sent successfully! We'll get back to you soon.",
@@ -467,7 +484,7 @@ export function ContactTerminal() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className={`${spaceY.compact} text-center`}
+            className="space-y-2 text-center"
           >
             <div className="text-primary animate-pulse text-sm">Loading terminal...</div>
             <div className="text-muted-foreground text-xs">Initializing commands</div>
@@ -485,11 +502,11 @@ export function ContactTerminal() {
           <motion.div
             initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 10 }}
             animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-            className={`${spaceY.comfortable} text-center`}
+            className="space-y-6 text-center"
           >
-            <X className={`text-destructive ${marginX.auto} h-8 w-8`} />
-            <div className={`${spaceY.compact}`}>
-              <div className="text-destructive text-sm font-medium">{loadError}</div>
+            <X className="mx-auto h-8 w-8 text-destructive" />
+            <div className="space-y-2">
+              <div className="text-destructive text-sm-medium">{loadError}</div>
               <Button
                 variant="outline"
                 size="sm"
@@ -515,7 +532,7 @@ export function ContactTerminal() {
     <>
       <Terminal className="relative flex min-h-[500px] flex-col" wrapInPreCode={false}>
         {/* Output History */}
-        <div className={`${marginBottom.default} min-h-0 flex-1 overflow-y-auto`}>
+        <div className="mb-4 min-h-0 flex-1 overflow-y-auto">
           <AnimatePresence>
             {output.map((line, index) => (
               <motion.div
@@ -530,7 +547,7 @@ export function ContactTerminal() {
                   line.type === 'command' && 'text-primary font-semibold'
                 )}
               >
-                {line.icon ? <span className={marginTop['4.5']}>{line.icon}</span> : null}
+                {line.icon ? <span className="mt-[18px]">{line.icon}</span> : null}
                 {line.type === 'command' ? (
                   <TypingAnimation duration={20}>{line.content}</TypingAnimation>
                 ) : (
@@ -546,8 +563,8 @@ export function ContactTerminal() {
         <div className="relative">
           {/* Suggestions Dropdown */}
           {showSuggestions && filteredCommands.length > 0 ? (
-            <div className={`absolute right-0 bottom-full left-0 ${marginBottom.compact}`}>
-              <Command className="bg-popover rounded-lg border shadow-lg">
+            <div className="absolute bottom-full left-0 right-0 mb-2">
+              <Command className="bg-popover card-base shadow-lg">
                 <CommandList className="max-h-[200px]">
                   <CommandEmpty>No commands found.</CommandEmpty>
                   <CommandGroup heading="Suggestions">
@@ -558,11 +575,11 @@ export function ContactTerminal() {
                         onSelect={() => handleSuggestionSelect(cmd.text)}
                         className="cursor-pointer"
                       >
-                        <div className={`flex w-full items-center ${gap.tight}`}>
+                        <div className="flex w-full items-center gap-1">
                           <span className="text-primary font-mono text-xs">$</span>
-                          <span className="text-sm font-medium">{cmd.text}</span>
+                          <span className="text-sm-medium">{cmd.text}</span>
                           {cmd.description ? (
-                            <span className={`text-muted-foreground ${marginLeft.auto} truncate text-xs`}>
+                            <span className="ml-auto truncate text-muted-foreground text-xs">
                               {cmd.description}
                             </span>
                           ) : null}
@@ -576,7 +593,7 @@ export function ContactTerminal() {
           ) : null}
 
           {/* Input Prompt */}
-          <div className={`border-border flex items-center ${gap.tight} border-t ${paddingTop.default}`}>
+          <div className="flex items-center gap-1 border-t border-border pt-4">
             <span className="text-primary text-sm font-semibold">$</span>
             <input
               ref={inputRef}
@@ -605,8 +622,8 @@ export function ContactTerminal() {
             </SheetDescription>
           </SheetHeader>
 
-          <form onSubmit={handleFormSubmit} className={`${marginTop.comfortable} ${spaceY.comfortable}`}>
-            <div className={`${spaceY.compact}`}>
+          <form onSubmit={handleFormSubmit} className="mt-6 space-y-6">
+            <div className="space-y-2">
               <Label htmlFor="name">Name</Label>
               <Input
                 id="name"
@@ -617,7 +634,7 @@ export function ContactTerminal() {
               />
             </div>
 
-            <div className={`${spaceY.compact}`}>
+            <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
@@ -629,7 +646,7 @@ export function ContactTerminal() {
               />
             </div>
 
-            <div className={`${spaceY.compact}`}>
+            <div className="space-y-2">
               <Label htmlFor="message">Message</Label>
               <Textarea
                 id="message"
@@ -642,7 +659,7 @@ export function ContactTerminal() {
               />
             </div>
 
-            <div className={`flex justify-end ${gap.tight}`}>
+            <div className="flex justify-end gap-1">
               <Button
                 type="button"
                 variant="outline"

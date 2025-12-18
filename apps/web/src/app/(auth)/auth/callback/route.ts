@@ -3,12 +3,12 @@
  */
 
 import { env } from '@heyclaude/shared-runtime/schemas/env';
-import { validateNextParameter } from '@heyclaude/web-runtime';
-import { subscribeViaOAuthAction } from '@heyclaude/web-runtime/actions';
+import { subscribeViaOAuthAction } from '@heyclaude/web-runtime/actions/newsletter';
 import { refreshProfileFromOAuthServer } from '@heyclaude/web-runtime/actions/user';
 import { SECURITY_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { createSupabaseServerClient } from '@heyclaude/web-runtime/server';
+import { validateNextParameter } from '@heyclaude/web-runtime/utils/auth-redirect';
 import { type NextRequest, NextResponse } from 'next/server';
 
 /**
@@ -147,9 +147,9 @@ export async function GET(request: NextRequest) {
 
       const redirectUrl = isLocalEnvironment
         ? `${origin}${next}`
-        : (forwardedHost && isValidHost
+        : forwardedHost && isValidHost
           ? `https://${forwardedHost}${next}`
-          : `${origin}${next}`);
+          : `${origin}${next}`;
 
       const response = NextResponse.redirect(redirectUrl);
       if (shouldSetNewsletterCookie) {

@@ -8,12 +8,16 @@ import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { connection } from 'next/server';
-import { Suspense } from 'react';
-
-import { CompanyForm } from '@/src/components/core/forms/company-form';
+import { lazy, Suspense } from 'react';
 
 import Loading from './loading';
-import { spaceY, marginBottom, muted } from "@heyclaude/web-runtime/design-system";
+
+// OPTIMIZATION: Dynamic import for large form component (580 lines) - only loads when needed
+const CompanyForm = lazy(() =>
+  import('@/src/components/core/forms/company-form').then((mod) => ({
+    default: mod.CompanyForm,
+  }))
+);
 
 /**
  * Dynamic Rendering Required
@@ -83,15 +87,17 @@ async function NewCompanyPageContent() {
   }
 
   return (
-    <div className={`${spaceY.relaxed}`}>
+    <div className="space-y-6">
       <div>
-        <h1 className={`${marginBottom.compact} text-3xl font-bold`}>Create Company</h1>
-        <p className={`${muted.default}`}>
+        <h1 className="mb-2 text-3xl font-bold">Create Company</h1>
+        <p className="text-muted-foreground">
           Add a new company profile to post jobs and showcase your organization
         </p>
       </div>
 
-      <CompanyForm mode="create" />
+      <Suspense fallback={<Loading />}>
+        <CompanyForm mode="create" />
+      </Suspense>
     </div>
   );
 }

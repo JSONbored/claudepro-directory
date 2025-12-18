@@ -5,8 +5,7 @@
 
 'use client';
 
-import { type MFAFactor } from '@heyclaude/web-runtime';
-import { createMFAChallenge, listMFAFactors, verifyMFAChallenge } from '@heyclaude/web-runtime';
+import { type MFAFactor, createMFAChallenge, listMFAFactors, verifyMFAChallenge } from '@heyclaude/web-runtime/auth/mfa';
 import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { AlertCircle, Loader2, Shield } from '@heyclaude/web-runtime/icons';
@@ -23,7 +22,6 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import { useBoolean } from '@heyclaude/web-runtime/hooks';
 import { useCallback, useEffect, useState } from 'react';
-import { iconSize, marginRight, gap, padding, paddingY, spaceY, paddingX } from "@heyclaude/web-runtime/design-system";
 
 interface MFAChallengeDialogProps {
   onVerified: () => void;
@@ -57,7 +55,7 @@ export function MFAChallengeDialog({ open, onVerified }: MFAChallengeDialogProps
             throw listError;
           }
 
-          const verifiedFactors = userFactors.filter((f) => f.status === 'verified');
+          const verifiedFactors = userFactors.filter((f: MFAFactor) => f.status === 'verified');
           if (verifiedFactors.length === 0) {
             throw new Error('No verified MFA factors found');
           }
@@ -161,8 +159,8 @@ export function MFAChallengeDialog({ open, onVerified }: MFAChallengeDialogProps
     >
       <DialogContent className="sm:max-w-md" onPointerDownOutside={(e) => e.preventDefault()}>
         <DialogHeader>
-          <DialogTitle className={`flex items-center ${gap.tight}`}>
-            <Shield className={iconSize.sm} />
+          <DialogTitle className="flex items-center gap-1">
+            <Shield className="h-4 w-4" />
             Two-Factor Authentication Required
           </DialogTitle>
           <DialogDescription>
@@ -171,28 +169,28 @@ export function MFAChallengeDialog({ open, onVerified }: MFAChallengeDialogProps
         </DialogHeader>
 
         {error ? (
-          <div className={`bg-destructive/10 text-destructive flex items-center ${gap.tight} rounded-md ${padding.compact} text-sm`}>
-            <AlertCircle className={iconSize.sm} />
+          <div className="flex items-center gap-1 rounded-md bg-destructive/10 p-2 text-sm text-destructive">
+            <AlertCircle className="h-4 w-4" />
             <span>{error}</span>
           </div>
         ) : null}
 
         {loading && factors.length === 0 ? (
-          <div className={`flex items-center justify-center ${paddingY.relaxed}`}>
-            <Loader2 className={`${iconSize.xl} text-muted-foreground animate-spin`} />
+          <div className="flex-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
         ) : (
-          <div className={`${spaceY.comfortable}`}>
+          <div className="space-y-6">
             {factors.length > 1 && (
-              <div className={`${spaceY.compact}`}>
+              <div className="space-y-2">
                 <Label>Select authenticator</Label>
                 <select
                   value={selectedFactor?.id || ''}
                   onChange={(e) => {
-                    const factor = factors.find((f) => f.id === e.target.value);
+                    const factor = factors.find((f: MFAFactor) => f.id === e.target.value);
                     setSelectedFactor(factor || null);
                   }}
-                  className={`border-input bg-background ring-offset-background flex h-10 w-full rounded-md border ${paddingX.compact} ${paddingY.tight} text-sm`}
+                  className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background"
                   disabled={loading}
                 >
                   {factors.map((factor) => (
@@ -204,7 +202,7 @@ export function MFAChallengeDialog({ open, onVerified }: MFAChallengeDialogProps
               </div>
             )}
 
-            <div className={`${spaceY.compact}`}>
+            <div className="space-y-2">
               <Label htmlFor="mfa-code">Enter 6-digit code</Label>
               <Input
                 id="mfa-code"
@@ -243,7 +241,7 @@ export function MFAChallengeDialog({ open, onVerified }: MFAChallengeDialogProps
             >
               {loading ? (
                 <>
-                  <Loader2 className={`${iconSize.sm} ${marginRight.compact} animate-spin`} />
+                  <Loader2 className="mr-1 h-4 w-4 animate-spin" />
                   Verifying...
                 </>
               ) : (

@@ -4,8 +4,8 @@
  * Wrapped in Suspense by parent layout for non-blocking data fetching
  */
 
-import { ensureUserRecord } from '@heyclaude/web-runtime/actions';
-import { getUserSettings, getUserSponsorships } from '@heyclaude/web-runtime/data';
+import { ensureUserRecord } from '@heyclaude/web-runtime/actions/user';
+import { getUserCompleteData } from '@heyclaude/web-runtime/data';
 import {
   Activity,
   Bookmark,
@@ -20,7 +20,6 @@ import {
 } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { Button, Card } from '@heyclaude/web-runtime/ui';
-import { size, muted, padding, marginBottom, paddingBottom, gap, spaceY, marginRight, weight } from '@heyclaude/web-runtime/design-system';
 import { type User } from '@supabase/supabase-js';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -44,24 +43,18 @@ export async function AccountSidebar({
     userId: user.id, // Automatically hashed by redaction
   });
 
-  // Fetch sponsorships in parallel with settings (they don't depend on each other)
-  const sponsorshipsPromise = getUserSponsorships(user.id);
-
-  // getUserSettings now returns user_settings_result_v2 from get_user_complete_data
-  // This provides automatic TypeScript type generation from the database
-  let settings: Awaited<ReturnType<typeof getUserSettings>> = null;
-  let profile: NonNullable<Awaited<ReturnType<typeof getUserSettings>>>['user_data'] | null = null;
+  // OPTIMIZATION: Use getUserCompleteData directly - single database call instead of two
+  let completeData: Awaited<ReturnType<typeof getUserCompleteData>> | null = null;
   try {
-    settings = await getUserSettings(user.id);
-    if (settings) {
-      profile = settings.user_data;
-    } else {
-      reqLogger.warn({}, 'AccountSidebar: getUserSettings returned null');
-    }
+    completeData = await getUserCompleteData(user.id);
   } catch (error) {
-    const normalized = normalizeError(error, 'Failed to load user settings in account sidebar');
-    reqLogger.error({ err: normalized }, 'AccountSidebar: getUserSettings threw');
+    const normalized = normalizeError(error, 'Failed to load user data in account sidebar');
+    reqLogger.error({ err: normalized }, 'AccountSidebar: getUserCompleteData threw');
   }
+
+  const settings = completeData?.user_settings ?? null;
+  let profile = settings?.user_data ?? null;
+  let sponsorships = completeData?.sponsorships ?? [];
 
   if (!profile) {
     try {
@@ -71,29 +64,27 @@ export async function AccountSidebar({
         name: userNameMetadata,
         image: userImageMetadata,
       });
-      settings = await getUserSettings(user.id);
-      if (settings) {
-        profile = settings.user_data;
+      // Reload complete data after ensuring user record
+      const refreshedData = await getUserCompleteData(user.id);
+      if (refreshedData?.user_settings) {
+        const refreshedSettings = refreshedData.user_settings;
+        const refreshedProfile = refreshedSettings.user_data;
+        if (refreshedProfile) {
+          // Update local variables
+          profile = refreshedProfile;
+        } else {
+          reqLogger.warn({}, 'AccountSidebar: getUserCompleteData returned null user_data after ensureUserRecord');
+        }
       } else {
-        reqLogger.warn({}, 'AccountSidebar: getUserSettings returned null after ensureUserRecord');
+        reqLogger.warn({}, 'AccountSidebar: getUserCompleteData returned null user_settings after ensureUserRecord');
       }
     } catch (error) {
       const normalized = normalizeError(
         error,
-        'Failed to ensure user record or reload settings in account sidebar'
+        'Failed to ensure user record or reload data in account sidebar'
       );
-      reqLogger.error({ err: normalized }, 'AccountSidebar: ensureUserRecord or getUserSettings threw');
+      reqLogger.error({ err: normalized }, 'AccountSidebar: ensureUserRecord or getUserCompleteData threw');
     }
-  }
-
-  // Await sponsorships (fetched in parallel)
-  let sponsorships: Awaited<ReturnType<typeof getUserSponsorships>> = [];
-  try {
-    sponsorships = await sponsorshipsPromise;
-  } catch (error) {
-    const normalized = normalizeError(error, 'Failed to load user sponsorships in account sidebar');
-    reqLogger.error({ err: normalized }, 'AccountSidebar: getUserSponsorships threw');
-    sponsorships = [];
   }
 
   const hasSponsorships = sponsorships.length > 0;
@@ -116,8 +107,8 @@ export async function AccountSidebar({
   const imageSrc = userImageMetadata || profile?.image || null;
 
   return (
-    <Card className={`h-fit ${padding.default} md:col-span-1`}>
-      <div className={`${marginBottom.comfortable} flex items-center ${gap.compact} border-b ${paddingBottom.default}`}>
+    <Card className="h-fit p-4 md:col-span-1">
+      <div className="mb-6 flex items-center gap-2 border-b pb-4">
         {imageSrc ? (
           <Image
             src={imageSrc}
@@ -129,26 +120,26 @@ export async function AccountSidebar({
             priority
           />
         ) : (
-          <div className="bg-accent flex h-12 w-12 items-center justify-center rounded-full">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent">
             <UserIcon className="h-6 w-6" />
           </div>
         )}
         <div className="flex-1">
-          <p className={`${weight.medium}`}>{profile?.name ?? userNameMetadata}</p>
-          <p className={`${size.xs} ${muted.default}`}>{user.email ?? ''}</p>
+          <p className="font-medium">{profile?.name ?? userNameMetadata}</p>
+          <p className="text-muted-foreground text-xs">{user.email ?? ''}</p>
           {profile?.slug ? (
-            <Link href={`/u/${profile.slug}`} className={`text-accent ${size.xs} hover:underline`}>
+            <Link href={`/u/${profile.slug}`} className="text-xs text-accent hover:underline">
               View Profile
             </Link>
           ) : null}
         </div>
       </div>
 
-      <nav className={`${spaceY.compact}`}>
+      <nav className="space-y-2">
         {navigation.map((item) => (
           <Link key={item.name} href={item.href}>
-            <Button variant="ghost" className={`w-full justify-start ${size.sm}`}>
-              <item.icon className={`${marginRight.tight} h-4 w-4`} />
+            <Button variant="ghost" className="w-full justify-start text-sm">
+              <item.icon className="mr-1 h-4 w-4" />
               {item.name}
             </Button>
           </Link>

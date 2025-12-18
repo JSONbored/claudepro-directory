@@ -1,6 +1,6 @@
+import { type sponsorship_tier } from '@heyclaude/data-layer/prisma';
+import { type GetSponsorshipAnalyticsReturns } from '@heyclaude/database-types/postgres-types';
 import { sponsorship_tier as sponsorshipTierEnum } from '@heyclaude/database-types/prisma';
-import type { sponsorship_tier } from '@heyclaude/data-layer/prisma';
-import type { GetSponsorshipAnalyticsReturns } from '@heyclaude/database-types/postgres-types';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
@@ -13,7 +13,6 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  POSITION_PATTERNS,
   UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
@@ -26,7 +25,6 @@ import { SignInButton } from '@/src/components/core/auth/sign-in-button';
 import { MetricsDisplay } from '@/src/components/features/analytics/metrics-display';
 
 import Loading from './loading';
-import { cluster, spaceY, gap } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Dynamic Rendering Required
@@ -129,7 +127,7 @@ async function SponsorshipAnalyticsPageContent({
       'SponsorshipAnalyticsPage: unauthenticated access attempt'
     );
     return (
-      <div className={`${spaceY.relaxed}`}>
+      <div className="space-y-6">
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl">Sign in required</CardTitle>
@@ -207,9 +205,7 @@ async function SponsorshipAnalyticsPageContent({
 
   const isTierValid = isValidTier(rawTier);
 
-  const safeTier: sponsorship_tier = isTierValid
-    ? rawTier
-    : 'sponsored'; // Safe default for invalid values
+  const safeTier: sponsorship_tier = isTierValid ? rawTier : 'sponsored'; // Safe default for invalid values
 
   if (!isTierValid) {
     userLogger.warn(
@@ -243,10 +239,10 @@ async function SponsorshipAnalyticsPageContent({
   }
 
   return (
-    <div className={`${spaceY.relaxed}`}>
+    <div className="space-y-6">
       {/* Header */}
       <div>
-        <div className={cluster.compact}>
+        <div className="flex items-center gap-2">
           <UnifiedBadge showIcon tier={safeTier} variant="sponsored" />
           <h1 className="text-3xl font-bold">Sponsorship Analytics</h1>
         </div>
@@ -277,7 +273,7 @@ async function SponsorshipAnalyticsPageContent({
             change: 'Clicks / Impressions',
             label: 'Click-Through Rate',
             trend:
-              Number.parseFloat(ctr) > 2 ? 'up' : (Number.parseFloat(ctr) > 0 ? 'unchanged' : 'down'),
+              Number.parseFloat(ctr) > 2 ? 'up' : Number.parseFloat(ctr) > 0 ? 'unchanged' : 'down',
             value: `${ctr}%`,
           },
           {
@@ -296,35 +292,35 @@ async function SponsorshipAnalyticsPageContent({
           <CardTitle>Campaign Details</CardTitle>
           <CardDescription>Current sponsorship configuration</CardDescription>
         </CardHeader>
-        <CardContent className={`${spaceY.comfortable}`}>
-          <div className={`grid grid-cols-2 ${gap.default}`}>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 gap-3">
             <div>
-              <p className="text-sm font-medium">Content Type</p>
+              <p className="text-sm-medium">Content Type</p>
               <p className="text-muted-foreground">{sponsorship.content_type}</p>
             </div>
 
             <div>
-              <p className="text-sm font-medium">Content ID</p>
+              <p className="text-sm-medium">Content ID</p>
               <p className="text-muted-foreground font-mono text-xs">{sponsorship.content_id}</p>
             </div>
 
             <div>
-              <p className="text-sm font-medium">Start Date</p>
+              <p className="text-sm-medium">Start Date</p>
               <p className="text-muted-foreground">
                 {new Date(sponsorship.start_date).toLocaleDateString()}
               </p>
             </div>
 
             <div>
-              <p className="text-sm font-medium">End Date</p>
+              <p className="text-sm-medium">End Date</p>
               <p className="text-muted-foreground">
                 {new Date(sponsorship.end_date).toLocaleDateString()}
               </p>
             </div>
 
             <div>
-              <p className="text-sm font-medium">Status</p>
-              <div className={cluster.compact}>
+              <p className="text-sm-medium">Status</p>
+              <div className="flex items-center gap-2">
                 <UnifiedBadge style={sponsorship.active ? 'default' : 'outline'} variant="base">
                   {sponsorship.active ? 'Active' : 'Inactive'}
                 </UnifiedBadge>
@@ -332,7 +328,7 @@ async function SponsorshipAnalyticsPageContent({
             </div>
 
             <div>
-              <p className="text-sm font-medium">Tier</p>
+              <p className="text-sm-medium">Tier</p>
               <div>
                 <UnifiedBadge showIcon tier={safeTier} variant="sponsored" />
               </div>
@@ -348,7 +344,7 @@ async function SponsorshipAnalyticsPageContent({
           <CardDescription>Last 30 days</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className={`${spaceY.compact}`}>
+          <div className="space-y-2">
             {Array.from({ length: 30 }, (_, index) => {
               const date = new Date();
               date.setDate(date.getDate() - (29 - index));
@@ -358,32 +354,28 @@ async function SponsorshipAnalyticsPageContent({
               const maxImpressions = Math.max(...impressionsMap.values(), 1);
 
               return (
-                <div className={`grid grid-cols-12 items-center ${gap.tight}`} key={dayKey}>
+                <div className="grid grid-cols-12 items-center gap-1" key={dayKey}>
                   <div className="text-muted-foreground col-span-2 text-xs">
                     {date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}
                   </div>
-                  <div className={`col-span-10 grid grid-cols-2 ${gap.micro}`}>
+                  <div className="col-span-10 grid grid-cols-2 gap-0.5">
                     {/* Impressions bar */}
                     <div className="bg-muted relative h-8 overflow-hidden rounded">
                       <div
-                        className={`${POSITION_PATTERNS.ABSOLUTE_TOP_LEFT} bg-primary/30 h-full transition-all`}
+                        className="bg-primary/30 absolute top-0 left-0 h-full transition-all"
                         style={{ width: `${(impressions / maxImpressions) * 100}%` }}
                       />
-                      <div
-                        className={`${POSITION_PATTERNS.ABSOLUTE_INSET} flex items-center px-2 text-xs`}
-                      >
+                      <div className="absolute inset-0 flex items-center px-2 text-xs">
                         {impressions > 0 && `${impressions} views`}
                       </div>
                     </div>
                     {/* Clicks bar */}
                     <div className="bg-muted relative h-8 overflow-hidden rounded">
                       <div
-                        className={`${POSITION_PATTERNS.ABSOLUTE_TOP_LEFT} bg-accent/50 h-full transition-all`}
+                        className="bg-accent/50 absolute top-0 left-0 h-full transition-all"
                         style={{ width: `${impressions > 0 ? (clicks / impressions) * 100 : 0}%` }}
                       />
-                      <div
-                        className={`${POSITION_PATTERNS.ABSOLUTE_INSET} flex items-center px-2 text-xs`}
-                      >
+                      <div className="absolute inset-0 flex items-center px-2 text-xs">
                         {clicks > 0 && `${clicks} clicks`}
                       </div>
                     </div>
@@ -402,7 +394,7 @@ async function SponsorshipAnalyticsPageContent({
           <CardDescription>Improve your campaign performance</CardDescription>
         </CardHeader>
         <CardContent>
-          <ul className={`${spaceY.compact} text-sm`}>
+          <ul className="space-y-2 text-sm">
             <li>• CTR above 2% is excellent for sponsored content</li>
             <li>• Featured tier gets 3x more impressions than promoted</li>
             <li>• Premium tier includes newsletter promotion for extra reach</li>

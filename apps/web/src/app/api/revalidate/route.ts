@@ -34,19 +34,21 @@ import {
   createApiOptionsHandler,
   createApiRoute,
   getOnlyCorsHeaders,
+  getVersionedRoute,
+  jsonResponse,
   unauthorizedResponse,
 } from '@heyclaude/web-runtime/server';
 import { revalidatePath, revalidateTag } from 'next/cache';
-import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
 /**
  * Zod schema for revalidate request body validation
+ * Exported for OpenAPI generation
  *
  * Note: `secret` is optional in schema to allow handler to return 401 instead of 400
  * when secret is missing. Handler will validate secret and return 401 if missing/invalid.
  */
-const revalidateRequestSchema = z.object({
+export const revalidateRequestSchema = z.object({
   category: z.string().optional().describe('Content category to revalidate'),
   secret: z.string().optional().describe('Revalidation secret token'),
   slug: z.string().optional().describe('Content slug to revalidate'),
@@ -67,32 +69,11 @@ export const POST = createApiRoute({
     // Zod schema ensures proper types
     const { category, secret, slug, tags } = body;
 
-    // Verify secret from body (PostgreSQL trigger sends in payload)
-    // Note: If secret is missing, Zod validation will catch it and return 400
-    // But if secret is provided but invalid, we return 401
-    if (!secret) {
-      // Secret is required by schema, so this should be caught by validation
-      // But handle it here as a safety check
+    // Validate secret (required for security)
+    if (!secret || secret !== env.REVALIDATE_SECRET) {
       logger.warn(
         {
-          hasSecret: false,
-          // eslint-disable-next-line architectural-rules/warn-pii-field-logging -- IP address necessary for security audit trail
-          ip: request.headers.get('x-forwarded-for') ?? 'unknown',
-          securityEvent: true,
-        },
-        'Revalidate webhook missing secret'
-      );
-      return unauthorizedResponse(
-        'Missing secret parameter',
-        undefined, // No login/signup for automation endpoints
-        getOnlyCorsHeaders
-      );
-    }
-
-    if (secret !== env.REVALIDATE_SECRET) {
-      logger.warn(
-        {
-          hasSecret: true,
+          hasSecret: Boolean(secret),
           // eslint-disable-next-line architectural-rules/warn-pii-field-logging -- IP address necessary for security audit trail
           ip: request.headers.get('x-forwarded-for') ?? 'unknown',
           securityEvent: true,
@@ -100,8 +81,8 @@ export const POST = createApiRoute({
         'Revalidate webhook unauthorized'
       );
       return unauthorizedResponse(
-        'Invalid secret',
-        undefined, // No login/signup for automation endpoints
+        secret ? 'Invalid secret' : 'Missing secret parameter',
+        undefined,
         getOnlyCorsHeaders
       );
     }
@@ -109,30 +90,19 @@ export const POST = createApiRoute({
     const paths: string[] = [];
     const invalidatedTags: string[] = [];
 
-    // Path revalidation (existing logic)
+    // Path revalidation
     if (category) {
-      // Always revalidate homepage (shows recent content)
       paths.push('/', `/${category}`);
-
-      // Revalidate detail page if slug provided
-      if (slug) {
-        paths.push(`/${category}/${slug}`);
-      }
-
-      // Revalidate all paths
-      for (const path of paths) {
-        revalidatePath(path);
-      }
+      if (slug) paths.push(`/${category}/${slug}`);
+      paths.forEach((path) => revalidatePath(path));
     }
 
-    // Tag invalidation (new logic)
-    if (tags && tags.length > 0) {
-      // Invalidate each tag (already validated as strings by Zod)
-      // Using 'max' profile for stale-while-revalidate semantics (recommended)
-      for (const tag of tags) {
+    // Tag invalidation
+    if (tags?.length) {
+      tags.forEach((tag) => {
         revalidateTag(tag, 'max');
         invalidatedTags.push(tag);
-      }
+      });
     }
 
     // If neither category nor tags provided, return error
@@ -148,31 +118,30 @@ export const POST = createApiRoute({
       throw new Error('Missing category or tags in webhook payload');
     }
 
-    // Structured logging with revalidation targets and cache tags
     logger.info(
       {
         operation: 'cache_revalidation',
         securityEvent: true,
-        ...(category ? { category } : {}),
-        ...(slug ? { slug } : {}),
+        ...(category && { category }),
+        ...(slug && { slug }),
         pathCount: paths.length,
-        paths, // Array of revalidated paths - better for querying
-        revalidationTargets: {
-          paths,
-          tags: invalidatedTags,
-        },
+        paths,
         tagCount: invalidatedTags.length,
-        tags: invalidatedTags.length > 0 ? invalidatedTags : undefined, // Array support enables better log querying
+        tags: invalidatedTags.length > 0 ? invalidatedTags : undefined,
       },
       'Cache revalidation completed'
     );
 
-    return NextResponse.json({
-      revalidated: true,
-      ...(paths.length > 0 && { paths }),
-      ...(invalidatedTags.length > 0 && { tags: invalidatedTags }),
-      timestamp: new Date().toISOString(),
-    });
+    return jsonResponse(
+      {
+        revalidated: true,
+        ...(paths.length > 0 && { paths }),
+        ...(invalidatedTags.length > 0 && { tags: invalidatedTags }),
+        timestamp: new Date().toISOString(),
+      },
+      200,
+      getOnlyCorsHeaders
+    );
   },
   method: 'POST',
   openapi: {
@@ -194,7 +163,7 @@ export const POST = createApiRoute({
     tags: ['cache', 'revalidation', 'webhook'],
   },
   operation: 'RevalidateAPI',
-  route: '/api/revalidate',
+  route: getVersionedRoute('revalidate'),
 });
 
 /**

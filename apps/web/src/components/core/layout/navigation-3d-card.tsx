@@ -27,7 +27,6 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { useBoolean } from '@heyclaude/web-runtime/hooks';
-import { padding, paddingBottom, marginBottom, marginTop, paddingX, paddingY, muted, size, center, stack } from "@heyclaude/web-runtime/design-system";
 
 export interface Navigation3DCardProps {
   href: string;
@@ -76,7 +75,7 @@ export function Navigation3DCard({
 
   const cardContent = (
     <div
-      className={cn('relative group/pin cursor-pointer h-full w-full perspective-[1000px]', center, className)}
+      className={cn('relative group/pin cursor-pointer h-full w-full perspective-[1000px]', 'flex items-center justify-center', className)}
       onMouseEnter={setIsHoveredTrue}
       onMouseLeave={setIsHoveredFalse}
     >
@@ -95,20 +94,20 @@ export function Navigation3DCard({
           'group-hover/pin:border-white/[0.2] transition-all duration-700 overflow-hidden'
         )}
       >
-        <div className={cn(stack.none, 'basis-full', padding.tight, 'tracking-tight text-slate-100/50 w-full h-full')}>
+        <div className={cn('flex flex-col', 'basis-full', 'p-2', 'tracking-tight text-slate-100/50 w-full h-full')}>
           {/* Title */}
-          <h3 className={cn('max-w-xs', paddingBottom.micro, '!m-0 font-bold', size['3xs'], 'text-slate-100 leading-tight')}>
+          <h3 className={cn('max-w-xs', 'pb-0.5', '!m-0 font-bold', 'text-[10px]', 'text-slate-100 leading-tight')}>
             {label}
           </h3>
 
           {/* Badge (if category) */}
           {category && (
-            <div className={marginBottom.tight}>
+            <div className="mb-1">
               <UnifiedBadge
                 variant="category"
                 category={category}
                 href={null}
-                className={cn('text-[8px]', paddingX.micro, paddingY.default)}
+                className={cn('text-[8px]', 'px-1', 'py-4')}
               />
             </div>
           )}
@@ -117,7 +116,7 @@ export function Navigation3DCard({
           <div
             className={cn(
               'flex flex-1 w-full rounded-lg',
-              marginTop.tight,
+              'mt-1',
               'bg-gradient-to-br',
               gradient
             )}
@@ -138,8 +137,8 @@ export function Navigation3DCard({
             </Link>
           </TooltipTrigger>
           <TooltipContent side="bottom" className="max-w-xs text-xs">
-            <div className={cn('font-semibold', marginBottom['4.5'])}>{label}</div>
-            <div className={`${muted.default}`}>{description}</div>
+            <div className={cn('font-semibold', 'mb-[18px]')}>{label}</div>
+            <div className="text-muted-foreground">{description}</div>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>

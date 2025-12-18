@@ -84,12 +84,12 @@ export default defineConfig({
         '**/__tests__/**',
         '**/tests/**',
       ],
-      // Coverage thresholds - start conservative, increase over time
+      // Coverage thresholds - increased to maintain high code quality
       thresholds: {
-        lines: 60,
-        functions: 60,
-        branches: 50,
-        statements: 60,
+        lines: 80,
+        functions: 80,
+        branches: 70,
+        statements: 80,
       },
     },
 

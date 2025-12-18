@@ -1,9 +1,11 @@
-import type { UserActivityTimelineItem } from '@heyclaude/database-types/postgres-types';
+import {
+  type GetUserCompleteDataReturns,
+  type UserActivityTimelineItem,
+} from '@heyclaude/database-types/postgres-types';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
-  getUserActivitySummary,
-  getUserActivityTimeline,
+  getUserCompleteData,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { GitPullRequest } from '@heyclaude/web-runtime/icons';
@@ -26,7 +28,6 @@ import { SignInButton } from '@/src/components/core/auth/sign-in-button';
 import { ActivityTimeline } from '@/src/components/features/user-activity/activity-timeline';
 
 import Loading from './loading';
-import { cluster, iconSize, spaceY, marginBottom, gap, paddingBottom, marginTop } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Produce the Metadata for the account Activity route.
@@ -56,8 +57,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * @returns The React element tree for the Account Activity page.
  *
  * @see getAuthenticatedUser
- * @see getUserActivitySummary
- * @see getUserActivityTimeline
+ * @see getUserCompleteData
  * @see ActivityTimeline
  */
 export default async function ActivityPage() {
@@ -92,8 +92,7 @@ export default async function ActivityPage() {
  * @returns The JSX content for the Account Activity page.
  *
  * @see getAuthenticatedUser
- * @see getUserActivitySummary
- * @see getUserActivityTimeline
+ * @see getUserCompleteData
  * @see ActivityTimeline
  */
 async function ActivityPageContent({ reqLogger }: { reqLogger: ReturnType<typeof logger.child> }) {
@@ -108,7 +107,7 @@ async function ActivityPageContent({ reqLogger }: { reqLogger: ReturnType<typeof
       'ActivityPage: unauthenticated access attempt detected'
     );
     return (
-      <div className={`${spaceY.relaxed}`}>
+      <div className="space-y-6">
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl">Sign in required</CardTitle>
@@ -141,42 +140,26 @@ async function ActivityPageContent({ reqLogger }: { reqLogger: ReturnType<typeof
   // Section: Activity Data Fetch
   // Fetch activity data - use Promise.allSettled for partial success handling
   // CRITICAL: Call data functions directly instead of actions to avoid cookies() access issues in Cache Components
-  const [summaryResult, timelineResult] = await Promise.allSettled([
-    getUserActivitySummary(user.id),
-    getUserActivityTimeline({ limit: 50, offset: 0, userId: user.id }),
+  // OPTIMIZATION: Use getUserCompleteData directly - single database call instead of two
+  const [completeDataResult] = await Promise.allSettled([
+    getUserCompleteData(user.id, { activityLimit: 50, activityOffset: 0 }),
   ]);
 
-  /****
-   * Normalize a settled activity-data result, log any rejection, and return the fulfilled value or `null`.
-   *
-   * @param {string} name - Human-readable name of the data being loaded (used in error messages and logs)
-   * @param {PromiseSettledResult<null | T>} result - The settled promise result to inspect
-   * @returns The fulfilled value of type `T` if present, `null` if the promise was rejected
-   *
-   * @see normalizeError
-   * @see ActivityPage
-   */
-  function handleDataResult<T>(name: string, result: PromiseSettledResult<null | T>): null | T {
-    if (result.status === 'fulfilled') {
-      return result.value;
-    }
-    // result.status === 'rejected' at this point
-    const reason = result.reason;
-    const normalized = normalizeError(reason, `Failed to load ${name}`);
-    if (user) {
-      userLogger.error(
-        {
-          err: normalized,
-          section: 'activity-data-fetch',
-        },
-        `ActivityPage: ${name} failed`
-      );
-    }
-    return null;
-  }
+  // Extract activity data from complete data
+  // GetUserCompleteDataReturns is UserCompleteDataResult which has activity_summary and activity_timeline as direct properties
+  let summary: GetUserCompleteDataReturns['activity_summary'] | null = null;
+  let timeline: GetUserCompleteDataReturns['activity_timeline'] | null = null;
 
-  const summary = handleDataResult('activity summary', summaryResult);
-  const timeline = handleDataResult('activity timeline', timelineResult);
+  if (completeDataResult.status === 'fulfilled' && completeDataResult.value) {
+    summary = completeDataResult.value.activity_summary ?? null;
+    timeline = completeDataResult.value.activity_timeline ?? null;
+  } else if (completeDataResult.status === 'rejected') {
+    const normalized = normalizeError(completeDataResult.reason, 'Failed to load activity data');
+    userLogger.error(
+      { err: normalized, section: 'data-fetch' },
+      'ActivityPage: getUserCompleteData fetch failed'
+    );
+  }
 
   const hasSummary = !!summary;
   const hasTimeline = !!timeline;
@@ -184,7 +167,7 @@ async function ActivityPageContent({ reqLogger }: { reqLogger: ReturnType<typeof
   // Only show global fallback when both fail
   if (!hasSummary && !hasTimeline) {
     return (
-      <div className={`${spaceY.relaxed}`}>
+      <div className="space-y-6">
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl">Activity unavailable</CardTitle>
@@ -222,28 +205,28 @@ async function ActivityPageContent({ reqLogger }: { reqLogger: ReturnType<typeof
   );
 
   return (
-    <div className={`${spaceY.relaxed}`}>
+    <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className={`${marginBottom.compact} text-3xl font-bold`}>Activity</h1>
+        <h1 className="mb-2 text-3xl font-bold">Activity</h1>
         <p className="text-muted-foreground">Your contribution history and community activity</p>
       </div>
 
       {/* Stats Overview - only render if summary is available */}
       {summary == null ? null : (
-        <div className={`grid grid-cols-1 ${gap.default} md:grid-cols-2`}>
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           <Card>
-            <CardHeader className={`${paddingBottom.compact}`}>
+            <CardHeader className="pb-3">
               <CardTitle className="text-sm">Submissions</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className={cluster.compact}>
-                <GitPullRequest className={`${iconSize.md} text-blue-500 dark:text-blue-400`} />
+              <div className="flex items-center gap-2">
+                <GitPullRequest className="h-5 w-5 text-blue-500 dark:text-blue-400" />
                 <span className="text-2xl font-bold">
                   {summary.merged_submissions}/{summary.total_submissions}
                 </span>
               </div>
-              <p className={`text-muted-foreground ${marginTop.tight} text-xs`}>Merged</p>
+              <p className="text-muted-foreground mt-1 text-xs">Merged</p>
             </CardContent>
           </Card>
         </div>
@@ -262,11 +245,13 @@ async function ActivityPageContent({ reqLogger }: { reqLogger: ReturnType<typeof
           <CardContent>
             <ActivityTimeline
               activities={activities.filter(
-                (a): a is UserActivityTimelineItem & {
-                  id: string;
-                  type: string;
-                  title: string;
+                (
+                  a: UserActivityTimelineItem
+                ): a is UserActivityTimelineItem & {
                   body: string;
+                  id: string;
+                  title: string;
+                  type: string;
                   user_id: string;
                 } => Boolean(a.id && a.type && a.title && a.body && a.user_id)
               )}

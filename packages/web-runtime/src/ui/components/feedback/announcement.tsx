@@ -2,8 +2,7 @@
 
 import type { announcement_variant } from '@heyclaude/data-layer/prisma';
 import { baseBadgeVariants } from '../badges/unified-badge.tsx';
-import { ANIMATION_CONSTANTS } from '../../constants.ts';
-import { size, weight, tracking } from '../../../design-system/index.ts';
+// Removed deprecated design system utilities - using direct Tailwind classes
 import { cn } from '../../utils.ts';
 import type * as React from 'react';
 
@@ -68,7 +67,7 @@ export function Announcement({
         'inline-flex items-center gap-2',
         'px-3 py-1.5',
         'text-sm',
-        ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT,
+        'transition-all duration-200 ease-out',
         // Themed enhancements
         themed && ['shadow-sm hover:shadow-md', 'hover:scale-[1.02]', 'active:scale-[0.98]'],
         className
@@ -92,7 +91,7 @@ export function AnnouncementTag({ className, ...props }: AnnouncementTagProps) {
         // Base styles
         'inline-flex items-center justify-center',
         'px-1.5 py-0.5',
-        cn(weight.semibold, size['2xs'], 'uppercase', tracking.wide),
+        'font-semibold text-[10px] uppercase tracking-wide',
         'rounded',
         'bg-accent text-accent-foreground',
         'shrink-0',

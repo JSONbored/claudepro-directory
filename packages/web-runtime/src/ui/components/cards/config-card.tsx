@@ -69,7 +69,6 @@ import {
   Sparkles,
 } from '../../../icons.tsx';
 import type { ConfigCardProps, ContentItem } from '../../../types/component.types.ts';
-import { size, weight, iconSize, marginRight, gap, hoverBg } from '../../../design-system/index.ts';
 // COLORS removed - using direct Tailwind utilities
 import { getDisplayTitle } from '../../utils.ts';
 import { toasts } from '../../../client/toast.ts';
@@ -684,7 +683,7 @@ export const ConfigCard = memo(
                         <UnifiedBadge
                           variant="base"
                           style="outline"
-                          className={`${size.xs} ${weight.semibold} ${
+                          className={`text-xs font-semibold ${
                             collectionType === 'starter-kit' ? 'bg-color-badge-collectiontype-starter-kit-bg text-color-badge-collectiontype-starter-kit-text border-color-badge-collectiontype-starter-kit-border' :
                             collectionType === 'workflow' ? 'bg-color-badge-collectiontype-workflow-bg text-color-badge-collectiontype-workflow-text border-color-badge-collectiontype-workflow-border' :
                             collectionType === 'advanced-system' ? 'bg-color-badge-collectiontype-advanced-system-bg text-color-badge-collectiontype-advanced-system-text border-color-badge-collectiontype-advanced-system-border' :
@@ -692,7 +691,7 @@ export const ConfigCard = memo(
                             ''
                           }`}
                         >
-                          <Layers className={`${iconSize.xs} ${marginRight.tight}`} aria-hidden="true" />
+                          <Layers className="mr-1 h-3 w-3" aria-hidden="true" />
                           {COLLECTION_TYPE_LABELS[collectionType as keyof typeof COLLECTION_TYPE_LABELS]}
                         </UnifiedBadge>
                       </div>
@@ -716,7 +715,7 @@ export const ConfigCard = memo(
                           <UnifiedBadge
                             variant="base"
                             style="outline"
-                            className={`${size.xs} ${weight.semibold} ${
+                            className={`text-xs font-semibold ${
                               collectionDifficulty === 'beginner' ? 'bg-color-badge-difficulty-beginner-bg text-color-badge-difficulty-beginner-text border-color-badge-difficulty-beginner-border' :
                               collectionDifficulty === 'intermediate' ? 'bg-color-badge-difficulty-intermediate-bg text-color-badge-difficulty-intermediate-text border-color-badge-difficulty-intermediate-border' :
                               collectionDifficulty === 'advanced' ? 'bg-color-badge-difficulty-advanced-bg text-color-badge-difficulty-advanced-text border-color-badge-difficulty-advanced-border' :
@@ -749,7 +748,7 @@ export const ConfigCard = memo(
                         <UnifiedBadge
                           variant="base"
                           style="outline"
-                          className={`border-muted-foreground/20 text-muted-foreground ${size.xs} ${weight.semibold}`}
+                          className="border-muted-foreground/20 text-xs font-semibold text-muted-foreground"
                         >
                           {itemCount} {itemCount === 1 ? 'item' : 'items'}
                         </UnifiedBadge>
@@ -773,15 +772,15 @@ export const ConfigCard = memo(
                         <UnifiedBadge
                           variant="base"
                           style="secondary"
-                          className={`fade-in slide-in-from-top-2 animate-in ${gap.tight} font-semibold shadow-sm transition-all duration-300 hover:from-amber-500/15 hover:to-yellow-500/15 hover:shadow-md`}
+                          className="fade-in slide-in-from-top-2 animate-in gap-1 font-semibold shadow-sm transition-all duration-300 hover:from-amber-500/15 hover:to-yellow-500/15 hover:shadow-md"
                         >
                           {featuredRank && featuredRank <= 3 ? (
                             <Award
-                              className={`${iconSize.xs} text-amber-500`}
+                              className="h-3 w-3 text-amber-500"
                               aria-hidden="true"
                             />
                           ) : (
-                            <Sparkles className={iconSize.xs} aria-hidden="true" />
+                            <Sparkles className="h-3 w-3" aria-hidden="true" />
                           )}
                           Featured
                           {featuredRank && <span className="text-xs opacity-75">#{featuredRank}</span>}
@@ -867,7 +866,7 @@ export const ConfigCard = memo(
                     <Button
                       variant="ghost"
                       size="sm"
-                      className={`h-7 w-7 p-0 ${hoverBg.default} hover:text-accent`}
+                      className="h-7 w-7 p-0 hover:bg-accent/10 hover:text-accent"
                       onClick={(e) => {
                         e.stopPropagation();
                         if (!item.slug) return;
@@ -906,7 +905,7 @@ export const ConfigCard = memo(
                       }}
                       aria-label={`View ${displayTitle} repository on GitHub`}
                     >
-                      <Github className={iconSize.xs} aria-hidden="true" />
+                      <Github className="h-3 w-3" aria-hidden="true" />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -924,7 +923,7 @@ export const ConfigCard = memo(
                       <Button
                         variant="ghost"
                         size="sm"
-                        className={`h-7 w-7 p-0 ${hoverBg.default} hover:text-accent`}
+                        className="h-7 w-7 p-0 hover:bg-accent/10 hover:text-accent"
                         onClick={(e) => {
                           e.stopPropagation();
                           if (!item.slug) return;
@@ -964,7 +963,7 @@ export const ConfigCard = memo(
                         }}
                         aria-label={`View ${displayTitle} documentation`}
                       >
-                        <ExternalLink className={iconSize.xs} aria-hidden="true" />
+                        <ExternalLink className="h-3 w-3" aria-hidden="true" />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
@@ -1022,7 +1021,7 @@ export const ConfigCard = memo(
                     <Button
                       variant={pinned ? 'secondary' : 'ghost'}
                       size="sm"
-                      className={`h-7 w-7 p-0 ${pinned ? '' : `${hoverBg.default} hover:text-accent`}`}
+                      className={`h-7 w-7 p-0 ${pinned ? '' : 'hover:bg-accent/10 hover:text-accent'}`}
                       onClick={handlePinToggle}
                       aria-label={pinned ? 'Unpin from pinboard' : 'Pin to pinboard'}
                     >
@@ -1036,7 +1035,7 @@ export const ConfigCard = memo(
                             transition={MICROINTERACTIONS.iconTransition.transition}
                             className="text-color-accent-primary"
                           >
-                            <Pin className={iconSize.xs} fill="currentColor" aria-hidden="true" />
+                            <Pin className="h-3 w-3" fill="currentColor" aria-hidden="true" />
                           </motion.div>
                         ) : (
                           <motion.div
@@ -1046,7 +1045,7 @@ export const ConfigCard = memo(
                             exit={MICROINTERACTIONS.iconTransition.exit}
                             transition={MICROINTERACTIONS.iconTransition.transition}
                           >
-                            <Pin className={iconSize.xs} aria-hidden="true" />
+                            <Pin className="h-3 w-3" aria-hidden="true" />
                           </motion.div>
                         )}
                       </AnimatePresence>
@@ -1073,7 +1072,7 @@ export const ConfigCard = memo(
                     <Button
                       variant="ghost"
                       size="sm"
-                      className={`h-7 w-7 p-0 ${hoverBg.default} hover:text-accent`}
+                      className="h-7 w-7 p-0 hover:bg-accent/10 hover:text-accent"
                       onClick={(event) => {
                         event.stopPropagation();
                         copyInlineValue(
@@ -1094,7 +1093,7 @@ export const ConfigCard = memo(
                       }}
                       aria-label="Copy configuration JSON"
                     >
-                      <FileJson className={iconSize.xs} aria-hidden="true" />
+                      <FileJson className="h-3 w-3" aria-hidden="true" />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -1119,7 +1118,7 @@ export const ConfigCard = memo(
                           variant="ghost"
                           size="sm"
                           className="h-7 w-7 p-0"
-                          iconClassName={iconSize.xs}
+                          iconClassName="h-3 w-3"
                           ariaLabel={`Copy link to ${displayTitle}`}
                           onCopySuccess={() => {
                             const category: content_category =
@@ -1161,7 +1160,7 @@ export const ConfigCard = memo(
                     <Button
                       variant="ghost"
                       size="sm"
-                      className={`h-7 w-7 p-0 ${hoverBg.default} hover:text-accent`}
+                      className="h-7 w-7 p-0 hover:bg-accent/10 hover:text-accent"
                       onClick={(e) => {
                         e.stopPropagation();
                         if (isSafeCategoryAndSlug(item.category, item.slug)) {
@@ -1184,7 +1183,7 @@ export const ConfigCard = memo(
                         }}
                         aria-label={`View details for ${displayTitle}${cardConfig.showViewCount && viewCount !== undefined && typeof viewCount === 'number' ? ` - ${formatViewCount(viewCount)}` : ''}`}
                       >
-                        <Eye className={iconSize.xs} aria-hidden="true" />
+                        <Eye className="h-3 w-3" aria-hidden="true" />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>

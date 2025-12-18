@@ -7,10 +7,6 @@
  */
 
 import type {
-  GetActiveNotificationsArgs,
-  GetActiveNotificationsReturns,
-  GetActiveAnnouncementReturns,
-  GetContactCommandsReturns,
   GetFormFieldConfigArgs,
   GetFormFieldConfigReturns,
   GetSocialProofStatsReturns,
@@ -21,11 +17,43 @@ import type {
   GetSiteUrlsFormattedReturns,
   GenerateSitemapXmlArgs,
   GenerateSitemapXmlReturns,
-  GetWebhookEventBySvixIdArgs,
-  GetWebhookEventBySvixIdReturns,
   InsertWebhookEventArgs,
   InsertWebhookEventReturns,
+  GenerateMetadataCompleteArgs,
+  GenerateMetadataCompleteReturns,
+  GetCommunityDirectoryArgs,
+  GetCommunityDirectoryReturns,
+  GetUserProfileArgs,
+  GetUserProfileReturns,
+  GetUserCollectionDetailArgs,
+  GetUserCollectionDetailReturns,
+  GetRecommendationsArgs,
+  GetRecommendationsReturns,
+  GetDueSequenceEmailsReturns,
+  EnrollInEmailSequenceArgs,
+  DueSequenceEmailItem,
 } from '@heyclaude/database-types/postgres-types';
+import type { webhook_source } from '@heyclaude/data-layer/prisma';
+// Use explicit Prisma model type to avoid conflicts with postgres-types composite types
+import type { announcementsModel } from '@heyclaude/database-types/prisma/models';
+
+// Local types for converted RPCs (using Prisma directly)
+type GetWebhookEventBySvixIdArgs = {
+  p_svix_id: string;
+  p_source: webhook_source;
+};
+
+type GetActiveAnnouncementArgs = {
+  p_now?: Date;
+};
+
+// Local types for get_active_notifications (RPC removed, using Prisma directly)
+type GetActiveNotificationsArgs = {
+  p_dismissed_ids?: string[];
+};
+
+// Use Prisma model type instead of postgres-types composite type
+import type { notificationsModel } from '@heyclaude/database-types/prisma/models';
 import { prisma } from '../prisma/client.ts';
 import { BasePrismaService } from './base-prisma-service.ts';
 import { logRpcError } from '../utils/rpc-error-logging.ts';
@@ -36,6 +64,24 @@ type SponsoredContent = Awaited<ReturnType<typeof prisma.sponsored_content.findU
 type AppSetting = Awaited<ReturnType<typeof prisma.app_settings.findUnique>>;
 type EmailEngagementSummary = Awaited<ReturnType<typeof prisma.email_engagement_summary.findUnique>>;
 type Notification = Awaited<ReturnType<typeof prisma.notifications.create>>;
+type EmailSequence = Awaited<ReturnType<typeof prisma.email_sequences.findUnique>>;
+
+// Local types for consolidated services
+type QuizConfigurationQuestion = {
+  id: string | null;
+  question: string | null;
+  description: string | null;
+  required: boolean | null;
+  display_order: number | null;
+  options: Array<{
+    value: string | null;
+    label: string | null;
+    description: string | null;
+    icon_name: string | null;
+  }> | null;
+};
+
+type GetQuizConfigurationReturns = QuizConfigurationQuestion[];
 
 // Type helpers: Extract input types from Prisma operations
 type AppSettingCreateInput = Parameters<typeof prisma.app_settings.create>[0]['data'];
@@ -53,47 +99,369 @@ type NotificationCreateInput = Parameters<typeof prisma.notifications.create>[0]
  * - Same public API as Supabase-based service
  */
 export class MiscService extends BasePrismaService {
+  /**
+   * Get active notifications
+   *
+   * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
+   * The RPC was doing a simple SELECT with WHERE filters, which Prisma handles perfectly.
+   *
+   * @param args - Arguments with optional p_dismissed_ids array
+   * @returns Array of active notifications
+   */
   async getActiveNotifications(
-    args: GetActiveNotificationsArgs
-  ): Promise<GetActiveNotificationsReturns> {
-    return this.callRpc<GetActiveNotificationsReturns>(
-      'get_active_notifications',
-      args,
-      { methodName: 'getActiveNotifications' }
+    args: GetActiveNotificationsArgs = {}
+  ): Promise<notificationsModel[]> {
+    const { p_dismissed_ids = [] } = args;
+
+    return withSmartCache<notificationsModel[]>(
+      'getActiveNotifications',
+      'getActiveNotifications',
+      async () => {
+        const now = new Date();
+        
+        // Build where clause: active = true, not in dismissed_ids, not expired
+        const whereConditions = [];
+        
+        // Not in dismissed_ids array (if provided)
+        if (p_dismissed_ids.length > 0) {
+          whereConditions.push({ id: { notIn: p_dismissed_ids } });
+        }
+        
+        // Not expired (expires_at IS NULL OR expires_at > NOW())
+        whereConditions.push({
+          OR: [
+            { expires_at: null },
+            { expires_at: { gt: now } },
+          ],
+        });
+
+        // OPTIMIZATION: Check what fields are actually used by callers
+        // For now, fetch all fields since notifications may need full data
+        // TODO: Review usage and add select if only specific fields are needed
+        const notifications = await prisma.notifications.findMany({
+          where: {
+            active: true,
+            AND: whereConditions,
+          },
+          orderBy: { created_at: 'desc' },
+        });
+
+        return notifications;
+      },
+      args
     );
   }
 
-  async getActiveAnnouncement(): Promise<GetActiveAnnouncementReturns> {
-    return this.callRpc<GetActiveAnnouncementReturns>(
-      'get_active_announcement',
-      {},
-      { methodName: 'getActiveAnnouncement' }
+  /**
+   * Get active announcement
+   *
+   * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
+   * The RPC was doing a simple SELECT with date range filtering, which Prisma handles perfectly.
+   *
+   * @param args - Optional arguments with p_now (defaults to current date)
+   * @returns Active announcement or null if none found
+   */
+  async getActiveAnnouncement(
+    args: GetActiveAnnouncementArgs = {}
+  ): Promise<announcementsModel | null> {
+    const { p_now = new Date() } = args;
+
+    return withSmartCache<announcementsModel | null>(
+      'getActiveAnnouncement',
+      'getActiveAnnouncement',
+      async () => {
+        // Prisma findFirst returns the model type directly (announcementsModel | null)
+        // Explicitly type the result to ensure correct type inference
+        const result = await prisma.announcements.findFirst({
+          where: {
+            active: true,
+            AND: [
+              {
+                OR: [
+                  { start_date: null },
+                  { start_date: { lte: p_now } },
+                ],
+              },
+              {
+                OR: [
+                  { end_date: null },
+                  { end_date: { gte: p_now } },
+                ],
+              },
+            ],
+          },
+          orderBy: [
+            { priority: 'desc' },
+            { start_date: 'desc' },
+          ],
+        });
+        // Prisma findFirst returns the model type directly (announcementsModel | null)
+        return result;
+      },
+      args
     );
   }
 
-  async getContactCommands(): Promise<GetContactCommandsReturns> {
-    return this.callRpc<GetContactCommandsReturns>(
-      'get_contact_commands',
-      {},
-      { methodName: 'getContactCommands' }
+  /**
+   * Get contact commands
+   * 
+   * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
+   * The RPC was returning a nested array structure (ContactCommandResult[][]), but we can
+   * return a simple array directly. Transform Prisma model to match RPC composite type structure.
+   * 
+   * Note: The RPC returned ContactCommandResult[][] (array of arrays), but consumers
+   * access it as result?.[0] (first array). We return an array that matches ContactCommandResult
+   * structure (with `text` field instead of `command_text`).
+   * 
+   * @returns Array of contact commands (transformed to match RPC structure)
+   */
+  async getContactCommands(): Promise<Array<{
+    id: string | null;
+    text: string | null;
+    description: string | null;
+    category: string | null;
+    icon_name: string | null;
+    action_type: string | null;
+    action_value: string | null;
+    confetti_variant: string | null;
+    requires_auth: boolean | null;
+    aliases: string[] | null;
+  }>> {
+    return withSmartCache(
+      'getContactCommands',
+      'getContactCommands',
+      async () => {
+        // OPTIMIZATION: Use select to fetch only needed fields, excluding timestamps and unused metadata
+        const commands = await prisma.contact_commands.findMany({
+          where: {
+            is_active: true,
+          },
+          select: {
+            id: true,
+            command_text: true,
+            description: true,
+            category: true,
+            icon_name: true,
+            action_type: true,
+            action_value: true,
+            confetti_variant: true,
+            requires_auth: true,
+            aliases: true,
+            // Exclude: created_at, updated_at, metadata (not used in transformation)
+          },
+          orderBy: {
+            display_order: 'asc',
+          },
+        });
+
+        // Transform Prisma model to match RPC composite type structure
+        // RPC uses `text` instead of `command_text`, and `id` instead of `id`
+        return commands.map((cmd) => ({
+          id: cmd.id,
+          text: cmd.command_text, // Transform command_text -> text
+          description: cmd.description,
+          category: cmd.category,
+          icon_name: cmd.icon_name,
+          action_type: cmd.action_type,
+          action_value: cmd.action_value,
+          confetti_variant: cmd.confetti_variant,
+          requires_auth: cmd.requires_auth,
+          aliases: cmd.aliases,
+        }));
+      },
+      {}
     );
   }
 
+  /**
+   * Get form field configuration
+   * 
+   * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
+   * The RPC was doing a simple SELECT with WHERE/ORDER BY, which Prisma handles perfectly.
+   * 
+   * @param args - Arguments with p_form_type
+   * @returns Array of form field configurations
+   */
   async getFormFieldConfig(
     args: GetFormFieldConfigArgs
   ): Promise<GetFormFieldConfigReturns> {
-    return this.callRpc<GetFormFieldConfigReturns>(
-      'get_form_field_config',
-      args,
-      { methodName: 'getFormFieldConfig' }
+    return withSmartCache(
+      'getFormFieldConfig',
+      'getFormFieldConfig',
+      async () => {
+        // OPTIMIZATION: Use select to fetch only needed fields, excluding timestamps
+        const configs = await prisma.form_field_configs.findMany({
+          where: {
+            form_type: args.p_form_type,
+            enabled: true,
+          },
+          select: {
+            field_name: true,
+            field_label: true,
+            field_type: true,
+            required: true,
+            placeholder: true,
+            help_text: true,
+            default_value: true,
+            grid_column: true,
+            icon_name: true,
+            icon_position: true,
+            config: true, // JSONB field needed for additional config data
+            field_group: true,
+            display_order: true,
+            // Exclude: id, form_type, created_at, updated_at, enabled (not used in transformation)
+          },
+          orderBy: [
+            { field_group: 'asc' },
+            { display_order: 'asc' },
+          ],
+        });
+
+        // Transform Prisma model to match RPC return structure
+        // RPC returns FormFieldConfigResult composite type with form_type and fields array
+        // FormFieldConfigItem uses different field names (name, label, type instead of field_name, field_label, field_type)
+        const fields = configs.map((config) => {
+          // Extract additional fields from config JSON if present
+          const configData = (config.config as Record<string, unknown> | null) ?? {};
+          return {
+            name: config.field_name,
+            label: config.field_label,
+            type: config.field_type,
+            required: config.required,
+            placeholder: config.placeholder,
+            help_text: config.help_text,
+            default_value: config.default_value,
+            grid_column: config.grid_column,
+            icon_name: config.icon_name,
+            icon_position: config.icon_position,
+            rows: typeof configData['rows'] === 'number' ? configData['rows'] : null,
+            monospace: typeof configData['monospace'] === 'boolean' ? configData['monospace'] : null,
+            min_value: typeof configData['min_value'] === 'number' ? configData['min_value'] : null,
+            max_value: typeof configData['max_value'] === 'number' ? configData['max_value'] : null,
+            step_value: typeof configData['step_value'] === 'number' ? configData['step_value'] : null,
+            select_options: (configData['select_options'] as Record<string, unknown> | null) ?? null,
+            field_group: config.field_group,
+            display_order: config.display_order,
+          };
+        });
+
+        return {
+          form_type: args.p_form_type,
+          fields: fields.length > 0 ? fields : null,
+        } as GetFormFieldConfigReturns;
+      },
+      args
     );
   }
 
+  /**
+   * Get social proof stats
+   * 
+   * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
+   * The RPC was doing aggregations and counts, which Prisma handles perfectly.
+   * 
+   * @returns Social proof statistics (contributor count, names, submission count, success rate, total users)
+   */
   async getSocialProofStats(): Promise<GetSocialProofStatsReturns> {
-    return this.callRpc<GetSocialProofStatsReturns>(
-      'get_social_proof_stats',
-      {},
-      { methodName: 'getSocialProofStats' }
+    return withSmartCache(
+      'getSocialProofStats',
+      'getSocialProofStats',
+      async () => {
+        // Calculate date ranges
+        const now = new Date();
+        const weekAgo = new Date(now);
+        weekAgo.setDate(weekAgo.getDate() - 7);
+        const monthAgo = new Date(now);
+        monthAgo.setDate(monthAgo.getDate() - 30);
+
+        // Fetch all stats in parallel
+        const [
+          recentSubmissionsCount,
+          monthSubmissions,
+          topContributors,
+          totalContentCount,
+        ] = await Promise.all([
+          // Recent submissions count (last 7 days)
+          prisma.content_submissions.count({
+            where: {
+              created_at: {
+                gte: weekAgo,
+              },
+            },
+          }),
+          // Month submissions and success rate
+          prisma.content_submissions.groupBy({
+            by: ['status'],
+            where: {
+              created_at: {
+                gte: monthAgo,
+              },
+            },
+            _count: {
+              id: true,
+            },
+          }),
+          // Top 5 contributors this week (unique authors with most submissions)
+          prisma.content_submissions.groupBy({
+            by: ['author'],
+            where: {
+              created_at: {
+                gte: weekAgo,
+              },
+            },
+            _count: {
+              id: true,
+            },
+            orderBy: {
+              _count: {
+                id: 'desc',
+              },
+            },
+            take: 5,
+          }),
+          // Total content count (proxy for total users)
+          prisma.content.count(),
+        ]);
+
+        // OPTIMIZATION: Calculate month submissions count and success rate from groupBy results
+        // groupBy already provides counts per status, so we can sum them directly
+        const monthSubmissionsCount = monthSubmissions.reduce(
+          (sum, stat) => sum + stat._count.id,
+          0
+        );
+        const approvedCount = monthSubmissions.find(
+          (stat) => stat.status === 'merged'
+        )?._count.id ?? 0;
+        const successRate =
+          monthSubmissionsCount > 0
+            ? Math.round((approvedCount / monthSubmissionsCount) * 100)
+            : null;
+
+        // Process contributor names (extract username from email if needed)
+        const contributorNames = topContributors
+          .map((contributor) => {
+            if (!contributor.author) return null;
+            // Extract username: handle both email and non-email formats
+            const author = contributor.author.trim();
+            if (author.includes('@')) {
+              return author.substring(0, author.indexOf('@'));
+            }
+            return author;
+          })
+          .filter((name): name is string => name !== null);
+
+        // Return single row result (matching RPC return structure)
+        return [
+          {
+            contributor_count: topContributors.length,
+            contributor_names: contributorNames.length > 0 ? contributorNames : null,
+            submission_count: recentSubmissionsCount,
+            success_rate: successRate,
+            total_users: totalContentCount,
+          },
+        ];
+      },
+      {}
     );
   }
 
@@ -323,15 +691,34 @@ export class MiscService extends BasePrismaService {
     }
   }
 
+  /**
+   * Get webhook event by Svix ID
+   * 
+   * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
+   * The RPC was doing a simple SELECT id FROM webhook_events WHERE svix_id = ? AND source = ?,
+   * which Prisma handles perfectly. This eliminates the array unwrapping logic.
+   * 
+   * @param args - Arguments with svix_id and source
+   * @returns Webhook event ID or null if not found
+   */
   async getWebhookEventBySvixId(
     args: GetWebhookEventBySvixIdArgs
-  ): Promise<GetWebhookEventBySvixIdReturns[0] | null> {
-    const result = await this.callRpc<GetWebhookEventBySvixIdReturns>(
-      'get_webhook_event_by_svix_id',
-      args,
-      { methodName: 'getWebhookEventBySvixId' }
+  ): Promise<{ id: string } | null> {
+    return withSmartCache(
+      'getWebhookEventBySvixId',
+      'getWebhookEventBySvixId',
+      async () => {
+        const event = await prisma.webhook_events.findFirst({
+          where: {
+            svix_id: args.p_svix_id,
+            source: args.p_source as webhook_source,
+          },
+          select: { id: true },
+        });
+        return event;
+      },
+      args
     );
-    return Array.isArray(result) && result.length > 0 ? (result[0] ?? null) : null;
   }
 
   async insertWebhookEvent(
@@ -367,6 +754,263 @@ export class MiscService extends BasePrismaService {
       rpcName,
       args,
       { methodName: 'handlePolarWebhookRpc', useCache: false }
+    );
+  }
+
+  // ============================================================================
+  // CONSOLIDATED SERVICES: Methods moved from SeoService, CommunityService,
+  // QuizService, and EmailService into MiscService for better organization
+  // ============================================================================
+
+  /**
+   * Generate SEO metadata (from SeoService)
+   * 
+   * @param args - Arguments with p_route and p_include
+   * @returns SEO metadata with optional schemas
+   */
+  async generateMetadata(
+    args: GenerateMetadataCompleteArgs
+  ): Promise<GenerateMetadataCompleteReturns> {
+    return this.callRpc<GenerateMetadataCompleteReturns>(
+      'generate_metadata_complete',
+      args,
+      { methodName: 'generateMetadata' }
+    );
+  }
+
+  /**
+   * Get community directory (from CommunityService)
+   * 
+   * @param args - Arguments with p_limit
+   * @returns Community directory data
+   */
+  async getCommunityDirectory(
+    args: GetCommunityDirectoryArgs
+  ): Promise<GetCommunityDirectoryReturns> {
+    return this.callRpc<GetCommunityDirectoryReturns>(
+      'get_community_directory',
+      args,
+      { methodName: 'getCommunityDirectory' }
+    );
+  }
+
+  /**
+   * Get user profile (from CommunityService)
+   * 
+   * @param args - Arguments with p_user_slug and optional p_viewer_id
+   * @returns User profile data
+   */
+  async getUserProfile(
+    args: GetUserProfileArgs
+  ): Promise<GetUserProfileReturns> {
+    return this.callRpc<GetUserProfileReturns>(
+      'get_user_profile',
+      args,
+      { methodName: 'getUserProfile' }
+    );
+  }
+
+  /**
+   * Get user collection detail (from CommunityService)
+   * 
+   * @param args - Arguments with p_collection_slug, p_user_slug, and optional p_viewer_id
+   * @returns User collection detail data
+   */
+  async getUserCollectionDetail(
+    args: GetUserCollectionDetailArgs
+  ): Promise<GetUserCollectionDetailReturns> {
+    return this.callRpc<GetUserCollectionDetailReturns>(
+      'get_user_collection_detail',
+      args,
+      { methodName: 'getUserCollectionDetail' }
+    );
+  }
+
+  /**
+   * Get quiz configuration (from QuizService)
+   * 
+   * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
+   * 
+   * @returns Array of quiz questions with nested options
+   */
+  async getQuizConfiguration(): Promise<GetQuizConfigurationReturns> {
+    return withSmartCache(
+      'getQuizConfiguration',
+      'getQuizConfiguration',
+      async () => {
+        // OPTIMIZATION: Use relationLoadStrategy: 'join' to fetch questions and options in a single query
+        const questions = await prisma.quiz_questions.findMany({
+          include: {
+            quiz_options: {
+              orderBy: {
+                display_order: 'asc',
+              },
+            },
+          },
+          orderBy: {
+            display_order: 'asc',
+          },
+          relationLoadStrategy: 'join' // Use JOIN for better performance (requires relationJoins preview feature)
+        });
+
+        // Transform to match RPC return structure (QuizConfigurationQuestion[])
+        const transformed: QuizConfigurationQuestion[] = questions.map((q) => ({
+          id: q.question_id,
+          question: q.question_text,
+          description: q.description,
+          required: q.required ?? false,
+          display_order: q.display_order,
+          options: q.quiz_options.map((opt) => ({
+            value: opt.value,
+            label: opt.label,
+            description: opt.description,
+            icon_name: opt.icon_name,
+          })),
+        }));
+
+        return transformed;
+      },
+      {}
+    );
+  }
+
+  /**
+   * Get recommendations (from QuizService)
+   * 
+   * @param args - Arguments for recommendations
+   * @returns Recommendations data
+   */
+  async getRecommendations(
+    args: GetRecommendationsArgs
+  ): Promise<GetRecommendationsReturns> {
+    return this.callRpc<GetRecommendationsReturns>(
+      'get_recommendations',
+      args,
+      { methodName: 'getRecommendations' }
+    );
+  }
+
+  /**
+   * Get due sequence emails (from EmailService)
+   * 
+   * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
+   * 
+   * @returns Array of due sequence email items
+   */
+  async getDueSequenceEmails(): Promise<GetDueSequenceEmailsReturns> {
+    const now = new Date();
+    
+    // Fetch due emails (step 1)
+    const dueSchedules = await prisma.email_sequence_schedule.findMany({
+      where: {
+        sequence_id: 'onboarding',
+        processed: false,
+        due_at: {
+          lte: now,
+        },
+      },
+      orderBy: {
+        due_at: 'asc',
+      },
+      take: 100, // Safety limit: max 100 emails per batch
+    });
+
+    if (dueSchedules.length === 0) {
+      return [] as unknown as GetDueSequenceEmailsReturns;
+    }
+
+    // Fetch active sequences for the emails (step 2)
+    const emails = dueSchedules.map((s) => s.email);
+    const activeSequences = await prisma.email_sequences.findMany({
+      where: {
+        sequence_id: 'onboarding',
+        email: {
+          in: emails,
+        },
+        status: 'active',
+      },
+      select: {
+        email: true,
+      },
+    });
+
+    // Create a Set of active email addresses for fast lookup
+    const activeEmailsSet = new Set(activeSequences.map((s) => s.email));
+
+    // Filter schedules to only those with active sequences and transform to match RPC return structure
+    const result: DueSequenceEmailItem[] = dueSchedules
+      .filter((schedule) => activeEmailsSet.has(schedule.email))
+      .map((schedule) => ({
+        id: schedule.id,
+        email: schedule.email,
+        step: schedule.step,
+      }));
+    
+    return result as unknown as GetDueSequenceEmailsReturns;
+  }
+
+  /**
+   * Claims an email sequence step (idempotent update) (from EmailService)
+   * Updates current_step only if it matches the expected value (prevents duplicate sends)
+   * Returns the updated record if successful, null if already claimed
+   * 
+   * OPTIMIZATION: Uses transaction for atomic operation (update + fetch in same transaction)
+   */
+  async claimEmailSequenceStep(
+    sequenceId: string,
+    expectedStep: number
+  ): Promise<EmailSequence | null> {
+    // OPTIMIZATION: Use transaction for atomic operation
+    return this.transaction(async (tx) => {
+      // Step 1: Update (atomic check + update)
+      const result = await tx.email_sequences.updateMany({
+        where: {
+          id: sequenceId,
+          current_step: expectedStep, // Only update if step hasn't changed (idempotency check)
+        },
+        data: {
+          current_step: expectedStep + 1,
+          updated_at: new Date(),
+        },
+      });
+
+      // Step 2: Fetch updated record (in same transaction)
+      if (result.count === 0) {
+        return null; // Step was already claimed
+      }
+
+      const updated = await tx.email_sequences.findUnique({
+        where: { id: sequenceId },
+      });
+
+      return updated ?? null;
+    });
+  }
+
+  /**
+   * Updates email sequence last_sent_at timestamp (from EmailService)
+   */
+  async updateEmailSequenceLastSent(sequenceId: string): Promise<void> {
+    await prisma.email_sequences.update({
+      where: { id: sequenceId },
+      data: {
+        last_sent_at: new Date(),
+      },
+    });
+  }
+
+  /**
+   * Enrolls an email address into the onboarding email sequence (from EmailService)
+   * Uses the database RPC to create/update the email sequence record
+   * This is a mutation, so it does NOT use request-scoped caching
+   */
+  async enrollInEmailSequence(
+    args: EnrollInEmailSequenceArgs
+  ): Promise<void> {
+    await this.callRpc<void>(
+      'enroll_in_email_sequence',
+      args,
+      { methodName: 'enrollInEmailSequence', useCache: false }
     );
   }
 }

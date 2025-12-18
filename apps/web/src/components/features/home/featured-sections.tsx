@@ -3,7 +3,10 @@
 /** Featured sections consuming homepageConfigs for runtime-tunable categories */
 
 import type { content_category } from '@heyclaude/data-layer/prisma';
-import type { Jobs } from '@heyclaude/database-types/postgres-types';
+import type { jobsModel } from '@heyclaude/database-types/prisma/models';
+
+// Use Prisma model type instead of excluded composite type
+type Jobs = jobsModel;
 import { trackMissingData, getTrendingSlugs, isNewSince, isValidCategory } from '@heyclaude/web-runtime/core';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ExternalLink } from '@heyclaude/web-runtime/icons';
@@ -12,7 +15,7 @@ import {
   type UnifiedCategoryConfig,
 } from '@heyclaude/web-runtime/types/component.types';
 import { UnifiedBadge, UnifiedCardGrid, ConfigCard, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, BlurText, cn } from '@heyclaude/web-runtime/ui';
-import { SPRING, TEXT_ANIMATIONS, STAGGER, VIEWPORT, between, iconSize, cluster, stack, grid, marginBottom, size, tracking, paddingY, spaceY } from '@heyclaude/web-runtime/design-system';
+import { SPRING, TEXT_ANIMATIONS, STAGGER, VIEWPORT } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import Link from 'next/link';
@@ -69,7 +72,7 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
 
     return (
       <div>
-        <div className={cn(between.center, marginBottom.relaxed)}>
+        <div className={cn('flex items-center justify-between', 'mb-8')}>
           <BlurText
             text={title}
             delay={50}
@@ -82,8 +85,8 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
             animationTo={[...TEXT_ANIMATIONS.blur.to]}
             stepDuration={0.35}
           />
-          <Link href={href} className={`text-accent ${cluster.compact} hover:underline`}>
-            View all <ExternalLink className={iconSize.sm} />
+          <Link href={href} className="text-accent flex items-center gap-2 hover:underline">
+            View all <ExternalLink className="h-4 w-4" />
           </Link>
         </div>
         <UnifiedCardGrid
@@ -114,7 +117,7 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
               >
                 {showNew || showTrending ? (
                   <TooltipProvider delayDuration={300}>
-                    <div className={`absolute top-3 left-3 z-10 ${stack.compact}`}>
+                    <div className="absolute top-3 left-3 z-10 flex flex-col gap-1">
                       {showNew ? (
                         <Tooltip>
                           <TooltipTrigger asChild>
@@ -122,7 +125,7 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
                               <UnifiedBadge
                                 variant="base"
                                 style="secondary"
-                                className={cn(size['2xs'], tracking.wide, 'uppercase pointer-events-auto')}
+                                className={cn('text-[10px]', 'tracking-wide', 'uppercase pointer-events-auto')}
                               >
                                 New this week
                               </UnifiedBadge>
@@ -140,7 +143,7 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
                               <UnifiedBadge
                                 variant="base"
                                 style="outline"
-                                className={cn(size['2xs'], tracking.wide, 'uppercase pointer-events-auto')}
+                                className={cn('text-[10px]', 'tracking-wide', 'uppercase pointer-events-auto')}
                               >
                                 Trending
                               </UnifiedBadge>
@@ -213,9 +216,9 @@ const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({
   }, [featuredCategories.length, categories, categoryConfigs, featuredJobs.length]);
 
   return (
-    <div className={cn(marginBottom.hero, spaceY.hero)}>
+    <div className={cn('mb-16', 'space-y-16')}>
       {featuredCategories.length === 0 && (
-        <div className={`text-muted-foreground ${paddingY.relaxed} text-center`}>
+        <div className="text-muted-foreground py-8 text-center">
           No featured categories available.
         </div>
       )}
@@ -274,7 +277,7 @@ const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({
       {/* Featured Jobs - Dynamic from database */}
       {displayedJobs.length > 0 && (
         <div>
-          <div className={cn(between.center, marginBottom.relaxed)}>
+          <div className={cn('flex items-center justify-between', 'mb-8')}>
             <BlurText
               text="Featured Jobs"
               delay={50}
@@ -292,12 +295,12 @@ const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({
             />
             <Link
               href={ROUTES.JOBS}
-              className={`text-accent ${cluster.compact} hover:underline`}
+              className="text-accent flex items-center gap-2 hover:underline"
             >
-              View all <ExternalLink className={iconSize.sm} />
+              View all <ExternalLink className="h-4 w-4" />
             </Link>
           </div>
-          <div className={`grid ${grid.cols1} gap-6 md:${grid.cols2} lg:${grid.cols3}`}>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {displayedJobs.map((job, index) => (
               <motion.div
                 key={job.slug}

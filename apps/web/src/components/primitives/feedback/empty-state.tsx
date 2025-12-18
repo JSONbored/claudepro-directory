@@ -54,7 +54,7 @@ export function EmptySearchResults({
         </Button>
       )}
       actionLabel="Submit New Config"
-      actionHref="/submit/wizard"
+      actionHref="/submit"
       secondaryActionLabel="Browse All"
       secondaryActionHref="/"
       variant="search"
@@ -100,7 +100,7 @@ export function EmptySubmissions({ className }: { className?: string }) {
         </Button>
       )}
       actionLabel="Submit Your First Config"
-      actionHref="/submit/wizard"
+      actionHref="/submit"
       variant="default"
       {...(className ? { className } : {})}
     />
@@ -144,7 +144,7 @@ export function EmptyCategory({ category, className }: { category: string; class
         </Button>
       )}
       actionLabel={`Submit ${category.slice(0, -1)}`}
-      actionHref="/submit/wizard"
+      actionHref="/submit"
       variant="default"
       {...(className ? { className } : {})}
     />

@@ -5,7 +5,7 @@
  * All questions/options fetched from PostgreSQL.
  */
 
-import { getQuizConfigurationAction } from '@heyclaude/web-runtime/actions';
+import { getQuizConfigurationAction } from '@heyclaude/web-runtime/actions/quiz';
 import { generateConfigRecommendations } from '@heyclaude/web-runtime/core';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { ArrowLeft, ArrowRight, Sparkles } from '@heyclaude/web-runtime/icons';
@@ -17,12 +17,9 @@ import {
   CardHeader,
   CardTitle,
   Separator,
-  DIMENSIONS,
-  cn,
   toasts,
   InlineSpinner,
 } from '@heyclaude/web-runtime/ui';
-import { cluster, between, iconSize, marginRight, marginLeft, size, weight, gap, muted, spaceY, center, padding, marginTop, marginY } from '@heyclaude/web-runtime/design-system';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState, useTransition } from 'react';
 import { z } from 'zod';
@@ -344,7 +341,7 @@ export function QuizForm() {
 
   if (!quizConfig) {
     return (
-      <div className={cn(center, padding.section)}>
+      <div className="flex-center p-12">
         <InlineSpinner size="lg" />
       </div>
     );
@@ -371,7 +368,7 @@ export function QuizForm() {
   );
 
   return (
-    <div className={spaceY.relaxed}>
+    <div className="space-y-6">
       <QuizProgress
         currentQuestion={currentQuestion}
         totalQuestions={totalQuestions}
@@ -380,14 +377,14 @@ export function QuizForm() {
 
       <Card className="relative overflow-hidden">
         <CardHeader>
-          <CardTitle className={cluster.compact}>
-            <span className={cn(muted.default, size.sm)}>
+          <CardTitle className="flex items-center gap-2">
+            <span className="text-muted-foreground text-sm">
               Question {currentQuestion} of {totalQuestions}
             </span>
           </CardTitle>
         </CardHeader>
 
-        <CardContent className={spaceY.relaxed}>
+        <CardContent className="space-y-6">
           {currentQuestionData.id === 'review' ? (
             <QuestionCard
               question={currentQuestionData.question}
@@ -395,57 +392,57 @@ export function QuizForm() {
                 description: currentQuestionData.description,
               })}
             >
-              <div className={spaceY.comfortable}>
-                <div className={`bg-muted ${spaceY.compact} rounded-lg ${padding.default}`}>
+              <div className="space-y-4">
+                <div className="bg-muted space-y-2 rounded-lg p-4">
                   <div>
-                    <span className={`${weight.medium}`}>Use Case:</span>{' '}
-                    <span className={muted.default}>
+                    <span className="font-medium">Use Case:</span>{' '}
+                    <span className="text-muted-foreground">
                       {answers.useCase?.replace('-', ' ')}
                     </span>
                   </div>
                   <div>
-                    <span className={`${weight.medium}`}>Experience:</span>{' '}
-                    <span className={muted.default}>{answers.experienceLevel}</span>
+                    <span className="font-medium">Experience:</span>{' '}
+                    <span className="text-muted-foreground">{answers.experienceLevel}</span>
                   </div>
                   <div>
-                    <span className={`${weight.medium}`}>Tool Preferences:</span>{' '}
-                    <span className={muted.default}>
+                    <span className="font-medium">Tool Preferences:</span>{' '}
+                    <span className="text-muted-foreground">
                       {answers.toolPreferences?.join(', ')}
                     </span>
                   </div>
                   {answers.p_integrations && answers.p_integrations.length > 0 ? (
                     <div>
-                      <span className={`${weight.medium}`}>Integrations:</span>{' '}
-                      <span className={muted.default}>
+                      <span className="font-medium">Integrations:</span>{' '}
+                      <span className="text-muted-foreground">
                         {answers.p_integrations.join(', ')}
                       </span>
                     </div>
                   ) : null}
                   {answers.p_focus_areas && answers.p_focus_areas.length > 0 ? (
                     <div>
-                      <span className={`${weight.medium}`}>Focus Areas:</span>{' '}
-                      <span className={muted.default}>
+                      <span className="font-medium">Focus Areas:</span>{' '}
+                      <span className="text-muted-foreground">
                         {answers.p_focus_areas.join(', ')}
                       </span>
                     </div>
                   ) : null}
                   {answers.teamSize ? (
                     <div>
-                      <span className={`${weight.medium}`}>Team Size:</span>{' '}
-                      <span className={muted.default}>{answers.teamSize}</span>
+                      <span className="font-medium">Team Size:</span>{' '}
+                      <span className="text-muted-foreground">{answers.teamSize}</span>
                     </div>
                   ) : null}
                 </div>
 
                 <Card className="border-primary/20 bg-primary/5">
                   <CardHeader>
-                    <CardTitle className={cn(cluster.compact, gap.compact, size.lg)}>
-                      <Sparkles className={`${iconSize.md} text-primary`} />
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <Sparkles className="h-5 w-5 text-primary" />
                       What happens next?
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <ul className={cn(muted.default, spaceY.compact, size.sm)}>
+                    <ul className="text-muted-foreground text-sm space-y-2">
                       <li>? We'll analyze 147+ configurations</li>
                       <li>? Match them to your specific needs</li>
                       <li>? Show you the top 8-10 best fits</li>
@@ -492,7 +489,7 @@ export function QuizForm() {
                         }
                       }}
                       disabled={!canSelect}
-                      className={`rounded-lg border-2 p-4 text-left transition-all ${
+                      className={`rounded-xl border-2 p-4 text-left transition-all ${
                         isSelected
                           ? 'border-primary bg-primary/5'
                           : canSelect
@@ -500,47 +497,47 @@ export function QuizForm() {
                             : 'border-border cursor-not-allowed opacity-50'
                       }`}
                     >
-                      <div className={`${weight.medium}`}>{option.label}</div>
-                      <div className={cn(muted.default, marginTop.tight, size.sm)}>{option.description}</div>
+                      <div className="font-medium">{option.label}</div>
+                      <div className="text-muted-foreground text-sm mt-1">{option.description}</div>
                     </button>
                   );
                 })}
               </div>
               {fieldKey && errors[fieldKey] ? (
-                <p className={`text-destructive ${marginTop.compact} ${size.sm}`}>{errors[fieldKey]}</p>
+                <p className="text-destructive mt-2 text-sm">{errors[fieldKey]}</p>
               ) : null}
             </QuestionCard>
           )}
 
-          <Separator className={`${marginY.comfortable}`} />
-          <div className={between.center}>
+          <Separator className="my-6" />
+          <div className="flex items-center justify-between">
             <Button
               type="button"
               variant="outline"
               onClick={goToPrevious}
               disabled={currentQuestion === 1 || isPending}
             >
-              <ArrowLeft className={`${iconSize.sm} ${marginRight.compact}`} />
+              <ArrowLeft className="h-4 w-4 mr-2" />
               Previous
             </Button>
 
             {currentQuestion < totalQuestions ? (
               <Button type="button" onClick={goToNext} disabled={isPending}>
                 Next
-                <ArrowRight className={cn(marginLeft.compact, iconSize.sm)} />
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             ) : (
               <Button
                 type="button"
                 onClick={handleSubmit}
                 disabled={isPending}
-                className={DIMENSIONS.MIN_W_INPUT}
+                className="min-w-[200px]"
               >
                 {isPending ? (
                   <InlineSpinner size="sm" message="Generating..." />
                 ) : (
                   <>
-                    <Sparkles className={`${iconSize.sm} ${marginRight.compact}`} />
+                    <Sparkles className="h-4 w-4 mr-2" />
                     Get Results
                   </>
                 )}

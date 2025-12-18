@@ -6,7 +6,6 @@
 import { ArrowDownIcon, ArrowUpIcon, MinusIcon } from '@heyclaude/web-runtime/icons';
 import { type MetricsDisplayProps } from '@heyclaude/web-runtime/types/component.types';
 import { cn } from '@heyclaude/web-runtime/ui';
-import { iconSize, cluster, grid, size, weight, tracking, marginY, marginBottom, marginTop } from "@heyclaude/web-runtime/design-system";
 
 // Lightweight Badge component for delta display
 function BadgeDelta({
@@ -18,11 +17,11 @@ function BadgeDelta({
 }) {
   const icon =
     deltaType === 'increase' ? (
-      <ArrowUpIcon className={iconSize.xs} />
+      <ArrowUpIcon className="h-3 w-3" />
     ) : deltaType === 'decrease' ? (
-      <ArrowDownIcon className={iconSize.xs} />
+      <ArrowDownIcon className="h-3 w-3" />
     ) : (
-      <MinusIcon className={iconSize.xs} />
+      <MinusIcon className="h-3 w-3" />
     );
 
   const colorClass =
@@ -52,16 +51,16 @@ export function MetricsDisplay(props: MetricsDisplayProps) {
   const validMetrics = metrics;
 
   return (
-    <section itemScope itemType="https://schema.org/Dataset" className={`${marginY.default}`}>
+    <section itemScope itemType="https://schema.org/Dataset" className="my-4">
       {title || description ? (
-        <div className={`${marginBottom.relaxed} text-center`}>
+        <div className="mb-8 text-center">
           {title ? (
-            <h3 className={`text-foreground ${marginBottom.default} ${size.xl} ${weight.semibold}`} itemProp="name">
+            <h3 className="mb-4 text-xl font-semibold text-foreground" itemProp="name">
               {title}
             </h3>
           ) : null}
           {description ? (
-            <p className={`text-muted-foreground mx-auto max-w-3xl ${size.lg}`} itemProp="description">
+            <p className="mx-auto max-w-3xl text-lg text-muted-foreground" itemProp="description">
               {description}
             </p>
           ) : null}
@@ -69,7 +68,7 @@ export function MetricsDisplay(props: MetricsDisplayProps) {
       ) : null}
 
       {/* Grid layout - responsive columns */}
-      <div className={`grid gap-6 ${grid.cols1} md:${grid.cols2} lg:${grid.cols3}`}>
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {validMetrics.map((metric, index) => {
           const metricLabel = metric.label || `Metric ${index + 1}`;
           const metricValue = metric.value;
@@ -89,25 +88,25 @@ export function MetricsDisplay(props: MetricsDisplayProps) {
             <div
               key={`${metricLabel}-${metricValue}`}
               className={cn(
-                'rounded-lg border bg-linear-to-br p-6 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-xl',
+                'card-base bg-linear-to-br p-6 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-xl',
                 gradientClass
               )}
             >
               {/* Metric Label */}
-              <p className={`text-muted-foreground ${size.sm} ${weight.medium} ${tracking.wide} uppercase`}>
+              <p className="text-muted-foreground text-sm font-medium uppercase tracking-wide">
                 {metricLabel}
               </p>
 
               {/* Metric Value */}
-              <p className={`from-foreground to-muted-foreground ${marginTop.compact} bg-linear-to-r bg-clip-text ${size['3xl']} ${weight.bold} text-transparent`}>
+              <p className="mt-2 bg-linear-to-r from-foreground to-muted-foreground bg-clip-text text-3xl font-bold text-transparent">
                 {metricValue}
               </p>
 
               {/* Change indicator */}
               {metricChange ? (
-                <div className={`${marginTop.default} ${cluster.compact}`}>
-                  <BadgeDelta deltaType={deltaType} className={`${weight.semibold}`} />
-                  <span className={`text-muted-foreground ${size.sm} ${weight.medium}`}>{metricChange}</span>
+                <div className="mt-4 flex items-center gap-2">
+                  <BadgeDelta deltaType={deltaType} className="font-semibold" />
+                  <span className="text-muted-foreground text-sm font-medium">{metricChange}</span>
                 </div>
               ) : null}
             </div>

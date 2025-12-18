@@ -6,8 +6,7 @@
 
 import { ChangelogCategory } from '@heyclaude/data-layer/prisma';
 import type { changelog_category } from '@heyclaude/data-layer/prisma';
-import { DIMENSIONS, UnifiedBadge, TabsList, TabsTrigger, cn } from '@heyclaude/web-runtime/ui';
-import { cluster, gap, size, marginLeft, paddingX } from '@heyclaude/web-runtime/design-system';
+import { UnifiedBadge, TabsList, TabsTrigger, cn } from '@heyclaude/web-runtime/ui';
 
 // Use Prisma enum values
 const CHANGELOG_CATEGORY_VALUES = Object.values(ChangelogCategory);
@@ -24,12 +23,12 @@ export function CategoryFilter({ activeCategory, categoryCounts }: CategoryFilte
   return (
     <TabsList className={`grid w-full gap-1 lg:w-auto lg:auto-cols-fr lg:grid-flow-col`}>
       {FILTER_CATEGORIES.map((category) => (
-        <TabsTrigger key={category} value={category} className={cn(cluster.compact, gap.compact, size.sm)}>
+        <TabsTrigger key={category} value={category} className={cn('flex items-center gap-2', 'gap-2', 'text-sm')}>
           <span>{category}</span>
           <UnifiedBadge
             variant="base"
             style={activeCategory === category ? 'default' : 'secondary'}
-            className={cn(marginLeft.tight, 'h-5', DIMENSIONS.MIN_W_BADGE, 'justify-center', paddingX['1.5'], 'text-xs')}
+            className={cn('ml-1', 'h-5', 'min-w-[1.5rem]', 'justify-center', 'px-1.5', 'text-xs')}
           >
             {categoryCounts[category] || 0}
           </UnifiedBadge>

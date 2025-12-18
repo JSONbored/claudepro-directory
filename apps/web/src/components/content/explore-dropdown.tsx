@@ -28,7 +28,6 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { useMemo } from 'react';
-import { marginLeft, padding, spaceY, paddingX, paddingY, gap } from "@heyclaude/web-runtime/design-system";
 
 interface ExploreDropdownProps {
   /** Content category (e.g., 'agents', 'mcp') */
@@ -209,24 +208,24 @@ export function ExploreDropdown({
           aria-label="Explore content variants"
         >
           <span>Explore here</span>
-          <ExternalLink className={`h-3 w-3 ${marginLeft.micro}`} />
+          <ExternalLink className="h-3 w-3 ml-0.5" />
         </Button>
       </NavigationHoverCardTrigger>
-      <NavigationHoverCardContent align="end" className={`w-56 ${padding.tight}`} sideOffset={8}>
-        <div className={spaceY['1.5']}>
+      <NavigationHoverCardContent align="end" className="w-56 p-2" sideOffset={8}>
+        <div className="space-y-1.5">
           {items.map((item) => {
             const Icon = item.icon;
             if (item.disabled) {
               return (
                 <div
                   key={item.label}
-                  className={cn('flex items-center', gap.tight, paddingX.tight, paddingY['1.5'], 'text-sm rounded-md opacity-50 cursor-not-allowed')}
+                  className={cn('flex items-center', 'gap-1', 'px-1', 'py-1.5', 'text-sm rounded-md opacity-50 cursor-not-allowed')}
                 >
                   <Icon className="h-4 w-4 text-muted-foreground" />
                   <div className="flex-1">
                     <div className="font-medium">{item.label}</div>
                     {item.description && (
-                      <div className="text-xs text-muted-foreground">{item.description}</div>
+                      <div className="text-muted-foreground text-xs">{item.description}</div>
                     )}
                   </div>
                 </div>
@@ -237,13 +236,13 @@ export function ExploreDropdown({
               <Link
                 key={item.label}
                 href={item.href}
-                className={cn('flex items-center', gap.tight, paddingX.tight, paddingY['1.5'], 'text-sm rounded-md hover:bg-accent/5 transition-colors group/item')}
+                className={cn('flex items-center', 'gap-1', 'px-1', 'py-1.5', 'text-sm rounded-md hover:bg-accent/5 transition-colors group/item')}
               >
                 <Icon className="h-4 w-4 text-muted-foreground group-hover/item:text-foreground transition-colors" />
                 <div className="flex-1">
                   <div className="font-medium">{item.label}</div>
                   {item.description && (
-                    <div className="text-xs text-muted-foreground">{item.description}</div>
+                    <div className="text-muted-foreground text-xs">{item.description}</div>
                   )}
                 </div>
               </Link>

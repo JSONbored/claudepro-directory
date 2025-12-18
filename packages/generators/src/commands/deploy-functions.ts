@@ -199,7 +199,7 @@ function verifySupabaseCli(): void {
 function printHelp(): void {
   logger.log(`Usage:
   pnpm exec heyclaude-deploy-edge              # Deploy all edge functions
-  pnpm exec heyclaude-deploy-edge data-api og-image   # Deploy selected functions
+  pnpm exec heyclaude-deploy-edge heyclaude-mcp   # Deploy selected functions
 
 Environment variables:
   SUPABASE_PROJECT_REF          # Preferred explicit project ref

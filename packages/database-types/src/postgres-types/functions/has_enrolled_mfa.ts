@@ -27,12 +27,12 @@ export type HasEnrolledMfaArgsFromZod = z.infer<typeof hasEnrolledMfaArgsSchema>
 /**
  * Return type for PostgreSQL function: has_enrolled_mfa
  */
-export type HasEnrolledMfaReturns = boolean;
+export type HasEnrolledMfaReturns = unknown;
 
 /**
  * Zod schema for has_enrolled_mfa function return type
  */
-export const hasEnrolledMfaReturnsSchema = z.boolean();
+export const hasEnrolledMfaReturnsSchema = z.any();
 
 /**
  * Type inference from Zod schema (should match type above)

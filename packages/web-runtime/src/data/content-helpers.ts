@@ -1,5 +1,6 @@
 import 'server-only';
-import type { content_category } from '@heyclaude/data-layer/prisma';
+import { type content_category } from '@heyclaude/data-layer/prisma';
+import { cacheTag } from 'next/cache';
 
 export function generateContentTags(
   category?: content_category | null,
@@ -18,6 +19,115 @@ export function generateContentTags(
   }
 
   return tags;
+}
+
+/**
+ * Unified cache tag helpers for all data types
+ *
+ * These helpers provide consistent cache tag patterns across all data types.
+ */
+
+/**
+ * Apply companies cache tags
+ * @param slug - Optional company slug
+ * @param additionalTags - Optional additional tags
+ */
+export function applyCompaniesCacheTags(slug?: null | string, additionalTags: string[] = []): void {
+  const tags: string[] = ['companies', ...additionalTags];
+  if (slug) {
+    tags.push(`company-${slug}`);
+  }
+  for (const tag of tags) {
+    cacheTag(tag);
+  }
+}
+
+/**
+ * Apply changelog cache tags
+ * @param slug - Optional changelog entry slug
+ * @param additionalTags - Optional additional tags
+ */
+export function applyChangelogCacheTags(slug?: null | string, additionalTags: string[] = []): void {
+  const tags: string[] = ['changelog', ...additionalTags];
+  if (slug) {
+    tags.push(`changelog-${slug}`);
+  }
+  for (const tag of tags) {
+    cacheTag(tag);
+  }
+}
+
+/**
+ * Apply community cache tags
+ * @param additionalTags - Optional additional tags
+ */
+export function applyCommunityCacheTags(additionalTags: string[] = []): void {
+  const tags: string[] = ['community', ...additionalTags];
+  for (const tag of tags) {
+    cacheTag(tag);
+  }
+}
+
+/**
+ * Apply marketing cache tags
+ * @param additionalTags - Optional additional tags
+ */
+export function applyMarketingCacheTags(additionalTags: string[] = []): void {
+  const tags: string[] = ['marketing', ...additionalTags];
+  for (const tag of tags) {
+    cacheTag(tag);
+  }
+}
+
+/**
+ * Apply layout cache tags
+ * @param additionalTags - Optional additional tags
+ */
+export function applyLayoutCacheTags(additionalTags: string[] = []): void {
+  const tags: string[] = ['layout', ...additionalTags];
+  for (const tag of tags) {
+    cacheTag(tag);
+  }
+}
+
+/**
+ * Apply announcements cache tags
+ * @param additionalTags - Optional additional tags
+ */
+export function applyAnnouncementsCacheTags(additionalTags: string[] = []): void {
+  const tags: string[] = ['announcements', ...additionalTags];
+  for (const tag of tags) {
+    cacheTag(tag);
+  }
+}
+
+/**
+ * Apply templates cache tags
+ * @param category - Optional template category
+ * @param additionalTags - Optional additional tags
+ */
+export function applyTemplatesCacheTags(
+  category?: null | string,
+  additionalTags: string[] = []
+): void {
+  const tags: string[] = ['templates', ...additionalTags];
+  if (category) {
+    tags.push(`templates-${category}`);
+  }
+  for (const tag of tags) {
+    cacheTag(tag);
+  }
+}
+
+/**
+ * Apply contact cache tags
+ * @param additionalTags - Optional additional tags
+ */
+export function applyContactCacheTags(additionalTags: string[] = []): void {
+  const tags: string[] = ['contact', ...additionalTags];
+  for (const tag of tags) {
+    cacheTag(tag);
+  }
 }
 
 export function normalizeRpcResult<T>(result: null | T | T[] | undefined): null | T {

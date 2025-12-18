@@ -14,11 +14,11 @@ import type {
 } from '@heyclaude/data-layer/prisma';
 import { ContentCategory } from '@heyclaude/data-layer/prisma';
 import type { GetRecommendationsReturns } from '@heyclaude/database-types/postgres-types';
-import { addBookmarkBatch } from '@heyclaude/web-runtime/actions';
+import { addBookmarkBatch } from '@heyclaude/web-runtime/actions/user';
 import { getContentItemUrl, isValidCategory, sanitizeSlug } from '@heyclaude/web-runtime/core';
 import { getCategoryConfig } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks';
+import { useAuthenticatedUser, useSafeAction } from '@heyclaude/web-runtime/hooks';
 import {
   ArrowRight,
   Award,
@@ -33,7 +33,6 @@ import {
   TrendingUp,
 } from '@heyclaude/web-runtime/icons';
 import {
-  POSITION_PATTERNS,
   BookmarkButton,
   UnifiedBadge,
   BaseCard,
@@ -58,11 +57,10 @@ import {
   TooltipTrigger,
   toasts,
 } from '@heyclaude/web-runtime/ui';
-import { cluster, iconSize, between, gap, marginRight, marginTop, center, stack, paddingY, spaceY, marginX, paddingTop, marginBottom } from '@heyclaude/web-runtime/design-system';
 import Link from 'next/link';
 import { useBoolean } from '@heyclaude/web-runtime/hooks';
 import { usePathname } from 'next/navigation';
-import { useCallback, useState, useTransition } from 'react';
+import { useCallback, useState } from 'react';
 
 import { useAuthModal } from '@/src/hooks/use-auth-modal';
 import { ShareResults } from './share-results';
@@ -92,13 +90,45 @@ interface ResultsDisplayProps {
 export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProps) {
   const { value: showShareModal, setTrue: setShowShareModalTrue, setFalse: setShowShareModalFalse } = useBoolean();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [isPending, startTransition] = useTransition();
   const [minScore, setMinScore] = useState(60);
   const [maxResults, setMaxResults] = useState(10);
   const { value: showRefinePanel, setValue: setShowRefinePanel } = useBoolean();
   const { openAuthModal } = useAuthModal();
   const pathname = usePathname();
   const { user, status } = useAuthenticatedUser({ context: 'ResultsDisplay' });
+  
+  // Use useSafeAction hook - this properly infers types from next-safe-action
+  const { executeAsync: executeSaveBatch, isPending } = useSafeAction(addBookmarkBatch, {
+    onSuccess: ({ data }: { data?: { success: boolean | null; saved_count: number; total_requested: number } }) => {
+      if (data?.success) {
+        toasts.raw.success(
+          `Saved ${data.saved_count} of ${data.total_requested} recommendations to your library`,
+          {
+            description: 'View them in your library',
+            action: {
+              label: 'View Library',
+              onClick: () => {
+                globalThis.location.href = '/account/library';
+              },
+            },
+          }
+        );
+      } else {
+        toasts.error.saveFailed();
+      }
+    },
+    onError: ({ error }: { error: { serverError?: string; validationErrors?: unknown } }) => {
+      const errorMessage = error.serverError || 'Failed to save recommendations';
+      if (errorMessage.includes('signed in') || errorMessage.includes('auth') || errorMessage.includes('unauthorized')) {
+        openAuthModal({
+          valueProposition: 'Sign in to save recommendations',
+          redirectTo: pathname ?? undefined,
+        });
+      } else {
+        toasts.error.saveFailed();
+      }
+    },
+  });
 
   const { results, summary, total_matches, answers } = recommendations;
 
@@ -119,65 +149,26 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
     }
 
     // User is authenticated - proceed with save action
-    startTransition(async () => {
-      try {
-        const items = (results ?? [])
-          .filter(
-            (
-              result
-            ): result is typeof result & {
-              category: content_category;
-              slug: string;
-            } => {
-              if (!(result.category && result.slug)) return false;
-              return isValidCategory(result.category);
-            }
-          )
-          .map((result) => ({
-            content_type: result.category,
-            content_slug: result.slug,
-          }));
-
-        const response = await addBookmarkBatch({ items });
-
-        if (response?.data?.success) {
-          toasts.raw.success(
-            `Saved ${response.data.saved_count} of ${response.data.total_requested} recommendations to your library`,
-            {
-              description: 'View them in your library',
-              action: {
-                label: 'View Library',
-                onClick: () => {
-                  globalThis.location.href = '/account/library';
-                },
-              },
-            }
-          );
-        } else {
-          toasts.error.saveFailed();
+    const items = (results ?? [])
+      .filter(
+        (
+          result
+        ): result is typeof result & {
+          category: content_category;
+          slug: string;
+        } => {
+          if (!(result.category && result.slug)) return false;
+          return isValidCategory(result.category);
         }
-      } catch (error) {
-        // Check if error is auth-related and show modal if so
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        if (errorMessage.includes('signed in') || errorMessage.includes('auth') || errorMessage.includes('unauthorized')) {
-          openAuthModal({
-            valueProposition: 'Sign in to save recommendations',
-            redirectTo: pathname ?? undefined,
-          });
-        } else {
-          // Non-auth errors - show toast with retry option
-          toasts.raw.error('Failed to save recommendations', {
-            action: {
-              label: 'Retry',
-              onClick: () => {
-                handleSaveAll();
-              },
-            },
-          });
-        }
-      }
-    });
-  }, [user, status, openAuthModal, pathname, results]);
+      )
+      .map((result) => ({
+        content_type: result.category,
+        content_slug: result.slug,
+      }));
+
+    // Execute the action using useSafeAction's executeAsync
+    executeSaveBatch({ items });
+  }, [user, status, openAuthModal, pathname, results, executeSaveBatch]);
 
   const filteredResults = (results ?? [])
     .filter((r) => selectedCategory === 'all' || r.category === selectedCategory)
@@ -187,26 +178,26 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
   const categories = ['all', ...new Set((results ?? []).map((r) => r.category).filter(Boolean))];
 
   return (
-    <div className={`${spaceY.loose}`}>
-      <div className={`${spaceY.comfortable} text-center`}>
-        <div className={`${cluster.compact} justify-center`}>
-          <Sparkles className={`${iconSize.lg} text-primary`} />
+    <div className="space-y-8">
+      <div className="space-y-4 text-center">
+        <div className="flex items-center gap-2 justify-center">
+          <Sparkles className="h-6 w-6 text-primary" />
           <h1 className="text-3xl font-bold md:text-4xl">Your Personalized Recommendations</h1>
         </div>
 
-        <p className={`text-muted-foreground ${marginX.auto} max-w-2xl text-lg`}>
+        <p className="text-muted-foreground mx-auto max-w-2xl text-lg">
           Based on your preferences, we found{' '}
           <strong>{total_matches ?? 0} matching configurations</strong>. Here are the top{' '}
           {results?.length ?? 0} best fits for your needs.
         </p>
 
-        <div className={`flex-wrap items-center justify-center ${gap.compact}`}>
+        <div className="flex-wrap items-center justify-center gap-2">
           <UnifiedBadge variant="base" style="secondary" className="text-sm">
-            <TrendingUp className={`${iconSize.xs} ${marginRight.tight}`} />
+            <TrendingUp className="h-3 w-3 mr-1" />
             {(summary?.avg_match_score ?? 0).toFixed(0)}% Avg Match
           </UnifiedBadge>
           <UnifiedBadge variant="base" style="secondary" className="text-sm">
-            <BarChart className={`${iconSize.xs} ${marginRight.tight}`} />
+            <BarChart className="h-3 w-3 mr-1" />
             {(summary?.diversity_score ?? 0).toFixed(0)}% Diversity
           </UnifiedBadge>
           <UnifiedBadge variant="base" style="outline" className="text-sm">
@@ -217,29 +208,29 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
           </UnifiedBadge>
         </div>
 
-        <div className={`flex-wrap items-center justify-center ${gap.compact}`}>
+        <div className="flex-wrap items-center justify-center gap-2">
           <Button
             variant="default"
             size="sm"
             onClick={handleSaveAll}
             disabled={isPending}
-            className={`${gap.tight}`}
+            className="gap-1.5"
           >
-            <Bookmark className={iconSize.sm} />
+            <Bookmark className="h-4 w-4" />
             {isPending ? 'Saving...' : 'Save All to Library'}
           </Button>
           <Button
             variant="outline"
             size="sm"
             onClick={setShowShareModalTrue}
-            className={`${gap.tight}`}
+            className="gap-1.5"
           >
-            <Share2 className={iconSize.sm} />
+            <Share2 className="h-4 w-4" />
             Share Results
           </Button>
           <Button variant="outline" size="sm" asChild>
-            <Link href={ROUTES.TOOLS_CONFIG_RECOMMENDER} className={`${gap.tight}`}>
-              <RefreshCw className={iconSize.sm} />
+            <Link href={ROUTES.TOOLS_CONFIG_RECOMMENDER} className="gap-1.5">
+              <RefreshCw className="h-4 w-4" />
               Start Over
             </Link>
           </Button>
@@ -248,8 +239,8 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
 
       <Collapsible open={showRefinePanel} onOpenChange={setShowRefinePanel}>
         <CollapsibleTrigger asChild>
-          <Button variant="ghost" size="sm" className={`w-full ${gap.tight}`}>
-            <Settings className={iconSize.sm} />
+          <Button variant="ghost" size="sm" className="w-full gap-1.5">
+            <Settings className="h-4 w-4" />
             Adjust Preferences
             <ChevronDown
               className={`h-4 w-4 transition-transform ${showRefinePanel ? 'rotate-180' : ''}`}
@@ -257,17 +248,17 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
           </Button>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <Card className={`${marginTop.default}`}>
+          <Card className="mt-4">
             <CardHeader>
               <CardTitle className="text-lg">Refine Your Results</CardTitle>
               <CardDescription>
                 Adjust these settings to fine-tune your recommendations
               </CardDescription>
             </CardHeader>
-            <CardContent className={`${spaceY.relaxed}`}>
-              <div className={`${spaceY.compact}`}>
-                <div className={between.center}>
-                  <span className="text-sm font-medium">Minimum Match Score</span>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm-medium">Minimum Match Score</span>
                   <span className="text-muted-foreground text-sm">{minScore}%</span>
                 </div>
                 <Slider
@@ -284,9 +275,9 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                 </p>
               </div>
 
-              <div className={`${spaceY.compact}`}>
-                <div className={between.center}>
-                  <span className="text-sm font-medium">Maximum Results</span>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm-medium">Maximum Results</span>
                   <span className="text-muted-foreground text-sm">{maxResults}</span>
                 </div>
                 <Slider
@@ -303,9 +294,9 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                 </p>
               </div>
 
-              <div className={`${paddingTop.default}`}>
-                <Separator className={`${marginBottom.default}`} />
-                <div className={`${between.center} text-sm`}>
+              <div className="pt-4">
+                <Separator className="mb-4" />
+                <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Showing results:</span>
                   <span className="font-medium">
                     {filteredResults.length} of {results?.length ?? 0}
@@ -323,22 +314,22 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
           <CardDescription>We matched configurations based on these preferences</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className={`grid ${gap.compact} sm:grid-cols-2 md:grid-cols-3`}>
+          <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-3">
             <div>
-              <span className="text-sm font-medium">Use Case</span>
-              <p className={`text-muted-foreground ${marginTop.tight} text-sm capitalize`}>
+              <span className="text-sm-medium">Use Case</span>
+              <p className="text-muted-foreground text-sm mt-1 capitalize">
                 {String(answers.useCase).replace('-', ' ')}
               </p>
             </div>
             <div>
-              <span className="text-sm font-medium">Experience Level</span>
-              <p className={`text-muted-foreground ${marginTop.tight} text-sm capitalize`}>
+              <span className="text-sm-medium">Experience Level</span>
+              <p className="text-muted-foreground text-sm mt-1 capitalize">
                 {String(answers.experienceLevel)}
               </p>
             </div>
             <div>
-              <span className="text-sm font-medium">Tool Preferences</span>
-              <p className={`text-muted-foreground ${marginTop.tight} text-sm`}>
+              <span className="text-sm-medium">Tool Preferences</span>
+              <p className="text-muted-foreground text-sm mt-1">
                 {Array.isArray(answers.toolPreferences) ? answers.toolPreferences.join(', ') : ''}
               </p>
             </div>
@@ -346,8 +337,8 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
             Array.isArray(answers.p_integrations) &&
             answers.p_integrations.length > 0 ? (
               <div>
-                <span className="text-sm font-medium">Integrations</span>
-                <p className={`text-muted-foreground ${marginTop.tight} text-sm`}>
+                <span className="text-sm-medium">Integrations</span>
+                <p className="text-muted-foreground text-sm mt-1">
                   {answers.p_integrations.join(', ')}
                 </p>
               </div>
@@ -356,16 +347,16 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
             Array.isArray(answers.p_focus_areas) &&
             answers.p_focus_areas.length > 0 ? (
               <div>
-                <span className="text-sm font-medium">Focus Areas</span>
-                <p className={`text-muted-foreground ${marginTop.tight} text-sm`}>
+                <span className="text-sm-medium">Focus Areas</span>
+                <p className="text-muted-foreground text-sm mt-1">
                   {answers.p_focus_areas.join(', ')}
                 </p>
               </div>
             ) : null}
             {answers.teamSize ? (
               <div>
-                <span className="text-sm font-medium">Team Size</span>
-                <p className={`text-muted-foreground ${marginTop.tight} text-sm capitalize`}>
+                <span className="text-sm-medium">Team Size</span>
+                <p className="text-muted-foreground text-sm mt-1 capitalize">
                   {String(answers.teamSize)}
                 </p>
               </div>
@@ -395,8 +386,8 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
           })}
         </TabsList>
 
-        <TabsContent value={selectedCategory} className={`${marginTop.comfortable}`}>
-          <div className={`grid ${gap.comfortable} md:grid-cols-2 lg:grid-cols-3`}>
+        <TabsContent value={selectedCategory} className="mt-6">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {filteredResults
               .filter(
                 (
@@ -451,7 +442,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
 
                 return (
                   <div key={result.slug} className="relative">
-                    <div className={`${POSITION_PATTERNS.ABSOLUTE_TOP_RIGHT_OFFSET_XL} z-10`}>
+                    <div className="absolute top-4 right-4 z-10">
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
@@ -460,7 +451,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                               style="secondary"
                               className={`${getMatchScoreColor(matchScore)} px-3 py-1 text-base font-bold`}
                             >
-                              <Sparkles className={`${iconSize.xs} ${marginRight.tight}`} />
+                              <Sparkles className="h-3 w-3 mr-1" />
                               {matchScore}%
                             </UnifiedBadge>
                           </TooltipTrigger>
@@ -472,18 +463,18 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                     </div>
 
                     {rank !== null && rank <= 3 && (
-                      <div className={`${POSITION_PATTERNS.ABSOLUTE_TOP_LEFT_OFFSET_XL} z-10`}>
+                      <div className="absolute top-4 left-4 z-10">
                         <UnifiedBadge
                           variant="base"
                           style="outline"
                           className="bg-background/80 backdrop-blur-sm"
                         >
-                          <Award className={`${iconSize.xs} ${marginRight.tight}`} />#{rank}
+                          <Award className="h-3 w-3 mr-1" />#{rank}
                         </UnifiedBadge>
                       </div>
                     )}
 
-                    <div className={`${POSITION_PATTERNS.ABSOLUTE_BOTTOM_RIGHT_OFFSET} z-10`}>
+                    <div className="absolute bottom-4 right-4 z-10">
                       <BookmarkButton
                         contentType={result.category}
                         contentSlug={result.slug}
@@ -498,7 +489,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                     </div>
 
                     <div
-                      className={`${POSITION_PATTERNS.ABSOLUTE_INSET} bg-linear-to-br ${getMatchGradient(matchScore)} pointer-events-none opacity-50`}
+                      className={`absolute inset-0 bg-linear-to-br ${getMatchGradient(matchScore)} pointer-events-none opacity-50`}
                     />
 
                     <Link href={targetPath}>
@@ -519,19 +510,19 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                         renderContent={() => (
                           <>
                             <div
-                              className={`flex items-start ${gap.compact} bg-accent/50 mb-3 rounded-lg p-3`}
+                              className="flex items-start gap-2 bg-accent/50 mb-3 rounded-lg p-3"
                             >
                               <Info
-                                className={`text-primary h-4 w-4 flex-shrink-0 ${marginTop.micro}`}
+                                className="text-primary h-4 w-4 flex-shrink-0 mt-0.5"
                               />
                               <div>
-                                <p className="text-sm font-medium">Why recommended:</p>
+                                <p className="text-sm-medium">Why recommended:</p>
                                 <p className="text-muted-foreground text-sm">{primaryReason}</p>
                               </div>
                             </div>
 
                             {reasons.length > 1 && (
-                              <div className={`flex flex-wrap ${gap.micro}`}>
+                              <div className="flex flex-wrap gap-0.5">
                                 {reasons.slice(1, 4).map((reason) => (
                                   <UnifiedBadge
                                     key={`${result.slug}-${reason.message}`}
@@ -550,13 +541,13 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                           <Button
                             variant="ghost"
                             size="sm"
-                            className={`group -${marginX.default} ${marginTop.compact} -${marginBottom.default} w-full`}
+                            className="group -mx-4 mt-2 -mb-4 w-full"
                             asChild
                           >
-                            <span className={`${cluster.compact} justify-center`}>
+                            <span className="flex items-center gap-2 justify-center">
                               View Details
                               <ArrowRight
-                                className={`${iconSize.sm} transition-transform group-hover:translate-x-1`}
+                                className="h-4 w-4 transition-transform group-hover:translate-x-1"
                               />
                             </span>
                           </Button>
@@ -571,7 +562,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
 
           {filteredResults.length === 0 && (
             <Card>
-              <CardContent className={`${stack.none} ${center} ${paddingY.section}`}>
+              <CardContent className="flex flex-col items-center justify-center py-12">
                 <p className="text-muted-foreground">No results in this category</p>
               </CardContent>
             </Card>
@@ -581,21 +572,21 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
 
       <Card className="border-primary/20 bg-primary/5">
         <CardHeader>
-          <CardTitle className={cluster.compact}>
-            <Sparkles className={`${iconSize.md} text-primary`} />
+          <CardTitle className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-primary" />
             What's Next?
           </CardTitle>
         </CardHeader>
-        <CardContent className={`${spaceY.comfortable}`}>
+        <CardContent className="space-y-4">
           <p className="text-muted-foreground text-sm">
             Ready to start using these configurations? Click any card to view detailed setup
             instructions, examples, and documentation.
           </p>
-          <div className={`flex flex-wrap ${gap.default}`}>
+          <div className="flex flex-wrap gap-3">
             <Button asChild>
-              <Link href="/" className={`${gap.tight}`}>
+              <Link href="/" className="gap-1.5">
                 Browse All Configs
-                <ArrowRight className={iconSize.sm} />
+                <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
             <Button variant="outline" asChild>

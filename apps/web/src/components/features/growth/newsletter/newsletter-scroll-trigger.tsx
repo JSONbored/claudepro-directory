@@ -9,7 +9,7 @@ import type { newsletter_source } from '@heyclaude/data-layer/prisma';
 import { getNewsletterConfigValue } from '@heyclaude/web-runtime/config/static-configs';
 import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
 import { ensureNumber } from '@heyclaude/web-runtime/data/utils';
-import { SPRING, marginY } from '@heyclaude/web-runtime/design-system';
+import { SPRING } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { useLoggedAsync, useBoolean, useSessionStorage } from '@heyclaude/web-runtime/hooks';
 import { motion, useScroll } from 'motion/react';
@@ -123,7 +123,7 @@ export function NewsletterScrollTrigger({
       initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
       animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
       transition={SPRING.smooth}
-      className={`${marginY.default}`}
+      className="my-4"
     >
       <NewsletterCTAVariant variant="inline" source={source} {...(category ? { category } : {})} />
     </motion.div>

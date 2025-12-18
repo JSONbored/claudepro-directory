@@ -19,8 +19,8 @@ import { normalizeError, getFormDataString, getFormDataStringRequired, getFormDa
 import {
   createCompany,
   updateCompany,
-  uploadCompanyLogoAction,
-} from '@heyclaude/web-runtime/actions';
+} from '@heyclaude/web-runtime/actions/companies-crud';
+import { uploadCompanyLogoAction } from '@heyclaude/web-runtime/actions/companies';
 import { FORM_CONFIG } from '@heyclaude/web-runtime/config/unified-config';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { useAuthenticatedUser, useFormSubmit, useLoggedAsync, useSafeAction } from '@heyclaude/web-runtime/hooks';
@@ -37,7 +37,6 @@ import {
   CardTitle,
   SelectItem,
 } from '@heyclaude/web-runtime/ui';
-import { stack, size, muted, spaceY, marginLeft, gap, marginRight, padding, paddingX, paddingY } from '@heyclaude/web-runtime/design-system';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useId, useState } from 'react';
@@ -369,13 +368,13 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
   }, [user, status, openAuthModal, pathname, mode, handleSubmit, logoUrl, useCursorDate, initialData?.id]);
 
   return (
-    <form onSubmit={onSubmit} className={`${spaceY.relaxed}`}>
+    <form onSubmit={onSubmit} className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle>Company Information</CardTitle>
           <CardDescription>Basic details about your company</CardDescription>
         </CardHeader>
-        <CardContent className={`${spaceY.comfortable}`}>
+        <CardContent className="space-y-4">
           <FormField
             variant="input"
             label="Company Name"
@@ -395,17 +394,17 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
             description="Your company's website URL"
           />
 
-          <div className={`${spaceY.compact}`}>
-            <label htmlFor={logoUploadId} className="text-sm font-medium">
+          <div className="space-y-2">
+            <label htmlFor={logoUploadId} className="text-sm-medium">
               Company Logo
-              <span className={`text-muted-foreground ${marginLeft.micro} text-xs font-normal`}>
+              <span className="text-muted-foreground ml-0.5 text-xs font-normal">
                 (max 200KB, 512x512px, WebP/PNG/JPG)
               </span>
             </label>
 
             {logoPreview ? (
-              <div className={`flex items-start ${gap.default}`}>
-                <div className="relative h-24 w-24 overflow-hidden rounded-lg border">
+              <div className="flex items-start gap-3">
+                <div className="relative h-24 w-24 overflow-hidden card-base">
                   <Image
                     src={logoPreview}
                     alt="Company logo preview"
@@ -413,7 +412,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
                     className="object-cover"
                   />
                 </div>
-                <div className={`flex flex-col ${gap.tight}`}>
+                <div className="flex flex-col gap-1">
                   <Button
                     type="button"
                     variant="outline"
@@ -424,7 +423,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
                     }}
                     disabled={isUploadingLogo}
                   >
-                    <X className={`${marginRight.micro} h-3 w-3`} />
+                    <X className="mr-0.5 h-3 w-3" />
                     Remove Logo
                   </Button>
                   <label htmlFor={logoUploadId}>
@@ -435,21 +434,21 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
                       disabled={isUploadingLogo}
                       onClick={() => document.getElementById(logoUploadId)?.click()}
                     >
-                      <FileText className={`${marginRight.micro} h-3 w-3`} />
+                      <FileText className="mr-0.5 h-3 w-3" />
                       Change Logo
                     </Button>
                   </label>
                 </div>
               </div>
             ) : (
-              <label htmlFor={logoUploadId} className={`border-border bg-muted/50 hover:bg-muted/80 flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed ${padding.relaxed} transition-colors`}>
-                <div className={`${stack.compact} items-center text-center`}>
+              <label htmlFor={logoUploadId} className="border-border bg-muted/50 hover:bg-muted/80 flex cursor-pointer flex-col items-center justify-center card-base border-2 border-dashed p-8 transition-colors">
+                <div className="flex flex-col gap-2 items-center text-center">
                   <FileText className="text-muted-foreground h-8 w-8" />
                   <div>
-                    <p className="text-sm font-medium">
+                    <p className="text-sm-medium">
                       {isUploadingLogo ? 'Uploading...' : 'Click to upload logo'}
                     </p>
-                    <p className={`${size.sm} ${muted.default}`}>Max 200KB, 512x512px</p>
+                    <p className="text-muted-foreground text-sm">Max 200KB, 512x512px</p>
                   </div>
                 </div>
               </label>
@@ -521,7 +520,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
           <CardTitle>Company Details</CardTitle>
           <CardDescription>Additional information about your organization</CardDescription>
         </CardHeader>
-        <CardContent className={`${spaceY.comfortable}`}>
+        <CardContent className="space-y-4">
           <FormField
             variant="select"
             label="Company Size"
@@ -546,8 +545,8 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
             description="Maximum 100 characters"
           />
 
-          <div className={`${spaceY.compact}`}>
-            <label className={`flex items-center ${gap.tight} text-sm font-medium`}>
+          <div className="space-y-2">
+            <label className="flex items-center gap-1 text-sm-medium">
               <input
                 type="checkbox"
                 checked={useCursorDate}
@@ -561,14 +560,14 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
                 type="date"
                 name="using_cursor_since"
                 defaultValue={initialData?.using_cursor_since || ''}
-                className={`border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border ${paddingX.compact} ${paddingY.tight} text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50`}
+                className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-1 text-sm ring-offset-background placeholder:text-muted-foreground file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               />
             ) : null}
           </div>
         </CardContent>
       </Card>
 
-      <div className={`flex ${gap.default}`}>
+      <div className="flex gap-3">
         <Button type="submit" disabled={isPending}>
           {isPending ? 'Saving...' : mode === 'create' ? 'Create Company' : 'Save Changes'}
         </Button>

@@ -14,8 +14,6 @@
 
 import { SPRING } from '../../design-system/index.ts';
 import { X } from '../../icons.tsx';
-import { POSITION_PATTERNS } from '../constants.ts';
-import { iconSize, stack, spaceY } from '../../design-system/index.ts';
 import { cn } from '../utils.ts';
 import { useScrollLock } from '../../hooks/use-scroll-lock.ts';
 import * as SheetPrimitive from '@radix-ui/react-dialog';
@@ -41,7 +39,7 @@ const SheetOverlay = ({
 }) => (
   <SheetPrimitive.Overlay
     className={cn(
-      `data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 ${POSITION_PATTERNS.FIXED_INSET} z-[60]`,
+      'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-[60]',
               // Vercel's minimal backdrop
               'bg-black/50 backdrop-blur-sm', // Subtle blur
       'will-change-opacity',
@@ -220,9 +218,9 @@ const SheetContent = ({
           {children}
           <SheetPrimitive.Close
             data-radix-sheet-close={true}
-            className={`${POSITION_PATTERNS.ABSOLUTE_TOP_RIGHT_OFFSET_XL} rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary`}
+            className="absolute top-4 right-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary"
           >
-            <X className={iconSize.sm} />
+            <X className="h-4 w-4" />
             <span className="sr-only">Close</span>
           </SheetPrimitive.Close>
         </motion.div>
@@ -234,7 +232,7 @@ SheetContent.displayName = SheetPrimitive.Content.displayName;
 
 const SheetHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={cn(`${stack.none} ${spaceY.compact}`, 'text-center sm:text-left', className)}
+    className={cn('flex flex-col space-y-2 text-center sm:text-left', className)}
     {...props}
   />
 );

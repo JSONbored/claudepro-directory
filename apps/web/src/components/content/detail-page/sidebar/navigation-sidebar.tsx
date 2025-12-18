@@ -28,7 +28,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
-import { iconSize, marginRight, cluster, size, muted, between, spaceY, marginBottom, gap, marginLeft } from '@heyclaude/web-runtime/design-system';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { memo } from 'react';
@@ -237,18 +236,18 @@ export const DetailSidebar = memo(function DetailSidebar({
     : [];
 
   if (customRenderer) {
-    return <div className={`${spaceY.relaxed}`}>{customRenderer(item, relatedItems, router)}</div>;
+    return <div className="space-y-6">{customRenderer(item, relatedItems, router)}</div>;
   }
 
   return (
-    <div className={`${spaceY.relaxed}`}>
+    <div className="space-y-6">
       {/* Resources Card */}
       {!!(showGitHubLink || hasDocumentationUrl) && (
         <Card>
           <CardHeader>
             <CardTitle>Resources</CardTitle>
           </CardHeader>
-          <CardContent className={`${spaceY.default}`}>
+          <CardContent className="space-y-3">
             {showGitHubLink && githubUrl ? (
               <Button
                 variant="outline"
@@ -278,7 +277,7 @@ export const DetailSidebar = memo(function DetailSidebar({
                 asChild
               >
                 <a href={githubUrl} target="_blank" rel="noopener noreferrer">
-                  <Github className={`${iconSize.sm} ${marginRight.compact}`} />
+                  <Github className="h-4 w-4 mr-2" />
                   View on GitHub
                 </a>
               </Button>
@@ -338,7 +337,7 @@ export const DetailSidebar = memo(function DetailSidebar({
                       asChild
                     >
                       <a href={safeDocUrl} target="_blank" rel="noopener noreferrer">
-                        <ExternalLink className={`${iconSize.sm} ${marginRight.compact}`} />
+                        <ExternalLink className="h-4 w-4 mr-2" />
                         Documentation
                       </a>
                     </Button>
@@ -355,26 +354,26 @@ export const DetailSidebar = memo(function DetailSidebar({
           <CardHeader>
             <CardTitle>{`${config.typeName} Details`}</CardTitle>
           </CardHeader>
-          <CardContent className={`${spaceY.comfortable}`}>
+          <CardContent className="space-y-4">
             {itemCategory ? (
               <div>
-                <h4 className={`${marginBottom.tight} font-medium`}>Category</h4>
+                <h4 className="mb-1 font-medium">Category</h4>
                 <UnifiedBadge
                   variant="base"
                   style="default"
-                  className={`text-xs font-medium ${
-                    itemCategory === 'agents' ? 'bg-color-badge-category-agents-bg text-color-badge-category-agents-text border-color-badge-category-agents-border' :
-                    itemCategory === 'mcp' ? 'bg-color-badge-category-mcp-bg text-color-badge-category-mcp-text border-color-badge-category-mcp-border' :
-                    itemCategory === 'commands' ? 'bg-color-badge-category-commands-bg text-color-badge-category-commands-text border-color-badge-category-commands-border' :
-                    itemCategory === 'rules' ? 'bg-color-badge-category-rules-bg text-color-badge-category-rules-text border-color-badge-category-rules-border' :
-                    itemCategory === 'hooks' ? 'bg-color-badge-category-hooks-bg text-color-badge-category-hooks-text border-color-badge-category-hooks-border' :
-                    itemCategory === 'statuslines' ? 'bg-color-badge-category-statuslines-bg text-color-badge-category-statuslines-text border-color-badge-category-statuslines-border' :
-                    itemCategory === 'collections' ? 'bg-color-badge-category-collections-bg text-color-badge-category-collections-text border-color-badge-category-collections-border' :
-                    itemCategory === 'skills' ? 'bg-color-badge-category-skills-bg text-color-badge-category-skills-text border-color-badge-category-skills-border' :
-                    itemCategory === 'guides' ? 'bg-color-badge-category-guides-bg text-color-badge-category-guides-text border-color-badge-category-guides-border' :
-                    itemCategory === 'jobs' ? 'bg-color-badge-category-jobs-bg text-color-badge-category-jobs-text border-color-badge-category-jobs-border' :
-                    itemCategory === 'changelog' ? 'bg-color-badge-category-changelog-bg text-color-badge-category-changelog-text border-color-badge-category-changelog-border' :
-                    'bg-color-badge-category-default-bg text-color-badge-category-default-text border-color-badge-category-default-border'
+                  className={`text-xs-medium ${
+                    itemCategory === 'agents' ? 'bg-transparent text-category-agents border-category-agents-border font-semibold' :
+                    itemCategory === 'mcp' ? 'bg-transparent text-category-mcp border-category-mcp-border font-semibold' :
+                    itemCategory === 'commands' ? 'bg-transparent text-category-commands border-category-commands-border font-semibold' :
+                    itemCategory === 'rules' ? 'bg-transparent text-category-rules border-category-rules-border font-semibold' :
+                    itemCategory === 'hooks' ? 'bg-transparent text-category-hooks border-category-hooks-border font-semibold' :
+                    itemCategory === 'statuslines' ? 'bg-transparent text-category-statuslines border-category-statuslines-border font-semibold' :
+                    itemCategory === 'collections' ? 'bg-transparent text-category-collections border-category-collections-border font-semibold' :
+                    itemCategory === 'skills' ? 'bg-transparent text-category-skills border-category-skills-border font-semibold' :
+                    itemCategory === 'guides' ? 'bg-transparent text-category-guides border-category-guides-border font-semibold' :
+                    itemCategory === 'jobs' ? 'bg-muted/20 text-muted border-muted/30' :
+                    itemCategory === 'changelog' ? 'bg-muted/20 text-muted border-muted/30' :
+                    'bg-muted/20 text-muted border-muted/30'
                   }`}
                 >
                   {config.typeName}
@@ -398,13 +397,13 @@ export const DetailSidebar = memo(function DetailSidebar({
               }
               return (
                 <div>
-                  <h4 className={`${marginBottom.tight} font-medium`}>Temperature</h4>
-                  <div className={cluster.compact}>
-                    <Thermometer className={`${iconSize.xs} text-orange-500`} />
+                  <h4 className="mb-1 font-medium">Temperature</h4>
+                  <div className="flex items-center gap-2">
+                    <Thermometer className="h-3 w-3 text-orange-500" />
                     <UnifiedBadge
                       variant="base"
                       style="outline"
-                      className="border-orange-500/30 bg-orange-500/10 text-xs font-medium text-orange-600"
+                      className="border-orange-500/30 bg-orange-500/10 text-xs-medium text-orange-600"
                     >
                       {String(temperature)}
                     </UnifiedBadge>
@@ -415,7 +414,7 @@ export const DetailSidebar = memo(function DetailSidebar({
 
             {hasPackage && packageName ? (
               <div>
-                <h4 className={`${marginBottom.tight} font-medium`}>Package</h4>
+                <h4 className="mb-1 font-medium">Package</h4>
                 <UnifiedBadge variant="base" style="outline" className="font-mono text-xs">
                   {packageName}
                 </UnifiedBadge>
@@ -424,8 +423,8 @@ export const DetailSidebar = memo(function DetailSidebar({
 
             {hasAuth ? (
               <div>
-                <h4 className={`${marginBottom.tight} font-medium`}>Authentication</h4>
-                <p className={`${size.sm} ${muted.default}`}>
+                <h4 className="mb-1 font-medium">Authentication</h4>
+                <p className="text-muted-foreground text-sm">
                   {typeof metadata['requiresAuth'] === 'boolean' && metadata['requiresAuth']
                     ? 'Required'
                     : 'Not required'}
@@ -435,8 +434,8 @@ export const DetailSidebar = memo(function DetailSidebar({
 
             {hasPermissions && permissions.length > 0 ? (
               <div>
-                <h4 className={`${marginBottom.tight} font-medium`}>Permissions</h4>
-                <div className={`flex flex-wrap ${gap.micro}`}>
+                <h4 className="mb-1 font-medium">Permissions</h4>
+                <div className="flex flex-wrap gap-0.5">
                   {permissions.map((perm) => (
                     <UnifiedBadge key={perm} variant="base" style="outline" className="text-xs">
                       {perm}
@@ -448,7 +447,7 @@ export const DetailSidebar = memo(function DetailSidebar({
 
             {hasSource && 'source' in item && typeof item.source === 'string' && item.source ? (
               <div>
-                <h4 className={`${marginBottom.tight} font-medium`}>Source</h4>
+                <h4 className="mb-1 font-medium">Source</h4>
                 <UnifiedBadge variant="base" style="outline">
                   {item.source}
                 </UnifiedBadge>
@@ -463,17 +462,17 @@ export const DetailSidebar = memo(function DetailSidebar({
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
-          <CardContent className={`${spaceY.compact}`}>
+          <CardContent className="space-y-2">
             {quickActions.map((action) => (
               <Button
                 key={action.key}
                 variant="secondary"
-                className={`w-full justify-start ${gap.compact} text-left`}
+                className="w-full justify-start gap-2 text-left"
                 onClick={action.onClick}
               >
-                <Copy className={`${iconSize.sm} ${marginRight.compact}`} />
+                <Copy className="h-4 w-4 mr-2" />
                 <div className="text-left">
-                  <div className="text-sm font-medium">{action.label}</div>
+                  <div className="text-sm-medium">{action.label}</div>
                   {action.description ? (
                     <p className="text-muted-foreground text-xs">{action.description}</p>
                   ) : null}
@@ -490,7 +489,7 @@ export const DetailSidebar = memo(function DetailSidebar({
           <CardHeader>
             <CardTitle>{`Related ${config.typeName}s`}</CardTitle>
           </CardHeader>
-          <CardContent className={`${spaceY.default}`}>
+          <CardContent className="space-y-3">
             {relatedItems.slice(0, 5).map((relatedItem) => {
               const relatedCategory =
                 'category' in relatedItem &&
@@ -525,10 +524,10 @@ export const DetailSidebar = memo(function DetailSidebar({
                 <Link
                   key={relatedSlug}
                   href={safeRelatedUrl}
-                  className={`${between.center} border-border hover:bg-muted/50 block w-full cursor-pointer rounded-lg border p-3 text-left transition-colors`}
+                  className="flex items-center justify-between border-border hover:bg-muted/50 block w-full cursor-pointer card-base p-3 text-left transition-colors"
                 >
                   <div className="min-w-0 flex-1">
-                    <h4 className="truncate text-sm font-medium">
+                    <h4 className="truncate text-sm-medium">
                       {getDisplayTitle({
                         title:
                           'title' in relatedItem && typeof relatedItem.title === 'string'
@@ -544,7 +543,7 @@ export const DetailSidebar = memo(function DetailSidebar({
                         : ''}
                     </p>
                   </div>
-                  <ExternalLink className={`text-muted-foreground ${marginLeft.tight} h-4 w-4 shrink-0`} />
+                  <ExternalLink className="text-muted-foreground ml-1 h-4 w-4 shrink-0" />
                 </Link>
               );
             })}

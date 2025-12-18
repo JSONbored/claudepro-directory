@@ -14,8 +14,9 @@
 
 import 'server-only';
 
+import { NextRequest } from 'next/server';
 import { routeFluxRequest } from '@heyclaude/web-runtime/flux';
-import { createApiOptionsHandler, createApiRoute } from '@heyclaude/web-runtime/server';
+import { createApiOptionsHandler, createApiRoute, getVersionedRoute } from '@heyclaude/web-runtime/server';
 
 interface RouteContext {
   params: Promise<{
@@ -23,37 +24,32 @@ interface RouteContext {
   }>;
 }
 
+// Shared Flux handler (GET and POST follow same pattern)
+async function handleFluxRequest(
+  method: 'GET' | 'POST',
+  logger: ReturnType<typeof import('@heyclaude/web-runtime/logging/server').logger.child>,
+  nextContext: unknown,
+  request: NextRequest
+) {
+  const context = nextContext as RouteContext;
+  if (!context?.params) {
+    logger.error({}, 'Missing route context for Flux handler');
+    throw new Error('Missing route context');
+  }
+  const params = await context.params;
+  logger.debug({ method, path: params.path }, `Flux ${method} request`);
+  return await routeFluxRequest(method, params.path, request);
+}
+
 /**
  * GET /api/flux/[...path] - Flux catch-all GET handler
  *
  * Routes GET requests to appropriate Flux handlers based on path segments.
- *
- * @example
- * ```ts
- * // Request - Newsletter subscriber count
- * GET /api/flux/email/count
- *
- * // Response (200)
- * { count: 1234 }
- * ```
  */
 export const GET = createApiRoute({
   cors: 'anon',
-  handler: async ({ logger, nextContext, request }) => {
-    // Extract path from Next.js route context
-    const context = nextContext as RouteContext;
-    if (!context?.params) {
-      logger.error({}, 'Missing route context for Flux handler');
-      throw new Error('Missing route context');
-    }
-
-    const params = await context.params;
-
-    logger.debug({ path: params.path }, 'Flux GET request');
-
-    // Delegate to Flux router
-    return await routeFluxRequest('GET', params.path, request);
-  },
+  handler: async ({ logger, nextContext, request }) =>
+    handleFluxRequest('GET', logger, nextContext, request),
   method: 'GET',
   openapi: {
     description:
@@ -71,41 +67,18 @@ export const GET = createApiRoute({
     tags: ['flux', 'internal'],
   },
   operation: 'FluxAPI',
-  route: '/api/flux/[...path]',
+  route: getVersionedRoute('flux/[...path]'),
 });
 
 /**
  * POST /api/flux/[...path] - Flux catch-all POST handler
  *
  * Routes POST requests to appropriate Flux handlers based on path segments.
- *
- * @example
- * ```ts
- * // Request - Send Discord notification
- * POST /api/flux/discord/direct
- * Body: { message: "..." }
- *
- * // Response (200)
- * { success: true }
- * ```
  */
 export const POST = createApiRoute({
   cors: 'anon',
-  handler: async ({ logger, nextContext, request }) => {
-    // Extract path from Next.js route context
-    const context = nextContext as RouteContext;
-    if (!context?.params) {
-      logger.error({}, 'Missing route context for Flux handler');
-      throw new Error('Missing route context');
-    }
-
-    const params = await context.params;
-
-    logger.debug({ path: params.path }, 'Flux POST request');
-
-    // Delegate to Flux router
-    return await routeFluxRequest('POST', params.path, request);
-  },
+  handler: async ({ logger, nextContext, request }) =>
+    handleFluxRequest('POST', logger, nextContext, request),
   method: 'POST',
   openapi: {
     description:
@@ -123,7 +96,7 @@ export const POST = createApiRoute({
     tags: ['flux', 'internal'],
   },
   operation: 'FluxAPI',
-  route: '/api/flux/[...path]',
+  route: getVersionedRoute('flux/[...path]'),
 });
 
 /**

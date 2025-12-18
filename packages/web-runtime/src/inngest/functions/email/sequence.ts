@@ -5,13 +5,13 @@
  * Runs on a cron schedule (every 6 hours).
  */
 
-import { EmailService } from '@heyclaude/data-layer';
 import { normalizeError } from '@heyclaude/shared-runtime';
 
 import { inngest } from '../../client';
 import { sendEmail } from '../../../integrations/resend';
 import { ONBOARDING_FROM } from '../../../email/config/email-config';
 import { logger, createWebAppContextWithId } from '../../../logging/server';
+import { getService } from '../../../data/service-factory';
 import { sendCronSuccessHeartbeat } from '../../utils/monitoring';
 
 // Type for sequence email - simplified based on RPC return
@@ -45,7 +45,7 @@ export const processEmailSequence = inngest.createFunction(
 
     // Step 1: Fetch due sequence emails
     const dueEmails = await step.run('fetch-due-emails', async (): Promise<SequenceEmailItem[]> => {
-      const service = new EmailService();
+      const service = await getService('misc'); // Consolidated: EmailService methods moved to MiscService
 
       try {
         const data = await service.getDueSequenceEmails();
@@ -150,7 +150,7 @@ async function processSequenceEmail(
 ): Promise<void> {
   const { email, step, id: sequenceEmailId } = emailItem;
 
-  const service = new EmailService();
+  const service = await getService('misc'); // Consolidated: EmailService methods moved to MiscService
 
   // IDEMPOTENCY: First, atomically claim this email by updating the step
   // This prevents duplicate sends if the function retries after sending but before updating

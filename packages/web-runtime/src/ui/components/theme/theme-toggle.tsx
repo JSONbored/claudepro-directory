@@ -36,7 +36,6 @@ import { useAnimate, useReducedMotion } from 'motion/react';
 import { SPRING } from '../../../design-system/index.ts';
 import { useTernaryDarkMode } from '../../../hooks/use-ternary-dark-mode.ts';
 import { Moon, Sun } from '../../../icons.tsx';
-import { cluster, iconSize } from '../../../design-system/index.ts';
 import { ThemeToggleLayout } from './theme-toggle-layout.tsx';
 
 /**
@@ -183,8 +182,8 @@ export function ThemeToggle() {
     : `Switch to ${ternaryDarkMode === 'light' ? 'dark' : 'light'} mode`;
 
   return (
-    <div ref={containerRef} className={cluster.compact}>
-      <Sun className={`${iconSize.sm} text-muted-foreground`} aria-hidden="true" />
+    <div ref={containerRef} className="flex items-center gap-2">
+      <Sun className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
       <ThemeToggleLayout
         checked={toggleChecked}
         onCheckedChange={(_checked, event) => {
@@ -193,7 +192,7 @@ export function ThemeToggle() {
         }}
         aria-label={ariaLabel}
       />
-      <Moon className={`${iconSize.sm} text-muted-foreground`} aria-hidden="true" />
+      <Moon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
     </div>
   );
 }

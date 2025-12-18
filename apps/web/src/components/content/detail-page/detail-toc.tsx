@@ -3,11 +3,10 @@
 import { ListTree } from '@heyclaude/web-runtime/icons';
 import { type ContentHeadingMetadata } from '@heyclaude/web-runtime/types/component.types';
 import { useIsClient, useMultipleIntersectionObserver, useReducedMotion } from '@heyclaude/web-runtime/hooks';
-import { cn, STATE_PATTERNS } from '@heyclaude/web-runtime/ui';
+import { cn } from '@heyclaude/web-runtime/ui';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { normalizeHeadings, type NormalizedHeading } from './utils/normalize-headings';
-import { gap, marginTop, spaceY, size, weight, tracking, truncate, iconSize, iconSizeRect, between, muted, paddingX, paddingY } from "@heyclaude/web-runtime/design-system";
 
 interface DetailTocProps {
   className?: string;
@@ -159,17 +158,17 @@ export function DetailToc({ headings, className }: DetailTocProps) {
       )}
       aria-label="On this page"
     >
-      <div className={cn(between.center, gap.compact)}>
-        <div className={`flex items-center ${gap.tight}`}>
-          <ListTree className={cn(muted.default, iconSize.sm)} aria-hidden="true" />
-          <p className={cn(muted.default, size.xs, weight.semibold, tracking.wide, 'uppercase')}>
+      <div className={cn('flex items-center justify-between', 'gap-2')}>
+        <div className="flex items-center gap-1.5">
+          <ListTree className={cn('text-muted-foreground', 'h-4 w-4')} aria-hidden="true" />
+          <p className={cn('text-muted-foreground', 'text-xs', 'font-semibold', 'tracking-wide', 'uppercase')}>
             On this page
           </p>
         </div>
-        <span className={cn(muted.default, size.xs)}>{normalizedHeadings.length}</span>
+        <span className={cn('text-muted-foreground', 'text-xs')}>{normalizedHeadings.length}</span>
       </div>
 
-      <ul className={cn(marginTop.default, spaceY['1.5'])}>
+      <ul className={cn('mt-4', 'space-y-1.5')}>
         {normalizedHeadings.map((heading) => {
           const depthOffset = Math.max(heading.level - baseLevel, 0);
 
@@ -179,8 +178,8 @@ export function DetailToc({ headings, className }: DetailTocProps) {
                 type="button"
                 onClick={() => handleHeadingClick(heading)}
                 className={cn(
-                  STATE_PATTERNS.FOCUS_RING,
-                  'w-full rounded-md', paddingX.compact, paddingY['1.5'], 'text-left text-sm transition-colors',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                  'w-full rounded-md', 'px-3', 'py-1.5', 'text-left text-sm transition-colors',
                   activeId === heading.id
                     ? 'bg-accent/15 text-foreground'
                     : 'text-muted-foreground hover:bg-accent/10 hover:text-foreground'
@@ -190,14 +189,14 @@ export function DetailToc({ headings, className }: DetailTocProps) {
                 }}
                 aria-current={activeId === heading.id ? 'true' : undefined}
               >
-                <span className={`flex items-center ${gap.tight}`}>
+                <span className="flex items-center gap-1.5">
                   <span
                     className={cn(
-                      cn(iconSizeRect['1.5x1.5'], 'rounded-full'),
+                      'h-6 w-6', 'rounded-full',
                       activeId === heading.id ? 'bg-primary' : 'bg-muted-foreground/50'
                     )}
                   />
-                  <span className={`${truncate.single}`}>{heading.title}</span>
+                  <span className="truncate">{heading.title}</span>
                 </span>
               </button>
             </li>

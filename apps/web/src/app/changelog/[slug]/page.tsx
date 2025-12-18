@@ -11,7 +11,7 @@
  * - View tracking integration
  *
  * Performance:
- * - cacheLife('static'): 5min stale, 1day revalidate, 1week expire
+ * - cacheLife('long'): 1 day stale, 6hr revalidate, 30 days expire
  * - Database-cached entry loading
  * - Static params generation for recent entries only
  *
@@ -21,22 +21,12 @@
  * - Accessibility support
  * - Responsive design
  */
-import type { content_category } from '@heyclaude/data-layer/prisma';
-import {
-  generatePageMetadata,
-  getAllChangelogEntries,
-  getChangelogEntryBySlug,
-} from '@heyclaude/web-runtime/data';
+import { type content_category } from '@heyclaude/data-layer/prisma';
+import { generatePageMetadata, getChangelogEntryBySlug } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft, Calendar } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
-import {
-  ANIMATION_CONSTANTS,
-  Breadcrumbs,
-  NavLink,
-  Separator,
-} from '@heyclaude/web-runtime/ui';
-import { spaceY, paddingY, size, muted, cluster, iconSize, marginBottom, marginY, weight, tracking, leading } from '@heyclaude/web-runtime/design-system';
+import { Breadcrumbs, NavLink, Separator } from '@heyclaude/web-runtime/ui';
 import { formatChangelogDate, getChangelogUrl } from '@heyclaude/web-runtime/utils/changelog';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
@@ -58,7 +48,7 @@ import ChangelogEntryLoading from './loading';
  *
  * @returns An array of param objects `{ slug: string }` used by Next.js to statically generate routes, or an empty array when no entries are available or an error occurs.
  *
- * @see getAllChangelogEntries
+ * @see getPublishedChangelogSlugs
  * @see STATIC_GENERATION_LIMITS
  */
 export async function generateStaticParams() {
@@ -73,15 +63,28 @@ export async function generateStaticParams() {
   });
 
   try {
-    const entries = await getAllChangelogEntries();
-
-    // Only pre-render the most recent entries to optimize build time
+    // OPTIMIZATION: Use Prisma directly to get only slugs needed for static generation
+    // This avoids unnecessary RPC function calls and data processing
+    const { getPublishedChangelogSlugs } = await import('@heyclaude/web-runtime/data');
     const limit = Math.max(0, STATIC_GENERATION_LIMITS.changelog);
-    // Return empty array if no entries found - Suspense boundaries will handle dynamic rendering
-    // This follows Next.js best practices by avoiding placeholder patterns
-    return entries.slice(0, limit).map((entry) => ({
-      slug: entry.slug,
-    }));
+    const slugs = await getPublishedChangelogSlugs(limit);
+    const params = (slugs ?? []).map((slug) => ({ slug }));
+
+    // Cache Components requires at least one result for build-time validation
+    // If no entries found, return a placeholder that will be handled gracefully by the page component
+    if (params.length === 0) {
+      reqLogger.warn(
+        {
+          section: 'data-fetch',
+        },
+        'ChangelogEntryPage: No entries found in generateStaticParams, returning placeholder'
+      );
+      // Return placeholder slug (valid format: lowercase, numbers, single hyphens)
+      // Page component will handle 404 gracefully for placeholder slug
+      return [{ slug: 'placeholder' }];
+    }
+
+    return params;
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to generate changelog static params');
     reqLogger.error(
@@ -91,8 +94,9 @@ export async function generateStaticParams() {
       },
       'ChangelogEntryPage: generateStaticParams threw'
     );
-    // Return empty array on error - Suspense boundaries will handle dynamic rendering
-    return [];
+    // Cache Components requires at least one result - return placeholder on error
+    // Page component will handle 404 gracefully for placeholder slug
+    return [{ slug: 'placeholder' }];
   }
 }
 
@@ -164,7 +168,7 @@ export default async function ChangelogEntryPage({
   params: Promise<{ slug: string }>;
 }) {
   'use cache';
-  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
+  cacheLife('long'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
   // Create request-scoped child logger
   const reqLogger = logger.child({
@@ -242,36 +246,28 @@ async function ChangelogEntryPageContent({
       <ReadProgress />
 
       {/* View Tracker - Track page views */}
-      <Pulse
-        category={'changelog' as content_category}
-        slug={entry.slug}
-        variant="view"
-      />
+      <Pulse category={'changelog' as content_category} slug={entry.slug} variant="view" />
 
       {/* Structured Data - Pre-generated schemas from database */}
       <StructuredData route={`/changelog/${entry.slug}`} />
 
-      <article
-        className={`container max-w-6xl ${spaceY.relaxed} ${paddingY.relaxed}`}
-      >
+      <article className="container max-w-6xl space-y-6 py-8">
         {/* Breadcrumbs */}
         <Breadcrumbs categoryLabel="Changelog" currentTitle={entry.title} />
 
         {/* Navigation */}
         <NavLink
-          className={`${size.xs} ${muted.default} ${cluster.compact} ${size.sm} ${leading.normal}`}
+          className="text-muted-foreground flex items-center gap-2 text-sm text-xs leading-normal"
           href={ROUTES.CHANGELOG}
         >
-          <ArrowLeft className={iconSize.sm} />
+          <ArrowLeft className="h-4 w-4" />
           <span>Back to Changelog</span>
         </NavLink>
 
         {/* Header */}
-        <header className={`${spaceY.comfortable} ${marginBottom.comfortable}`}>
-          <div
-            className={`${cluster.default} ${size.xs} ${muted.default} ${size.sm} ${leading.normal}`}
-            >
-            <Calendar className={iconSize.sm} />
+        <header className="mb-6 space-y-4">
+          <div className="text-muted-foreground flex items-center gap-3 text-sm text-xs leading-normal">
+            <Calendar className="h-4 w-4" />
             <time
               dateTime={
                 entry.release_date instanceof Date
@@ -283,13 +279,13 @@ async function ChangelogEntryPageContent({
             </time>
           </div>
 
-          <h1 className={`${size['4xl']} ${weight.bold} ${tracking.tight}`}>{entry.title}</h1>
+          <h1 className="text-4xl font-bold tracking-tight">{entry.title}</h1>
 
           {/* Canonical URL */}
-          <div className={`${cluster.compact} ${size.sm} ${leading.normal}`}>
-            <span className={`${size.xs} ${muted.default}`}>Permanent link:</span>
+          <div className="flex items-center gap-2 text-sm leading-normal">
+            <span className="text-muted-foreground text-xs">Permanent link:</span>
             <a
-              className={`text-primary hover:text-primary/80 truncate ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT}`}
+              className="text-primary hover:text-primary/80 truncate transition-all duration-200 ease-out"
               href={canonicalUrl}
             >
               {canonicalUrl}
@@ -297,10 +293,10 @@ async function ChangelogEntryPageContent({
           </div>
         </header>
 
-        <Separator className={marginY.relaxed} />
+        <Separator className="my-8" />
 
         {/* Content */}
-        <ChangelogContent hideHeader entry={entry} />
+        <ChangelogContent entry={entry} hideHeader />
       </article>
     </>
   );

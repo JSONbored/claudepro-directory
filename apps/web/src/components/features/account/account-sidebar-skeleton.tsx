@@ -4,22 +4,21 @@
  */
 
 import { Card, Skeleton } from '@heyclaude/web-runtime/ui';
-import { padding, marginBottom, paddingBottom, gap, spaceY } from "@heyclaude/web-runtime/design-system";
 
 export function AccountSidebarSkeleton() {
   return (
-    <Card className={`h-fit ${padding.default} md:col-span-1`}>
+    <Card className="h-fit p-4 md:col-span-1">
       {/* User profile header skeleton */}
-      <div className={`${marginBottom.comfortable} flex items-center ${gap.compact} border-b ${paddingBottom.default}`}>
+      <div className="mb-6 flex items-center gap-2 border-b pb-4">
         <Skeleton className="h-12 w-12 rounded-full" />
-        <div className={`flex-1 ${spaceY.compact}`}>
+        <div className="flex flex-col gap-2 flex-1">
           <Skeleton className="h-4 w-24" />
           <Skeleton className="h-3 w-32" />
         </div>
       </div>
 
       {/* Navigation items skeleton */}
-      <nav className={`${spaceY.compact}`}>
+      <nav className="space-y-2">
         {Array.from({ length: 9 }).map((_, i) => (
           <Skeleton key={i} className="h-9 w-full" />
         ))}

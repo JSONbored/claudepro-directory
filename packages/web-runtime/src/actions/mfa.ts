@@ -20,6 +20,14 @@ import {
 import { revalidatePath } from 'next/cache';
 
 /**
+ * Helper to revalidate MFA-related pages
+ */
+async function revalidateMFAPages() {
+  revalidatePath('/account/settings');
+  revalidatePath('/account');
+}
+
+/**
  * List all MFA factors for the current user
  */
 export const listMFAAction = authedAction
@@ -28,11 +36,7 @@ export const listMFAAction = authedAction
   .action(async () => {
     const supabase = await createSupabaseServerClient();
     const { factors, error } = await listMFAFactors(supabase);
-
-    if (error) {
-      throw error;
-    }
-
+    if (error) throw error;
     return { factors };
   });
 
@@ -45,15 +49,8 @@ export const enrollTOTPAction = authedAction
   .action(async () => {
     const supabase = await createSupabaseServerClient();
     const { data, error } = await enrollTOTPFactor(supabase);
-
-    if (error) {
-      throw error;
-    }
-
-    if (!data) {
-      throw new Error('TOTP enrollment failed - no data returned');
-    }
-
+    if (error) throw error;
+    if (!data) throw new Error('TOTP enrollment failed - no data returned');
     return { enrollment: data };
   });
 
@@ -62,23 +59,12 @@ export const enrollTOTPAction = authedAction
  */
 export const createMFAChallengeAction = authedAction
   .metadata({ actionName: 'createMFAChallenge', category: 'mfa' })
-  .inputSchema(
-    z.object({
-      factorId: z.string().uuid('Invalid factor ID'),
-    })
-  )
+  .inputSchema(z.object({ factorId: z.string().uuid('Invalid factor ID') }))
   .action(async ({ parsedInput }) => {
     const supabase = await createSupabaseServerClient();
     const { data, error } = await createMFAChallenge(supabase, parsedInput.factorId);
-
-    if (error) {
-      throw error;
-    }
-
-    if (!data) {
-      throw new Error('MFA challenge creation failed - no data returned');
-    }
-
+    if (error) throw error;
+    if (!data) throw new Error('MFA challenge creation failed - no data returned');
     return { challenge: data };
   });
 
@@ -102,21 +88,12 @@ export const verifyMFAChallengeAction = authedAction
       parsedInput.challengeId,
       parsedInput.code
     );
-
-    if (error) {
-      throw error;
-    }
-
-    if (!success) {
-      throw new Error('MFA verification failed');
-    }
+    if (error) throw error;
+    if (!success) throw new Error('MFA verification failed');
 
     // Refresh session to get updated AAL
     await supabase.auth.refreshSession();
-
-    // Revalidate account pages to show updated MFA status
-    revalidatePath('/account/settings');
-    revalidatePath('/account');
+    await revalidateMFAPages();
 
     return { success: true };
   });
@@ -126,19 +103,13 @@ export const verifyMFAChallengeAction = authedAction
  */
 export const unenrollMFAAction = authedAction
   .metadata({ actionName: 'unenrollMFA', category: 'mfa' })
-  .inputSchema(
-    z.object({
-      factorId: z.string().uuid('Invalid factor ID'),
-    })
-  )
+  .inputSchema(z.object({ factorId: z.string().uuid('Invalid factor ID') }))
   .action(async ({ parsedInput }) => {
     const supabase = await createSupabaseServerClient();
 
     // Check how many factors the user has
     const { factors, error: listError } = await listMFAFactors(supabase);
-    if (listError) {
-      throw listError;
-    }
+    if (listError) throw listError;
 
     const verifiedFactors = factors.filter((f) => f.status === 'verified');
     if (verifiedFactors.length <= 1) {
@@ -146,19 +117,10 @@ export const unenrollMFAAction = authedAction
     }
 
     const { success, error } = await unenrollMFAFactor(supabase, parsedInput.factorId);
+    if (error) throw error;
+    if (!success) throw new Error('MFA unenrollment failed');
 
-    if (error) {
-      throw error;
-    }
-
-    if (!success) {
-      throw new Error('MFA unenrollment failed');
-    }
-
-    // Revalidate account pages
-    revalidatePath('/account/settings');
-    revalidatePath('/account');
-
+    await revalidateMFAPages();
     return { success: true };
   });
 
@@ -171,15 +133,8 @@ export const getAALAction = authedAction
   .action(async () => {
     const supabase = await createSupabaseServerClient();
     const { data, error } = await getAuthenticatorAssuranceLevel(supabase);
-
-    if (error) {
-      throw error;
-    }
-
-    if (!data) {
-      throw new Error('Failed to get AAL - no data returned');
-    }
-
+    if (error) throw error;
+    if (!data) throw new Error('Failed to get AAL - no data returned');
     return { aal: data };
   });
 
@@ -192,10 +147,6 @@ export const checkMFARequiredAction = authedAction
   .action(async () => {
     const supabase = await createSupabaseServerClient();
     const { requires, error } = await requiresMFAChallenge(supabase);
-
-    if (error) {
-      throw error;
-    }
-
+    if (error) throw error;
     return { requires };
   });

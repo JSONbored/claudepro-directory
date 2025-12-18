@@ -17,7 +17,7 @@ import {
   cn,
 } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
-import { MICROINTERACTIONS, gap, marginBottom, border, cluster, muted, size } from '@heyclaude/web-runtime/design-system';
+import { MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import type { GetUserProfileReturns } from '@heyclaude/database-types/postgres-types';
 import type { content_category } from '@heyclaude/data-layer/prisma';
@@ -41,7 +41,7 @@ export function ProfileContributionsSection({
   }
 
   return (
-    <div className={`grid ${gap.default} sm:grid-cols-2 lg:grid-cols-3`}>
+    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
       {contributions
         .filter(
           (
@@ -69,10 +69,10 @@ export function ProfileContributionsSection({
               whileTap={shouldReduceMotion ? {} : MICROINTERACTIONS.card.tap}
               transition={MICROINTERACTIONS.card.transition}
             >
-              <Card className={`border-${border.default}/50 cursor-pointer`}>
+              <Card className="cursor-pointer border-border/50">
                 <NavLink href={safeContentUrl}>
                   <CardHeader>
-                    <div className={`${marginBottom.compact} flex items-center justify-between`}>
+                    <div className="mb-2 flex items-center justify-between">
                       <UnifiedBadge variant="base" style="secondary" className="text-xs">
                         {item.content_type}
                       </UnifiedBadge>
@@ -88,7 +88,7 @@ export function ProfileContributionsSection({
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className={cn(muted.default, cluster.tight, gap.tight, size.xs)}>
+                    <div className={cn('flex items-center gap-1 text-muted-foreground text-xs')}>
                       <span>{item.view_count ?? 0} views</span>
                       <span>•</span>
                       <span>{item.download_count ?? 0} downloads</span>

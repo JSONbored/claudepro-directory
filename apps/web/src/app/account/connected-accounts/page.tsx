@@ -20,7 +20,6 @@ import { SignInButton } from '@/src/components/core/auth/sign-in-button';
 import { ConnectedAccountsClient } from '@/src/components/features/account/connected-accounts-client';
 
 import Loading from './loading';
-import { spaceY, marginBottom, muted } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Dynamic Rendering Required
@@ -107,7 +106,7 @@ async function ConnectedAccountsPageContent() {
       'ConnectedAccountsPage: page render completed (unauthenticated)'
     );
     return (
-      <div className={`${spaceY.relaxed}`}>
+      <div className="space-y-6">
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl">Sign in required</CardTitle>
@@ -159,8 +158,8 @@ async function ConnectedAccountsPageContent() {
 
   const pageHeader = (
     <div>
-      <h1 className={`${marginBottom.compact} text-3xl font-bold`}>Connected Accounts</h1>
-      <p className={`${muted.default}`}>Manage your OAuth provider connections</p>
+      <h1 className="mb-2 text-3xl font-bold">Connected Accounts</h1>
+      <p className="text-muted-foreground">Manage your OAuth provider connections</p>
     </div>
   );
 
@@ -176,7 +175,7 @@ async function ConnectedAccountsPageContent() {
   );
 
   return (
-    <div className={`${spaceY.relaxed}`}>
+    <div className="space-y-6">
       {pageHeader}
 
       <Card>

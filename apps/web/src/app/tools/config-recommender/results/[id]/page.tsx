@@ -3,33 +3,42 @@
  * Personalized results from PostgreSQL RPC, shareable via URL-encoded answers.
  */
 
-import type { RecommendationItem } from '@heyclaude/database-types/postgres-types';
 import {
-  UseCaseType,
   ExperienceLevel,
-  IntegrationType,
   FocusAreaType,
+  IntegrationType,
+  UseCaseType,
 } from '@heyclaude/data-layer/prisma';
-import type {
-  content_category,
-  experience_level,
-  focus_area_type,
-  integration_type,
-  use_case_type,
+import {
+  type content_category,
+  type experience_level,
+  type focus_area_type,
+  type integration_type,
+  type use_case_type,
 } from '@heyclaude/data-layer/prisma';
-import type { GetRecommendationsReturns } from '@heyclaude/database-types/postgres-types';
+import {
+  type GetRecommendationsReturns,
+  type RecommendationItem,
+} from '@heyclaude/database-types/postgres-types';
 import { generatePageMetadata, getConfigRecommendations } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { type Metadata } from 'next';
+import dynamic from 'next/dynamic';
 import { notFound } from 'next/navigation';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 
-import { ResultsDisplay } from '@/src/components/features/tools/recommender/results-display';
-
 import ResultsLoading from './loading';
-import { paddingX, paddingY, marginX } from "@heyclaude/web-runtime/design-system";
+
+// Dynamic import for ResultsDisplay (615 lines) - lazy load for code splitting
+const ResultsDisplay = dynamic(
+  () =>
+    import('@/src/components/features/tools/recommender/results-display').then((mod) => ({
+      default: mod.ResultsDisplay,
+    })),
+  { ssr: true }
+);
 
 /**
  * Dynamic Rendering Required
@@ -45,8 +54,8 @@ type RecommendationResponse = GetRecommendationsReturns & {
 // Type matching QuizAnswers from quiz-form.tsx
 interface DecodedQuizAnswers {
   experienceLevel: experience_level;
-  p_focus_areas?: Array<focus_area_type>;
-  p_integrations?: Array<integration_type>;
+  p_focus_areas?: focus_area_type[];
+  p_integrations?: integration_type[];
   teamSize?: string;
   timestamp?: string;
   toolPreferences: string[];
@@ -108,9 +117,7 @@ function decodeQuizAnswers(
 
     // Validate enum values
     if (
-      !(Object.values(UseCaseType) as readonly string[]).includes(
-        data['useCase'] as use_case_type
-      )
+      !(Object.values(UseCaseType) as readonly string[]).includes(data['useCase'] as use_case_type)
     ) {
       throw new Error(`Invalid useCase value: ${data['useCase']}`);
     }
@@ -162,11 +169,11 @@ function decodeQuizAnswers(
       useCase: data['useCase'] as use_case_type,
       ...(Array.isArray(data['p_integrations']) &&
         data['p_integrations'].length > 0 && {
-          p_integrations: data['p_integrations'] as Array<integration_type>,
+          p_integrations: data['p_integrations'] as integration_type[],
         }),
       ...(Array.isArray(data['p_focus_areas']) &&
         data['p_focus_areas'].length > 0 && {
-          p_focus_areas: data['p_focus_areas'] as Array<focus_area_type>,
+          p_focus_areas: data['p_focus_areas'] as focus_area_type[],
         }),
       ...(typeof data['teamSize'] === 'string' && data['teamSize'] !== ''
         ? { teamSize: data['teamSize'] }
@@ -225,7 +232,9 @@ function normalizeRecommendationResults(
   if (!results) return [];
   const normalized = results
     .filter(
-      (item): item is RecommendationItem & {
+      (
+        item
+      ): item is RecommendationItem & {
         category: content_category;
         slug: string;
         title: string;
@@ -233,17 +242,17 @@ function normalizeRecommendationResults(
     )
     .map((item) => ({
       ...item,
-      category: item.category!,
-      slug: item.slug!,
-      title: item.title!,
-      description: item.description ?? '',
       author: item.author ?? '',
-      tags: item.tags ?? [],
-      match_score: item.match_score ?? 0,
+      category: item.category,
+      description: item.description ?? '',
       match_percentage: item.match_percentage ?? 0,
+      match_score: item.match_score ?? 0,
       primary_reason: item.primary_reason ?? '',
       rank: item.rank ?? 0,
       reasons: item.reasons ?? [],
+      slug: item.slug,
+      tags: item.tags ?? [],
+      title: item.title,
     }));
 
   if (normalized.length < results.length) {
@@ -461,9 +470,11 @@ async function ResultsPageContent({
   );
 
   return (
-    <div className={`bg-background min-h-screen`}>
-      <section className={`container ${marginX.auto} ${paddingX.default} ${paddingY.section}`}>
-        <ResultsDisplay recommendations={recommendations} shareUrl={shareUrl} />
+    <div className="bg-background min-h-screen">
+      <section className="container mx-auto px-4 py-12">
+        <Suspense fallback={<div className="h-96" />}>
+          <ResultsDisplay recommendations={recommendations} shareUrl={shareUrl} />
+        </Suspense>
       </section>
     </div>
   );

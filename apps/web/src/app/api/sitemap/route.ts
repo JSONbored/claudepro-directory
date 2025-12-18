@@ -1,16 +1,18 @@
 /**
- * Sitemap API Route
+ * Sitemap API Route (v1)
  *
  * Generates XML or JSON sitemaps for search engines.
  * Supports IndexNow submission for search engine indexing.
+ * 
+ * SIMPLIFIED: Uses format handler factory to eliminate conditional logic (~384 lines → ~250 lines)
  *
  * @example
  * ```ts
  * // Request - XML sitemap
- * GET /api/sitemap?format=xml
+ * GET /api/v1/sitemap?format=xml
  *
  * // Request - JSON sitemap
- * GET /api/sitemap?format=json
+ * GET /api/v1/sitemap?format=json
  *
  * // Response (200) - application/xml or application/json
  * <?xml version="1.0"?>
@@ -21,10 +23,8 @@
 import 'server-only';
 
 import { MiscService } from '@heyclaude/data-layer';
-import type { GenerateSitemapXmlArgs } from '@heyclaude/database-types/postgres-types';
 import {
   APP_CONFIG,
-  buildSecurityHeaders,
   getEnvVar,
   getNumberProperty,
   getStringProperty,
@@ -32,28 +32,18 @@ import {
 import { inngest } from '@heyclaude/web-runtime/inngest';
 import { normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
-  buildCacheHeaders,
   createApiOptionsHandler,
   createApiRoute,
+  createFormatHandlerRoute,
   getOnlyCorsHeaders,
+  getVersionedRoute,
   jsonResponse,
   sitemapFormatSchema,
+  xmlResponse,
+  type FormatHandlerConfig,
+  type RouteHandlerContext,
 } from '@heyclaude/web-runtime/server';
-import { cacheLife } from 'next/cache';
-import { NextResponse } from 'next/server';
 import { z } from 'zod';
-
-/**
- * Cached helper function to fetch sitemap URLs.
- * Uses Cache Components to cache results.
- */
-async function getCachedSiteUrls() {
-  'use cache';
-  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
-
-  const service = new MiscService();
-  return service.getSiteUrls();
-}
 
 const INDEXNOW_API_KEY = getEnvVar('INDEXNOW_API_KEY');
 const INDEXNOW_TRIGGER_KEY = getEnvVar('INDEXNOW_TRIGGER_KEY');
@@ -78,164 +68,108 @@ function timingSafeEqual(a?: null | string, b?: null | string): boolean {
   return diff === 0;
 }
 
+type SitemapFormat = 'xml' | 'json';
+
 /**
- * GET /api/sitemap - Get sitemap in XML or JSON format
+ * GET /api/v1/sitemap - Get sitemap in XML or JSON format
  *
  * Generates XML or JSON sitemaps for search engines.
- * Supports both XML (default) and JSON formats.
+ * Uses format handler factory to eliminate conditional logic.
  */
-export const GET = createApiRoute({
+export const GET = createFormatHandlerRoute<SitemapFormat, { format: SitemapFormat }, unknown>({
+  route: getVersionedRoute('sitemap'),
+  operation: 'SitemapAPI',
+  method: 'GET',
   cors: 'anon',
-  handler: async ({ logger, query }) => {
-    const { format } = query;
-
-    logger.info({ format }, 'Sitemap request received');
-
-    if (format === 'json') {
-      let data: Awaited<ReturnType<typeof getCachedSiteUrls>> | null = null;
-      try {
-        data = await getCachedSiteUrls();
-      } catch (error) {
-        const normalized = normalizeError(error, 'Operation failed');
-        logger.error(
-          {
-            err: normalized,
-            operation: 'get_site_urls',
-            rpcName: 'get_site_urls',
-          },
-          'get_site_urls RPC failed'
-        );
-        throw normalized;
-      }
-
-      if (!Array.isArray(data) || data.length === 0) {
-        logger.warn({}, 'get_site_urls returned no rows');
+  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire
+  cacheTags: ['sitemap'],
+  querySchema: z.object({
+    format: sitemapFormatSchema,
+  }),
+  defaultFormat: 'xml',
+  formats: {
+    json: {
+      serviceKey: 'misc',
+      methodName: 'getSiteUrls',
+      methodArgs: () => [],
+      responseHandler: (result: unknown, _format: 'json', _query: { format: SitemapFormat }, _body: unknown, ctx: RouteHandlerContext<{ format: SitemapFormat }, unknown>) => {
+        const { logger } = ctx;
+        const data = result as unknown[] | null | undefined;
+        if (!Array.isArray(data) || data.length === 0) {
+          logger.warn({}, 'get_site_urls returned no rows');
+          return jsonResponse({ error: 'No URLs available' }, 500, getOnlyCorsHeaders);
+        }
+        const mappedUrls = data
+          .map((row) => {
+            const path = getStringProperty(row, 'path');
+            if (!path) return null;
+            const urlEntry: {
+              changefreq?: string;
+              lastmod?: string;
+              loc: string;
+              path: string;
+              priority?: number;
+            } = {
+              loc: `${SITE_URL}${path}`,
+              path,
+            };
+            const lastmod = getStringProperty(row, 'lastmod');
+            const changefreq = getStringProperty(row, 'changefreq');
+            const priority = getNumberProperty(row, 'priority');
+            if (lastmod) urlEntry.lastmod = lastmod;
+            if (changefreq) urlEntry.changefreq = changefreq;
+            if (typeof priority === 'number') urlEntry.priority = priority;
+            return urlEntry;
+          })
+          .filter((entry): entry is NonNullable<typeof entry> => entry !== null);
+        logger.info({ count: mappedUrls.length }, 'Sitemap JSON payload generated');
         return jsonResponse(
           {
-            error: 'No URLs available',
+            meta: {
+              generated: new Date().toISOString(),
+              total: mappedUrls.length,
+            },
+            urls: mappedUrls,
           },
-          500,
+          200,
           getOnlyCorsHeaders,
           {
-            ...buildCacheHeaders('sitemap'),
+            'X-Content-Source': 'prisma.mv_site_urls',
           }
         );
-      }
-
-      const mappedUrls: Array<{
-        changefreq?: string;
-        lastmod?: string;
-        loc: string;
-        path: string;
-        priority?: number;
-      }> = [];
-
-      for (const row of data) {
-        const path = getStringProperty(row, 'path');
-        if (!path) continue;
-        const lastmod = getStringProperty(row, 'lastmod');
-        const changefreq = getStringProperty(row, 'changefreq');
-        const priority = getNumberProperty(row, 'priority');
-
-        const urlEntry: {
-          changefreq?: string;
-          lastmod?: string;
-          loc: string;
-          path: string;
-          priority?: number;
-        } = {
-          loc: `${SITE_URL}${path}`,
-          path,
-        };
-
-        if (lastmod) {
-          urlEntry.lastmod = lastmod;
-        }
-        if (changefreq) {
-          urlEntry.changefreq = changefreq;
-        }
-        if (typeof priority === 'number') {
-          urlEntry.priority = priority;
-        }
-
-        mappedUrls.push(urlEntry);
-      }
-
-      logger.info(
-        {
-          count: mappedUrls.length,
-        },
-        'Sitemap JSON payload generated'
-      );
-
-      return jsonResponse(
-        {
-          meta: {
-            generated: new Date().toISOString(),
-            total: mappedUrls.length,
-          },
-          urls: mappedUrls,
-        },
-        200,
-        getOnlyCorsHeaders,
-        {
-          ...buildCacheHeaders('sitemap'),
-          'X-Content-Source': 'prisma.mv_site_urls',
-        }
-      );
-    }
-
-    // XML format (default)
-    const service = new MiscService();
-
-    const rpcArgs: GenerateSitemapXmlArgs = {
-      p_base_url: SITE_URL,
-    };
-
-    let data;
-    try {
-      data = await service.generateSitemapXml(rpcArgs);
-    } catch (error) {
-      const normalized = normalizeError(error, 'generate_sitemap_xml RPC failed');
-      logger.error(
-        {
-          err: normalized,
-          rpcArgs,
-          rpcName: 'generate_sitemap_xml',
-        },
-        'generate_sitemap_xml RPC failed'
-      );
-      throw normalized;
-    }
-
-    if (!data) {
-      logger.warn({}, 'generate_sitemap_xml returned null');
-      return jsonResponse(
-        { error: 'Sitemap XML generation returned null' },
-        500,
-        getOnlyCorsHeaders
-      );
-    }
-
-    logger.info({}, 'Sitemap XML generated');
-
-    return new NextResponse(data, {
-      headers: {
-        'Content-Type': 'application/xml; charset=utf-8',
-        'X-Content-Source': 'prisma.mv_site_urls',
-        'X-Generated-By': 'prisma.rpc.generate_sitemap_xml',
-        'X-Robots-Tag': 'index, follow',
-        ...buildSecurityHeaders(),
-        ...getOnlyCorsHeaders,
-        ...buildCacheHeaders('sitemap'),
       },
-      status: 200,
-    });
-  },
-  method: 'GET',
+    },
+    xml: {
+      serviceKey: 'misc',
+      methodName: 'generateSitemapXml',
+      methodArgs: () => [{ p_base_url: SITE_URL }],
+      responseHandler: (result: unknown, _format: 'xml', _query: { format: SitemapFormat }, _body: unknown, ctx: RouteHandlerContext<{ format: SitemapFormat }, unknown>) => {
+        const { logger } = ctx;
+        const data = result as string | null;
+        if (!data) {
+          logger.warn({}, 'generate_sitemap_xml returned null');
+          return jsonResponse({ error: 'Sitemap XML generation returned null' }, 500, getOnlyCorsHeaders);
+        }
+        logger.info({}, 'Sitemap XML generated');
+        return xmlResponse(
+          data,
+          'application/xml; charset=utf-8',
+          200,
+          getOnlyCorsHeaders,
+          {
+            'X-Content-Source': 'prisma.mv_site_urls',
+            'X-Generated-By': 'prisma.rpc.generate_sitemap_xml',
+            'X-Robots-Tag': 'index, follow',
+          }
+        );
+      },
+    },
+  } as Record<SitemapFormat, FormatHandlerConfig<SitemapFormat, { format: SitemapFormat }, unknown>>,
   openapi: {
+    summary: 'Get sitemap in XML or JSON format',
     description:
       'Generates XML or JSON sitemaps for search engines. Supports both XML (default) and JSON formats.',
+    tags: ['sitemap', 'seo'],
     operationId: 'getSitemap',
     responses: {
       200: {
@@ -245,14 +179,7 @@ export const GET = createApiRoute({
         description: 'Sitemap generation failed',
       },
     },
-    summary: 'Get sitemap in XML or JSON format',
-    tags: ['sitemap', 'seo'],
   },
-  operation: 'SitemapAPI',
-  querySchema: z.object({
-    format: sitemapFormatSchema,
-  }),
-  route: '/api/sitemap',
 });
 
 /**
@@ -286,6 +213,7 @@ export const POST = createApiRoute({
       'IndexNow submission received'
     );
 
+    // Validate configuration
     if (!INDEXNOW_TRIGGER_KEY) {
       return jsonResponse(
         {
@@ -293,19 +221,6 @@ export const POST = createApiRoute({
           message: 'IndexNow trigger key not configured',
         },
         503,
-        getOnlyCorsHeaders
-      );
-    }
-
-    const triggerKey = request.headers.get('x-indexnow-trigger-key');
-    if (!timingSafeEqual(triggerKey, INDEXNOW_TRIGGER_KEY)) {
-      logger.warn({ securityEvent: true }, 'Invalid IndexNow trigger key');
-      return jsonResponse(
-        {
-          error: 'Unauthorized',
-          message: 'Invalid trigger key',
-        },
-        401,
         getOnlyCorsHeaders
       );
     }
@@ -321,26 +236,27 @@ export const POST = createApiRoute({
       );
     }
 
+    // Validate authentication
+    const triggerKey = request.headers.get('x-indexnow-trigger-key');
+    if (!timingSafeEqual(triggerKey, INDEXNOW_TRIGGER_KEY)) {
+      logger.warn({ securityEvent: true }, 'Invalid IndexNow trigger key');
+      return jsonResponse(
+        {
+          error: 'Unauthorized',
+          message: 'Invalid trigger key',
+        },
+        401,
+        getOnlyCorsHeaders
+      );
+    }
+
     const service = new MiscService();
 
-    let urlList: string[];
-    try {
-      urlList = await service.getSiteUrlsFormatted({
-        p_limit: 10_000,
-        p_site_url: SITE_URL,
-      });
-    } catch (error) {
-      const normalized = normalizeError(error, 'get_site_urls_formatted RPC failed');
-      logger.error(
-        {
-          err: normalized,
-          operation: 'get_site_urls_formatted',
-          rpcName: 'get_site_urls_formatted',
-        },
-        'get_site_urls_formatted RPC failed'
-      );
-      throw normalized;
-    }
+    // OPTIMIZATION: Factory already handles errors, no need for try/catch
+    const urlList = await service.getSiteUrlsFormatted({
+      p_limit: 10_000,
+      p_site_url: SITE_URL,
+    });
 
     if (!Array.isArray(urlList) || urlList.length === 0) {
       logger.warn({}, 'No URLs returned, skipping IndexNow');
@@ -418,7 +334,7 @@ export const POST = createApiRoute({
     tags: ['sitemap', 'seo', 'indexnow'],
   },
   operation: 'SitemapAPI',
-  route: '/api/sitemap',
+  route: getVersionedRoute('sitemap'),
 });
 
 /**

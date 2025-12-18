@@ -8,7 +8,6 @@
 import { createHmac, timingSafeEqual } from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 
-import { MiscService } from '@heyclaude/data-layer';
 import type { content_category } from '@heyclaude/data-layer/prisma';
 import { normalizeError, verifySvixSignature } from '@heyclaude/shared-runtime';
 
@@ -340,7 +339,8 @@ async function ingestWebhookEvent(
   let webhookId: string | null = null;
   
   if (svixId) {
-    const miscService = new MiscService();
+    const { getService } = await import('../../data/service-factory');
+    const miscService = await getService('misc');
     
     // Use MiscService for proper data layer architecture
     const existing = await miscService.getWebhookEventBySvixId({
@@ -348,10 +348,10 @@ async function ingestWebhookEvent(
       p_source: source,
     });
 
-    // GetWebhookEventBySvixIdReturns is string[] (array of UUIDs), not an object
-    if (existing && existing.length > 0) {
+    // getWebhookEventBySvixId now returns { id: string } | null (converted from RPC to Prisma)
+    if (existing) {
       duplicate = true;
-      webhookId = existing[0] ?? null;
+      webhookId = existing.id;
     } else {
       // Record the event with proper column names
       const webhookEventType = mapEventType(source, eventTypeRaw);

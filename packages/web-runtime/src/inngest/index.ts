@@ -105,10 +105,10 @@ export const functions = [
   jobPostingDripCampaign, // Event: job/published
 
   // Analytics functions (Phase 3) - COMPLETE
-  processPulseQueue, // Cron: Every 30 minutes
+  processPulseQueue, // Cron: Every hour (optimized from 30 minutes)
 
   // Trending functions (Phase 3) - COMPLETE
-  calculateTrendingMetrics, // Cron: Every 30 minutes (calculates time-windowed metrics and refreshes materialized view)
+  calculateTrendingMetrics, // Cron: Every hour (optimized from 30 minutes - calculates time-windowed metrics and refreshes materialized view)
 
   // Changelog functions (Phase 3) - COMPLETE
   // processChangelogQueue removed - replaced by /api/changelog/sync endpoint
@@ -117,7 +117,7 @@ export const functions = [
   // Discord functions (Phase 3) - COMPLETE
   processDiscordJobsQueue, // Cron: Every 30 minutes
   processDiscordSubmissionsQueue, // Cron: Every 30 minutes
-  processDiscordErrorsQueue, // Cron: Every 15 minutes (webhook error alerts)
+  processDiscordErrorsQueue, // Cron: Every 30 minutes (optimized from 15 minutes - webhook error alerts)
   sendDiscordDirect, // Event: discord/direct (sends direct Discord notifications)
 
   // Notification functions (Phase 3) - COMPLETE

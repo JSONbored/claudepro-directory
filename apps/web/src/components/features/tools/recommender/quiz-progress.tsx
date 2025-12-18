@@ -6,8 +6,7 @@
  */
 
 import { CheckCircle } from '@heyclaude/web-runtime/icons';
-import { POSITION_PATTERNS, UnifiedBadge } from '@heyclaude/web-runtime/ui';
-import { between, cluster, iconSize, spaceY } from "@heyclaude/web-runtime/design-system";
+import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 
 interface QuizProgressProps {
   currentQuestion: number;
@@ -21,18 +20,18 @@ export function QuizProgress({
   percentComplete,
 }: QuizProgressProps) {
   return (
-    <div className={`${spaceY.default}`}>
+    <div className="space-y-3">
       {/* Question counter */}
-      <div className={between.center}>
-        <div className={cluster.compact}>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
           <span className="text-sm font-medium">Progress</span>
           <UnifiedBadge variant="base" style="secondary">
             {currentQuestion} / {totalQuestions}
           </UnifiedBadge>
         </div>
         {percentComplete === 100 && (
-          <div className={`${cluster.compact} text-primary text-sm`}>
-            <CheckCircle className={iconSize.sm} />
+          <div className="flex items-center gap-2 text-primary text-sm">
+            <CheckCircle className="h-4 w-4" />
             <span>Complete!</span>
           </div>
         )}
@@ -41,7 +40,7 @@ export function QuizProgress({
       {/* Progress bar */}
       <div className="bg-muted relative h-2 w-full overflow-hidden rounded-full">
         <div
-          className={`${POSITION_PATTERNS.ABSOLUTE_TOP_LEFT} bg-primary h-full transition-all duration-300 ease-in-out`}
+          className="absolute top-0 left-0 bg-primary h-full transition-all duration-300 ease-in-out"
           style={{ width: `${percentComplete}%` }}
           role="progressbar"
           aria-valuenow={percentComplete}
@@ -52,11 +51,11 @@ export function QuizProgress({
       </div>
 
       {/* Step indicators */}
-      <div className={between.center}>
+      <div className="flex items-center justify-between">
         {Array.from({ length: totalQuestions }, (_, i) => i + 1).map((step) => (
           <div
             key={step}
-            className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-medium transition-colors ${
+            className={`flex h-8 w-8 items-center justify-center rounded-full text-xs-medium transition-colors ${
               step < currentQuestion
                 ? 'bg-primary text-primary-foreground'
                 : step === currentQuestion
@@ -65,7 +64,7 @@ export function QuizProgress({
             }`}
             title={`Question ${step}${step < currentQuestion ? ' (completed)' : step === currentQuestion ? ' (current)' : ''}`}
           >
-            {step < currentQuestion ? <CheckCircle className={iconSize.sm} /> : step}
+            {step < currentQuestion ? <CheckCircle className="h-4 w-4" /> : step}
           </div>
         ))}
       </div>

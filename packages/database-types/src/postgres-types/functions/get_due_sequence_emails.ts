@@ -30,12 +30,12 @@ export type GetDueSequenceEmailsArgsFromZod = z.infer<typeof getDueSequenceEmail
 /**
  * Return type for PostgreSQL function: get_due_sequence_emails
  */
-export type GetDueSequenceEmailsReturns = DueSequenceEmailItem;
+export type GetDueSequenceEmailsReturns = DueSequenceEmailItem[];
 
 /**
  * Zod schema for get_due_sequence_emails function return type
  */
-export const getDueSequenceEmailsReturnsSchema = dueSequenceEmailItemSchema;
+export const getDueSequenceEmailsReturnsSchema = z.array(dueSequenceEmailItemSchema);
 
 /**
  * Type inference from Zod schema (should match type above)

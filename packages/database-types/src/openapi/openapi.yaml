@@ -1668,8 +1668,6 @@ components:
           type: string
         users:
           $ref: "#/components/schemas/public_users"
-        content_embeddings:
-          $ref: "#/components/schemas/content_embeddings"
         content_time_metrics:
           $ref: "#/components/schemas/content_time_metrics"
         content_votes:
@@ -1696,42 +1694,6 @@ components:
         - use_count
         - keywords
         - content_votes
-    content_embeddings:
-      type: object
-      description: >-
-        This model or at least one of its fields has comments in the database,
-        and requires an additional setup for migrations: Read more:
-        https://pris.ly/d/database-comments
-
-        This model contains row level security and requires additional setup for
-        migrations. Visit https://pris.ly/d/row-level-security for more info.
-      properties:
-        id:
-          type: integer
-          format: int64
-        content_id:
-          type: string
-        content_text:
-          type: string
-        created_at:
-          type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
-        embedding_generated_at:
-          type: string
-          format: date-time
-        content:
-          $ref: "#/components/schemas/content"
-      required:
-        - id
-        - content_id
-        - content_text
-        - created_at
-        - updated_at
-        - embedding_generated_at
-        - content
     content_generation_tracking:
       type: object
       description: >-
@@ -4147,10 +4109,10 @@ components:
       enum:
         - Added
         - Changed
-        - Deprecated
-        - Removed
         - Fixed
         - Security
+        - Deprecated
+        - Removed
     changelog_source:
       type: string
       enum:

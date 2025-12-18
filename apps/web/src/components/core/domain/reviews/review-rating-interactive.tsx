@@ -3,7 +3,6 @@
 import { Star } from '@heyclaude/web-runtime/icons';
 import { type ReviewRatingInteractiveProps } from '@heyclaude/web-runtime/types/component.types';
 import { Rating, RatingButton } from '@heyclaude/web-runtime/ui';
-import { cluster, gap, marginLeft } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Interactive star rating input for collecting and editing a numeric rating.
@@ -40,12 +39,12 @@ export function ReviewRatingInteractive({
   const iconSize = sizeMap[size];
 
   return (
-    <div className={`${cluster.tight} ${className}`}>
+    <div className={`flex items-center gap-1 ${className}`}>
       <Rating
         value={value}
         onValueChange={onChange}
         readOnly={false}
-        className={`${gap.micro}`}
+        className="gap-0.5"
         aria-describedby={ariaDescribedby}
         aria-invalid={ariaInvalid}
       >
@@ -54,7 +53,7 @@ export function ReviewRatingInteractive({
         ))}
       </Rating>
       {showValue ? (
-        <span className={`text-muted-foreground ${marginLeft.micro} text-sm font-medium`}>{value.toFixed(1)}</span>
+        <span className="text-muted-foreground text-sm ml-0.5 font-medium">{value.toFixed(1)}</span>
       ) : null}
     </div>
   );

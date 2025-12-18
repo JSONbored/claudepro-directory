@@ -34,24 +34,37 @@ export async function generateCompositeTypes(
   const files: Record<string, string> = {};
   const exports: string[] = [];
 
+  // Filter out excluded composite types
+  let filteredComposites = compositeTypes;
+  if (config.excludeCompositeTypes) {
+    filteredComposites = Object.fromEntries(
+      Object.entries(compositeTypes).filter(([name]) => {
+        const matches = config.excludeCompositeTypes!.some((pattern) =>
+          new RegExp(pattern.replace(/\*/g, '.*')).test(name)
+        );
+        return !matches; // Exclude if matches pattern
+      })
+    );
+  }
+
   const context: TypeMappingContext = {
     enums,
-    compositeTypes: Object.keys(compositeTypes),
+    compositeTypes: Object.keys(filteredComposites),
   };
 
   // Generate in dependency order (simple composites first, then nested ones)
-  const sortedComposites = sortCompositesByDependency(compositeTypes);
+  const sortedComposites = sortCompositesByDependency(filteredComposites);
 
   for (const compositeName of sortedComposites) {
     const attributes = compositeTypes[compositeName];
     if (!attributes) continue;
 
     const safeName = toSafeIdentifier(compositeName);
-    const dependencies = findCompositeDependencies(attributes, compositeTypes);
+    const dependencies = findCompositeDependencies(attributes, filteredComposites);
     const content = generateCompositeFile(
       compositeName,
       attributes,
-      compositeTypes,
+      filteredComposites,
       enums,
       context,
       config,

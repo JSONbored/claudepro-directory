@@ -9,8 +9,6 @@ import { z } from 'zod';
 
 import type { ApiHealthCategoryConfigsCheck } from './api_health_category_configs_check';
 import { apiHealthCategoryConfigsCheckSchema } from './api_health_category_configs_check';
-import type { ApiHealthContentTableCheck } from './api_health_content_table_check';
-import { apiHealthContentTableCheckSchema } from './api_health_content_table_check';
 import type { ApiHealthDatabaseCheck } from './api_health_database_check';
 import { apiHealthDatabaseCheckSchema } from './api_health_database_check';
 
@@ -21,7 +19,7 @@ export type ApiHealthChecks = {
   /** Attribute: database (api_health_database_check, nullable) */
   database: ApiHealthDatabaseCheck | null;
   /** Attribute: content_table (api_health_content_table_check, nullable) */
-  content_table: ApiHealthContentTableCheck | null;
+  content_table: unknown | null;
   /** Attribute: category_configs (api_health_category_configs_check, nullable) */
   category_configs: ApiHealthCategoryConfigsCheck | null;
 };
@@ -33,7 +31,7 @@ export const apiHealthChecksSchema = z.object({
   /** Attribute: database */
   database: apiHealthDatabaseCheckSchema.nullable(),
   /** Attribute: content_table */
-  content_table: apiHealthContentTableCheckSchema.nullable(),
+  content_table: z.any().nullable(),
   /** Attribute: category_configs */
   category_configs: apiHealthCategoryConfigsCheckSchema.nullable(),
 });

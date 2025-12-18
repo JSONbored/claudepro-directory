@@ -1,15 +1,15 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
-// Mock dependencies - simulate next-safe-action behavior
+// Mock safe-action middleware
 vi.mock('./safe-action.ts', () => {
-  // Create a helper to build action mocks
   const createActionMock = (schema: any) => ({
     action: vi.fn((handler) => {
-      // Return a function that validates input and calls handler
       return async (input: unknown) => {
-        // In tests, we'll parse the input and call the handler
-        const parsed = schema.parse(input);
-        return handler({ parsedInput: parsed, ctx: {} });
+        const parsed = schema ? schema.parse(input) : input;
+        return handler({
+          parsedInput: parsed,
+          ctx: { userId: 'test-user-id' },
+        });
       };
     }),
   });
@@ -21,9 +21,6 @@ vi.mock('./safe-action.ts', () => {
       })),
     },
     rateLimitedAction: {
-      metadata: vi.fn(() => ({
-        inputSchema: vi.fn((schema) => createActionMock(schema)),
-      })),
       inputSchema: vi.fn((schema) => ({
         metadata: vi.fn(() => createActionMock(schema)),
       })),
@@ -31,6 +28,7 @@ vi.mock('./safe-action.ts', () => {
   };
 });
 
+// Mock data layer
 vi.mock('../data/content/reviews.ts', () => ({
   getReviewsWithStatsData: vi.fn(),
 }));
@@ -39,35 +37,116 @@ vi.mock('../data/content/paginated.ts', () => ({
   getPaginatedContent: vi.fn(),
 }));
 
-describe('Content Actions', () => {
+// Mock logging
+vi.mock('../logging/server.ts', () => ({
+  logger: {
+    error: vi.fn(),
+  },
+  createWebAppContextWithId: vi.fn(() => ({
+    requestId: 'test-request-id',
+    operation: 'test-operation',
+  })),
+}));
+
+// Mock errors
+vi.mock('../errors.ts', () => ({
+  normalizeError: vi.fn((error, message) => {
+    const err = error instanceof Error ? error : new Error(String(error));
+    err.message = message;
+    return err;
+  }),
+}));
+
+describe('getReviewsWithStats', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe('getReviewsWithStats', () => {
-    it('should validate content_type enum', async () => {
-      // This test verifies that the Zod schema uses the correct enum values
-      // Import the schema to get enum values
-      const { content_categorySchema } = await import('../prisma-zod-schemas.ts');
+  describe('input validation', () => {
+    it('should validate content_category enum', async () => {
+      const { getReviewsWithStats } = await import('./content.ts');
+      const { content_categorySchema } = await import('./prisma-zod-schemas.ts');
       const validCategories = content_categorySchema._def.values;
-      
-      expect(validCategories).toContain('agents');
-      expect(validCategories).toContain('skills');
-      expect(validCategories.length).toBeGreaterThan(0);
+
+      expect(() => {
+        content_categorySchema.parse(validCategories[0]);
+      }).not.toThrow();
     });
 
-    it('should call getReviewsWithStatsData with correct params', async () => {
+    it('should validate content_slug format', async () => {
+      const { getReviewsWithStats } = await import('./content.ts');
+
+      // Invalid slug format
+      await expect(
+        getReviewsWithStats({
+          content_type: 'agents',
+          content_slug: 'invalid slug with spaces!',
+        } as any)
+      ).rejects.toThrow();
+    });
+
+    it('should validate sort_by enum', async () => {
+      const { getReviewsWithStats } = await import('./content.ts');
+
+      await expect(
+        getReviewsWithStats({
+          content_type: 'agents',
+          content_slug: 'test-agent',
+          sort_by: 'invalid-sort',
+        } as any)
+      ).rejects.toThrow();
+    });
+
+    it('should validate limit and offset ranges', async () => {
+      const { getReviewsWithStats } = await import('./content.ts');
+
+      await expect(
+        getReviewsWithStats({
+          content_type: 'agents',
+          content_slug: 'test-agent',
+          limit: 0,
+        } as any)
+      ).rejects.toThrow();
+
+      await expect(
+        getReviewsWithStats({
+          content_type: 'agents',
+          content_slug: 'test-agent',
+          limit: 101,
+        } as any)
+      ).rejects.toThrow();
+
+      await expect(
+        getReviewsWithStats({
+          content_type: 'agents',
+          content_slug: 'test-agent',
+          offset: -1,
+        } as any)
+      ).rejects.toThrow();
+    });
+  });
+
+  describe('data fetching', () => {
+    it('should call getReviewsWithStatsData with correct parameters', async () => {
+      const { getReviewsWithStats } = await import('./content.ts');
       const { getReviewsWithStatsData } = await import('../data/content/reviews.ts');
+
       const mockData = {
-        reviews: [],
-        stats: { average_rating: 4.5, total_reviews: 10 },
+        reviews: [
+          {
+            id: 'review-1',
+            rating: 5,
+            review_text: 'Great!',
+          },
+        ],
+        stats: {
+          total_reviews: 10,
+          average_rating: 4.5,
+        },
       };
 
-      vi.mocked(getReviewsWithStatsData).mockResolvedValue(mockData);
+      vi.mocked(getReviewsWithStatsData).mockResolvedValue(mockData as any);
 
-      const { getReviewsWithStats } = await import('./content.ts');
-      
-      // Call the action handler directly with input (next-safe-action structure)
       const result = await getReviewsWithStats({
         content_type: 'agents',
         content_slug: 'test-agent',
@@ -82,163 +161,409 @@ describe('Content Actions', () => {
         sortBy: 'recent',
         limit: 20,
         offset: 0,
-        // Note: userId won't be in ctx since we're not mocking auth
+        userId: 'test-user-id',
       });
+
       expect(result).toEqual(mockData);
     });
 
-    it('should handle unauthenticated requests', async () => {
-      const { getReviewsWithStatsData } = await import('../data/content/reviews.ts');
-      const mockData = {
-        reviews: [],
-        stats: { average_rating: 0, total_reviews: 0 },
-      };
-
-      vi.mocked(getReviewsWithStatsData).mockResolvedValue(mockData);
-
+    it('should not include userId when user is not authenticated', async () => {
       const { getReviewsWithStats } = await import('./content.ts');
-      
-      // Call the action handler directly (optionalAuthAction allows no userId)
-      await getReviewsWithStats({
-        content_type: 'skills',
-        content_slug: 'test-skill',
-        sort_by: 'recent',
-        limit: 10,
-        offset: 0,
+      const { getReviewsWithStatsData } = await import('../data/content/reviews.ts');
+
+      // Mock optionalAuthAction to return null userId
+      vi.mock('./safe-action.ts', async () => {
+        const actual = await vi.importActual('./safe-action.ts');
+        return {
+          ...actual,
+          optionalAuthAction: {
+            metadata: vi.fn(() => ({
+              inputSchema: vi.fn((schema) => ({
+                action: vi.fn((handler) => {
+                  return async (input: unknown) => {
+                    const parsed = schema.parse(input);
+                    return handler({
+                      parsedInput: parsed,
+                      ctx: { userId: null },
+                    });
+                  };
+                }),
+              })),
+            })),
+          },
+        };
       });
 
-      const callArgs = vi.mocked(getReviewsWithStatsData).mock.calls[0][0];
-      expect(callArgs).not.toHaveProperty('userId');
-    });
+      vi.mocked(getReviewsWithStatsData).mockResolvedValue({ reviews: [], stats: {} } as any);
 
-    it('should throw error when data fetch fails', async () => {
-      const { getReviewsWithStatsData } = await import('../data/content/reviews.ts');
-      vi.mocked(getReviewsWithStatsData).mockResolvedValue(null);
+      await getReviewsWithStats({
+        content_type: 'agents',
+        content_slug: 'test-agent',
+      });
 
-      const { getReviewsWithStats } = await import('./content.ts');
-      
-      // Call the action handler directly
-      await expect(
-        getReviewsWithStats({
-          content_type: 'agents',
-          content_slug: 'test',
-          sort_by: 'recent',
-          limit: 10,
-          offset: 0,
+      expect(getReviewsWithStatsData).toHaveBeenCalledWith(
+        expect.not.objectContaining({
+          userId: expect.anything(),
         })
-      ).rejects.toThrow('Failed to fetch reviews');
+      );
     });
   });
 
-  describe('fetchPaginatedContent', () => {
-    it('should fetch paginated content with defaults', async () => {
-      const { getPaginatedContent } = await import('../data/content/paginated.ts');
-      const mockData = {
-        items: [{ slug: 'item1' }, { slug: 'item2' }],
-        total: 2,
-      };
+  describe('error handling', () => {
+    it('should handle null data from service', async () => {
+      const { getReviewsWithStats } = await import('./content.ts');
+      const { getReviewsWithStatsData } = await import('../data/content/reviews.ts');
+      const { logger } = await import('../logging/server.ts');
 
-      vi.mocked(getPaginatedContent).mockResolvedValue(mockData);
+      vi.mocked(getReviewsWithStatsData).mockResolvedValue(null);
 
-      const { fetchPaginatedContent } = await import('./content.ts');
-      
-      // Call the action handler directly
-      const result = await fetchPaginatedContent({
-        offset: 0,
-        limit: 30,
-        category: null,
-      });
+      await expect(
+        getReviewsWithStats({
+          content_type: 'agents',
+          content_slug: 'test-agent',
+        })
+      ).rejects.toThrow('Failed to fetch reviews');
 
-      expect(getPaginatedContent).toHaveBeenCalledWith({
-        category: null,
-        limit: 30,
-        offset: 0,
-      });
-      expect(result).toEqual(mockData.items);
+      expect(logger.error).toHaveBeenCalled();
     });
 
-    it('should filter by category when provided', async () => {
-      const { getPaginatedContent } = await import('../data/content/paginated.ts');
-      const mockData = {
-        items: [{ slug: 'agent1', category: 'agents' }],
-        total: 1,
-      };
+    it('should handle service errors', async () => {
+      const { getReviewsWithStats } = await import('./content.ts');
+      const { getReviewsWithStatsData } = await import('../data/content/reviews.ts');
+      const { logger } = await import('../logging/server.ts');
 
-      vi.mocked(getPaginatedContent).mockResolvedValue(mockData);
+      const mockError = new Error('Service error');
+      vi.mocked(getReviewsWithStatsData).mockRejectedValue(mockError);
 
+      await expect(
+        getReviewsWithStats({
+          content_type: 'agents',
+          content_slug: 'test-agent',
+        })
+      ).rejects.toThrow();
+
+      expect(logger.error).toHaveBeenCalled();
+    });
+
+    it('should handle ctx.userId being undefined', async () => {
+      const { getReviewsWithStats } = await import('./content.ts');
+      const { getReviewsWithStatsData } = await import('../data/content/reviews.ts');
+
+      vi.mocked(getReviewsWithStatsData).mockResolvedValue({ reviews: [], stats: {} } as any);
+
+      // Mock to return ctx without userId
+      vi.doMock('./safe-action.ts', async () => {
+        const actual = await vi.importActual('./safe-action.ts');
+        return {
+          ...actual,
+          optionalAuthAction: {
+            metadata: vi.fn(() => ({
+              inputSchema: vi.fn((schema) => ({
+                action: vi.fn((handler) => {
+                  return async (input: unknown) => {
+                    const parsed = schema.parse(input);
+                    return handler({
+                      parsedInput: parsed,
+                      ctx: {}, // No userId
+                    });
+                  };
+                }),
+              })),
+            })),
+          },
+        };
+      });
+
+      await getReviewsWithStats({
+        content_type: 'agents',
+        content_slug: 'test-agent',
+      });
+
+      expect(getReviewsWithStatsData).toHaveBeenCalledWith(
+        expect.not.objectContaining({
+          userId: expect.anything(),
+        })
+      );
+    });
+  });
+
+  describe('edge cases', () => {
+    it('should handle lazy import errors for data/content/reviews', async () => {
+      // This tests error handling when dynamic import fails
+      // Note: Actual import errors are hard to test, but we verify error handling path
+      const { getReviewsWithStats } = await import('./content.ts');
+      const { getReviewsWithStatsData } = await import('../data/content/reviews.ts');
+      const { logger } = await import('../logging/server.ts');
+
+      const mockError = new Error('Import failed');
+      vi.mocked(getReviewsWithStatsData).mockRejectedValue(mockError);
+
+      await expect(
+        getReviewsWithStats({
+          content_type: 'agents',
+          content_slug: 'test-agent',
+        })
+      ).rejects.toThrow();
+
+      expect(logger.error).toHaveBeenCalled();
+    });
+
+    it('should handle createWebAppContextWithId errors gracefully', async () => {
+      const { getReviewsWithStats } = await import('./content.ts');
+      const { getReviewsWithStatsData } = await import('../data/content/reviews.ts');
+      const { createWebAppContextWithId } = await import('../logging/server.ts');
+
+      vi.mocked(createWebAppContextWithId).mockImplementation(() => {
+        throw new Error('Context creation failed');
+      });
+
+      // Should still work, just without logging context
+      vi.mocked(getReviewsWithStatsData).mockResolvedValue({ reviews: [], stats: {} } as any);
+
+      await expect(
+        getReviewsWithStats({
+          content_type: 'agents',
+          content_slug: 'test-agent',
+        })
+      ).rejects.toThrow();
+    });
+  });
+});
+
+describe('fetchPaginatedContent', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  describe('input validation', () => {
+    it('should validate offset and limit ranges', async () => {
       const { fetchPaginatedContent } = await import('./content.ts');
-      
-      // Call the action handler directly
+
+      await expect(
+        fetchPaginatedContent({
+          offset: -1,
+          limit: 10,
+        } as any)
+      ).rejects.toThrow();
+
+      await expect(
+        fetchPaginatedContent({
+          offset: 0,
+          limit: 0,
+        } as any)
+      ).rejects.toThrow();
+
+      await expect(
+        fetchPaginatedContent({
+          offset: 0,
+          limit: 101,
+        } as any)
+      ).rejects.toThrow();
+    });
+
+    it('should accept nullable category', async () => {
+      const { fetchPaginatedContent } = await import('./content.ts');
+      const { getPaginatedContent } = await import('../data/content/paginated.ts');
+
+      vi.mocked(getPaginatedContent).mockResolvedValue([]);
+
       await fetchPaginatedContent({
         offset: 0,
-        limit: 10,
+        limit: 30,
+        category: null,
+      });
+
+      expect(getPaginatedContent).toHaveBeenCalled();
+    });
+  });
+
+  describe('data fetching', () => {
+    it('should call getPaginatedContent with correct parameters', async () => {
+      const { fetchPaginatedContent } = await import('./content.ts');
+      const { getPaginatedContent } = await import('../data/content/paginated.ts');
+
+      const mockContent = [
+        {
+          id: 'content-1',
+          title: 'Test Content',
+          slug: 'test-content',
+        },
+      ];
+
+      vi.mocked(getPaginatedContent).mockResolvedValue(mockContent as any);
+
+      const result = await fetchPaginatedContent({
+        offset: 0,
+        limit: 30,
         category: 'agents',
       });
 
       expect(getPaginatedContent).toHaveBeenCalledWith({
-        category: 'agents',
-        limit: 10,
         offset: 0,
+        limit: 30,
+        category: 'agents',
+      });
+
+      expect(result).toEqual(mockContent);
+    });
+
+    it('should use default values', async () => {
+      const { fetchPaginatedContent } = await import('./content.ts');
+      const { getPaginatedContent } = await import('../data/content/paginated.ts');
+
+      vi.mocked(getPaginatedContent).mockResolvedValue([]);
+
+      await fetchPaginatedContent({});
+
+      expect(getPaginatedContent).toHaveBeenCalledWith({
+        offset: 0,
+        limit: 30,
+        category: null,
       });
     });
 
-    it('should return empty array when no items', async () => {
-      const { getPaginatedContent } = await import('../data/content/paginated.ts');
-      vi.mocked(getPaginatedContent).mockResolvedValue({
-        items: null,
-        total: 0,
-      } as any);
-
+    it('should handle getPaginatedContent returning null data', async () => {
       const { fetchPaginatedContent } = await import('./content.ts');
-      
-      // Call the action handler directly
+      const { getPaginatedContent } = await import('../data/content/paginated.ts');
+      const { logger } = await import('../logging/server.ts');
+
+      vi.mocked(getPaginatedContent).mockResolvedValue(null as any);
+
       const result = await fetchPaginatedContent({
         offset: 0,
-        limit: 10,
-        category: null,
+        limit: 30,
+      });
+
+      expect(result).toEqual([]);
+      expect(logger.warn).toHaveBeenCalled();
+    });
+
+    it('should handle getPaginatedContent returning data without items', async () => {
+      const { fetchPaginatedContent } = await import('./content.ts');
+      const { getPaginatedContent } = await import('../data/content/paginated.ts');
+      const { logger } = await import('../logging/server.ts');
+
+      vi.mocked(getPaginatedContent).mockResolvedValue({
+        items: null,
+        pagination: { total_count: 0 },
+      } as any);
+
+      const result = await fetchPaginatedContent({
+        offset: 0,
+        limit: 30,
+      });
+
+      expect(result).toEqual([]);
+      expect(logger.warn).toHaveBeenCalled();
+    });
+
+    it('should handle getPaginatedContent returning data with empty items array', async () => {
+      const { fetchPaginatedContent } = await import('./content.ts');
+      const { getPaginatedContent } = await import('../data/content/paginated.ts');
+
+      vi.mocked(getPaginatedContent).mockResolvedValue({
+        items: [],
+        pagination: { total_count: 0 },
+      } as any);
+
+      const result = await fetchPaginatedContent({
+        offset: 0,
+        limit: 30,
       });
 
       expect(result).toEqual([]);
     });
+
+    it('should handle getPaginatedContent returning non-array items', async () => {
+      const { fetchPaginatedContent } = await import('./content.ts');
+      const { getPaginatedContent } = await import('../data/content/paginated.ts');
+      const { logger } = await import('../logging/server.ts');
+
+      vi.mocked(getPaginatedContent).mockResolvedValue({
+        items: 'not-an-array',
+        pagination: { total_count: 0 },
+      } as any);
+
+      const result = await fetchPaginatedContent({
+        offset: 0,
+        limit: 30,
+      });
+
+      expect(result).toEqual([]);
+      expect(logger.warn).toHaveBeenCalled();
+    });
   });
 
-  describe('input validation', () => {
-    it('should validate slug format', () => {
-      // Test that the regex pattern works
-      const validSlugs = ['test-agent', 'my_skill', 'agent/v1', 'ABC123'];
-      const invalidSlugs = ['test agent', 'test@agent', 'test.agent'];
+  describe('error handling', () => {
+    it('should return empty array on error', async () => {
+      const { fetchPaginatedContent } = await import('./content.ts');
+      const { getPaginatedContent } = await import('../data/content/paginated.ts');
+      const { logger } = await import('../logging/server.ts');
 
-      const slugRegex = /^[a-zA-Z0-9\-_/]+$/;
+      vi.mocked(getPaginatedContent).mockRejectedValue(new Error('Service error'));
 
-      validSlugs.forEach(slug => {
-        expect(slugRegex.test(slug)).toBe(true);
+      const result = await fetchPaginatedContent({
+        offset: 0,
+        limit: 30,
       });
 
-      invalidSlugs.forEach(slug => {
-        expect(slugRegex.test(slug)).toBe(false);
+      expect(result).toEqual([]);
+      expect(logger.error).toHaveBeenCalled();
+    });
+  });
+
+  describe('edge cases', () => {
+    it('should handle lazy import errors for data/content/paginated', async () => {
+      const { fetchPaginatedContent } = await import('./content.ts');
+      const { getPaginatedContent } = await import('../data/content/paginated.ts');
+      const { logger } = await import('../logging/server.ts');
+
+      vi.mocked(getPaginatedContent).mockRejectedValue(new Error('Import failed'));
+
+      const result = await fetchPaginatedContent({
+        offset: 0,
+        limit: 30,
       });
+
+      expect(result).toEqual([]);
+      expect(logger.error).toHaveBeenCalled();
     });
 
-    it('should validate sort_by enum values', () => {
-      const validSortValues = ['recent', 'helpful', 'rating_high', 'rating_low'];
-      
-      validSortValues.forEach(value => {
-        expect(validSortValues).toContain(value);
+    it('should handle createWebAppContextWithId errors gracefully', async () => {
+      const { fetchPaginatedContent } = await import('./content.ts');
+      const { getPaginatedContent } = await import('../data/content/paginated.ts');
+      const { createWebAppContextWithId } = await import('../logging/server.ts');
+
+      vi.mocked(createWebAppContextWithId).mockImplementation(() => {
+        throw new Error('Context creation failed');
       });
+
+      vi.mocked(getPaginatedContent).mockResolvedValue({ items: [] } as any);
+
+      // Should still work, just without logging context
+      const result = await fetchPaginatedContent({
+        offset: 0,
+        limit: 30,
+      });
+
+      expect(result).toEqual([]);
     });
 
-    it('should enforce limit constraints', () => {
-      const validLimits = [1, 50, 100];
-      const invalidLimits = [0, -1, 101, 1000];
+    it('should handle data.items being undefined (nullish coalescing)', async () => {
+      const { fetchPaginatedContent } = await import('./content.ts');
+      const { getPaginatedContent } = await import('../data/content/paginated.ts');
 
-      validLimits.forEach(limit => {
-        expect(limit).toBeGreaterThanOrEqual(1);
-        expect(limit).toBeLessThanOrEqual(100);
+      vi.mocked(getPaginatedContent).mockResolvedValue({
+        items: undefined,
+        pagination: { total_count: 0 },
+      } as any);
+
+      const result = await fetchPaginatedContent({
+        offset: 0,
+        limit: 30,
       });
 
-      invalidLimits.forEach(limit => {
-        expect(limit < 1 || limit > 100).toBe(true);
-      });
+      expect(result).toEqual([]);
     });
   });
 });

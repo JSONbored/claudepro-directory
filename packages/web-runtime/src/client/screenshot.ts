@@ -4,9 +4,10 @@
  * Screenshot Utility - Code Block to Image Generation
  * Uses html2canvas-pro for high-quality PNG generation with modern color support (oklch, lab)
  * Includes watermark branding for viral loop attribution
+ * 
+ * Optimized: html2canvas-pro is dynamically imported to reduce initial bundle size (~200KB saved)
  */
 
-import html2canvas from 'html2canvas-pro';
 import { logger } from '../logger.ts';
 import { normalizeError } from '../errors.ts';
 
@@ -183,6 +184,9 @@ export async function generateCodeScreenshot(
 
     // Wait for fonts to load
     await document.fonts.ready;
+
+    // Dynamically import html2canvas-pro only when needed (optimized: reduces initial bundle size)
+    const html2canvas = (await import('html2canvas-pro')).default;
 
     // Generate canvas with html2canvas-pro
     const canvas = await html2canvas(container, {

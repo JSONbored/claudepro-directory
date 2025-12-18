@@ -12,7 +12,7 @@ import { useNewsletter } from '@heyclaude/web-runtime/hooks';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { ArrowRight, Loader2, Mail } from '@heyclaude/web-runtime/icons';
 import { cn, SimpleCopyButton } from '@heyclaude/web-runtime/ui';
-import { SPRING, STAGGER, DURATION, size, muted, paddingX, paddingY, marginX, gap, spaceY, padding, marginBottom, marginTop } from '@heyclaude/web-runtime/design-system';
+import { SPRING, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useId, useMemo, useState } from 'react';
@@ -68,10 +68,10 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
         // Sanitize highlighted code with DOMPurify for XSS protection
         // Even though input is hardcoded, sanitization provides defense-in-depth
         if (typeof window !== 'undefined' && rawHighlightedCode) {
-          const DOMPurify = await import('dompurify');
+          const { sanitizeHtml } = await import('@heyclaude/web-runtime/utils/dompurify');
           // Sanitize with restrictive allowlist for Shiki HTML
           // Shiki typically uses: <pre>, <code>, <span> with class and style attributes
-          const sanitized = DOMPurify.default.sanitize(rawHighlightedCode, {
+          const sanitized = await sanitizeHtml(rawHighlightedCode, {
             ALLOWED_TAGS: ['pre', 'code', 'span', 'div'],
             ALLOWED_ATTR: ['class', 'style', 'data-line'],
             // Allow data-* attributes (Shiki may use data-line for line numbers)
@@ -106,18 +106,18 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
 
   return (
     <div className="border-border/50 bg-background border-b">
-      <div className={`container ${marginX.auto} ${paddingX.default} ${paddingY.section} md:${paddingY.default}`}>
-        <div className={`${marginX.auto} max-w-6xl`}>
-          <div className={`grid grid-cols-1 ${gap.relaxed} lg:grid-cols-2 lg:${gap.default}`}>
+      <div className="container mx-auto px-4 py-12 md:py-4">
+        <div className="mx-auto max-w-6xl">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-3">
             {/* Left Column - MCP Command */}
             <motion.div
-              className={`${spaceY.comfortable}`}
+              className="space-y-4"
               initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -20 }}
               whileInView={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: DURATION.moderate }}
             >
-              <div className={`${spaceY.compact}`}>
+              <div className="space-y-2">
                 <h2 className="text-foreground text-2xl font-bold leading-tight md:text-3xl">
                   Create what's exciting. Maintain what's essential.
                 </h2>
@@ -128,8 +128,8 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
 
               {/* Code Block with Copy Button */}
               <div className="relative">
-                <div className={`border-border/50 bg-card/50 rounded-lg border ${padding.default}`}>
-                  <div className={`${marginBottom.compact} flex items-center justify-between`}>
+                <div className="border-border/50 bg-card/50 card-base p-4">
+                  <div className="mb-2 flex items-center justify-between">
                     <span className="text-muted-foreground text-sm font-medium">Get Claude Code</span>
                     <SimpleCopyButton
                       content={MCP_COMMAND}
@@ -137,7 +137,7 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
                       ariaLabel="Copy MCP command"
                       variant="ghost"
                       size="sm"
-                      className={`h-8 w-8 ${padding.default}`}
+                      className="h-8 w-8 p-4"
                       iconClassName="h-4 w-4"
                     />
                   </div>
@@ -148,7 +148,7 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
                     dangerouslySetInnerHTML={{ __html: sanitizedCode }}
                   />
                 </div>
-                <p className={`text-muted-foreground ${marginTop.default} text-sm`}>
+                <p className="text-muted-foreground text-sm mt-4">
                   Or{' '}
                   <a
                     href="/docs"
@@ -162,7 +162,7 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
 
             {/* Right Column - Newsletter */}
             <motion.div
-              className={`${spaceY.comfortable}`}
+              className="space-y-4"
               initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: 20 }}
               whileInView={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
               viewport={{ once: true }}
@@ -176,7 +176,7 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
                 viewport={{ once: true }}
                 transition={SPRING.smooth}
               >
-                <div className={`border-border/50 bg-card/50 rounded-xl border ${padding.default}`}>
+                <div className="border-border/50 bg-card/50 rounded-xl border p-4">
                   <Mail className="text-foreground h-8 w-8 md:h-10 md:w-10" aria-hidden="true" />
                 </div>
               </motion.div>
@@ -193,8 +193,8 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
               </p>
 
               {/* Integrated Form */}
-              <form onSubmit={handleSubmit} className={`${spaceY.default}`}>
-                <div className={`relative flex w-full items-center ${gap.tight}`}>
+              <form onSubmit={handleSubmit} className="space-y-3">
+                <div className="relative flex w-full items-center gap-1">
                   {/* Email Input */}
                   <input
                     type="email"
@@ -207,7 +207,7 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
                     disabled={isSubmitting}
                     autoComplete="email"
                     className={cn(
-                      'h-14 w-full rounded-lg border px-4 pr-14 text-base',
+                      'h-14 w-full card-base px-4 pr-14 text-base',
                       'border-border bg-background',
                       'transition-all duration-200 ease-out',
                       'focus:border-color-newsletter-border focus:ring-2 focus:ring-color-newsletter-ring focus:outline-none',
@@ -289,7 +289,7 @@ export function FooterNewsletterCTA({ source }: FooterNewsletterCTAProps) {
                 </AnimatePresence>
 
                 {/* Privacy text */}
-                <p className={cn(size.xs, muted.default, 'leading-snug')}>
+                <p className={cn('text-xs', 'text-muted-foreground', 'leading-snug')}>
                   Please provide your email address if you'd like to receive our monthly developer
                   newsletter. You can unsubscribe at any time.
                 </p>

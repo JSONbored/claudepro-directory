@@ -1,23 +1,20 @@
 'use server';
 
-import { NewsletterService } from '@heyclaude/data-layer';
-import { cacheLife, cacheTag } from 'next/cache';
+import { createCachedDataFunction, generateResourceTags } from './cached-data-factory.ts';
 
 /**
  * Get newsletter subscriber count
  *
  * Uses 'use cache' to cache newsletter count. This data is public and same for all users.
- * Newsletter count changes frequently, so we use the 'quarter' cacheLife profile.
+ * Newsletter count changes frequently, so we use the 'long' cacheLife profile.
  */
-export async function getNewsletterSubscriberCount(): Promise<null | number> {
-  'use cache';
-
-  // Configure cache - use 'stable' profile for optimal SEO (6hr stale, 1hr revalidate, 7 days expire)
-  cacheLife('stable'); // 6hr stale, 1hr revalidate, 7 days expire - optimized for SEO
-  cacheTag('newsletter');
-  cacheTag('stats');
-
-  const service = new NewsletterService();
-  const result = await service.getNewsletterSubscriberCount();
-  return result ?? 0;
-}
+export const getNewsletterSubscriberCount = createCachedDataFunction<void, number>({
+  serviceKey: 'newsletter',
+  methodName: 'getNewsletterSubscriberCount',
+  cacheMode: 'public',
+  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
+  cacheTags: () => generateResourceTags('newsletter', undefined, ['stats']),
+  module: 'data/newsletter',
+  operation: 'getNewsletterSubscriberCount',
+  transformResult: (result) => (result as number | null) ?? 0,
+});

@@ -23,31 +23,24 @@
 import 'server-only';
 import { type content_category } from '@heyclaude/data-layer/prisma';
 import { VALID_CATEGORIES } from '@heyclaude/web-runtime/core';
-import { getContentTemplates } from '@heyclaude/web-runtime/data';
 import {
   badRequestResponse,
-  buildCacheHeaders,
   categorySchema,
   createApiOptionsHandler,
-  createApiRoute,
+  createCachedApiRoute,
   getOnlyCorsHeaders,
+  getVersionedRoute,
+  jsonResponse,
+  type RouteHandlerContext,
 } from '@heyclaude/web-runtime/server';
-import { cacheLife, cacheTag } from 'next/cache';
-import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
-/***
- * Cached helper function to fetch content templates
- * Uses Cache Components to reduce function invocations
- * @param {content_category} category
- */
-async function getCachedTemplatesForAPI(category: content_category) {
-  'use cache';
-  cacheTag('templates');
-  cacheTag(`templates-${category}`);
-  cacheLife('static'); // 5min stale, 1day revalidate, 1week expire
-
-  return getContentTemplates(category);
+// Shared category validator
+function validateCategory(category: content_category | null | undefined): content_category {
+  if (!category || !VALID_CATEGORIES.includes(category)) {
+    throw new Error(`Category parameter is required and cannot be "all". Valid categories: ${VALID_CATEGORIES.join(', ')}`);
+  }
+  return category;
 }
 
 /**
@@ -56,61 +49,13 @@ async function getCachedTemplatesForAPI(category: content_category) {
  * Fetches content templates for a specified category.
  * Validates category parameter and returns templates with metadata.
  */
-export const GET = createApiRoute({
-  cors: 'anon',
-  handler: async ({ logger, query }) => {
-    const { category } = query as {
-      category: content_category | null;
-    };
-
-    // Handle category: schema transforms "all" to null, but this endpoint requires a specific category
-    // If category is null (from "all" transformation), return 400 Bad Request (validation error)
-    if (!category || !VALID_CATEGORIES.includes(category)) {
-      logger.warn(
-        {
-          category,
-        },
-        'Templates API: invalid or missing category'
-      );
-      return badRequestResponse(
-        `Category parameter is required and cannot be "all". Valid categories: ${VALID_CATEGORIES.join(', ')}`,
-        getOnlyCorsHeaders
-      );
-    }
-
-    // Type narrowing: category is validated and guaranteed to be content_category
-    const validCategory = category;
-
-    // Fetch templates from cached helper (adds page-level caching on top of data layer caching)
-    const templates = await getCachedTemplatesForAPI(validCategory);
-
-    // Structured logging with cache tags
-    logger.info(
-      {
-        cacheTags: ['templates', `templates-${validCategory}`],
-        category: validCategory,
-        count: templates.length,
-      },
-      'Templates API: success'
-    );
-
-    // Return success response with optimized cache headers
-    // Using 'config' preset: 1 day TTL, 2 days stale (templates change rarely)
-    return NextResponse.json(
-      {
-        category: validCategory,
-        count: templates.length,
-        success: true,
-        templates,
-      },
-      {
-        headers: {
-          ...buildCacheHeaders('config'), // 1 day TTL, 2 days stale
-        },
-        status: 200,
-      }
-    );
+export const GET = createCachedApiRoute({
+  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire
+  cacheTags: (query) => {
+    const category = query.category as content_category | null;
+    return category ? ['templates', `templates-${category}`] : ['templates'];
   },
+  cors: 'anon',
   method: 'GET',
   openapi: {
     description:
@@ -131,7 +76,54 @@ export const GET = createApiRoute({
   querySchema: z.object({
     category: categorySchema,
   }),
-  route: '/api/templates',
+  responseHandler: (result: unknown, query: { category: content_category | null }, _body: unknown, ctx: RouteHandlerContext<{ category: content_category | null }, unknown>) => {
+    const { logger } = ctx;
+    const { category } = query;
+
+    // Validate category (schema transforms "all" to null, but this endpoint requires a specific category)
+    let validCategory: content_category;
+    try {
+      validCategory = validateCategory(category);
+    } catch (error) {
+      logger.warn({ category }, 'Templates API: invalid or missing category');
+      return badRequestResponse(
+        error instanceof Error ? error.message : 'Invalid category parameter',
+        getOnlyCorsHeaders
+      );
+    }
+    const serviceResult = result as { templates?: unknown[] } | null | undefined;
+    const templates = serviceResult?.templates?.filter(Boolean) ?? [];
+
+    // Structured logging with cache tags
+    logger.info(
+      {
+        cacheTags: ['templates', `templates-${validCategory}`],
+        category: validCategory,
+        count: templates.length,
+      },
+      'Templates API: success'
+    );
+
+    return jsonResponse(
+      {
+        category: validCategory,
+        count: templates.length,
+        success: true,
+        templates,
+      },
+      200,
+      getOnlyCorsHeaders
+    );
+  },
+  route: getVersionedRoute('templates'),
+  service: {
+    methodArgs: (query) => {
+      const category = validateCategory(query.category as content_category | null);
+      return [{ p_category: category }];
+    },
+    methodName: 'getContentTemplates',
+    serviceKey: 'content',
+  },
 });
 
 /**

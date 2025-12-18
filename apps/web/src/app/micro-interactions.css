@@ -112,31 +112,6 @@ a:not([class*="button"]):not([class*="btn"]):not(.no-underline):hover::after {
 }
 
 /* ===========================
- * Card Interactions
- * =========================== */
-
-/* DEPRECATED: .hover-lift CSS class (replaced by Motion.dev)
- *
- * This CSS class is NO LONGER USED in BaseCard (as of 2025-11-09).
- * BaseCard now uses Motion.dev whileHover for card lift animations.
- *
- * MIGRATION GUIDE:
- * - Old approach: <div className="hover-lift"> (CSS)
- * - New approach: <motion.div whileHover={{ y: -2 }}> (Motion.dev)
- *
- * This class is kept for backward compatibility with:
- * - Legacy components that haven't migrated to Motion.dev yet
- * - Static cards that don't need interactive animations
- *
- * If you're building a new component, use Motion.dev instead.
- * See: src/lib/ui-constants.ts → ANIMATION_CONSTANTS
- */
-.hover-lift:hover {
-  transform: translateY(-2px);
-  transition: transform var(--duration-quick) cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* ===========================
  * Form Element Polish
  * =========================== */
 

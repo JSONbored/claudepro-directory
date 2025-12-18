@@ -16,7 +16,7 @@ import {
 } from '@heyclaude/web-runtime/ui';
 import { FolderOpen } from '@heyclaude/web-runtime/icons';
 import { motion } from 'motion/react';
-import { MICROINTERACTIONS, between, paddingY, marginBottom, gap } from '@heyclaude/web-runtime/design-system';
+import { MICROINTERACTIONS } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import type { GetUserProfileReturns } from '@heyclaude/database-types/postgres-types';
 
@@ -39,8 +39,8 @@ export function ProfileCollectionsSection({
   if (!collections || collections.length === 0) {
     return (
       <Card>
-        <CardContent className={`flex flex-col items-center ${paddingY.section}`}>
-          <FolderOpen className={`text-muted-foreground ${marginBottom.default} h-12 w-12`} />
+        <CardContent className="flex flex-col items-center py-12">
+          <FolderOpen className="mb-4 h-12 w-12 text-muted-foreground" />
           <p className="text-muted-foreground">No public collections yet</p>
         </CardContent>
       </Card>
@@ -48,7 +48,7 @@ export function ProfileCollectionsSection({
   }
 
   return (
-    <div className={`grid ${gap.default} sm:grid-cols-2`}>
+    <div className="grid gap-3 sm:grid-cols-2">
       {collections
         .filter(
           (
@@ -86,7 +86,7 @@ export function ProfileCollectionsSection({
                   </CardHeader>
                   <CardContent>
                     <div
-                      className={`${between.center} text-sm`}
+                      className="flex items-center justify-between text-sm"
                     >
                       <span className="text-muted-foreground">
                         {collection.item_count ?? 0}{' '}

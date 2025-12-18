@@ -7,7 +7,6 @@
 import type { GetContentTemplatesReturns } from '@heyclaude/database-types/postgres-types';
 import { ChevronDown, FileText } from '@heyclaude/web-runtime/icons';
 import {
-  DIMENSIONS,
   Button,
   DropdownMenu,
   DropdownMenuContent,
@@ -15,7 +14,6 @@ import {
   DropdownMenuTrigger,
   cn,
 } from '@heyclaude/web-runtime/ui';
-import { cluster, iconSize, paddingY, marginTop, muted, size } from "@heyclaude/web-runtime/design-system";
 
 // Use generated type directly from @heyclaude/database-types
 type ContentTemplatesResult = GetContentTemplatesReturns;
@@ -55,25 +53,25 @@ export function TemplateSelector({ templates, onSelect }: TemplateSelectorProps)
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" className={`w-full justify-between`} type="button">
-          <span className={cluster.compact}>
-            <FileText className={iconSize.sm} />
+          <span className="flex items-center gap-2">
+            <FileText className="h-4 w-4" />
             Use Template
           </span>
-          <ChevronDown className={`${iconSize.sm} opacity-50`} />
+          <ChevronDown className="h-4 w-4 opacity-50" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="start"
-        className={`${DIMENSIONS.DROPDOWN_SM} sm:${DIMENSIONS.DROPDOWN_MD}`}
+        className="w-[280px] sm:w-[380px]"
       >
         {templates.map((template) => (
           <DropdownMenuItem
             key={template.id}
             onClick={() => onSelect(template)}
-            className={`cursor-pointer flex-col items-start ${paddingY.compact}`}
+            className="cursor-pointer flex-col items-start py-2"
           >
             <div className="font-medium">{template.name}</div>
-            <div className={cn(muted.default, marginTop['4.5'], size.xs)}>{template.description}</div>
+            <div className={cn('text-muted-foreground', 'mt-4.5', 'text-xs')}>{template.description}</div>
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

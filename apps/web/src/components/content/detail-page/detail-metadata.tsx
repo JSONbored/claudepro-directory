@@ -18,7 +18,6 @@ import { formatDate } from '@heyclaude/web-runtime/data/utils';
 import { Calendar, Copy, Eye, Tag, User } from '@heyclaude/web-runtime/icons';
 import { type ContentItem } from '@heyclaude/web-runtime/types/component.types';
 import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
-import { cluster, iconSize, wrap, gap, paddingX, marginX, marginBottom } from '@heyclaude/web-runtime/design-system';
 
 export interface DetailMetadataProps {
   copyCount?: number | undefined;
@@ -206,10 +205,10 @@ export function DetailMetadata({ item, viewCount, copyCount }: DetailMetadataPro
   if (!(hasMetadata || hasTags)) return null;
 
   return (
-    <div className={`container ${marginX.auto} ${paddingX.default}`}>
+    <div className="container mx-auto px-4">
       {/* Author, Date & View Count Metadata */}
       {hasMetadata ? (
-        <div className={`text-muted-foreground ${marginBottom.default} flex flex-wrap ${gap.default} text-sm`}>
+        <div className="text-muted-foreground text-sm mb-4 flex flex-wrap gap-3">
           {'author' in item && item.author
             ? (() => {
                 // Get safe author profile URL - this function validates and sanitizes the URL
@@ -224,8 +223,8 @@ export function DetailMetadata({ item, viewCount, copyCount }: DetailMetadataPro
                 // Check if this is an internal user profile link
                 const isInternalProfile = validatedUrl.startsWith('/u/');
                 return (
-                  <div className={cluster.compact}>
-                    <User className={iconSize.sm} />
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4" />
                     {isInternalProfile ? (
                       <a
                         href={validatedUrl}
@@ -248,20 +247,20 @@ export function DetailMetadata({ item, viewCount, copyCount }: DetailMetadataPro
               })()
             : null}
           {'date_added' in item && item.date_added ? (
-            <div className={cluster.compact}>
-              <Calendar className={iconSize.sm} />
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
               <span>{formatDate(item.date_added)}</span>
             </div>
           ) : null}
           {typeof viewCount === 'number' && viewCount > 0 && (
-            <div className={cluster.compact}>
-              <Eye className={iconSize.sm} />
+            <div className="flex items-center gap-2">
+              <Eye className="h-4 w-4" />
               <span>{formatViewCount(viewCount)}</span>
             </div>
           )}
           {typeof copyCount === 'number' && copyCount > 0 && (
-            <div className={cluster.compact}>
-              <Copy className={iconSize.sm} />
+            <div className="flex items-center gap-2">
+              <Copy className="h-4 w-4" />
               <span>{formatCopyCount(copyCount)}</span>
             </div>
           )}
@@ -269,8 +268,8 @@ export function DetailMetadata({ item, viewCount, copyCount }: DetailMetadataPro
       ) : null}
       {/* Tags */}
       {hasTags && tags.length > 0 ? (
-        <div className={`${wrap} ${gap.compact}`}>
-          <Tag className={`${iconSize.sm} text-muted-foreground`} />
+        <div className="flex flex-wrap gap-2">
+          <Tag className="h-4 w-4 text-muted-foreground" />
           {tags.map((tag) => (
             <UnifiedBadge key={tag} variant="base" style="outline" className="text-xs">
               {tag}

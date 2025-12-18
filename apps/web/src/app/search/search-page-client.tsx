@@ -22,7 +22,6 @@ import { usePathname } from 'next/navigation';
 import { Suspense, useCallback, useMemo } from 'react';
 
 import { useAuthModal } from '@/src/hooks/use-auth-modal';
-import { spaceY, padding } from "@heyclaude/web-runtime/design-system";
 
 export interface SearchPageClientProps {
   /** Available authors for filters */
@@ -35,9 +34,13 @@ export interface SearchPageClientProps {
 
 /**
  * SearchPageClient - Unified search for /search page
- * 
+ *
  * React Compiler automatically handles memoization (reactCompiler: true in next.config.mjs).
  * We only use useMemo/useCallback here to ensure stable prop references for child components.
+ * @param root0
+ * @param root0.availableAuthors
+ * @param root0.availableCategories
+ * @param root0.availableTags
  */
 export function SearchPageClient({
   availableAuthors = [],
@@ -47,12 +50,12 @@ export function SearchPageClient({
   const pulse = usePulse();
   const { openAuthModal } = useAuthModal();
   const pathname = usePathname();
-  
+
   // OPTIMIZATION: Memoize prop arrays to ensure stable references
   const stableAuthors = useMemo(() => availableAuthors, [availableAuthors]);
   const stableCategories = useMemo(() => availableCategories, [availableCategories]);
   const stableTags = useMemo(() => availableTags, [availableTags]);
-  
+
   // OPTIMIZATION: Memoize search API configuration to prevent recreation
   const searchApiConfig = useMemo(
     () => ({
@@ -62,7 +65,7 @@ export function SearchPageClient({
     }),
     []
   );
-  
+
   const searchFunction = useSearchAPI(searchApiConfig);
 
   // Handle search with analytics
@@ -99,16 +102,20 @@ export function SearchPageClient({
       valueProposition: 'Sign in to save bookmarks',
     });
   }, [openAuthModal, pathname]);
-  
+
   // OPTIMIZATION: Memoize default filters to prevent recreation
   const defaultFilters = useMemo(() => ({}), []);
-  
+
   // OPTIMIZATION: Memoize default query to prevent recreation
   const defaultQuery = useMemo(() => '', []);
 
   return (
-    <SearchProvider defaultFilters={defaultFilters} defaultQuery={defaultQuery} onSearch={handleSearch}>
-      <div className={`${spaceY.relaxed}`}>
+    <SearchProvider
+      defaultFilters={defaultFilters}
+      defaultQuery={defaultQuery}
+      onSearch={handleSearch}
+    >
+      <div className="space-y-6">
         {/* Search Bar */}
         <SearchBar
           placeholder="Search agents, MCP servers, rules, commands..."
@@ -118,7 +125,7 @@ export function SearchPageClient({
 
         {/* Search Filters */}
         <Suspense
-          fallback={<div className={`text-muted-foreground ${padding.default} text-center`}>Loading filters...</div>}
+          fallback={<div className="text-muted-foreground p-4 text-center">Loading filters...</div>}
         >
           <SearchFilters
             availableAuthors={stableAuthors}
@@ -130,7 +137,7 @@ export function SearchPageClient({
         {/* Search Results */}
         <Suspense
           fallback={
-            <div className={`text-muted-foreground ${padding.relaxed} text-center`}>Loading search results...</div>
+            <div className="text-muted-foreground p-8 text-center">Loading search results...</div>
           }
         >
           <SearchResults onAuthRequired={handleAuthRequired} showActions showCategory />

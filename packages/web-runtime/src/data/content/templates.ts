@@ -1,12 +1,10 @@
 'use server';
 
-import type { content_category } from '@heyclaude/data-layer/prisma';
-import type { GetContentTemplatesReturns } from '@heyclaude/database-types/postgres-types';
+import { type content_category } from '@heyclaude/data-layer/prisma';
+import { type GetContentTemplatesReturns } from '@heyclaude/database-types/postgres-types';
 import { serializeForClient } from '@heyclaude/shared-runtime';
-// Temporarily removed cache imports - will be re-added when caching is re-implemented
-// import { cacheLife, cacheTag } from 'next/cache';
 
-import { logger, normalizeError } from '../../logging/server.ts';
+import { createCachedDataFunction, generateResourceTags } from '../cached-data-factory.ts';
 
 type ContentTemplatesResult = GetContentTemplatesReturns;
 type ContentTemplateItem = NonNullable<NonNullable<ContentTemplatesResult['templates']>[number]>;
@@ -21,45 +19,33 @@ export type MergedTemplateItem = ContentTemplateItem &
 /**
  * Get content templates
  * Uses 'use cache' to cache content templates. This data is public and same for all users.
- * Templates change periodically, so we use the 'hours' cacheLife profile.
- * @param category
+ * Templates change periodically, so we use the 'medium' cacheLife profile.
  */
-export async function getContentTemplates(
-  category: content_category
-): Promise<MergedTemplateItem[]> {
-  // Temporarily removed 'use cache' to fix serialization issues during prerendering
-  // The issue is that Next.js tries to serialize the entire function closure when using 'use cache',
-  // and class instances (Prisma client, ContentService) created inside the function are being captured.
-
-  // Configure cache - use 'hours' profile for templates (changes every 2 hours)
-  // Note: cacheLife/cacheTag require 'use cache', so these are currently no-ops
-  // cacheLife('hours'); // 1hr stale, 15min revalidate, 1 day expire
-  // cacheTag('templates');
-  // cacheTag(`templates-${category}`);
-
-  // Create request-scoped child logger to avoid race conditions
-  const reqLogger = logger.child({
-    module: 'data/content/templates',
-    operation: 'getContentTemplates',
-    route: 'utility-function', // Utility function - no specific route
-  });
-
-  try {
-    // ContentService now uses Prisma (no constructor needed)
-    const { ContentService } = await import('@heyclaude/data-layer');
-    const result = await new ContentService().getContentTemplates({ p_category: category });
-
-    if (result === null || result === undefined) {
+export const getContentTemplates = createCachedDataFunction<
+  content_category,
+  MergedTemplateItem[]
+>({
+  serviceKey: 'content',
+  methodName: 'getContentTemplates',
+  cacheMode: 'public',
+  cacheLife: 'medium', // 1hr stale, 15min revalidate, 1 day expire
+  cacheTags: (category) => generateResourceTags('templates', category),
+  module: 'data/content/templates',
+  operation: 'getContentTemplates',
+  transformArgs: (category) => ({ p_category: category }),
+  transformResult: (result) => {
+    const templatesResult = result as GetContentTemplatesReturns;
+    if (templatesResult === null || templatesResult === undefined) {
       return [];
     }
 
-    const templates = result.templates?.filter(Boolean) ?? [];
+    const templates = templatesResult.templates?.filter(Boolean) ?? [];
 
     const merged = templates.map((template) => {
       const templateData = template.template_data;
       const mergedData =
         typeof templateData === 'object' && templateData !== null && !Array.isArray(templateData)
-          ? (templateData as Record<string, unknown>)
+          ? templateData
           : {};
       return {
         ...template,
@@ -69,23 +55,7 @@ export async function getContentTemplates(
     });
 
     // Serialize for Client Component compatibility - ensure all data is plain objects
-    // Uses standardized serializeForClient utility for consistent serialization
-    // This handles Date objects, class instances, and any other non-serializable data
-    const serialized = serializeForClient(merged);
-
-    reqLogger.info(
-      { category, templateCount: serialized.length },
-      'getContentTemplates: fetched successfully'
-    );
-
-    return serialized;
-  } catch (error) {
-    const normalized = normalizeError(error, 'Failed to fetch content templates');
-    reqLogger.error(
-      { category, err: normalized, source: 'getContentTemplates' },
-      'getContentTemplates: failed'
-    );
-    // Return empty array on error to avoid breaking the build
-    return [];
-  }
-}
+    return serializeForClient(merged) as MergedTemplateItem[];
+  },
+  onError: () => [], // Return empty array on error to avoid breaking the build
+});

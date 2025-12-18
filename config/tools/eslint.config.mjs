@@ -950,6 +950,14 @@ export default tseslint.config(
       'architectural-rules/require-safe-action-middleware': 'error',
       'architectural-rules/no-direct-database-access-in-actions': 'error',
       'architectural-rules/require-edge-logging-setup': 'error', // Consolidated edge logging rule
+
+      // ============================================
+      // Design System Enforcement Rules
+      // ============================================
+      // DISABLED: We use Direct Tailwind with @theme as the design system
+      // Semantic utilities are deprecated - use Direct Tailwind classes
+      // 'architectural-rules/design-system-no-inline-tailwind': 'off', // Direct Tailwind is the standard
+      // 'architectural-rules/design-system-prefer-design-system-utility': 'off', // Direct Tailwind is the standard
       // ============================================
       // Custom Architectural Autofix Rules
       // ============================================

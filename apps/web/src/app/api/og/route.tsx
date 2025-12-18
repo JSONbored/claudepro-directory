@@ -17,26 +17,16 @@
 import 'server-only';
 import { OG_DEFAULTS, OG_DIMENSIONS } from '@heyclaude/shared-runtime';
 import {
-  buildCacheHeaders,
   createApiOptionsHandler,
   createApiRoute,
+  getVersionedRoute,
   ogImageQuerySchema,
 } from '@heyclaude/web-runtime/server';
 import { ImageResponse } from 'next/og';
-import { NextResponse } from 'next/server';
 
-/******
- * Generate an Open Graph image
- *
- * Note: ImageResponse cannot be cached via Next.js Cache Components APIs.
- * Caching is handled via HTTP cache headers (7-day TTL with 30-day stale-while-revalidate)
- * configured in the route handler for proper CDN/browser caching.
- *
- * @param {string} title - Title text to render
- * @param {string} description - Descriptive subtitle
- * @param {string} type - Badge text rendered at the top
- * @param {string[]} tags - Array of tags to render (up to 5)
- * @returns ImageResponse containing the rendered Open Graph image
+/**
+ * Generate an Open Graph image using Next.js ImageResponse.
+ * Caching is handled via HTTP cache headers (not Cache Components).
  */
 async function generateOgImage(
   title: string,
@@ -62,7 +52,7 @@ async function generateOgImage(
       }}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ alignItems: 'center', display: 'flex', gap: '12px' }}>
           <div
             style={{
               backgroundColor: '#f97316',
@@ -157,7 +147,9 @@ async function generateOgImage(
             <div style={{ color: 'var(--muted-foreground)', fontSize: '28px' }}>Directory</div>
           </div>
 
-          <div style={{ color: 'var(--muted-foreground)', fontSize: '24px' }}>claudepro.directory</div>
+          <div style={{ color: 'var(--muted-foreground)', fontSize: '24px' }}>
+            claudepro.directory
+          </div>
         </div>
       </div>
     </div>
@@ -197,49 +189,19 @@ export const GET = createApiRoute({
     const description = queryDescription ?? OG_DEFAULTS.description;
     const type = queryType ?? OG_DEFAULTS.type;
 
-    // Optimized tag parsing: single-pass with Set for deduplication (eliminates multiple array iterations)
-    // This reduces CPU usage by ~2-3% compared to split/map/filter/Set spread pattern
+    // Parse and deduplicate tags (single-pass with Set for efficiency)
     const tags: string[] = [];
     if (rawTags) {
       const tagSet = new Set<string>();
-      const parts = rawTags.split(',');
-      for (const part of parts) {
+      for (const part of rawTags.split(',')) {
         const trimmed = part.trim();
-        if (trimmed.length > 0) {
-          tagSet.add(trimmed);
-        }
+        if (trimmed) tagSet.add(trimmed);
       }
-      // Convert Set to array only once (more efficient than spread operator for small arrays)
       tags.push(...tagSet);
     }
 
     logger.info({ tagCount: tags.length, title, type }, 'Generating OG image');
-
-    // Generate ImageResponse - CPU savings come from HTTP response caching below
-    // (7-day TTL with 30-day stale-while-revalidate) rather than function-level caching
-    const imageResponse = await generateOgImage(title, description, type, tags);
-
-    // Add aggressive caching headers (7+ days) to reduce CPU usage
-    // OG images rarely change, so long cache is safe (30-50% CPU savings)
-    // Using 'content_export' preset with 7-day TTL and 30-day stale-while-revalidate
-    const cacheHeaders = buildCacheHeaders('content_export', {
-      stale: 60 * 60 * 24 * 30, // 30 days stale-while-revalidate (2592000 seconds)
-      ttl: 60 * 60 * 24 * 7, // 7 days (604800 seconds)
-    });
-
-    // Clone response to add cache headers
-    const headers = new Headers(imageResponse.headers);
-    for (const [key, value] of Object.entries(cacheHeaders)) {
-      if (value) {
-        headers.set(key, value);
-      }
-    }
-
-    return new NextResponse(imageResponse.body, {
-      headers,
-      status: imageResponse.status,
-      statusText: imageResponse.statusText,
-    });
+    return await generateOgImage(title, description, type, tags);
   },
   method: 'GET',
   openapi: {
@@ -259,7 +221,7 @@ export const GET = createApiRoute({
   },
   operation: 'OGImageAPI',
   querySchema: ogImageQuerySchema,
-  route: '/api/og',
+  route: getVersionedRoute('og'),
 });
 
 /**

@@ -1,11 +1,8 @@
 'use server';
 
-import { MiscService } from '@heyclaude/data-layer';
-import type { FormFieldConfigItem } from '@heyclaude/database-types/postgres-types';
+import { type FormFieldConfigItem } from '@heyclaude/database-types/postgres-types';
 import { cacheLife, cacheTag } from 'next/cache';
 
-import { normalizeError } from '../../errors.ts';
-import { logger } from '../../logger.ts';
 import {
   type FieldDefinition,
   type NumberFieldDefinition,
@@ -18,6 +15,7 @@ import {
   type TextareaFieldDefinition,
   type TextFieldDefinition,
 } from '../../types/component.types.ts';
+import { createCachedDataFunction, generateResourceTags } from '../cached-data-factory.ts';
 
 const FORM_FIELDS_CACHE_TAG = 'submission-form-fields';
 const FORM_FIELDS_CACHE_SECONDS = 60 * 60 * 6;
@@ -113,54 +111,36 @@ function emptySection(): SubmissionFormSection {
   };
 }
 
-/***
- *
+/**
  * Fetch fields for a content type (cached)
  * Uses 'use cache' to cache form field configuration. This data is public and same for all users.
- * @param {SubmissionContentType} contentType
- * @returns {Promise<unknown>} Return value description
  */
-async function fetchFieldsForContentType(
-  contentType: SubmissionContentType
-): Promise<SubmissionFormSection> {
-  'use cache';
-
-  // Configure cache - use 'static' profile for optimal SEO (1 day stale, 6hr revalidate, 30 days expire)
-  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
-  cacheTag('templates');
-  cacheTag(`submission-${contentType}`);
-
-  // Create request-scoped child logger to avoid race conditions
-  const requestLogger = logger.child({
-    module: 'data/forms/submission-form-fields',
-    operation: 'fetchFieldsForContentType',
-    route: 'utility-function', // Utility function - no specific route
-  });
-
-  try {
-    const service = new MiscService();
-    const result = await service.getFormFieldConfig({ p_form_type: contentType });
-
+const fetchFieldsForContentType = createCachedDataFunction<
+  SubmissionContentType,
+  SubmissionFormSection
+>({
+  serviceKey: 'misc',
+  methodName: 'getFormFieldConfig',
+  cacheMode: 'public',
+  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
+  cacheTags: (contentType) => generateResourceTags('forms', undefined, ['templates', `submission-${contentType}`]),
+  module: 'data/forms/submission-form-fields',
+  operation: 'fetchFieldsForContentType',
+  transformArgs: (contentType) => ({ p_form_type: contentType }),
+  transformResult: (result) => {
+    const rpcResult = result as { fields: FormFieldConfigItem[] | null } | null;
     if (
-      result === null ||
-      result === undefined ||
-      result.fields === null ||
-      result.fields === undefined
+      rpcResult === null ||
+      rpcResult === undefined ||
+      rpcResult.fields === null ||
+      rpcResult.fields === undefined
     ) {
-      requestLogger.error(
-        {
-          contentType,
-          err: new Error('RPC returned null or no fields'),
-          source: 'SubmissionFormConfig',
-        },
-        'Failed to load form fields'
-      );
       return emptySection();
     }
 
     const section = emptySection();
 
-    for (const item of result.fields) {
+    for (const item of rpcResult.fields) {
       const field = mapField(item);
       if (!field) continue;
 
@@ -194,28 +174,20 @@ async function fetchFieldsForContentType(
       }
     }
 
-    requestLogger.info(
-      {
-        contentType,
-        fieldCount: section.common.length + section.typeSpecific.length + section.tags.length,
-      },
-      'fetchFieldsForContentType: fetched successfully'
-    );
-
     return section;
-  } catch (error) {
-    const normalized = normalizeError(error, 'fetchFieldsForContentType failed');
-    requestLogger.error(
-      {
-        contentType,
-        err: normalized,
-        source: 'SubmissionFormConfig',
-      },
-      'fetchFieldsForContentType: failed'
-    );
-    return emptySection();
-  }
-}
+  },
+  onError: () => emptySection(),
+  logContext: (contentType, result) => {
+    const section = result as SubmissionFormSection | undefined;
+    return {
+      contentType,
+      fieldCount:
+        section
+          ? section.common.length + section.typeSpecific.length + section.tags.length
+          : 0,
+    };
+  },
+});
 
 async function loadSubmissionFormFields(): Promise<SubmissionFormConfig> {
   return fetchSubmissionSections(SUBMISSION_CONTENT_TYPES);
@@ -227,7 +199,7 @@ async function fetchSubmissionSections(
   const entries = await Promise.all(
     types.map(async (contentType) => {
       const section = await fetchFieldsForContentType(contentType);
-      return [contentType, section] as const;
+      return [contentType, section ?? emptySection()] as const;
     })
   );
 

@@ -19,71 +19,29 @@
  */
 
 import 'server-only';
-import { ContentService } from '@heyclaude/data-layer';
-import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
 import {
-  buildCacheHeaders,
   changelogFormatSchema,
   createApiOptionsHandler,
-  createApiRoute,
+  createCachedApiRoute,
   getOnlyCorsHeaders,
+  getVersionedRoute,
+  textResponse,
+  type RouteHandlerContext,
 } from '@heyclaude/web-runtime/server';
-import { cacheLife } from 'next/cache';
-import { NextResponse } from 'next/server';
 import { z } from 'zod';
-
-/**
- * Cached helper function to fetch changelog LLMs.txt content.
- 
- * @returns {unknown} Description of return value*/
-async function getCachedChangelogLlmsTxt(): Promise<null | string> {
-  'use cache';
-  cacheLife({ expire: 2_592_000, revalidate: 21_600, stale: 86_400 }); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
-
-  const service = new ContentService();
-  return service.getChangelogLlmsTxt();
-}
 
 /**
  * GET /api/content/changelog - Get changelog in LLMs.txt format
  *
  * Returns the changelog in LLMs.txt format for AI/LLM consumption.
  * Validates format parameter (must be 'llms-changelog').
+ * 
+ * OPTIMIZATION: Uses createCachedApiRoute to eliminate cached helper function boilerplate.
  */
-export const GET = createApiRoute({
+export const GET = createCachedApiRoute({
+  cacheLife: { expire: 2_592_000, revalidate: 21_600, stale: 86_400 }, // 1 day stale, 6hr revalidate, 30 days expire
+  cacheTags: ['changelog', 'changelog-llms-txt'],
   cors: 'anon',
-  handler: async ({ logger, query }) => {
-    const { format } = query as { format: 'llms-changelog' };
-
-    logger.info({ format }, 'Changelog index request received');
-
-    const data = await getCachedChangelogLlmsTxt();
-
-    if (!data) {
-      logger.warn({}, 'Changelog LLMs.txt not found');
-      throw new Error('Changelog LLMs.txt not found or invalid');
-    }
-
-    const formatted = data.replaceAll(String.raw`\n`, '\n');
-
-    logger.info(
-      {
-        bytes: formatted.length,
-      },
-      'Changelog LLMs.txt generated'
-    );
-
-    return new NextResponse(formatted, {
-      headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-        'X-Generated-By': 'prisma.rpc.generate_changelog_llms_txt',
-        ...buildSecurityHeaders(),
-        ...getOnlyCorsHeaders,
-        ...buildCacheHeaders('content_export'),
-      },
-      status: 200,
-    });
-  },
   method: 'GET',
   openapi: {
     description:
@@ -104,7 +62,27 @@ export const GET = createApiRoute({
   querySchema: z.object({
     format: changelogFormatSchema,
   }),
-  route: '/api/content/changelog',
+  responseHandler: (result: unknown, _query: unknown, _body: unknown, ctx: RouteHandlerContext<unknown, unknown>) => {
+    const { logger } = ctx;
+    const data = result as null | string;
+
+    if (!data) {
+      logger.warn({}, 'Changelog LLMs.txt not found');
+      throw new Error('Changelog LLMs.txt not found or invalid');
+    }
+
+    const formatted = data.replaceAll(String.raw`\n`, '\n');
+    logger.info({ bytes: formatted.length }, 'Changelog LLMs.txt generated');
+    return textResponse(formatted, 200, getOnlyCorsHeaders, {
+      'X-Generated-By': 'prisma.rpc.generate_changelog_llms_txt',
+    });
+  },
+  route: getVersionedRoute('content/changelog'),
+  service: {
+    methodArgs: () => [],
+    methodName: 'getChangelogLlmsTxt',
+    serviceKey: 'content',
+  },
 });
 
 /**

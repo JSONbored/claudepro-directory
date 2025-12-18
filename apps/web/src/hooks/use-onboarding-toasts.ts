@@ -23,41 +23,20 @@ interface OnboardingToast {
   title: string;
 }
 
-const ONBOARDING_TOASTS: OnboardingToast[] = [
-  {
-    id: 'wizard-welcome',
-    title: '👋 Welcome to the Submission Wizard',
-    message: "We'll guide you through each step to create a perfect submission.",
-    delay: 1000,
-    duration: 5000,
-  },
-  {
-    id: 'wizard-drafts',
-    title: '💾 Auto-Save Enabled',
-    message: 'Your progress is automatically saved. Feel free to take breaks!',
-    delay: 6500,
-    duration: 5000,
-  },
-  {
-    id: 'wizard-templates',
-    title: '✨ Pro Tip: Use Templates',
-    message: 'Save time by starting with proven templates from the community.',
-    delay: 12_000,
-    duration: 5000,
-  },
-];
+// Wizard toasts removed - wizard page has been deleted
+// ONBOARDING_TOASTS removed - unused constant
 
 const STORAGE_KEY = 'claudepro_onboarding_toasts_seen';
 
 interface OnboardingToastsOptions {
-  context?: 'general' | 'submit' | 'wizard';
+  context?: 'general' | 'submit';
   customToasts?: OnboardingToast[];
   enabled?: boolean;
 }
 
 export function useOnboardingToasts({
   enabled = true,
-  context = 'wizard',
+  context = 'submit',
 }: OnboardingToastsOptions = {}) {
   const [activeToasts] = useState<Set<string>>(new Set());
 
@@ -108,9 +87,7 @@ export function useOnboardingToasts({
 /**
  * Onboarding toasts for different contexts
  */
-export const ONBOARDING_TOASTS_BY_CONTEXT = {
-  wizard: ONBOARDING_TOASTS,
-
+export const ONBOARDING_TOASTS_BY_CONTEXT: Record<string, OnboardingToast[]> = {
   submit: [
     {
       id: 'submit-welcome',

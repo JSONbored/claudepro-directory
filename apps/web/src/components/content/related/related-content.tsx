@@ -13,7 +13,6 @@ import { logClientError, normalizeError } from '@heyclaude/web-runtime/logging/c
 import { UnifiedBadge, UnifiedCardGrid, BaseCard, deepEqual, cn } from '@heyclaude/web-runtime/ui';
 import { useIsClient, useIsMounted, useBoolean } from '@heyclaude/web-runtime/hooks';
 import { useEffect, useState, useRef } from 'react';
-import { iconSize, cluster, marginY, marginBottom, padding, paddingX, paddingY } from "@heyclaude/web-runtime/design-system";
 
 // Use the new composite type from @heyclaude/data-layer
 type RelatedContentItemWithUI = RelatedContentItem & {
@@ -45,16 +44,16 @@ export interface SmartRelatedContentProps {
  */
 function getCategoryBadgeClass(category: string): string {
   const classes: Record<string, string> = {
-    agents: 'badge-category-agents',
-    mcp: 'badge-category-mcp',
-    rules: 'badge-category-rules',
-    commands: 'badge-category-commands',
-    hooks: 'badge-category-hooks',
-    tutorials: 'badge-category-tutorials',
+    agents: 'bg-transparent text-category-agents border-category-agents-border font-semibold',
+    mcp: 'bg-transparent text-category-mcp border-category-mcp-border font-semibold',
+    rules: 'bg-transparent text-category-rules border-category-rules-border font-semibold',
+    commands: 'bg-transparent text-category-commands border-category-commands-border font-semibold',
+    hooks: 'bg-transparent text-category-hooks border-category-hooks-border font-semibold',
+    tutorials: 'bg-transparent text-category-tutorials border-category-tutorials-border font-semibold',
     comparisons: 'bg-primary/20 text-primary border-primary/30',
-    workflows: 'badge-category-workflows',
-    'use-cases': 'badge-category-use-cases',
-    troubleshooting: 'badge-category-troubleshooting',
+    workflows: 'bg-transparent text-category-workflows border-category-workflows-border font-semibold',
+    'use-cases': 'bg-transparent text-category-use-cases border-category-use-cases-border font-semibold',
+    troubleshooting: 'bg-transparent text-category-troubleshooting border-category-troubleshooting-border font-semibold',
   };
 
   return classes[category] || 'bg-muted/20 text-muted border-muted/30';
@@ -189,7 +188,7 @@ export function RelatedContentClient({
 
         if (!isMounted()) return;
 
-        const convertedItems: RelatedContentItemWithUI[] = (response.items || [])
+        const convertedItems: RelatedContentItemWithUI[] = (response?.items || [])
           .filter((item) => Boolean(item.category && item.slug && item.title))
           .map((item): RelatedContentItemWithUI => {
             const result: RelatedContentItemWithUI = {
@@ -263,18 +262,18 @@ export function RelatedContentClient({
     <section
       itemScope
       itemType="https://schema.org/ItemList"
-      className={`${marginY.default}`}
+      className="my-4"
       aria-label="Related content"
     >
       {showTitle ? (
-        <div className={`border-primary/20 from-primary/5 to-primary/10 ${marginBottom.relaxed} rounded-xl border bg-linear-to-r ${padding.default} sm:${padding.comfortable}`}>
+        <div className={`border-primary/20 from-primary/5 to-primary/10 mb-8 rounded-xl border bg-linear-to-r p-4 sm:p-6`}>
           <div className={`flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center`}>
-            <div className={`${cluster.default} sm:gap-4`}>
-              <div className={`bg-primary/10 shrink-0 rounded-lg ${padding.tight}`}>
-                <Sparkles className={`${iconSize.md} text-primary sm:h-6 sm:w-6`} />
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="bg-primary/10 shrink-0 rounded-lg p-2">
+                <Sparkles className="h-5 w-5 text-primary sm:h-6 sm:w-6" />
               </div>
               <div className="min-w-0">
-                <h2 className={`text-foreground ${marginBottom.tight} text-xl font-bold sm:text-2xl`} itemProp="name">
+                <h2 className="text-foreground mb-1 text-xl font-bold sm:text-2xl" itemProp="name">
                   {title}
                 </h2>
                 <p className="text-muted-foreground text-xs sm:text-sm">
@@ -285,7 +284,7 @@ export function RelatedContentClient({
             <UnifiedBadge
               variant="base"
               style="secondary"
-              className={`shrink-0 border-primary/30 bg-primary/10 text-primary ${paddingX.tight} ${paddingY.micro} text-xs font-medium sm:${paddingX.compact} sm:text-sm`}
+              className="shrink-0 border-primary/30 bg-primary/10 text-primary px-2 py-1 text-xs font-medium sm:px-3 sm:text-sm"
             >
               AI Powered
             </UnifiedBadge>
@@ -325,7 +324,7 @@ export function RelatedContentClient({
               renderTopBadges={() => (
                 <div className={`flex w-full items-center justify-between gap-2`}>
                   <UnifiedBadge
-                    className={cn(categoryBadge, 'shrink-0 border', paddingX.compact, paddingY.tight, 'text-xs font-medium', 'sm:' + paddingX.compact, 'sm:text-sm')}
+                    className={cn(categoryBadge, 'shrink-0 border px-3 py-2 text-xs font-medium sm:px-3 sm:text-sm')}
                     variant="base"
                     style="secondary"
                   >
@@ -335,7 +334,7 @@ export function RelatedContentClient({
                     <UnifiedBadge
                       variant="base"
                       style={matchBadge.variant}
-                      className={`text-2xs shrink-0 border ${paddingX.micro}.5 ${paddingY.micro} font-medium sm:${paddingX.tight} sm:text-xs`}
+                      className="text-2xs shrink-0 border px-1 py-1 font-medium sm:px-2 sm:text-xs"
                     >
                       {matchBadge.label}
                     </UnifiedBadge>

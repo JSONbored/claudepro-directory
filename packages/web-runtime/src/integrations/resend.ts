@@ -969,9 +969,9 @@ export async function enrollInOnboardingSequence(email: string): Promise<void> {
   };
 
   try {
-    // Dynamically import to avoid circular dependency issues
-    const { EmailService } = await import('@heyclaude/data-layer');
-    const service = new EmailService();
+    // Use service factory instead of direct import
+    const { getService } = await import('../data/service-factory');
+    const service = await getService('misc'); // Consolidated: EmailService methods moved to MiscService
 
     const enrollArgs = {
       p_email: email,

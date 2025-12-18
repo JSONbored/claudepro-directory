@@ -1,116 +1,72 @@
 'use server';
+import { type content_category, type contentModel } from '@heyclaude/data-layer/prisma';
 
-import { ContentService } from '@heyclaude/data-layer';
-import type { ContentPaginatedSlimResult } from '@heyclaude/database-types/postgres-types';
-import type { content_category } from '@heyclaude/data-layer/prisma';
-import { cacheLife, cacheTag } from 'next/cache';
+import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 
-import { normalizeError } from '../../errors.ts';
-import { logger } from '../../logger.ts';
-import { generateContentTags } from '../content-helpers.ts';
+import { createCachedDataFunction, generateContentTags } from '../cached-data-factory.ts';
 
-interface PaginatedContentParameters {
+// Local types for migrated RPC (RPC removed, using Prisma directly)
+type ContentPaginatedSlimItem = contentModel;
+export interface ContentPaginatedSlimResult {
+  items: ContentPaginatedSlimItem[];
+  pagination: {
+    current_page: number;
+    has_more: boolean;
+    limit: number;
+    offset: number;
+    total_count: number;
+    total_pages: number;
+  };
+}
+
+export interface PaginatedContentParameters {
   category?: null | string;
   limit: number;
   offset: number;
 }
 
-// Prisma enum values for validation
-const CONTENT_CATEGORY_VALUES: readonly content_category[] = [
-  'agents',
-  'mcp',
-  'rules',
-  'commands',
-  'hooks',
-  'statuslines',
-  'skills',
-  'collections',
-  'guides',
-  'jobs',
-  'changelog',
-] as const;
-
+/***
+ * Normalize a string value to a content_category or undefined.
+ * Uses shared isValidCategory validation from @heyclaude/web-runtime/utils/category-validation.
+ */
 function toContentCategory(value: null | string | undefined): content_category | undefined {
   if (!value) return undefined;
-  const lowered = value.trim().toLowerCase();
-  // Type guard: Check if lowered is a valid content_category
-  // Use proper type guard with explicit check
-  for (const validCategory of CONTENT_CATEGORY_VALUES) {
-    if (lowered === validCategory) {
-      return validCategory;
-    }
-  }
-  return undefined;
+  const normalized = value.trim().toLowerCase();
+  return isValidCategory(normalized) ? normalized : undefined;
 }
 
 /**
  * Get paginated content.
  * Uses 'use cache' to cache paginated content lists. This data is public and same for all users.
- *
- * @param params - Pagination and category filter parameters
- * @param params.category - Optional category filter (null, string, or undefined)
- * @param params.limit - Maximum number of results to return
- * @param params.offset - Number of results to skip
- * @returns Promise resolving to paginated content result or null
  */
-export async function getPaginatedContent({
-  category,
-  limit,
-  offset,
-}: PaginatedContentParameters): Promise<ContentPaginatedSlimResult | null> {
-  'use cache';
-
-  const normalizedCategory = category ? toContentCategory(category) : undefined;
-
-  // Configure cache - use 'static' profile for paginated content (changes daily)
-  cacheLife('static'); // 1 day stale, 6 hours revalidate, 30 days expire
-  const tags = generateContentTags(normalizedCategory ?? null, null, ['content-paginated']);
-  for (const tag of tags) {
-    cacheTag(tag);
-  }
-
-  const reqLogger = logger.child({
-    module: 'data/content/paginated',
-    operation: 'getPaginatedContent',
-  });
-
-  try {
-    const rpcArgs = {
+export const getPaginatedContent = createCachedDataFunction<
+  PaginatedContentParameters,
+  ContentPaginatedSlimResult | null
+>({
+  serviceKey: 'content',
+  methodName: 'getContentPaginatedSlim',
+  cacheMode: 'public',
+  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire
+  cacheTags: (params) => {
+    const normalizedCategory = params.category ? toContentCategory(params.category) : undefined;
+    return generateContentTags(normalizedCategory ?? null, null, ['content-paginated']);
+  },
+  module: 'data/content/paginated',
+  operation: 'getPaginatedContent',
+  transformArgs: (params) => {
+    const normalizedCategory = params.category ? toContentCategory(params.category) : undefined;
+    return {
       ...(normalizedCategory ? { p_category: normalizedCategory } : {}),
-      p_limit: limit,
-      p_offset: offset,
+      p_limit: params.limit,
+      p_offset: params.offset,
     };
-
-    reqLogger.info(
-      { category: normalizedCategory ?? category ?? 'all', limit, offset, rpcArgs },
-      'getPaginatedContent: calling RPC get_content_paginated_slim'
-    );
-
-    const service = new ContentService();
-    const result = await service.getContentPaginatedSlim(rpcArgs);
-
-    reqLogger.info(
-      {
-        category: normalizedCategory ?? category ?? 'all',
-        hasItems: Boolean(result?.items),
-        hasPagination: Boolean(result?.pagination),
-        hasResult: Boolean(result),
-        itemsLength: Array.isArray(result?.items) ? result.items.length : 0,
-        limit,
-        offset,
-        paginationTotal: result?.pagination?.total_count ?? null,
-        resultKeys: result ? Object.keys(result) : [],
-      },
-      'getPaginatedContent: RPC call completed'
-    );
-
-    return result;
-  } catch (error) {
-    const normalized = normalizeError(error, 'getPaginatedContent failed');
-    reqLogger.error(
-      { category: normalizedCategory ?? category ?? 'all', err: normalized, limit, offset },
-      'getPaginatedContent: failed'
-    );
-    return null;
-  }
-}
+  },
+  logContext: (params) => {
+    const normalizedCategory = params.category ? toContentCategory(params.category) : undefined;
+    return {
+      category: normalizedCategory ?? params.category ?? 'all',
+      limit: params.limit,
+      offset: params.offset,
+    };
+  },
+});

@@ -8,7 +8,6 @@
 
 import { Tabs, TabsList, TabsTrigger, TabsContent, LayoutGroup } from '@heyclaude/web-runtime/ui';
 import type { ReactNode } from 'react';
-import { marginBottom, spaceY } from "@heyclaude/web-runtime/design-system";
 
 export interface DashboardTabsProps {
   /**
@@ -37,19 +36,19 @@ export function DashboardTabs({
 }: DashboardTabsProps) {
   return (
     <LayoutGroup>
-      <Tabs defaultValue="overview" className={`w-full`}>
-        <TabsList className={`${marginBottom.comfortable}`}>
+      <Tabs defaultValue="overview" className="w-full">
+        <TabsList className="mb-6">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="bookmarks">Bookmarks</TabsTrigger>
           <TabsTrigger value="recommendations">Recommendations</TabsTrigger>
         </TabsList>
-        <TabsContent value="overview" className={`${spaceY.relaxed}`}>
+        <TabsContent value="overview" className="space-y-6">
           {overview}
         </TabsContent>
-        <TabsContent value="bookmarks" className={`${spaceY.relaxed}`}>
+        <TabsContent value="bookmarks" className="space-y-6">
           {bookmarks}
         </TabsContent>
-        <TabsContent value="recommendations" className={`${spaceY.relaxed}`}>
+        <TabsContent value="recommendations" className="space-y-6">
           {recommendations}
         </TabsContent>
       </Tabs>

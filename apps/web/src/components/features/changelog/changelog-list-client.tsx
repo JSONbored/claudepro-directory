@@ -3,7 +3,6 @@
 import type { changelogModel } from '@heyclaude/data-layer/prisma';
 
 import { ChangelogTimelineView } from '@/src/components/features/changelog/changelog-timeline-view';
-import { paddingY, size } from "@heyclaude/web-runtime/design-system";
 
 type ChangelogEntry = changelogModel;
 
@@ -23,10 +22,10 @@ export interface ChangelogListClientProps {
  */
 export function ChangelogListClient({ entries }: ChangelogListClientProps) {
   return (
-    <div className={`w-full`}>
+    <div className="w-full">
       {entries.length === 0 ? (
-        <output className={`flex items-center justify-center ${paddingY.section}`} aria-live="polite">
-          <p className={`text-muted-foreground ${size.lg}`}>No changelog entries found.</p>
+        <output className="flex items-center justify-center py-12" aria-live="polite">
+          <p className="text-lg text-muted-foreground">No changelog entries found.</p>
         </output>
       ) : (
         <ChangelogTimelineView entries={entries} />

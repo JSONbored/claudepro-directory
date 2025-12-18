@@ -5,7 +5,6 @@
  * Runs as a cron job to process notification queue.
  */
 
-import { MiscService } from '@heyclaude/data-layer';
 import type { notificationsCreateInput } from '@heyclaude/database-types/prisma';
 import { normalizeError, getEnvVar } from '@heyclaude/shared-runtime';
 import { revalidateTag } from 'next/cache';
@@ -13,6 +12,7 @@ import { revalidateTag } from 'next/cache';
 import { inngest } from '../../client';
 import { pgmqRead, pgmqDelete, type PgmqMessage } from '../../../supabase/pgmq-client';
 import { logger, createWebAppContextWithId } from '../../../logging/server';
+import { getService } from '../../../data/service-factory';
 import { sendCronSuccessHeartbeat } from '../../utils/monitoring';
 
 const CHANGELOG_NOTIFY_QUEUE = 'changelog_notify';
@@ -174,7 +174,7 @@ export const processChangelogNotifyQueue = inngest.createFunction(
             action_href: `/changelog/${job.slug}`,
           };
 
-          const service = new MiscService();
+          const service = await getService('misc');
           await service.upsertNotification(notificationInsert);
 
           notificationInserted = true;

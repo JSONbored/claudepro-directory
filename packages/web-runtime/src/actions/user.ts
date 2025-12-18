@@ -6,37 +6,24 @@
  */
 
 import type {
-  BookmarkItemInput,
   UpdateUserProfileResultV2,
+  RefreshProfileFromOauthReturns,
 } from '@heyclaude/database-types/postgres-types';
+import type { UpdateUserProfileReturns } from '@heyclaude/database-types/postgres-types';
+import { toggleFollowReturnsSchema } from '@heyclaude/database-types/postgres-types/functions/toggle_follow';
+import { batchAddBookmarksReturnsSchema } from '@heyclaude/database-types/postgres-types/functions/batch_add_bookmarks';
 import type {
   follow_action,
   submission_status,
 } from '@heyclaude/data-layer/prisma';
-import { runRpc } from './run-rpc-instance.ts';
-import { authedAction } from './safe-action.ts';
-import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
-import { logger } from '../logger.ts';
 import {
   content_categorySchema,
   follow_actionSchema,
 } from '../prisma-zod-schemas.ts';
 
-// Export input types for generated bookmark actions (can't export from 'use server' files)
-const addBookmarkSchema = z.object({
-  content_type: content_categorySchema,
-  content_slug: z.string(),
-  notes: z.string().optional()
-});
-
-const removeBookmarkSchema = z.object({
-  content_type: content_categorySchema,
-  content_slug: z.string()
-});
-
-export type AddBookmarkInput = z.infer<typeof addBookmarkSchema>;
-export type RemoveBookmarkInput = z.infer<typeof removeBookmarkSchema>;
+// Export input types for bookmark actions (can't export from 'use server' files)
+export type { AddBookmarkInput, RemoveBookmarkInput } from './bookmarks.ts';
 
 // UUID validation regex pattern (RFC 4122 compliant)
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -66,13 +53,8 @@ type SubmissionActivity = {
 
 export type UserActivity = SubmissionActivity;
 
-type UserSurface = 'account' | 'library' | 'settings';
-
-const USER_SURFACE_PATHS: Record<UserSurface, string> = {
-  account: '/account',
-  library: '/account/library',
-  settings: '/account/settings',
-};
+// Removed executeMutationAction - inlining logic directly
+import { authedAction } from './safe-action.ts';
 
 async function invalidateUserCaches({
   tags: extraTags,
@@ -82,6 +64,7 @@ async function invalidateUserCaches({
   userIds?: Array<string | null | undefined>;
 }): Promise<void> {
   const { revalidateCacheTags } = await import('../cache-tags.ts');
+  const { revalidateTag } = await import('next/cache');
   const tags = new Set(extraTags ?? []);
 
   if (tags.size) {
@@ -97,142 +80,116 @@ async function invalidateUserCaches({
   }
 }
 
-async function revalidateUserSurfaces({
-  slug,
-  accountSections,
-}: {
-  slug?: string | null;
-  accountSections?: UserSurface[];
-}): Promise<void> {
-  const paths = new Set<string>();
-  if (slug) {
-    paths.add(`/u/${slug}`);
-  }
-  if (accountSections) {
-    for (const section of accountSections) {
-      const path = USER_SURFACE_PATHS[section];
-      if (path) {
-        paths.add(path);
-      }
-    }
-  }
 
-  if (!paths.size) {
-    return;
-  }
-
-  await Promise.allSettled([...paths].map((path) => Promise.resolve(revalidatePath(path))));
-}
+const updateProfileSchema = z.object({
+  display_name: z.string().optional(),
+  // Username validation is handled by database constraint (users_username_format_check)
+  // Database enforces: lowercase alphanumeric + hyphens, 3-30 chars, no leading/trailing hyphens
+  username: z.string().optional(),
+  bio: z.string().optional(),
+  work: z.string().optional(),
+  website: z.string().optional().or(z.literal('')),
+  social_x_link: z.string().optional(),
+  interests: z.array(z.string()).optional(),
+  profile_public: z.boolean().optional(),
+  follow_email: z.boolean().optional(),
+});
 
 export const updateProfile = authedAction
+  .inputSchema(updateProfileSchema)
   .metadata({ actionName: 'updateProfile', category: 'user' })
-  .inputSchema(
-    z.object({
-      display_name: z.string().optional(),
-      // Username validation is handled by database constraint (users_username_format_check)
-      // Database enforces: lowercase alphanumeric + hyphens, 3-30 chars, no leading/trailing hyphens
-      username: z.string().optional(),
-      bio: z.string().optional(),
-      work: z.string().optional(),
-      website: z.string().optional().or(z.literal('')),
-      social_x_link: z.string().optional(),
-      interests: z.array(z.string()).optional(),
-      profile_public: z.boolean().optional(),
-      follow_email: z.boolean().optional(),
-    })
-  )
-  .action(async ({ parsedInput, ctx }) => {
-    const result = await runRpc<UpdateUserProfileResultV2>(
+  .action(async ({ parsedInput, ctx }): Promise<UpdateUserProfileReturns> => {
+    const { runRpc } = await import('./run-rpc-instance.ts');
+    const { revalidatePath, revalidateTag } = await import('next/cache');
+    
+    const args = {
+      p_user_id: ctx.userId,
+      ...(parsedInput.display_name && { p_display_name: parsedInput.display_name }),
+      ...(parsedInput.username !== undefined && { p_username: parsedInput.username }),
+      ...(parsedInput.bio !== undefined && { p_bio: parsedInput.bio }),
+      ...(parsedInput.work !== undefined && { p_work: parsedInput.work }),
+      ...(parsedInput.website !== undefined && { p_website: parsedInput.website }),
+      ...(parsedInput.social_x_link !== undefined && { p_social_x_link: parsedInput.social_x_link }),
+      ...(parsedInput.interests && { p_interests: parsedInput.interests }),
+      ...(parsedInput.profile_public !== undefined && { p_profile_public: parsedInput.profile_public }),
+      ...(parsedInput.follow_email !== undefined && { p_follow_email: parsedInput.follow_email }),
+    };
+    
+    const rawResult = await runRpc<UpdateUserProfileResultV2>(
       'update_user_profile',
+      args,
       {
-        p_user_id: ctx.userId,
-        ...(parsedInput.display_name && { p_display_name: parsedInput.display_name }),
-        ...(parsedInput.username !== undefined && { p_username: parsedInput.username }),
-        ...(parsedInput.bio !== undefined && { p_bio: parsedInput.bio }),
-        ...(parsedInput.work !== undefined && { p_work: parsedInput.work }),
-        ...(parsedInput.website !== undefined && { p_website: parsedInput.website }),
-        ...(parsedInput.social_x_link !== undefined && {
-          p_social_x_link: parsedInput.social_x_link,
-        }),
-        ...(parsedInput.interests && { p_interests: parsedInput.interests as string[] }),
-        ...(parsedInput.profile_public !== undefined && {
-          p_profile_public: parsedInput.profile_public,
-        }),
-        ...(parsedInput.follow_email !== undefined && { p_follow_email: parsedInput.follow_email }),
-      },
-      {
-        action: 'user.updateProfile',
+        action: 'updateProfile.rpc',
         userId: ctx.userId,
-        meta: { hasDisplayName: Boolean(parsedInput.display_name) },
       }
     );
-
-    // Extract profile with null check
-    // update_user_profile returns composite type update_user_profile_result_v2
-    if (!result || !result.profile) {
+    
+    // Transform result - extract profile with null check
+    if (!rawResult || !rawResult.profile) {
       throw new Error('update_user_profile returned null profile');
     }
-    const profile = result.profile;
-
-    // Log profile update for audit trail (user data modification)
-    logger.info({ audit: true, // Structured tag for audit trail filtering
-      userId: ctx.userId,
-      operation: 'profile_update',
-      fieldsUpdated: Object.keys(parsedInput).filter(k => parsedInput[k as keyof typeof parsedInput] !== undefined), }, 'User profile updated');
-
-    await revalidateUserSurfaces({
-      slug: profile.slug ?? null,
-      accountSections: ['account', 'settings'],
-    });
-
-    await invalidateUserCaches({
-      tags: ['users', `user-${ctx.userId}`],
-      userIds: [ctx.userId],
-    });
-
+    const result: UpdateUserProfileReturns = rawResult;
+    
+    // Cache invalidation
+    revalidatePath('/account');
+    revalidatePath('/account/settings');
+    if (result.profile?.slug) {
+      revalidatePath(`/u/${result.profile.slug}`);
+    }
+    revalidateTag('users', 'default');
+    revalidateTag(`user-${ctx.userId}`, 'default');
+    
     return result;
   });
 
-import type {
-  RefreshProfileFromOauthReturns,
-  BatchAddBookmarksReturns,
-  ToggleFollowReturns,
-} from '@heyclaude/database-types/postgres-types';
+export const refreshProfileFromOAuth = authedAction
+  .inputSchema(z.void())
+  .metadata({ actionName: 'refreshProfileFromOAuth', category: 'user' })
+  .action(async ({ ctx }): Promise<{ success: boolean; message: string; slug: string | null }> => {
+    const { runRpc } = await import('./run-rpc-instance.ts');
+    const { revalidatePath, revalidateTag } = await import('next/cache');
+    
+    const args = { user_id: ctx.userId };
+    
+    const rawResult = await runRpc<RefreshProfileFromOauthReturns>(
+      'refresh_profile_from_oauth',
+      args,
+      {
+        action: 'refreshProfileFromOAuth.rpc',
+        userId: ctx.userId,
+      }
+    );
+    
+    // Transform result
+    const slug = rawResult.user_profile?.slug ?? null;
+    const result: { success: boolean; message: string; slug: string | null } = {
+      success: true,
+      message: 'Profile refreshed from OAuth provider',
+      slug,
+    };
+    
+    // Cache invalidation
+    revalidatePath('/account');
+    revalidatePath('/account/settings');
+    if (slug) {
+      revalidatePath(`/u/${slug}`);
+    }
+    revalidateTag('users', 'default');
+    revalidateTag(`user-${ctx.userId}`, 'default');
+    
+    return result;
+  });
 
-async function refreshProfileFromOAuthInternal(userId: string) {
+export async function refreshProfileFromOAuthServer(userId: string) {
+  const { runRpc } = await import('./run-rpc-instance.ts');
   const result = await runRpc<RefreshProfileFromOauthReturns>(
     'refresh_profile_from_oauth',
     { user_id: userId },
     { action: 'user.refreshProfileFromOAuth', userId }
   );
-
-  const profile = result.user_profile;
-  const slug = profile?.slug ?? null;
-
-  await revalidateUserSurfaces({
-    slug,
-    accountSections: ['account', 'settings'],
-  });
-
-  await invalidateUserCaches({
-    tags: ['users', `user-${userId}`],
-    userIds: [userId],
-  });
-
+  const slug = result.user_profile?.slug ?? null;
   return { success: true, slug };
 }
-
-export async function refreshProfileFromOAuthServer(userId: string) {
-  return refreshProfileFromOAuthInternal(userId);
-}
-
-export const refreshProfileFromOAuth = authedAction
-  .metadata({ actionName: 'refreshProfileFromOAuth', category: 'user' })
-  .inputSchema(z.void())
-  .action(async ({ ctx }) => {
-    const result = await refreshProfileFromOAuthInternal(ctx.userId);
-    return { success: true, message: 'Profile refreshed from OAuth provider', slug: result.slug };
-  });
 
 // Removed addBookmark, removeBookmark - migrated
 
@@ -256,52 +213,50 @@ export const isBookmarkedAction = authedAction
     });
   });
 
-export const addBookmarkBatch = authedAction
-  .metadata({
-    actionName: 'addBookmarkBatch',
-    category: 'user',
-  })
-  .inputSchema(
-    z.object({
-      items: z
-        .array(
-          z.object({
-            content_type: content_categorySchema,
-            content_slug: z.string().min(1),
-          })
-        )
-        .min(1)
-        .max(20),
-    })
-  )
-  .action(async ({ parsedInput, ctx }) => {
+const addBookmarkBatchSchema = z.object({
+  items: z
+    .array(
+      z.object({
+        content_type: content_categorySchema,
+        content_slug: z.string().min(1),
+      })
+    )
+    .min(1)
+    .max(20),
+});
 
-    // Construct composite type array from parsed input
-    const items: BookmarkItemInput[] =
-      parsedInput.items.map((item) => ({
+export const addBookmarkBatch = authedAction
+  .inputSchema(addBookmarkBatchSchema)
+  .outputSchema(batchAddBookmarksReturnsSchema)
+  .metadata({ actionName: 'addBookmarkBatch', category: 'user' })
+  .action(async ({ parsedInput, ctx }): Promise<z.infer<typeof batchAddBookmarksReturnsSchema>> => {
+    const { runRpc } = await import('./run-rpc-instance.ts');
+    const { revalidatePath, revalidateTag } = await import('next/cache');
+    
+    const args = {
+      p_user_id: ctx.userId,
+      p_items: parsedInput.items.map((item) => ({
         content_type: item.content_type,
         content_slug: item.content_slug,
-      }));
-
-    const result = await runRpc<BatchAddBookmarksReturns>(
+      })),
+    };
+    
+    const result = await runRpc<z.infer<typeof batchAddBookmarksReturnsSchema>>(
       'batch_add_bookmarks',
+      args,
       {
-        p_user_id: ctx.userId,
-        p_items: items,
-      },
-      {
-        action: 'user.addBookmarkBatch',
+        action: 'addBookmarkBatch.rpc',
         userId: ctx.userId,
-        meta: { itemCount: parsedInput.items.length },
       }
     );
-
-    await revalidateUserSurfaces({ accountSections: ['account', 'library'] });
-    await invalidateUserCaches({
-      tags: ['user-bookmarks', 'users', `user-${ctx.userId}`],
-      userIds: [ctx.userId],
-    });
-
+    
+    // Cache invalidation
+    revalidatePath('/account');
+    revalidatePath('/account/library');
+    revalidateTag('user-bookmarks', 'default');
+    revalidateTag('users', 'default');
+    revalidateTag(`user-${ctx.userId}`, 'default');
+    
     return result;
   });
 
@@ -312,35 +267,37 @@ const followSchema = z.object({
 });
 
 export const toggleFollow = authedAction
-  .metadata({
-    actionName: 'toggleFollow',
-    category: 'user',
-  })
   .inputSchema(followSchema)
-  .action(async ({ parsedInput: { action, user_id, slug }, ctx }) => {
-    const result = await runRpc<ToggleFollowReturns>(
+  .outputSchema(toggleFollowReturnsSchema)
+  .metadata({ actionName: 'toggleFollow', category: 'user' })
+  .action(async ({ parsedInput, ctx }): Promise<z.infer<typeof toggleFollowReturnsSchema>> => {
+    const { runRpc } = await import('./run-rpc-instance.ts');
+    const { revalidatePath, revalidateTag } = await import('next/cache');
+    
+    const args = {
+      p_follower_id: ctx.userId,
+      p_following_id: parsedInput.user_id,
+      p_action: parsedInput.action satisfies follow_action,
+    };
+    
+    const result = await runRpc<z.infer<typeof toggleFollowReturnsSchema>>(
       'toggle_follow',
+      args,
       {
-        p_follower_id: ctx.userId,
-        p_following_id: user_id,
-        p_action: action satisfies follow_action,
-      },
-      {
-        action: 'user.toggleFollow',
+        action: 'toggleFollow.rpc',
         userId: ctx.userId,
-        meta: { targetUserId: user_id, followAction: action },
       }
     );
-
-    await revalidateUserSurfaces({
-      slug,
-      accountSections: ['account'],
-    });
-    await invalidateUserCaches({
-      tags: ['users', `user-${ctx.userId}`, `user-${user_id}`],
-      userIds: [ctx.userId, user_id],
-    });
-
+    
+    // Cache invalidation
+    revalidatePath('/account');
+    if (parsedInput.slug) {
+      revalidatePath(`/u/${parsedInput.slug}`);
+    }
+    revalidateTag('users', 'default');
+    revalidateTag(`user-${ctx.userId}`, 'default');
+    revalidateTag(`user-${parsedInput.user_id}`, 'default');
+    
     return result;
   });
 
@@ -417,25 +374,24 @@ export const getActivitySummary = authedAction
   .metadata({ actionName: 'getActivitySummary', category: 'user' })
   .inputSchema(z.void())
   .action(async ({ ctx }) => {
-    // Use data function with 'use cache: private' for Cache Components support
-    const { getUserActivitySummary } = await import('../data/account.ts');
-    const data = await getUserActivitySummary(ctx.userId);
-    return data;
+    // OPTIMIZATION: Use getUserCompleteData directly - single database call
+    const { getUserCompleteData } = await import('../data/account.ts');
+    const completeData = await getUserCompleteData(ctx.userId);
+    return completeData?.activity_summary ?? null;
   });
 
 export const getActivityTimeline = authedAction
   .metadata({ actionName: 'getActivityTimeline', category: 'user' })
   .inputSchema(activityFilterSchema)
   .action(async ({ parsedInput: { type, limit = 20, offset = 0 }, ctx }) => {
-    // Use data function with 'use cache: private' for Cache Components support
-    const { getUserActivityTimeline } = await import('../data/account.ts');
-    const data = await getUserActivityTimeline({
-      userId: ctx.userId,
-      type: type ?? undefined,
-      limit,
-      offset,
+    // OPTIMIZATION: Use getUserCompleteData directly - single database call
+    const { getUserCompleteData } = await import('../data/account.ts');
+    const completeData = await getUserCompleteData(ctx.userId, {
+      activityLimit: limit,
+      activityOffset: offset,
+      activityType: type ?? null, // Convert undefined to null for exactOptionalPropertyTypes
     });
-    return data;
+    return completeData?.activity_timeline ?? null;
   });
 
 export const getUserIdentities = authedAction
@@ -458,6 +414,7 @@ export async function ensureUserRecord(params: {
 }) {
   'use server';
 
+  const { runRpc } = await import('./run-rpc-instance.ts');
   await runRpc<{
     id: string;
     email: string | null;

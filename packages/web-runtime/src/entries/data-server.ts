@@ -6,7 +6,6 @@
 export * from '../storage/image-storage.ts';
 export * from '../storage/image-utils.ts';
 export * from '../supabase/server.ts'; // Export server client
-export * from '../edge/call-edge-function.ts';
 export * from '../edge/transform.ts';
 // Removed search-client.ts export - all search functions migrated to /api/search route
 export * from '../seo/og.ts';
@@ -45,7 +44,7 @@ export {
 
 // Data Services (Server-Side)
 export * from '../data/content-helpers.ts';
-export * from '../data/content/similar.ts';
+// export * from '../data/content/similar.ts'; // Removed - similar content feature was removed
 export * from '../data/tools/recommendations.ts';
 export * from '../data/newsletter.ts';
 export * from '../data/quiz.ts';
@@ -63,7 +62,8 @@ export * from '../data/marketing/site.ts';
 export * from '../seo/generator.ts';
 export * from '../data/seo/client.ts';
 export * from '../data/content/index.ts';
-export * from '../data/content/detail.ts';
+// Removed: export * from '../data/content/detail.ts' - Use direct import to avoid client/server boundary issues
+// Import directly: import { getContentDetailCore } from '@heyclaude/web-runtime/data/content/detail'
 export * from '../data/content/templates.ts';
 export * from '../data/content/related.ts';
 export * from '../data/content/paginated.ts';

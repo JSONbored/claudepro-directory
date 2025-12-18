@@ -1,20 +1,17 @@
-import type { CreateJobWithPaymentResult } from '@heyclaude/database-types/postgres-types';
-import { type CreateJobInput } from '@heyclaude/web-runtime/actions';
-import { createJob } from '@heyclaude/web-runtime/actions';
+import { type CreateJobWithPaymentResult } from '@heyclaude/database-types/postgres-types';
+import { type CreateJobInput, createJob } from '@heyclaude/web-runtime/actions/jobs-crud';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import { generatePageMetadata, getPaymentPlanCatalog } from '@heyclaude/web-runtime/server';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { connection } from 'next/server';
-import { Suspense, lazy } from 'react';
+import { lazy, Suspense } from 'react';
 
 // OPTIMIZATION: Dynamic import for large form component (763 lines) - only loads when needed
-const JobForm = lazy(
-  () => import('@/src/components/core/forms/job-form').then((mod) => ({ default: mod.JobForm }))
+const JobForm = lazy(() =>
+  import('@/src/components/core/forms/job-form').then((mod) => ({ default: mod.JobForm }))
 );
-
-import { size, weight, tracking, muted, marginBottom, spaceY } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Dynamic Rendering Required
@@ -62,7 +59,8 @@ export default async function NewJobPage() {
   // Section: Plan Catalog Fetch
   let planCatalog: Awaited<ReturnType<typeof getPaymentPlanCatalog>> = [];
   try {
-    planCatalog = await getPaymentPlanCatalog();
+    const fetchedCatalog = await getPaymentPlanCatalog();
+    planCatalog = fetchedCatalog ?? [];
     reqLogger.info(
       {
         plansCount: planCatalog.length,
@@ -80,7 +78,7 @@ export default async function NewJobPage() {
       },
       'NewJobPage: failed to fetch plan catalog, using fallback'
     );
-    // planCatalog remains [] - JobForm will use legacy fallback
+    planCatalog = [];
   }
 
   /***
@@ -109,7 +107,7 @@ export default async function NewJobPage() {
       route: '/account/jobs/new',
     });
 
-    let result: Awaited<ReturnType<typeof createJob>>;
+    let result;
     try {
       // Call createJob server action (calls create_job_with_payment RPC + Polar checkout)
       result = await createJob(data);
@@ -136,10 +134,9 @@ export default async function NewJobPage() {
     }
 
     // Type the result data using Prisma-generated types
-    type CreateJobResult =
-      CreateJobWithPaymentResult & {
-        checkoutUrl?: null | string;
-      };
+    type CreateJobResult = CreateJobWithPaymentResult & {
+      checkoutUrl?: null | string;
+    };
     const jobResult = result.data as CreateJobResult;
 
     if (jobResult.success) {
@@ -198,16 +195,20 @@ export default async function NewJobPage() {
   }
 
   return (
-    <div className={spaceY.relaxed}>
+    <div className="space-y-6">
       <div>
-        <h1 className={`${marginBottom.compact} ${size['3xl']} ${weight.semibold} ${tracking.tight}`}>Post a Job</h1>
-        <p className={`${muted.default}`}>
+        <h1 className="mb-2 text-3xl font-semibold tracking-tight">Post a Job</h1>
+        <p className="text-muted-foreground">
           Create a new job listing to reach talented developers
         </p>
       </div>
 
-      <Suspense fallback={<div className={`${muted.default} ${size.sm}`}>Loading job form...</div>}>
-        <JobForm planCatalog={planCatalog} submitLabel="Create Job Listing" onSubmit={handleSubmit} />
+      <Suspense fallback={<div className="text-muted-foreground text-sm">Loading job form...</div>}>
+        <JobForm
+          onSubmit={handleSubmit}
+          planCatalog={planCatalog}
+          submitLabel="Create Job Listing"
+        />
       </Suspense>
     </div>
   );

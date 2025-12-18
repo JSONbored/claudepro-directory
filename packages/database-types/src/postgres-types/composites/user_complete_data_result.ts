@@ -9,8 +9,6 @@ import { z } from 'zod';
 
 import type { AccountDashboardResult } from './account_dashboard_result';
 import { accountDashboardResultSchema } from './account_dashboard_result';
-import type { SponsoredContent } from './sponsored_content';
-import { sponsoredContentSchema } from './sponsored_content';
 import type { UserActivitySummary } from './user_activity_summary';
 import { userActivitySummarySchema } from './user_activity_summary';
 import type { UserActivityTimelineResult } from './user_activity_timeline_result';
@@ -43,7 +41,7 @@ export type UserCompleteDataResult = {
   /** Attribute: user_identities (user_identities_result, nullable) */
   user_identities: UserIdentitiesResult | null;
   /** Attribute: sponsorships (_sponsored_content, nullable) */
-  sponsorships: SponsoredContent[] | null;
+  sponsorships: unknown[] | null;
 };
 
 /**
@@ -65,7 +63,7 @@ export const userCompleteDataResultSchema = z.object({
   /** Attribute: user_identities */
   user_identities: userIdentitiesResultSchema.nullable(),
   /** Attribute: sponsorships */
-  sponsorships: z.array(sponsoredContentSchema).nullable(),
+  sponsorships: z.array(z.any()).nullable(),
 });
 
 /**

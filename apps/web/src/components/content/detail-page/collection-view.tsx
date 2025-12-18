@@ -23,9 +23,9 @@
  */
 
 import type { EnrichedContentItem } from '@heyclaude/database-types/postgres-types';
-import type { contentModel } from '@heyclaude/data-layer/prisma';
+import type { contentModel, content_category } from '@heyclaude/data-layer/prisma';
 import { ensureStringArray, getMetadata, isValidCategory } from '@heyclaude/web-runtime/core';
-import { getCategoryConfigs, getContentBySlug } from '@heyclaude/web-runtime/data';
+import { getCategoryConfigs } from '@heyclaude/web-runtime/data';
 import { AlertTriangle, CheckCircle } from '@heyclaude/web-runtime/icons';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
@@ -36,7 +36,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
-import { iconSize, cluster, gap, marginTop, spaceY, marginBottom } from '@heyclaude/web-runtime/design-system';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { Suspense } from 'react';
 
@@ -84,40 +83,56 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
     ? metadata['items'].filter(isCollectionItem)
     : [];
 
-  const itemsWithContent = await Promise.all(
-    items.map(async (itemRef): Promise<ItemWithData | null> => {
-      const refData = itemRef;
+  // OPTIMIZATION: Batch fetch all collection items in single RPC call(s) instead of N+1 queries
+  // This reduces database calls from N (one per item) to C (one per category)
+  const validItemRefs = items.filter((itemRef) => {
+    if (!isValidCategory(itemRef.category)) {
+      logger.error(
+        {
+          err: new Error('Invalid category'),
+          category: itemRef.category,
+          slug: itemRef.slug,
+        },
+        'Invalid category in collection item reference'
+      );
+      return false;
+    }
+    return true;
+  });
 
-      try {
-        // Type guard validation
-        if (!isValidCategory(refData.category)) {
-          logger.error(
-            {
-              err: new Error('Invalid category'),
-              category: refData.category,
-              slug: refData.slug,
-            },
-            'Invalid category in collection item reference'
-          );
-          return null;
-        }
+  let itemsWithContent: Array<ItemWithData | null> = [];
+  
+  if (validItemRefs.length > 0) {
+    try {
+      // Import batch fetch function
+      const { getContentBatchBySlugs } = await import('@heyclaude/web-runtime/data');
+      
+      // Batch fetch all items by category
+      const contentMap = await getContentBatchBySlugs(
+        validItemRefs.map((ref) => ({
+          category: ref.category as content_category,
+          slug: ref.slug,
+        }))
+      );
 
-        const item = await getContentBySlug(refData.category, refData.slug);
+      // Map fetched content to items
+      itemsWithContent = validItemRefs.map((refData): ItemWithData | null => {
+        const item = contentMap.get(refData.slug);
         return item ? { ...refData, data: item } : null;
-      } catch (error) {
-        const normalized = normalizeError(error, 'Failed to load collection item');
-        logger.error(
-          {
-            err: normalized,
-            category: refData.category,
-            slug: refData.slug,
-          },
-          'Failed to load collection item'
-        );
-        return null;
-      }
-    })
-  );
+      });
+    } catch (error) {
+      const normalized = normalizeError(error, 'Failed to batch load collection items');
+      logger.error(
+        {
+          err: normalized,
+          itemCount: validItemRefs.length,
+        },
+        'Failed to batch load collection items'
+      );
+      // Fallback to empty array on error
+      itemsWithContent = [];
+    }
+  }
 
   // Filter out failed loads
   const validItems = itemsWithContent.filter(
@@ -185,20 +200,20 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
       {prerequisites && prerequisites.length > 0 ? (
         <Card>
           <CardHeader>
-            <CardTitle className={`flex items-center ${gap.tight} text-xl`}>
+            <CardTitle className="flex items-center gap-1 text-lg">
               <AlertTriangle
-                className={`${iconSize.md} text-yellow-500`}
+                className="h-5 w-5 text-yellow-500"
                 aria-hidden="true"
               />
               Prerequisites
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ul className={`${spaceY.compact}`}>
+            <ul className="space-y-2">
               {prerequisites.map((prereq: string) => (
-                <li key={prereq} className={`flex items-start ${gap.compact}`}>
+                <li key={prereq} className="flex items-start gap-2">
                   <CheckCircle
-                    className={`text-muted-foreground h-4 w-4 flex-shrink-0 ${marginTop.micro}`}
+                    className="text-muted-foreground h-4 w-4 flex-shrink-0 mt-0.5"
                     aria-hidden="true"
                   />
                   <span className="text-muted-foreground text-sm">{prereq}</span>
@@ -211,30 +226,30 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
 
       {/* What's Included Section - Embedded ConfigCards */}
       <div>
-        <h2 className={`text-foreground ${marginBottom.comfortable} text-2xl font-bold`}>
+        <h2 className="text-foreground mb-6 text-2xl font-bold">
           What's Included ({validItems.length} {validItems.length === 1 ? 'item' : 'items'})
         </h2>
 
         <Suspense
           fallback={
-            <output className={`${spaceY.relaxed}`} aria-busy="true" aria-label="Loading collection items">
+            <output className="space-y-6" aria-busy="true" aria-label="Loading collection items">
               <Skeleton size="xl" width="3xl" className="h-48" />
               <Skeleton size="xl" width="3xl" className="h-48" />
               <Skeleton size="xl" width="3xl" className="h-48" />
             </output>
           }
         >
-          <div className={`${spaceY.loose}`}>
+          <div className="space-y-8">
             {Object.entries(itemsByCategory).map(([category, items]) => (
               <div key={category}>
-                <h3 className={`text-foreground ${marginBottom.default} text-lg font-semibold`}>
+                <h3 className="text-foreground mb-4 text-lg font-semibold">
                   {(isValidCategory(category) && category in categoryConfigs
                     ? categoryConfigs[category]?.pluralTitle
                     : null) ||
                     category}{' '}
                   ({items.length})
                 </h3>
-                <div className={`grid ${gap.default} sm:grid-cols-1`}>
+                <div className="grid gap-3 sm:grid-cols-1">
                   {items.map((item: ItemWithData) =>
                     item?.data ? (
                       <ConfigCard
@@ -256,21 +271,21 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
       {installationOrder && installationOrder.length > 0 ? (
         <Card>
           <CardHeader>
-            <CardTitle className="text-xl">Recommended Installation Order</CardTitle>
+            <CardTitle className="text-lg">Recommended Installation Order</CardTitle>
           </CardHeader>
           <CardContent>
-            <ol className={`${spaceY.compact}`}>
+            <ol className="space-y-2">
               {installationOrder.map((slug: string, index: number) => {
                 const item = validItems.find((i: ItemWithData) => i?.slug === slug);
                 return (
-                  <li key={slug} className={`flex items-start ${gap.default}`}>
+                  <li key={slug} className="flex items-start gap-3">
                     <span
                       className="bg-primary/10 text-primary flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-sm font-semibold"
                       aria-hidden="true"
                     >
                       {index + 1}
                     </span>
-                    <span className={cn('text-foreground', marginTop['4.5'], 'text-sm')}>
+                    <span className={cn('text-foreground', 'mt-[18px]', 'text-sm')}>
                       {item?.data?.title || slug}
                     </span>
                   </li>
@@ -285,19 +300,19 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
       {compatibility ? (
         <Card>
           <CardHeader>
-            <CardTitle className="text-xl">Compatibility</CardTitle>
+            <CardTitle className="text-lg">Compatibility</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className={`grid grid-cols-2 ${gap.default}`}>
-              <div className={cluster.compact}>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex items-center gap-2">
                 {compatibility.claudeDesktop ? (
                   <CheckCircle
-                    className={`${iconSize.sm} text-green-500`}
+                    className="h-4 w-4 text-green-500"
                     aria-hidden="true"
                   />
                 ) : (
                   <AlertTriangle
-                    className={`${iconSize.sm} text-red-500`}
+                    className="h-4 w-4 text-red-500"
                     aria-hidden="true"
                   />
                 )}
@@ -305,15 +320,15 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
                   Claude Desktop {compatibility.claudeDesktop ? '(Supported)' : '(Not Supported)'}
                 </span>
               </div>
-              <div className={cluster.compact}>
+              <div className="flex items-center gap-2">
                 {compatibility.claudeCode ? (
                   <CheckCircle
-                    className={`${iconSize.sm} text-green-500`}
+                    className="h-4 w-4 text-green-500"
                     aria-hidden="true"
                   />
                 ) : (
                   <AlertTriangle
-                    className={`${iconSize.sm} text-red-500`}
+                    className="h-4 w-4 text-red-500"
                     aria-hidden="true"
                   />
                 )}

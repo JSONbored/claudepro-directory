@@ -23,7 +23,6 @@ import {
   LazyAllContentSection,
 } from '@/src/components/features/home/lazy-home-sections';
 import { getCategoryConfigs } from '@heyclaude/web-runtime/data';
-import { paddingX, paddingBottom, marginX, marginBottom, padding } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Inner component that uses search context
@@ -174,11 +173,11 @@ function HomePageClientContent({
       {/* Category Stats Section removed - now in hero section directly below search bar */}
 
       {/* Main Content Section */}
-      <section className={`container ${marginX.auto} ${paddingX.default} ${paddingBottom.default}`}>
+      <section className="container mx-auto px-4 pb-4">
         {/* Search Results Section - Show at top when there's an active search query */}
         {query.trim().length > 0 && (
-          <div className={`${marginBottom.relaxed}`}>
-            <Suspense fallback={<div className={`text-muted-foreground ${padding.relaxed} text-center`}>Loading search results...</div>}>
+          <div className="mb-8">
+            <Suspense fallback={<div className="text-muted-foreground p-8 text-center">Loading search results...</div>}>
               <SearchResults
                 showCategory
                 showActions

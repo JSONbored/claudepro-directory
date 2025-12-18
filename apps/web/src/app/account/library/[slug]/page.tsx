@@ -17,7 +17,6 @@ import {
   SimpleCopyButton,
   UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
-import { cluster, between, spaceY, marginBottom, marginTop, gap, paddingBottom } from '@heyclaude/web-runtime/design-system';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import Link from 'next/link';
@@ -190,7 +189,7 @@ async function CollectionDetailContent({
 
   if (hasError) {
     return (
-      <div className={`${spaceY.relaxed}`}>
+      <div className="space-y-6">
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl">Collection unavailable</CardTitle>
@@ -261,19 +260,19 @@ async function CollectionDetailContent({
       : null;
 
   return (
-    <div className={`${spaceY.relaxed}`}>
+    <div className="space-y-6">
       {/* Header */}
       <div>
         <Link href={ROUTES.ACCOUNT_LIBRARY}>
-          <Button className={`${marginBottom.default} ${cluster.compact}`} variant="ghost">
+          <Button className="mb-4 flex items-center gap-2" variant="ghost">
             <ArrowLeft className="h-4 w-4" />
             Back to Library
           </Button>
         </Link>
 
-        <div className={between.start}>
+        <div className="flex items-start justify-between">
           <div className="flex-1">
-            <div className={`${cluster.compact} ${marginBottom.compact}`}>
+            <div className="mb-2 flex items-center gap-2">
               <h1 className="text-3xl font-bold">{collection.name}</h1>
               {collection.is_public ? (
                 <UnifiedBadge className="text-xs" style="outline" variant="base">
@@ -284,16 +283,16 @@ async function CollectionDetailContent({
             {collection.description ? (
               <p className="text-muted-foreground">{collection.description}</p>
             ) : null}
-            <div className={`text-muted-foreground ${marginTop.compact} text-sm`}>
+            <div className="text-muted-foreground mt-2 text-sm">
               {collection.item_count} {collection.item_count === 1 ? 'item' : 'items'} •{' '}
               {collection.view_count} views
             </div>
           </div>
 
-          <div className={cluster.compact}>
+          <div className="flex items-center gap-2">
             {shareUrl ? (
               <SimpleCopyButton
-                className={cluster.compact}
+                className="flex items-center gap-2"
                 content={shareUrl}
                 iconClassName="h-4 w-4"
                 label="Share"
@@ -303,7 +302,7 @@ async function CollectionDetailContent({
               />
             ) : null}
             <Link href={`/account/library/${slug}/edit`}>
-              <Button className={cluster.compact} size="sm" variant="outline">
+              <Button className="flex items-center gap-2" size="sm" variant="outline">
                 <Edit className="h-4 w-4" />
                 Edit
               </Button>
@@ -330,26 +329,26 @@ async function CollectionDetailContent({
       </Card>
 
       {/* Stats */}
-      <div className={`grid ${gap.default} sm:grid-cols-3`}>
+      <div className="grid gap-3 sm:grid-cols-3">
         <Card>
-          <CardHeader className={`${paddingBottom.compact}`}>
-            <CardTitle className="text-sm font-medium">Total Items</CardTitle>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm-medium">Total Items</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{collection.item_count}</div>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className={`${paddingBottom.compact}`}>
-            <CardTitle className="text-sm font-medium">Views</CardTitle>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm-medium">Views</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{collection.view_count}</div>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className={`${paddingBottom.compact}`}>
-            <CardTitle className="text-sm font-medium">Visibility</CardTitle>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm-medium">Visibility</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{collection.is_public ? 'Public' : 'Private'}</div>

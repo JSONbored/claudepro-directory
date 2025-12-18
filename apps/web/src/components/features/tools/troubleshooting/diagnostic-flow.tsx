@@ -16,7 +16,6 @@ import {
   CardTitle,
 } from '@heyclaude/web-runtime/ui';
 import React from 'react';
-import { marginY, spaceY, marginBottom, paddingTop, gap, cluster, iconSize, size, muted } from "@heyclaude/web-runtime/design-system";
 
 export function DiagnosticFlow(props: DiagnosticFlowProps) {
   // Database CHECK constraint validates structure - no runtime validation needed
@@ -60,17 +59,17 @@ export function DiagnosticFlow(props: DiagnosticFlowProps) {
   const isComplete = currentStepData?.solution !== undefined;
 
   return (
-    <Card itemScope itemType="https://schema.org/HowTo" className={`${marginY.relaxed}`}>
+    <Card itemScope itemType="https://schema.org/HowTo" className="my-8">
       <CardHeader>
         <CardTitle>{title}</CardTitle>
         {description ? <CardDescription>{description}</CardDescription> : null}
       </CardHeader>
       <CardContent>
-        <div className={`${spaceY.comfortable}`}>
+        <div className="space-y-6">
           {path.length > 0 && (
-            <div className={`${size.sm} ${muted.default}`}>
-              <p className={`${marginBottom.compact} font-medium`}>Diagnostic Path:</p>
-              <ol className={`list-inside list-decimal ${spaceY.tight}`}>
+            <div className="text-muted-foreground text-sm">
+              <p className="mb-2 font-medium">Diagnostic Path:</p>
+              <ol className="list-inside list-decimal space-y-1">
                 {path.map((step) => (
                   <li key={step}>{step}</li>
                 ))}
@@ -79,24 +78,24 @@ export function DiagnosticFlow(props: DiagnosticFlowProps) {
           )}
 
           <Card className="bg-muted/30">
-            <CardContent className={`${paddingTop.comfortable}`}>
+            <CardContent className="pt-6">
               {isComplete ? (
-                <div className={`${spaceY.comfortable}`}>
+                <div className="space-y-6">
                   <div
-                    className={`${cluster.compact} text-green-600 dark:text-green-400`}
+                    className="flex items-center gap-2 text-green-600 dark:text-green-400"
                   >
-                    <CheckCircle className={iconSize.md} />
+                    <CheckCircle className="h-5 w-5" />
                     <p className="font-medium">Solution Found:</p>
                   </div>
-                  <p className={`${muted.default}`}>{currentStepData?.solution}</p>
+                  <p className="text-muted-foreground">{currentStepData?.solution}</p>
                   <Button onClick={reset} variant="outline">
                     Start Over
                   </Button>
                 </div>
               ) : (
-                <div className={`${spaceY.comfortable}`}>
+                <div className="space-y-6">
                   <p className="text-lg font-medium">{currentStepData?.question}</p>
-                  <div className={`flex ${gap.default}`}>
+                  <div className="flex gap-3">
                     <Button onClick={() => handleAnswer('yes')} variant="default">
                       Yes
                     </Button>

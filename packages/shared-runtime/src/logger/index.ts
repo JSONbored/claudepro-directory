@@ -319,6 +319,56 @@ export function createLogger(
     return pino(config);
   }
   
+  // Production Axiom integration: Multi-stream (Vercel console + Axiom)
+  // Only enable in production when Axiom env vars are set
+  const isProduction = typeof process !== 'undefined' && process.env?.['NODE_ENV'] === 'production';
+  const axiomDataset = typeof process !== 'undefined' ? process.env?.['AXIOM_DATASET'] : undefined;
+  const axiomToken = typeof process !== 'undefined' ? process.env?.['AXIOM_TOKEN'] : undefined;
+  
+  if (isProduction && isServer && axiomDataset && axiomToken) {
+    // Multi-stream: Send to both Vercel console (for immediate visibility) and Axiom (for long-term storage)
+    const vercelDest = createVercelCompatibleDestination();
+    
+    if (vercelDest) {
+      // Create Axiom transport
+      // Pino transports are loaded in a worker thread, so we can pass the target string directly
+      // Pino will handle loading @axiomhq/pino in the worker thread
+      const axiomTransport = pino.transport({
+        target: '@axiomhq/pino',
+        options: {
+          dataset: axiomDataset,
+          token: axiomToken,
+        },
+      });
+      
+      // Multi-stream: Vercel console (all levels) + Axiom (all levels)
+      const streams = [
+        {
+          level: 'trace' as pino.Level,
+          stream: vercelDest,
+        },
+        {
+          level: 'trace' as pino.Level, // Send all log levels to Axiom
+          stream: axiomTransport,
+        },
+      ];
+      
+      const configWithoutTransport = { ...config };
+      delete configWithoutTransport.transport;
+      
+      // Increase max listeners to prevent MaxListenersExceededWarning
+      if (typeof process !== 'undefined' && process.stdout && typeof process.stdout.setMaxListeners === 'function') {
+        process.stdout.setMaxListeners(20);
+      }
+      if (typeof process !== 'undefined' && process.stderr && typeof process.stderr.setMaxListeners === 'function') {
+        process.stderr.setMaxListeners(20);
+      }
+      
+      // eslint-disable-next-line architectural-rules/detect-outdated-logging-patterns -- This is the intended usage: createPinoConfig() returns config, pino() creates the logger
+      return pino(configWithoutTransport, pino.multistream(streams));
+    }
+  }
+  
   // Production or no transport: Use Vercel-compatible destination
   // This ensures Vercel properly detects log levels via console methods:
   // - console.error() → error (red)

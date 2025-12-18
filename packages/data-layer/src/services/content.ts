@@ -9,17 +9,62 @@
  * Uses Prisma queries directly where possible, custom SQL for complex operations.
  */
 
-import type { content_category } from '@heyclaude/data-layer/prisma';
+import type { content_category, Json } from '@heyclaude/data-layer/prisma';
 import { prisma } from '../prisma/client.ts';
 import { BasePrismaService } from './base-prisma-service.ts';
 import { withSmartCache } from '../utils/request-cache.ts';
-import type { ContentTemplatesItem } from '@heyclaude/database-types/postgres-types';
+import type { contentModel } from '@heyclaude/database-types/prisma/models';
 import type {
   EnrichedContentItem,
-  ContentPaginatedSlimResult,
-  ContentPaginatedSlimItem,
 } from '@heyclaude/database-types/postgres-types';
+
+// Local types for migrated RPCs (RPCs removed, using Prisma directly)
+// These types match the transformed Prisma query results
+
+/**
+ * ContentTemplatesItem - Transformed template structure
+ * Based on Prisma content_templates query with transformation applied
+ */
+type ContentTemplatesItem = {
+  id: string;
+  type: string; // category from template (renamed from category)
+  name: string;
+  description: string | null;
+  category: string | null; // extracted from template_data JSON
+  tags: string | null; // extracted from template_data JSON
+  template_data: Record<string, unknown> | null;
+};
+
+/**
+ * ContentTemplatesResult - Return type for getContentTemplates
+ */
+type ContentTemplatesResult = {
+  templates: ContentTemplatesItem[] | null;
+};
+
+/**
+ * ContentPaginatedSlimItem - Item from materialized view mv_content_list_slim
+ * Matches contentModel structure (same columns as content table)
+ */
+type ContentPaginatedSlimItem = contentModel;
+
+/**
+ * ContentPaginatedSlimResult - Paginated result with items and pagination metadata
+ */
+type ContentPaginatedSlimResult = {
+  items: ContentPaginatedSlimItem[];
+  pagination: {
+    total_count: number;
+    limit: number;
+    offset: number;
+    has_more: boolean;
+    current_page: number;
+    total_pages: number;
+  };
+};
 import type {
+  CategoryConfigFeatures,
+  CategoryConfigWithFeatures,
   GenerateReadmeDataArgs,
   GenerateReadmeDataReturns,
   GetSitewideContentListArgs,
@@ -36,7 +81,6 @@ import type {
   GenerateChangelogEntryLlmsTxtReturns,
   GenerateToolLlmsTxtArgs,
   GenerateToolLlmsTxtReturns,
-  GetCategoryConfigsWithFeaturesArgs,
   GetCategoryConfigsWithFeaturesReturns,
   GetApiContentFullArgs,
   GetApiContentFullReturns,
@@ -58,10 +102,7 @@ import type {
   GetReviewsWithStatsReturns,
   GetRelatedContentArgs,
   GetRelatedContentReturns,
-  GetSimilarContentArgs,
-  GetSimilarContentReturns,
   GetContentTemplatesArgs,
-  GetContentTemplatesReturns,
   GetContentDetailCoreArgs,
   GetContentDetailCoreReturns,
   GetContentAnalyticsArgs,
@@ -201,11 +242,123 @@ export class ContentService extends BasePrismaService {
     );
   }
 
+  /**
+   * Get category configs with features
+   *
+   * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
+   * The RPC was doing a simple SELECT with JSON transformations, which we can do in TypeScript.
+   *
+   * @returns Category configs with features matching the RPC return type for backward compatibility
+   */
   async getCategoryConfigs(): Promise<GetCategoryConfigsWithFeaturesReturns> {
-    return this.callRpc<GetCategoryConfigsWithFeaturesReturns>(
-      'get_category_configs_with_features',
-      {} satisfies GetCategoryConfigsWithFeaturesArgs,
-      { methodName: 'getCategoryConfigs' }
+    // OPTIMIZATION: Use Prisma directly with request-scoped caching
+    return withSmartCache<GetCategoryConfigsWithFeaturesReturns>(
+      'getCategoryConfigs',
+      'getCategoryConfigs',
+      async (): Promise<GetCategoryConfigsWithFeaturesReturns> => {
+        // OPTIMIZATION: Use select to fetch only needed fields, excluding timestamps
+        // We use almost all fields, but exclude created_at/updated_at which aren't used
+        const configs = await prisma.category_configs.findMany({
+          select: {
+            category: true,
+            title: true,
+            plural_title: true,
+            description: true,
+            icon_name: true,
+            color_scheme: true,
+            show_on_homepage: true,
+            keywords: true,
+            meta_description: true,
+            sections: true,
+            primary_action_type: true,
+            primary_action_label: true,
+            primary_action_config: true,
+            search_placeholder: true,
+            empty_state_message: true,
+            url_slug: true,
+            content_loader: true,
+            display_config: true,
+            config_format: true,
+            validation_config: true,
+            generation_config: true,
+            schema_name: true,
+            api_schema: true,
+            metadata_fields: true,
+            badges: true,
+            // Exclude created_at and updated_at - not used in transformation
+          },
+          orderBy: { category: 'asc' },
+        });
+
+        // Transform to match RPC return type structure (CategoryConfigWithFeatures[])
+        // The RPC extracts features from sections JSON and builds a composite type
+        const transformed = configs.map((config) => {
+          // Extract sections JSON (default structure if missing)
+          const sections =
+            typeof config.sections === 'object' && config.sections !== null && !Array.isArray(config.sections)
+              ? (config.sections as Record<string, unknown>)
+              : {
+                  examples: false,
+                  features: true,
+                  security: false,
+                  use_cases: true,
+                  installation: true,
+                  configuration: true,
+                  troubleshooting: true,
+                };
+
+          // Build features composite type (matching RPC logic)
+          const features: CategoryConfigFeatures = {
+            show_on_homepage: config.show_on_homepage,
+            display_config: config.display_config,
+            generate_full_content: true, // RPC hardcodes this
+            build_enable_cache: true, // RPC hardcodes this
+            api_generate_static: true, // RPC hardcodes this
+            api_include_trending: true, // RPC hardcodes this
+            section_features: typeof sections['features'] === 'boolean' ? sections['features'] : null,
+            section_installation: typeof sections['installation'] === 'boolean' ? sections['installation'] : null,
+            section_use_cases: typeof sections['use_cases'] === 'boolean' ? sections['use_cases'] : null,
+            section_configuration: typeof sections['configuration'] === 'boolean' ? sections['configuration'] : null,
+            section_security: typeof sections['security'] === 'boolean' ? sections['security'] : null,
+            section_troubleshooting: typeof sections['troubleshooting'] === 'boolean' ? sections['troubleshooting'] : null,
+            section_examples: typeof sections['examples'] === 'boolean' ? sections['examples'] : null,
+            section_requirements: typeof sections['requirements'] === 'boolean' ? sections['requirements'] : null,
+            section_description: typeof sections['description'] === 'boolean' ? sections['description'] : null,
+            metadata_show_github_link: true, // RPC hardcodes this
+          };
+
+          // Build result matching CategoryConfigWithFeatures composite type
+          const result: CategoryConfigWithFeatures = {
+            category: config.category,
+            title: config.title,
+            plural_title: config.plural_title,
+            description: config.description,
+            icon_name: config.icon_name,
+            color_scheme: config.color_scheme,
+            keywords: config.keywords,
+            meta_description: config.meta_description,
+            search_placeholder: config.search_placeholder,
+            empty_state_message: config.empty_state_message,
+            url_slug: config.url_slug,
+            content_loader: config.content_loader,
+            config_format: config.config_format,
+            primary_action_type: config.primary_action_type,
+            primary_action_label: config.primary_action_label,
+            primary_action_config: config.primary_action_config,
+            validation_config: config.validation_config,
+            generation_config: config.generation_config,
+            schema_name: config.schema_name,
+            api_schema: config.api_schema,
+            metadata_fields: config.metadata_fields ?? null,
+            badges: config.badges ?? null,
+            features: features as CategoryConfigFeatures | null,
+          };
+          return result;
+        });
+
+        return transformed as unknown as GetCategoryConfigsWithFeaturesReturns;
+      },
+      {} // No args, so empty cache key
     );
   }
 
@@ -408,15 +561,9 @@ export class ContentService extends BasePrismaService {
     );
   }
 
-  async getSimilarContent(
-    args: GetSimilarContentArgs
-  ): Promise<GetSimilarContentReturns> {
-    return this.callRpc<GetSimilarContentReturns>(
-      'get_similar_content',
-      args,
-      { methodName: 'getSimilarContent' }
-    );
-  }
+  // getSimilarContent removed - embedding generation system has been deleted
+  // Similar content feature used content_similarities table, not embeddings
+  // If needed in future, implement using content_similarities table directly
 
   /**
    * Get content templates by category
@@ -429,7 +576,7 @@ export class ContentService extends BasePrismaService {
    */
   async getContentTemplates(
     args: GetContentTemplatesArgs
-  ): Promise<GetContentTemplatesReturns> {
+  ): Promise<ContentTemplatesResult> {
     // OPTIMIZATION: Use Prisma directly with request-scoped caching
     return withSmartCache(
       'getContentTemplates',
@@ -485,7 +632,7 @@ export class ContentService extends BasePrismaService {
         // Return in RPC format for backward compatibility
         return {
           templates: transformedTemplates.length > 0 ? transformedTemplates : null,
-        } as GetContentTemplatesReturns;
+        };
       },
       args // Cache key includes category
     );
@@ -651,13 +798,170 @@ export class ContentService extends BasePrismaService {
     );
   }
 
+  /**
+   * Get content detail core
+   * 
+   * OPTIMIZATION: Uses Prisma directly instead of RPC for better type safety and performance.
+   * The RPC was doing a SELECT with conditional LEFT JOIN for collection items.
+   * Since collection_items doesn't have a direct relation to content (polymorphic via content_type+slug),
+   * we fetch collection items separately and then fetch related content.
+   * 
+   * @param args - Arguments with p_category and p_slug
+   * @returns Content detail with collection items (if category is 'collections') matching RPC return structure
+   */
   async getContentDetailCore(
     args: GetContentDetailCoreArgs
   ): Promise<GetContentDetailCoreReturns> {
-    return this.callRpc<GetContentDetailCoreReturns>(
-      'get_content_detail_core',
-      args,
-      { methodName: 'getContentDetailCore' }
+    return withSmartCache(
+      'getContentDetailCore',
+      'getContentDetailCore',
+      async () => {
+        // Fetch content
+        // OPTIMIZATION: Use select to fetch only needed fields, reducing data transfer
+        // This query uses most fields, but excludes large JSONB fields that aren't used
+        const content = await prisma.content.findUnique({
+          where: {
+            slug_category: {
+              slug: args.p_slug,
+              category: args.p_category,
+            },
+          },
+          select: {
+            id: true,
+            category: true,
+            slug: true,
+            title: true,
+            display_title: true,
+            seo_title: true,
+            description: true,
+            author: true,
+            author_profile_url: true,
+            date_added: true,
+            tags: true,
+            content: true,
+            source: true,
+            documentation_url: true,
+            features: true,
+            use_cases: true,
+            examples: true,
+            metadata: true,
+            popularity_score: true,
+            created_at: true,
+            updated_at: true,
+            // Exclude large/unused fields: internal_notes, seo_description, etc.
+          },
+        });
+
+        if (!content) {
+          // RPC returns NULL when content not found, cast through unknown to match GetContentDetailCoreReturns
+          return null as unknown as GetContentDetailCoreReturns;
+        }
+
+        // Build content JSONB object matching RPC structure
+        const contentJson = {
+          id: content.id,
+          category: content.category,
+          slug: content.slug,
+          title: content.title,
+          display_title: content.display_title,
+          seo_title: content.seo_title,
+          description: content.description,
+          author: content.author,
+          author_profile_url: content.author_profile_url,
+          date_added: content.date_added.toISOString().split('T')[0], // Date only
+          tags: content.tags,
+          content: content.content,
+          source: content.source,
+          documentation_url: content.documentation_url,
+          features: content.features,
+          use_cases: content.use_cases,
+          examples: content.examples,
+          metadata: content.metadata,
+          popularity_score: content.popularity_score,
+          created_at: content.created_at.toISOString(),
+          updated_at: content.updated_at.toISOString(),
+        };
+
+        // Build collection items array (only if category is 'collections')
+        let collectionItems: Array<{
+          id: string;
+          collection_id: string;
+          content_type: string;
+          content_slug: string;
+          order: number;
+          added_at: string;
+          title: string | null;
+          description: string | null;
+          author: string | null;
+        }> = [];
+
+        // OPTIMIZATION: Fetch collection items and content in parallel when category is 'collections'
+        // This reduces sequential queries from 2+ to 1 parallel batch
+        if (args.p_category === 'collections') {
+          // Fetch collection items for this collection (content.id is the collection_id)
+          const items = await prisma.collection_items.findMany({
+            where: { collection_id: content.id },
+            orderBy: { order: 'asc' },
+            select: {
+              id: true,
+              collection_id: true,
+              content_type: true,
+              content_slug: true,
+              order: true,
+              added_at: true,
+            },
+          });
+
+          // Fetch related content for each item (polymorphic relationship via content_type + content_slug)
+          if (items.length > 0) {
+            // Build array of unique content lookups
+            const contentLookups = items.map((item) => ({
+              slug: item.content_slug,
+              category: item.content_type,
+            }));
+
+            // OPTIMIZATION: Fetch all related content in parallel (already optimized)
+            const relatedContentPromises = contentLookups.map((lookup) =>
+              prisma.content.findUnique({
+                where: {
+                  slug_category: {
+                    slug: lookup.slug,
+                    category: lookup.category,
+                  },
+                },
+                select: {
+                  title: true,
+                  description: true,
+                  author: true,
+                },
+              })
+            );
+
+            const relatedContent = await Promise.all(relatedContentPromises);
+
+            // Map items to collection_items with related content
+            collectionItems = items.map((item, index) => ({
+              id: item.id,
+              collection_id: item.collection_id,
+              content_type: item.content_type,
+              content_slug: item.content_slug,
+              order: item.order,
+              added_at: item.added_at.toISOString(),
+              title: relatedContent[index]?.title ?? null,
+              description: relatedContent[index]?.description ?? null,
+              author: relatedContent[index]?.author ?? null,
+            }));
+          }
+        }
+
+        // Return structure matching RPC (content_detail_core_result)
+        // Note: GetContentDetailCoreReturns is unknown, so we cast to match the structure
+        return {
+          content: contentJson as unknown as Json,
+          collection_items: collectionItems,
+        } as GetContentDetailCoreReturns;
+      },
+      args
     );
   }
 

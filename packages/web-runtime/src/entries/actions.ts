@@ -1,36 +1,12 @@
-export * from '../actions/pulse.ts';
-export * from '../actions/newsletter.ts';
-export { getQuizConfigurationAction } from '../actions/quiz.ts';
-export * from '../actions/companies.ts';
-export * from '../actions/contact.ts';
-export * from '../actions/content.ts';
-export * from '../actions/search.ts';
-export * from '../actions/jobs.ts';
-export * from '../actions/user.ts';
+// Export types only - actions should be imported directly from action files
+// This prevents TypeScript from losing callable function signatures through re-exports
 
-// Export input types (can't export from 'use server' files)
-export type { CreateJobInput } from '../actions/jobs.ts';
-export type { AddBookmarkInput, RemoveBookmarkInput } from '../actions/user.ts';
-export * from '../actions/create-job.ts';
-export * from '../actions/update-job.ts';
-export * from '../actions/delete-job.ts';
-export * from '../actions/toggle-job-status.ts';
-export * from '../actions/create-company.ts';
-export * from '../actions/update-company.ts';
-export * from '../actions/delete-company.ts';
-export * from '../actions/create-collection.ts';
-export * from '../actions/update-collection.ts';
-export * from '../actions/delete-collection.ts';
-export * from '../actions/add-item-to-collection.ts';
-export * from '../actions/remove-item-from-collection.ts';
-export * from '../actions/reorder-collection-items.ts';
-export * from '../actions/create-review.ts';
-export * from '../actions/update-review.ts';
-export * from '../actions/delete-review.ts';
-export * from '../actions/mark-review-helpful.ts';
-export * from '../actions/submit-content-for-review.ts';
-export * from '../actions/submit-contact-form.ts';
-export * from '../actions/add-bookmark.ts';
-export * from '../actions/remove-bookmark.ts';
-export * from '../actions/unlink-oauth-provider.ts';
-export * from '../actions/mfa.ts';
+// Export input types (can't export from 'use server' files, but types are OK)
+export type { CreateJobInput } from '../actions/jobs-crud.ts';
+export type { AddBookmarkInput, RemoveBookmarkInput } from '../actions/bookmarks.ts';
+
+// NOTE: Actions are NOT re-exported here to preserve next-safe-action callable function signatures.
+// Import actions directly from their source files:
+// - import { createJob, updateJob, deleteJob } from '@heyclaude/web-runtime/actions/jobs-crud';
+// - import { addBookmark } from '@heyclaude/web-runtime/actions/bookmarks';
+// etc.

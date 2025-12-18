@@ -16,7 +16,7 @@ import type {
   ErrorFallbackProps,
 } from '../../types/component.types.ts';
 import { createErrorBoundaryFallback } from '../../client/error-handler.ts';
-import { responsive } from '../../design-system/index.ts';
+// Removed deprecated responsive utility - using direct Tailwind classes
 import { useCopyToClipboard } from '../../hooks/index.ts';
 import { Button } from './button.tsx';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './card.tsx';
@@ -126,7 +126,7 @@ function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
             )}
 
             <motion.div
-              className={responsive.col}
+              className="flex flex-col gap-2"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ ...SPRING.smooth, delay: 0.3 }}

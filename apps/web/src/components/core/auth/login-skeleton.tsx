@@ -9,7 +9,7 @@
  */
 
 import { Skeleton } from '@heyclaude/web-runtime/ui';
-import { SPRING, STAGGER, paddingX, spaceY, marginBottom, padding, marginX, gap, marginTop } from '@heyclaude/web-runtime/design-system';
+import { SPRING, STAGGER } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 
@@ -30,23 +30,23 @@ export function LoginSkeleton() {
       <div className="hidden min-h-dvh min-h-screen lg:grid lg:grid-cols-2">
         {/* Left: Brand content */}
         <motion.div
-          className={`flex min-h-dvh min-h-screen items-center justify-center ${paddingX.default} xl:${paddingX.default}`}
+          className="flex min-h-dvh min-h-screen items-center justify-center px-4 xl:px-4"
           initial={!prefersReducedMotion ? { opacity: 0, x: -30 } : false}
           animate={!prefersReducedMotion ? { opacity: 1, x: 0 } : {}}
           transition={SPRING.smooth}
         >
-          <div className={`flex max-w-2xl flex-col items-start justify-center ${spaceY.loose}`}>
+          <div className="flex max-w-2xl flex-col items-start justify-center gap-8">
             {/* Logo */}
             <motion.div
               initial={!prefersReducedMotion ? { opacity: 0, y: 20 } : false}
               animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
               transition={{ ...SPRING.smooth, delay: 0.1 }}
             >
-              <Skeleton size="xl" width="xl" rounded="lg" className={`${marginBottom.comfortable} h-16 w-16`} />
+              <Skeleton size="xl" width="xl" rounded="lg" className="mb-6 h-16 w-16" />
             </motion.div>
             {/* Title */}
             <motion.div
-              className={`${spaceY.comfortable}`}
+              className="space-y-4"
               initial={!prefersReducedMotion ? { opacity: 0, y: 20 } : false}
               animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
               transition={{ ...SPRING.smooth, delay: 0.2 }}
@@ -58,22 +58,22 @@ export function LoginSkeleton() {
         </motion.div>
 
         {/* Right: Auth card */}
-        <div className={`flex min-h-dvh min-h-screen items-center justify-center ${paddingX.relaxed}`}>
+        <div className="flex min-h-dvh min-h-screen items-center justify-center px-8">
           <motion.div
-            className={`bg-card w-full max-w-md rounded-2xl ${padding.default} shadow-2xl xl:${padding.section} border border-color-accent-primary`}
+            className="bg-card w-full max-w-md rounded-2xl p-4 shadow-2xl xl:p-12 border border-color-accent-primary"
             initial={!prefersReducedMotion ? { opacity: 0, y: 20 } : false}
             animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
             transition={{ ...SPRING.smooth, delay: STAGGER.fast }}
           >
-            <div className={`w-full ${spaceY.loose}`}>
+            <div className="w-full space-y-8">
               {/* Title and description */}
-              <div className={`${marginBottom.loose} ${spaceY.comfortable} text-center`}>
-                <Skeleton size="xl" width="lg" className={`${marginX.auto} h-9`} />
-                <Skeleton size="sm" width="md" className={`${marginX.auto} h-5`} />
+              <div className="mb-12 space-y-4 text-center">
+                <Skeleton size="xl" width="lg" className="mx-auto h-9" />
+                <Skeleton size="sm" width="md" className="mx-auto h-5" />
               </div>
 
               {/* OAuth buttons */}
-              <div className={`flex items-center justify-center ${gap.default}`}>
+              <div className="flex-center gap-3">
                 {Array.from({ length: 3 }).map((_, i) => (
                   <motion.div
                     key={i}
@@ -88,7 +88,7 @@ export function LoginSkeleton() {
 
               {/* Newsletter opt-in tile */}
               <motion.div
-                className={`${marginTop.relaxed} ${spaceY.default} rounded-lg border ${padding.default}`}
+                className="mt-8 space-y-3 card-base p-4"
                 initial={!prefersReducedMotion ? { opacity: 0, y: 10 } : false}
                 animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
                 transition={{ ...SPRING.loading, delay: 0.5 }}
@@ -96,7 +96,7 @@ export function LoginSkeleton() {
                 <Skeleton size="md" width="md" className="h-6" />
                 <Skeleton size="sm" width="3xl" className="h-4" />
                 <Skeleton size="sm" width="2xl" className="h-4" />
-                <div className={`flex items-center ${gap.tight}`}>
+                <div className="flex items-center gap-1">
                   <Skeleton size="sm" width="xs" rounded="md" className="h-5 w-5" />
                   <Skeleton size="sm" width="xs" className="h-4" />
                 </div>
@@ -110,7 +110,7 @@ export function LoginSkeleton() {
       <div className="flex min-h-dvh min-h-screen flex-col lg:hidden">
         {/* Mobile header */}
         <motion.div
-          className={`border-b ${padding.default}`}
+          className="border-b p-4"
           initial={!prefersReducedMotion ? { opacity: 0, y: -20 } : false}
           animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
           transition={{ ...SPRING.smooth, delay: 0.1 }}
@@ -119,28 +119,28 @@ export function LoginSkeleton() {
         </motion.div>
 
         {/* Auth card */}
-        <div className={`flex flex-1 items-center justify-center ${padding.comfortable}`}>
-          <div className={`bg-card w-full max-w-md rounded-2xl ${padding.relaxed} border border-color-accent-primary`}>
-            <div className={`w-full ${spaceY.loose}`}>
+        <div className="flex flex-1 items-center justify-center p-6">
+          <div className="bg-card w-full max-w-md rounded-2xl p-8 border border-color-accent-primary">
+            <div className="w-full space-y-8">
               {/* Title and description */}
-              <div className={`${marginBottom.loose} ${spaceY.comfortable} text-center`}>
-                <Skeleton size="xl" width="lg" className={`${marginX.auto} h-9`} />
-                <Skeleton size="sm" width="md" className={`${marginX.auto} h-5`} />
+              <div className="mb-12 space-y-4 text-center">
+                <Skeleton size="xl" width="lg" className="mx-auto h-9" />
+                <Skeleton size="sm" width="md" className="mx-auto h-5" />
               </div>
 
               {/* OAuth buttons */}
-              <div className={`flex items-center justify-center ${gap.default}`}>
+              <div className="flex-center gap-3">
                 {Array.from({ length: 3 }).map((_, i) => (
                   <Skeleton key={i} size="lg" width="lg" rounded="lg" className="h-12 w-12" />
                 ))}
               </div>
 
               {/* Newsletter opt-in tile */}
-              <div className={`${marginTop.relaxed} ${spaceY.default} rounded-lg border ${padding.default}`}>
+              <div className="mt-8 space-y-3 card-base p-4">
                 <Skeleton size="md" width="md" className="h-6" />
                 <Skeleton size="sm" width="3xl" className="h-4" />
                 <Skeleton size="sm" width="2xl" className="h-4" />
-                <div className={`flex items-center ${gap.tight}`}>
+                <div className="flex items-center gap-1">
                   <Skeleton size="sm" width="xs" rounded="md" className="h-5 w-5" />
                   <Skeleton size="sm" width="xs" className="h-4" />
                 </div>

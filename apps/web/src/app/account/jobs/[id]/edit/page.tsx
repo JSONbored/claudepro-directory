@@ -3,10 +3,9 @@
  * Uses updateJob server action (calls update_job RPC)
  */
 
-import { JobType, JobCategory } from '@heyclaude/data-layer/prisma';
-import type { job_category, job_type, jobsModel } from '@heyclaude/data-layer/prisma';
-import { type CreateJobInput } from '@heyclaude/web-runtime/actions';
-import { updateJob } from '@heyclaude/web-runtime/actions';
+import { JobCategory, JobType } from '@heyclaude/data-layer/prisma';
+import { type job_category, type job_type, type jobsModel } from '@heyclaude/data-layer/prisma';
+import { type CreateJobInput, updateJob } from '@heyclaude/web-runtime/actions/jobs-crud';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
 import {
   generatePageMetadata,
@@ -18,15 +17,14 @@ import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import { notFound, redirect } from 'next/navigation';
 import { connection } from 'next/server';
-import { Suspense, lazy } from 'react';
-
-// OPTIMIZATION: Dynamic import for large form component (763 lines) - only loads when needed
-const JobForm = lazy(
-  () => import('@/src/components/core/forms/job-form').then((mod) => ({ default: mod.JobForm }))
-);
+import { lazy, Suspense } from 'react';
 
 import Loading from './loading';
-import { size, weight, tracking, muted, radius, marginBottom, spaceY, padding } from '@heyclaude/web-runtime/design-system';
+
+// OPTIMIZATION: Dynamic import for large form component (763 lines) - only loads when needed
+const JobForm = lazy(() =>
+  import('@/src/components/core/forms/job-form').then((mod) => ({ default: mod.JobForm }))
+);
 
 /**
  * Dynamic Rendering Required
@@ -170,7 +168,8 @@ async function EditJobPageContent({
   // Section: Plan Catalog Fetch
   let planCatalog: Awaited<ReturnType<typeof getPaymentPlanCatalog>> = [];
   try {
-    planCatalog = await getPaymentPlanCatalog();
+    const fetchedCatalog = await getPaymentPlanCatalog();
+    planCatalog = fetchedCatalog ?? [];
     userLogger.info(
       { plansCount: planCatalog.length, section: 'data-fetch' },
       'EditJobPage: plan catalog loaded'
@@ -184,6 +183,7 @@ async function EditJobPageContent({
       },
       'EditJobPage: getPaymentPlanCatalog threw'
     );
+    planCatalog = [];
   }
 
   const handleSubmit = async (data: EditJobInput) => {
@@ -196,7 +196,7 @@ async function EditJobPageContent({
       route: `/account/jobs/${id}/edit`,
     });
 
-    let result: Awaited<ReturnType<typeof updateJob>>;
+    let result;
     try {
       result = await updateJob({
         job_id: id,
@@ -256,14 +256,14 @@ async function EditJobPageContent({
   const hasInvalidData = !isValidJobType(job.type) || !isValidJobCategory(job.category);
 
   return (
-    <div className={spaceY.relaxed}>
+    <div className="space-y-6">
       <div>
-        <h1 className={`${marginBottom.compact} ${size['3xl']} ${weight.semibold} ${tracking.tight}`}>Edit Job Listing</h1>
-        <p className={`${muted.default}`}>Update your job posting details</p>
+        <h1 className="mb-2 text-3xl font-semibold tracking-tight">Edit Job Listing</h1>
+        <p className="text-muted-foreground">Update your job posting details</p>
       </div>
       {hasInvalidData ? (
-        <div className={`${radius.md} bg-yellow-50 ${padding.default} dark:bg-yellow-900/20`}>
-          <p className={`${size.sm} text-yellow-800 dark:text-yellow-200`}>
+        <div className="rounded-md bg-yellow-50 p-4 dark:bg-yellow-900/20">
+          <p className="text-sm text-yellow-800 dark:text-yellow-200">
             Some fields contain invalid data and couldn&apos;t be loaded. Please review and update.
           </p>
         </div>
@@ -289,9 +289,9 @@ async function EditJobPageContent({
             requirements: job.requirements,
             tags: job.tags,
           }}
+          onSubmit={handleSubmit}
           planCatalog={planCatalog}
           submitLabel="Update Job Listing"
-          onSubmit={handleSubmit}
         />
       </Suspense>
     </div>

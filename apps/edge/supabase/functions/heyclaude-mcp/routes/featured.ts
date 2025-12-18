@@ -103,7 +103,6 @@ export async function handleGetFeatured(
           })
           .filter((item: FeaturedItem | null): item is FeaturedItem => item !== null);
         }
-      }
     } else if (result.status === 'rejected') {
       // Promise was rejected - log error
       await logError('ContentService.getContentPaginatedSlim failed in getFeatured', {

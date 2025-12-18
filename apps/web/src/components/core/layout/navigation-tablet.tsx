@@ -7,14 +7,9 @@
 
 'use client';
 
-import type { content_category } from '@heyclaude/data-layer/prisma';
 import { PRIMARY_NAVIGATION, SECONDARY_NAVIGATION } from '@heyclaude/web-runtime/config/navigation';
 import { ChevronDown, PlusCircle, Bookmark, Github, MessageSquare, Search } from '@heyclaude/web-runtime/icons';
 import {
-  ANIMATION_CONSTANTS,
-  DIMENSIONS,
-  POSITION_PATTERNS,
-  STATE_PATTERNS,
   PrefetchLink,
   Button,
   Popover,
@@ -24,7 +19,6 @@ import {
   AnimatedBorder,
   cn,
 } from '@heyclaude/web-runtime/ui';
-import { size, padding, spaceY, cluster, gap, weight, muted, tracking, paddingX, paddingY, marginBottom, marginTop, marginLeft, marginY, marginX, paddingTop } from '@heyclaude/web-runtime/design-system';
 import { SPRING, MICROINTERACTIONS, STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { AnimatePresence, motion } from 'motion/react';
@@ -32,64 +26,13 @@ import Link from 'next/link';
 import { Fragment, useEffect, useState } from 'react';
 import { useBoolean } from '@heyclaude/web-runtime/hooks';
 
-import { getSocialLinks, logUnhandledPromise } from '@heyclaude/web-runtime/core';
+import { getSocialLinks, logUnhandledPromise, getCategoryFromHref, getIconBackgroundClass } from '@heyclaude/web-runtime/core';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 
 import { usePinboardDrawer } from '@/src/components/features/navigation/pinboard-drawer-provider';
 import { useCommandPalette } from '@/src/components/features/navigation/command-palette-provider';
 
-/**
- * Get category from href for badge display
- */
-function getCategoryFromHref(href: string): content_category | null {
-  if (href.includes('/agents')) return 'agents';
-  if (href.includes('/mcp')) return 'mcp';
-  if (href.includes('/commands')) return 'commands';
-  if (href.includes('/rules') || href.includes('/claude.md')) return 'rules';
-  if (href.includes('/hooks')) return 'hooks';
-  if (href.includes('/statuslines')) return 'statuslines';
-  if (href.includes('/collections')) return 'collections';
-  if (href.includes('/skills')) return 'skills';
-  if (href.includes('/guides')) return 'guides';
-  return null;
-}
-
-/**
- * Get icon background gradient classes based on link href/category
- * Returns gradient background classes for icons instead of flat colors
- */
-function getIconBackgroundClass(href: string): string {
-  // Category-based gradients
-  if (href.includes('/agents')) return 'bg-gradient-to-br from-purple-500/20 to-purple-600/10 text-purple-400 group-hover/item:from-purple-500/30 group-hover/item:to-purple-600/20';
-  if (href.includes('/mcp')) return 'bg-gradient-to-br from-cyan-500/20 to-cyan-600/10 text-cyan-400 group-hover/item:from-cyan-500/30 group-hover/item:to-cyan-600/20';
-  if (href.includes('/commands')) return 'bg-gradient-to-br from-blue-500/20 to-blue-600/10 text-blue-400 group-hover/item:from-blue-500/30 group-hover/item:to-blue-600/20';
-  if (href.includes('/rules') || href.includes('/claude.md')) return 'bg-gradient-to-br from-amber-500/20 to-amber-600/10 text-amber-400 group-hover/item:from-amber-500/30 group-hover/item:to-amber-600/20';
-  if (href.includes('/hooks')) return 'bg-gradient-to-br from-green-500/20 to-green-600/10 text-green-400 group-hover/item:from-green-500/30 group-hover/item:to-green-600/20';
-  if (href.includes('/statuslines')) return 'bg-gradient-to-br from-teal-500/20 to-teal-600/10 text-teal-400 group-hover/item:from-teal-500/30 group-hover/item:to-teal-600/20';
-  if (href.includes('/collections')) return 'bg-gradient-to-br from-indigo-500/20 to-indigo-600/10 text-indigo-400 group-hover/item:from-indigo-500/30 group-hover/item:to-indigo-600/20';
-  if (href.includes('/skills')) return 'bg-gradient-to-br from-pink-500/20 to-pink-600/10 text-pink-400 group-hover/item:from-pink-500/30 group-hover/item:to-pink-600/20';
-  if (href.includes('/guides')) return 'bg-gradient-to-br from-violet-500/20 to-violet-600/10 text-violet-400 group-hover/item:from-violet-500/30 group-hover/item:to-violet-600/20';
-  if (href.includes('/jobs')) return 'bg-gradient-to-br from-orange-500/20 to-orange-600/10 text-orange-400 group-hover/item:from-orange-500/30 group-hover/item:to-orange-600/20';
-  if (href.includes('/changelog')) return 'bg-gradient-to-br from-slate-500/20 to-slate-600/10 text-slate-400 group-hover/item:from-slate-500/30 group-hover/item:to-slate-600/20';
-  
-  // Feature-based gradients
-  if (href.includes('/search')) return 'bg-gradient-to-br from-blue-500/20 to-blue-600/10 text-blue-400 group-hover/item:from-blue-500/30 group-hover/item:to-blue-600/20';
-  if (href.includes('/trending')) return 'bg-gradient-to-br from-orange-500/20 to-orange-600/10 text-orange-400 group-hover/item:from-orange-500/30 group-hover/item:to-orange-600/20';
-  if (href.includes('/help')) return 'bg-gradient-to-br from-green-500/20 to-green-600/10 text-green-400 group-hover/item:from-green-500/30 group-hover/item:to-green-600/20';
-  if (href.includes('/tools')) return 'bg-gradient-to-br from-purple-500/20 to-purple-600/10 text-purple-400 group-hover/item:from-purple-500/30 group-hover/item:to-purple-600/20';
-  if (href.includes('/submit')) return 'bg-gradient-to-br from-accent/20 to-accent/10 text-accent group-hover/item:from-accent/30 group-hover/item:to-accent/20';
-  if (href.includes('/community')) return 'bg-gradient-to-br from-blue-500/20 to-blue-600/10 text-blue-400 group-hover/item:from-blue-500/30 group-hover/item:to-blue-600/20';
-  if (href.includes('/companies')) return 'bg-gradient-to-br from-indigo-500/20 to-indigo-600/10 text-indigo-400 group-hover/item:from-indigo-500/30 group-hover/item:to-indigo-600/20';
-  if (href.includes('/partner')) return 'bg-gradient-to-br from-amber-500/20 to-amber-600/10 text-amber-400 group-hover/item:from-amber-500/30 group-hover/item:to-amber-600/20';
-  if (href.includes('/consulting')) return 'bg-gradient-to-br from-orange-500/20 to-orange-600/10 text-orange-400 group-hover/item:from-orange-500/30 group-hover/item:to-orange-600/20';
-  if (href.includes('/contact')) return 'bg-gradient-to-br from-blue-500/20 to-blue-600/10 text-blue-400 group-hover/item:from-blue-500/30 group-hover/item:to-blue-600/20';
-  if (href.includes('/rss') || href.includes('/feeds')) return 'bg-gradient-to-br from-orange-500/20 to-orange-600/10 text-orange-400 group-hover/item:from-orange-500/30 group-hover/item:to-orange-600/20';
-  if (href.includes('/llms.txt')) return 'bg-gradient-to-br from-purple-500/20 to-purple-600/10 text-purple-400 group-hover/item:from-purple-500/30 group-hover/item:to-purple-600/20';
-  
-  // Default gradient
-  return 'bg-gradient-to-br from-muted/50 to-muted/30 text-muted-foreground group-hover/item:from-accent/20 group-hover/item:to-accent/10 group-hover/item:text-accent';
-}
 
 interface NavLinkProps {
   children: React.ReactNode;
@@ -105,7 +48,7 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
   const linkProps = {
     href,
     prefetch: true,
-    className: cn('group relative', paddingX.compact, paddingY.tight, 'text-xs font-medium', ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT, 'no-underline',
+    className: cn('group relative', 'px-3', 'py-2', 'text-xs-medium', 'transition-all duration-200 ease-out', 'no-underline',
       active ? 'text-foreground' : 'text-foreground/80 hover:text-foreground',
       className
     ),
@@ -121,7 +64,7 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
       <span className="relative inline-block">
         {children}
         <span
-          className={`${POSITION_PATTERNS.ABSOLUTE_BOTTOM_LEFT} ${DIMENSIONS.UNDERLINE} bg-accent ${ANIMATION_CONSTANTS.CSS_TRANSITION_SLOW} ${
+          className={`absolute bottom-0 left-0 h-[2px] bg-accent transition-all duration-300 ease-out ${
             active ? 'w-full' : 'w-0 group-hover:w-full'
           }`}
           aria-hidden="true"
@@ -229,8 +172,8 @@ function CommunityIconsRow({
   };
   
   return (
-    <div className={cn('border-t border-border/30', marginTop.default, paddingTop.default)}>
-      <div className={`flex items-center justify-center ${gap.compact} ${paddingX.tight}`}>
+    <div className={cn('border-t border-border/30', 'mt-4', 'pt-4')}>
+      <div className="flex-center gap-2 px-2">
         {/* Search / Command Menu */}
         <motion.div
           whileHover={shouldReduceMotion ? {} : MICROINTERACTIONS.button.hover}
@@ -304,7 +247,7 @@ function CommunityIconsRow({
           >
             <Github className="h-4 w-4" />
             {githubStars !== null && (
-              <span className={cn('absolute -top-1 -right-1', size['2xs'], 'font-medium text-accent')}>
+              <span className={cn('absolute -top-1 -right-1', 'text-[10px]', 'font-medium text-accent')}>
                 {githubStars > 999 ? `${(githubStars / 1000).toFixed(1)}k` : githubStars.toLocaleString()}
               </span>
             )}
@@ -333,7 +276,7 @@ export function NavigationTablet({ isActive }: NavigationTabletProps) {
       transition={{ duration: DURATION.default, ease: 'easeOut' }}
       aria-label="Tablet navigation"
     >
-      <div className={cn('flex', cluster.tight, paddingX.compact)}>
+      <div className={cn('flex', 'items-center gap-1', 'px-3')}>
         {PRIMARY_NAVIGATION.slice(0, 5).map((link, linkIndex) => {
           // Special handling for Jobs dropdown with enhanced design
           if (link.label === 'Jobs' && link.sections) {
@@ -349,24 +292,24 @@ export function NavigationTablet({ isActive }: NavigationTabletProps) {
                   <PopoverTrigger asChild>
                     <button
                       type="button"
-                      className={cn('group relative flex items-center', paddingX.compact, paddingY.tight, 'font-medium', size.xs, 'text-foreground/80 hover:text-foreground', ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT, 'whitespace-nowrap')}
+                      className={cn('group relative flex items-center', 'px-3', 'py-2', 'font-medium', 'text-xs', 'text-foreground/80 hover:text-foreground', 'transition-all duration-200 ease-out', 'whitespace-nowrap')}
                       aria-label={`Open ${link.label} menu`}
                     >
                       <span className="relative">
                         {link.label}
                         <span
-                          className={`${POSITION_PATTERNS.ABSOLUTE_BOTTOM_LEFT} ${DIMENSIONS.UNDERLINE} bg-accent w-0 ${ANIMATION_CONSTANTS.CSS_TRANSITION_SLOW} group-hover:w-full`}
+                          className="absolute bottom-0 left-0 h-[2px] bg-accent w-0 transition-all duration-300 ease-out group-hover:w-full"
                           aria-hidden="true"
                         />
                       </span>
-                      <ChevronDown className={cn(marginLeft.tight, 'h-2.5 w-2.5 opacity-50')} />
+                      <ChevronDown className={cn('ml-1', 'h-2.5 w-2.5 opacity-50')} />
                     </button>
                   </PopoverTrigger>
                   <PopoverContent 
                     align="start" 
                     className={cn(
-                      DIMENSIONS.NAV_DROPDOWN_TABLET,
-                      padding.default,
+                      'w-[440px]',
+                      'p-4',
                       'relative overflow-hidden rounded-xl border border-border/60 bg-background/95 backdrop-blur-xl shadow-2xl'
                     )} 
                     sideOffset={8}
@@ -378,7 +321,7 @@ export function NavigationTablet({ isActive }: NavigationTabletProps) {
                       duration={4}
                       borderWidth={1.5}
                     />
-                    <div className={`relative z-10 ${spaceY.comfortable}`}>
+                    <div className="relative z-10 space-y-4">
                       {/* Post a Job Hero Card */}
                       <motion.div
                         whileHover={MICROINTERACTIONS.card.hover}
@@ -387,21 +330,21 @@ export function NavigationTablet({ isActive }: NavigationTabletProps) {
                       >
                         <Link
                           href="/account/jobs/new"
-                          className={`group/cta block rounded-lg border-2 border-accent/20 bg-gradient-to-br from-accent/10 to-accent/5 ${padding.default}`}
+                          className="group/cta block card-base border-2 border-accent/20 bg-gradient-to-br from-accent/10 to-accent/5 p-4"
                         >
-                        <div className={cn(cluster.default, marginBottom.compact)}>
-                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/20 group-hover/cta:bg-accent/30 transition-colors">
+                        <div className={cn('flex items-center gap-3', 'mb-2')}>
+                          <div className="flex-center h-10 w-10 rounded-lg bg-accent/20 group-hover/cta:bg-accent/30 transition-colors">
                             <PlusCircle className="h-5 w-5 text-accent" />
                           </div>
                           <div className="flex-1">
                             <h3 className="font-semibold text-sm">Post a Job</h3>
-                            <p className="text-xs text-muted-foreground">Reach talented developers</p>
+                            <p className="text-muted-foreground text-xs">Reach talented developers</p>
                           </div>
                         </div>
-                        <p className={cn('text-xs text-muted-foreground', marginBottom.default)}>
+                        <p className={cn('text-muted-foreground text-xs', 'mb-4')}>
                           Featured listings available. Premium placement options.
                         </p>
-                        <div className={`flex items-center ${gap.tight} text-xs font-medium text-accent`}>
+                        <div className="flex items-center gap-1 text-xs-medium text-accent">
                           <span>Create Listing</span>
                         <ChevronDown className="h-3 w-3 rotate-[-90deg]" />
                       </div>
@@ -409,7 +352,7 @@ export function NavigationTablet({ isActive }: NavigationTabletProps) {
                       </motion.div>
 
                       {/* Quick Links */}
-                      <div className={`${spaceY.tight}`}>
+                      <div className="space-y-1">
                         {link.sections[0]?.links.map((child, childIndex) => {
                           const ChildIcon = child.icon;
                               const iconBgClass = getIconBackgroundClass(child.href);
@@ -423,9 +366,9 @@ export function NavigationTablet({ isActive }: NavigationTabletProps) {
                               <Link
                                 href={child.href}
                                 prefetch
-                                className={`group/item block rounded-lg ${paddingX.compact} ${paddingY.tight} text-sm leading-none no-underline outline-none hover:bg-accent/5 focus:bg-accent/5 overflow-hidden`}
+                                className="group/item block rounded-lg px-3 py-2 text-sm leading-none no-underline outline-none hover:bg-accent/5 focus:bg-accent/5 overflow-hidden"
                               >
-                              <div className={`flex items-start ${gap.compact}`}>
+                              <div className="flex items-start gap-2">
                                 {ChildIcon && (
                                   <motion.div
                                     className={cn(
@@ -442,7 +385,7 @@ export function NavigationTablet({ isActive }: NavigationTabletProps) {
                                 <div className="flex-1 min-w-0">
                                   <div className="font-medium">{child.label}</div>
                                   {child.description && (
-                                    <p className={cn('text-muted-foreground line-clamp-1 text-xs leading-snug', marginTop.micro)}>
+                                    <p className={cn('text-muted-foreground line-clamp-1 text-xs leading-snug', 'mt-0.5')}>
                                       {child.description}
                                     </p>
                                     )}
@@ -474,24 +417,24 @@ export function NavigationTablet({ isActive }: NavigationTabletProps) {
                   <PopoverTrigger asChild>
                     <button
                       type="button"
-                      className={cn('group relative flex items-center', paddingX.compact, paddingY.tight, 'font-medium', size.xs, 'text-foreground/80 hover:text-foreground', ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT, 'whitespace-nowrap')}
+                      className={cn('group relative flex items-center', 'px-3', 'py-2', 'font-medium', 'text-xs', 'text-foreground/80 hover:text-foreground', 'transition-all duration-200 ease-out', 'whitespace-nowrap')}
                       aria-label={`Open ${link.label} menu`}
                     >
                       <span className="relative">
                         {link.label}
                         <span
-                          className={`${POSITION_PATTERNS.ABSOLUTE_BOTTOM_LEFT} ${DIMENSIONS.UNDERLINE} bg-accent w-0 ${ANIMATION_CONSTANTS.CSS_TRANSITION_SLOW} group-hover:w-full`}
+                          className="absolute bottom-0 left-0 h-[2px] bg-accent w-0 transition-all duration-300 ease-out group-hover:w-full"
                           aria-hidden="true"
                         />
                       </span>
-                      <ChevronDown className={cn(marginLeft.tight, 'h-2.5 w-2.5 opacity-50')} />
+                      <ChevronDown className={cn('ml-1', 'h-2.5 w-2.5 opacity-50')} />
                     </button>
                   </PopoverTrigger>
                   <PopoverContent 
                     align="start" 
                     className={cn(
                       'w-[720px] xl:w-[800px]',
-                      padding.default,
+                      'p-4',
                       'relative overflow-hidden rounded-xl border border-border/60 bg-background/95 backdrop-blur-xl shadow-2xl'
                     )} 
                     sideOffset={8}
@@ -503,7 +446,7 @@ export function NavigationTablet({ isActive }: NavigationTabletProps) {
                       duration={3}
                       borderWidth={2}
                     />
-                    <div className={`relative z-10 grid grid-cols-[.6fr_1.4fr] ${gap.comfortable}`}>
+                    <div className="relative z-10 grid grid-cols-[.6fr_1.4fr] gap-4">
                       {/* Left Column: Hero Card */}
                       <div>
                         <motion.div
@@ -513,15 +456,15 @@ export function NavigationTablet({ isActive }: NavigationTabletProps) {
                         >
                           <Link
                             href="/tools/config-recommender"
-                            className={`group/hero block rounded-lg border border-border/50 bg-card/50 ${padding.default}`}
+                            className="group/hero block card-base border-border/50 bg-card/50 p-4"
                           >
-                            <div className={marginBottom.default}>
-                              <h3 className={cn('font-semibold text-base', marginBottom.tight)}>{link.label}</h3>
+                            <div className="mb-4">
+                              <h3 className={cn('font-semibold text-base', 'mb-1')}>{link.label}</h3>
                               <p className="text-muted-foreground text-sm leading-tight">
                                 {link.description || 'Browse all configuration types for Claude Code'}
                               </p>
                             </div>
-                            <div className={`flex items-center ${gap.tight} text-xs font-medium text-accent`}>
+                            <div className="flex items-center gap-1 text-xs-medium text-accent">
                               <span>Explore All</span>
                               <ChevronDown className="h-3 w-3 rotate-[-90deg]" />
                             </div>
@@ -548,7 +491,7 @@ export function NavigationTablet({ isActive }: NavigationTabletProps) {
                           return (
                             <div className={cn('grid gap-4', columns.length === 1 ? 'grid-cols-1' : columns.length === 2 ? 'grid-cols-2' : 'grid-cols-3')}>
                               {columns.map((columnLinks, colIndex) => (
-                                <div key={`${link.label}-column-${colIndex}`} className={`${spaceY.compact} max-h-[280px] overflow-y-auto overflow-x-hidden scrollbar-hide`}>
+                                <div key={`${link.label}-column-${colIndex}`} className="space-y-2 max-h-[280px] overflow-y-auto overflow-x-hidden scrollbar-hide">
                                   {columnLinks.map((child, childIndex) => {
                                     const category = getCategoryFromHref(child.href);
                                     const ChildIcon = child.icon;
@@ -571,11 +514,11 @@ export function NavigationTablet({ isActive }: NavigationTabletProps) {
                                             <Link
                                               href={child.href}
                                               prefetch
-                                              className={cn('group/item block rounded-lg', paddingX['2.5'], paddingY.compact, 'text-sm leading-none no-underline outline-none', STATE_PATTERNS.HOVER_BG_STRONG, STATE_PATTERNS.FOCUS_RING, 'overflow-hidden')}
+                                              className={cn('group/item block rounded-lg', 'px-2.5', 'py-3', 'text-sm leading-none no-underline outline-none', 'hover:bg-accent/20', 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2', 'overflow-hidden')}
                                             >
-                                              <div className={cn(cluster.compact, marginBottom.micro, 'flex-wrap')}>
+                                              <div className={cn('flex items-center gap-2', 'mb-0.5', 'flex-wrap')}>
                                                 {ChildIcon && (
-                                                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-muted/50 text-muted-foreground group-hover/item:bg-muted group-hover/item:text-foreground">
+                                                  <div className="flex-center h-6 w-6 shrink-0 rounded-lg bg-muted/50 text-muted-foreground group-hover/item:bg-muted group-hover/item:text-foreground">
                                                     <ChildIcon className="h-3.5 w-3.5" />
                                                   </div>
                                                 )}
@@ -585,18 +528,18 @@ export function NavigationTablet({ isActive }: NavigationTabletProps) {
                                                     variant="category" 
                                                     category={category} 
                                                     href={null}
-                                                    className={cn('shrink-0', size['2xs'], paddingX['1.5'], paddingY.zero)} 
+                                                    className={cn('shrink-0', 'text-[10px]', 'px-1.5', 'py-0')} 
                                                   />
                                                 )}
                                                 {child.isNew && (
                                                   <UnifiedBadge variant="new-badge" badgeVariant="default" className="shrink-0" />
                                                 )}
                                                 {child.external && (
-                                                  <span className={cn('text-muted-foreground text-xs shrink-0', marginLeft.auto)}>↗</span>
+                                                  <span className={cn('text-muted-foreground text-xs shrink-0', 'ml-auto')}>↗</span>
                                                 )}
                                               </div>
                                               {child.description && (
-                                                <p className={cn('text-muted-foreground', size['3xs'], 'leading-snug break-words word-break-break-word line-clamp-1', marginLeft.relaxed)}>
+                                                <p className={cn('text-muted-foreground', 'text-[11px]', 'leading-snug break-words word-break-break-word line-clamp-1', 'ml-8')}>
                                                   {child.description}
                                                 </p>
                                               )}
@@ -604,7 +547,7 @@ export function NavigationTablet({ isActive }: NavigationTabletProps) {
                                           </motion.div>
                                         </motion.div>
                                         {!isLastInColumn && (
-                                          <div className={`h-px bg-border/30 ${marginY.micro}.5`} />
+                                          <div className="h-px bg-border/30 my-0.5" />
                                         )}
                                       </div>
                                     );
@@ -649,25 +592,25 @@ export function NavigationTablet({ isActive }: NavigationTabletProps) {
                   <PopoverTrigger asChild>
                     <button
                       type="button"
-                      className={cn('group relative flex items-center', paddingX.compact, paddingY.tight, 'font-medium', size.xs, 'text-foreground/80 hover:text-foreground', ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT, 'whitespace-nowrap')}
+                      className={cn('group relative flex items-center', 'px-3', 'py-2', 'font-medium', 'text-xs', 'text-foreground/80 hover:text-foreground', 'transition-all duration-200 ease-out', 'whitespace-nowrap')}
                       aria-label={`Open ${link.label} menu`}
                     >
                       <span className="relative">
                         {link.label}
                         <span
-                          className={`${POSITION_PATTERNS.ABSOLUTE_BOTTOM_LEFT} ${DIMENSIONS.UNDERLINE} bg-accent w-0 ${ANIMATION_CONSTANTS.CSS_TRANSITION_SLOW} group-hover:w-full`}
+                          className="absolute bottom-0 left-0 h-[2px] bg-accent w-0 transition-all duration-300 ease-out group-hover:w-full"
                           aria-hidden="true"
                         />
                       </span>
-                      <ChevronDown className={cn(marginLeft.tight, 'h-2.5 w-2.5 opacity-50')} />
+                      <ChevronDown className={cn('ml-1', 'h-2.5 w-2.5 opacity-50')} />
                     </button>
                   </PopoverTrigger>
                   <PopoverContent 
                     align="start" 
                     className={cn(
-                      DIMENSIONS.NAV_DROPDOWN_BASE,
-                      DIMENSIONS.NAV_DROPDOWN_BASE_LG,
-                      padding.default,
+                      'w-[480px]',
+                      'lg:w-[600px]',
+                      'p-4',
                       'relative overflow-hidden rounded-xl border border-border/60 bg-background/95 backdrop-blur-xl shadow-2xl'
                     )} 
                     sideOffset={8}
@@ -687,16 +630,16 @@ export function NavigationTablet({ isActive }: NavigationTabletProps) {
                           animate={{ opacity: 1 }}
                           exit={{ opacity: 0 }}
                           transition={{ duration: DURATION.micro }}
-                          className={cn('relative z-10 grid', spaceY.default, DIMENSIONS.NAV_DROPDOWN_INNER_SM, DIMENSIONS.NAV_DROPDOWN_BASE_MD, 'md:grid-cols-2', DIMENSIONS.NAV_DROPDOWN_INNER_LG)}
+                          className={cn('relative z-10 grid', 'space-y-3', 'sm:w-[400px]', 'md:w-[480px]', 'md:grid-cols-2', 'lg:w-[600px]')}
                         >
                           {link.sections.map((section, sectionIndex) => (
                             <li key={`${link.label}-section-${sectionIndex}-${section.heading}`}>
-                              <div className={marginBottom.compact}>
-                                <p className={cn(size['2xs'], weight.semibold, muted.default, 'opacity-70 uppercase', tracking.wide, paddingX.compact)}>
+                              <div className="mb-2">
+                                <p className={cn('text-[10px]', 'font-semibold', 'text-muted-foreground', 'opacity-70 uppercase', 'tracking-wide', 'px-3')}>
                                   {section.heading}
                                 </p>
                               </div>
-                              <div className={spaceY.tight}>
+                              <div className="space-y-1">
                                 {section.links.map((child, childIndex) => {
                                   const ChildIcon = child.icon;
                                   return (
@@ -717,16 +660,16 @@ export function NavigationTablet({ isActive }: NavigationTabletProps) {
                                           <Link
                                             href={child.href}
                                             prefetch
-                                            className={cn('group/item block rounded-lg', paddingX.compact, paddingY['2.5'], 'text-sm leading-none no-underline outline-none', STATE_PATTERNS.HOVER_BG_STRONG, STATE_PATTERNS.FOCUS_RING)}
+                                            className={cn('group/item block rounded-lg', 'px-3', 'py-2.5', 'text-sm leading-none no-underline outline-none', 'hover:bg-accent/20', 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2')}
                                           >
-                                            <div className={`flex items-start ${gap.compact}`}>
+                                            <div className="flex items-start gap-2">
                                               {ChildIcon && (
-                                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted/50 text-muted-foreground group-hover/item:bg-muted group-hover/item:text-foreground">
+                                                <div className="flex-center h-8 w-8 shrink-0 rounded-lg bg-muted/50 text-muted-foreground group-hover/item:bg-muted group-hover/item:text-foreground">
                                                   <ChildIcon className="h-4 w-4" />
                                                 </div>
                                               )}
                                               <div className="flex-1 min-w-0">
-                                                <div className={cn(cluster.compact, marginBottom.micro, 'flex-wrap')}>
+                                                <div className={cn('flex items-center gap-2', 'mb-0.5', 'flex-wrap')}>
                                                   <div className="font-medium break-words word-break-break-word">{child.label}</div>
                                                   {(() => {
                                                     const category = getCategoryFromHref(child.href);
@@ -735,7 +678,7 @@ export function NavigationTablet({ isActive }: NavigationTabletProps) {
                                                         variant="category" 
                                                         category={category} 
                                                         href={null}
-                                                        className={cn('shrink-0', size['2xs'], paddingX['1.5'], paddingY.zero)} 
+                                                        className={cn('shrink-0', 'text-[10px]', 'px-1.5', 'py-0')} 
                                                       />
                                                     ) : null;
                                                   })()}
@@ -743,7 +686,7 @@ export function NavigationTablet({ isActive }: NavigationTabletProps) {
                                                     <UnifiedBadge variant="new-badge" badgeVariant="default" className="shrink-0" />
                                                   )}
                                                   {child.external && (
-                                                    <span className={cn('text-muted-foreground text-xs shrink-0', marginLeft.auto)}>↗</span>
+                                                    <span className={cn('text-muted-foreground text-xs shrink-0', 'ml-auto')}>↗</span>
                                                   )}
                                                 </div>
                                                 {child.description && (
@@ -787,24 +730,24 @@ export function NavigationTablet({ isActive }: NavigationTabletProps) {
                   <PopoverTrigger asChild>
                     <button
                       type="button"
-                      className={cn('group relative flex items-center', paddingX.compact, paddingY.tight, 'font-medium', size.xs, 'text-foreground/80 hover:text-foreground', ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT, 'whitespace-nowrap')}
+                      className={cn('group relative flex items-center', 'px-3', 'py-2', 'font-medium', 'text-xs', 'text-foreground/80 hover:text-foreground', 'transition-all duration-200 ease-out', 'whitespace-nowrap')}
                       aria-label={`Open ${link.label} menu`}
                     >
                       <span className="relative">
                         {link.label}
                         <span
-                          className={`${POSITION_PATTERNS.ABSOLUTE_BOTTOM_LEFT} ${DIMENSIONS.UNDERLINE} bg-accent w-0 ${ANIMATION_CONSTANTS.CSS_TRANSITION_SLOW} group-hover:w-full`}
+                          className="absolute bottom-0 left-0 h-[2px] bg-accent w-0 transition-all duration-300 ease-out group-hover:w-full"
                           aria-hidden="true"
                         />
                       </span>
-                      <ChevronDown className={cn(marginLeft.tight, 'h-2.5 w-2.5 opacity-50')} />
+                      <ChevronDown className={cn('ml-1', 'h-2.5 w-2.5 opacity-50')} />
                     </button>
                   </PopoverTrigger>
                   <PopoverContent 
                     align="start" 
                     className={cn(
                       'w-64',
-                      padding.compact,
+                      'p-3',
                       'relative overflow-hidden rounded-xl border border-border/60 bg-background/95 backdrop-blur-xl shadow-2xl'
                     )} 
                     sideOffset={8}
@@ -819,17 +762,17 @@ export function NavigationTablet({ isActive }: NavigationTabletProps) {
                     <div className="relative z-10">
                     {link.sections ? (
                       // Organized sections with headers
-                      <div className={spaceY.comfortable}>
+                      <div className="space-y-4">
                         {link.sections.map((section, sectionIndex) => (
                           <div key={`${link.label}-section-${sectionIndex}-${section.heading}`}>
                             {/* Section header */}
-                            <div className={cn(paddingX.compact, paddingY.tight, marginBottom['1.5'])}>
-                              <p className={cn(size['2xs'], weight.semibold, muted.default, 'opacity-70 uppercase', tracking.wide)}>
+                            <div className={cn('px-3', 'py-2', 'mb-1.5')}>
+                              <p className={cn('text-[10px]', 'font-semibold', 'text-muted-foreground', 'opacity-70 uppercase', 'tracking-wide')}>
                                 {section.heading}
                               </p>
                             </div>
                             {/* Section items */}
-                            <div className={spaceY.tight}>
+                            <div className="space-y-1">
                               {section.links.map((child, childIndex) => {
                                 const ChildIcon = child.icon;
                                 const iconBgClass = getIconBackgroundClass(child.href);
@@ -851,19 +794,19 @@ export function NavigationTablet({ isActive }: NavigationTabletProps) {
                                       <Link
                                         href={child.href}
                                         prefetch
-                                        className={cn('group/item block rounded-lg', paddingX.compact, paddingY['2.5'], 'text-sm leading-none no-underline outline-none', STATE_PATTERNS.HOVER_BG_STRONG, STATE_PATTERNS.FOCUS_RING)}
+                                        className={cn('group/item block rounded-lg', 'px-3', 'py-2.5', 'text-sm leading-none no-underline outline-none', 'hover:bg-accent/20', 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2')}
                                       >
-                                      <div className={`flex items-start ${gap.compact}`}>
+                                      <div className="flex items-start gap-2">
                                         {ChildIcon && (
                                           <div className={cn(
-                                            'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg',
+                                            'flex-center h-8 w-8 shrink-0 rounded-lg',
                                             iconBgClass
                                           )}>
                                             <ChildIcon className="h-4 w-4" />
                                           </div>
                                         )}
                                         <div className="flex-1 min-w-0">
-                                          <div className={`flex items-center ${gap.tight} ${marginBottom.default}.5 flex-wrap`}>
+                                          <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
                                             <div className="font-medium break-words word-break-break-word">{child.label}</div>
                                             {(() => {
                                               const category = getCategoryFromHref(child.href);
@@ -872,7 +815,7 @@ export function NavigationTablet({ isActive }: NavigationTabletProps) {
                                                   variant="category" 
                                                   category={category} 
                                                   href={null}
-                                                  className={cn('shrink-0', size['2xs'], paddingX['1.5'], paddingY.zero)} 
+                                                  className={cn('shrink-0', 'text-[10px]', 'px-1.5', 'py-0')} 
                                                 />
                                               ) : null;
                                             })()}
@@ -880,7 +823,7 @@ export function NavigationTablet({ isActive }: NavigationTabletProps) {
                                               <UnifiedBadge variant="new-badge" badgeVariant="default" className="shrink-0" />
                                             )}
                                             {child.external && (
-                                              <span className={`text-muted-foreground text-xs shrink-0 ${marginLeft.auto}`}>↗</span>
+                                              <span className="text-muted-foreground text-xs shrink-0 ml-auto">↗</span>
                                             )}
                                           </div>
                                           {child.description && (
@@ -898,14 +841,14 @@ export function NavigationTablet({ isActive }: NavigationTabletProps) {
                             </div>
                             {/* Separator between sections (except last) */}
                             {link.sections && sectionIndex < link.sections.length - 1 && (
-                              <div className={cn(marginTop.default, marginBottom.zero, 'h-px bg-border/50')} />
+                              <div className={cn('mt-4', 'mb-0', 'h-px bg-border/50')} />
                             )}
                           </div>
                         ))}
                       </div>
                     ) : link.children ? (
                       // Fallback: flat list for links without sections
-                      <div className={`${spaceY.default}.5`}>
+                      <div className="space-y-3.5">
                         {link.children.map((child, childIndex) => {
                           const ChildIcon = child.icon;
                           return (
@@ -918,11 +861,11 @@ export function NavigationTablet({ isActive }: NavigationTabletProps) {
                               <Link
                                 href={child.href}
                                 prefetch
-                                className={`flex items-center ${gap.tight} ${paddingX.tight} ${paddingY.micro}.5 text-sm rounded-md hover:bg-accent/5 group/item`}
+                                className="flex items-center gap-1.5 px-2 py-0.5 text-sm rounded-md hover:bg-accent/5 group/item"
                               >
                               {ChildIcon && (
                                 <motion.div
-                                  className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg opacity-70 group-hover/item:opacity-100"
+                                  className="flex-center h-6 w-6 shrink-0 rounded-lg opacity-70 group-hover/item:opacity-100"
                                   whileHover={MICROINTERACTIONS.iconButton.hover}
                                   whileTap={MICROINTERACTIONS.iconButton.tap}
                                   transition={MICROINTERACTIONS.iconButton.transition}
@@ -959,10 +902,10 @@ export function NavigationTablet({ isActive }: NavigationTabletProps) {
               <NavLink
                 href={link.href}
                 isActive={isActive}
-                className={`${paddingX.tight} ${paddingY.micro} text-xs whitespace-nowrap`}
+                className="px-2 py-1 text-xs whitespace-nowrap"
               >
                 {link.isNew ? (
-                  <span className={cn(cluster.compact, gap['1.5'])}>
+                  <span className={cn('flex items-center gap-2', 'gap-1.5')}>
                     {link.label}
                     <UnifiedBadge variant="new-indicator" label={`New: ${link.label}`} />
                   </span>
@@ -978,24 +921,24 @@ export function NavigationTablet({ isActive }: NavigationTabletProps) {
           <PopoverTrigger asChild>
             <button
               type="button"
-              className={cn('group relative flex items-center', paddingX.compact, paddingY.tight, 'font-medium', size.xs, 'text-foreground/80 hover:text-foreground', ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT, 'whitespace-nowrap')}
+              className={cn('group relative flex items-center', 'px-3', 'py-2', 'font-medium', 'text-xs', 'text-foreground/80 hover:text-foreground', 'transition-all duration-200 ease-out', 'whitespace-nowrap')}
               aria-label="Open additional navigation menu"
             >
               <span className="relative">
                 More
                 <span
-                  className={`${POSITION_PATTERNS.ABSOLUTE_BOTTOM_LEFT} ${DIMENSIONS.UNDERLINE} bg-accent w-0 ${ANIMATION_CONSTANTS.CSS_TRANSITION_SLOW} group-hover:w-full`}
+                  className="absolute bottom-0 left-0 h-[2px] bg-accent w-0 transition-all duration-300 ease-out group-hover:w-full"
                   aria-hidden="true"
                 />
               </span>
-              <ChevronDown className={`${marginLeft.micro} h-2.5 w-2.5 opacity-50`} />
+              <ChevronDown className="ml-0.5 h-2.5 w-2.5 opacity-50" />
             </button>
           </PopoverTrigger>
           <PopoverContent
             align="end"
             className={cn(
               'w-80',
-              padding.default,
+              'p-4',
               'relative overflow-hidden rounded-xl border border-border/60 bg-background/95 backdrop-blur-xl shadow-2xl'
             )}
             sideOffset={8}
@@ -1008,15 +951,15 @@ export function NavigationTablet({ isActive }: NavigationTabletProps) {
               borderWidth={1.5}
             />
             {/* Support group with enhanced layout */}
-            <div className={cn('relative z-10', spaceY.default)}>
+            <div className={cn('relative z-10', 'space-y-3')}>
               {SECONDARY_NAVIGATION.map((group, groupIndex) => {
                 const isLastGroup = groupIndex === SECONDARY_NAVIGATION.length - 1;
                 return (
                   <div key={group.heading}>
-                    <div className={cn(size['2xs'], weight.semibold, muted.default, 'uppercase', tracking.wide, paddingX.compact, paddingY['1.5'], marginBottom.compact)}>
+                    <div className={cn('text-[10px]', 'font-semibold', 'text-muted-foreground', 'uppercase', 'tracking-wide', 'px-3', 'py-1.5', 'mb-2')}>
                       {group.heading}
                     </div>
-                    <ul className={`grid ${gap.micro}`}>
+                    <ul className="grid gap-0.5">
                       {group.links
                         // Filter out Pinboard, Discord, and GitHub from vertical list (they'll be in horizontal icon row at bottom)
                         .filter((link) => {
@@ -1032,7 +975,7 @@ export function NavigationTablet({ isActive }: NavigationTabletProps) {
                       <Fragment key={`${group.heading}-${link.label}-fragment`}>
                         {linkIndex > 0 && (
                           <li key={`${group.heading}-${link.label}-divider`}>
-                            <div className={`h-px bg-border/30 ${marginY.micro} ${marginX.compact}`} />
+                            <div className="h-px bg-border/30 my-0.5 mx-2" />
                           </li>
                         )}
                         <li key={`${group.heading}-${link.label}`}>
@@ -1049,16 +992,16 @@ export function NavigationTablet({ isActive }: NavigationTabletProps) {
                               href={link.href}
                               prefetch={!link.external}
                               {...(link.external && { target: '_blank', rel: 'noopener noreferrer' })}
-                              className={`group/item block rounded-lg ${paddingX.compact} ${paddingY.tight}.5 text-sm leading-none no-underline outline-none focus:bg-accent/5`}
+                              className="group/item block rounded-lg px-3 py-2.5 text-sm leading-none no-underline outline-none focus:bg-accent/5"
                             >
-                              <div className={`flex items-start ${gap.compact}`}>
+                              <div className="flex items-start gap-2">
                                 {LinkIcon && (
-                                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted/50 text-muted-foreground group-hover/item:bg-muted group-hover/item:text-foreground">
+                                  <div className="flex-center h-8 w-8 shrink-0 rounded-lg bg-muted/50 text-muted-foreground group-hover/item:bg-muted group-hover/item:text-foreground">
                                     <LinkIcon className="h-4 w-4" />
                                   </div>
                                 )}
                                 <div className="flex-1 min-w-0 overflow-hidden">
-                                  <div className={cn('font-medium', marginBottom.micro, 'break-words')}>{link.label}</div>
+                                  <div className={cn('font-medium', 'mb-0.5', 'break-words')}>{link.label}</div>
                                   {link.description && (
                                     <p className="text-muted-foreground text-xs leading-snug break-words line-clamp-2">
                                       {link.description}
@@ -1074,7 +1017,7 @@ export function NavigationTablet({ isActive }: NavigationTabletProps) {
                   })}
                   </ul>
                   {!isLastGroup && (
-                    <div className={`h-px bg-border/40 ${marginY.default} ${marginX.tight}`} />
+                    <div className="h-px bg-border/40 my-4 mx-1" />
                   )}
                 </div>
               );

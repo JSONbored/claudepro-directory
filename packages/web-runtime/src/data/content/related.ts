@@ -1,21 +1,10 @@
 'use server';
+import { type GetRelatedContentReturns } from '@heyclaude/database-types/postgres-types';
+import { type content_category } from '@heyclaude/data-layer/prisma';
 
-import { ContentService } from '@heyclaude/data-layer';
-import type { content_category } from '@heyclaude/data-layer/prisma';
-import { ContentCategory } from '@heyclaude/data-layer/prisma';
-import type { GetRelatedContentReturns } from '@heyclaude/database-types/postgres-types';
-import { cacheLife, cacheTag } from 'next/cache';
+import { isValidCategory } from '@heyclaude/web-runtime/utils/category-validation';
 
-import { normalizeError } from '../../errors.ts';
-import { logger } from '../../logger.ts';
-import { generateContentTags } from '../content-helpers.ts';
-
-// Use Prisma-generated enum values directly - no manual arrays!
-const CONTENT_CATEGORY_VALUES = Object.values(ContentCategory) as readonly content_category[];
-
-function isValidContentCategory(value: string): value is content_category {
-  return typeof value === 'string' && CONTENT_CATEGORY_VALUES.includes(value as content_category);
-}
+import { createCachedDataFunction, generateContentTags } from '../cached-data-factory.ts';
 
 export interface RelatedContentInput {
   currentCategory: string;
@@ -34,57 +23,37 @@ export interface RelatedContentResult {
 /**
  * Get related content
  * Uses 'use cache' to cache related content. This data is public and same for all users.
- * @param input
  */
-export async function getRelatedContent(input: RelatedContentInput): Promise<RelatedContentResult> {
-  'use cache';
-
-  const currentSlug = input.currentPath.split('/').pop() ?? '';
-  const category = input.currentCategory;
-
-  if (!isValidContentCategory(category)) {
+export const getRelatedContent = createCachedDataFunction<RelatedContentInput, RelatedContentResult>({
+  serviceKey: 'content',
+  methodName: 'getRelatedContent',
+  cacheMode: 'public',
+  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
+  cacheTags: (input) => generateContentTags(input.currentCategory, null, ['related-content']),
+  module: 'data/content/related',
+  operation: 'getRelatedContent',
+  validate: (input) => isValidCategory(input.currentCategory),
+  transformArgs: (input) => {
+    const currentSlug = input.currentPath.split('/').pop() ?? '';
     return {
-      items: [],
-    };
-  }
-
-  // Configure cache - use 'static' profile for optimal SEO (1 day stale, 6hr revalidate, 30 days expire)
-  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
-  const tags = generateContentTags(category, null, ['related-content']);
-  for (const tag of tags) {
-    cacheTag(tag);
-  }
-
-  const reqLogger = logger.child({
-    module: 'data/content/related',
-    operation: 'getRelatedContent',
-  });
-
-  try {
-    const service = new ContentService();
-    const data = await service.getRelatedContent({
-      p_category: category,
+      p_category: input.currentCategory as content_category,
       p_exclude_slugs: input.exclude ?? [],
       p_limit: input.limit ?? 3,
       p_slug: currentSlug,
       p_tags: input.currentTags ?? [],
-    });
-
+    };
+  },
+  transformResult: (result) => {
+    const data = result as GetRelatedContentReturns;
     const items = data.filter((item) => Boolean(item.title && item.slug && item.category));
-
-    reqLogger.info(
-      { category, count: items.length, slug: currentSlug },
-      'getRelatedContent: fetched successfully'
-    );
-
+    return { items };
+  },
+  onError: () => ({ items: [] }), // Return empty array on error
+  logContext: (input) => {
+    const currentSlug = input.currentPath.split('/').pop() ?? '';
     return {
-      items,
+      category: input.currentCategory,
+      slug: currentSlug,
     };
-  } catch (error) {
-    const normalized = normalizeError(error, 'getRelatedContent failed');
-    reqLogger.error({ category, err: normalized, slug: currentSlug }, 'getRelatedContent: failed');
-    return {
-      items: [],
-    };
-  }
-}
+  },
+});

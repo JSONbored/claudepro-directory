@@ -22,88 +22,30 @@
 
 import 'server-only';
 
-import { SearchService } from '@heyclaude/data-layer';
-import type { GetSearchSuggestionsFormattedArgs } from '@heyclaude/database-types/postgres-types';
-import { createErrorResponse, normalizeError } from '@heyclaude/web-runtime/logging/server';
+import { type GetSearchSuggestionsFormattedArgs } from '@heyclaude/database-types/postgres-types';
+// OPTIMIZATION: Removed unused imports - factory handles errors automatically
 import {
-  buildCacheHeaders,
   createApiOptionsHandler,
-  createApiRoute,
+  createCachedApiRoute,
+  getVersionedRoute,
   getWithAuthCorsHeaders,
   jsonResponse,
   searchAutocompleteQuerySchema,
+  type RouteHandlerContext,
 } from '@heyclaude/web-runtime/server';
-import { cacheLife } from 'next/cache';
-
-/****
- * Cached helper function to fetch search autocomplete suggestions.
- * Uses Cache Components to reduce function invocations.
- * Cache key includes query and limit for per-query caching.
- * @param {string} query
- * @param {number} limit
- */
-async function getCachedSearchSuggestionsFormatted(query: string, limit: number) {
-  'use cache';
-  cacheLife('quarter'); // 15min stale, 5min revalidate, 2hr expire
-
-  const service = new SearchService();
-  const rpcArgs: GetSearchSuggestionsFormattedArgs = {
-    p_limit: limit,
-    p_query: query,
-  };
-
-  return await service.getSearchSuggestionsFormatted(rpcArgs);
-}
 
 /**
  * GET /api/search/autocomplete - Get search autocomplete suggestions
  *
  * Returns search autocomplete suggestions based on a query string.
  * Validates query (minimum 2 characters) and limit (1-20, default 10) parameters.
+ * 
+ * OPTIMIZATION: Uses createCachedApiRoute to eliminate cached helper function boilerplate.
  */
-export const GET = createApiRoute({
+export const GET = createCachedApiRoute({
+  cacheLife: 'short', // 15min stale, 5min revalidate, 2hr expire
+  cacheTags: (query) => ['search-autocomplete', `search-autocomplete-${query.q}`],
   cors: 'auth',
-  handler: async ({ logger, query }) => {
-    const { limit, q } = query as { limit: number; q: string };
-
-    // Additional validation: query must be at least 2 characters after trimming
-    const trimmedQuery = q.trim();
-    if (trimmedQuery.length < 2) {
-      throw new Error('Query must be at least 2 characters');
-    }
-
-    logger.info({ limit, query: trimmedQuery }, 'Autocomplete request received');
-
-    let data: Awaited<ReturnType<typeof getCachedSearchSuggestionsFormatted>> | null = null;
-    try {
-      data = await getCachedSearchSuggestionsFormatted(trimmedQuery, limit);
-    } catch (error) {
-      const normalized = normalizeError(error, 'Autocomplete RPC failed');
-      logger.error({ err: normalized }, 'Autocomplete RPC failed');
-      return createErrorResponse(normalized, {
-        logContext: {
-          query: trimmedQuery,
-        },
-        method: 'GET',
-        operation: 'SearchAutocompleteAPI',
-        route: '/api/search/autocomplete',
-      });
-    }
-
-    const suggestions = Array.isArray(data) ? data : [];
-
-    return jsonResponse(
-      {
-        query: trimmedQuery,
-        suggestions,
-      },
-      200,
-      {
-        ...getWithAuthCorsHeaders,
-        ...buildCacheHeaders('search_autocomplete'),
-      }
-    );
-  },
   method: 'GET',
   openapi: {
     description:
@@ -122,7 +64,42 @@ export const GET = createApiRoute({
   },
   operation: 'SearchAutocompleteAPI',
   querySchema: searchAutocompleteQuerySchema,
-  route: '/api/search/autocomplete',
+  responseHandler: (result: unknown, query: { limit: number; q: string }, _body: unknown, ctx: RouteHandlerContext<{ limit: number; q: string }, unknown>) => {
+    const { logger } = ctx;
+    const { limit, q } = query;
+
+    // Additional validation: query must be at least 2 characters after trimming
+    const trimmedQuery = q.trim();
+    if (trimmedQuery.length < 2) {
+      throw new Error('Query must be at least 2 characters');
+    }
+
+    logger.info({ limit, query: trimmedQuery }, 'Autocomplete request received');
+
+    const suggestions = Array.isArray(result) ? result : [];
+
+    return jsonResponse(
+      {
+        query: trimmedQuery,
+        suggestions,
+      },
+      200,
+      getWithAuthCorsHeaders
+    );
+  },
+  route: getVersionedRoute('search/autocomplete'),
+  service: {
+    methodArgs: (query) => {
+      const trimmedQuery = query.q.trim();
+      const rpcArgs: GetSearchSuggestionsFormattedArgs = {
+        p_limit: query.limit,
+        p_query: trimmedQuery,
+      };
+      return [rpcArgs];
+    },
+    methodName: 'getSearchSuggestionsFormatted',
+    serviceKey: 'search',
+  },
 });
 
 /**

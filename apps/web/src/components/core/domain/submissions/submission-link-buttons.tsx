@@ -1,7 +1,6 @@
 import { ExternalLink, GitPullRequest } from '@heyclaude/web-runtime/icons';
 import { Button } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
-import { marginRight } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Renders a small outlined button that opens the given pull request URL in a new browser tab.
@@ -14,7 +13,7 @@ export function PrLinkButton({ href }: { href: string }) {
   return (
     <Button variant="outline" size="sm" asChild>
       <a href={href} target="_blank" rel="noopener noreferrer">
-        <GitPullRequest className={`${marginRight.micro} h-3 w-3`} />
+        <GitPullRequest className="mr-0.5 h-3 w-3" />
         View PR
       </a>
     </Button>
@@ -34,7 +33,7 @@ export function ContentLinkButton({ href }: { href: string }) {
   return (
     <Button variant="outline" size="sm" asChild>
       <Link href={href}>
-        <ExternalLink className={`${marginRight.micro} h-3 w-3`} />
+        <ExternalLink className="mr-0.5 h-3 w-3" />
         View Live
       </Link>
     </Button>

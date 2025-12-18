@@ -22,7 +22,6 @@ import { SPRING, DURATION } from '@heyclaude/web-runtime/design-system';
 import { isValidCategory } from '@heyclaude/web-runtime/core';
 import { getCategoryConfig } from '@heyclaude/web-runtime/data';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
-import { between, wrap, gap } from '@heyclaude/web-runtime/design-system';
 import {
   UnifiedBadge,
   Button,
@@ -304,7 +303,7 @@ export function SearchFilters({
         >
           <div className="border-border/50 border-t pt-3" />
           <div>
-            <div className={`${between.center} mb-3`}>
+            <div className="mb-3 flex items-center justify-between">
               <legend className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                 Tags
               </legend>
@@ -323,7 +322,7 @@ export function SearchFilters({
               className="border-border/50 h-40 w-full rounded-md border p-4 md:h-48"
               aria-label="Select tags to filter by"
             >
-              <div className={`${wrap} ${gap.compact}`}>
+              <div className="flex flex-wrap gap-2">
                 {availableTags.map((tag, index) => (
                   <motion.button
                     key={tag}

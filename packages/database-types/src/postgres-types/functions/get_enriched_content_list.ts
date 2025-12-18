@@ -7,9 +7,6 @@
 
 import { z } from 'zod';
 
-import type { EnrichedContentItem } from '../composites/enriched_content_item';
-import { enrichedContentItemSchema } from '../composites/enriched_content_item';
-
 /**
  * Arguments for PostgreSQL function: get_enriched_content_list
  */
@@ -46,12 +43,12 @@ export type GetEnrichedContentListArgsFromZod = z.infer<typeof getEnrichedConten
 /**
  * Return type for PostgreSQL function: get_enriched_content_list
  */
-export type GetEnrichedContentListReturns = EnrichedContentItem[];
+export type GetEnrichedContentListReturns = unknown[];
 
 /**
  * Zod schema for get_enriched_content_list function return type
  */
-export const getEnrichedContentListReturnsSchema = z.array(enrichedContentItemSchema);
+export const getEnrichedContentListReturnsSchema = z.array(z.unknown());
 
 /**
  * Type inference from Zod schema (should match type above)

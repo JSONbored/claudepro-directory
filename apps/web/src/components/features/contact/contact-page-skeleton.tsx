@@ -10,7 +10,7 @@
  */
 
 import { Skeleton } from '@heyclaude/web-runtime/ui';
-import { SPRING, STAGGER, paddingX, paddingY, marginX, marginBottom, gap, marginTop, spaceY, iconSize } from '@heyclaude/web-runtime/design-system';
+import { SPRING, STAGGER } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
@@ -25,33 +25,33 @@ export function ContactPageSkeleton() {
 
   return (
     <motion.div
-      className={`container ${marginX.auto} max-w-6xl ${paddingX.default} ${paddingY.relaxed} sm:${paddingY.section}`}
+      className="container mx-auto max-w-6xl px-4 py-8 sm:py-12"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={SPRING.smooth}
     >
       {/* Header */}
       <motion.div
-        className={`${marginBottom.relaxed} text-center`}
+        className="mb-8 text-center"
         initial={!prefersReducedMotion ? { opacity: 0, y: -20 } : false}
         animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
         transition={{ ...SPRING.smooth, delay: 0.1 }}
       >
-        <Skeleton size="xl" width="lg" className={`${marginBottom.default} ${marginX.auto} h-10`} />
-        <Skeleton size="md" width="2xl" className={`${marginX.auto} h-6`} />
+        <Skeleton size="xl" width="lg" className="mx-auto mb-4 h-10" />
+        <Skeleton size="md" width="2xl" className="mx-auto h-6" />
       </motion.div>
 
       {/* Contact Cards Grid */}
       <motion.div
-        className={`${marginBottom.loose}`}
+        className="mb-12"
         initial={!prefersReducedMotion ? { opacity: 0, y: 20 } : false}
         animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
         transition={{ ...SPRING.smooth, delay: 0.2 }}
       >
-        <h2 className={`${marginBottom.comfortable} text-center text-2xl font-semibold`}>
-          <Skeleton size="lg" width="md" className={`${marginX.auto} h-8`} />
+        <h2 className="mb-6 text-center text-2xl font-semibold">
+          <Skeleton size="lg" width="md" className="mx-auto h-8" />
         </h2>
-        <div className={`grid ${gap.comfortable} md:grid-cols-2`}>
+        <div className="grid gap-6 md:grid-cols-2">
           {KEYS_4.map((key, i) => (
             <motion.div
               key={key}
@@ -61,13 +61,13 @@ export function ContactPageSkeleton() {
             >
               <Card>
                 <CardHeader>
-                  <CardTitle className={`flex items-center ${gap.tight}`}>
-                    <Skeleton size="sm" width="xs" rounded="md" className={`${iconSize.md}`} />
+                  <CardTitle className="flex items-center gap-1">
+                    <Skeleton size="sm" width="xs" rounded="md" className="h-5 w-5" />
                     <Skeleton size="md" width="md" className="h-6" />
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Skeleton size="sm" width="3xl" className={`${marginBottom.default} h-4`} />
+                  <Skeleton size="sm" width="3xl" className="mb-4 h-4" />
                   <Skeleton size="sm" width="lg" rounded="md" className="h-6" />
                 </CardContent>
               </Card>
@@ -78,7 +78,7 @@ export function ContactPageSkeleton() {
 
       {/* Prose Sections */}
       <motion.div
-        className={`prose prose-invert ${marginX.auto} ${marginTop.default} max-w-none ${spaceY.loose}`}
+        className="prose prose-invert mx-auto mt-4 max-w-none space-y-12"
         initial={!prefersReducedMotion ? { opacity: 0, y: 20 } : false}
         animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
         transition={{ ...SPRING.smooth, delay: 0.4 }}
@@ -86,7 +86,7 @@ export function ContactPageSkeleton() {
         {Array.from({ length: 3 }).map((_, i) => (
           <motion.section
             key={i}
-            className={`${spaceY.comfortable}`}
+            className="space-y-6"
             initial={!prefersReducedMotion ? { opacity: 0, y: 10 } : false}
             animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
             transition={{ ...SPRING.loading, delay: 0.5 + i * STAGGER.micro }}

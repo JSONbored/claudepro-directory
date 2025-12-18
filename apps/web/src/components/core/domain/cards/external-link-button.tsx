@@ -9,7 +9,6 @@ import { logUnhandledPromise, getSafeExternalUrl } from '@heyclaude/web-runtime/
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import { ExternalLink } from '@heyclaude/web-runtime/icons';
 import { Button } from '@heyclaude/web-runtime/ui';
-import { hoverBg, iconSize, center, radius } from '@heyclaude/web-runtime/design-system';
 
 interface ExternalLinkButtonProps {
   url: string | null | undefined;
@@ -33,7 +32,7 @@ export function ExternalLinkButton({
     <Button
       variant="ghost"
       size="sm"
-      className={`${center} ${iconSize.sm} ${radius.md} ${hoverBg.default}`}
+      className="flex items-center justify-center h-4 w-4 rounded-md hover:bg-accent/10"
       onClick={(e) => {
         e.stopPropagation();
         pulse
@@ -60,7 +59,7 @@ export function ExternalLinkButton({
       }}
       aria-label={ariaLabel}
     >
-      <ExternalLink className={iconSize.xs} aria-hidden="true" />
+      <ExternalLink className="h-3 w-3" aria-hidden="true" />
     </Button>
   );
 }

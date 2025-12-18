@@ -23,7 +23,7 @@ import {
   Sparkles,
 } from '@heyclaude/web-runtime/icons';
 import { cn, UnifiedBadge, ThemeToggle } from '@heyclaude/web-runtime/ui';
-import { STAGGER, DURATION, paddingX, paddingY, marginX, gap, spaceY, marginBottom, marginTop, paddingTop } from '@heyclaude/web-runtime/design-system';
+import { STAGGER, DURATION } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import Link from 'next/link';
@@ -139,13 +139,13 @@ function FooterComponent() {
         <NewsletterCTAVariant variant="hero" source="footer" />
       </LazySection>
 
-      <div className={`container ${marginX.auto} ${paddingX.default} ${paddingY.default} lg:${paddingY.section}`}>
+      <div className="container mx-auto px-4 py-4 lg:py-12">
         {/* Main footer content - Two section layout */}
-        <div className={`grid grid-cols-1 ${gap.default} lg:grid-cols-[1.5fr_2.5fr] lg:${gap.default}`}>
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-[1.5fr_2.5fr] lg:gap-3">
           {/* Left section - Brand & Social */}
           {mounted ? (
             <motion.div
-              className={`${spaceY.relaxed}`}
+              className="space-y-6"
               initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
               whileInView={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -157,12 +157,12 @@ function FooterComponent() {
               </div>
 
               {/* Description */}
-              <p className="text-muted-foreground max-w-sm text-sm leading-relaxed">
+              <p className="text-muted-foreground text-sm max-w-sm leading-relaxed">
                 {APP_CONFIG.description}
               </p>
 
               {/* Social links */}
-              <div className={`flex items-center ${gap.default}`}>
+              <div className="flex items-center gap-3">
                 {[
                   { href: CONTACT_CHANNELS.github, icon: Github, label: 'GitHub' },
                   { href: CONTACT_CHANNELS.discord, icon: DiscordIcon, label: 'Discord' },
@@ -192,19 +192,19 @@ function FooterComponent() {
               </UnifiedBadge>
             </motion.div>
           ) : (
-            <div className={`${spaceY.relaxed}`}>
+            <div className="space-y-6">
               {/* Logo */}
               <div>
                 <HeyClaudeLogo size="md" inView duration={1.5} />
               </div>
 
               {/* Description */}
-              <p className="text-muted-foreground max-w-sm text-sm leading-relaxed">
+              <p className="text-muted-foreground text-sm max-w-sm leading-relaxed">
                 {APP_CONFIG.description}
               </p>
 
               {/* Social links */}
-              <div className={`flex items-center ${gap.default}`}>
+              <div className="flex items-center gap-3">
                 {[
                   { href: CONTACT_CHANNELS.github, icon: Github, label: 'GitHub' },
                   { href: CONTACT_CHANNELS.discord, icon: DiscordIcon, label: 'Discord' },
@@ -238,7 +238,7 @@ function FooterComponent() {
           {/* Right section - Navigation grid */}
           {mounted ? (
             <motion.div
-              className={`grid grid-cols-2 ${gap.relaxed} sm:grid-cols-4`}
+              className="grid grid-cols-2 gap-6 sm:grid-cols-4"
               initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
               whileInView={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -246,13 +246,13 @@ function FooterComponent() {
             >
               {/* Browse column */}
               <div>
-                <h3 className={`text-foreground ${marginBottom.default} text-sm font-semibold`}>Browse</h3>
-                <ul className={spaceY['1.5']}>
+                <h3 className="text-foreground mb-4 text-sm font-semibold">Browse</h3>
+                <ul className="space-y-1.5">
                   {browseLinks.map((link) => (
                     <li key={`browse-${link.label}`}>
                       <Link
                         href={link.href}
-                        className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                        className="text-muted-foreground text-sm hover:text-foreground transition-colors"
                       >
                         {link.label}
                       </Link>
@@ -263,15 +263,15 @@ function FooterComponent() {
 
               {/* Resources column */}
               <div>
-                <h3 className={`text-foreground ${marginBottom.default} text-sm font-semibold`}>Resources</h3>
-                <ul className={spaceY['1.5']}>
+                <h3 className="text-foreground mb-4 text-sm font-semibold">Resources</h3>
+                <ul className="space-y-1.5">
                   {resourceLinks.map((link) => {
                     const isExternal = link.href.startsWith('http');
                     return (
                       <li key={`resources-${link.label}`}>
                         <Link
                           href={link.href}
-                          className={cn('text-muted-foreground hover:text-foreground inline-flex items-center', gap['1.5'], 'text-sm transition-colors')}
+                          className={cn('text-muted-foreground text-sm hover:text-foreground inline-flex items-center', 'gap-1.5', 'transition-colors')}
                           {...(isExternal && {
                             target: '_blank',
                             rel: 'noopener noreferrer',
@@ -288,13 +288,13 @@ function FooterComponent() {
 
               {/* Support column */}
               <div>
-                <h3 className={`text-foreground ${marginBottom.default} text-sm font-semibold`}>Support</h3>
-                <ul className={spaceY['1.5']}>
+                <h3 className="text-foreground mb-4 text-sm font-semibold">Support</h3>
+                <ul className="space-y-1.5">
                   {supportLinks.map((link) => (
                     <li key={`support-${link.label}`}>
                       <Link
                         href={link.href}
-                        className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                        className="text-muted-foreground text-sm hover:text-foreground transition-colors"
                       >
                         {link.label}
                       </Link>
@@ -305,13 +305,13 @@ function FooterComponent() {
 
               {/* Legal column */}
               <div>
-                <h3 className={`text-foreground ${marginBottom.default} text-sm font-semibold`}>Legal</h3>
-                <ul className={spaceY['1.5']}>
+                <h3 className="text-foreground mb-4 text-sm font-semibold">Legal</h3>
+                <ul className="space-y-1.5">
                   {legalLinks.map((link) => (
                     <li key={`legal-${link.label}`}>
                       <Link
                         href={link.href}
-                        className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                        className="text-muted-foreground text-sm hover:text-foreground transition-colors"
                       >
                         {link.label}
                       </Link>
@@ -321,16 +321,16 @@ function FooterComponent() {
               </div>
             </motion.div>
           ) : (
-            <div className={`grid grid-cols-2 ${gap.relaxed} sm:grid-cols-4`}>
+            <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
               {/* Browse column */}
               <div>
-                <h3 className={`text-foreground ${marginBottom.default} text-sm font-semibold`}>Browse</h3>
-                <ul className={spaceY['1.5']}>
+                <h3 className="text-foreground mb-4 text-sm font-semibold">Browse</h3>
+                <ul className="space-y-1.5">
                   {browseLinks.map((link) => (
                     <li key={`browse-${link.label}`}>
                       <Link
                         href={link.href}
-                        className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                        className="text-muted-foreground text-sm hover:text-foreground transition-colors"
                       >
                         {link.label}
                       </Link>
@@ -341,15 +341,15 @@ function FooterComponent() {
 
               {/* Resources column */}
               <div>
-                <h3 className={`text-foreground ${marginBottom.default} text-sm font-semibold`}>Resources</h3>
-                <ul className={spaceY['1.5']}>
+                <h3 className="text-foreground mb-4 text-sm font-semibold">Resources</h3>
+                <ul className="space-y-1.5">
                   {resourceLinks.map((link) => {
                     const isExternal = link.href.startsWith('http');
                     return (
                       <li key={`resources-${link.label}`}>
                         <Link
                           href={link.href}
-                          className={cn('text-muted-foreground hover:text-foreground inline-flex items-center', gap['1.5'], 'text-sm transition-colors')}
+                          className={cn('text-muted-foreground text-sm hover:text-foreground inline-flex items-center', 'gap-1.5', 'transition-colors')}
                           {...(isExternal && {
                             target: '_blank',
                             rel: 'noopener noreferrer',
@@ -366,13 +366,13 @@ function FooterComponent() {
 
               {/* Support column */}
               <div>
-                <h3 className={`text-foreground ${marginBottom.default} text-sm font-semibold`}>Support</h3>
-                <ul className={spaceY['1.5']}>
+                <h3 className="text-foreground mb-4 text-sm font-semibold">Support</h3>
+                <ul className="space-y-1.5">
                   {supportLinks.map((link) => (
                     <li key={`support-${link.label}`}>
                       <Link
                         href={link.href}
-                        className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                        className="text-muted-foreground text-sm hover:text-foreground transition-colors"
                       >
                         {link.label}
                       </Link>
@@ -383,13 +383,13 @@ function FooterComponent() {
 
               {/* Legal column */}
               <div>
-                <h3 className={`text-foreground ${marginBottom.default} text-sm font-semibold`}>Legal</h3>
-                <ul className={spaceY['1.5']}>
+                <h3 className="text-foreground mb-4 text-sm font-semibold">Legal</h3>
+                <ul className="space-y-1.5">
                   {legalLinks.map((link) => (
                     <li key={`legal-${link.label}`}>
                       <Link
                         href={link.href}
-                        className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                        className="text-muted-foreground text-sm hover:text-foreground transition-colors"
                       >
                         {link.label}
                       </Link>
@@ -404,15 +404,15 @@ function FooterComponent() {
         {/* Bottom bar - Modern divider and layout */}
         {mounted ? (
           <motion.div
-            className={`border-border/30 ${marginTop.default} border-t ${paddingTop.relaxed}`}
+            className="border-border/30 mt-4 border-t pt-8"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ delay: STAGGER.slow }}
           >
-            <div className={`flex flex-col items-center justify-between ${gap.default} md:flex-row`}>
+            <div className="flex flex-col items-center justify-between gap-3 md:flex-row">
               {/* Left - Copyright with heart and version */}
-              <div className={cn('text-muted-foreground flex items-center', gap['1.5'], 'text-sm')}>
+              <div className={cn('text-muted-foreground text-sm flex items-center', 'gap-1.5')}>
                 <span>© {currentYear}</span>
                 <span className="text-border">•</span>
                 <span>Made with</span>
@@ -456,7 +456,7 @@ function FooterComponent() {
               </div>
 
               {/* Right - Status badge */}
-              <div className={`flex items-center ${gap.default}`}>
+              <div className="flex items-center gap-3">
                 {mounted ? (
                   <iframe
                     src={`${EXTERNAL_SERVICES.betterstack.status}/badge?theme=${resolvedTheme === 'light' ? 'light' : 'dark'}`}
@@ -471,10 +471,10 @@ function FooterComponent() {
             </div>
           </motion.div>
         ) : (
-          <div className={`border-border/30 ${marginTop.default} border-t ${paddingTop.relaxed}`}>
-            <div className={`flex flex-col items-center justify-between ${gap.default} md:flex-row`}>
+          <div className="border-border/30 mt-4 border-t pt-8">
+            <div className="flex flex-col items-center justify-between gap-3 md:flex-row">
               {/* Left - Copyright with heart and version */}
-              <div className={cn('text-muted-foreground flex items-center', gap['1.5'], 'text-sm')}>
+              <div className={cn('text-muted-foreground text-sm flex items-center', 'gap-1.5')}>
                 <span>© {currentYear}</span>
                 <span className="text-border">•</span>
                 <span>Made with</span>
@@ -518,7 +518,7 @@ function FooterComponent() {
               </div>
 
               {/* Right - Status badge */}
-              <div className={`flex items-center ${gap.default}`}>
+              <div className="flex items-center gap-3">
                 {/* Status badge only renders after mount */}
               </div>
             </div>

@@ -1,172 +1,124 @@
 /**
- * Trending API Route
+ * Trending API Route (v1)
  *
  * Returns trending, popular, or recent content based on tab selection.
  * Supports both page and sidebar modes with category filtering.
- *
- * @example
- * ```ts
- * // Request - Trending tab
- * GET /api/trending?tab=trending&category=skills&limit=12
- *
- * // Response (200)
- * {
- *   "trending": [...],
- *   "totalCount": 50
- * }
- *
- * // Request - Sidebar mode
- * GET /api/trending?mode=sidebar&category=guides&limit=8
- *
- * // Response (200)
- * {
- *   "trending": [...],
- *   "recent": [...]
- * }
- * ```
  */
 
 import 'server-only';
 
-import { TrendingService } from '@heyclaude/data-layer';
 import { type content_category } from '@heyclaude/data-layer/prisma';
 import {
-  buildCacheHeaders,
   createApiOptionsHandler,
-  createApiRoute,
+  createCachedApiRoute,
   getOnlyCorsHeaders,
+  getVersionedRoute,
   jsonResponse,
   trendingQuerySchema,
+  type RouteHandlerContext,
 } from '@heyclaude/web-runtime/server';
-import type { RouteHandlerContext } from '@heyclaude/web-runtime/server';
-import { cacheLife } from 'next/cache';
 
 type ContentCategory = content_category;
 
-/****
- * Cached helper function to fetch trending metrics
- * Uses Cache Components to reduce function invocations
- * @param {ContentCategory | null} category
- * @param {number} limit
- */
-async function getCachedTrendingMetricsFormatted(category: ContentCategory | null, limit: number) {
-  'use cache';
-  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
-
-  const service = new TrendingService();
-  return service.getTrendingMetricsFormatted({
+// Shared method args builder
+function buildTrendingMethodArgs(category: ContentCategory | null | undefined, limit: number) {
+  return [{
     ...(category ? { p_category: category } : {}),
     p_limit: limit,
-  });
+  }];
 }
 
-/****
- * Cached helper function to fetch popular content
- * Uses Cache Components to reduce function invocations
- * @param {ContentCategory | null} category
- * @param {number} limit
- */
-async function getCachedPopularContentFormatted(category: ContentCategory | null, limit: number) {
-  'use cache';
-  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
-
-  const service = new TrendingService();
-  return service.getPopularContentFormatted({
-    ...(category ? { p_category: category } : {}),
-    p_limit: limit,
-  });
-}
-
-/*****
- * Cached helper function to fetch recent content
- * Uses Cache Components to reduce function invocations
- * @param {ContentCategory | null} category
- * @param {number} limit
- * @param {number} days
- */
-async function getCachedRecentContentFormatted(
-  category: ContentCategory | null,
-  limit: number,
-  days: number
-) {
-  'use cache';
-  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
-
-  const service = new TrendingService();
-  return service.getRecentContentFormatted({
-    ...(category ? { p_category: category } : {}),
-    p_days: days,
-    p_limit: limit,
-  });
-}
-
-/****
- * Cached helper function to fetch sidebar trending content
- * @param {ContentCategory | null} category
- * @param {number} limit
- */
-async function getCachedSidebarTrendingFormatted(category: ContentCategory | null, limit: number) {
-  'use cache';
-  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
-
-  const service = new TrendingService();
-  return service.getSidebarTrendingFormatted({
-    ...(category ? { p_category: category } : {}),
-    p_limit: limit,
-  });
-}
-
-/*****
- * Cached helper function to fetch sidebar recent content
- * @param {ContentCategory | null} category
- * @param {number} limit
- * @param {number} days
- */
-async function getCachedSidebarRecentFormatted(
-  category: ContentCategory | null,
-  limit: number,
-  days: number
-) {
-  'use cache';
-  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire
-
-  const service = new TrendingService();
-  return service.getSidebarRecentFormatted({
-    ...(category ? { p_category: category } : {}),
-    p_days: days,
-    p_limit: limit,
-  });
+// Shared response builder
+function buildTabResponse(data: unknown[], key: 'trending' | 'popular' | 'recent') {
+  const items = Array.isArray(data) ? data : [];
+  return jsonResponse(
+    key === 'trending'
+      ? { totalCount: items.length, trending: items }
+      : { [key]: items, totalCount: items.length },
+    200,
+    getOnlyCorsHeaders
+  );
 }
 
 /**
- * GET /api/trending - Get trending, popular, or recent content
+ * GET /api/v1/trending - Get trending, popular, or recent content
  *
  * Returns trending, popular, or recent content based on tab selection.
  * Supports both page and sidebar modes with category filtering.
  */
-export const GET = createApiRoute({
+export const GET = createCachedApiRoute({
+  route: getVersionedRoute('trending'),
+  operation: 'TrendingAPI',
+  method: 'GET',
   cors: 'anon',
-  handler: async ({ logger, query, url }) => {
+  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire
+  cacheTags: (query) => {
+    const category = query.category as ContentCategory | null;
+    const mode = query.mode as 'sidebar' | undefined;
+    const tab = query.tab as 'popular' | 'recent' | 'trending' | undefined;
+    const tags = ['trending'];
+    if (category) tags.push(`trending-${category}`);
+    if (mode) tags.push(`trending-${mode}`);
+    if (tab) tags.push(`trending-${tab}`);
+    return tags;
+  },
+  querySchema: trendingQuerySchema as any,
+  service: {
+    serviceKey: 'trending',
+    methodName: 'getTrendingMetricsFormatted',
+    methodArgs: (query) => buildTrendingMethodArgs(query.category as ContentCategory | null, query.limit as number),
+  },
+  responseHandler: async (_result: unknown, query: { category?: ContentCategory | null; limit: number; mode?: 'sidebar'; tab?: 'popular' | 'recent' | 'trending' }, _body: unknown, ctx: RouteHandlerContext<{ category?: ContentCategory | null; limit: number; mode?: 'sidebar'; tab?: 'popular' | 'recent' | 'trending' }, unknown>) => {
+    const { logger } = ctx;
     const { category, limit, mode, tab } = query;
 
-    // Handle path-based sidebar route (/api/trending/sidebar)
-    const segments = url.pathname.replace('/api/trending', '').split('/').filter(Boolean);
-    if (segments.length > 0 && segments[0] === 'sidebar') {
-      return handleSidebar(logger, category, limit);
-    }
+    // Import service once
+    const { TrendingService } = await import('@heyclaude/data-layer');
+    const service = new TrendingService();
 
-    // Handle mode-based sidebar
+    // Handle sidebar mode
     if (mode === 'sidebar') {
-      return handleSidebar(logger, category, limit);
+      const sidebarCategory = category ?? 'guides';
+      logger.info({ category: sidebarCategory, limit }, 'Processing trending sidebar');
+      const [trending, recent] = await Promise.all([
+        service.getSidebarTrendingFormatted(buildTrendingMethodArgs(sidebarCategory, limit)[0] as any),
+        service.getSidebarRecentFormatted({ ...buildTrendingMethodArgs(sidebarCategory, limit)[0] as any, p_days: 30 }),
+      ]);
+      return jsonResponse(
+        {
+          recent: Array.isArray(recent) ? recent : [],
+          trending: Array.isArray(trending) ? trending : [],
+        },
+        200,
+        getOnlyCorsHeaders
+      );
     }
 
     // Handle page tabs
-    return handlePageTabs(logger, tab, category, limit);
+    logger.info({ category: category ?? 'all', limit, tab }, 'Processing trending page tabs');
+
+    if (tab === 'trending') {
+      const trending = await service.getTrendingMetricsFormatted(buildTrendingMethodArgs(category, limit)[0] as any);
+      return buildTabResponse(Array.isArray(trending) ? trending : [], 'trending');
+    }
+
+    if (tab === 'popular') {
+      const popular = await service.getPopularContentFormatted(buildTrendingMethodArgs(category, limit)[0] as any);
+      return buildTabResponse(Array.isArray(popular) ? popular : [], 'popular');
+    }
+
+    if (tab === 'recent') {
+      const recent = await service.getRecentContentFormatted({ ...buildTrendingMethodArgs(category, limit)[0] as any, p_days: 30 });
+      return buildTabResponse(Array.isArray(recent) ? recent : [], 'recent');
+    }
+
+    throw new Error('Invalid tab. Valid tabs: trending, popular, recent');
   },
-  method: 'GET',
   openapi: {
+    summary: 'Get trending, popular, or recent content',
     description:
       'Returns trending, popular, or recent content based on tab selection. Supports both page and sidebar modes with category filtering.',
+    tags: ['content', 'trending'],
     operationId: 'getTrending',
     responses: {
       200: {
@@ -176,103 +128,8 @@ export const GET = createApiRoute({
         description: 'Invalid tab or category parameter',
       },
     },
-    summary: 'Get trending, popular, or recent content',
-    tags: ['content', 'trending'],
   },
-  operation: 'TrendingAPI',
-  querySchema: trendingQuerySchema,
-  route: '/api/trending',
 });
-
-/******
- * Handle page tabs (trending, popular, recent)
- * @param {ReturnType<typeof logger.child>} logger
- * @param {'popular' | 'recent' | 'trending'} tab
- * @param {ContentCategory | null} category
- * @param {number} limit
- */
-async function handlePageTabs(
-  reqLogger: RouteHandlerContext['logger'],
-  tab: 'popular' | 'recent' | 'trending',
-  category: ContentCategory | null,
-  limit: number
-) {
-  reqLogger.info({ category: category ?? 'all', limit, tab }, 'Processing trending page tabs');
-
-  if (tab === 'trending') {
-    const trending = await getCachedTrendingMetricsFormatted(category, limit);
-    return jsonResponse(
-      {
-        totalCount: Array.isArray(trending) ? trending.length : 0,
-        trending: Array.isArray(trending) ? trending : [],
-      },
-      200,
-      getOnlyCorsHeaders,
-      buildCacheHeaders('trending_page')
-    );
-  }
-
-  if (tab === 'popular') {
-    const popular = await getCachedPopularContentFormatted(category, limit);
-    return jsonResponse(
-      {
-        popular: Array.isArray(popular) ? popular : [],
-        totalCount: Array.isArray(popular) ? popular.length : 0,
-      },
-      200,
-      getOnlyCorsHeaders,
-      buildCacheHeaders('trending_page')
-    );
-  }
-
-  if (tab === 'recent') {
-    const recent = await getCachedRecentContentFormatted(category, limit, 30);
-    return jsonResponse(
-      {
-        recent: Array.isArray(recent) ? recent : [],
-        totalCount: Array.isArray(recent) ? recent.length : 0,
-      },
-      200,
-      getOnlyCorsHeaders,
-      buildCacheHeaders('trending_page')
-    );
-  }
-
-  throw new Error('Invalid tab. Valid tabs: trending, popular, recent');
-}
-
-/*****
- * Handle sidebar mode
- * @param {ReturnType<typeof logger.child>} logger
- * @param {ContentCategory | null} category
- * @param {number} limit
- */
-async function handleSidebar(
-  reqLogger: RouteHandlerContext['logger'],
-  category: ContentCategory | null,
-  limit: number
-) {
-  // Default to 'guides' if category is null for sidebar
-  const sidebarCategory = category ?? 'guides';
-
-  reqLogger.info({ category: sidebarCategory, limit }, 'Processing trending sidebar');
-
-  // Fetch trending and recent content in parallel
-  const [trending, recent] = await Promise.all([
-    getCachedSidebarTrendingFormatted(sidebarCategory, limit),
-    getCachedSidebarRecentFormatted(sidebarCategory, limit, 30),
-  ]);
-
-  return jsonResponse(
-    {
-      recent: Array.isArray(recent) ? recent : [],
-      trending: Array.isArray(trending) ? trending : [],
-    },
-    200,
-    getOnlyCorsHeaders,
-    buildCacheHeaders('trending_sidebar')
-  );
-}
 
 /**
  * OPTIONS handler for CORS preflight requests

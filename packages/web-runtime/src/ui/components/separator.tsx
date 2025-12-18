@@ -1,6 +1,5 @@
 'use client';
 
-import { DIMENSIONS } from '../constants.ts';
 import { cn } from '../utils.ts';
 import * as SeparatorPrimitive from '@radix-ui/react-separator';
 import type * as React from 'react';
@@ -21,8 +20,8 @@ const Separator = ({
     className={cn(
       'shrink-0 bg-border',
       orientation === 'horizontal'
-        ? `${DIMENSIONS.DIVIDER} w-full`
-        : `h-full ${DIMENSIONS.DIVIDER.replace('h-', 'w-')}`,
+        ? 'h-[1px] w-full'
+        : 'h-full w-[1px]',
       className
     )}
     {...props}

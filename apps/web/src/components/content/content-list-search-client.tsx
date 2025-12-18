@@ -23,7 +23,6 @@ import type { DisplayableContent } from '@heyclaude/web-runtime/types/component.
 import { Suspense, useCallback } from 'react';
 import { useAuthModal } from '@/src/hooks/use-auth-modal';
 import { usePathname } from 'next/navigation';
-import { spaceY, padding } from "@heyclaude/web-runtime/design-system";
 
 export interface ContentListSearchClientProps<T extends DisplayableContent> {
   /** Initial items to display */
@@ -102,18 +101,18 @@ export function ContentListSearchClient<T extends DisplayableContent>({
       defaultQuery=""
       defaultFilters={category ? { category } : {}}
     >
-      <div className={`${spaceY.relaxed}`}>
+      <div className="space-y-6">
         <SearchBar
           placeholder={searchPlaceholder}
           variant="default"
           size="lg"
         />
 
-        <Suspense fallback={<div className={`text-muted-foreground ${padding.default} text-center`}>Loading filters...</div>}>
+        <Suspense fallback={<div className="text-muted-foreground p-4 text-center">Loading filters...</div>}>
           <SearchFilters />
         </Suspense>
 
-        <Suspense fallback={<div className={`text-muted-foreground ${padding.relaxed} text-center`}>Loading search results...</div>}>
+        <Suspense fallback={<div className="text-muted-foreground p-8 text-center">Loading search results...</div>}>
           <SearchResults
             showCategory
             showActions

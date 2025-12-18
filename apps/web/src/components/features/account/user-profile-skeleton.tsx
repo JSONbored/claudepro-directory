@@ -11,7 +11,7 @@
  */
 
 import { Skeleton } from '@heyclaude/web-runtime/ui';
-import { SPRING, STAGGER, paddingX, marginX, paddingTop, gap, marginTop, spaceY, paddingY, padding, marginBottom, paddingBottom, size, iconSize } from '@heyclaude/web-runtime/design-system';
+import { SPRING, STAGGER } from '@heyclaude/web-runtime/design-system';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
 import { motion } from 'motion/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
@@ -32,41 +32,41 @@ export function UserProfileSkeleton() {
       transition={SPRING.smooth}
     >
       {/* Hero/Profile Header */}
-      <section className={`relative`}>
+      <section className="relative">
         <motion.div
-          className={`container ${marginX.auto} ${paddingX.default}`}
+          className="container mx-auto px-4"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ ...SPRING.smooth, delay: 0.1 }}
         >
-          <div className={`flex items-start justify-between ${paddingTop.default}`}>
-            <div className={`flex items-start ${gap.default}`}>
+          <div className="flex items-start justify-between pt-4">
+            <div className="flex items-start gap-3">
               {/* Avatar */}
-              <Skeleton size="xl" width="xl" rounded="full" className={`${iconSize['24']} shrink-0`} />
+              <Skeleton size="xl" width="xl" rounded="full" className="h-24 w-24 shrink-0" />
               
               {/* Content */}
-              <div className={`${marginTop.default} ${spaceY.default}`}>
+              <div className="mt-4 space-y-3">
                 <Skeleton size="xl" width="lg" className="h-9" />
                 <Skeleton size="md" width="2xl" className="h-5" />
                 
                 {/* Social Stats */}
-                <div className={`flex items-center ${gap.default}`}>
-                  <div className={`flex items-center ${gap.micro}`}>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-0.5">
                     <Skeleton size="sm" width="xs" />
                     <Skeleton size="xs" width="xs" />
                   </div>
                   <span>•</span>
-                  <div className={`flex items-center ${gap.micro}`}>
+                  <div className="flex items-center gap-0.5">
                     <Skeleton size="sm" width="xs" />
                     <Skeleton size="xs" width="xs" />
                   </div>
                 </div>
                 
                 {/* Website link */}
-                <div className={`flex items-center ${gap.default}`}>
+                <div className="flex items-center gap-3">
                   <span>•</span>
-                  <div className={`flex items-center ${gap.micro}`}>
-                    <Skeleton size="sm" width="xs" rounded="full" className={`${iconSize.sm}`} />
+                  <div className="flex items-center gap-0.5">
+                    <Skeleton size="sm" width="xs" rounded="full" className="h-4 w-4" />
                     <Skeleton size="sm" width="xs" />
                   </div>
                 </div>
@@ -80,8 +80,8 @@ export function UserProfileSkeleton() {
       </section>
 
       {/* Content Section */}
-      <section className={`container ${marginX.auto} ${paddingX.default} ${paddingY.section}`}>
-        <div className={`${spaceY.relaxed}`}>
+      <section className="container mx-auto px-4 py-12">
+        <div className="space-y-6">
           {/* Profile Stats Card */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -89,12 +89,12 @@ export function UserProfileSkeleton() {
             transition={{ ...SPRING.smooth, delay: 0.2 }}
           >
             <Card>
-              <CardContent className={`${padding.comfortable}`}>
-                <div className={`grid grid-cols-2 ${gap.default} md:grid-cols-4`}>
+              <CardContent className="p-6">
+                <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
                   {Array.from({ length: 4 }).map((_, i) => (
                     <div key={i} className="text-center">
-                      <Skeleton size="xl" width="md" className={`${marginX.auto} ${marginBottom.compact} h-8`} />
-                      <Skeleton size="xs" width="xs" className={`${marginX.auto}`} />
+                      <Skeleton size="xl" width="md" className="mx-auto mb-2 h-8" />
+                      <Skeleton size="xs" width="xs" className="mx-auto" />
                     </div>
                   ))}
                 </div>
@@ -111,15 +111,15 @@ export function UserProfileSkeleton() {
             <Card>
               <CardHeader>
                 {/* Tabs */}
-                <div className={`flex ${gap.tight} border-b ${paddingBottom.tight}`}>
+                <div className="flex gap-1 border-b pb-2">
                   <Skeleton size="md" width="lg" rounded="md" className="h-10" />
                   <Skeleton size="md" width="xl" rounded="md" className="h-10" />
                   <Skeleton size="md" width="xl" rounded="md" className="h-10" />
                 </div>
               </CardHeader>
-              <CardContent className={`${marginTop.comfortable}`}>
+              <CardContent className="mt-6">
                 {/* Content grid - Collections/Contributions */}
-                <div className={`grid ${gap.default} sm:grid-cols-2`}>
+                <div className="grid gap-3 sm:grid-cols-2">
                   {KEYS_6.map((key, i) => {
                     return (
                       <motion.div
@@ -134,17 +134,17 @@ export function UserProfileSkeleton() {
                       >
                         <Card>
                           <CardHeader>
-                            <div className={`flex items-center ${gap.tight}`}>
-                              <Skeleton size="sm" width="xs" rounded="full" className={`${iconSize.md}`} />
-                              <CardTitle className={`${size.sm}`}>
+                            <div className="flex items-center gap-1">
+                              <Skeleton size="sm" width="xs" rounded="full" className="h-5 w-5" />
+                              <CardTitle className="text-sm">
                                 <Skeleton size="sm" width="sm" />
                               </CardTitle>
                             </div>
-                            <Skeleton size="xs" width="xs" className={`${marginTop.tight}`} />
+                            <Skeleton size="xs" width="xs" className="mt-1" />
                           </CardHeader>
                           <CardContent>
-                            <div className={`flex items-center ${gap.tight}`}>
-                              <Skeleton size="sm" width="xs" rounded="full" className={`${iconSize.sm}`} />
+                            <div className="flex items-center gap-1">
+                              <Skeleton size="sm" width="xs" rounded="full" className="h-4 w-4" />
                               <Skeleton size="xs" width="xs" />
                             </div>
                           </CardContent>

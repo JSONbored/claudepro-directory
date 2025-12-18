@@ -17,17 +17,22 @@
 
 import 'server-only';
 
-import { addBookmark } from '@heyclaude/web-runtime/actions';
+import { addBookmark } from '@heyclaude/web-runtime/actions/bookmarks';
 import { content_categorySchema } from '@heyclaude/web-runtime/prisma-zod-schemas';
 import {
   createApiOptionsHandler,
   createApiRoute,
+  getVersionedRoute,
   jsonResponse,
 } from '@heyclaude/web-runtime/server';
 import { connection } from 'next/server';
 import { z } from 'zod';
 
-const addBookmarkSchema = z.object({
+/**
+ * Schema for adding a bookmark
+ * Exported for OpenAPI generation
+ */
+export const addBookmarkSchema = z.object({
   content_slug: z.string(),
   content_type: content_categorySchema,
   notes: z.string().optional(),
@@ -37,14 +42,11 @@ export const POST = createApiRoute({
   bodySchema: addBookmarkSchema,
   cors: 'auth',
   handler: async ({ body, cors, logger, user }) => {
-    // Defer to request time for non-deterministic operations (required for Cache Components)
     await connection();
-
+    // user is guaranteed (requireAuth: true)
     if (!user) {
-      logger.warn({}, 'Unauthorized bookmark add attempt');
-      return jsonResponse({ error: 'Unauthorized - authentication required' }, 401, cors);
+      throw new Error('User not authenticated');
     }
-
     const { content_slug, content_type, notes } = body;
 
     logger.info(
@@ -85,7 +87,7 @@ export const POST = createApiRoute({
   },
   operation: 'BookmarkAPI',
   requireAuth: true,
-  route: '/api/bookmarks/add',
+  route: getVersionedRoute('bookmarks/add'),
 });
 
 export const OPTIONS = createApiOptionsHandler('auth');

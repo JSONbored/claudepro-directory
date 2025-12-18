@@ -43,7 +43,6 @@ import {
   AlertCircle,
   AlertTriangle,
 } from '../../../icons.tsx';
-import { gap } from '../../../design-system/index.ts';
 import { cn } from '../../utils.ts';
 // TOKENS removed - using direct Tailwind utilities
 import { SPRING, STAGGER } from '../../../design-system/index.ts';
@@ -208,7 +207,7 @@ export function EmptyState({
       {(actionLabel || secondaryActionLabel || renderAction || renderSecondaryAction) && (
         <motion.div
           {...ctaAnimation}
-          className={cn(gap.default, 'flex flex-col sm:flex-row')}
+          className={cn('flex flex-col gap-3 sm:flex-row')}
         >
           {renderActionButton()}
           {renderSecondaryActionButton()}

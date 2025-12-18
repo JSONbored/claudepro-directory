@@ -6,8 +6,8 @@
 
 import type { content_category } from '@heyclaude/data-layer/prisma';
 import { isValidCategory, logUnhandledPromise, type SharePlatform } from '@heyclaude/web-runtime/core';
-import { DURATION, size, weight, marginTop, padding, marginBottom, paddingX, paddingY, gap, center, iconSize, radius, transition, cluster, muted, border, tracking } from '@heyclaude/web-runtime/design-system';
-import { VALID_CATEGORIES } from '@heyclaude/web-runtime';
+import { DURATION } from '@heyclaude/web-runtime/design-system';
+import { VALID_CATEGORIES } from '@heyclaude/web-runtime/core';
 import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
@@ -32,14 +32,13 @@ import {
   generateScreenshotFilename,
   generateShareText,
   generateShareUrl,
-  POSITION_PATTERNS,
   toasts,
 } from '@heyclaude/web-runtime/ui';
 // DOMPurify will be dynamically imported
 import { motion } from 'motion/react';
 import { usePathname } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { LinkedinShareButton, TwitterShareButton } from 'react-share';
+// Removed react-share - using native Web Share API and custom share buttons instead
 import { useBoolean, useIsClient, useTimeout } from '@heyclaude/web-runtime/hooks';
 
 const CLIPBOARD_RESET_DEFAULT_MS = 2000;
@@ -80,16 +79,16 @@ function escapeHtml(html: string): string {
  */
 async function sanitizeShikiHtml(html: string): Promise<string> {
   if (!html || typeof html !== 'string') return '';
-  // DOMPurify only works in browser - dynamically import
+  // DOMPurify only works in browser - use shared utility
   if (typeof window === 'undefined') {
     // During SSR, return empty string (will be sanitized on client)
     return '';
   }
   try {
-    const DOMPurify = await import('dompurify');
+    const { sanitizeHtml } = await import('@heyclaude/web-runtime/utils/dompurify');
     // Sanitize with very restrictive allowlist for Shiki HTML
     // Shiki typically uses: <pre>, <code>, <span> with class and style attributes
-    return DOMPurify.default.sanitize(html, {
+    return await sanitizeHtml(html, {
       ALLOWED_TAGS: ['pre', 'code', 'span', 'div'],
       ALLOWED_ATTR: ['class', 'style'],
       // Allow data-* attributes (Shiki may use data-* for metadata)
@@ -160,78 +159,121 @@ interface ShareDropdownProps {
  */
 function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: ShareDropdownProps) {
   const shouldReduceMotion = useReducedMotion();
+  const isClient = useIsClient();
+  const supportsWebShare = isClient && typeof navigator !== 'undefined' && 'share' in navigator;
+
+  // Handle native Web Share API (mobile/desktop with support)
+  const handleNativeShare = async () => {
+    if (!supportsWebShare) return false;
+    
+    try {
+      const shareText = generateShareText({
+        url: currentUrl,
+        category,
+        slug,
+        platform: 'native',
+        title: `${category} - ${slug}`,
+      });
+      
+      await navigator.share({
+        title: `${category} - ${slug}`,
+        text: shareText,
+        url: currentUrl,
+      });
+      
+      onShare('native');
+      return true;
+    } catch (error) {
+      // User cancelled or error occurred - fall through to platform-specific buttons
+      if (error instanceof Error && error.name !== 'AbortError') {
+        const normalized = normalizeError(error, 'Native share failed');
+        logClientWarn(
+          '[Share] Native share failed',
+          normalized,
+          'ShareDropdown.handleNativeShare',
+          {
+            component: 'ShareDropdown',
+            action: 'native-share',
+            category: 'share',
+          }
+        );
+      }
+      return false;
+    }
+  };
+
+  // Handle platform-specific share (opens in new window)
+  const handlePlatformShare = (platform: 'twitter' | 'linkedin') => {
+    const shareUrl = generateShareUrl({
+      url: currentUrl,
+      category,
+      slug,
+      platform,
+      title: `${category} - ${slug}`,
+    });
+    
+    // Open share URL in new window
+    window.open(shareUrl, '_blank', 'noopener,noreferrer');
+    onShare(platform);
+  };
+
   return (
     <motion.div
       initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -10 }}
       animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-      className={`${POSITION_PATTERNS.ABSOLUTE_TOP_RIGHT} border-border bg-card/95 top-full z-50 ${marginTop.compact} w-56 rounded-lg border ${padding.compact} shadow-xl backdrop-blur-md`}
+      className="absolute top-0 right-0 border-border bg-card/95 top-full z-50 mt-2 w-56 card-base p-3 shadow-xl backdrop-blur-md"
       onMouseLeave={onMouseLeave}
     >
-      {/* Twitter Share */}
-      <div className={`share-button-wrapper ${marginBottom.tight}`}>
-        <TwitterShareButton
-          url={generateShareUrl({
-            url: currentUrl,
-            category,
-            slug,
-            platform: 'twitter',
-            title: `${category} - ${slug}`,
-          })}
-          title={generateShareText({
-            url: currentUrl,
-            category,
-            slug,
-            platform: 'twitter',
-            title: `${category} - ${slug}`,
-          })}
-          onClick={() => onShare('twitter')}
+      {/* Native Web Share (if supported) */}
+      {supportsWebShare ? (
+        <button
+          type="button"
+          onClick={handleNativeShare}
+          className={cn('hover:bg-accent/15 flex w-full items-center', 'gap-3', 'rounded-lg', 'px-4', 'py-2.5', 'text-sm', 'font-medium', 'transition-all duration-200 ease-out', 'hover:scale-[1.02] active:scale-[0.98]')}
         >
-          <div className={cn('hover:bg-accent/15 flex w-full items-center', gap.default, 'rounded-lg', paddingX.default, paddingY['2.5'], size.sm, weight.medium, transition.default)}>
-            <div className={`${center} ${iconSize.md} ${radius.full} bg-color-twitter-bg`}>
-              <Twitter className={`${iconSize.xs} text-color-twitter`} />
-            </div>
-            <span className="text-foreground">Share on Twitter</span>
+          <div className="flex-center h-5 w-5 rounded-full bg-accent/20">
+            <Share2 className="h-3 w-3" />
           </div>
-        </TwitterShareButton>
-      </div>
+          <span className="text-foreground">Share</span>
+        </button>
+      ) : null}
 
-      {/* LinkedIn Share */}
-      <div className={`share-button-wrapper ${marginBottom.tight}`}>
-        <LinkedinShareButton
-          url={generateShareUrl({
-            url: currentUrl,
-            category,
-            slug,
-            platform: 'linkedin',
-            title: `${category} - ${slug}`,
-          })}
-          title={generateShareText({
-            url: currentUrl,
-            category,
-            slug,
-            platform: 'linkedin',
-            title: `${category} - ${slug}`,
-          })}
-          summary={`Check out this ${category} resource on claudepro.directory`}
-          onClick={() => onShare('linkedin')}
+      {/* Twitter Share (fallback if no native share) */}
+      {!supportsWebShare ? (
+        <button
+          type="button"
+          onClick={() => handlePlatformShare('twitter')}
+          className={cn('hover:bg-accent/15 flex w-full items-center', 'gap-3', 'rounded-lg', 'px-4', 'py-2.5', 'text-sm', 'font-medium', 'transition-all duration-200 ease-out', 'hover:scale-[1.02] active:scale-[0.98]')}
         >
-          <div className={cn('hover:bg-accent/15 flex w-full items-center', gap.default, 'rounded-lg', paddingX.default, paddingY['2.5'], size.sm, weight.medium, transition.default)}>
-            <div className={`${center} ${iconSize.md} ${radius.full} bg-color-linkedin-bg`}>
-              <Linkedin className={`${iconSize.xs} text-color-linkedin`} />
-            </div>
-            <span className="text-foreground">Share on LinkedIn</span>
+          <div className="flex-center h-5 w-5 rounded-full bg-color-twitter-bg">
+            <Twitter className="h-3 w-3 text-color-twitter" />
           </div>
-        </LinkedinShareButton>
-      </div>
+          <span className="text-foreground">Share on Twitter</span>
+        </button>
+      ) : null}
+
+      {/* LinkedIn Share (fallback if no native share) */}
+      {!supportsWebShare ? (
+        <button
+          type="button"
+          onClick={() => handlePlatformShare('linkedin')}
+          className={cn('hover:bg-accent/15 flex w-full items-center', 'gap-3', 'rounded-lg', 'px-4', 'py-2.5', 'text-sm', 'font-medium', 'transition-all duration-200 ease-out', 'hover:scale-[1.02] active:scale-[0.98]')}
+        >
+          <div className="flex-center h-5 w-5 rounded-full bg-color-linkedin-bg">
+            <Linkedin className="h-3 w-3 text-color-linkedin" />
+          </div>
+          <span className="text-foreground">Share on LinkedIn</span>
+        </button>
+      ) : null}
 
       {/* Copy Link */}
       <button
         type="button"
         onClick={() => onShare('copy_link')}
-        className={cn('text-foreground hover:bg-accent/15 flex w-full items-center', gap.default, 'rounded-lg', paddingX.default, paddingY['2.5'], size.sm, weight.medium, transition.default, 'hover:scale-[1.02] active:scale-[0.98]')}
+        className={cn('text-foreground hover:bg-accent/15 flex w-full items-center', 'gap-3', 'rounded-lg', 'px-4', 'py-2.5', 'text-sm', 'font-medium', 'transition-all duration-200 ease-out', 'hover:scale-[1.02] active:scale-[0.98]')}
       >
-        <div className={`${center} ${iconSize.md} ${radius.full} bg-accent/20`}>
-          <Copy className={iconSize.xs} />
+        <div className="flex-center h-5 w-5 rounded-full bg-accent/20">
+          <Copy className="h-3 w-3" />
         </div>
         <span>Copy Link</span>
       </button>
@@ -644,6 +686,9 @@ export function ProductionCodeBlock({
             },
           });
         }
+      } else if (platform === 'native') {
+        // Native share already handled in ShareDropdown component
+        // Just track the analytics here
       }
 
       pulse.share({ platform, category, slug, url: currentUrl }).catch((error) => {
@@ -687,21 +732,21 @@ export function ProductionCodeBlock({
   const maxHeight = `${maxLines * 1.6}rem`; // 1.6rem per line
 
   return (
-    <div className={`relative rounded-lg border bg-code/50 ${className}`}>
+    <div className={`relative card-base bg-code/50 ${className}`}>
       {/* Header with filename, language badge, and action buttons */}
       {filename ? (
-        <div className={`flex items-center justify-between border-b border-border/50 ${paddingX.default} ${paddingY.tight}`}>
-          <span className={`${size.sm} ${weight.medium} font-mono`}>{filename}</span>
-          <div className={cluster.tight}>
+        <div className="flex items-center justify-between border-b border-border/50 px-4 py-2">
+          <span className="text-sm-medium font-mono">{filename}</span>
+          <div className="flex items-center gap-1">
             {/* Screenshot button */}
             <motion.button
               type="button"
               onClick={handleScreenshot}
               disabled={isScreenshotting}
-              className={`${center} ${radius.md} bg-code/95 p-1.5 text-muted-foreground shadow-md backdrop-blur-md ${transition.colors} hover:bg-code hover:text-foreground disabled:opacity-50`}
+              className="flex-center rounded-md bg-code/95 p-1.5 text-muted-foreground shadow-md backdrop-blur-md transition-colors hover:bg-code hover:text-foreground disabled:opacity-50"
               title={isScreenshotting ? 'Capturing screenshot...' : 'Screenshot code'}
             >
-              <Camera className={iconSize.xs} />
+              <Camera className="h-3 w-3" />
             </motion.button>
 
             {/* Share button with dropdown */}
@@ -709,10 +754,10 @@ export function ProductionCodeBlock({
               <motion.button
                 type="button"
                 onClick={toggleIsShareOpen}
-                className={`${center} ${radius.md} bg-code/95 p-1.5 text-muted-foreground shadow-md backdrop-blur-md ${transition.colors} hover:bg-code hover:text-foreground`}
+                className="flex-center rounded-md bg-code/95 p-1.5 text-muted-foreground shadow-md backdrop-blur-md transition-colors hover:bg-code hover:text-foreground"
                 title="Share code"
               >
-                <Share2 className={iconSize.xs} />
+                <Share2 className="h-3 w-3" />
               </motion.button>
 
               {/* Share dropdown - positioned below button */}
@@ -733,13 +778,13 @@ export function ProductionCodeBlock({
               onClick={handleCopy}
               animate={isCopied && !shouldReduceMotion ? { scale: [1, 1.1, 1] } : {}}
               transition={{ duration: DURATION.default }}
-              className={`${center} ${radius.md} bg-code/95 p-1.5 shadow-md backdrop-blur-md ${transition.colors} hover:bg-code`}
+              className="flex-center rounded-md bg-code/95 p-1.5 shadow-md backdrop-blur-md transition-colors hover:bg-code"
               title={isCopied ? 'Copied!' : 'Copy code'}
             >
               {isCopied ? (
-                <Check className={`${iconSize.xs} text-green-500`} />
+                <Check className="h-3 w-3 text-green-500" />
               ) : (
-                <Copy className={`${iconSize.xs} text-muted-foreground`} />
+                <Copy className="h-3 w-3 text-muted-foreground" />
               )}
             </motion.button>
 
@@ -747,15 +792,15 @@ export function ProductionCodeBlock({
             <motion.button
               type="button"
               onClick={handleDownload}
-              className={`${center} ${radius.md} bg-code/95 p-1.5 text-muted-foreground shadow-md backdrop-blur-md ${transition.colors} hover:bg-code hover:text-foreground`}
+              className="flex-center rounded-md bg-code/95 p-1.5 text-muted-foreground shadow-md backdrop-blur-md transition-colors hover:bg-code hover:text-foreground"
               title="Download code"
             >
-              <Download className={iconSize.xs} />
+              <Download className="h-3 w-3" />
             </motion.button>
 
             {/* Language badge - Polar-style minimal */}
             {language && language !== 'text' ? (
-              <div className={cn(muted.default, paddingX.compact, paddingY.micro, size['2xs'], weight.semibold, tracking.wide, 'uppercase')}>
+              <div className={cn('text-muted-foreground', 'px-3', 'py-1', 'text-[10px]', 'font-semibold', 'tracking-wide', 'uppercase')}>
                 {language}
               </div>
             ) : null}
@@ -766,23 +811,23 @@ export function ProductionCodeBlock({
       {/* Code block container - Polar-style clean design */}
       <div
         ref={codeBlockRef}
-        className="border-border relative overflow-hidden rounded-lg border transition-[height] ease-in-out duration-[0.2s]"
+        className="border-border relative overflow-hidden card-base transition-[height] ease-in-out duration-[0.2s]"
         style={{
           height: needsCollapse && !isExpanded ? maxHeight : 'auto',
         }}
       >
         {/* Top-right action buttons + badge (when no filename header) */}
         {!filename && (
-          <div className={`${POSITION_PATTERNS.ABSOLUTE_TOP_RIGHT_OFFSET_LG} z-20 flex items-center gap-1`}>
+          <div className="absolute top-3 right-3 z-20 flex items-center gap-1">
             {/* Screenshot button */}
             <motion.button
               type="button"
               onClick={handleScreenshot}
               disabled={isScreenshotting}
-              className={`${center} ${radius.md} bg-code/95 p-1.5 text-muted-foreground shadow-md backdrop-blur-md ${transition.colors} hover:bg-code hover:text-foreground disabled:opacity-50`}
+              className="flex-center rounded-md bg-code/95 p-1.5 text-muted-foreground shadow-md backdrop-blur-md transition-colors hover:bg-code hover:text-foreground disabled:opacity-50"
               title={isScreenshotting ? 'Capturing screenshot...' : 'Screenshot code'}
             >
-              <Camera className={iconSize.xs} />
+              <Camera className="h-3 w-3" />
             </motion.button>
 
             {/* Share button with dropdown */}
@@ -790,10 +835,10 @@ export function ProductionCodeBlock({
               <motion.button
                 type="button"
                 onClick={toggleIsShareOpen}
-                className={`${center} ${radius.md} bg-code/95 p-1.5 text-muted-foreground shadow-md backdrop-blur-md ${transition.colors} hover:bg-code hover:text-foreground`}
+                className="flex-center rounded-md bg-code/95 p-1.5 text-muted-foreground shadow-md backdrop-blur-md transition-colors hover:bg-code hover:text-foreground"
                 title="Share code"
               >
-                <Share2 className={iconSize.xs} />
+                <Share2 className="h-3 w-3" />
               </motion.button>
 
               {/* Share dropdown - positioned below button */}
@@ -814,13 +859,13 @@ export function ProductionCodeBlock({
               onClick={handleCopy}
               animate={isCopied && !shouldReduceMotion ? { scale: [1, 1.1, 1] } : {}}
               transition={{ duration: DURATION.default }}
-              className={`${center} ${radius.md} bg-code/95 p-1.5 shadow-md backdrop-blur-md ${transition.colors} hover:bg-code`}
+              className="flex-center rounded-md bg-code/95 p-1.5 shadow-md backdrop-blur-md transition-colors hover:bg-code"
               title={isCopied ? 'Copied!' : 'Copy code'}
             >
               {isCopied ? (
-                <Check className={`${iconSize.xs} text-green-500`} />
+                <Check className="h-3 w-3 text-green-500" />
               ) : (
-                <Copy className={`${iconSize.xs} text-muted-foreground`} />
+                <Copy className="h-3 w-3 text-muted-foreground" />
               )}
             </motion.button>
 
@@ -828,15 +873,15 @@ export function ProductionCodeBlock({
             <motion.button
               type="button"
               onClick={handleDownload}
-              className={`${center} ${radius.md} bg-code/95 p-1.5 text-muted-foreground shadow-md backdrop-blur-md ${transition.colors} hover:bg-code hover:text-foreground`}
+              className="flex-center rounded-md bg-code/95 p-1.5 text-muted-foreground shadow-md backdrop-blur-md transition-colors hover:bg-code hover:text-foreground"
               title="Download code"
             >
-              <Download className={iconSize.xs} />
+              <Download className="h-3 w-3" />
             </motion.button>
 
             {/* Language badge - Polar-style minimal */}
             {language && language !== 'text' ? (
-              <div className={cn(muted.default, paddingX.compact, paddingY.micro, size['2xs'], weight.semibold, tracking.wide, 'uppercase')}>
+              <div className={cn('text-muted-foreground', 'px-3', 'py-1', 'text-[10px]', 'font-semibold', 'tracking-wide', 'uppercase')}>
                 {language}
               </div>
             ) : null}
@@ -877,10 +922,10 @@ export function ProductionCodeBlock({
         <button
           type="button"
           onClick={toggleIsExpanded}
-          className={cn(border.default, 'border-t', muted.default, 'hover:text-foreground', cluster.compact, 'w-full', gap['1.5'], paddingY.compact, size.xs, transition.colors)}
+          className={cn('border', 'border-t', 'text-muted-foreground', 'hover:text-foreground', 'flex items-center gap-2', 'w-full', 'gap-1.5', 'py-3', 'text-xs', 'transition-colors')}
         >
           <ChevronDown
-            className={cn('h-3.5 w-3.5', transition.transform, transition.quick, isExpanded ? 'rotate-180' : '')}
+            className={cn('h-3.5 w-3.5 transition-transform duration-200', isExpanded ? 'rotate-180' : '')}
           />
           <span>{isExpanded ? 'Collapse' : `Show ${code.split('\n').length} lines`}</span>
         </button>

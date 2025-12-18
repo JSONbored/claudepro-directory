@@ -30,12 +30,12 @@ export type GetCategoryConfigsWithFeaturesArgsFromZod = z.infer<typeof getCatego
 /**
  * Return type for PostgreSQL function: get_category_configs_with_features
  */
-export type GetCategoryConfigsWithFeaturesReturns = CategoryConfigWithFeatures;
+export type GetCategoryConfigsWithFeaturesReturns = CategoryConfigWithFeatures[];
 
 /**
  * Zod schema for get_category_configs_with_features function return type
  */
-export const getCategoryConfigsWithFeaturesReturnsSchema = categoryConfigWithFeaturesSchema;
+export const getCategoryConfigsWithFeaturesReturnsSchema = z.array(categoryConfigWithFeaturesSchema);
 
 /**
  * Type inference from Zod schema (should match type above)

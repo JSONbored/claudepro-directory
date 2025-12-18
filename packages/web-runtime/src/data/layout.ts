@@ -1,10 +1,9 @@
 'use server';
 
-import { cacheLife, cacheTag } from 'next/cache';
-
 import { logger } from '../logger.ts';
 
 import { getActiveAnnouncement } from './announcements';
+import { generateResourceTags } from './cached-data-factory.ts';
 import { DEFAULT_LAYOUT_DATA, type LayoutData } from './layout/constants';
 
 /**
@@ -22,17 +21,19 @@ const PROMISE_REJECTED_STATUS = 'rejected' as const;
 /**
  * Get layout data (announcements and navigation)
  * Uses 'use cache' to cache layout data. This data is public and same for all users.
- * Layout data (navigation + announcements) changes very rarely, so we use the 'stable' cacheLife profile.
+ * Layout data (navigation + announcements) changes very rarely, so we use the 'long' cacheLife profile.
  */
 export async function getLayoutData(): Promise<LayoutData> {
   'use cache';
 
-  // Configure cache - use 'stable' profile for rarely-changing layout data
-  cacheLife('stable'); // 6hr stale, 1hr revalidate, 7 days expire
-  cacheTag('layout');
-  cacheTag('ui');
-  cacheTag('navigation');
-  cacheTag('announcements');
+  const { cacheLife, cacheTag } = await import('next/cache');
+
+  // Configure cache - use 'long' profile for rarely-changing layout data
+  cacheLife('long'); // 1 day stale, 6hr revalidate, 30 days expire
+  const tags = generateResourceTags('layout', undefined, ['ui', 'navigation', 'announcements']);
+  for (const tag of tags) {
+    cacheTag(tag);
+  }
 
   const reqLogger = logger.child({
     module: 'data/layout',
@@ -48,8 +49,6 @@ export async function getLayoutData(): Promise<LayoutData> {
         : null;
 
     if (announcementResult.status === PROMISE_REJECTED_STATUS) {
-      // logger.error() normalizes errors internally, so pass raw error
-      // Convert unknown error to Error | string for TypeScript
       const reason = announcementResult.reason;
       const errorForLogging: Error | string =
         typeof reason === 'object' && reason !== null && 'message' in reason && 'stack' in reason
@@ -78,14 +77,12 @@ export async function getLayoutData(): Promise<LayoutData> {
       navigationData: DEFAULT_LAYOUT_DATA.navigationData,
     };
   } catch (error) {
-    // logger.error() normalizes errors internally, so pass raw error
-    // Convert unknown error to Error | string for TypeScript
     const errorForLogging: Error | string =
       typeof error === 'object' && error !== null && 'message' in error && 'stack' in error
         ? (error as Error)
-        : (typeof error === 'string'
+        : typeof error === 'string'
           ? error
-          : String(error));
+          : String(error);
     reqLogger.error(
       { err: errorForLogging, fallbackStrategy: 'defaults', source: 'layout-data' },
       'getLayoutData: catastrophic failure, using defaults'

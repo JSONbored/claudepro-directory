@@ -66,9 +66,11 @@ export abstract class BasePrismaService {
     options?: {
       useCache?: boolean;
       methodName?: string;
+      /** Return type pattern: 'array' for SETOF functions, 'single' for composite types, 'auto' to detect */
+      returnType?: 'array' | 'single' | 'auto';
     }
   ): Promise<T> {
-    const { useCache = true, methodName } = options || {};
+    const { useCache = true, methodName, returnType = 'auto' } = options || {};
 
     const rpcCall = async (): Promise<T> => {
       try {
@@ -77,62 +79,36 @@ export abstract class BasePrismaService {
         const argNames = Object.keys(args);
         const argValues = Object.values(args);
 
-        if (argNames.length === 0) {
-          // No arguments - simple function call
-          const query = `SELECT * FROM ${functionName}()`;
-          const result = await prisma.$queryRawUnsafe(query);
-          // Prisma $queryRawUnsafe always returns arrays for SELECT * FROM function()
-          // If result is array with one element, check if we should unwrap
-          // For functions returning SETOF (arrays), return array
-          // For functions returning single composite types, unwrap single element
-          if (Array.isArray(result) && result.length === 1) {
-            // Check if function name suggests it returns a single value (not SETOF)
-            // Functions returning single composite types typically don't have "list" or "get_*_list" in name
-            // And they return single composite types, not arrays
-            // For now, we'll check the result structure - if it's an object (not array of objects), unwrap
-            const firstElement = result[0];
-            if (firstElement && typeof firstElement === 'object' && !Array.isArray(firstElement)) {
-              // This looks like a single composite type result, unwrap it
-              return firstElement as T;
-            }
-          }
-          return result as T;
-        }
-
-        // Build parameterized query with named parameters
-        // PostgreSQL supports both positional ($1, $2) and named parameters
-        // We'll use positional for compatibility
-        const placeholders = argNames.map((_, i) => `$${i + 1}`).join(', ');
-        const query = `SELECT * FROM ${functionName}(${placeholders})`;
+        // Build parameterized query with named parameters using PostgreSQL's => syntax
+        // This ensures parameters are passed in the correct order regardless of object key order
+        // Format: function_name(p_param1 => $1, p_param2 => $2, ...)
+        const namedParams = argNames.length > 0
+          ? argNames.map((name, i) => `${name} => $${i + 1}`).join(', ')
+          : '';
+        const query = argNames.length === 0
+          ? `SELECT * FROM ${functionName}()`
+          : `SELECT * FROM ${functionName}(${namedParams})`;
 
         const result = await prisma.$queryRawUnsafe(query, ...argValues);
 
         // Prisma $queryRawUnsafe always returns arrays for SELECT * FROM function()
-        // Handle unwrapping for single composite type returns
-        if (Array.isArray(result)) {
-          // Check if this is a single-row result that should be unwrapped
-          // Functions returning SETOF (arrays) should return arrays
-          // Functions returning single composite types should return single objects
-          if (result.length === 1) {
-            const firstElement = result[0];
-            // If the first element is an object (composite type), check if we should unwrap
-            // We'll use a heuristic: if the function doesn't have "list" or plural in name,
-            // and returns a single object, unwrap it
-            if (firstElement && typeof firstElement === 'object' && !Array.isArray(firstElement)) {
-              // Check function name pattern - single result functions often don't have "list" or "get_*_list"
-              const isListFunction = functionName.includes('list') || 
-                                     functionName.includes('_list') ||
-                                     functionName.includes('search') ||
-                                     functionName.includes('get_') && functionName.includes('_content');
-              
-              // If it's not a list function and returns a single object, unwrap
-              if (!isListFunction) {
-                return firstElement as T;
-              }
-            }
-          }
-          // For array results (SETOF functions), return as array
+        // Handle unwrapping based on returnType option
+        if (!Array.isArray(result)) {
           return result as T;
+        }
+
+        // Determine if we should unwrap single-element arrays
+        const shouldUnwrap = returnType === 'single' || 
+          (returnType === 'auto' && result.length === 1 && 
+           typeof result[0] === 'object' && 
+           !Array.isArray(result[0]) &&
+           // Simple heuristic: functions with 'list', 'search', or returning arrays typically return arrays
+           !functionName.includes('list') && 
+           !functionName.includes('search') &&
+           !functionName.includes('_content'));
+
+        if (shouldUnwrap && result.length === 1) {
+          return result[0] as T;
         }
 
         return result as T;

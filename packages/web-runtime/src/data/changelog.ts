@@ -1,27 +1,21 @@
 import 'server-only';
-import { ChangelogService } from '@heyclaude/data-layer';
-import type { changelogModel, changelog_category, JsonValue } from '@heyclaude/data-layer/prisma';
-import type {
-  GetChangelogOverviewReturns,
-  ChangelogOverviewEntry,
+import {
+  type changelog_category,
+  type changelogModel,
+  type JsonValue,
+} from '@heyclaude/data-layer/prisma';
+import {
+  type GetChangelogOverviewReturns,
 } from '@heyclaude/database-types/postgres-types';
-import { cacheLife, cacheTag } from 'next/cache';
 
-import { normalizeError } from '../errors.ts';
-import { logger } from '../logger.ts';
-
+import { createCachedDataFunction, generateResourceTags } from './cached-data-factory.ts';
 import { QUERY_LIMITS } from './config/constants.ts';
 import './changelog.shared.ts';
 
 // Export shared utils
 export * from './changelog.shared.ts';
 
-const CHANGELOG_TAG = 'changelog';
-
-function createEmptyOverview(
-  limit: number,
-  offset = 0
-): GetChangelogOverviewReturns {
+function createEmptyOverview(limit: number, offset = 0): GetChangelogOverviewReturns {
   return {
     entries: [],
     featured: [],
@@ -42,115 +36,86 @@ function createEmptyOverview(
 /**
  * Get changelog overview
  * Uses 'use cache' to cache changelog overview. This data is public and same for all users.
- * @param options
- * @param options.category
- * @param options.featuredOnly
- * @param options.limit
- * @param options.offset
- * @param options.publishedOnly
  */
-export async function getChangelogOverview(
-  options: {
+export const getChangelogOverview = createCachedDataFunction<
+  {
     category?: changelog_category;
     featuredOnly?: boolean;
     limit?: number;
     offset?: number;
     publishedOnly?: boolean;
-  } = {}
-): Promise<GetChangelogOverviewReturns> {
-  'use cache';
-
-  const { category, featuredOnly = false, limit = 50, offset = 0, publishedOnly = true } = options;
-
-  // Configure cache - use 'static' profile for optimal SEO (1 day stale, 6hr revalidate, 30 days expire)
-  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
-  cacheTag(CHANGELOG_TAG);
-  if (category) {
-    cacheTag(`changelog-category-${category}`);
-  }
-
-  const reqLogger = logger.child({
-    module: 'data/changelog',
-    operation: 'getChangelogOverview',
-  });
-
-  try {
-    const service = new ChangelogService();
-    const result = await service.getChangelogOverview({
-      ...(category ? { p_category: category } : {}),
-      p_featured_only: featuredOnly,
-      p_limit: limit,
-      p_offset: offset,
-      p_published_only: publishedOnly,
-    });
-
-    reqLogger.info(
-      {
-        ...(category ? { category } : {}),
-        entryCount: result.entries?.length ?? 0,
-        featuredOnly,
-        limit,
-        offset,
-        publishedOnly,
-      },
-      'getChangelogOverview: fetched successfully'
-    );
-
-    return result;
-  } catch (error) {
-    const normalized = normalizeError(error, 'getChangelogOverview failed');
-    reqLogger.error(
-      {
-        err: normalized,
-        ...(category ? { category } : {}),
-        featuredOnly,
-        limit,
-        offset,
-        publishedOnly,
-      },
-      'getChangelogOverview: failed'
-    );
-    return createEmptyOverview(limit, offset);
-  }
-}
+  },
+  GetChangelogOverviewReturns
+>({
+  serviceKey: 'changelog',
+  methodName: 'getChangelogOverview',
+  cacheMode: 'public',
+  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
+  cacheTags: (options) => {
+    const tags = generateResourceTags('changelog');
+    if (options.category) {
+      tags.push(`changelog-category-${options.category}`);
+    }
+    return tags;
+  },
+  module: 'data/changelog',
+  operation: 'getChangelogOverview',
+  transformArgs: (options) => ({
+    ...(options.category ? { p_category: options.category } : {}),
+    p_featured_only: options.featuredOnly ?? false,
+    p_limit: options.limit ?? 50,
+    p_offset: options.offset ?? 0,
+    p_published_only: options.publishedOnly ?? true,
+  }),
+  onError: (_, options) => createEmptyOverview(options.limit ?? 50, options.offset ?? 0),
+  logContext: (options) => ({
+    ...(options.category ? { category: options.category } : {}),
+    featuredOnly: options.featuredOnly ?? false,
+    limit: options.limit ?? 50,
+    offset: options.offset ?? 0,
+    publishedOnly: options.publishedOnly ?? true,
+  }),
+});
 
 /**
  * Get changelog entry by slug
  * Uses 'use cache' to cache changelog entries. This data is public and same for all users.
- * Changelog entries change periodically, so we use the 'hours' cacheLife profile.
- * @param slug
+ * Changelog entries change periodically, so we use the 'long' cacheLife profile.
  */
-export async function getChangelogEntryBySlug(slug: string): Promise<changelogModel | null> {
-  'use cache';
-
-  // Configure cache - use 'static' profile for optimal SEO (1 day stale, 6hr revalidate, 30 days expire)
-  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
-  cacheTag(CHANGELOG_TAG);
-  cacheTag(`changelog-${slug}`);
-
-  const reqLogger = logger.child({
-    module: 'data/changelog',
-    operation: 'getChangelogEntryBySlug',
-  });
-
-  try {
-    const service = new ChangelogService();
-    const result = await service.getChangelogDetail({ p_slug: slug });
-
-    if (!result.entry) {
-      reqLogger.info({ slug }, 'getChangelogEntryBySlug: entry not found');
+export const getChangelogEntryBySlug = createCachedDataFunction<string, changelogModel | null>({
+  serviceKey: 'changelog',
+  methodName: 'getChangelogDetail',
+  cacheMode: 'public',
+  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire - optimized for SEO
+  cacheTags: (slug) => generateResourceTags('changelog', slug),
+  module: 'data/changelog',
+  operation: 'getChangelogEntryBySlug',
+  transformArgs: (slug) => ({ p_slug: slug }),
+  transformResult: (result) => {
+    const detailResult = result as { entry?: unknown } | null;
+    if (!detailResult?.entry) {
       return null;
     }
 
-    const entry = result.entry;
+    const entry = detailResult.entry as {
+      created_at?: string;
+      updated_at?: string;
+      release_date?: string;
+      changes?: unknown;
+      content?: string;
+      description?: string;
+      featured?: boolean;
+      id?: string;
+      keywords?: string[];
+      metadata?: unknown;
+      published?: boolean;
+      raw_content?: string;
+      slug?: string;
+      title?: string;
+      tldr?: string;
+    };
+
     // Convert RPC return data (string dates) to Prisma types (Date objects)
-    // RPC returns: { created_at: string, updated_at: string, release_date: string, ... }
-    // Prisma expects: { created_at: Date, updated_at: Date, release_date: Date, ... }
-    // Convert RPC return data (string dates) to Prisma types (Date objects)
-    // RPC returns: { created_at: string, updated_at: string, release_date: string, ... }
-    // Prisma expects: { created_at: Date, updated_at: Date, release_date: Date, ... }
-    // Also: contributors and keywords are String[] in Prisma (not nullable)
-    // Note: RPC return type (changelog_detail_entry) doesn't have contributors field
     const normalizedEntry: changelogModel = {
       canonical_url: null,
       changes: (entry.changes ?? {}) as JsonValue,
@@ -158,7 +123,7 @@ export async function getChangelogEntryBySlug(slug: string): Promise<changelogMo
       content: entry.content ?? '',
       contributors: [], // RPC doesn't return contributors, use empty array
       created_at: new Date(entry.created_at ?? ''),
-      description: entry.description,
+      description: entry.description ?? null,
       featured: entry.featured ?? false,
       git_commit_sha: null,
       id: entry.id ?? '',
@@ -177,23 +142,14 @@ export async function getChangelogEntryBySlug(slug: string): Promise<changelogMo
       slug: entry.slug ?? '',
       source: null,
       title: entry.title ?? '',
-      tldr: entry.tldr,
+      tldr: entry.tldr ?? null,
       twitter_card: null,
       updated_at: new Date(entry.updated_at ?? ''),
     };
 
-    reqLogger.info(
-      { hasEntry: Boolean(normalizedEntry), slug },
-      'getChangelogEntryBySlug: fetched successfully'
-    );
-
     return normalizedEntry;
-  } catch (error) {
-    const normalized = normalizeError(error, 'getChangelogEntryBySlug failed');
-    reqLogger.error({ err: normalized, slug }, 'getChangelogEntryBySlug: failed');
-    return null;
-  }
-}
+  },
+});
 
 export async function getChangelog(): Promise<{
   entries: GetChangelogOverviewReturns['entries'];
@@ -210,6 +166,16 @@ export async function getChangelog(): Promise<{
     publishedOnly: true,
   });
 
+  if (!overview) {
+    return {
+      entries: [],
+      hasMore: false,
+      limit: 0,
+      offset: 0,
+      total: 0,
+    };
+  }
+
   return {
     entries: overview.entries ?? [],
     hasMore: overview.pagination?.has_more ?? false,
@@ -219,158 +185,22 @@ export async function getChangelog(): Promise<{
   };
 }
 
-function normalizeChangelogEntry(
-  entry: changelogModel | ChangelogOverviewEntry
-): Omit<changelogModel, 'contributors' | 'keywords'> & {
-  contributors: string[];
-  keywords: string[];
-} {
-  // Convert RPC return data (string dates) to Prisma types (Date objects) if needed
-  // If entry is from RPC (CompositeType), dates are strings; if from Prisma, dates are Date objects
-  const created_at =
-    entry.created_at instanceof Date
-      ? entry.created_at
-      : new Date((entry.created_at as string) ?? '');
-  const updated_at =
-    entry.updated_at instanceof Date
-      ? entry.updated_at
-      : new Date((entry.updated_at as string) ?? '');
-  const release_date =
-    entry.release_date instanceof Date
-      ? entry.release_date
-      : entry.release_date
-        ? new Date(entry.release_date)
-        : new Date();
 
-  // Handle contributors and keywords - ensure they're arrays (Prisma requires String[], not null)
-  // Note: RPC CompositeTypes (changelog_overview_entry) don't have contributors field
-  const contributors =
-    'contributors' in entry && Array.isArray(entry.contributors) ? entry.contributors : [];
-  const keywords = Array.isArray(entry.keywords) ? entry.keywords : [];
+/**
+ * Get published changelog slugs for static generation
+ *
+ * OPTIMIZATION: Uses Prisma directly instead of RPC for better performance.
+ * Only fetches slugs needed for generateStaticParams, avoiding unnecessary data processing.
+ */
+export const getPublishedChangelogSlugs = createCachedDataFunction<number, string[]>({
+  serviceKey: 'changelog',
+  methodName: 'getPublishedChangelogSlugs',
+  cacheMode: 'public',
+  cacheLife: 'long', // 1 day stale, 6hr revalidate, 30 days expire
+  cacheTags: () => generateResourceTags('changelog', undefined, ['changelog-slugs']),
+  module: 'data/changelog',
+  operation: 'getPublishedChangelogSlugs',
+  onError: () => [], // Return empty array on error
+  logContext: (limit) => ({ limit }),
+});
 
-  const fullEntry: changelogModel = {
-    ...entry,
-    canonical_url: null,
-    changes: (entry.changes ?? {}) as JsonValue,
-    commit_count: null,
-    content: entry.content ?? '',
-    contributors,
-    created_at,
-    git_commit_sha: null,
-    json_ld: null,
-    keywords,
-    og_image: null,
-    og_type: null,
-    release_date,
-    robots_follow: null,
-    robots_index: null,
-    seo_description: 'seo_description' in entry ? entry.seo_description : null,
-    seo_title: 'seo_title' in entry ? entry.seo_title : null,
-    source: null,
-    twitter_card: null,
-    updated_at,
-  } as changelogModel;
-
-  return {
-    ...fullEntry,
-    contributors,
-    keywords,
-  };
-}
-
-export async function getAllChangelogEntries(): Promise<
-  Array<
-    Omit<changelogModel, 'contributors' | 'keywords'> & {
-      contributors: string[];
-      keywords: string[];
-    }
-  >
-> {
-  // OPTIMIZATION: Use max limit constant for admin/export scenario (getAllChangelogEntries)
-  const limit = QUERY_LIMITS.changelog.max;
-  const overview = await getChangelogOverview({
-    limit,
-    offset: 0,
-    publishedOnly: false,
-  });
-
-  return (overview.entries ?? []).map((entry) => normalizeChangelogEntry(entry));
-}
-
-export async function getRecentChangelogEntries(limit = 5): Promise<
-  Array<
-    Omit<changelogModel, 'contributors' | 'keywords'> & {
-      contributors: string[];
-      keywords: string[];
-    }
-  >
-> {
-  const overview = await getChangelogOverview({
-    limit,
-    offset: 0,
-    publishedOnly: true,
-  });
-
-  return (overview.entries ?? []).map((entry) => normalizeChangelogEntry(entry));
-}
-
-export async function getChangelogEntriesByCategory(category: changelog_category): Promise<
-  Array<
-    Omit<changelogModel, 'contributors' | 'keywords'> & {
-      contributors: string[];
-      keywords: string[];
-    }
-  >
-> {
-  // OPTIMIZATION: Use configurable limit instead of hardcoded 1000
-  const limit = QUERY_LIMITS.changelog.default;
-  const overview = await getChangelogOverview({
-    category,
-    limit,
-    offset: 0,
-    publishedOnly: true,
-  });
-
-  return (overview.entries ?? []).map((entry) => normalizeChangelogEntry(entry));
-}
-
-export async function getFeaturedChangelogEntries(limit = 3): Promise<
-  Array<
-    Omit<changelogModel, 'contributors' | 'keywords'> & {
-      contributors: string[];
-      keywords: string[];
-    }
-  >
-> {
-  const overview = await getChangelogOverview({
-    featuredOnly: true,
-    limit,
-    offset: 0,
-    publishedOnly: true,
-  });
-
-  return (overview.featured ?? []).map((entry) => normalizeChangelogEntry(entry));
-}
-
-export async function getChangelogMetadata() {
-  const overview = await getChangelogOverview({ limit: 1, offset: 0 });
-  const metadata = overview.metadata;
-  if (!metadata) {
-    return {
-      categoryCounts: {},
-      dateRange: { earliest: '', latest: '' },
-      totalEntries: 0,
-    };
-  }
-  const categoryCounts =
-    metadata.category_counts == null ? {} : (metadata.category_counts as Record<string, number>);
-
-  return {
-    categoryCounts,
-    dateRange: {
-      earliest: metadata.date_range?.earliest ?? '',
-      latest: metadata.date_range?.latest ?? '',
-    },
-    totalEntries: metadata.total_entries ?? 0,
-  };
-}

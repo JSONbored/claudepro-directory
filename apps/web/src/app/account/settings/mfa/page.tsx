@@ -12,14 +12,13 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle
+  CardTitle,
 } from '@heyclaude/web-runtime/ui';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 import { MFAFactorsListClient } from './mfa-factors-list-client';
-import { iconSize, spaceY, marginTop, gap } from "@heyclaude/web-runtime/design-system";
 
 export const metadata: Metadata = {
   description: 'Manage your two-factor authentication settings',
@@ -77,18 +76,18 @@ export default async function MFASettingsPage() {
   );
 
   return (
-    <div className={`${spaceY.relaxed}`}>
+    <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Two-Factor Authentication</h1>
-        <p className={`text-muted-foreground ${marginTop.compact}`}>
+        <p className="text-muted-foreground mt-2">
           Add an extra layer of security to your account with two-factor authentication.
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className={`flex items-center ${gap.tight}`}>
-            <Shield className={iconSize.sm} />
+          <CardTitle className="flex items-center gap-1">
+            <Shield className="h-4 w-4" />
             MFA Factors
           </CardTitle>
           <CardDescription>
@@ -105,7 +104,7 @@ export default async function MFASettingsPage() {
           <CardTitle>How it works</CardTitle>
           <CardDescription>Learn about two-factor authentication</CardDescription>
         </CardHeader>
-        <CardContent className={`text-muted-foreground ${spaceY.compact} text-sm`}>
+        <CardContent className="text-muted-foreground space-y-2 text-sm">
           <p>
             • Scan the QR code with an authenticator app (Google Authenticator, Authy, 1Password,
             etc.)

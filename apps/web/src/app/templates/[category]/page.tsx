@@ -9,7 +9,7 @@
  * Cache: Handled by getContentTemplates data layer function
  */
 
-import type { content_category } from '@heyclaude/data-layer/prisma';
+import { type content_category } from '@heyclaude/data-layer/prisma';
 import { VALID_CATEGORIES } from '@heyclaude/web-runtime/core';
 import { getContentTemplates } from '@heyclaude/web-runtime/data';
 import { logger, normalizeError } from '@heyclaude/web-runtime/logging/server';
@@ -34,10 +34,7 @@ export default async function TemplatesPage({ params }: { params: Promise<{ cate
   const { category } = await params;
 
   // Validate category
-  if (
-    !category ||
-    !VALID_CATEGORIES.includes(category as content_category)
-  ) {
+  if (!category || !VALID_CATEGORIES.includes(category as content_category)) {
     notFound();
   }
 
@@ -56,7 +53,7 @@ export default async function TemplatesPage({ params }: { params: Promise<{ cate
 
   // Pino serializers handle Date objects automatically via JSON.stringify
   // But for Client Components, we need plain objects - use JSON round-trip
-  const serializedTemplates = structuredClone(templates);
+  const serializedTemplates = structuredClone(templates ?? []);
 
   return NextResponse.json({
     category: validCategory,

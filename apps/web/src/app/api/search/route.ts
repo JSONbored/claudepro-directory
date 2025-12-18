@@ -21,34 +21,38 @@
  */
 
 import 'server-only';
-import { SearchService } from '@heyclaude/data-layer';
 import {
   type content_category,
-  ContentCategory,
   type experience_level,
   type job_category,
   type job_type,
 } from '@heyclaude/data-layer/prisma';
-import type {
-  FilterJobsArgs,
-  Jobs,
-  SearchContentOptimizedArgs,
-  SearchContentOptimizedRow,
-  SearchUnifiedArgs,
-  SearchUnifiedRow,
-} from '@heyclaude/database-types/postgres-types';
-import type { Json } from '@heyclaude/data-layer/prisma';
-import { normalizeError } from '@heyclaude/shared-runtime';
 import {
-  buildCacheHeaders,
+  type SearchContentOptimizedArgs,
+  type SearchContentOptimizedRow,
+  type SearchUnifiedRow,
+} from '@heyclaude/database-types/postgres-types';
+import { type jobsModel } from '@heyclaude/database-types/prisma/models';
+import { normalizeError } from '@heyclaude/shared-runtime';
+import { type Json } from '@heyclaude/data-layer/prisma';
+import { VALID_CATEGORIES } from '@heyclaude/web-runtime/core';
+import {
   createApiOptionsHandler,
   createApiRoute,
   enqueuePulseEventServer,
+  getVersionedRoute,
   getWithAuthCorsHeaders,
   jsonResponse,
   searchQuerySchema,
 } from '@heyclaude/web-runtime/server';
 import { cacheLife } from 'next/cache';
+
+// OPTIMIZATION: Use SearchService methods instead of separate helper files
+import { SearchService } from '@heyclaude/data-layer';
+import { isValidCategory } from '@heyclaude/web-runtime/core';
+
+// Use Prisma model type instead of excluded composite type
+type Jobs = jobsModel;
 
 type JobCategory = job_category;
 type JobEmployment = job_type;
@@ -57,45 +61,10 @@ type JobExperience = experience_level;
 type SortType = 'alphabetical' | 'newest' | 'popularity' | 'relevance';
 type SearchType = 'content' | 'jobs' | 'unified';
 
-const DEFAULT_ENTITIES = ['content', 'company', 'job', 'user'] as const;
-
 // Use Prisma-generated types directly - no custom types
 // Functions now return composite types, so we extract the row types from the results array
 // Also include jobs composite type for filter_jobs results
-type SearchResultRow =
-  | SearchContentOptimizedRow
-  | SearchUnifiedRow
-  | Jobs;
-
-// HighlightedSearchResult is now just SearchResultRow since database provides highlighted fields
-type HighlightedSearchResult = SearchResultRow;
-
-/***
- *
- * Convert string array to content_category enum array
- * Filters out invalid categories and returns only valid enum values
- * Uses Prisma-generated types
- * @param {string[] | undefined} categories
- * @returns {Array<content_category> | undefined} Return value description
- */
-// Use Prisma enum object for validation (ensures sync with database)
-const CONTENT_CATEGORY_VALUES = Object.values(ContentCategory) as readonly content_category[];
-
-function toContentCategoryArray(categories: string[] | undefined): SearchContentOptimizedArgs['p_categories'] {
-  if (!categories || categories.length === 0) return undefined;
-  const valid = categories
-    .map((cat) => {
-      const lowered = cat.trim().toLowerCase();
-      return CONTENT_CATEGORY_VALUES.includes(
-        lowered as content_category
-      )
-        ? (lowered as content_category)
-        : null;
-    })
-    .filter((cat): cat is content_category => cat !== null);
-  // Cast to match the exact generated type (literal union array)
-  return valid.length > 0 ? (valid as NonNullable<SearchContentOptimizedArgs['p_categories']>) : undefined;
-}
+type SearchResultRow = Jobs | SearchContentOptimizedRow | SearchUnifiedRow;
 
 /**
  * GET /api/search - Unified search across content, jobs, companies, and users
@@ -126,10 +95,21 @@ export const GET = createApiRoute({
     const trimmedQuery = queryString.trim();
 
     // Convert categories array to enum array (using Prisma types)
-    const validatedCategories = toContentCategoryArray(categoriesArray);
+    const validatedCategories = (() => {
+      if (!categoriesArray || categoriesArray.length === 0) return undefined;
+      const valid = categoriesArray
+        .map((cat) => {
+          const normalized = cat.trim().toLowerCase();
+          return isValidCategory(normalized) ? normalized : null;
+        })
+        .filter((cat): cat is content_category => cat !== null);
+      return valid.length > 0
+        ? (valid as NonNullable<SearchContentOptimizedArgs['p_categories']>)
+        : undefined;
+    })();
 
     if (categoriesArray && categoriesArray.length > 0 && !validatedCategories?.length) {
-      throw new Error(`Invalid categories. Valid values: ${CONTENT_CATEGORY_VALUES.join(', ')}`);
+      throw new Error(`Invalid categories. Valid values: ${VALID_CATEGORIES.join(', ')}`);
     }
 
     const hasJobFilters = Boolean(
@@ -139,7 +119,11 @@ export const GET = createApiRoute({
       jobRemote !== undefined
     );
 
-    const searchType = determineSearchType(entitiesArray, hasJobFilters);
+    const searchType: SearchType = hasJobFilters
+      ? 'jobs'
+      : entitiesArray && entitiesArray.length > 0
+        ? 'unified'
+        : 'content';
 
     logger.info(
       {
@@ -170,21 +154,21 @@ export const GET = createApiRoute({
       tags: tagsArray,
     });
 
-    const highlightedResults = highlightResults(results, trimmedQuery);
+    const highlightedResults = SearchService.highlightResults(results, trimmedQuery);
 
     // Track analytics non-blocking (fire and forget)
     // Don't await - this prevents blocking the response
     // Build analytics params object, only including properties with values (for exactOptionalPropertyTypes)
     const analyticsParams: {
-      sort: SortType;
-      categories?: SearchContentOptimizedArgs['p_categories'];
-      tags?: string[];
       authors?: string[];
+      categories?: SearchContentOptimizedArgs['p_categories'];
       entities?: string[];
       job_category?: job_category;
       job_employment?: job_type;
       job_experience?: experience_level;
       job_remote?: boolean;
+      sort: SortType;
+      tags?: string[];
     } = {
       sort,
     };
@@ -212,22 +196,32 @@ export const GET = createApiRoute({
     if (jobRemote !== undefined) {
       analyticsParams.job_remote = jobRemote;
     }
-    trackSearchAnalytics(
-      trimmedQuery,
-      analyticsParams,
-      highlightedResults.length,
-      {
-        error: (context: Record<string, unknown>, message: string) =>
-          logger.error(context as Parameters<typeof logger.error>[0], message),
-        warn: (context: Record<string, unknown>, message: string) =>
-          logger.warn(context as Parameters<typeof logger.warn>[0], message),
-      }
-    ).catch((error) => {
-      // Errors already logged inside trackSearchAnalytics
-      // Just prevent unhandled promise rejection
-      const normalized = normalizeError(error, 'Search analytics failed silently');
-      logger.warn({ err: normalized }, 'Search analytics failed (non-blocking)');
-    });
+    // Track analytics non-blocking (fire and forget)
+    if (trimmedQuery) {
+      (async () => {
+        try {
+          const metadata: Json = {
+            filters: analyticsParams,
+            query: trimmedQuery,
+            result_count: highlightedResults.length,
+          };
+          await enqueuePulseEventServer({
+            content_slug: null,
+            content_type: null,
+            interaction_type: 'search',
+            metadata,
+            session_id: null,
+            user_id: null,
+          });
+        } catch (error) {
+          const normalized = normalizeError(error, 'Search analytics tracking failed');
+          logger.warn({ err: normalized }, 'Search analytics tracking failed (non-blocking)');
+        }
+      })().catch((error) => {
+        const normalized = normalizeError(error, 'Search analytics failed silently');
+        logger.warn({ err: normalized }, 'Search analytics failed (non-blocking)');
+      });
+    }
 
     // Response uses simple types for JSON serialization (no custom types)
     const responseBody = {
@@ -262,9 +256,7 @@ export const GET = createApiRoute({
       'Search completed'
     );
 
-    return jsonResponse(responseBody, 200, getWithAuthCorsHeaders, {
-      ...buildCacheHeaders('search'),
-    });
+    return jsonResponse(responseBody, 200, getWithAuthCorsHeaders);
   },
   method: 'GET',
   openapi: {
@@ -284,7 +276,7 @@ export const GET = createApiRoute({
   },
   operation: 'SearchAPI',
   querySchema: searchQuerySchema,
-  route: '/api/search',
+  route: getVersionedRoute('search'),
 });
 
 /**
@@ -298,7 +290,7 @@ export const OPTIONS = createApiOptionsHandler('auth');
  *
  * Uses Prisma-generated enum types - categories must be enum array, not string array
  *
- * @param params
+ * @param params - Search parameters
  * @param params.authors
  * @param params.categories
  * @param params.entities
@@ -330,1507 +322,12 @@ export async function getCachedSearchResults(params: {
   tags?: string[] | undefined;
 }): Promise<{ results: SearchResultRow[]; totalCount: number }> {
   'use cache';
-  cacheLife('quarter'); // 15min stale, 5min revalidate, 2hr expire - Search results change frequently
+  cacheLife('short'); // 15min stale, 5min revalidate, 2hr expire - Search results change frequently
 
+  // OPTIMIZATION: Instantiate service directly to avoid barrel export issues
+  // (client/server boundary, performance, and module resolution problems)
+  const { SearchService } = await import('@heyclaude/data-layer');
   const searchService = new SearchService();
 
-  return executeSearch({
-    searchService,
-    ...params,
-  });
-}
-
-/*****************
- * Dispatches the search to the appropriate backend ('jobs', 'unified', or 'content') and returns matching rows with a total count.
- *
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params.authors - Optional list of author slugs to filter content results.
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params.categories - Optional list of content categories to filter content results (enum array, not string array).
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params.entities - Optional list of entity types to include for unified searches; when omitted or empty, defaults to DEFAULT_ENTITIES.
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params.jobCategory - Optional job category to filter job searches.
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params.jobEmployment - Optional employment type to filter job searches.
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params.jobExperience - Optional experience level to filter job searches.
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params.jobRemote - Optional flag to restrict job searches to remote-only roles; included in job backend args only when defined.
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params.limit - Maximum number of results to return.
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params.offset - Number of results to skip (pagination offset).
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params.query - The raw search query string; may be empty.
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params.searchService - SearchService instance used to perform backend searches.
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params.searchType - The type of search to perform: `'jobs'`, `'unified'`, or `'content'`.
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params.sort - Sort order to apply for content searches.
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params.tags - Optional list of tags to filter content results.
- * @returns An object containing `results` (array of matching rows) and `totalCount` (the total number of matching items; prefers a backend-provided total when available, otherwise falls back to `results.length`).
-  * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
- * @param {{
-  authors?: string[] | undefined;
-  categories?: content_category[] | undefined; // Use Prisma-generated enum type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}} params Parameter description
-*/
-async function executeSearch(params: {
-  authors?: string[] | undefined;
-  categories?: SearchContentOptimizedArgs['p_categories']; // Use generated function arg type
-  entities?: string[] | undefined;
-  jobCategory?: JobCategory | undefined;
-  jobEmployment?: JobEmployment | undefined;
-  jobExperience?: JobExperience | undefined;
-  jobRemote?: boolean | undefined;
-  limit: number;
-  offset: number;
-  query: string;
-  searchService: SearchService;
-  searchType: SearchType;
-  sort: SortType;
-  tags?: string[] | undefined;
-}): Promise<{ results: SearchResultRow[]; totalCount: number }> {
-  const {
-    authors,
-    categories,
-    entities,
-    jobCategory,
-    jobEmployment,
-    jobExperience,
-    jobRemote,
-    limit,
-    offset,
-    query,
-    searchService,
-    searchType,
-    sort,
-    tags,
-  } = params;
-
-  if (searchType === 'jobs') {
-    const jobArgs: FilterJobsArgs = {
-      p_limit: limit,
-      p_offset: offset,
-    };
-
-    if (query) {
-      jobArgs.p_search_query = query;
-    }
-    if (jobCategory) {
-      jobArgs.p_category = jobCategory;
-    }
-    if (jobEmployment) {
-      jobArgs.p_employment_type = jobEmployment;
-    }
-    if (jobExperience) {
-      jobArgs.p_experience_level = jobExperience;
-    }
-    if (jobRemote !== undefined) {
-      jobArgs.p_remote_only = jobRemote;
-    }
-
-    const result = await searchService.filterJobs(jobArgs);
-
-    const jobs = result.jobs ?? [];
-    const totalCount = typeof result.total_count === 'number' ? result.total_count : jobs.length;
-    return {
-      results: jobs as SearchResultRow[], // Jobs table row is part of SearchResultRow union type
-      totalCount,
-    };
-  }
-
-  if (searchType === 'unified') {
-    // Create args object - search_unified now has single function with optional p_highlight_query
-    const unifiedArgs: SearchUnifiedArgs = {
-      p_entities: entities && entities.length > 0 ? entities : [...DEFAULT_ENTITIES],
-      p_limit: limit,
-      p_offset: offset,
-      p_query: query,
-      ...(query && query.trim() ? { p_highlight_query: query } : {}),
-    };
-
-    const unifiedResult = await searchService.searchUnified(unifiedArgs);
-
-    const rows = Array.isArray(unifiedResult.data) ? unifiedResult.data : [];
-    const totalCount =
-      typeof unifiedResult.total_count === 'number' ? unifiedResult.total_count : rows.length;
-    return {
-      results: rows as SearchResultRow[],
-      totalCount,
-    };
-  }
-
-  // searchType === 'content'
-  // Build args object, only including properties that have values (for exactOptionalPropertyTypes)
-  const args: SearchContentOptimizedArgs = {
-    p_limit: limit,
-    p_offset: offset,
-  };
-
-  // Only add optional properties if they have values (for exactOptionalPropertyTypes)
-  if (query) {
-    args.p_query = query;
-  }
-  if (sort) {
-    args.p_sort = sort;
-  }
-  if (categories && categories.length > 0) {
-    // categories is already enum array from getCachedSearchResults params
-    // Only set if array has items (for exactOptionalPropertyTypes)
-    // The generated type expects the literal union array, which content_category[] satisfies
-    args.p_categories = categories;
-  }
-  if (tags?.length) {
-    args.p_tags = tags;
-  }
-  if (authors?.length) {
-    args.p_authors = authors;
-  }
-
-  // Add highlighting parameter when query is provided
-  if (query && query.trim()) {
-    args.p_highlight_query = query;
-  }
-
-  const result = await searchService.searchContent(args);
-  const rows = Array.isArray(result.data) ? result.data : [];
-  const totalCount = typeof result.total_count === 'number' ? result.total_count : rows.length;
-  return {
-    results: rows as SearchResultRow[],
-    totalCount,
-  };
-}
-
-/****
- * Produces search-term-highlighted copies of result rows using database-provided highlighting.
- *
- * Database RPCs (search_unified, search_content_optimized) provide highlighting when
- * p_highlight_query is passed. This function simply passes through the database-provided
- * highlighted fields, eliminating CPU-intensive client-side string processing.
- *
- * @param {SearchResultRow[]} results - Array of search result rows from database RPCs with highlighted fields
- * @param {string} query - The search query (used for logging only, not for processing)
- * @returns An array of results with database-provided highlighted fields
- */
-function highlightResults(results: SearchResultRow[], query: string): HighlightedSearchResult[] {
-  if (!query.trim()) {
-    return results.map((result) => ({ ...result }));
-  }
-
-  // Database RPCs always provide highlighting when p_highlight_query is passed
-  // Simply pass through the database-provided highlighted fields
-  // This eliminates CPU-intensive client-side string processing (20-30% CPU savings)
-  // SearchResultRow already includes highlighted fields, so we can return it directly
-  return results;
-}
-
-async function trackSearchAnalytics(
-  query: string,
-  filters: {
-    authors?: string[];
-    categories?: SearchContentOptimizedArgs['p_categories'];
-    entities?: string[];
-    job_category?: JobCategory;
-    job_employment?: JobEmployment;
-    job_experience?: JobExperience;
-    job_remote?: boolean;
-    sort: SortType;
-    tags?: string[];
-  },
-  resultCount: number,
-  reqLogger: {
-    error: (context: Record<string, unknown>, message: string) => void;
-    warn: (context: Record<string, unknown>, message: string) => void;
-  }
-) {
-  if (!query.trim()) {
-    return;
-  }
-
-  try {
-    const metadata: Json = {
-      filters: filters as Json,
-      query: query.trim(),
-      result_count: resultCount,
-    };
-    await enqueuePulseEventServer({
-      content_slug: null,
-      content_type: null,
-      interaction_type: 'search',
-      metadata,
-      session_id: null,
-      user_id: null,
-    });
-  } catch (error) {
-    const normalized = normalizeError(error, 'Search analytics tracking failed');
-    reqLogger.warn({ err: normalized }, 'Search analytics tracking failed (non-blocking)');
-  }
-}
-
-/****
- * Choose the effective search type based on requested entities and whether job-specific filters are present.
- *
- * @param {string[] | undefined} entities - Array of entity types requested by the client; may be undefined or empty.
- * @param {boolean} hasJobFilters - `true` when job-specific filters (category, employment, experience, remote) are present.
- * @returns The search type to use: `'jobs'` when job filters are present, `'unified'` when entities are specified, otherwise `'content'`.
- */
-function determineSearchType(entities: string[] | undefined, hasJobFilters: boolean): SearchType {
-  if (hasJobFilters) {
-    return 'jobs';
-  }
-  if (entities && entities.length > 0) {
-    return 'unified';
-  }
-  return 'content';
+  return searchService.executeSearch(params as Parameters<SearchService['executeSearch']>[0]);
 }

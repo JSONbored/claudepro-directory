@@ -5,7 +5,6 @@
  * Used for system announcements, feature releases, etc.
  */
 
-import { MiscService } from '@heyclaude/data-layer';
 import type { notification_type, notification_priority } from '@heyclaude/data-layer/prisma';
 import type { notificationsCreateInput } from '@heyclaude/database-types/prisma';
 import {
@@ -15,6 +14,7 @@ import {
 
 import { inngest } from '../../client';
 import { logger, createWebAppContextWithId } from '../../../logging/server';
+import { getService } from '../../../data/service-factory';
 
 type NotificationType = 'announcement' | 'feedback';
 type NotificationPriority = 'high' | 'medium' | 'low';
@@ -114,7 +114,7 @@ export const createNotification = inngest.createFunction(
         notificationData.action_href = action_href;
       }
 
-      const service = new MiscService();
+      const service = await getService('misc');
       const data = await service.insertNotification(notificationData);
 
       return { id: data.id };
@@ -214,7 +214,7 @@ export const broadcastNotification = inngest.createFunction(
         notificationData.action_href = action_href;
       }
 
-      const service = new MiscService();
+      const service = await getService('misc');
       const data = await service.insertNotification(notificationData);
 
       return { id: data.id };

@@ -2,7 +2,7 @@
  * Job Detail Page - Database-first job listing display
  */
 
-import { ContentCategory } from '@heyclaude/data-layer/prisma';
+import { ContentCategory, type content_category } from '@heyclaude/data-layer/prisma';
 import { getSafeMailtoUrl, getSafeWebsiteUrl, isValidCategory } from '@heyclaude/web-runtime/core';
 import { getCategoryConfig } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
@@ -28,7 +28,6 @@ import {
   CardTitle,
   UnifiedBadge,
 } from '@heyclaude/web-runtime/ui';
-import { cluster, gap, wrap, muted, paddingX, paddingY, marginX, marginBottom, marginRight, padding, spaceY, marginTop } from '@heyclaude/web-runtime/design-system';
 import { type Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import Link from 'next/link';
@@ -86,8 +85,9 @@ export async function generateMetadata({
     );
   }
 
+  const jobForMetadata = job ? (job as Record<string, unknown>) : undefined;
   return generatePageMetadata('/jobs/:slug', {
-    item: job ? { ...job, tags: job.tags ?? [] } : undefined,
+    item: jobForMetadata ? { ...jobForMetadata, tags: (Array.isArray(jobForMetadata['tags']) ? jobForMetadata['tags'] : []) } : undefined,
     params: { slug },
     slug,
   });
@@ -115,14 +115,15 @@ export async function generateStaticParams() {
     route: '/jobs',
   });
 
-  const { getFilteredJobs } = await import('@heyclaude/web-runtime/server');
+  const { getActiveJobSlugs } = await import('@heyclaude/web-runtime/data');
   try {
-    const jobsResult = await getFilteredJobs({ limit: MAX_STATIC_JOBS });
-    const jobs = jobsResult?.jobs ?? [];
+    // OPTIMIZATION: Use Prisma directly to get only slugs needed for static generation
+    // This avoids unnecessary RPC function calls and data processing
+    const slugs = await getActiveJobSlugs(MAX_STATIC_JOBS);
 
     // Cache Components requires at least one result for build-time validation
     // If no jobs found, return a placeholder that will be handled gracefully by the page component
-    if (jobs.length === 0) {
+    if (!slugs || slugs.length === 0) {
       reqLogger.warn(
         {
           section: 'data-fetch',
@@ -134,7 +135,7 @@ export async function generateStaticParams() {
       return [{ slug: 'placeholder' }];
     }
 
-    return jobs.map((job: { slug: string }) => ({ slug: job.slug }));
+    return slugs.map((slug) => ({ slug }));
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load jobs for static params');
     reqLogger.error(
@@ -142,7 +143,7 @@ export async function generateStaticParams() {
         err: normalized,
         section: 'data-fetch',
       },
-      'JobPage: getFilteredJobs threw in generateStaticParams'
+      'JobPage: getActiveJobSlugs threw in generateStaticParams'
     );
     // Cache Components requires at least one result - return placeholder on error
     // Page component will handle 404 gracefully for placeholder slug
@@ -168,7 +169,7 @@ export async function generateStaticParams() {
  */
 export default async function JobPage({ params }: PageProps) {
   'use cache';
-  cacheLife('static'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
+  cacheLife('long'); // 1 day stale, 6hr revalidate, 30 days expire - Low traffic, content rarely changes
 
   if (!params) {
     notFound();
@@ -260,9 +261,12 @@ async function JobPageContent({
     notFound();
   }
 
-  const tags = job.tags ?? [];
-  const requirements = job.requirements ?? [];
-  const benefits = job.benefits ?? [];
+  // Type assertion: job is guaranteed to be non-null here, but TypeScript doesn't know the shape
+  // Use bracket notation for index signature properties
+  const jobData = job as Record<string, unknown>;
+  const tags = (Array.isArray(jobData['tags']) ? jobData['tags'] : []) as string[];
+  const requirements = (Array.isArray(jobData['requirements']) ? jobData['requirements'] : []) as string[];
+  const benefits = (Array.isArray(jobData['benefits']) ? jobData['benefits'] : []) as string[];
 
   return (
     <>
@@ -273,51 +277,51 @@ async function JobPageContent({
       />
       <StructuredData route={`/jobs/${slug}`} />
 
-      <div className={`bg-background min-h-screen`}>
+      <div className="bg-background min-h-screen">
         <div className="border-border/50 bg-card/30 border-b">
-          <div className={`container ${marginX.auto} ${paddingX.default} ${paddingY.relaxed}`}>
-            <Button asChild className={`${marginBottom.comfortable}`} variant="ghost">
+          <div className="container mx-auto px-4 py-8">
+            <Button asChild className="mb-6" variant="ghost">
               <Link href={ROUTES.JOBS}>
-                <ArrowLeft className={`${marginRight.tight} h-4 w-4`} />
+                <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Jobs
               </Link>
             </Button>
 
             <div className="max-w-4xl">
-              <div className={`flex items-start ${gap.default} ${marginBottom.comfortable} gap-4`}>
-                <div className={`bg-accent/10 rounded-lg ${padding.compact}`}>
-                  <Building2 className={`text-primary h-6 w-6`} />
+              <div className="mb-6 flex items-start gap-4">
+                <div className="bg-accent/10 rounded-lg p-3">
+                  <Building2 className="text-primary h-6 w-6" />
                 </div>
                 <div className="flex-1">
-                  <h1 className={`${marginBottom.compact} text-3xl font-bold`}>{job.title}</h1>
-                  <p className={`${muted.default} text-xl`}>{job.company}</p>
+                  <h1 className="mb-2 text-3xl font-bold">{jobData['title'] as string}</h1>
+                  <p className="text-muted-foreground text-xl">{jobData['company'] as string}</p>
                 </div>
               </div>
 
-              <div className={`${muted.default} ${marginBottom.default} flex flex-wrap gap-4 text-sm`}>
-                <div className={cluster.tight}>
+              <div className="text-muted-foreground mb-4 flex flex-wrap gap-4 text-sm">
+                <div className="flex items-center gap-1">
                   <MapPin className="h-4 w-4" />
-                  <span>{job.location}</span>
+                  <span>{jobData['location'] as string}</span>
                 </div>
-                <div className={cluster.tight}>
+                <div className="flex items-center gap-1">
                   <DollarSign className="h-4 w-4" />
-                  <span>{job.salary ?? 'Competitive'}</span>
+                  <span>{(jobData['salary'] as string) ?? 'Competitive'}</span>
                 </div>
-                <div className={cluster.tight}>
+                <div className="flex items-center gap-1">
                   <Clock className="h-4 w-4" />
-                  <span>{job.type}</span>
+                  <span>{jobData['type'] as string}</span>
                 </div>
-                <div className={cluster.tight}>
+                <div className="flex items-center gap-1">
                   <Users className="h-4 w-4" />
-                  <span>{job.category}</span>
+                  <span>{jobData['category'] as string}</span>
                 </div>
-                <div className={cluster.tight}>
+                <div className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />
-                  <span>Posted {job.posted_at}</span>
+                  <span>Posted {jobData['posted_at'] as string}</span>
                 </div>
               </div>
 
-              <div className={`${wrap} ${gap.compact}`}>
+              <div className="flex flex-wrap gap-2">
                 {tags.map((skill: string) => (
                   <UnifiedBadge key={skill} style="secondary" variant="base">
                     {skill}
@@ -328,15 +332,15 @@ async function JobPageContent({
           </div>
         </div>
 
-        <div className={`container ${marginX.auto} ${paddingX.default} ${paddingY.section}`}>
-          <div className={`grid grid-cols-1 ${gap.relaxed} lg:grid-cols-3`}>
-            <div className={`${spaceY.loose} lg:col-span-2`}>
+        <div className="container mx-auto px-4 py-12">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            <div className="space-y-8 lg:col-span-2">
               <Card>
                 <CardHeader>
                   <CardTitle>About this role</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className={`${muted.default}`}>{job.description}</p>
+                  <p className="text-muted-foreground">{jobData['description'] as string}</p>
                 </CardContent>
               </Card>
 
@@ -345,10 +349,10 @@ async function JobPageContent({
                   <CardTitle>Requirements</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ul className={`${spaceY.compact}`}>
+                  <ul className="space-y-2">
                     {requirements.map((request: string) => (
-                      <li className={`flex items-start ${gap.default}`} key={request}>
-                        <span className={`text-accent ${marginTop.tight}`}>•</span>
+                      <li className="flex items-start gap-3" key={request}>
+                        <span className="text-accent mt-1">•</span>
                         <span>{request}</span>
                       </li>
                     ))}
@@ -362,10 +366,10 @@ async function JobPageContent({
                     <CardTitle>Benefits</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <ul className={`${spaceY.compact}`}>
+                    <ul className="space-y-2">
                       {benefits.map((benefit: string) => (
-                        <li className={`flex items-start ${gap.default}`} key={benefit}>
-                          <span className={`${marginTop.tight} text-green-500`}>✓</span>
+                        <li className="flex items-start gap-3" key={benefit}>
+                          <span className="mt-1 text-green-500">✓</span>
                           <span>{benefit}</span>
                         </li>
                       ))}
@@ -375,15 +379,15 @@ async function JobPageContent({
               )}
             </div>
 
-            <div className={`${spaceY.relaxed}`}>
+            <div className="space-y-6">
               {/* Apply Actions */}
               <Card>
                 <CardHeader>
                   <CardTitle>Apply for this position</CardTitle>
                 </CardHeader>
-                <CardContent className={`${spaceY.compact}`}>
+                <CardContent className="space-y-2">
                   {(() => {
-                    const safeJobLink = getSafeWebsiteUrl(job.link);
+                    const safeJobLink = getSafeWebsiteUrl(jobData['link'] as string | undefined);
                     if (!safeJobLink) return null;
                     // Explicit validation: getSafeWebsiteUrl guarantees the URL is safe
                     // It validates protocol (HTTPS only, or HTTP for localhost), removes credentials,
@@ -393,19 +397,19 @@ async function JobPageContent({
                     return (
                       <Button asChild className="w-full">
                         <a href={validatedUrl} rel="noopener noreferrer" target="_blank">
-                          <ExternalLink className={`${marginRight.tight} h-4 w-4`} />
+                          <ExternalLink className="mr-2 h-4 w-4" />
                           Apply Now
                         </a>
                       </Button>
                     );
                   })()}
                   {(() => {
-                    const safeMailtoUrl = getSafeMailtoUrl(job.contact_email);
+                    const safeMailtoUrl = getSafeMailtoUrl(jobData['contact_email'] as string | undefined);
                     if (!safeMailtoUrl) return null;
                     return (
                       <Button asChild className="w-full" variant="outline">
                         <a href={safeMailtoUrl}>
-                          <Building2 className={`${marginRight.tight} h-4 w-4`} />
+                          <Building2 className="mr-2 h-4 w-4" />
                           Contact Company
                         </a>
                       </Button>
@@ -419,24 +423,24 @@ async function JobPageContent({
                 <CardHeader>
                   <CardTitle>Job Details</CardTitle>
                 </CardHeader>
-                <CardContent className={`${spaceY.compact}`}>
-                  <div className={`${cluster.compact} text-sm`}>
-                    <Clock className={`${muted.default} h-4 w-4`} />
+                <CardContent className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Clock className="text-muted-foreground h-4 w-4" />
                     <span>
-                      {(job.type ?? 'Unknown').charAt(0).toUpperCase() +
-                        (job.type ?? 'Unknown').slice(1)}
+                      {((jobData['type'] as string) ?? 'Unknown').charAt(0).toUpperCase() +
+                        ((jobData['type'] as string) ?? 'Unknown').slice(1)}
                     </span>
                   </div>
-                  <div className={`${cluster.compact} text-sm`}>
-                    <MapPin className={`${muted.default} h-4 w-4`} />
-                    <span>{job.remote ? 'Remote Available' : 'On-site'}</span>
+                  <div className="flex items-center gap-2 text-sm">
+                    <MapPin className="text-muted-foreground h-4 w-4" />
+                    <span>{(jobData['remote'] as boolean) ? 'Remote Available' : 'On-site'}</span>
                   </div>
-                  <div className={`${cluster.compact} text-sm`}>
-                    <Users className={`${muted.default} h-4 w-4`} />
+                  <div className="flex items-center gap-2 text-sm">
+                    <Users className="text-muted-foreground h-4 w-4" />
                     <span>
-                      {job.category && isValidCategory(job.category)
-                        ? (getCategoryConfig(job.category)?.typeName ?? job.category)
-                        : (job.category ?? 'General')}
+                      {jobData['category'] && isValidCategory(jobData['category'] as string)
+                        ? (getCategoryConfig(jobData['category'] as content_category)?.typeName ?? (jobData['category'] as string))
+                        : ((jobData['category'] as string) ?? 'General')}
                     </span>
                   </div>
                 </CardContent>

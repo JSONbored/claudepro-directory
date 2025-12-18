@@ -11,7 +11,6 @@ import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { LogOut } from '@heyclaude/web-runtime/icons';
 import { type ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
 import { toasts, Button } from '@heyclaude/web-runtime/ui';
-import { iconSize, marginRight } from '@heyclaude/web-runtime/design-system';
 import { useBoolean } from '@heyclaude/web-runtime/hooks';
 import { useRouter } from 'next/navigation';
 import { useCallback } from 'react';
@@ -89,7 +88,7 @@ export function AuthSignOutButton({
       variant={variant}
       className={className}
     >
-      <LogOut className={`${iconSize.sm} ${marginRight.compact}`} />
+      <LogOut className="mr-2 h-4 w-4" />
       {loading ? 'Signing out...' : 'Sign out'}
     </Button>
   );

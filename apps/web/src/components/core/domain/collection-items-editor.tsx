@@ -13,11 +13,10 @@ import {
   addItemToCollection,
   removeItemFromCollection,
   reorderCollectionItems,
-} from '@heyclaude/web-runtime/actions';
+} from '@heyclaude/web-runtime/actions/collection-items';
 import { isValidCategory, sanitizeSlug } from '@heyclaude/web-runtime/core';
-import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks';
+import { useAuthenticatedUser, useSafeAction } from '@heyclaude/web-runtime/hooks';
 import { useReducedMotion } from '@heyclaude/web-runtime/hooks/motion';
-import { logClientWarn, normalizeError } from '@heyclaude/web-runtime/logging/client';
 import { ExternalLink, Plus, Trash } from '@heyclaude/web-runtime/icons';
 import {
   toasts,
@@ -33,10 +32,9 @@ import {
   cn,
 } from '@heyclaude/web-runtime/ui';
 import { usePathname, useRouter } from 'next/navigation';
-import { useCallback, useState, useTransition } from 'react';
+import { useCallback, useState } from 'react';
 
 import { useAuthModal } from '@/src/hooks/use-auth-modal';
-import { cluster, iconSize, stack, size, weight, muted, spaceY, padding, marginTop, marginY, paddingY, paddingBottom, gap } from "@heyclaude/web-runtime/design-system";
 
 /**
  * Validate slug is safe for use in URLs
@@ -102,9 +100,78 @@ export function CollectionItemManager({
   const { user, status } = useAuthenticatedUser({ context: 'CollectionItemManager' });
   const { openAuthModal } = useAuthModal();
   const shouldReduceMotion = useReducedMotion();
-  const [isPending, startTransition] = useTransition();
   const [items, setItems] = useState(initialItems);
   const [selectedBookmarkId, setSelectedBookmarkId] = useState<string>('');
+  
+  // Use useSafeAction hooks - this properly infers types from next-safe-action
+  const { executeAsync: executeAddItem, isPending: isAdding } = useSafeAction(addItemToCollection, {
+    onSuccess: ({ data }: { data?: { success: boolean | null } }) => {
+      if (data?.success) {
+        toasts.success.actionCompleted('Item added to collection');
+        setSelectedBookmarkId('');
+        router.refresh();
+      }
+    },
+    onError: ({ error }: { error: { serverError?: string; validationErrors?: unknown } }) => {
+      const errorMessage = error.serverError || 'Failed to add item to collection';
+      if (errorMessage.includes('signed in') || errorMessage.includes('auth') || errorMessage.includes('unauthorized')) {
+        openAuthModal({
+          valueProposition: 'Sign in to add items to collections',
+          redirectTo: pathname ?? undefined,
+        });
+      } else {
+        toasts.raw.error('Failed to add item to collection', {
+          action: {
+            label: 'Retry',
+            onClick: () => {
+              handleAdd();
+            },
+          },
+        });
+      }
+    },
+  });
+  
+  const { executeAsync: executeRemoveItem, isPending: isRemoving } = useSafeAction(removeItemFromCollection, {
+    onSuccess: ({ data }: { data?: { success: boolean | null } }) => {
+      if (data?.success) {
+        toasts.success.actionCompleted('Item removed from collection');
+        router.refresh();
+      }
+    },
+    onError: () => {
+      // Error handling is done in the hook's onError callback
+      toasts.raw.error('Failed to remove item', {
+        action: {
+          label: 'Retry',
+          onClick: () => {
+            // Will be handled by the caller
+          },
+        },
+      });
+    },
+  });
+  
+  const { executeAsync: executeReorderItems, isPending: isReordering } = useSafeAction(reorderCollectionItems, {
+    onSuccess: () => {
+      toasts.success.actionCompleted('Items reordered');
+      router.refresh();
+    },
+    onError: () => {
+      // Revert on error
+      setItems(items);
+      toasts.raw.error('Failed to reorder items', {
+        action: {
+          label: 'Retry',
+          onClick: () => {
+            // Will be handled by the caller
+          },
+        },
+      });
+    },
+  });
+  
+  const isPending = isAdding || isRemoving || isReordering;
 
   // Filter out bookmarks that are already in the collection
   const availableToAdd = availableBookmarks.filter(
@@ -140,94 +207,21 @@ export function CollectionItemManager({
     if (!bookmark) return;
 
     // User is authenticated - proceed with add action
-    startTransition(async () => {
-      try {
-        // Server-side schema validation handles content_type validation via categoryIdSchema
-        const result = await addItemToCollection({
-          collection_id: collectionId,
-          content_type: isValidCategory(bookmark.content_type) ? bookmark.content_type : 'agents',
-          content_slug: bookmark.content_slug,
-          order: items.length, // Add to end
-        });
-
-        if (result?.data?.success) {
-          toasts.success.actionCompleted('Item added to collection');
-          setSelectedBookmarkId('');
-          router.refresh();
-        }
-      } catch (error) {
-        const normalized = normalizeError(error, 'Failed to add item to collection');
-        logClientWarn(
-          '[Collection] Add item failed',
-          normalized,
-          'CollectionItemManager.handleAdd',
-          {
-            component: 'CollectionItemManager',
-            action: 'add-item',
-            category: 'collection',
-            collectionId,
-            bookmarkId: bookmark.id,
-          }
-        );
-        // Check if error is auth-related and show modal if so
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        if (errorMessage.includes('signed in') || errorMessage.includes('auth') || errorMessage.includes('unauthorized')) {
-          openAuthModal({
-            valueProposition: 'Sign in to add items to collections',
-            redirectTo: pathname ?? undefined,
-          });
-        } else {
-          // Non-auth errors - show toast with retry option
-          toasts.raw.error('Failed to add item to collection', {
-            action: {
-              label: 'Retry',
-              onClick: () => {
-                handleAdd();
-              },
-            },
-          });
-        }
-      }
+    // Execute the action using useSafeAction's executeAsync
+    executeAddItem({
+      collection_id: collectionId,
+      content_type: isValidCategory(bookmark.content_type) ? bookmark.content_type : 'agents',
+      content_slug: bookmark.content_slug,
+      order: items.length, // Add to end
     });
-  }, [user, status, openAuthModal, pathname, selectedBookmarkId, availableBookmarks, collectionId, items.length, router]);
+  }, [user, status, openAuthModal, pathname, selectedBookmarkId, availableBookmarks, collectionId, items.length, router, executeAddItem]);
 
-  const handleRemove = async (itemId: string) => {
-    startTransition(async () => {
-      try {
-        const result = await removeItemFromCollection({
-          remove_item_id: itemId,
-        });
-
-        if (result?.data?.success) {
-          toasts.success.actionCompleted('Item removed from collection');
-          router.refresh();
-        }
-      } catch (error) {
-        const normalized = normalizeError(error, 'Failed to remove item from collection');
-        logClientWarn(
-          '[Collection] Remove item failed',
-          normalized,
-          'CollectionItemManager.handleRemove',
-          {
-            component: 'CollectionItemManager',
-            action: 'remove-item',
-            category: 'collection',
-            collectionId,
-            itemId,
-          }
-        );
-        // Show error toast with "Retry" button
-        toasts.raw.error('Failed to remove item', {
-          action: {
-            label: 'Retry',
-            onClick: () => {
-              handleRemove(itemId);
-            },
-          },
-        });
-      }
+  const handleRemove = useCallback(async (itemId: string) => {
+    // Execute the action using useSafeAction's executeAsync
+    executeRemoveItem({
+      remove_item_id: itemId,
     });
-  };
+  }, [executeRemoveItem]);
 
   const handleReorder = useCallback(
     (newOrder: unknown[]) => {
@@ -243,64 +237,35 @@ export function CollectionItemManager({
       // Optimistic update
       setItems(typedOrder);
 
-      startTransition(async () => {
-        try {
-          await reorderCollectionItems({
-            collection_id: collectionId,
-            items: reorderedItems,
-          });
-          toasts.success.actionCompleted('Items reordered');
-          router.refresh();
-        } catch (error) {
-          // Revert on error
-          setItems(items);
-          const normalized = normalizeError(error, 'Failed to reorder items');
-          logClientWarn(
-            '[Collection] Reorder failed',
-            normalized,
-            'CollectionItemManager.handleReorder',
-            {
-              component: 'CollectionItemManager',
-              action: 'reorder',
-              category: 'collection',
-              collectionId,
-            }
-          );
-          // Show error toast with "Retry" button
-          toasts.raw.error('Failed to reorder items', {
-            action: {
-              label: 'Retry',
-              onClick: () => {
-                handleReorder(newOrder);
-              },
-            },
-          });
-        }
+      // Execute the action using useSafeAction's executeAsync
+      executeReorderItems({
+        collection_id: collectionId,
+        items: reorderedItems,
       });
     },
-    [collectionId, items, router]
+    [collectionId, items, router, executeReorderItems, setItems]
   );
 
   return (
-    <div className={spaceY.comfortable}>
+    <div className="space-y-4">
       {/* Add Item Section */}
-      <div className={cn('flex items-end', gap.compact, paddingBottom.default)}>
+      <div className={cn('flex items-end', 'gap-2', 'pb-4')}>
         <div className={`flex-1`}>
-          <div className={`mb-2 block text-sm font-medium`}>Add Bookmark to Collection</div>
+          <div className={`mb-2 block text-sm-medium`}>Add Bookmark to Collection</div>
           <Select value={selectedBookmarkId} onValueChange={setSelectedBookmarkId}>
             <SelectTrigger>
               <SelectValue placeholder="Select a bookmark to add" />
             </SelectTrigger>
             <SelectContent>
               {availableToAdd.length === 0 ? (
-                <div className={cn(muted.default, padding.tight, size.sm)}>
+                <div className={cn('text-muted-foreground text-sm', 'p-2')}>
                   All bookmarks have been added
                 </div>
               ) : (
                 availableToAdd.map((bookmark) => (
                   <SelectItem key={bookmark.id} value={bookmark.id}>
-                    <div className={cluster.compact}>
-                      <UnifiedBadge variant="base" style="outline" className={`${size.xs} capitalize`}>
+                    <div className="flex items-center gap-2">
+                      <UnifiedBadge variant="base" style="outline" className="text-[10px] capitalize">
                         {bookmark.content_type}
                       </UnifiedBadge>
                       {bookmark.content_slug}
@@ -314,19 +279,19 @@ export function CollectionItemManager({
         <Button
           onClick={handleAdd}
           disabled={!selectedBookmarkId || isPending}
-          className={cluster.compact}
+          className="flex items-center gap-2"
         >
-          <Plus className={iconSize.sm} />
+          <Plus className="h-4 w-4" />
           Add
         </Button>
       </div>
 
-      <Separator className={`${marginY.default}`} />
+      <Separator className="my-4" />
 
       {/* Items List */}
       {items.length === 0 ? (
-        <div className={`rounded-lg border border-dashed ${paddingY.section} text-center`}>
-          <p className={muted.default}>
+        <div className="card-base border-dashed py-12 text-center">
+          <p className="text-muted-foreground">
             No items in this collection yet. Add bookmarks above to get started.
           </p>
         </div>
@@ -346,22 +311,22 @@ export function CollectionItemManager({
           values={items}
           onReorder={shouldReduceMotion || isPending ? () => {} : handleReorder}
           as="div"
-          className={spaceY.compact}
+          className="space-y-2"
         >
           {items.map((item: CollectionItem, index: number) => (
             <Reorder.Item
               key={item.id}
               value={item}
               as="div"
-              className={`${cluster.default} bg-card hover:bg-accent/50 rounded-lg border p-3 transition-colors ${
+              className="flex items-center gap-3 bg-card hover:bg-accent/50 card-base p-3 transition-colors ${
                 shouldReduceMotion || isPending ? '' : 'cursor-grab active:cursor-grabbing'
-              }`}
+              }"
               dragListener={!shouldReduceMotion && !isPending}
             >
               {/* Drag Handle - Only visible when drag is enabled */}
               {!shouldReduceMotion && !isPending && (
                 <div
-                  className={cn(muted.default, stack.default, 'gap-3.5 cursor-grab active:cursor-grabbing touch-none')}
+                  className={cn('text-muted-foreground', 'flex flex-col', 'gap-3.5 cursor-grab active:cursor-grabbing touch-none')}
                   aria-label="Drag handle"
                 >
                   <div className="h-0.5 w-3 rounded-full bg-current" />
@@ -371,25 +336,25 @@ export function CollectionItemManager({
               )}
 
               {/* Order Number */}
-              <div className={cn(muted.default, 'w-8 text-center', size.sm, weight.medium)}>
+              <div className={cn('text-muted-foreground text-sm', 'w-8 text-center', 'font-medium')}>
                 #{index + 1}
               </div>
 
               {/* Content Info */}
               <div className={`flex-1`}>
-                <div className={cluster.compact}>
-                  <UnifiedBadge variant="base" style="outline" className={`${size.xs} capitalize`}>
+                <div className="flex items-center gap-2">
+                  <UnifiedBadge variant="base" style="outline" className="text-[10px] capitalize">
                     {item.content_type}
                   </UnifiedBadge>
-                  <span className={`${size.sm} ${weight.medium}`}>{item.content_slug}</span>
+                  <span className="text-sm-medium">{item.content_slug}</span>
                 </div>
                 {item.notes ? (
-                  <p className={cn(muted.default, marginTop.tight, size.xs)}>{item.notes}</p>
+                  <p className={cn('text-muted-foreground', 'mt-1', 'text-xs')}>{item.notes}</p>
                 ) : null}
               </div>
 
               {/* Actions */}
-              <div className={cluster.tight}>
+              <div className="flex items-center gap-1">
                 {(() => {
                   const safeContentUrl = getSafeContentUrl(item.content_type, item.content_slug);
                   if (!safeContentUrl) return null;
@@ -397,23 +362,23 @@ export function CollectionItemManager({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className={`${iconSize.xl} p-0`}
+                      className="h-8 w-8 p-0"
                       onClick={() => window.open(safeContentUrl, '_blank')}
                       aria-label="View item"
                     >
-                      <ExternalLink className={iconSize.sm} />
+                      <ExternalLink className="h-4 w-4" />
                     </Button>
                   );
                 })()}
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`${iconSize.xl} text-destructive hover:text-destructive p-0`}
+                  className="h-8 w-8 text-destructive hover:text-destructive p-0"
                   onClick={() => handleRemove(item.id)}
                   disabled={isPending}
                   aria-label="Remove item"
                 >
-                  <Trash className={iconSize.sm} />
+                  <Trash className="h-4 w-4" />
                 </Button>
               </div>
             </Reorder.Item>
